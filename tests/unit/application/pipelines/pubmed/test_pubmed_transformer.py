@@ -6,6 +6,7 @@ records into Silver-layer format.
 
 from __future__ import annotations
 
+from typing import Any
 from unittest.mock import MagicMock
 from uuid import uuid4
 
@@ -16,7 +17,6 @@ from bioetl.application.pipelines.pubmed.transformer import (
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
-
 
 # Sample PubMed XML for testing
 MINIMAL_PUBMED_XML = """<?xml version="1.0"?>
@@ -144,7 +144,7 @@ NO_ARTICLE_XML = """<?xml version="1.0"?>
 
 
 @pytest.fixture
-def mock_context():
+def mock_context() -> PipelineContext:
     """Create a mock pipeline context."""
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
@@ -162,14 +162,18 @@ class TestPubMedPublicationTransformer:
     """Tests for PubMedPublicationTransformer."""
 
     @pytest.fixture
-    def transformer(self):
+    def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
         return PubMedPublicationTransformer(provider="pubmed")
 
     @pytest.mark.asyncio
-    async def test_transform_minimal_xml(self, transformer, mock_context):
+    async def test_transform_minimal_xml(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test transformation of minimal valid PubMed XML."""
-        record = {"_raw_xml": MINIMAL_PUBMED_XML}
+        record: dict[str, Any] = {"_raw_xml": MINIMAL_PUBMED_XML}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -180,9 +184,13 @@ class TestPubMedPublicationTransformer:
         assert "content_hash" in result
 
     @pytest.mark.asyncio
-    async def test_transform_full_xml(self, transformer, mock_context):
+    async def test_transform_full_xml(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test transformation of full PubMed XML with all fields."""
-        record = {"_raw_xml": FULL_PUBMED_XML}
+        record: dict[str, Any] = {"_raw_xml": FULL_PUBMED_XML}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -221,9 +229,13 @@ class TestPubMedPublicationTransformer:
         assert len(result["authors"]) == 2
 
     @pytest.mark.asyncio
-    async def test_transform_structured_abstract(self, transformer, mock_context):
+    async def test_transform_structured_abstract(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test extraction of structured abstract with labeled sections."""
-        record = {"_raw_xml": STRUCTURED_ABSTRACT_XML}
+        record: dict[str, Any] = {"_raw_xml": STRUCTURED_ABSTRACT_XML}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -235,27 +247,39 @@ class TestPubMedPublicationTransformer:
         assert "CONCLUSION:" in result["abstract"]
 
     @pytest.mark.asyncio
-    async def test_transform_missing_raw_xml(self, transformer, mock_context):
+    async def test_transform_missing_raw_xml(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test that transformation returns None when _raw_xml is missing."""
-        record = {"pmid": "12345678"}
+        record: dict[str, Any] = {"pmid": "12345678"}
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_transform_empty_raw_xml(self, transformer, mock_context):
+    async def test_transform_empty_raw_xml(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test that transformation returns None for empty _raw_xml."""
-        record = {"_raw_xml": ""}
+        record: dict[str, Any] = {"_raw_xml": ""}
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_transform_invalid_xml(self, transformer, mock_context):
+    async def test_transform_invalid_xml(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test that transformation returns None for invalid XML."""
-        record = {"_raw_xml": "<invalid><xml>"}
+        record: dict[str, Any] = {"_raw_xml": "<invalid><xml>"}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -263,7 +287,11 @@ class TestPubMedPublicationTransformer:
         mock_context.logger.warning.assert_called()
 
     @pytest.mark.asyncio
-    async def test_transform_xml_without_pmid(self, transformer, mock_context):
+    async def test_transform_xml_without_pmid(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test that transformation returns None when PMID is missing."""
         xml_without_pmid = """<?xml version="1.0"?>
         <PubmedArticle>
@@ -274,16 +302,20 @@ class TestPubMedPublicationTransformer:
           </MedlineCitation>
         </PubmedArticle>
         """
-        record = {"_raw_xml": xml_without_pmid}
+        record: dict[str, Any] = {"_raw_xml": xml_without_pmid}
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_transform_no_article_element(self, transformer, mock_context):
+    async def test_transform_no_article_element(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test transformation when Article element is missing."""
-        record = {"_raw_xml": NO_ARTICLE_XML}
+        record: dict[str, Any] = {"_raw_xml": NO_ARTICLE_XML}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -292,9 +324,13 @@ class TestPubMedPublicationTransformer:
         assert result["pmid"] == "99999999"
 
     @pytest.mark.asyncio
-    async def test_entity_id_format(self, transformer, mock_context):
+    async def test_entity_id_format(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test that entity_id follows the expected format."""
-        record = {"_raw_xml": MINIMAL_PUBMED_XML}
+        record: dict[str, Any] = {"_raw_xml": MINIMAL_PUBMED_XML}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -303,9 +339,13 @@ class TestPubMedPublicationTransformer:
         assert "12345678" in result["entity_id"]
 
     @pytest.mark.asyncio
-    async def test_content_hash_determinism(self, transformer, mock_context):
+    async def test_content_hash_determinism(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test that content_hash is deterministic for same input."""
-        record = {"_raw_xml": FULL_PUBMED_XML}
+        record: dict[str, Any] = {"_raw_xml": FULL_PUBMED_XML}
 
         result1 = await transformer.transform(mock_context, record, index=0)
         result2 = await transformer.transform(mock_context, record, index=0)
@@ -315,9 +355,13 @@ class TestPubMedPublicationTransformer:
         assert result1["content_hash"] == result2["content_hash"]
 
     @pytest.mark.asyncio
-    async def test_lineage_metadata_present(self, transformer, mock_context):
+    async def test_lineage_metadata_present(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test that lineage metadata fields are present."""
-        record = {"_raw_xml": MINIMAL_PUBMED_XML}
+        record: dict[str, Any] = {"_raw_xml": MINIMAL_PUBMED_XML}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -329,9 +373,13 @@ class TestPubMedPublicationTransformer:
         assert result["_index"] == 0
 
     @pytest.mark.asyncio
-    async def test_index_propagation(self, transformer, mock_context):
+    async def test_index_propagation(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test that index is correctly propagated to result."""
-        record = {"_raw_xml": MINIMAL_PUBMED_XML}
+        record: dict[str, Any] = {"_raw_xml": MINIMAL_PUBMED_XML}
 
         result = await transformer.transform(mock_context, record, index=42)
 
@@ -344,12 +392,16 @@ class TestPubMedTransformerJournalExtraction:
     """Tests for journal data extraction."""
 
     @pytest.fixture
-    def transformer(self):
+    def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
         return PubMedPublicationTransformer(provider="pubmed")
 
     @pytest.mark.asyncio
-    async def test_missing_journal_element(self, transformer, mock_context):
+    async def test_missing_journal_element(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test extraction when Journal element is missing."""
         xml = """<?xml version="1.0"?>
         <PubmedArticle>
@@ -361,7 +413,7 @@ class TestPubMedTransformerJournalExtraction:
           </MedlineCitation>
         </PubmedArticle>
         """
-        record = {"_raw_xml": xml}
+        record: dict[str, Any] = {"_raw_xml": xml}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -373,7 +425,11 @@ class TestPubMedTransformerJournalExtraction:
         assert result["issue"] is None
 
     @pytest.mark.asyncio
-    async def test_partial_journal_data(self, transformer, mock_context):
+    async def test_partial_journal_data(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test extraction with partial journal information."""
         xml = """<?xml version="1.0"?>
         <PubmedArticle>
@@ -388,7 +444,7 @@ class TestPubMedTransformerJournalExtraction:
           </MedlineCitation>
         </PubmedArticle>
         """
-        record = {"_raw_xml": xml}
+        record: dict[str, Any] = {"_raw_xml": xml}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -403,12 +459,16 @@ class TestPubMedTransformerDateExtraction:
     """Tests for date data extraction."""
 
     @pytest.fixture
-    def transformer(self):
+    def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
         return PubMedPublicationTransformer(provider="pubmed")
 
     @pytest.mark.asyncio
-    async def test_year_only_date(self, transformer, mock_context):
+    async def test_year_only_date(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test extraction when only year is available."""
         xml = """<?xml version="1.0"?>
         <PubmedArticle>
@@ -427,7 +487,7 @@ class TestPubMedTransformerDateExtraction:
           </MedlineCitation>
         </PubmedArticle>
         """
-        record = {"_raw_xml": xml}
+        record: dict[str, Any] = {"_raw_xml": xml}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -436,7 +496,11 @@ class TestPubMedTransformerDateExtraction:
         assert result["pub_year"] == 2024
 
     @pytest.mark.asyncio
-    async def test_year_month_date(self, transformer, mock_context):
+    async def test_year_month_date(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test extraction when year and month are available."""
         xml = """<?xml version="1.0"?>
         <PubmedArticle>
@@ -456,7 +520,7 @@ class TestPubMedTransformerDateExtraction:
           </MedlineCitation>
         </PubmedArticle>
         """
-        record = {"_raw_xml": xml}
+        record: dict[str, Any] = {"_raw_xml": xml}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -465,9 +529,13 @@ class TestPubMedTransformerDateExtraction:
         assert result["pub_year"] == 2024
 
     @pytest.mark.asyncio
-    async def test_missing_history_dates(self, transformer, mock_context):
+    async def test_missing_history_dates(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test that missing history dates return None."""
-        record = {"_raw_xml": MINIMAL_PUBMED_XML}
+        record: dict[str, Any] = {"_raw_xml": MINIMAL_PUBMED_XML}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -482,12 +550,16 @@ class TestPubMedTransformerIdentifierExtraction:
     """Tests for identifier extraction."""
 
     @pytest.fixture
-    def transformer(self):
+    def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
         return PubMedPublicationTransformer(provider="pubmed")
 
     @pytest.mark.asyncio
-    async def test_doi_from_elocation(self, transformer, mock_context):
+    async def test_doi_from_elocation(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test DOI extraction from ELocationID element."""
         xml = """<?xml version="1.0"?>
         <PubmedArticle>
@@ -500,7 +572,7 @@ class TestPubMedTransformerIdentifierExtraction:
           </MedlineCitation>
         </PubmedArticle>
         """
-        record = {"_raw_xml": xml}
+        record: dict[str, Any] = {"_raw_xml": xml}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -508,7 +580,11 @@ class TestPubMedTransformerIdentifierExtraction:
         assert result["doi"] == "10.1000/eloc.test"
 
     @pytest.mark.asyncio
-    async def test_doi_from_article_id_list(self, transformer, mock_context):
+    async def test_doi_from_article_id_list(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test DOI extraction from ArticleIdList fallback."""
         xml = """<?xml version="1.0"?>
         <PubmedArticle>
@@ -525,7 +601,7 @@ class TestPubMedTransformerIdentifierExtraction:
           </PubmedData>
         </PubmedArticle>
         """
-        record = {"_raw_xml": xml}
+        record: dict[str, Any] = {"_raw_xml": xml}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -533,9 +609,13 @@ class TestPubMedTransformerIdentifierExtraction:
         assert result["doi"] == "10.1000/artid.test"
 
     @pytest.mark.asyncio
-    async def test_no_doi_available(self, transformer, mock_context):
+    async def test_no_doi_available(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test handling when DOI is not available."""
-        record = {"_raw_xml": MINIMAL_PUBMED_XML}
+        record: dict[str, Any] = {"_raw_xml": MINIMAL_PUBMED_XML}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -548,14 +628,18 @@ class TestPubMedTransformerClassificationExtraction:
     """Tests for classification data extraction (keywords, MeSH, pub types)."""
 
     @pytest.fixture
-    def transformer(self):
+    def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
         return PubMedPublicationTransformer(provider="pubmed")
 
     @pytest.mark.asyncio
-    async def test_empty_classification_lists(self, transformer, mock_context):
+    async def test_empty_classification_lists(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test handling when classification lists are empty."""
-        record = {"_raw_xml": MINIMAL_PUBMED_XML}
+        record: dict[str, Any] = {"_raw_xml": MINIMAL_PUBMED_XML}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -566,7 +650,11 @@ class TestPubMedTransformerClassificationExtraction:
         assert result["mesh_terms"] is None or result["mesh_terms"] == []
 
     @pytest.mark.asyncio
-    async def test_multiple_keywords(self, transformer, mock_context):
+    async def test_multiple_keywords(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
         """Test extraction of multiple keywords."""
         xml = """<?xml version="1.0"?>
         <PubmedArticle>
@@ -583,7 +671,7 @@ class TestPubMedTransformerClassificationExtraction:
           </MedlineCitation>
         </PubmedArticle>
         """
-        record = {"_raw_xml": xml}
+        record: dict[str, Any] = {"_raw_xml": xml}
 
         result = await transformer.transform(mock_context, record, index=0)
 
