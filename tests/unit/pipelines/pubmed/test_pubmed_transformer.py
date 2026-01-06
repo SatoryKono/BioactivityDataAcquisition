@@ -325,7 +325,7 @@ class TestExtractDateData:
         result = transformer._extract_date_data(article, pubmed_data)
 
         assert result["pub_date"] == "2023-03-15"
-        assert result["pub_year"] == 2023
+        assert result["year"] == 2023
         assert result["publication_year"] == 2023
         assert result["accepted_date"] == "2023-02-15"
         assert result["received_date"] == "2022-12-01"
@@ -352,7 +352,7 @@ class TestExtractDateData:
         result = transformer._extract_date_data(article, None)
 
         assert result["pub_date"] == "2023"
-        assert result["pub_year"] == 2023
+        assert result["year"] == 2023
         assert result["publication_year"] == 2023
         assert result["accepted_date"] is None
         assert result["received_date"] is None
@@ -369,7 +369,7 @@ class TestExtractDateData:
         result = transformer._extract_date_data(article, None)
 
         assert result["pub_date"] is None
-        assert result["pub_year"] is None
+        assert result["year"] is None
         assert result["publication_year"] is None
         assert result["accepted_date"] is None
         assert result["received_date"] is None
@@ -390,7 +390,7 @@ class TestExtractDateData:
         result = transformer._extract_date_data(article, None)
 
         assert result["pub_date"] is None
-        assert result["pub_year"] is None
+        assert result["year"] is None
 
 
 class TestExtractBusinessData:
@@ -475,7 +475,7 @@ class TestExtractBusinessData:
         assert result["volume"] == "10"
         assert result["issue"] == "5"
         assert result["pub_date"] == "2023-03-15"
-        assert result["pub_year"] == 2023
+        assert result["year"] == 2023
         assert result["publication_year"] == 2023
         assert result["publication_types"] == ["Journal Article", "Review"]
         assert result["keywords"] == ["keyword1", "keyword2"]

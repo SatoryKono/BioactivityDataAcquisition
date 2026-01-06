@@ -70,7 +70,7 @@ async def test_pubmed_publications_date_fields(e2e_data_dir: Path):
     """E2E: Verify date fields are extracted correctly.
 
     Publications should have various date fields:
-    - pub_date, pub_year: Publication date
+    - pub_date, year: Publication date
     - accepted_date: Date manuscript was accepted
     - received_date: Date manuscript was received
     - revised_date: Date manuscript was revised
@@ -90,11 +90,11 @@ async def test_pubmed_publications_date_fields(e2e_data_dir: Path):
         # PMID must always be present
         assert record.get("pmid") is not None
 
-        # Most publications should have at least pub_year
-        pub_year = record.get("pub_year") or record.get("publication_year")
-        if pub_year is not None:
-            assert 1800 <= pub_year <= 2100, (
-                f"Invalid pub_year {pub_year} for PMID {record.get('pmid')}"
+        # Most publications should have at least year
+        year = record.get("year") or record.get("publication_year")
+        if year is not None:
+            assert 1800 <= year <= 2100, (
+                f"Invalid year {year} for PMID {record.get('pmid')}"
             )
 
 

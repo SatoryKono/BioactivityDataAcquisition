@@ -33,7 +33,7 @@ class ArticleRecord(BaseModel):
         ...     pmid="12345678",
         ...     title="Example Article Title",
         ...     journal="Nature",
-        ...     pub_year=2024,
+        ...     year=2024,
         ... )
         >>> record.model_dump()
         {'pmid': '12345678', 'title': 'Example Article Title', ...}
@@ -71,8 +71,8 @@ class ArticleRecord(BaseModel):
     pub_date: str | None = PydanticField(
         default=None, description="Publication date (ISO format)"
     )
-    pub_year: int | None = PydanticField(
-        default=None, description="Publication year (for partitioning)"
+    year: int | None = PydanticField(
+        default=None, description="Publication year (1800-2100)"
     )
     accepted_date: str | None = PydanticField(default=None, description="Date accepted")
     received_date: str | None = PydanticField(default=None, description="Date received")
@@ -139,7 +139,7 @@ class Publication(BaseEntity):
 
     # Dates (stored as ISO strings YYYY-MM-DD or partial YYYY-MM, YYYY)
     pub_date: str | None = None  # Publication date
-    pub_year: int | None = None  # Publication year (for partitioning)
+    year: int | None = None  # Publication year (1800-2100)
     accepted_date: str | None = None  # Date accepted
     received_date: str | None = None  # Date received
     revised_date: str | None = None  # Date revised
@@ -156,7 +156,7 @@ class Publication(BaseEntity):
     pmc_id: str | None = None  # PubMed Central ID
 
     # Legacy field (kept for backward compatibility)
-    publication_year: int | None = None  # Alias for pub_year
+    publication_year: int | None = None  # Alias for year
 
     def __post_init__(self) -> None:
         """Post-initialization validation."""
