@@ -38,7 +38,7 @@ class ETLRecordSchema(pa.DataFrameModel):
     )
 
     @pa.check("_run_type", name="run_type_values")
-    def _check_run_type(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
+    def _check_run_type(cls, series: Series[str]) -> Series[bool]:
         """Validate _run_type values."""
         return cast("Series[bool]", series.isin(["incremental", "backfill", "rebuild"]))
 
@@ -54,7 +54,7 @@ class ETLRecordSchema(pa.DataFrameModel):
     )
 
     @pa.check("_ingestion_ts", name="ingestion_ts_not_future")
-    def _check_ingestion_ts(cls, series: Series[datetime]) -> Series[bool]:  # noqa: N805
+    def _check_ingestion_ts(cls, series: Series[datetime]) -> Series[bool]:
         """Ensure ingestion timestamp is not in the future."""
         # Note: In practice, we just check it's a valid datetime
         return cast("Series[bool]", series <= datetime.now(series.dt.tz))
@@ -78,7 +78,7 @@ class ETLRecordSchema(pa.DataFrameModel):
     )
 
     @pa.check("_index", name="index_non_negative")
-    def _check_index(cls, series: Series[int]) -> Series[bool]:  # noqa: N805
+    def _check_index(cls, series: Series[int]) -> Series[bool]:
         """Validate index is non-negative."""
         return cast("Series[bool]", series >= 0)
 
