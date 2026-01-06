@@ -31,13 +31,13 @@ from bioetl.domain.ports.data_source import (
     FilterableDataSourcePort,
 )
 from bioetl.domain.ports.filtering import InputFilterPort
-from bioetl.domain.ports.idmapping import IDMappingClientPort
 from bioetl.domain.ports.health_check import (
     HealthCheckPort,
     HealthCheckResult,
     HealthMonitorPort,
     HealthStatusLiteral,
 )
+from bioetl.domain.ports.idmapping import IDMappingClientPort
 from bioetl.domain.ports.locking import LockPort
 from bioetl.domain.ports.memory import MemoryMonitorPort, MemoryStats
 from bioetl.domain.ports.noop import (
