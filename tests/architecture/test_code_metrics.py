@@ -400,6 +400,8 @@ class TestClassSize:
         "TestClassSize": 350,  # Test class with many exemptions
         # Extracted validators (REFACTOR-003)
         "MedallionConfigValidator": 350,  # Extracted from PreflightService - cohesive validation
+        # Pandera schemas (declarative field definitions)
+        "CompoundSchema": 350,  # 330 lines - PubChem compound schema with many chemical fields
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:
@@ -545,6 +547,8 @@ class TestGodObjectDetection:
         "ValueValidator": "Cohesive validator - all methods relate to domain value validation",
         # Lifecycle orchestration service
         "MedallionLifecycleService": "Lifecycle orchestrator - coordinates Bronze/Silver/Gold operations",
+        # Pandera schemas (declarative data containers, no behavior to delegate)
+        "CompoundSchema": "Pandera schema - declarative field definitions, no behavior to delegate",
     }
 
     def test_large_classes_have_delegation(self, src_dir: Path) -> None:
