@@ -291,14 +291,19 @@ def vcr_config(project_root: Path) -> dict[str, Any]:
     CI mode: record_mode="none" - fail if cassette missing
     Local recording: pytest --vcr-record=new_episodes
     """
+    import os
+
     cassette_library_dir = project_root / "tests" / "fixtures" / "vcr"
     cassette_library_dir.mkdir(parents=True, exist_ok=True)
+
+    # Use "none" in CI (fail if cassette missing), "new_episodes" locally
+    record_mode = os.environ.get("VCR_RECORD_MODE", "none")
 
     return {
         "cassette_library_dir": str(cassette_library_dir),
         # CI mode: fail if cassette is missing
-        # Override with --vcr-record=new_episodes for local recording
-        "record_mode": "new_episodes",
+        # Override with VCR_RECORD_MODE=new_episodes for local recording
+        "record_mode": record_mode,
         "match_on": ["method", "scheme", "host", "port", "path", "query"],
         "before_record_request": _sanitize_request,
         "before_record_response": _sanitize_response,
