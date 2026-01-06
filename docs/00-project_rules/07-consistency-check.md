@@ -1,8 +1,8 @@
-# Consistency Check Guide (RULES.md v5.9)
+# Consistency Check Guide (RULES.md v5.10)
 
-*Синхронизировано с RULES.md v5.9 (2026-01-01)*
+*Синхронизировано с RULES.md v5.10 (2026-01-06)*
 
-Цель: описать автоматическую проверку согласованности документов `docs/*` с RULES.md v5.9 без реализации кода.
+Цель: описать автоматическую проверку согласованности документов `docs/*` с RULES.md v5.10 без реализации кода.
 
 ## Проверяемые инварианты
 
@@ -27,7 +27,7 @@
 
 ```bash
 # 1) Проверка шапок документов на версию RULES
-grep -R "Синхронизировано с RULES.md v5.9" docs/00-project_rules/ | wc -l
+grep -R "Синхронизировано с RULES.md v5.10" docs/00-project_rules/ | wc -l
 
 # 2) Ключевые формулировки (примерный набор)
 grep -R "Raw Parquet" docs/00-project_rules/00-rules-summary.md

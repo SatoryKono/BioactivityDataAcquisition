@@ -1,6 +1,6 @@
 # Data Flow
 
-*Aligned with RULES.md v5.9 (Local-Only Deployment)*
+*Aligned with RULES.md v5.10 (Local-Only Deployment)*
 
 ## Overview
 
