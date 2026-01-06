@@ -322,3 +322,10 @@ class TestIDMappingTransformer:
         assert result_missing["mapping_status"] == "not_found"
         assert result_none["_dq_warn"] is True
         assert result_missing["_dq_warn"] is True
+
+    def test_idmapping_transformer_accepts_pii_hasher(self):
+        """IDMappingTransformer MUST accept pii_hasher parameter."""
+        from bioetl.domain.ports import NoOpPiiHasher
+
+        transformer = IDMappingTransformer(pii_hasher=NoOpPiiHasher())
+        assert transformer._pii_hasher is not None
