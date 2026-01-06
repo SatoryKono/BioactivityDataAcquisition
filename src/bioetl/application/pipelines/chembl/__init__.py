@@ -27,6 +27,12 @@ from bioetl.application.pipelines.chembl.activity_transformer import (
     ActivityTransformer,
 )
 from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
+from bioetl.application.pipelines.chembl.assay_parameters import (
+    ChEMBLAssayParametersPipeline,
+)
+from bioetl.application.pipelines.chembl.assay_parameters_transformer import (
+    AssayParametersTransformer,
+)
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
@@ -64,10 +70,12 @@ from bioetl.application.pipelines.chembl.target_transformer import TargetTransfo
 
 __all__ = [
     "ActivityTransformer",
+    "AssayParametersTransformer",
     "AssayTransformer",
     "BaseChemblTransformer",
     "CellLineTransformer",
     "ChEMBLActivityPipeline",
+    "ChEMBLAssayParametersPipeline",
     "ChEMBLAssayPipeline",
     "ChEMBLCellLinePipeline",
     "ChEMBLCompoundRecordPipeline",

@@ -36,6 +36,7 @@ from bioetl.domain.entities.chembl import (
 
 # ChEMBL Domain Entities (dataclass)
 from bioetl.domain.entities.chembl_activity import Assay
+from bioetl.domain.entities.chembl_assay_parameters import AssayParameters
 from bioetl.domain.entities.chembl_compound_record import CompoundRecord
 from bioetl.domain.entities.chembl_structures import (
     CellLine,
@@ -62,6 +63,7 @@ __all__ = [
     "ActivityRecord",
     "ArticleRecord",
     "Assay",
+    "AssayParameters",
     "AssayRecord",
     "BaseEntity",
     "Bioactivity",
