@@ -6,6 +6,7 @@ Used for ChEMBL → UniProt and similar cross-database mappings.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Protocol, runtime_checkable
 
 from bioetl.domain.types import HealthStatus
@@ -32,7 +33,7 @@ class IDMappingClientPort(Protocol):
         from_db: str,
         to_db: str,
         ids: list[str],
-    ) -> dict[str, str | None]:
+    ) -> Mapping[str, str | None]:
         """Map identifiers from source database to target database.
 
         Args:
