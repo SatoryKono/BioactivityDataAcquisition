@@ -15,10 +15,7 @@ from bioetl.domain.types import HealthStatus
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
-        UniProtIDMappingClient,
-    )
+    from bioetl.domain.ports import IDMappingClientPort, LoggerPort
 
 
 class IDMappingDataSource:
@@ -44,7 +41,7 @@ class IDMappingDataSource:
 
     def __init__(
         self,
-        idmapping_client: UniProtIDMappingClient,
+        idmapping_client: IDMappingClientPort,
         input_path: Path,
         logger: LoggerPort,
         from_db: str = "ChEMBL",
