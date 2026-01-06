@@ -22,7 +22,6 @@ class NoOpTracer:
         exc_tb: TracebackType | None,
     ) -> None:
         """Context manager exit."""
-        pass
 
     def start_as_current_span(self, *args: Any, **kwargs: Any) -> Self:
         """Start a new span (no-op).
@@ -33,15 +32,12 @@ class NoOpTracer:
 
     def set_attribute(self, key: str, value: Any) -> None:
         """Set span attribute (no-op)."""
-        pass
 
     def set_status(self, status: Any) -> None:
         """Set span status (no-op)."""
-        pass
 
     def record_exception(self, exception: Exception) -> None:
         """Record exception (no-op)."""
-        pass
 
 
 class NoOpTracing:

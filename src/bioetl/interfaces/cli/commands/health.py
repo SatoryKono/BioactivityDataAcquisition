@@ -21,7 +21,6 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 @click.group()
 def health() -> None:
     """Health check and monitoring operations."""
-    pass
 
 
 @health.command("server")

@@ -209,7 +209,6 @@ class UnifiedQuarantine:
 
     async def aclose(self) -> None:
         """Close resources."""
-        pass
 
     def _calculate_hash(self, payload_json: str) -> str:
         """Calculate SHA256 hash of payload for deduplication."""

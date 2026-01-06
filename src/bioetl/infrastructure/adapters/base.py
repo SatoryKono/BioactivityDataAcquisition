@@ -114,7 +114,6 @@ class BaseHttpAdapter(HealthCheckMixin, DataSourcePort):
         Base implementation is a no-op as HTTP client is managed by context.
         Subclasses can override if they manage additional resources.
         """
-        pass
 
     async def health_check(self) -> HealthStatus:
         """Check API health status using Template Method pattern.

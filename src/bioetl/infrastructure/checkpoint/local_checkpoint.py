@@ -132,4 +132,3 @@ class LocalCheckpoint:
 
     async def aclose(self) -> None:
         """Close checkpoint storage (no-op for local filesystem)."""
-        pass
