@@ -4,9 +4,9 @@ This package provides pipelines and transformers for extracting and
 processing data from the ChEMBL database.
 
 Main Components:
-- Transformers: ActivityTransformer, AssayTransformer, etc.
+- Transformers: ActivityTransformer, AssayTransformer, DocumentSimilarityTransformer, etc.
 - BaseChemblTransformer: Base class for ChEMBL-specific transformers
-- Pipeline classes: ChEMBLActivityPipeline, ChEMBLAssayPipeline, etc.
+- Pipeline classes: ChEMBLActivityPipeline, ChEMBLAssayPipeline, ChEMBLDocumentSimilarityPipeline, etc.
 
 Usage:
     # Use transformers for custom pipelines
@@ -48,6 +48,12 @@ from bioetl.application.pipelines.chembl.compound_record_transformer import (
     CompoundRecordTransformer,
 )
 from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
+from bioetl.application.pipelines.chembl.document_similarity import (
+    ChEMBLDocumentSimilarityPipeline,
+)
+from bioetl.application.pipelines.chembl.document_similarity_transformer import (
+    DocumentSimilarityTransformer,
+)
 from bioetl.application.pipelines.chembl.document_term import ChEMBLDocumentTermPipeline
 from bioetl.application.pipelines.chembl.document_term_transformer import (
     DocumentTermTransformer,
@@ -80,11 +86,13 @@ __all__ = [
     "ChEMBLCellLinePipeline",
     "ChEMBLCompoundRecordPipeline",
     "ChEMBLDocumentPipeline",
+    "ChEMBLDocumentSimilarityPipeline",
     "ChEMBLDocumentTermPipeline",
     "ChEMBLMoleculePipeline",
     "ChEMBLTargetComponentPipeline",
     "ChEMBLTargetPipeline",
     "CompoundRecordTransformer",
+    "DocumentSimilarityTransformer",
     "DocumentTermTransformer",
     "DocumentTransformer",
     "MoleculeTransformer",

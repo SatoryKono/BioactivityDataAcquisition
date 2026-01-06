@@ -1,6 +1,7 @@
 """ChEMBL structural domain entities.
 
-Contains Document, DocumentTerm, Target, TargetComponent, CellLine, and Molecule entities.
+Contains Document, DocumentTerm, DocumentSimilarity, Target, TargetComponent,
+CellLine, and Molecule entities.
 """
 
 from __future__ import annotations
@@ -322,3 +323,57 @@ class Molecule(BaseEntity):
             raise ValueError("Molecule ChEMBL ID is required")
         if self.max_phase is not None and not (0 <= self.max_phase <= 4):
             raise ValueError(f"max_phase must be 0-4, got {self.max_phase}")
+
+
+def _validate_tanimoto(value: float | None, field_name: str) -> None:
+    """Validate Tanimoto coefficient is in [0.0, 1.0] range."""
+    if value is not None and not 0.0 <= value <= 1.0:
+        raise ValueError(f"{field_name} must be in [0.0, 1.0], got {value}")
+
+
+@dataclass(frozen=True, kw_only=True)
+class DocumentSimilarity(BaseEntity):
+    """Represents similarity between two ChEMBL documents.
+
+    Based on Tanimoto coefficients calculated from:
+    - Molecules described in documents (mol_tani)
+    - Targets described in documents (tid_tani)
+
+    Source: ChEMBL API /document_similarity
+    See: https://www.ebi.ac.uk/chembl/api/data/document_similarity
+    """
+
+    # === Primary Key ===
+    sim_id: int
+
+    # === Foreign Keys (internal document IDs) ===
+    doc_1: int
+    doc_2: int
+
+    # === PubMed Identifiers ===
+    pubmed_id1: int | None = None
+    pubmed_id2: int | None = None
+
+    # === Tanimoto Coefficients ===
+    tid_tani: float | None = None  # Target-based
+    mol_tani: float | None = None  # Molecule-based
+
+    # === Derived Metrics (computed in transformer) ===
+    avg_tani: float | None = None
+    max_tani: float | None = None
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
+        if self.sim_id <= 0:
+            raise ValueError(f"sim_id must be positive, got {self.sim_id}")
+        if self.doc_1 <= 0 or self.doc_2 <= 0:
+            raise ValueError("doc_1 and doc_2 must be positive")
+        if self.doc_1 == self.doc_2:
+            raise ValueError("Document cannot be similar to itself")
+        _validate_tanimoto(self.tid_tani, "tid_tani")
+        _validate_tanimoto(self.mol_tani, "mol_tani")
+        _validate_tanimoto(self.avg_tani, "avg_tani")
+        _validate_tanimoto(self.max_tani, "max_tani")
