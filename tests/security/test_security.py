@@ -290,6 +290,7 @@ class TestPrivateKeyExposure:
         assert not violations, "Private keys found:\n" + "\n".join(violations)
 
 
+@pytest.mark.timeout(120)  # File scanning needs more time
 class TestPIIHandling:
     """Tests for PII handling patterns.
 
