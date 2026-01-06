@@ -20,6 +20,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.entities import Molecule
 from bioetl.domain.transformations import safe_float, safe_int
+from bioetl.domain.value_objects import SMILES, InChIKey
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
@@ -157,6 +158,27 @@ class MoleculeTransformer(BaseChemblTransformer):
         """
         # Cast to dict for type-safe access to .get() method
         rec = cast("dict[str, Any]", record)
+
+        # Extract structure fields
+        structure_data = flatten_nested_dict(
+            cast("dict[str, Any] | None", rec.get("molecule_structures")),
+            "",  # No prefix - unified naming with PubChem
+            _STRUCTURES_FIELDS,
+            renames=_STRUCTURES_RENAMES,
+        )
+
+        # Validate InChI Key using Value Object (returns None for invalid/empty)
+        inchi_key = InChIKey.from_raw(structure_data.get("inchi_key"))
+        structure_data["inchi_key"] = str(inchi_key) if inchi_key else None
+
+        # Validate SMILES using Value Object (returns None for invalid/empty)
+        # ChEMBL provides canonical_smiles, so mark as canonical
+        smiles = SMILES.from_raw(
+            structure_data.get("canonical_smiles"),
+            is_canonical=True,
+        )
+        structure_data["canonical_smiles"] = str(smiles) if smiles else None
+
         return {
             # Primary identifier
             "molecule_chembl_id": str(primary_id),
@@ -177,10 +199,6 @@ class MoleculeTransformer(BaseChemblTransformer):
                 _PROPERTIES_FIELDS,
                 renames=_PROPERTIES_RENAMES,
             ),
-            **flatten_nested_dict(
-                cast("dict[str, Any] | None", rec.get("molecule_structures")),
-                "",  # No prefix - unified naming with PubChem
-                _STRUCTURES_FIELDS,
-                renames=_STRUCTURES_RENAMES,
-            ),
+            # Structure data with validated InChI Key and SMILES
+            **structure_data,
         }

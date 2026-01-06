@@ -51,7 +51,8 @@ class TestFileSizeLimits:
         "batch.py": 550,  # 531 LOC - Batch aggregate with lifecycle methods
         "pipeline_run.py": 600,  # 581 LOC - PipelineRun aggregate with state machine
         "quarantine_entry.py": 520,  # 501 LOC - QuarantineEntry with detailed error info
-        "identifiers.py": 350,  # 332 LOC - Value objects with validation
+        "chemical.py": 330,  # 326 LOC - Chemical structure Value Objects (InChIKey, SMILES, PublicationYear)
+        "validation.py": 330,  # 326 LOC - Domain validation utilities
         "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
         # Domain ports NoOp implementations
         "noop.py": 400,  # 383 LOC - NoOp implementations for Null Object Pattern (+ NoOpPiiHasher)
