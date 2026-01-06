@@ -61,6 +61,7 @@ def health_server_command(host: str, port: int) -> None:
     click.echo("\nPress Ctrl+C to stop.")
 
     async def run() -> None:
+        """Start health server and keep it running until interrupted."""
         # Import HealthServer here (interfaces layer can import from interfaces)
         from bioetl.interfaces.http.health_server import HealthServer
 
@@ -122,6 +123,7 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
     click.echo("Running health checks...")
 
     async def run_checks() -> dict[str, dict[str, str]]:
+        """Execute health checks and return results as dictionary."""
         service = get_health_service()
 
         # Convert tuple to list or None for all providers
