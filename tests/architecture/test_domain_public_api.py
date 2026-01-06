@@ -49,7 +49,6 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "resilience",
         "schemas",  # Pandera schemas (provider-specific, accessed directly)
         "serialization",
-        "schemas",  # Pandera schema submodule (provider-specific schemas)
         "services",  # Submodule for domain services (IdentityService)
         "transformations",
         "types",
