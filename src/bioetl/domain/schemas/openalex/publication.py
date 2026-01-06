@@ -33,8 +33,8 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
         description="OpenAlex Work ID (e.g., W2148763428)",
     )
 
-    @classmethod
     @pa.check("openalex_id", name="openalex_id_format")
+    @classmethod
     def _check_openalex_id(cls, series: Series[str]) -> Series[bool]:
         """Validate OpenAlex ID format."""
         return series.str.match(r"^W\d+$")
@@ -45,8 +45,8 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
         description="Digital Object Identifier",
     )
 
-    @classmethod
     @pa.check("doi", name="doi_format")
+    @classmethod
     def _check_doi(cls, series: Series[str]) -> Series[bool]:
         """Validate DOI format."""
         return series.isna() | series.str.match(r"^10\.\d{4,}/.*$")
@@ -66,8 +66,8 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
         description="Publication year",
     )
 
-    @classmethod
     @pa.check("year", name="year_range")
+    @classmethod
     def _check_year(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate year range."""
         return series.isna() | ((series >= 1500) & (series <= 2100))
@@ -77,8 +77,8 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
         description="Publication date (YYYY-MM-DD)",
     )
 
-    @classmethod
     @pa.check("publication_date", name="publication_date_format")
+    @classmethod
     def _check_publication_date(cls, series: Series[str]) -> Series[bool]:
         """Validate publication date format."""
         return series.isna() | series.str.match(r"^\d{4}-\d{2}-\d{2}$")
@@ -115,8 +115,8 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
         description="OA status",
     )
 
-    @classmethod
     @pa.check("oa_status", name="oa_status_values")
+    @classmethod
     def _check_oa_status(cls, series: Series[str]) -> Series[bool]:
         """Validate OA status values."""
         return series.isna() | series.isin(OA_STATUS_VALUES)
@@ -127,8 +127,8 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
         description="Citation count",
     )
 
-    @classmethod
     @pa.check("cited_by_count", name="cited_by_count_non_negative")
+    @classmethod
     def _check_cited_by_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate citation count is non-negative."""
         return series.isna() | (series >= 0)
@@ -153,8 +153,8 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
         description="How record was resolved: doi, title_fallback, title_only",
     )
 
-    @classmethod
     @pa.check("_lookup_method", name="lookup_method_values")
+    @classmethod
     def _check_lookup_method(cls, series: Series[str]) -> Series[bool]:
         """Validate lookup method values."""
         return series.isin(LOOKUP_METHODS)
