@@ -396,9 +396,9 @@ gold_filters:
 | Файл | Покрытие |
 |------|----------|
 | `tests/integration/adapters/openalex/test_adapter.py` | HTTP interactions (VCR) |
-| `tests/integration/adapters/openalex/test_pipeline.py` | Full pipeline flow |
+| `tests/integration/adapters/openalex/test_pipeline.py` | Transformer extractors |
 
-**VCR Configuration:**
+**VCR Configuration** (для test_adapter.py):
 ```python
 {
     "cassette_library_dir": "tests/fixtures/vcr/openalex",
