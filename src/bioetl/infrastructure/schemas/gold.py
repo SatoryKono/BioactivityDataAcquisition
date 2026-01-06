@@ -627,3 +627,43 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
 
     class Config:
         strict = True
+
+
+class ChEMBLProteinClassGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Protein Classification in Gold layer.
+
+    Hierarchical classification of protein targets (enzyme classes, receptor types, etc.).
+    Self-referencing structure with up to 8 levels of depth.
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary identifier
+    protein_class_id: Series[float] = pa.Field(nullable=False, ge=1, coerce=True)
+
+    # Hierarchy
+    parent_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
+    class_level: Series[float] = pa.Field(nullable=True, ge=1, le=8, coerce=True)
+
+    # Classification data
+    pref_name: Series[str] = pa.Field(nullable=True)
+    short_name: Series[str] = pa.Field(nullable=True)
+    protein_class_desc: Series[str] = pa.Field(nullable=True)
+    definition: Series[str] = pa.Field(nullable=True)
+
+    # Additional metadata
+    sort_order: Series[float] = pa.Field(nullable=True, coerce=True)
+    replaced_by: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
+    downgraded: Series[float] = pa.Field(nullable=True, isin=[0, 1], coerce=True)
+
+    # Lineage metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        strict = True

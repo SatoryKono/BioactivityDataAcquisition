@@ -585,3 +585,33 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_original_doi", pa.string()),
     ]
 )
+
+# Schema for ChEMBL Protein Classification
+# See: https://www.ebi.ac.uk/chembl/api/data/protein_class
+CHEMBL_PROTEIN_CLASS_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        # Primary identifier
+        pa.field("protein_class_id", pa.int64()),
+        # Hierarchy
+        pa.field("parent_id", pa.int64()),
+        pa.field("class_level", pa.int64()),
+        # Classification data
+        pa.field("pref_name", pa.string()),
+        pa.field("short_name", pa.string()),
+        pa.field("protein_class_desc", pa.string()),
+        pa.field("definition", pa.string()),
+        # Additional metadata
+        pa.field("sort_order", pa.int64()),
+        pa.field("replaced_by", pa.int64()),
+        pa.field("downgraded", pa.int64()),
+        # Lineage metadata
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+    ]
+)
