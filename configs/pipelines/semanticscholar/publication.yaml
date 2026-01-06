@@ -9,7 +9,7 @@
 pipeline_name: semanticscholar_publication
 provider: semanticscholar
 entity_type: publication
-version: "1.0.0"
+version: "1.1.0"
 description: "Batch DOI resolution via Semantic Scholar with title fallback"
 
 primary_keys: ["paper_id"]

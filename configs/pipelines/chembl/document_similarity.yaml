@@ -6,7 +6,7 @@
 pipeline_name: chembl_document_similarity
 provider: chembl
 entity_type: document_similarity
-version: "1.0.0"
+version: "1.1.0"
 description: "Extract document similarity data (Tanimoto coefficients) from ChEMBL API"
 
 primary_keys: ["sim_id"]

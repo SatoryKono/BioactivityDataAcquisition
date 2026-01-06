@@ -7,7 +7,7 @@
 pipeline_name: chembl_protein_class
 provider: chembl
 entity_type: protein_class
-version: "1.0.0"
+version: "1.1.0"
 description: "ChEMBL Protein Classification hierarchy (enzyme classes, receptor types, etc.)"
 
 primary_keys: ["protein_class_id"]

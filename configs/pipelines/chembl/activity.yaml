@@ -7,7 +7,7 @@
 pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
-version: "1.0.0"
+version: "1.1.0"
 description: "Extract biological activity records from ChEMBL API"
 
 primary_keys: ["activity_id"]

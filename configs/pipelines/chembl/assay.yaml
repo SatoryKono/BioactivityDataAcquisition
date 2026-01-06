@@ -6,7 +6,7 @@
 pipeline_name: chembl_assay
 provider: chembl
 entity_type: assay
-version: "1.0.0"
+version: "1.1.0"
 description: "Extract bioassay definitions from ChEMBL API"
 
 primary_keys: ["assay_chembl_id"]

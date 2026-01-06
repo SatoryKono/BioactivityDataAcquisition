@@ -9,7 +9,7 @@
 pipeline_name: openalex_publication
 provider: openalex
 entity_type: publication
-version: "1.0.0"
+version: "1.1.0"
 description: "Batch DOI resolution via OpenAlex with title fallback"
 
 primary_keys: ["openalex_id"]
