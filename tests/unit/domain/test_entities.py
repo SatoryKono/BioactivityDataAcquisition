@@ -10,10 +10,10 @@ import pytest
 from bioetl.domain.entities import (
     Bioactivity,
     BioactivityState,
-    Compound,
     DocumentSimilarity,
-    Protein,
+    PubchemMolecule,
     PublicationEntity,
+    UniprotTarget,
 )
 from bioetl.domain.types import ContentHash, EntityID, RunType
 
@@ -272,12 +272,12 @@ class TestBioactivityState:
 
 
 @pytest.mark.unit
-class TestCompound:
-    """Tests for Compound entity."""
+class TestPubchemMolecule:
+    """Tests for PubchemMolecule entity."""
 
     def test_compound_creation_with_smiles(self, base_entity_kwargs):
-        """Test Compound creation with canonical SMILES."""
-        compound = Compound(
+        """Test PubchemMolecule creation with canonical SMILES."""
+        compound = PubchemMolecule(
             **base_entity_kwargs,
             cid="12345",
             canonical_smiles="CCO",
@@ -286,8 +286,8 @@ class TestCompound:
         assert compound.canonical_smiles == "CCO"
 
     def test_compound_creation_with_isomeric_smiles(self, base_entity_kwargs):
-        """Test Compound creation with isomeric SMILES."""
-        compound = Compound(
+        """Test PubchemMolecule creation with isomeric SMILES."""
+        compound = PubchemMolecule(
             **base_entity_kwargs,
             cid="12345",
             isomeric_smiles="C[C@H](O)CC",
@@ -295,8 +295,8 @@ class TestCompound:
         assert compound.isomeric_smiles == "C[C@H](O)CC"
 
     def test_compound_creation_with_inchi(self, base_entity_kwargs):
-        """Test Compound creation with InChI."""
-        compound = Compound(
+        """Test PubchemMolecule creation with InChI."""
+        compound = PubchemMolecule(
             **base_entity_kwargs,
             cid="12345",
             inchi="InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3",
@@ -304,8 +304,8 @@ class TestCompound:
         assert compound.inchi == "InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3"
 
     def test_compound_with_all_optional_fields(self, base_entity_kwargs):
-        """Test Compound with all optional fields."""
-        compound = Compound(
+        """Test PubchemMolecule with all optional fields."""
+        compound = PubchemMolecule(
             **base_entity_kwargs,
             cid="2244",
             molecular_formula="C9H8O4",
@@ -324,7 +324,7 @@ class TestCompound:
     def test_compound_requires_cid(self, base_entity_kwargs):
         """Test that empty cid raises ValueError."""
         with pytest.raises(ValueError, match="PubchemMolecule cid is required"):
-            Compound(
+            PubchemMolecule(
                 **base_entity_kwargs,
                 cid="",
                 canonical_smiles="CCO",
@@ -336,7 +336,7 @@ class TestCompound:
             ValueError,
             match="PubchemMolecule must have at least one structural identifier",
         ):
-            Compound(
+            PubchemMolecule(
                 **base_entity_kwargs,
                 cid="12345",
                 # No SMILES or InChI
@@ -348,7 +348,7 @@ class TestCompound:
             ValueError,
             match="PubchemMolecule must have at least one structural identifier",
         ):
-            Compound(
+            PubchemMolecule(
                 **base_entity_kwargs,
                 cid="12345",
                 inchikey="BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
@@ -356,8 +356,8 @@ class TestCompound:
             )
 
     def test_compound_is_frozen(self, base_entity_kwargs):
-        """Test that Compound is immutable."""
-        compound = Compound(
+        """Test that PubchemMolecule is immutable."""
+        compound = PubchemMolecule(
             **base_entity_kwargs,
             cid="12345",
             canonical_smiles="CCO",
@@ -367,12 +367,12 @@ class TestCompound:
 
 
 @pytest.mark.unit
-class TestProtein:
-    """Tests for Protein entity."""
+class TestUniprotTarget:
+    """Tests for UniprotTarget entity."""
 
     def test_protein_creation_success(self, base_entity_kwargs):
-        """Test successful Protein creation."""
-        protein = Protein(
+        """Test successful UniprotTarget creation."""
+        protein = UniprotTarget(
             **base_entity_kwargs,
             accession="P12345",
             entry_name="TEST_HUMAN",
@@ -383,8 +383,8 @@ class TestProtein:
         assert protein.protein_name == "Test protein"
 
     def test_protein_with_all_optional_fields(self, base_entity_kwargs):
-        """Test Protein with all optional fields."""
-        protein = Protein(
+        """Test UniprotTarget with all optional fields."""
+        protein = UniprotTarget(
             **base_entity_kwargs,
             accession="P00533",
             entry_name="EGFR_HUMAN",
@@ -399,7 +399,7 @@ class TestProtein:
 
     def test_protein_default_gene_names_empty_list(self, base_entity_kwargs):
         """Test that gene_names defaults to empty list."""
-        protein = Protein(
+        protein = UniprotTarget(
             **base_entity_kwargs,
             accession="P12345",
             entry_name="TEST_HUMAN",
@@ -410,7 +410,7 @@ class TestProtein:
     def test_protein_requires_accession(self, base_entity_kwargs):
         """Test that empty accession raises ValueError."""
         with pytest.raises(ValueError, match="UniprotTarget accession is required"):
-            Protein(
+            UniprotTarget(
                 **base_entity_kwargs,
                 accession="",
                 entry_name="TEST_HUMAN",
@@ -420,7 +420,7 @@ class TestProtein:
     def test_protein_sequence_length_must_be_positive(self, base_entity_kwargs):
         """Test that non-positive sequence_length raises ValueError."""
         with pytest.raises(ValueError, match="Sequence length must be positive"):
-            Protein(
+            UniprotTarget(
                 **base_entity_kwargs,
                 accession="P12345",
                 entry_name="TEST_HUMAN",
@@ -431,7 +431,7 @@ class TestProtein:
     def test_protein_sequence_length_negative_raises(self, base_entity_kwargs):
         """Test that negative sequence_length raises ValueError."""
         with pytest.raises(ValueError, match="Sequence length must be positive"):
-            Protein(
+            UniprotTarget(
                 **base_entity_kwargs,
                 accession="P12345",
                 entry_name="TEST_HUMAN",
@@ -441,7 +441,7 @@ class TestProtein:
 
     def test_protein_sequence_length_none_is_valid(self, base_entity_kwargs):
         """Test that None sequence_length is valid."""
-        protein = Protein(
+        protein = UniprotTarget(
             **base_entity_kwargs,
             accession="P12345",
             entry_name="TEST_HUMAN",
@@ -451,8 +451,8 @@ class TestProtein:
         assert protein.sequence_length is None
 
     def test_protein_is_frozen(self, base_entity_kwargs):
-        """Test that Protein is immutable."""
-        protein = Protein(
+        """Test that UniprotTarget is immutable."""
+        protein = UniprotTarget(
             **base_entity_kwargs,
             accession="P12345",
             entry_name="TEST_HUMAN",

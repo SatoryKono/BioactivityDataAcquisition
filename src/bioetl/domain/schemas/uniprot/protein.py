@@ -1,8 +1,5 @@
 """Pandera schema for UniProt Target entity.
 
-Canonical name: UniprotTargetSchema
-Deprecated alias: ProteinSchema (backward compatibility)
-
 Aligned with RULES.md v5.0 and UniProt REST API.
 Source: https://rest.uniprot.org/uniprotkb/
 
@@ -13,9 +10,6 @@ Extended schema includes:
 - Functional annotations (comments)
 - Cross-references (GO, DrugBank, ChEMBL, GtoPdb)
 - Sequence features and keywords
-
-.. versionchanged:: 2.0.0
-    ProteinSchema renamed to UniprotTargetSchema for Ubiquitous Language alignment.
 """
 
 from __future__ import annotations
@@ -50,11 +44,7 @@ PROTEIN_FLAGS = ["Fragment", "Precursor", "Fragments"]
 class UniprotTargetSchema(ETLRecordSchema):
     """UniProt Target validation schema for Silver layer.
 
-    Canonical name for ProteinSchema, aligned with Ubiquitous Language.
     Represents a UniProtKB protein entry (Swiss-Prot or TrEMBL).
-
-    .. versionadded:: 2.0.0
-        Replaces :class:`ProteinSchema` as the canonical schema name.
     """
 
     # === Primary Key & Core Identifiers ===
@@ -342,13 +332,3 @@ class UniprotTargetSchema(ETLRecordSchema):
         coerce = True
         name = "UniprotTargetSchema"
         description = "UniProt Target Silver layer validation"
-
-
-# === Deprecated Alias (backward compatibility) ===
-
-# ProteinSchema is a deprecated alias for UniprotTargetSchema.
-# Use UniprotTargetSchema in new code for Ubiquitous Language alignment.
-#
-# .. deprecated:: 2.0.0
-#     Use :class:`UniprotTargetSchema` instead.
-ProteinSchema = UniprotTargetSchema
