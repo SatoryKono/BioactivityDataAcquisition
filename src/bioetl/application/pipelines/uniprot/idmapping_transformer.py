@@ -15,7 +15,7 @@ from bioetl.domain.services import IdentityService
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig
-    from bioetl.domain.ports import MetricsPort, TracingPort
+    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
@@ -40,6 +40,7 @@ class IDMappingTransformer(BaseTransformer):
         metrics: MetricsPort | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
+        pii_hasher: PiiHasherPort | None = None,
     ):
         """Initialize ID Mapping transformer.
 
@@ -50,6 +51,7 @@ class IDMappingTransformer(BaseTransformer):
             metrics: Optional metrics port for duration/error tracking.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
+            pii_hasher: Optional PII hasher for hashing sensitive data.
         """
         super().__init__(
             provider,
@@ -58,6 +60,7 @@ class IDMappingTransformer(BaseTransformer):
             metrics=metrics,
             gold_filters=gold_filters,
             identity_service=identity_service,
+            pii_hasher=pii_hasher,
         )
 
     async def _transform_impl(
