@@ -207,12 +207,18 @@ class TestNoHardcodedSecrets:
             )
 
 
+@pytest.mark.timeout(180)  # File scanning needs more time
 class TestPrivateKeyExposure:
     """Tests for private key exposure."""
 
     @pytest.fixture
     def all_files(self) -> list[Path]:
-        """Get all files in project (excluding .git and venv)."""
+        """Get all files in project (excluding .git and venv).
+
+        Uses os.walk for efficiency to prune ignored directories.
+        """
+        import os
+
         excluded = {
             ".git",
             ".venv",
@@ -230,11 +236,24 @@ class TestPrivateKeyExposure:
             "node_modules",
             "site",
             "htmlcov",
+            ".ruff_cache",
+            ".import_linter_cache",
+            "coverage.json",  # Skip large generated files
         }
+        
         files = []
-        for item in PROJECT_ROOT.rglob("*"):
-            if item.is_file() and not any(ex in item.parts for ex in excluded):
-                files.append(item)
+        # Walk effectively prunes trees, unlike rglob
+        for root, dirs, filenames in os.walk(PROJECT_ROOT):
+            # Prune excluded directories in-place
+            dirs[:] = [d for d in dirs if d not in excluded]
+            
+            for filename in filenames:
+                if filename in excluded:
+                    continue
+                    
+                file_path = Path(root) / filename
+                files.append(file_path)
+                
         return files
 
     def test_no_private_keys_in_repo(self, all_files: list[Path]) -> None:
