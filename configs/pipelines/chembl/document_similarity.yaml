@@ -1,0 +1,46 @@
+# configs/pipelines/chembl/document_similarity.yaml
+# Pipeline configuration for ChEMBL Document Similarity entity.
+#
+# Inherits defaults from ../_defaults.yaml
+
+pipeline_name: chembl_document_similarity
+provider: chembl
+entity_type: document_similarity
+version: "1.0.0"
+description: "Extract document similarity data (Tanimoto coefficients) from ChEMBL API"
+
+primary_keys: ["sim_id"]
+silver_table: "chembl_document_similarity"
+
+source_file: ../../sources/chembl.yaml
+
+# Entity-specific gold filters
+gold_filters:
+  ranges:
+    # Filter to significant similarities only
+    max_tani:
+      min: 0.5
+      include_min: true
+  required_fields:
+    - sim_id
+    - doc_1
+    - doc_2
+
+# Entity-specific sink overrides
+sink:
+  bronze:
+    path: "data/output/bronze"
+  silver:
+    path: "data/output/silver"
+    primary_key: ["sim_id"]
+    partition_by: []  # No good partition key
+    csv_export:
+      path: "data/output/csv/silver"
+  gold:
+    path: "data/output/gold"
+    csv_export:
+      path: "data/output/csv/gold"
+
+# No input filter needed - load full dataset
+input_filter:
+  enabled: false
