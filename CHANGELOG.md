@@ -45,6 +45,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Migration Required**: Run `scripts/migrate_openalex_citation_count.py` for existing Delta Lake tables
   - Source field from OpenAlex API remains `cited_by_count`; only BioETL unified field name changed
 
+### Changed
+
+- **BREAKING: Standardized ChEMBL Molecule Structure Field Names**
+  - Renamed structure fields to align with PubChem naming conventions:
+    - `structure_canonical_smiles` → `canonical_smiles`
+    - `structure_standard_inchi` → `standard_inchi`
+    - `structure_standard_inchi_key` → `inchi_key`
+  - Affected files:
+    - `domain/entities/chembl_structures.py` (Molecule entity)
+    - `domain/entities/chembl.py` (MoleculeRecord DTO)
+    - `application/pipelines/chembl/molecule_transformer.py`
+    - `infrastructure/schemas/silver.py` (CHEMBL_MOLECULE_SCHEMA)
+    - `infrastructure/schemas/gold.py` (ChEMBLMoleculeGoldSchema)
+  - Migration script: `scripts/migrations/rename_structure_fields.py`
+  - **Migration required**: Run migration script before processing new data
+  - **Downstream impact**: Update any consumers that reference the old field names
+
 ### Added
 
 - **`normalize_pmid()` function**: New helper in `application/core/field_specs.py` for safe PMID normalization:

@@ -320,10 +320,10 @@ class Molecule(BaseEntity):
     property_full_molformula: str | None = None
     property_ro3_pass: str | None = None  # "Y" or "N"
 
-    # Flattened Structures
-    structure_canonical_smiles: str | None = None
-    structure_standard_inchi: str | None = None
-    structure_standard_inchi_key: str | None = None
+    # Flattened Structures (unified naming without structure_ prefix)
+    canonical_smiles: str | None = None
+    standard_inchi: str | None = None
+    inchi_key: str | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()

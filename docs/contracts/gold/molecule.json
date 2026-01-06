@@ -104,15 +104,15 @@
             "type": ["string", "null"],
             "description": "Full molecular formula."
         },
-        "structure_canonical_smiles": {
+        "canonical_smiles": {
             "type": ["string", "null"],
             "description": "Canonical SMILES representation (flattened from molecule_structures)."
         },
-        "structure_standard_inchi": {
+        "standard_inchi": {
             "type": ["string", "null"],
-            "description": "Standard InChI (flattened from molecule_structures)."
+            "description": "Standard InChI representation (flattened from molecule_structures)."
         },
-        "structure_standard_inchi_key": {
+        "inchi_key": {
             "type": ["string", "null"],
             "description": "Standard InChI Key (flattened from molecule_structures)."
         },
