@@ -99,10 +99,12 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     )
 
     # === Metrics ===
-    cited_by_count: Series[pd.Int64Dtype] = pa.Field(
+    # OpenAlex source field: cited_by_count
+    # Unified BioETL field: citation_count (standardized across all providers)
+    citation_count: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
         ge=0,
-        description="Citation count",
+        description="Number of citations (from OpenAlex cited_by_count).",
     )
 
     # === Metadata ===
