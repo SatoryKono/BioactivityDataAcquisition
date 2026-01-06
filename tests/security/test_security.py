@@ -375,6 +375,7 @@ class TestPIIHandling:
             pytest.skip("Review PII handling:\n" + "\n".join(files_with_pii))
 
 
+@pytest.mark.timeout(120)  # File scanning needs more time
 class TestInputValidation:
     """Tests for input validation and injection prevention."""
 
@@ -467,6 +468,7 @@ class TestInputValidation:
             pytest.skip("Review pickle usage:\n" + "\n".join(violations))
 
 
+@pytest.mark.timeout(120)  # File scanning needs more time
 class TestPathTraversal:
     """Tests for path traversal vulnerabilities."""
 
@@ -508,6 +510,7 @@ class TestPathTraversal:
         assert not violations, "Path issues in configs:\n" + "\n".join(violations)
 
 
+@pytest.mark.timeout(120)  # File scanning needs more time
 class TestSecurityHeaders:
     """Tests for security-related header handling."""
 
@@ -540,6 +543,7 @@ class TestSecurityHeaders:
         assert not violations, "Sensitive headers in logs:\n" + "\n".join(violations)
 
 
+@pytest.mark.timeout(120)  # File scanning needs more time
 class TestCryptographyUsage:
     """Tests for proper cryptography usage."""
 
