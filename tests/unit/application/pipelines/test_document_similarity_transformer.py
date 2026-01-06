@@ -57,8 +57,9 @@ class TestDocumentSimilarityTransformer:
         assert result["doc_2"] == 12346
         assert result["tid_tani"] == 0.8
         assert result["mol_tani"] == 0.6
-        assert result["pubmed_id1"] == 12345678
-        assert result["pubmed_id2"] == 87654321
+        # PMID should be normalized to string
+        assert result["pubmed_id1"] == "12345678"
+        assert result["pubmed_id2"] == "87654321"
         # Verify derived metrics
         assert result["avg_tani"] == 0.7
         assert result["max_tani"] == 0.8
@@ -189,7 +190,11 @@ class TestDocumentSimilarityTransformer:
 
     @pytest.mark.asyncio
     async def test_transform_ids_as_string(self, transformer, mock_context):
-        """Test that integer IDs as strings are converted."""
+        """Test that integer IDs as strings are converted appropriately.
+
+        sim_id, doc_1, doc_2 are converted to int.
+        pubmed_id1, pubmed_id2 are normalized to string.
+        """
         record = {
             "sim_id": "123",
             "doc_1": "100",
@@ -203,7 +208,8 @@ class TestDocumentSimilarityTransformer:
         assert result["sim_id"] == 123
         assert result["doc_1"] == 100
         assert result["doc_2"] == 200
-        assert result["pubmed_id1"] == 12345678
+        # PMID should remain as string (normalized)
+        assert result["pubmed_id1"] == "12345678"
 
     def test_primary_id_field(self, transformer):
         """Test primary ID field is set correctly."""

@@ -230,53 +230,59 @@ class DOI(ValueObject[str]):
         return self._value.split("/")[0][3:]  # Skip "10."
 
 
-class PubMedId(ValueObject[int]):
+class PubMedId(ValueObject[str]):
     """PubMed identifier (PMID).
 
-    A positive integer uniquely identifying an article in PubMed.
-    Examples: 12345, 28891234
+    A numeric string uniquely identifying an article in PubMed.
+    Stored as string to match PubMed API behavior and enable consistent
+    cross-provider JOIN operations.
+
+    Examples: "12345", "28891234"
 
     Invariants:
-        - Must be a positive integer
+        - Must be a string containing only digits
+        - Must represent a positive integer (no leading zeros except for "0")
         - Cannot exceed reasonable bounds (< 10^10)
     """
 
     __slots__ = ()
-    _value: int
-
+    _value: str
+    _PATTERN = re.compile(r"^\d+$")
     _MAX_PMID = 10_000_000_000  # Reasonable upper bound
 
-    def _coerce_to_int(self, value: int | str) -> int:
-        """Coerce value to int, raising ValueError on failure."""
+    def _coerce_to_str(self, value: str | int) -> str:
+        """Coerce value to string, raising ValueError on failure."""
         if isinstance(value, bool):
-            raise ValueError(f"PubMedId must be int, got {type(value).__name__}")
+            raise ValueError(f"PubMedId must be str or int, got {type(value).__name__}")
         if isinstance(value, int):
-            return value
+            return str(value)
         if isinstance(value, str):
-            try:
-                return int(value.strip())
-            except ValueError:
-                raise ValueError(f"Invalid PubMed ID: {value!r}") from None
-        raise ValueError(f"PubMedId must be int, got {type(value).__name__}")
+            return value.strip()
+        raise ValueError(f"PubMedId must be str or int, got {type(value).__name__}")
 
-    def _validate(self, value: int) -> int:
-        """Validate PubMed ID.
+    def _validate(self, value: str | int) -> str:
+        """Validate and normalize PubMed ID to string."""
+        str_value = self._coerce_to_str(value)
 
-        Args:
-            value: Raw PMID value.
+        if not str_value:
+            raise ValueError("PubMed ID cannot be empty")
+        if not self._PATTERN.match(str_value):
+            raise ValueError(
+                f"Invalid PubMed ID format: {value!r}. Must contain only digits."
+            )
 
-        Returns:
-            Validated PMID.
-
-        Raises:
-            ValueError: If PMID is invalid.
-        """
-        int_value = self._coerce_to_int(value)
+        int_value = int(str_value)
         if int_value <= 0:
-            raise ValueError(f"PubMed ID must be positive: {int_value}")
+            raise ValueError(f"PubMed ID must be positive: {str_value}")
         if int_value >= self._MAX_PMID:
-            raise ValueError(f"PubMed ID too large: {int_value}")
-        return int_value
+            raise ValueError(f"PubMed ID too large: {str_value}")
+
+        return str(int_value)
+
+    @property
+    def as_int(self) -> int:
+        """Get the PMID as integer for numeric operations."""
+        return int(self._value)
 
 
 class PubChemCid(ValueObject[int]):

@@ -22,8 +22,16 @@ class DocumentSimilaritySchema(ETLRecordSchema):
     doc_2: Series[int] = pa.Field(nullable=False, description="FK to document 2.")
 
     # === Identifiers ===
-    pubmed_id1: Series[int] | None = pa.Field(nullable=True, description="PubMed ID 1.")
-    pubmed_id2: Series[int] | None = pa.Field(nullable=True, description="PubMed ID 2.")
+    pubmed_id1: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=r"^\d+$",
+        description="PubMed identifier 1 (numeric string).",
+    )
+    pubmed_id2: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=r"^\d+$",
+        description="PubMed identifier 2 (numeric string).",
+    )
 
     # === Metrics ===
     tid_tani: Series[float] | None = pa.Field(

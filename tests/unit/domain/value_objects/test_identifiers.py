@@ -306,36 +306,65 @@ class TestDOI:
 
 
 class TestPubMedId:
-    """Tests for PubMedId Value Object."""
+    """Tests for PubMedId Value Object.
 
-    def test_valid_pmid(self) -> None:
-        """Test creation with valid PMID."""
+    PubMedId stores PMID as a string (numeric digits only) to match
+    PubMed API behavior and enable consistent cross-provider JOINs.
+    """
+
+    def test_valid_pmid_from_int(self) -> None:
+        """Test creation with valid PMID from int."""
         pmid = PubMedId(12345)
-        assert pmid.value == 12345
+        assert pmid.value == "12345"
+
+    def test_valid_pmid_from_string(self) -> None:
+        """Test creation with valid PMID from string."""
+        pmid = PubMedId("12345678")
+        assert pmid.value == "12345678"
 
     def test_large_pmid(self) -> None:
         """Test creation with large PMID."""
         pmid = PubMedId(28891234)
-        assert pmid.value == 28891234
+        assert pmid.value == "28891234"
 
-    def test_string_conversion(self) -> None:
-        """Test string input is converted to int."""
-        pmid = PubMedId("12345")  # type: ignore[arg-type]
-        assert pmid.value == 12345
+    def test_int_conversion(self) -> None:
+        """Test int input is converted to string."""
+        pmid = PubMedId(12345)
+        assert pmid.value == "12345"
+        assert isinstance(pmid.value, str)
 
     def test_string_with_whitespace(self) -> None:
-        """Test string with whitespace is handled."""
-        pmid = PubMedId("  12345  ")  # type: ignore[arg-type]
-        assert pmid.value == 12345
+        """Test string with whitespace is stripped."""
+        pmid = PubMedId("  12345  ")
+        assert pmid.value == "12345"
+
+    def test_leading_zeros_normalized(self) -> None:
+        """Test leading zeros are removed."""
+        pmid = PubMedId("00012345")
+        assert pmid.value == "12345"
+
+    def test_as_int_property(self) -> None:
+        """Test as_int property returns integer value."""
+        pmid = PubMedId("12345678")
+        assert pmid.as_int == 12345678
+        assert isinstance(pmid.as_int, int)
 
     def test_zero_raises(self) -> None:
         """Test zero PMID raises ValueError."""
         with pytest.raises(ValueError, match="must be positive"):
             PubMedId(0)
 
-    def test_negative_raises(self) -> None:
-        """Test negative PMID raises ValueError."""
+    def test_zero_string_raises(self) -> None:
+        """Test zero as string raises ValueError."""
         with pytest.raises(ValueError, match="must be positive"):
+            PubMedId("0")
+
+    def test_negative_raises(self) -> None:
+        """Test negative PMID raises ValueError.
+
+        Note: Negative numbers are caught by the format check since '-' is not a digit.
+        """
+        with pytest.raises(ValueError, match="Must contain only digits"):
             PubMedId(-1)
 
     def test_too_large_raises(self) -> None:
@@ -343,31 +372,51 @@ class TestPubMedId:
         with pytest.raises(ValueError, match="too large"):
             PubMedId(10_000_000_000)
 
+    def test_too_large_string_raises(self) -> None:
+        """Test too large PMID as string raises ValueError."""
+        with pytest.raises(ValueError, match="too large"):
+            PubMedId("10000000000")
+
     def test_bool_raises(self) -> None:
         """Test boolean input raises ValueError."""
-        with pytest.raises(ValueError, match="must be int"):
+        with pytest.raises(ValueError, match="must be str or int"):
             PubMedId(True)  # type: ignore[arg-type]
 
     def test_invalid_string_raises(self) -> None:
         """Test invalid string raises ValueError."""
-        with pytest.raises(ValueError, match="Invalid PubMed ID"):
-            PubMedId("not-a-number")  # type: ignore[arg-type]
+        with pytest.raises(ValueError, match="Must contain only digits"):
+            PubMedId("not-a-number")
+
+    def test_mixed_string_raises(self) -> None:
+        """Test mixed alphanumeric string raises ValueError."""
+        with pytest.raises(ValueError, match="Must contain only digits"):
+            PubMedId("123abc")
 
     def test_float_raises(self) -> None:
         """Test float input raises ValueError."""
-        with pytest.raises(ValueError, match="must be int"):
+        with pytest.raises(ValueError, match="must be str or int"):
             PubMedId(12345.5)  # type: ignore[arg-type]
+
+    def test_empty_string_raises(self) -> None:
+        """Test empty string raises ValueError."""
+        with pytest.raises(ValueError, match="cannot be empty"):
+            PubMedId("")
+
+    def test_whitespace_only_raises(self) -> None:
+        """Test whitespace-only string raises ValueError."""
+        with pytest.raises(ValueError, match="cannot be empty"):
+            PubMedId("   ")
 
     def test_immutability(self) -> None:
         """Test Value Object is immutable."""
         pmid = PubMedId(12345)
         with pytest.raises(AttributeError, match="immutable"):
-            pmid._value = 99999  # type: ignore[misc]
+            pmid._value = "99999"  # type: ignore[misc]
 
     def test_equality_by_value(self) -> None:
         """Test equality is based on value."""
         pmid1 = PubMedId(12345)
-        pmid2 = PubMedId(12345)
+        pmid2 = PubMedId("12345")
         assert pmid1 == pmid2
         assert pmid1 is not pmid2
 
@@ -380,13 +429,18 @@ class TestPubMedId:
     def test_hash_consistency(self) -> None:
         """Test hash is consistent with equality."""
         pmid1 = PubMedId(12345)
-        pmid2 = PubMedId(12345)
+        pmid2 = PubMedId("12345")
         assert hash(pmid1) == hash(pmid2)
 
     def test_str(self) -> None:
         """Test string conversion."""
         pmid = PubMedId(12345)
         assert str(pmid) == "12345"
+
+    def test_repr(self) -> None:
+        """Test repr output."""
+        pmid = PubMedId(12345)
+        assert repr(pmid) == "PubMedId('12345')"
 
 
 class TestPubChemCid:
