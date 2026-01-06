@@ -88,9 +88,9 @@ async def test_uniprot_protein_metadata_fields(e2e_data_dir: Path):
         has_protein_name = record.get("protein_name") is not None
 
         # Most proteins should have basic metadata
-        assert (
-            has_entry_name or has_protein_name
-        ), f"Protein {record.get('accession')} missing basic metadata"
+        assert has_entry_name or has_protein_name, (
+            f"Protein {record.get('accession')} missing basic metadata"
+        )
 
 
 @pytest.mark.e2e
@@ -118,6 +118,6 @@ async def test_uniprot_protein_sequence_fields(e2e_data_dir: Path):
         # Check sequence_length if present
         seq_length = record.get("sequence_length")
         if seq_length is not None:
-            assert (
-                seq_length >= 0
-            ), f"Invalid sequence_length {seq_length} for {record.get('accession')}"
+            assert seq_length >= 0, (
+                f"Invalid sequence_length {seq_length} for {record.get('accession')}"
+            )

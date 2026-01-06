@@ -151,14 +151,14 @@ class TestRequiredMetricsSmoke:
         ]
 
         for metric in required_histograms:
-            assert (
-                metric in HISTOGRAMS
-            ), f"Required histogram '{metric}' not found in HISTOGRAMS registry"
+            assert metric in HISTOGRAMS, (
+                f"Required histogram '{metric}' not found in HISTOGRAMS registry"
+            )
 
         for metric in required_counters:
-            assert (
-                metric in COUNTERS
-            ), f"Required counter '{metric}' not found in COUNTERS registry"
+            assert metric in COUNTERS, (
+                f"Required counter '{metric}' not found in COUNTERS registry"
+            )
 
     def test_required_circuit_breaker_metrics_registered(self):
         """Verify Circuit Breaker metrics are registered (per ADR-007)."""
@@ -173,14 +173,14 @@ class TestRequiredMetricsSmoke:
         ]
 
         for metric in cb_counters:
-            assert (
-                metric in COUNTERS
-            ), f"Required CB counter '{metric}' not found in COUNTERS registry"
+            assert metric in COUNTERS, (
+                f"Required CB counter '{metric}' not found in COUNTERS registry"
+            )
 
         for metric in cb_gauges:
-            assert (
-                metric in GAUGES
-            ), f"Required CB gauge '{metric}' not found in GAUGES registry"
+            assert metric in GAUGES, (
+                f"Required CB gauge '{metric}' not found in GAUGES registry"
+            )
 
     def test_metrics_have_correct_labels(self):
         """Verify metrics have expected label names."""

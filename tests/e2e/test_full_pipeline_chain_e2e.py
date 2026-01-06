@@ -205,6 +205,6 @@ async def test_rerun_same_pipeline_twice(e2e_data_dir: Path):
     )
 
     # Should not double the records
-    assert (
-        second_count <= first_count * 2
-    ), f"Records may have duplicated: {first_count} -> {second_count}"
+    assert second_count <= first_count * 2, (
+        f"Records may have duplicated: {first_count} -> {second_count}"
+    )

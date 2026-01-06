@@ -112,6 +112,6 @@ async def test_chembl_assay_confidence_score(e2e_data_dir: Path):
     for record in records:
         confidence = record.get("confidence_score")
         if confidence is not None:
-            assert (
-                0 <= confidence <= 9
-            ), f"Invalid confidence_score {confidence} for {record.get('assay_chembl_id')}"
+            assert 0 <= confidence <= 9, (
+                f"Invalid confidence_score {confidence} for {record.get('assay_chembl_id')}"
+            )
