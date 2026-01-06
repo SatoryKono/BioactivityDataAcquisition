@@ -63,6 +63,7 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     Publication,
     PublicationEntity,
     PublicationRecord,
+    SemanticScholarPublicationEntity,
     Target,
     TargetComponent,
     TargetComponentRecord,
@@ -305,6 +306,7 @@ __all__ = [
     "ProteinClassification",
     "Publication",
     "PublicationEntity",
+    "SemanticScholarPublicationEntity",
     "Target",
     "TargetComponent",
     "Work",  # Deprecated: use PublicationEntity

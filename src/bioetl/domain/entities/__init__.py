@@ -58,6 +58,9 @@ from bioetl.domain.entities.pubchem import Compound, PubChemCompoundRecord
 # PubMed DTO + Entity
 from bioetl.domain.entities.pubmed import ArticleRecord, Publication
 
+# Semantic Scholar Entity
+from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
+
 # UniProt Entity
 from bioetl.domain.entities.uniprot import Protein
 
@@ -87,6 +90,7 @@ __all__ = [
     "Publication",
     "PublicationEntity",
     "PublicationRecord",
+    "SemanticScholarPublicationEntity",
     "Target",
     "TargetComponent",
     "TargetComponentRecord",
