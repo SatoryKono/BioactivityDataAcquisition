@@ -42,16 +42,6 @@ class DQEvaluationStatus(str, Enum):
     FAILED = "failed"
 
 
-# Deprecated alias for backward compatibility
-DQStatus = DQEvaluationStatus
-"""Deprecated alias for DQEvaluationStatus.
-
-.. deprecated:: 1.1.0
-    Use :class:`DQEvaluationStatus` instead.
-    DQStatus was renamed to avoid confusion with QuarantineStatus.
-"""
-
-
 @dataclass(frozen=True, slots=True)
 class DQResult:
     """Result of Data Quality evaluation.
@@ -99,4 +89,4 @@ class DQResult:
         return len(self.anomalies)
 
 
-__all__ = ["DQEvaluationStatus", "DQResult", "DQStatus"]
+__all__ = ["DQEvaluationStatus", "DQResult"]

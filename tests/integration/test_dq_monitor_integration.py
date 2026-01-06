@@ -320,7 +320,7 @@ class TestDataQualityServiceMetricsEmission:
         """
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
-        from bioetl.domain.value_objects.dq_result import DQStatus
+        from bioetl.domain.value_objects.dq_result import DQEvaluationStatus
 
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
         service = DataQualityService(
@@ -334,7 +334,7 @@ class TestDataQualityServiceMetricsEmission:
         # Error rate 10% - above soft (5%), below hard (20%)
         result = await service.evaluate({"error_rate": 0.10})
 
-        assert result.status == DQStatus.WARNING
+        assert result.status == DQEvaluationStatus.WARNING
 
         # Verify counter was emitted
         counter_calls = recording_metrics.get_counter_calls(
@@ -493,7 +493,7 @@ class TestDataQualityServiceMetricsEmission:
         """
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
-        from bioetl.domain.value_objects.dq_result import DQStatus
+        from bioetl.domain.value_objects.dq_result import DQEvaluationStatus
 
         config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
         service = DataQualityService(
@@ -507,7 +507,7 @@ class TestDataQualityServiceMetricsEmission:
         # Error rate 3% - below soft threshold
         result = await service.evaluate({"error_rate": 0.03})
 
-        assert result.status == DQStatus.PASSED
+        assert result.status == DQEvaluationStatus.PASSED
 
         # Verify NO counter was emitted
         counter_calls = recording_metrics.get_counter_calls(

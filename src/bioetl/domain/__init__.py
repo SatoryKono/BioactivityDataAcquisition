@@ -36,7 +36,6 @@ from bioetl.domain.context import (
 )
 
 # Entities (Domain objects)
-from bioetl.domain.entities import Work  # Deprecated: use PublicationEntity
 from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities (dataclass)
     ActivityRecord,
     ArticleRecord,
@@ -217,7 +216,6 @@ from bioetl.domain.transformations import (
 )
 
 # Types
-from bioetl.domain.types import DQStatus  # Deprecated: use QuarantineRecordStatus
 from bioetl.domain.types import (
     ArrowSchema,
     BatchID,
@@ -309,7 +307,6 @@ __all__ = [
     "SemanticScholarPublicationEntity",
     "Target",
     "TargetComponent",
-    "Work",  # Deprecated: use PublicationEntity
     # Error classifier
     "ErrorClassifier",
     # Events
@@ -459,7 +456,6 @@ __all__ = [
     "ConfigValidationError",
     "ContentHash",
     "DataClassification",
-    "DQStatus",  # Deprecated: use QuarantineRecordStatus
     "DriftLevel",
     "EntityID",
     "ErrorType",

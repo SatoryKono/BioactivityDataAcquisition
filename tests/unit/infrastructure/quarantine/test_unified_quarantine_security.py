@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.domain.types import DQStatus
+from bioetl.domain.types import QuarantineRecordStatus
 from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
 
 
@@ -65,7 +65,9 @@ def test_update_status_handles_malicious_hash(mock_delta_table):
     quarantine = UnifiedQuarantine(base_path="/fake/path")
     malicious_hash = "abc'; --"
 
-    quarantine.update_status(payload_hash=malicious_hash, new_status=DQStatus.IGNORED)
+    quarantine.update_status(
+        payload_hash=malicious_hash, new_status=QuarantineRecordStatus.IGNORED
+    )
 
     # Verify that the predicate is properly escaped
     _args, kwargs = mock_instance.update.call_args
@@ -75,4 +77,4 @@ def test_update_status_handles_malicious_hash(mock_delta_table):
 
     # Verify that the update value is also escaped
     updates = kwargs["updates"]
-    assert f"'{DQStatus.IGNORED.value}'" in updates["dq_status"]
+    assert f"'{QuarantineRecordStatus.IGNORED.value}'" in updates["dq_status"]
