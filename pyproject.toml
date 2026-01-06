@@ -300,11 +300,18 @@ module = [
 disable_error_code = ["misc"]
 
 # Disable no-any-return for modules using orjson (type stubs incomplete)
+# and Pandera schemas where Series operations return Any
 [[tool.mypy.overrides]]
 module = [
     "bioetl.application.core.base_transformer",
+    # Pandera DataFrameModel check methods use Series operations that return Any
+    "bioetl.domain.schemas.uniprot.protein",
+    "bioetl.domain.schemas.uniprot.isoform",
+    "bioetl.domain.schemas.semanticscholar.publication",
+    "bioetl.domain.schemas.pubmed.article",
+    "bioetl.domain.schemas.pubchem.compound",
 ]
-disable_error_code = ["no-any-return"]
+disable_error_code = ["no-any-return", "return-value"]
 
 # Note: All layers now pass strict mypy checks.
 # ignore_errors was removed as part of architecture review (2025-12-23).
