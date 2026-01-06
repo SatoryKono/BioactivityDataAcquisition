@@ -366,3 +366,33 @@ class TestUniProtProteinTransformer:
 
         assert result is not None
         assert result["organism_id"] == 10090
+
+    def test_transformer_accepts_entity_type(self):
+        """Transformer MUST accept entity_type parameter."""
+        transformer = UniProtProteinTransformer(entity_type="protein")
+        assert transformer.entity_type == "protein"
+
+    def test_transformer_default_entity_type(self):
+        """Transformer SHOULD default entity_type to 'protein'."""
+        transformer = UniProtProteinTransformer()
+        assert transformer.entity_type == "protein"
+
+    def test_transformer_custom_entity_type(self):
+        """Transformer MUST accept custom entity_type."""
+        transformer = UniProtProteinTransformer(entity_type="custom_entity")
+        assert transformer.entity_type == "custom_entity"
+
+    def test_transformer_accepts_pii_hasher(self):
+        """Transformer MUST accept pii_hasher parameter."""
+        from bioetl.domain.ports import NoOpPiiHasher
+
+        hasher = NoOpPiiHasher()
+        transformer = UniProtProteinTransformer(pii_hasher=hasher)
+        assert transformer._pii_hasher is hasher
+
+    def test_transformer_default_pii_hasher(self):
+        """Transformer SHOULD default pii_hasher to NoOpPiiHasher."""
+        from bioetl.domain.ports import NoOpPiiHasher
+
+        transformer = UniProtProteinTransformer()
+        assert isinstance(transformer._pii_hasher, NoOpPiiHasher)
