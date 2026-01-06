@@ -15,6 +15,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # === Fixed Value Constants ===
 # CrossRef publication types (from CrossRef API "type" field)
@@ -62,7 +63,7 @@ class PublicationSchema(ETLRecordSchema):
     # === Primary Key ===
     doi: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^10\.\d{4,}/.*$",
+        str_matches=DOI_REGEX_PATTERN,
         description="Digital Object Identifier (PK)",
     )
 
