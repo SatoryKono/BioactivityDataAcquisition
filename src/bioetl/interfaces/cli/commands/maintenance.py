@@ -16,7 +16,6 @@ from bioetl.interfaces.cli.commands.vacuum import vacuum_all_command, vacuum_com
 @click.group()
 def maintenance() -> None:
     """Maintenance operations for Delta tables."""
-    pass
 
 
 # Register all maintenance subcommands

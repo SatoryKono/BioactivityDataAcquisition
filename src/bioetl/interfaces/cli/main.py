@@ -24,7 +24,6 @@ from bioetl.interfaces.cli.commands.run_all import run_all
 @click.version_option(version=__version__)
 def cli() -> None:
     """BioETL - Bioactivity Data ETL Pipeline."""
-    pass
 
 
 # Register commands

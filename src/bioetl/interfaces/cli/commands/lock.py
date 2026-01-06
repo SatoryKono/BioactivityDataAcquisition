@@ -20,7 +20,6 @@ from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 @click.group()
 def lock() -> None:
     """Manage pipeline locks."""
-    pass
 
 
 @lock.command("release")
