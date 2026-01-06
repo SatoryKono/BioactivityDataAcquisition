@@ -11,6 +11,7 @@ description: "Extract molecules/compounds from ChEMBL API"
 
 primary_keys: ["molecule_chembl_id"]
 silver_table: "chembl_molecule"
+gold_table: "chembl_molecule"
 
 source_file: ../../sources/chembl.yaml
 

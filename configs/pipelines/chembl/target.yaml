@@ -11,6 +11,7 @@ description: "Extract biological targets from ChEMBL API"
 
 primary_keys: ["target_chembl_id"]
 silver_table: "chembl_target"
+gold_table: "chembl_target"
 
 source_file: ../../sources/chembl.yaml
 

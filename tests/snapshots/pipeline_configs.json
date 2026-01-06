@@ -63,7 +63,7 @@
         "target_chembl_id"
       ]
     },
-    "gold_table": null,
+    "gold_table": "chembl_activity",
     "gold_write_mode": "overwrite",
     "on_schema_mismatch": "evolve",
     "partition_cols": [],

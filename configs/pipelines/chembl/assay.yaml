@@ -11,6 +11,7 @@ description: "Extract bioassay definitions from ChEMBL API"
 
 primary_keys: ["assay_chembl_id"]
 silver_table: "chembl_assay"
+gold_table: "chembl_assay"
 
 source_file: ../../sources/chembl.yaml
 

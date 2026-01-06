@@ -31,6 +31,7 @@ sink:
     path: data/bronze/chembl/target_component
   silver:
     path: data/silver/chembl/target_component
+    primary_key: ["component_id"]
     partition_by: ["organism"]
     csv_export:
       path: "data/output/csv/silver"
