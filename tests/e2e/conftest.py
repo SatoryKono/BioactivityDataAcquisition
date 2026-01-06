@@ -30,6 +30,15 @@ def e2e_environment():
     """Настройка окружения для E2E тестов (Local-Only)."""
     os.environ["BIOETL_ENV"] = "dev"
     os.environ["BIOETL_TEST_MODE"] = "true"
+    # Prevent shutil.get_terminal_size hangs in CI/Test environments
+    os.environ["COLUMNS"] = "80"
+    os.environ["LINES"] = "24"
+
+    # Configure pandas to avoid terminal size detection
+    import pandas as pd
+
+    pd.set_option("display.width", 80)
+    pd.set_option("display.max_columns", 20)
 
     # Register all pipelines (required for bootstrap_pipeline to work)
     from bioetl.composition.factories.pipeline_factories import register_all_pipelines
