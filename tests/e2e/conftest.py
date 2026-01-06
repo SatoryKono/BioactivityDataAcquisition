@@ -24,6 +24,29 @@ from deltalake import DeltaTable
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunType
 
+# Default timeout for E2E tests (seconds)
+# E2E tests run full pipelines with HTTP calls, Delta Lake operations,
+# and PyArrow imports which can be slow, especially on Python 3.14
+E2E_DEFAULT_TIMEOUT = 120
+
+
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    """Automatically apply default timeout to all E2E tests.
+
+    This hook runs after test collection and adds a timeout marker
+    to E2E tests that don't already have one. This ensures pipeline
+    tests have enough time to complete without timing out during
+    Delta Lake/PyArrow operations.
+    """
+    for item in items:
+        # Only apply to tests in this directory (e2e)
+        if "e2e" in str(item.fspath):
+            # Check if test already has a timeout marker
+            existing_timeout = item.get_closest_marker("timeout")
+            if existing_timeout is None:
+                # Add default E2E timeout
+                item.add_marker(pytest.mark.timeout(E2E_DEFAULT_TIMEOUT))
+
 
 @pytest.fixture(scope="session", autouse=True)
 def e2e_environment():
