@@ -1,6 +1,6 @@
 """Tests for identifier Value Objects.
 
-Tests for ChemblId, UniProtId, DOI, PubMedId, PubChemCid.
+Tests for ChemblId, UniProtId, DOI, PubMedId, PubChemCid, InChIKey, SMILES, PublicationYear.
 """
 
 from __future__ import annotations
@@ -10,8 +10,11 @@ import pytest
 from bioetl.domain.value_objects import (
     DOI,
     ChemblId,
+    InChIKey,
     PubChemCid,
     PubMedId,
+    PublicationYear,
+    SMILES,
     UniProtId,
 )
 
@@ -503,3 +506,457 @@ class TestPubChemCid:
         """Test string conversion."""
         cid = PubChemCid(2244)
         assert str(cid) == "2244"
+
+    def test_from_raw_valid_int(self) -> None:
+        """Test from_raw with valid integer."""
+        cid = PubChemCid.from_raw(2244)
+        assert cid is not None
+        assert cid.value == 2244
+
+    def test_from_raw_valid_string(self) -> None:
+        """Test from_raw with valid string."""
+        cid = PubChemCid.from_raw("2244")
+        assert cid is not None
+        assert cid.value == 2244
+
+    def test_from_raw_none(self) -> None:
+        """Test from_raw with None."""
+        assert PubChemCid.from_raw(None) is None
+
+    def test_from_raw_empty_string(self) -> None:
+        """Test from_raw with empty string."""
+        assert PubChemCid.from_raw("") is None
+        assert PubChemCid.from_raw("   ") is None
+
+    def test_from_raw_invalid(self) -> None:
+        """Test from_raw with invalid value."""
+        assert PubChemCid.from_raw(-1) is None
+        assert PubChemCid.from_raw(0) is None
+
+
+class TestChemblIdFromRaw:
+    """Tests for ChemblId.from_raw() factory method."""
+
+    def test_from_raw_valid(self) -> None:
+        """Test from_raw with valid ChEMBL ID."""
+        cid = ChemblId.from_raw("CHEMBL25")
+        assert cid is not None
+        assert cid.value == "CHEMBL25"
+
+    def test_from_raw_normalizes_case(self) -> None:
+        """Test from_raw normalizes case."""
+        cid = ChemblId.from_raw("chembl25")
+        assert cid is not None
+        assert cid.value == "CHEMBL25"
+
+    def test_from_raw_none(self) -> None:
+        """Test from_raw with None."""
+        assert ChemblId.from_raw(None) is None
+
+    def test_from_raw_empty(self) -> None:
+        """Test from_raw with empty string."""
+        assert ChemblId.from_raw("") is None
+        assert ChemblId.from_raw("   ") is None
+
+    def test_from_raw_invalid(self) -> None:
+        """Test from_raw with invalid value returns None."""
+        assert ChemblId.from_raw("invalid") is None
+        assert ChemblId.from_raw("CH25") is None
+
+
+class TestUniProtIdFromRaw:
+    """Tests for UniProtId.from_raw() factory method."""
+
+    def test_from_raw_valid(self) -> None:
+        """Test from_raw with valid UniProt ID."""
+        uid = UniProtId.from_raw("P12345")
+        assert uid is not None
+        assert uid.value == "P12345"
+
+    def test_from_raw_normalizes_case(self) -> None:
+        """Test from_raw normalizes case."""
+        uid = UniProtId.from_raw("p12345")
+        assert uid is not None
+        assert uid.value == "P12345"
+
+    def test_from_raw_none(self) -> None:
+        """Test from_raw with None."""
+        assert UniProtId.from_raw(None) is None
+
+    def test_from_raw_empty(self) -> None:
+        """Test from_raw with empty string."""
+        assert UniProtId.from_raw("") is None
+        assert UniProtId.from_raw("   ") is None
+
+    def test_from_raw_invalid(self) -> None:
+        """Test from_raw with invalid value returns None."""
+        assert UniProtId.from_raw("invalid") is None
+        assert UniProtId.from_raw("P123") is None
+
+
+class TestDOIFromRaw:
+    """Tests for DOI.from_raw() factory method."""
+
+    def test_from_raw_valid(self) -> None:
+        """Test from_raw with valid DOI."""
+        doi = DOI.from_raw("10.1038/nature12373")
+        assert doi is not None
+        assert doi.value == "10.1038/nature12373"
+
+    def test_from_raw_strips_url(self) -> None:
+        """Test from_raw strips URL prefixes."""
+        doi = DOI.from_raw("https://doi.org/10.1038/nature12373")
+        assert doi is not None
+        assert doi.value == "10.1038/nature12373"
+
+    def test_from_raw_none(self) -> None:
+        """Test from_raw with None."""
+        assert DOI.from_raw(None) is None
+
+    def test_from_raw_empty(self) -> None:
+        """Test from_raw with empty string."""
+        assert DOI.from_raw("") is None
+        assert DOI.from_raw("   ") is None
+
+    def test_from_raw_invalid(self) -> None:
+        """Test from_raw with invalid value returns None."""
+        assert DOI.from_raw("not-a-doi") is None
+        assert DOI.from_raw("doi.org/10.1038") is None
+
+
+class TestPubMedIdFromRaw:
+    """Tests for PubMedId.from_raw() factory method."""
+
+    def test_from_raw_valid_int(self) -> None:
+        """Test from_raw with valid integer."""
+        pmid = PubMedId.from_raw(12345)
+        assert pmid is not None
+        assert pmid.value == "12345"
+
+    def test_from_raw_valid_string(self) -> None:
+        """Test from_raw with valid string."""
+        pmid = PubMedId.from_raw("12345678")
+        assert pmid is not None
+        assert pmid.value == "12345678"
+
+    def test_from_raw_none(self) -> None:
+        """Test from_raw with None."""
+        assert PubMedId.from_raw(None) is None
+
+    def test_from_raw_empty(self) -> None:
+        """Test from_raw with empty string."""
+        assert PubMedId.from_raw("") is None
+        assert PubMedId.from_raw("   ") is None
+
+    def test_from_raw_invalid(self) -> None:
+        """Test from_raw with invalid value returns None."""
+        assert PubMedId.from_raw("abc") is None
+        assert PubMedId.from_raw(0) is None
+
+
+class TestInChIKey:
+    """Tests for InChIKey Value Object."""
+
+    def test_valid_inchi_key(self) -> None:
+        """Test creation with valid InChI Key."""
+        key = InChIKey("BSYNRYMUTXBXSQ-UHFFFAOYSA-N")
+        assert key.value == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+
+    def test_normalizes_case(self) -> None:
+        """Test case normalization to uppercase."""
+        key = InChIKey("bsynrymutxbxsq-uhfffaoysa-n")
+        assert key.value == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+
+    def test_strips_whitespace(self) -> None:
+        """Test whitespace stripping."""
+        key = InChIKey("  BSYNRYMUTXBXSQ-UHFFFAOYSA-N  ")
+        assert key.value == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+
+    def test_connectivity_layer(self) -> None:
+        """Test connectivity layer property."""
+        key = InChIKey("BSYNRYMUTXBXSQ-UHFFFAOYSA-N")
+        assert key.connectivity_layer == "BSYNRYMUTXBXSQ"
+
+    def test_stereochemistry_layer(self) -> None:
+        """Test stereochemistry layer property."""
+        key = InChIKey("BSYNRYMUTXBXSQ-UHFFFAOYSA-N")
+        assert key.stereochemistry_layer == "UHFFFAOYSA"
+
+    def test_protonation_layer(self) -> None:
+        """Test protonation layer property."""
+        key = InChIKey("BSYNRYMUTXBXSQ-UHFFFAOYSA-N")
+        assert key.protonation_layer == "N"
+
+    def test_empty_raises(self) -> None:
+        """Test empty string raises ValueError."""
+        with pytest.raises(ValueError, match="cannot be empty"):
+            InChIKey("")
+
+    def test_invalid_format_raises(self) -> None:
+        """Test invalid format raises ValueError."""
+        with pytest.raises(ValueError, match="Invalid InChI Key format"):
+            InChIKey("INVALID")
+
+    def test_wrong_length_raises(self) -> None:
+        """Test wrong length raises ValueError."""
+        with pytest.raises(ValueError, match="Invalid InChI Key format"):
+            InChIKey("BSYNRYMUTXBXSQ-UHFFFAOYSA")  # Missing last part
+
+    def test_invalid_characters_raises(self) -> None:
+        """Test invalid characters raise ValueError."""
+        with pytest.raises(ValueError, match="Invalid InChI Key format"):
+            InChIKey("BSYNRYMUTXBXSQ-UHFFFAOYS1-N")  # Contains digit
+
+    def test_non_string_raises(self) -> None:
+        """Test non-string input raises ValueError."""
+        with pytest.raises(ValueError, match="must be str"):
+            InChIKey(123)  # type: ignore[arg-type]
+
+    def test_immutability(self) -> None:
+        """Test Value Object is immutable."""
+        key = InChIKey("BSYNRYMUTXBXSQ-UHFFFAOYSA-N")
+        with pytest.raises(AttributeError, match="immutable"):
+            key._value = "OTHER"  # type: ignore[misc]
+
+    def test_equality_by_value(self) -> None:
+        """Test equality is based on value."""
+        key1 = InChIKey("BSYNRYMUTXBXSQ-UHFFFAOYSA-N")
+        key2 = InChIKey("bsynrymutxbxsq-uhfffaoysa-n")
+        assert key1 == key2
+
+    def test_hash_consistency(self) -> None:
+        """Test hash is consistent with equality."""
+        key1 = InChIKey("BSYNRYMUTXBXSQ-UHFFFAOYSA-N")
+        key2 = InChIKey("bsynrymutxbxsq-uhfffaoysa-n")
+        assert hash(key1) == hash(key2)
+
+    def test_from_raw_valid(self) -> None:
+        """Test from_raw with valid InChI Key."""
+        key = InChIKey.from_raw("BSYNRYMUTXBXSQ-UHFFFAOYSA-N")
+        assert key is not None
+        assert key.value == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+
+    def test_from_raw_none(self) -> None:
+        """Test from_raw with None."""
+        assert InChIKey.from_raw(None) is None
+
+    def test_from_raw_empty(self) -> None:
+        """Test from_raw with empty string."""
+        assert InChIKey.from_raw("") is None
+        assert InChIKey.from_raw("   ") is None
+
+    def test_from_raw_invalid(self) -> None:
+        """Test from_raw with invalid value returns None."""
+        assert InChIKey.from_raw("invalid") is None
+
+    def test_str(self) -> None:
+        """Test string conversion."""
+        key = InChIKey("BSYNRYMUTXBXSQ-UHFFFAOYSA-N")
+        assert str(key) == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+
+    def test_repr(self) -> None:
+        """Test repr output."""
+        key = InChIKey("BSYNRYMUTXBXSQ-UHFFFAOYSA-N")
+        assert repr(key) == "InChIKey('BSYNRYMUTXBXSQ-UHFFFAOYSA-N')"
+
+
+class TestSMILES:
+    """Tests for SMILES Value Object."""
+
+    def test_valid_smiles(self) -> None:
+        """Test creation with valid SMILES."""
+        smiles = SMILES("CC(=O)OC1=CC=CC=C1C(=O)O")
+        assert smiles.value == "CC(=O)OC1=CC=CC=C1C(=O)O"
+        assert smiles.is_canonical is False
+
+    def test_canonical_smiles(self) -> None:
+        """Test creation of canonical SMILES."""
+        smiles = SMILES.canonical("CC(=O)OC1=CC=CC=C1C(=O)O")
+        assert smiles.value == "CC(=O)OC1=CC=CC=C1C(=O)O"
+        assert smiles.is_canonical is True
+
+    def test_strips_whitespace(self) -> None:
+        """Test whitespace stripping."""
+        smiles = SMILES("  CC(=O)O  ")
+        assert smiles.value == "CC(=O)O"
+
+    def test_empty_raises(self) -> None:
+        """Test empty string raises ValueError."""
+        with pytest.raises(ValueError, match="cannot be empty"):
+            SMILES("")
+
+    def test_whitespace_only_raises(self) -> None:
+        """Test whitespace-only string raises ValueError."""
+        with pytest.raises(ValueError, match="cannot be empty"):
+            SMILES("   ")
+
+    def test_non_string_raises(self) -> None:
+        """Test non-string input raises ValueError."""
+        with pytest.raises(ValueError, match="must be str"):
+            SMILES(123)  # type: ignore[arg-type]
+
+    def test_immutability(self) -> None:
+        """Test Value Object is immutable."""
+        smiles = SMILES("CC(=O)O")
+        with pytest.raises(AttributeError, match="immutable"):
+            smiles._value = "OTHER"  # type: ignore[misc]
+
+    def test_equality_by_value_and_canonical(self) -> None:
+        """Test equality considers both value and canonical flag."""
+        smiles1 = SMILES("CC(=O)O")
+        smiles2 = SMILES("CC(=O)O")
+        smiles3 = SMILES.canonical("CC(=O)O")
+        assert smiles1 == smiles2
+        assert smiles1 != smiles3  # Different canonical flag
+
+    def test_hash_consistency(self) -> None:
+        """Test hash is consistent with equality."""
+        smiles1 = SMILES("CC(=O)O")
+        smiles2 = SMILES("CC(=O)O")
+        assert hash(smiles1) == hash(smiles2)
+
+    def test_from_raw_valid(self) -> None:
+        """Test from_raw with valid SMILES."""
+        smiles = SMILES.from_raw("CC(=O)O")
+        assert smiles is not None
+        assert smiles.value == "CC(=O)O"
+        assert smiles.is_canonical is False
+
+    def test_from_raw_canonical(self) -> None:
+        """Test from_raw with canonical flag."""
+        smiles = SMILES.from_raw("CC(=O)O", is_canonical=True)
+        assert smiles is not None
+        assert smiles.is_canonical is True
+
+    def test_from_raw_none(self) -> None:
+        """Test from_raw with None."""
+        assert SMILES.from_raw(None) is None
+
+    def test_from_raw_empty(self) -> None:
+        """Test from_raw with empty string."""
+        assert SMILES.from_raw("") is None
+        assert SMILES.from_raw("   ") is None
+
+    def test_str(self) -> None:
+        """Test string conversion."""
+        smiles = SMILES("CC(=O)O")
+        assert str(smiles) == "CC(=O)O"
+
+    def test_repr_non_canonical(self) -> None:
+        """Test repr output for non-canonical SMILES."""
+        smiles = SMILES("CC(=O)O")
+        assert repr(smiles) == "SMILES('CC(=O)O')"
+
+    def test_repr_canonical(self) -> None:
+        """Test repr output for canonical SMILES."""
+        smiles = SMILES.canonical("CC(=O)O")
+        assert repr(smiles) == "SMILES('CC(=O)O', is_canonical=True)"
+
+
+class TestPublicationYear:
+    """Tests for PublicationYear Value Object."""
+
+    def test_valid_year(self) -> None:
+        """Test creation with valid year."""
+        year = PublicationYear(2020)
+        assert year.value == 2020
+
+    def test_from_string(self) -> None:
+        """Test creation from string."""
+        year = PublicationYear("2020")  # type: ignore[arg-type]
+        assert year.value == 2020
+
+    def test_minimum_year(self) -> None:
+        """Test creation with minimum valid year."""
+        year = PublicationYear(1800)
+        assert year.value == 1800
+
+    def test_maximum_year(self) -> None:
+        """Test creation with maximum valid year."""
+        year = PublicationYear(2100)
+        assert year.value == 2100
+
+    def test_decade_property(self) -> None:
+        """Test decade property."""
+        year = PublicationYear(1953)
+        assert year.decade == 1950
+
+    def test_century_property(self) -> None:
+        """Test century property."""
+        year = PublicationYear(1953)
+        assert year.century == 20
+
+    def test_below_minimum_raises(self) -> None:
+        """Test year below minimum raises ValueError."""
+        with pytest.raises(ValueError, match="outside valid range"):
+            PublicationYear(1799)
+
+    def test_above_maximum_raises(self) -> None:
+        """Test year above maximum raises ValueError."""
+        with pytest.raises(ValueError, match="outside valid range"):
+            PublicationYear(2101)
+
+    def test_bool_raises(self) -> None:
+        """Test boolean input raises ValueError."""
+        with pytest.raises(ValueError, match="must be int"):
+            PublicationYear(True)  # type: ignore[arg-type]
+
+    def test_invalid_string_raises(self) -> None:
+        """Test invalid string raises ValueError."""
+        with pytest.raises(ValueError, match="Invalid publication year"):
+            PublicationYear("not-a-year")  # type: ignore[arg-type]
+
+    def test_immutability(self) -> None:
+        """Test Value Object is immutable."""
+        year = PublicationYear(2020)
+        with pytest.raises(AttributeError, match="immutable"):
+            year._value = 2021  # type: ignore[misc]
+
+    def test_equality_by_value(self) -> None:
+        """Test equality is based on value."""
+        year1 = PublicationYear(2020)
+        year2 = PublicationYear(2020)
+        assert year1 == year2
+
+    def test_hash_consistency(self) -> None:
+        """Test hash is consistent with equality."""
+        year1 = PublicationYear(2020)
+        year2 = PublicationYear(2020)
+        assert hash(year1) == hash(year2)
+
+    def test_from_raw_valid_int(self) -> None:
+        """Test from_raw with valid integer."""
+        year = PublicationYear.from_raw(2020)
+        assert year is not None
+        assert year.value == 2020
+
+    def test_from_raw_valid_string(self) -> None:
+        """Test from_raw with valid string."""
+        year = PublicationYear.from_raw("2020")
+        assert year is not None
+        assert year.value == 2020
+
+    def test_from_raw_none(self) -> None:
+        """Test from_raw with None."""
+        assert PublicationYear.from_raw(None) is None
+
+    def test_from_raw_empty(self) -> None:
+        """Test from_raw with empty string."""
+        assert PublicationYear.from_raw("") is None
+        assert PublicationYear.from_raw("   ") is None
+
+    def test_from_raw_invalid(self) -> None:
+        """Test from_raw with invalid value returns None."""
+        assert PublicationYear.from_raw("abc") is None
+        assert PublicationYear.from_raw(1799) is None
+        assert PublicationYear.from_raw(2101) is None
+
+    def test_str(self) -> None:
+        """Test string conversion."""
+        year = PublicationYear(2020)
+        assert str(year) == "2020"
+
+    def test_repr(self) -> None:
+        """Test repr output."""
+        year = PublicationYear(2020)
+        assert repr(year) == "PublicationYear(2020)"

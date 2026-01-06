@@ -26,6 +26,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.entities import ChemblPublication
 from bioetl.domain.services import DataNormalizationService, IdentityService
+from bioetl.domain.value_objects import DOI
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig
@@ -151,6 +152,10 @@ class DocumentTransformer(BaseChemblTransformer):
         # Strip HTML from abstract field using DataNormalizationService
         normalizer = self._data_normalizer
         data["abstract"] = normalizer.strip_html_tags(data.get("abstract"))
+
+        # Validate DOI using Value Object (returns None for invalid/empty)
+        doi = DOI.from_raw(data.get("doi"))
+        data["doi"] = str(doi) if doi else None
 
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON
