@@ -107,7 +107,7 @@ jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
 
 ```markdown
 - **Deterministic Mode**: При `RetryConfig(deterministic=True)` jitter **MUST** вычисляться
-  через MD5-hash вместо random для воспроизводимости. См. [ADR-014](02-architecture/decisions/ADR-014-deterministic-writes.md).
+  через MD5-hash вместо random для воспроизводимости. См. [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md).
 ```
 
 ### Критерии Приёмки
