@@ -180,7 +180,8 @@ class TestPiiFieldsInTransformers:
         )
         content = transformer_path.read_text()
 
-        # ChEMBL uses single string authors, so hash_pii_value
-        assert "hash_pii_value" in content, (
-            "ChEMBL DocumentTransformer MUST use hash_pii_value() for authors field"
+        # ChEMBL parses concatenated string to list and uses hash_pii_list
+        # (unified authors format across all providers)
+        assert "hash_pii_list" in content, (
+            "ChEMBL DocumentTransformer MUST use hash_pii_list() for authors field"
         )

@@ -118,7 +118,7 @@
     '_run_type': 'incremental',
     '_source_batch_id': None,
     'abstract': 'This is a test abstract for the document.',
-    'authors': 'Test Author, Another Author',
+    'authors': '["Test Author","Another Author"]',
     'content_hash': '<content_hash>',
     'doc_type': 'PUBLICATION',
     'document_chembl_id': 'CHEMBL1234567',

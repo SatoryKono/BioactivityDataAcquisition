@@ -16,6 +16,7 @@ from bioetl.domain.normalization import (
     normalize_doi,
     normalize_string,
     normalize_to_string,
+    parse_authors_to_list,
     parse_date_field,
     parse_page_range,
     strip_html_tags,
@@ -271,3 +272,115 @@ class TestExtractFirstString:
     ) -> None:
         """Test first string extraction with normalization."""
         assert extract_first_string(items) == expected
+
+
+class TestParseAuthorsToList:
+    """Tests for parse_authors_to_list function.
+
+    This function parses various author input formats into a unified list:
+    - Direct list[str]: Passed through with whitespace stripping
+    - JSON string: Parsed as JSON array
+    - Concatenated string: Split by semicolon or comma delimiters
+    """
+
+    @pytest.mark.parametrize(
+        "input_authors,expected",
+        [
+            # Direct list input
+            (["John Doe", "Jane Smith"], ["John Doe", "Jane Smith"]),
+            (["  John Doe  ", "  Jane Smith  "], ["John Doe", "Jane Smith"]),
+            (["Single Author"], ["Single Author"]),
+            ([], []),
+            # JSON string input
+            ('["John Doe", "Jane Smith"]', ["John Doe", "Jane Smith"]),
+            ('["Single Author"]', ["Single Author"]),
+            ("[]", []),
+            # Semicolon-separated (ChEMBL format)
+            ("John Doe; Jane Smith", ["John Doe", "Jane Smith"]),
+            ("  John Doe  ;  Jane Smith  ", ["John Doe", "Jane Smith"]),
+            ("John Doe;Jane Smith;Bob Jones", ["John Doe", "Jane Smith", "Bob Jones"]),
+            # Comma-separated
+            ("John Doe, Jane Smith", ["John Doe", "Jane Smith"]),
+            ("  John Doe  ,  Jane Smith  ", ["John Doe", "Jane Smith"]),
+            # Single author (no delimiter)
+            ("John Doe", ["John Doe"]),
+            ("  John Doe  ", ["John Doe"]),
+            # None and empty
+            (None, []),
+            ("", []),
+            ("   ", []),
+        ],
+    )
+    def test_parse_authors_to_list(
+        self, input_authors: list[str] | str | None, expected: list[str]
+    ) -> None:
+        """Test parsing various author input formats."""
+        assert parse_authors_to_list(input_authors) == expected
+
+    def test_parse_authors_filters_empty_strings(self) -> None:
+        """Test that empty strings are filtered from the result."""
+        assert parse_authors_to_list(["John Doe", "", "Jane Smith"]) == [
+            "John Doe",
+            "Jane Smith",
+        ]
+        assert parse_authors_to_list("John Doe;;Jane Smith") == [
+            "John Doe",
+            "Jane Smith",
+        ]
+
+    def test_parse_authors_json_with_null(self) -> None:
+        """Test parsing JSON array with null values."""
+        assert parse_authors_to_list('["John Doe", null, "Jane Smith"]') == [
+            "John Doe",
+            "Jane Smith",
+        ]
+
+    def test_parse_authors_prefers_semicolon_over_comma(self) -> None:
+        """Test that semicolon takes precedence over comma as delimiter.
+
+        This is important for names with commas like "Doe, John".
+        ChEMBL uses semicolon-separated format.
+        """
+        # When both semicolon and comma are present, semicolon wins
+        result = parse_authors_to_list("Doe, John; Smith, Jane")
+        assert result == ["Doe, John", "Smith, Jane"]
+
+    def test_parse_authors_with_count(self) -> None:
+        """Test that parsed list has expected count."""
+        # List input
+        result = parse_authors_to_list(["Smith J", "Jones A"])
+        assert len(result) == 2
+
+        # JSON string
+        result = parse_authors_to_list('["Smith J", "Jones A"]')
+        assert len(result) == 2
+
+        # Concatenated string
+        result = parse_authors_to_list("Smith J; Jones A")
+        assert len(result) == 2
+
+    def test_parse_authors_malformed_json_fallback(self) -> None:
+        """Test that malformed JSON falls back to delimiter parsing."""
+        # Starts with '[' but is not valid JSON - should fall back to delimiter
+        result = parse_authors_to_list("[John Doe; Jane Smith")
+        # Falls back to semicolon parsing after JSON fails
+        assert result == ["[John Doe", "Jane Smith"]
+
+    def test_parse_authors_non_string_items_in_list(self) -> None:
+        """Test handling of non-string items in list input."""
+        # Non-string items should be filtered out
+        result = parse_authors_to_list(["John Doe", 123, None, "Jane Smith"])  # type: ignore[list-item]
+        assert result == ["John Doe", "Jane Smith"]
+
+    def test_parse_authors_unicode(self) -> None:
+        """Test handling of unicode characters in author names."""
+        result = parse_authors_to_list(["José García", "François Müller"])
+        assert result == ["José García", "François Müller"]
+
+        result = parse_authors_to_list("José García; François Müller")
+        assert result == ["José García", "François Müller"]
+
+    def test_parse_authors_json_unicode(self) -> None:
+        """Test handling of JSON with unicode characters."""
+        result = parse_authors_to_list('["José García", "François Müller"]')
+        assert result == ["José García", "François Müller"]

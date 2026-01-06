@@ -134,13 +134,16 @@ async def test_transform_bronze_to_silver(pipeline, pipeline_context):
         pipeline_context, bronze_record
     )
 
+    import json
+
     assert silver_record is not None
     # Basic fields
     assert silver_record["pmid"] == "12345"
     assert silver_record["title"] == "Test Title"
     assert silver_record["journal"] == "Test Journal"
     assert silver_record["abstract"] == "Test Abstract"
-    assert silver_record["authors"] == ["Doe, J"]
+    # Authors are now JSON-serialized
+    assert json.loads(silver_record["authors"]) == ["Doe, J"]
     # Date fields
     assert silver_record["pub_year"] == 2023
     assert silver_record["publication_year"] == 2023

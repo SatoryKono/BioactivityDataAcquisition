@@ -462,13 +462,16 @@ class TestExtractBusinessData:
         """
         root = ET.fromstring(xml)
 
+        import json
+
         result = transformer._extract_business_data(root, "12345")
 
         assert result["pmid"] == "12345"
         assert result["doi"] == "10.1234/test.2023"
         assert result["title"] == "Complete Test Article"
         assert result["abstract"] == "Full abstract text here."
-        assert result["authors"] == ["Doe, J", "Smith, Jane"]
+        # Authors are now JSON-serialized
+        assert json.loads(result["authors"]) == ["Doe, J", "Smith, Jane"]
         assert result["journal"] == "Test Journal"
         assert result["journal_abbrev"] == "Test J"
         assert result["issn"] == "1234-5678"
@@ -633,10 +636,13 @@ class TestTransformImplCollectiveAuthors:
             {"pmid": "12345", "_raw_xml": xml_content, "source_batch_id": "test"},
         )
 
+        import json
+
         result = await transformer._transform_impl(pipeline_context, bronze_record, 0)
 
         assert result is not None
-        assert result["authors"] == ["Doe, J", "WHO Collaborative Group"]
+        # Authors are now JSON-serialized
+        assert json.loads(result["authors"]) == ["Doe, J", "WHO Collaborative Group"]
 
 
 class TestTransformImplSpecialCharacters:
@@ -671,11 +677,14 @@ class TestTransformImplSpecialCharacters:
             {"pmid": "12345", "_raw_xml": xml_content, "source_batch_id": "test"},
         )
 
+        import json
+
         result = await transformer._transform_impl(pipeline_context, bronze_record, 0)
 
         assert result is not None
         assert result["title"] == "Effect of α-tocopherol on β-cells"
-        assert result["authors"] == ["Müller, H", "García, M"]
+        # Authors are now JSON-serialized
+        assert json.loads(result["authors"]) == ["Müller, H", "García, M"]
 
 
 class TestTransformImplXMLEntities:

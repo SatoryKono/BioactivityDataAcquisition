@@ -59,7 +59,6 @@ class TestFileSizeLimits:
         "protein.py": 360,  # 354 LOC - UniProt target schema + deprecated alias (v2.0)
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
-        "base_transformer.py": 650,  # 639 LOC - Template Method with helpers (tracing + PII hashing)
         "batch_executor.py": 650,  # 610 LOC - unified executor for batch processing
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
         # Composition layer exemptions
@@ -85,6 +84,8 @@ class TestFileSizeLimits:
         # New exemptions for split storage factory
         "storage_factory.py": 400,  # Extracted from storage.py
         "observability.py": 450,  # Bootstrap observability
+        # Application layer exemptions
+        "base_transformer.py": 680,  # 667 LOC - BaseTransformer with serialization helpers
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
@@ -355,7 +356,7 @@ class TestClassSize:
         "PipelineObserver": 350,  # 319 lines - unified observability with lifecycle events
         # Baseline exemptions for existing classes
         "StorageAdapter": 520,  # 510 lines - storage adapter with writers
-        "BaseTransformer": 580,  # 577 lines - Template Method with helpers (tracing + PII hashing)
+        "BaseTransformer": 620,  # 605 lines - Template Method with helpers (tracing + PII hashing + serialize_json_list)
         "SilverWriter": 830,  # 822 lines - includes schema drift detection (M4) + audit + lock validation + validation
         "GoldWriter": 720,  # 709 lines - includes SCD Type 2 with ingestion_ts per ADR-014 + lock validation
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
