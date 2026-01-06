@@ -76,7 +76,7 @@ class DefaultDataNormalizationService:
 
     def _hash_pii(self, value: str, salt: str) -> str:
         """Hash a PII value with salt using SHA-256."""
-        return hashlib.sha256(f"{salt}{value}".encode("utf-8")).hexdigest()
+        return hashlib.sha256(f"{salt}{value}".encode()).hexdigest()
 
     def strip_html_tags(self, text: str | None) -> str | None:
         """Remove HTML tags, decode entities, normalize whitespace."""
