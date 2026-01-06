@@ -166,8 +166,8 @@ class TestCorpusIdValidation:
         assert not (invalid_id >= 0)
 
 
-class TestOpenAccessStatusValidation:
-    """Tests for open_access_status enum validation."""
+class TestOaStatusValidation:
+    """Tests for oa_status enum validation (normalized to lowercase)."""
 
     @pytest.mark.parametrize("status", OA_STATUS_VALUES)
     def test_valid_oa_status(self, status: str) -> None:
@@ -178,6 +178,15 @@ class TestOpenAccessStatusValidation:
         """Test invalid open access status."""
         invalid_status = "INVALID"
         assert invalid_status not in OA_STATUS_VALUES
+
+    def test_oa_status_values_are_lowercase(self) -> None:
+        """Test that all OA status values are lowercase."""
+        for status in OA_STATUS_VALUES:
+            assert status == status.lower(), f"Status {status} should be lowercase"
+
+    def test_oa_status_includes_closed(self) -> None:
+        """Test that 'closed' is included in valid OA status values."""
+        assert "closed" in OA_STATUS_VALUES
 
 
 class TestLookupMethodValidation:
@@ -238,9 +247,9 @@ class TestSchemaFieldDefinitions:
             "venue",
             "citation_count",
             "reference_count",
-            "is_open_access",
+            "is_oa",
             "open_access_url",
-            "open_access_status",
+            "oa_status",
             "fields_of_study",
             "publication_types",
             "authors",
@@ -282,7 +291,7 @@ class TestSchemaFieldDefinitions:
             "pages",
             "venue",
             "open_access_url",
-            "open_access_status",
+            "oa_status",
             "fields_of_study",
             "publication_types",
             "authors",

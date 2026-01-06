@@ -16,8 +16,8 @@ from bioetl.domain.validation import DOI_REGEX_PATTERN
 # Lookup method values for batch DOI resolution
 LOOKUP_METHODS = ["doi", "title_fallback", "title_only", "unknown"]
 
-# Open Access status values (from S2 API)
-OA_STATUS_VALUES = ["GREEN", "GOLD", "HYBRID", "BRONZE"]
+# Open Access status values (normalized to lowercase for consistency with OpenAlex)
+OA_STATUS_VALUES = ["gold", "green", "hybrid", "bronze", "closed"]
 
 
 class SemanticScholarPublicationSchema(ETLRecordSchema):
@@ -128,7 +128,7 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     )
 
     # === Open Access ===
-    is_open_access: Series[bool] = pa.Field(
+    is_oa: Series[bool] = pa.Field(
         nullable=True,
         description="Is Open Access",
     )
@@ -138,10 +138,10 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
         description="Direct link to OA PDF",
     )
 
-    open_access_status: Series[str] = pa.Field(
+    oa_status: Series[str] = pa.Field(
         nullable=True,
         isin=OA_STATUS_VALUES,
-        description="OA status (GREEN, GOLD, HYBRID, BRONZE)",
+        description="Open Access status (normalized to lowercase).",
     )
 
     # === Classification ===

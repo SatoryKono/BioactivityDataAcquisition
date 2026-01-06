@@ -46,9 +46,9 @@ class SemanticScholarPublicationEntity(BaseEntity):
         publication_date: Publication date (YYYY-MM-DD).
         citation_count: Number of citations.
         reference_count: Number of references.
-        is_open_access: Whether the work is Open Access.
+        is_oa: Whether the work is Open Access.
         open_access_url: URL to open access PDF.
-        open_access_status: OA status string.
+        oa_status: OA status (gold, green, hybrid, bronze, closed).
         fields_of_study: JSON string of fields of study.
         publication_types: JSON string of publication types.
         _lookup_method: How record was resolved (doi, title_fallback, title_only).
@@ -91,9 +91,9 @@ class SemanticScholarPublicationEntity(BaseEntity):
     reference_count: int | None = None
 
     # Open Access status
-    is_open_access: bool | None = None
+    is_oa: bool | None = None
     open_access_url: str | None = None
-    open_access_status: str | None = None
+    oa_status: str | None = None
 
     # Classification (JSON strings)
     fields_of_study: str | None = None
