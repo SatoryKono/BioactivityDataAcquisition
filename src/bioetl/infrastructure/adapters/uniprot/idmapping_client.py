@@ -71,7 +71,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
     Example:
         >>> client = UniProtIDMappingClient(http_client, logger)
         >>> results = await client.map_ids("ChEMBL", "UniProtKB", ["CHEMBL204"])
-        >>> print(results)
+        >>> results
         {"CHEMBL204": "P00742"}
     """
 

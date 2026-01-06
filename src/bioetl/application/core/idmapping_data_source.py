@@ -36,8 +36,8 @@ class IDMappingDataSource:
         ...     logger=logger,
         ... )
         >>> async for record in data_source.fetch("idmapping"):
-        ...     print(record)
-        {"target_chembl_id": "CHEMBL204", "uniprot_accession": "P00742"}
+        ...     logger.info("record_fetched", record=record)
+        # Output: {"target_chembl_id": "CHEMBL204", "uniprot_accession": "P00742"}
     """
 
     provider_name: str = "uniprot_idmapping"
