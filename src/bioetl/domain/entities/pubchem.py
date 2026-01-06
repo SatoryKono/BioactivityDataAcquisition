@@ -106,7 +106,7 @@ class PubchemMolecule(BaseEntity):
 
     cid: str
     molecular_formula: str | None = None
-    molecular_weight: str | None = None  # Kept as string to preserve precision/format
+    molecular_weight: float | None = None
 
     # Structure representations
     canonical_smiles: str | None = None

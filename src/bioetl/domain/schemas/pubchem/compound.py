@@ -92,13 +92,11 @@ class PubchemMoleculeSchema(ETLRecordSchema):
 
     # === Physical Properties ===
     molecular_weight: Series[float] | None = pa.Field(
-        nullable=True, description="Average molecular weight (Da)"
+        nullable=True,
+        ge=0.0,
+        le=100000.0,
+        description="Molecular weight in g/mol",
     )
-
-    @pa.check("molecular_weight", name="molecular_weight_non_negative")
-    def _check_molecular_weight(cls, series: Series[float]) -> Series[bool]:
-        """Validate molecular weight is non-negative."""
-        return cast("Series[bool]", series.isna() | (series >= 0))
 
     exact_mass: Series[float] | None = pa.Field(
         nullable=True, description="Monoisotopic exact mass (Da)"
