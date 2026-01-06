@@ -268,7 +268,9 @@ class TestIDMappingTransformer:
         assert result["_dq_warn"] is False
 
     @pytest.mark.asyncio
-    async def test_transform_dq_warn_true_for_not_found(self, transformer, mock_context):
+    async def test_transform_dq_warn_true_for_not_found(
+        self, transformer, mock_context
+    ):
         """Test _dq_warn is True for not_found mappings."""
         record = {
             "target_chembl_id": "CHEMBL204",

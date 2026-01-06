@@ -181,9 +181,7 @@ class TestUniProtIDMappingClient:
         assert exc_info.value.job_id == "test-job-error"
 
     @pytest.mark.asyncio
-    async def test_map_ids_submission_failure(
-        self, idmapping_client, mock_http_client
-    ):
+    async def test_map_ids_submission_failure(self, idmapping_client, mock_http_client):
         """Test handling of job submission failure."""
         # Mock failed submission
         submit_response = MagicMock()

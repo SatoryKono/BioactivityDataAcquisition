@@ -42,9 +42,7 @@ class TestUniProtIDMappingIntegration:
         )
 
     @pytest.fixture
-    def idmapping_client(
-        self, uniprot_http_client: Any, mock_logger: MagicMock
-    ) -> Any:
+    def idmapping_client(self, uniprot_http_client: Any, mock_logger: MagicMock) -> Any:
         """Create UniProtIDMappingClient instance."""
         from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
             UniProtIDMappingClient,
