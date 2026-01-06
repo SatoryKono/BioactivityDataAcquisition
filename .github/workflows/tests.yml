@@ -61,6 +61,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        python-version: ["3.11", "3.12", "3.13"]
         test-group:
           - name: unit-domain
             path: tests/unit/domain/
@@ -79,10 +80,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v1
@@ -93,27 +94,27 @@ jobs:
           path: |
             .pytest_cache
             .hypothesis
-          key: pytest-${{ matrix.test-group.name }}-${{ runner.os }}-${{ hashFiles('tests/**/*.py') }}
+          key: pytest-${{ matrix.python-version }}-${{ matrix.test-group.name }}-${{ runner.os }}-${{ hashFiles('tests/**/*.py') }}
           restore-keys: |
-            pytest-${{ matrix.test-group.name }}-${{ runner.os }}-
+            pytest-${{ matrix.python-version }}-${{ matrix.test-group.name }}-${{ runner.os }}-
 
       - name: Install dependencies
         run: uv sync --extra dev --extra tracing --extra performance
 
-      - name: Run Tests (${{ matrix.test-group.name }})
+      - name: Run Tests (${{ matrix.test-group.name }} on Python ${{ matrix.python-version }})
         run: |
           uv run pytest ${{ matrix.test-group.path }} \
             -n auto --dist loadscope \
             --cov=src/bioetl \
-            --cov-report=xml:coverage-${{ matrix.test-group.name }}.xml \
+            --cov-report=xml:coverage-${{ matrix.test-group.name }}-py${{ matrix.python-version }}.xml \
             -q --tb=short
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: coverage-${{ matrix.test-group.name }}
-          path: coverage-${{ matrix.test-group.name }}.xml
+          name: coverage-${{ matrix.test-group.name }}-py${{ matrix.python-version }}
+          path: coverage-${{ matrix.test-group.name }}-py${{ matrix.python-version }}.xml
           retention-days: 7
 
   # Final coverage verification (runs full test suite with threshold)
