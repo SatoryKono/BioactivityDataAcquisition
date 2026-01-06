@@ -30,11 +30,8 @@ jobs:
       - name: Ruff (lint)
         run: ruff check src tests
 
-      - name: Black (format check)
-        run: black --check src tests
-
-      - name: Isort (import order)
-        run: isort --check-only src tests
+      - name: Ruff (format check)
+        run: ruff format --check src tests
 
       - name: Mypy (strict-ish)
         run: mypy --config-file pyproject.toml src/bioetl
