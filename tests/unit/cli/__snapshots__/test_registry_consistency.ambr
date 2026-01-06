@@ -4,6 +4,7 @@
   Available pipelines:
     - chembl_activity
     - chembl_assay
+    - chembl_assay_parameters
     - chembl_cell_line
     - chembl_compound_record
     - chembl_document
@@ -16,6 +17,7 @@
     - openalex_publication
     - pubchem_compound
     - pubmed_publications
+    - semanticscholar_publication
     - uniprot_protein
   
   '''

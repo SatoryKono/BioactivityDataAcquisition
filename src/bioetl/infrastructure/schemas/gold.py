@@ -527,6 +527,71 @@ class ChEMBLCellLineGoldSchema(pa.DataFrameModel):
         strict = True
 
 
+class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
+    """Schema for Semantic Scholar Publication in Gold layer.
+
+    Used for enriching publication records with Semantic Scholar metadata.
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary key
+    paper_id: Series[str] = pa.Field(nullable=False)
+
+    # External IDs
+    doi: Series[str] = pa.Field(nullable=True)
+    pmid: Series[str] = pa.Field(nullable=True)
+    pmcid: Series[str] = pa.Field(nullable=True)
+    arxiv_id: Series[str] = pa.Field(nullable=True)
+    corpus_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+
+    # Core fields
+    title: Series[str] = pa.Field(nullable=True)
+    abstract: Series[str] = pa.Field(nullable=True)
+    tldr: Series[str] = pa.Field(nullable=True)
+    year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    publication_date: Series[str] = pa.Field(nullable=True)
+
+    # Journal/Venue
+    journal: Series[str] = pa.Field(nullable=True)
+    volume: Series[str] = pa.Field(nullable=True)
+    pages: Series[str] = pa.Field(nullable=True)
+    venue: Series[str] = pa.Field(nullable=True)
+
+    # Metrics
+    citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)  # int64
+    reference_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)  # int64
+
+    # Open Access
+    is_open_access: Series[bool] = pa.Field(nullable=True)
+    open_access_url: Series[str] = pa.Field(nullable=True)
+    open_access_status: Series[str] = pa.Field(nullable=True)
+
+    # Classification (JSON strings)
+    fields_of_study: Series[str] = pa.Field(nullable=True)
+    publication_types: Series[str] = pa.Field(nullable=True)
+    authors: Series[str] = pa.Field(nullable=True)
+
+    # Source tracking
+    source: Series[str] = pa.Field(nullable=True)
+
+    # Lookup metadata
+    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    original_doi: Series[str] = pa.Field(nullable=True, alias="_original_doi")
+
+    # Lineage metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        strict = True
+
+
 class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     """Schema for CrossRef Publication in Gold layer.
 
@@ -657,6 +722,52 @@ class ChEMBLProteinClassGoldSchema(pa.DataFrameModel):
     sort_order: Series[float] = pa.Field(nullable=True, coerce=True)
     replaced_by: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
     downgraded: Series[float] = pa.Field(nullable=True, isin=[0, 1], coerce=True)
+
+    # Lineage metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        strict = True
+
+
+class ChEMBLAssayParametersGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL AssayParameters in Gold layer.
+
+    Experimental parameters for bioassays: concentrations, pH, temperature, etc.
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary identifier (surrogate)
+    assay_param_id: Series[float] = pa.Field(
+        nullable=False, coerce=True
+    )  # int64 in Silver
+
+    # Foreign key
+    assay_chembl_id: Series[str] = pa.Field(nullable=False)
+
+    # Parameter type
+    type: Series[str] = pa.Field(nullable=False)
+
+    # Raw values
+    relation: Series[str] = pa.Field(nullable=True)
+    value: Series[float] = pa.Field(nullable=True, coerce=True)
+    units: Series[str] = pa.Field(nullable=True)
+    text_value: Series[str] = pa.Field(nullable=True)
+    comments: Series[str] = pa.Field(nullable=True)
+
+    # Standardized values
+    standard_type: Series[str] = pa.Field(nullable=True)
+    standard_relation: Series[str] = pa.Field(nullable=True)
+    standard_value: Series[float] = pa.Field(nullable=True, coerce=True)
+    standard_units: Series[str] = pa.Field(nullable=True)
+    standard_text_value: Series[str] = pa.Field(nullable=True)
 
     # Lineage metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")

@@ -61,12 +61,12 @@ class TestFileSizeLimits:
         # Composition layer exemptions
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "entrypoints.py": 720,  # 703 LOC - pipeline entrypoints (run_pipeline expanded + services)
-        "registration.py": 550,  # 532 LOC - provider registration with data source creators (OpenAlex added)
+        "registration.py": 620,  # 607 LOC - provider registration with data source creators (OpenAlex + SemanticScholar)
         "storage_adapter.py": 550,  # 540 LOC - storage adapter with Bronze/Silver/Gold writers
         # Consolidated factory files (v5.2)
         "storage.py": 700,  # 640 LOC - merged storage_factory + storage_adapter
         "pipeline_factory.py": 520,  # 517 LOC - merged generic_factory + runner_assembly
-        "pipeline_factories.py": 450,  # 434 LOC - pipeline factory configurations (OpenAlex added)
+        "pipeline_factories.py": 500,  # 480+ LOC - pipeline factory configurations (OpenAlex + SemanticScholar)
         "services_factory.py": 600,  # 562 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
         # Infrastructure layer exemptions
         "silver_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
@@ -74,6 +74,10 @@ class TestFileSizeLimits:
         "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
         "gold.py": 700,  # 669 LOC - Gold layer Pandera schemas for all entities
         "client.py": 700,  # 692 LOC - ChemblAdapter (complex FilterableDataSourcePort), CrossRefAdapter (DOI→title fallback)
+        "adapter.py": 550,  # 496 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
+        # Gold schemas (consolidated)
+        "gold.py": 750,  # 740 LOC - Gold schemas for all providers (OpenAlex + SemanticScholar + AssayParameters)
+        "silver.py": 680,  # 673 LOC - Silver PyArrow schemas for all providers (AssayParameters added)
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
@@ -170,8 +174,8 @@ class TestFunctionComplexity:
         "validate_concentration": 7,  # Concentration validation with unit checks
         "validate_pchembl": 7,  # pChEMBL validation with range checks
         "validate_activity_value": 10,  # Activity value validation
-        # CrossRef adapter fallback logic
-        "fetch_filtered_with_fallback": 25,  # DOI→title fallback with batch processing (OpenAlex has complex logic)
+        # CrossRef/OpenAlex/SemanticScholar adapter fallback logic
+        "fetch_filtered_with_fallback": 25,  # DOI→title fallback with batch processing + multi-identifier resolution
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -364,6 +368,8 @@ class TestClassSize:
         "CrossRefTransformer": 360,  # 354 lines - transformer with field extraction
         # UniProt adapter (similar to ChEMBL adapter)
         "UniProtAdapter": 320,  # 312 lines - HTTP adapter with streaming
+        # SemanticScholar adapter
+        "SemanticScholarAdapter": 500,  # 496 lines - HTTP adapter with multi-identifier fallback + FilterableDataSourcePort
         # PubMed adapter (similar to ChEMBL adapter)
         "PubMedAdapter": 400,  # 373 lines - HTTP adapter with Entrez API + FilterableDataSourcePort
         # OpenAlex adapter (FilterableDataSourcePort with batch DOI + title fallback)
@@ -508,6 +514,7 @@ class TestGodObjectDetection:
         "PubChemAdapter": "Sync adapter using ThreadPoolExecutor; delegates to BaseSyncAdapter, CircuitBreaker",
         "PubMedAdapter": "HTTP adapter with FilterableDataSourcePort implementation; delegates to BaseHttpAdapter",
         "OpenAlexAdapter": "HTTP adapter with FilterableDataSourcePort; batch DOI resolution + title fallback",
+        "SemanticScholarAdapter": "HTTP adapter with multi-identifier fallback; delegates to BaseHttpAdapter, CircuitBreaker",
         "UnifiedHTTPClient": "HTTP client with internal retry logic; single responsibility",
         # CLI (inherently has many commands but delegates to entrypoints)
         "CLI": "CLI entry point - commands are cohesive, delegates to entrypoints",
