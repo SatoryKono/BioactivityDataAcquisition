@@ -204,7 +204,8 @@ exclude_lines = [
     "raise NotImplementedError",
     "@abstractmethod",
 ]
-fail_under = 85
+# Note: fail_under threshold is enforced via --cov-fail-under=85 in Makefile and CI
+# This allows test-matrix jobs to run subsets of tests without failing on coverage
 show_missing = true
 precision = 2
 

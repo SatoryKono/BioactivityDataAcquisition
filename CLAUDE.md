@@ -182,7 +182,7 @@ src/bioetl/
 | **MemoryMonitor** | "Возвращает захардкоженные нули, баг" | **Graceful degradation** — возвращает консервативные оценки (50% использования), не нули. Это **валидный паттерн** при недоступности psutil. См. `memory_monitor.py:170-180` |
 | **DQ метрики** | "Не экспортируются в Prometheus" | **УЖЕ РЕАЛИЗОВАНО**: `postrun_service.py:158-163` эмитит `dq_soft_threshold_exceeded` (counter), `dq_check_duration_ms` (histogram). `DQConfig` имеет `soft_fail_threshold=0.05`, `hard_fail_threshold=0.20` |
 | **protocols.py** | "Пустой файл с нулевым покрытием" | Содержит 4 Protocol: `TransformCallback`, `GoldFilterCallback`, `GoldTransformCallback`, `TransformerPort`. См. `application/core/protocols.py` |
-| **Coverage gate** | "Нет coverage gate в CI, нужно добавить --cov-fail-under" | **УЖЕ РЕАЛИЗОВАНО**: `pyproject.toml:180` (`fail_under = 85`), `Makefile:63` (`--cov-fail-under=85`), `.github/workflows/tests.yml:45`. Верификация: 2025-12-31 |
+| **Coverage gate** | "Нет coverage gate в CI, нужно добавить --cov-fail-under" | **УЖЕ РЕАЛИЗОВАНО**: `Makefile:63` (`--cov-fail-under=85`), `.github/workflows/tests.yml:158`. Верификация: 2026-01-06 |
 | **OTLPSpanExporter** | "Ошибка Optional-аннотации, mypy --strict падает" | **ОШИБОК НЕТ**: `uv run mypy src/bioetl --strict` → "Success: no issues found in 326 source files". Код в `tracing.py:36-44` корректен. Верификация: 2025-12-31 |
 | **OpenTelemetryTracer** | "Типизация сломана, mypy --strict не проходит" | **ОШИБОК НЕТ**: mypy strict проходит без ошибок. Верификация: 2025-12-31 |
 
