@@ -49,19 +49,35 @@ class ProteinSchema(ETLRecordSchema):
     # === Primary Key & Core Identifiers ===
     accession: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$",
         description="UniProt primary accession (PK)",
     )
+
+    @pa.check("accession", name="accession_format")
+    def _check_accession(cls, series: Series[str]) -> Series[bool]:
+        """Validate UniProt accession format."""
+        pattern = r"^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$"
+        return series.str.match(pattern)
+
     entry_name: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^\w+_\w+$",
         description="Entry name (e.g., MK01_HUMAN)",
     )
+
+    @pa.check("entry_name", name="entry_name_format")
+    def _check_entry_name(cls, series: Series[str]) -> Series[bool]:
+        """Validate entry name format."""
+        return series.str.match(r"^\w+_\w+$")
+
     entry_type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=ENTRY_TYPES,
         description="Entry type (Swiss-Prot reviewed / TrEMBL unreviewed)",
     )
+
+    @pa.check("entry_type", name="entry_type_values")
+    def _check_entry_type(cls, series: Series[str]) -> Series[bool]:
+        """Validate entry type values."""
+        return series.isna() | series.isin(ENTRY_TYPES)
+
     secondary_accessions: Series[str] | None = pa.Field(
         nullable=True, description="JSON array of secondary accessions"
     )
@@ -81,9 +97,13 @@ class ProteinSchema(ETLRecordSchema):
     )
     flag: Series[str] | None = pa.Field(
         nullable=True,
-        isin=PROTEIN_FLAGS,
         description="Protein sequence completeness flag (Fragment/Precursor)",
     )
+
+    @pa.check("flag", name="flag_values")
+    def _check_flag(cls, series: Series[str]) -> Series[bool]:
+        """Validate flag values."""
+        return series.isna() | series.isin(PROTEIN_FLAGS)
 
     # === Gene Names ===
     gene_primary: Series[str] | None = pa.Field(
@@ -104,8 +124,14 @@ class ProteinSchema(ETLRecordSchema):
         nullable=True, description="Common organism name"
     )
     taxonomy_id: Series[int] | None = pa.Field(
-        nullable=True, ge=1, description="NCBI Taxonomy ID"
+        nullable=True, description="NCBI Taxonomy ID"
     )
+
+    @pa.check("taxonomy_id", name="taxonomy_id_positive")
+    def _check_taxonomy_id(cls, series: Series[int]) -> Series[bool]:
+        """Validate taxonomy ID is positive."""
+        return series.isna() | (series >= 1)
+
     lineage: Series[str] | None = pa.Field(
         nullable=True, description="JSON array of taxonomic lineage"
     )
@@ -113,12 +139,23 @@ class ProteinSchema(ETLRecordSchema):
     # === Evidence & Quality ===
     protein_existence: Series[str] | None = pa.Field(
         nullable=True,
-        isin=PROTEIN_EXISTENCE_LEVELS,
         description="Evidence level for existence",
     )
+
+    @pa.check("protein_existence", name="protein_existence_values")
+    def _check_protein_existence(cls, series: Series[str]) -> Series[bool]:
+        """Validate protein existence values."""
+        return series.isna() | series.isin(PROTEIN_EXISTENCE_LEVELS)
+
     annotation_score: Series[int] | None = pa.Field(
-        nullable=True, ge=1, le=5, description="Annotation quality (1-5 stars)"
+        nullable=True, description="Annotation quality (1-5 stars)"
     )
+
+    @pa.check("annotation_score", name="annotation_score_range")
+    def _check_annotation_score(cls, series: Series[int]) -> Series[bool]:
+        """Validate annotation score range."""
+        return series.isna() | ((series >= 1) & (series <= 5))
+
     reviewed: Series[bool] = pa.Field(
         nullable=False, description="Swiss-Prot (True) vs TrEMBL (False)"
     )
@@ -126,15 +163,32 @@ class ProteinSchema(ETLRecordSchema):
     # === Sequence ===
     sequence: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^[ACDEFGHIKLMNPQRSTVWY]+$",
         description="Amino acid sequence",
     )
+
+    @pa.check("sequence", name="sequence_format")
+    def _check_sequence(cls, series: Series[str]) -> Series[bool]:
+        """Validate amino acid sequence."""
+        return series.str.match(r"^[ACDEFGHIKLMNPQRSTVWY]+$")
+
     sequence_length: Series[int] = pa.Field(
-        nullable=False, ge=1, description="Sequence length"
+        nullable=False, description="Sequence length"
     )
+
+    @pa.check("sequence_length", name="sequence_length_positive")
+    def _check_sequence_length(cls, series: Series[int]) -> Series[bool]:
+        """Validate sequence length is positive."""
+        return series >= 1
+
     sequence_mass: Series[int] | None = pa.Field(
-        nullable=True, ge=1, description="Molecular mass (Da)"
+        nullable=True, description="Molecular mass (Da)"
     )
+
+    @pa.check("sequence_mass", name="sequence_mass_positive")
+    def _check_sequence_mass(cls, series: Series[int]) -> Series[bool]:
+        """Validate sequence mass is positive."""
+        return series.isna() | (series >= 1)
+
     sequence_checksum: Series[str] | None = pa.Field(
         nullable=True, description="CRC64 checksum"
     )
@@ -144,8 +198,14 @@ class ProteinSchema(ETLRecordSchema):
 
     # === Entry Metadata ===
     entry_version: Series[int] | None = pa.Field(
-        nullable=True, ge=1, description="Entry version number"
+        nullable=True, description="Entry version number"
     )
+
+    @pa.check("entry_version", name="entry_version_positive")
+    def _check_entry_version(cls, series: Series[int]) -> Series[bool]:
+        """Validate entry version is positive."""
+        return series.isna() | (series >= 1)
+
     entry_created: Series[date] | None = pa.Field(
         nullable=True, description="Entry creation date"
     )
@@ -215,20 +275,49 @@ class ProteinSchema(ETLRecordSchema):
 
     # === Counts ===
     cross_reference_count: Series[int] | None = pa.Field(
-        nullable=True, ge=0, description="Number of database cross-references"
+        nullable=True, description="Number of database cross-references"
     )
+
+    @pa.check("cross_reference_count", name="cross_reference_count_non_negative")
+    def _check_cross_reference_count(cls, series: Series[int]) -> Series[bool]:
+        """Validate cross-reference count is non-negative."""
+        return series.isna() | (series >= 0)
+
     feature_count: Series[int] | None = pa.Field(
-        nullable=True, ge=0, description="Number of sequence features"
+        nullable=True, description="Number of sequence features"
     )
+
+    @pa.check("feature_count", name="feature_count_non_negative")
+    def _check_feature_count(cls, series: Series[int]) -> Series[bool]:
+        """Validate feature count is non-negative."""
+        return series.isna() | (series >= 0)
+
     keyword_count: Series[int] | None = pa.Field(
-        nullable=True, ge=0, description="Number of keywords"
+        nullable=True, description="Number of keywords"
     )
+
+    @pa.check("keyword_count", name="keyword_count_non_negative")
+    def _check_keyword_count(cls, series: Series[int]) -> Series[bool]:
+        """Validate keyword count is non-negative."""
+        return series.isna() | (series >= 0)
+
     publication_count: Series[int] | None = pa.Field(
-        nullable=True, ge=0, description="Number of publications"
+        nullable=True, description="Number of publications"
     )
+
+    @pa.check("publication_count", name="publication_count_non_negative")
+    def _check_publication_count(cls, series: Series[int]) -> Series[bool]:
+        """Validate publication count is non-negative."""
+        return series.isna() | (series >= 0)
+
     isoform_count: Series[int] | None = pa.Field(
-        nullable=True, ge=0, description="Number of isoforms"
+        nullable=True, description="Number of isoforms"
     )
+
+    @pa.check("isoform_count", name="isoform_count_non_negative")
+    def _check_isoform_count(cls, series: Series[int]) -> Series[bool]:
+        """Validate isoform count is non-negative."""
+        return series.isna() | (series >= 0)
 
     class Config:
         """Pandera configuration."""
