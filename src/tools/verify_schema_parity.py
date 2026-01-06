@@ -1,6 +1,8 @@
 """Script to programmatically verify schema parity."""
 
 import dataclasses
+import logging
+import sys
 
 from bioetl.domain.entities.bioactivity import Bioactivity
 from bioetl.domain.entities.chembl_activity import Assay
@@ -17,6 +19,14 @@ from bioetl.infrastructure.schemas.silver import (
     CHEMBL_MOLECULE_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
 )
+
+# Configure logging for CLI output
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
+logger = logging.getLogger(__name__)
 
 
 def get_dataclass_fields(cls):
@@ -35,7 +45,7 @@ def get_pandera_fields(model):
 
 
 def check_parity(name, domain_cls, silver_schema, gold_model):
-    print(f"Checking {name}...")
+    logger.info("Checking %s...", name)
     domain_fields = get_dataclass_fields(domain_cls)
     silver_fields = get_pyarrow_fields(silver_schema)
     gold_fields = get_pandera_fields(gold_model)
@@ -59,9 +69,11 @@ def check_parity(name, domain_cls, silver_schema, gold_model):
     }
 
     if missing_in_silver:
-        print(f"  [ERROR] Fields in Domain but missing in Silver: {missing_in_silver}")
+        logger.error(
+            "  [ERROR] Fields in Domain but missing in Silver: %s", missing_in_silver
+        )
     else:
-        print("  [OK] All Domain fields present in Silver.")
+        logger.info("  [OK] All Domain fields present in Silver.")
 
     # Check 2: Silver vs Gold
     # Gold Schema keys() usually returns the aliased name if defined, or the field name.
@@ -71,13 +83,16 @@ def check_parity(name, domain_cls, silver_schema, gold_model):
     missing_in_silver_from_gold = set(gold_fields) - silver_fields
 
     if missing_in_gold:
-        print(f"  [ERROR] Fields in Silver but missing in Gold: {missing_in_gold}")
+        logger.error(
+            "  [ERROR] Fields in Silver but missing in Gold: %s", missing_in_gold
+        )
     elif missing_in_silver_from_gold:
-        print(
-            f"  [ERROR] Fields in Gold but missing in Silver: {missing_in_silver_from_gold}"
+        logger.error(
+            "  [ERROR] Fields in Gold but missing in Silver: %s",
+            missing_in_silver_from_gold,
         )
     else:
-        print("  [OK] Silver and Gold schemas match exactly.")
+        logger.info("  [OK] Silver and Gold schemas match exactly.")
 
 
 if __name__ == "__main__":
