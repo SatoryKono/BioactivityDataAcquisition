@@ -61,7 +61,7 @@ class TestFileSizeLimits:
         # Composition layer exemptions
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "entrypoints.py": 720,  # 703 LOC - pipeline entrypoints (run_pipeline expanded + services)
-        "registration.py": 620,  # 607 LOC - provider registration with data source creators (OpenAlex + SemanticScholar)
+        "registration.py": 720,  # 705 LOC - provider registration with data source creators (OpenAlex + SemanticScholar + UniProt IDMapping)
         "storage_adapter.py": 550,  # 540 LOC - storage adapter with Bronze/Silver/Gold writers
         # Consolidated factory files (v5.2)
         "storage.py": 700,  # 640 LOC - merged storage_factory + storage_adapter
