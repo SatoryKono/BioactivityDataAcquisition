@@ -1,0 +1,85 @@
+interactions:
+- request:
+    body: '{"ids": ["DOI:10.1038/nature12373", "DOI:10.1016/j.cell.2019.03.025"]}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - BioETL/1.0
+    method: POST
+    uri: https://api.semanticscholar.org/graph/v1/paper/batch?fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal
+  response:
+    body:
+      string: |
+        [
+          {
+            "paperId": "a88fbdb9b47a8e8aef2b8cabd1fe0adfb96a9f25",
+            "externalIds": {
+              "PubMed": "23868264",
+              "DOI": "10.1038/nature12373",
+              "CorpusId": 4463122
+            },
+            "title": "Crystal structure of rhodopsin bound to arrestin by femtosecond X-ray laser",
+            "abstract": "G-protein-coupled receptors (GPCRs) signal primarily through G proteins or arrestins.",
+            "year": 2015,
+            "publicationDate": "2015-07-22",
+            "venue": "Nature",
+            "authors": [
+              {"authorId": "4713315", "name": "Yanyong Kang"}
+            ],
+            "citationCount": 892,
+            "referenceCount": 50,
+            "isOpenAccess": true,
+            "openAccessPdf": null,
+            "tldr": null,
+            "fieldsOfStudy": ["Biology"],
+            "publicationTypes": ["JournalArticle"],
+            "journal": {
+              "name": "Nature",
+              "volume": "523"
+            }
+          },
+          {
+            "paperId": "b2c8f1d3e4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9",
+            "externalIds": {
+              "PubMed": "30955886",
+              "DOI": "10.1016/j.cell.2019.03.025",
+              "CorpusId": 102352455
+            },
+            "title": "Structure of the human serotonin receptor in complex with two antidepressants",
+            "abstract": "Serotonin (5-hydroxytryptamine, 5-HT) is a key neurotransmitter implicated in mood regulation.",
+            "year": 2019,
+            "publicationDate": "2019-04-18",
+            "venue": "Cell",
+            "authors": [
+              {"authorId": "1234567", "name": "John Smith"}
+            ],
+            "citationCount": 245,
+            "referenceCount": 60,
+            "isOpenAccess": false,
+            "openAccessPdf": null,
+            "tldr": {
+              "model": "tldr@v2.0.0",
+              "text": "The structure reveals the binding mode of antidepressants."
+            },
+            "fieldsOfStudy": ["Biology", "Medicine"],
+            "publicationTypes": ["JournalArticle"],
+            "journal": {
+              "name": "Cell",
+              "volume": "177"
+            }
+          }
+        ]
+    headers:
+      Content-Type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1
