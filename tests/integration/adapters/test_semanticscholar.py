@@ -86,7 +86,9 @@ class TestSemanticScholarAdapterIntegration:
     Use --vcr-record=new_episodes to record new cassettes.
     """
 
-    def test_provider_name(self, semanticscholar_adapter: SemanticScholarAdapter) -> None:
+    def test_provider_name(
+        self, semanticscholar_adapter: SemanticScholarAdapter
+    ) -> None:
         """Adapter should have correct provider name."""
         assert semanticscholar_adapter.provider_name == "semanticscholar"
 
@@ -348,9 +350,9 @@ class TestSemanticScholarAdapterEdgeCases:
             )
 
             with respx.mock:
-                respx.post(
-                    "https://api.semanticscholar.org/graph/v1/paper/batch"
-                ).mock(return_value=Response(200, json=mock_response))
+                respx.post("https://api.semanticscholar.org/graph/v1/paper/batch").mock(
+                    return_value=Response(200, json=mock_response)
+                )
 
                 records: list[dict[str, Any]] = []
                 async for record in adapter.fetch_filtered(
