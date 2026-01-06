@@ -35,16 +35,33 @@ class IsoformSchema(ETLRecordSchema):
         nullable=True, description="Isoform name"
     )
     sequence_status: Series[str] | None = pa.Field(
-        nullable=True, isin=SEQUENCE_STATUSES, description="Sequence display status"
+        nullable=True, description="Sequence display status"
     )
+
+    @pa.check("sequence_status", name="sequence_status_values")
+    def _check_sequence_status(cls, series: Series[str]) -> Series[bool]:
+        """Validate sequence status values."""
+        return series.isna() | series.isin(SEQUENCE_STATUSES)
+
     sequence: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^[ACDEFGHIKLMNPQRSTVWY]+$",
         description="Isoform amino acid sequence",
     )
+
+    @pa.check("sequence", name="sequence_format")
+    def _check_sequence(cls, series: Series[str]) -> Series[bool]:
+        """Validate amino acid sequence."""
+        return series.isna() | series.str.match(r"^[ACDEFGHIKLMNPQRSTVWY]+$")
+
     sequence_length: Series[int] | None = pa.Field(
-        nullable=True, ge=1, description="Isoform sequence length"
+        nullable=True, description="Isoform sequence length"
     )
+
+    @pa.check("sequence_length", name="sequence_length_positive")
+    def _check_sequence_length(cls, series: Series[int]) -> Series[bool]:
+        """Validate sequence length is positive."""
+        return series.isna() | (series >= 1)
+
     note: Series[str] | None = pa.Field(
         nullable=True, description="Isoform description/note"
     )
