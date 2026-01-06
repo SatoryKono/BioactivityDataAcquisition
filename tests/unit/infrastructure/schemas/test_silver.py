@@ -337,20 +337,27 @@ class TestPubchemCompoundSchema:
 
     def test_all_fields_are_strings(self):
         """Verify all non-system fields are strings."""
-        non_system_fields = [
+        # String fields (excludes molecular_weight which is now float64)
+        string_fields = [
             "cid",
             "molecular_formula",
-            "molecular_weight",
             "canonical_smiles",
             "inchi",
             "inchikey",
             "iupac_name",
         ]
-        for field_name in non_system_fields:
+        for field_name in string_fields:
             field = PUBCHEM_COMPOUND_SCHEMA.field(field_name)
             assert field.type == pa.string(), (
                 f"{field_name} should be string, got {field.type}"
             )
+
+    def test_molecular_weight_is_float(self):
+        """Verify molecular_weight is float64 for numeric calculations."""
+        field = PUBCHEM_COMPOUND_SCHEMA.field("molecular_weight")
+        assert field.type == pa.float64(), (
+            f"molecular_weight should be float64, got {field.type}"
+        )
 
 
 class TestUniprotProteinSchema:
@@ -535,7 +542,7 @@ class TestSilverSchemaValidation:
             "entity_id": "CID_2244",
             "cid": "2244",
             "molecular_formula": "C9H8O4",
-            "molecular_weight": "180.16",
+            "molecular_weight": 180.16,  # Float value (converted in transformer)
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
             "isomeric_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
             "inchi": "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)",
@@ -546,6 +553,7 @@ class TestSilverSchemaValidation:
             "_run_type": "incremental",
             "_source_batch_id": "batch_002",
             "_ingestion_ts": "2024-01-15T11:00:00Z",
+            "_index": 0,
         }
 
         table = pa.Table.from_pylist([valid_record], schema=PUBCHEM_COMPOUND_SCHEMA)

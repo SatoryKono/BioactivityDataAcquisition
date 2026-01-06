@@ -121,7 +121,7 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     entity_id: Series[str] = pa.Field(nullable=False)
     cid: Series[str] = pa.Field(nullable=False)
     molecular_formula: Series[str] = pa.Field(nullable=True)
-    molecular_weight: Series[str] = pa.Field(nullable=True)
+    molecular_weight: Series[float] = pa.Field(nullable=True)
     canonical_smiles: Series[str] = pa.Field(nullable=True)
     isomeric_smiles: Series[str] = pa.Field(nullable=True)
     inchi: Series[str] = pa.Field(nullable=True)

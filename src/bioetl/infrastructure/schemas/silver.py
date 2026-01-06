@@ -95,7 +95,7 @@ PUBCHEM_COMPOUND_SCHEMA = pa.schema(
         pa.field("entity_id", pa.string()),
         pa.field("cid", pa.string()),
         pa.field("molecular_formula", pa.string()),
-        pa.field("molecular_weight", pa.string()),  # Stored as string from source
+        pa.field("molecular_weight", pa.float64()),  # Converted to float with rounding
         pa.field("canonical_smiles", pa.string()),
         pa.field("isomeric_smiles", pa.string()),
         pa.field("inchi", pa.string()),
