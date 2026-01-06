@@ -10,7 +10,7 @@ import pytest
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.domain.config import DQConfig
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
-from bioetl.domain.value_objects.dq_result import DQResult, DQStatus
+from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
 
 @pytest.fixture
@@ -161,7 +161,7 @@ class TestDataQualityServiceThresholds:
 
         result = await service.evaluate(metrics)
 
-        assert result.status == DQStatus.WARNING
+        assert result.status == DQEvaluationStatus.WARNING
         assert result.error_rate == 0.10
         mock_logger.warning.assert_called_once()
         mock_metrics.increment_counter.assert_called_once_with(
@@ -191,7 +191,7 @@ class TestDataQualityServiceThresholds:
 
         result = await service.evaluate(metrics)
 
-        assert result.status == DQStatus.WARNING
+        assert result.status == DQEvaluationStatus.WARNING
         mock_logger.warning.assert_called_once()
         mock_metrics.increment_counter.assert_called_once()
 
@@ -216,7 +216,7 @@ class TestDataQualityServiceThresholds:
 
         result = await service.evaluate(metrics)
 
-        assert result.status == DQStatus.PASSED
+        assert result.status == DQEvaluationStatus.PASSED
         assert result.error_rate == 0.03
         mock_logger.warning.assert_not_called()
         mock_logger.error.assert_not_called()
@@ -270,7 +270,7 @@ class TestDataQualityServiceGracefulDegradation:
 
         result = await service.evaluate(metrics)
 
-        assert result.status == DQStatus.WARNING
+        assert result.status == DQEvaluationStatus.WARNING
         mock_logger.warning.assert_called_once()
 
 
@@ -526,14 +526,14 @@ class TestDQResult:
         """Test DQResult creation with all fields."""
         result = DQResult(
             error_rate=0.05,
-            status=DQStatus.WARNING,
+            status=DQEvaluationStatus.WARNING,
             anomalies=(),
             has_critical=False,
             check_duration_ms=123.45,
         )
 
         assert result.error_rate == 0.05
-        assert result.status == DQStatus.WARNING
+        assert result.status == DQEvaluationStatus.WARNING
         assert result.anomalies == ()
         assert result.has_critical is False
         assert result.check_duration_ms == 123.45
@@ -542,7 +542,7 @@ class TestDQResult:
         """Test that DQResult converts list anomalies to tuple."""
         result = DQResult(
             error_rate=0.05,
-            status=DQStatus.PASSED,
+            status=DQEvaluationStatus.PASSED,
             anomalies=["anomaly1", "anomaly2"],  # type: ignore
         )
 
@@ -551,9 +551,9 @@ class TestDQResult:
 
     def test_dq_result_properties(self):
         """Test DQResult property methods."""
-        passed = DQResult(error_rate=0.01, status=DQStatus.PASSED)
-        warning = DQResult(error_rate=0.10, status=DQStatus.WARNING)
-        failed = DQResult(error_rate=0.25, status=DQStatus.FAILED)
+        passed = DQResult(error_rate=0.01, status=DQEvaluationStatus.PASSED)
+        warning = DQResult(error_rate=0.10, status=DQEvaluationStatus.WARNING)
+        failed = DQResult(error_rate=0.25, status=DQEvaluationStatus.FAILED)
 
         assert passed.is_passed is True
         assert passed.is_warning is False
@@ -571,7 +571,7 @@ class TestDQResult:
         """Test anomalies_count property."""
         result = DQResult(
             error_rate=0.05,
-            status=DQStatus.PASSED,
+            status=DQEvaluationStatus.PASSED,
             anomalies=("a", "b", "c"),
         )
 
@@ -579,16 +579,16 @@ class TestDQResult:
 
 
 @pytest.mark.unit
-class TestDQStatus:
-    """Tests for DQStatus enum."""
+class TestDQEvaluationStatus:
+    """Tests for DQEvaluationStatus enum."""
 
     def test_status_values(self):
-        """Test DQStatus enum values."""
-        assert DQStatus.PASSED.value == "passed"
-        assert DQStatus.WARNING.value == "warning"
-        assert DQStatus.FAILED.value == "failed"
+        """Test DQEvaluationStatus enum values."""
+        assert DQEvaluationStatus.PASSED.value == "passed"
+        assert DQEvaluationStatus.WARNING.value == "warning"
+        assert DQEvaluationStatus.FAILED.value == "failed"
 
     def test_status_is_string(self):
-        """Test that DQStatus is a string enum."""
-        assert isinstance(DQStatus.PASSED, str)
-        assert DQStatus.PASSED == "passed"
+        """Test that DQEvaluationStatus is a string enum."""
+        assert isinstance(DQEvaluationStatus.PASSED, str)
+        assert DQEvaluationStatus.PASSED == "passed"

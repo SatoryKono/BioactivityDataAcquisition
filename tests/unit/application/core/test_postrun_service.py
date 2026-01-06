@@ -15,7 +15,7 @@ from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
 from bioetl.domain.types import RunType
-from bioetl.domain.value_objects.dq_result import DQResult, DQStatus
+from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
 
 @pytest.fixture
@@ -95,7 +95,7 @@ def mock_dq_service():
     service.evaluate = AsyncMock(
         return_value=DQResult(
             error_rate=0.05,
-            status=DQStatus.PASSED,
+            status=DQEvaluationStatus.PASSED,
             anomalies=(),
             has_critical=False,
             check_duration_ms=10.0,
@@ -390,7 +390,7 @@ class TestPostrunResult:
         """Test PostrunResult creation."""
         dq_result = DQResult(
             error_rate=0.05,
-            status=DQStatus.PASSED,
+            status=DQEvaluationStatus.PASSED,
         )
         vacuum_result = VacuumResult(
             silver_files_removed=10,
@@ -458,7 +458,7 @@ class TestPostrunServiceIntegrationWithDataQualityService:
 
         assert isinstance(result, PostrunResult)
         # 5% error rate exactly equals soft threshold (5%), so status is WARNING
-        assert result.dq.status == DQStatus.WARNING
+        assert result.dq.status == DQEvaluationStatus.WARNING
         assert result.dq.error_rate == 0.05
         assert result.vacuum.skipped is False
 

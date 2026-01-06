@@ -5,7 +5,6 @@ Source: https://api.crossref.org/swagger-ui/index.html
 
 Terminology:
 - Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
-- WorkSchema is kept as deprecated alias for backward compatibility
 """
 
 from __future__ import annotations
@@ -160,11 +159,3 @@ class PublicationSchema(ETLRecordSchema):
         coerce = True
         name = "PublicationSchema"
         description = "CrossRef Publication Silver layer validation"
-
-
-# Deprecated aliases for backward compatibility
-WorkSchema = PublicationSchema
-"""Deprecated: Use PublicationSchema instead. Kept for backward compatibility."""
-
-WORK_TYPES = PUBLICATION_TYPES
-"""Deprecated: Use PUBLICATION_TYPES instead. Kept for backward compatibility."""

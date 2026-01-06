@@ -114,7 +114,7 @@ ALLOWED_NO_SUFFIX = {
     "CircuitBreakerState",
     "DataClassification",
     "ErrorType",
-    "DQStatus",
+    "QuarantineRecordStatus",
     "LifecyclePhase",
     "AuditOperation",
     "AuditLayer",

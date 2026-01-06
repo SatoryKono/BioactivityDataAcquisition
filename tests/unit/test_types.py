@@ -5,10 +5,10 @@ from __future__ import annotations
 from bioetl.domain.types import (
     CircuitBreakerState,
     DataClassification,
-    DQStatus,
     DriftLevel,
     ErrorType,
     HealthStatus,
+    QuarantineRecordStatus,
     RunType,
 )
 
@@ -170,11 +170,11 @@ class TestDataClassification:
         assert DataClassification.RESTRICTED.value == "RESTRICTED"
 
 
-class TestDQStatus:
-    """Tests for DQStatus enum."""
+class TestQuarantineRecordStatus:
+    """Tests for QuarantineRecordStatus enum."""
 
-    def test_dq_status_values(self) -> None:
-        """DQStatus should have correct values."""
-        assert DQStatus.NEW.value == "NEW"
-        assert DQStatus.IGNORED.value == "IGNORED"
-        assert DQStatus.REPROCESSED.value == "REPROCESSED"
+    def test_quarantine_record_status_values(self) -> None:
+        """QuarantineRecordStatus should have correct values."""
+        assert QuarantineRecordStatus.NEW.value == "NEW"
+        assert QuarantineRecordStatus.IGNORED.value == "IGNORED"
+        assert QuarantineRecordStatus.REPROCESSED.value == "REPROCESSED"

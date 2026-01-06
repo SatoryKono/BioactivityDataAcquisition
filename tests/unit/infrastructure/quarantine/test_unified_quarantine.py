@@ -9,7 +9,7 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.domain.types import BatchID, DQStatus
+from bioetl.domain.types import BatchID, QuarantineRecordStatus
 from bioetl.infrastructure.quarantine import UnifiedQuarantine, quote_literal
 
 # Fixed timestamp for test reproducibility
@@ -254,7 +254,7 @@ class TestUnifiedQuarantineWrite:
         )
 
         record = _extract_record_from_call(mock_write_deltalake)
-        assert record["dq_status"] == DQStatus.NEW.value
+        assert record["dq_status"] == QuarantineRecordStatus.NEW.value
 
 
 @pytest.mark.unit
@@ -298,7 +298,7 @@ class TestUnifiedQuarantineInspect:
                 pipeline="test",
                 limit=50,
                 error_code="INVALID_DATA",
-                dq_status=DQStatus.IGNORED,
+                dq_status=QuarantineRecordStatus.IGNORED,
             )
 
         assert result == []
@@ -416,7 +416,7 @@ class TestUnifiedQuarantineUpdateStatus:
 
         mock_delta_table.side_effect = TableNotFoundError("Not found")
 
-        result = quarantine.update_status("hash123", DQStatus.IGNORED)
+        result = quarantine.update_status("hash123", QuarantineRecordStatus.IGNORED)
 
         assert result is False
 
@@ -432,7 +432,9 @@ class TestUnifiedQuarantineUpdateStatus:
         mock_table.to_pyarrow_table.return_value = mock_arrow_table
         mock_delta_table.return_value = mock_table
 
-        result = quarantine.update_status("nonexistent_hash", DQStatus.IGNORED)
+        result = quarantine.update_status(
+            "nonexistent_hash", QuarantineRecordStatus.IGNORED
+        )
 
         assert result is False
 
@@ -444,7 +446,7 @@ class TestUnifiedQuarantineUpdateStatus:
         mock_table.to_pyarrow_table.return_value = mock_arrow_table
         mock_delta_table.return_value = mock_table
 
-        result = quarantine.update_status("hash123", DQStatus.REPROCESSED)
+        result = quarantine.update_status("hash123", QuarantineRecordStatus.REPROCESSED)
 
         assert result is True
         mock_table.update.assert_called_once()
