@@ -36,7 +36,9 @@ if TYPE_CHECKING:
 logger = structlog.get_logger()
 
 # VCR cassette directory
-CASSETTE_DIR = Path(__file__).parent.parent.parent.parent / "fixtures" / "vcr" / "openalex"
+CASSETTE_DIR = (
+    Path(__file__).parent.parent.parent.parent / "fixtures" / "vcr" / "openalex"
+)
 
 
 @pytest.fixture(scope="module")
@@ -215,12 +217,14 @@ class TestOpenAlexPublicationPipeline:
     ) -> None:
         """Test DOI resolution flow: Bronze -> Silver -> Gold."""
         # Create input CSV with known DOI
-        input_csv = self._create_input_csv([
-            {
-                "doi": "10.1038/s41586-020-2012-7",
-                "title": "A pneumonia outbreak associated with a new coronavirus",
-            },
-        ])
+        input_csv = self._create_input_csv(
+            [
+                {
+                    "doi": "10.1038/s41586-020-2012-7",
+                    "title": "A pneumonia outbreak associated with a new coronavirus",
+                },
+            ]
+        )
 
         # Limit to 1 record for test
         runtime_config = replace(runtime_config, limit=1)
@@ -278,12 +282,14 @@ class TestOpenAlexPublicationPipeline:
     ) -> None:
         """Test title fallback when DOI not found."""
         # Create input CSV with invalid DOI and valid title
-        input_csv = self._create_input_csv([
-            {
-                "doi": "10.9999/invalid-doi-12345",
-                "title": "COVID-19 vaccine development",
-            },
-        ])
+        input_csv = self._create_input_csv(
+            [
+                {
+                    "doi": "10.9999/invalid-doi-12345",
+                    "title": "COVID-19 vaccine development",
+                },
+            ]
+        )
 
         runtime_config = replace(runtime_config, limit=1)
 
@@ -327,12 +333,14 @@ class TestOpenAlexPublicationPipeline:
     ) -> None:
         """Test title-only lookup when DOI is empty."""
         # Create input CSV with empty DOI
-        input_csv = self._create_input_csv([
-            {
-                "doi": "",
-                "title": "COVID-19 vaccine development",
-            },
-        ])
+        input_csv = self._create_input_csv(
+            [
+                {
+                    "doi": "",
+                    "title": "COVID-19 vaccine development",
+                },
+            ]
+        )
 
         runtime_config = replace(runtime_config, limit=1)
 
@@ -372,16 +380,18 @@ class TestOpenAlexPublicationPipeline:
     ) -> None:
         """Test batch DOI resolution with multiple DOIs."""
         # Create input CSV with multiple DOIs
-        input_csv = self._create_input_csv([
-            {
-                "doi": "10.1038/s41586-020-2012-7",
-                "title": "A pneumonia outbreak",
-            },
-            {
-                "doi": "10.1016/j.cell.2020.02.052",
-                "title": "Structure of SARS-CoV-2 spike",
-            },
-        ])
+        input_csv = self._create_input_csv(
+            [
+                {
+                    "doi": "10.1038/s41586-020-2012-7",
+                    "title": "A pneumonia outbreak",
+                },
+                {
+                    "doi": "10.1016/j.cell.2020.02.052",
+                    "title": "Structure of SARS-CoV-2 spike",
+                },
+            ]
+        )
 
         runtime_config = replace(runtime_config, limit=5)
 
@@ -446,12 +456,14 @@ class TestOpenAlexPublicationPipeline:
         run_id,
     ) -> None:
         """Test error handling when API fails."""
-        input_csv = self._create_input_csv([
-            {
-                "doi": "10.1038/s41586-020-2012-7",
-                "title": "Test",
-            },
-        ])
+        input_csv = self._create_input_csv(
+            [
+                {
+                    "doi": "10.1038/s41586-020-2012-7",
+                    "title": "Test",
+                },
+            ]
+        )
 
         runner = self._create_runner(
             settings=settings,
@@ -481,7 +493,9 @@ class TestOpenAlexPublicationTransformerIntegration:
     @pytest.mark.asyncio
     async def test_transformer_abstract_reconstruction(self) -> None:
         """Test abstract reconstruction from inverted index."""
-        from bioetl.application.pipelines.openalex.extractors import reconstruct_abstract
+        from bioetl.application.pipelines.openalex.extractors import (
+            reconstruct_abstract,
+        )
 
         inverted_index = {
             "This": [0],
@@ -516,9 +530,13 @@ class TestOpenAlexPublicationTransformerIntegration:
         from bioetl.application.pipelines.openalex.extractors import extract_doi
 
         # HTTPS URL
-        assert extract_doi("https://doi.org/10.1038/nature12373") == "10.1038/nature12373"
+        assert (
+            extract_doi("https://doi.org/10.1038/nature12373") == "10.1038/nature12373"
+        )
         # HTTP URL
-        assert extract_doi("http://doi.org/10.1038/nature12373") == "10.1038/nature12373"
+        assert (
+            extract_doi("http://doi.org/10.1038/nature12373") == "10.1038/nature12373"
+        )
         # doi: prefix
         assert extract_doi("doi:10.1038/nature12373") == "10.1038/nature12373"
         # Bare DOI
@@ -563,7 +581,9 @@ class TestOpenAlexPublicationTransformerIntegration:
     @pytest.mark.asyncio
     async def test_transformer_journal_info_extraction(self) -> None:
         """Test journal info extraction from primary_location."""
-        from bioetl.application.pipelines.openalex.extractors import extract_journal_info
+        from bioetl.application.pipelines.openalex.extractors import (
+            extract_journal_info,
+        )
 
         primary_location = {
             "source": {
@@ -581,7 +601,9 @@ class TestOpenAlexPublicationTransformerIntegration:
     @pytest.mark.asyncio
     async def test_transformer_open_access_extraction(self) -> None:
         """Test Open Access info extraction."""
-        from bioetl.application.pipelines.openalex.extractors import extract_open_access_info
+        from bioetl.application.pipelines.openalex.extractors import (
+            extract_open_access_info,
+        )
 
         open_access = {
             "is_oa": True,
