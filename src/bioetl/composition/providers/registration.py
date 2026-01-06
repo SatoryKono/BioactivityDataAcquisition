@@ -36,6 +36,9 @@ from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
     PubMedAdapter,
     _create_pubmed_adapter,
 )
+from bioetl.infrastructure.adapters.semanticscholar.adapter import (
+    SemanticScholarAdapter,
+)
 from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 from bioetl.infrastructure.config import load_source_config
 
@@ -391,6 +394,59 @@ def _create_openalex_data_source(
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
+def _create_semanticscholar_data_source(
+    settings: Settings,
+    pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
+    filter_config: InputFilterConfig | None = None,
+    metrics: MetricsPort | None = None,
+    pipeline_name: str = "unknown",
+) -> DataSourcePort:
+    """Create Semantic Scholar data source with optional CSV filtering.
+
+    Semantic Scholar requires API key for stable rate limits (1 req/sec).
+    API key is obtained from settings.semanticscholar_api_key.
+
+    Args:
+        settings: Application settings.
+        pipeline_config: Pipeline configuration from YAML.
+        logger: LoggerPort for structured logging.
+        filter_config: Optional filter configuration for CSV-based DOI filtering.
+        metrics: Optional MetricsPort for recording adapter metrics.
+        pipeline_name: Pipeline name for metrics labels.
+
+    Returns:
+        Configured DataSourcePort with optional filtering wrapper.
+
+    """
+    _, HttpClientFactory = _get_factories()
+    http_client = HttpClientFactory.create_for_provider("semanticscholar", settings)
+
+    # Get API key from settings (configured via BIOETL_SEMANTICSCHOLAR_API_KEY env var)
+    api_key = (
+        settings.semanticscholar_api_key.get_secret_value()
+        if settings.semanticscholar_api_key
+        else ""
+    )
+    if not api_key:
+        logger.warning(
+            "semanticscholar_no_api_key",
+            message="No API key provided. Rate limits will be shared with other users.",
+        )
+
+    batch_size = _get_batch_size_from_config("semanticscholar", default=100)
+
+    data_source = SemanticScholarAdapter(
+        http_client=http_client,
+        logger=logger,
+        api_key=api_key,
+        batch_size=batch_size,
+        metrics=metrics,
+    )
+
+    return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
+
+
 # =============================================================================
 # Provider registration
 # =============================================================================
@@ -413,6 +469,7 @@ def register_all_providers() -> None:
     - PubMed: configs/sources/pubmed.yaml
     - CrossRef: configs/sources/crossref.yaml
     - OpenAlex: configs/sources/openalex.yaml
+    - Semantic Scholar: configs/sources/semanticscholar.yaml
 
     Each provider includes a data_source_creator for unified registry access.
     """
@@ -528,5 +585,23 @@ def register_all_providers() -> None:
                 requires_logger=True,
                 custom_creator=_create_openalex_adapter,
                 data_source_creator=_create_openalex_data_source,
+            ),
+        )
+
+    # Semantic Scholar - async HTTP adapter for DOI resolution with title fallback
+    # API key recommended for stable rate limits (1 req/sec guaranteed)
+    s2_rate, s2_capacity = _get_rate_limit_from_config("semanticscholar")
+    if not ProviderRegistry.is_registered("semanticscholar"):
+        ProviderRegistry.register(
+            "semanticscholar",
+            ProviderConfig(
+                adapter_class=SemanticScholarAdapter,
+                http_config=HttpConfig(
+                    rate=s2_rate,
+                    capacity=s2_capacity,
+                ),
+                requires_http_client=True,
+                requires_logger=True,
+                data_source_creator=_create_semanticscholar_data_source,
             ),
         )
