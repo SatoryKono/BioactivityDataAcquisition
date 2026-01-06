@@ -1,9 +1,12 @@
-"""UniProt Protein Transformer.
+"""UniProt Target Transformer.
 
 Transforms raw UniProt protein records into Silver-layer format using
-the Protein domain entity for validation and invariant checking.
+the UniprotTarget domain entity for validation and invariant checking.
 
 Delegates data extraction to specialized extractors for maintainability.
+
+.. versionchanged:: 2.0.0
+    Uses UniprotTarget (canonical) instead of Protein (deprecated).
 """
 
 from __future__ import annotations
@@ -21,7 +24,7 @@ from bioetl.application.pipelines.uniprot.extractors import (
     FeatureExtractor,
     GeneExtractor,
 )
-from bioetl.domain.entities import Protein
+from bioetl.domain.entities import UniprotTarget
 from bioetl.domain.services import IdentityService
 
 if TYPE_CHECKING:
@@ -34,9 +37,9 @@ if TYPE_CHECKING:
 class UniProtProteinTransformer(BaseTransformer):
     """Transformer for UniProt protein records.
 
-    Uses Protein domain entity for validation and lineage tracking.
-    Records without required fields (accession, entry_name) are skipped.
-    protein_name is optional and may be None.
+    Uses UniprotTarget domain entity (canonical name) for validation
+    and lineage tracking. Records without required fields (accession,
+    entry_name) are skipped. protein_name is optional and may be None.
 
     Delegates extraction logic to specialized extractors:
     - CommentExtractor: functional annotations
@@ -96,7 +99,7 @@ class UniProtProteinTransformer(BaseTransformer):
         content_hash = self.compute_content_hash(business_data, exclude_none=True)
 
         entity = self._create_entity(
-            Protein,
+            UniprotTarget,
             context,
             entity_id=entity_id,
             content_hash=content_hash,

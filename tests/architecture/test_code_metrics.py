@@ -43,7 +43,7 @@ class TestFileSizeLimits:
         "value_validator.py": 360,  # 351 LOC - Value objects validation
         "activity.py": 330,  # 327 LOC - Activity domain types with rich validation
         "types.py": 400,  # 396 LOC
-        "chembl_structures.py": 450,  # ~420 LOC - ChEMBL structural entities (DocumentSimilarity + ProteinClassification)
+        "chembl_structures.py": 470,  # ~469 LOC - ChEMBL structural entities + deprecated aliases (v2.0)
         "config_types.py": 320,  # 313 LOC
         "exceptions.py": 550,  # 513 LOC
         # Domain value objects (rich domain models with validation)
@@ -55,8 +55,8 @@ class TestFileSizeLimits:
         # Domain ports NoOp implementations
         "noop.py": 400,  # 383 LOC - NoOp implementations for Null Object Pattern (+ NoOpPiiHasher)
         # Domain Pandera schemas (declarative field definitions)
-        "compound.py": 360,  # 344 LOC - PubChem compound schema with many chemical properties
-        "protein.py": 350,  # 329 LOC - UniProt protein schema with many biological fields
+        "compound.py": 380,  # 377 LOC - PubChem molecule schema + deprecated alias (v2.0)
+        "protein.py": 360,  # 354 LOC - UniProt target schema + deprecated alias (v2.0)
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
         "base_transformer.py": 650,  # 639 LOC - Template Method with helpers (tracing + PII hashing)
@@ -404,7 +404,8 @@ class TestClassSize:
         # Extracted validators (REFACTOR-003)
         "MedallionConfigValidator": 350,  # Extracted from PreflightService - cohesive validation
         # Pandera schemas (declarative field definitions)
-        "CompoundSchema": 350,  # 330 lines - PubChem compound schema with many chemical fields
+        "CompoundSchema": 350,  # Deprecated alias for PubchemMoleculeSchema
+        "PubchemMoleculeSchema": 350,  # 345 lines - PubChem molecule schema with many chemical fields
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:
@@ -552,6 +553,7 @@ class TestGodObjectDetection:
         "MedallionLifecycleService": "Lifecycle orchestrator - coordinates Bronze/Silver/Gold operations",
         # Pandera schemas (declarative data containers, no behavior to delegate)
         "CompoundSchema": "Pandera schema - declarative field definitions, no behavior to delegate",
+        "PubchemMoleculeSchema": "Pandera schema - declarative field definitions, no behavior to delegate",
     }
 
     def test_large_classes_have_delegation(self, src_dir: Path) -> None:
