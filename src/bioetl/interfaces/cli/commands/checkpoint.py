@@ -16,7 +16,6 @@ from bioetl.interfaces.cli.formatters import echo_checkpoint, echo_info
 @click.group()
 def checkpoint() -> None:
     """Manage checkpoints."""
-    pass
 
 
 @checkpoint.command("list")

@@ -74,7 +74,6 @@ class PipelineServices:
         """Validate that all services are provided."""
         # Validation is implicit - dataclass requires all non-default fields
         # Runtime checks happen via Protocol structural typing
-        pass
 
     async def __aenter__(self) -> Self:
         """Enter the async context manager, initializing services."""

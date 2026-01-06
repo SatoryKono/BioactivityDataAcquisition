@@ -33,7 +33,6 @@ def _config_to_dict(config: Any) -> dict[str, Any]:
 @click.group()
 def config() -> None:
     """View and validate configuration."""
-    pass
 
 
 @config.command("show")

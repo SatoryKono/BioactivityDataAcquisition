@@ -62,7 +62,6 @@ class NoOpMetrics(MetricsPort):
         labels: dict[str, str],
     ) -> None:
         """No-op histogram observation."""
-        pass
 
     def increment_counter(
         self,
@@ -71,7 +70,6 @@ class NoOpMetrics(MetricsPort):
         labels: dict[str, str],
     ) -> None:
         """No-op counter increment."""
-        pass
 
     def set_gauge(
         self,
@@ -80,11 +78,9 @@ class NoOpMetrics(MetricsPort):
         labels: dict[str, str],
     ) -> None:
         """No-op gauge set."""
-        pass
 
     def close(self) -> None:
         """No-op close. Idempotent."""
-        pass
 
     @classmethod
     def reset_warning(cls) -> None:
