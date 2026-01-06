@@ -49,7 +49,7 @@
 | **Версионирование контрактов** | `docs/contracts/gold/*.json` | Добавлено `$version: "1.0.0"` во все 3 JSON-схемы (activity, assay, molecule) |
 | **Property-based тесты Pandera** | `test_pandera_validator.py:292-395` | 5 hypothesis-тестов для валидаторов с arbitrary input |
 | **Документация Hypothesis стратегий** | `tests/strategies.py:1-118` | Добавлены docstrings с примерами использования |
-| **Порог покрытия 85%** | `pyproject.toml:182` | `fail_under = 85` уже установлен |
+| **Порог покрытия 85%** | `Makefile:63`, `tests.yml:158` | `--cov-fail-under=85` в make test и CI coverage-verify |
 | **BatchExecutor декомпозиция** | `batch_executor.py:540 LOC`, `batch_tracing.py:245 LOC` | Трacing извлечён в `BatchTracingManager`, размер < 550 лимита (верификация 2025-12-31) |
 
 ### ❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ (НЕ ПОВТОРЯТЬ)
@@ -124,11 +124,11 @@
 | "ValueValidator и ActivityAggregator без делегации/стратегий" | **УЖЕ РЕАЛИЗОВАНО**: `ActivityAggregator` использует strategy dict (`aggregators` в строках 155-161). `ValueValidator` использует extracted methods (`_check_*`, `_validate_*`) | `activity_aggregator.py:155-165`, `value_validator.py:98-104,106-117` (верификация 2025-12-31) |
 | "Bronze формат не зафиксирован на JSONL+zstd" | **ЗАФИКСИРОВАН**: `BronzeWriter` использует `.jsonl.zst` (строка 335), `zstandard` compression (строки 231-235). Docstring явно указывает: "JSONL + zstd compression" | `bronze_writer.py:1,335,231-235` (верификация 2025-12-31) |
 | "Bronze разрешает Parquet (ARCH-002 action_plan)" | **ЛОЖНОЕ**: `BronzeSinkDict` type допускает parquet в схеме, но `BronzeWriter` реализует ТОЛЬКО JSONL+zstd. Тип не равен реализации. | `bronze_writer.py:1,335`, `config_types.py:66` (верификация 2025-12-31) |
-| "Покрытие ≥85% не настроено (QA-002 action_plan)" | **УЖЕ РЕАЛИЗОВАНО**: `pyproject.toml:182` содержит `fail_under = 85` | `pyproject.toml:182` (верификация 2025-12-31) |
+| "Покрытие ≥85% не настроено (QA-002 action_plan)" | **УЖЕ РЕАЛИЗОВАНО**: `Makefile:63` (`--cov-fail-under=85`), `.github/workflows/tests.yml:158` | `Makefile`, `tests.yml` (верификация 2026-01-06) |
 | "MemoryLock TTL=90s, heartbeat=30s нужно применить (OPS-001 action_plan)" | **УЖЕ РЕАЛИЗОВАНО**: RuntimeConfig defaults: `lock_ttl=90`, `heartbeat_interval=30`. Документация синхронизирована в RULES.md v5.10. | `domain/config.py:238,241` (верификация 2026-01-06) |
 | "content_hash в Bioactivity.from_raw не использует IdentityService" | **LOW PRIORITY**: `Bioactivity.from_raw` хэширует `raw_data` из API, которые не содержат meta-полей. Разная семантика — hash идентичности vs hash версионирования. | `bioactivity.py:210-212`, `identity_service.py:98-128` (верификация 2025-12-31) |
 | "QuarantineEntry payload_hash требует IdentityService" | **LOW PRIORITY**: `QuarantineEntry.create()` хэширует error payload, не бизнес-данные. Разная семантика — hash дедупликации ошибок vs hash контента. | `quarantine_entry.py:220-223` (верификация 2025-12-31) |
-| "Нет coverage gate в CI, нужно добавить --cov-fail-under" | **УЖЕ РЕАЛИЗОВАНО**: `pyproject.toml:180` (`fail_under = 85`), `Makefile:63` (`--cov-fail-under=85`), `.github/workflows/tests.yml:45` | `pyproject.toml`, `Makefile`, `.github/workflows/tests.yml` (верификация 2025-12-31) |
+| "Нет coverage gate в CI, нужно добавить --cov-fail-under" | **УЖЕ РЕАЛИЗОВАНО**: `Makefile:63` (`--cov-fail-under=85`), `.github/workflows/tests.yml:158` | `Makefile`, `.github/workflows/tests.yml` (верификация 2026-01-06) |
 | "OTLPSpanExporter ошибка Optional-аннотации, mypy --strict падает" | **ОШИБОК НЕТ**: `uv run mypy src/bioetl --strict` → "Success: no issues found in 326 source files" | `tracing.py:36-44` (верификация 2025-12-31) |
 | "OpenTelemetryTracer типизация сломана, mypy --strict не проходит" | **ОШИБОК НЕТ**: mypy strict проходит без ошибок | `tracing.py:52-108` (верификация 2025-12-31) |
 | "Обработчик SIGINT/SIGTERM падает без активного event loop" | **КОД УДАЛЁН**: `register_signal_handlers` экспортировался, но не вызывался нигде. CLI обрабатывает `KeyboardInterrupt` напрямую. Мёртвый код удалён. | `interfaces/orchestration/signals.py` удалён (2025-12-31) |

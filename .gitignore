@@ -119,3 +119,4 @@ coverage_summary.txt
 .coverage.*
 htmlcov/
 tests.zip
+coverage-*.xml
