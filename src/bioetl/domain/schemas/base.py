@@ -6,7 +6,6 @@ Contains common metadata fields required by RULES.md §2.4.
 from __future__ import annotations
 
 from datetime import datetime
-from uuid import UUID
 
 import pandera.pandas as pa
 from pandera.typing import Series
