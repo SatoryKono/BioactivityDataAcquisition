@@ -718,41 +718,6 @@ class TestPublicationRecord:
 
 
 @pytest.mark.unit
-class TestWorkDeprecation:
-    """Tests for deprecated Work alias."""
-
-    def test_work_emits_deprecation_warning(self, base_entity_kwargs):
-        """Test that Work usage emits deprecation warning."""
-        import warnings
-
-        from bioetl.domain.entities.crossref import Work
-
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            Work(
-                **base_entity_kwargs,
-                doi="10.1234/test",
-            )
-            assert len(w) == 1
-            assert issubclass(w[0].category, DeprecationWarning)
-            assert "Work is deprecated" in str(w[0].message)
-
-    def test_work_isinstance_check(self, base_entity_kwargs):
-        """Test that Work isinstance check works with PublicationEntity."""
-
-        from bioetl.domain.entities.crossref import PublicationEntity, Work
-
-        # Create a PublicationEntity
-        publication = PublicationEntity(
-            **base_entity_kwargs,
-            doi="10.1234/test",
-        )
-
-        # Should be recognized as Work via metaclass
-        assert isinstance(publication, Work)
-
-
-@pytest.mark.unit
 class TestDocumentSimilarity:
     """Tests for DocumentSimilarity entity."""
 

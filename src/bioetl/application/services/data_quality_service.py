@@ -20,7 +20,7 @@ import time
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
-from bioetl.domain.value_objects.dq_result import DQResult, DQStatus
+from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
 if TYPE_CHECKING:
     from bioetl.domain.config import DQConfig
@@ -94,7 +94,7 @@ class DataQualityService:
         status = self._determine_status(error_rate)
 
         # Log warning and emit metric if soft threshold exceeded
-        if status == DQStatus.WARNING:
+        if status == DQEvaluationStatus.WARNING:
             self._emit_soft_threshold_warning(error_rate)
 
         # Run anomaly detection if monitor available
@@ -130,18 +130,18 @@ class DataQualityService:
                 threshold=self._config.hard_fail_threshold,
             )
 
-    def _determine_status(self, error_rate: float) -> DQStatus:
+    def _determine_status(self, error_rate: float) -> DQEvaluationStatus:
         """Determine DQ status based on error rate.
 
         Args:
             error_rate: Current error rate.
 
         Returns:
-            DQStatus based on threshold comparison.
+            DQEvaluationStatus based on threshold comparison.
         """
         if error_rate >= self._config.soft_fail_threshold:
-            return DQStatus.WARNING
-        return DQStatus.PASSED
+            return DQEvaluationStatus.WARNING
+        return DQEvaluationStatus.PASSED
 
     def _emit_soft_threshold_warning(self, error_rate: float) -> None:
         """Log warning and emit metric for soft threshold breach.
@@ -166,7 +166,7 @@ class DataQualityService:
         self,
         metrics: dict[str, float],
         error_rate: float,
-        status: DQStatus,
+        status: DQEvaluationStatus,
     ) -> DQResult:
         """Run anomaly detection and process results.
 

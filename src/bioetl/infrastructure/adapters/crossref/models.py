@@ -382,18 +382,6 @@ class CrossRefPublicationResponse(BaseModel):
     message: CrossRefPublicationRecord = Field(description="Publication record")
 
 
-# === Deprecated Aliases (backward compatibility) ===
-
-CrossRefWorkRecord = CrossRefPublicationRecord
-"""Deprecated: Use CrossRefPublicationRecord instead."""
-
-CrossRefWorksResponse = CrossRefPublicationsResponse
-"""Deprecated: Use CrossRefPublicationsResponse instead."""
-
-CrossRefWorkResponse = CrossRefPublicationResponse
-"""Deprecated: Use CrossRefPublicationResponse instead."""
-
-
 # === Record Type Mapping ===
 
 CROSSREF_RECORD_MODELS: dict[str, type[BaseModel]] = {
