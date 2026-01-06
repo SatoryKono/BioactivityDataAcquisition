@@ -38,6 +38,7 @@ class TestFileSizeLimits:
         "entities.py": 600,  # 569 LOC
         "chembl.py": 720,  # 714 LOC - ChEMBL entity DTOs with many fields
         "normalization.py": 350,  # 341 LOC - Pure domain normalization functions
+        "validation.py": 330,  # 326 LOC - Pure domain validation functions (SMILES, DOI, InChI Key, year)
         "activity_aggregator.py": 400,  # 392 LOC - Activity aggregation with multiple strategies
         "normalization_service.py": 420,  # 411 LOC - Normalization service with validation
         "value_validator.py": 360,  # 351 LOC - Value objects validation
@@ -52,7 +53,6 @@ class TestFileSizeLimits:
         "quarantine_entry.py": 520,  # 501 LOC - QuarantineEntry with detailed error info
         "identifiers.py": 350,  # 332 LOC - Value objects with validation
         "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
-        "validation.py": 330,  # 326 LOC - Pure domain validation functions
         # Domain ports NoOp implementations
         "noop.py": 400,  # 383 LOC - NoOp implementations for Null Object Pattern (+ NoOpPiiHasher)
         # Domain Pandera schemas (declarative field definitions)
