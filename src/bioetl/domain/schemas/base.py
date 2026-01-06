@@ -6,7 +6,6 @@ Contains common metadata fields required by RULES.md §2.4.
 from __future__ import annotations
 
 from datetime import datetime
-from uuid import UUID
 
 import pandera.pandas as pa
 from pandera.typing import Series
@@ -21,14 +20,9 @@ class ETLRecordSchema(pa.DataFrameModel):
     )
     content_hash: Series[str] = pa.Field(
         nullable=False,
-        description="SHA256 hash of canonical record representation for versioning.",
+        str_matches=r"^[a-f0-9]{64}$",
+        description="SHA256 hash of canonical record representation (64 hex chars).",
     )
-
-    @classmethod
-    @pa.check("content_hash", name="content_hash_format")
-    def _check_content_hash(cls, series: Series[str]) -> Series[bool]:
-        """Validate content_hash is a 64-character hex string."""
-        return series.str.match(r"^[a-f0-9]{64}$")
 
     # === Lineage & DQ Fields (from RULES.md §2.4) ===
     run_id: Series[object] = pa.Field(
@@ -42,9 +36,8 @@ class ETLRecordSchema(pa.DataFrameModel):
         description="Type of pipeline run.",
     )
 
-    @classmethod
     @pa.check("_run_type", name="run_type_values")
-    def _check_run_type(cls, series: Series[str]) -> Series[bool]:
+    def _check_run_type(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
         """Validate _run_type values."""
         return series.isin(["incremental", "backfill", "rebuild"])
 
@@ -59,9 +52,8 @@ class ETLRecordSchema(pa.DataFrameModel):
         description="Timestamp when the record was ingested (UTC).",
     )
 
-    @classmethod
     @pa.check("_ingestion_ts", name="ingestion_ts_not_future")
-    def _check_ingestion_ts(cls, series: Series[datetime]) -> Series[bool]:
+    def _check_ingestion_ts(cls, series: Series[datetime]) -> Series[bool]:  # noqa: N805
         """Ensure ingestion timestamp is not in the future."""
         # Note: In practice, we just check it's a valid datetime
         return series <= datetime.now(series.dt.tz)
@@ -84,9 +76,8 @@ class ETLRecordSchema(pa.DataFrameModel):
         description="Sequential index of the record in the pipeline run.",
     )
 
-    @classmethod
     @pa.check("_index", name="index_non_negative")
-    def _check_index(cls, series: Series[int]) -> Series[bool]:
+    def _check_index(cls, series: Series[int]) -> Series[bool]:  # noqa: N805
         """Validate index is non-negative."""
         return series >= 0
 
