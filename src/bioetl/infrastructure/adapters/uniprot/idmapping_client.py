@@ -310,18 +310,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
 
             # Process results
             for mapping in data.get("results", []):
-                from_id = mapping.get("from")
-                to_entry = mapping.get("to", {})
-
-                # Handle both direct mapping and entry-based response
-                to_id: str | None = None
-                if isinstance(to_entry, str):
-                    to_id = to_entry
-                elif isinstance(to_entry, dict):
-                    # UniProtKB returns full entry with primaryAccession
-                    accession = to_entry.get("primaryAccession")
-                    to_id = str(accession) if accession else None
-
+                from_id, to_id = self._parse_mapping_entry(mapping)
                 if from_id in results and to_id:
                     results[from_id] = to_id
 
@@ -355,6 +344,33 @@ class UniProtIDMappingClient(BaseHttpAdapter):
 
         match = re.search(r'<([^>]+)>;\s*rel="next"', str(link_header))
         return match.group(1) if match else None
+
+    @staticmethod
+    def _parse_mapping_entry(mapping: dict[str, Any]) -> tuple[str | None, str | None]:
+        """Parse a single mapping entry from API response.
+
+        Handles both direct string mappings and entry-based responses
+        where UniProtKB returns full entry objects with primaryAccession.
+
+        Args:
+            mapping: Single mapping entry from results array.
+
+        Returns:
+            Tuple of (from_id, to_id), either may be None if not found.
+        """
+        from_id = mapping.get("from")
+        to_entry = mapping.get("to", {})
+
+        # Handle both direct mapping and entry-based response
+        if isinstance(to_entry, str):
+            return from_id, to_entry
+
+        if isinstance(to_entry, dict):
+            # UniProtKB returns full entry with primaryAccession
+            accession = to_entry.get("primaryAccession")
+            return from_id, str(accession) if accession else None
+
+        return from_id, None
 
     async def _probe_health(self) -> HealthStatus:
         """Perform health probe for ID Mapping API.
