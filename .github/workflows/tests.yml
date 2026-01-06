@@ -14,9 +14,10 @@ env:
   PYTHONUNBUFFERED: 1
 
 jobs:
-  test:
+  # Fast tests run first for quick feedback
+  test-fast:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
@@ -36,26 +37,119 @@ jobs:
           path: |
             .pytest_cache
             .hypothesis
-          key: pytest-${{ runner.os }}-${{ hashFiles('tests/**/*.py') }}
+          key: pytest-fast-${{ runner.os }}-${{ hashFiles('tests/**/*.py') }}
           restore-keys: |
-            pytest-${{ runner.os }}-
+            pytest-fast-${{ runner.os }}-
 
       - name: Install dependencies
-        run: |
-          uv sync --extra dev --extra tracing --extra performance
+        run: uv sync --extra dev --extra tracing --extra performance
 
-      - name: Validate orjson installation
+      - name: Run Fast Unit Tests (no slow markers)
         run: |
-          uv run python - <<'PY'
-          import orjson
-          print(orjson.__version__)
-          PY
+          # Quick feedback: run unit tests without slow markers
+          # Uses HYPOTHESIS_PROFILE=fast for minimal property-based examples
+          HYPOTHESIS_PROFILE=fast uv run pytest tests/unit/ tests/architecture/ \
+            -m "not slow" \
+            -n auto --dist loadscope \
+            -q --tb=short
 
-      - name: Run Tests with Coverage (Parallel)
+  # Full test matrix runs in parallel for comprehensive coverage
+  test-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: test-fast  # Only run full tests if fast tests pass
+    strategy:
+      fail-fast: false
+      matrix:
+        test-group:
+          - name: unit-domain
+            path: tests/unit/domain/
+          - name: unit-application
+            path: tests/unit/application/
+          - name: unit-infrastructure
+            path: tests/unit/infrastructure/
+          - name: unit-other
+            path: tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/
+          - name: integration
+            path: tests/integration/
+          - name: architecture
+            path: tests/architecture/
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+
+      - name: Cache pytest and hypothesis
+        uses: actions/cache@v4
+        with:
+          path: |
+            .pytest_cache
+            .hypothesis
+          key: pytest-${{ matrix.test-group.name }}-${{ runner.os }}-${{ hashFiles('tests/**/*.py') }}
+          restore-keys: |
+            pytest-${{ matrix.test-group.name }}-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: uv sync --extra dev --extra tracing --extra performance
+
+      - name: Run Tests (${{ matrix.test-group.name }})
         run: |
-          # Run unit and integration tests with coverage (parallel execution)
-          # Uses pytest-xdist for ~50% faster test execution
-          # Enforce 85% coverage threshold (RULES.md §4.2)
+          uv run pytest ${{ matrix.test-group.path }} \
+            -n auto --dist loadscope \
+            --cov=src/bioetl \
+            --cov-report=xml:coverage-${{ matrix.test-group.name }}.xml \
+            -q --tb=short
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-${{ matrix.test-group.name }}
+          path: coverage-${{ matrix.test-group.name }}.xml
+          retention-days: 7
+
+  # Final coverage verification (runs full test suite with threshold)
+  coverage-verify:
+    runs-on: ubuntu-latest
+    needs: test-matrix
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+
+      - name: Cache pytest and hypothesis
+        uses: actions/cache@v4
+        with:
+          path: |
+            .pytest_cache
+            .hypothesis
+          key: pytest-coverage-${{ runner.os }}-${{ hashFiles('tests/**/*.py') }}
+          restore-keys: |
+            pytest-coverage-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: uv sync --extra dev --extra tracing --extra performance
+
+      - name: Run Full Tests with Coverage Threshold
+        run: |
+          # Final coverage verification: 85% threshold (RULES.md §4.2)
           uv run pytest tests/ -m "not e2e" \
             -n auto --dist loadscope \
             --cov=src/bioetl \

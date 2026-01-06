@@ -58,6 +58,7 @@ tests = [
     "pytest-cov>=4.0",
     "pytest-asyncio>=0.23",
     "pytest-xdist>=3.5",
+    "pytest-timeout>=2.3",  # Catch stuck tests (prevents CI hangs)
     "syrupy>=4.0",
     # Resource monitoring
     "psutil>=5.9",
@@ -81,6 +82,7 @@ dev = [
     "pytest-cov>=4.0",
     "pytest-asyncio>=0.23",
     "pytest-xdist>=3.5",
+    "pytest-timeout>=2.3",  # Catch stuck tests (prevents CI hangs)
     "pytest-benchmark>=4.0",
     "hypothesis>=6.100",
     # Resource monitoring
@@ -164,7 +166,13 @@ markers = [
     "architecture: Architecture tests (layer boundaries, contracts)",
     "benchmark: Benchmark tests (excluded from standard runs, run with -m benchmark)",
     "smoke: Smoke tests (quick sanity checks for local development)",
+    "serial: Tests that must run serially (not parallel-safe, e.g., shared state)",
 ]
+# Default timeout: 60 seconds per test (prevents CI hangs from stuck tests)
+# Override per-test with @pytest.mark.timeout(N) or disable with @pytest.mark.timeout(0)
+timeout = 60
+# Timeout method: signal is most reliable on Unix (thread on Windows)
+timeout_method = "signal"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 filterwarnings = [
@@ -404,6 +412,7 @@ dev = [
     "pytest-cov>=4.0",
     "pytest-asyncio>=0.23",
     "pytest-xdist>=3.5",
+    "pytest-timeout>=2.3",  # Catch stuck tests (prevents CI hangs)
     "pytest-benchmark>=4.0",
     "hypothesis>=6.100",
     # HTTP mocking
