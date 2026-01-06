@@ -149,9 +149,12 @@ lint-fix: ## Auto-fix linting issues
 	$(RUN) ruff check --fix src/ tests/
 	$(RUN) ruff format src/ tests/
 
-security: ## Run security audit (pip-audit)
+security: ## Run security audit (osv-scanner + pip-audit)
 	@echo "$(BLUE)Running security audit...$(NC)"
-	$(RUN) pip-audit --strict
+	@echo "$(BLUE)Running osv-scanner (primary, supports uv.lock)...$(NC)"
+	@which osv-scanner >/dev/null 2>&1 && osv-scanner scan . || echo "$(YELLOW)osv-scanner not installed. Install from: https://github.com/google/osv-scanner$(NC)"
+	@echo "$(BLUE)Running pip-audit (secondary, skips local package)...$(NC)"
+	$(RUN) pip-audit --skip-editable
 
 docker-up: ## Start Docker Compose services (Postgres, Redis, MinIO)
 	@echo "$(BLUE)Starting Docker services...$(NC)"

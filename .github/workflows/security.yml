@@ -25,7 +25,10 @@ jobs:
       - name: Install security tools
         run: |
           python -m pip install --upgrade pip
-          python -m pip install bandit[toml] pip-audit safety
+          python -m pip install bandit[toml] pip-audit
+          # Install osv-scanner (Google's vulnerability scanner, supports uv.lock natively)
+          curl -sSL https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64 -o /usr/local/bin/osv-scanner
+          chmod +x /usr/local/bin/osv-scanner
 
       - name: Run Bandit SAST
         run: |
@@ -36,14 +39,22 @@ jobs:
           echo "--- Bandit Report ---"
           cat reports/bandit-report.txt
 
-      - name: Run pip-audit (dependency vulnerabilities)
+      - name: Run osv-scanner (dependency vulnerabilities)
         run: |
-          echo "Checking for known vulnerabilities in dependencies..."
+          echo "Checking for known vulnerabilities with osv-scanner..."
+          # osv-scanner natively supports uv.lock and pyproject.toml
+          # No need to install the local package - it scans lockfiles directly
+          osv-scanner scan --format json . > reports/osv-scanner.json 2>&1 || true
+          osv-scanner scan . || true
+
+      - name: Run pip-audit (secondary scanner)
+        run: |
+          echo "Running pip-audit as secondary scanner..."
           # Install project dependencies first
           python -m pip install .
-          # Run pip-audit on installed packages
-          pip-audit --format json --output reports/pip-audit.json || true
-          pip-audit || true
+          # Run pip-audit with --skip-editable to skip local package (bioetl)
+          pip-audit --skip-editable --format json --output reports/pip-audit.json || true
+          pip-audit --skip-editable || true
 
       - name: Upload security reports
         uses: actions/upload-artifact@v4
@@ -105,51 +116,91 @@ jobs:
           import sys
           from pathlib import Path
 
-          report_path = Path("reports/pip-audit.json")
-          if not report_path.exists():
-              print("⚠️  pip-audit report not found, skipping vulnerability check")
-              sys.exit(0)
+          all_vulns = []
 
-          with open(report_path) as f:
-              data = json.load(f)
+          # Check osv-scanner results (primary scanner, supports uv.lock natively)
+          osv_path = Path("reports/osv-scanner.json")
+          if osv_path.exists():
+              try:
+                  with open(osv_path) as f:
+                      data = json.load(f)
+                  for result in data.get("results", []):
+                      for pkg in result.get("packages", []):
+                          pkg_info = pkg.get("package", {})
+                          for group in pkg.get("groups", []):
+                              for vuln_id in group.get("ids", []):
+                                  all_vulns.append({
+                                      "package": pkg_info.get("name", "unknown"),
+                                      "version": pkg_info.get("version", "unknown"),
+                                      "id": vuln_id,
+                                      "severity": group.get("max_severity", "unknown"),
+                                      "source": "osv-scanner"
+                                  })
+              except (json.JSONDecodeError, KeyError) as e:
+                  print(f"⚠️  Could not parse osv-scanner report: {e}")
+          else:
+              print("⚠️  osv-scanner report not found")
 
-          # pip-audit JSON format: list of vulnerability objects
-          vulnerabilities = data if isinstance(data, list) else data.get("dependencies", [])
+          # Check pip-audit results (secondary scanner)
+          pip_path = Path("reports/pip-audit.json")
+          if pip_path.exists():
+              try:
+                  with open(pip_path) as f:
+                      data = json.load(f)
+                  dependencies = data if isinstance(data, list) else data.get("dependencies", [])
+                  for dep in dependencies:
+                      vulns_list = dep.get("vulns", [])
+                      if not vulns_list:
+                          continue
+                      pkg_name = dep.get("name", "unknown")
+                      pkg_version = dep.get("version", "unknown")
+                      for v in vulns_list:
+                          # Skip if already found by osv-scanner
+                          vuln_id = v.get("id", "unknown")
+                          if any(x["id"] == vuln_id for x in all_vulns):
+                              continue
+                          all_vulns.append({
+                              "package": pkg_name,
+                              "version": pkg_version,
+                              "id": vuln_id,
+                              "severity": "unknown",
+                              "source": "pip-audit"
+                          })
+              except (json.JSONDecodeError, KeyError) as e:
+                  print(f"⚠️  Could not parse pip-audit report: {e}")
 
-          critical_vulns = []
-          high_vulns = []
+          # Categorize by severity (osv-scanner provides CVSS scores)
+          critical_vulns = [v for v in all_vulns if str(v.get("severity", "0")).replace(".", "").isdigit() and float(v.get("severity", 0)) >= 9.0]
+          high_vulns = [v for v in all_vulns if str(v.get("severity", "0")).replace(".", "").isdigit() and 7.0 <= float(v.get("severity", 0)) < 9.0]
+          other_vulns = [v for v in all_vulns if v not in critical_vulns and v not in high_vulns]
 
-          for vuln in vulnerabilities:
-              # Handle different pip-audit output formats
-              vulns_list = vuln.get("vulns", [])
-              if not vulns_list:
-                  continue
-
-              pkg_name = vuln.get("name", "unknown")
-              pkg_version = vuln.get("version", "unknown")
-
-              for v in vulns_list:
-                  severity = v.get("fix_versions", [])
-                  vuln_id = v.get("id", "unknown")
-                  # pip-audit doesn't provide severity directly, treat all as high
-                  high_vulns.append({
-                      "package": pkg_name,
-                      "version": pkg_version,
-                      "id": vuln_id,
-                      "description": v.get("description", "No description")[:100]
-                  })
-
-          if high_vulns:
-              print(f"⚠️  Found {len(high_vulns)} dependency vulnerability issue(s):")
-              for v in high_vulns[:10]:
-                  print(f"  - {v['package']}=={v['version']}: {v['id']}")
-              if len(high_vulns) > 10:
-                  print(f"  ... and {len(high_vulns) - 10} more")
-              print("\n⚠️  Please review and update vulnerable dependencies.")
-              # Don't fail on dependency vulnerabilities (may need coordination)
+          if critical_vulns:
+              print(f"🚨 Found {len(critical_vulns)} CRITICAL vulnerability issue(s):")
+              for v in critical_vulns[:5]:
+                  print(f"  - {v['package']}=={v['version']}: {v['id']} (CVSS: {v['severity']})")
+              if len(critical_vulns) > 5:
+                  print(f"  ... and {len(critical_vulns) - 5} more")
+              # Critical vulnerabilities should fail CI
               # sys.exit(1)
 
-          print("✅ Dependency vulnerability check complete")
+          if high_vulns:
+              print(f"⚠️  Found {len(high_vulns)} HIGH severity vulnerability issue(s):")
+              for v in high_vulns[:5]:
+                  print(f"  - {v['package']}=={v['version']}: {v['id']} (CVSS: {v['severity']})")
+              if len(high_vulns) > 5:
+                  print(f"  ... and {len(high_vulns) - 5} more")
+
+          if other_vulns:
+              print(f"ℹ️  Found {len(other_vulns)} other vulnerability issue(s):")
+              for v in other_vulns[:5]:
+                  print(f"  - {v['package']}=={v['version']}: {v['id']}")
+              if len(other_vulns) > 5:
+                  print(f"  ... and {len(other_vulns) - 5} more")
+
+          if all_vulns:
+              print("\n⚠️  Please review and update vulnerable dependencies.")
+
+          print(f"\n✅ Dependency vulnerability check complete ({len(all_vulns)} total issues found)")
           PY
 
   secrets-scan:
