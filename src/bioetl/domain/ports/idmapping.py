@@ -7,7 +7,7 @@ Used for ChEMBL → UniProt and similar cross-database mappings.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, Self, runtime_checkable
 
 from bioetl.domain.types import HealthStatus
 
@@ -26,6 +26,19 @@ class IDMappingPort(Protocol):
     @property
     def provider_name(self) -> str:
         """The unique name of the mapping provider (e.g., 'uniprot_idmapping')."""
+        ...
+
+    async def __aenter__(self) -> Self:
+        """Enter async context manager."""
+        ...
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: Any,
+    ) -> None:
+        """Exit async context manager."""
         ...
 
     async def map_ids(
