@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
         CheckpointPort,
+        DataNormalizationPort,
         DataSourcePort,
         DQMonitorPort,
         LockPort,
@@ -49,6 +50,7 @@ if TYPE_CHECKING:
         QuarantinePort,
         TracingPort,
     )
+    from bioetl.domain.services import DataNormalizationConfig
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -57,6 +59,7 @@ if TYPE_CHECKING:
 __all__ = [
     "BaseServicesFactory",
     "ServicesBuilder",
+    "create_data_normalization_service",
     "extract_pipeline_callbacks",
 ]
 
@@ -458,3 +461,42 @@ class ServicesBuilder:
             memory_monitor=memory_monitor,
             memory_config=memory_config,
         )
+
+
+# =============================================================================
+# Domain Service Factory Functions
+# =============================================================================
+
+
+def create_data_normalization_service(
+    config: DataNormalizationConfig | None = None,
+) -> DataNormalizationPort:
+    """Create DataNormalizationService with optional configuration.
+
+    Factory function for creating DataNormalizationService instances.
+    Uses default configuration if not provided.
+
+    Args:
+        config: Optional configuration for normalization behavior.
+
+    Returns:
+        DataNormalizationPort implementation (DefaultDataNormalizationService).
+
+    Example:
+        >>> from bioetl.composition.factories import create_data_normalization_service
+        >>> normalizer = create_data_normalization_service()
+        >>> normalizer.normalize_doi("10.1038/NATURE12373")
+        '10.1038/nature12373'
+
+        >>> from bioetl.domain.services import DataNormalizationConfig
+        >>> config = DataNormalizationConfig(min_publication_year=1900)
+        >>> normalizer = create_data_normalization_service(config)
+    """
+    from bioetl.domain.services import (
+        DataNormalizationConfig,
+        DefaultDataNormalizationService,
+    )
+
+    if config is None:
+        config = DataNormalizationConfig()
+    return DefaultDataNormalizationService(config=config)

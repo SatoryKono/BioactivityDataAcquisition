@@ -11,6 +11,7 @@ Terminology:
 - All layers use "publication" to refer to scholarly works (articles, preprints, etc.)
 
 Note: Business logic functions are delegated to domain layer per REFACTOR-004.
+Uses DataNormalizationService for text normalization (DI pattern).
 """
 
 from __future__ import annotations
@@ -21,18 +22,20 @@ from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities.crossref import CROSSREF_TYPE_MAP, PublicationEntity
 from bioetl.domain.normalization import (
     extract_first_string,
-    format_date_parts,
-    normalize_doi,
     parse_page_range,
-    strip_html_tags,
 )
-from bioetl.domain.services import IdentityService
+from bioetl.domain.services import DataNormalizationService, IdentityService
 from bioetl.domain.validation import validate_year_range
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
+    from bioetl.domain.ports import (
+        DataNormalizationPort,
+        MetricsPort,
+        PiiHasherPort,
+        TracingPort,
+    )
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
@@ -57,6 +60,7 @@ class CrossRefPublicationTransformer(BaseTransformer):
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
+        data_normalizer: DataNormalizationPort | None = None,
     ) -> None:
         """Initialize CrossRef transformer.
 
@@ -68,6 +72,7 @@ class CrossRefPublicationTransformer(BaseTransformer):
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
+            data_normalizer: Optional data normalization service for text normalization.
 
         """
         super().__init__(
@@ -79,6 +84,7 @@ class CrossRefPublicationTransformer(BaseTransformer):
             identity_service=identity_service,
             pii_hasher=pii_hasher,
         )
+        self._data_normalizer = data_normalizer or DataNormalizationService()
 
     # ========================================================================
     # Field Extraction Methods (Orchestration - delegates to domain)
@@ -156,7 +162,7 @@ class CrossRefPublicationTransformer(BaseTransformer):
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
         """Extract Publication business data from bronze record.
 
-        Delegates normalization to domain layer per REFACTOR-004.
+        Delegates normalization to DataNormalizationService per DI pattern.
 
         Args:
             record: Raw Bronze record from CrossRef API.
@@ -168,17 +174,18 @@ class CrossRefPublicationTransformer(BaseTransformer):
         # Cast to dict for type-safe access (BronzeRecord is an empty TypedDict marker)
         rec = cast("dict[str, Any]", record)
 
-        # Use domain functions for normalization
-        doi = normalize_doi(rec.get("DOI", "")) or ""
+        # Use DataNormalizationService for normalization
+        normalizer = self._data_normalizer
+        doi = normalizer.normalize_doi(rec.get("DOI", "")) or ""
         first_page, last_page = parse_page_range(rec.get("page"))
 
-        # Extract date fields using domain functions
+        # Extract date fields using normalizer service
         published_print = rec.get("published-print", {})
         published_online = rec.get("published-online", {})
 
-        # Extract abstract with HTML stripping via domain function
+        # Extract abstract with HTML stripping via normalizer service
         abstract_raw = rec.get("abstract", "")
-        abstract = strip_html_tags(abstract_raw) if abstract_raw else None
+        abstract = normalizer.strip_html_tags(abstract_raw) if abstract_raw else None
 
         # Extract and hash PII fields (RULES.md §5.4)
         # Authors stored as JSON-serialized list for unified format across providers
@@ -198,12 +205,12 @@ class CrossRefPublicationTransformer(BaseTransformer):
             "first_page": first_page,
             "last_page": last_page,
             "year": self._extract_year(rec),
-            "published_print": format_date_parts(
+            "published_print": normalizer.format_date_parts(
                 published_print.get("date-parts")
                 if isinstance(published_print, dict)
                 else None
             ),
-            "published_online": format_date_parts(
+            "published_online": normalizer.format_date_parts(
                 published_online.get("date-parts")
                 if isinstance(published_online, dict)
                 else None
