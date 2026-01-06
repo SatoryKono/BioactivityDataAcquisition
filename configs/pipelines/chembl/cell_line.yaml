@@ -6,7 +6,7 @@
 pipeline_name: chembl_cell_line
 provider: chembl
 entity_type: cell_line
-version: "1.0.0"
+version: "1.1.0"
 description: "Extract cell lines from ChEMBL API"
 
 primary_keys: ["cell_chembl_id"]

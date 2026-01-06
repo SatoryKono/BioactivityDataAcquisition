@@ -6,7 +6,7 @@
 pipeline_name: chembl_target_component
 provider: chembl
 entity_type: target_component
-version: "1.0.0"
+version: "1.1.0"
 description: "ChEMBL Target Components (protein sequences, etc.)"
 
 primary_keys: ["component_id"]
@@ -14,10 +14,6 @@ silver_table: chembl_target_component
 gold_table: chembl_target_component
 
 source_file: ../../sources/chembl.yaml
-
-# Entity-specific batch settings
-batch_size: 1000
-checkpoint_interval: 1000
 
 # Entity-specific gold filters
 gold_filters:
