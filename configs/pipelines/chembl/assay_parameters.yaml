@@ -1,0 +1,45 @@
+# configs/pipelines/chembl/assay_parameters.yaml
+# Pipeline configuration for ChEMBL AssayParameters entity.
+#
+# Inherits defaults from ../_defaults.yaml
+# Endpoint: /assay_parameters
+
+pipeline_name: chembl_assay_parameters
+provider: chembl
+entity_type: assay_parameters
+version: "1.0.0"
+description: "Extract experimental assay parameters from ChEMBL API"
+
+primary_keys: ["assay_param_id"]
+silver_table: "chembl_assay_parameters"
+
+source_file: ../../sources/chembl.yaml
+
+# Entity-specific gold filters
+gold_filters:
+  required_fields:
+    - assay_chembl_id
+    - type
+
+# Entity-specific sink overrides
+sink:
+  bronze:
+    path: "data/output/bronze"
+  silver:
+    path: "data/output/silver"
+    primary_key: ["assay_param_id"]
+    partition_by: ["type"]
+    csv_export:
+      path: "data/output/csv/silver"
+  gold:
+    path: "data/output/gold"
+    csv_export:
+      path: "data/output/csv/gold"
+
+# Entity-specific input filter
+input_filter:
+  enabled: true
+  source_path: "data/input/assay_parameters.csv"
+  column_name: "assay_param_id"
+  filter_field: "assay_param_id"
+  batch_size: 1000

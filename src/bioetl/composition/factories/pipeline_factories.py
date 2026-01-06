@@ -38,6 +38,9 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 
 # Transformers (all DI-injected)
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
+from bioetl.application.pipelines.chembl.assay_parameters_transformer import (
+    AssayParametersTransformer,
+)
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
 from bioetl.application.pipelines.chembl.cell_line_transformer import (
     CellLineTransformer,
@@ -72,6 +75,7 @@ from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.infrastructure.schemas.gold import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
+    ChEMBLAssayParametersGoldSchema,
     ChEMBLCellLineGoldSchema,
     ChEMBLCompoundRecordGoldSchema,
     ChEMBLDocumentGoldSchema,
@@ -90,6 +94,7 @@ from bioetl.infrastructure.schemas.gold import (
 # Silver schemas (optional PyArrow schemas)
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
+    CHEMBL_ASSAY_PARAMETERS_SCHEMA,
     CHEMBL_ASSAY_SCHEMA,
     CHEMBL_CELL_LINE_SCHEMA,
     CHEMBL_COMPOUND_RECORD_SCHEMA,
@@ -154,6 +159,13 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=AssayTransformer,
         silver_schema=CHEMBL_ASSAY_SCHEMA,
         gold_schema=ChEMBLAssayGoldSchema,
+    ),
+    PipelineFactoryConfig(
+        pipeline_name="chembl_assay_parameters",
+        provider="chembl",
+        transformer_class=AssayParametersTransformer,
+        silver_schema=CHEMBL_ASSAY_PARAMETERS_SCHEMA,
+        gold_schema=ChEMBLAssayParametersGoldSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_cell_line",
@@ -288,6 +300,7 @@ _factories: dict[str, GenericPipelineFactory[GenericPipeline]] = {
 # Export individual factories for backward compatibility
 chembl_activity_factory = _factories["chembl_activity"]
 chembl_assay_factory = _factories["chembl_assay"]
+chembl_assay_parameters_factory = _factories["chembl_assay_parameters"]
 chembl_cell_line_factory = _factories["chembl_cell_line"]
 chembl_compound_record_factory = _factories["chembl_compound_record"]
 chembl_document_factory = _factories["chembl_document"]
@@ -428,6 +441,7 @@ __all__ = [
     "PipelineFactoryConfig",
     "chembl_activity_factory",
     "chembl_assay_factory",
+    "chembl_assay_parameters_factory",
     "chembl_cell_line_factory",
     "chembl_compound_record_factory",
     "chembl_document_factory",
