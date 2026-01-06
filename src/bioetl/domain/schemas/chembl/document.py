@@ -39,7 +39,11 @@ class ChemblPublicationSchema(ETLRecordSchema):
         str_matches=r"^CHEMBL\d+$",
         description="ChEMBL ID.",
     )
-    pubmed_id: Series[int] | None = pa.Field(nullable=True, description="PubMed ID.")
+    pubmed_id: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=r"^\d+$",
+        description="PubMed identifier (numeric string).",
+    )
     doi: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=DOI_REGEX_PATTERN,

@@ -35,6 +35,60 @@ FLOAT: Callable[[Any], float | None] = safe_float
 STR: Callable[[Any], str] = str
 
 
+def normalize_pmid(value: Any) -> str | None:
+    """Normalize PubMed ID to string format.
+
+    Converts int or string PMID to normalized string representation.
+    Returns None for invalid inputs.
+
+    Args:
+        value: Raw PMID value (int, str, or None).
+
+    Returns:
+        Normalized PMID string (digits only), or None if invalid.
+
+    Examples:
+        >>> normalize_pmid(12345678)
+        '12345678'
+        >>> normalize_pmid("12345678")
+        '12345678'
+        >>> normalize_pmid("  12345678  ")
+        '12345678'
+        >>> normalize_pmid(None)
+        None
+        >>> normalize_pmid("abc")
+        None
+    """
+    if value is None:
+        return None
+
+    # Convert to string and strip whitespace
+    if isinstance(value, bool):
+        # Reject booleans explicitly (isinstance(True, int) is True)
+        return None
+    if isinstance(value, int):
+        str_value = str(value)
+    elif isinstance(value, str):
+        str_value = value.strip()
+    else:
+        return None
+
+    # Validate: must be non-empty and contain only digits
+    if not str_value or not str_value.isdigit():
+        return None
+
+    # Validate: must be positive (no "0" alone)
+    int_value = int(str_value)
+    if int_value <= 0:
+        return None
+
+    # Normalize: remove leading zeros
+    return str(int_value)
+
+
+PMID: Callable[[Any], str | None] = normalize_pmid
+
+
 @dataclass(frozen=True, slots=True)
 class FieldSpec:
     """Specification for a single field mapping.
@@ -253,9 +307,28 @@ def float_fields(*field_names: str) -> tuple[FieldSpec, ...]:
     return tuple(FieldSpec(name, converter=FLOAT) for name in field_names)
 
 
+def pmid_fields(*field_names: str) -> tuple[FieldSpec, ...]:
+    """Create field specs with normalize_pmid converter for PubMed IDs.
+
+    Converts int or string PMIDs to normalized string format.
+    Returns None for invalid values.
+
+    Args:
+        *field_names: Variable number of field names.
+
+    Returns:
+        Tuple of FieldSpec objects with PMID converter.
+
+    Example:
+        >>> specs = pmid_fields("pubmed_id", "pubmed_id1", "pubmed_id2")
+    """
+    return tuple(FieldSpec(name, converter=PMID) for name in field_names)
+
+
 __all__ = [
     "FLOAT",
     "INT",
+    "PMID",
     "STR",
     "FieldGroup",
     "FieldSpec",
@@ -265,5 +338,7 @@ __all__ = [
     "map_field_group",
     "map_field_groups",
     "map_fields",
+    "normalize_pmid",
+    "pmid_fields",
     "simple_fields",
 ]

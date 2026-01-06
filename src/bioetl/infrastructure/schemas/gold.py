@@ -363,7 +363,7 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
     document_chembl_id: Series[str] = pa.Field(nullable=False)
-    pubmed_id: Series[float] = pa.Field(nullable=True, coerce=True)
+    pubmed_id: Series[str] = pa.Field(nullable=True)  # Numeric string (matches Silver)
     doi: Series[str] = pa.Field(nullable=True)
     patent_id: Series[str] = pa.Field(nullable=True)
     title: Series[str] = pa.Field(nullable=True)
@@ -578,9 +578,9 @@ class ChEMBLDocumentSimilarityGoldSchema(pa.DataFrameModel):
     doc_1: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
     doc_2: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
 
-    # PubMed identifiers
-    pubmed_id1: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 in Silver
-    pubmed_id2: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 in Silver
+    # PubMed identifiers (numeric strings - matches Silver)
+    pubmed_id1: Series[str] = pa.Field(nullable=True)
+    pubmed_id2: Series[str] = pa.Field(nullable=True)
 
     # Tanimoto coefficients
     tid_tani: Series[float] = pa.Field(nullable=True, ge=0, le=1, coerce=True)
