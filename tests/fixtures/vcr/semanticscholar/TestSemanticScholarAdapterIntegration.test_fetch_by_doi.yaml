@@ -1,0 +1,64 @@
+interactions:
+- request:
+    body: '{"ids": ["DOI:10.1038/nature12373"]}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - BioETL/1.0
+    method: POST
+    uri: https://api.semanticscholar.org/graph/v1/paper/batch?fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal
+  response:
+    body:
+      string: |
+        [
+          {
+            "paperId": "a88fbdb9b47a8e8aef2b8cabd1fe0adfb96a9f25",
+            "externalIds": {
+              "PubMed": "23868264",
+              "DOI": "10.1038/nature12373",
+              "CorpusId": 4463122
+            },
+            "title": "Crystal structure of rhodopsin bound to arrestin by femtosecond X-ray laser",
+            "abstract": "G-protein-coupled receptors (GPCRs) signal primarily through G proteins or arrestins. Arrestins bind to phosphorylated GPCRs, terminating G protein signalling and initiating distinct arrestin-mediated signalling pathways.",
+            "year": 2015,
+            "publicationDate": "2015-07-22",
+            "venue": "Nature",
+            "authors": [
+              {"authorId": "4713315", "name": "Yanyong Kang"},
+              {"authorId": "6628836", "name": "X. Zhou"},
+              {"authorId": "2534082", "name": "Xiang Gao"}
+            ],
+            "citationCount": 892,
+            "referenceCount": 50,
+            "isOpenAccess": true,
+            "openAccessPdf": {
+              "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4536825/pdf/nihms712283.pdf",
+              "status": "GREEN"
+            },
+            "tldr": {
+              "model": "tldr@v2.0.0",
+              "text": "The crystal structure of a constitutively active form of human rhodopsin bound to a pre-activated form of mouse visual arrestin provides a basis for understanding GPCR-mediated arrestin-biased signalling."
+            },
+            "fieldsOfStudy": ["Biology", "Chemistry"],
+            "publicationTypes": ["JournalArticle"],
+            "journal": {
+              "name": "Nature",
+              "volume": "523",
+              "pages": "561-567"
+            }
+          }
+        ]
+    headers:
+      Content-Type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1

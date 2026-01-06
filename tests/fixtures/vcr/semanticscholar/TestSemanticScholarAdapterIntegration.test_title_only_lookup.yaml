@@ -1,0 +1,62 @@
+interactions:
+# Request for title-only search (empty DOI in filter_ids)
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - BioETL/1.0
+    method: GET
+    uri: https://api.semanticscholar.org/graph/v1/paper/search?query=Machine+Learning+Drug+Discovery&fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal&limit=5
+  response:
+    body:
+      string: |
+        {
+          "total": 5000,
+          "offset": 0,
+          "data": [
+            {
+              "paperId": "4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e",
+              "externalIds": {
+                "DOI": "10.1038/s41573-019-0050-3",
+                "CorpusId": 555666
+              },
+              "title": "Machine learning for drug discovery",
+              "abstract": "Machine learning is revolutionizing drug discovery processes.",
+              "year": 2019,
+              "publicationDate": "2019-12-01",
+              "venue": "Nature Reviews Drug Discovery",
+              "authors": [
+                {"authorId": "5555555", "name": "ML Researcher"}
+              ],
+              "citationCount": 1500,
+              "referenceCount": 100,
+              "isOpenAccess": true,
+              "openAccessPdf": {
+                "url": "https://example.com/ml-drug.pdf",
+                "status": "GREEN"
+              },
+              "tldr": {
+                "model": "tldr@v2.0.0",
+                "text": "Machine learning applications in drug discovery."
+              },
+              "fieldsOfStudy": ["Computer Science", "Biology"],
+              "publicationTypes": ["Review"],
+              "journal": {"name": "Nature Reviews Drug Discovery", "volume": "18"}
+            }
+          ]
+        }
+    headers:
+      Content-Type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1
