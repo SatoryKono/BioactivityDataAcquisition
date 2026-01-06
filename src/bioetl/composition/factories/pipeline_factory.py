@@ -69,6 +69,20 @@ __all__ = [
 ]
 
 
+def _extract_entity_type(pipeline_name: str) -> str | None:
+    """Extract entity_type from pipeline_name.
+
+    Example: "chembl_activity" → "activity"
+
+    Args:
+        pipeline_name: Full pipeline name with provider prefix.
+
+    Returns:
+        Entity type suffix, or None if no underscore in name.
+    """
+    return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
+
+
 # =============================================================================
 # GenericPipelineFactory - Main factory class
 # =============================================================================
@@ -139,14 +153,9 @@ class GenericPipelineFactory(Generic[TPipeline]):
         if self.transformer_class is None:
             return None
 
-        # Extract entity_type from pipeline_name (e.g., "chembl_activity" → "activity")
-        entity_type = (
-            self.pipeline_name.split("_")[-1] if "_" in self.pipeline_name else None
-        )
-
         return self.transformer_class(
             provider=self.provider,
-            entity_type=entity_type,
+            entity_type=_extract_entity_type(self.pipeline_name),
             tracer=tracer,
             metrics=metrics,
             gold_filters=gold_filters,
@@ -401,12 +410,9 @@ def create_pipeline_with_services(
     # Create transformer via DI if configured (with observability)
     transformer = None
     if transformer_class is not None:
-        # Extract entity_type from pipeline_name (e.g., "chembl_activity" → "activity")
-        entity_type = pipeline_name.split("_")[-1] if "_" in pipeline_name else None
-
         transformer = transformer_class(
             provider=provider,
-            entity_type=entity_type,
+            entity_type=_extract_entity_type(pipeline_name),
             tracer=tracer,
             metrics=metrics,
             gold_filters=domain_config.gold_filters,
