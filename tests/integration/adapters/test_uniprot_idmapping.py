@@ -85,6 +85,7 @@ class TestUniProtIDMappingIntegration:
                 HealthStatus.UNHEALTHY,
             ]
 
+    @pytest.mark.skip(reason="VCR cassette not yet recorded - requires real API call")
     @pytest.mark.vcr
     async def test_map_single_id(
         self, uniprot_http_client: Any, mock_logger: MagicMock
@@ -92,7 +93,7 @@ class TestUniProtIDMappingIntegration:
         """Test mapping a single ChEMBL ID.
 
         This test requires a VCR cassette.
-        Record with: pytest --vcr-record=new_episodes -k test_map_single_id
+        Record with: VCR_RECORD_MODE=new_episodes pytest -k test_map_single_id
 
         Note: CHEMBL204 corresponds to Factor X (UniProt: P00742).
         """
@@ -112,6 +113,7 @@ class TestUniProtIDMappingIntegration:
             # P00742 is Factor X (Coagulation factor X)
             assert result["CHEMBL204"] is not None
 
+    @pytest.mark.skip(reason="VCR cassette not yet recorded - requires real API call")
     @pytest.mark.vcr
     async def test_map_multiple_ids(
         self, uniprot_http_client: Any, mock_logger: MagicMock
@@ -119,7 +121,7 @@ class TestUniProtIDMappingIntegration:
         """Test mapping multiple ChEMBL IDs.
 
         This test requires a VCR cassette.
-        Record with: pytest --vcr-record=new_episodes -k test_map_multiple_ids
+        Record with: VCR_RECORD_MODE=new_episodes pytest -k test_map_multiple_ids
         """
         from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
             UniProtIDMappingClient,
@@ -142,6 +144,7 @@ class TestUniProtIDMappingIntegration:
             found_count = sum(1 for v in result.values() if v is not None)
             assert found_count > 0
 
+    @pytest.mark.skip(reason="VCR cassette not yet recorded - requires real API call")
     @pytest.mark.vcr
     async def test_map_not_found_id(
         self, uniprot_http_client: Any, mock_logger: MagicMock
@@ -149,7 +152,7 @@ class TestUniProtIDMappingIntegration:
         """Test mapping ID that doesn't exist.
 
         This test requires a VCR cassette.
-        Record with: pytest --vcr-record=new_episodes -k test_map_not_found_id
+        Record with: VCR_RECORD_MODE=new_episodes pytest -k test_map_not_found_id
         """
         from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
             UniProtIDMappingClient,
@@ -192,6 +195,7 @@ class TestUniProtIDMappingIntegration:
 
             assert result == {}
 
+    @pytest.mark.skip(reason="VCR cassette not yet recorded - requires real API call")
     @pytest.mark.vcr
     async def test_map_mixed_results(
         self, uniprot_http_client: Any, mock_logger: MagicMock
@@ -199,7 +203,7 @@ class TestUniProtIDMappingIntegration:
         """Test mapping with mixed results (some found, some not).
 
         This test requires a VCR cassette.
-        Record with: pytest --vcr-record=new_episodes -k test_map_mixed_results
+        Record with: VCR_RECORD_MODE=new_episodes pytest -k test_map_mixed_results
         """
         from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
             UniProtIDMappingClient,
