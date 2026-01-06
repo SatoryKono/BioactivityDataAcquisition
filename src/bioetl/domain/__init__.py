@@ -41,6 +41,7 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     ActivityRecord,
     ArticleRecord,
     Assay,
+    AssayParameters,
     AssayRecord,
     BaseEntity,
     Bioactivity,
@@ -286,6 +287,7 @@ __all__ = [
     "TargetRecord",
     # Domain Entities (dataclass)
     "Assay",
+    "AssayParameters",
     "BaseEntity",
     "Bioactivity",
     "BioactivityState",

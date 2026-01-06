@@ -637,3 +637,37 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_original_doi", pa.string()),
     ]
 )
+
+# Schema for ChEMBL AssayParameters
+# See: https://www.ebi.ac.uk/chembl/api/data/assay_parameters
+CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        # Primary identifier (surrogate)
+        pa.field("assay_param_id", pa.int64()),
+        # Foreign key
+        pa.field("assay_chembl_id", pa.string()),
+        # Parameter type
+        pa.field("type", pa.string()),
+        # Raw values
+        pa.field("relation", pa.string()),
+        pa.field("value", pa.float64()),
+        pa.field("units", pa.string()),
+        pa.field("text_value", pa.string()),
+        pa.field("comments", pa.string()),
+        # Standardized values
+        pa.field("standard_type", pa.string()),
+        pa.field("standard_relation", pa.string()),
+        pa.field("standard_value", pa.float64()),
+        pa.field("standard_units", pa.string()),
+        pa.field("standard_text_value", pa.string()),
+        # Lineage metadata
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+    ]
+)

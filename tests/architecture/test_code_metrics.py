@@ -74,7 +74,9 @@ class TestFileSizeLimits:
         "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
         "client.py": 700,  # 692 LOC - ChemblAdapter (complex FilterableDataSourcePort), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 550,  # 496 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
-        "gold.py": 700,  # 694 LOC - Gold schemas for all providers (OpenAlex + SemanticScholar added)
+        # Gold schemas (consolidated)
+        "gold.py": 750,  # 740 LOC - Gold schemas for all providers (OpenAlex + SemanticScholar + AssayParameters)
+        "silver.py": 680,  # 673 LOC - Silver PyArrow schemas for all providers (AssayParameters added)
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
