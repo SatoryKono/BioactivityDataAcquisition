@@ -22,7 +22,7 @@ _WHITESPACE_PATTERN = re.compile(r"\s+")
 _DATE_FORMATS = {3: "{0:04d}-{1:02d}-{2:02d}", 2: "{0:04d}-{1:02d}", 1: "{0:04d}"}
 
 
-@dataclass(slots=True)
+@dataclass(frozen=True, slots=True)
 class DefaultDataNormalizationService:
     """Default implementation of data normalization service.
 
@@ -124,13 +124,21 @@ class DefaultDataNormalizationService:
         """Try to parse JSON array of authors."""
         if not text.startswith("["):
             return None
-        try:
-            parsed = json.loads(text)
-            if isinstance(parsed, list):
-                return [str(a).strip() for a in parsed if a is not None and str(a).strip()]
-        except json.JSONDecodeError:
-            pass
+        parsed = self._try_json_loads(text)
+        if isinstance(parsed, list):
+            return self._filter_json_authors(parsed)
         return None
+
+    def _try_json_loads(self, text: str) -> Any:
+        """Attempt JSON parsing, returning None on failure."""
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            return None
+
+    def _filter_json_authors(self, items: list[Any]) -> list[str]:
+        """Filter and convert JSON array items to author strings."""
+        return [str(a).strip() for a in items if a is not None and str(a).strip()]
 
     def _parse_delimited(self, text: str) -> list[str]:
         """Parse delimited string (semicolon or comma separated)."""
@@ -138,7 +146,9 @@ class DefaultDataNormalizationService:
         parts = text.split(delimiter) if delimiter in text else [text]
         return [a.strip() for a in parts if a.strip()]
 
-    def format_date_parts(self, date_parts: Sequence[Sequence[int]] | None) -> str | None:
+    def format_date_parts(
+        self, date_parts: Sequence[Sequence[int]] | None
+    ) -> str | None:
         """Format CrossRef date-parts [[year, month?, day?]] to ISO string."""
         if not date_parts or not date_parts[0]:
             return None
