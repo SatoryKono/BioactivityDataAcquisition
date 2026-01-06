@@ -197,11 +197,17 @@ class TestValidateDoi:
     @pytest.mark.parametrize(
         "doi,expected",
         [
+            # Valid DOIs - standard format
             ("10.1038/nature12373", True),
             ("10.1000/xyz123", True),
             ("10.12345/some-thing.here", True),
             ("  10.1038/nature12373  ", True),  # With whitespace
             ("10.1038/NATURE12373", True),  # Uppercase
+            # Valid DOIs - minimum registrant (4 digits)
+            ("10.1234/a", True),
+            ("10.9999/suffix", True),
+            # Valid DOIs - longer registrant codes
+            ("10.1234567890/a", True),
         ],
     )
     def test_valid_doi(self, doi: str, expected: bool) -> None:
@@ -215,10 +221,34 @@ class TestValidateDoi:
             None,
             "invalid",
             "11.1038/nature",  # Wrong prefix
-            "10.123/nature",  # Registrant too short
+            "10.123/nature",  # Registrant too short (3 digits)
+            "10.12/nature",  # Registrant too short (2 digits)
+            "10.1/nature",  # Registrant too short (1 digit)
             "doi:10.1038/nature",  # With prefix
+            "10.1234/",  # Empty suffix
+            "10.1234",  # No suffix at all
         ],
     )
     def test_invalid_doi(self, doi: str | None) -> None:
         """Test invalid DOIs are rejected."""
         assert validate_doi(doi) is False
+
+    @pytest.mark.parametrize(
+        "registrant_digits",
+        [1, 2, 3],
+    )
+    def test_short_registrant_rejected(self, registrant_digits: int) -> None:
+        """Test registrant codes with < 4 digits are rejected."""
+        registrant = "1" * registrant_digits
+        doi = f"10.{registrant}/suffix"
+        assert validate_doi(doi) is False
+
+    @pytest.mark.parametrize(
+        "registrant_digits",
+        [4, 5, 6, 10],
+    )
+    def test_valid_registrant_lengths(self, registrant_digits: int) -> None:
+        """Test registrant codes with >= 4 digits are accepted."""
+        registrant = "1" * registrant_digits
+        doi = f"10.{registrant}/suffix"
+        assert validate_doi(doi) is True
