@@ -33,6 +33,7 @@ class PubMedPublicationTransformer(BaseTransformer):
     def __init__(
         self,
         provider: str = "pubmed",
+        entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
         gold_filters: GoldFilterConfig | None = None,
@@ -43,6 +44,7 @@ class PubMedPublicationTransformer(BaseTransformer):
 
         Args:
             provider: Data provider identifier.
+            entity_type: Entity type for metrics labels. Defaults to 'publication'.
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
             gold_filters: Optional filter configuration for Gold layer.
@@ -52,7 +54,7 @@ class PubMedPublicationTransformer(BaseTransformer):
         """
         super().__init__(
             provider,
-            entity_type="publication",  # AUDIT-2026-01-06: explicit entity_type
+            entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
             gold_filters=gold_filters,

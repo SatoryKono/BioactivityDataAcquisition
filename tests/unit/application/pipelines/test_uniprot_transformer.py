@@ -618,7 +618,9 @@ class TestUniProtProteinTransformerExtendedFields:
             "comments": [
                 {
                     "commentType": "FUNCTION",
-                    "texts": [{"value": "Serine/threonine kinase involved in cell survival."}],
+                    "texts": [
+                        {"value": "Serine/threonine kinase involved in cell survival."}
+                    ],
                 }
             ],
         }
@@ -651,7 +653,10 @@ class TestUniProtProteinTransformerExtendedFields:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert '"reaction": "ATP + protein = ADP + phosphoprotein"' in result["catalytic_activity"]
+        assert (
+            '"reaction": "ATP + protein = ADP + phosphoprotein"'
+            in result["catalytic_activity"]
+        )
         assert '"ec_number": "2.7.11.1"' in result["catalytic_activity"]
 
     @pytest.mark.asyncio
@@ -807,7 +812,11 @@ class TestUniProtProteinTransformerExtendedFields:
             "primaryAccession": "P31749",
             "uniProtkbId": "AKT1_HUMAN",
             "keywords": [
-                {"id": "KW-0067", "category": "Molecular function", "name": "ATP-binding"},
+                {
+                    "id": "KW-0067",
+                    "category": "Molecular function",
+                    "name": "ATP-binding",
+                },
                 {"id": "KW-0418", "category": "Biological process", "name": "Kinase"},
             ],
         }
@@ -907,7 +916,12 @@ class TestUniProtProteinTransformerExtendedFields:
                 },
                 {"database": "ChEMBL", "id": "CHEMBL4282"},
             ],
-            "features": [{"type": "Chain", "location": {"start": {"value": 1}, "end": {"value": 480}}}],
+            "features": [
+                {
+                    "type": "Chain",
+                    "location": {"start": {"value": 1}, "end": {"value": 480}},
+                }
+            ],
             "keywords": [{"id": "KW-0067", "name": "ATP-binding"}],
             "sequence": {"value": "MSDV", "length": 480, "molWeight": 55686},
         }
