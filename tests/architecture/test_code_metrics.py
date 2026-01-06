@@ -407,7 +407,6 @@ class TestClassSize:
         # Extracted validators (REFACTOR-003)
         "MedallionConfigValidator": 350,  # Extracted from PreflightService - cohesive validation
         # Pandera schemas (declarative field definitions)
-        "CompoundSchema": 350,  # Deprecated alias for PubchemMoleculeSchema
         "PubchemMoleculeSchema": 350,  # 345 lines - PubChem molecule schema with many chemical fields
     }
 
@@ -555,7 +554,6 @@ class TestGodObjectDetection:
         # Lifecycle orchestration service
         "MedallionLifecycleService": "Lifecycle orchestrator - coordinates Bronze/Silver/Gold operations",
         # Pandera schemas (declarative data containers, no behavior to delegate)
-        "CompoundSchema": "Pandera schema - declarative field definitions, no behavior to delegate",
         "PubchemMoleculeSchema": "Pandera schema - declarative field definitions, no behavior to delegate",
     }
 

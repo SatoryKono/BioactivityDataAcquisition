@@ -17,13 +17,6 @@ Field Classification:
 - REQUIRED: Fields validated on construction
 - API-OPTIONAL: Fields from external APIs (may be None)
 - COMPUTED: Derived fields (calculated from other fields)
-
-.. versionchanged:: 2.0.0
-    Entity Naming Unification for Ubiquitous Language alignment:
-    - ChemblPublication (canonical) replaces Document (deprecated alias)
-    - PubchemMolecule (canonical) replaces Compound (deprecated alias)
-    - UniprotTarget (canonical) replaces Protein (deprecated alias)
-    Deprecated aliases remain for backward compatibility.
 """
 
 from bioetl.domain.entities.base import BaseEntity
@@ -47,8 +40,7 @@ from bioetl.domain.entities.chembl_assay_parameters import AssayParameters
 from bioetl.domain.entities.chembl_compound_record import CompoundRecord
 from bioetl.domain.entities.chembl_structures import (
     CellLine,
-    ChemblPublication,  # Canonical name (v2.0)
-    Document,  # Deprecated alias → ChemblPublication
+    ChemblPublication,
     DocumentSimilarity,
     DocumentTerm,
     Molecule,
@@ -62,9 +54,8 @@ from bioetl.domain.entities.crossref import PublicationEntity, PublicationRecord
 
 # PubChem DTO + Entity
 from bioetl.domain.entities.pubchem import (
-    Compound,  # Deprecated alias → PubchemMolecule
     PubChemCompoundRecord,
-    PubchemMolecule,  # Canonical name (v2.0)
+    PubchemMolecule,
 )
 
 # PubMed DTO + Entity
@@ -74,10 +65,7 @@ from bioetl.domain.entities.pubmed import ArticleRecord, Publication
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
 
 # UniProt Entity
-from bioetl.domain.entities.uniprot import (
-    Protein,  # Deprecated alias → UniprotTarget
-    UniprotTarget,  # Canonical name (v2.0)
-)
+from bioetl.domain.entities.uniprot import UniprotTarget
 
 __all__ = [
     "ActivityRecord",
@@ -90,20 +78,17 @@ __all__ = [
     "BioactivityState",
     "CellLine",
     "CellLineRecord",
-    "ChemblPublication",  # Canonical (v2.0)
-    "Compound",  # Deprecated → PubchemMolecule
+    "ChemblPublication",
     "CompoundRecord",
-    "Document",  # Deprecated → ChemblPublication
     "DocumentRecord",
     "DocumentSimilarity",
     "DocumentTerm",
     "DocumentTermRecord",
     "Molecule",
     "MoleculeRecord",
-    "Protein",  # Deprecated → UniprotTarget
     "ProteinClassification",
     "PubChemCompoundRecord",
-    "PubchemMolecule",  # Canonical (v2.0)
+    "PubchemMolecule",
     "Publication",
     "PublicationEntity",
     "PublicationRecord",
@@ -112,5 +97,5 @@ __all__ = [
     "TargetComponent",
     "TargetComponentRecord",
     "TargetRecord",
-    "UniprotTarget",  # Canonical (v2.0)
+    "UniprotTarget",
 ]
