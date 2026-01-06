@@ -111,9 +111,7 @@ class TestInchiKeyRegexEdgeCases:
         "first_block_length",
         [1, 5, 10, 13, 15, 20],
     )
-    def test_wrong_first_block_length_rejected(
-        self, first_block_length: int
-    ) -> None:
+    def test_wrong_first_block_length_rejected(self, first_block_length: int) -> None:
         """Test that first blocks with != 14 letters are rejected."""
         first_block = "A" * first_block_length
         inchi_key = f"{first_block}-UHFFFAOYSA-N"
@@ -129,9 +127,7 @@ class TestInchiKeyRegexEdgeCases:
         "second_block_length",
         [1, 5, 9, 11, 15],
     )
-    def test_wrong_second_block_length_rejected(
-        self, second_block_length: int
-    ) -> None:
+    def test_wrong_second_block_length_rejected(self, second_block_length: int) -> None:
         """Test that second blocks with != 10 letters are rejected."""
         second_block = "B" * second_block_length
         inchi_key = f"BSYNRYMUTXBXSQ-{second_block}-N"
@@ -147,9 +143,7 @@ class TestInchiKeyRegexEdgeCases:
         "third_block_length",
         [0, 2, 3, 5],
     )
-    def test_wrong_third_block_length_rejected(
-        self, third_block_length: int
-    ) -> None:
+    def test_wrong_third_block_length_rejected(self, third_block_length: int) -> None:
         """Test that third blocks with != 1 letter are rejected."""
         third_block = "C" * third_block_length if third_block_length > 0 else ""
         inchi_key = f"BSYNRYMUTXBXSQ-UHFFFAOYSA-{third_block}"
