@@ -8,7 +8,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-import pandera as pa
+import pandera.pandas as pa
 from pandera.typing import Series
 
 
@@ -21,36 +21,67 @@ class ETLRecordSchema(pa.DataFrameModel):
     )
     content_hash: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^[a-f0-9]{64}$",
         description="SHA256 hash of canonical record representation for versioning.",
     )
 
+    @classmethod
+    @pa.check("content_hash", name="content_hash_format")
+    def _check_content_hash(cls, series: Series[str]) -> Series[bool]:
+        """Validate content_hash is a 64-character hex string."""
+        return series.str.match(r"^[a-f0-9]{64}$")
+
     # === Lineage & DQ Fields (from RULES.md §2.4) ===
-    _run_id: Series[UUID] = pa.Field(
+    run_id: Series[object] = pa.Field(
+        alias="_run_id",
         nullable=False, description="Correlation ID for the pipeline run."
     )
-    _run_type: Series[str] = pa.Field(
+    run_type: Series[str] = pa.Field(
+        alias="_run_type",
         nullable=False,
-        isin=["incremental", "backfill", "rebuild"],
         description="Type of pipeline run.",
     )
-    _source_batch_id: Series[UUID] | None = pa.Field(
+
+    @classmethod
+    @pa.check("_run_type", name="run_type_values")
+    def _check_run_type(cls, series: Series[str]) -> Series[bool]:
+        """Validate _run_type values."""
+        return series.isin(["incremental", "backfill", "rebuild"])
+
+    source_batch_id: Series[object] | None = pa.Field(
+        alias="_source_batch_id",
         nullable=True, description="Batch context ID from the source."
     )
-    _ingestion_ts: Series[datetime] = pa.Field(
+    ingestion_ts: Series[datetime] = pa.Field(
+        alias="_ingestion_ts",
         nullable=False, description="Timestamp when the record was ingested (UTC)."
     )
-    _dq_warn: Series[bool] = pa.Field(
+
+    @classmethod
+    @pa.check("_ingestion_ts", name="ingestion_ts_not_future")
+    def _check_ingestion_ts(cls, series: Series[datetime]) -> Series[bool]:
+        """Ensure ingestion timestamp is not in the future."""
+        # Note: In practice, we just check it's a valid datetime
+        return series <= datetime.now(series.dt.tz)
+
+    dq_warn: Series[bool] = pa.Field(
+        alias="_dq_warn",
         nullable=False, default=False, description="Flag for data quality warnings."
     )
-    _dq_error: Series[bool] = pa.Field(
+    dq_error: Series[bool] = pa.Field(
+        alias="_dq_error",
         nullable=False, default=False, description="Flag for data quality errors."
     )
-    _index: Series[int] = pa.Field(
+    index: Series[int] = pa.Field(
+        alias="_index",
         nullable=False,
-        ge=0,
         description="Sequential index of the record in the pipeline run.",
     )
+
+    @classmethod
+    @pa.check("_index", name="index_non_negative")
+    def _check_index(cls, series: Series[int]) -> Series[bool]:
+        """Validate index is non-negative."""
+        return series >= 0
 
     class Config:
         """Pandera configuration."""

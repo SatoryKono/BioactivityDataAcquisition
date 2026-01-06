@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from datetime import date
 
-import pandera as pa
+import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema

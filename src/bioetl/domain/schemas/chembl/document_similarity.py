@@ -5,7 +5,7 @@ Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 
 from __future__ import annotations
 
-import pandera as pa
+import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
