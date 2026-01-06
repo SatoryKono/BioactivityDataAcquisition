@@ -61,6 +61,9 @@ from bioetl.application.pipelines.openalex.transformer import (
 )
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
+from bioetl.application.pipelines.semanticscholar.transformer import (
+    SemanticScholarPublicationTransformer,
+)
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
@@ -80,6 +83,7 @@ from bioetl.infrastructure.schemas.gold import (
     OpenAlexPublicationGoldSchema,
     PubChemCompoundGoldSchema,
     PubMedPublicationGoldSchema,
+    SemanticScholarPublicationGoldSchema,
     UniProtProteinGoldSchema,
 )
 
@@ -98,6 +102,7 @@ from bioetl.infrastructure.schemas.silver import (
     OPENALEX_PUBLICATION_SCHEMA,
     PUBCHEM_COMPOUND_SCHEMA,
     PUBMED_PUBLICATION_SCHEMA,
+    SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
     UNIPROT_PROTEIN_SCHEMA,
 )
 
@@ -239,6 +244,14 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         silver_schema=OPENALEX_PUBLICATION_SCHEMA,
         gold_schema=OpenAlexPublicationGoldSchema,
     ),
+    # Semantic Scholar pipeline
+    PipelineFactoryConfig(
+        pipeline_name="semanticscholar_publication",
+        provider="semanticscholar",
+        transformer_class=SemanticScholarPublicationTransformer,
+        silver_schema=SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
+        gold_schema=SemanticScholarPublicationGoldSchema,
+    ),
 )
 
 
@@ -287,6 +300,7 @@ uniprot_protein_factory = _factories["uniprot_protein"]
 pubmed_publications_factory = _factories["pubmed_publications"]
 crossref_publication_enrichment_factory = _factories["crossref_publication_enrichment"]
 openalex_publication_factory = _factories["openalex_publication"]
+semanticscholar_publication_factory = _factories["semanticscholar_publication"]
 
 
 # =============================================================================
@@ -430,5 +444,6 @@ __all__ = [
     "pubmed_publications_factory",
     "register_all_pipelines",
     "reset_registration",
+    "semanticscholar_publication_factory",
     "uniprot_protein_factory",
 ]

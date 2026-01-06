@@ -459,7 +459,8 @@ class TestPortDefinitionQuality:
                                     return True
                                 # For Python < 3.12 compatibility
                                 if hasattr(ast, "Ellipsis") and isinstance(
-                                    node, ast.Ellipsis  # type: ignore[attr-defined]
+                                    node,
+                                    ast.Ellipsis,  # type: ignore[attr-defined]
                                 ):
                                     return True
                                 return False
