@@ -180,7 +180,7 @@ class TestDataSourceFactoryPort:
                 return ["chembl"]
 
             @staticmethod
-            def create(provider_name: str) -> Any:
+            def create(_provider_name: str) -> Any:
                 return MagicMock()
 
         assert isinstance(MockFactory(), DataSourceFactoryPort)

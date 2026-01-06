@@ -1,6 +1,6 @@
 """Unit tests for CrossRef Transformer.
 
-Tests for CrossRefTransformer (domain entity creation from Bronze records).
+Tests for CrossRefPublicationTransformer (domain entity creation from Bronze records).
 
 Note: Field extraction tests now use domain functions directly per REFACTOR-004.
 """
@@ -12,7 +12,9 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.pipelines.crossref.transformer import CrossRefTransformer
+from bioetl.application.pipelines.crossref.transformer import (
+    CrossRefPublicationTransformer,
+)
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities.crossref import CROSSREF_TYPE_MAP
 from bioetl.domain.normalization import extract_first_string, normalize_doi
@@ -21,8 +23,8 @@ from bioetl.domain.types import RunID, RunType
 
 @pytest.fixture
 def transformer():
-    """Create a CrossRefTransformer instance."""
-    return CrossRefTransformer()
+    """Create a CrossRefPublicationTransformer instance."""
+    return CrossRefPublicationTransformer()
 
 
 @pytest.fixture
