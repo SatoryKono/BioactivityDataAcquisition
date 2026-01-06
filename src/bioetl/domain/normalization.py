@@ -5,6 +5,7 @@ REFACTOR-004: Domain logic separation from use-case layer.
 
 from __future__ import annotations
 
+import json
 import re
 from datetime import date
 from typing import Any
@@ -97,3 +98,70 @@ def extract_first_string(items: list[str] | None) -> str | None:
     if not items or not isinstance(items, list):
         return None
     return next((s for item in items if (s := _is_valid_string(item))), None)
+
+
+def parse_authors_to_list(authors: list[str] | str | None) -> list[str]:
+    """Parse various author input formats into a list of author names.
+
+    Supports:
+    - list[str]: Direct list of authors (returned as-is with stripping)
+    - str (JSON): JSON-serialized list (e.g., '["John Doe", "Jane Smith"]')
+    - str (concatenated): Semicolon or comma-separated string
+      (e.g., "John Doe; Jane Smith" or "John Doe, Jane Smith")
+
+    Args:
+        authors: Raw author data in various formats.
+
+    Returns:
+        List of individual author names (empty list if None or empty).
+        Each name is stripped of whitespace.
+
+    Example:
+        >>> parse_authors_to_list(["John Doe", "Jane Smith"])
+        ['John Doe', 'Jane Smith']
+        >>> parse_authors_to_list('["John Doe", "Jane Smith"]')
+        ['John Doe', 'Jane Smith']
+        >>> parse_authors_to_list("John Doe; Jane Smith")
+        ['John Doe', 'Jane Smith']
+        >>> parse_authors_to_list("John Doe, Jane Smith")
+        ['John Doe', 'Jane Smith']
+        >>> parse_authors_to_list(None)
+        []
+    """
+    if authors is None:
+        return []
+
+    if isinstance(authors, list):
+        # Direct list - strip whitespace from each item
+        return [a.strip() for a in authors if isinstance(a, str) and a.strip()]
+
+    # String input - try JSON first, then delimited string
+    if isinstance(authors, str):
+        stripped = authors.strip()
+        if not stripped:
+            return []
+
+        # Try JSON parsing first (starts with '[')
+        if stripped.startswith("["):
+            try:
+                parsed = json.loads(stripped)
+                if isinstance(parsed, list):
+                    return [
+                        str(a).strip()
+                        for a in parsed
+                        if a is not None and str(a).strip()
+                    ]
+            except json.JSONDecodeError:
+                pass  # Fall through to delimiter parsing
+
+        # Parse as delimited string
+        # Prefer semicolon as delimiter (common in ChEMBL), fall back to comma
+        if ";" in stripped:
+            return [a.strip() for a in stripped.split(";") if a.strip()]
+        elif "," in stripped:
+            return [a.strip() for a in stripped.split(",") if a.strip()]
+        else:
+            # Single author
+            return [stripped]
+
+    return []

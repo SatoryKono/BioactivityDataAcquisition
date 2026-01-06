@@ -527,13 +527,13 @@ class TestPublicationEntity:
         )
         assert publication.doc_type == "PREPRINT"
 
-    def test_publication_default_authors_empty_list(self, base_entity_kwargs):
-        """Test that authors defaults to empty list."""
+    def test_publication_default_authors_none(self, base_entity_kwargs):
+        """Test that authors defaults to None (JSON string format)."""
         publication = PublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
         )
-        assert publication.authors == []
+        assert publication.authors is None
 
     def test_publication_default_issn_empty_list(self, base_entity_kwargs):
         """Test that issn defaults to empty list."""
@@ -680,7 +680,7 @@ class TestPublicationRecord:
         record = PublicationRecord(doi="10.1234/test")
         assert record.title is None
         assert record.abstract is None
-        assert record.authors == []
+        assert record.authors is None  # JSON string format, defaults to None
         assert record.issn == []
         assert record.subjects == []
         assert record.source == "crossref"
@@ -688,13 +688,16 @@ class TestPublicationRecord:
 
     def test_publication_record_with_all_fields(self):
         """Test PublicationRecord with all fields."""
+        import json
+
         from bioetl.domain.entities.crossref import PublicationRecord
 
+        authors_json = json.dumps(["John Doe", "Jane Smith"])
         record = PublicationRecord(
             doi="10.1038/nature12373",
             title="Test Title",
             abstract="Test abstract",
-            authors=["John Doe", "Jane Smith"],
+            authors=authors_json,  # JSON string format
             journal="Nature",
             issn=["0028-0836"],
             publisher="Springer",
@@ -714,7 +717,8 @@ class TestPublicationRecord:
             source="crossref",
         )
         assert record.citation_count == 892
-        assert len(record.authors) == 2
+        assert record.authors == authors_json
+        assert len(json.loads(record.authors)) == 2
 
 
 @pytest.mark.unit

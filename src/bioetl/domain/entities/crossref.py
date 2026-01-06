@@ -70,8 +70,10 @@ class PublicationRecord(BaseModel):
         default=None, description="Publication abstract"
     )
 
-    # Authors (list of "given family" formatted names)
-    authors: list[str] = PydanticField(default_factory=list, description="Author names")
+    # Authors (JSON-serialized list of hashed names for PII compliance)
+    authors: str | None = PydanticField(
+        default=None, description="Author names (JSON array, hashed for PII)"
+    )
 
     # Journal information
     journal: str | None = PydanticField(
@@ -139,7 +141,7 @@ class PublicationEntity(BaseEntity):
         doi: Digital Object Identifier (normalized: lowercase, stripped).
         title: Publication title.
         abstract: Publication abstract (HTML tags stripped).
-        authors: List of author names in "given family" format.
+        authors: JSON-serialized list of hashed author names (PII compliance).
         journal: Journal name (container-title from CrossRef).
         issn: List of ISSNs.
         publisher: Publisher name.
@@ -168,8 +170,8 @@ class PublicationEntity(BaseEntity):
     title: str | None = None
     abstract: str | None = None
 
-    # Authors (list of "given family" formatted names)
-    authors: list[str] = field(default_factory=list)
+    # Authors (JSON-serialized list of hashed names for PII compliance)
+    authors: str | None = None
 
     # Journal information
     journal: str | None = None  # container-title[0]

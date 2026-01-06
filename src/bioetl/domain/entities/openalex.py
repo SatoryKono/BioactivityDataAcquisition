@@ -93,9 +93,9 @@ class OpenAlexPublicationRecord(BaseModel):
         description="Publication abstract (reconstructed from inverted index)",
     )
 
-    # Authors (list of display names, hashed for PII)
-    authors: list[str] = PydanticField(
-        default_factory=list, description="Author display names (hashed)"
+    # Authors (JSON-serialized list of hashed names for PII compliance)
+    authors: str | None = PydanticField(
+        default=None, description="Author names (JSON array, hashed for PII)"
     )
 
     # Journal information
@@ -169,7 +169,7 @@ class OpenAlexPublicationEntity(BaseEntity):
         doi: Digital Object Identifier (normalized: lowercase, stripped).
         title: Publication title.
         abstract: Publication abstract (reconstructed from inverted index).
-        authors: List of author display names (hashed for PII).
+        authors: JSON-serialized list of hashed author names (PII compliance).
         journal: Source name (journal/venue).
         issn: ISSN-L identifier.
         publisher: Host organization name.
@@ -198,8 +198,8 @@ class OpenAlexPublicationEntity(BaseEntity):
     title: str | None = None
     abstract: str | None = None
 
-    # Authors (list of display names, hashed for PII)
-    authors: list[str] = field(default_factory=list)
+    # Authors (JSON-serialized list of hashed names for PII compliance)
+    authors: str | None = None
 
     # Journal information
     journal: str | None = None
