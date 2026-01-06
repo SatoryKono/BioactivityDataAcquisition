@@ -33,6 +33,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Migration**: Added `scripts/migrations/migrate_pmid_to_string.py` for existing data conversion
   - **Rationale**: Enables consistent cross-provider JOINs (PubMed, ChEMBL, SemanticScholar) and matches PubMed API behavior
 
+- **OpenAlex Citation Count Field Renamed**: Standardized citation count field naming across all providers:
+  - Renamed `cited_by_count` to `citation_count` in OpenAlex publication schema
+  - Aligns with CrossRef and SemanticScholar naming convention
+  - Affected files:
+    - `domain/schemas/openalex/publication.py`
+    - `domain/entities/openalex.py`
+    - `application/pipelines/openalex/transformer.py`
+    - `infrastructure/schemas/silver.py`
+    - `infrastructure/schemas/gold.py`
+  - **Migration Required**: Run `scripts/migrate_openalex_citation_count.py` for existing Delta Lake tables
+  - Source field from OpenAlex API remains `cited_by_count`; only BioETL unified field name changed
+
 ### Added
 
 - **`normalize_pmid()` function**: New helper in `application/core/field_specs.py` for safe PMID normalization:

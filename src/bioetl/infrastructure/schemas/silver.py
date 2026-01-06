@@ -685,7 +685,9 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("doc_type", pa.string()),
         pa.field("is_oa", pa.bool_()),
         pa.field("oa_status", pa.string()),
-        pa.field("cited_by_count", pa.int64()),
+        # OpenAlex source field: cited_by_count
+        # Unified BioETL field: citation_count (standardized across all providers)
+        pa.field("citation_count", pa.int64()),
         pa.field("language", pa.string()),
         pa.field("source", pa.string()),
         # Lookup metadata
