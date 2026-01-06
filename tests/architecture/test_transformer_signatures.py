@@ -18,14 +18,10 @@ See RULES.md §2 for architecture requirements.
 from __future__ import annotations
 
 import inspect
-from typing import TYPE_CHECKING
 
 import pytest
 
 from bioetl.application.core.base_transformer import BaseTransformer
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
 
 
 def get_all_transformers() -> list[type[BaseTransformer]]:
@@ -302,9 +298,7 @@ class TestTransformerInstantiation:
             )
 
     @pytest.mark.parametrize("transformer_class", get_all_transformers())
-    def test_entity_type_is_set(
-        self, transformer_class: type[BaseTransformer]
-    ) -> None:
+    def test_entity_type_is_set(self, transformer_class: type[BaseTransformer]) -> None:
         """All transformers MUST have entity_type set after initialization.
 
         Entity type is used for metrics labeling and tracing attributes.
@@ -323,9 +317,7 @@ class TestTransformerInstantiation:
         )
 
     @pytest.mark.parametrize("transformer_class", get_all_transformers())
-    def test_provider_is_set(
-        self, transformer_class: type[BaseTransformer]
-    ) -> None:
+    def test_provider_is_set(self, transformer_class: type[BaseTransformer]) -> None:
         """All transformers MUST have provider set after initialization.
 
         Provider identifies the data source and is used for entity IDs.
