@@ -220,7 +220,6 @@ def assert_silver_table_has_records(
     Raises:
         AssertionError: Если таблица пуста или записей меньше expected_min
     """
-    from deltalake import DeltaTable
 
     table_path = data_dir / "silver" / table_name
     if not table_path.exists():
@@ -259,7 +258,6 @@ def assert_gold_table_has_records(
     Raises:
         AssertionError: Если таблица пуста или записей меньше expected_min
     """
-    from deltalake import DeltaTable
 
     table_path = data_dir / "gold" / table_name
     if not table_path.exists():
@@ -286,7 +284,6 @@ def get_silver_records(data_dir: Path, table_name: str) -> list[dict]:
     Returns:
         Список словарей с записями
     """
-    from deltalake import DeltaTable
 
     table_path = data_dir / "silver" / table_name
     dt = DeltaTable(str(table_path))
@@ -303,7 +300,6 @@ def get_gold_records(data_dir: Path, table_name: str) -> list[dict]:
     Returns:
         Список словарей с записями
     """
-    from deltalake import DeltaTable
 
     table_path = data_dir / "gold" / table_name
     dt = DeltaTable(str(table_path))
