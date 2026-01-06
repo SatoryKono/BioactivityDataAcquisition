@@ -216,6 +216,6 @@ def test_no_silent_degradation_in_batch_writer() -> None:
     )
 
     # Check that new pattern is present
-    assert (
-        "Pass write mode directly without silent degradation" in source
-    ), "R1 refactoring comment should be present in batch_writer.py"
+    assert "Pass write mode directly without silent degradation" in source, (
+        "R1 refactoring comment should be present in batch_writer.py"
+    )

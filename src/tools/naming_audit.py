@@ -20,12 +20,21 @@ from __future__ import annotations
 
 import argparse
 import ast
+import logging
 import re
 import sys
 from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
+
+# Configure logging for CLI output
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
+logger = logging.getLogger(__name__)
 
 
 class ViolationType(str, Enum):
@@ -441,7 +450,8 @@ def format_report(results: dict[str, list[Violation]]) -> str:
             for v in violations:
                 line = v.line if v.line else "-"
                 lines.append(
-                    f"| `{v.path}` | {line} | `{v.current_name}` | {v.issue.value} | `{v.recommendation}` |"
+                    f"| `{v.path}` | {line} | `{v.current_name}` | "
+                    f"{v.issue.value} | `{v.recommendation}` |"
                 )
             lines.append("")
 
@@ -501,14 +511,14 @@ def main() -> int:
     if args.output:
         output_path = Path(args.output)
         output_path.write_text(report, encoding="utf-8")
-        print(f"Report saved to {output_path}")
+        logger.info("Report saved to %s", output_path)
     else:
-        print(report)
+        logger.info("%s", report)
 
     # CI mode
     total_violations = sum(len(v) for v in results.values())
     if args.check and total_violations > 0:
-        print(f"\n❌ Found {total_violations} naming violations", file=sys.stderr)
+        logger.error("❌ Found %d naming violations", total_violations)
         return 1
 
     return 0

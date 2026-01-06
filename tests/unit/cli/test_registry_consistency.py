@@ -211,9 +211,9 @@ class TestRegistryNameUniqueness:
         registered = test_registry.list_pipelines()
 
         # list_pipelines returns a list, check for duplicates
-        assert len(registered) == len(
-            set(registered)
-        ), "Registry contains duplicate pipeline names"
+        assert len(registered) == len(set(registered)), (
+            "Registry contains duplicate pipeline names"
+        )
 
     def test_duplicate_registration_raises_error(self) -> None:
         """Verify that registering a duplicate pipeline raises ValueError."""
@@ -242,21 +242,21 @@ class TestFactoryValidity:
         from bioetl.composition.factories.pipeline_factories import _factories
 
         for name, factory in _factories.items():
-            assert hasattr(
-                factory, "pipeline_name"
-            ), f"Factory {name} missing pipeline_name attribute"
-            assert (
-                factory.pipeline_name == name
-            ), f"Factory pipeline_name mismatch: {factory.pipeline_name} != {name}"
+            assert hasattr(factory, "pipeline_name"), (
+                f"Factory {name} missing pipeline_name attribute"
+            )
+            assert factory.pipeline_name == name, (
+                f"Factory pipeline_name mismatch: {factory.pipeline_name} != {name}"
+            )
 
     def test_all_factories_have_silver_schema(self) -> None:
         """Verify each factory has a silver_schema attribute (can be None)."""
         from bioetl.composition.factories.pipeline_factories import _factories
 
         for name, factory in _factories.items():
-            assert hasattr(
-                factory, "silver_schema"
-            ), f"Factory {name} missing silver_schema attribute"
+            assert hasattr(factory, "silver_schema"), (
+                f"Factory {name} missing silver_schema attribute"
+            )
 
     def test_all_factories_have_gold_schema(self) -> None:
         """Verify each factory has a non-None gold_schema attribute.
@@ -266,9 +266,9 @@ class TestFactoryValidity:
         from bioetl.composition.factories.pipeline_factories import _factories
 
         for name, factory in _factories.items():
-            assert hasattr(
-                factory, "gold_schema"
-            ), f"Factory {name} missing gold_schema attribute"
+            assert hasattr(factory, "gold_schema"), (
+                f"Factory {name} missing gold_schema attribute"
+            )
             assert factory.gold_schema is not None, (
                 f"Factory {name} has None gold_schema. "
                 "All pipelines require a Gold schema for validation."
@@ -279,24 +279,24 @@ class TestFactoryValidity:
         from bioetl.composition.factories.pipeline_factories import _factories
 
         for name, factory in _factories.items():
-            assert hasattr(
-                factory, "create_with_services"
-            ), f"Factory {name} missing create_with_services method"
-            assert callable(
-                factory.create_with_services
-            ), f"Factory {name}.create_with_services is not callable"
+            assert hasattr(factory, "create_with_services"), (
+                f"Factory {name} missing create_with_services method"
+            )
+            assert callable(factory.create_with_services), (
+                f"Factory {name}.create_with_services is not callable"
+            )
 
     def test_all_factories_have_create_runner(self) -> None:
         """Verify each factory has create_runner method."""
         from bioetl.composition.factories.pipeline_factories import _factories
 
         for name, factory in _factories.items():
-            assert hasattr(
-                factory, "create_runner"
-            ), f"Factory {name} missing create_runner method"
-            assert callable(
-                factory.create_runner
-            ), f"Factory {name}.create_runner is not callable"
+            assert hasattr(factory, "create_runner"), (
+                f"Factory {name} missing create_runner method"
+            )
+            assert callable(factory.create_runner), (
+                f"Factory {name}.create_runner is not callable"
+            )
 
     def test_factory_count_matches_config_count(self) -> None:
         """Verify factory count matches PIPELINE_CONFIGS count."""
@@ -412,6 +412,6 @@ class TestListAvailablePipelinesFunction:
         function_result = list_available_pipelines()
         registry_result = test_registry.list_pipelines()
 
-        assert (
-            function_result == registry_result
-        ), "list_available_pipelines() should match registry.list_pipelines()"
+        assert function_result == registry_result, (
+            "list_available_pipelines() should match registry.list_pipelines()"
+        )

@@ -268,9 +268,9 @@ async def test_circuit_breaker_opens_on_failures():
     # Simulate failures via force_open (circuit breaker uses internal _on_failure)
     breaker.force_open()
 
-    assert (
-        breaker.get_state() == CircuitBreakerState.OPEN
-    ), "Should be OPEN after force_open()"
+    assert breaker.get_state() == CircuitBreakerState.OPEN, (
+        "Should be OPEN after force_open()"
+    )
 
 
 @pytest.mark.e2e
