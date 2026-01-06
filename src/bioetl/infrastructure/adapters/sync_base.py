@@ -56,7 +56,6 @@ class BaseSyncAdapter(HealthCheckMixin, DataSourcePort):
 
     Error Handling:
     - _error_handler: Provides unified error classification, logging, and wrapping
-    - _handle_adapter_error(): Template method for consistent error handling
 
     Attributes:
         provider_name: Unique identifier for the data provider.
@@ -245,36 +244,3 @@ class BaseSyncAdapter(HealthCheckMixin, DataSourcePort):
             "circuit_breaker_state": cb_state,
             "circuit_breaker_failures": cb_failures,
         }
-
-    def _handle_adapter_error(
-        self,
-        error: Exception,
-        operation: str = "fetch",
-        context: dict[str, Any] | None = None,
-    ) -> None:
-        """Handle adapter error with unified logging and wrapping.
-
-        Logs error with full context and raises appropriate exception.
-        Uses ErrorHandler for consistent behavior across all adapters.
-
-        Args:
-            error: The exception that occurred.
-            operation: Operation that failed (e.g., 'fetch', 'health_check').
-            context: Additional context (status_code, retry_count, etc.).
-
-        Raises:
-            CriticalError: For authentication failures (401, 403).
-            ExternalServiceError: For other errors.
-        """
-        ctx = self._get_error_context(operation)
-        if context:
-            ctx.update(context)
-
-        # Let ErrorHandler log and wrap the error
-        wrapped = self._error_handler.handle_error(
-            error=error,
-            provider=self.provider_name,
-            operation=operation,
-            context=ctx,
-        )
-        raise wrapped from error
