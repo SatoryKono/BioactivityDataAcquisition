@@ -20,18 +20,13 @@ from bioetl.infrastructure.adapters.uniprot.models import (
 )
 
 __all__ = [
-    # Model Mappings
     "UNIPROT_RECORD_MODELS",
-    # Adapters
-    "UniProtAdapter",
-    "UniProtIDMappingClient",
-    # ID Mapping Exceptions
     "IDMappingJobError",
     "IDMappingTimeoutError",
-    # Record Models
+    "UniProtAdapter",
     "UniProtFeatureRecord",
+    "UniProtIDMappingClient",
     "UniProtProteinRecord",
-    # Response Models
     "UniProtSearchResponse",
     "UniProtSequenceRecord",
 ]
