@@ -15,7 +15,7 @@ from bioetl.domain.services import IdentityService
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig
-    from bioetl.domain.ports import MetricsPort, TracingPort
+    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
@@ -30,27 +30,34 @@ class PubChemCompoundTransformer(BaseTransformer):
     def __init__(
         self,
         provider: str = "pubchem",
+        entity_type: str = "compound",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
+        pii_hasher: PiiHasherPort | None = None,
     ):
         """Initialize PubChem compound transformer.
 
         Args:
-            provider: Data provider identifier.
+            provider: Data provider identifier. Defaults to 'pubchem'.
+            entity_type: Entity type for metrics labels. Defaults to 'compound'.
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
+            pii_hasher: Optional PII hasher. Not typically used for compounds
+                (no PII in chemical data), but included for API consistency.
 
         """
         super().__init__(
             provider,
+            entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
             gold_filters=gold_filters,
             identity_service=identity_service,
+            pii_hasher=pii_hasher,
         )
 
     async def _transform_impl(
