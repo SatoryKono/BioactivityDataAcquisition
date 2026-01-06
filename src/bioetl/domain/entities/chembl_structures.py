@@ -1,7 +1,7 @@
 """ChEMBL structural domain entities.
 
 Contains Document, DocumentTerm, DocumentSimilarity, Target, TargetComponent,
-CellLine, and Molecule entities.
+CellLine, Molecule, and ProteinClassification entities.
 """
 
 from __future__ import annotations
@@ -377,3 +377,65 @@ class DocumentSimilarity(BaseEntity):
         _validate_tanimoto(self.mol_tani, "mol_tani")
         _validate_tanimoto(self.avg_tani, "avg_tani")
         _validate_tanimoto(self.max_tani, "max_tani")
+
+
+@dataclass(frozen=True, kw_only=True)
+class ProteinClassification(BaseEntity):
+    """Represents a protein classification hierarchy node (ChEMBL protein_class).
+
+    Hierarchical classification of protein targets. Self-referencing
+    structure with up to 8 levels of depth. Used to annotate Target entities
+    and aggregate bioactivity data by protein family.
+
+    Entity ID: protein_class_id (string representation)
+    Hierarchy: parent_id → protein_class_id
+    Source: ChEMBL API /protein_class
+    """
+
+    # Primary identifier (REQUIRED)
+    protein_class_id: int
+
+    # Hierarchy (API-OPTIONAL)
+    parent_id: int | None = None
+    class_level: int | None = None
+
+    # Classification data (API-OPTIONAL)
+    pref_name: str | None = None
+    short_name: str | None = None
+    protein_class_desc: str | None = None
+    definition: str | None = None
+
+    # Additional metadata (API-OPTIONAL)
+    sort_order: int | None = None
+    replaced_by: int | None = None
+    downgraded: int | None = None  # 0 or 1
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
+        if self.protein_class_id < 1:
+            raise ValueError(
+                f"protein_class_id must be >= 1, got {self.protein_class_id}"
+            )
+        self._validate_class_level()
+        self._validate_downgraded()
+
+    def _validate_class_level(self) -> None:
+        """Validate class_level is within 1-8 range if present."""
+        if self.class_level is not None and not 1 <= self.class_level <= 8:
+            raise ValueError(f"class_level must be 1-8, got {self.class_level}")
+
+    def _validate_downgraded(self) -> None:
+        """Validate downgraded flag is 0 or 1 if present."""
+        if self.downgraded is not None and self.downgraded not in (0, 1):
+            raise ValueError(f"downgraded must be 0 or 1, got {self.downgraded}")
+
+    def is_root(self) -> bool:
+        """Check if this is a root node (no parent)."""
+        return self.parent_id is None
+
+    def is_deprecated(self) -> bool:
+        """Check if this classification is deprecated."""
+        return self.replaced_by is not None or self.downgraded == 1

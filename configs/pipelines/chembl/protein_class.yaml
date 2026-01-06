@@ -1,0 +1,52 @@
+# configs/pipelines/chembl/protein_class.yaml
+# Pipeline configuration for ChEMBL Protein Classification entity.
+#
+# Reference table (~1,500 records) - full load strategy.
+# Hierarchical structure: parent_id -> protein_class_id
+
+pipeline_name: chembl_protein_class
+provider: chembl
+entity_type: protein_class
+version: "1.0.0"
+description: "ChEMBL Protein Classification hierarchy (enzyme classes, receptor types, etc.)"
+
+primary_keys: ["protein_class_id"]
+silver_table: chembl_protein_class
+gold_table: chembl_protein_class
+
+source_file: ../../sources/chembl.yaml
+
+# Full load for reference table
+batch_size: 500
+checkpoint_interval: 500
+
+# Entity-specific gold filters - exclude deprecated records
+gold_filters:
+  required_fields:
+    - pref_name
+  columns:
+    downgraded: ["0"]
+
+# Entity-specific sink overrides
+sink:
+  bronze:
+    path: data/bronze/chembl/protein_class
+  silver:
+    path: data/silver/chembl/protein_class
+    partition_by: ["class_level"]
+    sort_by:
+      columns: ["protein_class_id"]
+      ascending: true
+    csv_export:
+      path: "data/output/csv/silver"
+  gold:
+    path: data/gold/chembl/protein_class
+    sort_by:
+      columns: ["class_level", "sort_order", "protein_class_id"]
+      ascending: true
+    csv_export:
+      path: "data/output/csv/gold"
+
+# No input filter for reference table (full load)
+input_filter:
+  enabled: false
