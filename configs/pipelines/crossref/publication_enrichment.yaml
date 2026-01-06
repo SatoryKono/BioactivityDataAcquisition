@@ -57,3 +57,4 @@ input_filter:
   filter_field: "doi"
   batch_size: 50
   fallback_column: "title"  # Search by title if DOI not found (404)
+

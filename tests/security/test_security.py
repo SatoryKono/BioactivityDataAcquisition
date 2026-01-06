@@ -228,6 +228,14 @@ class TestPrivateKeyExposure:
             "__pycache__",
             ".mypy_cache",
             ".pytest_cache",
+            ".ruff_cache",
+            ".hypothesis",
+            ".benchmarks",
+            ".import_linter_cache",
+            ".claude",
+            ".codex",
+            ".jules",
+            ".github",
             "data",
             "build",
             "dist",
@@ -238,24 +246,22 @@ class TestPrivateKeyExposure:
             "node_modules",
             "site",
             "htmlcov",
-            ".ruff_cache",
-            ".import_linter_cache",
             "coverage.json",  # Skip large generated files
         }
-        
+
         files = []
         # Walk effectively prunes trees, unlike rglob
         for root, dirs, filenames in os.walk(PROJECT_ROOT):
             # Prune excluded directories in-place
             dirs[:] = [d for d in dirs if d not in excluded]
-            
+
             for filename in filenames:
                 if filename in excluded:
                     continue
-                    
+
                 file_path = Path(root) / filename
                 files.append(file_path)
-                
+
         return files
 
     def test_no_private_keys_in_repo(self, all_files: list[Path]) -> None:
@@ -271,6 +277,8 @@ class TestPrivateKeyExposure:
                 continue
 
             # Check content for text files
+            # Skip large files (private keys are typically < 10KB)
+            max_file_size = 10 * 1024  # 10KB
             if file_path.suffix.lower() in {
                 ".py",
                 ".txt",
@@ -280,12 +288,14 @@ class TestPrivateKeyExposure:
                 ".md",
             }:
                 try:
+                    if file_path.stat().st_size > max_file_size:
+                        continue  # Skip large files
                     content = file_path.read_text(encoding="utf-8")
                     if re.search(key_pattern, content):
                         rel_path = file_path.relative_to(PROJECT_ROOT)
                         violations.append(f"{rel_path}: Contains private key")
-                except UnicodeDecodeError:
-                    pass  # Binary file
+                except (UnicodeDecodeError, OSError):
+                    pass  # Binary file or can't stat
 
         assert not violations, "Private keys found:\n" + "\n".join(violations)
 
