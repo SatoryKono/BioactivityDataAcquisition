@@ -22,6 +22,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- **PMID Type Standardization**: Changed `pubmed_id` field type from `int` to `str` across all layers:
+  - **Domain Layer**: Updated `PubMedId` Value Object from `ValueObject[int]` to `ValueObject[str]`
+  - **Schemas**: Updated Pandera schemas (`DocumentSchema`, `DocumentSimilaritySchema`) with `str_matches=r"^\d+$"` validation
+  - **PyArrow Schemas**: Changed `CHEMBL_DOCUMENT_SCHEMA` and `CHEMBL_DOCUMENT_SIMILARITY_SCHEMA` from `pa.int64()` to `pa.string()`
+  - **Gold Schemas**: Updated `ChEMBLDocumentGoldSchema` and `DocumentSimilarityGoldSchema` from `Series[float]` to `Series[str]`
+  - **Transformers**: Document and DocumentSimilarity transformers now use `normalize_pmid()` for string conversion
+  - **Migration**: Added `scripts/migrations/migrate_pmid_to_string.py` for existing data conversion
+  - **Rationale**: Enables consistent cross-provider JOINs (PubMed, ChEMBL, SemanticScholar) and matches PubMed API behavior
+
+- **OpenAlex Citation Count Field Renamed**: Standardized citation count field naming across all providers:
+  - Renamed `cited_by_count` to `citation_count` in OpenAlex publication schema
+  - Aligns with CrossRef and SemanticScholar naming convention
+  - Affected files:
+    - `domain/schemas/openalex/publication.py`
+    - `domain/entities/openalex.py`
+    - `application/pipelines/openalex/transformer.py`
+    - `infrastructure/schemas/silver.py`
+    - `infrastructure/schemas/gold.py`
+  - **Migration Required**: Run `scripts/migrate_openalex_citation_count.py` for existing Delta Lake tables
+  - Source field from OpenAlex API remains `cited_by_count`; only BioETL unified field name changed
+
+### Added
+
+- **`normalize_pmid()` function**: New helper in `application/core/field_specs.py` for safe PMID normalization:
+  - Converts `int` or `str` to normalized string (digits only)
+  - Strips whitespace, removes leading zeros
+  - Returns `None` for invalid inputs (non-numeric, negative, boolean)
+  - Added `pmid_fields()` convenience function for transformer field specs
+  - Added `PMID` type alias for converter consistency
+
+- **`PubMedId.as_int` property**: Returns the integer value of a PMID for numeric operations
+
 ### Removed
 
 - **Deprecated Pipeline Aliases (`compat.py`)**: Removed deprecated pipeline alias module:

@@ -202,7 +202,8 @@ class TestDocumentTransformer:
 
         assert result is not None
         assert result["document_chembl_id"] == "CHEMBL1234567"
-        assert result["pubmed_id"] == 12345678
+        # PMID is normalized to string for cross-provider consistency
+        assert result["pubmed_id"] == "12345678"
         assert result["doi"] == "10.1000/test.doi"
         assert result["year"] == 2024
         assert "entity_id" in result

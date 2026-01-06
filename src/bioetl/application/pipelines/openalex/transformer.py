@@ -28,6 +28,7 @@ from bioetl.application.pipelines.openalex.extractors import (
     reconstruct_abstract,
 )
 from bioetl.domain.entities.openalex import OPENALEX_TYPE_MAP, OpenAlexPublicationEntity
+from bioetl.domain.normalization import strip_html_tags
 from bioetl.domain.services import IdentityService
 from bioetl.domain.validation import validate_year_range
 
@@ -118,9 +119,9 @@ class OpenAlexPublicationTransformer(BaseTransformer):
         # Extract and normalize DOI
         doi = extract_doi(rec.get("doi"))
 
-        # Reconstruct abstract from inverted index
+        # Reconstruct abstract from inverted index (then strip HTML for cleaning)
         abstract_index = rec.get("abstract_inverted_index")
-        abstract = reconstruct_abstract(abstract_index)
+        abstract = strip_html_tags(reconstruct_abstract(abstract_index))
 
         # Extract and hash authors (PII)
         # Authors stored as JSON-serialized list for unified format across providers
@@ -163,7 +164,9 @@ class OpenAlexPublicationTransformer(BaseTransformer):
             "doc_type": doc_type,
             "is_oa": oa_info.get("is_oa"),
             "oa_status": oa_info.get("oa_status"),
-            "cited_by_count": rec.get("cited_by_count"),
+            # OpenAlex source field: cited_by_count
+            # Unified BioETL field: citation_count (standardized across all providers)
+            "citation_count": rec.get("cited_by_count"),
             "concepts": concepts,
             "language": rec.get("language"),
             "_lookup_method": lookup_method,

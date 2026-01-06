@@ -130,7 +130,7 @@
     'journal_full_title': 'Full Test Journal Name',
     'last_page': '110',
     'patent_id': None,
-    'pubmed_id': 12345678,
+    'pubmed_id': '12345678',
     'src_id': 1,
     'title': 'Test Document Title',
     'volume': '10',

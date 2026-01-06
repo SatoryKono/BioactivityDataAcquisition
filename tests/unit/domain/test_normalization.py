@@ -140,6 +140,7 @@ class TestStripHtmlTags:
     @pytest.mark.parametrize(
         "text,expected",
         [
+            # Basic HTML tags
             ("<p>Hello world</p>", "Hello world"),
             ("<b>Bold</b> text", "Bold text"),
             ("<jats:p>Abstract text</jats:p>", "Abstract text"),
@@ -148,15 +149,67 @@ class TestStripHtmlTags:
             ("", None),
             (None, None),
             ("<p></p>", None),  # Empty after stripping
+            # HTML entity decoding
+            ("&amp; &lt; &gt;", "& < >"),
+            ("5 &gt; 3 &amp;&amp; 2 &lt; 4", "5 > 3 && 2 < 4"),
+            ("H&auml;llo W&ouml;rld", "Hällo Wörld"),
+            ("&quot;quoted&quot;", '"quoted"'),
+            ("&apos;apostrophe&apos;", "'apostrophe'"),
+            # Note: &nbsp; is decoded to \xa0 but our whitespace normalization
+            # treats \xa0 as whitespace and collapses it
+            ("&nbsp;non-breaking&nbsp;space", "non-breaking space"),
+            # Whitespace normalization
+            ("  Multiple   spaces  ", "Multiple spaces"),
+            ("Line\nbreak", "Line break"),
+            ("Tab\there", "Tab here"),
+            ("Mixed\n\t  spaces", "Mixed spaces"),
+            # Tags between content don't add spaces
+            ("<p>Para 1</p><p>Para 2</p>", "Para 1Para 2"),
+            # But newlines between tags are normalized to spaces
+            ("<p>Para 1</p>\n\n<p>Para 2</p>", "Para 1 Para 2"),
+            # XSS script tags
+            ("<script>alert('xss')</script>Text", "alert('xss')Text"),
+            ("<SCRIPT>malicious</SCRIPT>Safe", "maliciousSafe"),
+            # Combined scenarios
+            ("<p>&amp; test &lt;value&gt;</p>", "& test <value>"),
+            (
+                "<jats:p>  Multiple &amp; spaces  </jats:p>",
+                "Multiple & spaces",
+            ),
         ],
     )
     def test_strip_html_tags(self, text: str | None, expected: str | None) -> None:
-        """Test HTML tag stripping."""
+        """Test HTML tag stripping with entity decoding and whitespace normalization."""
         assert strip_html_tags(text) == expected
 
     def test_nested_tags(self) -> None:
         """Test stripping nested HTML tags."""
         assert strip_html_tags("<div><p>Nested <b>tags</b></p></div>") == "Nested tags"
+
+    def test_complex_html_abstract(self) -> None:
+        """Test stripping complex HTML typical in scientific abstracts."""
+        html = """<jats:p>This study investigates the &alpha;-receptor
+        binding affinity of <jats:italic>compound X</jats:italic>.
+        Results show IC<jats:sub>50</jats:sub> &lt; 10 nM.</jats:p>"""
+        expected = (
+            "This study investigates the \u03b1-receptor binding affinity of compound X. "
+            "Results show IC50 < 10 nM."
+        )
+        assert strip_html_tags(html) == expected
+
+    def test_script_tag_content_preserved(self) -> None:
+        """Test that script tag content is preserved (tags removed, content kept).
+
+        Note: This function only strips tags, it doesn't sanitize for security.
+        Security-sensitive contexts should use proper HTML sanitization libraries.
+        """
+        result = strip_html_tags("<script>alert(1)</script>Safe text")
+        assert result == "alert(1)Safe text"
+
+    def test_numeric_entities(self) -> None:
+        """Test decoding of numeric HTML entities."""
+        assert strip_html_tags("&#60;tag&#62;") == "<tag>"
+        assert strip_html_tags("&#x3C;hex&#x3E;") == "<hex>"
 
 
 class TestParsePageRange:
