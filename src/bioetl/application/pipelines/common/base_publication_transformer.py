@@ -184,9 +184,7 @@ class BasePublicationTransformer(BaseTransformer):
         )
 
         # 6. Compute content hash (exclude metadata fields)
-        hash_data = {
-            k: v for k, v in business_data.items() if not k.startswith("_")
-        }
+        hash_data = {k: v for k, v in business_data.items() if not k.startswith("_")}
         content_hash = self.compute_content_hash(hash_data, exclude_none=True)
 
         # 7. Create domain entity
