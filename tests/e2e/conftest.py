@@ -63,6 +63,15 @@ def e2e_environment():
     pd.set_option("display.width", 80)
     pd.set_option("display.max_columns", 20)
 
+    # Pre-import pandera engines to avoid import contention in thread pool executors.
+    # On Windows, pandera's is_geopandas_dtype() check can hang when importing
+    # during schema validation in concurrent threads. Pre-importing warms up
+    # the import cache and prevents filesystem stat hangs.
+    try:
+        import pandera.engines.pandas_engine  # noqa: F401
+    except ImportError:
+        pass  # Pandera may not have this submodule in all versions
+
     # Register all pipelines (required for bootstrap_pipeline to work)
     from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 

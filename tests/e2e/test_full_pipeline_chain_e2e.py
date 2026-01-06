@@ -92,11 +92,16 @@ async def test_chembl_molecule_then_activity_chain(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
+@pytest.mark.timeout(600)  # Extended timeout: 5 pipelines × ~60s each + Gold validation
 async def test_all_chembl_pipelines_chain(e2e_data_dir: Path):
     """E2E: Run all ChEMBL pipelines in sequence.
 
     Order: Target → Molecule → Document → Activity → Assay
     This tests the full ChEMBL data ecosystem.
+
+    Note: This test has an extended timeout (600s) because it runs 5 pipelines
+    sequentially, each with HTTP calls, Delta Lake operations, and Gold layer
+    validation with Pandera schema checks.
     """
     pipelines_in_order = [
         ("chembl_target", "chembl_target", 2),
