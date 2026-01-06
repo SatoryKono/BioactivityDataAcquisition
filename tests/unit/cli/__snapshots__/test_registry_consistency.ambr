@@ -8,6 +8,7 @@
     - chembl_cell_line
     - chembl_compound_record
     - chembl_document
+    - chembl_document_similarity
     - chembl_document_term
     - chembl_molecule
     - chembl_target
