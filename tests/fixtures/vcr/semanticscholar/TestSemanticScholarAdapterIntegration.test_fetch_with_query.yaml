@@ -1,0 +1,124 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - BioETL/1.0
+    method: GET
+    uri: https://api.semanticscholar.org/graph/v1/paper/search?query=CRISPR+gene+editing&fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal&offset=0&limit=3
+  response:
+    body:
+      string: |
+        {
+          "total": 50000,
+          "offset": 0,
+          "next": 3,
+          "data": [
+            {
+              "paperId": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b",
+              "externalIds": {
+                "DOI": "10.1126/science.aad5227",
+                "CorpusId": 123456
+              },
+              "title": "CRISPR-Cas9 structures and mechanisms",
+              "abstract": "CRISPR-Cas9 has revolutionized genome editing.",
+              "year": 2016,
+              "publicationDate": "2016-01-01",
+              "venue": "Science",
+              "authors": [
+                {"authorId": "1111111", "name": "Jennifer Doudna"}
+              ],
+              "citationCount": 5000,
+              "referenceCount": 80,
+              "isOpenAccess": true,
+              "openAccessPdf": {
+                "url": "https://example.com/paper.pdf",
+                "status": "GOLD"
+              },
+              "tldr": {
+                "model": "tldr@v2.0.0",
+                "text": "CRISPR-Cas9 technology for genome editing."
+              },
+              "fieldsOfStudy": ["Biology", "Genetics"],
+              "publicationTypes": ["Review"],
+              "journal": {
+                "name": "Science",
+                "volume": "351"
+              }
+            },
+            {
+              "paperId": "2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c",
+              "externalIds": {
+                "DOI": "10.1038/nature14136",
+                "PubMed": "25587962",
+                "CorpusId": 789012
+              },
+              "title": "In vivo genome editing using Staphylococcus aureus Cas9",
+              "abstract": "A compact Cas9 ortholog for in vivo applications.",
+              "year": 2015,
+              "publicationDate": "2015-02-01",
+              "venue": "Nature",
+              "authors": [
+                {"authorId": "2222222", "name": "Feng Zhang"}
+              ],
+              "citationCount": 3000,
+              "referenceCount": 45,
+              "isOpenAccess": false,
+              "openAccessPdf": null,
+              "tldr": null,
+              "fieldsOfStudy": ["Biology"],
+              "publicationTypes": ["JournalArticle"],
+              "journal": {
+                "name": "Nature",
+                "volume": "520"
+              }
+            },
+            {
+              "paperId": "3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d",
+              "externalIds": {
+                "DOI": "10.1016/j.cell.2014.09.040",
+                "CorpusId": 345678
+              },
+              "title": "Development and applications of CRISPR-Cas9 for genome engineering",
+              "abstract": "Comprehensive overview of CRISPR-Cas9 applications.",
+              "year": 2014,
+              "publicationDate": "2014-10-01",
+              "venue": "Cell",
+              "authors": [
+                {"authorId": "3333333", "name": "Patrick Hsu"}
+              ],
+              "citationCount": 8000,
+              "referenceCount": 120,
+              "isOpenAccess": true,
+              "openAccessPdf": {
+                "url": "https://example.com/crispr-review.pdf",
+                "status": "GREEN"
+              },
+              "tldr": {
+                "model": "tldr@v2.0.0",
+                "text": "A comprehensive review of CRISPR-Cas9 genome engineering."
+              },
+              "fieldsOfStudy": ["Biology", "Computer Science"],
+              "publicationTypes": ["Review"],
+              "journal": {
+                "name": "Cell",
+                "volume": "157"
+              }
+            }
+          ]
+        }
+    headers:
+      Content-Type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1
