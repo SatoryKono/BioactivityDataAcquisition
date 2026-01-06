@@ -33,19 +33,6 @@ gold_filters:
       min: 1900
       max: 2100
 
-# Entity-specific transform steps
-transform:
-  version: "1.0.0"
-  steps:
-    - extract_openalex_id
-    - extract_doi
-    - reconstruct_abstract
-    - extract_authors
-    - extract_concepts
-    - normalize_dates
-    - add_metadata
-    - calculate_content_hash
-
 # Entity-specific sink overrides
 sink:
   bronze:

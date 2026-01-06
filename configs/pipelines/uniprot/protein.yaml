@@ -24,14 +24,6 @@ gold_filters:
   columns:
     reviewed: ["true"]  # Swiss-Prot (reviewed) only
 
-# Entity-specific transform steps (different from ChEMBL)
-transform:
-  version: "1.0.0"
-  steps:
-    - normalize_fields
-    - extract_features
-    - generate_content_hash
-
 # Entity-specific sink overrides (custom paths)
 sink:
   bronze:
