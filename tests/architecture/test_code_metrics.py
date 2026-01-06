@@ -53,7 +53,6 @@ class TestFileSizeLimits:
         "chemical.py": 330,  # 326 LOC - Chemical structure Value Objects (InChIKey, SMILES, PublicationYear)
         "validation.py": 330,  # 326 LOC - Domain validation utilities
         "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
-        "validation.py": 330,  # 326 LOC - Pure domain validation functions
         # Domain ports NoOp implementations
         "noop.py": 400,  # 383 LOC - NoOp implementations for Null Object Pattern (+ NoOpPiiHasher)
         # Domain Pandera schemas (declarative field definitions)
