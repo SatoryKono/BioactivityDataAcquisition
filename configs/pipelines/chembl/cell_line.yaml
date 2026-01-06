@@ -11,6 +11,7 @@ description: "Extract cell lines from ChEMBL API"
 
 primary_keys: ["cell_chembl_id"]
 silver_table: "chembl_cell_line"
+gold_table: "chembl_cell_line"
 
 source_file: ../../sources/chembl.yaml
 
@@ -26,6 +27,7 @@ sink:
   silver:
     path: "data/output/silver"
     primary_key: ["cell_chembl_id"]
+    partition_by: []
     sort_by:
       columns: ["cell_chembl_id"]
       ascending: true

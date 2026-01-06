@@ -28,14 +28,6 @@ gold_filters:
     - title
   columns: {}
 
-# Entity-specific transform steps
-transform:
-  version: "1.0.0"
-  steps:
-    - parse_xml
-    - extract_metadata
-    - normalize_dates
-
 # Entity-specific sink overrides
 sink:
   bronze:

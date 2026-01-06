@@ -11,6 +11,7 @@ description: "Extract scientific documents from ChEMBL API"
 
 primary_keys: ["document_chembl_id"]
 silver_table: "chembl_document"
+gold_table: "chembl_document"
 
 source_file: ../../sources/chembl.yaml
 

@@ -12,6 +12,7 @@ description: "Enrich publication records with CrossRef metadata via DOI resoluti
 
 primary_keys: ["doi"]
 silver_table: "crossref_publication"
+gold_table: "crossref_publication"
 
 source_file: ../../sources/crossref.yaml
 
@@ -25,16 +26,6 @@ gold_filters:
       min: 1900
       max: 2100
 
-# Entity-specific transform steps
-transform:
-  version: "1.0.0"
-  steps:
-    - normalize_doi
-    - extract_metadata
-    - strip_html_abstract
-    - add_metadata
-    - calculate_content_hash
-
 # Entity-specific sink overrides
 sink:
   bronze:
@@ -42,6 +33,7 @@ sink:
   silver:
     path: "data/output/silver"
     primary_key: ["doi"]
+    partition_by: []
     csv_export:
       path: "data/output/csv/silver"
   gold:

@@ -28,19 +28,6 @@ gold_filters:
       min: 1900
       max: 2100
 
-# Entity-specific transform steps
-transform:
-  version: "1.0.0"
-  steps:
-    - extract_external_ids
-    - extract_authors
-    - extract_journal_info
-    - extract_open_access_info
-    - extract_tldr
-    - normalize_dates
-    - add_metadata
-    - calculate_content_hash
-
 # Entity-specific sink configuration
 sink:
   bronze:

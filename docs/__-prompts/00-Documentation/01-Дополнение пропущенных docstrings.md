@@ -59,11 +59,11 @@ def fetch_batch(self, query: Query, limit: int = 100) -> Iterator[RawRecord]:
 
 ### 4. Шаблоны по типу компонента
 
-**Protocol (domain/ports.py):**
+**Protocol (domain/ports/, импорт из фасада):**
 ```python
 class DataSourcePort(Protocol):
     """Port for data source interactions.
-    
+
     Defines contract for extracting data from external providers.
     Implementations must handle rate limiting and circuit breaker (§3.1.4).
     """
@@ -119,7 +119,7 @@ grep -rL '"""' src/bioetl/**/*.py | head -20
 ```
 
 ### Шаг 2: Приоритизация
-1. Protocols в `domain/ports.py`
+1. Protocols в `domain/ports/`
 2. Публичные классы в `domain/`
 3. Pipeline классы в `application/`
 4. Adapter классы в `infrastructure/`
