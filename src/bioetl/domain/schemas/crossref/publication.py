@@ -10,7 +10,11 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
-from bioetl.domain.validation import DOI_REGEX_PATTERN
+from bioetl.domain.validation import (
+    DOI_REGEX_PATTERN,
+    MAX_PUBLICATION_YEAR,
+    MIN_PUBLICATION_YEAR,
+)
 
 # === Fixed Value Constants ===
 DOCUMENT_TYPES = ["PUBLICATION", "PREPRINT"]
@@ -68,7 +72,10 @@ class PublicationEnrichedSchema(ETLRecordSchema):
 
     # === Dates ===
     year: Series[int] | None = pa.Field(
-        nullable=True, ge=1800, le=2100, description="Publication year"
+        nullable=True,
+        ge=MIN_PUBLICATION_YEAR,
+        le=MAX_PUBLICATION_YEAR,
+        description="Publication year (1800-2100).",
     )
     published_print: Series[str] | None = pa.Field(
         nullable=True, description="Print publication date (ISO format)"

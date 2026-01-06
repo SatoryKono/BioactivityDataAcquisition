@@ -173,7 +173,7 @@ class PubMedPublicationTransformer(BaseTransformer):
 
         return {
             "pub_date": pub_date,
-            "pub_year": pub_year,
+            "year": pub_year,
             "publication_year": pub_year,
             "accepted_date": DateExtractor.extract_history_date(history, "accepted"),
             "received_date": DateExtractor.extract_history_date(history, "received"),

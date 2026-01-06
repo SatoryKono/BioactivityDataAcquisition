@@ -11,7 +11,11 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
-from bioetl.domain.validation import DOI_REGEX_PATTERN
+from bioetl.domain.validation import (
+    DOI_REGEX_PATTERN,
+    MAX_PUBLICATION_YEAR,
+    MIN_PUBLICATION_YEAR,
+)
 
 # Lookup method values for batch DOI resolution
 LOOKUP_METHODS = ["doi", "title_fallback", "title_only", "unknown"]
@@ -82,9 +86,9 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
 
     year: Series[int] = pa.Field(
         nullable=True,
-        ge=1500,
-        le=2100,
-        description="Publication year",
+        ge=MIN_PUBLICATION_YEAR,
+        le=MAX_PUBLICATION_YEAR,
+        description="Publication year (1800-2100).",
     )
 
     publication_date: Series[str] = pa.Field(

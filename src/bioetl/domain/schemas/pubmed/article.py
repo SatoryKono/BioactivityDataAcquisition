@@ -13,7 +13,11 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
-from bioetl.domain.validation import DOI_REGEX_PATTERN
+from bioetl.domain.validation import (
+    DOI_REGEX_PATTERN,
+    MAX_PUBLICATION_YEAR,
+    MIN_PUBLICATION_YEAR,
+)
 
 # === Fixed Value Constants ===
 PUBLICATION_STATUSES = ["ppublish", "epublish", "aheadofprint"]
@@ -128,15 +132,17 @@ class ArticleSchema(ETLRecordSchema):
     medline_pgn: Series[str] | None = pa.Field(
         nullable=True, description="Page numbers (MEDLINE format)"
     )
-    pub_year: Series[int] | None = pa.Field(
-        nullable=True, description="Publication year"
+    year: Series[int] | None = pa.Field(
+        nullable=True, description="Publication year (1800-2100)."
     )
 
-    @pa.check("pub_year", name="pub_year_range")
-    def _check_pub_year(cls, series: Series[int]) -> Series[bool]:
+    @pa.check("year", name="year_range")
+    def _check_year(cls, series: Series[int]) -> Series[bool]:
         """Validate publication year range."""
         return cast(
-            "Series[bool]", series.isna() | ((series >= 1800) & (series <= 2100))
+            "Series[bool]",
+            series.isna()
+            | ((series >= MIN_PUBLICATION_YEAR) & (series <= MAX_PUBLICATION_YEAR)),
         )
 
     pub_month: Series[int] | None = pa.Field(

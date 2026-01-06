@@ -110,21 +110,28 @@ class TestOpenAlexPublicationSchema:
         assert pd.isna(validated["doi"].iloc[0])
 
     def test_year_range_validation(self, valid_record: dict) -> None:
-        """Should validate year range (1500-2100)."""
+        """Should validate year range (1800-2100)."""
         # Valid year
         valid_record["year"] = 2024
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
         assert validated["year"].iloc[0] == 2024
 
+        # Valid boundary values
+        for year in [1800, 2100]:
+            valid_record["year"] = year
+            df = pd.DataFrame([valid_record])
+            validated = OpenAlexPublicationSchema.validate(df)
+            assert validated["year"].iloc[0] == year
+
         # Year too low
-        valid_record["year"] = 1400
+        valid_record["year"] = 1799
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             OpenAlexPublicationSchema.validate(df)
 
         # Year too high
-        valid_record["year"] = 2200
+        valid_record["year"] = 2101
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             OpenAlexPublicationSchema.validate(df)

@@ -211,7 +211,7 @@ class TestPubMedPublicationTransformer:
         assert result["pages"] == "123-145"
         # Dates
         assert result["pub_date"] == "2025-03-15"
-        assert result["pub_year"] == 2025
+        assert result["year"] == 2025
         assert result["publication_year"] == 2025
         assert result["epub_date"] == "2025-02-28"
         assert result["received_date"] == "2024-12-01"
@@ -496,7 +496,7 @@ class TestPubMedTransformerDateExtraction:
 
         assert result is not None
         assert result["pub_date"] == "2024"
-        assert result["pub_year"] == 2024
+        assert result["year"] == 2024
 
     @pytest.mark.asyncio
     async def test_year_month_date(
@@ -529,7 +529,7 @@ class TestPubMedTransformerDateExtraction:
 
         assert result is not None
         assert result["pub_date"] == "2024-12"
-        assert result["pub_year"] == 2024
+        assert result["year"] == 2024
 
     @pytest.mark.asyncio
     async def test_missing_history_dates(
