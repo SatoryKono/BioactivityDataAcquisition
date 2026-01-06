@@ -147,9 +147,7 @@ class UniProtProteinTransformer(BaseTransformer):
                 record, "TISSUE SPECIFICITY"
             ),
             "alternative_products": self._extract_alternative_products(record),
-            "disease_involvement": self._extract_comments_by_type(
-                record, "DISEASE"
-            ),
+            "disease_involvement": self._extract_comments_by_type(record, "DISEASE"),
             "similarity_comment": self._extract_comments_by_type(record, "SIMILARITY"),
             "caution": self._extract_comments_by_type(record, "CAUTION"),
             # Cross-references
@@ -332,9 +330,7 @@ class UniProtProteinTransformer(BaseTransformer):
         Returns:
             JSON array of alternative names or None.
         """
-        alt_names = self._extract_nested(
-            record, "proteinDescription.alternativeNames"
-        )
+        alt_names = self._extract_nested(record, "proteinDescription.alternativeNames")
         if not alt_names or not isinstance(alt_names, list):
             return None
 
@@ -686,15 +682,21 @@ class UniProtProteinTransformer(BaseTransformer):
             if go_term_value and ":" in go_term_value:
                 parts = go_term_value.split(":", 1)
                 if len(parts) == 2:
-                    aspect = parts[0].strip() if parts[0].strip() in ("F", "P", "C") else None
+                    aspect = (
+                        parts[0].strip()
+                        if parts[0].strip() in ("F", "P", "C")
+                        else None
+                    )
                     term = parts[1].strip() if parts[1].strip() else None
 
-            go_terms.append({
-                "id": go_id,
-                "term": term,
-                "aspect": aspect,
-                "evidence": props.get("GoEvidenceType"),
-            })
+            go_terms.append(
+                {
+                    "id": go_id,
+                    "term": term,
+                    "aspect": aspect,
+                    "evidence": props.get("GoEvidenceType"),
+                }
+            )
 
         return json.dumps(go_terms, ensure_ascii=False) if go_terms else None
 

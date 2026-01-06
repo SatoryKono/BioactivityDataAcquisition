@@ -64,6 +64,7 @@ class OpenAlexPublicationTransformer(BaseTransformer):
     def __init__(
         self,
         provider: str = "openalex",
+        entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
         gold_filters: GoldFilterConfig | None = None,
@@ -74,6 +75,7 @@ class OpenAlexPublicationTransformer(BaseTransformer):
 
         Args:
             provider: Data provider identifier. Defaults to 'openalex'.
+            entity_type: Entity type for metrics labels. Defaults to 'publication'.
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
             gold_filters: Optional filter configuration for Gold layer.
@@ -83,7 +85,7 @@ class OpenAlexPublicationTransformer(BaseTransformer):
         """
         super().__init__(
             provider,
-            entity_type="publication",
+            entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
             gold_filters=gold_filters,
