@@ -1,12 +1,6 @@
 """Pandera schema for ChEMBL Publication entity.
 
-Canonical name: ChemblPublicationSchema
-Deprecated alias: DocumentSchema (backward compatibility)
-
 Aligned with RULES.md v5.0 and ChEMBL 34 schema.
-
-.. versionchanged:: 2.0.0
-    DocumentSchema renamed to ChemblPublicationSchema for Ubiquitous Language alignment.
 """
 
 from __future__ import annotations
@@ -23,13 +17,7 @@ from bioetl.domain.validation import (
 
 
 class ChemblPublicationSchema(ETLRecordSchema):
-    """ChEMBL Publication validation schema for Silver layer.
-
-    Canonical name for DocumentSchema, aligned with Ubiquitous Language.
-
-    .. versionadded:: 2.0.0
-        Replaces :class:`DocumentSchema` as the canonical schema name.
-    """
+    """ChEMBL Publication validation schema for Silver layer."""
 
     # === Primary Key ===
     # doc_id: Series[int] = pa.Field(
@@ -89,13 +77,3 @@ class ChemblPublicationSchema(ETLRecordSchema):
         strict = True
         ordered = False
         coerce = True
-
-
-# === Deprecated Alias (backward compatibility) ===
-
-# DocumentSchema is a deprecated alias for ChemblPublicationSchema.
-# Use ChemblPublicationSchema in new code for Ubiquitous Language alignment.
-#
-# .. deprecated:: 2.0.0
-#     Use :class:`ChemblPublicationSchema` instead.
-DocumentSchema = ChemblPublicationSchema

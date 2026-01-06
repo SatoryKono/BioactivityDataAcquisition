@@ -138,7 +138,7 @@ class TestDoiSchemaIntegration:
     """Integration tests verifying DOI_REGEX_PATTERN is correctly imported in schemas."""
 
     def test_chembl_document_uses_doi_regex_pattern(self) -> None:
-        """Test ChEMBL DocumentSchema uses DOI_REGEX_PATTERN constant."""
+        """Test ChEMBL ChemblPublicationSchema uses DOI_REGEX_PATTERN constant."""
         from bioetl.domain.schemas.chembl import document
 
         # Verify the import exists

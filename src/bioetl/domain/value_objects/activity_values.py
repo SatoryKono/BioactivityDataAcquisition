@@ -7,11 +7,6 @@ Contains Value Objects for bioactivity data (Ubiquitous Language):
 
 These Value Objects encapsulate validation and unit conversion logic.
 
-Note:
-    This module was renamed from `measurements.py` to `activity_values.py`
-    to align with the Ubiquitous Language defined in glossary.md.
-    The old module name is deprecated but kept for backward compatibility.
-
 See Also:
     docs/glossary.md: Ubiquitous Language definitions
 """
