@@ -43,7 +43,7 @@ docs/
 ├── 00-map.md                    # This file (Project Navigator)
 ├── index.md                     # Welcome page
 ├── glossary.md                  # Ubiquitous Language terminology
-├── RULES.md                     # Canonical rules document (v5.9)
+├── RULES.md                     # Canonical rules document (v5.10)
 ├── REQUIREMENTS.md              # 127 testable requirements
 ├── CHANGELOG.md                 # Version history
 ├── refactoring-plan.md          # Current refactoring roadmap
@@ -339,12 +339,12 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2026-01-01   | v5.9 (TTL/Heartbeat Sync)    |
+| RULES.md                 | 2026-01-06   | v5.10 (TTL/Heartbeat Values) |
 | refactoring-plan.md      | 2025-12-31   | Active refactoring roadmap   |
 | REQUIREMENTS.md          | 2025-12-27   | v1.2 (127 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
 | 00-map.md                | 2026-01-06   | v6.3 Audit validated         |
-| 00-rules-summary.md      | 2026-01-01   | v5.9 Synced                  |
+| 00-rules-summary.md      | 2026-01-06   | v5.10 Synced                 |
 | 03-guides/               | 2025-12-31   | Consolidated (10 guides)     |
 | ADR-001..022             | 2025-12-31   | All 22 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
