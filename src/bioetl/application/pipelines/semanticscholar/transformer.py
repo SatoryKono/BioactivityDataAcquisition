@@ -46,7 +46,8 @@ class SemanticScholarPublicationTransformer(BaseTransformer):
     - publication_date: publicationDate
     - citation_count: citationCount
     - reference_count: referenceCount
-    - is_open_access: isOpenAccess
+    - is_oa: isOpenAccess (normalized)
+    - oa_status: openAccessPdf.status (normalized to lowercase)
     - open_access_url: openAccessPdf.url
     - fields_of_study: fieldsOfStudy
     - publication_types: publicationTypes
@@ -156,9 +157,9 @@ class SemanticScholarPublicationTransformer(BaseTransformer):
             "publication_date": rec.get("publicationDate"),
             "citation_count": rec.get("citationCount"),
             "reference_count": rec.get("referenceCount"),
-            "is_open_access": oa_info.get("is_open_access"),
+            "is_oa": oa_info.get("is_oa"),
             "open_access_url": oa_info.get("url"),
-            "open_access_status": oa_info.get("status"),
+            "oa_status": oa_info.get("oa_status"),
             "fields_of_study": self.serialize_json(fields_of_study),
             "publication_types": self.serialize_json(rec.get("publicationTypes")),
             "source": "semanticscholar",

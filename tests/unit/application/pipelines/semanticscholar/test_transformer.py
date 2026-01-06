@@ -107,9 +107,9 @@ class TestSemanticScholarPublicationTransformer:
         assert result["pages"] == "123-130"
         assert result["citation_count"] == 42
         assert result["reference_count"] == 85
-        assert result["is_open_access"] is True
+        assert result["is_oa"] is True
         assert result["open_access_url"] == "https://example.com/paper.pdf"
-        assert result["open_access_status"] == "GREEN"
+        assert result["oa_status"] == "green"  # Normalized to lowercase
         assert result["source"] == "semanticscholar"
         assert result["_lookup_method"] == "doi"
 
@@ -311,9 +311,9 @@ class TestSemanticScholarPublicationTransformer:
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        assert result["is_open_access"] is False
+        assert result["is_oa"] is False
         assert result["open_access_url"] is None
-        assert result["open_access_status"] is None
+        assert result["oa_status"] == "closed"  # Now returns "closed" for non-OA
 
 
 class TestTransformerWithPiiHasher:
