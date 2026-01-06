@@ -68,6 +68,8 @@ class IDMappingDataSource:
 
     async def __aenter__(self) -> Self:
         """Enter async context manager."""
+        # Enter the underlying client's context (opens HTTP client)
+        await self._client.__aenter__()
         self._is_open = True
         return self
 
@@ -82,6 +84,9 @@ class IDMappingDataSource:
 
     async def aclose(self) -> None:
         """Close data source and release resources."""
+        # Exit the underlying client's context (closes HTTP client)
+        if self._is_open:
+            await self._client.__aexit__(None, None, None)
         self._is_open = False
 
     async def fetch(
