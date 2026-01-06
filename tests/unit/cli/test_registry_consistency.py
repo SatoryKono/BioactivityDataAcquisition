@@ -119,16 +119,23 @@ class TestChemblPipelinesRegistered:
         """Verify each provider has at least one registered pipeline."""
         registered = test_registry.list_pipelines()
 
-        # Extract unique providers from registered pipeline names
-        providers = {name.split("_")[0] for name in registered}
+        # Map from provider to list of pipelines for that provider
+        provider_to_pipelines: dict[str, list[str]] = {}
+        for config in PIPELINE_CONFIGS:
+            provider_to_pipelines.setdefault(config.provider, []).append(
+                config.pipeline_name
+            )
 
-        # Expected providers based on PIPELINE_CONFIGS
-        expected_providers = {config.provider for config in PIPELINE_CONFIGS}
+        # Check each provider's pipelines are registered
+        missing_pipelines: list[str] = []
+        for provider, pipelines in provider_to_pipelines.items():
+            for pipeline in pipelines:
+                if pipeline not in registered:
+                    missing_pipelines.append(f"{provider}:{pipeline}")
 
-        assert providers == expected_providers, (
-            f"Provider mismatch. "
-            f"Expected: {sorted(expected_providers)}, "
-            f"Got: {sorted(providers)}"
+        assert not missing_pipelines, (
+            f"Pipelines not registered: {missing_pipelines}. "
+            f"Add them to the registry in pipeline_factories.py"
         )
 
 
@@ -367,13 +374,30 @@ class TestTransformerClassConsistency:
             )
 
     def test_all_configs_have_matching_provider(self) -> None:
-        """Verify PIPELINE_CONFIG.provider matches pipeline_name prefix."""
+        """Verify PIPELINE_CONFIG.provider matches pipeline_name prefix.
+
+        Note: Some pipelines use specialized providers that don't follow
+        the standard {provider}_{entity} naming convention, e.g.,
+        'uniprot_idmapping' uses provider 'uniprot_idmapping' (not 'uniprot').
+        """
+        # Pipelines with specialized providers that don't follow naming convention
+        specialized_providers = {
+            "uniprot_idmapping": "uniprot_idmapping",
+        }
+
         for config in PIPELINE_CONFIGS:
-            prefix = config.pipeline_name.split("_")[0]
-            assert config.provider == prefix, (
-                f"Pipeline {config.pipeline_name}: "
-                f"provider '{config.provider}' doesn't match prefix '{prefix}'"
-            )
+            if config.pipeline_name in specialized_providers:
+                expected = specialized_providers[config.pipeline_name]
+                assert config.provider == expected, (
+                    f"Pipeline {config.pipeline_name}: "
+                    f"provider '{config.provider}' doesn't match expected '{expected}'"
+                )
+            else:
+                prefix = config.pipeline_name.split("_")[0]
+                assert config.provider == prefix, (
+                    f"Pipeline {config.pipeline_name}: "
+                    f"provider '{config.provider}' doesn't match prefix '{prefix}'"
+                )
 
 
 # =============================================================================

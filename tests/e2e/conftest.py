@@ -229,6 +229,7 @@ def assert_silver_table_has_records(
     Raises:
         AssertionError: Если таблица пуста или записей меньше expected_min
     """
+
     table_path = data_dir / "silver" / table_name
     if not table_path.exists():
         raise AssertionError(f"Silver table does not exist: {table_path}")
@@ -266,6 +267,7 @@ def assert_gold_table_has_records(
     Raises:
         AssertionError: Если таблица пуста или записей меньше expected_min
     """
+
     table_path = data_dir / "gold" / table_name
     if not table_path.exists():
         raise AssertionError(f"Gold table does not exist: {table_path}")
@@ -291,6 +293,7 @@ def get_silver_records(data_dir: Path, table_name: str) -> list[dict]:
     Returns:
         Список словарей с записями
     """
+
     table_path = data_dir / "silver" / table_name
     dt = DeltaTable(str(table_path))
     return dt.to_pyarrow_table().to_pylist()
@@ -306,6 +309,7 @@ def get_gold_records(data_dir: Path, table_name: str) -> list[dict]:
     Returns:
         Список словарей с записями
     """
+
     table_path = data_dir / "gold" / table_name
     dt = DeltaTable(str(table_path))
     return dt.to_pyarrow_table().to_pylist()

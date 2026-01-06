@@ -14,15 +14,18 @@ CHEMBL_STATUS_URL = f"{CHEMBL_API_BASE}/status.json"
 ENTITY_MAPPING: dict[str, str] = {
     "activity": "activity",
     "assay": "assay",
+    "assay_parameters": "assay",
     "compound": "molecule",
     "molecule": "molecule",
     "target": "target",
     "target_component": "target_component",
     "document": "document",
     "document_similarity": "document_similarity",
+    "document_term": "document",
     "cell_line": "cell_line",
     "tissue": "tissue",
     "compound_record": "compound_record",
+    "protein_class": "protein_classification",
 }
 
 # Plural forms for API response keys (ChEMBL uses irregular plurals)
@@ -37,20 +40,24 @@ ENTITY_PLURAL: dict[str, str] = {
     "cell_line": "cell_lines",
     "tissue": "tissues",
     "compound_record": "compound_records",
+    "protein_classification": "protein_classifications",
 }
 
 # Primary key field overrides by entity type
 PK_FIELD_OVERRIDES: dict[str, str] = {
     "assay": "assay_chembl_id",
+    "assay_parameters": "assay_param_id",
     "molecule": "molecule_chembl_id",
     "compound": "molecule_chembl_id",
     "document": "document_chembl_id",
     "document_similarity": "sim_id",
+    "document_term": "document_chembl_id",
     "target": "target_chembl_id",
     "target_component": "component_id",
     "cell_line": "cell_chembl_id",
     "tissue": "tissue_chembl_id",
     "compound_record": "record_id",
+    "protein_class": "protein_class_id",
 }
 
 

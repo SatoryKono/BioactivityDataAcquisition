@@ -197,6 +197,39 @@ class PubChemAdapter(BaseSyncAdapter):
             "Use fetch_filtered() with a single filter_field instead."
         )
 
+    async def fetch_filtered_with_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records with fallback (not applicable for PubChem).
+
+        Implements FilterableDataSourcePort.fetch_filtered_with_fallback().
+
+        PubChem uses CID/SMILES for filtering which are always resolvable,
+        so fallback is not needed. This method simply delegates to fetch_filtered()
+        and ignores the fallback_mapping parameter.
+
+        Args:
+            entity_type: Type of entity to fetch
+            filter_ids: List of IDs to filter by
+            filter_field: Field name to filter on
+            fallback_mapping: Ignored - PubChem doesn't need fallback search
+            limit: Maximum number of records to fetch
+
+        Yields:
+            Dictionary records matching the filter criteria
+
+        """
+        _ = fallback_mapping  # Unused - PubChem IDs are always resolvable
+        async for record in self.fetch_filtered(
+            entity_type, filter_ids, filter_field, limit
+        ):
+            yield record
+
     async def fetch_as_models(
         self,
         entity_type: str,

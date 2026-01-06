@@ -163,7 +163,7 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     # === Source Tracking ===
     source: Series[str] = pa.Field(
         nullable=False,
-        isin=["semanticscholar"],
+        eq="semanticscholar",
         description="Data source identifier",
     )
 
