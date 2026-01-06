@@ -204,7 +204,10 @@ exclude_lines = [
     "raise NotImplementedError",
     "@abstractmethod",
 ]
-fail_under = 85
+# Note: fail_under is NOT set here because:
+# 1. CI test-matrix runs parallel test groups that cover partial codebase
+# 2. CI coverage-verify step explicitly uses --cov-fail-under=85
+# 3. Setting fail_under here would cause partial test groups to fail
 show_missing = true
 precision = 2
 
