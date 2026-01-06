@@ -52,6 +52,7 @@ class TestFileSizeLimits:
         "quarantine_entry.py": 520,  # 501 LOC - QuarantineEntry with detailed error info
         "identifiers.py": 350,  # 332 LOC - Value objects with validation
         "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
+        "validation.py": 330,  # 326 LOC - Pure domain validation functions
         # Domain ports NoOp implementations
         "noop.py": 400,  # 383 LOC - NoOp implementations for Null Object Pattern (+ NoOpPiiHasher)
         # Domain Pandera schemas (declarative field definitions)
