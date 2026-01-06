@@ -325,6 +325,12 @@ class Molecule(BaseEntity):
             raise ValueError(f"max_phase must be 0-4, got {self.max_phase}")
 
 
+def _validate_tanimoto(value: float | None, field_name: str) -> None:
+    """Validate Tanimoto coefficient is in [0.0, 1.0] range."""
+    if value is not None and not 0.0 <= value <= 1.0:
+        raise ValueError(f"{field_name} must be in [0.0, 1.0], got {value}")
+
+
 @dataclass(frozen=True, kw_only=True)
 class DocumentSimilarity(BaseEntity):
     """Represents similarity between two ChEMBL documents.
@@ -367,9 +373,7 @@ class DocumentSimilarity(BaseEntity):
             raise ValueError("doc_1 and doc_2 must be positive")
         if self.doc_1 == self.doc_2:
             raise ValueError("Document cannot be similar to itself")
-
-        # Validate Tanimoto range
-        for field_name in ("tid_tani", "mol_tani", "avg_tani", "max_tani"):
-            value = getattr(self, field_name)
-            if value is not None and not 0.0 <= value <= 1.0:
-                raise ValueError(f"{field_name} must be in [0.0, 1.0], got {value}")
+        _validate_tanimoto(self.tid_tani, "tid_tani")
+        _validate_tanimoto(self.mol_tani, "mol_tani")
+        _validate_tanimoto(self.avg_tani, "avg_tani")
+        _validate_tanimoto(self.max_tani, "max_tani")
