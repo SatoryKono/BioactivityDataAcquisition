@@ -1,0 +1,153 @@
+name: Port Contract Tests
+
+# Runs contract tests for domain ports to verify:
+# - All ports have required methods
+# - Implementations satisfy Protocol contracts
+# - Error conditions are handled correctly
+# - Concurrent access patterns work as expected
+
+on:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'src/bioetl/domain/ports/**'
+      - 'src/bioetl/infrastructure/**'
+      - 'tests/architecture/test_*contract*.py'
+      - '.github/workflows/port-contracts.yml'
+  pull_request:
+    branches: [main, master, develop]
+    paths:
+      - 'src/bioetl/domain/ports/**'
+      - 'src/bioetl/infrastructure/**'
+      - 'tests/architecture/test_*contract*.py'
+      - '.github/workflows/port-contracts.yml'
+  workflow_dispatch:
+    inputs:
+      include_hypothesis:
+        description: 'Include property-based tests (slower)'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  PYTHON_VERSION: "3.11"
+  HYPOTHESIS_PROFILE: ci
+  PYTHONDONTWRITEBYTECODE: 1
+  PYTHONUNBUFFERED: 1
+
+jobs:
+  # Fast contract tests for quick feedback
+  port-contracts:
+    name: Port Contract Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+
+      - name: Cache pytest
+        uses: actions/cache@v4
+        with:
+          path: .pytest_cache
+          key: pytest-contracts-${{ runner.os }}-${{ hashFiles('tests/architecture/test_*contract*.py') }}
+          restore-keys: |
+            pytest-contracts-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: uv sync --extra tests
+
+      - name: Run Port Contract Tests
+        run: |
+          uv run pytest \
+            tests/architecture/test_port_contracts.py \
+            tests/architecture/test_adapter_contracts.py \
+            tests/architecture/test_registry_contracts.py \
+            -v --tb=short \
+            --junit-xml=port-contracts-results.xml
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: port-contracts-results
+          path: port-contracts-results.xml
+          retention-days: 7
+
+  # Property-based contract tests (slower, more thorough)
+  hypothesis-contracts:
+    name: Property-Based Contract Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Skip on workflow_dispatch if hypothesis disabled
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.include_hypothesis == 'true'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+
+      - name: Cache hypothesis database
+        uses: actions/cache@v4
+        with:
+          path: |
+            .pytest_cache
+            .hypothesis
+          key: hypothesis-contracts-${{ runner.os }}-${{ hashFiles('tests/architecture/test_*hypothesis*.py') }}
+          restore-keys: |
+            hypothesis-contracts-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: uv sync --extra tests
+
+      - name: Run Hypothesis Contract Tests
+        run: |
+          uv run pytest \
+            tests/architecture/test_port_contracts_hypothesis.py \
+            -v --tb=short \
+            --junit-xml=hypothesis-contracts-results.xml
+        env:
+          HYPOTHESIS_PROFILE: ci
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hypothesis-contracts-results
+          path: hypothesis-contracts-results.xml
+          retention-days: 7
+
+  # Summary job for branch protection
+  contracts-status:
+    name: Contract Tests Status
+    runs-on: ubuntu-latest
+    needs: [port-contracts, hypothesis-contracts]
+    if: always()
+
+    steps:
+      - name: Check contract test results
+        run: |
+          if [[ "${{ needs.port-contracts.result }}" == "failure" ]]; then
+            echo "::error::Port contract tests failed"
+            exit 1
+          fi
+          if [[ "${{ needs.hypothesis-contracts.result }}" == "failure" ]]; then
+            echo "::error::Hypothesis contract tests failed"
+            exit 1
+          fi
+          echo "::notice::All contract tests passed"
