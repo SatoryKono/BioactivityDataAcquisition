@@ -17,6 +17,24 @@ from pydantic import BaseModel, ConfigDict, Field
 # === Shared Models ===
 
 
+class UniProtEcNumber(BaseModel):
+    """EC number entry."""
+
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
+
+    value: str = Field(description="EC number value (e.g., 2.7.11.1)")
+
+
+class UniProtKeyword(BaseModel):
+    """UniProt keyword entry."""
+
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
+
+    id: str = Field(description="Keyword ID (e.g., KW-0067)")
+    category: str | None = Field(default=None, description="Keyword category")
+    name: str = Field(description="Keyword name")
+
+
 class UniProtOrganism(BaseModel):
     """Organism information from UniProt."""
 
@@ -64,6 +82,9 @@ class UniProtRecommendedName(BaseModel):
     short_names: list[UniProtName] | None = Field(
         default_factory=list, alias="shortNames", description="Short names"
     )
+    ec_numbers: list[UniProtEcNumber] | None = Field(
+        default_factory=list, alias="ecNumbers", description="EC numbers"
+    )
 
 
 class UniProtProteinDescription(BaseModel):
@@ -79,6 +100,9 @@ class UniProtProteinDescription(BaseModel):
     )
     submitted_name: list[UniProtFullName] | None = Field(
         default_factory=list, alias="submittedName", description="Submitted names"
+    )
+    flag: str | None = Field(
+        default=None, description="Protein sequence completeness flag (Fragment/Precursor)"
     )
 
 
@@ -122,8 +146,64 @@ class UniProtText(BaseModel):
     )
 
 
+class UniProtLocation(BaseModel):
+    """Location value with evidence."""
+
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
+
+    value: str = Field(description="Location name")
+    evidences: list[UniProtEvidence] | None = Field(
+        default_factory=list, description="Supporting evidence"
+    )
+
+
+class UniProtSubcellularLocation(BaseModel):
+    """Subcellular location entry."""
+
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
+
+    location: UniProtLocation | None = Field(default=None, description="Location")
+    topology: UniProtLocation | None = Field(default=None, description="Topology")
+    orientation: UniProtLocation | None = Field(default=None, description="Orientation")
+
+
+class UniProtReaction(BaseModel):
+    """Catalytic reaction entry."""
+
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
+
+    name: str | None = Field(default=None, description="Reaction name")
+    ec_number: str | None = Field(
+        default=None, alias="ecNumber", description="EC number"
+    )
+    evidences: list[UniProtEvidence] | None = Field(
+        default_factory=list, description="Supporting evidence"
+    )
+
+
+class UniProtIsoform(BaseModel):
+    """Isoform entry for alternative products."""
+
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
+
+    isoform_ids: list[str] | None = Field(
+        default_factory=list, alias="isoformIds", description="Isoform identifiers"
+    )
+    name: UniProtName | None = Field(default=None, description="Isoform name")
+    sequence_status: str | None = Field(
+        default=None, alias="sequenceStatus", description="Sequence status"
+    )
+
+
 class UniProtComment(BaseModel):
-    """Protein comment/annotation."""
+    """Protein comment/annotation.
+
+    Supports multiple comment types with type-specific structured fields:
+    - FUNCTION, SUBUNIT, TISSUE_SPECIFICITY, ACTIVITY_REGULATION: texts[]
+    - CATALYTIC_ACTIVITY: reaction
+    - SUBCELLULAR_LOCATION: subcellularLocations[]
+    - ALTERNATIVE_PRODUCTS: isoforms[]
+    """
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
@@ -132,6 +212,20 @@ class UniProtComment(BaseModel):
         default_factory=list, description="Comment text entries"
     )
     molecule: str | None = Field(default=None, description="Molecule name")
+    # CATALYTIC_ACTIVITY specific
+    reaction: UniProtReaction | None = Field(
+        default=None, description="Catalytic reaction details"
+    )
+    # SUBCELLULAR_LOCATION specific
+    subcellular_locations: list[UniProtSubcellularLocation] | None = Field(
+        default_factory=list,
+        alias="subcellularLocations",
+        description="Subcellular location entries",
+    )
+    # ALTERNATIVE_PRODUCTS specific
+    isoforms: list[UniProtIsoform] | None = Field(
+        default_factory=list, description="Isoform entries"
+    )
 
 
 class UniProtFeatureLocation(BaseModel):
@@ -219,6 +313,21 @@ class UniProtProteinRecord(BaseModel):
         default=None, alias="uniProtkbId", description="UniProtKB ID (entry name)"
     )
 
+    # Secondary Accessions
+    secondary_accessions: list[str] | None = Field(
+        default_factory=list,
+        alias="secondaryAccessions",
+        description="Secondary accessions",
+    )
+
+    # Quality & Evidence
+    annotation_score: int | None = Field(
+        default=None, alias="annotationScore", description="Annotation quality (1-5)"
+    )
+    protein_existence: str | None = Field(
+        default=None, alias="proteinExistence", description="Protein existence evidence"
+    )
+
     # Organism
     organism: UniProtOrganism | None = Field(
         default=None, description="Source organism"
@@ -244,6 +353,11 @@ class UniProtProteinRecord(BaseModel):
         default_factory=list, description="Sequence features"
     )
 
+    # Keywords
+    keywords: list[UniProtKeyword] | None = Field(
+        default_factory=list, description="UniProt keywords"
+    )
+
     # Cross-References
     uniprot_kb_cross_references: list[UniProtCrossReference] | None = Field(
         default_factory=list,
@@ -259,13 +373,6 @@ class UniProtProteinRecord(BaseModel):
     # Extra Attributes
     extra_attributes: UniProtExtraAttributes | None = Field(
         default=None, alias="extraAttributes", description="Extra attributes"
-    )
-
-    # Secondary Accessions
-    secondary_accessions: list[str] | None = Field(
-        default_factory=list,
-        alias="secondaryAccessions",
-        description="Secondary accessions",
     )
 
 
