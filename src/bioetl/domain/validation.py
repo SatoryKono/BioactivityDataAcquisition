@@ -231,3 +231,47 @@ def validate_doi(doi: str | None) -> bool:
     if not doi or not isinstance(doi, str):
         return False
     return bool(_DOI_PATTERN.match(doi.strip().lower()))
+
+
+# =============================================================================
+# InChI Key Validation
+# =============================================================================
+
+# InChI Key format: XXXXXXXXXXXXXX-YYYYYYYYYY-Z
+# - First block: 14 uppercase letters (connectivity layer)
+# - Second block: 10 uppercase letters (stereochemistry + isotopes)
+# - Third block: 1 uppercase letter (protonation)
+# Total: 27 characters (14 + 1 + 10 + 1 + 1 = 27)
+# Reference: IUPAC InChI specification https://www.inchi-trust.org/
+INCHI_KEY_REGEX_PATTERN: str = r"^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
+_INCHI_KEY_PATTERN = re.compile(INCHI_KEY_REGEX_PATTERN)
+
+
+def validate_inchi_key(key: str | None) -> bool:
+    """Validate InChI Key format.
+
+    InChI Key is a 27-character string in format: XXXXXXXXXXXXXX-YYYYYYYYYY-Z
+    where each block contains only uppercase letters A-Z.
+
+    Args:
+        key: InChI Key string to validate.
+
+    Returns:
+        True if InChI Key format is valid.
+
+    Example:
+        >>> validate_inchi_key("BSYNRYMUTXBXSQ-UHFFFAOYSA-N")  # Aspirin
+        True
+        >>> validate_inchi_key("RYYVLZVUVIJVGH-UHFFFAOYSA-N")  # Caffeine
+        True
+        >>> validate_inchi_key("bsynrymutxbxsq-uhfffaoysa-n")  # Lowercase
+        False
+        >>> validate_inchi_key("invalid")
+        False
+        >>> validate_inchi_key(None)
+        False
+
+    """
+    if not key or not isinstance(key, str):
+        return False
+    return bool(_INCHI_KEY_PATTERN.match(key.strip()))
