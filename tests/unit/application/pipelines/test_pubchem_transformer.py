@@ -9,6 +9,7 @@ import pytest
 
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.transformations import safe_float
 from bioetl.domain.types import RunType
 
 
@@ -250,3 +251,154 @@ class TestPubChemCompoundTransformer:
         assert isinstance(result["_run_id"], str)
         assert isinstance(result["_run_type"], str)
         assert isinstance(result["_ingestion_ts"], str)
+
+    @pytest.mark.asyncio
+    async def test_transform_molecular_weight_float_conversion(
+        self, transformer, mock_context
+    ):
+        """Test that molecular_weight is converted from string to float."""
+        record = {
+            "cid": 2244,
+            "molecular_formula": "C9H8O4",
+            "molecular_weight": "180.156",
+            "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["molecular_weight"] == 180.156
+        assert isinstance(result["molecular_weight"], float)
+
+    @pytest.mark.asyncio
+    async def test_transform_molecular_weight_numeric_input(
+        self, transformer, mock_context
+    ):
+        """Test that numeric molecular_weight is preserved as float."""
+        record = {
+            "cid": 2244,
+            "molecular_weight": 180.156,
+            "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["molecular_weight"] == 180.156
+        assert isinstance(result["molecular_weight"], float)
+
+    @pytest.mark.asyncio
+    async def test_transform_molecular_weight_none(self, transformer, mock_context):
+        """Test that None molecular_weight is preserved as None."""
+        record = {
+            "cid": 2244,
+            "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+            # molecular_weight not provided
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result.get("molecular_weight") is None
+
+    @pytest.mark.asyncio
+    async def test_transform_molecular_weight_empty_string(
+        self, transformer, mock_context
+    ):
+        """Test that empty string molecular_weight becomes None."""
+        record = {
+            "cid": 2244,
+            "molecular_weight": "",
+            "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result.get("molecular_weight") is None
+
+    @pytest.mark.asyncio
+    async def test_transform_molecular_weight_invalid_string(
+        self, transformer, mock_context
+    ):
+        """Test that invalid string molecular_weight becomes None."""
+        record = {
+            "cid": 2244,
+            "molecular_weight": "invalid",
+            "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result.get("molecular_weight") is None
+
+    @pytest.mark.asyncio
+    async def test_transform_molecular_weight_negative(self, transformer, mock_context):
+        """Test that negative molecular_weight becomes None."""
+        record = {
+            "cid": 2244,
+            "molecular_weight": "-5.0",
+            "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result.get("molecular_weight") is None
+
+    @pytest.mark.asyncio
+    async def test_transform_molecular_weight_zero(self, transformer, mock_context):
+        """Test that zero molecular_weight is preserved."""
+        record = {
+            "cid": 2244,
+            "molecular_weight": "0",
+            "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["molecular_weight"] == 0.0
+
+    @pytest.mark.asyncio
+    async def test_transform_molecular_weight_precision(self, transformer, mock_context):
+        """Test that molecular_weight precision is preserved up to 10 decimal places."""
+        record = {
+            "cid": 2244,
+            "molecular_weight": "1234.5678901234",
+            "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        # Should be rounded to 10 decimal places
+        assert abs(result["molecular_weight"] - 1234.5678901234) < 1e-10
+
+
+@pytest.mark.unit
+class TestSafeFloatConversion:
+    """Tests for safe_float conversion function."""
+
+    @pytest.mark.parametrize(
+        "input_mw,expected",
+        [
+            ("180.156", 180.156),
+            ("0", 0.0),
+            ("1234.5678901234", 1234.5678901234),
+            ("", None),
+            (None, None),
+            ("invalid", None),
+            ("-5.0", -5.0),  # safe_float converts, transformer filters negative
+            (180.156, 180.156),
+            (0, 0.0),
+        ],
+    )
+    def test_molecular_weight_conversion(self, input_mw, expected):
+        """Test safe_float conversion for molecular weight values."""
+        result = safe_float(input_mw)
+        if expected is None:
+            assert result is None
+        else:
+            assert abs(result - expected) < 1e-10
