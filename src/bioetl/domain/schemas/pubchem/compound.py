@@ -18,6 +18,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.validation import INCHI_KEY_REGEX_PATTERN
 
 
 class PubchemMoleculeSchema(ETLRecordSchema):
@@ -78,7 +79,7 @@ class PubchemMoleculeSchema(ETLRecordSchema):
         """Validate InChI key format."""
         return cast(
             "Series[bool]",
-            series.isna() | series.str.match(r"^[A-Z]{14}-[A-Z]{10}-[A-Z]$"),
+            series.isna() | series.str.match(INCHI_KEY_REGEX_PATTERN),
         )
 
     # === Nomenclature ===
