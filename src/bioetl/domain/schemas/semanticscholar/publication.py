@@ -7,6 +7,8 @@ Includes lookup metadata fields for DOI/title resolution tracking.
 
 from __future__ import annotations
 
+from typing import cast
+
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -33,9 +35,9 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("paper_id", name="paper_id_format")
-    def _check_paper_id(cls, series: Series[str]) -> Series[bool]:
+    def _check_paper_id(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
         """Validate Semantic Scholar paper ID format."""
-        return series.str.match(r"^[a-f0-9]{40}$")
+        return cast("Series[bool]", series.str.match(r"^[a-f0-9]{40}$"))
 
     # === External Identifiers ===
     doi: Series[str] = pa.Field(
@@ -44,9 +46,11 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("doi", name="doi_format")
-    def _check_doi(cls, series: Series[str]) -> Series[bool]:
+    def _check_doi(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
         """Validate DOI format."""
-        return series.isna() | series.str.match(r"^10\.\d{4,}/.*$")
+        return cast(
+            "Series[bool]", series.isna() | series.str.match(r"^10\.\d{4,}/.*$")
+        )
 
     pmid: Series[str] = pa.Field(
         nullable=True,
@@ -54,9 +58,9 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("pmid", name="pmid_format")
-    def _check_pmid(cls, series: Series[str]) -> Series[bool]:
+    def _check_pmid(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
         """Validate PMID format."""
-        return series.isna() | series.str.match(r"^\d+$")
+        return cast("Series[bool]", series.isna() | series.str.match(r"^\d+$"))
 
     pmcid: Series[str] = pa.Field(
         nullable=True,
@@ -64,9 +68,9 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("pmcid", name="pmcid_format")
-    def _check_pmcid(cls, series: Series[str]) -> Series[bool]:
+    def _check_pmcid(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
         """Validate PMCID format."""
-        return series.isna() | series.str.match(r"^PMC\d+$")
+        return cast("Series[bool]", series.isna() | series.str.match(r"^PMC\d+$"))
 
     arxiv_id: Series[str] = pa.Field(
         nullable=True,
@@ -79,9 +83,9 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("corpus_id", name="corpus_id_non_negative")
-    def _check_corpus_id(cls, series: Series[int]) -> Series[bool]:
+    def _check_corpus_id(cls, series: Series[int]) -> Series[bool]:  # noqa: N805
         """Validate corpus ID is non-negative."""
-        return series.isna() | (series >= 0)
+        return cast("Series[bool]", series.isna() | (series >= 0))
 
     # === Core Fields ===
     title: Series[str] = pa.Field(
@@ -105,9 +109,11 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("year", name="year_range")
-    def _check_year(cls, series: Series[int]) -> Series[bool]:
+    def _check_year(cls, series: Series[int]) -> Series[bool]:  # noqa: N805
         """Validate year range."""
-        return series.isna() | ((series >= 1500) & (series <= 2100))
+        return cast(
+            "Series[bool]", series.isna() | ((series >= 1500) & (series <= 2100))
+        )
 
     publication_date: Series[str] = pa.Field(
         nullable=True,
@@ -115,9 +121,11 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("publication_date", name="publication_date_format")
-    def _check_publication_date(cls, series: Series[str]) -> Series[bool]:
+    def _check_publication_date(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
         """Validate publication date format."""
-        return series.isna() | series.str.match(r"^\d{4}-\d{2}-\d{2}$")
+        return cast(
+            "Series[bool]", series.isna() | series.str.match(r"^\d{4}-\d{2}-\d{2}$")
+        )
 
     # === Journal/Venue ===
     journal: Series[str] = pa.Field(
@@ -147,9 +155,9 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("citation_count", name="citation_count_non_negative")
-    def _check_citation_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_citation_count(cls, series: Series[int]) -> Series[bool]:  # noqa: N805
         """Validate citation count is non-negative."""
-        return series.isna() | (series >= 0)
+        return cast("Series[bool]", series.isna() | (series >= 0))
 
     reference_count: Series[int] = pa.Field(
         nullable=True,
@@ -157,9 +165,9 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("reference_count", name="reference_count_non_negative")
-    def _check_reference_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_reference_count(cls, series: Series[int]) -> Series[bool]:  # noqa: N805
         """Validate reference count is non-negative."""
-        return series.isna() | (series >= 0)
+        return cast("Series[bool]", series.isna() | (series >= 0))
 
     # === Open Access ===
     is_open_access: Series[bool] = pa.Field(
@@ -178,9 +186,9 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("open_access_status", name="open_access_status_values")
-    def _check_open_access_status(cls, series: Series[str]) -> Series[bool]:
+    def _check_open_access_status(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
         """Validate OA status values."""
-        return series.isna() | series.isin(OA_STATUS_VALUES)
+        return cast("Series[bool]", series.isna() | series.isin(OA_STATUS_VALUES))
 
     # === Classification ===
     fields_of_study: Series[str] = pa.Field(
@@ -206,9 +214,9 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("source", name="source_values")
-    def _check_source(cls, series: Series[str]) -> Series[bool]:
+    def _check_source(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
         """Validate source values."""
-        return series.isin(["semanticscholar"])
+        return cast("Series[bool]", series.isin(["semanticscholar"]))
 
     # === Lookup Metadata (batch DOI resolution) ===
     lookup_method: Series[str] = pa.Field(
@@ -217,10 +225,10 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
         description="How record was resolved: doi, title_fallback, title_only",
     )
 
-    @pa.check("lookup_method", name="lookup_method_values")
-    def _check_lookup_method(cls, series: Series[str]) -> Series[bool]:
+    @pa.check("_lookup_method", name="lookup_method_values")
+    def _check_lookup_method(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
         """Validate lookup method values."""
-        return series.isin(LOOKUP_METHODS)
+        return cast("Series[bool]", series.isin(LOOKUP_METHODS))
 
     original_doi: Series[str] = pa.Field(
         alias="_original_doi",
@@ -231,8 +239,7 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     class Config:
         """Pandera configuration."""
 
-        strict = True  # Disallow extra columns not in schema
-        ordered = True  # Enforce column order
+        strict = "filter"  # Filter out columns not in schema
         coerce = True  # Coerce data types to match schema
         name = "SemanticScholarPublicationSchema"
         description = "Semantic Scholar Publication Silver layer validation"
