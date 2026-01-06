@@ -7,7 +7,7 @@
 pipeline_name: chembl_document_term
 provider: chembl
 entity_type: document_term
-version: "1.0.0"
+version: "1.1.0"
 description: "Extract document terms (MeSH, keywords) from ChEMBL Document records"
 
 # Composite primary key (document_chembl_id + term_type + term)

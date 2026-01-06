@@ -6,7 +6,7 @@
 pipeline_name: pubmed_publications
 provider: pubmed
 entity_type: publication
-version: "1.0.0"
+version: "1.1.0"
 description: "Extract publication metadata from PubMed via Entrez API"
 
 primary_keys: ["pmid"]
