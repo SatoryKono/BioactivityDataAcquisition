@@ -15,7 +15,7 @@ from bioetl.domain.types import HealthStatus
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import IDMappingClientPort, LoggerPort
+    from bioetl.domain.ports import IDMappingPort, LoggerPort
 
 
 class IDMappingDataSource:
@@ -41,7 +41,7 @@ class IDMappingDataSource:
 
     def __init__(
         self,
-        idmapping_client: IDMappingClientPort,
+        idmapping_client: IDMappingPort,
         input_path: Path,
         logger: LoggerPort,
         from_db: str = "ChEMBL",
