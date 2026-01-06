@@ -216,7 +216,9 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     authors: Series[object] = pa.Field(nullable=True)  # list[str]
     pub_date: Series[str] = pa.Field(nullable=True)
     year: Series[float] = pa.Field(nullable=True, coerce=True)
-    publication_year: Series[float] = pa.Field(nullable=True, coerce=True)  # Legacy alias
+    publication_year: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # Legacy alias
     accepted_date: Series[str] = pa.Field(nullable=True)
     received_date: Series[str] = pa.Field(nullable=True)
     revised_date: Series[str] = pa.Field(nullable=True)
