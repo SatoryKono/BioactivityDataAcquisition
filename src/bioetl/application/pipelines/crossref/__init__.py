@@ -3,6 +3,11 @@
 Transformers and utilities for CrossRef data processing.
 """
 
-from bioetl.application.pipelines.crossref.transformer import CrossRefTransformer
+from bioetl.application.pipelines.crossref.transformer import (
+    CrossRefPublicationTransformer,
+)
 
-__all__ = ["CrossRefTransformer"]
+# Backward compatibility alias (deprecated, will be removed in v2.0)
+CrossRefTransformer = CrossRefPublicationTransformer
+
+__all__ = ["CrossRefPublicationTransformer", "CrossRefTransformer"]

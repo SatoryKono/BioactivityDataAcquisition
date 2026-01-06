@@ -63,7 +63,9 @@ from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
-from bioetl.application.pipelines.crossref.transformer import CrossRefTransformer
+from bioetl.application.pipelines.crossref.transformer import (
+    CrossRefPublicationTransformer,
+)
 from bioetl.application.pipelines.generic import GenericPipeline
 from bioetl.application.pipelines.openalex.transformer import (
     OpenAlexPublicationTransformer,
@@ -280,7 +282,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="crossref_publication_enrichment",
         provider="crossref",
-        transformer_class=CrossRefTransformer,
+        transformer_class=CrossRefPublicationTransformer,
         silver_schema=CROSSREF_PUBLICATION_SCHEMA,
         gold_schema=CrossRefPublicationGoldSchema,
     ),
