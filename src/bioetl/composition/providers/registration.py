@@ -488,11 +488,9 @@ def _create_uniprot_idmapping_data_source(
     http_client = HttpClientFactory.create_for_provider("uniprot", settings)
 
     # Create ID Mapping client
-    base_url = (
-        pipeline_config.source.api.base_url
-        if pipeline_config.source.api
-        else "https://rest.uniprot.org"
-    )
+    base_url = "https://rest.uniprot.org"
+    if pipeline_config.source.api and pipeline_config.source.api.base_url:
+        base_url = pipeline_config.source.api.base_url
     idmapping_client = UniProtIDMappingClient(
         http_client=http_client,
         logger=logger,
@@ -686,6 +684,8 @@ def register_all_providers() -> None:
     # UniProt ID Mapping - maps ChEMBL target IDs to UniProt accessions
     # Uses UniProt ID Mapping REST API (job-based async)
     # Input comes from CSV file, not external API filtering
+    # Note: IDMappingDataSource is a lightweight wrapper, actual API client is
+    # UniProtIDMappingClient created in the data_source_creator
     uniprot_idmapping_rate, uniprot_idmapping_capacity = _get_rate_limit_from_config(
         "uniprot"
     )
@@ -693,7 +693,7 @@ def register_all_providers() -> None:
         ProviderRegistry.register(
             "uniprot_idmapping",
             ProviderConfig(
-                adapter_class=UniProtIDMappingClient,
+                adapter_class=IDMappingDataSource,
                 http_config=HttpConfig(
                     rate=uniprot_idmapping_rate,
                     capacity=uniprot_idmapping_capacity,

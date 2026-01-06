@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import asyncio
 import re
-from collections.abc import Mapping
+from collections.abc import AsyncIterator, Mapping
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.ports.noop import NoOpMetrics
@@ -396,6 +396,30 @@ class UniProtIDMappingClient(BaseHttpAdapter):
             Health check endpoint path.
         """
         return "/configure/idmapping/fields"
+
+    async def fetch(
+        self,
+        entity_type: str,
+        limit: int | None = None,
+        query: str | None = None,
+        filter_ids: list[str] | None = None,
+        filter_field: str | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Not implemented - use IDMappingDataSource instead.
+
+        This client is designed to be used via IDMappingDataSource,
+        not directly as a DataSourcePort. Use map_ids() for direct
+        ID mapping operations.
+
+        Raises:
+            NotImplementedError: Always, as this is not a data source.
+        """
+        raise NotImplementedError(
+            "UniProtIDMappingClient is not a DataSourcePort. "
+            "Use IDMappingDataSource for pipeline integration, "
+            "or call map_ids() directly for ID mapping operations."
+        )
+        yield  # pragma: no cover  # Make this an async generator
 
     def __repr__(self) -> str:
         """Return string representation."""
