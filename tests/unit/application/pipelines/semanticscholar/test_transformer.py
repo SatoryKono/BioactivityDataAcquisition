@@ -269,15 +269,18 @@ class TestSemanticScholarPublicationTransformer:
         mock_context: PipelineContext,
         sample_record: dict[str, Any],
     ) -> None:
-        """Test that lineage fields are added."""
+        """Test that lineage fields are added.
+
+        Note: _dq_warn and _dq_error are added later in the pipeline
+        (record processor level), not in the transformer itself.
+        This aligns with the OpenAlex transformer pattern.
+        """
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
         assert result["_run_id"] == "12345678-1234-5678-1234-567812345678"
         assert result["_run_type"] == "incremental"
         assert result["_index"] == 0
-        assert result["_dq_warn"] is False
-        assert result["_dq_error"] is False
 
     @pytest.mark.asyncio
     async def test_transform_invalid_year_filtered(
