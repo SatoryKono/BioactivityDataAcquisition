@@ -70,7 +70,7 @@ docs/
 │   ├── data-layers.md           # Bronze/Silver/Gold layer details
 │   ├── observability-layers.md  # Observability architecture
 │   ├── diagrams.md              # Mermaid diagrams collection
-│   ├── decisions/               # ADR-001..022 (22 records)
+│   ├── decisions/               # ADR-001..024 (24 records)
 │   └── diagrams/                # 34 Mermaid diagram files + render_diagrams.py
 │
 ├── 03-guides/                   # How-to guides (10 guides)
@@ -165,6 +165,10 @@ docs/
 | [ADR-018: Gold Strict Validation](02-architecture/decisions/ADR-018-gold-strict-validation.md) | Pandera Gold validation                | §2.7     |
 | [ADR-019: Observability Port Enforcement](02-architecture/decisions/ADR-019-observability-port-enforcement.md) | REQ-OBS-001 compliance       | §5.1     |
 | [ADR-020: BasePipeline Decomposition](02-architecture/decisions/ADR-020-basepipeline-decomposition.md) | God Object refactoring       | §1.1     |
+| [ADR-021: DDD Aggregates](02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md) | DDD aggregates adoption       | -        |
+| [ADR-022: Tracing NoOp](02-architecture/decisions/ADR-022-tracing-noop.md) | NoOp for tracing              | -        |
+| [ADR-023: Entity Type Patterns](02-architecture/decisions/ADR-023-entity-type-patterns.md) | Entity type patterns          | -        |
+| [ADR-024: Entity Naming Unification](02-architecture/decisions/ADR-024-entity-naming-unification.md) | Entity naming unification     | -        |
 
 ### Data Management
 
@@ -346,10 +350,10 @@ graph TD
 | 00-map.md                | 2026-01-06   | v6.3 Audit validated         |
 | 00-rules-summary.md      | 2026-01-06   | v5.10 Synced                 |
 | 03-guides/               | 2025-12-31   | Consolidated (10 guides)     |
-| ADR-001..022             | 2025-12-31   | All 22 ADRs documented       |
+| ADR-001..024             | 2026-01-06   | All 24 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
-| audits/                  | 2026-01-06   | 28 files (audit added)       |
+| audits/                  | 2026-01-06   | 31 files (audit added)       |
 | 02-architecture/diagrams/| 2025-12-31   | 34 Mermaid diagrams          |
 
 ---
