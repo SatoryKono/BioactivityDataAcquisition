@@ -19,6 +19,7 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_tldr,
     validate_year,
 )
+from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -183,42 +184,52 @@ class SemanticScholarPublicationTransformer(BaseTransformer):
             SilverRecord if transformation successful, None if record should be skipped.
 
         """
-        # Extract business fields
-        fields = self._extract_business_fields(record)
+        # 1. Extract business fields
+        business_data = self._extract_business_fields(record)
 
-        # Skip if no ID
-        if not fields.get("paper_id"):
+        # 2. Validate required field
+        paper_id = business_data.get("paper_id")
+        if not paper_id:
             context.logger.warning(
                 "record_skipped_no_id",
                 index=index,
-                lookup_method=fields.get("_lookup_method"),
+                lookup_method=business_data.get("_lookup_method"),
             )
             return None
 
-        # Log fallback usage for metrics
-        if fields.get("_lookup_method") in ("title_fallback", "title_only"):
+        # 3. Log fallback usage for metrics
+        lookup_method = business_data.get("_lookup_method", "unknown")
+        if lookup_method in ("title_fallback", "title_only"):
             context.logger.info(
                 "fallback_lookup_used",
-                paper_id=fields["paper_id"],
-                lookup_method=fields["_lookup_method"],
-                original_doi=fields.get("_original_doi"),
+                paper_id=paper_id,
+                lookup_method=lookup_method,
+                original_doi=business_data.get("_original_doi"),
             )
 
-        # Compute entity_id and content_hash
-        # Exclude lookup metadata from content hash (they're operational, not content)
-        business_data = {k: v for k, v in fields.items() if not k.startswith("_lookup")}
-        content_hash = self.compute_content_hash(business_data)
-        entity_id = self.compute_entity_id(fields["paper_id"], fields)
+        # 4. Generate entity ID using IdentityService
+        entity_id = self.compute_entity_id(
+            source_id=paper_id,
+            record={"paper_id": paper_id},
+        )
 
-        # Add ETL metadata
-        fields["entity_id"] = str(entity_id)
-        fields["content_hash"] = str(content_hash)
-        fields["_run_id"] = str(context.run_id)
-        fields["_run_type"] = context.run_type.value
-        fields["_source_batch_id"] = None
-        fields["_ingestion_ts"] = context.started_at.isoformat()
-        fields["_dq_warn"] = False
-        fields["_dq_error"] = False
-        fields["_index"] = index
+        # 5. Compute content hash (exclude lookup metadata from hash)
+        hash_data = {
+            k: v
+            for k, v in business_data.items()
+            if not k.startswith("_")  # Exclude _lookup_method, _original_doi
+        }
+        content_hash = self.compute_content_hash(hash_data, exclude_none=True)
 
-        return cast("SilverRecord", fields)
+        # 6. Create domain entity
+        entity = self._create_entity(
+            SemanticScholarPublicationEntity,
+            context,
+            entity_id=entity_id,
+            content_hash=content_hash,
+            index=index,
+            **business_data,
+        )
+
+        # 7. Convert to SilverRecord
+        return cast("SilverRecord", self.entity_to_silver_record(entity))
