@@ -108,15 +108,15 @@ lock = MemoryLock()
 | **Graceful Shutdown** | `aclose()` — отменяет TTL checker и освобождает все блокировки | `memory_lock.py:240-256` |
 
 **Конфигурация по умолчанию** (из `PipelineSettings`):
-- `heartbeat_interval = 20s` (см. `config.py:254`)
-- `effective_lock_ttl = heartbeat_interval * 3 = 60s`
+- `heartbeat_interval = 30s` (см. `config.py:238`)
+- `effective_lock_ttl = heartbeat_interval * 3 = 90s`
 - TTL check interval = 1s
 
 **Пример использования:**
 
 ```python
 lock = MemoryLock()
-await lock.acquire(key="pipeline:chembl", owner_id=run_id, ttl=60)
+await lock.acquire(key="pipeline:chembl", owner_id=run_id, ttl=90)
 
 # В пайплайне — периодически продлевать
 await lock.heartbeat(key="pipeline:chembl", owner_id=run_id)

@@ -15,7 +15,7 @@ stateDiagram-v2
 
     state LOCK_ACQUIRING {
         [*] --> RequestLock
-        RequestLock: acquire(key, owner_id, ttl=60s)
+        RequestLock: acquire(key, owner_id, ttl=90s)
         RequestLock --> WaitingForLock: blocked
         WaitingForLock: wait_timeout=300s
         RequestLock --> LockAcquired: success
