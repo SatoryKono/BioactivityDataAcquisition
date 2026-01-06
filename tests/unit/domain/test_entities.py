@@ -749,3 +749,205 @@ class TestWorkDeprecation:
 
         # Should be recognized as Work via metaclass
         assert isinstance(publication, Work)
+
+
+@pytest.mark.unit
+class TestProteinClassification:
+    """Tests for ProteinClassification entity."""
+
+    def test_create_root_node(self, base_entity_kwargs):
+        """Test creating a root classification node."""
+        from bioetl.domain.entities import ProteinClassification
+
+        entity = ProteinClassification(
+            **base_entity_kwargs,
+            protein_class_id=1,
+            parent_id=None,
+            pref_name="Enzyme",
+            class_level=1,
+        )
+
+        assert entity.protein_class_id == 1
+        assert entity.is_root() is True
+        assert entity.is_deprecated() is False
+
+    def test_create_child_node(self, base_entity_kwargs):
+        """Test creating a child classification node."""
+        from bioetl.domain.entities import ProteinClassification
+
+        entity = ProteinClassification(
+            **base_entity_kwargs,
+            protein_class_id=100,
+            parent_id=1,
+            pref_name="Kinase",
+            class_level=2,
+        )
+
+        assert entity.protein_class_id == 100
+        assert entity.parent_id == 1
+        assert entity.is_root() is False
+
+    def test_deprecated_by_replaced_by(self, base_entity_kwargs):
+        """Test deprecation via replaced_by field."""
+        from bioetl.domain.entities import ProteinClassification
+
+        entity = ProteinClassification(
+            **base_entity_kwargs,
+            protein_class_id=50,
+            replaced_by=100,
+        )
+
+        assert entity.is_deprecated() is True
+
+    def test_deprecated_by_downgraded_flag(self, base_entity_kwargs):
+        """Test deprecation via downgraded flag."""
+        from bioetl.domain.entities import ProteinClassification
+
+        entity = ProteinClassification(
+            **base_entity_kwargs,
+            protein_class_id=60,
+            downgraded=1,
+        )
+
+        assert entity.is_deprecated() is True
+
+    def test_not_deprecated_when_downgraded_zero(self, base_entity_kwargs):
+        """Test not deprecated when downgraded is 0."""
+        from bioetl.domain.entities import ProteinClassification
+
+        entity = ProteinClassification(
+            **base_entity_kwargs,
+            protein_class_id=60,
+            downgraded=0,
+        )
+
+        assert entity.is_deprecated() is False
+
+    def test_invalid_protein_class_id_zero(self, base_entity_kwargs):
+        """Test validation of protein_class_id with zero."""
+        from bioetl.domain.entities import ProteinClassification
+
+        with pytest.raises(ValueError, match="protein_class_id must be >= 1"):
+            ProteinClassification(
+                **base_entity_kwargs,
+                protein_class_id=0,
+            )
+
+    def test_invalid_protein_class_id_negative(self, base_entity_kwargs):
+        """Test validation of protein_class_id with negative value."""
+        from bioetl.domain.entities import ProteinClassification
+
+        with pytest.raises(ValueError, match="protein_class_id must be >= 1"):
+            ProteinClassification(
+                **base_entity_kwargs,
+                protein_class_id=-1,
+            )
+
+    def test_invalid_class_level_zero(self, base_entity_kwargs):
+        """Test validation of class_level with zero."""
+        from bioetl.domain.entities import ProteinClassification
+
+        with pytest.raises(ValueError, match="class_level must be 1-8"):
+            ProteinClassification(
+                **base_entity_kwargs,
+                protein_class_id=1,
+                class_level=0,
+            )
+
+    def test_invalid_class_level_too_high(self, base_entity_kwargs):
+        """Test validation of class_level with value > 8."""
+        from bioetl.domain.entities import ProteinClassification
+
+        with pytest.raises(ValueError, match="class_level must be 1-8"):
+            ProteinClassification(
+                **base_entity_kwargs,
+                protein_class_id=1,
+                class_level=9,
+            )
+
+    def test_valid_class_levels(self, base_entity_kwargs):
+        """Test that all valid class levels (1-8) are accepted."""
+        from bioetl.domain.entities import ProteinClassification
+
+        for level in range(1, 9):
+            entity = ProteinClassification(
+                **base_entity_kwargs,
+                protein_class_id=level,
+                class_level=level,
+            )
+            assert entity.class_level == level
+
+    def test_invalid_downgraded_value(self, base_entity_kwargs):
+        """Test validation of downgraded flag with invalid value."""
+        from bioetl.domain.entities import ProteinClassification
+
+        with pytest.raises(ValueError, match="downgraded must be 0 or 1"):
+            ProteinClassification(
+                **base_entity_kwargs,
+                protein_class_id=1,
+                downgraded=2,
+            )
+
+    def test_entity_is_frozen(self, base_entity_kwargs):
+        """Test that ProteinClassification is immutable."""
+        from bioetl.domain.entities import ProteinClassification
+
+        entity = ProteinClassification(
+            **base_entity_kwargs,
+            protein_class_id=1,
+            pref_name="Enzyme",
+        )
+        with pytest.raises(AttributeError):
+            entity.protein_class_id = 2
+
+    def test_full_entity_creation(self, base_entity_kwargs):
+        """Test creating entity with all fields."""
+        from bioetl.domain.entities import ProteinClassification
+
+        entity = ProteinClassification(
+            **base_entity_kwargs,
+            protein_class_id=100,
+            parent_id=1,
+            class_level=2,
+            pref_name="Kinase",
+            short_name="KIN",
+            protein_class_desc="Enzymes that transfer phosphate groups",
+            definition="Full definition of kinase class",
+            sort_order=10,
+            replaced_by=None,
+            downgraded=0,
+        )
+
+        assert entity.protein_class_id == 100
+        assert entity.parent_id == 1
+        assert entity.class_level == 2
+        assert entity.pref_name == "Kinase"
+        assert entity.short_name == "KIN"
+        assert entity.protein_class_desc == "Enzymes that transfer phosphate groups"
+        assert entity.definition == "Full definition of kinase class"
+        assert entity.sort_order == 10
+        assert entity.replaced_by is None
+        assert entity.downgraded == 0
+
+    def test_class_level_none_is_valid(self, base_entity_kwargs):
+        """Test that class_level can be None."""
+        from bioetl.domain.entities import ProteinClassification
+
+        entity = ProteinClassification(
+            **base_entity_kwargs,
+            protein_class_id=1,
+            class_level=None,
+        )
+        assert entity.class_level is None
+
+    def test_downgraded_none_is_valid(self, base_entity_kwargs):
+        """Test that downgraded can be None."""
+        from bioetl.domain.entities import ProteinClassification
+
+        entity = ProteinClassification(
+            **base_entity_kwargs,
+            protein_class_id=1,
+            downgraded=None,
+        )
+        assert entity.downgraded is None
+        assert entity.is_deprecated() is False

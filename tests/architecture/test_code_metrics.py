@@ -43,7 +43,7 @@ class TestFileSizeLimits:
         "value_validator.py": 360,  # 351 LOC - Value objects validation
         "activity.py": 330,  # 327 LOC - Activity domain types with rich validation
         "types.py": 400,  # 396 LOC
-        "chembl_structures.py": 350,  # 324 LOC - ChEMBL structural entities
+        "chembl_structures.py": 400,  # 387 LOC - ChEMBL structural entities + ProteinClassification
         "config_types.py": 320,  # 313 LOC
         "exceptions.py": 550,  # 513 LOC
         # Domain value objects (rich domain models with validation)

@@ -42,6 +42,7 @@ from bioetl.domain.entities.chembl_structures import (
     Document,
     DocumentTerm,
     Molecule,
+    ProteinClassification,
     Target,
     TargetComponent,
 )
@@ -77,6 +78,7 @@ __all__ = [
     "Molecule",
     "MoleculeRecord",
     "Protein",
+    "ProteinClassification",
     "PubChemCompoundRecord",
     "Publication",
     "PublicationEntity",
