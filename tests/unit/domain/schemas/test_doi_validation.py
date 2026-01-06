@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import re
 
-import pandas as pd
 import pytest
 
 from bioetl.domain.validation import DOI_REGEX_PATTERN
@@ -67,7 +66,9 @@ class TestDoiRegexPattern:
         - Suffix has at least 1 character
         """
         result = bool(re.match(DOI_REGEX_PATTERN, doi))
-        assert result == is_valid, f"DOI '{doi}' should be {'valid' if is_valid else 'invalid'}"
+        assert result == is_valid, (
+            f"DOI '{doi}' should be {'valid' if is_valid else 'invalid'}"
+        )
 
     def test_pattern_is_string(self) -> None:
         """Test DOI_REGEX_PATTERN is exported as string for Pandera str_matches."""
@@ -79,7 +80,9 @@ class TestDoiRegexPattern:
         """Test DOI regex pattern has correct components."""
         # Pattern should be: ^10\.\d{4,}/.+$
         assert "10\\." in DOI_REGEX_PATTERN, "Pattern should start with '10.'"
-        assert "\\d{4,}" in DOI_REGEX_PATTERN, "Pattern should require 4+ digit registrant"
+        assert "\\d{4,}" in DOI_REGEX_PATTERN, (
+            "Pattern should require 4+ digit registrant"
+        )
         assert "/.+" in DOI_REGEX_PATTERN, "Pattern should require non-empty suffix"
 
 
@@ -126,7 +129,9 @@ class TestDoiRegexEdgeCases:
         ]
         for suffix in special_suffixes:
             doi = f"10.1234/{suffix}"
-            assert re.match(DOI_REGEX_PATTERN, doi), f"Suffix '{suffix}' should be valid"
+            assert re.match(DOI_REGEX_PATTERN, doi), (
+                f"Suffix '{suffix}' should be valid"
+            )
 
 
 class TestDoiSchemaIntegration:

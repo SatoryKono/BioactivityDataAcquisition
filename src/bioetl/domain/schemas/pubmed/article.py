@@ -43,9 +43,7 @@ class ArticleSchema(ETLRecordSchema):
     @pa.check("doi", name="doi_format")
     def _check_doi(cls, series: Series[str]) -> Series[bool]:
         """Validate DOI format."""
-        return cast(
-            "Series[bool]", series.isna() | series.str.match(DOI_REGEX_PATTERN)
-        )
+        return cast("Series[bool]", series.isna() | series.str.match(DOI_REGEX_PATTERN))
 
     pmc_id: Series[str] | None = pa.Field(
         nullable=True, description="PubMed Central ID"
