@@ -5,6 +5,8 @@ Aligned with RULES.md v5.0 and UniProt REST API.
 
 from __future__ import annotations
 
+from typing import cast
+
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -41,7 +43,7 @@ class IsoformSchema(ETLRecordSchema):
     @pa.check("sequence_status", name="sequence_status_values")
     def _check_sequence_status(cls, series: Series[str]) -> Series[bool]:
         """Validate sequence status values."""
-        return series.isna() | series.isin(SEQUENCE_STATUSES)
+        return cast("Series[bool]", series.isna() | series.isin(SEQUENCE_STATUSES))
 
     sequence: Series[str] | None = pa.Field(
         nullable=True,
@@ -51,7 +53,10 @@ class IsoformSchema(ETLRecordSchema):
     @pa.check("sequence", name="sequence_format")
     def _check_sequence(cls, series: Series[str]) -> Series[bool]:
         """Validate amino acid sequence."""
-        return series.isna() | series.str.match(r"^[ACDEFGHIKLMNPQRSTVWY]+$")
+        return cast(
+            "Series[bool]",
+            series.isna() | series.str.match(r"^[ACDEFGHIKLMNPQRSTVWY]+$"),
+        )
 
     sequence_length: Series[int] | None = pa.Field(
         nullable=True, description="Isoform sequence length"
@@ -60,7 +65,7 @@ class IsoformSchema(ETLRecordSchema):
     @pa.check("sequence_length", name="sequence_length_positive")
     def _check_sequence_length(cls, series: Series[int]) -> Series[bool]:
         """Validate sequence length is positive."""
-        return series.isna() | (series >= 1)
+        return cast("Series[bool]", series.isna() | (series >= 1))
 
     note: Series[str] | None = pa.Field(
         nullable=True, description="Isoform description/note"
