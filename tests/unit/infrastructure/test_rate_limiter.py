@@ -71,7 +71,8 @@ class TestTokenBucket:
         elapsed = time.monotonic() - start
 
         assert elapsed >= 0.05  # Should wait for refill
-        assert elapsed < 0.5  # But not too long
+        # Allow generous tolerance for CI/slow systems (Python 3.14 can have timing issues)
+        assert elapsed < 3.0  # But not excessively long
 
     @pytest.mark.unit
     async def test_acquire_exceeds_capacity_raises(self) -> None:

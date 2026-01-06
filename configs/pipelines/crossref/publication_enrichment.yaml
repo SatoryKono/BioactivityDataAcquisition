@@ -46,6 +46,8 @@ sink:
       path: "data/output/csv/silver"
   gold:
     path: "data/output/gold"
+
+
     csv_export:
       path: "data/output/csv/gold"
 
