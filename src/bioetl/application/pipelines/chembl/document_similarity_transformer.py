@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar
 
+from bioetl.application.core.field_specs import normalize_pmid
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -82,9 +83,9 @@ class DocumentSimilarityTransformer(BaseChemblTransformer):
             # Foreign keys
             "doc_1": safe_int(record.get("doc_1")),
             "doc_2": safe_int(record.get("doc_2")),
-            # PubMed identifiers
-            "pubmed_id1": safe_int(record.get("pubmed_id1")),
-            "pubmed_id2": safe_int(record.get("pubmed_id2")),
+            # PubMed identifiers (normalized to string)
+            "pubmed_id1": normalize_pmid(record.get("pubmed_id1")),
+            "pubmed_id2": normalize_pmid(record.get("pubmed_id2")),
             # Tanimoto coefficients
             "tid_tani": tid_tani,
             "mol_tani": mol_tani,

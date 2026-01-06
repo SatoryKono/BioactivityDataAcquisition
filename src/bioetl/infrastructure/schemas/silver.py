@@ -376,7 +376,7 @@ CHEMBL_DOCUMENT_SCHEMA = pa.schema(
         # Primary identifier
         pa.field("document_chembl_id", pa.string()),
         # Publication identifiers
-        pa.field("pubmed_id", pa.int64()),
+        pa.field("pubmed_id", pa.string()),  # Numeric string for cross-provider consistency
         pa.field("doi", pa.string()),
         pa.field("patent_id", pa.string()),
         # Core metadata
@@ -542,9 +542,9 @@ CHEMBL_DOCUMENT_SIMILARITY_SCHEMA = pa.schema(
         # Foreign keys
         pa.field("doc_1", pa.int64()),
         pa.field("doc_2", pa.int64()),
-        # PubMed identifiers
-        pa.field("pubmed_id1", pa.int64()),
-        pa.field("pubmed_id2", pa.int64()),
+        # PubMed identifiers (numeric strings for cross-provider consistency)
+        pa.field("pubmed_id1", pa.string()),
+        pa.field("pubmed_id2", pa.string()),
         # Tanimoto coefficients
         pa.field("tid_tani", pa.float64()),
         pa.field("mol_tani", pa.float64()),

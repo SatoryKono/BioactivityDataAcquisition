@@ -7,6 +7,7 @@ import pytest
 from bioetl.application.core.field_specs import (
     FLOAT,
     INT,
+    PMID,
     STR,
     FieldGroup,
     FieldSpec,
@@ -16,6 +17,8 @@ from bioetl.application.core.field_specs import (
     map_field_group,
     map_field_groups,
     map_fields,
+    normalize_pmid,
+    pmid_fields,
     simple_fields,
 )
 
@@ -319,3 +322,110 @@ class TestIntegrationWithChemblPatterns:
         assert result["units"] == "nM"
         assert result["value"] == pytest.approx(5.5)
         assert result["pchembl_value"] == pytest.approx(8.26)
+
+
+class TestNormalizePmid:
+    """Tests for normalize_pmid function.
+
+    PubMed IDs should be normalized to string format for
+    cross-provider consistency.
+    """
+
+    @pytest.mark.parametrize(
+        "input_pmid,expected",
+        [
+            (12345678, "12345678"),
+            ("12345678", "12345678"),
+            ("  12345678  ", "12345678"),
+            (1, "1"),
+            ("1", "1"),
+            (None, None),
+            ("abc", None),  # invalid - non-numeric
+            ("123abc", None),  # invalid - mixed
+            ("", None),  # invalid - empty
+            ("   ", None),  # invalid - whitespace only
+            (0, None),  # invalid - zero
+            ("0", None),  # invalid - zero string
+            (-1, None),  # invalid - negative
+            (True, None),  # invalid - boolean
+            (False, None),  # invalid - boolean
+            (12.5, None),  # invalid - float
+            ([], None),  # invalid - list
+            ({}, None),  # invalid - dict
+        ],
+    )
+    def test_pmid_conversion(self, input_pmid, expected):
+        """Test PMID normalization across various input types."""
+        result = normalize_pmid(input_pmid)
+        assert result == expected
+
+    def test_leading_zeros_removed(self):
+        """Test that leading zeros are removed from PMIDs."""
+        assert normalize_pmid("00012345") == "12345"
+        assert normalize_pmid("0001") == "1"
+
+    def test_large_pmid(self):
+        """Test large valid PMID."""
+        assert normalize_pmid(9999999999) == "9999999999"
+        assert normalize_pmid("9999999999") == "9999999999"
+
+
+class TestPmidFields:
+    """Tests for pmid_fields convenience function."""
+
+    def test_pmid_fields_creates_specs(self):
+        """Test pmid_fields creates correct field specs."""
+        specs = pmid_fields("pubmed_id", "pubmed_id1")
+        assert len(specs) == 2
+        assert all(spec.converter is PMID for spec in specs)
+        assert [spec.source for spec in specs] == ["pubmed_id", "pubmed_id1"]
+
+    def test_pmid_field_in_mapping(self):
+        """Test PMID field spec in actual mapping."""
+        record = {"pubmed_id": 12345678}
+        spec = FieldSpec("pubmed_id", converter=PMID)
+        _, value = map_field(record, spec)
+        assert value == "12345678"
+        assert isinstance(value, str)
+
+    def test_pmid_field_string_input(self):
+        """Test PMID field spec with string input."""
+        record = {"pubmed_id": "  87654321  "}
+        spec = FieldSpec("pubmed_id", converter=PMID)
+        _, value = map_field(record, spec)
+        assert value == "87654321"
+
+    def test_pmid_field_invalid_input(self):
+        """Test PMID field spec with invalid input returns None."""
+        record = {"pubmed_id": "not-a-number"}
+        spec = FieldSpec("pubmed_id", converter=PMID)
+        _, value = map_field(record, spec)
+        assert value is None
+
+    def test_pmid_field_none_input(self):
+        """Test PMID field spec with None input."""
+        record = {"pubmed_id": None}
+        spec = FieldSpec("pubmed_id", converter=PMID)
+        _, value = map_field(record, spec)
+        assert value is None
+
+    def test_combined_with_other_specs(self):
+        """Test PMID fields combined with other spec types."""
+        record = {
+            "doc_1": "100",
+            "doc_2": "200",
+            "pubmed_id1": 12345678,
+            "pubmed_id2": "87654321",
+            "tid_tani": "0.85",
+        }
+        specs = (
+            *int_fields("doc_1", "doc_2"),
+            *pmid_fields("pubmed_id1", "pubmed_id2"),
+            *float_fields("tid_tani"),
+        )
+        result = map_fields(record, specs)
+        assert result["doc_1"] == 100
+        assert result["doc_2"] == 200
+        assert result["pubmed_id1"] == "12345678"
+        assert result["pubmed_id2"] == "87654321"
+        assert result["tid_tani"] == pytest.approx(0.85)
