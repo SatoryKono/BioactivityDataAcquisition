@@ -9,6 +9,7 @@ import pytest
 
 from bioetl.domain.validation import (
     validate_doi,
+    validate_inchi_key,
     validate_non_empty_string,
     validate_non_negative,
     validate_positive_int,
@@ -252,3 +253,61 @@ class TestValidateDoi:
         registrant = "1" * registrant_digits
         doi = f"10.{registrant}/suffix"
         assert validate_doi(doi) is True
+
+
+class TestValidateInchiKey:
+    """Tests for validate_inchi_key function."""
+
+    @pytest.mark.parametrize(
+        "inchi_key,expected",
+        [
+            # Valid InChI Keys - real examples
+            ("BSYNRYMUTXBXSQ-UHFFFAOYSA-N", True),  # Aspirin
+            ("RYYVLZVUVIJVGH-UHFFFAOYSA-N", True),  # Caffeine
+            ("HEFNNWSXXWATRW-UHFFFAOYSA-N", True),  # Paracetamol
+            ("RZVAJINKPMORJF-UHFFFAOYSA-N", True),  # Ibuprofen
+            # Valid InChI Keys - format check
+            ("XXXXXXXXXXXXXX-YYYYYYYYYY-Z", True),
+            ("ABCDEFGHIJKLMN-OPQRSTUVWX-Y", True),
+        ],
+    )
+    def test_valid_inchi_key(self, inchi_key: str, expected: bool) -> None:
+        """Test valid InChI Keys are accepted."""
+        assert validate_inchi_key(inchi_key) is expected
+
+    @pytest.mark.parametrize(
+        "inchi_key",
+        [
+            "",
+            None,
+            "   ",
+            "invalid",
+            "bsynrymutxbxsq-uhfffaoysa-n",  # Lowercase
+            "BSYNRYMUTXBXSQ-UHFFFAOYSA",  # Missing last part
+            "BSYNRYMUTXBXSQ-UHFFFAOYSAA-N",  # Too long middle (11 chars)
+            "BSYNRYMUTXBXS-UHFFFAOYSA-N",  # Too short first (13 chars)
+            "BSYNRYMUTXBXSQA-UHFFFAOYSA-N",  # Too long first (15 chars)
+            "BSYNRYMUTXBXSQ-UHFFFAOYS-N",  # Too short middle (9 chars)
+            "BSYNRYMUTXBXSQ-UHFFFAOYSA-",  # Empty last part
+            "BSYNRYMUTXBXSQ-UHFFFAOYSA-NN",  # Too long last part (2 chars)
+            "BSYNRYMUTXBXSQ_UHFFFAOYSA_N",  # Wrong separator
+            "BSYNRYMUTXBXSQUHFFFAOYSAN",  # No separators
+            "123456789012345-1234567890-X",  # Numbers instead of letters
+        ],
+    )
+    def test_invalid_inchi_key(self, inchi_key: str | None) -> None:
+        """Test invalid InChI Keys are rejected."""
+        assert validate_inchi_key(inchi_key) is False
+
+    def test_inchi_key_with_whitespace(self) -> None:
+        """Test InChI Key with leading/trailing whitespace."""
+        assert validate_inchi_key("  BSYNRYMUTXBXSQ-UHFFFAOYSA-N  ") is True
+
+    def test_inchi_key_case_sensitive(self) -> None:
+        """Test InChI Key validation is case-sensitive (uppercase only)."""
+        # Uppercase should pass
+        assert validate_inchi_key("BSYNRYMUTXBXSQ-UHFFFAOYSA-N") is True
+        # Lowercase should fail
+        assert validate_inchi_key("bsynrymutxbxsq-uhfffaoysa-n") is False
+        # Mixed case should fail
+        assert validate_inchi_key("BSYNRYMUTXBXSQ-uhfffaoysa-N") is False

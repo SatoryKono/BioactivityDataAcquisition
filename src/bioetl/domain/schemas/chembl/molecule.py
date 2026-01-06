@@ -9,6 +9,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.validation import INCHI_KEY_REGEX_PATTERN
 
 
 class MoleculeSchema(ETLRecordSchema):
@@ -26,14 +27,16 @@ class MoleculeSchema(ETLRecordSchema):
         str_matches=r"^CHEMBL\d+$",
         description="ChEMBL ID.",
     )
+    structure_standard_inchi_key: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=INCHI_KEY_REGEX_PATTERN,
+        description="Standard InChI Key (27 characters, format: XXXX-YYYY-Z).",
+    )
     # chebi_id: Optional[Series[int]] = pa.Field(
     #     nullable=True, description="ChEBI ID."
     # )
     # chebi_par_id: Optional[Series[int]] = pa.Field(
     #     nullable=True, description="Parent ChEBI ID."
-    # )
-    # structure_key: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="InChI Key."
     # )
 
     # === Core Properties ===
