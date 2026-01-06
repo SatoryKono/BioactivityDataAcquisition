@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: from=ChEMBL&to=UniProtKB&ids=CHEMBL204
+    body: from=ChEMBL&to=UniProtKB&ids=CHEMBL204,CHEMBL_INVALID_XYZ
     headers:
       Accept:
       - '*/*'
@@ -8,8 +8,6 @@ interactions:
       - gzip, deflate, zstd
       Connection:
       - keep-alive
-      Content-Length:
-      - '38'
       Content-Type:
       - application/x-www-form-urlencoded
       Host:
@@ -20,7 +18,7 @@ interactions:
     uri: https://rest.uniprot.org/idmapping/run
   response:
     body:
-      string: '{"jobId":"test_job_001"}'
+      string: '{"jobId":"test_job_004"}'
     headers:
       content-type:
       - application/json
@@ -41,7 +39,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://rest.uniprot.org/idmapping/status/test_job_001
+    uri: https://rest.uniprot.org/idmapping/status/test_job_004
   response:
     body:
       string: '{"jobStatus":"FINISHED"}'
@@ -65,7 +63,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://rest.uniprot.org/idmapping/results/test_job_001
+    uri: https://rest.uniprot.org/idmapping/results/test_job_004
   response:
     body:
       string: '{"results":[{"from":"CHEMBL204","to":{"primaryAccession":"P00742"}}]}'

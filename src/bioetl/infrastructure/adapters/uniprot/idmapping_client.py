@@ -238,7 +238,8 @@ class UniProtIDMappingClient(BaseHttpAdapter):
             with self._adapter_metrics.measure_request("/idmapping/status"):
                 response = await self.http_client.get(url)
 
-            if response.status_code != 200:
+            # UniProt returns 200 for running jobs, 303 redirect when finished
+            if response.status_code not in (200, 303):
                 self.logger.warning(
                     "idmapping_status_error",
                     job_id=job_id,
@@ -249,6 +250,10 @@ class UniProtIDMappingClient(BaseHttpAdapter):
 
             result = response.json()
             status = result.get("jobStatus", "UNKNOWN")
+
+            # 303 redirect indicates job is finished (redirect to results)
+            if response.status_code == 303:
+                status = "FINISHED"
 
             if status == "FINISHED":
                 self.logger.debug(

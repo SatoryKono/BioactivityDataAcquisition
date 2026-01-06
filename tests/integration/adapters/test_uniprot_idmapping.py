@@ -85,7 +85,6 @@ class TestUniProtIDMappingIntegration:
                 HealthStatus.UNHEALTHY,
             ]
 
-    @pytest.mark.skip(reason="VCR cassette not yet recorded - requires real API call")
     @pytest.mark.vcr
     async def test_map_single_id(
         self, uniprot_http_client: Any, mock_logger: MagicMock
@@ -113,7 +112,6 @@ class TestUniProtIDMappingIntegration:
             # P00742 is Factor X (Coagulation factor X)
             assert result["CHEMBL204"] is not None
 
-    @pytest.mark.skip(reason="VCR cassette not yet recorded - requires real API call")
     @pytest.mark.vcr
     async def test_map_multiple_ids(
         self, uniprot_http_client: Any, mock_logger: MagicMock
@@ -144,7 +142,6 @@ class TestUniProtIDMappingIntegration:
             found_count = sum(1 for v in result.values() if v is not None)
             assert found_count > 0
 
-    @pytest.mark.skip(reason="VCR cassette not yet recorded - requires real API call")
     @pytest.mark.vcr
     async def test_map_not_found_id(
         self, uniprot_http_client: Any, mock_logger: MagicMock
@@ -195,7 +192,6 @@ class TestUniProtIDMappingIntegration:
 
             assert result == {}
 
-    @pytest.mark.skip(reason="VCR cassette not yet recorded - requires real API call")
     @pytest.mark.vcr
     async def test_map_mixed_results(
         self, uniprot_http_client: Any, mock_logger: MagicMock
