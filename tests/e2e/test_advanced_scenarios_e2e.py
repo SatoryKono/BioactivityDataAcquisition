@@ -17,6 +17,7 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
+from deltalake import DeltaTable
 
 from bioetl.composition.bootstrap import bootstrap_pipeline
 from bioetl.domain.context import PipelineRunContext
@@ -62,8 +63,6 @@ async def test_vacuum_runs_after_successful_pipeline(e2e_data_dir: Path):
     assert_silver_table_has_records(e2e_data_dir, "chembl_activity", expected_min=1)
 
     # Check Delta table has proper metadata (VACUUM ran)
-    from deltalake import DeltaTable
-
     table_path = e2e_data_dir / "silver" / "chembl_activity"
     dt = DeltaTable(str(table_path))
 
@@ -95,8 +94,6 @@ async def test_vacuum_respects_retention_days(e2e_data_dir: Path):
     assert count >= 1
 
     # VACUUM with 7 day retention shouldn't delete anything recent
-    from deltalake import DeltaTable
-
     table_path = e2e_data_dir / "silver" / "chembl_activity"
     dt = DeltaTable(str(table_path))
 
