@@ -48,7 +48,7 @@ def valid_record() -> dict:
         "publisher": "Springer Nature",
         "is_oa": True,
         "oa_status": "gold",
-        "cited_by_count": 42,
+        "citation_count": 42,  # Unified field name (from OpenAlex cited_by_count)
         "language": "en",
         "source": "openalex",
         "_lookup_method": "doi",
@@ -167,16 +167,20 @@ class TestOpenAlexPublicationSchema:
         validated = OpenAlexPublicationSchema.validate(df)
         assert pd.isna(validated["oa_status"].iloc[0])
 
-    def test_cited_by_count_non_negative(self, valid_record: dict) -> None:
-        """Should validate cited_by_count is non-negative."""
+    def test_citation_count_non_negative(self, valid_record: dict) -> None:
+        """Should validate citation_count is non-negative.
+
+        Note: OpenAlex source field is 'cited_by_count', but we use the
+        unified field name 'citation_count' for cross-provider consistency.
+        """
         # Valid count
-        valid_record["cited_by_count"] = 0
+        valid_record["citation_count"] = 0
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["cited_by_count"].iloc[0] == 0
+        assert validated["citation_count"].iloc[0] == 0
 
         # Negative count
-        valid_record["cited_by_count"] = -1
+        valid_record["citation_count"] = -1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             OpenAlexPublicationSchema.validate(df)
