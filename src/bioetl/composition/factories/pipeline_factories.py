@@ -56,6 +56,9 @@ from bioetl.application.pipelines.chembl.document_term_transformer import (
 )
 from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
+from bioetl.application.pipelines.chembl.protein_class_transformer import (
+    ProteinClassTransformer,
+)
 from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
 )
@@ -85,6 +88,7 @@ from bioetl.infrastructure.schemas.gold import (
     ChEMBLDocumentSimilarityGoldSchema,
     ChEMBLDocumentTermGoldSchema,
     ChEMBLMoleculeGoldSchema,
+    ChEMBLProteinClassGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
     CrossRefPublicationGoldSchema,
@@ -106,6 +110,7 @@ from bioetl.infrastructure.schemas.silver import (
     CHEMBL_DOCUMENT_SIMILARITY_SCHEMA,
     CHEMBL_DOCUMENT_TERM_SCHEMA,
     CHEMBL_MOLECULE_SCHEMA,
+    CHEMBL_PROTEIN_CLASS_SCHEMA,
     CHEMBL_TARGET_COMPONENT_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
     CROSSREF_PUBLICATION_SCHEMA,
@@ -228,6 +233,13 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         silver_schema=CHEMBL_TARGET_COMPONENT_SCHEMA,
         gold_schema=ChEMBLTargetComponentGoldSchema,
     ),
+    PipelineFactoryConfig(
+        pipeline_name="chembl_protein_class",
+        provider="chembl",
+        transformer_class=ProteinClassTransformer,
+        silver_schema=CHEMBL_PROTEIN_CLASS_SCHEMA,
+        gold_schema=ChEMBLProteinClassGoldSchema,
+    ),
     # PubChem pipeline
     PipelineFactoryConfig(
         pipeline_name="pubchem_compound",
@@ -321,6 +333,7 @@ chembl_document_term_factory = _factories["chembl_document_term"]
 chembl_molecule_factory = _factories["chembl_molecule"]
 chembl_target_factory = _factories["chembl_target"]
 chembl_target_component_factory = _factories["chembl_target_component"]
+chembl_protein_class_factory = _factories["chembl_protein_class"]
 pubchem_compound_factory = _factories["pubchem_compound"]
 uniprot_protein_factory = _factories["uniprot_protein"]
 pubmed_publications_factory = _factories["pubmed_publications"]
@@ -461,6 +474,7 @@ __all__ = [
     "chembl_document_similarity_factory",
     "chembl_document_term_factory",
     "chembl_molecule_factory",
+    "chembl_protein_class_factory",
     "chembl_target_component_factory",
     "chembl_target_factory",
     "crossref_publication_enrichment_factory",

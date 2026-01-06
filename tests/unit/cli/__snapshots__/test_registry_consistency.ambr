@@ -11,6 +11,7 @@
     - chembl_document_similarity
     - chembl_document_term
     - chembl_molecule
+    - chembl_protein_class
     - chembl_target
     - chembl_target_component
     - crossref_publication_enrichment
