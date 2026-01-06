@@ -15,7 +15,11 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
-from bioetl.domain.validation import DOI_REGEX_PATTERN
+from bioetl.domain.validation import (
+    DOI_REGEX_PATTERN,
+    MAX_PUBLICATION_YEAR,
+    MIN_PUBLICATION_YEAR,
+)
 
 
 class ChemblPublicationSchema(ETLRecordSchema):
@@ -65,7 +69,12 @@ class ChemblPublicationSchema(ETLRecordSchema):
     journal_full_title: Series[str] | None = pa.Field(
         nullable=True, description="Full journal title."
     )
-    year: Series[int] | None = pa.Field(nullable=True, description="Year.")
+    year: Series[int] | None = pa.Field(
+        nullable=True,
+        ge=MIN_PUBLICATION_YEAR,
+        le=MAX_PUBLICATION_YEAR,
+        description="Publication year (1800-2100).",
+    )
     volume: Series[str] | None = pa.Field(nullable=True, description="Volume.")
     issue: Series[str] | None = pa.Field(nullable=True, description="Issue.")
     first_page: Series[str] | None = pa.Field(nullable=True, description="First page.")

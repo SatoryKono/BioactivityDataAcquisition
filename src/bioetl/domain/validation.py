@@ -64,6 +64,17 @@ def validate_smiles(smiles: str | None) -> bool:
 
 
 # =============================================================================
+# Publication Year Constants
+# =============================================================================
+
+# Standard publication year range for scientific publications.
+# First scientific journals appeared in XVII century, but systematic
+# publications began in XIX century.
+MIN_PUBLICATION_YEAR: int = 1800
+MAX_PUBLICATION_YEAR: int = 2100
+
+
+# =============================================================================
 # Numeric Validation
 # =============================================================================
 
@@ -129,6 +140,44 @@ def validate_year_range(
     if year is None:
         return False
     return min_year <= year <= max_year
+
+
+def validate_publication_year(year: int | None) -> tuple[int | None, bool]:
+    """Validate publication year and flag if out of range.
+
+    Uses standard publication year range [MIN_PUBLICATION_YEAR, MAX_PUBLICATION_YEAR].
+    Values outside this range are preserved but flagged for DQ warnings.
+
+    Args:
+        year: Publication year to validate.
+
+    Returns:
+        Tuple of (year, is_warning) where:
+        - year: Original value (preserved even if out of range)
+        - is_warning: True if year is outside valid range (requires DQ warning)
+
+    Example:
+        >>> validate_publication_year(2020)
+        (2020, False)
+        >>> validate_publication_year(1800)
+        (1800, False)
+        >>> validate_publication_year(2100)
+        (2100, False)
+        >>> validate_publication_year(1799)
+        (1799, True)
+        >>> validate_publication_year(2101)
+        (2101, True)
+        >>> validate_publication_year(1500)
+        (1500, True)
+        >>> validate_publication_year(None)
+        (None, False)
+
+    """
+    if year is None:
+        return None, False
+    if MIN_PUBLICATION_YEAR <= year <= MAX_PUBLICATION_YEAR:
+        return year, False
+    return year, True  # Keep value but flag as warning
 
 
 def validate_non_negative(value: Any) -> float | None:
