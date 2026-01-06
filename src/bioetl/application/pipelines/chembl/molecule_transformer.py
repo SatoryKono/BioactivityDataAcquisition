@@ -64,6 +64,11 @@ _STRUCTURES_FIELDS: dict[str, Any] = {
     "standard_inchi_key": None,
 }
 
+# Rename mapping for structures fields (standard_inchi_key -> inchi_key for PubChem consistency)
+_STRUCTURES_RENAMES: dict[str, str] = {
+    "standard_inchi_key": "inchi_key",
+}
+
 # JSON fields to serialize
 _JSON_FIELDS: tuple[str, ...] = (
     "molecule_hierarchy",
@@ -174,7 +179,8 @@ class MoleculeTransformer(BaseChemblTransformer):
             ),
             **flatten_nested_dict(
                 cast("dict[str, Any] | None", rec.get("molecule_structures")),
-                "structure_",
+                "",  # No prefix - unified naming with PubChem
                 _STRUCTURES_FIELDS,
+                renames=_STRUCTURES_RENAMES,
             ),
         }

@@ -492,10 +492,10 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("property_qed_weighted", pa.float64()),
         pa.field("property_full_molformula", pa.string()),
         pa.field("property_ro3_pass", pa.string()),
-        # Flattened Structures
-        pa.field("structure_canonical_smiles", pa.string()),
-        pa.field("structure_standard_inchi", pa.string()),
-        pa.field("structure_standard_inchi_key", pa.string()),
+        # Flattened Structures (unified naming without structure_ prefix)
+        pa.field("canonical_smiles", pa.string()),
+        pa.field("standard_inchi", pa.string()),
+        pa.field("inchi_key", pa.string()),
         # Lineage metadata
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
