@@ -31,14 +31,6 @@ source:
     from_db: ChEMBL
     to_db: UniProtKB
 
-# Transform configuration
-transform:
-  version: "1.0.0"
-  steps:
-    - map_ids
-    - validate_schema
-    - generate_content_hash
-
 # DQ rules - elevated thresholds for ID mapping
 # Many ChEMBL targets may not have UniProt mappings (expected behavior)
 dq_rules:

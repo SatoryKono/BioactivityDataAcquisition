@@ -22,13 +22,6 @@ gold_filters:
     - molecular_formula
   columns: {}
 
-# Entity-specific transform steps (different from ChEMBL)
-transform:
-  version: "1.0.0"
-  steps:
-    - normalize_fields
-    - generate_content_hash
-
 # Entity-specific sink overrides (custom paths)
 sink:
   bronze:

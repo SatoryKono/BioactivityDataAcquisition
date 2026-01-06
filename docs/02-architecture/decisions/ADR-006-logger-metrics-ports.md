@@ -15,7 +15,7 @@ Note: `domain/ports.py` was reorganized into a package `domain/ports/` with a fa
 
 We have chosen to:
 
-1. **Create `LoggerPort`** in `domain/ports.py` as a formal Protocol for logging
+1. **Create `LoggerPort`** in `domain/ports/` package as a formal Protocol for logging
 2. **Keep `MetricsPort`** as-is (already properly defined)
 3. **Use ports consistently** in `PipelineServices` for both logger and metrics
 4. **Maintain backward compatibility** via `BoundLogger` alias in `domain/context.py`
@@ -28,13 +28,13 @@ All external dependencies should be abstracted through ports:
 
 | Dependency | Port | Location |
 |------------|------|----------|
-| Data Source | `DataSourcePort` | `domain/ports.py` |
-| Storage | `StoragePort` | `domain/ports.py` |
-| Lock | `LockPort` | `domain/ports.py` |
-| Checkpoint | `CheckpointPort` | `domain/ports.py` |
-| Quarantine | `QuarantinePort` | `domain/ports.py` |
-| Metrics | `MetricsPort` | `domain/ports.py` |
-| **Logger** | **`LoggerPort`** | `domain/ports.py` |
+| Data Source | `DataSourcePort` | `domain/ports/` |
+| Storage | `StoragePort` | `domain/ports/` |
+| Lock | `LockPort` | `domain/ports/` |
+| Checkpoint | `CheckpointPort` | `domain/ports/` |
+| Quarantine | `QuarantinePort` | `domain/ports/` |
+| Metrics | `MetricsPort` | `domain/ports/` |
+| **Logger** | **`LoggerPort`** | `domain/ports/` |
 
 ### 2. Testability
 
@@ -61,7 +61,7 @@ The abstraction allows switching logging implementations without changing applic
 
 ### 4. Domain Layer Purity
 
-The domain layer should not depend on infrastructure details. By defining `LoggerPort` in `domain/ports.py`, we ensure the domain only depends on an abstract contract, not on `structlog`.
+The domain layer should not depend on infrastructure details. By defining `LoggerPort` in `domain/ports/`, we ensure the domain only depends on an abstract contract, not on `structlog`.
 
 ## Implementation Details
 
@@ -125,7 +125,7 @@ Rejected because:
 ### 3. Move LoggerPort to a separate file
 
 Rejected because:
-- All other ports are in `domain/ports.py`
+- All other ports are in `domain/ports/` package
 - Keeping them together improves discoverability
 - No circular dependency issues
 

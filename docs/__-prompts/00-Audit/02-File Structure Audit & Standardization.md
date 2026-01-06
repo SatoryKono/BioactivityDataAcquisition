@@ -45,7 +45,7 @@ src/
 │   ├── domain/          # Чистая логика, Protocols, схемы
 │   ├── application/     # Пайплайны, use cases
 │   ├── infrastructure/  # Адаптеры (HTTP, Storage, Locking)
-│   └── interfaces/      # CLI (Typer)
+│   └── interfaces/      # CLI (Click)
 │
 └── tools/               # Утилиты проекта
     ├── cleanup_project.py
