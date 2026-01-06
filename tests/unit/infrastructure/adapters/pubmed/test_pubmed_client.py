@@ -150,9 +150,9 @@ async def test_health_check_logs_error_on_exception(
         in str(call[1].get("error", "") or call[1].get("error_message", ""))
         for call in mock_logger.warning.call_args_list
     )
-    assert (
-        failed_warning_found
-    ), "Expected 'health_check_failed' warning with 'Network timeout' to be logged"
+    assert failed_warning_found, (
+        "Expected 'health_check_failed' warning with 'Network timeout' to be logged"
+    )
 
 
 @pytest.mark.asyncio

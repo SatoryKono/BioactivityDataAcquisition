@@ -320,9 +320,9 @@ class GoldWriter(BaseDeltaWriter):
             },
         )
         # Safety assertion: this method is only called when self._audit is not None
-        assert (
-            self._audit is not None
-        ), "_log_gold_audit called without audit configured"
+        assert self._audit is not None, (
+            "_log_gold_audit called without audit configured"
+        )
         await self._audit.log_write(audit_entry)
 
     async def _run_in_executor(self, func: Callable[..., T], *args: Any) -> T:
@@ -425,7 +425,11 @@ class GoldWriter(BaseDeltaWriter):
         for attempt in range(3):
             try:
                 await self._run_in_executor(
-                    lambda table_or_uri=table_path, data=arrow_data, mode=mode, partition_by=partition_cols, schema_mode=schema_mode: write_deltalake(
+                    lambda table_or_uri=table_path,
+                    data=arrow_data,
+                    mode=mode,
+                    partition_by=partition_cols,
+                    schema_mode=schema_mode: write_deltalake(
                         table_or_uri=table_or_uri,
                         data=pa.RecordBatchReader.from_batches(
                             data.schema, data.to_batches()
@@ -505,7 +509,10 @@ class GoldWriter(BaseDeltaWriter):
                 except TableNotFoundError:
                     arrow_data = self._to_arrow_table(records)
                     await self._run_in_executor(
-                        lambda table_or_uri=table_path, data=arrow_data, mode="append", partition_by=partition_cols: write_deltalake(
+                        lambda table_or_uri=table_path,
+                        data=arrow_data,
+                        mode="append",
+                        partition_by=partition_cols: write_deltalake(
                             table_or_uri=table_or_uri,
                             data=pa.RecordBatchReader.from_batches(
                                 data.schema, data.to_batches()

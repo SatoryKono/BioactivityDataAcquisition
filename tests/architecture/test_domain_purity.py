@@ -89,10 +89,9 @@ class TestDomainImmutability:
                             f"{py_file.name}:{node.lineno} - {node.name} is not frozen"
                         )
 
-        assert (
-            not violations
-        ), "Found mutable domain dataclasses (must be frozen=True):\n" + "\n".join(
-            f"  - {v}" for v in violations
+        assert not violations, (
+            "Found mutable domain dataclasses (must be frozen=True):\n"
+            + "\n".join(f"  - {v}" for v in violations)
         )
 
     def test_no_mutable_defaults_in_frozen_dataclasses(self, src_dir: Path) -> None:
@@ -281,9 +280,9 @@ class TestDomainComplexity:
             except SyntaxError:
                 continue
 
-        assert (
-            not violations
-        ), f"Domain layer has functions with CC > {max_cc}:\n" + "\n".join(violations)
+        assert not violations, (
+            f"Domain layer has functions with CC > {max_cc}:\n" + "\n".join(violations)
+        )
 
 
 class TestDomainProtocols:
@@ -315,9 +314,9 @@ class TestDomainProtocols:
                 if protocol_import_found and protocol_class_found:
                     break
 
-        assert (
-            protocol_import_found
-        ), "Domain ports should use typing.Protocol for interface definitions"
-        assert (
-            protocol_class_found
-        ), "Port interfaces should be classes inheriting from Protocol"
+        assert protocol_import_found, (
+            "Domain ports should use typing.Protocol for interface definitions"
+        )
+        assert protocol_class_found, (
+            "Port interfaces should be classes inheriting from Protocol"
+        )

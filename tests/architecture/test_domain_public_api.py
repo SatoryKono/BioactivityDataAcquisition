@@ -71,18 +71,16 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
 
     # Check for symbols in module but not in __all__
     missing_from_all = public_attrs - declared_all
-    assert (
-        not missing_from_all
-    ), "Public symbols missing from domain.__all__:\n" + "\n".join(
-        f"  - {s}" for s in sorted(missing_from_all)
+    assert not missing_from_all, (
+        "Public symbols missing from domain.__all__:\n"
+        + "\n".join(f"  - {s}" for s in sorted(missing_from_all))
     )
 
     # Check for symbols in __all__ but not actually exported
     not_exported = declared_all - public_attrs
-    assert (
-        not not_exported
-    ), "Symbols in __all__ but not exported from domain:\n" + "\n".join(
-        f"  - {s}" for s in sorted(not_exported)
+    assert not not_exported, (
+        "Symbols in __all__ but not exported from domain:\n"
+        + "\n".join(f"  - {s}" for s in sorted(not_exported))
     )
 
 
@@ -94,14 +92,14 @@ def test_domain_all_symbols_are_importable() -> None:
     from bioetl import domain
 
     for symbol in domain.__all__:
-        assert hasattr(
-            domain, symbol
-        ), f"Symbol '{symbol}' is in __all__ but cannot be accessed on domain module"
+        assert hasattr(domain, symbol), (
+            f"Symbol '{symbol}' is in __all__ but cannot be accessed on domain module"
+        )
         # Verify it's not None (actual object exists)
         obj = getattr(domain, symbol)
-        assert obj is not None or symbol in {
-            "None"
-        }, f"Symbol '{symbol}' is None - may indicate broken import"
+        assert obj is not None or symbol in {"None"}, (
+            f"Symbol '{symbol}' is None - may indicate broken import"
+        )
 
 
 def test_domain_public_api_categories() -> None:
@@ -207,8 +205,7 @@ def test_domain_exports_all_submodule_symbols() -> None:
                 if symbol not in domain_all:
                     missing_symbols.append(f"{submodule_name}.{symbol}")
 
-    assert (
-        not missing_symbols
-    ), "Submodule symbols missing from domain.__all__:\n" + "\n".join(
-        f"  - {s}" for s in sorted(missing_symbols)
+    assert not missing_symbols, (
+        "Submodule symbols missing from domain.__all__:\n"
+        + "\n".join(f"  - {s}" for s in sorted(missing_symbols))
     )
