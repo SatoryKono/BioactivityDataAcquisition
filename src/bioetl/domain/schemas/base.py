@@ -41,7 +41,6 @@ class ETLRecordSchema(pa.DataFrameModel):
         description="Type of pipeline run.",
     )
 
-    @classmethod
     @pa.check("_run_type", name="run_type_values")
     def _check_run_type(cls, series: Series[str]) -> Series[bool]:
         """Validate _run_type values."""
@@ -58,7 +57,6 @@ class ETLRecordSchema(pa.DataFrameModel):
         description="Timestamp when the record was ingested (UTC).",
     )
 
-    @classmethod
     @pa.check("_ingestion_ts", name="ingestion_ts_not_future")
     def _check_ingestion_ts(cls, series: Series[datetime]) -> Series[bool]:
         """Ensure ingestion timestamp is not in the future."""
@@ -83,7 +81,6 @@ class ETLRecordSchema(pa.DataFrameModel):
         description="Sequential index of the record in the pipeline run.",
     )
 
-    @classmethod
     @pa.check("_index", name="index_non_negative")
     def _check_index(cls, series: Series[int]) -> Series[bool]:
         """Validate index is non-negative."""
