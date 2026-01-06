@@ -1,6 +1,13 @@
 """UniProt domain entities.
 
-Contains entities for UniProt data: Protein, IDMappingResult.
+Contains entities for UniProt data:
+- UniprotTarget: Domain entity (canonical name) for protein targets
+- Protein: Deprecated alias for UniprotTarget (backward compatibility)
+- IDMappingResult: ID mapping result entity
+
+.. versionchanged:: 2.0.0
+    Protein renamed to UniprotTarget for Ubiquitous Language alignment.
+    The deprecated Protein alias remains for backward compatibility.
 """
 
 from __future__ import annotations
@@ -52,8 +59,11 @@ class IDMappingResult(BaseEntity):
 
 
 @dataclass(frozen=True, kw_only=True)
-class Protein(BaseEntity):
+class UniprotTarget(BaseEntity):
     """Represents a protein target (UniProt).
+
+    Canonical name for UniProt's Protein entity, aligned with Ubiquitous Language.
+    In the bioactivity domain, proteins are typically biological targets.
 
     Extended entity with comprehensive UniProt data including:
     - Core identifiers (accession, entry_name, entry_type)
@@ -68,6 +78,9 @@ class Protein(BaseEntity):
 
     Required fields: accession, entry_name
     All other fields are optional.
+
+    .. versionadded:: 2.0.0
+        Replaces :class:`Protein` as the canonical entity name.
     """
 
     # Core identifiers
@@ -150,9 +163,9 @@ class Protein(BaseEntity):
 
     def _validate_invariants(self) -> None:
         if not self.accession:
-            raise ValueError("Protein accession is required")
+            raise ValueError("UniprotTarget accession is required")
         if not self.entry_name:
-            raise ValueError("Protein entry_name is required")
+            raise ValueError("UniprotTarget entry_name is required")
         self._validate_sequence_length()
         self._validate_annotation_score()
 
@@ -169,3 +182,20 @@ class Protein(BaseEntity):
             raise ValueError(
                 f"Annotation score must be 1-5, got {self.annotation_score}"
             )
+
+
+# === Deprecated Aliases (backward compatibility) ===
+
+# Protein is a deprecated alias for UniprotTarget.
+# Use UniprotTarget in new code for Ubiquitous Language alignment.
+#
+# .. deprecated:: 2.0.0
+#     Use :class:`UniprotTarget` instead.
+#
+# Migration:
+#     # Before
+#     from bioetl.domain.entities import Protein
+#
+#     # After
+#     from bioetl.domain.entities import UniprotTarget
+Protein = UniprotTarget

@@ -1,7 +1,10 @@
-"""ChEMBL Document Transformer.
+"""ChEMBL Publication Transformer.
 
-Transforms Bronze records to Silver format (Document entity inflation).
+Transforms Bronze records to Silver format (ChemblPublication entity inflation).
 Uses declarative field_specs DSL for mapping.
+
+.. versionchanged:: 2.0.0
+    Uses ChemblPublication (canonical) instead of Document (deprecated).
 """
 
 from __future__ import annotations
@@ -17,13 +20,13 @@ from bioetl.application.core.field_specs import (
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
-from bioetl.domain.entities import Document
+from bioetl.domain.entities import ChemblPublication
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
 
 
-# Declarative field groups for Document entity
+# Declarative field groups for ChemblPublication entity
 _PUBLICATION_IDS = FieldGroup(
     name="publication_ids",
     fields=(
@@ -57,8 +60,8 @@ _SOURCE_INFO = FieldGroup(
     fields=int_fields("src_id"),
 )
 
-# All field groups for Document entity
-_DOCUMENT_GROUPS: tuple[FieldGroup, ...] = (
+# All field groups for ChemblPublication entity
+_PUBLICATION_GROUPS: tuple[FieldGroup, ...] = (
     _PUBLICATION_IDS,
     _CORE_METADATA,
     _JOURNAL_INFO,
@@ -67,9 +70,12 @@ _DOCUMENT_GROUPS: tuple[FieldGroup, ...] = (
 
 
 class DocumentTransformer(BaseChemblTransformer):
-    """Transforms ChEMBL bronze document records to silver."""
+    """Transforms ChEMBL bronze document records to silver.
 
-    entity_class = Document
+    Uses ChemblPublication entity (canonical name).
+    """
+
+    entity_class = ChemblPublication
     primary_id_field = "document_chembl_id"
 
     def _extract_business_data(
@@ -77,20 +83,20 @@ class DocumentTransformer(BaseChemblTransformer):
         record: BronzeRecord,
         primary_id: Any,
     ) -> dict[str, Any]:
-        """Extract Document business data from bronze record.
+        """Extract ChemblPublication business data from bronze record.
 
         Args:
             record: Raw Bronze record from ChEMBL API.
             primary_id: Validated document_chembl_id value.
 
         Returns:
-            Dictionary of Document business fields.
+            Dictionary of ChemblPublication business fields.
 
         """
         # Extract base fields using declarative DSL
         data = {
             "document_chembl_id": str(primary_id),
-            **map_field_groups(record, _DOCUMENT_GROUPS),
+            **map_field_groups(record, _PUBLICATION_GROUPS),
         }
 
         # Hash PII field (RULES.md §5.4)
