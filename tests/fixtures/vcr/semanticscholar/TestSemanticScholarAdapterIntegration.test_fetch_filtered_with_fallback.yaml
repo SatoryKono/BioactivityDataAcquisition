@@ -1,0 +1,108 @@
+interactions:
+# First request: batch DOI lookup (one found, one not found)
+- request:
+    body: '{"ids": ["DOI:10.1038/nature12373", "DOI:10.9999/notfound"]}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - BioETL/1.0
+    method: POST
+    uri: https://api.semanticscholar.org/graph/v1/paper/batch?fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal
+  response:
+    body:
+      string: |
+        [
+          {
+            "paperId": "a88fbdb9b47a8e8aef2b8cabd1fe0adfb96a9f25",
+            "externalIds": {
+              "PubMed": "23868264",
+              "DOI": "10.1038/nature12373",
+              "CorpusId": 4463122
+            },
+            "title": "Crystal structure of rhodopsin bound to arrestin",
+            "abstract": "G-protein-coupled receptors signal through G proteins or arrestins.",
+            "year": 2015,
+            "publicationDate": "2015-07-22",
+            "venue": "Nature",
+            "authors": [
+              {"authorId": "4713315", "name": "Yanyong Kang"}
+            ],
+            "citationCount": 892,
+            "referenceCount": 50,
+            "isOpenAccess": true,
+            "openAccessPdf": null,
+            "tldr": null,
+            "fieldsOfStudy": ["Biology"],
+            "publicationTypes": ["JournalArticle"],
+            "journal": {"name": "Nature"}
+          },
+          null
+        ]
+    headers:
+      Content-Type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+# Second request: title search fallback
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - BioETL/1.0
+    method: GET
+    uri: https://api.semanticscholar.org/graph/v1/paper/search?query=Unknown+Paper+Title&fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal&limit=5
+  response:
+    body:
+      string: |
+        {
+          "total": 10,
+          "offset": 0,
+          "data": [
+            {
+              "paperId": "f1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6e",
+              "externalIds": {
+                "DOI": "10.1000/fallback.paper",
+                "CorpusId": 999999
+              },
+              "title": "Unknown Paper Title Found By Search",
+              "abstract": "This paper was found through title search fallback.",
+              "year": 2020,
+              "publicationDate": "2020-06-15",
+              "venue": "Journal of Unknown",
+              "authors": [
+                {"authorId": "9999999", "name": "Fallback Author"}
+              ],
+              "citationCount": 10,
+              "referenceCount": 20,
+              "isOpenAccess": false,
+              "openAccessPdf": null,
+              "tldr": null,
+              "fieldsOfStudy": ["Computer Science"],
+              "publicationTypes": ["JournalArticle"],
+              "journal": {"name": "Journal of Unknown"}
+            }
+          ]
+        }
+    headers:
+      Content-Type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1
