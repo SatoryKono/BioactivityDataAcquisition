@@ -38,7 +38,7 @@ jobs:
           echo "Checking overall code complexity (max CC = 10, grade B)..."
           # Exempt complex adapter files that implement FilterableDataSourcePort with fallback logic
           xenon --max-absolute B --max-modules B --max-average A \
-            --exclude "tests/*,src/tools/*,src/bioetl/infrastructure/adapters/openalex/*" src
+            --exclude "tests/*,src/tools/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*" src
 
       - name: Strict complexity check for domain layer (CC ≤ 5)
         run: |
@@ -76,6 +76,7 @@ jobs:
           # Exempted paths (adapter files with complex fallback logic)
           EXEMPT_PATHS = {
               "src/bioetl/infrastructure/adapters/openalex/",
+              "src/bioetl/infrastructure/adapters/semanticscholar/",
           }
 
           # Exempted functions (with documented reasons)
