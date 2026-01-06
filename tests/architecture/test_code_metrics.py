@@ -66,14 +66,14 @@ class TestFileSizeLimits:
         # Consolidated factory files (v5.2)
         "storage.py": 700,  # 640 LOC - merged storage_factory + storage_adapter
         "pipeline_factory.py": 520,  # 517 LOC - merged generic_factory + runner_assembly
-        "pipeline_factories.py": 500,  # 480+ LOC - pipeline factory configurations (OpenAlex + SemanticScholar)
+        "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
         "services_factory.py": 600,  # 562 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
         # Infrastructure layer exemptions
         "silver_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
         "gold_writer.py": 770,  # 759 LOC - SCD Type 2 + audit logging + lock validation
         "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
-        "gold.py": 850,  # ~830 LOC - Gold layer Pandera schemas (OpenAlex + SemanticScholar + AssayParameters + ProteinClass + DocumentSimilarity)
-        "silver.py": 750,  # ~730 LOC - Silver PyArrow schemas (AssayParameters + ProteinClass + DocumentSimilarity added)
+        "gold.py": 870,  # 854 LOC - Gold layer Pandera schemas (+ IDMapping)
+        "silver.py": 770,  # 757 LOC - Silver PyArrow schemas (+ IDMapping)
         "client.py": 700,  # 692 LOC - ChemblAdapter (complex FilterableDataSourcePort), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 550,  # 496 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         # Interfaces layer exemptions
