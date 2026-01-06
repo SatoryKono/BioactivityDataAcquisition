@@ -6,26 +6,49 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  # Use CI hypothesis profile for faster property-based tests
+  HYPOTHESIS_PROFILE: ci
+  PYTHONDONTWRITEBYTECODE: 1
+  PYTHONUNBUFFERED: 1
+
 jobs:
   architecture-metrics:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+
+      - name: Cache pytest and hypothesis
+        uses: actions/cache@v4
+        with:
+          path: |
+            .pytest_cache
+            .hypothesis
+          key: arch-metrics-${{ runner.os }}-${{ hashFiles('tests/**/*.py') }}
+          restore-keys: |
+            arch-metrics-${{ runner.os }}-
+
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .[dev]
-      - name: Architecture Metrics
-        run: |
-          # Layer violations (conceptual - using import-linter for now)
-          # python -c "import tests.test_architecture; ..."
+        run: uv sync --extra dev --extra tracing --extra performance
 
-          # Cyclomatic complexity
-          radon cc src/bioetl --min C --show-closures
+      - name: Cyclomatic Complexity Check
+        run: |
+          # Cyclomatic complexity (fail on C or worse)
+          uv run radon cc src/bioetl --min C --show-closures
 
-          # Test coverage
-          pytest --cov=src/bioetl --cov-fail-under=85
+      - name: Run Tests with Coverage
+        run: |
+          # Run tests with coverage threshold (parallel for speed)
+          uv run pytest tests/ -m "not e2e" \
+            -n auto --dist loadscope \
+            --cov=src/bioetl \
+            --cov-report=term-missing \
+            --cov-fail-under=85
