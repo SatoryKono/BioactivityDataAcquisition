@@ -5,6 +5,9 @@ Uses declarative field_specs DSL for mapping.
 
 .. versionchanged:: 2.0.0
     Uses ChemblPublication (canonical) instead of Document (deprecated).
+
+.. versionchanged:: 2.1.0
+    Uses DataNormalizationService for text normalization (DI pattern).
 """
 
 from __future__ import annotations
@@ -22,9 +25,16 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import ChemblPublication
-from bioetl.domain.normalization import parse_authors_to_list, strip_html_tags
+from bioetl.domain.services import DataNormalizationService, IdentityService
 
 if TYPE_CHECKING:
+    from bioetl.domain.filtering import GoldFilterConfig
+    from bioetl.domain.ports import (
+        DataNormalizationPort,
+        MetricsPort,
+        PiiHasherPort,
+        TracingPort,
+    )
     from bioetl.domain.types import BronzeRecord
 
 
@@ -75,10 +85,47 @@ class DocumentTransformer(BaseChemblTransformer):
     """Transforms ChEMBL bronze document records to silver.
 
     Uses ChemblPublication entity (canonical name).
+    Uses DataNormalizationService for text normalization (DI pattern).
     """
 
     entity_class = ChemblPublication
     primary_id_field = "document_chembl_id"
+
+    def __init__(
+        self,
+        provider: str = "chembl",
+        entity_type: str | None = None,
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
+        gold_filters: GoldFilterConfig | None = None,
+        identity_service: IdentityService | None = None,
+        pii_hasher: PiiHasherPort | None = None,
+        data_normalizer: DataNormalizationPort | None = None,
+    ) -> None:
+        """Initialize ChEMBL Document transformer.
+
+        Args:
+            provider: Data provider identifier. Defaults to 'chembl'.
+            entity_type: Entity type for metrics labels. If None, derived from
+                entity_class name.
+            tracer: Optional tracing port for distributed tracing.
+            metrics: Optional metrics port for duration/error tracking.
+            gold_filters: Optional filter configuration for Gold layer.
+            identity_service: Service for computing entity IDs and content hashes.
+            pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
+            data_normalizer: Optional data normalization service for text normalization.
+
+        """
+        super().__init__(
+            provider=provider,
+            entity_type=entity_type,
+            tracer=tracer,
+            metrics=metrics,
+            gold_filters=gold_filters,
+            identity_service=identity_service,
+            pii_hasher=pii_hasher,
+        )
+        self._data_normalizer = data_normalizer or DataNormalizationService()
 
     def _extract_business_data(
         self,
@@ -101,15 +148,16 @@ class DocumentTransformer(BaseChemblTransformer):
             **map_field_groups(record, _PUBLICATION_GROUPS),
         }
 
-        # Strip HTML from abstract field
-        data["abstract"] = strip_html_tags(data.get("abstract"))
+        # Strip HTML from abstract field using DataNormalizationService
+        normalizer = self._data_normalizer
+        data["abstract"] = normalizer.strip_html_tags(data.get("abstract"))
 
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON
         # Authors stored as JSON-serialized list for unified format across providers
         raw_authors = data.get("authors")
         if raw_authors:
-            author_list = parse_authors_to_list(raw_authors)
+            author_list = normalizer.parse_authors_to_list(raw_authors)
             hashed_authors = self.hash_pii_list(author_list) or []
             data["authors"] = self.serialize_json_list(hashed_authors)
         else:
