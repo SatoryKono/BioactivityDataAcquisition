@@ -129,7 +129,7 @@ Application и interfaces слои **MUST NOT** импортировать `stru
 | `infrastructure/storage/gold_writer.py` | Удалён `random`, фиксированный backoff |
 | `infrastructure/storage/bronze_writer.py` | Принимает `ingestion_ts` параметр |
 | `infrastructure/quarantine/unified.py` | Принимает `ingestion_ts` параметр |
-| `domain/ports.py` | Обновлён `QuarantinePort.write()` |
+| `domain/ports/quarantine.py` | Обновлён `QuarantinePort.write()` |
 
 ### Архитектурные тесты
 

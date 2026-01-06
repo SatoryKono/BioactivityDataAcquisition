@@ -54,7 +54,7 @@ class BasePipeline(ABC):
 
 ### 2. Формализация API очистки в StoragePort
 
-Добавлены методы в `StoragePort` (`domain/ports.py`):
+Добавлены методы в `StoragePort` (`domain/ports/storage.py`, импорт из фасада `domain/ports/`):
 
 ```python
 def clear_silver(self, table_name: str) -> int:
