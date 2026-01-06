@@ -54,6 +54,9 @@ class TestFileSizeLimits:
         "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
         # Domain ports NoOp implementations
         "noop.py": 400,  # 383 LOC - NoOp implementations for Null Object Pattern (+ NoOpPiiHasher)
+        # Domain Pandera schemas (declarative field definitions)
+        "compound.py": 360,  # 344 LOC - PubChem compound schema with many chemical properties
+        "protein.py": 350,  # 329 LOC - UniProt protein schema with many biological fields
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
         "base_transformer.py": 650,  # 639 LOC - Template Method with helpers (tracing + PII hashing)
