@@ -627,3 +627,49 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
 
     class Config:
         strict = True
+
+
+class ChEMBLAssayParametersGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL AssayParameters in Gold layer.
+
+    Experimental parameters for bioassays: concentrations, pH, temperature, etc.
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary identifier (surrogate)
+    assay_param_id: Series[float] = pa.Field(
+        nullable=False, coerce=True
+    )  # int64 in Silver
+
+    # Foreign key
+    assay_chembl_id: Series[str] = pa.Field(nullable=False)
+
+    # Parameter type
+    type: Series[str] = pa.Field(nullable=False)
+
+    # Raw values
+    relation: Series[str] = pa.Field(nullable=True)
+    value: Series[float] = pa.Field(nullable=True, coerce=True)
+    units: Series[str] = pa.Field(nullable=True)
+    text_value: Series[str] = pa.Field(nullable=True)
+    comments: Series[str] = pa.Field(nullable=True)
+
+    # Standardized values
+    standard_type: Series[str] = pa.Field(nullable=True)
+    standard_relation: Series[str] = pa.Field(nullable=True)
+    standard_value: Series[float] = pa.Field(nullable=True, coerce=True)
+    standard_units: Series[str] = pa.Field(nullable=True)
+    standard_text_value: Series[str] = pa.Field(nullable=True)
+
+    # Lineage metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        strict = True
