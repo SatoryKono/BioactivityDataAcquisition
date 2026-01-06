@@ -236,7 +236,7 @@ participant DeltaLake
 Worker -> Redis: SETNX lock:chembl_activity
 Redis --> Worker: OK
 
-loop Every 20s
+loop Every 30s
     Worker -> Redis: EXPIRE (heartbeat)
 end
 

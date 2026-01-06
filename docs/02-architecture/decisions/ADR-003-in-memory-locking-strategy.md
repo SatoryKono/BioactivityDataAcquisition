@@ -64,8 +64,8 @@ MemoryLock полностью реализует `LockPort` и покрывае�
 ### 3. Конфигурация по умолчанию
 
 Из `PipelineSettings` (`config.py`):
-- `heartbeat_interval = 20s`
-- `effective_lock_ttl = heartbeat_interval * 3 = 60s`
+- `heartbeat_interval = 30s`
+- `effective_lock_ttl = heartbeat_interval * 3 = 90s`
 - TTL check interval = 1s
 
 ## Implementation
@@ -78,11 +78,11 @@ lock = MemoryLock()
 await lock.acquire(
     key="pipeline:chembl_activity",
     owner_id=run_id,
-    ttl=60,
+    ttl=90,
     exclusive=True
 )
 
-# Heartbeat в пайплайне (каждые 20s)
+# Heartbeat в пайплайне (каждые 30s)
 await lock.heartbeat(key="pipeline:chembl_activity", owner_id=run_id)
 
 # Safety Guard перед записью

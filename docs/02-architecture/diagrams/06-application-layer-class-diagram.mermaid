@@ -80,8 +80,8 @@ classDiagram
         class LockManager {
             -_lock: LockPort
             -_logger: LoggerPort
-            -_ttl: int = 60
-            -_heartbeat_interval: int = 20
+            -_ttl: int = 90
+            -_heartbeat_interval: int = 30
             +acquire_lock(resource, owner_id) LockResult
             +release_lock(resource, owner_id) bool
             +refresh_lock(resource, owner_id) bool
