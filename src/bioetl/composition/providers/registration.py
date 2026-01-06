@@ -102,17 +102,6 @@ def _get_circuit_breaker_from_config(provider: str) -> tuple[int, int]:
     return 5, 300
 
 
-def _get_page_size_from_config(provider: str, default: int = 1000) -> int:
-    """Get page size from config for paginated APIs (e.g., ChEMBL).
-
-    DEPRECATED: Use _get_adapter_config() instead.
-    """
-    source_config = _get_source_config(provider)
-    if source_config and source_config.page_size is not None:
-        return source_config.page_size
-    return default
-
-
 def _get_adapter_config(provider: str, default_page_size: int = 1000) -> AdapterConfig:
     """Get AdapterConfig from source YAML config.
 

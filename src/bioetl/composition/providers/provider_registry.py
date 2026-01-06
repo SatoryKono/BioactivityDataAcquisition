@@ -311,12 +311,3 @@ class ProviderRegistry:
     def clear(cls) -> None:
         """Очищает реестр. Используется для тестов."""
         cls._providers.clear()
-
-    @classmethod
-    def _reset_for_testing(cls) -> None:
-        """Сбрасывает реестр для изолированного тестирования.
-
-        Warning:
-            Только для использования в тестах!
-        """
-        cls.clear()
