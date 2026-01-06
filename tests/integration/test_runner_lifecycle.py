@@ -55,9 +55,9 @@ class CallRecorder:
             # Ensure this call comes after all previous expected calls
             for prev in expected[:i]:
                 prev_idx = actual.index(prev)
-                assert (
-                    prev_idx < idx
-                ), f"'{prev}' (idx {prev_idx}) should come before '{method}' (idx {idx})"
+                assert prev_idx < idx, (
+                    f"'{prev}' (idx {prev_idx}) should come before '{method}' (idx {idx})"
+                )
 
 
 @pytest.fixture

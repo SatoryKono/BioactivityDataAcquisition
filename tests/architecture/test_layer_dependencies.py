@@ -768,9 +768,9 @@ def test_storage_port_has_preview_cleanup(src_dir: Path) -> None:
     with storage_file.open(encoding="utf-8") as f:
         content = f.read()
 
-    assert (
-        "def preview_cleanup(" in content
-    ), "StoragePort must define preview_cleanup() method for CLI dry-run support"
+    assert "def preview_cleanup(" in content, (
+        "StoragePort must define preview_cleanup() method for CLI dry-run support"
+    )
 
 
 def test_error_classifier_uses_error_type_attribute(src_dir: Path) -> None:
@@ -786,6 +786,6 @@ def test_error_classifier_uses_error_type_attribute(src_dir: Path) -> None:
         content = f.read()
 
     # Should have get_error_type() call for domain errors
-    assert (
-        "get_error_type()" in content or "error_type" in content
-    ), "ErrorClassifier should use error_type attribute for domain exceptions"
+    assert "get_error_type()" in content or "error_type" in content, (
+        "ErrorClassifier should use error_type attribute for domain exceptions"
+    )

@@ -184,6 +184,6 @@ class TestExitCodeIntegration:
             ExitCode.NETWORK_ERROR,
             ExitCode.CHECKPOINT_ERROR,
         ]
-        assert len(bioetl_codes) == len(
-            set(bioetl_codes)
-        ), "BioETL codes must be unique"
+        assert len(bioetl_codes) == len(set(bioetl_codes)), (
+            "BioETL codes must be unique"
+        )

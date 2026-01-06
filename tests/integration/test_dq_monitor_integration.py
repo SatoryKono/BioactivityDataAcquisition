@@ -565,6 +565,6 @@ class TestDataQualityServiceMetricsEmission:
 
         # Verify baseline update counters
         baseline_calls = recording_metrics.get_counter_calls("dq_baseline_updated")
-        assert (
-            len(baseline_calls) == 2
-        ), "dq_baseline_updated should be emitted for each metric"
+        assert len(baseline_calls) == 2, (
+            "dq_baseline_updated should be emitted for each metric"
+        )

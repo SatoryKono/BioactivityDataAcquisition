@@ -135,6 +135,6 @@ def test_all_layers_checked() -> None:
     expected_layers = {"application", "composition", "interfaces", "infrastructure"}
     checked_layers = {d.name for d in CHECKED_DIRS}
 
-    assert (
-        checked_layers == expected_layers
-    ), f"Layer mismatch. Expected: {expected_layers}, Got: {checked_layers}"
+    assert checked_layers == expected_layers, (
+        f"Layer mismatch. Expected: {expected_layers}, Got: {checked_layers}"
+    )

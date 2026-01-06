@@ -182,9 +182,9 @@ class TestTransformerInjectionPath:
         content = factory_file.read_text(encoding="utf-8")
 
         # Check for create_transformer method (public API for direct usage)
-        assert (
-            "def create_transformer" in content
-        ), "GenericPipelineFactory must have create_transformer() method"
+        assert "def create_transformer" in content, (
+            "GenericPipelineFactory must have create_transformer() method"
+        )
 
         # Check that create_with_services passes transformer_class
         assert "transformer_class=self.transformer_class" in content, (
@@ -194,9 +194,9 @@ class TestTransformerInjectionPath:
 
         # Verify pipeline_factory creates transformer and passes to pipeline
         # Check that factory creates transformer and passes to pipeline
-        assert (
-            "transformer_class(" in content
-        ), "pipeline_factory must create transformer from transformer_class"
-        assert (
-            "transformer=transformer" in content
-        ), "pipeline_factory must pass transformer to pipeline constructor"
+        assert "transformer_class(" in content, (
+            "pipeline_factory must create transformer from transformer_class"
+        )
+        assert "transformer=transformer" in content, (
+            "pipeline_factory must pass transformer to pipeline constructor"
+        )

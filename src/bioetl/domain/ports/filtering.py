@@ -79,7 +79,7 @@ class InputFilterPort(Protocol):
                     source_path="data/input/molecules.csv",
                     column_name="molecule_chembl_id",
                 )
-                print(f"Loaded {result.unique_count} unique IDs")
+                # result.unique_count -> 3
                 # result.ids -> ('CHEMBL1', 'CHEMBL2', 'CHEMBL3', ...)
         """
         ...
