@@ -43,6 +43,7 @@ from bioetl.composition.factories.pipeline_factory import (
 from bioetl.composition.factories.services_factory import (
     BaseServicesFactory,
     ServicesBuilder,
+    create_data_normalization_service,
 )
 
 # Storage factory
@@ -73,6 +74,7 @@ __all__ = [
     "assemble_runner",
     "build_pipeline_services",
     "chembl_activity_factory",
+    "create_data_normalization_service",
     "create_pipeline_factory",
     "create_transformer",
     "get_transformer_class",
