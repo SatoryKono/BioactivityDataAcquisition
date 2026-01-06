@@ -9,7 +9,7 @@ from collections import defaultdict
 from datetime import UTC, datetime  # UTC used in add_record
 from typing import Any
 
-from bioetl.domain.types import BatchID, DQStatus, RunID
+from bioetl.domain.types import BatchID, QuarantineRecordStatus, RunID
 
 
 class InMemoryQuarantine:
@@ -45,7 +45,7 @@ class InMemoryQuarantine:
             "bronze_batch_id": str(bronze_batch_id),
             "bronze_file_uri": meta.get("bronze_file_uri", ""),
             "error_details": meta.get("error_details", {}),
-            "dq_status": DQStatus.NEW.value,
+            "dq_status": QuarantineRecordStatus.NEW.value,
             "run_id": str(run_id) if run_id else "",
         }
         self._records[pipeline].append(record)
@@ -55,7 +55,7 @@ class InMemoryQuarantine:
         pipeline: str,
         limit: int = 100,
         error_code: str | None = None,
-        dq_status: DQStatus | None = None,
+        dq_status: QuarantineRecordStatus | None = None,
     ) -> list[dict[str, Any]]:
         """Inspect quarantine records."""
         records = self._records.get(pipeline, [])
@@ -108,7 +108,7 @@ class InMemoryQuarantine:
             "bronze_batch_id": "test-batch-id",
             "bronze_file_uri": "",
             "error_details": {},
-            "dq_status": DQStatus.NEW.value,
+            "dq_status": QuarantineRecordStatus.NEW.value,
             "run_id": "",
         }
         self._records[pipeline].append(record)

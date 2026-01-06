@@ -269,16 +269,6 @@ class QuarantineRecordStatus(str, Enum):
     """Successfully reprocessed and moved to Silver."""
 
 
-# Deprecated alias for backward compatibility
-DQStatus = QuarantineRecordStatus
-"""Deprecated alias for QuarantineRecordStatus.
-
-.. deprecated:: 1.1.0
-    Use :class:`QuarantineRecordStatus` instead.
-    DQStatus was renamed to avoid confusion with DQEvaluationStatus.
-"""
-
-
 @dataclass(frozen=True, slots=True)
 class ValidationResult:
     """Result of record validation.

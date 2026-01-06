@@ -154,13 +154,17 @@ def mock_preflight_service():
 @pytest.fixture
 def mock_postrun_service():
     """Create a mock PostrunService (injected via DI)."""
-    from bioetl.application.core.postrun_service import DQResult, DQStatus, VacuumResult
+    from bioetl.application.core.postrun_service import (
+        DQEvaluationStatus,
+        DQResult,
+        VacuumResult,
+    )
 
     service = MagicMock(spec=PostrunService)
     service.run_dq_checks = AsyncMock(
         return_value=DQResult(
             error_rate=0.0,
-            status=DQStatus.PASSED,
+            status=DQEvaluationStatus.PASSED,
             anomalies=(),
             has_critical=False,
             check_duration_ms=0.0,
@@ -724,8 +728,8 @@ class TestPipelineRunnerCheckDataQuality:
     ):
         """Test _check_data_quality delegates to PostrunService."""
         from bioetl.application.core.postrun_service import (
+            DQEvaluationStatus,
             DQResult,
-            DQStatus,
             VacuumResult,
         )
 
@@ -735,7 +739,7 @@ class TestPipelineRunnerCheckDataQuality:
         postrun_service.run_dq_checks = AsyncMock(
             return_value=DQResult(
                 error_rate=0.0,
-                status=DQStatus.PASSED,
+                status=DQEvaluationStatus.PASSED,
                 anomalies=(),
                 has_critical=False,
                 check_duration_ms=5.0,
@@ -789,8 +793,8 @@ class TestPipelineRunnerCheckDataQuality:
     ):
         """Test _check_data_quality is invoked during run()."""
         from bioetl.application.core.postrun_service import (
+            DQEvaluationStatus,
             DQResult,
-            DQStatus,
             VacuumResult,
         )
 
@@ -800,7 +804,7 @@ class TestPipelineRunnerCheckDataQuality:
         postrun_service.run_dq_checks = AsyncMock(
             return_value=DQResult(
                 error_rate=0.0,
-                status=DQStatus.PASSED,
+                status=DQEvaluationStatus.PASSED,
                 anomalies=(),
                 has_critical=False,
                 check_duration_ms=0.0,

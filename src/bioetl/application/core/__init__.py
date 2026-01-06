@@ -36,8 +36,8 @@ from bioetl.application.core.memory_monitor import (
 )
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.postrun_service import (
+    DQEvaluationStatus,
     DQResult,
-    DQStatus,
     PostrunResult,
     PostrunService,
     VacuumResult,
@@ -84,8 +84,8 @@ __all__ = [
     "CleanupResult",
     "CleanupService",
     "ClearResult",
+    "DQEvaluationStatus",
     "DQResult",
-    "DQStatus",
     "Layer",
     "LayerInfo",
     "LockManager",

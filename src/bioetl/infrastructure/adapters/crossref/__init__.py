@@ -9,9 +9,9 @@ from bioetl.infrastructure.adapters.crossref.client import (
 )
 from bioetl.infrastructure.adapters.crossref.models import (
     CROSSREF_RECORD_MODELS,
-    CrossRefWorkRecord,
-    CrossRefWorkResponse,
-    CrossRefWorksResponse,
+    CrossRefPublicationRecord,
+    CrossRefPublicationResponse,
+    CrossRefPublicationsResponse,
 )
 
 __all__ = [
@@ -20,9 +20,9 @@ __all__ = [
     # Adapter
     "CrossRefAdapter",
     # Record Models
-    "CrossRefWorkRecord",
+    "CrossRefPublicationRecord",
     # Response Models
-    "CrossRefWorkResponse",
-    "CrossRefWorksResponse",
+    "CrossRefPublicationResponse",
+    "CrossRefPublicationsResponse",
     "_create_crossref_adapter",
 ]
