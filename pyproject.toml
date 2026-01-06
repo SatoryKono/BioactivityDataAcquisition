@@ -171,8 +171,8 @@ markers = [
 # Default timeout: 60 seconds per test (prevents CI hangs from stuck tests)
 # Override per-test with @pytest.mark.timeout(N) or disable with @pytest.mark.timeout(0)
 timeout = 60
-# Timeout method: signal is most reliable on Unix (thread on Windows)
-timeout_method = "signal"
+# Timeout method: thread works on all platforms (signal only on Unix)
+timeout_method = "thread"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 filterwarnings = [

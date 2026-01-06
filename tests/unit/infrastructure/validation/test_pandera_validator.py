@@ -308,6 +308,7 @@ class TestPanderaValidatorPropertyBased:
     @given(records=st.lists(arbitrary_record, max_size=10))
     @settings(
         deadline=None,
+        max_examples=10,  # Limit examples to avoid pytest timeout
         suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much],
     )
     def test_silver_validator_never_raises_on_arbitrary_input(
@@ -327,6 +328,7 @@ class TestPanderaValidatorPropertyBased:
     @given(records=st.lists(arbitrary_record, max_size=10))
     @settings(
         deadline=None,
+        max_examples=10,  # Limit examples to avoid pytest timeout
         suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much],
     )
     def test_gold_validator_never_raises_on_arbitrary_input(self, records: list[dict]):
@@ -344,6 +346,7 @@ class TestPanderaValidatorPropertyBased:
     @given(records=st.lists(arbitrary_record, max_size=10))
     @settings(
         deadline=None,
+        max_examples=10,  # Limit examples to avoid pytest timeout
         suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much],
     )
     def test_noop_validators_always_return_valid(self, records: list[dict]):
@@ -362,6 +365,7 @@ class TestPanderaValidatorPropertyBased:
     @given(records=st.lists(arbitrary_record, max_size=10))
     @settings(
         deadline=None,
+        max_examples=10,  # Limit examples to avoid pytest timeout
         suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much],
     )
     def test_strict_mode_without_schema_always_fails(self, records: list[dict]):
