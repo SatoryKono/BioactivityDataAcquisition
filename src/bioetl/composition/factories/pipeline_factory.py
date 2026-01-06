@@ -402,9 +402,7 @@ def create_pipeline_with_services(
     transformer = None
     if transformer_class is not None:
         # Extract entity_type from pipeline_name (e.g., "chembl_activity" → "activity")
-        entity_type = (
-            pipeline_name.split("_")[-1] if "_" in pipeline_name else None
-        )
+        entity_type = pipeline_name.split("_")[-1] if "_" in pipeline_name else None
 
         transformer = transformer_class(
             provider=provider,
