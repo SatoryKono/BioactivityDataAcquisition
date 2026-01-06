@@ -46,19 +46,15 @@ class _NoOpSpan:
         exc_tb: TracebackType | None,
     ) -> None:
         """Context manager exit."""
-        pass
 
     def set_attribute(self, key: str, value: Any) -> None:
         """Set span attribute (no-op)."""
-        pass
 
     def set_status(self, status: Any) -> None:
         """Set span status (no-op)."""
-        pass
 
     def record_exception(self, exception: Exception) -> None:
         """Record exception (no-op)."""
-        pass
 
 
 class _NoOpOtelTracer:
@@ -110,7 +106,6 @@ class NoOpTracing:
 
     def close(self) -> None:
         """No-op close. Idempotent."""
-        pass
 
 
 class NoOpMetrics:
@@ -143,7 +138,6 @@ class NoOpMetrics:
             labels: A dictionary of label names to label values.
 
         """
-        pass
 
     def increment_counter(
         self,
@@ -159,7 +153,6 @@ class NoOpMetrics:
             labels: A dictionary of label names to label values.
 
         """
-        pass
 
     def set_gauge(
         self,
@@ -175,11 +168,9 @@ class NoOpMetrics:
             labels: A dictionary of label names to label values.
 
         """
-        pass
 
     def close(self) -> None:
         """No-op close. Idempotent."""
-        pass
 
 
 class NoOpAudit:
@@ -205,7 +196,6 @@ class NoOpAudit:
             entry: The audit entry (ignored).
 
         """
-        pass
 
     async def get_entries(
         self,
@@ -234,7 +224,6 @@ class NoOpAudit:
 
     async def aclose(self) -> None:
         """No-op close. Idempotent."""
-        pass
 
 
 class NoOpPiiHasher:

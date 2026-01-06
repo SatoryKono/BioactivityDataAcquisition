@@ -45,7 +45,6 @@ class BronzeRecord(TypedDict):
     # We use NotRequired for dynamic fields, but TypedDict doesn't allow mixing optional/required well in old python
     # For now, we assume keys are strings and values Any
     # This is a marker type for clarity in signatures
-    pass
 
 
 class SilverRecord(TypedDict, total=False):
