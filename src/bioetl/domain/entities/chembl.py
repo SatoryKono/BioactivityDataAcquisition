@@ -667,6 +667,42 @@ class TargetComponentRecord(BaseModel):
     )
 
 
+class ProteinClassRecord(BaseModel):
+    """Protein classification DTO from ChEMBL.
+
+    Represents a protein classification hierarchy node from ChEMBL API.
+    Required field: protein_class_id.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    # Primary identifier (REQUIRED)
+    protein_class_id: int = Field(description="Unique protein class ID")
+
+    # Hierarchy
+    parent_id: int | None = Field(default=None, description="Parent class ID")
+    class_level: int | None = Field(
+        default=None, description="Hierarchy level (1-8)"
+    )
+
+    # Classification data
+    pref_name: str | None = Field(default=None, description="Preferred name")
+    short_name: str | None = Field(default=None, description="Short name")
+    protein_class_desc: str | None = Field(
+        default=None, description="Full description"
+    )
+    definition: str | None = Field(default=None, description="Classification definition")
+
+    # Additional metadata
+    sort_order: int | None = Field(default=None, description="Sort order")
+    replaced_by: int | None = Field(
+        default=None, description="ID of replacement class if deprecated"
+    )
+    downgraded: int | None = Field(
+        default=None, description="Deprecation flag (0 or 1)"
+    )
+
+
 __all__ = [
     "ActivityRecord",
     "AssayRecord",
@@ -674,6 +710,7 @@ __all__ = [
     "DocumentRecord",
     "DocumentTermRecord",
     "MoleculeRecord",
+    "ProteinClassRecord",
     "TargetComponentRecord",
     "TargetRecord",
 ]
