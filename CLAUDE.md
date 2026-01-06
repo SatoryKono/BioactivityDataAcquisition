@@ -131,7 +131,7 @@ ls tests/architecture/test_*.py
 | **Python-файлов** | ~380 |
 | **Строк кода** | ~68,400 |
 | **Тестов** | ~5,277 |
-| **ADR** | 23 |
+| **ADR** | 24 |
 | **Провайдеров** | 7 |
 | **Pipeline-конфигураций** | 20 |
 
@@ -392,7 +392,7 @@ sha256(provider + canonical_json(record))
 
 ### 4.5. Архитектурные Решения (ADR)
 
-**23 ADR** определяют ключевые архитектурные решения проекта:
+**24 ADR** определяют ключевые архитектурные решения проекта:
 
 | ADR | Название | Описание |
 |-----|----------|----------|
@@ -419,6 +419,7 @@ sha256(provider + canonical_json(record))
 | 021 | DDD Aggregates Adoption | DDD агрегаты |
 | 022 | Tracing NoOp | NoOp для трассировки |
 | 023 | Entity Type Patterns | Паттерны типов сущностей |
+| 024 | Entity Naming Unification | Унификация именования сущностей |
 
 Документы: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
 
@@ -803,7 +804,7 @@ git commit -m "..."
 | `docs/RULES.md` | Конституция проекта v5.10 |
 | `docs/REQUIREMENTS.md` | 127 тестируемых требований |
 | `docs/CHANGELOG.md` | История изменений |
-| `docs/02-architecture/decisions/` | ADR (001-023) — 23 архитектурных решения |
+| `docs/02-architecture/decisions/` | ADR (001-024) — 24 архитектурных решения |
 | `AGENT.md` | Детальные инструкции для агента v2.2 |
 | `.claude/PROJECT_CONTEXT.md` | Компактный контекст |
 
