@@ -123,12 +123,21 @@ def register_all_transformers() -> None:
     from bioetl.application.pipelines.chembl.activity_transformer import (
         ActivityTransformer,
     )
+    from bioetl.application.pipelines.chembl.assay_parameters_transformer import (
+        AssayParametersTransformer,
+    )
     from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
+    from bioetl.application.pipelines.chembl.cell_line_transformer import (
+        CellLineTransformer,
+    )
     from bioetl.application.pipelines.chembl.compound_record_transformer import (
         CompoundRecordTransformer,
     )
     from bioetl.application.pipelines.chembl.document_similarity_transformer import (
         DocumentSimilarityTransformer,
+    )
+    from bioetl.application.pipelines.chembl.document_term_transformer import (
+        DocumentTermTransformer,
     )
     from bioetl.application.pipelines.chembl.document_transformer import (
         DocumentTransformer,
@@ -136,10 +145,19 @@ def register_all_transformers() -> None:
     from bioetl.application.pipelines.chembl.molecule_transformer import (
         MoleculeTransformer,
     )
+    from bioetl.application.pipelines.chembl.protein_class_transformer import (
+        ProteinClassTransformer,
+    )
     from bioetl.application.pipelines.chembl.target_component_transformer import (
         TargetComponentTransformer,
     )
     from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
+    from bioetl.application.pipelines.crossref.transformer import (
+        CrossRefPublicationTransformer,
+    )
+    from bioetl.application.pipelines.openalex.transformer import (
+        OpenAlexPublicationTransformer,
+    )
     from bioetl.application.pipelines.pubchem.transformer import (
         PubChemCompoundTransformer,
     )
@@ -149,6 +167,9 @@ def register_all_transformers() -> None:
     from bioetl.application.pipelines.semanticscholar.transformer import (
         SemanticScholarPublicationTransformer,
     )
+    from bioetl.application.pipelines.uniprot.idmapping_transformer import (
+        IDMappingTransformer,
+    )
     from bioetl.application.pipelines.uniprot.transformer import (
         UniProtProteinTransformer,
     )
@@ -156,10 +177,14 @@ def register_all_transformers() -> None:
     # ChEMBL transformers
     register_transformer("chembl", "activity", ActivityTransformer)
     register_transformer("chembl", "assay", AssayTransformer)
+    register_transformer("chembl", "assay_parameters", AssayParametersTransformer)
+    register_transformer("chembl", "cell_line", CellLineTransformer)
     register_transformer("chembl", "compound_record", CompoundRecordTransformer)
     register_transformer("chembl", "document", DocumentTransformer)
     register_transformer("chembl", "document_similarity", DocumentSimilarityTransformer)
+    register_transformer("chembl", "document_term", DocumentTermTransformer)
     register_transformer("chembl", "molecule", MoleculeTransformer)
+    register_transformer("chembl", "protein_class", ProteinClassTransformer)
     register_transformer("chembl", "target", TargetTransformer)
     register_transformer("chembl", "target_component", TargetComponentTransformer)
 
@@ -168,9 +193,16 @@ def register_all_transformers() -> None:
 
     # UniProt transformers
     register_transformer("uniprot", "protein", UniProtProteinTransformer)
+    register_transformer("uniprot", "idmapping", IDMappingTransformer)
 
     # PubMed transformers
     register_transformer("pubmed", "publications", PubMedPublicationTransformer)
+
+    # CrossRef transformers
+    register_transformer("crossref", "publication", CrossRefPublicationTransformer)
+
+    # OpenAlex transformers
+    register_transformer("openalex", "publication", OpenAlexPublicationTransformer)
 
     # Semantic Scholar transformers
     register_transformer(
