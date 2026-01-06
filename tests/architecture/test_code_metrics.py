@@ -366,6 +366,8 @@ class TestClassSize:
         "CrossRefTransformer": 360,  # 354 lines - transformer with field extraction
         # UniProt adapter (similar to ChEMBL adapter)
         "UniProtAdapter": 320,  # 312 lines - HTTP adapter with streaming
+        # UniProt ID Mapping client (job-based async API)
+        "UniProtIDMappingClient": 400,  # 362 lines - ID Mapping client with job polling
         # SemanticScholar adapter
         "SemanticScholarAdapter": 500,  # 496 lines - HTTP adapter with multi-identifier fallback + FilterableDataSourcePort
         # PubMed adapter (similar to ChEMBL adapter)
@@ -513,6 +515,7 @@ class TestGodObjectDetection:
         "PubMedAdapter": "HTTP adapter with FilterableDataSourcePort implementation; delegates to BaseHttpAdapter",
         "OpenAlexAdapter": "HTTP adapter with FilterableDataSourcePort; batch DOI resolution + title fallback",
         "SemanticScholarAdapter": "HTTP adapter with multi-identifier fallback; delegates to BaseHttpAdapter, CircuitBreaker",
+        "UniProtIDMappingClient": "ID Mapping client with job-based async API; delegates to BaseHttpAdapter, AdapterMetrics",
         "UnifiedHTTPClient": "HTTP client with internal retry logic; single responsibility",
         # CLI (inherently has many commands but delegates to entrypoints)
         "CLI": "CLI entry point - commands are cohesive, delegates to entrypoints",
