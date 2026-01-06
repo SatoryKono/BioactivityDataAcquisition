@@ -11,6 +11,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Lookup method values
 LOOKUP_METHODS = ["doi", "title_fallback", "title_only", "unknown"]
@@ -37,7 +38,7 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     # === Core Fields ===
     doi: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^10\.\d{4,}/.*$",
+        str_matches=DOI_REGEX_PATTERN,
         description="Digital Object Identifier",
     )
 

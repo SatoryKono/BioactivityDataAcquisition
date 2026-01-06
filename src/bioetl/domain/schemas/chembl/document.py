@@ -15,6 +15,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 
 class ChemblPublicationSchema(ETLRecordSchema):
@@ -41,7 +42,7 @@ class ChemblPublicationSchema(ETLRecordSchema):
     pubmed_id: Series[int] | None = pa.Field(nullable=True, description="PubMed ID.")
     doi: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^10\.\d+/.+$",
+        str_matches=DOI_REGEX_PATTERN,
         description="DOI.",
     )
     patent_id: Series[str] | None = pa.Field(nullable=True, description="Patent ID.")
