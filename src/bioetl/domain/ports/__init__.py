@@ -17,6 +17,7 @@ This package contains all port definitions organized by domain:
 - shutdown: ShutdownPort for graceful termination coordination
 - memory: MemoryMonitorPort for adaptive batch sizing
 - normalization: UnitConverterPort, ValueValidatorPort, ActivityAggregatorPort
+- data_normalization: DataNormalizationPort for text/data normalization
 """
 
 from bioetl.domain.ports.audit import (
@@ -26,6 +27,7 @@ from bioetl.domain.ports.audit import (
     AuditPort,
 )
 from bioetl.domain.ports.checkpoint import CheckpointPort
+from bioetl.domain.ports.data_normalization import DataNormalizationPort
 from bioetl.domain.ports.data_source import (
     DataSourcePort,
     FilterableDataSourcePort,
@@ -82,6 +84,7 @@ __all__ = [
     "CheckpointPort",
     "CircuitBreakerPort",
     "DQMonitorPort",
+    "DataNormalizationPort",
     "DataSourcePort",
     "FilterableDataSourcePort",
     "GoldValidatorPort",
