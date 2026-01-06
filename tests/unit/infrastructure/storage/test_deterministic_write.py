@@ -93,9 +93,9 @@ class TestDeterministicCsvExport:
                 outputs.append(f.read())
 
         # All outputs should be identical
-        assert (
-            outputs[0] == outputs[1] == outputs[2]
-        ), "CSV exports should be identical regardless of input order"
+        assert outputs[0] == outputs[1] == outputs[2], (
+            "CSV exports should be identical regardless of input order"
+        )
 
     async def test_csv_export_with_complex_types_sorted(
         self, csv_exporter: CsvExporter, tmp_path: Path
@@ -219,9 +219,9 @@ class TestDeterministicCsvFilterRead:
             results.append(result.ids)
 
         # All reads should produce identical results
-        assert all(
-            r == results[0] for r in results
-        ), "Multiple reads should produce identical sorted results"
+        assert all(r == results[0] for r in results), (
+            "Multiple reads should produce identical sorted results"
+        )
         assert results[0] == ("ID_1", "ID_2", "ID_3")
 
 

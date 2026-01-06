@@ -18,10 +18,19 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import sys
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
+
+# Configure logging for CLI output
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
+logger = logging.getLogger(__name__)
 
 # =============================================================================
 # Configuration: Allowed directories and paths
@@ -338,46 +347,47 @@ def run_audit(project_root: Path) -> AuditResult:
 # =============================================================================
 
 
-def print_text_report(result: AuditResult) -> None:
-    """Print human-readable report."""
-    print("=" * 70)
-    print("BioETL Structure Audit Report")
-    print("=" * 70)
-    print()
+def log_text_report(result: AuditResult) -> None:
+    """Log human-readable report."""
+    logger.info("=" * 70)
+    logger.info("BioETL Structure Audit Report")
+    logger.info("=" * 70)
+    logger.info("")
 
     if result.must_violations:
-        print(f"## MUST Violations ({len(result.must_violations)}) - BLOCKERS")
-        print()
+        logger.info("## MUST Violations (%d) - BLOCKERS", len(result.must_violations))
+        logger.info("")
         for v in result.must_violations:
-            print(f"  [{v.category}] {v.path}")
-            print(f"    → {v.message}")
-        print()
+            logger.info("  [%s] %s", v.category, v.path)
+            logger.info("    → %s", v.message)
+        logger.info("")
 
     if result.should_violations:
-        print(
-            f"## SHOULD Violations ({len(result.should_violations)}) - RECOMMENDATIONS"
+        logger.info(
+            "## SHOULD Violations (%d) - RECOMMENDATIONS", len(result.should_violations)
         )
-        print()
+        logger.info("")
         for v in result.should_violations:
-            print(f"  [{v.category}] {v.path}")
-            print(f"    → {v.message}")
-        print()
+            logger.info("  [%s] %s", v.category, v.path)
+            logger.info("    → %s", v.message)
+        logger.info("")
 
     if not result.violations:
-        print("✓ Структура проекта соответствует File Policy")
-        print()
+        logger.info("✓ Структура проекта соответствует File Policy")
+        logger.info("")
 
-    print("=" * 70)
-    print(
-        f"Summary: {len(result.must_violations)} MUST, "
-        f"{len(result.should_violations)} SHOULD"
+    logger.info("=" * 70)
+    logger.info(
+        "Summary: %d MUST, %d SHOULD",
+        len(result.must_violations),
+        len(result.should_violations),
     )
-    print("=" * 70)
+    logger.info("=" * 70)
 
 
-def print_json_report(result: AuditResult) -> None:
-    """Print JSON report."""
-    print(json.dumps(result.to_dict(), indent=2, ensure_ascii=False))
+def log_json_report(result: AuditResult) -> None:
+    """Log JSON report."""
+    logger.info(json.dumps(result.to_dict(), indent=2, ensure_ascii=False))
 
 
 # =============================================================================
@@ -418,7 +428,7 @@ def main() -> int:
     # Resolve project root
     project_root = args.path.resolve()
     if not project_root.exists():
-        print(f"Error: Path does not exist: {project_root}", file=sys.stderr)
+        logger.error("Error: Path does not exist: %s", project_root)
         return 2
 
     # Run audit
@@ -426,9 +436,9 @@ def main() -> int:
 
     # Output results
     if args.json:
-        print_json_report(result)
+        log_json_report(result)
     else:
-        print_text_report(result)
+        log_text_report(result)
 
     # Determine exit code
     if result.must_violations:

@@ -71,16 +71,16 @@ class TestConcurrentRegistration:
 
         # Verify all registrations succeeded
         assert len(errors) == 0, f"Errors during registration: {errors}"
-        assert (
-            len(results) == num_threads
-        ), f"Expected {num_threads} registrations, got {len(results)}"
+        assert len(results) == num_threads, (
+            f"Expected {num_threads} registrations, got {len(results)}"
+        )
 
         # Verify all pipelines are registered
         registered = isolated_registry.list_pipelines()
         for i in range(num_threads):
-            assert (
-                f"test_pipeline_{i}" in registered
-            ), f"Pipeline test_pipeline_{i} not found in registry"
+            assert f"test_pipeline_{i}" in registered, (
+                f"Pipeline test_pipeline_{i} not found in registry"
+            )
 
     def test_concurrent_read_write_safety(self, isolated_registry) -> None:
         """Concurrent reads during writes do not cause errors.
@@ -173,12 +173,12 @@ class TestConcurrentRegistration:
                 future.result()
 
         # Exactly one should succeed
-        assert (
-            len(successes) == 1
-        ), f"Expected 1 success, got {len(successes)}: {successes}"
-        assert (
-            len(failures) == num_threads - 1
-        ), f"Expected {num_threads - 1} failures, got {len(failures)}"
+        assert len(successes) == 1, (
+            f"Expected 1 success, got {len(successes)}: {successes}"
+        )
+        assert len(failures) == num_threads - 1, (
+            f"Expected {num_threads - 1} failures, got {len(failures)}"
+        )
 
 
 class TestListPipelinesDeterminism:
@@ -198,9 +198,9 @@ class TestListPipelinesDeterminism:
         result = isolated_registry.list_pipelines()
 
         # Verify sorted order
-        assert result == sorted(
-            names
-        ), f"Expected sorted list {sorted(names)}, got {result}"
+        assert result == sorted(names), (
+            f"Expected sorted list {sorted(names)}, got {result}"
+        )
 
     def test_list_pipelines_consistent_across_calls(self, isolated_registry) -> None:
         """Multiple calls to list_pipelines() return identical results.
@@ -259,9 +259,9 @@ class TestRegisterAllPipelinesThreadSafety:
                 future.result()
 
         # All threads should complete
-        assert (
-            len(call_count) == num_threads
-        ), f"Expected {num_threads} completions, got {len(call_count)}"
+        assert len(call_count) == num_threads, (
+            f"Expected {num_threads} completions, got {len(call_count)}"
+        )
 
         # Verify no unexpected errors
         assert len(errors) == 0, f"Unexpected errors: {errors}"

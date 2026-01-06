@@ -9,8 +9,17 @@ Currently a placeholder that validates diagram file existence.
 
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
+
+# Configure logging for CLI output
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
+logger = logging.getLogger(__name__)
 
 
 def find_mermaid_files(docs_dir: Path) -> list[Path]:
@@ -23,12 +32,12 @@ def validate_diagrams(docs_dir: Path) -> bool:
     mermaid_files = find_mermaid_files(docs_dir)
 
     if not mermaid_files:
-        print("No Mermaid diagram files found in docs/")
+        logger.info("No Mermaid diagram files found in docs/")
         return True
 
-    print(f"Found {len(mermaid_files)} Mermaid diagram file(s):")
+    logger.info("Found %d Mermaid diagram file(s):", len(mermaid_files))
     for f in mermaid_files:
-        print(f"  - {f.relative_to(docs_dir.parent)}")
+        logger.info("  - %s", f.relative_to(docs_dir.parent))
 
     return True
 
@@ -39,11 +48,11 @@ def main() -> int:
     docs_dir = project_root / "docs"
 
     if not docs_dir.exists():
-        print(f"Warning: docs directory not found at {docs_dir}")
+        logger.warning("Warning: docs directory not found at %s", docs_dir)
         return 0
 
     if validate_diagrams(docs_dir):
-        print("Diagram validation passed.")
+        logger.info("Diagram validation passed.")
         return 0
 
     return 1

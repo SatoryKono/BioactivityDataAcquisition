@@ -709,9 +709,9 @@ class TestErrorClassificationCompleteness:
             error = httpx.HTTPStatusError(
                 f"Error {status_code}", request=request, response=response
             )
-            assert (
-                is_circuit_breaker_error(error) is True
-            ), f"Status {status_code} should trigger"
+            assert is_circuit_breaker_error(error) is True, (
+                f"Status {status_code} should trigger"
+            )
 
     @pytest.mark.unit
     def test_all_4xx_except_429_dont_trigger(self) -> None:
@@ -723,18 +723,18 @@ class TestErrorClassificationCompleteness:
             error = httpx.HTTPStatusError(
                 f"Error {status_code}", request=request, response=response
             )
-            assert (
-                is_circuit_breaker_error(error) is False
-            ), f"Status {status_code} should NOT trigger"
+            assert is_circuit_breaker_error(error) is False, (
+                f"Status {status_code} should NOT trigger"
+            )
 
         for status_code in range(430, 452):
             response = httpx.Response(status_code, request=request)
             error = httpx.HTTPStatusError(
                 f"Error {status_code}", request=request, response=response
             )
-            assert (
-                is_circuit_breaker_error(error) is False
-            ), f"Status {status_code} should NOT trigger"
+            assert is_circuit_breaker_error(error) is False, (
+                f"Status {status_code} should NOT trigger"
+            )
 
     @pytest.mark.unit
     def test_httpx_timeout_variants_trigger(self) -> None:

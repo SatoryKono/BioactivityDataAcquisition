@@ -73,9 +73,8 @@ tests = [
     # VCR.py for API testing (RULES.md Section 4.2)
     "vcrpy>=6.0",
     "pytest-vcr>=1.0",
-    # Code formatting (required by architecture tests)
-    "black>=24.0",
-    "isort>=5.13",
+    # Code formatting (required by architecture tests) - ruff replaces black+isort
+    "ruff>=0.4",
 ]
 dev = [
     "pytest>=8.0",
@@ -98,10 +97,10 @@ dev = [
     # VCR.py for API testing (RULES.md Section 4.2)
     "vcrpy>=6.0",
     "pytest-vcr>=1.0",
-    # Code formatting and linting
-    "black>=24.0",
-    "isort>=5.13",
+    # Code formatting and linting - ruff replaces black+isort
     "import-linter>=2.0",
+    # Docstring style checking
+    "pydocstyle>=6.3",
     # Tracing stack for OpenTelemetry-backed tests
     "opentelemetry-api>=1.20",
     "opentelemetry-sdk>=1.20",
@@ -353,8 +352,8 @@ known-first-party = ["bioetl", "tests"]
 "src/bioetl/domain/schemas/crossref/__init__.py" = ["I001"]
 # Entrypoints uses semantic grouping with comments in __all__ (not alphabetical)
 "src/bioetl/composition/entrypoints.py" = ["RUF022"]
-# CLI tools legitimately use print() and may use simpler patterns
-"src/tools/**/*.py" = ["T201", "PTH", "SIM"]
+# CLI tools use logging instead of print(), may use simpler patterns
+"src/tools/**/*.py" = ["PTH", "SIM"]
 # Infrastructure adapters implement Protocol interfaces, may not use all args
 "src/bioetl/infrastructure/adapters/**/*.py" = ["ARG001", "ARG002", "SIM102", "SIM113"]
 # Infrastructure may have unused args for interface consistency, use open() is fine
@@ -437,4 +436,6 @@ dev = [
     # Dead code detection
     "vulture>=2.11",
     # Note: osv-scanner is preferred for vulnerability scanning (Go binary)
+    # Docstring style checking
+    "pydocstyle>=6.3",
 ]

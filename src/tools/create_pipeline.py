@@ -14,9 +14,18 @@ Usage:
 """
 
 import argparse
+import logging
 import sys
 from pathlib import Path
 from string import Template
+
+# Configure logging for CLI output
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
+logger = logging.getLogger(__name__)
 
 # Templates
 YAML_TEMPLATE = Template(
@@ -66,11 +75,11 @@ dq:
 )
 
 PIPELINE_TEMPLATE = Template(
-    """\"\"\"${provider_title} ${entity_title} Pipeline.
+    '''"""${provider_title} ${entity_title} Pipeline.
 
 Defines the pipeline structure for ${provider_title} ${entity_title} data.
 Transformation logic is delegated to ${entity_title}Transformer.
-\"\"\"
+"""
 
 from __future__ import annotations
 
@@ -80,20 +89,20 @@ from bioetl.composition.registry import register_pipeline
 
 @register_pipeline(name="${pipeline_name}")
 class ${class_prefix}Pipeline(BasePipeline):
-    \"\"\"Pipeline for ${provider_title} ${entity_title} data processing.
+    """Pipeline for ${provider_title} ${entity_title} data processing.
 
     Inherits standard behavior from BasePipeline.
     Transformation logic is injected via DI (GenericPipelineFactory).
-    \"\"\"
+    """
     pass
-"""
+'''
 )
 
 TRANSFORMER_TEMPLATE = Template(
-    """\"\"\"${provider_title} ${entity_title} Transformer.
+    '''"""${provider_title} ${entity_title} Transformer.
 
 Handles transformation from Bronze (JSON) to Silver (Standardized) format.
-\"\"\"
+"""
 
 from __future__ import annotations
 
@@ -104,7 +113,7 @@ from bioetl.domain.context import PipelineContext
 
 
 class ${class_prefix}Transformer(BaseTransformer):
-    \"\"\"Transformer for ${provider_title} ${entity_title} records.\"\"\"
+    """Transformer for ${provider_title} ${entity_title} records."""
 
     async def _transform_impl(
         self,
@@ -112,7 +121,7 @@ class ${class_prefix}Transformer(BaseTransformer):
         record: dict[str, Any],
         index: int,
     ) -> dict[str, Any] | None:
-        \"\"\"Transform a single raw record.
+        """Transform a single raw record.
 
         Args:
             context: Pipeline context (run_id, etc.)
@@ -121,7 +130,7 @@ class ${class_prefix}Transformer(BaseTransformer):
 
         Returns:
             Transformed dictionary or None to skip.
-        \"\"\"
+        """
         # Implement mapping logic
         # Example:
         # if "id" not in record:
@@ -134,14 +143,14 @@ class ${class_prefix}Transformer(BaseTransformer):
         }
 
     def _get_gold_filter_config(self) -> dict[str, Any]:
-        \"\"\"Get configuration for Gold layer filtering.\"\"\"
+        """Get configuration for Gold layer filtering."""
         # If needed, override to provide custom filter config
         return super()._get_gold_filter_config()
-"""
+'''
 )
 
 TEST_TEMPLATE = Template(
-    """\"\"\"Unit tests for ${provider_title} ${entity_title} Pipeline.\"\"\"
+    '''"""Unit tests for ${provider_title} ${entity_title} Pipeline."""
 
 from __future__ import annotations
 
@@ -159,11 +168,11 @@ def transformer():
 
 @pytest.mark.unit
 class Test${class_prefix}Transformer:
-    \"\"\"Tests for ${class_prefix}Transformer.\"\"\"
+    """Tests for ${class_prefix}Transformer."""
 
     @pytest.mark.asyncio
     async def test_transform_record(self, transformer):
-        \"\"\"Test basic record transformation.\"\"\"
+        """Test basic record transformation."""
         context = MagicMock(spec=PipelineContext)
         # Setup context.started_at etc.
 
@@ -172,7 +181,7 @@ class Test${class_prefix}Transformer:
 
         assert result is not None
         assert result["${entity}_id"] == "123"
-"""
+'''
 )
 
 
@@ -205,10 +214,12 @@ def main() -> int:
 
     # Validation
     if not provider.replace("_", "").isalnum():
-        print(f"Error: Provider name '{provider}' must be alphanumeric/snake_case")
+        logger.error(
+            "Error: Provider name '%s' must be alphanumeric/snake_case", provider
+        )
         return 1
     if not entity.replace("_", "").isalnum():
-        print(f"Error: Entity name '{entity}' must be alphanumeric/snake_case")
+        logger.error("Error: Entity name '%s' must be alphanumeric/snake_case", entity)
         return 1
 
     # Derived names
@@ -224,12 +235,10 @@ def main() -> int:
     test_dir = Path("tests/unit/pipelines") / provider
 
     files_to_create = {
-        config_dir
-        / f"{entity}.yaml": YAML_TEMPLATE.substitute(
+        config_dir / f"{entity}.yaml": YAML_TEMPLATE.substitute(
             provider=provider, entity=entity, pipeline_name=pipeline_name
         ),
-        pipeline_dir
-        / f"{entity}.py": PIPELINE_TEMPLATE.substitute(
+        pipeline_dir / f"{entity}.py": PIPELINE_TEMPLATE.substitute(
             provider=provider,
             entity=entity,
             provider_title=provider_title,
@@ -237,16 +246,14 @@ def main() -> int:
             pipeline_name=pipeline_name,
             class_prefix=class_prefix,
         ),
-        pipeline_dir
-        / "transformer.py": TRANSFORMER_TEMPLATE.substitute(
+        pipeline_dir / "transformer.py": TRANSFORMER_TEMPLATE.substitute(
             provider=provider,
             entity=entity,
             provider_title=provider_title,
             entity_title=entity_title,
             class_prefix=class_prefix,
         ),
-        test_dir
-        / f"test_{entity}_pipeline.py": TEST_TEMPLATE.substitute(
+        test_dir / f"test_{entity}_pipeline.py": TEST_TEMPLATE.substitute(
             provider=provider,
             entity=entity,
             provider_title=provider_title,
@@ -263,14 +270,16 @@ def main() -> int:
         new_transformer_path = pipeline_dir / f"{entity}_transformer.py"
         content = files_to_create.pop(transformer_path)
         files_to_create[new_transformer_path] = content
-        print(
-            f"Note: {transformer_path} exists. Creating {new_transformer_path} instead."
+        logger.info(
+            "Note: %s exists. Creating %s instead.",
+            transformer_path,
+            new_transformer_path,
         )
 
     if args.dry_run:
-        print("Dry Run - Files to be created:")
+        logger.info("Dry Run - Files to be created:")
         for path in files_to_create:
-            print(f"- {path}")
+            logger.info("- %s", path)
         return 0
 
     # Create directories and files
@@ -282,17 +291,20 @@ def main() -> int:
             init_file.touch()
 
         if path.exists():
-            print(f"Skipping {path}: File already exists")
+            logger.info("Skipping %s: File already exists", path)
             continue
 
         with path.open("w") as f:
             f.write(content)
-        print(f"Created {path}")
+        logger.info("Created %s", path)
 
-    print("\nDone! Don't forget to:")
-    print("1. Implement transformation logic in transformer.py")
-    print("2. Define validation schema in src/bioetl/infrastructure/schemas/gold.py")
-    print(
+    logger.info("")
+    logger.info("Done! Don't forget to:")
+    logger.info("1. Implement transformation logic in transformer.py")
+    logger.info(
+        "2. Define validation schema in src/bioetl/infrastructure/schemas/gold.py"
+    )
+    logger.info(
         "3. Register any new factories if needed (though GenericPipelineFactory should handle it)"
     )
 
