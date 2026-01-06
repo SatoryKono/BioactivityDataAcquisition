@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_authors,
     extract_external_ids,
@@ -23,14 +23,13 @@ from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEnt
 from bioetl.domain.normalization import strip_html_tags
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig
     from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.services import IdentityService
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord
 
 
-class SemanticScholarPublicationTransformer(BaseTransformer):
+class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     """Transforms Semantic Scholar papers to Publication entity.
 
     Mapping:
@@ -57,6 +56,11 @@ class SemanticScholarPublicationTransformer(BaseTransformer):
     - _lookup_method: "doi" | "title_fallback" | "title_only"
     - _original_doi: Original DOI for fallback records
 
+    Subclasses BasePublicationTransformer to provide:
+    - Unified transformation flow via Template Method
+    - Automatic primary ID validation and fallback logging
+    - Content hash computation (excluding metadata)
+    - Tracing and metrics observability (O1)
     """
 
     def __init__(
@@ -169,69 +173,20 @@ class SemanticScholarPublicationTransformer(BaseTransformer):
             "_original_doi": original_doi,
         }
 
-    async def _transform_impl(
-        self,
-        context: PipelineContext,
-        record: BronzeRecord,
-        index: int,
-    ) -> SilverRecord | None:
-        """Transform Semantic Scholar record to Silver format.
-
-        Args:
-            context: Pipeline context with run_id, run_type, logger.
-            record: Raw Bronze record from Semantic Scholar API.
-            index: Sequential index of the record in the pipeline run.
+    def _get_primary_id_field(self) -> str:
+        """Return the primary ID field name for Semantic Scholar publications.
 
         Returns:
-            SilverRecord if transformation successful, None if record should be skipped.
+            'paper_id' - the Semantic Scholar-specific identifier field.
 
         """
-        # 1. Extract business data
-        business_data = self._extract_business_data(record)
+        return "paper_id"
 
-        # 2. Validate required field
-        paper_id = business_data.get("paper_id")
-        if not paper_id:
-            context.logger.warning(
-                "record_skipped_no_id",
-                index=index,
-                lookup_method=business_data.get("_lookup_method"),
-            )
-            return None
+    def _get_entity_class(self) -> type[SemanticScholarPublicationEntity]:
+        """Return the domain entity class for Semantic Scholar publications.
 
-        # 3. Log fallback usage for metrics
-        lookup_method = business_data.get("_lookup_method", "unknown")
-        if lookup_method in ("title_fallback", "title_only"):
-            context.logger.info(
-                "fallback_lookup_used",
-                paper_id=paper_id,
-                lookup_method=lookup_method,
-                original_doi=business_data.get("_original_doi"),
-            )
+        Returns:
+            SemanticScholarPublicationEntity class.
 
-        # 4. Generate entity ID using IdentityService
-        entity_id = self.compute_entity_id(
-            source_id=paper_id,
-            record={"paper_id": paper_id},
-        )
-
-        # 5. Compute content hash (exclude lookup metadata from hash)
-        hash_data = {
-            k: v
-            for k, v in business_data.items()
-            if not k.startswith("_")  # Exclude _lookup_method, _original_doi
-        }
-        content_hash = self.compute_content_hash(hash_data, exclude_none=True)
-
-        # 6. Create domain entity
-        entity = self._create_entity(
-            SemanticScholarPublicationEntity,
-            context,
-            entity_id=entity_id,
-            content_hash=content_hash,
-            index=index,
-            **business_data,
-        )
-
-        # 7. Convert to SilverRecord
-        return cast("SilverRecord", self.entity_to_silver_record(entity))
+        """
+        return SemanticScholarPublicationEntity
