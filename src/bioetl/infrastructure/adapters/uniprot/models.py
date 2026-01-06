@@ -102,7 +102,8 @@ class UniProtProteinDescription(BaseModel):
         default_factory=list, alias="submittedName", description="Submitted names"
     )
     flag: str | None = Field(
-        default=None, description="Protein sequence completeness flag (Fragment/Precursor)"
+        default=None,
+        description="Protein sequence completeness flag (Fragment/Precursor)",
     )
 
 
