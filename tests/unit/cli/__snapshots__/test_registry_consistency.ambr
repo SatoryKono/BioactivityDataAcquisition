@@ -16,6 +16,7 @@
     - openalex_publication
     - pubchem_compound
     - pubmed_publications
+    - semanticscholar_publication
     - uniprot_protein
   
   '''

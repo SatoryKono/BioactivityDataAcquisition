@@ -506,6 +506,58 @@ CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
     ]
 )
 
+# Schema for Semantic Scholar Publication
+# See: https://api.semanticscholar.org/api-docs/graph
+SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
+    [
+        # System fields
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
+        pa.field("_index", pa.int64()),
+        # Primary key
+        pa.field("paper_id", pa.string()),
+        # External IDs
+        pa.field("doi", pa.string()),
+        pa.field("pmid", pa.string()),
+        pa.field("pmcid", pa.string()),
+        pa.field("arxiv_id", pa.string()),
+        pa.field("corpus_id", pa.int64()),
+        # Core fields
+        pa.field("title", pa.string()),
+        pa.field("abstract", pa.string()),
+        pa.field("tldr", pa.string()),
+        pa.field("year", pa.int64()),
+        pa.field("publication_date", pa.string()),
+        # Journal/Venue
+        pa.field("journal", pa.string()),
+        pa.field("volume", pa.string()),
+        pa.field("pages", pa.string()),
+        pa.field("venue", pa.string()),
+        # Metrics
+        pa.field("citation_count", pa.int64()),
+        pa.field("reference_count", pa.int64()),
+        # Open Access
+        pa.field("is_open_access", pa.bool_()),
+        pa.field("open_access_url", pa.string()),
+        pa.field("open_access_status", pa.string()),
+        # Classification (JSON strings)
+        pa.field("fields_of_study", pa.string()),
+        pa.field("publication_types", pa.string()),
+        pa.field("authors", pa.string()),
+        # Source tracking
+        pa.field("source", pa.string()),
+        # Lookup metadata
+        pa.field("_lookup_method", pa.string()),
+        pa.field("_original_doi", pa.string()),
+    ]
+)
+
 # Schema for CrossRef Publication
 # See: https://api.crossref.org/swagger-ui/index.html
 CROSSREF_PUBLICATION_SCHEMA = pa.schema(

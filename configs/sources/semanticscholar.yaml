@@ -1,0 +1,44 @@
+# configs/sources/semanticscholar.yaml
+# Configuration for Semantic Scholar Academic Graph API data source.
+# Provides publication metadata via DOI resolution and title search.
+#
+# API Documentation: https://api.semanticscholar.org/api-docs/
+#
+# Rate Limits:
+# - Without API key: Shared pool of 1000 req/sec (unstable, not recommended)
+# - With API key: Guaranteed 1 req/sec per endpoint (stable, recommended)
+#
+# Get API key at: https://www.semanticscholar.org/product/api
+
+source:
+    type: api
+    load_strategy: full
+    batch_size: 100  # Max 500 per API, using 100 for safety
+    provider_config:
+        provider: semanticscholar
+        base_url: https://api.semanticscholar.org/graph/v1
+        api_key: ${BIOETL_SEMANTICSCHOLAR_API_KEY}
+        client:
+            timeout_sec: 30.0
+            max_retries: 3
+        batch_size: 100  # IDs per batch request
+        page_size: 100   # Records per search page
+
+    # Circuit breaker settings (per ADR-007)
+    circuit_breaker:
+        failure_threshold: 5
+        recovery_timeout: 300
+
+    # Rate limits with API key (1 req/sec guaranteed)
+    rate_limit:
+        requests_per_second: 1
+        burst: 1
+
+    # Health check configuration
+    health_check:
+        endpoint: /paper/search
+        params:
+            query: test
+            limit: 1
+            fields: paperId
+        timeout: 5
