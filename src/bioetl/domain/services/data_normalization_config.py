@@ -44,9 +44,7 @@ class DataNormalizationConfig:
         if self.min_publication_year < 0:
             raise ValueError("min_publication_year cannot be negative")
         if self.max_publication_year < self.min_publication_year:
-            raise ValueError(
-                "max_publication_year must be >= min_publication_year"
-            )
+            raise ValueError("max_publication_year must be >= min_publication_year")
 
     @classmethod
     def for_scientific_publications(cls) -> DataNormalizationConfig:
