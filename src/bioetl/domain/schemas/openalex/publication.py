@@ -37,7 +37,7 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
 
     # NOTE: Do not add @classmethod - Pandera requires @pa.check to be the outermost decorator
     @pa.check("openalex_id", name="openalex_id_format")
-    def _check_openalex_id(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
+    def _check_openalex_id(cls, series: Series[str]) -> Series[bool]:
         """Validate OpenAlex ID format."""
         return cast("Series[bool]", series.str.match(r"^W\d+$"))
 
@@ -48,7 +48,7 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("doi", name="doi_format")
-    def _check_doi(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
+    def _check_doi(cls, series: Series[str]) -> Series[bool]:
         """Validate DOI format."""
         return cast(
             "Series[bool]", series.isna() | series.str.match(r"^10\.\d{4,}/.*$")
@@ -70,7 +70,7 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("year", name="year_range")
-    def _check_year(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:  # noqa: N805
+    def _check_year(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate year range."""
         return cast(
             "Series[bool]", series.isna() | ((series >= 1500) & (series <= 2100))
@@ -82,7 +82,7 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("publication_date", name="publication_date_format")
-    def _check_publication_date(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
+    def _check_publication_date(cls, series: Series[str]) -> Series[bool]:
         """Validate publication date format."""
         return cast(
             "Series[bool]", series.isna() | series.str.match(r"^\d{4}-\d{2}-\d{2}$")
@@ -121,7 +121,7 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("oa_status", name="oa_status_values")
-    def _check_oa_status(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
+    def _check_oa_status(cls, series: Series[str]) -> Series[bool]:
         """Validate OA status values."""
         return cast("Series[bool]", series.isna() | series.isin(OA_STATUS_VALUES))
 
@@ -132,7 +132,7 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("cited_by_count", name="cited_by_count_non_negative")
-    def _check_cited_by_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:  # noqa: N805
+    def _check_cited_by_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate citation count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
@@ -157,7 +157,7 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     )
 
     @pa.check("_lookup_method", name="lookup_method_values")
-    def _check_lookup_method(cls, series: Series[str]) -> Series[bool]:  # noqa: N805
+    def _check_lookup_method(cls, series: Series[str]) -> Series[bool]:
         """Validate lookup method values."""
         return cast("Series[bool]", series.isin(LOOKUP_METHODS))
 
