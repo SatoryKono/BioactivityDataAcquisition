@@ -305,10 +305,10 @@ class TestChemblDocumentSchema:
         for field_name in expected:
             assert field_name in CHEMBL_DOCUMENT_SCHEMA.names
 
-    def test_pubmed_id_is_int64(self):
-        """Verify pubmed_id is int64."""
+    def test_pubmed_id_is_string(self):
+        """Verify pubmed_id is string (numeric string for cross-provider consistency)."""
         field = CHEMBL_DOCUMENT_SCHEMA.field("pubmed_id")
-        assert field.type == pa.int64()
+        assert field.type == pa.string()
 
 
 class TestPubchemCompoundSchema:
