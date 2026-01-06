@@ -170,6 +170,8 @@ asyncio_default_fixture_loop_scope = "function"
 filterwarnings = [
     "error",
     "ignore::DeprecationWarning",
+    # Pandera deprecated import warning (will update imports in future PR)
+    "ignore:Importing pandas-specific classes:FutureWarning",
     # NoOpMetrics warns when metrics are disabled (expected in tests)
     "ignore:NoOpMetrics is being used:UserWarning",
     # Pytest cleanup warnings (sockets/event loops not closed during teardown)

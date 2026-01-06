@@ -304,6 +304,10 @@ class Settings(BaseSettings):
         default=None,
         description="API key for PubMed",
     )
+    semanticscholar_api_key: SecretStr | None = Field(
+        default=None,
+        description="API key for Semantic Scholar Academic Graph API",
+    )
 
     @property
     def bronze_path(self) -> Path:
