@@ -12,7 +12,7 @@
 #   # ... rest is inherited from _defaults.yaml
 
 # Version for this defaults file
-defaults_version: "1.0.0"
+defaults_version: "1.1.0"
 
 # =============================================================================
 # Data Quality Rules (identical across all pipelines)

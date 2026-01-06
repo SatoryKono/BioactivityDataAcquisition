@@ -6,7 +6,7 @@
 pipeline_name: uniprot_protein
 provider: uniprot
 entity_type: protein
-version: "1.0.0"
+version: "1.1.0"
 description: "Pipeline for ingesting UniProt proteins"
 
 primary_keys: ["accession"]
