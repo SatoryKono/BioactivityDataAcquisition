@@ -326,7 +326,7 @@ flowchart TD
 ## 7. Работа с Компонентами
 
 ### 7.1. Создание Нового Адаптера
-1.  **Порт:** Убедись, что в `domain/ports.py` есть подходящий `Protocol`.
+1.  **Порт:** Убедись, что в `domain/ports/` есть подходящий `Protocol` (импортируй из фасада: `from bioetl.domain.ports import ...`).
 2.  **Адаптер:** Создай класс в `src/bioetl/infrastructure/adapters/{provider}/`
 3.  **Реализация:**
     - Класс **MUST** реализовывать порт.
