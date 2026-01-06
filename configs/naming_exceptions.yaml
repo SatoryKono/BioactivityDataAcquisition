@@ -1,7 +1,7 @@
 # Naming Convention Exceptions
 # This file documents allowed exceptions to the naming conventions in RULES.md §2.
-# Version: 1.0
-# Last Updated: 2025-12-28
+# Version: 2.0
+# Last Updated: 2026-01-06
 
 # Documentation files that are allowed to use UPPER_CASE names.
 # These are conventional files recognized by GitHub and standard tooling.
@@ -32,9 +32,15 @@ class_suffix_exceptions:
     - Target
     - TargetComponent
     - Molecule
-    - Document
-    - Compound
-    - Protein
+    # Canonical names (v2.0)
+    - ChemblPublication  # Replaces Document
+    - PubchemMolecule    # Replaces Compound
+    - UniprotTarget      # Replaces Protein
+    # Deprecated aliases (backward compatibility, v2.0)
+    - Document           # → ChemblPublication (deprecated)
+    - Compound           # → PubchemMolecule (deprecated)
+    - Protein            # → UniprotTarget (deprecated)
+    # Other publication entities
     - Publication
 
   # Enums (inherently self-describing)
