@@ -32,6 +32,7 @@ def flatten_nested_dict(
     data: dict[str, Any] | None,
     prefix: str,
     field_mapping: dict[str, Callable[[Any], Any] | None],
+    renames: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Разворачивает вложенный словарь в плоскую структуру с префиксом.
 
@@ -43,7 +44,9 @@ def flatten_nested_dict(
               словарь с None значениями для всех ключей.
         prefix: Префикс для результирующих ключей (e.g., "property_", "hierarchy_").
         field_mapping: Словарь {исходный_ключ: конвертер}.
-                       Конвертер может быть safe_float, safe_int или None (без конвертации).
+                       Конвертер может быть safe_float, safe_int или None (без конвертация).
+        renames: Опциональный словарь {старый_ключ: новый_ключ} для переименования
+                 полей после разворачивания. Ключи должны включать префикс.
 
     Returns:
         Плоский словарь с префиксами и сконвертированными значениями.
@@ -57,17 +60,30 @@ def flatten_nested_dict(
         >>> flatten_nested_dict(None, "property_", mapping)
         {'property_alogp': None, 'property_hba': None}
 
+        >>> # With renames parameter
+        >>> data = {"molecule_chembl_id": "CHEMBL25"}
+        >>> mapping = {"molecule_chembl_id": None}
+        >>> renames = {"hierarchy_molecule_chembl_id": "hierarchy_child_chembl_id"}
+        >>> flatten_nested_dict(data, "hierarchy_", mapping, renames)
+        {'hierarchy_child_chembl_id': 'CHEMBL25'}
+
     """
     if not data or not isinstance(data, dict):
-        return {f"{prefix}{key}": None for key in field_mapping}
+        result = {f"{prefix}{key}": None for key in field_mapping}
+    else:
+        result = {}
+        for source_key, converter in field_mapping.items():
+            value = data.get(source_key)
+            if converter is not None and value is not None:
+                result[f"{prefix}{source_key}"] = converter(value)
+            else:
+                result[f"{prefix}{source_key}"] = value
 
-    result: dict[str, Any] = {}
-    for source_key, converter in field_mapping.items():
-        value = data.get(source_key)
-        if converter is not None and value is not None:
-            result[f"{prefix}{source_key}"] = converter(value)
-        else:
-            result[f"{prefix}{source_key}"] = value
+    # Apply renames if provided
+    if renames:
+        for old_key, new_key in renames.items():
+            if old_key in result:
+                result[new_key] = result.pop(old_key)
 
     return result
 

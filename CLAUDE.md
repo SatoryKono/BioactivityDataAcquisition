@@ -2,7 +2,7 @@
 
 Справочник для Claude Code при работе с репозиторием BioETL.
 
-*Синхронизировано с RULES.md v5.8 (2025-12-29)*
+*Синхронизировано с RULES.md v5.9 (2026-01-01)*
 
 ---
 
@@ -556,6 +556,30 @@ await self._run_in_executor(sync_func, *args)
 ```
 
 **Строгий режим:** `BIOETL_STRICT_ERROR_HANDLING=true` → raise, иначе warning
+
+### Инструменты Безопасности
+
+| Инструмент | Назначение | Команда |
+|------------|------------|---------|
+| **osv-scanner** | Сканирование уязвимостей зависимостей (primary) | `osv-scanner scan .` |
+| **pip-audit** | Сканирование уязвимостей (secondary) | `pip-audit --skip-editable` |
+| **Bandit** | SAST-анализ кода Python | `bandit -r src/bioetl` |
+| **Gitleaks** | Поиск секретов в Git-истории | GitHub Action |
+
+#### Почему osv-scanner (а не pip-audit)?
+
+| Проблема | Решение |
+|----------|---------|
+| bioetl не опубликован на PyPI | osv-scanner сканирует `uv.lock` напрямую |
+| pip-audit требует установки пакета | `--skip-editable` пропускает локальный пакет |
+| safety требует API-ключ | osv-scanner бесплатен и без аутентификации |
+
+**Локальный запуск:**
+```bash
+make security  # Запускает osv-scanner + pip-audit
+```
+
+**CI:** `.github/workflows/security.yml` использует оба сканера параллельно.
 
 ---
 
