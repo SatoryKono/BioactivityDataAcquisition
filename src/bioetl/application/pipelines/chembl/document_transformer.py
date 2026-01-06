@@ -15,13 +15,14 @@ from bioetl.application.core.field_specs import (
     FieldGroup,
     int_fields,
     map_field_groups,
+    pmid_fields,
     simple_fields,
 )
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import ChemblPublication
-from bioetl.domain.normalization import parse_authors_to_list
+from bioetl.domain.normalization import parse_authors_to_list, strip_html_tags
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
@@ -31,7 +32,7 @@ if TYPE_CHECKING:
 _PUBLICATION_IDS = FieldGroup(
     name="publication_ids",
     fields=(
-        *int_fields("pubmed_id"),
+        *pmid_fields("pubmed_id"),
         *simple_fields("doi", "patent_id"),
     ),
 )
@@ -99,6 +100,9 @@ class DocumentTransformer(BaseChemblTransformer):
             "document_chembl_id": str(primary_id),
             **map_field_groups(record, _PUBLICATION_GROUPS),
         }
+
+        # Strip HTML from abstract field
+        data["abstract"] = strip_html_tags(data.get("abstract"))
 
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON

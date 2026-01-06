@@ -67,7 +67,8 @@ def sample_openalex_record() -> dict[str, Any]:
             "is_oa": True,
             "oa_status": "gold",
         },
-        "cited_by_count": 42,
+        # Note: OpenAlex API returns cited_by_count, transformed to citation_count
+        "cited_by_count": 42,  # Source field name from OpenAlex API
         "concepts": [
             {"display_name": "Chemistry", "score": 0.9},
             {"display_name": "Biology", "score": 0.7},
@@ -105,7 +106,7 @@ class TestOpenAlexPublicationTransformer:
         assert result["publisher"] == "Springer Nature"
         assert result["is_oa"] is True
         assert result["oa_status"] == "gold"
-        assert result["cited_by_count"] == 42
+        assert result["citation_count"] == 42  # Unified field name
         assert result["language"] == "en"
         assert result["source"] == "openalex"
         assert result["_lookup_method"] == "doi"
