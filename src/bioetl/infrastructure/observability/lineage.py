@@ -10,7 +10,7 @@ Lineage is stored in Delta Lake tables for queryability.
 
 Usage:
     tracker = LineageTracker(
-        delta_path="s3://bucket/lineage",
+        delta_path="./data/lineage",
         pipeline_name="chembl_activity"
     )
 
