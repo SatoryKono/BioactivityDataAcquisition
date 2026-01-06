@@ -323,7 +323,7 @@ class TestCompound:
 
     def test_compound_requires_cid(self, base_entity_kwargs):
         """Test that empty cid raises ValueError."""
-        with pytest.raises(ValueError, match="Compound CID is required"):
+        with pytest.raises(ValueError, match="PubchemMolecule cid is required"):
             Compound(
                 **base_entity_kwargs,
                 cid="",
@@ -333,7 +333,8 @@ class TestCompound:
     def test_compound_requires_structural_identifier(self, base_entity_kwargs):
         """Test that at least one structural identifier is required."""
         with pytest.raises(
-            ValueError, match="Compound must have at least one structural identifier"
+            ValueError,
+            match="PubchemMolecule must have at least one structural identifier",
         ):
             Compound(
                 **base_entity_kwargs,
@@ -344,7 +345,8 @@ class TestCompound:
     def test_compound_inchikey_alone_not_sufficient(self, base_entity_kwargs):
         """Test that InChIKey alone is not sufficient."""
         with pytest.raises(
-            ValueError, match="Compound must have at least one structural identifier"
+            ValueError,
+            match="PubchemMolecule must have at least one structural identifier",
         ):
             Compound(
                 **base_entity_kwargs,
@@ -407,7 +409,7 @@ class TestProtein:
 
     def test_protein_requires_accession(self, base_entity_kwargs):
         """Test that empty accession raises ValueError."""
-        with pytest.raises(ValueError, match="Protein accession is required"):
+        with pytest.raises(ValueError, match="UniprotTarget accession is required"):
             Protein(
                 **base_entity_kwargs,
                 accession="",

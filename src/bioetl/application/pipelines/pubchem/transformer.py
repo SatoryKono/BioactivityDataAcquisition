@@ -1,7 +1,10 @@
-"""PubChem Compound Transformer.
+"""PubChem Molecule Transformer.
 
 Transforms raw PubChem compound records into Silver-layer format using
-the Compound domain entity for validation and invariant checking.
+the PubchemMolecule domain entity for validation and invariant checking.
+
+.. versionchanged:: 2.0.0
+    Uses PubchemMolecule (canonical) instead of Compound (deprecated).
 """
 
 from __future__ import annotations
@@ -9,7 +12,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
-from bioetl.domain.entities import Compound
+from bioetl.domain.entities import PubchemMolecule
 from bioetl.domain.services import IdentityService
 
 if TYPE_CHECKING:
@@ -22,9 +25,9 @@ if TYPE_CHECKING:
 class PubChemCompoundTransformer(BaseTransformer):
     """Transformer for PubChem compound records.
 
-    Uses Compound domain entity for validation and lineage tracking.
-    Records without structural identifiers (SMILES/InChI) are skipped
-    per entity invariant validation.
+    Uses PubchemMolecule domain entity (canonical name) for validation
+    and lineage tracking. Records without structural identifiers
+    (SMILES/InChI) are skipped per entity invariant validation.
     """
 
     def __init__(
@@ -46,7 +49,7 @@ class PubChemCompoundTransformer(BaseTransformer):
             metrics: Optional metrics port for duration/error tracking (O1 observability).
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
-            pii_hasher: Optional PII hasher. Not typically used for compounds
+            pii_hasher: Optional PII hasher. Not typically used for molecules
                 (no PII in chemical data), but included for API consistency.
 
         """
@@ -78,7 +81,7 @@ class PubChemCompoundTransformer(BaseTransformer):
 
         Raises:
             TransformationError: If cid is missing.
-            ValueError: If Compound entity validation fails.
+            ValueError: If PubchemMolecule entity validation fails.
 
         """
         # Step 1: Validate required field
@@ -110,7 +113,7 @@ class PubChemCompoundTransformer(BaseTransformer):
         # Step 5: Create domain entity with lineage metadata
         # ValueError is raised if invariants fail (e.g., no structural identifiers)
         entity = self._create_entity(
-            Compound,
+            PubchemMolecule,
             context,
             entity_id=entity_id,
             content_hash=content_hash,

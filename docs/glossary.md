@@ -1,6 +1,6 @@
 # BioETL Glossary (Ubiquitous Language)
 
-*Version 1.1 | Updated: 2026-01-02 | Created: 2025-12-29*
+*Version 2.0 | Updated: 2026-01-06 | Created: 2025-12-29*
 
 This glossary defines the canonical terminology used throughout BioETL. Following Domain-Driven Design principles, these terms form the **Ubiquitous Language** — a shared vocabulary understood by both developers and domain experts.
 
@@ -10,12 +10,17 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 
 ### Core Domain Terms
 
-| Canonical Term | Provider Variation | Description |
-|----------------|-------------------|-------------|
-| **Activity** | ChEMBL: Activity | Bioactivity measurement |
-| **Molecule** | ChEMBL: Molecule, PubChem: Compound | Chemical compound |
-| **Target** | ChEMBL: Target, UniProt: Protein | Biological target |
-| **Publication** | PubMed: Publication, ChEMBL: Document, CrossRef: Publication | Scientific document |
+| Canonical Term | Provider Variation | Domain Entity | Description |
+|----------------|-------------------|---------------|-------------|
+| **Activity** | ChEMBL: Activity | `Activity` | Bioactivity measurement |
+| **Molecule** | ChEMBL: Molecule, PubChem: Compound | `Molecule`, `PubchemMolecule` | Chemical compound |
+| **Target** | ChEMBL: Target, UniProt: Protein | `Target`, `UniprotTarget` | Biological target |
+| **Publication** | PubMed: Publication, ChEMBL: Document, CrossRef: Publication | `Publication`, `ChemblPublication` | Scientific document |
+
+> **v2.0 Migration Notes:**
+> - `Compound` → `PubchemMolecule` (deprecated alias retained)
+> - `Document` → `ChemblPublication` (deprecated alias retained)
+> - `Protein` → `UniprotTarget` (deprecated alias retained)
 
 ### Operations Terms
 
@@ -33,12 +38,14 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 
 ### Chemical Compounds
 
-| Canonical Term | Definition | Provider-Specific Names | Avoid |
-|----------------|------------|------------------------|-------|
-| **Molecule** | A chemical entity that can be characterized by a molecular structure (small molecule, peptide, antibody, etc.) | ChEMBL: `Molecule` (API endpoint `/molecule`) | `drug`, `substance`, `ligand` (in general context) |
-| **Compound** | PubChem-specific term for chemical entities. Interchangeable with Molecule. | PubChem: `Compound` (CID-based) | Mixing with ChEMBL context |
+| Canonical Term | Definition | Provider-Specific Names | Domain Entity | Avoid |
+|----------------|------------|------------------------|---------------|-------|
+| **Molecule** | A chemical entity that can be characterized by a molecular structure (small molecule, peptide, antibody, etc.) | ChEMBL: `Molecule` (API endpoint `/molecule`), **PubChem: `PubchemMolecule`** | `Molecule`, `PubchemMolecule` | `drug`, `substance`, `ligand` (in general context) |
 
-**Note**: Both `Molecule` (ChEMBL) and `Compound` (PubChem) are correct within their respective provider contexts. The distinction reflects the source terminology:
+> **Migration Note (v2.0)**: PubChem `Compound` entity renamed to `PubchemMolecule`.
+> The deprecated `Compound` alias remains for backward compatibility.
+
+**Note**: ChEMBL uses `Molecule` and PubChem uses `PubchemMolecule` as canonical domain entity names:
 - ChEMBL API returns `molecule_chembl_id`
 - PubChem API returns `cid` (Compound ID)
 
@@ -53,18 +60,22 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 
 ### Biological Targets
 
-| Canonical Term | Definition | Provider-Specific Names | Avoid |
-|----------------|------------|------------------------|-------|
-| **Target** | A biological entity (protein, complex, organism) that is the subject of activity measurement | ChEMBL: `Target` | `receptor`, `gene` (in target context) |
-| **Protein** | A specific protein sequence from UniProt | UniProt: `Protein` | `gene_product` |
-| **Target Component** | A molecular component of a multi-component target | ChEMBL: `TargetComponent` | `subunit` |
+| Canonical Term | Definition | Provider-Specific Names | Domain Entity | Avoid |
+|----------------|------------|------------------------|---------------|-------|
+| **Target** | A biological entity (protein, complex, organism) that is the subject of activity measurement | ChEMBL: `Target`, **UniProt: `UniprotTarget`** | `Target`, `UniprotTarget` | `receptor`, `gene` (in target context) |
+| **Target Component** | A molecular component of a multi-component target | ChEMBL: `TargetComponent` | `TargetComponent` | `subunit` |
+
+> **Migration Note (v2.0)**: UniProt `Protein` entity renamed to `UniprotTarget`.
+> The deprecated `Protein` alias remains for backward compatibility.
 
 ### Publications
 
-| Canonical Term | Definition | Provider-Specific Names | Avoid |
-|----------------|------------|------------------------|-------|
-| **Publication** | A scientific document (article, patent, etc.) | PubMed: `Publication`, CrossRef: `PublicationEntity` | `paper`, `article` (as class names), `Work` (deprecated CrossRef API term) |
-| **Document** | ChEMBL's representation of a source document | ChEMBL: `Document` | `reference`, `source` |
+| Canonical Term | Definition | Provider-Specific Names | Domain Entity | Avoid |
+|----------------|------------|------------------------|---------------|-------|
+| **Publication** | A scientific document (article, patent, etc.) | PubMed: `Publication`, CrossRef: `PublicationEntity`, **ChEMBL: `ChemblPublication`** | `Publication`, `ChemblPublication`, `PublicationEntity` | `paper`, `article` (as class names), `Work` (deprecated CrossRef API term) |
+
+> **Migration Note (v2.0)**: ChEMBL `Document` entity renamed to `ChemblPublication`.
+> The deprecated `Document` alias remains for backward compatibility.
 
 **Note**: CrossRef's API uses the term "Work" but our codebase uses "Publication" as the canonical term for Ubiquitous Language. The deprecated alias `Work` is kept for backward compatibility.
 
@@ -320,6 +331,12 @@ These terms should NOT be used in new code:
 | `Work` | `Publication` | CrossRef API term → Ubiquitous Language |
 | `WorkSchema` | `PublicationSchema` | CrossRef schema naming |
 | `CrossRefWorkRecord` | `CrossRefPublicationRecord` | CrossRef model naming |
+| `Document` | `ChemblPublication` | ChEMBL API term → Ubiquitous Language (v2.0) |
+| `DocumentSchema` | `ChemblPublicationSchema` | ChEMBL schema naming (v2.0) |
+| `Compound` | `PubchemMolecule` | PubChem API term → Ubiquitous Language (v2.0) |
+| `CompoundSchema` | `PubchemMoleculeSchema` | PubChem schema naming (v2.0) |
+| `Protein` | `UniprotTarget` | UniProt API term → Ubiquitous Language (v2.0) |
+| `ProteinSchema` | `UniprotTargetSchema` | UniProt schema naming (v2.0) |
 
 ---
 
