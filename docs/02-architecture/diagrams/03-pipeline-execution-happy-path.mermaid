@@ -21,9 +21,9 @@ sequenceDiagram
 
     rect rgb(240, 248, 255)
         Note over Runner,Lock: Phase 1: Lock Acquisition
-        Runner->>Lock: acquire_lock(resource, owner_id, ttl=60s)
+        Runner->>Lock: acquire_lock(resource, owner_id, ttl=90s)
         Lock-->>Runner: LockResult(acquired=true)
-        Runner->>Heartbeat: start(interval=20s)
+        Runner->>Heartbeat: start(interval=30s)
         activate Heartbeat
     end
 
@@ -62,7 +62,7 @@ sequenceDiagram
 
             Processor-->>Executor: BatchResult
 
-            Note over Heartbeat: Every 20s
+            Note over Heartbeat: Every 30s
             Heartbeat->>Lock: heartbeat()
             Lock-->>Heartbeat: TTL refreshed
         end
