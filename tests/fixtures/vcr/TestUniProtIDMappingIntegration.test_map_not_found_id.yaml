@@ -1,0 +1,5604 @@
+interactions:
+- request:
+    body: from=ChEMBL&to=UniProtKB&ids=CHEMBL99999999999
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '46'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: POST
+    uri: https://rest.uniprot.org/idmapping/run
+  response:
+    body:
+      string: '{"jobId":"t9UhelRBv7"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:27 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:27 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:27 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:30 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:31 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:34 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:34 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:37 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:37 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:40 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:40 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:44 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:44 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:47 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:47 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:50 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:50 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:54 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:54 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:57 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:31:57 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:00 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:00 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:03 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:04 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:07 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:07 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:10 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:10 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:13 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:14 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:17 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:17 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:21 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:21 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:24 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:24 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:27 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:27 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:30 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:31 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:34 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:34 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:37 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:37 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:40 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:40 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:44 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:44 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:47 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:47 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:50 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:50 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:53 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:54 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:57 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:32:57 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:00 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:00 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:03 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:03 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:07 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:07 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:10 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:10 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:13 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:14 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:17 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:17 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:20 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:20 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:23 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:23 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:26 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:27 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:30 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:30 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:33 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:33 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:36 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:36 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:40 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:40 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:43 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:43 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:46 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:46 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:50 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:50 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:53 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:53 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:56 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:33:57 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:34:00 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:34:00 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:34:03 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:34:03 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:34:06 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+  response:
+    body:
+      string: '{"results":[],"failedIds":["CHEMBL99999999999"],"obsoleteCount":0}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:34:06 GMT
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-total-results:
+      - '0'
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/idmapping/status/t9UhelRBv7
+  response:
+    body:
+      string: '{"jobStatus":"FINISHED"}'
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      access-control-allow-headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      access-control-allow-methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      access-control-max-age:
+      - '1728000'
+      cache-control:
+      - no-cache
+      content-length:
+      - '24'
+      content-type:
+      - application/json
+      date:
+      - Tue, 06 Jan 2026 03:34:10 GMT
+      location:
+      - https://rest.uniprot.org/idmapping/uniprotkb/results/t9UhelRBv7
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date,User-Agent
+      x-api-deployment-date:
+      - 11-December-2025
+      x-uniprot-release:
+      - '2025_04'
+      x-uniprot-release-date:
+      - 15-October-2025
+    status:
+      code: 303
+      message: See Other
+version: 1
