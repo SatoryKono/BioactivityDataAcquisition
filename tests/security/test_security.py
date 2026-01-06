@@ -242,20 +242,20 @@ class TestPrivateKeyExposure:
             ".import_linter_cache",
             "coverage.json",  # Skip large generated files
         }
-        
+
         files = []
         # Walk effectively prunes trees, unlike rglob
         for root, dirs, filenames in os.walk(PROJECT_ROOT):
             # Prune excluded directories in-place
             dirs[:] = [d for d in dirs if d not in excluded]
-            
+
             for filename in filenames:
                 if filename in excluded:
                     continue
-                    
+
                 file_path = Path(root) / filename
                 files.append(file_path)
-                
+
         return files
 
     def test_no_private_keys_in_repo(self, all_files: list[Path]) -> None:
