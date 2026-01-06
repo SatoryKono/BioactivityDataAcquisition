@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import re
 from datetime import date
+from html import unescape
 from typing import Any
 
 
@@ -57,14 +58,38 @@ def parse_date_field(value: str | None, fmt: str = "%Y-%m-%d") -> date | None:
 
 
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
+_WHITESPACE_PATTERN = re.compile(r"\s+")
 
 
 def strip_html_tags(text: str | None) -> str | None:
-    """Strip HTML tags from text, return None if empty."""
+    """Remove HTML tags and decode entities from text.
+
+    Performs the following normalization steps:
+    1. Remove HTML tags (including JATS tags like <jats:p>)
+    2. Decode HTML entities (&amp; → &, &lt; → <, etc.)
+    3. Normalize whitespace (collapse multiple spaces to single space)
+    4. Strip leading/trailing whitespace
+
+    Args:
+        text: Input text possibly containing HTML.
+
+    Returns:
+        Clean text without HTML tags, or None if input is None/empty.
+
+    """
     if not text:
         return None
-    result = _HTML_TAG_PATTERN.sub("", text).strip()
-    return result if result else None
+
+    # Remove HTML tags
+    clean = _HTML_TAG_PATTERN.sub("", text)
+
+    # Decode HTML entities (&amp; → &, &lt; → <, etc.)
+    clean = unescape(clean)
+
+    # Normalize whitespace (collapse multiple spaces/newlines to single space)
+    clean = _WHITESPACE_PATTERN.sub(" ", clean).strip()
+
+    return clean if clean else None
 
 
 def _to_none_if_empty(s: str) -> str | None:

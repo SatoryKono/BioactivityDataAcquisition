@@ -21,6 +21,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import ChemblPublication
+from bioetl.domain.normalization import strip_html_tags
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
@@ -98,6 +99,9 @@ class DocumentTransformer(BaseChemblTransformer):
             "document_chembl_id": str(primary_id),
             **map_field_groups(record, _PUBLICATION_GROUPS),
         }
+
+        # Strip HTML from abstract field
+        data["abstract"] = strip_html_tags(data.get("abstract"))
 
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a single string, not a list
