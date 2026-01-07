@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -177,6 +177,32 @@ class TestFilteredDataSourceContextManager:
         assert filtered._filter_ids is None
 
     @pytest.mark.asyncio
+    async def test_aenter_graceful_degradation_when_filter_file_missing(
+        self,
+        mock_data_source,
+        mock_filter_reader,
+        enabled_filter_config,
+    ):
+        """Test __aenter__ proceeds without filtering when filter file is missing."""
+        filtered = FilteredDataSource(
+            data_source=mock_data_source,
+            filter_reader=mock_filter_reader,
+            filter_config=enabled_filter_config,
+        )
+
+        # Simulate file not existing
+        with patch.object(filtered, "_filter_file_exists", return_value=False):
+            result = await filtered.__aenter__()
+
+        assert result is filtered
+        mock_data_source.__aenter__.assert_called_once()
+        # Filter reader should NOT be called when file doesn't exist
+        mock_filter_reader.load_filter_ids.assert_not_called()
+        # Filter IDs should remain None (graceful degradation)
+        assert filtered._filter_ids is None
+        assert filtered.filter_result is None
+
+    @pytest.mark.asyncio
     async def test_aenter_with_filtering_enabled(
         self,
         mock_data_source,
@@ -190,7 +216,9 @@ class TestFilteredDataSourceContextManager:
             filter_config=enabled_filter_config,
         )
 
-        await filtered.__aenter__()
+        # Simulate file existing
+        with patch.object(filtered, "_filter_file_exists", return_value=True):
+            await filtered.__aenter__()
 
         mock_filter_reader.load_filter_ids.assert_called_once_with(
             source_path="data/molecules.csv",
@@ -270,8 +298,9 @@ class TestFilteredDataSourceFetch:
             filter_config=enabled_filter_config,
         )
 
-        # Simulate entering context to load filter IDs
-        await filtered.__aenter__()
+        # Simulate entering context to load filter IDs (with file existing)
+        with patch.object(filtered, "_filter_file_exists", return_value=True):
+            await filtered.__aenter__()
 
         records = []
         async for record in filtered.fetch("activity"):
@@ -313,8 +342,9 @@ class TestFilteredDataSourceFetch:
         if hasattr(mock_data_source, "fetch_filtered"):
             delattr(mock_data_source, "fetch_filtered")
 
-        # Simulate entering context to load filter IDs
-        await filtered.__aenter__()
+        # Simulate entering context to load filter IDs (with file existing)
+        with patch.object(filtered, "_filter_file_exists", return_value=True):
+            await filtered.__aenter__()
 
         with pytest.raises(
             TypeError, match="does not implement FilterableDataSourcePort"
