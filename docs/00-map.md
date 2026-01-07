@@ -8,7 +8,7 @@
 > - No content duplication issues found
 > - Diagrams verified against codebase
 > - Navigation structure validated
-> - See: [audits/documentation-audit-2026-01-06.md](audits/documentation-audit-2026-01-06.md)
+> - See: [audits/documentation-audit-2026-01-06.md](audit/documentation-audit-2026-01-06.md)
 
 ## Quick Links
 

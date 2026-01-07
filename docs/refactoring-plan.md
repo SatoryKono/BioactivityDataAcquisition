@@ -12,7 +12,7 @@
 >
 > **📊 Консолидированный анализ:** [`archived/consolidated-refactoring-analysis.md`](archived/consolidated-refactoring-analysis.md)
 >
-> **📋 Верификация аудитов 2025-02:** [`audits/consolidated-audit-verification-2025-12.md`](audits/consolidated-audit-verification-2025-12.md) — 74% утверждений ложны
+> **📋 Верификация аудитов 2025-02:** [`audits/consolidated-audit-verification-2025-12.md`](audit/consolidated-audit-verification-2025-12.md) — 74% утверждений ложны
 
 ---
 
