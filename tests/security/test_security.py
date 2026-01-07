@@ -330,6 +330,7 @@ class TestPIIHandling:
             "pipeline_config.py",  # NCBI API source config
             "client.py",  # User-Agent header identification
             "source_config.py",  # NCBI API default_email for PubMed
+            "batch.py",  # CrossRef mailto for polite pool access (higher rate limits)
         }
     )
 
