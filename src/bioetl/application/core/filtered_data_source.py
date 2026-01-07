@@ -62,6 +62,23 @@ class FilteredDataSource:
         """Access to filter load result with duplicate statistics."""
         return self._filter_result
 
+    def _filter_file_exists(self, source_path: str) -> bool:
+        """Check if filter file exists, log warning if missing.
+
+        Returns True if file exists, False otherwise (graceful degradation).
+        """
+        if Path(source_path).exists():
+            return True
+
+        if self._logger:
+            self._logger.warning(
+                "input_filter_file_not_found",
+                source_path=source_path,
+                pipeline=self._pipeline_name,
+                message="Filter file not found, proceeding without filtering",
+            )
+        return False
+
     async def __aenter__(self) -> Self:
         """Enter async context and load filter IDs if enabled."""
         await self._data_source.__aenter__()
@@ -73,14 +90,7 @@ class FilteredDataSource:
                 return self
 
             # Check if filter file exists - graceful degradation if missing
-            if not Path(source_path).exists():
-                if self._logger:
-                    self._logger.warning(
-                        "input_filter_file_not_found",
-                        source_path=source_path,
-                        pipeline=self._pipeline_name,
-                        message="Filter file not found, proceeding without filtering",
-                    )
+            if not self._filter_file_exists(source_path):
                 return self
 
             # Check if multi-column mode
