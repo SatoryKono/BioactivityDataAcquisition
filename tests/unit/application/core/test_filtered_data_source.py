@@ -177,10 +177,8 @@ class TestFilteredDataSourceContextManager:
         assert filtered._filter_ids is None
 
     @pytest.mark.asyncio
-    @patch("bioetl.application.core.filtered_data_source.Path.exists", return_value=False)
     async def test_aenter_graceful_degradation_when_filter_file_missing(
         self,
-        mock_path_exists,
         mock_data_source,
         mock_filter_reader,
         enabled_filter_config,
@@ -192,7 +190,9 @@ class TestFilteredDataSourceContextManager:
             filter_config=enabled_filter_config,
         )
 
-        result = await filtered.__aenter__()
+        # Simulate file not existing
+        with patch.object(filtered, "_filter_file_exists", return_value=False):
+            result = await filtered.__aenter__()
 
         assert result is filtered
         mock_data_source.__aenter__.assert_called_once()
@@ -203,10 +203,8 @@ class TestFilteredDataSourceContextManager:
         assert filtered.filter_result is None
 
     @pytest.mark.asyncio
-    @patch("bioetl.application.core.filtered_data_source.Path.exists", return_value=True)
     async def test_aenter_with_filtering_enabled(
         self,
-        mock_path_exists,
         mock_data_source,
         mock_filter_reader,
         enabled_filter_config,
@@ -218,7 +216,9 @@ class TestFilteredDataSourceContextManager:
             filter_config=enabled_filter_config,
         )
 
-        await filtered.__aenter__()
+        # Simulate file existing
+        with patch.object(filtered, "_filter_file_exists", return_value=True):
+            await filtered.__aenter__()
 
         mock_filter_reader.load_filter_ids.assert_called_once_with(
             source_path="data/molecules.csv",
@@ -285,10 +285,8 @@ class TestFilteredDataSourceFetch:
         assert records == [{"id": "1"}, {"id": "2"}, {"id": "3"}]
 
     @pytest.mark.asyncio
-    @patch("bioetl.application.core.filtered_data_source.Path.exists", return_value=True)
     async def test_fetch_with_filtering_enabled(
         self,
-        mock_path_exists,
         mock_data_source_with_filtered,
         mock_filter_reader,
         enabled_filter_config,
@@ -300,8 +298,9 @@ class TestFilteredDataSourceFetch:
             filter_config=enabled_filter_config,
         )
 
-        # Simulate entering context to load filter IDs
-        await filtered.__aenter__()
+        # Simulate entering context to load filter IDs (with file existing)
+        with patch.object(filtered, "_filter_file_exists", return_value=True):
+            await filtered.__aenter__()
 
         records = []
         async for record in filtered.fetch("activity"):
@@ -326,10 +325,8 @@ class TestFilteredDataSourceFetch:
         assert len(records) == 3
 
     @pytest.mark.asyncio
-    @patch("bioetl.application.core.filtered_data_source.Path.exists", return_value=True)
     async def test_fetch_raises_when_adapter_missing_fetch_filtered(
         self,
-        mock_path_exists,
         mock_data_source,  # Does not have fetch_filtered
         mock_filter_reader,
         enabled_filter_config,
@@ -345,8 +342,9 @@ class TestFilteredDataSourceFetch:
         if hasattr(mock_data_source, "fetch_filtered"):
             delattr(mock_data_source, "fetch_filtered")
 
-        # Simulate entering context to load filter IDs
-        await filtered.__aenter__()
+        # Simulate entering context to load filter IDs (with file existing)
+        with patch.object(filtered, "_filter_file_exists", return_value=True):
+            await filtered.__aenter__()
 
         with pytest.raises(
             TypeError, match="does not implement FilterableDataSourcePort"
