@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -177,8 +177,36 @@ class TestFilteredDataSourceContextManager:
         assert filtered._filter_ids is None
 
     @pytest.mark.asyncio
+    @patch("bioetl.application.core.filtered_data_source.Path.exists", return_value=False)
+    async def test_aenter_graceful_degradation_when_filter_file_missing(
+        self,
+        mock_path_exists,
+        mock_data_source,
+        mock_filter_reader,
+        enabled_filter_config,
+    ):
+        """Test __aenter__ proceeds without filtering when filter file is missing."""
+        filtered = FilteredDataSource(
+            data_source=mock_data_source,
+            filter_reader=mock_filter_reader,
+            filter_config=enabled_filter_config,
+        )
+
+        result = await filtered.__aenter__()
+
+        assert result is filtered
+        mock_data_source.__aenter__.assert_called_once()
+        # Filter reader should NOT be called when file doesn't exist
+        mock_filter_reader.load_filter_ids.assert_not_called()
+        # Filter IDs should remain None (graceful degradation)
+        assert filtered._filter_ids is None
+        assert filtered.filter_result is None
+
+    @pytest.mark.asyncio
+    @patch("bioetl.application.core.filtered_data_source.Path.exists", return_value=True)
     async def test_aenter_with_filtering_enabled(
         self,
+        mock_path_exists,
         mock_data_source,
         mock_filter_reader,
         enabled_filter_config,
@@ -257,8 +285,10 @@ class TestFilteredDataSourceFetch:
         assert records == [{"id": "1"}, {"id": "2"}, {"id": "3"}]
 
     @pytest.mark.asyncio
+    @patch("bioetl.application.core.filtered_data_source.Path.exists", return_value=True)
     async def test_fetch_with_filtering_enabled(
         self,
+        mock_path_exists,
         mock_data_source_with_filtered,
         mock_filter_reader,
         enabled_filter_config,
@@ -296,8 +326,10 @@ class TestFilteredDataSourceFetch:
         assert len(records) == 3
 
     @pytest.mark.asyncio
+    @patch("bioetl.application.core.filtered_data_source.Path.exists", return_value=True)
     async def test_fetch_raises_when_adapter_missing_fetch_filtered(
         self,
+        mock_path_exists,
         mock_data_source,  # Does not have fetch_filtered
         mock_filter_reader,
         enabled_filter_config,
