@@ -1,14 +1,13 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.10 | Last updated: 2026-01-06*
+*Synced with RULES.md v5.10 | Last updated: 2026-01-07*
 
-> **Documentation Audit Completed:** 2026-01-06
-> - Validated: 169 markdown files, 34 diagrams, 22 ADRs
-> - All core documents synchronized with RULES.md v5.10
-> - No content duplication issues found
-> - Diagrams verified against codebase
-> - Navigation structure validated
-> - See: [audits/documentation-audit-2026-01-06.md](audit/documentation-audit-2026-01-06.md)
+> **Documentation Cleanup Completed:** 2026-01-07
+> - Consolidated audit directories into single `audit/` folder
+> - Archived 42 historical audit files to `archived/audits/`
+> - Removed duplicate CHANGELOG.md from docs/
+> - Moved prompts to `.claude/prompts/`
+> - See: [audit/documentation-audit-2026-01-06.md](audit/documentation-audit-2026-01-06.md)
 
 ## Quick Links
 
@@ -45,7 +44,6 @@ docs/
 ├── glossary.md                  # Ubiquitous Language terminology
 ├── RULES.md                     # Canonical rules document (v5.10)
 ├── REQUIREMENTS.md              # 127 testable requirements
-├── CHANGELOG.md                 # Version history
 ├── refactoring-plan.md          # Current refactoring roadmap
 │
 ├── 00-project_rules/            # Project governance
@@ -97,19 +95,19 @@ docs/
 │   ├── runbooks/                # 16 incident response playbooks
 │   └── performance-baselines.md # Performance metrics
 │
-├── audits/                      # Architecture audits (consolidated)
-│   ├── audit-2025-12-31-comprehensive.md  # Latest comprehensive audit
-│   ├── architecture-audit-2025-12-31.md   # Architecture audit
-│   ├── application-layer-audit.md         # Application layer
-│   ├── infrastructure-layer-audit.md      # Infrastructure layer
-│   ├── interfaces-layer-audit-2025-12-30.md # Interfaces layer
-│   ├── false_positives.md                 # Documented false positives
-│   └── validation-matrix-2025-12-31.md    # Validation matrix
+├── audit/                       # Architecture audits (consolidated)
+│   ├── architecture-audit-2026-01-06.md   # Architecture audit
+│   ├── application-layer-audit-2026-01-06.md  # Application layer
+│   ├── domain-layer-audit-2026-01-06.md   # Domain layer
+│   ├── infrastructure-layer-audit-2026-01-06.md # Infrastructure layer
+│   ├── documentation-audit-2026-01-06.md  # Documentation audit
+│   ├── security-audit-2026-01-06.md       # Security audit
+│   └── false_positives.md                 # Documented false positives
 │
 ├── archived/                    # Historical documents
-│   ├── refactoring-plan-bronze-validation.md
-│   ├── consolidated-refactoring-analysis.md
-│   └── (7 more archived plans/issues)
+│   ├── audits/                  # 42 historical audit files (2025-2026)
+│   ├── plans/                   # Archived planning documents
+│   └── deprecated/              # Deprecated documentation
 │
 ├── domain/schemas/              # Schema documentation
 │   └── chembl/                  # ChEMBL entity schemas (4 files)
@@ -122,9 +120,7 @@ docs/
 │
 ├── contracts/gold/              # Gold layer JSON schemas
 │
-├── templates/                   # Document & code templates
-│
-└── __-prompts/                  # Claude prompts (internal)
+└── templates/                   # Document & code templates
 ```
 
 ---
@@ -347,15 +343,15 @@ graph TD
 | refactoring-plan.md      | 2025-12-31   | Active refactoring roadmap   |
 | REQUIREMENTS.md          | 2025-12-27   | v1.2 (127 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
-| 00-map.md                | 2026-01-06   | v6.3 Audit validated         |
+| 00-map.md                | 2026-01-07   | v6.4 Structure finalized     |
 | 00-rules-summary.md      | 2026-01-06   | v5.10 Synced                 |
 | 03-guides/               | 2025-12-31   | Consolidated (10 guides)     |
 | ADR-001..024             | 2026-01-06   | All 24 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
-| audits/                  | 2026-01-06   | 31 files (audit added)       |
+| audit/                   | 2026-01-07   | 11 current files, 42 archived |
 | 02-architecture/diagrams/| 2025-12-31   | 34 Mermaid diagrams          |
 
 ---
 
-*Last updated: 2026-01-06. Documentation audit validated.*
+*Last updated: 2026-01-07. Documentation structure finalized.*
