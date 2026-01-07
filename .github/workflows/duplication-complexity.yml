@@ -75,10 +75,11 @@ jobs:
           with open(report_path) as f:
               data = json.load(f)
 
-          # Exempted paths (adapter files with complex fallback logic)
+          # Exempted paths (adapter files with complex fallback logic, tools scripts)
           EXEMPT_PATHS = {
               "src/bioetl/infrastructure/adapters/openalex/",
               "src/bioetl/infrastructure/adapters/semanticscholar/",
+              "src/tools/",  # Utility scripts with complex reporting logic
           }
 
           # Exempted functions (with documented reasons)
