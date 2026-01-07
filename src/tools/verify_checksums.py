@@ -64,23 +64,18 @@ CRITICAL_PATTERNS: list[tuple[str, str]] = [
     # Pipeline configurations
     ("configs/pipelines/**/*.yaml", "pipeline_config"),
     ("configs/pipelines/**/*.yml", "pipeline_config"),
-
     # Schema definitions
     ("src/bioetl/domain/schemas/*.py", "domain_schema"),
     ("src/bioetl/infrastructure/schemas/*.py", "infra_schema"),
-
     # Core domain models
     ("src/bioetl/domain/ports/*.py", "domain_port"),
     ("src/bioetl/domain/types.py", "domain_type"),
     ("src/bioetl/domain/config.py", "domain_config"),
-
     # Composition root (DI)
     ("src/bioetl/composition/bootstrap.py", "composition"),
     ("src/bioetl/composition/factories/*.py", "factory"),
-
     # Security-critical
     ("src/bioetl/infrastructure/security/*.py", "security"),
-
     # CLI interface
     ("src/bioetl/interfaces/cli.py", "interface"),
 ]
@@ -359,7 +354,9 @@ def verify_checksums(
                         status=status,
                         expected_hash=expected.sha256,
                         actual_hash=actual_hash,
-                        size_change=actual_size - expected.size if status == "modified" else None,
+                        size_change=actual_size - expected.size
+                        if status == "modified"
+                        else None,
                     )
                 )
             except Exception as e:
@@ -440,8 +437,13 @@ def log_report_text(report: VerificationReport) -> None:
             if r.size_change:
                 size_info = f" ({r.size_change:+d} bytes)"
             logger.info("  [M] %s%s", r.path, size_info)
-            logger.info("      Expected: %s...", r.expected_hash[:16])
-            logger.info("      Actual:   %s...", r.actual_hash[:16] if r.actual_hash else "N/A")
+            logger.info(
+                "      Expected: %s...",
+                r.expected_hash[:16] if r.expected_hash else "N/A",
+            )
+            logger.info(
+                "      Actual:   %s...", r.actual_hash[:16] if r.actual_hash else "N/A"
+            )
         logger.info("")
 
     if "new" in by_status:
@@ -559,14 +561,14 @@ def main() -> int:
         return 0
 
     # Verify against manifest
-    manifest = load_manifest(args.manifest)
+    loaded_manifest = load_manifest(args.manifest)
 
-    if manifest is None:
+    if loaded_manifest is None:
         logger.error("Manifest not found: %s", args.manifest)
         logger.info("Run with --generate to create a new manifest.")
         return 2
 
-    report = verify_checksums(root, manifest)
+    report = verify_checksums(root, loaded_manifest)
 
     if args.json:
         log_report_json(report)

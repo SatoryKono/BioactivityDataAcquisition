@@ -35,7 +35,6 @@ import argparse
 import logging
 import sys
 from dataclasses import dataclass, field
-from datetime import timedelta
 from pathlib import Path
 
 # Configure logging for CLI output
@@ -127,7 +126,7 @@ def _find_delta_tables(base_path: Path) -> list[Path]:
     Returns:
         List of paths to Delta Lake tables.
     """
-    tables = []
+    tables: list[Path] = []
 
     if not base_path.exists():
         return tables
@@ -210,7 +209,9 @@ def vacuum_table(
         # Count removed files
         files_removed = len(files_deleted) if files_deleted else 0
 
-        logger.info("  VACUUM completed: %s (%d files removed)", table_name, files_removed)
+        logger.info(
+            "  VACUUM completed: %s (%d files removed)", table_name, files_removed
+        )
 
         return VacuumResult(
             table_path=table_path,
@@ -329,11 +330,12 @@ def vacuum_single_table(
 
 def _format_size(size_bytes: int) -> str:
     """Format size in human-readable form."""
+    size = float(size_bytes)
     for unit in ("B", "KB", "MB", "GB"):
-        if size_bytes < 1024:
-            return f"{size_bytes:.1f} {unit}"
-        size_bytes /= 1024
-    return f"{size_bytes:.1f} TB"
+        if size < 1024:
+            return f"{size:.1f} {unit}"
+        size /= 1024
+    return f"{size:.1f} TB"
 
 
 def log_report(report: VacuumReport) -> None:
@@ -345,7 +347,9 @@ def log_report(report: VacuumReport) -> None:
     logger.info("")
 
     retention_days = report.retention_hours // 24
-    logger.info("Retention Period: %d days (%d hours)", retention_days, report.retention_hours)
+    logger.info(
+        "Retention Period: %d days (%d hours)", retention_days, report.retention_hours
+    )
     logger.info("")
 
     if not report.results:
@@ -360,7 +364,9 @@ def log_report(report: VacuumReport) -> None:
             if result.dry_run:
                 logger.info("  [DRY-RUN] %s", result.table_name)
             else:
-                logger.info("  %s: %d files removed", result.table_name, result.files_removed)
+                logger.info(
+                    "  %s: %d files removed", result.table_name, result.files_removed
+                )
         logger.info("")
 
     # Failed operations

@@ -133,7 +133,9 @@ class UpdateReport:
 # =============================================================================
 
 
-def _load_run_metrics(data_dir: Path, pipeline: str | None, window: timedelta) -> list[RunMetrics]:
+def _load_run_metrics(
+    data_dir: Path, pipeline: str | None, window: timedelta
+) -> list[RunMetrics]:
     """Load run metrics from completed pipeline runs.
 
     This looks for metrics in the standard BioETL locations:
@@ -468,9 +470,17 @@ def log_report(report: UpdateReport, output_file: Path | None) -> None:
             if b:
                 logger.info("  Pipeline: %s", b.pipeline)
                 logger.info("    Runs analyzed:    %d", b.runs_analyzed)
-                logger.info("    Avg error rate:   %.4f (%.2f%%)", b.avg_error_rate, b.avg_error_rate * 100)
+                logger.info(
+                    "    Avg error rate:   %.4f (%.2f%%)",
+                    b.avg_error_rate,
+                    b.avg_error_rate * 100,
+                )
                 logger.info("    Stdev error rate: %.4f", b.stdev_error_rate)
-                logger.info("    Error range:      %.4f - %.4f", b.min_error_rate, b.max_error_rate)
+                logger.info(
+                    "    Error range:      %.4f - %.4f",
+                    b.min_error_rate,
+                    b.max_error_rate,
+                )
                 logger.info("    Avg records:      %.0f", b.avg_records)
                 logger.info("    Avg duration:     %.0f ms", b.avg_duration_ms)
                 logger.info("")
