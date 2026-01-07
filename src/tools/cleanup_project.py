@@ -311,11 +311,12 @@ def _find_temp_files(root: Path) -> list[CleanupTarget]:
 
 def _format_size(size_bytes: int) -> str:
     """Format size in human-readable form."""
+    size = float(size_bytes)
     for unit in ("B", "KB", "MB", "GB"):
-        if size_bytes < 1024:
-            return f"{size_bytes:.1f} {unit}"
-        size_bytes /= 1024
-    return f"{size_bytes:.1f} TB"
+        if size < 1024:
+            return f"{size:.1f} {unit}"
+        size /= 1024
+    return f"{size:.1f} TB"
 
 
 def find_cleanup_targets(
@@ -357,7 +358,7 @@ def archive_logs(root: Path, targets: list[CleanupTarget]) -> list[CleanupTarget
     Returns:
         List of archived targets.
     """
-    archived = []
+    archived: list[CleanupTarget] = []
     reports_dir = root / "reports" / "archived_logs"
 
     # Create archive directory with timestamp
@@ -382,7 +383,9 @@ def archive_logs(root: Path, targets: list[CleanupTarget]) -> list[CleanupTarget
     return archived
 
 
-def delete_targets(targets: list[CleanupTarget]) -> tuple[list[CleanupTarget], list[str]]:
+def delete_targets(
+    targets: list[CleanupTarget],
+) -> tuple[list[CleanupTarget], list[str]]:
     """Delete cleanup targets.
 
     Args:
@@ -432,11 +435,18 @@ def log_report(result: CleanupResult) -> None:
 
     for category, targets in sorted(by_category.items()):
         cat_size = sum(t.size_bytes for t in targets)
-        logger.info("## %s (%d items, %s)", category.upper(), len(targets), _format_size(cat_size))
+        logger.info(
+            "## %s (%d items, %s)",
+            category.upper(),
+            len(targets),
+            _format_size(cat_size),
+        )
         for target in targets:
             rel_path = target.path.relative_to(PROJECT_ROOT)
             marker = "[D]" if target.is_dir else "[F]"
-            logger.info("  %s %s (%s)", marker, rel_path, _format_size(target.size_bytes))
+            logger.info(
+                "  %s %s (%s)", marker, rel_path, _format_size(target.size_bytes)
+            )
         logger.info("")
 
     if result.archived:

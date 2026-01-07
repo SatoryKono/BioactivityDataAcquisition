@@ -61,21 +61,38 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 # Format: (deprecated_pattern, canonical_term, context_hint, is_fixable)
 DEPRECATED_TERMS: list[tuple[str, str, str, bool]] = [
     # Class/type naming
-    (r"\bclass\s+\w*Loader\b", "Adapter/Writer", "Use 'Adapter' for input, 'Writer' for output", False),
-    (r"\bclass\s+\w*Handler\b", "Manager/Service", "Use specific name (e.g., Manager, Service)", False),
-
+    (
+        r"\bclass\s+\w*Loader\b",
+        "Adapter/Writer",
+        "Use 'Adapter' for input, 'Writer' for output",
+        False,
+    ),
+    (
+        r"\bclass\s+\w*Handler\b",
+        "Manager/Service",
+        "Use specific name (e.g., Manager, Service)",
+        False,
+    ),
     # Variable/parameter naming
     (r"\bworkflow\b", "pipeline", "Use 'pipeline' instead of 'workflow'", True),
     (r"\bjob\b(?!\s*=|\s*:)", "run", "Use 'run' instead of 'job'", True),
     (r"\bchunk\b", "batch", "Use 'batch' instead of 'chunk'", True),
     (r"\bmeasurement\b", "activity", "Use 'activity' for bioactivity data", True),
     (r"\bdata_point\b", "record", "Use 'record' instead of 'data_point'", True),
-
     # CrossRef terminology
-    (r"\bWork\b(?!s?\s+endpoint)", "Publication", "Use 'Publication' instead of CrossRef 'Work'", True),
+    (
+        r"\bWork\b(?!s?\s+endpoint)",
+        "Publication",
+        "Use 'Publication' instead of CrossRef 'Work'",
+        True,
+    ),
     (r"\bWorkSchema\b", "PublicationSchema", "Use 'PublicationSchema'", True),
-    (r"\bCrossRefWorkRecord\b", "CrossRefPublicationRecord", "Use 'CrossRefPublicationRecord'", True),
-
+    (
+        r"\bCrossRefWorkRecord\b",
+        "CrossRefPublicationRecord",
+        "Use 'CrossRefPublicationRecord'",
+        True,
+    ),
     # Data layer naming
     (r"\braw\b(?!_|\w)", "bronze", "Use 'bronze' for raw data layer", True),
     (r"\blanding\b", "bronze", "Use 'bronze' for raw data layer", True),
@@ -83,19 +100,31 @@ DEPRECATED_TERMS: list[tuple[str, str, str, bool]] = [
     (r"\bcurated\b", "silver", "Use 'silver' for normalized layer", True),
     (r"\breporting\b(?!\s*server)", "gold", "Use 'gold' for analytics layer", True),
     (r"\bpresentation\b(?!\s*layer)", "gold", "Use 'gold' for analytics layer", True),
-
     # Operation terminology
-    (r"\bping\b(?!\()", "health_check", "Use 'health_check' for availability verification", True),
+    (
+        r"\bping\b(?!\()",
+        "health_check",
+        "Use 'health_check' for availability verification",
+        True,
+    ),
     (r"\bstatus_check\b", "health_check", "Use 'health_check'", True),
-
     # Error handling
     (r"\bdead_letter\b", "quarantine", "Use 'quarantine' for failed records", True),
-    (r"\berror_log\b(?!ger)", "quarantine", "Use 'quarantine' for failed records", True),
-
+    (
+        r"\berror_log\b(?!ger)",
+        "quarantine",
+        "Use 'quarantine' for failed records",
+        True,
+    ),
     # Identifier terminology
     (r"\bbusiness_key\b", "entity_id", "Use 'entity_id' for business identifier", True),
     (r"\bnatural_key\b", "entity_id", "Use 'entity_id' for business identifier", True),
-    (r"\bchecksum\b(?!s?\s*=)", "content_hash", "Use 'content_hash' for deduplication hash", True),
+    (
+        r"\bchecksum\b(?!s?\s*=)",
+        "content_hash",
+        "Use 'content_hash' for deduplication hash",
+        True,
+    ),
     (r"\bexecution_id\b", "run_id", "Use 'run_id' for pipeline run identifier", True),
     (r"\bjob_id\b", "run_id", "Use 'run_id' for pipeline run identifier", True),
     (r"\bchunk_id\b", "batch_id", "Use 'batch_id' for batch identifier", True),
@@ -207,7 +236,7 @@ def _check_file(file_path: Path) -> list[TermViolation]:
     Returns:
         List of violations found.
     """
-    violations = []
+    violations: list[TermViolation] = []
 
     try:
         content = file_path.read_text(encoding="utf-8")

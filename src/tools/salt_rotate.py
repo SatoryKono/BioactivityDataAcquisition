@@ -42,7 +42,6 @@ import os
 import secrets
 import sys
 from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path
 
 # Configure logging for CLI output
@@ -137,7 +136,11 @@ def get_current_status() -> SaltStatus:
     """
     current_salt = os.environ.get(ENV_SALT_CURRENT, "")
     next_salt = os.environ.get(ENV_SALT_NEXT, "")
-    rotation_active = os.environ.get(ENV_ROTATION_ACTIVE, "").lower() in ("true", "1", "yes")
+    rotation_active = os.environ.get(ENV_ROTATION_ACTIVE, "").lower() in (
+        "true",
+        "1",
+        "yes",
+    )
 
     issues = []
 
