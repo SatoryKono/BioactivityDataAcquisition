@@ -147,6 +147,7 @@ def _wrap_with_filter(
             filter_config=filter_config,
             metrics=metrics,
             pipeline_name=pipeline_name,
+            logger=logger,
         )
     return data_source
 

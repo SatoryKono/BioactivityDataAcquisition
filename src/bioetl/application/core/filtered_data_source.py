@@ -6,6 +6,7 @@ Loads filter IDs from external sources (CSV) and passes them to the adapter.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.domain.ports import FilterableDataSourcePort, InputFilterPort
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Mapping
 
     from bioetl.domain.filtering import FilterLoadResult, InputFilterConfig
-    from bioetl.domain.ports import DataSourcePort, MetricsPort
+    from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.domain.types import HealthStatus
 
 
@@ -33,6 +34,7 @@ class FilteredDataSource:
         filter_config: InputFilterConfig,
         metrics: MetricsPort | None = None,
         pipeline_name: str = "unknown",
+        logger: LoggerPort | None = None,
     ) -> None:
         """Initialize filtered data source wrapper."""
         self._data_source = data_source
@@ -40,6 +42,7 @@ class FilteredDataSource:
         self._filter_config = filter_config
         self._metrics = metrics
         self._pipeline_name = pipeline_name
+        self._logger = logger
         self._filter_ids: list[str] | None = None
         self._filter_result: FilterLoadResult | None = None
         # Multi-column filtering state
@@ -67,6 +70,17 @@ class FilteredDataSource:
         if self._filter_config.enabled and self._filter_reader:
             source_path = self._filter_config.source_path
             if not source_path:
+                return self
+
+            # Check if filter file exists - graceful degradation if missing
+            if not Path(source_path).exists():
+                if self._logger:
+                    self._logger.warning(
+                        "input_filter_file_not_found",
+                        source_path=source_path,
+                        pipeline=self._pipeline_name,
+                        message="Filter file not found, proceeding without filtering",
+                    )
                 return self
 
             # Check if multi-column mode
