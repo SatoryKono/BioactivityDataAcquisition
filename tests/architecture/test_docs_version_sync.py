@@ -177,12 +177,12 @@ class TestDocsVersionSync:
 
         Исключения:
         - docs/archived/ - исторические документы
-        - docs/audits/ - отчёты аудитов (фиксируют версию на момент аудита)
+        - docs/audits/, docs/audit/ - отчёты аудитов (фиксируют версию на момент аудита)
         - docs/__-prompts/ - шаблоны промптов
         - Changelog/История изменений секции (версия в контексте истории)
         """
         # Директории для исключения
-        excluded_dirs = {"archived", "audits", "__-prompts", "audit-reports"}
+        excluded_dirs = {"archived", "audits", "audit", "__-prompts", "audit-reports"}
 
         outdated = []
         current_major_minor = tuple(map(int, rules_version.split(".")))
