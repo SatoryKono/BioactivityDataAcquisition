@@ -11,7 +11,7 @@ from uuid import uuid4
 import pyarrow as pa
 import pytest
 
-from benchmarks.conftest import calculate_payload_size_mb
+from tools.benchmarks.conftest import calculate_payload_size_mb
 
 
 class FakeLogger:
@@ -35,18 +35,20 @@ class FakeLogger:
 
 def _create_activity_schema() -> pa.Schema:
     """Create a PyArrow schema for activity records."""
-    return pa.schema([
-        pa.field("id", pa.string()),
-        pa.field("molecule_chembl_id", pa.string()),
-        pa.field("assay_chembl_id", pa.string()),
-        pa.field("target_chembl_id", pa.string()),
-        pa.field("standard_value", pa.float64()),
-        pa.field("standard_units", pa.string()),
-        pa.field("pchembl_value", pa.float64()),
-        pa.field("canonical_smiles", pa.string()),
-        pa.field("_content_hash", pa.string()),
-        pa.field("_ingestion_ts", pa.timestamp("us")),
-    ])
+    return pa.schema(
+        [
+            pa.field("id", pa.string()),
+            pa.field("molecule_chembl_id", pa.string()),
+            pa.field("assay_chembl_id", pa.string()),
+            pa.field("target_chembl_id", pa.string()),
+            pa.field("standard_value", pa.float64()),
+            pa.field("standard_units", pa.string()),
+            pa.field("pchembl_value", pa.float64()),
+            pa.field("canonical_smiles", pa.string()),
+            pa.field("_content_hash", pa.string()),
+            pa.field("_ingestion_ts", pa.timestamp("us")),
+        ]
+    )
 
 
 def _prepare_records_for_delta(

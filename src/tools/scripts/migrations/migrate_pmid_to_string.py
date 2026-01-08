@@ -102,7 +102,11 @@ def migrate_table(
 
     if dry_run:
         logger.info(f"  [DRY RUN] Would migrate columns: {columns_to_migrate}")
-        return {"skipped": 0, "migrated": len(columns_to_migrate), "rows": original_rows}
+        return {
+            "skipped": 0,
+            "migrated": len(columns_to_migrate),
+            "rows": original_rows,
+        }
 
     # Perform migration
     for col in columns_to_migrate:

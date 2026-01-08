@@ -69,7 +69,9 @@ def main() -> None:
             print(f"  {filepath}:{lineno} - {class_name}.__init__ has {count} args")
 
         if warn_only:
-            print(f"\n[WARN MODE] {len(all_violations)} violation(s) found but not blocking CI")
+            print(
+                f"\n[WARN MODE] {len(all_violations)} violation(s) found but not blocking CI"
+            )
             sys.exit(0)
         else:
             print(f"\n❌ {len(all_violations)} violation(s) found")

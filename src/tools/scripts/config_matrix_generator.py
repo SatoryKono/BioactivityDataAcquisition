@@ -139,7 +139,9 @@ def main():
         print(f"   - {k} ({count}/{len(entity_configs)} configs)")
 
     print(f"\n4. Parameters MISSING in _defaults (candidates for addition):")
-    for k in sorted(missing_defaults - set(flatten_dict({"sink": {}, "input_filter": {}}).keys())):
+    for k in sorted(
+        missing_defaults - set(flatten_dict({"sink": {}, "input_filter": {}}).keys())
+    ):
         if not any(skip in k for skip in ["sink.", "input_filter.", "gold_filters."]):
             print(f"   - {k}")
 
@@ -172,10 +174,23 @@ def main():
 
         # Key structural parameters
         structural_keys = [
-            "pipeline_name", "provider", "entity_type", "version", "description",
-            "primary_keys", "silver_table", "gold_table", "source_file", "source",
-            "transform", "dq_rules", "circuit_breaker", "rate_limit",
-            "gold_filters", "sink", "input_filter"
+            "pipeline_name",
+            "provider",
+            "entity_type",
+            "version",
+            "description",
+            "primary_keys",
+            "silver_table",
+            "gold_table",
+            "source_file",
+            "source",
+            "transform",
+            "dq_rules",
+            "circuit_breaker",
+            "rate_limit",
+            "gold_filters",
+            "sink",
+            "input_filter",
         ]
 
         f.write("| Config | " + " | ".join(structural_keys) + " |\n")
@@ -195,7 +210,9 @@ def main():
 
         f.write("### A. Missing in _defaults (should be added)\n\n")
         for k in sorted(missing_defaults):
-            if not any(skip in k for skip in ["sink.", "gold_filters.", "input_filter."]):
+            if not any(
+                skip in k for skip in ["sink.", "gold_filters.", "input_filter."]
+            ):
                 present_in = [cfg for cfg, data in entity_configs.items() if k in data]
                 f.write(f"- `{k}` - present in: {', '.join(present_in)}\n")
 
@@ -203,32 +220,49 @@ def main():
         for k, present_in in sorted(partial_by_key.items()):
             if len(present_in) > 1 and len(present_in) < len(entity_configs):
                 f.write(f"- `{k}`\n")
-                f.write(f"  - Present in ({len(present_in)}): {', '.join(present_in)}\n")
+                f.write(
+                    f"  - Present in ({len(present_in)}): {', '.join(present_in)}\n"
+                )
                 missing = set(entity_configs.keys()) - set(present_in)
                 f.write(f"  - Missing in ({len(missing)}): {', '.join(missing)}\n")
 
         f.write("\n### C. Structural inconsistencies\n\n")
 
         # Check for source vs source_file
-        source_configs = [cfg for cfg, data in entity_configs.items() if "source" in data]
-        source_file_configs = [cfg for cfg, data in entity_configs.items() if "source_file" in data]
+        source_configs = [
+            cfg for cfg, data in entity_configs.items() if "source" in data
+        ]
+        source_file_configs = [
+            cfg for cfg, data in entity_configs.items() if "source_file" in data
+        ]
 
         f.write("#### source vs source_file\n\n")
         f.write(f"- Using `source`: {', '.join(source_configs) or 'none'}\n")
-        f.write(f"- Using `source_file`: {', '.join(source_file_configs) or 'none'}\n\n")
+        f.write(
+            f"- Using `source_file`: {', '.join(source_file_configs) or 'none'}\n\n"
+        )
 
         # Check for transform presence
-        transform_configs = [cfg for cfg, data in entity_configs.items()
-                           if "transform" in data or any(k.startswith("transform.") for k in data)]
+        transform_configs = [
+            cfg
+            for cfg, data in entity_configs.items()
+            if "transform" in data or any(k.startswith("transform.") for k in data)
+        ]
         f.write("#### transform block\n\n")
         f.write(f"- Has `transform`: {', '.join(transform_configs) or 'none'}\n")
-        f.write(f"- No `transform`: {', '.join(set(entity_configs.keys()) - set(transform_configs))}\n\n")
+        f.write(
+            f"- No `transform`: {', '.join(set(entity_configs.keys()) - set(transform_configs))}\n\n"
+        )
 
         # Check for gold_table presence
-        gold_table_configs = [cfg for cfg, data in entity_configs.items() if "gold_table" in data]
+        gold_table_configs = [
+            cfg for cfg, data in entity_configs.items() if "gold_table" in data
+        ]
         f.write("#### gold_table presence\n\n")
         f.write(f"- Has `gold_table`: {', '.join(gold_table_configs) or 'none'}\n")
-        f.write(f"- Missing `gold_table`: {', '.join(set(entity_configs.keys()) - set(gold_table_configs))}\n")
+        f.write(
+            f"- Missing `gold_table`: {', '.join(set(entity_configs.keys()) - set(gold_table_configs))}\n"
+        )
 
     print(f"\nDetailed report saved to {report_path}")
 

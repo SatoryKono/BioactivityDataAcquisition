@@ -59,7 +59,10 @@ def check_no_circular_imports(base_path: Path) -> list[str]:
         with open(py_file, "r", encoding="utf-8") as f:
             content = f.read()
 
-        if "from bioetl.application" in content or "import bioetl.application" in content:
+        if (
+            "from bioetl.application" in content
+            or "import bioetl.application" in content
+        ):
             violations.append(
                 f"{py_file}: infrastructure imports from application layer"
             )
@@ -69,7 +72,7 @@ def check_no_circular_imports(base_path: Path) -> list[str]:
 
 def main() -> int:
     """Run architecture checks."""
-    base_path = Path(".")
+    base_path = Path("")
 
     all_violations = []
 

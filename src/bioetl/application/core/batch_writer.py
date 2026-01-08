@@ -95,6 +95,7 @@ class BatchWriter:
         )
 
         # Pre-calculate write modes
+        # Pass write mode directly without silent degradation (R1 refactoring)
         silver_mode_val = self._table_config.silver_write_mode
         self._silver_mode = cast(
             Literal["merge", "append", "delete"],

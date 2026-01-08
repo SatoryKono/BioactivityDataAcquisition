@@ -12,7 +12,7 @@ from uuid import uuid4
 
 import pytest
 
-from benchmarks.conftest import calculate_payload_size_mb
+from tools.benchmarks.conftest import calculate_payload_size_mb
 
 
 def _records_to_bytes_iterator(records: list[dict[str, Any]]) -> Iterator[bytes]:

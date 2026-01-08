@@ -38,16 +38,28 @@ class TermViolation:
 # Based on docs/glossary.md "Deprecated Terms" section
 DEPRECATED_TERMS: dict[str, tuple[str, str]] = {
     # Generic technical names (class definitions)
-    r"class\s+\w*Loader\b": ("Adapter/Writer", "Use Adapter for input, Writer for output"),
-    r"class\s+\w*Handler\b": ("Manager/Service", "Use specific names like Manager or Service"),
+    r"class\s+\w*Loader\b": (
+        "Adapter/Writer",
+        "Use Adapter for input, Writer for output",
+    ),
+    r"class\s+\w*Handler\b": (
+        "Manager/Service",
+        "Use specific names like Manager or Service",
+    ),
     # ETL process terms
     r"\bworkflow\b": ("pipeline", "Use 'pipeline' for data processing sequences"),
     r"\bjob\b": ("run", "Use 'run' for pipeline execution instances"),
-    r"\bchunk\b": ("batch", "Use 'batch' for collections of records processed together"),
+    r"\bchunk\b": (
+        "batch",
+        "Use 'batch' for collections of records processed together",
+    ),
     # Data terms (when used as class/variable names, not in strings/comments)
     r"\bdata_point\b": ("record", "Use 'record' for data items"),
     # Domain terms (per glossary.md)
-    r"class\s+\w*Workflow\b": ("Pipeline", "Use Pipeline for data processing sequences"),
+    r"class\s+\w*Workflow\b": (
+        "Pipeline",
+        "Use Pipeline for data processing sequences",
+    ),
 }
 
 # Context-sensitive deprecated terms (only in certain files/contexts)
@@ -140,7 +152,11 @@ def check_file(filepath: Path, strict: bool = False) -> list[TermViolation]:
 
         # Check context-sensitive terms in strict mode
         if strict:
-            for pattern, (canonical, desc, allowed_files) in CONTEXT_SENSITIVE_TERMS.items():
+            for pattern, (
+                canonical,
+                desc,
+                allowed_files,
+            ) in CONTEXT_SENSITIVE_TERMS.items():
                 # Skip if file is in allowed list
                 if any(allowed in filepath.name for allowed in allowed_files):
                     continue
@@ -208,7 +224,9 @@ def format_violations(violations: list[TermViolation]) -> str:
     lines = [f"Found {len(violations)} terminology violation(s):", ""]
 
     for v in violations:
-        lines.append(f"{v.file}:{v.line_num}: Use '{v.canonical_term}' instead of '{v.deprecated_term}'")
+        lines.append(
+            f"{v.file}:{v.line_num}: Use '{v.canonical_term}' instead of '{v.deprecated_term}'"
+        )
         lines.append(f"    {v.context}")
         lines.append("")
 
