@@ -5,8 +5,8 @@ Usage: python scripts/generate_contracts.py
 """
 
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 # Ensure project root is in python path
 project_root = Path(__file__).resolve().parent.parent
@@ -16,8 +16,8 @@ try:
     from bioetl.infrastructure.schemas.gold import (
         ChEMBLActivityGoldSchema,
         PubChemCompoundGoldSchema,
-        UniProtProteinGoldSchema,
         PubMedPublicationGoldSchema,
+        UniProtProteinGoldSchema,
     )
 except ImportError as e:
     print(f"Error importing schemas: {e}")
@@ -31,6 +31,7 @@ ENTITY_SCHEMA_MAP = {
     "uniprot_protein": UniProtProteinGoldSchema,
     "pubmed_publication": PubMedPublicationGoldSchema,
 }
+
 
 def generate_contracts():
     CONTRACTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -52,6 +53,7 @@ def generate_contracts():
             sys.exit(1)
 
     print("\nAll contracts generated successfully.")
+
 
 if __name__ == "__main__":
     generate_contracts()

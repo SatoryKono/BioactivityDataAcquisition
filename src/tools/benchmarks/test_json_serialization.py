@@ -68,7 +68,9 @@ class TestJsonEncoderPerformance:
 
         elapsed = time.perf_counter() - start
         ops_per_sec = (iterations * len(small_payload)) / elapsed
-        print(f"\nStdLib small: {ops_per_sec:.0f} ops/sec, {elapsed/iterations:.4f}s per batch")
+        print(
+            f"\nStdLib small: {ops_per_sec:.0f} ops/sec, {elapsed / iterations:.4f}s per batch"
+        )
 
     @pytest.mark.benchmark
     def test_stdlib_dumps_medium(self, medium_payload: list[dict[str, Any]]) -> None:
@@ -83,7 +85,9 @@ class TestJsonEncoderPerformance:
 
         elapsed = time.perf_counter() - start
         ops_per_sec = (iterations * len(medium_payload)) / elapsed
-        print(f"\nStdLib medium: {ops_per_sec:.0f} ops/sec, {elapsed/iterations:.4f}s per batch")
+        print(
+            f"\nStdLib medium: {ops_per_sec:.0f} ops/sec, {elapsed / iterations:.4f}s per batch"
+        )
 
     @pytest.mark.benchmark
     @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
@@ -99,7 +103,9 @@ class TestJsonEncoderPerformance:
 
         elapsed = time.perf_counter() - start
         ops_per_sec = (iterations * len(small_payload)) / elapsed
-        print(f"\nOrjson small: {ops_per_sec:.0f} ops/sec, {elapsed/iterations:.4f}s per batch")
+        print(
+            f"\nOrjson small: {ops_per_sec:.0f} ops/sec, {elapsed / iterations:.4f}s per batch"
+        )
 
     @pytest.mark.benchmark
     @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
@@ -115,13 +121,13 @@ class TestJsonEncoderPerformance:
 
         elapsed = time.perf_counter() - start
         ops_per_sec = (iterations * len(medium_payload)) / elapsed
-        print(f"\nOrjson medium: {ops_per_sec:.0f} ops/sec, {elapsed/iterations:.4f}s per batch")
+        print(
+            f"\nOrjson medium: {ops_per_sec:.0f} ops/sec, {elapsed / iterations:.4f}s per batch"
+        )
 
     @pytest.mark.benchmark
     @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
-    def test_performance_comparison(
-        self, medium_payload: list[dict[str, Any]]
-    ) -> None:
+    def test_performance_comparison(self, medium_payload: list[dict[str, Any]]) -> None:
         """Direct comparison of stdlib vs orjson performance."""
         stdlib_encoder = StdLibJsonEncoder()
         orjson_encoder = OrjsonEncoder()
@@ -152,9 +158,9 @@ class TestJsonEncoderPerformance:
         orjson_mean = statistics.mean(orjson_times)
         speedup = stdlib_mean / orjson_mean
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("JSON Serialization Benchmark Results")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         print(f"Payload: {len(medium_payload)} records")
         print(f"Iterations: {iterations}")
         print(f"\nStdLib json:")
@@ -164,7 +170,7 @@ class TestJsonEncoderPerformance:
         print(f"  Mean: {orjson_mean:.4f}s")
         print(f"  Std:  {statistics.stdev(orjson_times):.4f}s")
         print(f"\nSpeedup: {speedup:.2f}x")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         # Verify speedup meets the >2x requirement
         assert speedup > 1.5, f"Expected >1.5x speedup, got {speedup:.2f}x"
@@ -222,23 +228,21 @@ class TestJsonEncoderPerformance:
         orjson_mean = statistics.mean(orjson_times)
         speedup = stdlib_mean / orjson_mean
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("JSON Deserialization Benchmark Results")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         print(f"Payload: {len(json_strings)} JSON strings")
         print(f"\nStdLib json.loads: {stdlib_mean:.4f}s")
         print(f"Orjson loads:      {orjson_mean:.4f}s")
         print(f"Speedup:           {speedup:.2f}x")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
 
 class TestBatchSerializationPerformance:
     """Benchmark batch serialization patterns used in Bronze writer."""
 
     @pytest.mark.benchmark
-    def test_batch_serialize_stdlib(
-        self, large_payload: list[dict[str, Any]]
-    ) -> None:
+    def test_batch_serialize_stdlib(self, large_payload: list[dict[str, Any]]) -> None:
         """Benchmark batch serialization pattern with stdlib."""
         encoder = StdLibJsonEncoder()
         start = time.perf_counter()
@@ -258,9 +262,7 @@ class TestBatchSerializationPerformance:
 
     @pytest.mark.benchmark
     @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
-    def test_batch_serialize_orjson(
-        self, large_payload: list[dict[str, Any]]
-    ) -> None:
+    def test_batch_serialize_orjson(self, large_payload: list[dict[str, Any]]) -> None:
         """Benchmark batch serialization pattern with orjson."""
         encoder = OrjsonEncoder()
         start = time.perf_counter()

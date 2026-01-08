@@ -6,7 +6,6 @@ from pathlib import Path
 
 import yaml
 
-
 REQUIRED_TOP_LEVEL = {
     "pipeline_name",
     "provider",
