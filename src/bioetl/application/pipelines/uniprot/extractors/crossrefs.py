@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any
+
+from bioetl.application.pipelines.uniprot.extractors.utils import ExtractorUtils
 
 
 class CrossRefExtractor:
@@ -51,7 +52,7 @@ class CrossRefExtractor:
                 }
             )
 
-        return json.dumps(go_terms, ensure_ascii=False) if go_terms else None
+        return ExtractorUtils.to_json(go_terms)
 
     @staticmethod
     def _parse_properties(properties: list[Any]) -> dict[str, str]:
@@ -121,4 +122,4 @@ class CrossRefExtractor:
             if xref_id:
                 ids.append(str(xref_id))
 
-        return json.dumps(ids, ensure_ascii=False) if ids else None
+        return ExtractorUtils.to_json(ids)

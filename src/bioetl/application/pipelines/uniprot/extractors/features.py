@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any
+
+from bioetl.application.pipelines.uniprot.extractors.utils import ExtractorUtils
 
 
 def _extract_feature_location(
@@ -90,7 +91,7 @@ class FeatureExtractor:
             if feature_data:
                 extracted.append(feature_data)
 
-        return json.dumps(extracted, ensure_ascii=False) if extracted else None
+        return ExtractorUtils.to_json(extracted)
 
     @staticmethod
     def extract_keywords(keywords: Any) -> str | None:
@@ -113,4 +114,4 @@ class FeatureExtractor:
             if kw_data:
                 extracted.append(kw_data)
 
-        return json.dumps(extracted, ensure_ascii=False) if extracted else None
+        return ExtractorUtils.to_json(extracted)

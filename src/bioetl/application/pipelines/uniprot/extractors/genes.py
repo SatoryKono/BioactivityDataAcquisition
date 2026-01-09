@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any
+
+from bioetl.application.pipelines.uniprot.extractors.utils import ExtractorUtils
 
 
 class GeneExtractor:
@@ -79,7 +80,7 @@ class GeneExtractor:
                         value = syn.get("value")
                         if value:
                             all_synonyms.append(str(value))
-        return json.dumps(all_synonyms, ensure_ascii=False) if all_synonyms else None
+        return ExtractorUtils.to_json(all_synonyms)
 
     @staticmethod
     def extract_gene_orf_names(genes: Any) -> str | None:
@@ -105,4 +106,4 @@ class GeneExtractor:
                         value = orf.get("value")
                         if value:
                             all_orf.append(str(value))
-        return json.dumps(all_orf, ensure_ascii=False) if all_orf else None
+        return ExtractorUtils.to_json(all_orf)

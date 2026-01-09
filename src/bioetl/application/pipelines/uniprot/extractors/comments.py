@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any
+
+from bioetl.application.pipelines.uniprot.extractors.utils import ExtractorUtils
 
 
 def _is_comment_of_type(comment: Any, comment_type: str) -> bool:
@@ -119,7 +120,7 @@ class CommentExtractor:
             return None
 
         extracted = cls.extract_text_values(comments, comment_type)
-        return json.dumps(extracted, ensure_ascii=False) if extracted else None
+        return ExtractorUtils.to_json(extracted)
 
     @staticmethod
     def extract_catalytic_activity(comments: Any) -> str | None:
@@ -145,7 +146,7 @@ class CommentExtractor:
                 if activity:
                     extracted.append(activity)
 
-        return json.dumps(extracted, ensure_ascii=False) if extracted else None
+        return ExtractorUtils.to_json(extracted)
 
     @staticmethod
     def extract_subcellular_locations(comments: Any) -> str | None:
@@ -173,7 +174,7 @@ class CommentExtractor:
                         if value:
                             extracted.append(value)
 
-        return json.dumps(extracted, ensure_ascii=False) if extracted else None
+        return ExtractorUtils.to_json(extracted)
 
     @staticmethod
     def extract_alternative_products(comments: Any) -> str | None:
@@ -201,7 +202,7 @@ class CommentExtractor:
                         if isoform_data:
                             extracted.append(isoform_data)
 
-        return json.dumps(extracted, ensure_ascii=False) if extracted else None
+        return ExtractorUtils.to_json(extracted)
 
     @staticmethod
     def count_isoforms(comments: Any) -> int | None:

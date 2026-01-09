@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import json
+import orjson
 from typing import Any, ClassVar
 
 
@@ -19,7 +19,22 @@ class ExtractorUtils:
     }
 
     @staticmethod
-    def serialize_list(value: Any) -> str | None:
+    def to_json(value: Any) -> str | None:
+        """Serialize value to compact JSON string using orjson.
+
+        Args:
+            value: Value to serialize.
+
+        Returns:
+            JSON string or None if value is empty/None.
+        """
+        if not value:
+            return None
+        # OPTIMIZATION: Use orjson for performance (approx 15x faster than json.dumps)
+        return orjson.dumps(value).decode("utf-8")
+
+    @classmethod
+    def serialize_list(cls, value: Any) -> str | None:
         """Serialize a list to JSON string.
 
         Args:
@@ -30,7 +45,7 @@ class ExtractorUtils:
         """
         if not value or not isinstance(value, list):
             return None
-        return json.dumps(value, ensure_ascii=False)
+        return cls.to_json(value)
 
     @staticmethod
     def count_list(value: Any) -> int | None:
@@ -75,8 +90,8 @@ class ExtractorUtils:
         existence_str = str(existence)
         return cls.EXISTENCE_MAP.get(existence_str, existence_str)
 
-    @staticmethod
-    def extract_short_names(recommended_name: dict[str, Any] | None) -> str | None:
+    @classmethod
+    def extract_short_names(cls, recommended_name: dict[str, Any] | None) -> str | None:
         """Extract short names from recommended name.
 
         Args:
@@ -92,10 +107,10 @@ class ExtractorUtils:
             return None
         values = [sn.get("value") for sn in short_names if isinstance(sn, dict)]
         values = [v for v in values if v]
-        return json.dumps(values, ensure_ascii=False) if values else None
+        return cls.to_json(values)
 
-    @staticmethod
-    def extract_alternative_names(protein_desc: Any) -> str | None:
+    @classmethod
+    def extract_alternative_names(cls, protein_desc: Any) -> str | None:
         """Extract alternative protein names.
 
         Args:
@@ -119,10 +134,10 @@ class ExtractorUtils:
                 name = full_name.get("value")
                 if name:
                     values.append(name)
-        return json.dumps(values, ensure_ascii=False) if values else None
+        return cls.to_json(values)
 
-    @staticmethod
-    def extract_ec_numbers(recommended_name: dict[str, Any] | None) -> str | None:
+    @classmethod
+    def extract_ec_numbers(cls, recommended_name: dict[str, Any] | None) -> str | None:
         """Extract EC numbers from recommended name.
 
         Args:
@@ -138,4 +153,4 @@ class ExtractorUtils:
             return None
         values = [ec.get("value") for ec in ec_numbers if isinstance(ec, dict)]
         values = [v for v in values if v]
-        return json.dumps(values, ensure_ascii=False) if values else None
+        return cls.to_json(values)
