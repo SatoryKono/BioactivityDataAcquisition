@@ -16,7 +16,7 @@ def check_adapter_implements_port(filepath: Path) -> list[str]:
     """Check if adapter classes reference domain ports."""
     violations = []
 
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         try:
             tree = ast.parse(f.read())
         except SyntaxError:
@@ -56,7 +56,7 @@ def check_no_circular_imports(base_path: Path) -> list[str]:
         if py_file.name.startswith("__"):
             continue
 
-        with open(py_file, "r", encoding="utf-8") as f:
+        with open(py_file, encoding="utf-8") as f:
             content = f.read()
 
         if (

@@ -12,7 +12,6 @@ Requirements:
 from __future__ import annotations
 
 import json
-import os
 import statistics
 import time
 from typing import Any
@@ -163,10 +162,10 @@ class TestJsonEncoderPerformance:
         print(f"{'=' * 60}")
         print(f"Payload: {len(medium_payload)} records")
         print(f"Iterations: {iterations}")
-        print(f"\nStdLib json:")
+        print("\nStdLib json:")
         print(f"  Mean: {stdlib_mean:.4f}s")
         print(f"  Std:  {statistics.stdev(stdlib_times):.4f}s")
-        print(f"\nOrjson:")
+        print("\nOrjson:")
         print(f"  Mean: {orjson_mean:.4f}s")
         print(f"  Std:  {statistics.stdev(orjson_times):.4f}s")
         print(f"\nSpeedup: {speedup:.2f}x")
