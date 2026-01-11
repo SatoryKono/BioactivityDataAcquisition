@@ -8,8 +8,10 @@ To build a robust, scalable, and maintainable data pipeline for acquiring and pr
 
 ## Quick Links
 
+*   [**Documentation Index**](INDEX.md): Structured navigation for all documentation.
+*   [**Quick Reference**](quick-reference/rules-summary.md): Key rules at a glance.
 *   [**Project Navigator**](00-map.md): Full documentation map with links to all resources.
-*   [**Project Rules**](RULES.md): The constitution of our project. All contributions **MUST** adhere to these rules.
+*   [**Project Rules**](RULES.md): The constitution of our project (SSOT). All contributions **MUST** adhere to these rules.
 *   [**Quick Start Guide**](03-guides/quick-start.md): Get your local development environment up and running in minutes.
 *   [**Architecture Overview**](02-architecture/system-context.md): Understand the high-level design and data flow.
 *   [**How-To Guides**](03-guides/): Guides for common tasks (adding sources, pipelines, troubleshooting).
@@ -37,7 +39,7 @@ To build a robust, scalable, and maintainable data pipeline for acquiring and pr
 
 ## Current Version
 
-**v5.9** (2026-01-01) — See [CHANGELOG](CHANGELOG.md) for details.
+**v5.10** (2026-01-06) — See [CHANGELOG](CHANGELOG.md) for details.
 
 ## Getting Started
 
@@ -56,4 +58,4 @@ make test
 
 ---
 
-*Last updated: 2026-01-01*
+*Last updated: 2026-01-07*

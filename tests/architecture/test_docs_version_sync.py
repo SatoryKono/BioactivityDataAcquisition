@@ -7,7 +7,7 @@ REQ-DOC-010: Все ключевые документы MUST ссылаться 
 2. Ключевые документы ссылаются на эту версию
 3. CLAUDE.md синхронизирован с RULES.md
 
-См. docs/00-project_rules/07-consistency-check.md
+См. docs/quick-reference/rules-summary.md
 """
 
 from __future__ import annotations
@@ -29,17 +29,13 @@ DOC_VERSION_PATTERNS = [
 
 # Документы, которые MUST быть синхронизированы с RULES.md
 # Исключаем: archived/, audits/ (исторические), __-prompts/ (шаблоны)
+# Note: docs/00-project_rules/ был консолидирован в docs/quick-reference/ и docs/03-guides/
 REQUIRED_SYNC_DOCS = [
     "CLAUDE.md",
     "docs/00-map.md",
     "docs/REQUIREMENTS.md",
-    "docs/00-project_rules/00-rules-summary.md",
-    "docs/00-project_rules/02-user-rules.md",
-    "docs/00-project_rules/03-file-policy.md",
-    "docs/00-project_rules/04-extending-bioetl.md",
-    "docs/00-project_rules/05-cleanup-policy.md",
-    "docs/00-project_rules/06-rules-mapping.md",
-    "docs/00-project_rules/07-consistency-check.md",
+    "docs/quick-reference/rules-summary.md",
+    "docs/03-guides/cleanup-policy.md",
     "docs/02-architecture/00-overview.md",
 ]
 
