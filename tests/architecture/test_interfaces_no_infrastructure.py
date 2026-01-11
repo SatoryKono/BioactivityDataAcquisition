@@ -108,12 +108,10 @@ class TestInterfacesNoDIrectInfrastructure:
 
         # Known legacy violations - these should be addressed in future refactoring
         # but are allowed for now to prevent regression in new code
-        allowed_legacy_files = {
-            # quarantine.py uses infrastructure config and quarantine directly
-            # TODO: Route through QuarantineService
-            "quarantine.py",
-            # Note: health.py was refactored to use composition entrypoints
-        }
+        # Note: All CLI commands are now properly routed through composition entrypoints:
+        #   - quarantine.py uses QuarantineService via get_quarantine_service()
+        #   - health.py was refactored to use composition entrypoints
+        allowed_legacy_files: set[str] = set()
 
         violations = []
 
