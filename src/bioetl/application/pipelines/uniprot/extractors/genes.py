@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any
+
+import orjson
 
 
 class GeneExtractor:
@@ -79,7 +80,8 @@ class GeneExtractor:
                         value = syn.get("value")
                         if value:
                             all_synonyms.append(str(value))
-        return json.dumps(all_synonyms, ensure_ascii=False) if all_synonyms else None
+        # Optimization: use orjson for faster serialization
+        return orjson.dumps(all_synonyms).decode("utf-8") if all_synonyms else None
 
     @staticmethod
     def extract_gene_orf_names(genes: Any) -> str | None:
@@ -105,4 +107,5 @@ class GeneExtractor:
                         value = orf.get("value")
                         if value:
                             all_orf.append(str(value))
-        return json.dumps(all_orf, ensure_ascii=False) if all_orf else None
+        # Optimization: use orjson for faster serialization
+        return orjson.dumps(all_orf).decode("utf-8") if all_orf else None

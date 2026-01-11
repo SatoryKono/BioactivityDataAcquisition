@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any
+
+import orjson
 
 
 class CrossRefExtractor:
@@ -51,7 +52,8 @@ class CrossRefExtractor:
                 }
             )
 
-        return json.dumps(go_terms, ensure_ascii=False) if go_terms else None
+        # Optimization: use orjson for faster serialization
+        return orjson.dumps(go_terms).decode("utf-8") if go_terms else None
 
     @staticmethod
     def _parse_properties(properties: list[Any]) -> dict[str, str]:
@@ -121,4 +123,5 @@ class CrossRefExtractor:
             if xref_id:
                 ids.append(str(xref_id))
 
-        return json.dumps(ids, ensure_ascii=False) if ids else None
+        # Optimization: use orjson for faster serialization
+        return orjson.dumps(ids).decode("utf-8") if ids else None

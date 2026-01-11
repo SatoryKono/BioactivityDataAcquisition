@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any
+
+import orjson
 
 
 def _extract_feature_location(
@@ -90,7 +91,8 @@ class FeatureExtractor:
             if feature_data:
                 extracted.append(feature_data)
 
-        return json.dumps(extracted, ensure_ascii=False) if extracted else None
+        # Optimization: use orjson for faster serialization
+        return orjson.dumps(extracted).decode("utf-8") if extracted else None
 
     @staticmethod
     def extract_keywords(keywords: Any) -> str | None:
@@ -113,4 +115,5 @@ class FeatureExtractor:
             if kw_data:
                 extracted.append(kw_data)
 
-        return json.dumps(extracted, ensure_ascii=False) if extracted else None
+        # Optimization: use orjson for faster serialization
+        return orjson.dumps(extracted).decode("utf-8") if extracted else None
