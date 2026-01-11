@@ -80,10 +80,10 @@ jobs:
         run: lint-imports --config .importlinter
 
       - name: Application layer dependency graph
-        run: python scripts/check_application_deps.py
+        run: python src/tools/scripts/check_application_deps.py
 
       - name: Infrastructure layer architecture check
-        run: python scripts/check_architecture.py
+        run: python src/tools/scripts/check_architecture.py
 
   unit-tests:
     needs: lint
