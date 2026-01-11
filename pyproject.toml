@@ -377,8 +377,8 @@ known-first-party = ["bioetl", "tests"]
 "src/bioetl/domain/schemas/crossref/__init__.py" = ["I001"]
 # Entrypoints uses semantic grouping with comments in __all__ (not alphabetical)
 "src/bioetl/composition/entrypoints.py" = ["RUF022"]
-# CLI tools use logging instead of print(), may use simpler patterns
-"src/tools/**/*.py" = ["PTH", "SIM"]
+# Tools scripts use print() for output, may have simpler patterns, and are not production code
+"src/tools/**/*.py" = ["PTH", "SIM", "T201", "F401", "F541", "UP015", "RUF005", "B007", "F841"]
 # Infrastructure adapters implement Protocol interfaces, may not use all args
 "src/bioetl/infrastructure/adapters/**/*.py" = ["ARG001", "ARG002", "SIM102", "SIM113"]
 # Infrastructure may have unused args for interface consistency, use open() is fine

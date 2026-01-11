@@ -34,10 +34,10 @@ jobs:
             # /render-diagrams command
             -   name: Render Diagrams & Check Consistency
                 run: |
-                    python src/tools/render_diagrams.py
+                    python scripts/render_diagrams.py
                     # Fail if diagrams were modified by the script (meaning they were out of sync)
                     if [[ -n $(git status --porcelain docs/) ]]; then
-                      echo "Error: Diagrams are out of sync. Please run 'python src/tools/render_diagrams.py' locally and commit the changes."
+                      echo "Error: Diagrams are out of sync. Please run 'python scripts/render_diagrams.py' locally and commit the changes."
                       git diff
                       exit 1
                     fi
