@@ -69,7 +69,7 @@ def migrate_table(
         return {"skipped": 1, "migrated": 0, "rows": 0}
 
     try:
-        dt = DeltaTable(str(table_path))
+        DeltaTable(str(table_path))
     except Exception as e:
         logger.warning(f"Could not open Delta table {table_path}: {e}")
         return {"skipped": 1, "migrated": 0, "rows": 0}

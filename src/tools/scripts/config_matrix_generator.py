@@ -76,7 +76,7 @@ def main():
 
         # Header
         config_names = sorted(configs.keys())
-        writer.writerow(["Parameter Path"] + config_names)
+        writer.writerow(["Parameter Path", *config_names])
 
         # Data rows
         for key in sorted_keys:
@@ -122,7 +122,7 @@ def main():
     # Parameters missing in defaults but present in entities
     missing_defaults = any_entity - defaults_keys
 
-    print(f"\n1. Parameters ONLY in _defaults (not used in entity configs):")
+    print("\n1. Parameters ONLY in _defaults (not used in entity configs):")
     for k in sorted(only_defaults):
         print(f"   - {k}")
 
@@ -130,7 +130,7 @@ def main():
     for k in sorted(common_entity):
         print(f"   - {k}")
 
-    print(f"\n3. Parameters in SOME entity configs (inconsistent):")
+    print("\n3. Parameters in SOME entity configs (inconsistent):")
     partial_by_key = {}
     for k in sorted(partial_entity):
         present_in = [cfg for cfg, data in entity_configs.items() if k in data]
@@ -138,7 +138,7 @@ def main():
         count = len(present_in)
         print(f"   - {k} ({count}/{len(entity_configs)} configs)")
 
-    print(f"\n4. Parameters MISSING in _defaults (candidates for addition):")
+    print("\n4. Parameters MISSING in _defaults (candidates for addition):")
     for k in sorted(
         missing_defaults - set(flatten_dict({"sink": {}, "input_filter": {}}).keys())
     ):

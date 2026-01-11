@@ -137,7 +137,7 @@ def check_file(filepath: Path, strict: bool = False) -> list[TermViolation]:
             continue
 
         # Check deprecated terms
-        for pattern, (canonical, desc) in DEPRECATED_TERMS.items():
+        for pattern, (canonical, _desc) in DEPRECATED_TERMS.items():
             matches = list(re.finditer(pattern, line, re.IGNORECASE))
             for match in matches:
                 violations.append(
@@ -154,7 +154,7 @@ def check_file(filepath: Path, strict: bool = False) -> list[TermViolation]:
         if strict:
             for pattern, (
                 canonical,
-                desc,
+                _desc,
                 allowed_files,
             ) in CONTEXT_SENSITIVE_TERMS.items():
                 # Skip if file is in allowed list
