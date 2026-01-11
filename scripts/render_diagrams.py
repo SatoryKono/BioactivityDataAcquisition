@@ -44,7 +44,7 @@ def validate_diagrams(docs_dir: Path) -> bool:
 
 def main() -> int:
     """Main entry point."""
-    project_root = Path(__file__).parent.parent.parent
+    project_root = Path(__file__).parent.parent
     docs_dir = project_root / "docs"
 
     if not docs_dir.exists():
