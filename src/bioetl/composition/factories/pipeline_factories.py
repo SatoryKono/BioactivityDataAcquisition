@@ -112,11 +112,11 @@ from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ASSAY_SCHEMA,
     CHEMBL_CELL_LINE_SCHEMA,
     CHEMBL_COMPOUND_RECORD_SCHEMA,
-    CHEMBL_DOCUMENT_SCHEMA,
     CHEMBL_DOCUMENT_SIMILARITY_SCHEMA,
     CHEMBL_DOCUMENT_TERM_SCHEMA,
     CHEMBL_MOLECULE_SCHEMA,
     CHEMBL_PROTEIN_CLASS_SCHEMA,
+    CHEMBL_PUBLICATION_SCHEMA,
     CHEMBL_TARGET_COMPONENT_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
     CROSSREF_PUBLICATION_SCHEMA,
@@ -202,7 +202,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         pipeline_name="chembl_document",
         provider="chembl",
         transformer_class=DocumentTransformer,
-        silver_schema=CHEMBL_DOCUMENT_SCHEMA,
+        silver_schema=CHEMBL_PUBLICATION_SCHEMA,
         gold_schema=ChEMBLDocumentGoldSchema,
     ),
     PipelineFactoryConfig(
@@ -280,7 +280,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     ),
     # CrossRef pipeline
     PipelineFactoryConfig(
-        pipeline_name="crossref_publication_enrichment",
+        pipeline_name="crossref_publication",
         provider="crossref",
         transformer_class=CrossRefPublicationTransformer,
         silver_schema=CROSSREF_PUBLICATION_SCHEMA,
@@ -352,7 +352,9 @@ pubchem_compound_factory = _factories["pubchem_compound"]
 uniprot_protein_factory = _factories["uniprot_protein"]
 uniprot_idmapping_factory = _factories["uniprot_idmapping"]
 pubmed_publications_factory = _factories["pubmed_publications"]
-crossref_publication_enrichment_factory = _factories["crossref_publication_enrichment"]
+crossref_publication_factory = _factories["crossref_publication"]
+# Backward compatibility alias (deprecated)
+crossref_publication_enrichment_factory = crossref_publication_factory
 openalex_publication_factory = _factories["openalex_publication"]
 semanticscholar_publication_factory = _factories["semanticscholar_publication"]
 
@@ -492,7 +494,8 @@ __all__ = [
     "chembl_protein_class_factory",
     "chembl_target_component_factory",
     "chembl_target_factory",
-    "crossref_publication_enrichment_factory",
+    "crossref_publication_enrichment_factory",  # Deprecated alias
+    "crossref_publication_factory",
     "get_factory",
     "is_registered",
     "list_available_pipelines",
