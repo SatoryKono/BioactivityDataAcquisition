@@ -10,6 +10,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from bioetl.domain.resilience import AdapterConfig
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
@@ -38,12 +39,14 @@ class TestChemblAdapter:
         assert adapter.effective_batch_size == 1000
 
     def test_adapter_with_custom_batch_size(self, mock_logger):
-        """Test ChEMBL adapter with custom batch size."""
+        """Test ChEMBL adapter with custom page size via adapter_config."""
         bucket = TokenBucket(rate=10.0, capacity=10)
         cb = CircuitBreaker(provider="chembl")
         http_client = UnifiedHTTPClient(bucket, cb)
         adapter = ChemblAdapter(
-            http_client=http_client, logger=mock_logger, batch_size=500
+            http_client=http_client,
+            logger=mock_logger,
+            adapter_config=AdapterConfig(page_size=500),
         )
 
         assert adapter.effective_batch_size == 500

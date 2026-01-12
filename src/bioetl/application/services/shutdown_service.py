@@ -89,14 +89,6 @@ class ShutdownService:
         return self._requested
 
     @property
-    def is_requested(self) -> bool:
-        """Backward-compatible alias for is_shutting_down().
-
-        Deprecated: Use is_shutting_down() instead.
-        """
-        return self._requested
-
-    @property
     def reason(self) -> ShutdownReason:
         """Get the reason for shutdown.
 

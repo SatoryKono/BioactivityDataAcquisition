@@ -56,11 +56,14 @@ class TestChemblAdapter:
         This test requires a VCR cassette.
         Record with: pytest --vcr-record=new_episodes -k test_fetch_activities
         """
+        from bioetl.domain.resilience import AdapterConfig
         from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 
         async with chembl_client:
             adapter = ChemblAdapter(
-                http_client=chembl_client, logger=mock_logger, batch_size=10
+                http_client=chembl_client,
+                logger=mock_logger,
+                adapter_config=AdapterConfig(page_size=10),
             )
 
             records = []
