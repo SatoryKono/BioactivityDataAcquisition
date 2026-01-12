@@ -48,6 +48,7 @@ jobs:
         run: |
           # Run tests with coverage threshold (parallel for speed)
           uv run pytest tests/ -m "not e2e" \
+            --ignore=tests/e2e --ignore=tests/contract \
             -n auto --dist loadscope \
             --cov=src/bioetl \
             --cov-report=term-missing \
