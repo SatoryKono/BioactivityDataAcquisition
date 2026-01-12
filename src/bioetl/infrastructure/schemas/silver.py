@@ -180,7 +180,7 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("issue", pa.string()),
         pa.field("pages", pa.string()),
         # Authors
-        pa.field("authors", pa.list_(pa.string())),
+        pa.field("authors", pa.string()),  # JSON-serialized list
         # Dates (ISO format strings)
         pa.field("pub_date", pa.string()),
         pa.field("year", pa.int64()),
@@ -635,7 +635,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         # Core fields
         pa.field("title", pa.string()),
         pa.field("abstract", pa.string()),
-        pa.field("authors", pa.list_(pa.string())),
+        pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("journal", pa.string()),
         pa.field("issn", pa.list_(pa.string())),
         pa.field("publisher", pa.string()),
@@ -676,7 +676,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("doi", pa.string()),
         pa.field("title", pa.string()),
         pa.field("abstract", pa.string()),
-        pa.field("authors", pa.list_(pa.string())),
+        pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("concepts", pa.list_(pa.string())),
         # Journal info
         pa.field("journal", pa.string()),
