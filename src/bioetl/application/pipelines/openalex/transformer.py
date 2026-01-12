@@ -29,12 +29,17 @@ from bioetl.application.pipelines.openalex.extractors import (
 )
 from bioetl.domain.entities.openalex import OPENALEX_TYPE_MAP, OpenAlexPublicationEntity
 from bioetl.domain.normalization import strip_html_tags
-from bioetl.domain.services import IdentityService
+from bioetl.domain.services import DataNormalizationService, IdentityService
 from bioetl.domain.validation import validate_year_range
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
+    from bioetl.domain.ports import (
+        DataNormalizationPort,
+        MetricsPort,
+        PiiHasherPort,
+        TracingPort,
+    )
     from bioetl.domain.types import BronzeRecord
 
 
@@ -71,6 +76,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
+        data_normalizer: DataNormalizationPort | None = None,
     ) -> None:
         """Initialize OpenAlex transformer.
 
@@ -82,6 +88,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md S5.4).
+            data_normalizer: Optional data normalization service for DOI normalization.
 
         """
         super().__init__(
@@ -93,6 +100,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             identity_service=identity_service,
             pii_hasher=pii_hasher,
         )
+        self._data_normalizer = data_normalizer or DataNormalizationService()
 
     # ========================================================================
     # Field Extraction Methods (Orchestration - delegates to extractors)
@@ -116,8 +124,10 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         # Extract OpenAlex ID from URL
         openalex_id = extract_openalex_id(rec.get("id"))
 
-        # Extract and normalize DOI
-        doi = extract_doi(rec.get("doi"))
+        # Extract bare DOI from URL, then normalize (lowercase, stripped)
+        # for cross-provider consistency
+        raw_doi = extract_doi(rec.get("doi"))
+        doi = self._data_normalizer.normalize_doi(raw_doi)
 
         # Reconstruct abstract from inverted index (then strip HTML for cleaning)
         abstract_index = rec.get("abstract_inverted_index")
