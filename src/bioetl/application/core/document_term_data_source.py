@@ -164,9 +164,7 @@ class DocumentTermDataSource:
         # 1. Not all documents have terms (mesh_terms/keywords may be empty)
         # 2. Each document yields variable number of terms (~2-5 on average)
         # Using multiplier ensures we fetch enough documents to satisfy term limit.
-        document_limit = (
-            limit * self.DOCUMENT_LIMIT_MULTIPLIER if limit else None
-        )
+        document_limit = limit * self.DOCUMENT_LIMIT_MULTIPLIER if limit else None
 
         async for document in self._data_source.fetch(
             entity_type=self.SOURCE_ENTITY_TYPE,
