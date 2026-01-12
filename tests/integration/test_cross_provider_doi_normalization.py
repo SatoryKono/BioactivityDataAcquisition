@@ -194,8 +194,12 @@ class TestCrossProviderDoiNormalization:
                 mock_context, make_record(lowercase_doi), 0
             )
 
-            assert result_upper is not None, f"{provider_name} uppercase transform failed"
-            assert result_lower is not None, f"{provider_name} lowercase transform failed"
+            assert result_upper is not None, (
+                f"{provider_name} uppercase transform failed"
+            )
+            assert result_lower is not None, (
+                f"{provider_name} lowercase transform failed"
+            )
 
             # Both should normalize to the same value
             assert result_upper["doi"] == expected_normalized, (
