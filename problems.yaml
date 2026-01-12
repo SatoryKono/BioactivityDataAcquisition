@@ -1,0 +1,18 @@
+- id: "TEST-001"
+  category: "TEST"
+  title: "Zero coverage in Domain Entity (OpenAlex)"
+  validation:
+    commit: "7e0a861e59d25462ab7fb70c88eb812fb5c37e50"
+    triangulation:
+      code: "src/bioetl/domain/entities/openalex.py exists (54 LOC)"
+      test: "pytest --cov shows 0% coverage"
+      docs: "RULES.md §4.2 requires >=85% line coverage"
+  impact:
+    severity: "Medium"
+    affected: ["src/bioetl/domain/entities/openalex.py"]
+  assessment:
+    complexity: 1
+    effort_days: 0.5
+  resolution:
+    approach: "Add unit tests for OpenAlex entity initialization and validation."
+    breaking_changes: false
