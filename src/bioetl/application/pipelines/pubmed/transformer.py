@@ -21,7 +21,6 @@ from bioetl.application.pipelines.pubmed.extractors import (
 )
 from bioetl.application.pipelines.pubmed.xml_utils import get_text
 from bioetl.domain.entities import Publication
-from bioetl.domain.normalization import strip_html_tags
 from bioetl.domain.services import DataNormalizationService, IdentityService
 
 if TYPE_CHECKING:
@@ -168,7 +167,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "pmid": pmid,
             "doi": normalized_doi,
             "title": get_text(article.find(".//ArticleTitle")),
-            "abstract": strip_html_tags(AbstractExtractor.extract_abstract(article)),
+            "abstract": self._data_normalizer.strip_html_tags(
+                AbstractExtractor.extract_abstract(article)
+            ),
             "authors": self.serialize_json_list(hashed_authors),
             **journal_data,
             **date_data,
