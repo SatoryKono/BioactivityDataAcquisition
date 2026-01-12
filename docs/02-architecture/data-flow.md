@@ -77,7 +77,7 @@ data/                              # Local-Only (current)
 │
 ├── silver/
 │   └── {provider}/{entity}/
-│       └── year={YYYY}/month={MM}/
+│       └── [{partition_cols}/]  # Optional, configured via `partition_by` in YAML
 │           └── _delta_log/
 │
 ├── gold/
@@ -91,6 +91,10 @@ data/                              # Local-Only (current)
 └── checkpoints/
     └── {pipeline_name}.json
 ```
+
+**Note**: Silver partitioning is **configurable** via `partition_by` field in pipeline YAML configs.
+Examples: `["year", "month"]`, `["assay_type"]`, `["organism"]`, or `[]` (no partitioning).
+See `configs/pipelines/{provider}/{entity}.yaml` for specific configurations.
 
 ---
 
