@@ -48,16 +48,13 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     CellLine,
     CellLineRecord,
     ChemblPublication,
-    Compound,  # Deprecated alias for PubchemMolecule (ADR-024)
     CompoundRecord,
-    Document,  # Deprecated alias for ChemblPublication (ADR-024)
     DocumentRecord,
     DocumentSimilarity,
     DocumentTerm,
     DocumentTermRecord,
     Molecule,
     MoleculeRecord,
-    Protein,  # Deprecated alias for UniprotTarget (ADR-024)
     ProteinClassification,
     PubChemCompoundRecord,
     PubchemMolecule,
@@ -299,13 +296,10 @@ __all__ = [
     "BioactivityState",
     "CellLine",
     "ChemblPublication",
-    "Compound",  # Deprecated alias for PubchemMolecule (ADR-024)
     "CompoundRecord",
-    "Document",  # Deprecated alias for ChemblPublication (ADR-024)
     "DocumentSimilarity",
     "DocumentTerm",
     "Molecule",
-    "Protein",  # Deprecated alias for UniprotTarget (ADR-024)
     "ProteinClassification",
     "PubchemMolecule",
     "Publication",
