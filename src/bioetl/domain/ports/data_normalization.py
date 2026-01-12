@@ -47,14 +47,22 @@ class DataNormalizationPort(Protocol):
     def normalize_doi(self, doi: str | None) -> str | None:
         """Normalize DOI identifier to lowercase, stripped format.
 
+        Handles DOIs in various formats:
+        - Bare DOI: "10.1038/nature12373"
+        - HTTPS URL: "https://doi.org/10.1038/nature12373"
+        - HTTP URL: "http://doi.org/10.1038/nature12373"
+        - doi: prefix: "doi:10.1038/nature12373"
+
         Args:
-            doi: DOI string to normalize.
+            doi: DOI string in any supported format.
 
         Returns:
-            Normalized DOI (lowercase, stripped) or None if input is None/empty.
+            Normalized bare DOI (lowercase, stripped) or None if input is None/empty.
 
         Example:
             >>> normalize_doi("10.1038/NATURE12373")
+            '10.1038/nature12373'
+            >>> normalize_doi("https://doi.org/10.1038/nature12373")
             '10.1038/nature12373'
             >>> normalize_doi("  10.1038/nature12373  ")
             '10.1038/nature12373'
