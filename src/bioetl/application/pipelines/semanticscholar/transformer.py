@@ -153,7 +153,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "title": rec.get("title"),
             "abstract": strip_html_tags(rec.get("abstract")),
             "tldr": tldr,
-            "authors": self.serialize_json(hashed_authors),
+            "authors": self.serialize_json_list(hashed_authors),
             "journal": journal_info.get("journal_name"),
             "volume": journal_info.get("volume"),
             "pages": journal_info.get("pages"),

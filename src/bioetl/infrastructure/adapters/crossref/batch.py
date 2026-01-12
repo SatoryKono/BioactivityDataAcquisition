@@ -121,11 +121,16 @@ class DoiBatchProcessor:
         if not dois:
             return
 
-        normalized_dois = [normalize_doi(d) or "" for d in dois]
-        filter_value = ",".join(normalized_dois)
+        normalized_dois = [normalize_doi(d) or "" for d in dois if normalize_doi(d)]
+        if not normalized_dois:
+            return
+
+        # CrossRef filter format: doi:value1,doi:value2,doi:value3
+        # Each DOI needs the "doi:" prefix
+        filter_value = ",".join(f"doi:{doi}" for doi in normalized_dois)
         url = f"{self._api_base}/works"
         params = {
-            "filter": f"doi:{filter_value}",
+            "filter": filter_value,
             "rows": str(len(normalized_dois)),
             "mailto": self._mailto,
         }
