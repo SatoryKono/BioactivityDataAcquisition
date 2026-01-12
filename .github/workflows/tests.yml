@@ -152,6 +152,7 @@ jobs:
         run: |
           # Final coverage verification: 85% threshold (RULES.md §4.2)
           uv run pytest tests/ -m "not e2e" \
+            --ignore=tests/e2e --ignore=tests/contract \
             -n auto --dist loadscope \
             --cov=src/bioetl \
             --cov-report=term-missing \

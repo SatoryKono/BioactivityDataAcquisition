@@ -29,6 +29,7 @@ from bioetl.application.pipelines.chembl.target_component_transformer import (
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
+from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
@@ -424,5 +425,150 @@ class TestUniProtProteinTransformerSnapshot:
     ) -> None:
         """Test UniProtProteinTransformer output matches snapshot."""
         result = await transformer.transform(mock_context, sample_record, index=0)
+        normalized = normalize_for_snapshot(result)
+        assert normalized == snapshot
+
+
+# Sample PubMed XML for snapshot tests
+PUBMED_MINIMAL_XML = """<?xml version="1.0"?>
+<PubmedArticle>
+  <MedlineCitation>
+    <PMID>12345678</PMID>
+    <Article>
+      <ArticleTitle>Test Article Title</ArticleTitle>
+    </Article>
+  </MedlineCitation>
+</PubmedArticle>
+"""
+
+PUBMED_FULL_XML = """<?xml version="1.0"?>
+<PubmedArticle>
+  <MedlineCitation>
+    <PMID>98765432</PMID>
+    <Article>
+      <Journal>
+        <ISSN IssnType="Print">1234-5678</ISSN>
+        <JournalIssue>
+          <Volume>42</Volume>
+          <Issue>3</Issue>
+          <PubDate>
+            <Year>2025</Year>
+            <Month>Mar</Month>
+            <Day>15</Day>
+          </PubDate>
+        </JournalIssue>
+        <Title>Journal of Test Science</Title>
+        <ISOAbbreviation>J Test Sci</ISOAbbreviation>
+      </Journal>
+      <ArticleTitle>A Comprehensive Study of Unit Testing</ArticleTitle>
+      <Pagination>
+        <MedlinePgn>123-145</MedlinePgn>
+      </Pagination>
+      <ELocationID EIdType="doi">10.1234/test.2025.001</ELocationID>
+      <Abstract>
+        <AbstractText>This is the abstract of the test article.</AbstractText>
+      </Abstract>
+      <AuthorList>
+        <Author>
+          <LastName>Smith</LastName>
+          <ForeName>John</ForeName>
+        </Author>
+        <Author>
+          <LastName>Doe</LastName>
+          <ForeName>Jane</ForeName>
+        </Author>
+      </AuthorList>
+      <Language>eng</Language>
+      <PublicationTypeList>
+        <PublicationType>Journal Article</PublicationType>
+        <PublicationType>Research Support</PublicationType>
+      </PublicationTypeList>
+      <ArticleDate DateType="Electronic">
+        <Year>2025</Year>
+        <Month>02</Month>
+        <Day>28</Day>
+      </ArticleDate>
+    </Article>
+    <MedlineJournalInfo>
+      <Country>United States</Country>
+    </MedlineJournalInfo>
+    <KeywordList>
+      <Keyword>unit testing</Keyword>
+      <Keyword>python</Keyword>
+    </KeywordList>
+    <MeshHeadingList>
+      <MeshHeading>
+        <DescriptorName>Software Testing</DescriptorName>
+      </MeshHeading>
+    </MeshHeadingList>
+  </MedlineCitation>
+  <PubmedData>
+    <History>
+      <PubMedPubDate PubStatus="received">
+        <Year>2024</Year>
+        <Month>12</Month>
+        <Day>01</Day>
+      </PubMedPubDate>
+      <PubMedPubDate PubStatus="accepted">
+        <Year>2025</Year>
+        <Month>01</Month>
+        <Day>15</Day>
+      </PubMedPubDate>
+      <PubMedPubDate PubStatus="revised">
+        <Year>2025</Year>
+        <Month>01</Month>
+        <Day>10</Day>
+      </PubMedPubDate>
+    </History>
+    <ArticleIdList>
+      <ArticleId IdType="pubmed">98765432</ArticleId>
+      <ArticleId IdType="pmc">PMC1234567</ArticleId>
+    </ArticleIdList>
+  </PubmedData>
+</PubmedArticle>
+"""
+
+
+@pytest.mark.unit
+class TestPubMedPublicationTransformerSnapshot:
+    """Snapshot tests for PubMedPublicationTransformer."""
+
+    @pytest.fixture
+    def transformer(self) -> PubMedPublicationTransformer:
+        return PubMedPublicationTransformer(provider="pubmed")
+
+    @pytest.fixture
+    def minimal_record(self) -> dict[str, Any]:
+        """Minimal valid PubMed record."""
+        return {"_raw_xml": PUBMED_MINIMAL_XML}
+
+    @pytest.fixture
+    def full_record(self) -> dict[str, Any]:
+        """Full PubMed record with all fields."""
+        return {"_raw_xml": PUBMED_FULL_XML}
+
+    @pytest.mark.asyncio
+    async def test_transform_minimal_snapshot(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+        minimal_record: dict[str, Any],
+        snapshot: Any,
+    ) -> None:
+        """Test PubMedPublicationTransformer minimal output matches snapshot."""
+        result = await transformer.transform(mock_context, minimal_record, index=0)
+        normalized = normalize_for_snapshot(result)
+        assert normalized == snapshot
+
+    @pytest.mark.asyncio
+    async def test_transform_full_snapshot(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+        full_record: dict[str, Any],
+        snapshot: Any,
+    ) -> None:
+        """Test PubMedPublicationTransformer full output matches snapshot."""
+        result = await transformer.transform(mock_context, full_record, index=0)
         normalized = normalize_for_snapshot(result)
         assert normalized == snapshot
