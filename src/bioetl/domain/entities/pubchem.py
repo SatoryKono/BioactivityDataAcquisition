@@ -119,4 +119,8 @@ class PubchemMolecule(BaseEntity):
             )
 
 
-__all__ = ["PubChemCompoundRecord", "PubchemMolecule"]
+# Backward compatibility alias (deprecated)
+# See ADR-024: Entity Naming Unification
+Compound = PubchemMolecule
+
+__all__ = ["Compound", "PubChemCompoundRecord", "PubchemMolecule"]
