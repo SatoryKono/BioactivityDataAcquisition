@@ -1,4 +1,4 @@
-Parameter Path,_defaults,chembl/activity,chembl/assay,chembl/assay_parameters,chembl/cell_line,chembl/compound_record,chembl/document,chembl/document_similarity,chembl/document_term,chembl/molecule,chembl/protein_class,chembl/target,chembl/target_component,crossref/publication_enrichment,openalex/publication,pubchem/compound,pubmed/publications,semanticscholar/publication,uniprot/idmapping,uniprot/protein
+Parameter Path,_defaults,chembl/activity,chembl/assay,chembl/assay_parameters,chembl/cell_line,chembl/compound_record,chembl/document,chembl/document_similarity,chembl/document_term,chembl/molecule,chembl/protein_class,chembl/target,chembl/target_component,crossref/publication,openalex/publication,pubchem/compound,pubmed/publications,semanticscholar/publication,uniprot/idmapping,uniprot/protein
 batch_size,—,—,—,—,—,—,—,—,—,—,500,—,1000,—,—,—,—,—,—,—
 checkpoint_interval,—,—,—,—,—,—,—,—,—,—,500,—,1000,—,—,—,—,—,—,—
 circuit_breaker,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—
@@ -10,7 +10,7 @@ gold_filters,—,(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),
 gold_table,—,—,—,—,—,—,—,—,—,—,chembl_protein_class,—,chembl_target_component,—,openalex_publication,pubchem_compound,pubmed_publication,semanticscholar_publication,uniprot_idmapping,uniprot_protein
 input_filter,(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict),(dict)
 maintenance,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-pipeline_name,—,chembl_activity,chembl_assay,chembl_assay_parameters,chembl_cell_line,chembl_compound_record,chembl_document,chembl_document_similarity,chembl_document_term,chembl_molecule,chembl_protein_class,chembl_target,chembl_target_component,crossref_publication_enrichment,openalex_publication,pubchem_compound,pubmed_publications,semanticscholar_publication,uniprot_idmapping,uniprot_protein
+pipeline_name,—,chembl_activity,chembl_assay,chembl_assay_parameters,chembl_cell_line,chembl_compound_record,chembl_document,chembl_document_similarity,chembl_document_term,chembl_molecule,chembl_protein_class,chembl_target,chembl_target_component,crossref_publication,openalex_publication,pubchem_compound,pubmed_publications,semanticscholar_publication,uniprot_idmapping,uniprot_protein
 primary_keys,—,"[""activity_id""]","[""assay_chembl_id""]","[""assay_param_id""]","[""cell_chembl_id""]","[""record_id""]","[""document_chembl_id""]","[""sim_id""]","[""entity_id""]","[""molecule_chembl_id""]","[""protein_class_id""]","[""target_chembl_id""]","[""component_id""]","[""doi""]","[""openalex_id""]","[""cid""]","[""pmid""]","[""paper_id""]","[""target_chembl_id""]","[""accession""]"
 provider,—,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,crossref,openalex,pubchem,pubmed,semanticscholar,uniprot,uniprot
 rate_limit,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—
