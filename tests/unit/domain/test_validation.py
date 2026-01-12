@@ -8,10 +8,13 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.validation import (
+    MAX_MOLECULAR_WEIGHT,
     MAX_PUBLICATION_YEAR,
+    MIN_MOLECULAR_WEIGHT,
     MIN_PUBLICATION_YEAR,
     validate_doi,
     validate_inchi_key,
+    validate_molecular_weight,
     validate_non_empty_string,
     validate_non_negative,
     validate_positive_int,
@@ -249,6 +252,117 @@ class TestValidateNonNegative:
     def test_invalid_non_negative(self, value) -> None:
         """Test invalid values return None."""
         assert validate_non_negative(value) is None
+
+
+class TestMolecularWeightConstants:
+    """Tests for molecular weight constants."""
+
+    def test_min_molecular_weight_value(self) -> None:
+        """Test MIN_MOLECULAR_WEIGHT is set to 0.0."""
+        assert MIN_MOLECULAR_WEIGHT == 0.0
+
+    def test_max_molecular_weight_value(self) -> None:
+        """Test MAX_MOLECULAR_WEIGHT is set to 100000.0."""
+        assert MAX_MOLECULAR_WEIGHT == 100000.0
+
+    def test_constants_are_valid_range(self) -> None:
+        """Test that min < max for valid range."""
+        assert MIN_MOLECULAR_WEIGHT < MAX_MOLECULAR_WEIGHT
+
+
+class TestValidateMolecularWeight:
+    """Tests for validate_molecular_weight function.
+
+    Validates molecular weight with:
+    - String to float conversion (PubChem API returns strings)
+    - Range validation: 0 < mw < 100000
+    - Precision: 10 decimals per RULES.md §2.8.1
+    """
+
+    @pytest.mark.parametrize(
+        "value,expected",
+        [
+            # Standard float values
+            (180.156, 180.156),
+            (342.3, 342.3),
+            (12.0, 12.0),
+            (99999.9, 99999.9),
+            # Integer values
+            (100, 100.0),
+            (500, 500.0),
+            # String values (PubChem API format)
+            ("180.156", 180.156),
+            ("342.30", 342.3),
+            ("100", 100.0),
+            # Edge cases near boundaries
+            (0.001, 0.001),  # Just above 0
+            (99999.999, 99999.999),  # Just below max
+        ],
+    )
+    def test_valid_molecular_weight(self, value, expected: float) -> None:
+        """Test valid molecular weights are converted and returned."""
+        assert validate_molecular_weight(value) == expected
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            # Zero and negative
+            0,
+            0.0,
+            -1,
+            -0.001,
+            -100.5,
+            # Too large (>= 100000)
+            100000,
+            100000.0,
+            100001,
+            150000.5,
+            # Invalid types
+            None,
+            "invalid",
+            "",
+            "abc",
+            # Edge cases
+            float("inf"),
+            float("-inf"),
+        ],
+    )
+    def test_invalid_molecular_weight(self, value) -> None:
+        """Test invalid values return None."""
+        assert validate_molecular_weight(value) is None
+
+    def test_nan_returns_none(self) -> None:
+        """Test NaN returns None (comparison with NaN is always False)."""
+        result = validate_molecular_weight(float("nan"))
+        assert result is None
+
+    def test_precision_10_decimals(self) -> None:
+        """Test molecular weight is rounded to 10 decimals per RULES.md §2.8.1."""
+        # Value with many decimals should be rounded
+        result = validate_molecular_weight(180.12345678901234567890)
+        assert result is not None
+        # Check precision is 10 decimals
+        assert result == round(180.12345678901234567890, 10)
+
+    def test_string_conversion_from_api(self) -> None:
+        """Test string values from PubChem API are properly converted."""
+        # PubChem may return molecular weight as string
+        assert validate_molecular_weight("180.156") == 180.156
+        assert validate_molecular_weight("  342.30  ") == 342.3  # Whitespace handled
+
+    def test_boundary_values(self) -> None:
+        """Test boundary values for molecular weight validation."""
+        # Just above 0 (valid)
+        assert validate_molecular_weight(0.0000000001) is not None
+
+        # At 0 (invalid - must be > 0)
+        assert validate_molecular_weight(0) is None
+
+        # Just below max (valid)
+        assert validate_molecular_weight(99999.9999999999) is not None
+
+        # At max (invalid - must be < 100000)
+        assert validate_molecular_weight(100000) is None
 
 
 class TestValidateNonEmptyString:
