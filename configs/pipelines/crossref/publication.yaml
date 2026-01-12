@@ -1,10 +1,10 @@
-# configs/pipelines/crossref/publication_enrichment.yaml
+# configs/pipelines/crossref/publication.yaml
 # Pipeline for enriching publication records with CrossRef metadata.
 # Resolves DOIs from Bronze (PubMed/ChEMBL docs) to enrich with citations.
 #
 # Inherits defaults from ../_defaults.yaml
 
-pipeline_name: crossref_publication_enrichment
+pipeline_name: crossref_publication
 provider: crossref
 entity_type: work
 version: "1.1.0"

@@ -370,9 +370,9 @@ CHEMBL_CELL_LINE_SCHEMA = pa.schema(
     ]
 )
 
-# Schema for ChEMBL Document
+# Schema for ChEMBL Publication (formerly Document)
 # See: https://www.ebi.ac.uk/chembl/api/data/document
-CHEMBL_DOCUMENT_SCHEMA = pa.schema(
+CHEMBL_PUBLICATION_SCHEMA = pa.schema(
     [
         # System fields
         pa.field("entity_id", pa.string()),

@@ -1,6 +1,6 @@
-# Пайплайн: CrossRef Publication Enrichment
+# Пайплайн: CrossRef Publication
 
-**Имя пайплайна:** `crossref_publication_enrichment`
+**Имя пайплайна:** `crossref_publication`
 **Провайдер:** `crossref`
 **Сущность:** `publication` (API-термин: `work`)
 **Версия схемы:** 1.0.0
@@ -146,16 +146,16 @@ input_filter:
 
 ```bash
 # Базовый запуск с файлом DOI
-bioetl run crossref_publication_enrichment
+bioetl run crossref_publication
 
 # С ограничением количества записей
-bioetl run crossref_publication_enrichment --limit 100
+bioetl run crossref_publication --limit 100
 
 # Проверка конфигурации без выполнения
-bioetl run crossref_publication_enrichment --dry-run
+bioetl run crossref_publication --dry-run
 
 # Полная перезагрузка
-bioetl run crossref_publication_enrichment --run-type rebuild
+bioetl run crossref_publication --run-type rebuild
 ```
 
 ### Подготовка входных данных
@@ -226,7 +226,7 @@ gold_filters:
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация пайплайна | `configs/pipelines/crossref/publication_enrichment.yaml` |
+| Конфигурация пайплайна | `configs/pipelines/crossref/publication.yaml` |
 | Конфигурация источника | `configs/sources/crossref.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/crossref/transformer.py` |
 | Адаптер | `src/bioetl/infrastructure/adapters/crossref/client.py` |
