@@ -398,7 +398,8 @@ class TestPubmedPublicationSchema:
 
     def test_has_list_fields(self):
         """Verify list fields exist and have correct types."""
-        list_fields = ["authors", "publication_types", "keywords", "mesh_terms"]
+        # authors is now JSON-serialized string (per commit fcf29f2)
+        list_fields = ["publication_types", "keywords", "mesh_terms"]
         for field_name in list_fields:
             assert field_name in PUBMED_PUBLICATION_SCHEMA.names
             field = PUBMED_PUBLICATION_SCHEMA.field(field_name)
@@ -406,6 +407,12 @@ class TestPubmedPublicationSchema:
                 f"{field_name} should be list, got {field.type}"
             )
             assert field.type.value_type == pa.string()
+
+    def test_authors_is_json_string(self):
+        """Verify authors field is JSON-serialized string."""
+        assert "authors" in PUBMED_PUBLICATION_SCHEMA.names
+        field = PUBMED_PUBLICATION_SCHEMA.field("authors")
+        assert field.type == pa.string(), f"authors should be string, got {field.type}"
 
     def test_year_is_int64(self):
         """Verify year is int64."""
