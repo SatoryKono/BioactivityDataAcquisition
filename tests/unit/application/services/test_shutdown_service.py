@@ -64,7 +64,6 @@ class TestShutdownService:
     def test_initial_state(self, shutdown_service: ShutdownService):
         """Test initial state is not shutting down."""
         assert shutdown_service.is_shutting_down() is False
-        assert shutdown_service.is_requested is False
         assert shutdown_service.reason == ShutdownReason.UNKNOWN
 
     @pytest.mark.asyncio
@@ -72,7 +71,6 @@ class TestShutdownService:
         """Test initiate_shutdown sets the shutdown flag."""
         await shutdown_service.initiate_shutdown("test reason")
         assert shutdown_service.is_shutting_down() is True
-        assert shutdown_service.is_requested is True
 
     @pytest.mark.asyncio
     async def test_initiate_shutdown_is_idempotent(

@@ -72,8 +72,6 @@ class ChemblAdapter(BaseHttpAdapter):
     http_client: UnifiedHTTPClient
     logger: LoggerPort
     adapter_config: AdapterConfig | None = None
-    batch_size: int | None = None  # DEPRECATED: use adapter_config.page_size
-    filter_batch_size: int | None = None  # DEPRECATED: use adapter_config.batch_size
     thread_pool: ThreadPoolExecutor | None = None
     metrics: MetricsPort | None = None
 
@@ -91,22 +89,12 @@ class ChemblAdapter(BaseHttpAdapter):
         """Initialize adapter with config values and metrics."""
         # Initialize error handler from base class
         self._error_handler = ErrorService(self.logger)
-        # Resolve configuration with clear priority
-        if self.adapter_config is not None:
-            # Primary: use AdapterConfig from YAML
-            self._page_size = self.adapter_config.page_size
-            self._filter_batch_size = self.adapter_config.batch_size
-        elif self.batch_size is not None or self.filter_batch_size is not None:
-            # Backward compatibility: use explicit parameters
-            self._page_size = self.batch_size if self.batch_size is not None else 1000
-            self._filter_batch_size = (
-                self.filter_batch_size if self.filter_batch_size is not None else 20
-            )
-        else:
-            # Fallback: use domain defaults from AdapterConfig
-            default_config = AdapterConfig()
-            self._page_size = default_config.page_size
-            self._filter_batch_size = default_config.batch_size
+        # Resolve configuration: use provided config or domain defaults
+        config = (
+            self.adapter_config if self.adapter_config is not None else AdapterConfig()
+        )
+        self._page_size = config.page_size
+        self._filter_batch_size = config.batch_size
 
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
