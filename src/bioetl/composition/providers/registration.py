@@ -5,13 +5,13 @@ Loads config from configs/sources/*.yaml. HttpConfig serves as fallback.
 
 from __future__ import annotations
 
-import logging
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.document_term_data_source import DocumentTermDataSource
 from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.application.core.idmapping_data_source import IDMappingDataSource
+from bioetl.composition.bootstrap_logger import BootstrapLogger
 from bioetl.composition.providers.provider_registry import (
     HttpConfig,
     ProviderConfig,
@@ -54,7 +54,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
     from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
-_logger = logging.getLogger(__name__)
+_logger = BootstrapLogger()
 
 
 def _get_factories() -> tuple[Any, Any]:
@@ -70,7 +70,7 @@ def _get_source_config(provider: str) -> SourceYamlConfig | None:
     try:
         return load_source_config(provider)
     except ValueError:
-        _logger.debug("Source config not found for %s, using defaults", provider)
+        _logger.debug("source_config_not_found", provider=provider, fallback="defaults")
         return None
 
 
@@ -124,10 +124,10 @@ def _get_adapter_config(provider: str, default_page_size: int = 1000) -> Adapter
 
     # Fallback to domain defaults
     _logger.warning(
-        "Source config not found for %s, using AdapterConfig defaults. "
-        "Create configs/sources/%s.yaml to configure adapter parameters.",
-        provider,
-        provider,
+        "source_config_missing",
+        provider=provider,
+        fallback="AdapterConfig defaults",
+        recommendation=f"Create configs/sources/{provider}.yaml to configure adapter parameters",
     )
     return AdapterConfig(page_size=default_page_size)
 
