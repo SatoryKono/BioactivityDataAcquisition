@@ -467,7 +467,8 @@ class SemanticScholarAdapter(BaseHttpAdapter):
     async def _probe_health(self) -> HealthStatus:
         """Probe Semantic Scholar API health.
 
-        Returns DEGRADED if response time exceeds 5 seconds.
+        Returns DEGRADED if response time exceeds 5 seconds or rate limited (429).
+        Without API key, 429 is expected and should not fail the pipeline.
 
         Returns:
             HealthStatus indicating API availability.
@@ -488,6 +489,15 @@ class SemanticScholarAdapter(BaseHttpAdapter):
                 )
             elapsed = time.monotonic() - start_time
 
+            # Rate limited (429) - return DEGRADED instead of UNHEALTHY
+            # Without API key, rate limiting is expected behavior
+            if response.status_code == 429:
+                self.logger.warning(
+                    "semanticscholar_health_check_rate_limited",
+                    message="Rate limited (429). Consider using API key for stable access.",
+                )
+                return HealthStatus.DEGRADED
+
             if response.status_code != 200:
                 self.logger.warning(
                     "semanticscholar_health_check_failed",
@@ -506,6 +516,14 @@ class SemanticScholarAdapter(BaseHttpAdapter):
             return HealthStatus.HEALTHY
 
         except Exception as e:
+            # Check if it's a 429 error from httpx
+            error_str = str(e)
+            if "429" in error_str:
+                self.logger.warning(
+                    "semanticscholar_health_check_rate_limited",
+                    message="Rate limited (429). Consider using API key.",
+                )
+                return HealthStatus.DEGRADED
             self.logger.warning(
                 "semanticscholar_health_check_failed",
                 error=str(e),

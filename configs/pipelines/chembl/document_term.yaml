@@ -43,10 +43,13 @@ sink:
       path: "data/output/csv/gold"
 
 # Entity-specific input filter (optional)
+# NOTE: Disabled because DocumentTermDataSource (derived entity wrapper)
+# does not implement FilterableDataSourcePort. Filtering is handled
+# by the --limit parameter which limits the number of terms extracted.
 input_filter:
-  enabled: true
+  enabled: false
   # When enabled, can filter by document_chembl_id
-  source_path: "data/input/documents.csv"
+  source_path: "data/input/publication.csv"
   column_name: "document_chembl_id"
   filter_field: "document_chembl_id"
   batch_size: 20
