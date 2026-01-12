@@ -21,6 +21,35 @@ try:
 except ImportError:
     VCR_AVAILABLE = False
 
+# Query parameters to ignore when matching VCR requests
+# These parameters vary between test runs but don't affect the response content
+_VCR_IGNORED_QUERY_PARAMS = {"email", "api_key", "apikey"}
+
+
+def _parse_query_params(uri: str) -> dict[str, list[str]]:
+    """Parse query parameters from URI, returning sorted dict."""
+    from urllib.parse import parse_qs, urlparse
+
+    parsed = urlparse(uri)
+    return parse_qs(parsed.query)
+
+
+def _query_matcher_ignoring_params(r1: "Request", r2: "Request") -> bool:
+    """Custom VCR query matcher that ignores certain parameters.
+
+    Ignores email, api_key parameters which vary between test runs
+    but don't affect the API response content.
+    """
+    params1 = _parse_query_params(r1.uri)
+    params2 = _parse_query_params(r2.uri)
+
+    # Remove ignored parameters from comparison
+    for param in _VCR_IGNORED_QUERY_PARAMS:
+        params1.pop(param, None)
+        params2.pop(param, None)
+
+    return params1 == params2
+
 
 def _is_plugin_available(module_name: str) -> bool:
     return importlib.util.find_spec(module_name) is not None
@@ -304,7 +333,16 @@ def vcr_config(project_root: Path) -> dict[str, Any]:
         # CI mode: fail if cassette is missing
         # Override with VCR_RECORD_MODE=new_episodes for local recording
         "record_mode": record_mode,
-        "match_on": ["method", "scheme", "host", "port", "path", "query"],
+        # Custom query matcher ignores email/api_key parameters
+        # which vary between test runs but don't affect API responses
+        "match_on": [
+            "method",
+            "scheme",
+            "host",
+            "port",
+            "path",
+            _query_matcher_ignoring_params,
+        ],
         "before_record_request": _sanitize_request,
         "before_record_response": _sanitize_response,
         "filter_headers": [
