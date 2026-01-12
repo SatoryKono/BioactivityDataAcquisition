@@ -1170,7 +1170,7 @@ class TestSilverWriterWriteModePolicy:
 
         with (
             patch(
-                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
                 side_effect=DeltaTableNotFoundError("Not found"),
             ),
             patch(
@@ -1214,7 +1214,7 @@ class TestSilverWriterWriteModePolicy:
 
         with (
             patch(
-                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
                 side_effect=DeltaTableNotFoundError("Not found"),
             ),
             patch(
