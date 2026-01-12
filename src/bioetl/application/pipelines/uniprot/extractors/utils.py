@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import json
+import orjson
 from typing import Any, ClassVar
 
 
@@ -30,7 +30,7 @@ class ExtractorUtils:
         """
         if not value or not isinstance(value, list):
             return None
-        return json.dumps(value, ensure_ascii=False)
+        return orjson.dumps(value).decode("utf-8")
 
     @staticmethod
     def count_list(value: Any) -> int | None:
@@ -92,7 +92,7 @@ class ExtractorUtils:
             return None
         values = [sn.get("value") for sn in short_names if isinstance(sn, dict)]
         values = [v for v in values if v]
-        return json.dumps(values, ensure_ascii=False) if values else None
+        return orjson.dumps(values).decode("utf-8") if values else None
 
     @staticmethod
     def extract_alternative_names(protein_desc: Any) -> str | None:
@@ -119,7 +119,7 @@ class ExtractorUtils:
                 name = full_name.get("value")
                 if name:
                     values.append(name)
-        return json.dumps(values, ensure_ascii=False) if values else None
+        return orjson.dumps(values).decode("utf-8") if values else None
 
     @staticmethod
     def extract_ec_numbers(recommended_name: dict[str, Any] | None) -> str | None:
@@ -138,4 +138,4 @@ class ExtractorUtils:
             return None
         values = [ec.get("value") for ec in ec_numbers if isinstance(ec, dict)]
         values = [v for v in values if v]
-        return json.dumps(values, ensure_ascii=False) if values else None
+        return orjson.dumps(values).decode("utf-8") if values else None
