@@ -16,9 +16,9 @@ SRP Compliance:
 
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING
 
+from bioetl.composition.bootstrap_logger import BootstrapLogger
 from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded
 from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
 
-_logger = logging.getLogger(__name__)
+_logger = BootstrapLogger()
 
 
 class HttpClientFactory:
@@ -120,8 +120,9 @@ class HttpClientFactory:
             source_config = load_source_config(provider)
         except ValueError:
             _logger.debug(
-                "Source config not found for %s, using ProviderRegistry defaults",
-                provider,
+                "source_config_not_found",
+                provider=provider,
+                fallback="ProviderRegistry defaults",
             )
 
         # Get rate limit, circuit breaker, and client settings

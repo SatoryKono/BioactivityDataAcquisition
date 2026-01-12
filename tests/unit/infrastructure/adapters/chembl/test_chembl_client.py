@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.domain.exceptions import CriticalError, ExternalServiceError, RateLimitError
+from bioetl.domain.resilience import AdapterConfig
 from bioetl.domain.types import CircuitBreakerState, ErrorType, HealthStatus
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 
@@ -320,7 +321,7 @@ class TestChemblAdapterHealthAwareBatchSize:
         adapter = ChemblAdapter(
             http_client=mock_http_client,
             logger=mock_logger,
-            batch_size=1000,
+            adapter_config=AdapterConfig(page_size=1000),
         )
 
         effective = adapter._get_effective_batch_size()
@@ -339,7 +340,7 @@ class TestChemblAdapterHealthAwareBatchSize:
         adapter = ChemblAdapter(
             http_client=mock_http_client,
             logger=mock_logger,
-            batch_size=1000,
+            adapter_config=AdapterConfig(page_size=1000),
         )
 
         effective = adapter._get_effective_batch_size()
@@ -366,7 +367,9 @@ class TestChemblAdapterHealthAwareBatchSize:
         adapter = ChemblAdapter(
             http_client=mock_http_client,
             logger=mock_logger,
-            batch_size=150,  # Half would be 75, below minimum
+            adapter_config=AdapterConfig(
+                page_size=150
+            ),  # Half would be 75, below minimum
         )
 
         effective = adapter._get_effective_batch_size()
@@ -385,7 +388,7 @@ class TestChemblAdapterHealthAwareBatchSize:
         adapter = ChemblAdapter(
             http_client=mock_http_client,
             logger=mock_logger,
-            batch_size=1000,
+            adapter_config=AdapterConfig(page_size=1000),
         )
 
         with pytest.raises(CriticalError) as exc_info:
@@ -408,7 +411,7 @@ class TestChemblAdapterHealthAwareBatchSize:
         adapter = ChemblAdapter(
             http_client=mock_http_client,
             logger=mock_logger,
-            batch_size=1000,
+            adapter_config=AdapterConfig(page_size=1000),
         )
 
         # Healthy
@@ -442,7 +445,7 @@ class TestChemblAdapterHealthTransitions:
         adapter = ChemblAdapter(
             http_client=mock_http_client,
             logger=mock_logger,
-            batch_size=1000,
+            adapter_config=AdapterConfig(page_size=1000),
         )
 
         # Trigger effective batch size calculation

@@ -45,7 +45,7 @@
 ### 2.1. Формат и Технологии
 *   **Формат**: Delta Lake (Parquet + Transaction Log).
 *   **Engine**: `delta-rs` (через библиотеку `deltalake` Python binding).
-*   **Путь**: `silver/{provider}/{entity}/`.
+*   **Путь**: `silver/{provider}/{entity}/[{partition_cols}/]` — партиционирование опционально, настраивается через `partition_by` в YAML конфиге пайплайна.
 *   **Протокол**: Writer Version 2 (поддержка Column Mapping), Reader Version 1.
 
 ### 2.2. Схема и Валидация
@@ -88,7 +88,9 @@ Silver слой использует стратегию **Merge/Upsert** для 
 *   Соль управляется через Secrets Manager и ротируется (см. `RULES.md` §5.4.1).
 
 ### 2.6. Партиционирование
-*   Стандарт: По дате источника (например, `year`, `month`) или по типу данных, если кардинальность низкая.
+*   **Конфигурация**: Определяется через `partition_by` в `configs/pipelines/{provider}/{entity}.yaml`.
+*   **Примеры**: `["year", "month"]` (по дате), `["assay_type"]` (по типу сущности), `[]` (без партиционирования).
+*   **Стандарт**: По дате источника или по типу данных, если кардинальность низкая.
 *   **Z-ORDER**: Не применяется в Silver (обычно сортировка по ingestion time), так как основная цель — write throughput.
 
 ---
