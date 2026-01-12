@@ -1,6 +1,101 @@
 doi,title
-10.1038/nature12373,Crystal structure of a human GABAA receptor
-10.1126/science.1259855,Structural basis of the allosteric behaviour of phosphofructokinase
-10.1016/j.cell.2015.06.034,FOXG1-Dependent Dysregulation of GABA/Glutamate Neuron Differentiation in Autism Spectrum Disorders
-10.1021/acs.jmedchem.5b01460,Discovery of Potent and Selective Inhibitors of Human Reticulocyte
-10.1038/s41586-020-2649-2,Highly accurate protein structure prediction with AlphaFold
+10.1016/j.bmcl.2015.05.094,Pharmacological profile of zacopride and new quaternarized fluorobenzamide analogues on mammalian α7 nicotinic acetylcholine receptor.
+10.1016/j.bmc.2015.07.029,"Synthesis, biological evaluation and molecular modeling of new tetrahydroacridine derivatives as potential multifunctional agents for the treatment of Alzheimer's disease."
+10.1016/j.bmc.2015.07.057,"Synthesis and biological evaluation of (3',5'-dichloro-2,6-dihydroxy-biphenyl-4-yl)-aryl/alkyl-methanone selective CB2 inverse agonist."
+10.1021/acs.jmedchem.5b00904,"Chemistry and Pharmacology of a Series of Unichiral Analogues of 2-(2-Pyrrolidinyl)-1,4-benzodioxane, Prolinol Phenyl Ether, and Prolinol 3-Pyridyl Ether Designed as α4β2-Nicotinic Acetylcholine Receptor Agonists."
+10.1016/j.bmcl.2015.05.004,3-Substituted pyrazoles and 4-substituted triazoles as inhibitors of human 15-lipoxygenase-1.
+10.1016/j.bmc.2015.07.058,"Galantamine derivatives with indole moiety: Docking, design, synthesis and acetylcholinesterase inhibitory activity."
+10.1021/acs.jmedchem.5b00958,Evaluation of Homobivalent Carbolines as Designed Multiple Ligands for the Treatment of Neurodegenerative Disorders.
+10.1016/j.bmcl.2015.06.057,"Structure activity relationship of pyridoxazinone substituted RHS analogs of oxabicyclooctane-linked 1,5-naphthyridinyl novel bacterial topoisomerase inhibitors as broad-spectrum antibacterial agents (Part-6)."
+10.1016/j.bmcl.2015.06.061,"Structure activity relationship of C-2 ether substituted 1,5-naphthyridine analogs of oxabicyclooctane-linked novel bacterial topoisomerase inhibitors as broad-spectrum antibacterial agents (Part-5)."
+10.1016/j.bmcl.2015.06.056,"Discovery, design, and synthesis of indole-based EZH2 inhibitors."
+10.1016/j.bmc.2015.07.068,Discovery of N-(4-aryl-5-aryloxy-thiazol-2-yl)-amides as potent RORγt inverse agonists.
+10.1016/j.bmcl.2015.06.077,"Discovery of a novel tricyclic 4H-thiazolo[5',4':4,5]pyrano[2,3-c]pyridine-2-amino scaffold and its application in a PI3Kα inhibitor with high PI3K isoform selectivity and potent cellular activity."
+10.1016/j.bmc.2015.07.059,Tight binding enantiomers of pre-clinical drug candidates.
+10.1016/j.bmc.2015.07.052,Phosphate-modified analogues of m(7)GTP and m(7)Gppppm(7)G-Synthesis and biochemical properties.
+10.1021/acs.jmedchem.5b01082,Targeting Drug Resistance in EGFR with Covalent Inhibitors: A Structure-Based Design Approach.
+10.1016/j.bmcl.2015.07.026,Discovery of new acetylcholinesterase inhibitors with small core structures through shape-based virtual screening.
+10.1021/acs.jmedchem.5b00261,Chemical Biology of Leucine-Rich Repeat Kinase 2 (LRRK2) Inhibitors.
+10.1016/j.bmc.2015.05.043,"Discovery of thieno[3,2-c]pyridin-4-amines as novel Bruton's tyrosine kinase (BTK) inhibitors."
+10.1021/acs.jmedchem.5b00902,"Discovery and Optimization of 4-(8-(3-Fluorophenyl)-1,7-naphthyridin-6-yl)transcyclohexanecarboxylic Acid, an Improved PDE4 Inhibitor for the Treatment of Chronic Obstructive Pulmonary Disease (COPD)."
+10.1021/acs.jmedchem.5b00684,Inhibition of Cancer-Associated Mutant Isocitrate Dehydrogenases by 2-Thiohydantoin Compounds.
+10.1021/acs.jmedchem.5b00746,Development of N-(Functionalized benzoyl)-homocycloleucyl-glycinonitriles as Potent Cathepsin K Inhibitors.
+10.1016/j.bmcl.2015.06.004,"Novel methyl substituted 1-(5,6-dihydro-[1,2,4]triazolo[4,3-a]pyrazin-7(8H)-yl)methanones are P2X7 antagonists."
+10.1021/acs.jmedchem.5b00892,Fragment and Structure-Based Drug Discovery for a Class C GPCR: Discovery of the mGlu5 Negative Allosteric Modulator HTL14242 (3-Chloro-5-[6-(5-fluoropyridin-2-yl)pyrimidin-4-yl]benzonitrile).
+10.1016/j.bmcl.2015.05.100,Cyclin dependent kinase (CDK) inhibitors as anticancer drugs.
+10.1016/j.bmcl.2015.06.049,Discovery of a 6-(pyridin-3-yl)benzo[d]thiazole template for optimization of hedgehog and PI3K/AKT/mTOR dual inhibitors.
+10.1016/j.bmcl.2015.06.021,Discovery of 2-arylamino-4-(1-methyl-3-isopropylsulfonyl-4-pyrazol-amino)pyrimidines as potent anaplastic lymphoma kinase (ALK) inhibitors.
+10.1016/j.bmc.2015.07.034,Discovery and structure of a new inhibitor scaffold of the autophagy initiating kinase ULK1.
+10.1021/jm501690r,New Frontiers in Selective Human MAO-B Inhibitors.
+10.1021/acs.jmedchem.5b00450,Discovery of Potent and Selective RSK Inhibitors as Biological Probes.
+10.1016/j.bmcl.2015.06.046,Biarylsulfonamide CCR9 inhibitors for inflammatory bowel disease.
+10.1016/j.bmc.2015.07.066,"Exploring new Probenecid-based carbonic anhydrase inhibitors: Synthesis, biological evaluation and docking studies."
+10.1021/acs.jmedchem.5b00545,Potent and Selective Inhibitors of Histone Deacetylase-3 Containing Chiral Oxazoline Capping Groups and a N-(2-Aminophenyl)-benzamide Binding Unit.
+10.1016/j.bmcl.2015.06.079,Sulfonamide inhibition studies of the γ-carbonic anhydrase from the Antarctic bacterium Pseudoalteromonas haloplanktis.
+10.1016/j.bmc.2015.07.072,Synthesis and evaluation of arylpiperazine-reverse amides as biased dopamine D3 receptor ligands.
+10.1016/j.bmc.2015.07.020,Imine/amide-imidazole conjugates derived from 5-amino-4-cyano-N1-substituted benzyl imidazole: Microwave-assisted synthesis and anticancer activity via selective topoisomerase-II-α inhibition.
+10.1021/acs.jmedchem.5b00867,Discovery of Potent 17β-Hydroxywithanolides for Castration-Resistant Prostate Cancer by High-Throughput Screening of a Natural Products Library for Androgen-Induced Gene Expression Inhibitors.
+10.1021/acs.jmedchem.5b00992,"Discovery of 4-Amino-8-quinoline Carboxamides as Novel, Submicromolar Inhibitors of NAD-Hydrolyzing Enzyme CD38."
+10.1016/j.bmc.2015.05.045,"Discovery of novel, non-acidic mPGES-1 inhibitors by virtual screening with a multistep protocol."
+10.1021/acs.jmedchem.5b00736,Indole Glucocorticoid Receptor Antagonists Active in a Model of Dyslipidemia Act via a Unique Association with an Agonist Binding Site.
+10.1016/j.bmcl.2015.07.017,Benzylated and prenylated flavonoids from the root barks of Cudrania tricuspidata with pancreatic lipase inhibitory activity.
+10.1016/j.ejmech.2015.06.020,"Synthesis, characterization, evaluation and molecular dynamics studies of 5, 6-diphenyl-1,2,4-triazin-3(2H)-one derivatives bearing 5-substituted 1,3,4-oxadiazole as potential anti-inflammatory and analgesic agents."
+10.1016/j.bmcl.2015.07.066,"Design, synthesis, and in vivo activity of novel inhibitors of delta-5 desaturase for the treatment of metabolic syndrome."
+10.1021/acsmedchemlett.5b00231,Inhibitors of the Epidermal Growth Factor Receptor (EGFR) May Provide Effective Treatment for Lung Adenocarcinoma.
+10.1021/acsmedchemlett.5b00117,Optimization of Novel Antagonists to the Neurokinin-3 Receptor for the Treatment of Sex-Hormone Disorders (Part II).
+10.1016/j.bmcl.2015.07.038,Discovery of novel bridged tetrahydronaphthalene derivatives as potent T/L-type calcium channel blockers.
+10.1021/acsmedchemlett.5b00102,Optimization of a Dibenzodiazepine Hit to a Potent and Selective Allosteric PAK1 Inhibitor.
+10.1016/j.bmcl.2015.07.080,"Design, synthesis and RON receptor tyrosine kinase inhibitory activity of new head groups analogs of LCRF-0004."
+10.1016/j.bmc.2015.06.016,"Pyrroloaryls and pyrroloheteroaryls: Inhibitors of the HIV fusion/attachment, reverse transcriptase and integrase."
+10.1016/j.bmcl.2015.07.005,"Novel inhibitor against Malassezia globosa LIP1 (SMG1), a potential anti-dandruff target."
+10.1016/j.bmcl.2015.06.078,"Identification and optimisation of a 4',5-bisthiazole series of selective phosphatidylinositol-3 kinase alpha inhibitors."
+10.1016/j.bmcl.2015.07.091,Tetrahydropyrrolo-diazepenones as inhibitors of ERK2 kinase.
+10.1021/ml500531p,Left-Hand Side Exploration of Novel Bacterial Topoisomerase Inhibitors to Improve Selectivity against hERG Binding.
+10.1016/j.bmcl.2015.07.090,Boronic acid-containing aminopyridine- and aminopyrimidinecarboxamide CXCR1/2 antagonists: Optimization of aqueous solubility and oral bioavailability.
+10.1016/j.bmcl.2015.07.046,Indolylpiperidine derivatives as potent and selective α1B adrenoceptor antagonists.
+10.1021/acsmedchemlett.5b00143,Fragment-Based Discovery of Potent and Selective DDR1/2 Inhibitors.
+10.1016/j.ejmech.2015.06.022,"Probing the 'bipolar' nature of the carbonic anhydrase active site: aromatic sulfonamides containing 1,3-oxazol-5-yl moiety as picomolar inhibitors of cytosolic CA I and CA II isoforms."
+10.1016/j.bmcl.2015.07.003,Discovery of novel triazolobenzazepinones as γ-secretase modulators with central Aβ42 lowering in rodents and rhesus monkeys.
+10.1021/acsmedchemlett.5b00084,BRD4 Structure-Activity Relationships of Dual PLK1 Kinase/BRD4 Bromodomain Inhibitor BI-2536.
+10.1016/j.bmcl.2015.07.039,"Strongylophorines, new protein tyrosine phosphatase 1B inhibitors, from the marine sponge Strongylophora strongilata collected at Iriomote Island."
+10.1016/j.bmcl.2015.07.004,"Synthesis and evaluation of novel 2,4-diaminopyrimidines bearing bicyclic aminobenzazepines for anaplastic lymphoma kinase (ALK) inhibitor."
+10.1021/acsmedchemlett.5b00175,Carbonic Anhydrase Glycoinhibitors belonging to the Aminoxysulfonamide Series.
+10.1016/j.bmcl.2015.06.067,"Identification and optimisation of 4,5-dihydrobenzo[1,2-d:3,4-d]bisthiazole and 4,5-dihydrothiazolo[4,5-h]quinazoline series of selective phosphatidylinositol-3 kinase alpha inhibitors."
+10.1021/acsmedchemlett.5b00122,"Discovery of Biaryl Amides as Potent, Orally Bioavailable, and CNS Penetrant RORγt Inhibitors."
+10.1016/j.bmcl.2015.06.034,Design and synthesis of constrained analogs of LCRF-0004 as potent RON tyrosine kinase inhibitors.
+10.1021/acsmedchemlett.5b00036,Pyrazolo-Piperidines Exhibit Dual Inhibition of CCR5/CXCR4 HIV Entry and Reverse Transcriptase.
+10.1016/j.bmcl.2015.07.012,C4 phenyl aporphines with selective h5-HT(2B) receptor affinity.
+10.1021/acs.jmedchem.5b00812,Fragment Binding Can Be Either More Enthalpy-Driven or Entropy-Driven: Crystal Structures and Residual Hydration Patterns Suggest Why.
+10.1016/j.ejmech.2015.06.001,Synthesis and biological evaluation of novel myrtucommulones and structural analogues that target mPGES-1 and 5-lipoxygenase.
+10.1016/j.bmcl.2015.07.060,"Synthesis of sulfonamides incorporating piperazinyl-ureido moieties and their carbonic anhydrase I, II, IX and XII inhibitory activity."
+10.1016/j.ejmech.2015.06.028,Identification of N-acylhydrazone derivatives as novel lactate dehydrogenase A inhibitors.
+10.1016/j.bmcl.2015.07.030,Discovery of novel potent and selective ligands for 5-HT2A receptor with quinazoline scaffold.
+10.1016/j.ejmech.2015.07.030,Molecular design and synthesis of certain new quinoline derivatives having potential anticancer activity.
+10.1016/j.bmc.2015.08.024,"Multifunctional novel Diallyl disulfide (DADS) derivatives with β-amyloid-reducing, cholinergic, antioxidant and metal chelating properties for the treatment of Alzheimer's disease."
+10.1016/j.bmc.2015.07.071,Discovery of 5-substituted tetrahydronaphthalen-2yl-methyl with N-phenyl-N-(piperidin-4-yl)propionamide derivatives as potent opioid receptor ligands.
+10.1016/j.ejmech.2015.06.057,"Synthesis, pharmacological evaluation and docking studies of pyrrole structure-based CB2 receptor antagonists."
+10.1016/j.bmc.2015.08.039,"Synthesis and biological evaluation of novel 7-substituted 3-(4-phenoxyphenyl)thieno[3,2-c]pyridin-4-amines as potent Bruton's tyrosine kinase (BTK) inhibitors."
+10.1016/j.bmcl.2015.07.009,"Design, synthesis and biological characterization of selective LIMK inhibitors."
+10.1016/j.bmc.2015.08.022,Design and synthesis of 4-benzylpiperidine carboxamides as dual serotonin and norepinephrine reuptake inhibitors.
+10.1021/acs.jmedchem.5b00931,Identification of Purines and 7-Deazapurines as Potent and Selective Type I Inhibitors of Troponin I-Interacting Kinase (TNNI3K).
+10.1021/acs.jmedchem.5b00975,Rational Design of Orthogonal Multipolar Interactions with Fluorine in Protein-Ligand Complexes.
+10.1016/j.ejmech.2015.07.008,"Design, synthesis and biological activities of novel oxazolo[4,5-g]quinazolin-2(1H)-one derivatives as EGFR inhibitors."
+10.1016/j.ejmech.2015.06.029,"4-Fluoro-3',4',5'-trimethoxychalcone as a new anti-invasive agent. From discovery to initial validation in an in vivo metastasis model."
+10.1016/j.bmc.2015.08.002,Design and discovery of 2-(4-(1H-tetrazol-5-yl)-1H-pyrazol-1-yl)-4-(4-phenyl)thiazole derivatives as cardiotonic agents via inhibition of PDE3.
+10.1016/j.bmc.2015.08.042,Novel inhibitors targeting PPM1D phosphatase potently suppress cancer cell proliferation.
+10.1016/j.bmc.2015.08.036,"Synthesis of new opioid derivatives with a propellane skeleton and their pharmacologies: Part 5, novel pentacyclic propellane derivatives with a 6-amide side chain."
+10.1016/j.bmcl.2015.06.098,Identification of orally-bioavailable antagonists of the TRPV4 ion-channel.
+10.1016/j.bmc.2015.07.047,Cyclodextrin complexation highly enhances efficacy of arylsulfonylureido benzenesulfonamide carbonic anhydrase inhibitors as a topical antiglaucoma agents.
+10.1016/j.bmc.2015.07.050,"1,4-Disubstituted aromatic piperazines with high 5-HT2A/D2 selectivity: Quantitative structure-selectivity investigations, docking, synthesis and biological evaluation."
+10.1021/acsmedchemlett.5b00150,Rigidified A3 Adenosine Receptor Agonists: 1-Deazaadenine Modification Maintains High in Vivo Efficacy.
+10.1021/ml500440u,Discovery of a Potent and Selective ROMK Inhibitor with Pharmacokinetic Properties Suitable for Preclinical Evaluation.
+10.1016/j.bmc.2015.08.030,"Revisiting 1,3,4-Oxadiazol-2-ones: Utilization in the Development of ABHD6 Inhibitors."
+10.1021/acs.jmedchem.5b00482,"6-Hydroxy-1,2,4-triazine-3,5(2H,4H)-dione Derivatives as Novel D-Amino Acid Oxidase Inhibitors."
+10.1016/j.ejmech.2015.06.025,"Design, synthesis, pharmacological evaluation and molecular dynamics of β-amino acids morphan-derivatives as novel ligands for opioid receptors."
+10.1016/j.ejmech.2015.07.011,"Design, synthesis and evaluation of semi-synthetic triazole-containing caffeic acid analogues as 5-lipoxygenase inhibitors."
+10.1016/j.bmc.2015.08.010,"Synthesis, antiangiogenesis evaluation and molecular docking studies of 1-aryl-3-[(thieno[3,2-b]pyridin-7-ylthio)phenyl]ureas: Discovery of a new substitution pattern for type II VEGFR-2 Tyr kinase inhibitors."
+10.1016/j.ejmech.2015.06.012,"Synthesis of 3,4-diaminobenzoyl derivatives as factor Xa inhibitors."
+10.1016/j.ejmech.2015.06.051,Synthesis of bicoumarin thiophosphate derivatives as steroid sulfatase inhibitors.
+10.1021/acs.jmedchem.5b01008,Discovery of Selective Small Molecule Inhibitors of Monoacylglycerol Acyltransferase 3.
+10.1021/acs.jmedchem.5b01228,Phosphate Chemical Probes Designed for Location Specific Inhibition of Intracellular Carbonic Anhydrases.
+10.1016/j.ejmech.2015.07.049,"Carbonic anhydrase inhibitors: Design, synthesis and structural characterization of new heteroaryl-N-carbonylbenzenesulfonamides targeting druggable human carbonic anhydrase isoforms."
