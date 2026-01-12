@@ -28,9 +28,7 @@ def test_registry_completeness():
 
     # Pipelines that have configs but are not yet fully integrated
     # These are new providers in development that will be registered later
-    pipelines_in_development = {
-        "crossref_publication_enrichment",  # CrossRef provider (DOI enrichment)
-    }
+    pipelines_in_development: set[str] = set()  # All pipelines are now fully integrated
 
     # Walk through the config directory
     found_configs = []
