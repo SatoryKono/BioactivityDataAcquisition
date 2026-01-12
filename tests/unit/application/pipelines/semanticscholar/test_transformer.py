@@ -338,3 +338,83 @@ class TestTransformerWithPiiHasher:
         # Authors should contain hashed values
         assert "hash1" in result["authors"]
         assert "hash2" in result["authors"]
+
+
+class TestSemanticScholarDoiNormalization:
+    """Tests for DOI normalization in Semantic Scholar transformer."""
+
+    @pytest.fixture
+    def transformer(self) -> SemanticScholarPublicationTransformer:
+        """Create a transformer instance."""
+        return SemanticScholarPublicationTransformer()
+
+    @staticmethod
+    def _make_record_with_doi(doi: str | None) -> dict[str, Any]:
+        """Create a Semantic Scholar record with a specific DOI."""
+        external_ids = {"CorpusId": 123456}
+        if doi is not None:
+            external_ids["DOI"] = doi
+        return {
+            "paperId": "649def34f8be52c8b66281af98ae884c09aef38b",
+            "externalIds": external_ids,
+            "title": "DOI Normalization Test",
+            "_lookup_method": "doi",
+        }
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "raw_doi,expected",
+        [
+            ("10.1038/NATURE12373", "10.1038/nature12373"),
+            ("10.1038/nature12373", "10.1038/nature12373"),
+            ("  10.1000/xyz  ", "10.1000/xyz"),
+            ("10.1000/ABC.DEF", "10.1000/abc.def"),
+            ("10.1000/Test-DOI_123", "10.1000/test-doi_123"),
+        ],
+    )
+    async def test_doi_normalization_lowercase_and_strip(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+        raw_doi: str,
+        expected: str,
+    ) -> None:
+        """Test that DOIs are normalized to lowercase and stripped."""
+        record = self._make_record_with_doi(raw_doi)
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["doi"] == expected
+
+    @pytest.mark.asyncio
+    async def test_doi_normalization_none_handling(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that None DOI remains None."""
+        record = self._make_record_with_doi(None)
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["doi"] is None
+
+    @pytest.mark.asyncio
+    async def test_doi_normalization_affects_content_hash(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that DOIs with different cases produce same content hash after normalization."""
+        record_upper = self._make_record_with_doi("10.1038/NATURE12373")
+        record_lower = self._make_record_with_doi("10.1038/nature12373")
+
+        result_upper = await transformer.transform(mock_context, record_upper, 0)
+        result_lower = await transformer.transform(mock_context, record_lower, 0)
+
+        assert result_upper is not None
+        assert result_lower is not None
+        # After normalization, content hashes should be identical
+        assert result_upper["content_hash"] == result_lower["content_hash"]

@@ -21,10 +21,16 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
 )
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
 from bioetl.domain.normalization import strip_html_tags
+from bioetl.domain.services import DataNormalizationService
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
+    from bioetl.domain.ports import (
+        DataNormalizationPort,
+        MetricsPort,
+        PiiHasherPort,
+        TracingPort,
+    )
     from bioetl.domain.services import IdentityService
     from bioetl.domain.types import BronzeRecord
 
@@ -72,6 +78,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
+        data_normalizer: DataNormalizationPort | None = None,
     ) -> None:
         """Initialize transformer.
 
@@ -83,6 +90,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names.
+            data_normalizer: Optional data normalization service for DOI normalization.
 
         """
         super().__init__(
@@ -94,6 +102,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             identity_service=identity_service,
             pii_hasher=pii_hasher,
         )
+        self._data_normalizer = data_normalizer or DataNormalizationService()
 
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
         """Extract and normalize fields from Semantic Scholar record.
@@ -112,7 +121,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
 
         # External identifiers
         external_ids = extract_external_ids(rec.get("externalIds"))
-        doi = external_ids.get("doi")
+        # Normalize DOI (lowercase, stripped) for cross-provider consistency
+        raw_doi = external_ids.get("doi")
+        doi = self._data_normalizer.normalize_doi(raw_doi)
 
         # Authors with optional PII hashing
         raw_authors = extract_authors(rec.get("authors"))

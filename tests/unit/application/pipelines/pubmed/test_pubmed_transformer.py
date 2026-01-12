@@ -683,3 +683,101 @@ class TestPubMedTransformerClassificationExtraction:
         assert "keyword1" in result["keywords"]
         assert "keyword2" in result["keywords"]
         assert "keyword3" in result["keywords"]
+
+
+@pytest.mark.unit
+class TestPubMedTransformerDoiNormalization:
+    """Tests for DOI normalization in PubMed transformer."""
+
+    @pytest.fixture
+    def transformer(self) -> PubMedPublicationTransformer:
+        """Create PubMedPublicationTransformer instance."""
+        return PubMedPublicationTransformer(provider="pubmed")
+
+    @staticmethod
+    def _make_xml_with_doi(pmid: str, doi: str) -> str:
+        """Create PubMed XML with a specific DOI."""
+        return f"""<?xml version="1.0"?>
+        <PubmedArticle>
+          <MedlineCitation>
+            <PMID>{pmid}</PMID>
+            <Article>
+              <ArticleTitle>DOI Normalization Test</ArticleTitle>
+              <ELocationID EIdType="doi">{doi}</ELocationID>
+            </Article>
+          </MedlineCitation>
+        </PubmedArticle>
+        """
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "raw_doi,expected",
+        [
+            ("10.1038/NATURE12373", "10.1038/nature12373"),
+            ("10.1038/nature12373", "10.1038/nature12373"),
+            ("  10.1000/xyz  ", "10.1000/xyz"),
+            ("10.1000/ABC.DEF", "10.1000/abc.def"),
+            ("10.1000/Test-DOI_123", "10.1000/test-doi_123"),
+        ],
+    )
+    async def test_doi_normalization_lowercase_and_strip(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+        raw_doi: str,
+        expected: str,
+    ) -> None:
+        """Test that DOIs are normalized to lowercase and stripped."""
+        xml = self._make_xml_with_doi("12345678", raw_doi)
+        record: dict[str, Any] = {"_raw_xml": xml}
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["doi"] == expected
+
+    @pytest.mark.asyncio
+    async def test_doi_normalization_none_handling(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that None DOI remains None."""
+        xml = """<?xml version="1.0"?>
+        <PubmedArticle>
+          <MedlineCitation>
+            <PMID>12345678</PMID>
+            <Article>
+              <ArticleTitle>No DOI Article</ArticleTitle>
+            </Article>
+          </MedlineCitation>
+        </PubmedArticle>
+        """
+        record: dict[str, Any] = {"_raw_xml": xml}
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["doi"] is None
+
+    @pytest.mark.asyncio
+    async def test_doi_normalization_affects_content_hash(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that DOIs with different cases produce same content hash after normalization."""
+        xml_upper = self._make_xml_with_doi("12345678", "10.1038/NATURE12373")
+        xml_lower = self._make_xml_with_doi("12345678", "10.1038/nature12373")
+
+        result_upper = await transformer.transform(
+            mock_context, {"_raw_xml": xml_upper}, index=0
+        )
+        result_lower = await transformer.transform(
+            mock_context, {"_raw_xml": xml_lower}, index=0
+        )
+
+        assert result_upper is not None
+        assert result_lower is not None
+        # After normalization, content hashes should be identical
+        assert result_upper["content_hash"] == result_lower["content_hash"]
