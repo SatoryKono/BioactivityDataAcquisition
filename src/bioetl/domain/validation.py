@@ -214,6 +214,60 @@ def validate_non_negative(value: Any) -> float | None:
 
 
 # =============================================================================
+# Molecular Weight Validation
+# =============================================================================
+
+# Molecular weight valid range:
+# - Min: > 0 (must be positive)
+# - Max: 100000 Da (covers small molecules ~100-1000 Da to large proteins ~50000 Da)
+# Reference: PubChem compound MW typically ranges from ~10 to ~5000 Da
+MIN_MOLECULAR_WEIGHT: float = 0.0
+MAX_MOLECULAR_WEIGHT: float = 100000.0
+
+
+def validate_molecular_weight(value: Any) -> float | None:
+    """Validate and convert molecular weight to float.
+
+    Handles string-to-float conversion (PubChem API may return strings)
+    and validates the range. Precision is 10 decimals per RULES.md §2.8.1.
+
+    Valid range: 0 < mw < 100000 (covers small molecules to large proteins).
+
+    Args:
+        value: Raw molecular weight value (string, int, float, or None).
+
+    Returns:
+        Valid float rounded to 10 decimals, or None if invalid/out of range.
+
+    Example:
+        >>> validate_molecular_weight(180.156)
+        180.156
+        >>> validate_molecular_weight("342.30")  # String from API
+        342.3
+        >>> validate_molecular_weight(0)  # Zero is invalid
+        None
+        >>> validate_molecular_weight(-1.0)  # Negative is invalid
+        None
+        >>> validate_molecular_weight(100001)  # Too large
+        None
+        >>> validate_molecular_weight(None)
+        None
+        >>> validate_molecular_weight("invalid")
+        None
+
+    """
+    if value is None:
+        return None
+    try:
+        mw = float(value)
+        if MIN_MOLECULAR_WEIGHT < mw < MAX_MOLECULAR_WEIGHT:
+            return round(mw, 10)
+        return None
+    except (ValueError, TypeError):
+        return None
+
+
+# =============================================================================
 # String Validation
 # =============================================================================
 
