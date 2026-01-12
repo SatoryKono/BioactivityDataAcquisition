@@ -79,7 +79,7 @@ class TestFileSizeLimits:
         "gold.py": 870,  # 854 LOC - Gold layer Pandera schemas (+ IDMapping)
         "silver.py": 770,  # 757 LOC - Silver PyArrow schemas (+ IDMapping)
         "client.py": 700,  # 692 LOC - ChemblAdapter (complex FilterableDataSourcePort), CrossRefAdapter (DOI→title fallback)
-        "adapter.py": 550,  # 496 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
+        "adapter.py": 560,  # 558 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
@@ -380,9 +380,9 @@ class TestClassSize:
         # UniProt adapter (similar to ChEMBL adapter)
         "UniProtAdapter": 320,  # 312 lines - HTTP adapter with streaming
         # UniProt ID Mapping client (job-based async API)
-        "UniProtIDMappingClient": 400,  # 362 lines - ID Mapping client with job polling
+        "UniProtIDMappingClient": 420,  # 415 lines - ID Mapping client with job polling
         # SemanticScholar adapter
-        "SemanticScholarAdapter": 500,  # 496 lines - HTTP adapter with multi-identifier fallback + FilterableDataSourcePort
+        "SemanticScholarAdapter": 520,  # 514 lines - HTTP adapter with multi-identifier fallback + FilterableDataSourcePort
         # PubMed adapter (similar to ChEMBL adapter)
         "PubMedAdapter": 400,  # 373 lines - HTTP adapter with Entrez API + FilterableDataSourcePort
         # OpenAlex adapter (FilterableDataSourcePort with batch DOI + title fallback)

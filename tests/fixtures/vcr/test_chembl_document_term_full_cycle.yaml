@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - BioETL/0.1.0 (contact@example.com)
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document.json?limit=1000&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/document.json?limit=250&offset=0&format=json
   response:
     body:
       string: '{"documents": [{"document_chembl_id": "CHEMBL1200001", "title": "Aspirin
@@ -57,7 +57,7 @@ interactions:
         "320", "pubmed_id": 56789012, "doi": "10.1038/s41568-023-004", "mesh_terms":
         [{"mesh_id": "D007167", "mesh_heading": "Immunotherapy", "mesh_qualifier":
         "methods"}], "keywords": ["immunotherapy", "cancer", "checkpoint inhibitors",
-        "CAR-T"]}], "page_meta": {"limit": 1000, "offset": 0, "total_count": 5}}'
+        "CAR-T"]}], "page_meta": {"limit": 250, "offset": 0, "total_count": 5}}'
     headers:
       Content-Type:
       - application/json

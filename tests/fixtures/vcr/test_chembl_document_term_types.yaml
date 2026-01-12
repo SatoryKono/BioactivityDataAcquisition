@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - BioETL/0.1.0 (contact@example.com)
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document.json?limit=1000&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/document.json?limit=500&offset=0&format=json
   response:
     body:
       string: '{"documents": [{"document_chembl_id": "CHEMBL1200001", "title": "Aspirin
@@ -95,7 +95,7 @@ interactions:
         "D018954", "mesh_heading": "Drugs, Investigational", "mesh_qualifier": "therapeutic
         use"}, {"mesh_id": "D010601", "mesh_heading": "Pharmacology, Clinical", "mesh_qualifier":
         "trends"}], "keywords": ["clinical pharmacology", "drug safety", "personalized
-        medicine"]}], "page_meta": {"limit": 1000, "offset": 0, "total_count": 10}}'
+        medicine"]}], "page_meta": {"limit": 500, "offset": 0, "total_count": 10}}'
     headers:
       Content-Type:
       - application/json
