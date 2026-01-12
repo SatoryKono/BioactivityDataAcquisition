@@ -76,51 +76,53 @@ class TestTransformImplBasicCases:
 
     @pytest.mark.asyncio
     async def test_transform_missing_raw_xml(self, transformer, pipeline_context):
-        """Test that missing _raw_xml returns None."""
+        """Test that missing _raw_xml raises ValueError.
+
+        After refactoring to BasePublicationTransformer, validation errors
+        are raised as ValueError from _pre_extract_validation.
+        """
         bronze_record: BronzeRecord = cast(
             "BronzeRecord",
             {"pmid": "12345", "source_batch_id": "test"},
         )
 
-        result = await transformer._transform_impl(pipeline_context, bronze_record, 0)
-
-        assert result is None
+        with pytest.raises(ValueError, match="Missing or invalid _raw_xml"):
+            await transformer._transform_impl(pipeline_context, bronze_record, 0)
 
     @pytest.mark.asyncio
     async def test_transform_empty_raw_xml(self, transformer, pipeline_context):
-        """Test that empty _raw_xml returns None."""
+        """Test that empty _raw_xml raises ValueError."""
         bronze_record: BronzeRecord = cast(
             "BronzeRecord",
             {"pmid": "12345", "_raw_xml": "", "source_batch_id": "test"},
         )
 
-        result = await transformer._transform_impl(pipeline_context, bronze_record, 0)
-
-        assert result is None
+        with pytest.raises(ValueError, match="Missing or invalid _raw_xml"):
+            await transformer._transform_impl(pipeline_context, bronze_record, 0)
 
     @pytest.mark.asyncio
     async def test_transform_non_string_raw_xml(self, transformer, pipeline_context):
-        """Test that non-string _raw_xml returns None."""
+        """Test that non-string _raw_xml raises ValueError."""
         bronze_record: BronzeRecord = cast(
             "BronzeRecord",
             {"pmid": "12345", "_raw_xml": 12345, "source_batch_id": "test"},
         )
 
-        result = await transformer._transform_impl(pipeline_context, bronze_record, 0)
-
-        assert result is None
+        with pytest.raises(ValueError, match="Missing or invalid _raw_xml"):
+            await transformer._transform_impl(pipeline_context, bronze_record, 0)
 
     @pytest.mark.asyncio
     async def test_transform_invalid_xml(self, transformer, pipeline_context):
-        """Test that invalid XML returns None and logs warning."""
+        """Test that invalid XML raises ValueError and logs warning."""
         bronze_record: BronzeRecord = cast(
             "BronzeRecord",
             {"pmid": "12345", "_raw_xml": "<Invalid>XML", "source_batch_id": "test"},
         )
 
-        result = await transformer._transform_impl(pipeline_context, bronze_record, 0)
+        with pytest.raises(ValueError, match="XML parse error"):
+            await transformer._transform_impl(pipeline_context, bronze_record, 0)
 
-        assert result is None
+        # XML_parse_error is logged before raising ValueError
         pipeline_context.logger.warning.assert_called_once()
         args, kwargs = pipeline_context.logger.warning.call_args
         assert args[0] == "XML_parse_error"
@@ -394,7 +396,13 @@ class TestExtractDateData:
 
 
 class TestExtractBusinessData:
-    """Tests for business data extraction."""
+    """Tests for business data extraction.
+
+    After refactoring to BasePublicationTransformer:
+    - _extract_business_data now takes only record (BronzeRecord)
+    - It uses the cached _cached_xml_root set by _pre_extract_validation
+    - Tests must set up _cached_xml_root before calling _extract_business_data
+    """
 
     def test_extract_business_data_complete(self, transformer):
         """Test extraction of complete business data."""
@@ -461,10 +469,12 @@ class TestExtractBusinessData:
         </PubmedArticle>
         """
         root = ET.fromstring(xml)
+        # Set up cached XML root (normally done by _pre_extract_validation)
+        transformer._cached_xml_root = root
 
         import json
 
-        result = transformer._extract_business_data(root, "12345")
+        result = transformer._extract_business_data({})
 
         assert result["pmid"] == "12345"
         assert result["doi"] == "10.1234/test.2023"
@@ -499,8 +509,10 @@ class TestExtractBusinessData:
         </PubmedArticle>
         """
         root = ET.fromstring(xml)
+        # Set up cached XML root (normally done by _pre_extract_validation)
+        transformer._cached_xml_root = root
 
-        result = transformer._extract_business_data(root, "12345")
+        result = transformer._extract_business_data({})
 
         assert result["pmid"] == "12345"
         # All other fields should be None/empty
@@ -522,8 +534,10 @@ class TestExtractBusinessData:
         </PubmedArticle>
         """
         root = ET.fromstring(xml)
+        # Set up cached XML root (normally done by _pre_extract_validation)
+        transformer._cached_xml_root = root
 
-        result = transformer._extract_business_data(root, "12345")
+        result = transformer._extract_business_data({})
 
         # When Article is missing, only pmid is returned
         assert result["pmid"] == "12345"

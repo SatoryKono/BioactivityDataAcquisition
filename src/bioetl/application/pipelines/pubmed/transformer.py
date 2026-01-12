@@ -1,6 +1,9 @@
 """PubMed Publication Transformer.
 
 See: https://www.nlm.nih.gov/bsd/licensee/elements_descriptions.html
+
+Refactored to use BasePublicationTransformer pattern for consistency
+with other publication pipelines (CrossRef, OpenAlex, SemanticScholar).
 """
 
 from __future__ import annotations
@@ -8,7 +11,7 @@ from __future__ import annotations
 import xml.etree.ElementTree as ET
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.pubmed.extractors import (
     AbstractExtractor,
     AuthorExtractor,
@@ -23,13 +26,27 @@ from bioetl.domain.services import IdentityService
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
+    from bioetl.domain.entities import BaseEntity
     from bioetl.domain.filtering import GoldFilterConfig
     from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord
 
 
-class PubMedPublicationTransformer(BaseTransformer):
-    """Transformer for PubMed publication records."""
+class PubMedPublicationTransformer(BasePublicationTransformer):
+    """Transformer for PubMed publication records.
+
+    Implements BasePublicationTransformer pattern for unified transformation flow:
+    1. Pre-extraction validation (XML parsing)
+    2. Business data extraction from parsed XML
+    3. Entity ID and content hash computation
+    4. Domain entity creation
+
+    The parsed XML root is cached during _pre_extract_validation and reused
+    in _extract_business_data to avoid parsing twice.
+    """
+
+    # Instance variable to cache parsed XML root between validation and extraction
+    _cached_xml_root: ET.Element | None
 
     def __init__(
         self,
@@ -62,45 +79,64 @@ class PubMedPublicationTransformer(BaseTransformer):
             identity_service=identity_service,
             pii_hasher=pii_hasher,
         )
+        self._cached_xml_root = None
 
-    async def _transform_impl(
-        self, context: PipelineContext, record: BronzeRecord, index: int
-    ) -> SilverRecord | None:
-        """Transform raw PubMed XML record to Silver format."""
+    def _pre_extract_validation(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> None:
+        """Validate raw XML and parse it before extraction.
+
+        Parses the XML upfront and caches the root element. This allows
+        ET.ParseError to be caught and converted to ValueError, which
+        BaseTransformer.transform() handles gracefully.
+
+        Args:
+            context: Pipeline context with run_id, run_type, logger.
+            record: Raw Bronze record containing _raw_xml field.
+            index: Sequential index of the record (unused).
+
+        Raises:
+            ValueError: If _raw_xml is missing, empty, or malformed XML.
+
+        """
         raw_xml = record.get("_raw_xml")
         if not raw_xml or not isinstance(raw_xml, str):
-            return None
+            raise ValueError("Missing or invalid _raw_xml field")
 
         try:
-            root = ET.fromstring(raw_xml)
-            pmid = get_text(root.find(".//PMID"))
-            if not pmid:
-                return None
-
-            business_data = self._extract_business_data(root, pmid)
-            entity_id = self.compute_entity_id(
-                source_id=pmid,
-                record={"pmid": pmid},
-            )
-            content_hash = self.compute_content_hash(business_data, exclude_none=False)
-            entity = self._create_entity(
-                Publication,
-                context,
-                entity_id=entity_id,
-                content_hash=content_hash,
-                index=index,
-                **business_data,
-            )
-            return cast("SilverRecord", self.entity_to_silver_record(entity))
-
+            self._cached_xml_root = ET.fromstring(raw_xml)
         except ET.ParseError as e:
+            # Log the parse error with context
             context.logger.warning(
-                "XML_parse_error", error=str(e), pmid=record.get("pmid")
+                "XML_parse_error",
+                error=str(e),
+                pmid=record.get("pmid"),
             )
-            return None
+            raise ValueError(f"XML parse error: {e}") from e
 
-    def _extract_business_data(self, root: ET.Element, pmid: str) -> dict[str, Any]:
-        """Extract all business fields from PubMedArticle XML."""
+    def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
+        """Extract all business fields from PubMed XML.
+
+        Uses the cached XML root from _pre_extract_validation.
+
+        Args:
+            record: Raw Bronze record (unused, XML already parsed).
+
+        Returns:
+            Dictionary of extracted and normalized fields.
+
+        """
+        # Use cached XML root from _pre_extract_validation
+        root = self._cached_xml_root
+        if root is None:
+            # This should not happen if _pre_extract_validation ran successfully
+            return {"pmid": None}
+
+        pmid = get_text(root.find(".//PMID"))
+
         medline = root.find(".//MedlineCitation")
         article = root.find(".//Article")
         pubmed_data = root.find(".//PubmedData")
@@ -137,6 +173,35 @@ class PubMedPublicationTransformer(BaseTransformer):
             ),
             "pmc_id": IdentifierExtractor.extract_pmc_id(root),
         }
+
+    def _get_primary_id_field(self) -> str:
+        """Return the primary ID field name for PubMed publications.
+
+        Returns:
+            'pmid' - the PubMed-specific identifier field.
+
+        """
+        return "pmid"
+
+    def _get_entity_class(self) -> type[BaseEntity]:
+        """Return the domain entity class for PubMed publications.
+
+        Returns:
+            Publication class.
+
+        """
+        return cast("type[BaseEntity]", Publication)
+
+    def _should_log_fallback_lookup(self) -> bool:
+        """Disable fallback lookup logging for PubMed.
+
+        PubMed uses PMID-only lookup without title fallback mechanism.
+
+        Returns:
+            False - no fallback logging needed.
+
+        """
+        return False
 
     def _extract_journal_data(self, article: ET.Element) -> dict[str, Any]:
         """Extract journal-related data from article XML."""
