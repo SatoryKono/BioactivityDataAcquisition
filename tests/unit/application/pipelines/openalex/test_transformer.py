@@ -304,3 +304,88 @@ class TestOpenAlexPublicationTransformer:
         assert "_index" in result
         assert result["_run_type"] == "incremental"
         assert result["_index"] == 0
+
+
+class TestOpenAlexDoiNormalization:
+    """Tests for DOI normalization in OpenAlex transformer."""
+
+    @pytest.fixture
+    def transformer(self) -> OpenAlexPublicationTransformer:
+        """Create a transformer instance for testing."""
+        return OpenAlexPublicationTransformer()
+
+    @staticmethod
+    def _make_record_with_doi(doi_url: str | None) -> dict[str, Any]:
+        """Create an OpenAlex record with a specific DOI URL."""
+        return {
+            "id": "https://openalex.org/W2148763428",
+            "doi": doi_url,
+            "title": "DOI Normalization Test",
+            "_lookup_method": "doi",
+        }
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "raw_doi_url,expected",
+        [
+            # Uppercase DOIs should be lowercased
+            ("https://doi.org/10.1038/NATURE12373", "10.1038/nature12373"),
+            # Already lowercase should stay the same
+            ("https://doi.org/10.1038/nature12373", "10.1038/nature12373"),
+            # Mixed case
+            ("https://doi.org/10.1000/ABC.DEF", "10.1000/abc.def"),
+            ("https://doi.org/10.1000/Test-DOI_123", "10.1000/test-doi_123"),
+            # HTTP prefix
+            ("http://doi.org/10.1038/NATURE12373", "10.1038/nature12373"),
+            # doi: prefix
+            ("doi:10.1038/NATURE12373", "10.1038/nature12373"),
+            # Bare DOI (no prefix)
+            ("10.1038/NATURE12373", "10.1038/nature12373"),
+        ],
+    )
+    async def test_doi_normalization_lowercase_and_strip(
+        self,
+        transformer: OpenAlexPublicationTransformer,
+        pipeline_context: PipelineContext,
+        raw_doi_url: str,
+        expected: str,
+    ) -> None:
+        """Test that DOIs are normalized to lowercase and stripped."""
+        record = self._make_record_with_doi(raw_doi_url)
+
+        result = await transformer.transform(pipeline_context, record, 0)
+
+        assert result is not None
+        assert result["doi"] == expected
+
+    @pytest.mark.asyncio
+    async def test_doi_normalization_none_handling(
+        self,
+        transformer: OpenAlexPublicationTransformer,
+        pipeline_context: PipelineContext,
+    ) -> None:
+        """Test that None DOI remains None."""
+        record = self._make_record_with_doi(None)
+
+        result = await transformer.transform(pipeline_context, record, 0)
+
+        assert result is not None
+        assert result["doi"] is None
+
+    @pytest.mark.asyncio
+    async def test_doi_normalization_affects_content_hash(
+        self,
+        transformer: OpenAlexPublicationTransformer,
+        pipeline_context: PipelineContext,
+    ) -> None:
+        """Test that DOIs with different cases produce same content hash after normalization."""
+        record_upper = self._make_record_with_doi("https://doi.org/10.1038/NATURE12373")
+        record_lower = self._make_record_with_doi("https://doi.org/10.1038/nature12373")
+
+        result_upper = await transformer.transform(pipeline_context, record_upper, 0)
+        result_lower = await transformer.transform(pipeline_context, record_lower, 0)
+
+        assert result_upper is not None
+        assert result_lower is not None
+        # After normalization, content hashes should be identical
+        assert result_upper["content_hash"] == result_lower["content_hash"]
