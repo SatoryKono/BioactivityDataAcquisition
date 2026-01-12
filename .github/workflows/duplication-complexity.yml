@@ -86,6 +86,7 @@ jobs:
           EXEMPT_FUNCTIONS = {
               "fetch_filtered_with_fallback": 25,  # DOI→title fallback with batch processing
               "_request_with_retry": 20,  # HTTP retry logic with circuit breaker
+              "fetch_batch": 15,  # CrossRef batch DOI resolution with fallback to individual
           }
 
           violations = []
