@@ -20,7 +20,6 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     validate_year,
 )
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
-from bioetl.domain.normalization import strip_html_tags
 from bioetl.domain.services import DataNormalizationService
 
 if TYPE_CHECKING:
@@ -162,7 +161,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "arxiv_id": external_ids.get("arxiv"),
             "corpus_id": external_ids.get("corpus_id"),
             "title": rec.get("title"),
-            "abstract": strip_html_tags(rec.get("abstract")),
+            "abstract": self._data_normalizer.strip_html_tags(rec.get("abstract")),
             "tldr": tldr,
             "authors": self.serialize_json_list(hashed_authors),
             "journal": journal_info.get("journal_name"),
