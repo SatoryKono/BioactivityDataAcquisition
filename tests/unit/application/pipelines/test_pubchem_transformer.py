@@ -349,7 +349,7 @@ class TestPubChemCompoundTransformer:
 
     @pytest.mark.asyncio
     async def test_transform_molecular_weight_zero(self, transformer, mock_context):
-        """Test that zero molecular_weight is preserved."""
+        """Test that zero molecular_weight returns None (invalid: must be > 0)."""
         record = {
             "cid": 2244,
             "molecular_weight": "0",
@@ -359,7 +359,8 @@ class TestPubChemCompoundTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["molecular_weight"] == 0.0
+        # Zero MW is invalid per validate_molecular_weight (range: 0 < mw < 100000)
+        assert result["molecular_weight"] is None
 
     @pytest.mark.asyncio
     async def test_transform_molecular_weight_precision(
