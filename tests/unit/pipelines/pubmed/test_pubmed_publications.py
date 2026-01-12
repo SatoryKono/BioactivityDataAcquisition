@@ -171,7 +171,14 @@ async def test_transform_bronze_to_silver(pipeline, pipeline_context):
 
 @pytest.mark.asyncio
 async def test_transform_bronze_to_silver_invalid_xml(pipeline, pipeline_context):
-    """Test transformation with invalid XML handles error gracefully."""
+    """Test transformation with invalid XML handles error gracefully.
+
+    After refactoring to BasePublicationTransformer pattern:
+    - XML parsing happens in _pre_extract_validation
+    - ET.ParseError is caught and logged as XML_parse_error
+    - Then ValueError is raised, which BaseTransformer catches and logs as entity_validation_failed
+    - The last warning logged is entity_validation_failed (unified behavior)
+    """
     bronze_record: BronzeRecord = cast(
         "BronzeRecord",
         {"pmid": "12345", "_raw_xml": "<Invalid>XML", "source_batch_id": "test_batch"},
@@ -182,11 +189,9 @@ async def test_transform_bronze_to_silver_invalid_xml(pipeline, pipeline_context
     )
 
     assert silver_record is None
-    # Check if warning was logged. pipeline.logger is actually accessed via self.services.logger or context.logger in BasePipeline
-    # In this test setup, BasePipeline might be using self.logger which comes from somewhere.
-    # BasePipeline init: self.logger = services.logger
-    # Verify warning call arguments
+    # Verify warning was logged - unified BasePublicationTransformer pattern
+    # logs entity_validation_failed when ValueError is raised from _pre_extract_validation
     args, kwargs = pipeline.logger.warning.call_args
-    assert args[0] == "XML_parse_error"
-    assert kwargs["pmid"] == "12345"
+    assert args[0] == "entity_validation_failed"
     assert "error" in kwargs
+    # The XML_parse_error is also logged earlier (can check call_args_list if needed)

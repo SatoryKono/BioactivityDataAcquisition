@@ -218,6 +218,87 @@
     'molecular_weight': 180.16,
   })
 # ---
+# name: TestPubMedPublicationTransformerSnapshot.test_transform_full_snapshot
+  dict({
+    '_index': 0,
+    '_ingestion_ts': '<ingestion_ts>',
+    '_run_id': '<run_id>',
+    '_run_type': 'incremental',
+    '_source_batch_id': None,
+    'abstract': 'This is the abstract of the test article.',
+    'accepted_date': '2025-01-15',
+    'authors': '["Smith, John","Doe, Jane"]',
+    'content_hash': '<content_hash>',
+    'country': 'United States',
+    'doi': '10.1234/test.2025.001',
+    'entity_id': '<entity_id>',
+    'epub_date': '2025-02-28',
+    'issn': '1234-5678',
+    'issue': '3',
+    'journal': 'Journal of Test Science',
+    'journal_abbrev': 'J Test Sci',
+    'keywords': list([
+      'unit testing',
+      'python',
+    ]),
+    'language': 'eng',
+    'mesh_terms': list([
+      'Software Testing',
+    ]),
+    'pages': '123-145',
+    'pmc_id': 'PMC1234567',
+    'pmid': '98765432',
+    'pub_date': '2025-03-15',
+    'publication_types': list([
+      'Journal Article',
+      'Research Support',
+    ]),
+    'publication_year': 2025,
+    'received_date': '2024-12-01',
+    'revised_date': '2025-01-10',
+    'title': 'A Comprehensive Study of Unit Testing',
+    'volume': '42',
+    'year': 2025,
+  })
+# ---
+# name: TestPubMedPublicationTransformerSnapshot.test_transform_minimal_snapshot
+  dict({
+    '_index': 0,
+    '_ingestion_ts': '<ingestion_ts>',
+    '_run_id': '<run_id>',
+    '_run_type': 'incremental',
+    '_source_batch_id': None,
+    'abstract': None,
+    'accepted_date': None,
+    'authors': None,
+    'content_hash': '<content_hash>',
+    'country': None,
+    'doi': None,
+    'entity_id': '<entity_id>',
+    'epub_date': None,
+    'issn': None,
+    'issue': None,
+    'journal': None,
+    'journal_abbrev': None,
+    'keywords': list([
+    ]),
+    'language': None,
+    'mesh_terms': list([
+    ]),
+    'pages': None,
+    'pmc_id': None,
+    'pmid': '12345678',
+    'pub_date': None,
+    'publication_types': list([
+    ]),
+    'publication_year': None,
+    'received_date': None,
+    'revised_date': None,
+    'title': 'Test Article Title',
+    'volume': None,
+    'year': None,
+  })
+# ---
 # name: TestTargetComponentTransformerSnapshot.test_transform_snapshot
   dict({
     '_index': 0,
