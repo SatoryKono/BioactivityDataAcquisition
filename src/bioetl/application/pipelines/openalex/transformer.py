@@ -21,7 +21,6 @@ from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.openalex.extractors import (
     extract_authors,
     extract_concepts,
-    extract_doi,
     extract_journal_info,
     extract_open_access_info,
     extract_openalex_id,
@@ -123,10 +122,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         # Extract OpenAlex ID from URL
         openalex_id = extract_openalex_id(rec.get("id"))
 
-        # Extract bare DOI from URL, then normalize (lowercase, stripped)
-        # for cross-provider consistency
-        raw_doi = extract_doi(rec.get("doi"))
-        doi = self._data_normalizer.normalize_doi(raw_doi)
+        # Normalize DOI (handles URL prefix stripping + lowercase/strip)
+        # OpenAlex stores DOIs as full URLs (e.g., "https://doi.org/10.1038/...")
+        doi = self._data_normalizer.normalize_doi(rec.get("doi"))
 
         # Reconstruct abstract from inverted index (then strip HTML for cleaning)
         abstract_index = rec.get("abstract_inverted_index")

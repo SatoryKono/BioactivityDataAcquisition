@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from bioetl.domain.entities.base import BaseEntity
+from bioetl.domain.validation import MAX_PUBLICATION_YEAR, MIN_PUBLICATION_YEAR
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -54,8 +55,13 @@ class ChemblPublication(BaseEntity):
     def _validate_invariants(self) -> None:
         if not self.document_chembl_id:
             raise ValueError("ChemblPublication document_chembl_id is required")
-        if self.year is not None and (self.year < 1800 or self.year > 2100):
-            raise ValueError(f"Year must be between 1800-2100, got {self.year}")
+        if self.year is not None and not (
+            MIN_PUBLICATION_YEAR <= self.year <= MAX_PUBLICATION_YEAR
+        ):
+            raise ValueError(
+                f"Year must be between {MIN_PUBLICATION_YEAR}-{MAX_PUBLICATION_YEAR}, "
+                f"got {self.year}"
+            )
 
 
 @dataclass(frozen=True, kw_only=True)
