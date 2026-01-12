@@ -441,3 +441,8 @@ class ProteinClassification(BaseEntity):
     def is_deprecated(self) -> bool:
         """Check if this classification is deprecated."""
         return self.replaced_by is not None or self.downgraded == 1
+
+
+# Backward compatibility alias (deprecated)
+# See ADR-024: Entity Naming Unification
+Document = ChemblPublication

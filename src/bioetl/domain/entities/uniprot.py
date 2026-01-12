@@ -173,3 +173,8 @@ class UniprotTarget(BaseEntity):
             raise ValueError(
                 f"Annotation score must be 1-5, got {self.annotation_score}"
             )
+
+
+# Backward compatibility alias (deprecated)
+# See ADR-024: Entity Naming Unification
+Protein = UniprotTarget
