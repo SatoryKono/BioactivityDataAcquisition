@@ -53,3 +53,4 @@ input_filter:
   column_name: "document_chembl_id"
   filter_field: "document_chembl_id"
   batch_size: 20
+
