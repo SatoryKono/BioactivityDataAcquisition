@@ -225,6 +225,12 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         GET /idmapping/status/{jobId}
         Response: {"jobStatus": "RUNNING|FINISHED|ERROR", ...}
 
+        Note: When job is finished, UniProt returns 303 redirect to results.
+        httpx follows redirects automatically, so we detect completion by:
+        1. Checking if response URL contains '/results/' (redirect was followed)
+        2. Checking if response has 'results' key (we got results directly)
+        3. Checking jobStatus field for running/error states
+
         Args:
             job_id: Job ID to poll.
 
@@ -238,7 +244,18 @@ class UniProtIDMappingClient(BaseHttpAdapter):
             with self._adapter_metrics.measure_request("/idmapping/status"):
                 response = await self.http_client.get(url)
 
-            # UniProt returns 200 for running jobs, 303 redirect when finished
+            # Check if httpx followed redirect to results URL
+            # This happens when job is finished (303 → results)
+            response_url = str(response.url) if hasattr(response, "url") else ""
+            if "/results/" in response_url or "/uniprotkb/results/" in response_url:
+                self.logger.debug(
+                    "idmapping_job_finished",
+                    job_id=job_id,
+                    attempts=attempt + 1,
+                    detected_by="redirect_to_results",
+                )
+                return
+
             if response.status_code not in (200, 303):
                 self.logger.warning(
                     "idmapping_status_error",
@@ -249,6 +266,18 @@ class UniProtIDMappingClient(BaseHttpAdapter):
                 continue
 
             result = response.json()
+
+            # If response contains 'results' key, job is finished
+            # (httpx followed redirect and we got results directly)
+            if "results" in result:
+                self.logger.debug(
+                    "idmapping_job_finished",
+                    job_id=job_id,
+                    attempts=attempt + 1,
+                    detected_by="results_in_response",
+                )
+                return
+
             status = result.get("jobStatus", "UNKNOWN")
 
             # 303 redirect indicates job is finished (redirect to results)
@@ -260,6 +289,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
                     "idmapping_job_finished",
                     job_id=job_id,
                     attempts=attempt + 1,
+                    detected_by="job_status",
                 )
                 return
 

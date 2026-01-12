@@ -57,6 +57,11 @@ class DocumentTermDataSource:
     SOURCE_ENTITY_TYPE = "document"
     # Target entity type this wrapper provides
     TARGET_ENTITY_TYPE = "document_term"
+    # Multiplier for document limit estimation.
+    # Not all documents have terms (mesh_terms/keywords may be empty).
+    # Analysis shows ~20-30% of ChEMBL documents have terms.
+    # Using 50x multiplier ensures we fetch enough documents to satisfy term limit.
+    DOCUMENT_LIMIT_MULTIPLIER = 50
 
     def __init__(
         self,
@@ -154,9 +159,18 @@ class DocumentTermDataSource:
         """
         term_count = 0
 
+        # Estimate document limit based on term limit.
+        # We need to fetch more documents than terms because:
+        # 1. Not all documents have terms (mesh_terms/keywords may be empty)
+        # 2. Each document yields variable number of terms (~2-5 on average)
+        # Using multiplier ensures we fetch enough documents to satisfy term limit.
+        document_limit = (
+            limit * self.DOCUMENT_LIMIT_MULTIPLIER if limit else None
+        )
+
         async for document in self._data_source.fetch(
             entity_type=self.SOURCE_ENTITY_TYPE,
-            limit=None,  # We limit by terms, not documents
+            limit=document_limit,
             filter_ids=filter_ids,
             filter_field=filter_field,
         ):
