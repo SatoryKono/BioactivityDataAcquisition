@@ -45,18 +45,6 @@ class DomainEvent:
 
 
 @dataclass(frozen=True, slots=True)
-class PipelineStarted(DomainEvent):
-    """Event: Pipeline run has started.
-
-    Published when a pipeline transitions from PENDING to RUNNING.
-    """
-
-    run_id: RunID
-    pipeline_name: str
-    run_type: str
-
-
-@dataclass(frozen=True, slots=True)
 class PipelineCompleted(DomainEvent):
     """Event: Pipeline run completed successfully.
 
@@ -97,21 +85,6 @@ class PipelineShutdown(DomainEvent):
     run_id: RunID
     pipeline_name: str
     records_processed: int
-
-
-@dataclass(frozen=True, slots=True)
-class StageCompleted(DomainEvent):
-    """Event: A pipeline stage completed.
-
-    Published after each stage (preflight, execution, postrun, etc.)
-    completes, regardless of success or failure.
-    """
-
-    run_id: RunID
-    stage_name: str
-    status: str
-    duration_seconds: float
-    records_processed: int = 0
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -227,34 +200,3 @@ class QuarantineEntryResolved(DomainEvent):
 # ──────────────────────────────────────────────────────────────────────────────
 # Data Quality Events
 # ──────────────────────────────────────────────────────────────────────────────
-
-
-@dataclass(frozen=True, slots=True)
-class DQThresholdExceeded(DomainEvent):
-    """Event: Data quality threshold was exceeded.
-
-    Published when the error rate exceeds soft or hard thresholds.
-    """
-
-    run_id: RunID
-    pipeline_name: str
-    threshold_type: str  # "soft", "hard"
-    threshold_value: float
-    actual_value: float
-    record_count: int
-    error_count: int
-
-
-@dataclass(frozen=True, slots=True)
-class SchemaEvolutionDetected(DomainEvent):
-    """Event: Schema evolution was detected.
-
-    Published when new fields appear or existing fields change.
-    """
-
-    run_id: RunID
-    pipeline_name: str
-    layer: str
-    drift_level: str  # "INFO", "WARN", "CRITICAL"
-    added_fields: tuple[str, ...]
-    removed_fields: tuple[str, ...]

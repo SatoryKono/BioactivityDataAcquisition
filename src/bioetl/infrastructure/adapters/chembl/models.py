@@ -578,16 +578,6 @@ class ChemblCellLineResponse(BaseModel):
 # === Status Response ===
 
 
-class ChemblStatusResponse(BaseModel):
-    """ChEMBL API status response."""
-
-    model_config = ConfigDict(extra="ignore", populate_by_name=True)
-
-    status: str = Field(description="Service status (UP, DOWN)")
-    chembl_db_version: str | None = Field(default=None)
-    chembl_release_date: str | None = Field(default=None)
-
-
 # === Response Type Mapping ===
 
 # Mapping from entity type to response class for factory usage

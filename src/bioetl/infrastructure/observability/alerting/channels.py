@@ -205,36 +205,3 @@ class WebhookAlertChannel(AlertChannel):
                 },
             ],
         }
-
-
-class CompositeAlertChannel(AlertChannel):
-    """Channel that sends alerts to multiple channels."""
-
-    def __init__(self, channels: list[AlertChannel]) -> None:
-        """Initialize composite channel.
-
-        Args:
-            channels: List of channels to send to
-
-        """
-        self._channels = channels
-
-    @property
-    def name(self) -> str:
-        """Channel name."""
-        return "composite"
-
-    async def send(self, alert: Alert) -> bool:
-        """Send alert to all channels.
-
-        Returns True if at least one channel succeeded.
-        """
-        results = []
-        for channel in self._channels:
-            try:
-                result = await channel.send(alert)
-                results.append(result)
-            except Exception:
-                results.append(False)
-
-        return any(results)
