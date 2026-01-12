@@ -41,7 +41,6 @@ from bioetl.domain.entities.chembl_compound_record import CompoundRecord
 from bioetl.domain.entities.chembl_structures import (
     CellLine,
     ChemblPublication,
-    Document,  # Deprecated alias for ChemblPublication (ADR-024)
     DocumentSimilarity,
     DocumentTerm,
     Molecule,
@@ -55,7 +54,6 @@ from bioetl.domain.entities.crossref import PublicationEntity, PublicationRecord
 
 # PubChem DTO + Entity
 from bioetl.domain.entities.pubchem import (
-    Compound,  # Deprecated alias for PubchemMolecule (ADR-024)
     PubChemCompoundRecord,
     PubchemMolecule,
 )
@@ -67,10 +65,7 @@ from bioetl.domain.entities.pubmed import ArticleRecord, Publication
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
 
 # UniProt Entity
-from bioetl.domain.entities.uniprot import (
-    Protein,  # Deprecated alias for UniprotTarget (ADR-024)
-    UniprotTarget,
-)
+from bioetl.domain.entities.uniprot import UniprotTarget
 
 __all__ = [
     "ActivityRecord",
@@ -84,16 +79,13 @@ __all__ = [
     "CellLine",
     "CellLineRecord",
     "ChemblPublication",
-    "Compound",  # Deprecated alias for PubchemMolecule (ADR-024)
     "CompoundRecord",
-    "Document",  # Deprecated alias for ChemblPublication (ADR-024)
     "DocumentRecord",
     "DocumentSimilarity",
     "DocumentTerm",
     "DocumentTermRecord",
     "Molecule",
     "MoleculeRecord",
-    "Protein",  # Deprecated alias for UniprotTarget (ADR-024)
     "ProteinClassification",
     "PubChemCompoundRecord",
     "PubchemMolecule",

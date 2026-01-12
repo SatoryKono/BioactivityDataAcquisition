@@ -763,7 +763,3 @@ CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
     ]
 )
-
-# Backward compatibility alias (deprecated)
-# See ADR-024: Entity Naming Unification
-CHEMBL_DOCUMENT_SCHEMA = CHEMBL_PUBLICATION_SCHEMA

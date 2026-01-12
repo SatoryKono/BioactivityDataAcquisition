@@ -353,8 +353,6 @@ uniprot_protein_factory = _factories["uniprot_protein"]
 uniprot_idmapping_factory = _factories["uniprot_idmapping"]
 pubmed_publications_factory = _factories["pubmed_publications"]
 crossref_publication_factory = _factories["crossref_publication"]
-# Backward compatibility alias (deprecated)
-crossref_publication_enrichment_factory = crossref_publication_factory
 openalex_publication_factory = _factories["openalex_publication"]
 semanticscholar_publication_factory = _factories["semanticscholar_publication"]
 
@@ -494,7 +492,6 @@ __all__ = [
     "chembl_protein_class_factory",
     "chembl_target_component_factory",
     "chembl_target_factory",
-    "crossref_publication_enrichment_factory",  # Deprecated alias
     "crossref_publication_factory",
     "get_factory",
     "is_registered",
