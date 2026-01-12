@@ -14,7 +14,7 @@
     - chembl_protein_class
     - chembl_target
     - chembl_target_component
-    - crossref_publication_enrichment
+    - crossref_publication
     - openalex_publication
     - pubchem_compound
     - pubmed_publications

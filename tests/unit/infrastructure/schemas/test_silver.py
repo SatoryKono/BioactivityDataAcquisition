@@ -11,8 +11,8 @@ import pytest
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
     CHEMBL_ASSAY_SCHEMA,
-    CHEMBL_DOCUMENT_SCHEMA,
     CHEMBL_MOLECULE_SCHEMA,
+    CHEMBL_PUBLICATION_SCHEMA,
     CHEMBL_TARGET_COMPONENT_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
     PUBCHEM_COMPOUND_SCHEMA,
@@ -47,9 +47,9 @@ class TestSchemaExistence:
         assert isinstance(CHEMBL_ASSAY_SCHEMA, pa.Schema)
 
     def test_chembl_document_schema_exists(self):
-        """Verify CHEMBL_DOCUMENT_SCHEMA is defined."""
-        assert CHEMBL_DOCUMENT_SCHEMA is not None
-        assert isinstance(CHEMBL_DOCUMENT_SCHEMA, pa.Schema)
+        """Verify CHEMBL_PUBLICATION_SCHEMA is defined."""
+        assert CHEMBL_PUBLICATION_SCHEMA is not None
+        assert isinstance(CHEMBL_PUBLICATION_SCHEMA, pa.Schema)
 
     def test_chembl_molecule_schema_exists(self):
         """Verify CHEMBL_MOLECULE_SCHEMA is defined."""
@@ -90,7 +90,7 @@ class TestSystemFields:
         [
             (CHEMBL_ACTIVITY_SCHEMA, "CHEMBL_ACTIVITY"),
             (CHEMBL_ASSAY_SCHEMA, "CHEMBL_ASSAY"),
-            (CHEMBL_DOCUMENT_SCHEMA, "CHEMBL_DOCUMENT"),
+            (CHEMBL_PUBLICATION_SCHEMA, "CHEMBL_DOCUMENT"),
             (CHEMBL_MOLECULE_SCHEMA, "CHEMBL_MOLECULE"),
             (CHEMBL_TARGET_SCHEMA, "CHEMBL_TARGET"),
             (CHEMBL_TARGET_COMPONENT_SCHEMA, "CHEMBL_TARGET_COMPONENT"),
@@ -112,7 +112,7 @@ class TestSystemFields:
         [
             (CHEMBL_ACTIVITY_SCHEMA, "CHEMBL_ACTIVITY"),
             (CHEMBL_ASSAY_SCHEMA, "CHEMBL_ASSAY"),
-            (CHEMBL_DOCUMENT_SCHEMA, "CHEMBL_DOCUMENT"),
+            (CHEMBL_PUBLICATION_SCHEMA, "CHEMBL_DOCUMENT"),
             (CHEMBL_MOLECULE_SCHEMA, "CHEMBL_MOLECULE"),
             (CHEMBL_TARGET_SCHEMA, "CHEMBL_TARGET"),
             (CHEMBL_TARGET_COMPONENT_SCHEMA, "CHEMBL_TARGET_COMPONENT"),
@@ -293,21 +293,21 @@ class TestChemblTargetSchema:
 
 
 class TestChemblDocumentSchema:
-    """Tests for CHEMBL_DOCUMENT_SCHEMA."""
+    """Tests for CHEMBL_PUBLICATION_SCHEMA."""
 
     def test_has_primary_key(self):
         """Verify primary key field exists."""
-        assert "document_chembl_id" in CHEMBL_DOCUMENT_SCHEMA.names
+        assert "document_chembl_id" in CHEMBL_PUBLICATION_SCHEMA.names
 
     def test_has_publication_identifiers(self):
         """Verify publication identifier fields exist."""
         expected = ["pubmed_id", "doi", "patent_id"]
         for field_name in expected:
-            assert field_name in CHEMBL_DOCUMENT_SCHEMA.names
+            assert field_name in CHEMBL_PUBLICATION_SCHEMA.names
 
     def test_pubmed_id_is_string(self):
         """Verify pubmed_id is string (numeric string for cross-provider consistency)."""
-        field = CHEMBL_DOCUMENT_SCHEMA.field("pubmed_id")
+        field = CHEMBL_PUBLICATION_SCHEMA.field("pubmed_id")
         assert field.type == pa.string()
 
 
@@ -427,7 +427,7 @@ class TestSchemaFieldCounts:
         [
             (CHEMBL_ACTIVITY_SCHEMA, "CHEMBL_ACTIVITY", 50),
             (CHEMBL_ASSAY_SCHEMA, "CHEMBL_ASSAY", 25),
-            (CHEMBL_DOCUMENT_SCHEMA, "CHEMBL_DOCUMENT", 15),
+            (CHEMBL_PUBLICATION_SCHEMA, "CHEMBL_DOCUMENT", 15),
             (CHEMBL_MOLECULE_SCHEMA, "CHEMBL_MOLECULE", 20),
             (CHEMBL_TARGET_SCHEMA, "CHEMBL_TARGET", 15),
             (CHEMBL_TARGET_COMPONENT_SCHEMA, "CHEMBL_TARGET_COMPONENT", 10),
