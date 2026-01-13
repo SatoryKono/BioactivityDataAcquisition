@@ -473,7 +473,9 @@ class ChemblDocumentRecord(BaseModel):
 
     # External IDs
     doi: str | None = Field(default=None, description="Digital Object Identifier")
-    pubmed_id: int | None = Field(default=None, description="PubMed ID")
+    pubmed_id: str | None = Field(
+        default=None, description="PubMed ID (numeric string)"
+    )
     patent_id: str | None = Field(default=None, description="Patent ID")
 
     # Source
