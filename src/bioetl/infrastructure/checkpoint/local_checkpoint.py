@@ -17,13 +17,13 @@ Architecture:
 
 from __future__ import annotations
 
-import json
 import os
 import tempfile
 from pathlib import Path
 from typing import Any
 from uuid import UUID
 
+from bioetl.domain.serialization import deserialize_from_json, serialize_to_json
 from bioetl.domain.types import RunID
 
 
@@ -65,7 +65,7 @@ class LocalCheckpoint:
             "metadata": metadata or {},
             "version": "2.0",
         }
-        checkpoint_json = json.dumps(checkpoint_data, indent=2)
+        checkpoint_json = serialize_to_json(checkpoint_data, ensure_ascii=False)
 
         # Atomic write: write to temp file, then replace
         fd, temp_path = tempfile.mkstemp(
@@ -96,7 +96,9 @@ class LocalCheckpoint:
         with open(full_path) as f:
             checkpoint_json = f.read()
 
-        checkpoint_data = json.loads(checkpoint_json)
+        checkpoint_data = deserialize_from_json(checkpoint_json)
+        if not isinstance(checkpoint_data, dict):
+            raise ValueError("Checkpoint data must be a dictionary")
         run_id = RunID(UUID(checkpoint_data["run_id"]))
         metadata = checkpoint_data.get("metadata", {})
         return (run_id, metadata)

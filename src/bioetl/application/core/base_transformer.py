@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, TypeVar
 import orjson
 
 from bioetl.domain.ports import (
+    DataNormalizationPort,
     MetricsPort,
     NoOpMetrics,
     NoOpPiiHasher,
@@ -29,7 +30,7 @@ from bioetl.domain.ports import (
     PiiHasherPort,
     TracingPort,
 )
-from bioetl.domain.services import IdentityService
+from bioetl.domain.services import DataNormalizationService, IdentityService
 from bioetl.domain.types import ContentHash, EntityID
 
 if TYPE_CHECKING:
@@ -98,6 +99,7 @@ class BaseTransformer(ABC):
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
+        data_normalizer: DataNormalizationPort | None = None,
     ) -> None:
         """Initialize transformer with provider name and observability.
 
@@ -111,6 +113,8 @@ class BaseTransformer(ABC):
                 Defaults to a new IdentityService instance.
             pii_hasher: Optional PII hasher for hashing author names and other PII.
                 Defaults to NoOpPiiHasher (no hashing) for backward compatibility.
+            data_normalizer: Data normalization service for text normalization
+                (DOI, PMID, authors, HTML). Defaults to DataNormalizationService.
 
         """
         self.provider = provider
@@ -123,6 +127,11 @@ class BaseTransformer(ABC):
         )
         self._pii_hasher: PiiHasherPort = (
             pii_hasher if pii_hasher is not None else NoOpPiiHasher()
+        )
+        self._data_normalizer: DataNormalizationPort = (
+            data_normalizer
+            if data_normalizer is not None
+            else DataNormalizationService()
         )
 
     # ========================================================================

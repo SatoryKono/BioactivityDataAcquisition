@@ -607,7 +607,8 @@ class TestUniProtProteinTransformerExtendedFields:
 
         assert result is not None
         assert result["gene_primary"] == "AKT1"
-        assert result["gene_synonyms"] == '["PKB", "RAC"]'
+        # Compact JSON format (no spaces) per centralized serialization
+        assert result["gene_synonyms"] == '["PKB","RAC"]'
 
     @pytest.mark.asyncio
     async def test_extract_function_comment(self, transformer, mock_context):
@@ -653,11 +654,12 @@ class TestUniProtProteinTransformerExtendedFields:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
+        # Compact JSON format (no spaces after colons) per centralized serialization
         assert (
-            '"reaction": "ATP + protein = ADP + phosphoprotein"'
+            '"reaction":"ATP + protein = ADP + phosphoprotein"'
             in result["catalytic_activity"]
         )
-        assert '"ec_number": "2.7.11.1"' in result["catalytic_activity"]
+        assert '"ec_number":"2.7.11.1"' in result["catalytic_activity"]
 
     @pytest.mark.asyncio
     async def test_extract_subcellular_location(self, transformer, mock_context):
@@ -679,7 +681,8 @@ class TestUniProtProteinTransformerExtendedFields:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["subcellular_location"] == '["Cytoplasm", "Nucleus"]'
+        # Compact JSON format (no spaces) per centralized serialization
+        assert result["subcellular_location"] == '["Cytoplasm","Nucleus"]'
 
     @pytest.mark.asyncio
     async def test_extract_alternative_products(self, transformer, mock_context):
@@ -702,7 +705,8 @@ class TestUniProtProteinTransformerExtendedFields:
 
         assert result is not None
         assert result["isoform_count"] == 2
-        assert '"ids": ["P31749-1"]' in result["alternative_products"]
+        # Compact JSON format per centralized serialization
+        assert '"ids":["P31749-1"]' in result["alternative_products"]
 
     @pytest.mark.asyncio
     async def test_extract_go_terms(self, transformer, mock_context):
@@ -725,10 +729,11 @@ class TestUniProtProteinTransformerExtendedFields:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert '"id": "GO:0005524"' in result["go_terms"]
-        assert '"term": "ATP binding"' in result["go_terms"]
-        assert '"aspect": "F"' in result["go_terms"]
-        assert '"evidence": "IEA"' in result["go_terms"]
+        # Compact JSON format per centralized serialization
+        assert '"id":"GO:0005524"' in result["go_terms"]
+        assert '"term":"ATP binding"' in result["go_terms"]
+        assert '"aspect":"F"' in result["go_terms"]
+        assert '"evidence":"IEA"' in result["go_terms"]
 
     @pytest.mark.asyncio
     async def test_extract_drugbank_ids(self, transformer, mock_context):
@@ -745,7 +750,8 @@ class TestUniProtProteinTransformerExtendedFields:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["drugbank_ids"] == '["DB00171", "DB00734"]'
+        # Compact JSON format (no spaces) per centralized serialization
+        assert result["drugbank_ids"] == '["DB00171","DB00734"]'
 
     @pytest.mark.asyncio
     async def test_extract_chembl_ids(self, transformer, mock_context):
@@ -801,9 +807,10 @@ class TestUniProtProteinTransformerExtendedFields:
 
         assert result is not None
         assert result["feature_count"] == 1
-        assert '"type": "Chain"' in result["features"]
-        assert '"start": 1' in result["features"]
-        assert '"end": 480' in result["features"]
+        # Compact JSON format per centralized serialization
+        assert '"type":"Chain"' in result["features"]
+        assert '"start":1' in result["features"]
+        assert '"end":480' in result["features"]
 
     @pytest.mark.asyncio
     async def test_extract_keywords(self, transformer, mock_context):
@@ -825,9 +832,10 @@ class TestUniProtProteinTransformerExtendedFields:
 
         assert result is not None
         assert result["keyword_count"] == 2
-        assert '"id": "KW-0067"' in result["keywords"]
-        assert '"name": "ATP-binding"' in result["keywords"]
-        assert '"category": "Molecular function"' in result["keywords"]
+        # Compact JSON format per centralized serialization
+        assert '"id":"KW-0067"' in result["keywords"]
+        assert '"name":"ATP-binding"' in result["keywords"]
+        assert '"category":"Molecular function"' in result["keywords"]
 
     @pytest.mark.asyncio
     async def test_extract_sequence_info(self, transformer, mock_context):
