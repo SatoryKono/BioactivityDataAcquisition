@@ -21,18 +21,18 @@ gold_filters:
   columns:
     component_type: ["PROTEIN"]
 
-# Entity-specific sink overrides (custom paths for this entity)
+# Entity-specific sink overrides
 sink:
   bronze:
-    path: data/bronze/chembl/target_component
+    path: "data/output/bronze"
   silver:
-    path: data/silver/chembl/target_component
+    path: "data/output/silver"
     primary_key: ["component_id"]
     partition_by: ["organism"]
     csv_export:
       path: "data/output/csv/silver"
   gold:
-    path: data/gold/chembl/target_component
+    path: "data/output/gold"
     csv_export:
       path: "data/output/csv/gold"
 

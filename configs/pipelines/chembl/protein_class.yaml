@@ -30,9 +30,9 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: data/bronze/chembl/protein_class
+    path: "data/output/bronze"
   silver:
-    path: data/silver/chembl/protein_class
+    path: "data/output/silver"
     primary_key: ["protein_class_id"]
     partition_by: ["class_level"]
     sort_by:
@@ -41,7 +41,7 @@ sink:
     csv_export:
       path: "data/output/csv/silver"
   gold:
-    path: data/gold/chembl/protein_class
+    path: "data/output/gold"
     sort_by:
       columns: ["class_level", "sort_order", "protein_class_id"]
       ascending: true

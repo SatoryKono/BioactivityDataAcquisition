@@ -31,15 +31,15 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze/pubmed/publication"
+    path: "data/output/bronze"
   silver:
-    path: "data/output/silver/pubmed/publication"
+    path: "data/output/silver"
     primary_key: ["pmid"]
     partition_by: ["pub_year"]
     csv_export:
       path: "data/output/csv/silver"
   gold:
-    path: "data/output/gold/pubmed/publication"
+    path: "data/output/gold"
     csv_export:
       path: "data/output/csv/gold"
 
