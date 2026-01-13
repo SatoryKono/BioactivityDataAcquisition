@@ -183,7 +183,7 @@ class TestDocumentTransformerSnapshot:
     def sample_record(self) -> dict[str, Any]:
         return {
             "document_chembl_id": "CHEMBL1234567",
-            "pubmed_id": 12345678,
+            "pubmed_id": "12345678",
             "doi": "10.1000/test.doi",
             "title": "Test Document Title",
             "authors": "Test Author, Another Author",
