@@ -13,7 +13,6 @@ Architecture:
 from __future__ import annotations
 
 import asyncio
-import json
 import os
 import tempfile
 from pathlib import Path
@@ -21,6 +20,8 @@ from typing import TYPE_CHECKING
 
 import pyarrow as pa
 import pyarrow.csv as pv
+
+from bioetl.domain.serialization import serialize_to_json
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -105,11 +106,10 @@ class CsvExporter:
     @staticmethod
     def _serialize_column_to_json(col: pa.ChunkedArray) -> pa.Array:
         """Serialize a column of complex values to JSON strings."""
-        json_strings = [
-            json.dumps(val.as_py(), sort_keys=True) if val.as_py() is not None else None
-            for val in col
+        vals = [
+            serialize_to_json(v.as_py()) if v.as_py() is not None else None for v in col
         ]
-        return pa.array(json_strings, type=pa.string())
+        return pa.array(vals, type=pa.string())
 
     @staticmethod
     def _flatten_for_csv(table: pa.Table) -> pa.Table:

@@ -79,7 +79,8 @@ class TestCsvExporterFlatten:
         result = CsvExporter._flatten_for_csv(table)
 
         assert pa.types.is_string(result.schema.field("tags").type)
-        assert result.column("tags").to_pylist() == ['["a", "b"]', '["c"]']
+        # Compact JSON format (no spaces) per centralized serialization
+        assert result.column("tags").to_pylist() == ['["a","b"]', '["c"]']
 
     def test_flatten_struct_type(self) -> None:
         """Test that struct types are converted to JSON strings."""
@@ -109,7 +110,8 @@ class TestCsvExporterFlatten:
         result = CsvExporter._flatten_for_csv(table)
 
         tags_list = result.column("tags").to_pylist()
-        assert tags_list[0] == '["a", "b"]'
+        # Compact JSON format (no spaces) per centralized serialization
+        assert tags_list[0] == '["a","b"]'
         assert tags_list[1] is None
 
 

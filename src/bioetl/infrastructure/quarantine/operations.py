@@ -5,7 +5,6 @@ Contains operations for reading and analyzing quarantined records.
 
 from __future__ import annotations
 
-import json
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
@@ -13,6 +12,7 @@ import pyarrow.compute as pc
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError
 
+from bioetl.domain.serialization import deserialize_from_json
 from bioetl.domain.types import QuarantineRecordStatus
 from bioetl.infrastructure.quarantine.helpers import quote_literal
 
@@ -50,8 +50,8 @@ def inspect_records(
 
     records: list[dict[str, Any]] = filtered_table.to_pylist()
     for record in records:
-        record["payload"] = json.loads(record["payload"])
-        record["error_details"] = json.loads(record["error_details"])
+        record["payload"] = deserialize_from_json(record["payload"])
+        record["error_details"] = deserialize_from_json(record["error_details"])
 
     return records
 
@@ -98,8 +98,8 @@ def replay_records(
     filtered_table = filtered_table.sort_by([("ingestion_ts", "ascending")])
 
     for record in filtered_table.to_pylist():
-        record["payload"] = json.loads(record["payload"])
-        record["error_details"] = json.loads(record["error_details"])
+        record["payload"] = deserialize_from_json(record["payload"])
+        record["error_details"] = deserialize_from_json(record["error_details"])
         yield record
 
 

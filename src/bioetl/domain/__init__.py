@@ -199,6 +199,14 @@ from bioetl.domain.ports import (
 # Resilience (domain value objects)
 from bioetl.domain.resilience import CircuitBreakerConfig, RetryConfig, RetryPolicy
 
+# Serialization (centralized JSON per RULES.md §2.8.1)
+from bioetl.domain.serialization import (
+    deserialize_from_json,
+    is_orjson_available,
+    serialize_to_json,
+    serialize_to_json_canonical,
+)
+
 # Domain services
 from bioetl.domain.services import IdentityService
 
@@ -425,6 +433,11 @@ __all__ = [
     "RetryPolicy",
     # Services
     "IdentityService",
+    # Serialization (centralized JSON)
+    "deserialize_from_json",
+    "is_orjson_available",
+    "serialize_to_json",
+    "serialize_to_json_canonical",
     # Normalization (pure functions, REFACTOR-004)
     "extract_first_item",
     "extract_first_string",
