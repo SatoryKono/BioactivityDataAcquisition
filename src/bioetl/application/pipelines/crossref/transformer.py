@@ -25,8 +25,7 @@ from bioetl.domain.normalization import (
     parse_page_range,
 )
 from bioetl.domain.services import DataNormalizationService, IdentityService
-from bioetl.domain.validation import validate_year_range
-from bioetl.domain.value_objects import DOI
+from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -124,7 +123,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         """Extract publication year from date-parts.
 
         Tries published-print, then published-online, then issued.
-        Delegates validation to domain.validation.validate_year_range.
+        Validates using PublicationYear Value Object for consistent range checking.
 
         Args:
             publication: CrossRef publication record.
@@ -137,9 +136,11 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             date_info = publication.get(date_field, {})
             date_parts = date_info.get("date-parts", [[]])
             if date_parts and date_parts[0] and len(date_parts[0]) > 0:
-                year = date_parts[0][0]
-                if isinstance(year, int) and validate_year_range(year):
-                    return year
+                raw_year = date_parts[0][0]
+                if isinstance(raw_year, int):
+                    year_vo = PublicationYear.from_raw(raw_year)
+                    if year_vo:
+                        return year_vo.value
         return None
 
     @staticmethod
