@@ -49,7 +49,7 @@ sink:
 # NOTE: Disabled because ChEMBL API doesn't support filtering by record_id.
 # To filter, use molecule_chembl_id in a CSV file instead.
 input_filter:
-  enabled: false
+  enabled: true
   source_path: "data/input/molecule.csv"
   column_name: "molecule_chembl_id"
   filter_field: "molecule_chembl_id"
