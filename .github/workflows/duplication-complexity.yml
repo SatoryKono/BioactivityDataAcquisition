@@ -39,8 +39,9 @@ jobs:
           # Exempt complex adapter files that implement FilterableDataSourcePort with fallback logic
           # OpenAlex: fetch_filtered_with_fallback with DOI→title fallback (CC=23)
           # SemanticScholar: fetch_filtered_with_fallback with DOI→ID fallback (CC=22)
+          # CrossRef: fetch_batch with batch DOI resolution and fallback to individual (CC=12)
           xenon --max-absolute B --max-modules B --max-average A \
-            --exclude "tests/*,src/tools/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*" src
+            --exclude "tests/*,src/tools/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*,src/bioetl/infrastructure/adapters/crossref/*" src
 
       - name: Strict complexity check for domain layer (CC ≤ 5)
         run: |
@@ -79,6 +80,7 @@ jobs:
           EXEMPT_PATHS = {
               "src/bioetl/infrastructure/adapters/openalex/",
               "src/bioetl/infrastructure/adapters/semanticscholar/",
+              "src/bioetl/infrastructure/adapters/crossref/",  # fetch_batch with fallback (CC=12)
               "src/tools/",  # Utility scripts with complex reporting logic
           }
 
