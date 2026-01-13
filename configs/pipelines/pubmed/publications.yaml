@@ -45,6 +45,7 @@ sink:
 
 # Entity-specific input filter
 # NOTE: Disabled - PubMed adapter does not implement FilterableDataSourcePort
+# Uses search_term in source configuration instead
 input_filter:
   enabled: false
   source_path: "data/input/pubmed.csv"

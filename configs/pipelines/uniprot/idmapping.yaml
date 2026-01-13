@@ -63,7 +63,11 @@ gold_filters:
     - target_chembl_id
     - mapping_status
 
-# Input filter - the CSV file IS the input (not a filter)
-# Disabled because we read directly from source.input_path
+# Input filter - disabled because ID Mapping reads directly from source.input_path
+# The adapter handles filtering internally via the ID Mapping API
 input_filter:
   enabled: false
+  source_path: "data/input/target.csv"
+  column_name: "target_chembl_id"
+  filter_field: "target_chembl_id"
+  batch_size: 100

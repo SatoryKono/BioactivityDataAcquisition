@@ -39,10 +39,11 @@ sink:
     csv_export:
       path: "data/output/csv/gold"
 
-# Entity-specific input filter (disabled by default)
+# Entity-specific input filter
+# CSV column 'uniprot_id' contains accession values for filtering
 input_filter:
-  enabled: false
+  enabled: true
   source_path: "data/input/protein.csv"
-  column_name: "accession"
+  column_name: "uniprot_id"
   filter_field: "accession"
   batch_size: 100
