@@ -106,7 +106,7 @@ async def test_all_chembl_pipelines_chain(e2e_data_dir: Path):
     pipelines_in_order = [
         ("chembl_target", "chembl_target", 2),
         ("chembl_molecule", "chembl_molecule", 2),
-        ("chembl_document", "chembl_document", 2),
+        ("chembl_publication", "chembl_publication", 2),
         ("chembl_activity", "chembl_activity", 3),
         ("chembl_assay", "chembl_assay", 2),
     ]
