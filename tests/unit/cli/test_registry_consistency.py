@@ -62,15 +62,37 @@ class TestChemblPipelinesRegistered:
 
         If this test fails, add the new pipeline to PIPELINE_CONFIGS in
         src/bioetl/composition/factories/pipeline_factories.py.
+
+        Note: Deprecated aliases (ADR-024) like ChEMBLDocumentPipeline that
+        point to the same class as their canonical counterpart (ChEMBLPublicationPipeline)
+        are excluded from the count to avoid double-counting.
         """
         # Import the chembl module to introspect exports
         from bioetl.application.pipelines import chembl as chembl_module
 
         # Get all exported names that end with 'Pipeline'
         chembl_exports = getattr(chembl_module, "__all__", [])
-        pipeline_classes = [
+        pipeline_class_names = [
             name for name in chembl_exports if name.endswith("Pipeline")
         ]
+
+        # Get unique pipeline classes (exclude aliases pointing to same class)
+        # This handles ADR-024 deprecated aliases like ChEMBLDocumentPipeline
+        # When the same class has multiple names, prefer the canonical name
+        # (Publication vs Document per ADR-024)
+        unique_classes: dict[type, str] = {}
+        for name in pipeline_class_names:
+            cls = getattr(chembl_module, name)
+            if cls not in unique_classes:
+                unique_classes[cls] = name
+            else:
+                # Prefer canonical names (Publication) over deprecated (Document)
+                existing_name = unique_classes[cls]
+                if "Document" in existing_name and "Publication" in name:
+                    unique_classes[cls] = name
+
+        # Use unique class names for counting
+        pipeline_classes = list(unique_classes.values())
 
         # Get registered ChEMBL pipelines
         registered_names = [

@@ -137,13 +137,13 @@ class TestDoiRegexEdgeCases:
 class TestDoiSchemaIntegration:
     """Integration tests verifying DOI_REGEX_PATTERN is correctly imported in schemas."""
 
-    def test_chembl_document_uses_doi_regex_pattern(self) -> None:
+    def test_chembl_publication_uses_doi_regex_pattern(self) -> None:
         """Test ChEMBL ChemblPublicationSchema uses DOI_REGEX_PATTERN constant."""
-        from bioetl.domain.schemas.chembl import document
+        from bioetl.domain.schemas.chembl import publication
 
         # Verify the import exists
-        assert hasattr(document, "DOI_REGEX_PATTERN")
-        assert document.DOI_REGEX_PATTERN == DOI_REGEX_PATTERN
+        assert hasattr(publication, "DOI_REGEX_PATTERN")
+        assert publication.DOI_REGEX_PATTERN == DOI_REGEX_PATTERN
 
     def test_pubmed_article_uses_doi_regex_pattern(self) -> None:
         """Test PubMed ArticleSchema uses DOI_REGEX_PATTERN constant."""
@@ -187,7 +187,7 @@ class TestDoiSchemaIntegration:
 
     def test_all_schemas_use_consistent_pattern(self) -> None:
         """Test all schemas use the same DOI pattern value."""
-        from bioetl.domain.schemas.chembl import document
+        from bioetl.domain.schemas.chembl import publication as chembl_pub
         from bioetl.domain.schemas.crossref import publication as crossref_pub
         from bioetl.domain.schemas.crossref import work
         from bioetl.domain.schemas.openalex import publication as openalex_pub
@@ -195,7 +195,7 @@ class TestDoiSchemaIntegration:
         from bioetl.domain.schemas.semanticscholar import publication as s2_pub
 
         patterns = [
-            document.DOI_REGEX_PATTERN,
+            chembl_pub.DOI_REGEX_PATTERN,
             article.DOI_REGEX_PATTERN,
             s2_pub.DOI_REGEX_PATTERN,
             openalex_pub.DOI_REGEX_PATTERN,
