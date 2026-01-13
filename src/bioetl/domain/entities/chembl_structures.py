@@ -359,8 +359,8 @@ class DocumentSimilarity(BaseEntity):
     doc_2: int
 
     # === PubMed Identifiers ===
-    pubmed_id1: int | None = None
-    pubmed_id2: int | None = None
+    pubmed_id1: str | None = None  # Numeric string for cross-provider consistency
+    pubmed_id2: str | None = None  # Numeric string for cross-provider consistency
 
     # === Tanimoto Coefficients ===
     tid_tani: float | None = None  # Target-based
