@@ -4,9 +4,9 @@ This package provides pipelines and transformers for extracting and
 processing data from the ChEMBL database.
 
 Main Components:
-- Transformers: ActivityTransformer, AssayTransformer, DocumentSimilarityTransformer, etc.
+- Transformers: ActivityTransformer, AssayTransformer, PublicationSimilarityTransformer, etc.
 - BaseChemblTransformer: Base class for ChEMBL-specific transformers
-- Pipeline classes: ChEMBLActivityPipeline, ChEMBLAssayPipeline, ChEMBLDocumentSimilarityPipeline, etc.
+- Pipeline classes: ChEMBLActivityPipeline, ChEMBLAssayPipeline, ChEMBLPublicationSimilarityPipeline, etc.
 
 Usage:
     # Use transformers for custom pipelines
@@ -58,29 +58,21 @@ from bioetl.application.pipelines.chembl.protein_class_transformer import (
     ProteinClassTransformer,
 )
 
-# Publication pipelines (canonical names, ADR-024)
-from bioetl.application.pipelines.chembl.publication import (
-    ChEMBLDocumentPipeline,  # Deprecated alias
-    ChEMBLPublicationPipeline,
-)
+# Publication pipelines
+from bioetl.application.pipelines.chembl.publication import ChEMBLPublicationPipeline
 from bioetl.application.pipelines.chembl.publication_similarity import (
-    ChEMBLDocumentSimilarityPipeline,  # Deprecated alias
     ChEMBLPublicationSimilarityPipeline,
 )
 from bioetl.application.pipelines.chembl.publication_similarity_transformer import (
-    DocumentSimilarityTransformer,  # Deprecated alias
     PublicationSimilarityTransformer,
 )
 from bioetl.application.pipelines.chembl.publication_term import (
-    ChEMBLDocumentTermPipeline,  # Deprecated alias
     ChEMBLPublicationTermPipeline,
 )
 from bioetl.application.pipelines.chembl.publication_term_transformer import (
-    DocumentTermTransformer,  # Deprecated alias
     PublicationTermTransformer,
 )
 from bioetl.application.pipelines.chembl.publication_transformer import (
-    DocumentTransformer,  # Deprecated alias
     PublicationTransformer,
 )
 from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
@@ -103,22 +95,14 @@ __all__ = [
     "ChEMBLAssayPipeline",
     "ChEMBLCellLinePipeline",
     "ChEMBLCompoundRecordPipeline",
-    # Deprecated aliases (ADR-024)
-    "ChEMBLDocumentPipeline",
-    "ChEMBLDocumentSimilarityPipeline",
-    "ChEMBLDocumentTermPipeline",
     "ChEMBLMoleculePipeline",
     "ChEMBLProteinClassPipeline",
-    # New canonical names (ADR-024)
     "ChEMBLPublicationPipeline",
     "ChEMBLPublicationSimilarityPipeline",
     "ChEMBLPublicationTermPipeline",
     "ChEMBLTargetComponentPipeline",
     "ChEMBLTargetPipeline",
     "CompoundRecordTransformer",
-    "DocumentSimilarityTransformer",
-    "DocumentTermTransformer",
-    "DocumentTransformer",
     "MoleculeTransformer",
     "ProteinClassTransformer",
     "PublicationSimilarityTransformer",

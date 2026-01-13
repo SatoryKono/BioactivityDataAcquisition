@@ -178,7 +178,3 @@ class PublicationTransformer(BaseChemblTransformer):
             data["authors"] = None
 
         return data
-
-
-# Backward-compatible alias (deprecated, ADR-024)
-DocumentTransformer = PublicationTransformer

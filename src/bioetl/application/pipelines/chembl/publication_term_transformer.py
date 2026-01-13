@@ -78,7 +78,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
             Dictionary of term business fields.
 
         """
-        # Case 1: Record is already a term record (from DocumentTermDataSource)
+        # Case 1: Record is already a term record (from PublicationTermDataSource)
         # These records have 'term' and 'term_type' fields directly
         if "term" in record and "term_type" in record:
             return {
@@ -226,7 +226,3 @@ class PublicationTermTransformer(BaseChemblTransformer):
         normalized_term = term.lower().strip() if term else ""
         composite = f"{document_chembl_id}:{term_type}:{normalized_term}"
         return hashlib.sha256(composite.encode()).hexdigest()[:16]
-
-
-# Backward-compatible alias (deprecated, ADR-024)
-DocumentTermTransformer = PublicationTermTransformer
