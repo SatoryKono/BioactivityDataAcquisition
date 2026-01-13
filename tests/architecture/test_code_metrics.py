@@ -407,6 +407,8 @@ class TestClassSize:
         "MedallionConfigValidator": 350,  # Extracted from PreflightService - cohesive validation
         # Pandera schemas (declarative field definitions)
         "PubchemMoleculeSchema": 350,  # 345 lines - PubChem molecule schema with many chemical fields
+        # Derived entity data source wrappers (comprehensive docstrings)
+        "PublicationTermDataSource": 310,  # Wrapper for derived entity extraction with detailed docs
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:

@@ -8,9 +8,11 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.document_term_data_source import DocumentTermDataSource
 from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.application.core.idmapping_data_source import IDMappingDataSource
+from bioetl.application.core.publication_term_data_source import (
+    PublicationTermDataSource,
+)
 from bioetl.composition.bootstrap_logger import BootstrapLogger
 from bioetl.composition.providers.provider_registry import (
     HttpConfig,
@@ -165,8 +167,8 @@ def _create_chembl_data_source(
     Configuration is loaded from configs/sources/chembl.yaml via AdapterConfig.
     This ensures YAML is the single source of truth (RULES.md §12.1.2).
 
-    For document_term entity type, wraps the adapter with DocumentTermDataSource
-    to extract terms from document records (derived entity pattern).
+    For document_term entity type, wraps the adapter with PublicationTermDataSource
+    to extract terms from publication records (derived entity pattern).
     """
     DataSourceFactory, HttpClientFactory = _get_factories()
     http_client = HttpClientFactory.create_for_provider("chembl", settings)
@@ -182,10 +184,10 @@ def _create_chembl_data_source(
         metrics=metrics,
     )
 
-    # Wrap with DocumentTermDataSource for derived entity extraction
-    # document_term is extracted from document records (1:M relationship)
+    # Wrap with PublicationTermDataSource for derived entity extraction
+    # document_term is extracted from publication records (1:M relationship)
     if pipeline_config.entity_type == "document_term":
-        base_adapter = DocumentTermDataSource(base_adapter)
+        base_adapter = PublicationTermDataSource(base_adapter)
 
     return _wrap_with_filter(
         base_adapter, filter_config, logger, metrics, pipeline_name

@@ -8,10 +8,12 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
-from bioetl.application.pipelines.chembl.document_term_transformer import (
-    DocumentTermTransformer,
+from bioetl.application.pipelines.chembl.publication_term_transformer import (
+    PublicationTermTransformer,
 )
-from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
+from bioetl.application.pipelines.chembl.publication_transformer import (
+    PublicationTransformer,
+)
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
@@ -177,13 +179,13 @@ class TestAssayTransformer:
 
 
 @pytest.mark.unit
-class TestDocumentTransformer:
-    """Tests for DocumentTransformer."""
+class TestPublicationTransformer:
+    """Tests for PublicationTransformer."""
 
     @pytest.fixture
     def transformer(self):
-        """Create DocumentTransformer instance."""
-        return DocumentTransformer(provider="chembl")
+        """Create PublicationTransformer instance."""
+        return PublicationTransformer(provider="chembl")
 
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):
@@ -808,13 +810,13 @@ class TestTargetComponentTransformer:
 
 
 @pytest.mark.unit
-class TestDocumentTermTransformer:
-    """Tests for DocumentTermTransformer."""
+class TestPublicationTermTransformer:
+    """Tests for PublicationTermTransformer."""
 
     @pytest.fixture
     def transformer(self):
-        """Create DocumentTermTransformer instance."""
-        return DocumentTermTransformer(provider="chembl")
+        """Create PublicationTermTransformer instance."""
+        return PublicationTermTransformer(provider="chembl")
 
     def test_extract_mesh_terms(self, transformer):
         """Test extraction of MeSH terms from document record."""

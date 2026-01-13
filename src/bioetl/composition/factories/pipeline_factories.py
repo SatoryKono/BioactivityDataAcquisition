@@ -48,16 +48,18 @@ from bioetl.application.pipelines.chembl.cell_line_transformer import (
 from bioetl.application.pipelines.chembl.compound_record_transformer import (
     CompoundRecordTransformer,
 )
-from bioetl.application.pipelines.chembl.document_similarity_transformer import (
-    DocumentSimilarityTransformer,
-)
-from bioetl.application.pipelines.chembl.document_term_transformer import (
-    DocumentTermTransformer,
-)
-from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.protein_class_transformer import (
     ProteinClassTransformer,
+)
+from bioetl.application.pipelines.chembl.publication_similarity_transformer import (
+    PublicationSimilarityTransformer,
+)
+from bioetl.application.pipelines.chembl.publication_term_transformer import (
+    PublicationTermTransformer,
+)
+from bioetl.application.pipelines.chembl.publication_transformer import (
+    PublicationTransformer,
 )
 from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
@@ -199,23 +201,23 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         gold_schema=ChEMBLCompoundRecordGoldSchema,
     ),
     PipelineFactoryConfig(
-        pipeline_name="chembl_document",
+        pipeline_name="chembl_publication",
         provider="chembl",
-        transformer_class=DocumentTransformer,
+        transformer_class=PublicationTransformer,
         silver_schema=CHEMBL_PUBLICATION_SCHEMA,
         gold_schema=ChEMBLDocumentGoldSchema,
     ),
     PipelineFactoryConfig(
-        pipeline_name="chembl_document_similarity",
+        pipeline_name="chembl_publication_similarity",
         provider="chembl",
-        transformer_class=DocumentSimilarityTransformer,
+        transformer_class=PublicationSimilarityTransformer,
         silver_schema=CHEMBL_DOCUMENT_SIMILARITY_SCHEMA,
         gold_schema=ChEMBLDocumentSimilarityGoldSchema,
     ),
     PipelineFactoryConfig(
-        pipeline_name="chembl_document_term",
+        pipeline_name="chembl_publication_term",
         provider="chembl",
-        transformer_class=DocumentTermTransformer,
+        transformer_class=PublicationTermTransformer,
         silver_schema=CHEMBL_DOCUMENT_TERM_SCHEMA,
         gold_schema=ChEMBLDocumentTermGoldSchema,
     ),
@@ -341,9 +343,9 @@ chembl_assay_factory = _factories["chembl_assay"]
 chembl_assay_parameters_factory = _factories["chembl_assay_parameters"]
 chembl_cell_line_factory = _factories["chembl_cell_line"]
 chembl_compound_record_factory = _factories["chembl_compound_record"]
-chembl_document_factory = _factories["chembl_document"]
-chembl_document_similarity_factory = _factories["chembl_document_similarity"]
-chembl_document_term_factory = _factories["chembl_document_term"]
+chembl_publication_factory = _factories["chembl_publication"]
+chembl_publication_similarity_factory = _factories["chembl_publication_similarity"]
+chembl_publication_term_factory = _factories["chembl_publication_term"]
 chembl_molecule_factory = _factories["chembl_molecule"]
 chembl_target_factory = _factories["chembl_target"]
 chembl_target_component_factory = _factories["chembl_target_component"]
@@ -355,6 +357,11 @@ pubmed_publications_factory = _factories["pubmed_publications"]
 crossref_publication_factory = _factories["crossref_publication"]
 openalex_publication_factory = _factories["openalex_publication"]
 semanticscholar_publication_factory = _factories["semanticscholar_publication"]
+
+# Backward-compatible aliases for renamed factories (deprecated, ADR-024)
+chembl_document_factory = chembl_publication_factory
+chembl_document_similarity_factory = chembl_publication_similarity_factory
+chembl_document_term_factory = chembl_publication_term_factory
 
 
 # =============================================================================
@@ -485,11 +492,16 @@ __all__ = [
     "chembl_assay_parameters_factory",
     "chembl_cell_line_factory",
     "chembl_compound_record_factory",
+    # Deprecated aliases (ADR-024)
     "chembl_document_factory",
     "chembl_document_similarity_factory",
     "chembl_document_term_factory",
     "chembl_molecule_factory",
     "chembl_protein_class_factory",
+    # New canonical names (ADR-024)
+    "chembl_publication_factory",
+    "chembl_publication_similarity_factory",
+    "chembl_publication_term_factory",
     "chembl_target_component_factory",
     "chembl_target_factory",
     "crossref_publication_factory",

@@ -1,17 +1,18 @@
-# configs/pipelines/chembl/document.yaml
-# Pipeline configuration for ChEMBL Document entity.
+# configs/pipelines/chembl/publication.yaml
+# Pipeline configuration for ChEMBL Publication entity.
 #
 # Inherits defaults from ../_defaults.yaml
+# Note: entity_type=document maps to ChEMBL API /document endpoint
 
-pipeline_name: chembl_document
+pipeline_name: chembl_publication
 provider: chembl
 entity_type: document
-version: "1.1.0"
-description: "Extract scientific documents from ChEMBL API"
+version: "2.0.0"
+description: "Extract scientific publications from ChEMBL API"
 
 primary_keys: ["document_chembl_id"]
-silver_table: "chembl_document"
-gold_table: "chembl_document"
+silver_table: "chembl_publication"
+gold_table: "chembl_publication"
 
 source_file: ../../sources/chembl.yaml
 

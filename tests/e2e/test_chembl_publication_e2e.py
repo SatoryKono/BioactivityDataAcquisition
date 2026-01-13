@@ -1,7 +1,10 @@
-"""E2E tests for ChEMBL Document pipeline.
+"""E2E tests for ChEMBL Publication pipeline.
 
 Tests the complete pipeline execution from fetch to Gold layer.
 Uses VCR cassettes for HTTP requests and local file storage.
+
+.. versionchanged:: 2.0.0
+    Renamed from test_chembl_document_e2e to test_chembl_publication_e2e (ADR-024).
 """
 
 from __future__ import annotations
@@ -29,15 +32,15 @@ def vcr_cassette_dir() -> Path:
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_chembl_document_full_cycle(e2e_data_dir: Path):
-    """E2E: ChEMBL Document pipeline from fetch to Silver.
+async def test_chembl_publication_full_cycle(e2e_data_dir: Path):
+    """E2E: ChEMBL Publication pipeline from fetch to Silver.
 
     Verifies:
-    1. Document data is fetched and transformed
+    1. Publication data is fetched and transformed
     2. Silver table contains expected records
     """
     # Arrange
-    ctx = create_test_context("chembl_document", limit=5)
+    ctx = create_test_context("chembl_publication", limit=5)
 
     # Act
     runner = bootstrap_pipeline(ctx)
@@ -49,12 +52,12 @@ async def test_chembl_document_full_cycle(e2e_data_dir: Path):
 
     # Assert - Silver layer
     silver_count = assert_silver_table_has_records(
-        e2e_data_dir, "chembl_document", expected_min=1
+        e2e_data_dir, "chembl_publication", expected_min=1
     )
     assert silver_count <= 5
 
     # Assert - Schema validation
-    records = get_silver_records(e2e_data_dir, "chembl_document")
+    records = get_silver_records(e2e_data_dir, "chembl_publication")
     required_fields = ["document_chembl_id"]
     for record in records:
         for field in required_fields:
@@ -64,20 +67,20 @@ async def test_chembl_document_full_cycle(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_chembl_document_publication_fields(e2e_data_dir: Path):
+async def test_chembl_publication_metadata_fields(e2e_data_dir: Path):
     """E2E: Verify publication-related fields are extracted.
 
-    Documents may contain journal, year, DOI and other publication metadata.
+    Publications may contain journal, year, DOI and other metadata.
     """
     # Arrange
-    ctx = create_test_context("chembl_document", limit=5)
+    ctx = create_test_context("chembl_publication", limit=5)
 
     # Act
     runner = bootstrap_pipeline(ctx)
     await runner.run()
 
     # Assert - Check publication fields
-    records = get_silver_records(e2e_data_dir, "chembl_document")
+    records = get_silver_records(e2e_data_dir, "chembl_publication")
 
     # Publication fields that may be present
     publication_fields = ["title", "year", "doi", "pubmed_id", "doc_type"]
