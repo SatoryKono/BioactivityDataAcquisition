@@ -34,11 +34,17 @@ def get_all_pipeline_configs():
     """Get all main pipeline config files, excluding source configs and defaults."""
     if not PIPELINE_CONFIG_PATH.exists():
         return []
-    # Exclude files in 'sources/' subdirectories and _defaults.yaml
+    # Exclude files in 'sources/' subdirectories, _defaults.yaml, _base.yaml,
+    # and internal directories starting with '_' (like _providers/)
     return [
         p
         for p in PIPELINE_CONFIG_PATH.glob("**/*.yaml")
-        if "sources" not in p.parts and p.name != "_defaults.yaml"
+        if "sources" not in p.parts
+        and p.name not in ("_defaults.yaml", "_base.yaml")
+        and not any(
+            part.startswith("_")
+            for part in p.relative_to(PIPELINE_CONFIG_PATH).parts[:-1]
+        )
     ]
 
 
