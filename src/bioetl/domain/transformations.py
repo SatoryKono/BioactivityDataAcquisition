@@ -13,12 +13,12 @@ All functions are pure (deterministic, side-effect free).
 from __future__ import annotations
 
 import hashlib
-import json
 import math
 from datetime import date, datetime
 from functools import singledispatch
 from typing import Any
 
+from .serialization import serialize_to_json_canonical
 from .types import ContentHash, DriftLevel, EntityID
 
 # =============================================================================
@@ -99,13 +99,12 @@ def normalize_for_hash(
 
 
 def canonical_json_dumps(obj: dict[str, Any]) -> str:
-    """Convert object to canonical JSON representation."""
-    return json.dumps(
-        obj,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=True,
-    )
+    """Convert object to canonical JSON representation.
+
+    Delegates to domain.serialization.serialize_to_json_canonical()
+    for consistent JSON serialization across the codebase.
+    """
+    return serialize_to_json_canonical(obj)
 
 
 def generate_content_hash(

@@ -11,7 +11,6 @@ Requirements:
 
 from __future__ import annotations
 
-import json
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
@@ -19,6 +18,7 @@ import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
+from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.types import BatchID, QuarantineRecordStatus, RunID
 from bioetl.infrastructure.quarantine.helpers import (
     MAX_PAYLOAD_SIZE,
@@ -78,7 +78,7 @@ class UnifiedQuarantine:
                          (single source of time per ADR-014). Required.
 
         """
-        payload_json = json.dumps(payload, ensure_ascii=True)
+        payload_json = serialize_to_json(payload, ensure_ascii=True)
 
         if len(payload_json) > MAX_PAYLOAD_SIZE:
             payload_json = payload_json[:MAX_PAYLOAD_SIZE]
@@ -98,7 +98,7 @@ class UnifiedQuarantine:
             "payload_truncated": truncated,
             "bronze_batch_id": str(bronze_batch_id),
             "bronze_file_uri": meta.get("bronze_file_uri", ""),
-            "error_details": json.dumps(meta.get("error_details", {})),
+            "error_details": serialize_to_json(meta.get("error_details", {})),
             "dq_status": QuarantineRecordStatus.NEW.value,
             "run_id": str(run_id) if run_id else "",
         }

@@ -47,9 +47,9 @@ def _require_field(raw_data: dict[str, Any], field: str) -> Any:
 
 def _safe_json(val: Any) -> str | None:
     """Convert to JSON string if not None/empty."""
-    import json
+    from bioetl.domain.serialization import serialize_to_json
 
-    return json.dumps(val) if val else None
+    return serialize_to_json(val) if val else None
 
 
 class BioactivityState(str, Enum):
@@ -204,13 +204,14 @@ class Bioactivity(BaseEntity):
     ) -> Bioactivity:
         """Create Bioactivity from raw API data. Returns entity in RAW state."""
         import hashlib
-        import json
+
+        from bioetl.domain.serialization import serialize_to_json_canonical
 
         activity_id = _require_field(raw_data, "activity_id")
         molecule_chembl_id = _require_field(raw_data, "molecule_chembl_id")
         entity_id = EntityID(str(activity_id))
         content_hash_str = hashlib.sha256(
-            json.dumps(raw_data, sort_keys=True, default=str).encode()
+            serialize_to_json_canonical(raw_data).encode()
         ).hexdigest()
 
         return cls(

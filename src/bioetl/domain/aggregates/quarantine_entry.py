@@ -214,14 +214,15 @@ class QuarantineEntry:
             New QuarantineEntry instance.
         """
         import hashlib
-        import json
         from uuid import uuid4
+
+        from bioetl.domain.serialization import serialize_to_json_canonical
 
         # Generate entry ID
         entry_id = str(uuid4())
 
         # Compute payload hash
-        canonical = json.dumps(payload, sort_keys=True, default=str)
+        canonical = serialize_to_json_canonical(payload)
         hash_value = hashlib.sha256(canonical.encode()).hexdigest()
         payload_hash = ContentHash(hash_value)
 
