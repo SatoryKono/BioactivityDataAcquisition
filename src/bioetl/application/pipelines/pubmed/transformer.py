@@ -22,6 +22,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
 from bioetl.application.pipelines.pubmed.xml_utils import get_text
 from bioetl.domain.entities import Publication
 from bioetl.domain.services import DataNormalizationService, IdentityService
+from bioetl.domain.value_objects import PubMedId
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -142,7 +143,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             # This should not happen if _pre_extract_validation ran successfully
             return {"pmid": None}
 
-        pmid = get_text(root.find(".//PMID"))
+        # Validate PMID using Value Object (returns None for invalid/empty)
+        raw_pmid = get_text(root.find(".//PMID"))
+        pmid_vo = PubMedId.from_raw(raw_pmid)
+        pmid = str(pmid_vo) if pmid_vo else None
 
         medline = root.find(".//MedlineCitation")
         article = root.find(".//Article")
