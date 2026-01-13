@@ -15,9 +15,12 @@ See also:
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from .transformations import safe_int
+
+if TYPE_CHECKING:
+    from bioetl.domain.config import ValidationConfig
 
 # =============================================================================
 # SMILES Validation (Chemical Structure)
@@ -70,8 +73,21 @@ def validate_smiles(smiles: str | None) -> bool:
 # Standard publication year range for scientific publications.
 # First scientific journals appeared in XVII century, but systematic
 # publications began in XIX century.
-MIN_PUBLICATION_YEAR: int = 1800
-MAX_PUBLICATION_YEAR: int = 2100
+#
+# These constants use DEFAULT_VALIDATION_CONFIG for the authoritative values.
+# For custom ranges, use ValidationConfig directly or PublicationYear Value Object.
+
+
+def _get_default_config() -> ValidationConfig:
+    """Get default validation config (lazy import to avoid circular deps)."""
+    from bioetl.domain.config import DEFAULT_VALIDATION_CONFIG
+
+    return DEFAULT_VALIDATION_CONFIG
+
+
+# Backward-compatible constants that reference DEFAULT_VALIDATION_CONFIG
+MIN_PUBLICATION_YEAR: int = 1800  # DEFAULT_VALIDATION_CONFIG.min_publication_year
+MAX_PUBLICATION_YEAR: int = 2100  # DEFAULT_VALIDATION_CONFIG.max_publication_year
 
 
 # =============================================================================
@@ -142,14 +158,19 @@ def validate_year_range(
     return min_year <= year <= max_year
 
 
-def validate_publication_year(year: int | None) -> tuple[int | None, bool]:
+def validate_publication_year(
+    year: int | None,
+    config: ValidationConfig | None = None,
+) -> tuple[int | None, bool]:
     """Validate publication year and flag if out of range.
 
-    Uses standard publication year range [MIN_PUBLICATION_YEAR, MAX_PUBLICATION_YEAR].
+    Uses validation range from config or DEFAULT_VALIDATION_CONFIG.
     Values outside this range are preserved but flagged for DQ warnings.
 
     Args:
         year: Publication year to validate.
+        config: Optional ValidationConfig for custom ranges.
+            If None, uses DEFAULT_VALIDATION_CONFIG.
 
     Returns:
         Tuple of (year, is_warning) where:
@@ -171,11 +192,19 @@ def validate_publication_year(year: int | None) -> tuple[int | None, bool]:
         (1500, True)
         >>> validate_publication_year(None)
         (None, False)
+        >>> # With custom config
+        >>> from bioetl.domain.config import ValidationConfig
+        >>> ss_config = ValidationConfig(min_publication_year=1500)
+        >>> validate_publication_year(1600, config=ss_config)
+        (1600, False)
 
     """
     if year is None:
         return None, False
-    if MIN_PUBLICATION_YEAR <= year <= MAX_PUBLICATION_YEAR:
+    resolved_config = config or _get_default_config()
+    min_year = resolved_config.min_publication_year
+    max_year = resolved_config.max_publication_year
+    if min_year <= year <= max_year:
         return year, False
     return year, True  # Keep value but flag as warning
 
@@ -218,26 +247,38 @@ def validate_non_negative(value: Any) -> float | None:
 # =============================================================================
 
 # Molecular weight valid range:
-# - Min: > 0 (must be positive)
-# - Max: 100000 Da (covers small molecules ~100-1000 Da to large proteins ~50000 Da)
+# - Min: > 10.0 Da (DEFAULT_VALIDATION_CONFIG)
+# - Max: < 10000.0 Da (DEFAULT_VALIDATION_CONFIG)
 # Reference: PubChem compound MW typically ranges from ~10 to ~5000 Da
-MIN_MOLECULAR_WEIGHT: float = 0.0
-MAX_MOLECULAR_WEIGHT: float = 100000.0
+#
+# For backward compatibility, these constants use broader ranges than
+# DEFAULT_VALIDATION_CONFIG. Use MolecularWeight Value Object for strict validation.
+MIN_MOLECULAR_WEIGHT: float = 0.0  # Legacy: 0.0 (exclusive bound)
+MAX_MOLECULAR_WEIGHT: float = 100000.0  # Legacy: 100000.0 (exclusive bound)
 
 
-def validate_molecular_weight(value: Any) -> float | None:
+def validate_molecular_weight(
+    value: Any,
+    config: ValidationConfig | None = None,
+) -> float | None:
     """Validate and convert molecular weight to float.
 
     Handles string-to-float conversion (PubChem API may return strings)
-    and validates the range. Precision is 10 decimals per RULES.md §2.8.1.
+    and validates the range. Precision from config (default 10 decimals)
+    per RULES.md §2.8.1.
 
-    Valid range: 0 < mw < 100000 (covers small molecules to large proteins).
+    When config is provided, uses config.min_molecular_weight and
+    config.max_molecular_weight (exclusive bounds).
+
+    When config is None, uses legacy bounds (0, 100000) for backward
+    compatibility. For stricter validation, use MolecularWeight Value Object.
 
     Args:
         value: Raw molecular weight value (string, int, float, or None).
+        config: Optional ValidationConfig for custom ranges and precision.
 
     Returns:
-        Valid float rounded to 10 decimals, or None if invalid/out of range.
+        Valid float rounded to precision, or None if invalid/out of range.
 
     Example:
         >>> validate_molecular_weight(180.156)
@@ -248,7 +289,7 @@ def validate_molecular_weight(value: Any) -> float | None:
         None
         >>> validate_molecular_weight(-1.0)  # Negative is invalid
         None
-        >>> validate_molecular_weight(100001)  # Too large
+        >>> validate_molecular_weight(100001)  # Too large (legacy bounds)
         None
         >>> validate_molecular_weight(None)
         None
@@ -260,8 +301,17 @@ def validate_molecular_weight(value: Any) -> float | None:
         return None
     try:
         mw = float(value)
-        if MIN_MOLECULAR_WEIGHT < mw < MAX_MOLECULAR_WEIGHT:
-            return round(mw, 10)
+        # Use config bounds if provided, otherwise legacy bounds
+        if config is not None:
+            min_mw = config.min_molecular_weight
+            max_mw = config.max_molecular_weight
+            precision = config.molecular_weight_precision
+        else:
+            min_mw = MIN_MOLECULAR_WEIGHT
+            max_mw = MAX_MOLECULAR_WEIGHT
+            precision = 10
+        if min_mw < mw < max_mw:
+            return round(mw, precision)
         return None
     except (ValueError, TypeError):
         return None

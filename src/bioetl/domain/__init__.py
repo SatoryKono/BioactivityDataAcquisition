@@ -16,10 +16,12 @@ from __future__ import annotations
 
 # Configuration objects
 from bioetl.domain.config import (
+    DEFAULT_VALIDATION_CONFIG,
     DQConfig,
     PipelineConfig,
     RuntimeConfig,
     TableConfig,
+    ValidationConfig,
 )
 
 # Base configuration classes (consolidated DTOs per RULES.md §12.1.6)
@@ -256,19 +258,23 @@ from bioetl.domain.value_objects import (
     Concentration,
     ConcentrationUnit,
     DQEvaluationStatus,
+    MolecularWeight,
     PChemblValue,
     PubChemCid,
     PubMedId,
+    PublicationYear,
     UniProtId,
     ValueObject,
 )
 
 __all__ = [
     # Configuration
+    "DEFAULT_VALIDATION_CONFIG",
     "DQConfig",
     "PipelineConfig",
     "RuntimeConfig",
     "TableConfig",
+    "ValidationConfig",
     # Base configuration classes (consolidated DTOs)
     "BaseClientConfig",
     "BaseProviderConfig",
@@ -475,9 +481,11 @@ __all__ = [
     "ConcentrationUnit",
     "DOI",
     "DQEvaluationStatus",
+    "MolecularWeight",
     "PChemblValue",
     "PubChemCid",
     "PubMedId",
+    "PublicationYear",
     "UniProtId",
     "ValueObject",
 ]
