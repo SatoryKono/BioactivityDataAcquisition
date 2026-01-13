@@ -1,17 +1,57 @@
 # configs/pipelines/_defaults.yaml
-# Default settings for all pipelines.
+# =============================================================================
+# BioETL Pipeline Configuration Defaults
+# =============================================================================
 #
-# These defaults are merged with entity-specific configs.
-# Entity configs can override any setting.
+# This file defines default settings for all pipelines following the
+# Medallion Architecture (Bronze → Silver → Gold).
 #
-# Usage in entity config:
-#   # Entity-specific settings only
+# CONFIGURATION HIERARCHY:
+# 1. _defaults.yaml          - Global defaults (this file)
+# 2. configs/sources/*.yaml  - Provider-specific settings (rate_limit, client)
+# 3. <provider>/<entity>.yaml - Entity-specific settings (gold_filters, keys)
+#
+# INHERITANCE:
+# Entity configs inherit from this file. Settings can be overridden at any level.
+# Provider-specific settings (rate_limit, circuit_breaker for HTTP) are in
+# configs/sources/<provider>.yaml and referenced via source_file.
+#
+# SCHEMA VERSION: 1.1.0 (aligned with RULES.md v5.10)
+# LAST UPDATED: 2026-01-13
+#
+# REQUIRED FIELDS (MUST be defined in entity config):
+#   - pipeline_name: str      # Unique identifier (e.g., "chembl_activity")
+#   - provider: str           # Provider name (e.g., "chembl", "pubchem")
+#   - entity_type: str        # Entity type (e.g., "activity", "compound")
+#   - primary_keys: list[str] # Primary key columns for merge operations
+#   - silver_table: str       # Silver layer table name
+#   - source_file: str        # Reference to provider source config
+#
+# OPTIONAL FIELDS (inherit defaults):
+#   - version: str            # Entity config version (default: "1.0.0")
+#   - gold_table: str         # Gold layer table name (default: same as silver)
+#   - gold_filters: dict      # Gold layer filtering rules
+#   - dq_rules: dict          # Data quality thresholds (can override defaults)
+#   - input_filter: dict      # Input CSV filtering configuration
+#
+# EXAMPLE ENTITY CONFIG:
 #   pipeline_name: chembl_activity
 #   provider: chembl
 #   entity_type: activity
-#   # ... rest is inherited from _defaults.yaml
+#   version: "1.1.0"
+#   primary_keys: ["activity_id"]
+#   silver_table: "chembl_activity"
+#   gold_table: "chembl_activity"
+#   source_file: ../../sources/chembl.yaml
+#   gold_filters:
+#     required_fields: [standard_type, standard_value]
+#   sink:
+#     silver:
+#       primary_key: ["activity_id"]
+#       partition_by: []
+# =============================================================================
 
-# Version for this defaults file
+# Schema version for this defaults file
 defaults_version: "1.1.0"
 
 # =============================================================================

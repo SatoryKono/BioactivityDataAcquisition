@@ -1,0 +1,55 @@
+# configs/pipelines/_providers/chembl.yaml
+# =============================================================================
+# ChEMBL Provider Reference Configuration
+# =============================================================================
+#
+# AUTHORITATIVE SOURCE: configs/sources/chembl.yaml
+#
+# This file documents ChEMBL-specific settings for reference.
+# Entity configs should use source_file: ../../sources/chembl.yaml
+#
+# API DOCUMENTATION: https://www.ebi.ac.uk/chembl/api/data/docs
+# =============================================================================
+
+provider: chembl
+
+# Rate Limiting
+# ChEMBL has no official rate limit, but we self-impose for stability
+rate_limit:
+  requests_per_second: 5
+  burst: 10
+
+# HTTP Client Settings
+client:
+  base_url: https://www.ebi.ac.uk/chembl/api/data
+  timeout_sec: 60.0  # ChEMBL can be slow for large queries
+  max_retries: 3
+
+# Batch Processing
+batch_size: 20  # Optimal for ChEMBL pagination
+
+# Health Check
+health_check:
+  endpoint: /status.json
+  timeout: 5
+
+# Supported Entities (12 total)
+entities:
+  - activity        # Biological activity records
+  - assay           # Bioassay definitions
+  - assay_parameters # Experimental parameters
+  - cell_line       # Cell lines used in assays
+  - compound_record # Compound-document links
+  - document        # Scientific publications
+  - document_similarity # Document Tanimoto coefficients
+  - document_term   # MeSH headings and keywords
+  - molecule        # Chemical compounds
+  - protein_class   # Protein classification hierarchy
+  - target          # Biological targets
+  - target_component # Target protein sequences
+
+# Notes
+notes:
+  - "ChEMBL API returns paginated results (default page_size: 1000)"
+  - "Some entities (compound_record) don't support direct ID filtering"
+  - "protein_class is a reference table (~1,500 records) - use full load"

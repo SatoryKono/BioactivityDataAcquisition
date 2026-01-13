@@ -1,0 +1,47 @@
+# configs/pipelines/_providers/openalex.yaml
+# =============================================================================
+# OpenAlex Provider Reference Configuration
+# =============================================================================
+#
+# AUTHORITATIVE SOURCE: configs/sources/openalex.yaml
+#
+# This file documents OpenAlex-specific settings for reference.
+# Entity configs should use source_file: ../../sources/openalex.yaml
+#
+# API DOCUMENTATION: https://docs.openalex.org/
+# =============================================================================
+
+provider: openalex
+
+# Rate Limiting
+# Polite pool: 10 req/sec with email, 100K req/day
+rate_limit:
+  requests_per_second: 10
+  burst: 20
+
+# HTTP Client Settings
+client:
+  base_url: https://api.openalex.org
+  timeout_sec: 30.0
+  max_retries: 3
+
+# Authentication
+auth:
+  polite_pool: true
+  email_env: BIOETL_OPENALEX_EMAIL  # Required for polite pool
+
+# Supported Entities
+entities:
+  - publication  # OpenAlex works (publications)
+
+# DOI Resolution
+doi_resolution:
+  fallback_column: title  # Search by title if DOI not found
+  batch_size: 50
+
+# Notes
+notes:
+  - "OpenAlex provides free, open scholarly metadata"
+  - "Works API supports DOI lookup and title search"
+  - "Partition by year for efficient storage"
+  - "openalex_id is the primary key (e.g., W1234567890)"

@@ -1,0 +1,46 @@
+# configs/pipelines/_providers/crossref.yaml
+# =============================================================================
+# CrossRef Provider Reference Configuration
+# =============================================================================
+#
+# AUTHORITATIVE SOURCE: configs/sources/crossref.yaml
+#
+# This file documents CrossRef-specific settings for reference.
+# Entity configs should use source_file: ../../sources/crossref.yaml
+#
+# API DOCUMENTATION: https://api.crossref.org/swagger-ui/index.html
+# =============================================================================
+
+provider: crossref
+
+# Rate Limiting
+# Polite pool: Higher limits with email identification
+rate_limit:
+  requests_per_second: 50
+  burst: 100
+
+# HTTP Client Settings
+client:
+  base_url: https://api.crossref.org
+  timeout_sec: 30.0
+  max_retries: 3
+
+# Authentication
+auth:
+  polite_pool: true  # Use polite pool with email
+  email_env: BIOETL_CROSSREF_EMAIL  # Required for polite pool
+
+# Supported Entities
+entities:
+  - publication  # CrossRef works (DOI resolution)
+
+# DOI Resolution
+doi_resolution:
+  fallback_column: title  # Search by title if DOI not found (404)
+  batch_size: 50
+
+# Notes
+notes:
+  - "Always include email header for polite pool access"
+  - "DOI resolution is primary mode; title search is fallback"
+  - "Works endpoint returns rich publication metadata"

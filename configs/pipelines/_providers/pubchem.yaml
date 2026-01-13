@@ -1,0 +1,45 @@
+# configs/pipelines/_providers/pubchem.yaml
+# =============================================================================
+# PubChem Provider Reference Configuration
+# =============================================================================
+#
+# AUTHORITATIVE SOURCE: configs/sources/pubchem.yaml
+#
+# This file documents PubChem-specific settings for reference.
+# Entity configs should use source_file: ../../sources/pubchem.yaml
+#
+# API DOCUMENTATION: https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest
+# =============================================================================
+
+provider: pubchem
+
+# Rate Limiting (NCBI guidelines)
+# https://pubchem.ncbi.nlm.nih.gov/docs/programmatic-access
+rate_limit:
+  requests_per_second: 5
+  burst: 10
+
+# HTTP Client Settings
+client:
+  base_url: https://pubchem.ncbi.nlm.nih.gov/rest/pug
+  timeout_sec: 30.0
+  max_retries: 3
+
+# Batch Processing
+# PubChem PUG REST limits batch sizes for certain operations
+batch_size: 50
+
+# Retry Configuration
+retry:
+  use_retry_after: true  # Respect Retry-After header from 429 responses
+
+# Supported Entities
+entities:
+  - compound  # Chemical compounds (CID-based)
+
+# SMILES Search Notes
+notes:
+  - "SMILES-based search is single-compound due to API limitations"
+  - "Use batch_size: 1 for SMILES queries"
+  - "PUG REST supports JSON and XML output formats"
+  - "Large result sets may require multiple requests"

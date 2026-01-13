@@ -1,0 +1,61 @@
+# configs/pipelines/_providers/semanticscholar.yaml
+# =============================================================================
+# Semantic Scholar Provider Reference Configuration
+# =============================================================================
+#
+# AUTHORITATIVE SOURCE: configs/sources/semanticscholar.yaml
+#
+# This file documents Semantic Scholar-specific settings for reference.
+# Entity configs should use source_file: ../../sources/semanticscholar.yaml
+#
+# API DOCUMENTATION: https://api.semanticscholar.org/api-docs/
+# =============================================================================
+
+provider: semanticscholar
+
+# Rate Limiting
+# Public API: 100 requests per 5 minutes (sliding window)
+# With API key: Higher limits available
+rate_limit:
+  requests_per_second: 0.33  # ~100 req / 300 sec = 0.33 req/sec average
+  burst: 10
+  window: 300  # 5-minute sliding window
+
+# HTTP Client Settings
+client:
+  base_url: https://api.semanticscholar.org/graph/v1
+  timeout_sec: 30.0
+  max_retries: 3
+
+# Authentication (optional but recommended)
+auth:
+  api_key_env: BIOETL_SEMANTICSCHOLAR_API_KEY
+
+# Supported Entities
+entities:
+  - publication  # Semantic Scholar papers
+
+# DOI Resolution
+doi_resolution:
+  fallback_column: title  # Search by title if DOI not found
+  batch_size: 100
+
+# Paper Fields (requested in API calls)
+fields:
+  - paperId
+  - title
+  - year
+  - authors
+  - abstract
+  - citationCount
+  - referenceCount
+  - fieldsOfStudy
+  - publicationTypes
+  - externalIds
+
+# Notes
+notes:
+  - "Semantic Scholar uses paper_id as primary key"
+  - "Rate limits are per 5-minute sliding window"
+  - "API key required for production workloads"
+  - "Supports DOI, ArXiv ID, and title search"

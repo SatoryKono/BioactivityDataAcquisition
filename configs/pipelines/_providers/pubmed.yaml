@@ -1,0 +1,54 @@
+# configs/pipelines/_providers/pubmed.yaml
+# =============================================================================
+# PubMed Provider Reference Configuration
+# =============================================================================
+#
+# AUTHORITATIVE SOURCE: configs/sources/pubmed.yaml
+#
+# This file documents PubMed-specific settings for reference.
+# Entity configs should use source_file: ../../sources/pubmed.yaml
+#
+# API DOCUMENTATION: https://www.ncbi.nlm.nih.gov/books/NBK25500/
+# =============================================================================
+
+provider: pubmed
+
+# Rate Limiting (NCBI E-utilities)
+# Without API key: 3 req/sec
+# With API key: 10 req/sec
+rate_limit:
+  requests_per_second: 3  # Conservative without API key
+  burst: 10
+
+# HTTP Client Settings
+client:
+  base_url: https://eutils.ncbi.nlm.nih.gov/entrez/eutils
+  timeout_sec: 30.0
+  max_retries: 3
+
+# Authentication (recommended)
+auth:
+  api_key_env: BIOETL_NCBI_API_KEY  # Increases rate limit to 10 req/sec
+  email_env: BIOETL_NCBI_EMAIL      # Required for NCBI tool identification
+
+# Tool Identification (required by NCBI)
+ncbi_tool:
+  tool_name: bioetl
+  email: "${BIOETL_NCBI_EMAIL}"
+
+# Supported Entities
+entities:
+  - publication  # PubMed articles (PMID-based)
+
+# Search Configuration
+search:
+  default_term: "bioinformatics[Title/Abstract] AND drug discovery[Title/Abstract]"
+  retmax: 10000  # Maximum results per request
+  partition_by: pub_year
+
+# Notes
+notes:
+  - "NCBI requires tool and email identification in requests"
+  - "API key significantly increases rate limits"
+  - "E-utilities support ESearch, EFetch, EInfo endpoints"
+  - "Adapter does not implement FilterableDataSourcePort"
