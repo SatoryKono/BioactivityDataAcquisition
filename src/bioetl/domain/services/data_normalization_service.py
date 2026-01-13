@@ -6,12 +6,12 @@ Pure domain service (no I/O) per RULES.md §1.1.
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 from dataclasses import dataclass, field
 from html import unescape
 from typing import TYPE_CHECKING, Any
 
+from bioetl.domain.serialization import deserialize_from_json, serialize_to_json
 from bioetl.domain.services.data_normalization_config import DataNormalizationConfig
 
 if TYPE_CHECKING:
@@ -97,7 +97,7 @@ class DefaultDataNormalizationService:
         if not author_list:
             return None
         hashed = [self._hash_pii(name, salt) for name in author_list]
-        return json.dumps(hashed, ensure_ascii=True)
+        return serialize_to_json(hashed, ensure_ascii=True)
 
     def _hash_pii(self, value: str, salt: str) -> str:
         """Hash a PII value with salt using SHA-256."""
@@ -157,8 +157,8 @@ class DefaultDataNormalizationService:
     def _try_json_loads(self, text: str) -> Any:
         """Attempt JSON parsing, returning None on failure."""
         try:
-            return json.loads(text)
-        except json.JSONDecodeError:
+            return deserialize_from_json(text)
+        except ValueError:
             return None
 
     def _filter_json_authors(self, items: list[Any]) -> list[str]:

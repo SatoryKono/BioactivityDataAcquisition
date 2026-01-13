@@ -5,11 +5,12 @@ REFACTOR-004: Domain logic separation from use-case layer.
 
 from __future__ import annotations
 
-import json
 import re
 from datetime import date
 from html import unescape
 from typing import Any
+
+from bioetl.domain.serialization import deserialize_from_json
 
 
 def normalize_string(value: str | None) -> str | None:
@@ -138,9 +139,9 @@ def _parse_authors_from_list(authors: list[Any]) -> list[str]:
 def _try_parse_json_array(text: str) -> list[Any] | None:
     """Try to parse text as JSON array. Returns None if invalid."""
     try:
-        parsed = json.loads(text)
+        parsed = deserialize_from_json(text)
         return parsed if isinstance(parsed, list) else None
-    except json.JSONDecodeError:
+    except ValueError:
         return None
 
 

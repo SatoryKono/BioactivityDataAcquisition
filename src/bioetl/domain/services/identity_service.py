@@ -14,11 +14,11 @@ Requirements:
 from __future__ import annotations
 
 import hashlib
-import json
 import math
 from datetime import date, datetime
 from typing import Any
 
+from bioetl.domain.serialization import serialize_to_json_canonical
 from bioetl.domain.types import ContentHash, EntityID
 
 # Meta-fields to exclude from hash calculation (RULES.md §2.8.1)
@@ -220,7 +220,11 @@ class IdentityService:
     def _canonical_json_dumps(obj: dict[str, Any]) -> str:
         """Convert object to canonical JSON representation.
 
-        Uses sorted keys and minimal separators for deterministic output.
+        Uses centralized serialization with sorted keys and minimal separators
+        for deterministic output per RULES.md §2.8.1.
+
+        Delegates to domain.serialization.serialize_to_json_canonical() which
+        uses orjson for optimal performance when available.
 
         Args:
             obj: Dictionary to serialize.
@@ -229,9 +233,4 @@ class IdentityService:
             Canonical JSON string.
 
         """
-        return json.dumps(
-            obj,
-            sort_keys=True,
-            separators=(",", ":"),
-            ensure_ascii=True,
-        )
+        return serialize_to_json_canonical(obj)
