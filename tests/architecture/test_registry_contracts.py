@@ -31,16 +31,17 @@ class TestRegistryProtocol:
         )
 
     def test_datasource_registry_has_required_methods(self) -> None:
-        """DataSourceRegistry must have get, register, list_providers methods."""
+        """DataSourceRegistry must have get, list_providers methods.
+
+        Note: register() was deprecated and removed. New registrations
+        should use ProviderRegistry.register() instead.
+        """
         from bioetl.composition.factories.data_source_factory import (
             DataSourceRegistry,
         )
 
         assert hasattr(DataSourceRegistry, "get"), (
             "DataSourceRegistry MUST have get() method"
-        )
-        assert hasattr(DataSourceRegistry, "register"), (
-            "DataSourceRegistry MUST have register() method"
         )
         assert hasattr(DataSourceRegistry, "list_providers"), (
             "DataSourceRegistry MUST have list_providers() method"
