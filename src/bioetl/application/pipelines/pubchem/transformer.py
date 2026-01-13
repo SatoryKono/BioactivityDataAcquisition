@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any, cast
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities import PubchemMolecule
 from bioetl.domain.services import IdentityService
-from bioetl.domain.transformations import safe_float
+from bioetl.domain.validation import validate_molecular_weight
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -89,12 +89,8 @@ class PubChemCompoundTransformer(BaseTransformer):
         cid = self._get_required_field(record, "cid")
 
         # Step 2: Build business data dictionary
-        # Convert molecular_weight to float with deterministic rounding (RULES.md §2.8.1)
-        raw_mw = record.get("molecular_weight")
-        mol_weight = safe_float(raw_mw)
-        # Apply deterministic rounding and validate range (negative MW is invalid)
-        if mol_weight is not None:
-            mol_weight = None if mol_weight < 0 else round(mol_weight, 10)
+        # Validate and convert molecular_weight (handles string→float, range, precision)
+        mol_weight = validate_molecular_weight(record.get("molecular_weight"))
         business_data: dict[str, Any] = {
             "cid": str(cid),
             "molecular_formula": record.get("molecular_formula"),

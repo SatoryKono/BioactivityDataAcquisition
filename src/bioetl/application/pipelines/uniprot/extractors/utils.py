@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any, ClassVar
+
+import orjson
 
 
 class ExtractorUtils:
@@ -30,7 +31,7 @@ class ExtractorUtils:
         """
         if not value or not isinstance(value, list):
             return None
-        return json.dumps(value, ensure_ascii=False)
+        return orjson.dumps(value).decode("utf-8")
 
     @staticmethod
     def count_list(value: Any) -> int | None:
@@ -76,6 +77,22 @@ class ExtractorUtils:
         return cls.EXISTENCE_MAP.get(existence_str, existence_str)
 
     @staticmethod
+    def _extract_values_from_list(
+        data: list[dict[str, Any]], key: str = "value"
+    ) -> list[str]:
+        """Extract values from a list of dictionaries.
+
+        Args:
+            data: List of dictionaries.
+            key: Key to extract from each dictionary.
+
+        Returns:
+            List of extracted values.
+        """
+        values = [item.get(key) for item in data if isinstance(item, dict)]
+        return [v for v in values if v]
+
+    @staticmethod
     def extract_short_names(recommended_name: dict[str, Any] | None) -> str | None:
         """Extract short names from recommended name.
 
@@ -87,12 +104,11 @@ class ExtractorUtils:
         """
         if not recommended_name:
             return None
-        short_names = recommended_name.get("shortNames", [])
+        short_names = recommended_name.get("shortNames")
         if not isinstance(short_names, list):
             return None
-        values = [sn.get("value") for sn in short_names if isinstance(sn, dict)]
-        values = [v for v in values if v]
-        return json.dumps(values, ensure_ascii=False) if values else None
+        values = ExtractorUtils._extract_values_from_list(short_names)
+        return orjson.dumps(values).decode("utf-8") if values else None
 
     @staticmethod
     def extract_alternative_names(protein_desc: Any) -> str | None:
@@ -106,7 +122,7 @@ class ExtractorUtils:
         """
         if not protein_desc or not isinstance(protein_desc, dict):
             return None
-        alt_names = protein_desc.get("alternativeNames", [])
+        alt_names = protein_desc.get("alternativeNames")
         if not isinstance(alt_names, list):
             return None
 
@@ -114,12 +130,12 @@ class ExtractorUtils:
         for alt in alt_names:
             if not isinstance(alt, dict):
                 continue
-            full_name = alt.get("fullName", {})
+            full_name = alt.get("fullName")
             if isinstance(full_name, dict):
                 name = full_name.get("value")
                 if name:
                     values.append(name)
-        return json.dumps(values, ensure_ascii=False) if values else None
+        return orjson.dumps(values).decode("utf-8") if values else None
 
     @staticmethod
     def extract_ec_numbers(recommended_name: dict[str, Any] | None) -> str | None:
@@ -133,9 +149,8 @@ class ExtractorUtils:
         """
         if not recommended_name:
             return None
-        ec_numbers = recommended_name.get("ecNumbers", [])
+        ec_numbers = recommended_name.get("ecNumbers")
         if not isinstance(ec_numbers, list):
             return None
-        values = [ec.get("value") for ec in ec_numbers if isinstance(ec, dict)]
-        values = [v for v in values if v]
-        return json.dumps(values, ensure_ascii=False) if values else None
+        values = ExtractorUtils._extract_values_from_list(ec_numbers)
+        return orjson.dumps(values).decode("utf-8") if values else None
