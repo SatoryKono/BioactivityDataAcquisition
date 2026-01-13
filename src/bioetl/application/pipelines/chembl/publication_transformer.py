@@ -27,7 +27,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.entities import ChemblPublication
 from bioetl.domain.services import DataNormalizationService, IdentityService
-from bioetl.domain.value_objects import DOI
+from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig
@@ -161,6 +161,10 @@ class PublicationTransformer(BaseChemblTransformer):
         # Validate DOI using Value Object (returns None for invalid/empty)
         doi = DOI.from_raw(data.get("doi"))
         data["doi"] = str(doi) if doi else None
+
+        # Validate year using PublicationYear Value Object
+        year_vo = PublicationYear.from_raw(data.get("year"))
+        data["year"] = year_vo.value if year_vo else None
 
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON
