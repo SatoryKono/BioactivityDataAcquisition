@@ -19,7 +19,7 @@ Instance-level registry support (2025-12):
 Refactored (2025-12):
 - All pipelines now use GenericPipeline instead of provider-specific subclasses
 - Pipeline definitions consolidated into PIPELINE_CONFIGS for loop-based registration
-- Provider-specific pipeline classes are deprecated (backward-compat aliases available)
+- Document → Publication naming unified (ADR-024)
 
 Usage:
     >>> from bioetl.composition.factories.pipeline_factories import register_all_pipelines
@@ -358,11 +358,6 @@ crossref_publication_factory = _factories["crossref_publication"]
 openalex_publication_factory = _factories["openalex_publication"]
 semanticscholar_publication_factory = _factories["semanticscholar_publication"]
 
-# Backward-compatible aliases for renamed factories (deprecated, ADR-024)
-chembl_document_factory = chembl_publication_factory
-chembl_document_similarity_factory = chembl_publication_similarity_factory
-chembl_document_term_factory = chembl_publication_term_factory
-
 
 # =============================================================================
 # Registration Functions
@@ -492,13 +487,8 @@ __all__ = [
     "chembl_assay_parameters_factory",
     "chembl_cell_line_factory",
     "chembl_compound_record_factory",
-    # Deprecated aliases (ADR-024)
-    "chembl_document_factory",
-    "chembl_document_similarity_factory",
-    "chembl_document_term_factory",
     "chembl_molecule_factory",
     "chembl_protein_class_factory",
-    # New canonical names (ADR-024)
     "chembl_publication_factory",
     "chembl_publication_similarity_factory",
     "chembl_publication_term_factory",

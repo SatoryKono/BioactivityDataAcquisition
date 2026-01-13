@@ -4,7 +4,7 @@ Provides common transformation logic for all ChEMBL entity transformers.
 Implements Template Method pattern to eliminate duplication across:
 - ActivityTransformer
 - AssayTransformer
-- DocumentTransformer
+- PublicationTransformer
 - MoleculeTransformer
 - TargetTransformer
 - TargetComponentTransformer

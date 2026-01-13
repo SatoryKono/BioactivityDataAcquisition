@@ -99,7 +99,3 @@ class PublicationSimilarityTransformer(BaseChemblTransformer):
             "avg_tani": avg_tani,
             "max_tani": max_tani,
         }
-
-
-# Backward-compatible alias (deprecated, ADR-024)
-DocumentSimilarityTransformer = PublicationSimilarityTransformer

@@ -38,7 +38,3 @@ class ChEMBLPublicationTermPipeline(BasePipeline):
 
     # transform_bronze_to_silver() is inherited from BasePipeline
     # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
-
-
-# Backward-compatible alias (deprecated, ADR-024)
-ChEMBLDocumentTermPipeline = ChEMBLPublicationTermPipeline
