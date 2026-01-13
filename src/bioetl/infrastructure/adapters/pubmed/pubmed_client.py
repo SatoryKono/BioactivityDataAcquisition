@@ -228,6 +228,42 @@ class PubMedAdapter(BaseHttpAdapter):
             "Use fetch_filtered() with filter_field='pmid' instead."
         )
 
+    async def fetch_filtered_with_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records with fallback (not applicable for PubMed).
+
+        Implements FilterableDataSourcePort.fetch_filtered_with_fallback().
+
+        PubMed uses PMIDs which are stable identifiers, so fallback is not needed.
+        This method simply delegates to fetch_filtered() and ignores the
+        fallback_mapping parameter.
+
+        Args:
+            entity_type: Must be 'publication'.
+            filter_ids: List of PMIDs to fetch.
+            filter_field: Field name (expected 'pmid').
+            fallback_mapping: Ignored - PMIDs are always resolvable.
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Dictionary records for each article.
+
+        """
+        _ = fallback_mapping  # Unused - PMIDs are stable identifiers
+        async for record in self.fetch_filtered(
+            entity_type=entity_type,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            limit=limit,
+        ):
+            yield record
+
     async def fetch(
         self,
         entity_type: str,

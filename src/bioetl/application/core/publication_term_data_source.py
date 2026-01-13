@@ -22,6 +22,8 @@ from __future__ import annotations
 import hashlib
 from typing import TYPE_CHECKING, Any, Self
 
+from bioetl.domain.ports.data_source import FilterableDataSourcePort
+
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
@@ -330,6 +332,232 @@ class PublicationTermDataSource:
     async def aclose(self) -> None:
         """Delegate close to wrapped adapter."""
         await self._data_source.aclose()
+
+    # FilterableDataSourcePort implementation (delegates to wrapped adapter)
+
+    def _ensure_filterable(self, method_name: str) -> FilterableDataSourcePort:
+        """Check that wrapped adapter implements FilterableDataSourcePort.
+
+        Args:
+            method_name: Name of the method being called (for error message).
+
+        Returns:
+            Wrapped adapter cast to FilterableDataSourcePort.
+
+        Raises:
+            TypeError: If wrapped adapter doesn't implement FilterableDataSourcePort.
+
+        """
+        if not isinstance(self._data_source, FilterableDataSourcePort):
+            raise TypeError(
+                f"Wrapped adapter {self._data_source.provider_name} does not implement "
+                f"FilterableDataSourcePort. {method_name}() requires a filterable adapter."
+            )
+        return self._data_source
+
+    async def fetch_filtered(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch filtered records, extracting terms if entity_type is document_term.
+
+        Implements FilterableDataSourcePort.fetch_filtered().
+
+        For document_term entity type:
+        - Delegates to wrapped adapter's fetch_filtered("document", ...)
+        - Extracts terms from each document
+
+        For other entity types:
+        - Delegates directly to wrapped adapter
+
+        Args:
+            entity_type: Type of entity to fetch.
+            filter_ids: List of IDs to filter by (document_chembl_id for document_term).
+            filter_field: Field name to filter on.
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Dictionary records matching the filter criteria.
+
+        """
+        filterable = self._ensure_filterable("fetch_filtered")
+
+        if entity_type == self.TARGET_ENTITY_TYPE:
+            # Fetch publications and extract terms
+            async for term in self._fetch_filtered_publication_terms(
+                filterable, filter_ids, filter_field, limit
+            ):
+                yield term
+        else:
+            # Delegate to wrapped adapter for other entity types
+            async for record in filterable.fetch_filtered(
+                entity_type=entity_type,
+                filter_ids=filter_ids,
+                filter_field=filter_field,
+                limit=limit,
+            ):
+                yield record
+
+    async def _fetch_filtered_publication_terms(
+        self,
+        filterable: FilterableDataSourcePort,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch filtered publications and extract terms.
+
+        Args:
+            filterable: Wrapped adapter that implements FilterableDataSourcePort.
+            filter_ids: Document ChEMBL IDs to filter by.
+            filter_field: Field name (typically document_chembl_id).
+            limit: Maximum number of term records to yield.
+
+        Yields:
+            Term records extracted from filtered publications.
+
+        """
+        term_count = 0
+        publication_limit = limit * self.PUBLICATION_LIMIT_MULTIPLIER if limit else None
+
+        async for publication in filterable.fetch_filtered(
+            entity_type=self.SOURCE_ENTITY_TYPE,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            limit=publication_limit,
+        ):
+            document_chembl_id = publication.get("document_chembl_id")
+            if not document_chembl_id:
+                continue
+
+            terms = self._extract_terms_from_publication(publication, document_chembl_id)
+
+            for term in terms:
+                yield term
+                term_count += 1
+                if limit and term_count >= limit:
+                    return
+
+    async def fetch_multi_filtered(
+        self,
+        entity_type: str,
+        filters: dict[str, list[str]],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records filtered by multiple fields (AND logic).
+
+        Implements FilterableDataSourcePort.fetch_multi_filtered().
+
+        Args:
+            entity_type: Type of entity to fetch.
+            filters: Mapping from filter_field to list of IDs.
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Dictionary records matching ALL filter criteria.
+
+        """
+        filterable = self._ensure_filterable("fetch_multi_filtered")
+
+        if entity_type == self.TARGET_ENTITY_TYPE:
+            # Fetch publications and extract terms
+            term_count = 0
+            publication_limit = (
+                limit * self.PUBLICATION_LIMIT_MULTIPLIER if limit else None
+            )
+
+            async for publication in filterable.fetch_multi_filtered(
+                entity_type=self.SOURCE_ENTITY_TYPE,
+                filters=filters,
+                limit=publication_limit,
+            ):
+                document_chembl_id = publication.get("document_chembl_id")
+                if not document_chembl_id:
+                    continue
+
+                terms = self._extract_terms_from_publication(
+                    publication, document_chembl_id
+                )
+
+                for term in terms:
+                    yield term
+                    term_count += 1
+                    if limit and term_count >= limit:
+                        return
+        else:
+            # Delegate to wrapped adapter for other entity types
+            async for record in filterable.fetch_multi_filtered(
+                entity_type=entity_type,
+                filters=filters,
+                limit=limit,
+            ):
+                yield record
+
+    async def fetch_filtered_with_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records with fallback search when primary lookup fails.
+
+        Implements FilterableDataSourcePort.fetch_filtered_with_fallback().
+
+        Args:
+            entity_type: Type of entity to fetch.
+            filter_ids: List of primary IDs to filter by.
+            filter_field: Field name for primary filtering.
+            fallback_mapping: Mapping from primary ID to fallback value.
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Dictionary records found via primary lookup or fallback search.
+
+        """
+        filterable = self._ensure_filterable("fetch_filtered_with_fallback")
+
+        if entity_type == self.TARGET_ENTITY_TYPE:
+            # Fetch publications and extract terms
+            term_count = 0
+            publication_limit = (
+                limit * self.PUBLICATION_LIMIT_MULTIPLIER if limit else None
+            )
+
+            async for publication in filterable.fetch_filtered_with_fallback(
+                entity_type=self.SOURCE_ENTITY_TYPE,
+                filter_ids=filter_ids,
+                filter_field=filter_field,
+                fallback_mapping=fallback_mapping,
+                limit=publication_limit,
+            ):
+                document_chembl_id = publication.get("document_chembl_id")
+                if not document_chembl_id:
+                    continue
+
+                terms = self._extract_terms_from_publication(
+                    publication, document_chembl_id
+                )
+
+                for term in terms:
+                    yield term
+                    term_count += 1
+                    if limit and term_count >= limit:
+                        return
+        else:
+            # Delegate to wrapped adapter for other entity types
+            async for record in filterable.fetch_filtered_with_fallback(
+                entity_type=entity_type,
+                filter_ids=filter_ids,
+                filter_field=filter_field,
+                fallback_mapping=fallback_mapping,
+                limit=limit,
+            ):
+                yield record
 
 
 # Backward-compatible alias (deprecated, ADR-024)

@@ -34,6 +34,10 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
+# Maximum IDs per batch for UniProt OR-query (API recommendation)
+UNIPROT_BATCH_SIZE = 100
+
+
 class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
     """UniProt API adapter implementing DataSourcePort.
 
@@ -83,10 +87,11 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records from UniProt."""
-        # Note: filter_ids and filter_field are ignored for UniProt -
-        # filtering should be done via query parameter
-        _ = filter_ids, filter_field  # Mark as intentionally unused
+        """Fetch records from UniProt.
+
+        If filter_ids are provided, builds an OR-query to fetch specific accessions.
+        Otherwise fetches all records matching the query.
+        """
         strategy = self._fetch_strategies.get(entity_type)
         if not strategy:
             raise ValueError(
@@ -94,9 +99,202 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 f"Supported: {', '.join(self._fetch_strategies.keys())}"
             )
 
-        # Ensure arguments are passed correctly to strategies
-        async for record in strategy(query=query, limit=limit):
+        # If filter_ids provided, use filtered fetch
+        if filter_ids and filter_field:
+            async for record in self.fetch_filtered(
+                entity_type=entity_type,
+                filter_ids=filter_ids,
+                filter_field=filter_field,
+                limit=limit,
+            ):
+                yield record
+        else:
+            # Standard fetch with optional query
+            async for record in strategy(query=query, limit=limit):
+                yield record
+
+    async def fetch_filtered(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records from UniProt filtered by specific IDs.
+
+        Implements FilterableDataSourcePort.fetch_filtered().
+
+        Builds OR-query for UniProt API: accession:P12345 OR accession:Q67890
+        Processes IDs in batches to avoid query length limits.
+
+        Args:
+            entity_type: Type of entity to fetch (protein, feature, sequence)
+            filter_ids: List of IDs to filter by
+            filter_field: Field name to filter on (typically 'accession')
+            limit: Maximum number of records to fetch
+
+        Yields:
+            Dictionary records matching the filter criteria
+
+        """
+        if not filter_ids:
+            return
+
+        strategy = self._fetch_strategies.get(entity_type)
+        if not strategy:
+            raise ValueError(
+                f"Unsupported entity type: {entity_type}. "
+                f"Supported: {', '.join(self._fetch_strategies.keys())}"
+            )
+
+        # For non-protein entities, delegate to strategy with accession query
+        if entity_type != "protein":
+            # Feature and sequence fetches use accession directly
+            fetched = 0
+            for acc_id in filter_ids:
+                if limit and fetched >= limit:
+                    break
+                async for record in strategy(query=acc_id, limit=1):
+                    yield record
+                    fetched += 1
+                    if limit and fetched >= limit:
+                        break
+            return
+
+        # For proteins: build OR-query in batches
+        fetched = 0
+        for batch_start in range(0, len(filter_ids), UNIPROT_BATCH_SIZE):
+            if limit and fetched >= limit:
+                break
+
+            batch = filter_ids[batch_start : batch_start + UNIPROT_BATCH_SIZE]
+            # Build OR-query: accession:P12345 OR accession:Q67890
+            or_query = " OR ".join(f"{filter_field}:{acc}" for acc in batch)
+
+            batch_limit = (limit - fetched) if limit else None
+            async for record in strategy(query=or_query, limit=batch_limit):
+                yield record
+                fetched += 1
+                if limit and fetched >= limit:
+                    return
+
+    async def fetch_multi_filtered(
+        self,
+        entity_type: str,
+        filters: dict[str, list[str]],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records from UniProt filtered by multiple fields (AND logic).
+
+        Implements FilterableDataSourcePort.fetch_multi_filtered().
+
+        Builds AND-query for UniProt API combining multiple filter conditions.
+        Example: (accession:P12345 OR accession:Q67890) AND (organism_id:9606)
+
+        Args:
+            entity_type: Type of entity to fetch
+            filters: Mapping from filter_field to list of IDs
+            limit: Maximum number of records to fetch
+
+        Yields:
+            Dictionary records matching ALL filter criteria
+
+        """
+        if not filters:
+            return
+
+        strategy = self._fetch_strategies.get(entity_type)
+        if not strategy:
+            raise ValueError(
+                f"Unsupported entity type: {entity_type}. "
+                f"Supported: {', '.join(self._fetch_strategies.keys())}"
+            )
+
+        # Build AND-query from multiple filter conditions
+        and_parts: list[str] = []
+        for field, ids in filters.items():
+            if not ids:
+                continue
+            # Build OR-part for this field
+            or_part = " OR ".join(f"{field}:{val}" for val in ids)
+            and_parts.append(f"({or_part})")
+
+        if not and_parts:
+            return
+
+        combined_query = " AND ".join(and_parts)
+        async for record in strategy(query=combined_query, limit=limit):
             yield record
+
+    async def fetch_filtered_with_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records with fallback search when primary lookup fails.
+
+        Implements FilterableDataSourcePort.fetch_filtered_with_fallback().
+
+        UniProt accessions are stable identifiers, so fallback is rarely needed.
+        This method first tries the primary lookup, then falls back to search
+        for any IDs not found.
+
+        Args:
+            entity_type: Type of entity to fetch
+            filter_ids: List of primary IDs to filter by
+            filter_field: Field name for primary filtering
+            fallback_mapping: Mapping from primary ID to fallback value (e.g., gene name)
+            limit: Maximum number of records to fetch
+
+        Yields:
+            Dictionary records found via primary lookup or fallback search
+
+        """
+        if not filter_ids:
+            return
+
+        fetched = 0
+        found_ids: set[str] = set()
+
+        # First: try primary lookup
+        async for record in self.fetch_filtered(
+            entity_type=entity_type,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            limit=limit,
+        ):
+            yield record
+            fetched += 1
+            # Track found IDs for fallback
+            if acc := record.get("accession"):
+                found_ids.add(acc)
+            if limit and fetched >= limit:
+                return
+
+        # Second: fallback search for missing IDs
+        missing_ids = [fid for fid in filter_ids if fid not in found_ids]
+        if not missing_ids or not fallback_mapping:
+            return
+
+        for missing_id in missing_ids:
+            if limit and fetched >= limit:
+                break
+
+            fallback_value = fallback_mapping.get(missing_id)
+            if not fallback_value:
+                continue
+
+            # Search by fallback value (e.g., gene name)
+            strategy = self._fetch_strategies.get(entity_type)
+            if strategy:
+                async for record in strategy(query=fallback_value, limit=1):
+                    yield record
+                    fetched += 1
+                    if limit and fetched >= limit:
+                        return
 
     def _build_protein_fetch_params(
         self, query: str, size: int, fetched: int, limit: int | None, cursor: str | None
