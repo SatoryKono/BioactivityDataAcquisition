@@ -40,7 +40,7 @@ sink:
       path: "data/output/csv/gold"
 
 # Entity-specific input filter
-# CSV column 'uniprot_id' contains accession values for filtering
+# UniProt adapter implements FilterableDataSourcePort with OR-query batching
 input_filter:
   enabled: true
   source_path: "data/input/protein.csv"
