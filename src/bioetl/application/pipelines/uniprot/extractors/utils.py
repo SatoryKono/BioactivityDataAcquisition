@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import orjson
 from typing import Any, ClassVar
+
+import orjson
 
 
 class ExtractorUtils:
