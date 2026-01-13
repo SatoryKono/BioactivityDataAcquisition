@@ -558,7 +558,3 @@ class PublicationTermDataSource:
                 limit=limit,
             ):
                 yield record
-
-
-# Backward-compatible alias (deprecated, ADR-024)
-DocumentTermDataSource = PublicationTermDataSource
