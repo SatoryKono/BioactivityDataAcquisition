@@ -45,6 +45,9 @@ def test_registry_completeness():
 
                 if len(parts) >= 2:
                     provider = parts[0]
+                    # Skip internal directories (documentation, templates, etc.)
+                    if provider.startswith("_"):
+                        continue
                     entity = os.path.splitext(parts[1])[0]
                     pipeline_name = f"{provider}_{entity}"
                     found_configs.append(pipeline_name)
