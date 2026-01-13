@@ -22,7 +22,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
 from bioetl.application.pipelines.pubmed.xml_utils import get_text
 from bioetl.domain.entities import Publication
 from bioetl.domain.services import DataNormalizationService, IdentityService
-from bioetl.domain.value_objects import PubMedId
+from bioetl.domain.value_objects import DOI, PublicationYear, PubMedId
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -163,9 +163,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         raw_authors = AuthorExtractor.parse_authors(article)
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
-        # Extract and normalize DOI (lowercase, stripped) for cross-provider consistency
+        # Validate DOI using Value Object (returns None for invalid/empty)
         raw_doi = IdentifierExtractor.extract_doi(root)
-        normalized_doi = self._data_normalizer.normalize_doi(raw_doi)
+        doi_vo = DOI.from_raw(raw_doi)
+        normalized_doi = str(doi_vo) if doi_vo else None
 
         return {
             "pmid": pmid,
@@ -250,13 +251,17 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         journal = article.find(".//Journal")
         journal_issue = journal.find("JournalIssue") if journal else None
         pub_date_node = journal_issue.find("PubDate") if journal_issue else None
-        pub_date, pub_year = DateExtractor.extract_date(pub_date_node)
+        pub_date, raw_year = DateExtractor.extract_date(pub_date_node)
         history = pubmed_data.find("History") if pubmed_data else None
+
+        # Validate year using PublicationYear Value Object
+        year_vo = PublicationYear.from_raw(raw_year)
+        validated_year = year_vo.value if year_vo else None
 
         return {
             "pub_date": pub_date,
-            "year": pub_year,
-            "publication_year": pub_year,
+            "year": validated_year,
+            "publication_year": validated_year,
             "accepted_date": DateExtractor.extract_history_date(history, "accepted"),
             "received_date": DateExtractor.extract_history_date(history, "received"),
             "revised_date": DateExtractor.extract_history_date(history, "revised"),

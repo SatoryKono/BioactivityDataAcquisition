@@ -4,7 +4,12 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.config import DQConfig, TableConfig
+from bioetl.domain.config import (
+    DEFAULT_VALIDATION_CONFIG,
+    DQConfig,
+    TableConfig,
+    ValidationConfig,
+)
 
 
 @pytest.mark.unit
@@ -178,3 +183,115 @@ class TestTableConfig:
         assert config.primary_keys == ("activity_id", "assay_chembl_id")
         assert config.silver_table == "chembl_activity_silver"
         assert config.gold_table == "chembl_activity_gold"
+
+
+@pytest.mark.unit
+class TestValidationConfig:
+    """Tests for ValidationConfig dataclass."""
+
+    def test_default_values(self) -> None:
+        """Test default validation range values."""
+        config = ValidationConfig()
+
+        assert config.min_publication_year == 1800
+        assert config.max_publication_year == 2100
+        assert config.min_molecular_weight == 10.0
+        assert config.max_molecular_weight == 10_000.0
+        assert config.molecular_weight_precision == 10
+        assert config.max_pmid == 10_000_000_000
+        assert config.max_taxonomy_id == 10_000_000
+        assert config.min_pchembl_value == 0.0
+        assert config.max_pchembl_value == 15.0
+
+    def test_custom_publication_year_range(self) -> None:
+        """Test custom publication year range (e.g., for Semantic Scholar)."""
+        config = ValidationConfig(
+            min_publication_year=1500, max_publication_year=2100
+        )
+
+        assert config.min_publication_year == 1500
+        assert config.max_publication_year == 2100
+
+    def test_custom_molecular_weight_range(self) -> None:
+        """Test custom molecular weight range."""
+        config = ValidationConfig(
+            min_molecular_weight=1.0, max_molecular_weight=50_000.0
+        )
+
+        assert config.min_molecular_weight == 1.0
+        assert config.max_molecular_weight == 50_000.0
+
+    def test_immutability(self) -> None:
+        """Test that ValidationConfig is frozen (immutable)."""
+        config = ValidationConfig()
+
+        with pytest.raises(AttributeError):
+            config.min_publication_year = 1500  # type: ignore[misc]
+
+    def test_equality(self) -> None:
+        """Test equality between ValidationConfig instances."""
+        config1 = ValidationConfig()
+        config2 = ValidationConfig()
+        config3 = ValidationConfig(min_publication_year=1500)
+
+        assert config1 == config2
+        assert config1 != config3
+
+    def test_hashable(self) -> None:
+        """Test that ValidationConfig is hashable."""
+        config1 = ValidationConfig()
+        config2 = ValidationConfig()
+
+        config_set = {config1, config2}
+        assert len(config_set) == 1
+
+    def test_invalid_year_range_raises(self) -> None:
+        """Test that invalid year range (min >= max) raises ValueError."""
+        with pytest.raises(ValueError, match="min_publication_year"):
+            ValidationConfig(
+                min_publication_year=2100, max_publication_year=1800
+            )
+
+    def test_invalid_year_range_equal_raises(self) -> None:
+        """Test that equal year range raises ValueError."""
+        with pytest.raises(ValueError, match="min_publication_year"):
+            ValidationConfig(
+                min_publication_year=2000, max_publication_year=2000
+            )
+
+    def test_invalid_mw_range_raises(self) -> None:
+        """Test that invalid MW range (min >= max) raises ValueError."""
+        with pytest.raises(ValueError, match="min_molecular_weight"):
+            ValidationConfig(
+                min_molecular_weight=10000.0, max_molecular_weight=10.0
+            )
+
+    def test_invalid_pchembl_range_raises(self) -> None:
+        """Test that invalid pChEMBL range raises ValueError."""
+        with pytest.raises(ValueError, match="min_pchembl_value"):
+            ValidationConfig(min_pchembl_value=15.0, max_pchembl_value=0.0)
+
+    def test_negative_precision_raises(self) -> None:
+        """Test that negative precision raises ValueError."""
+        with pytest.raises(ValueError, match="molecular_weight_precision"):
+            ValidationConfig(molecular_weight_precision=-1)
+
+    def test_zero_precision_valid(self) -> None:
+        """Test that zero precision is valid (rounds to integers)."""
+        config = ValidationConfig(molecular_weight_precision=0)
+        assert config.molecular_weight_precision == 0
+
+    def test_default_singleton_available(self) -> None:
+        """Test that DEFAULT_VALIDATION_CONFIG singleton is available."""
+        assert DEFAULT_VALIDATION_CONFIG is not None
+        assert isinstance(DEFAULT_VALIDATION_CONFIG, ValidationConfig)
+        assert DEFAULT_VALIDATION_CONFIG.min_publication_year == 1800
+
+    def test_semantic_scholar_config(self) -> None:
+        """Test Semantic Scholar-specific config with min_year=1500."""
+        ss_config = ValidationConfig(min_publication_year=1500)
+
+        assert ss_config.min_publication_year == 1500
+        # Other values remain at defaults
+        assert ss_config.max_publication_year == 2100
+        assert ss_config.min_molecular_weight == 10.0

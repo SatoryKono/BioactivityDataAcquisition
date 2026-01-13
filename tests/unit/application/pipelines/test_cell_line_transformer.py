@@ -45,7 +45,7 @@ class TestCellLineTransformer:
             "cell_description": "Human cervical cancer cell line",
             "cell_source_tissue": "Cervix",
             "cell_source_organism": "Homo sapiens",
-            "cell_source_tax_id": 9606,
+            "cell_source_tax_id": 9606,  # Source API field name
             "cell_type": "Cancer cell line",
             "cellosaurus_id": "CVCL_0030",
             "clo_id": "CLO_0003684",
@@ -61,7 +61,7 @@ class TestCellLineTransformer:
         assert result["cell_description"] == "Human cervical cancer cell line"
         assert result["cell_source_tissue"] == "Cervix"
         assert result["cell_source_organism"] == "Homo sapiens"
-        assert result["cell_source_tax_id"] == 9606
+        assert result["cell_source_taxonomy_id"] == 9606
         assert result["cell_type"] == "Cancer cell line"
         assert result["cellosaurus_id"] == "CVCL_0030"
         assert result["clo_id"] == "CLO_0003684"
@@ -99,7 +99,7 @@ class TestCellLineTransformer:
         assert result["cell_description"] is None
         assert result["cell_source_tissue"] is None
         assert result["cell_source_organism"] is None
-        assert result["cell_source_tax_id"] is None
+        assert result["cell_source_taxonomy_id"] is None
         assert result["cell_type"] is None
         assert result["cellosaurus_id"] is None
         assert result["clo_id"] is None
@@ -163,21 +163,21 @@ class TestCellLineTransformer:
 
     @pytest.mark.asyncio
     async def test_transform_with_invalid_tax_id_zero(self, transformer, mock_context):
-        """Test that tax_id of 0 becomes None (must be >= 1)."""
+        """Test that taxonomy_id of 0 becomes None (must be >= 1)."""
         record = {
             "cell_chembl_id": "CHEMBL3308376",
             "cell_name": "HeLa",
-            "cell_source_tax_id": 0,
+            "cell_source_tax_id": 0,  # Source API field name
         }
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["cell_source_tax_id"] is None
+        assert result["cell_source_taxonomy_id"] is None
 
     @pytest.mark.asyncio
     async def test_transform_with_negative_tax_id(self, transformer, mock_context):
-        """Test that negative tax_id becomes None (must be >= 1)."""
+        """Test that negative taxonomy_id becomes None (must be >= 1)."""
         record = {
             "cell_chembl_id": "CHEMBL3308376",
             "cell_name": "HeLa",
@@ -187,25 +187,25 @@ class TestCellLineTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["cell_source_tax_id"] is None
+        assert result["cell_source_taxonomy_id"] is None
 
     @pytest.mark.asyncio
     async def test_transform_with_valid_tax_id(self, transformer, mock_context):
-        """Test that valid tax_id is preserved."""
+        """Test that valid taxonomy_id is preserved."""
         record = {
             "cell_chembl_id": "CHEMBL3308376",
             "cell_name": "HeLa",
-            "cell_source_tax_id": 9606,
+            "cell_source_tax_id": 9606,  # Source API field name
         }
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["cell_source_tax_id"] == 9606
+        assert result["cell_source_taxonomy_id"] == 9606
 
     @pytest.mark.asyncio
     async def test_transform_with_tax_id_as_string(self, transformer, mock_context):
-        """Test that tax_id as string is converted to int."""
+        """Test that taxonomy_id as string is converted to int."""
         record = {
             "cell_chembl_id": "CHEMBL3308376",
             "cell_name": "HeLa",
@@ -215,7 +215,7 @@ class TestCellLineTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["cell_source_tax_id"] == 9606
+        assert result["cell_source_taxonomy_id"] == 9606
 
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
@@ -288,7 +288,7 @@ class TestCellLineTransformer:
         assert result["cell_description"] is None
         assert result["cell_source_tissue"] is None
         assert result["cell_source_organism"] is None
-        assert result["cell_source_tax_id"] is None
+        assert result["cell_source_taxonomy_id"] is None
         assert result["cell_type"] is None
         assert result["cellosaurus_id"] is None
         assert result["clo_id"] is None

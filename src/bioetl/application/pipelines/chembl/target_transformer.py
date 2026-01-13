@@ -16,6 +16,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.entities import Target
 from bioetl.domain.transformations import safe_int
+from bioetl.domain.value_objects import TaxonomyId
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
@@ -37,7 +38,7 @@ class TargetTransformer(BaseChemblTransformer):
 
         Returns:
             Dict with aggregated lists for accessions, IDs, types, relationships,
-            descriptions, organisms, and tax_ids.
+            descriptions, organisms, and taxonomy_ids.
 
         Note:
             protein_classifications are NOT available in /target endpoint.
@@ -58,13 +59,25 @@ class TargetTransformer(BaseChemblTransformer):
             "component_relationships": None,
             "component_descriptions": None,
             "component_organisms": None,
-            "component_tax_ids": None,
+            # Standardized to 'taxonomy_ids' for NCBI consistency
+            "component_taxonomy_ids": None,
         }
 
     def _extract_basic_component_fields(
         self, components: list[dict[str, Any]]
     ) -> dict[str, list[Any] | None]:
         """Extract basic fields from component list via transform_utils."""
+        # Extract taxonomy IDs and validate using TaxonomyId Value Object
+        raw_tax_ids = extract_list_field(components, "tax_id", safe_int)
+        validated_tax_ids: list[int] | None = None
+        if raw_tax_ids:
+            validated_list: list[int] = []
+            for tid in raw_tax_ids:
+                vo = TaxonomyId.from_raw(tid)
+                if vo is not None:
+                    validated_list.append(vo.value)
+            validated_tax_ids = validated_list if validated_list else None
+
         return {
             "component_accessions": extract_list_field(components, "accession"),
             "component_ids": extract_list_field(components, "component_id", safe_int),
@@ -74,7 +87,8 @@ class TargetTransformer(BaseChemblTransformer):
                 components, "component_description"
             ),
             "component_organisms": extract_list_field(components, "organism"),
-            "component_tax_ids": extract_list_field(components, "tax_id", safe_int),
+            # Standardized to 'taxonomy_ids' for NCBI consistency
+            "component_taxonomy_ids": validated_tax_ids,
         }
 
     def _aggregate_synonyms(
@@ -142,6 +156,13 @@ class TargetTransformer(BaseChemblTransformer):
         # Default to False if missing or invalid, to ensure boolean dtype for Gold schema
         downgraded = bool(downgraded_val) if downgraded_val is not None else False
 
+        # Validate taxonomy_id using TaxonomyId Value Object
+        raw_tax_id = record.get("tax_id")
+        taxonomy_id_vo = TaxonomyId.from_raw(
+            cast("str | int | None", raw_tax_id) if raw_tax_id is not None else None
+        )
+        taxonomy_id = taxonomy_id_vo.value if taxonomy_id_vo else None
+
         return {
             # Primary identifier
             "target_chembl_id": str(primary_id),
@@ -149,7 +170,8 @@ class TargetTransformer(BaseChemblTransformer):
             "pref_name": record.get("pref_name"),
             "target_type": record.get("target_type"),
             "organism": record.get("organism"),
-            "tax_id": safe_int(record.get("tax_id")),
+            # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
+            "taxonomy_id": taxonomy_id,
             "species_group_flag": record.get("species_group_flag"),
             "description": record.get("description"),
             "downgraded": downgraded,

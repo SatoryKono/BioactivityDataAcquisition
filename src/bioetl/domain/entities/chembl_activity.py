@@ -54,7 +54,8 @@ class Assay(BaseEntity):
 
     # Biological context
     assay_organism: str | None = None
-    assay_tax_id: int | None = None
+    # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
+    assay_taxonomy_id: int | None = None
     assay_cell_type: str | None = None
     assay_tissue: str | None = None
     assay_strain: str | None = None
@@ -81,7 +82,8 @@ class Assay(BaseEntity):
     variant_mutation: str | None = None  # Mutation description (e.g., V600E)
     variant_organism: str | None = None  # Organism name
     variant_sequence: str | None = None  # Amino acid sequence
-    variant_tax_id: int | None = None  # NCBI Taxonomy ID
+    # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
+    variant_taxonomy_id: int | None = None  # NCBI Taxonomy ID
     # Forensic: original JSON
     variant_sequence_json: str | None = None
 

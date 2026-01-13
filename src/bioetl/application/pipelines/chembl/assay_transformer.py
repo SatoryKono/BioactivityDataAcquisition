@@ -22,22 +22,35 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 from bioetl.domain.entities import Assay
 from bioetl.domain.transformations import (
     safe_float,
-    safe_int,
     safe_str,
 )
+from bioetl.domain.value_objects import TaxonomyId
+
+
+def _validate_taxonomy_id(value: Any) -> int | None:
+    """Validate taxonomy ID using TaxonomyId Value Object."""
+    vo = TaxonomyId.from_raw(value)
+    return vo.value if vo else None
+
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
 
 
 # Mapping for variant sequence fields extraction (from ChEMBL nested structure)
+# Source field is 'tax_id' from API, will be renamed to 'taxonomy_id' via renames
 _VARIANT_FIELDS: dict[str, Any] = {
     "accession": safe_str,
     "isoform": safe_str,
     "mutation": safe_str,
     "organism": safe_str,
     "sequence": safe_str,
-    "tax_id": safe_int,
+    "tax_id": _validate_taxonomy_id,  # Will be renamed to taxonomy_id
+}
+
+# Rename mapping for variant fields (tax_id -> taxonomy_id for NCBI consistency)
+_VARIANT_RENAMES: dict[str, str] = {
+    "variant_tax_id": "variant_taxonomy_id",
 }
 
 
@@ -50,9 +63,12 @@ def _extract_variant(data: dict[str, Any] | None) -> dict[str, Any]:
 
     Returns:
         Flattened dictionary with variant_ prefixed keys.
+        tax_id is renamed to taxonomy_id for NCBI consistency.
 
     """
-    return flatten_nested_dict(data, "variant_", _VARIANT_FIELDS)
+    return flatten_nested_dict(
+        data, "variant_", _VARIANT_FIELDS, renames=_VARIANT_RENAMES
+    )
 
 
 # ============================================================================
@@ -97,7 +113,10 @@ _BIOLOGICAL_CONTEXT = FieldGroup(
             "bao_format",
             "bao_label",
         ),
-        *int_fields("assay_tax_id"),
+        # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
+        FieldSpec(
+            "assay_tax_id", target="assay_taxonomy_id", converter=_validate_taxonomy_id
+        ),
     ),
 )
 

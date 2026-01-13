@@ -25,7 +25,7 @@ from bioetl.domain.normalization import (
     parse_page_range,
 )
 from bioetl.domain.services import DataNormalizationService, IdentityService
-from bioetl.domain.validation import validate_year_range
+from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -123,7 +123,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         """Extract publication year from date-parts.
 
         Tries published-print, then published-online, then issued.
-        Delegates validation to domain.validation.validate_year_range.
+        Validates using PublicationYear Value Object for consistent range checking.
 
         Args:
             publication: CrossRef publication record.
@@ -136,9 +136,11 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             date_info = publication.get(date_field, {})
             date_parts = date_info.get("date-parts", [[]])
             if date_parts and date_parts[0] and len(date_parts[0]) > 0:
-                year = date_parts[0][0]
-                if isinstance(year, int) and validate_year_range(year):
-                    return year
+                raw_year = date_parts[0][0]
+                if isinstance(raw_year, int):
+                    year_vo = PublicationYear.from_raw(raw_year)
+                    if year_vo:
+                        return year_vo.value
         return None
 
     @staticmethod
@@ -177,9 +179,13 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         # Cast to dict for type-safe access (BronzeRecord is an empty TypedDict marker)
         rec = cast("dict[str, Any]", record)
 
-        # Use DataNormalizationService for normalization
+        # Validate DOI using Value Object (returns None for invalid/empty)
+        # CrossRef always provides DOI, so we use empty string as fallback for type consistency
+        doi_vo = DOI.from_raw(rec.get("DOI"))
+        doi = str(doi_vo) if doi_vo else ""
+
+        # Use DataNormalizationService for other normalization tasks
         normalizer = self._data_normalizer
-        doi = normalizer.normalize_doi(rec.get("DOI", "")) or ""
         first_page, last_page = parse_page_range(rec.get("page"))
 
         # Extract date fields using normalizer service

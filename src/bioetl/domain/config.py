@@ -5,6 +5,7 @@ These are distinct from Infrastructure configuration schemas (Pydantic) to maint
 strict layer separation.
 
 Consolidated configuration classes (post-refactoring):
+- ValidationConfig: Centralized validation ranges for domain value objects
 - DQConfig: Data Quality thresholds
 - TableConfig: Database tables and keys
 - PipelineConfig: Complete immutable pipeline configuration
@@ -21,6 +22,96 @@ from bioetl.domain.types import RunType
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig
+
+
+# =============================================================================
+# Validation Configuration
+# =============================================================================
+
+
+@dataclass(frozen=True, slots=True)
+class ValidationConfig:
+    """Centralized configuration for validation ranges.
+
+    Provides configurable validation parameters for domain value objects
+    and validation functions. This enables:
+    - Consistent validation across all components
+    - Override capability via pipeline config
+    - Single source of truth for validation rules
+
+    Attributes:
+        min_publication_year: Minimum valid publication year. Default 1800
+            covers modern scientific publications. Use 1500 for historical
+            databases like Semantic Scholar.
+        max_publication_year: Maximum valid publication year. Default 2100.
+        min_molecular_weight: Minimum molecular weight in Daltons. Default 10.0.
+        max_molecular_weight: Maximum molecular weight in Daltons. Default 10000.0
+            covers small molecules to large peptides.
+        max_pmid: Maximum valid PubMed ID. Default 10_000_000_000.
+        max_taxonomy_id: Maximum valid NCBI Taxonomy ID. Default 10_000_000.
+        min_pchembl_value: Minimum pChEMBL value. Default 0.0.
+        max_pchembl_value: Maximum pChEMBL value. Default 15.0 (-log10(10^-15 M)).
+        molecular_weight_precision: Decimal precision for MW rounding. Default 10.
+
+    Example:
+        >>> config = ValidationConfig()
+        >>> config.min_publication_year
+        1800
+        >>> # Override for Semantic Scholar (older publications)
+        >>> ss_config = ValidationConfig(min_publication_year=1500)
+        >>> ss_config.min_publication_year
+        1500
+
+    """
+
+    # Publication year range
+    min_publication_year: int = 1800
+    max_publication_year: int = 2100
+
+    # Molecular properties
+    min_molecular_weight: float = 10.0
+    max_molecular_weight: float = 10_000.0
+    molecular_weight_precision: int = 10
+
+    # Identifiers
+    max_pmid: int = 10_000_000_000
+    max_taxonomy_id: int = 10_000_000
+
+    # Activity values
+    min_pchembl_value: float = 0.0
+    max_pchembl_value: float = 15.0
+
+    def __post_init__(self) -> None:
+        """Validate configuration invariants."""
+        self._validate_ranges()
+
+    def _validate_ranges(self) -> None:
+        """Validate that min/max ranges are valid."""
+        validations = [
+            (
+                self.min_publication_year >= self.max_publication_year,
+                "min_publication_year must be less than max_publication_year",
+            ),
+            (
+                self.min_molecular_weight >= self.max_molecular_weight,
+                "min_molecular_weight must be less than max_molecular_weight",
+            ),
+            (
+                self.min_pchembl_value >= self.max_pchembl_value,
+                "min_pchembl_value must be less than max_pchembl_value",
+            ),
+            (
+                self.molecular_weight_precision < 0,
+                "molecular_weight_precision must be non-negative",
+            ),
+        ]
+        for condition, message in validations:
+            if condition:
+                raise ValueError(message)
+
+
+# Default singleton instance for use when no custom config is provided
+DEFAULT_VALIDATION_CONFIG = ValidationConfig()
 
 
 @dataclass(frozen=True, slots=True)
