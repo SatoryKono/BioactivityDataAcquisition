@@ -58,8 +58,8 @@ class TargetSchema(ETLRecordSchema):
     pref_name: Series[str] | None = pa.Field(
         nullable=True, description="Preferred name."
     )
-    tax_id: Series[int] | None = pa.Field(
-        nullable=True, description="NCBI Taxonomy ID."
+    taxonomy_id: Series[int] | None = pa.Field(
+        nullable=True, description="NCBI Taxonomy ID. Standardized name (was tax_id)."
     )
     organism: Series[str] | None = pa.Field(nullable=True, description="Organism.")
     species_group_flag: Series[bool] | None = pa.Field(

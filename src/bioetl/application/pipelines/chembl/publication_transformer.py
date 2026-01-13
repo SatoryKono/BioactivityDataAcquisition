@@ -15,10 +15,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.field_specs import (
+    PMID,
     FieldGroup,
+    FieldSpec,
     int_fields,
     map_field_groups,
-    pmid_fields,
     simple_fields,
 )
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
@@ -43,7 +44,8 @@ if TYPE_CHECKING:
 _PUBLICATION_IDS = FieldGroup(
     name="publication_ids",
     fields=(
-        *pmid_fields("pubmed_id"),
+        # Rename pubmed_id -> pmid for cross-provider consistency (PMID standardization)
+        FieldSpec("pubmed_id", target="pmid", converter=PMID),
         *simple_fields("doi", "patent_id"),
     ),
 )

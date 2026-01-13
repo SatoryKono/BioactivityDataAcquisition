@@ -22,7 +22,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
 from bioetl.application.pipelines.pubmed.xml_utils import get_text
 from bioetl.domain.entities import Publication
 from bioetl.domain.services import DataNormalizationService, IdentityService
-from bioetl.domain.value_objects import PubMedId
+from bioetl.domain.value_objects import DOI, PubMedId
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -163,9 +163,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         raw_authors = AuthorExtractor.parse_authors(article)
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
-        # Extract and normalize DOI (lowercase, stripped) for cross-provider consistency
+        # Validate DOI using Value Object (returns None for invalid/empty)
         raw_doi = IdentifierExtractor.extract_doi(root)
-        normalized_doi = self._data_normalizer.normalize_doi(raw_doi)
+        doi_vo = DOI.from_raw(raw_doi)
+        normalized_doi = str(doi_vo) if doi_vo else None
 
         return {
             "pmid": pmid,

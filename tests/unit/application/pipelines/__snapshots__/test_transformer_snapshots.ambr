@@ -52,7 +52,7 @@
     'target_chembl_id': 'CHEMBL1862',
     'target_organism': 'Homo sapiens',
     'target_pref_name': 'Cyclooxygenase-2',
-    'target_tax_id': None,
+    'target_taxonomy_id': None,
     'text_value': None,
     'toid': None,
     'type': None,
@@ -80,7 +80,7 @@
     'assay_pref_name': None,
     'assay_strain': None,
     'assay_subcellular_fraction': None,
-    'assay_tax_id': 9606,
+    'assay_taxonomy_id': 9606,
     'assay_test_type': None,
     'assay_tissue': None,
     'assay_type': 'B',
@@ -107,7 +107,7 @@
     'variant_organism': None,
     'variant_sequence': None,
     'variant_sequence_json': None,
-    'variant_tax_id': None,
+    'variant_taxonomy_id': None,
   })
 # ---
 # name: TestMoleculeTransformerSnapshot.test_transform_snapshot
@@ -132,7 +132,7 @@
     'hierarchy_active_chembl_id': 'CHEMBL25',
     'hierarchy_child_chembl_id': 'CHEMBL25',
     'hierarchy_parent_chembl_id': 'CHEMBL25',
-    'inchi_key': 'BSYNRYMUTXBXSQ-UHFFFAOYSA-N',
+    'inchikey': 'BSYNRYMUTXBXSQ-UHFFFAOYSA-N',
     'inorganic_flag': None,
     'max_phase': 4,
     'molecule_chembl_id': 'CHEMBL25',
@@ -292,7 +292,7 @@
     'journal_full_title': 'Full Test Journal Name',
     'last_page': '110',
     'patent_id': None,
-    'pubmed_id': '12345678',
+    'pmid': '12345678',
     'src_id': 1,
     'title': 'Test Document Title',
     'volume': '10',
@@ -317,7 +317,7 @@
     'protein_classifications': None,
     'target_component_synonyms': '[{"synonym":"Gene1"},{"synonym":"Protein1"}]',
     'target_component_xrefs': '{"xref_id":"P12345","xref_src_db":"UniProt"}',
-    'tax_id': 9606,
+    'taxonomy_id': 9606,
   })
 # ---
 # name: TestTargetTransformerSnapshot.test_transform_snapshot
@@ -338,7 +338,7 @@
       'Homo sapiens',
     ]),
     'component_relationships': None,
-    'component_tax_ids': list([
+    'component_taxonomy_ids': list([
       9606,
     ]),
     'component_types': list([
@@ -359,7 +359,7 @@
     'target_components': '{"accession":"P35354","component_id":123,"component_type":"PROTEIN","organism":"Homo sapiens","target_component_xrefs":[{"xref_id":"P35354","xref_src_db":"UniProt"}],"tax_id":9606}',
     'target_constraints': None,
     'target_type': 'SINGLE PROTEIN',
-    'tax_id': 9606,
+    'taxonomy_id': 9606,
   })
 # ---
 # name: TestUniProtProteinTransformerSnapshot.test_transform_snapshot
