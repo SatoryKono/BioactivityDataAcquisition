@@ -721,7 +721,7 @@ jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
 > Утверждения делались без проверки фактического состояния кода.
 
 > **⚠️ ОБЯЗАТЕЛЬНО**: Перед предложением рефакторинга **MUST** выполнить верификацию согласно
-> протоколу из `CLAUDE.md` §0 и сверяться с секцией "УЖЕ РЕАЛИЗОВАНО" в `docs/refactoring-plan.md`.
+> протоколу из `CLAUDE.md` §0 и сверяться с секцией "УЖЕ РЕАЛИЗОВАНО" в `docs/archived/refactoring-plan.md`.
 
 При проведении архитектурных обзоров **MUST** выполнять двойную верификацию каждой найденной проблемы:
 
@@ -738,7 +738,7 @@ grep -c "def \|async def " src/bioetl/path/to/file.py
 grep -n "self\._.*\." src/bioetl/path/to/file.py | head -20
 
 # 3. Сверить с известными ложными утверждениями
-grep -A3 "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" docs/refactoring-plan.md
+grep -A3 "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" docs/archived/refactoring-plan.md
 
 # 4. Найти существующие реализации
 grep -r "class ClassName\|def method_name" src/bioetl/
@@ -814,7 +814,7 @@ PipelineRunner.run() создаёт PipelineObserver напрямую вмест
 | **Отсутствие верификации кодом** | Утверждения без проверки фактического состояния | `grep`, `wc -l`, чтение файла |
 | **Ложная корреляция размер → сложность** | 500+ LOC автоматически считается "монолитом" | Анализ делегирования (см. 7.1.6) |
 | **Неверная интерпретация паттернов** | NoOp как нарушение DI, shim как дублирование | Знание Null Object Pattern, backward-compat |
-| **Устаревшие знания** | Задача уже реализована, но это не проверено | Сверка с `refactoring-plan.md` |
+| **Устаревшие знания** | Задача уже реализована, но это не проверено | Сверка с `archived/refactoring-plan.md` |
 
 #### 7.1.6. Анализ Делегирования (MUST перед "god object")
 
@@ -831,7 +831,7 @@ grep -o "self\._[a-z_]*" src/bioetl/path/to/file.py | sort -u | wc -l
 grep -c "^    def \|^    async def " src/bioetl/path/to/file.py
 
 # 4. Сверить с известными ложными утверждениями
-grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/refactoring-plan.md
+grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/archived/refactoring-plan.md
 ```
 
 **Критерии "монолита" (ВСЕ должны выполняться):**
@@ -849,14 +849,14 @@ grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/refactoring-plan.md
 
 При обнаружении ложного утверждения **MUST**:
 
-1. Добавить в `docs/refactoring-plan.md` → секция "❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
+1. Добавить в `docs/archived/refactoring-plan.md` → секция "❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
 2. Указать причину, почему утверждение ложно
 3. Добавить ссылку на код (`файл:строка`)
 4. Закоммитить изменения
 
 При реализации задачи **MUST**:
 
-1. Переместить в `docs/refactoring-plan.md` → секция "✅ УЖЕ РЕАЛИЗОВАНО"
+1. Переместить в `docs/archived/refactoring-plan.md` → секция "✅ УЖЕ РЕАЛИЗОВАНО"
 2. Добавить ссылку на коммит или файл
 3. Указать дату реализации
 
@@ -877,7 +877,7 @@ grep "^from\|^import" src/bioetl/path/to/file.py | head -20
 find tests -name "*.py" -exec grep -l "ClassName" {} \;
 
 # Проверка в списке ложных утверждений
-grep -B2 -A2 "ComponentName" docs/refactoring-plan.md
+grep -B2 -A2 "ComponentName" docs/archived/refactoring-plan.md
 ```
 
 ---
