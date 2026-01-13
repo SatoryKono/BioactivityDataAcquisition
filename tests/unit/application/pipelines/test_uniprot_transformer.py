@@ -449,7 +449,7 @@ class TestUniProtProteinTransformerExtendedFields:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["secondary_accessions"] == '["Q5TEV0", "Q96QA2"]'
+        assert result["secondary_accessions"] == '["Q5TEV0","Q96QA2"]'
 
     @pytest.mark.asyncio
     async def test_extract_annotation_score(self, transformer, mock_context):
@@ -510,7 +510,7 @@ class TestUniProtProteinTransformerExtendedFields:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["protein_short_names"] == '["AKT1", "PKB alpha"]'
+        assert result["protein_short_names"] == '["AKT1","PKB alpha"]'
 
     @pytest.mark.asyncio
     async def test_extract_alternative_names(self, transformer, mock_context):
@@ -531,7 +531,7 @@ class TestUniProtProteinTransformerExtendedFields:
         assert result is not None
         assert (
             result["protein_alternative_names"]
-            == '["Protein kinase B alpha", "Proto-oncogene c-Akt"]'
+            == '["Protein kinase B alpha","Proto-oncogene c-Akt"]'
         )
 
     @pytest.mark.asyncio
@@ -587,7 +587,7 @@ class TestUniProtProteinTransformerExtendedFields:
         assert result["organism_scientific"] == "Homo sapiens"
         assert result["organism_common"] == "Human"
         assert result["taxonomy_id"] == 9606
-        assert result["lineage"] == '["Eukaryota", "Metazoa", "Chordata"]'
+        assert result["lineage"] == '["Eukaryota","Metazoa","Chordata"]'
 
     @pytest.mark.asyncio
     async def test_extract_gene_synonyms(self, transformer, mock_context):
