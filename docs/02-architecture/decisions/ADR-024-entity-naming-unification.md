@@ -87,7 +87,7 @@ Aliases работают идентично оригинальным класс�
 
 ## Implementation
 
-### Files Modified
+### Phase 1: Domain Entities (v2.0)
 
 **Domain Entities:**
 - `src/bioetl/domain/entities/chembl_structures.py` — `Document` → `ChemblPublication`
@@ -100,10 +100,42 @@ Aliases работают идентично оригинальным класс�
 - `src/bioetl/domain/schemas/pubchem/compound.py` — `CompoundSchema` → `PubchemMoleculeSchema`
 - `src/bioetl/domain/schemas/uniprot/protein.py` — `ProteinSchema` → `UniprotTargetSchema`
 
-**Transformers:**
-- `src/bioetl/application/pipelines/chembl/document_transformer.py` — uses `ChemblPublication`
-- `src/bioetl/application/pipelines/pubchem/transformer.py` — uses `PubchemMolecule`
-- `src/bioetl/application/pipelines/uniprot/transformer.py` — uses `UniprotTarget`
+### Phase 2: Pipeline and Transformer Renames (v2.0)
+
+**Pipeline Configs (renamed files):**
+- `configs/pipelines/chembl/document.yaml` → `publication.yaml`
+- `configs/pipelines/chembl/document_similarity.yaml` → `publication_similarity.yaml`
+- `configs/pipelines/chembl/document_term.yaml` → `publication_term.yaml`
+- Pipeline names changed: `chembl_document` → `chembl_publication`, etc.
+
+**Pipeline Classes (renamed files):**
+- `document.py` → `publication.py` — `ChEMBLDocumentPipeline` → `ChEMBLPublicationPipeline`
+- `document_similarity.py` → `publication_similarity.py` — `ChEMBLDocumentSimilarityPipeline` → `ChEMBLPublicationSimilarityPipeline`
+- `document_term.py` → `publication_term.py` — `ChEMBLDocumentTermPipeline` → `ChEMBLPublicationTermPipeline`
+
+**Transformer Classes (renamed files):**
+- `document_transformer.py` → `publication_transformer.py` — `DocumentTransformer` → `PublicationTransformer`
+- `document_similarity_transformer.py` → `publication_similarity_transformer.py` — `DocumentSimilarityTransformer` → `PublicationSimilarityTransformer`
+- `document_term_transformer.py` → `publication_term_transformer.py` — `DocumentTermTransformer` → `PublicationTermTransformer`
+
+**Data Source (renamed file):**
+- `document_term_data_source.py` → `publication_term_data_source.py` — `DocumentTermDataSource` → `PublicationTermDataSource`
+
+**Schema Files (renamed):**
+- `src/bioetl/domain/schemas/chembl/document.py` → `publication.py`
+- `src/bioetl/domain/schemas/chembl/document_similarity.py` → `publication_similarity.py`
+- `src/bioetl/domain/schemas/chembl/document_term.py` → `publication_term.py`
+
+**Factory Updates:**
+- `transformer_factory.py` — imports and registrations updated
+- `pipeline_factories.py` — imports, configs, and exports updated
+- `registration.py` — import updated
+
+**Test Files (renamed):**
+- `test_document_term_data_source.py` → `test_publication_term_data_source.py`
+- `test_document_similarity_transformer.py` → `test_publication_similarity_transformer.py`
+- `test_chembl_document_e2e.py` → `test_chembl_publication_e2e.py`
+- `test_chembl_document_term_e2e.py` → `test_chembl_publication_term_e2e.py`
 
 **Documentation:**
 - `docs/glossary.md` — Migration notes добавлены
@@ -111,15 +143,43 @@ Aliases работают идентично оригинальным класс�
 
 **Tests:**
 - `tests/unit/domain/test_entities.py` — Error messages обновлены
+- All test files updated to use new class names
 
 ### Migration Guide
 
+**Domain Entities:**
 ```python
 # Before (deprecated)
 from bioetl.domain.entities import Document, Compound, Protein
 
 # After (canonical)
 from bioetl.domain.entities import ChemblPublication, PubchemMolecule, UniprotTarget
+```
+
+**Pipelines and Transformers:**
+```python
+# Before (deprecated)
+from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
+from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
+
+# After (canonical)
+from bioetl.application.pipelines.chembl.publication_transformer import PublicationTransformer
+from bioetl.application.pipelines.chembl.publication import ChEMBLPublicationPipeline
+
+# Via package __init__.py (both work, new names preferred)
+from bioetl.application.pipelines.chembl import (
+    PublicationTransformer,    # Canonical
+    DocumentTransformer,       # Deprecated alias
+)
+```
+
+**Pipeline Names (CLI):**
+```bash
+# Before (deprecated)
+bioetl run chembl_document
+
+# After (canonical)
+bioetl run chembl_publication
 ```
 
 ### Deprecation Timeline

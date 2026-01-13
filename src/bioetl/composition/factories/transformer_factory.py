@@ -133,20 +133,20 @@ def register_all_transformers() -> None:
     from bioetl.application.pipelines.chembl.compound_record_transformer import (
         CompoundRecordTransformer,
     )
-    from bioetl.application.pipelines.chembl.document_similarity_transformer import (
-        DocumentSimilarityTransformer,
-    )
-    from bioetl.application.pipelines.chembl.document_term_transformer import (
-        DocumentTermTransformer,
-    )
-    from bioetl.application.pipelines.chembl.document_transformer import (
-        DocumentTransformer,
-    )
     from bioetl.application.pipelines.chembl.molecule_transformer import (
         MoleculeTransformer,
     )
     from bioetl.application.pipelines.chembl.protein_class_transformer import (
         ProteinClassTransformer,
+    )
+    from bioetl.application.pipelines.chembl.publication_similarity_transformer import (
+        PublicationSimilarityTransformer,
+    )
+    from bioetl.application.pipelines.chembl.publication_term_transformer import (
+        PublicationTermTransformer,
+    )
+    from bioetl.application.pipelines.chembl.publication_transformer import (
+        PublicationTransformer,
     )
     from bioetl.application.pipelines.chembl.target_component_transformer import (
         TargetComponentTransformer,
@@ -180,9 +180,9 @@ def register_all_transformers() -> None:
     register_transformer("chembl", "assay_parameters", AssayParametersTransformer)
     register_transformer("chembl", "cell_line", CellLineTransformer)
     register_transformer("chembl", "compound_record", CompoundRecordTransformer)
-    register_transformer("chembl", "document", DocumentTransformer)
-    register_transformer("chembl", "document_similarity", DocumentSimilarityTransformer)
-    register_transformer("chembl", "document_term", DocumentTermTransformer)
+    register_transformer("chembl", "document", PublicationTransformer)
+    register_transformer("chembl", "document_similarity", PublicationSimilarityTransformer)
+    register_transformer("chembl", "document_term", PublicationTermTransformer)
     register_transformer("chembl", "molecule", MoleculeTransformer)
     register_transformer("chembl", "protein_class", ProteinClassTransformer)
     register_transformer("chembl", "target", TargetTransformer)

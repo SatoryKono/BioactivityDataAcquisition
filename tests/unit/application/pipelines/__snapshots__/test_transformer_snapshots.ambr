@@ -110,33 +110,6 @@
     'variant_tax_id': None,
   })
 # ---
-# name: TestDocumentTransformerSnapshot.test_transform_snapshot
-  dict({
-    '_index': 0,
-    '_ingestion_ts': '<ingestion_ts>',
-    '_run_id': '<run_id>',
-    '_run_type': 'incremental',
-    '_source_batch_id': None,
-    'abstract': 'This is a test abstract for the document.',
-    'authors': '["Test Author","Another Author"]',
-    'content_hash': '<content_hash>',
-    'doc_type': 'PUBLICATION',
-    'document_chembl_id': 'CHEMBL1234567',
-    'doi': '10.1000/test.doi',
-    'entity_id': '<entity_id>',
-    'first_page': '100',
-    'issue': '5',
-    'journal': 'Test Journal',
-    'journal_full_title': 'Full Test Journal Name',
-    'last_page': '110',
-    'patent_id': None,
-    'pubmed_id': '12345678',
-    'src_id': 1,
-    'title': 'Test Document Title',
-    'volume': '10',
-    'year': 2024,
-  })
-# ---
 # name: TestMoleculeTransformerSnapshot.test_transform_snapshot
   dict({
     '_index': 0,
@@ -297,6 +270,33 @@
     'title': 'Test Article Title',
     'volume': None,
     'year': None,
+  })
+# ---
+# name: TestPublicationTransformerSnapshot.test_transform_snapshot
+  dict({
+    '_index': 0,
+    '_ingestion_ts': '<ingestion_ts>',
+    '_run_id': '<run_id>',
+    '_run_type': 'incremental',
+    '_source_batch_id': None,
+    'abstract': 'This is a test abstract for the document.',
+    'authors': '["Test Author","Another Author"]',
+    'content_hash': '<content_hash>',
+    'doc_type': 'PUBLICATION',
+    'document_chembl_id': 'CHEMBL1234567',
+    'doi': '10.1000/test.doi',
+    'entity_id': '<entity_id>',
+    'first_page': '100',
+    'issue': '5',
+    'journal': 'Test Journal',
+    'journal_full_title': 'Full Test Journal Name',
+    'last_page': '110',
+    'patent_id': None,
+    'pubmed_id': '12345678',
+    'src_id': 1,
+    'title': 'Test Document Title',
+    'volume': '10',
+    'year': 2024,
   })
 # ---
 # name: TestTargetComponentTransformerSnapshot.test_transform_snapshot

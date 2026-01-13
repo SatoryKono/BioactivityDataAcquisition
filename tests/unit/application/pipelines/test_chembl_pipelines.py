@@ -10,8 +10,8 @@ import pytest
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
-from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
-from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
+from bioetl.application.pipelines.chembl.publication import ChEMBLPublicationPipeline
+from bioetl.application.pipelines.chembl.publication_transformer import PublicationTransformer
 from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
@@ -122,8 +122,8 @@ class TestChEMBLAssayPipeline:
 
 
 @pytest.mark.unit
-class TestChEMBLDocumentPipeline:
-    """Tests for ChEMBLDocumentPipeline."""
+class TestChEMBLPublicationPipeline:
+    """Tests for ChEMBLPublicationPipeline."""
 
     @pytest.fixture
     def pipeline(self, mock_services, runtime_config, run_id):
@@ -134,12 +134,12 @@ class TestChEMBLDocumentPipeline:
             silver_table="chembl.document",
             primary_keys=["document_chembl_id"],
         )
-        return ChEMBLDocumentPipeline(
+        return ChEMBLPublicationPipeline(
             config=config,
             runtime=runtime_config,
             services=mock_services,
             run_id=run_id,
-            transformer=DocumentTransformer(provider="chembl"),
+            transformer=PublicationTransformer(provider="chembl"),
         )
 
     def test_pipeline_initialization(self, pipeline):

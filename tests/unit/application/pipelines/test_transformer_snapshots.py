@@ -22,7 +22,7 @@ pytest.importorskip("syrupy", reason="syrupy package required for snapshot tests
 
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
-from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
+from bioetl.application.pipelines.chembl.publication_transformer import PublicationTransformer
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
@@ -172,12 +172,12 @@ class TestAssayTransformerSnapshot:
 
 
 @pytest.mark.unit
-class TestDocumentTransformerSnapshot:
-    """Snapshot tests for DocumentTransformer."""
+class TestPublicationTransformerSnapshot:
+    """Snapshot tests for PublicationTransformer."""
 
     @pytest.fixture
-    def transformer(self) -> DocumentTransformer:
-        return DocumentTransformer(provider="chembl")
+    def transformer(self) -> PublicationTransformer:
+        return PublicationTransformer(provider="chembl")
 
     @pytest.fixture
     def sample_record(self) -> dict[str, Any]:
@@ -202,12 +202,12 @@ class TestDocumentTransformerSnapshot:
     @pytest.mark.asyncio
     async def test_transform_snapshot(
         self,
-        transformer: DocumentTransformer,
+        transformer: PublicationTransformer,
         mock_context: PipelineContext,
         sample_record: dict[str, Any],
         snapshot: Any,
     ) -> None:
-        """Test DocumentTransformer output matches snapshot."""
+        """Test PublicationTransformer output matches snapshot."""
         result = await transformer.transform(mock_context, sample_record, index=0)
         normalized = normalize_for_snapshot(result)
         assert normalized == snapshot
