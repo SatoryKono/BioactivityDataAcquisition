@@ -44,7 +44,10 @@ docs/
 ├── glossary.md                  # Ubiquitous Language terminology
 ├── RULES.md                     # Canonical rules document (v5.10)
 ├── REQUIREMENTS.md              # 127 testable requirements
-├── refactoring-plan.md          # Current refactoring roadmap
+│
+├── archived/                    # Historical documents
+│   ├── audits/                  # Audit reports
+│   └── refactoring-plan.md     # Archived refactoring roadmap
 │
 ├── 00-project_rules/            # Project governance
 │   ├── 00-rules-summary.md      # TL;DR of RULES.md
@@ -340,10 +343,9 @@ graph TD
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
 | RULES.md                 | 2026-01-06   | v5.10 (TTL/Heartbeat Values) |
-| refactoring-plan.md      | 2025-12-31   | Active refactoring roadmap   |
 | REQUIREMENTS.md          | 2025-12-27   | v1.2 (127 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
-| 00-map.md                | 2026-01-07   | v6.4 Structure finalized     |
+| 00-map.md                | 2026-01-13   | v6.5 Docs structure cleanup  |
 | 00-rules-summary.md      | 2026-01-06   | v5.10 Synced                 |
 | 03-guides/               | 2025-12-31   | Consolidated (10 guides)     |
 | ADR-001..024             | 2026-01-06   | All 24 ADRs documented       |
