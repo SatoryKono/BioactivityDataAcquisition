@@ -15,13 +15,14 @@ import pytest
 CONTRACTS_DIR = Path("docs/contracts/gold")
 
 # Required Gold schema contracts with version 1.0
-REQUIRED_SCHEMAS = {
+# Note: Using sorted tuple for deterministic pytest-xdist test collection order
+REQUIRED_SCHEMAS = (
     "activity_v1.0.json",
     "assay_v1.0.json",
     "molecule_v1.0.json",
-    "target_v1.0.json",
     "publication_v1.0.json",
-}
+    "target_v1.0.json",
+)
 
 # Required JSON Schema properties
 REQUIRED_SCHEMA_PROPERTIES = {
@@ -55,7 +56,7 @@ class TestGoldSchemaContracts:
 
         These contracts define the data interface for downstream consumers.
         """
-        missing = REQUIRED_SCHEMAS - set(schema_files.keys())
+        missing = set(REQUIRED_SCHEMAS) - set(schema_files.keys())
 
         assert not missing, (
             "Missing Gold schema contracts:\n"
