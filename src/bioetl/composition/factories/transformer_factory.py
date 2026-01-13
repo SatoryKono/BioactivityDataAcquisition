@@ -16,7 +16,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.domain.filtering import GoldFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
+    from bioetl.domain.ports import (
+        DataNormalizationPort,
+        MetricsPort,
+        PiiHasherPort,
+        TracingPort,
+    )
     from bioetl.domain.services import IdentityService
 
 # Mapping of (provider, entity_type) to transformer class
@@ -47,6 +52,7 @@ def create_transformer(
     gold_filters: GoldFilterConfig | None = None,
     identity_service: IdentityService | None = None,
     pii_hasher: PiiHasherPort | None = None,
+    data_normalizer: DataNormalizationPort | None = None,
 ) -> BaseTransformer:
     """Create a transformer instance for the given provider and entity type.
 
@@ -63,6 +69,8 @@ def create_transformer(
             Defaults to a new IdentityService instance in BaseTransformer.
         pii_hasher: Optional PII hasher for hashing author names and other PII.
             Defaults to NoOpPiiHasher (no hashing) in BaseTransformer.
+        data_normalizer: Optional data normalization service for text normalization
+            (DOI, PMID, authors, HTML). Defaults to DataNormalizationService.
 
     Returns:
         Configured transformer instance with observability.
@@ -93,6 +101,7 @@ def create_transformer(
         gold_filters=gold_filters,
         identity_service=identity_service,
         pii_hasher=pii_hasher,
+        data_normalizer=data_normalizer,
     )
 
 

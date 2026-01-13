@@ -1191,8 +1191,12 @@ class TestMolecularWeight:
 
     def test_equality_ignores_config(self) -> None:
         """Test that equality compares by value, ignoring config."""
-        config1 = ValidationConfig(min_molecular_weight=1.0, max_molecular_weight=50000.0)
-        config2 = ValidationConfig(min_molecular_weight=10.0, max_molecular_weight=10000.0)
+        config1 = ValidationConfig(
+            min_molecular_weight=1.0, max_molecular_weight=50000.0
+        )
+        config2 = ValidationConfig(
+            min_molecular_weight=10.0, max_molecular_weight=10000.0
+        )
         mw1 = MolecularWeight(100.0, config=config1)
         mw2 = MolecularWeight(100.0, config=config2)
         assert mw1 == mw2

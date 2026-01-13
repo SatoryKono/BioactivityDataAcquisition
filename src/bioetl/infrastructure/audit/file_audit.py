@@ -16,12 +16,12 @@ Requirements:
 from __future__ import annotations
 
 import asyncio
-import json
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
+from bioetl.domain.serialization import deserialize_from_json, serialize_to_json
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -85,7 +85,7 @@ class FileAuditAdapter:
         file_path = self._get_audit_file_path(entry.timestamp)
 
         # Convert entry to JSON line
-        json_line = json.dumps(entry.to_dict(), sort_keys=True) + "\n"
+        json_line = serialize_to_json(entry.to_dict(), sort_keys=True) + "\n"
 
         # Append atomically using exclusive create + append mode
         with open(file_path, "a", encoding="utf-8") as f:
@@ -161,7 +161,9 @@ class FileAuditAdapter:
                             continue
 
                         try:
-                            data = json.loads(line)
+                            data = deserialize_from_json(line)
+                            if not isinstance(data, dict):
+                                continue
                             entry = self._parse_entry(data)
 
                             # Apply filters
@@ -173,7 +175,7 @@ class FileAuditAdapter:
                             entries.append(entry)
                             if len(entries) >= limit:
                                 break
-                        except (json.JSONDecodeError, KeyError, ValueError):
+                        except (ValueError, KeyError):
                             # Skip malformed entries
                             continue
             except OSError:
