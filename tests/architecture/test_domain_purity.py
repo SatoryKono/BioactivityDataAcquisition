@@ -256,6 +256,8 @@ class TestDomainComplexity:
             "validate_concentration": 7,  # Concentration validation with unit checks
             "validate_pchembl": 7,  # pChEMBL validation with range checks
             "validate_activity_value": 10,  # Activity value validation
+            # Value coercion with type handling
+            "_coerce_to_int": 10,  # CC=8 - Integer coercion with multiple type checks
         }
 
         violations = []

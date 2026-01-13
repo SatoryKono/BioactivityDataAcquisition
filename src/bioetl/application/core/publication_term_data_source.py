@@ -22,7 +22,7 @@ from __future__ import annotations
 import hashlib
 from typing import TYPE_CHECKING, Any, Self
 
-from bioetl.domain.ports.data_source import FilterableDataSourcePort
+from bioetl.domain.ports import FilterableDataSourcePort
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -433,7 +433,9 @@ class PublicationTermDataSource:
             if not document_chembl_id:
                 continue
 
-            terms = self._extract_terms_from_publication(publication, document_chembl_id)
+            terms = self._extract_terms_from_publication(
+                publication, document_chembl_id
+            )
 
             for term in terms:
                 yield term

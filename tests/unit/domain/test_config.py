@@ -205,9 +205,7 @@ class TestValidationConfig:
 
     def test_custom_publication_year_range(self) -> None:
         """Test custom publication year range (e.g., for Semantic Scholar)."""
-        config = ValidationConfig(
-            min_publication_year=1500, max_publication_year=2100
-        )
+        config = ValidationConfig(min_publication_year=1500, max_publication_year=2100)
 
         assert config.min_publication_year == 1500
         assert config.max_publication_year == 2100
@@ -248,23 +246,17 @@ class TestValidationConfig:
     def test_invalid_year_range_raises(self) -> None:
         """Test that invalid year range (min >= max) raises ValueError."""
         with pytest.raises(ValueError, match="min_publication_year"):
-            ValidationConfig(
-                min_publication_year=2100, max_publication_year=1800
-            )
+            ValidationConfig(min_publication_year=2100, max_publication_year=1800)
 
     def test_invalid_year_range_equal_raises(self) -> None:
         """Test that equal year range raises ValueError."""
         with pytest.raises(ValueError, match="min_publication_year"):
-            ValidationConfig(
-                min_publication_year=2000, max_publication_year=2000
-            )
+            ValidationConfig(min_publication_year=2000, max_publication_year=2000)
 
     def test_invalid_mw_range_raises(self) -> None:
         """Test that invalid MW range (min >= max) raises ValueError."""
         with pytest.raises(ValueError, match="min_molecular_weight"):
-            ValidationConfig(
-                min_molecular_weight=10000.0, max_molecular_weight=10.0
-            )
+            ValidationConfig(min_molecular_weight=10000.0, max_molecular_weight=10.0)
 
     def test_invalid_pchembl_range_raises(self) -> None:
         """Test that invalid pChEMBL range raises ValueError."""

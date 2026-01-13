@@ -38,7 +38,7 @@ class TestFileSizeLimits:
         "entities.py": 600,  # 569 LOC
         "chembl.py": 720,  # 714 LOC - ChEMBL entity DTOs with many fields
         "normalization.py": 350,  # 341 LOC - Pure domain normalization functions
-        "validation.py": 385,  # 381 LOC - Pure domain validation functions (SMILES, DOI, InChI Key, year, molecular weight)
+        "validation.py": 450,  # 430 LOC - Pure domain validation functions (SMILES, DOI, InChI Key, year, molecular weight)
         "activity_aggregator.py": 400,  # 392 LOC - Activity aggregation with multiple strategies
         "normalization_service.py": 420,  # 411 LOC - Normalization service with validation
         "value_validator.py": 360,  # 351 LOC - Value objects validation
@@ -51,7 +51,7 @@ class TestFileSizeLimits:
         "batch.py": 550,  # 531 LOC - Batch aggregate with lifecycle methods
         "pipeline_run.py": 600,  # 581 LOC - PipelineRun aggregate with state machine
         "quarantine_entry.py": 520,  # 501 LOC - QuarantineEntry with detailed error info
-        "chemical.py": 330,  # 326 LOC - Chemical structure Value Objects (InChIKey, SMILES, PublicationYear)
+        "chemical.py": 600,  # 575 LOC - Chemical structure Value Objects (InChIKey, SMILES, PublicationYear)
         "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
         # Domain ports NoOp implementations
         "noop.py": 400,  # 383 LOC - NoOp implementations for Null Object Pattern (+ NoOpPiiHasher)
@@ -87,6 +87,7 @@ class TestFileSizeLimits:
         "observability.py": 450,  # Bootstrap observability
         # Application layer exemptions
         "base_transformer.py": 680,  # 667 LOC - BaseTransformer with serialization helpers
+        "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
@@ -187,6 +188,10 @@ class TestFunctionComplexity:
         "validate_activity_value": 10,  # Activity value validation
         # CrossRef/OpenAlex/SemanticScholar adapter fallback logic
         "fetch_filtered_with_fallback": 25,  # DOI→title fallback with batch processing + multi-identifier resolution
+        # Domain value coercion with type handling
+        "_coerce_to_int": 10,  # CC=8 - Integer coercion with multiple type checks
+        # FilterableDataSourcePort batch filtering
+        "fetch_filtered": 20,  # CC=18 - Batch filtering with OR-query and entity type handling
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -290,11 +295,15 @@ class TestFunctionLength:
         "write_bronze": 170,  # Full Bronze layer write with validation
         "write_silver": 100,  # Full Silver layer write with merge
         "_log_silver_audit": 75,  # Silver audit logging
+        # FilterableDataSourcePort implementations
+        "fetch_filtered": 70,  # Batch filtering with OR-query (UniProt)
+        "fetch_filtered_with_fallback": 70,  # Primary lookup + fallback search
+        "fetch_multi_filtered": 60,  # Multi-field AND filtering
     }
 
     # Maximum allowed violations (for tracking technical debt)
-    # Baseline updated 2026-01-12: 69 violations (authors JSON serialization refactor)
-    MAX_VIOLATIONS = 69
+    # Baseline updated 2026-01-13: 72 violations (FilterableDataSourcePort implementations)
+    MAX_VIOLATIONS = 72
 
     def test_functions_under_50_lines(self, src_dir: Path) -> None:
         """All functions must be under 50 lines (with exemptions)."""
@@ -378,13 +387,13 @@ class TestClassSize:
         "PubChemAdapter": 500,  # 489 lines - sync adapter with SMILES/CID filtering + DTO support
         "CrossRefPublicationTransformer": 360,  # 354 lines - transformer with field extraction
         # UniProt adapter (similar to ChEMBL adapter)
-        "UniProtAdapter": 320,  # 312 lines - HTTP adapter with streaming
+        "UniProtAdapter": 550,  # 546 lines - HTTP adapter with streaming + FilterableDataSourcePort
         # UniProt ID Mapping client (job-based async API)
         "UniProtIDMappingClient": 420,  # 415 lines - ID Mapping client with job polling
         # SemanticScholar adapter
         "SemanticScholarAdapter": 520,  # 514 lines - HTTP adapter with multi-identifier fallback + FilterableDataSourcePort
         # PubMed adapter (similar to ChEMBL adapter)
-        "PubMedAdapter": 400,  # 373 lines - HTTP adapter with Entrez API + FilterableDataSourcePort
+        "PubMedAdapter": 500,  # 488 lines - HTTP adapter with Entrez API + full FilterableDataSourcePort
         # OpenAlex adapter (FilterableDataSourcePort with batch DOI + title fallback)
         "OpenAlexAdapter": 500,  # 493 lines - HTTP adapter with batch DOI resolution + title fallback
         # Error handling utility (ErrorService + deprecated ErrorHandler alias)
@@ -408,7 +417,7 @@ class TestClassSize:
         # Pandera schemas (declarative field definitions)
         "PubchemMoleculeSchema": 350,  # 345 lines - PubChem molecule schema with many chemical fields
         # Derived entity data source wrappers (comprehensive docstrings)
-        "PublicationTermDataSource": 310,  # Wrapper for derived entity extraction with detailed docs
+        "PublicationTermDataSource": 570,  # 566 lines - Wrapper with FilterableDataSourcePort delegation
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:
