@@ -108,7 +108,7 @@ class TestAssayTransformer:
                 "mutation": "V600E",
                 "organism": "Homo sapiens",
                 "sequence": "MTEYKLVVVGAGGVGKSALT...",
-                "tax_id": 9606,
+                "tax_id": 9606,  # Source API field name
             },
         }
 
@@ -121,7 +121,7 @@ class TestAssayTransformer:
         assert result["variant_mutation"] == "V600E"
         assert result["variant_organism"] == "Homo sapiens"
         assert result["variant_sequence"] == "MTEYKLVVVGAGGVGKSALT..."
-        assert result["variant_tax_id"] == 9606
+        assert result["variant_taxonomy_id"] == 9606
         # Forensic JSON should also be present
         assert isinstance(result.get("variant_sequence_json"), str)
 
@@ -141,7 +141,7 @@ class TestAssayTransformer:
         assert result["variant_mutation"] is None
         assert result["variant_organism"] is None
         assert result["variant_sequence"] is None
-        assert result["variant_tax_id"] is None
+        assert result["variant_taxonomy_id"] is None
         assert result["variant_sequence_json"] is None
 
     @pytest.mark.asyncio
@@ -164,7 +164,7 @@ class TestAssayTransformer:
         assert result["variant_isoform"] is None
         assert result["variant_organism"] is None
         assert result["variant_sequence"] is None
-        assert result["variant_tax_id"] is None
+        assert result["variant_taxonomy_id"] is None
 
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
@@ -192,7 +192,7 @@ class TestPublicationTransformer:
         """Test transformation of valid document record."""
         record = {
             "document_chembl_id": "CHEMBL1234567",
-            "pubmed_id": "12345678",
+            "pubmed_id": "12345678",  # Source API field name
             "doi": "10.1000/test.doi",
             "title": "Test Document Title",
             "authors": "Test Author",
@@ -204,7 +204,7 @@ class TestPublicationTransformer:
 
         assert result is not None
         assert result["document_chembl_id"] == "CHEMBL1234567"
-        assert result["pubmed_id"] == "12345678"
+        assert result["pmid"] == "12345678"  # Standardized output field name
         assert result["doi"] == "10.1000/test.doi"
         assert result["year"] == 2024
         assert "entity_id" in result
@@ -215,7 +215,7 @@ class TestPublicationTransformer:
     async def test_transform_missing_document_id(self, transformer, mock_context):
         """Test transformation returns None when document_chembl_id is missing."""
         record = {
-            "pubmed_id": "12345678",
+            "pubmed_id": "12345678",  # Source API field name
             "title": "Test Document",
         }
 
@@ -228,7 +228,7 @@ class TestPublicationTransformer:
         """Test transformation with all document fields."""
         record = {
             "document_chembl_id": "CHEMBL1234567",
-            "pubmed_id": "12345678",
+            "pubmed_id": "12345678",  # Source API field name
             "doi": "10.1000/test",
             "patent_id": "US1234567",
             "title": "Full Title",
@@ -458,7 +458,7 @@ class TestTargetTransformer:
             "pref_name": "Cyclooxygenase-2",
             "target_type": "SINGLE PROTEIN",
             "organism": "Homo sapiens",
-            "tax_id": 9606,
+            "tax_id": 9606,  # Source API field name
         }
 
         result = await transformer.transform(mock_context, record, index=0)
@@ -467,7 +467,7 @@ class TestTargetTransformer:
         assert result["target_chembl_id"] == "CHEMBL1862"
         assert result["pref_name"] == "Cyclooxygenase-2"
         assert result["target_type"] == "SINGLE PROTEIN"
-        assert result["tax_id"] == 9606
+        assert result["taxonomy_id"] == 9606  # Standardized output field name
         assert "entity_id" in result
         assert "content_hash" in result
         assert "_run_id" in result
@@ -643,10 +643,10 @@ class TestTargetTransformer:
         assert stages["stage"] == "Phase 1"
 
     @pytest.mark.asyncio
-    async def test_transform_extracts_component_organisms_and_tax_ids(
+    async def test_transform_extracts_component_organisms_and_taxonomy_ids(
         self, transformer, mock_context
     ):
-        """Test transformation extracts organisms and tax_ids from components."""
+        """Test transformation extracts organisms and taxonomy_ids from components."""
         record = {
             "target_chembl_id": "CHEMBL2111431",
             "target_components": [
@@ -655,14 +655,14 @@ class TestTargetTransformer:
                     "component_id": 100,
                     "component_type": "PROTEIN",
                     "organism": "Homo sapiens",
-                    "tax_id": 9606,
+                    "tax_id": 9606,  # Source API field name
                 },
                 {
                     "accession": "P67890",
                     "component_id": 101,
                     "component_type": "PROTEIN",
                     "organism": "Mus musculus",
-                    "tax_id": 10090,
+                    "tax_id": 10090,  # Source API field name
                 },
             ],
         }
@@ -671,7 +671,7 @@ class TestTargetTransformer:
 
         assert result is not None
         assert result["component_organisms"] == ["Homo sapiens", "Mus musculus"]
-        assert result["component_tax_ids"] == [9606, 10090]
+        assert result["component_taxonomy_ids"] == [9606, 10090]  # Standardized output
 
     @pytest.mark.asyncio
     async def test_transform_handles_missing_new_fields_gracefully(
@@ -712,7 +712,7 @@ class TestTargetComponentTransformer:
             "component_type": "PROTEIN",
             "description": "Test Component",
             "organism": "Homo sapiens",
-            "tax_id": 9606,
+            "tax_id": 9606,  # Source API field name
         }
 
         result = await transformer.transform(mock_context, record, index=0)
@@ -721,7 +721,7 @@ class TestTargetComponentTransformer:
         assert result["component_id"] == 123
         assert result["accession"] == "P12345"
         assert result["component_type"] == "PROTEIN"
-        assert result["tax_id"] == 9606
+        assert result["taxonomy_id"] == 9606  # Standardized output field name
         assert "entity_id" in result
         assert "content_hash" in result
         assert "_run_id" in result

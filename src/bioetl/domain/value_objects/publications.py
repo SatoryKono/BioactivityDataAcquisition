@@ -66,7 +66,8 @@ class DOI(ValueObject[str]):
             raise ValueError("DOI cannot be empty")
 
         # Strip URL prefixes and normalize to lowercase
-        normalized = self._strip_url_prefix(normalized).lower()
+        # Also strip whitespace after URL prefix removal (handles "https://doi.org/  10.1000/xyz  ")
+        normalized = self._strip_url_prefix(normalized).strip().lower()
 
         if not self._PATTERN.match(normalized):
             raise ValueError(f"Invalid DOI format: {value!r}. Expected: 10.XXXX/suffix")

@@ -65,9 +65,9 @@ _STRUCTURES_FIELDS: dict[str, Any] = {
     "standard_inchi_key": None,
 }
 
-# Rename mapping for structures fields (standard_inchi_key -> inchi_key for PubChem consistency)
+# Rename mapping for structures fields (standard_inchi_key -> inchikey for IUPAC/PubChem consistency)
 _STRUCTURES_RENAMES: dict[str, str] = {
-    "standard_inchi_key": "inchi_key",
+    "standard_inchi_key": "inchikey",
 }
 
 # JSON fields to serialize
@@ -168,8 +168,8 @@ class MoleculeTransformer(BaseChemblTransformer):
         )
 
         # Validate InChI Key using Value Object (returns None for invalid/empty)
-        inchi_key = InChIKey.from_raw(structure_data.get("inchi_key"))
-        structure_data["inchi_key"] = str(inchi_key) if inchi_key else None
+        inchikey = InChIKey.from_raw(structure_data.get("inchikey"))
+        structure_data["inchikey"] = str(inchikey) if inchikey else None
 
         # Validate SMILES using Value Object (returns None for invalid/empty)
         # ChEMBL provides canonical_smiles, so mark as canonical

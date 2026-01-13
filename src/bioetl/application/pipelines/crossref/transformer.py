@@ -26,6 +26,7 @@ from bioetl.domain.normalization import (
 )
 from bioetl.domain.services import DataNormalizationService, IdentityService
 from bioetl.domain.validation import validate_year_range
+from bioetl.domain.value_objects import DOI
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -177,9 +178,13 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         # Cast to dict for type-safe access (BronzeRecord is an empty TypedDict marker)
         rec = cast("dict[str, Any]", record)
 
-        # Use DataNormalizationService for normalization
+        # Validate DOI using Value Object (returns None for invalid/empty)
+        # CrossRef always provides DOI, so we use empty string as fallback for type consistency
+        doi_vo = DOI.from_raw(rec.get("DOI"))
+        doi = str(doi_vo) if doi_vo else ""
+
+        # Use DataNormalizationService for other normalization tasks
         normalizer = self._data_normalizer
-        doi = normalizer.normalize_doi(rec.get("DOI", "")) or ""
         first_page, last_page = parse_page_range(rec.get("page"))
 
         # Extract date fields using normalizer service

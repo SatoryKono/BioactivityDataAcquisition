@@ -30,7 +30,9 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         # Target data
         pa.field("target_pref_name", pa.string()),
         pa.field("target_organism", pa.string()),
-        pa.field("target_tax_id", pa.string()),
+        pa.field(
+            "target_taxonomy_id", pa.string()
+        ),  # Standardized name (was target_tax_id)
         # Assay data
         pa.field("assay_type", pa.string()),
         pa.field("assay_description", pa.string()),
@@ -230,7 +232,9 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("assay_group", pa.string()),
         # Biological context
         pa.field("assay_organism", pa.string()),
-        pa.field("assay_tax_id", pa.int64()),
+        pa.field(
+            "assay_taxonomy_id", pa.int64()
+        ),  # Standardized name (was assay_tax_id)
         pa.field("assay_cell_type", pa.string()),
         pa.field("assay_tissue", pa.string()),
         pa.field("assay_strain", pa.string()),
@@ -253,7 +257,9 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("variant_mutation", pa.string()),
         pa.field("variant_organism", pa.string()),
         pa.field("variant_sequence", pa.string()),
-        pa.field("variant_tax_id", pa.int64()),
+        pa.field(
+            "variant_taxonomy_id", pa.int64()
+        ),  # Standardized name (was variant_tax_id)
         # Forensic: original JSON
         pa.field("variant_sequence_json", pa.string()),
         # Complex fields (stored as JSON strings)
@@ -281,7 +287,7 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("pref_name", pa.string()),
         pa.field("target_type", pa.string()),
         pa.field("organism", pa.string()),
-        pa.field("tax_id", pa.int64()),
+        pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
         pa.field("species_group_flag", pa.bool_()),
         pa.field("description", pa.string()),
         pa.field("downgraded", pa.bool_()),
@@ -299,7 +305,9 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("component_relationships", pa.list_(pa.string())),
         pa.field("component_descriptions", pa.list_(pa.string())),
         pa.field("component_organisms", pa.list_(pa.string())),
-        pa.field("component_tax_ids", pa.list_(pa.int64())),
+        pa.field(
+            "component_taxonomy_ids", pa.list_(pa.int64())
+        ),  # Standardized name (was component_tax_ids)
         # Note: protein_classifications not available in /target endpoint
         # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
         # Lineage metadata
@@ -325,7 +333,7 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         pa.field("component_type", pa.string()),
         pa.field("description", pa.string()),
         pa.field("organism", pa.string()),
-        pa.field("tax_id", pa.int64()),
+        pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
         # Complex fields (JSON strings)
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_component_xrefs", pa.string()),
@@ -356,7 +364,9 @@ CHEMBL_CELL_LINE_SCHEMA = pa.schema(
         # Source information
         pa.field("cell_source_tissue", pa.string()),
         pa.field("cell_source_organism", pa.string()),
-        pa.field("cell_source_tax_id", pa.int64()),
+        pa.field(
+            "cell_source_taxonomy_id", pa.int64()
+        ),  # Standardized name (was cell_source_tax_id)
         # External identifiers
         pa.field("cellosaurus_id", pa.string()),
         pa.field("cl_lincs_id", pa.string()),
@@ -381,8 +391,8 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("document_chembl_id", pa.string()),
         # Publication identifiers
         pa.field(
-            "pubmed_id", pa.string()
-        ),  # Numeric string for cross-provider consistency
+            "pmid", pa.string()
+        ),  # Standardized name (was pubmed_id), numeric string for cross-provider consistency
         pa.field("doi", pa.string()),
         pa.field("patent_id", pa.string()),
         # Core metadata

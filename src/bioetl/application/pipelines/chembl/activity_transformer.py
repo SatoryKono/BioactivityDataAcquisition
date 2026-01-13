@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.field_specs import (
     FieldGroup,
+    FieldSpec,
     float_fields,
     int_fields,
     map_field_groups,
@@ -21,6 +22,14 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.entities import Bioactivity
 from bioetl.domain.transformations import safe_float
+from bioetl.domain.value_objects import TaxonomyId
+
+
+def _validate_taxonomy_id_str(value: Any) -> str | None:
+    """Validate taxonomy ID using TaxonomyId Value Object, return as string."""
+    vo = TaxonomyId.from_raw(value)
+    return str(vo.value) if vo else None
+
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
@@ -55,20 +64,29 @@ _IDENTIFIERS = FieldGroup(
 
 _MOLECULE_TARGET_ASSAY = FieldGroup(
     name="molecule_target_assay",
-    fields=simple_fields(
-        "canonical_smiles",
-        "molecule_pref_name",
-        "parent_molecule_chembl_id",
-        "target_pref_name",
-        "target_organism",
-        "target_tax_id",
-        "assay_type",
-        "assay_description",
-        "assay_variant_accession",
-        "assay_variant_mutation",
-        "bao_endpoint",
-        "bao_format",
-        "bao_label",
+    fields=(
+        *simple_fields(
+            "canonical_smiles",
+            "molecule_pref_name",
+            "parent_molecule_chembl_id",
+            "target_pref_name",
+            "target_organism",
+        ),
+        # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
+        FieldSpec(
+            "target_tax_id",
+            target="target_taxonomy_id",
+            converter=_validate_taxonomy_id_str,
+        ),
+        *simple_fields(
+            "assay_type",
+            "assay_description",
+            "assay_variant_accession",
+            "assay_variant_mutation",
+            "bao_endpoint",
+            "bao_format",
+            "bao_label",
+        ),
     ),
 )
 
