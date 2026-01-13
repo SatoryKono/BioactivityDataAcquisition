@@ -7,11 +7,11 @@
     - chembl_assay_parameters
     - chembl_cell_line
     - chembl_compound_record
-    - chembl_document
-    - chembl_document_similarity
-    - chembl_document_term
     - chembl_molecule
     - chembl_protein_class
+    - chembl_publication
+    - chembl_publication_similarity
+    - chembl_publication_term
     - chembl_target
     - chembl_target_component
     - crossref_publication
