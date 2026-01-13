@@ -39,6 +39,7 @@ class MockTransformer:
         gold_filters: Any = None,
         identity_service: Any = None,
         pii_hasher: Any = None,
+        data_normalizer: Any = None,
     ):
         self.provider = provider
         self.entity_type = entity_type
@@ -47,6 +48,7 @@ class MockTransformer:
         self.gold_filters = gold_filters
         self.identity_service = identity_service
         self.pii_hasher = pii_hasher
+        self.data_normalizer = data_normalizer
 
 
 class TestRegisterTransformer:

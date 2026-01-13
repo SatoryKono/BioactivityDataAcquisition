@@ -71,9 +71,10 @@ class TestUnifiedQuarantine:
         record = _extract_record_from_call(mock_deltalake)
         assert record["pipeline"] == pipeline
         assert record["error_code"] == error_code
-        assert record["payload"] == '{"id": 1, "value": "a"}'
+        # Compact JSON format (no spaces) per centralized serialization
+        assert record["payload"] == '{"id":1,"value":"a"}'
         assert record["bronze_batch_id"] == str(bronze_batch_id)
-        assert record["error_details"] == '{"message": "Invalid value"}'
+        assert record["error_details"] == '{"message":"Invalid value"}'
 
     async def test_payload_truncation(self, mock_deltalake):
         """Test that large payloads are truncated at 64KB."""

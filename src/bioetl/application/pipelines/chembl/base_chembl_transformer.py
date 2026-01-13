@@ -22,7 +22,12 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
     from bioetl.domain.filtering import GoldFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
+    from bioetl.domain.ports import (
+        DataNormalizationPort,
+        MetricsPort,
+        PiiHasherPort,
+        TracingPort,
+    )
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
@@ -62,6 +67,7 @@ class BaseChemblTransformer(BaseTransformer):
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
+        data_normalizer: DataNormalizationPort | None = None,
     ) -> None:
         """Initialize ChEMBL transformer.
 
@@ -74,6 +80,8 @@ class BaseChemblTransformer(BaseTransformer):
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
+            data_normalizer: Data normalization service for text normalization
+                (DOI, PMID, authors, HTML). Defaults to DataNormalizationService.
 
         """
         # Derive entity_type from entity_class if not provided
@@ -89,6 +97,7 @@ class BaseChemblTransformer(BaseTransformer):
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
+            data_normalizer=data_normalizer,
         )
 
     async def _transform_impl(

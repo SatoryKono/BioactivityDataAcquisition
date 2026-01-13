@@ -30,7 +30,12 @@ from bioetl.domain.services import IdentityService
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
+    from bioetl.domain.ports import (
+        DataNormalizationPort,
+        MetricsPort,
+        PiiHasherPort,
+        TracingPort,
+    )
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
@@ -58,6 +63,7 @@ class UniProtProteinTransformer(BaseTransformer):
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
+        data_normalizer: DataNormalizationPort | None = None,
     ):
         """Initialize UniProt protein transformer.
 
@@ -69,6 +75,7 @@ class UniProtProteinTransformer(BaseTransformer):
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names and other PII.
+            data_normalizer: Data normalization service for text normalization.
         """
         super().__init__(
             provider,
@@ -78,6 +85,7 @@ class UniProtProteinTransformer(BaseTransformer):
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
+            data_normalizer=data_normalizer,
         )
 
     async def _transform_impl(
