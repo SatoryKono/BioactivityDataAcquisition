@@ -1,16 +1,19 @@
 """Tests for identifier Value Objects.
 
-Tests for ChemblId, UniProtId, DOI, PubMedId, PubChemCid, InChIKey, SMILES, PublicationYear.
+Tests for ChemblId, UniProtId, DOI, PubMedId, PubChemCid, InChIKey, SMILES,
+PublicationYear, MolecularWeight.
 """
 
 from __future__ import annotations
 
 import pytest
 
+from bioetl.domain.config import ValidationConfig
 from bioetl.domain.value_objects import (
     DOI,
     ChemblId,
     InChIKey,
+    MolecularWeight,
     PubChemCid,
     PubMedId,
     PublicationYear,
@@ -960,3 +963,242 @@ class TestPublicationYear:
         """Test repr output."""
         year = PublicationYear(2020)
         assert repr(year) == "PublicationYear(2020)"
+
+    def test_with_custom_config(self) -> None:
+        """Test PublicationYear with custom ValidationConfig."""
+        config = ValidationConfig(min_publication_year=1500)
+        year = PublicationYear(1600, config=config)
+        assert year.value == 1600
+
+    def test_custom_config_rejects_out_of_range(self) -> None:
+        """Test that custom config enforces its range."""
+        config = ValidationConfig(min_publication_year=1500, max_publication_year=2000)
+        with pytest.raises(ValueError, match="outside valid range"):
+            PublicationYear(2001, config=config)
+
+    def test_from_raw_with_config(self) -> None:
+        """Test from_raw with custom config."""
+        config = ValidationConfig(min_publication_year=1500)
+        year = PublicationYear.from_raw(1600, config=config)
+        assert year is not None
+        assert year.value == 1600
+
+    def test_from_raw_with_config_invalid(self) -> None:
+        """Test from_raw with config and invalid value returns None."""
+        config = ValidationConfig(min_publication_year=1500, max_publication_year=2000)
+        assert PublicationYear.from_raw(2001, config=config) is None
+
+    def test_date_string_extraction(self) -> None:
+        """Test year extraction from date string."""
+        # ISO date format: YYYY-MM-DD
+        year = PublicationYear("2024-01-15")  # type: ignore[arg-type]
+        assert year.value == 2024
+
+    def test_date_string_extraction_slash(self) -> None:
+        """Test year extraction from date string with slash."""
+        year = PublicationYear("2023/06/20")  # type: ignore[arg-type]
+        assert year.value == 2023
+
+    def test_from_raw_date_string(self) -> None:
+        """Test from_raw with date string."""
+        year = PublicationYear.from_raw("2024-01-15")
+        assert year is not None
+        assert year.value == 2024
+
+    def test_min_year_property(self) -> None:
+        """Test min_year property returns config value."""
+        year = PublicationYear(2020)
+        assert year.min_year == 1800
+
+    def test_max_year_property(self) -> None:
+        """Test max_year property returns config value."""
+        year = PublicationYear(2020)
+        assert year.max_year == 2100
+
+    def test_equality_ignores_config(self) -> None:
+        """Test that equality compares by value, ignoring config."""
+        config1 = ValidationConfig(min_publication_year=1800)
+        config2 = ValidationConfig(min_publication_year=1500)
+        year1 = PublicationYear(2020, config=config1)
+        year2 = PublicationYear(2020, config=config2)
+        assert year1 == year2
+
+    def test_hash_ignores_config(self) -> None:
+        """Test that hash is consistent with equality (ignoring config)."""
+        config1 = ValidationConfig(min_publication_year=1800)
+        config2 = ValidationConfig(min_publication_year=1500)
+        year1 = PublicationYear(2020, config=config1)
+        year2 = PublicationYear(2020, config=config2)
+        assert hash(year1) == hash(year2)
+
+
+class TestMolecularWeight:
+    """Tests for MolecularWeight Value Object."""
+
+    def test_valid_molecular_weight(self) -> None:
+        """Test creation with valid molecular weight."""
+        mw = MolecularWeight(180.156)
+        assert mw.value == 180.156
+
+    def test_from_int(self) -> None:
+        """Test creation from integer."""
+        mw = MolecularWeight(180)
+        assert mw.value == 180.0
+
+    def test_from_string(self) -> None:
+        """Test creation from string (e.g., from PubChem API)."""
+        mw = MolecularWeight("342.30")
+        assert mw.value == 342.3
+
+    def test_precision_rounding(self) -> None:
+        """Test rounding to configured precision (default 10 decimals)."""
+        mw = MolecularWeight(180.12345678901234)
+        # Should round to 10 decimal places
+        assert mw.value == 180.1234567890
+
+    def test_below_minimum_raises(self) -> None:
+        """Test that MW below minimum raises ValueError."""
+        with pytest.raises(ValueError, match="outside range"):
+            MolecularWeight(5.0)  # Below default min of 10.0
+
+    def test_at_minimum_raises(self) -> None:
+        """Test that MW at minimum raises ValueError (exclusive bound)."""
+        with pytest.raises(ValueError, match="outside range"):
+            MolecularWeight(10.0)  # At bound, but bounds are exclusive
+
+    def test_above_maximum_raises(self) -> None:
+        """Test that MW above maximum raises ValueError."""
+        with pytest.raises(ValueError, match="outside range"):
+            MolecularWeight(15000.0)  # Above default max of 10000.0
+
+    def test_at_maximum_raises(self) -> None:
+        """Test that MW at maximum raises ValueError (exclusive bound)."""
+        with pytest.raises(ValueError, match="outside range"):
+            MolecularWeight(10000.0)  # At bound, but bounds are exclusive
+
+    def test_zero_raises(self) -> None:
+        """Test that zero MW raises ValueError."""
+        with pytest.raises(ValueError, match="outside range"):
+            MolecularWeight(0.0)
+
+    def test_negative_raises(self) -> None:
+        """Test that negative MW raises ValueError."""
+        with pytest.raises(ValueError, match="outside range"):
+            MolecularWeight(-100.0)
+
+    def test_nan_raises(self) -> None:
+        """Test that NaN raises ValueError."""
+        with pytest.raises(ValueError, match="NaN or Inf"):
+            MolecularWeight(float("nan"))
+
+    def test_inf_raises(self) -> None:
+        """Test that Infinity raises ValueError."""
+        with pytest.raises(ValueError, match="NaN or Inf"):
+            MolecularWeight(float("inf"))
+
+    def test_invalid_string_raises(self) -> None:
+        """Test that invalid string raises ValueError."""
+        with pytest.raises(ValueError, match="Invalid molecular weight"):
+            MolecularWeight("not-a-number")
+
+    def test_immutability(self) -> None:
+        """Test Value Object is immutable."""
+        mw = MolecularWeight(180.156)
+        with pytest.raises(AttributeError, match="immutable"):
+            mw._value = 200.0  # type: ignore[misc]
+
+    def test_equality_by_value(self) -> None:
+        """Test equality is based on value."""
+        mw1 = MolecularWeight(180.156)
+        mw2 = MolecularWeight(180.156)
+        assert mw1 == mw2
+
+    def test_inequality(self) -> None:
+        """Test inequality for different values."""
+        mw1 = MolecularWeight(180.156)
+        mw2 = MolecularWeight(200.0)
+        assert mw1 != mw2
+
+    def test_hash_consistency(self) -> None:
+        """Test hash is consistent with equality."""
+        mw1 = MolecularWeight(180.156)
+        mw2 = MolecularWeight(180.156)
+        assert hash(mw1) == hash(mw2)
+
+    def test_from_raw_valid(self) -> None:
+        """Test from_raw with valid value."""
+        mw = MolecularWeight.from_raw(180.156)
+        assert mw is not None
+        assert mw.value == 180.156
+
+    def test_from_raw_valid_string(self) -> None:
+        """Test from_raw with valid string."""
+        mw = MolecularWeight.from_raw("342.30")
+        assert mw is not None
+        assert mw.value == 342.3
+
+    def test_from_raw_none(self) -> None:
+        """Test from_raw with None."""
+        assert MolecularWeight.from_raw(None) is None
+
+    def test_from_raw_empty_string(self) -> None:
+        """Test from_raw with empty string."""
+        assert MolecularWeight.from_raw("") is None
+        assert MolecularWeight.from_raw("   ") is None
+
+    def test_from_raw_invalid(self) -> None:
+        """Test from_raw with invalid value returns None."""
+        assert MolecularWeight.from_raw("abc") is None
+        assert MolecularWeight.from_raw(5.0) is None  # Below min
+        assert MolecularWeight.from_raw(15000.0) is None  # Above max
+
+    def test_str(self) -> None:
+        """Test string conversion."""
+        mw = MolecularWeight(180.156)
+        assert str(mw) == "180.156"
+
+    def test_repr(self) -> None:
+        """Test repr output."""
+        mw = MolecularWeight(180.156)
+        assert repr(mw) == "MolecularWeight(180.156)"
+
+    def test_with_custom_config(self) -> None:
+        """Test MolecularWeight with custom ValidationConfig."""
+        config = ValidationConfig(
+            min_molecular_weight=1.0, max_molecular_weight=50000.0
+        )
+        mw = MolecularWeight(5.0, config=config)
+        assert mw.value == 5.0
+
+    def test_from_raw_with_config(self) -> None:
+        """Test from_raw with custom config."""
+        config = ValidationConfig(
+            min_molecular_weight=1.0, max_molecular_weight=50000.0
+        )
+        mw = MolecularWeight.from_raw(5.0, config=config)
+        assert mw is not None
+        assert mw.value == 5.0
+
+    def test_min_weight_property(self) -> None:
+        """Test min_weight property returns config value."""
+        mw = MolecularWeight(100.0)
+        assert mw.min_weight == 10.0
+
+    def test_max_weight_property(self) -> None:
+        """Test max_weight property returns config value."""
+        mw = MolecularWeight(100.0)
+        assert mw.max_weight == 10000.0
+
+    def test_equality_ignores_config(self) -> None:
+        """Test that equality compares by value, ignoring config."""
+        config1 = ValidationConfig(min_molecular_weight=1.0, max_molecular_weight=50000.0)
+        config2 = ValidationConfig(min_molecular_weight=10.0, max_molecular_weight=10000.0)
+        mw1 = MolecularWeight(100.0, config=config1)
+        mw2 = MolecularWeight(100.0, config=config2)
+        assert mw1 == mw2
+
+    def test_custom_precision(self) -> None:
+        """Test custom precision via config."""
+        config = ValidationConfig(molecular_weight_precision=2)
+        mw = MolecularWeight(180.12345, config=config)
+        assert mw.value == 180.12

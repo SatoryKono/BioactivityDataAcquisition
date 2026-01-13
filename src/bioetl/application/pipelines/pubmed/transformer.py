@@ -22,7 +22,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
 from bioetl.application.pipelines.pubmed.xml_utils import get_text
 from bioetl.domain.entities import Publication
 from bioetl.domain.services import DataNormalizationService, IdentityService
-from bioetl.domain.value_objects import DOI, PubMedId
+from bioetl.domain.value_objects import DOI, PublicationYear, PubMedId
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -251,13 +251,17 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         journal = article.find(".//Journal")
         journal_issue = journal.find("JournalIssue") if journal else None
         pub_date_node = journal_issue.find("PubDate") if journal_issue else None
-        pub_date, pub_year = DateExtractor.extract_date(pub_date_node)
+        pub_date, raw_year = DateExtractor.extract_date(pub_date_node)
         history = pubmed_data.find("History") if pubmed_data else None
+
+        # Validate year using PublicationYear Value Object
+        year_vo = PublicationYear.from_raw(raw_year)
+        validated_year = year_vo.value if year_vo else None
 
         return {
             "pub_date": pub_date,
-            "year": pub_year,
-            "publication_year": pub_year,
+            "year": validated_year,
+            "publication_year": validated_year,
             "accepted_date": DateExtractor.extract_history_date(history, "accepted"),
             "received_date": DateExtractor.extract_history_date(history, "received"),
             "revised_date": DateExtractor.extract_history_date(history, "revised"),

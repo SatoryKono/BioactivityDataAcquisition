@@ -28,8 +28,7 @@ from bioetl.application.pipelines.openalex.extractors import (
 )
 from bioetl.domain.entities.openalex import OPENALEX_TYPE_MAP, OpenAlexPublicationEntity
 from bioetl.domain.services import DataNormalizationService, IdentityService
-from bioetl.domain.validation import validate_year_range
-from bioetl.domain.value_objects import DOI
+from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig
@@ -148,10 +147,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         # Extract Open Access info
         oa_info = extract_open_access_info(rec.get("open_access", {}))
 
-        # Validate year
-        year = rec.get("publication_year")
-        if year is not None and not validate_year_range(year):
-            year = None
+        # Validate year using PublicationYear Value Object
+        year_vo = PublicationYear.from_raw(rec.get("publication_year"))
+        year = year_vo.value if year_vo else None
 
         # Map document type
         raw_type = rec.get("type", "")
