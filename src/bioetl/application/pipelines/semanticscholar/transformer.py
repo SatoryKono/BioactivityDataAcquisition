@@ -21,6 +21,7 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
 )
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
 from bioetl.domain.services import DataNormalizationService
+from bioetl.domain.value_objects import DOI, PubMedId
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig
@@ -120,9 +121,16 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
 
         # External identifiers
         external_ids = extract_external_ids(rec.get("externalIds"))
-        # Normalize DOI (lowercase, stripped) for cross-provider consistency
+
+        # Validate DOI using Value Object (returns None for invalid/empty)
         raw_doi = external_ids.get("doi")
-        doi = self._data_normalizer.normalize_doi(raw_doi)
+        doi_vo = DOI.from_raw(raw_doi)
+        doi = str(doi_vo) if doi_vo else None
+
+        # Validate PMID using Value Object (returns None for invalid/empty)
+        raw_pmid = external_ids.get("pmid")
+        pmid_vo = PubMedId.from_raw(raw_pmid)
+        pmid = str(pmid_vo) if pmid_vo else None
 
         # Authors with optional PII hashing
         raw_authors = extract_authors(rec.get("authors"))
@@ -156,7 +164,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         return {
             "paper_id": paper_id,
             "doi": doi,
-            "pmid": external_ids.get("pmid"),
+            "pmid": pmid,  # Use validated PMID from PubMedId Value Object
             "pmcid": external_ids.get("pmcid"),
             "arxiv_id": external_ids.get("arxiv"),
             "corpus_id": external_ids.get("corpus_id"),

@@ -26,7 +26,8 @@ class ChemblPublication(BaseEntity):
     document_chembl_id: str
 
     # Publication identifiers
-    pubmed_id: str | None = None  # Numeric string for cross-provider consistency
+    # Standardized to 'pmid' for cross-provider JOIN consistency (was 'pubmed_id')
+    pmid: str | None = None  # Numeric string for cross-provider consistency
     doi: str | None = None
     patent_id: str | None = None
 
@@ -120,7 +121,8 @@ class Target(BaseEntity):
     pref_name: str | None = None
     target_type: str | None = None  # SINGLE PROTEIN, PROTEIN COMPLEX, ORGANISM, etc.
     organism: str | None = None
-    tax_id: int | None = None
+    # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
+    taxonomy_id: int | None = None
     species_group_flag: bool | None = None
     description: str | None = None  # General target description
     downgraded: bool | None = None  # Flag for deprecated/downgraded records
@@ -142,7 +144,8 @@ class Target(BaseEntity):
     component_relationships: list[str] | None = None
     component_descriptions: list[str] | None = None
     component_organisms: list[str] | None = None  # Organisms from components
-    component_tax_ids: list[int] | None = None  # Tax IDs from components
+    # Standardized to 'taxonomy_ids' for NCBI consistency (was 'tax_ids')
+    component_taxonomy_ids: list[int] | None = None  # Taxonomy IDs from components
 
     # Note: protein_classifications are NOT available in /target endpoint.
     # They are only available via /target_component endpoint (TargetComponent entity).
@@ -172,7 +175,8 @@ class TargetComponent(BaseEntity):
     component_type: str | None = None
     description: str | None = None
     organism: str | None = None
-    tax_id: int | None = None
+    # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
+    taxonomy_id: int | None = None
 
     # Complex fields (JSON serialized)
     target_component_synonyms: str | None = None  # JSON string of list
@@ -214,7 +218,8 @@ class CellLine(BaseEntity):
     # Source information (API-OPTIONAL)
     cell_source_tissue: str | None = None
     cell_source_organism: str | None = None
-    cell_source_tax_id: int | None = None
+    # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
+    cell_source_taxonomy_id: int | None = None
 
     # Cell type classification (API-OPTIONAL)
     cell_type: str | None = None
@@ -234,9 +239,12 @@ class CellLine(BaseEntity):
             raise ValueError("Cell ChEMBL ID is required")
         if not self.cell_name:
             raise ValueError("Cell name is required")
-        if self.cell_source_tax_id is not None and self.cell_source_tax_id < 1:
+        if (
+            self.cell_source_taxonomy_id is not None
+            and self.cell_source_taxonomy_id < 1
+        ):
             raise ValueError(
-                f"cell_source_tax_id must be >= 1, got {self.cell_source_tax_id}"
+                f"cell_source_taxonomy_id must be >= 1, got {self.cell_source_taxonomy_id}"
             )
 
 
@@ -320,7 +328,8 @@ class Molecule(BaseEntity):
     # Flattened Structures (unified naming without structure_ prefix)
     canonical_smiles: str | None = None
     standard_inchi: str | None = None
-    inchi_key: str | None = None
+    # Standardized to 'inchikey' (no underscore) for IUPAC/PubChem consistency
+    inchikey: str | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()
