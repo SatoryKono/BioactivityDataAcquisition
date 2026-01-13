@@ -26,7 +26,7 @@ class ChemblPublication(BaseEntity):
     document_chembl_id: str
 
     # Publication identifiers
-    pubmed_id: int | None = None
+    pubmed_id: str | None = None  # Numeric string for cross-provider consistency
     doi: str | None = None
     patent_id: str | None = None
 
