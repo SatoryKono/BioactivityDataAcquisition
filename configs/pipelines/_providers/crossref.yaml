@@ -1,0 +1,66 @@
+# configs/pipelines/_providers/crossref.yaml
+# =============================================================================
+# CrossRef Provider-Specific Configuration
+# =============================================================================
+#
+# Provider: CrossRef
+# API Documentation: https://api.crossref.org/swagger-ui/index.html
+# Data License: CC0 metadata, varies for full text
+#
+# =============================================================================
+
+provider: crossref
+
+# -----------------------------------------------------------------------------
+# API Configuration
+# -----------------------------------------------------------------------------
+api:
+  base_url: https://api.crossref.org
+  auth_type: email  # Email for polite pool access
+  email_env: BIOETL_CROSSREF_EMAIL
+
+  # Health check
+  health_check:
+    endpoint: /works
+    params:
+      rows: 1
+    timeout: 5
+
+# -----------------------------------------------------------------------------
+# Rate Limiting
+# -----------------------------------------------------------------------------
+# CrossRef polite pool: 50 req/sec with mailto parameter
+rate_limit:
+  requests_per_second: 50
+  burst: 100
+  polite_pool: true
+  notes: |
+    CrossRef polite pool provides 50 req/sec with email identification.
+    Set BIOETL_CROSSREF_EMAIL to access higher rate limits.
+    Without email: shared pool with aggressive rate limiting.
+
+# -----------------------------------------------------------------------------
+# Retry Configuration
+# -----------------------------------------------------------------------------
+retry:
+  max_retries: 3
+  use_retry_after: true
+
+# -----------------------------------------------------------------------------
+# Available Entities
+# -----------------------------------------------------------------------------
+entities:
+  - publication  # CrossRef works (DOI metadata)
+
+# -----------------------------------------------------------------------------
+# Entity-Specific Notes
+# -----------------------------------------------------------------------------
+entity_notes:
+  publication:
+    description: "Publication metadata via DOI resolution"
+    input_mode: "CSV file with DOIs"
+    fallback: "Title search when DOI not found (404)"
+    batch_size: 50
+    notes: |
+      CrossRef API provides rich publication metadata.
+      Falls back to title search for records with missing DOIs.

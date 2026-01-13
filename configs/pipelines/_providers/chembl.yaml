@@ -1,0 +1,98 @@
+# configs/pipelines/_providers/chembl.yaml
+# =============================================================================
+# ChEMBL Provider-Specific Configuration
+# =============================================================================
+#
+# Provider: European Bioinformatics Institute (EBI) ChEMBL
+# API Documentation: https://www.ebi.ac.uk/chembl/ws
+# Data License: CC BY-SA 3.0
+#
+# This file documents ChEMBL-specific settings that apply to all ChEMBL
+# entity pipelines. Actual rate_limit and circuit_breaker settings are
+# in configs/sources/chembl.yaml.
+#
+# =============================================================================
+
+provider: chembl
+
+# -----------------------------------------------------------------------------
+# API Configuration
+# -----------------------------------------------------------------------------
+api:
+  base_url: https://www.ebi.ac.uk/chembl/api/data
+  auth_type: public  # No authentication required
+
+  # Health check endpoint
+  health_check:
+    endpoint: /chembl/api/data/status.json
+    timeout: 5
+
+# -----------------------------------------------------------------------------
+# Rate Limiting
+# -----------------------------------------------------------------------------
+# ChEMBL has no official rate limit but recommends reasonable usage.
+# We use conservative defaults to be a good API citizen.
+rate_limit:
+  requests_per_second: 5
+  burst: 10
+  notes: |
+    ChEMBL has no enforced rate limit. These conservative settings
+    ensure stable operation and respect for the public API.
+
+# -----------------------------------------------------------------------------
+# Retry Configuration
+# -----------------------------------------------------------------------------
+retry:
+  max_retries: 3
+  use_retry_after: false  # ChEMBL doesn't return Retry-After headers
+
+# -----------------------------------------------------------------------------
+# Available Entities
+# -----------------------------------------------------------------------------
+entities:
+  - activity         # Biological activity measurements
+  - assay            # Bioassay definitions
+  - assay_parameters # Experimental parameters
+  - cell_line        # Cell line reference data
+  - compound_record  # Molecule-document links
+  - document         # Scientific publications
+  - document_similarity  # Document Tanimoto coefficients
+  - document_term    # MeSH headings and keywords
+  - molecule         # Chemical compounds
+  - protein_class    # Protein classification hierarchy
+  - target           # Biological targets
+  - target_component # Target protein components
+
+# -----------------------------------------------------------------------------
+# Entity-Specific Notes
+# -----------------------------------------------------------------------------
+entity_notes:
+  activity:
+    description: "Primary bioactivity data with IC50, Ki, etc."
+    typical_volume: "~20M records"
+    gold_filter_recommendation: "Filter by standard_type, assay_type"
+
+  assay:
+    description: "Bioassay definitions and metadata"
+    typical_volume: "~1.5M records"
+    gold_filter_recommendation: "Filter by assay_type, confidence_score"
+
+  molecule:
+    description: "Chemical compounds with structures"
+    typical_volume: "~2.5M records"
+    gold_filter_recommendation: "Filter by molecule_type"
+
+  target:
+    description: "Biological targets (proteins, genes)"
+    typical_volume: "~15K records"
+    gold_filter_recommendation: "Filter by target_type, organism"
+
+  protein_class:
+    description: "Reference table for protein classification"
+    typical_volume: "~1.5K records"
+    load_strategy: "Full load (small reference data)"
+
+  document_term:
+    description: "Derived entity - extracted from document records"
+    derived_from: "document"
+    extraction_method: "Flatten nested term arrays"

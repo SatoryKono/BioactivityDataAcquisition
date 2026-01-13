@@ -1,0 +1,67 @@
+# configs/pipelines/_providers/pubmed.yaml
+# =============================================================================
+# PubMed Provider-Specific Configuration
+# =============================================================================
+#
+# Provider: NCBI PubMed (Entrez E-utilities)
+# API Documentation: https://www.ncbi.nlm.nih.gov/books/NBK25500/
+# Data License: Public Domain (US Government)
+#
+# =============================================================================
+
+provider: pubmed
+
+# -----------------------------------------------------------------------------
+# API Configuration
+# -----------------------------------------------------------------------------
+api:
+  base_url: https://eutils.ncbi.nlm.nih.gov/entrez/eutils
+  auth_type: api_key  # Optional API key for higher rate limits
+  api_key_env: BIOETL_NCBI_API_KEY
+  email_env: BIOETL_NCBI_EMAIL  # Required by NCBI guidelines
+
+  # Health check
+  health_check:
+    endpoint: /einfo.fcgi
+    timeout: 10
+
+# -----------------------------------------------------------------------------
+# Rate Limiting
+# -----------------------------------------------------------------------------
+# PubMed E-utilities: 3 req/sec without key, 10 req/sec with key
+rate_limit:
+  requests_per_second: 3
+  burst: 5
+  with_api_key:
+    requests_per_second: 10
+    burst: 20
+  notes: |
+    NCBI requires email identification for all E-utilities requests.
+    API key (free) increases rate limit from 3 to 10 req/sec.
+    Register at: https://www.ncbi.nlm.nih.gov/account/
+
+# -----------------------------------------------------------------------------
+# Retry Configuration
+# -----------------------------------------------------------------------------
+retry:
+  max_retries: 3
+  use_retry_after: true
+
+# -----------------------------------------------------------------------------
+# Available Entities
+# -----------------------------------------------------------------------------
+entities:
+  - publication  # PubMed article metadata
+
+# -----------------------------------------------------------------------------
+# Entity-Specific Notes
+# -----------------------------------------------------------------------------
+entity_notes:
+  publication:
+    description: "PubMed article metadata via Entrez"
+    input_mode: "Search term or PMID list"
+    search_syntax: "PubMed boolean queries supported"
+    notes: |
+      PubMed pipeline uses search-based retrieval.
+      Configure search_term in pipeline config for targeted queries.
+      Example: "bioinformatics[Title/Abstract] AND drug discovery[Title/Abstract]"

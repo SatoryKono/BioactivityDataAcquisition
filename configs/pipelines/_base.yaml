@@ -1,0 +1,246 @@
+# configs/pipelines/_base.yaml
+# =============================================================================
+# Unified Base Schema for BioETL Pipeline Configurations
+# =============================================================================
+#
+# This file defines the canonical schema for all pipeline configurations.
+# All entity-specific configs MUST inherit these defaults unless explicitly
+# overriding with documented justification.
+#
+# Version: 1.0.0
+# Reference: RULES.md v5.0, Appendix D
+# Last Updated: 2026-01-13
+#
+# Usage:
+#   Entity configs specify only entity-specific fields:
+#   - pipeline_name, provider, entity_type
+#   - primary_keys, silver_table, gold_table
+#   - gold_filters
+#   - sink path overrides
+#   - input_filter configuration
+#
+# Inheritance Chain:
+#   _base.yaml (this file) -> _defaults.yaml -> <provider>/<entity>.yaml
+#
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Schema Version
+# -----------------------------------------------------------------------------
+schema_version: "1.0.0"
+
+# -----------------------------------------------------------------------------
+# Pipeline Identification (MUST be overridden in entity config)
+# -----------------------------------------------------------------------------
+# pipeline_name: <provider>_<entity>  # MUST: Unique identifier
+# provider: <provider>                 # MUST: chembl | pubchem | uniprot | ...
+# entity_type: <entity>                # MUST: activity | assay | molecule | ...
+# version: "1.0.0"                     # MUST: Semantic version of config
+
+# -----------------------------------------------------------------------------
+# Source Configuration
+# -----------------------------------------------------------------------------
+# NOTE: Source settings (type, load_strategy, rate_limit, circuit_breaker)
+# are defined in configs/sources/<provider>.yaml for DRY compliance.
+# Pipeline configs reference source via: source_file: ../../sources/<provider>.yaml
+
+source:
+  # Default source type (can be overridden for file-based pipelines)
+  type: api
+
+  # Load strategy
+  # - full: Complete dataset refresh (default for most pipelines)
+  # - incremental: Delta loads using watermark_field (future enhancement)
+  load_strategy: full
+
+  # Watermark field for incremental loads (SHOULD specify when using incremental)
+  # watermark_field: updated_at
+
+# -----------------------------------------------------------------------------
+# Transformation Configuration
+# -----------------------------------------------------------------------------
+transform:
+  # Version of transformation logic (MUST match config version)
+  # version: "1.0.0"  # Inherited from root `version` field
+
+  # Transformation steps (SHOULD document for complex pipelines)
+  # These are implemented in code but documented here for clarity
+  steps: []
+  # Example steps:
+  #   - normalize_units      # Standardize measurement units
+  #   - validate_smiles      # Validate SMILES notation
+  #   - deduplicate          # Remove duplicate records
+  #   - enrich_metadata      # Add computed fields
+
+# -----------------------------------------------------------------------------
+# Data Quality Rules
+# -----------------------------------------------------------------------------
+dq_rules:
+  # Soft threshold - triggers WARNING but continues processing
+  # MUST: Default 5% error rate before warning
+  soft_fail_threshold: 0.05
+
+  # Hard threshold - triggers FAILURE and stops batch
+  # MUST: Default 20% error rate before failure
+  hard_fail_threshold: 0.20
+
+  # Deviations from defaults MUST be documented with justification
+  # Example: ID mapping may have higher not_found rates (0.30/0.80)
+
+# -----------------------------------------------------------------------------
+# Circuit Breaker Configuration
+# -----------------------------------------------------------------------------
+circuit_breaker:
+  # Number of consecutive failures before circuit opens
+  # MUST: Default 5 failures
+  failure_threshold: 5
+
+  # Seconds to wait before attempting recovery (Half-Open state)
+  # MUST: Default 300 seconds (5 minutes)
+  recovery_timeout: 300
+
+  # Provider-specific overrides are defined in source configs
+
+# -----------------------------------------------------------------------------
+# Sink Configuration
+# -----------------------------------------------------------------------------
+sink:
+  # ---------------------------------------------------------------------------
+  # Bronze Layer - Raw Data
+  # ---------------------------------------------------------------------------
+  bronze:
+    # Output format
+    format: jsonl
+
+    # Preserve original JSON structure
+    save_json: true
+
+    # MUST: No random elements in writes (ADR-014)
+    deterministic: true
+
+    # Path template (overridden per entity)
+    # path: data/output/bronze
+
+  # ---------------------------------------------------------------------------
+  # Silver Layer - Cleansed Data
+  # ---------------------------------------------------------------------------
+  silver:
+    # MUST: Use Delta Lake format (not parquet)
+    format: delta
+
+    # Write mode
+    # - merge: Upsert based on primary_key (default)
+    # - overwrite: Full table replacement
+    mode: merge
+
+    # Schema evolution strategy
+    on_schema_mismatch: evolve
+
+    # Data classification
+    # - public: No access restrictions
+    # - internal: Organization-internal only
+    # - restricted: PII or sensitive data
+    classification: public
+
+    # Forensic data retention
+    # true: 30-day retention for critical tables
+    # false: 7-day default retention
+    forensic_retention: false
+
+    # MUST: No random elements in writes (ADR-014)
+    deterministic: true
+
+    # CSV export configuration
+    csv_export:
+      enabled: true
+      delimiter: ","
+      header: true
+      encoding: "utf-8"
+
+    # Entity-specific (MUST be overridden):
+    # path: data/output/silver
+    # primary_key: [<entity_id>]
+    # partition_by: [<partition_column>]  # SHOULD specify if applicable
+
+  # ---------------------------------------------------------------------------
+  # Gold Layer - Business-Ready Data
+  # ---------------------------------------------------------------------------
+  gold:
+    # Enable Gold layer processing
+    enabled: true
+
+    # Strict validation for Gold layer (ADR-018)
+    validation:
+      strict: true
+
+    # MUST: Use Delta Lake format
+    format: delta
+
+    # Write mode (overwrite is common for aggregated Gold tables)
+    mode: overwrite
+
+    # MUST: No random elements in writes (ADR-014)
+    deterministic: true
+
+    # CSV export configuration
+    csv_export:
+      enabled: true
+      delimiter: ","
+      header: true
+      encoding: "utf-8"
+
+    # Entity-specific (MUST be overridden):
+    # path: data/output/gold
+
+# -----------------------------------------------------------------------------
+# Maintenance Configuration
+# -----------------------------------------------------------------------------
+maintenance:
+  # Automatic VACUUM execution
+  auto_vacuum: false
+
+  # Retention period for VACUUM (days)
+  vacuum_retention_days: 7
+
+# -----------------------------------------------------------------------------
+# Input Filter Configuration
+# -----------------------------------------------------------------------------
+input_filter:
+  # Enable filtering by input CSV
+  enabled: false
+
+  # Default batch size for filtered processing
+  batch_size: 100
+
+  # Entity-specific (when enabled):
+  # source_path: data/input/<entity>.csv
+  # column_name: <id_column>
+  # filter_field: <api_field>
+  # fallback_column: <fallback_field>  # Optional: for DOI resolution
+
+# -----------------------------------------------------------------------------
+# Gold Filters Configuration
+# -----------------------------------------------------------------------------
+# Entity-specific gold filters are defined in each pipeline config.
+# Common patterns:
+#
+# gold_filters:
+#   columns:
+#     <field>: [<allowed_values>]
+#   ranges:
+#     <field>:
+#       min: <value>
+#       max: <value>
+#       include_min: true/false
+#       include_max: true/false
+#   required_fields:
+#     - <field1>
+#     - <field2>
+#   list_lengths:
+#     <list_field>:
+#       min: <value>
+#       max: <value>
+#   list_contains:
+#     <list_field>:
+#       values: [<value>]
+#       mode: any/all
