@@ -203,7 +203,7 @@ class TestChemblYearValidation:
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
         """Should accept year at boundaries (1800 and 2100)."""
-        from bioetl.domain.schemas.chembl.document import ChemblPublicationSchema
+        from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
 
         for year in [MIN_PUBLICATION_YEAR, MAX_PUBLICATION_YEAR]:
             valid_record["year"] = year
@@ -213,7 +213,7 @@ class TestChemblYearValidation:
 
     def test_year_outside_range_fails(self, valid_record: dict) -> None:
         """Should reject year outside valid range."""
-        from bioetl.domain.schemas.chembl.document import ChemblPublicationSchema
+        from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
 
         # Year below minimum
         valid_record["year"] = MIN_PUBLICATION_YEAR - 1
