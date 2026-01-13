@@ -49,9 +49,41 @@ lock_key_strategy = st.text(
     min_size=1, max_size=100, alphabet=st.characters(whitelist_categories=("L", "N"))
 ).filter(lambda x: x.strip() != "")
 
+# Windows reserved names that cannot be used as file/directory names
+# See: https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file
+_WINDOWS_RESERVED_NAMES = frozenset(
+    {
+        "con",
+        "prn",
+        "aux",
+        "nul",
+        "com1",
+        "com2",
+        "com3",
+        "com4",
+        "com5",
+        "com6",
+        "com7",
+        "com8",
+        "com9",
+        "lpt1",
+        "lpt2",
+        "lpt3",
+        "lpt4",
+        "lpt5",
+        "lpt6",
+        "lpt7",
+        "lpt8",
+        "lpt9",
+    }
+)
+
 # Strategy for valid pipeline names (lowercase alphanumeric with underscores)
 # Uses lowercase only to avoid case-sensitivity issues on Windows file system
-pipeline_name_strategy = st.from_regex(r"[a-z][a-z0-9_]{0,49}", fullmatch=True)
+# Filters out Windows reserved names to avoid filesystem errors
+pipeline_name_strategy = st.from_regex(r"[a-z][a-z0-9_]{0,49}", fullmatch=True).filter(
+    lambda name: name not in _WINDOWS_RESERVED_NAMES
+)
 
 # Strategy for TTL values (positive integers within reasonable range)
 ttl_strategy = st.integers(min_value=1, max_value=3600)
