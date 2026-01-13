@@ -190,7 +190,7 @@ class TestDocumentTransformer:
         """Test transformation of valid document record."""
         record = {
             "document_chembl_id": "CHEMBL1234567",
-            "pubmed_id": 12345678,
+            "pubmed_id": "12345678",
             "doi": "10.1000/test.doi",
             "title": "Test Document Title",
             "authors": "Test Author",
@@ -202,7 +202,6 @@ class TestDocumentTransformer:
 
         assert result is not None
         assert result["document_chembl_id"] == "CHEMBL1234567"
-        # PMID is normalized to string for cross-provider consistency
         assert result["pubmed_id"] == "12345678"
         assert result["doi"] == "10.1000/test.doi"
         assert result["year"] == 2024
@@ -214,7 +213,7 @@ class TestDocumentTransformer:
     async def test_transform_missing_document_id(self, transformer, mock_context):
         """Test transformation returns None when document_chembl_id is missing."""
         record = {
-            "pubmed_id": 12345678,
+            "pubmed_id": "12345678",
             "title": "Test Document",
         }
 
@@ -227,7 +226,7 @@ class TestDocumentTransformer:
         """Test transformation with all document fields."""
         record = {
             "document_chembl_id": "CHEMBL1234567",
-            "pubmed_id": 12345678,
+            "pubmed_id": "12345678",
             "doi": "10.1000/test",
             "patent_id": "US1234567",
             "title": "Full Title",

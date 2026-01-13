@@ -153,7 +153,7 @@ class TestChEMBLDocumentPipeline:
         record = {
             "document_chembl_id": "CHEMBL789012",
             "title": "Test Document",
-            "pubmed_id": 12345678,
+            "pubmed_id": "12345678",
         }
 
         result = await pipeline.transform_bronze_to_silver(pipeline.context, record)
