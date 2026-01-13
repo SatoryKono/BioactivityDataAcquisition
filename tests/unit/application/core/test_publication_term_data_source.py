@@ -1,4 +1,4 @@
-"""Unit tests for DocumentTermDataSource wrapper."""
+"""Unit tests for PublicationTermDataSource wrapper."""
 
 from __future__ import annotations
 
@@ -6,12 +6,14 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from bioetl.application.core.document_term_data_source import DocumentTermDataSource
+from bioetl.application.core.publication_term_data_source import (
+    PublicationTermDataSource,
+)
 from bioetl.domain.types import HealthStatus
 
 
 class MockDataSource:
-    """Mock data source for testing DocumentTermDataSource wrapper.
+    """Mock data source for testing PublicationTermDataSource wrapper.
 
     Tracks method calls for test assertions.
     """
@@ -96,12 +98,12 @@ def mock_data_source_single_document():
 
 
 @pytest.mark.unit
-class TestDocumentTermDataSourceInit:
-    """Tests for DocumentTermDataSource initialization."""
+class TestPublicationTermDataSourceInit:
+    """Tests for PublicationTermDataSource initialization."""
 
     def test_initialization(self, mock_data_source):
-        """Test DocumentTermDataSource initializes correctly."""
-        wrapper = DocumentTermDataSource(data_source=mock_data_source)
+        """Test PublicationTermDataSource initializes correctly."""
+        wrapper = PublicationTermDataSource(data_source=mock_data_source)
 
         assert wrapper.provider_name == "chembl"
         assert wrapper._data_source is mock_data_source
@@ -109,24 +111,24 @@ class TestDocumentTermDataSourceInit:
     def test_provider_name_from_wrapped(self, mock_data_source):
         """Test provider_name is delegated to wrapped data source."""
         mock_data_source.provider_name = "pubchem"
-        wrapper = DocumentTermDataSource(data_source=mock_data_source)
+        wrapper = PublicationTermDataSource(data_source=mock_data_source)
 
         assert wrapper.provider_name == "pubchem"
 
     def test_entity_type_constants(self):
         """Test entity type constants are set correctly."""
-        assert DocumentTermDataSource.SOURCE_ENTITY_TYPE == "document"
-        assert DocumentTermDataSource.TARGET_ENTITY_TYPE == "document_term"
+        assert PublicationTermDataSource.SOURCE_ENTITY_TYPE == "document"
+        assert PublicationTermDataSource.TARGET_ENTITY_TYPE == "document_term"
 
 
 @pytest.mark.unit
-class TestDocumentTermDataSourceContextManager:
+class TestPublicationTermDataSourceContextManager:
     """Tests for async context manager behavior."""
 
     @pytest.mark.asyncio
     async def test_aenter_delegates(self, mock_data_source):
         """Test __aenter__ delegates to wrapped data source."""
-        wrapper = DocumentTermDataSource(data_source=mock_data_source)
+        wrapper = PublicationTermDataSource(data_source=mock_data_source)
 
         result = await wrapper.__aenter__()
 
@@ -136,7 +138,7 @@ class TestDocumentTermDataSourceContextManager:
     @pytest.mark.asyncio
     async def test_aexit_delegates(self, mock_data_source):
         """Test __aexit__ delegates to wrapped data source."""
-        wrapper = DocumentTermDataSource(data_source=mock_data_source)
+        wrapper = PublicationTermDataSource(data_source=mock_data_source)
 
         await wrapper.__aexit__(None, None, None)
 
@@ -144,8 +146,8 @@ class TestDocumentTermDataSourceContextManager:
 
     @pytest.mark.asyncio
     async def test_context_manager_full_cycle(self, mock_data_source):
-        """Test using DocumentTermDataSource as async context manager."""
-        wrapper = DocumentTermDataSource(data_source=mock_data_source)
+        """Test using PublicationTermDataSource as async context manager."""
+        wrapper = PublicationTermDataSource(data_source=mock_data_source)
 
         async with wrapper as w:
             assert w is wrapper
@@ -155,7 +157,7 @@ class TestDocumentTermDataSourceContextManager:
 
 
 @pytest.mark.unit
-class TestDocumentTermDataSourceFetch:
+class TestPublicationTermDataSourceFetch:
     """Tests for fetch method."""
 
     @pytest.mark.asyncio
@@ -163,7 +165,9 @@ class TestDocumentTermDataSourceFetch:
         self, mock_data_source_single_document
     ):
         """Test fetch('document_term') extracts terms from documents."""
-        wrapper = DocumentTermDataSource(data_source=mock_data_source_single_document)
+        wrapper = PublicationTermDataSource(
+            data_source=mock_data_source_single_document
+        )
 
         terms = []
         async for term in wrapper.fetch("document_term"):
@@ -183,7 +187,9 @@ class TestDocumentTermDataSourceFetch:
         self, mock_data_source_single_document
     ):
         """Test fetch('document_term') respects limit parameter."""
-        wrapper = DocumentTermDataSource(data_source=mock_data_source_single_document)
+        wrapper = PublicationTermDataSource(
+            data_source=mock_data_source_single_document
+        )
 
         terms = []
         async for term in wrapper.fetch("document_term", limit=3):
@@ -194,7 +200,7 @@ class TestDocumentTermDataSourceFetch:
     @pytest.mark.asyncio
     async def test_fetch_other_entity_delegates(self, mock_data_source):
         """Test fetch for other entity types delegates to wrapped adapter."""
-        wrapper = DocumentTermDataSource(data_source=mock_data_source)
+        wrapper = PublicationTermDataSource(data_source=mock_data_source)
 
         records = []
         async for record in wrapper.fetch("document"):
@@ -209,7 +215,7 @@ class TestDocumentTermDataSourceFetch:
         self, mock_data_source_no_documents
     ):
         """Test fetch('document_term') with no documents yields nothing."""
-        wrapper = DocumentTermDataSource(data_source=mock_data_source_no_documents)
+        wrapper = PublicationTermDataSource(data_source=mock_data_source_no_documents)
 
         terms = []
         async for term in wrapper.fetch("document_term"):
@@ -219,14 +225,14 @@ class TestDocumentTermDataSourceFetch:
 
 
 @pytest.mark.unit
-class TestDocumentTermDataSourceTermExtraction:
+class TestPublicationTermDataSourceTermExtraction:
     """Tests for term extraction logic."""
 
     @pytest.mark.asyncio
     async def test_extract_mesh_headings(self):
         """Test MeSH heading extraction."""
         source = MockDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
-        wrapper = DocumentTermDataSource(data_source=source)
+        wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
         async for term in wrapper.fetch("document_term"):
@@ -241,7 +247,7 @@ class TestDocumentTermDataSourceTermExtraction:
     async def test_extract_mesh_qualifiers(self):
         """Test MeSH qualifier extraction as separate terms."""
         source = MockDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
-        wrapper = DocumentTermDataSource(data_source=source)
+        wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
         async for term in wrapper.fetch("document_term"):
@@ -255,7 +261,7 @@ class TestDocumentTermDataSourceTermExtraction:
     async def test_extract_keywords(self):
         """Test keyword extraction."""
         source = MockDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
-        wrapper = DocumentTermDataSource(data_source=source)
+        wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
         async for term in wrapper.fetch("document_term"):
@@ -272,7 +278,7 @@ class TestDocumentTermDataSourceTermExtraction:
     async def test_skip_empty_terms(self):
         """Test that empty terms are skipped."""
         source = MockDataSource(documents=[SAMPLE_DOCUMENT_EMPTY_TERMS])
-        wrapper = DocumentTermDataSource(data_source=source)
+        wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
         async for term in wrapper.fetch("document_term"):
@@ -284,7 +290,7 @@ class TestDocumentTermDataSourceTermExtraction:
     async def test_skip_missing_term_fields(self):
         """Test that documents without term fields are handled gracefully."""
         source = MockDataSource(documents=[SAMPLE_DOCUMENT_NO_TERMS])
-        wrapper = DocumentTermDataSource(data_source=source)
+        wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
         async for term in wrapper.fetch("document_term"):
@@ -296,7 +302,7 @@ class TestDocumentTermDataSourceTermExtraction:
     async def test_skip_invalid_mesh_entries(self):
         """Test that invalid mesh entries (non-dicts) are skipped."""
         source = MockDataSource(documents=[SAMPLE_DOCUMENT_INVALID_MESH])
-        wrapper = DocumentTermDataSource(data_source=source)
+        wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
         async for term in wrapper.fetch("document_term"):
@@ -308,14 +314,14 @@ class TestDocumentTermDataSourceTermExtraction:
 
 
 @pytest.mark.unit
-class TestDocumentTermDataSourceRecordFormat:
+class TestPublicationTermDataSourceRecordFormat:
     """Tests for term record format and entity_id computation."""
 
     @pytest.mark.asyncio
     async def test_term_record_fields(self):
         """Test that term records have all required fields."""
         source = MockDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
-        wrapper = DocumentTermDataSource(data_source=source)
+        wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
         async for term in wrapper.fetch("document_term"):
@@ -333,7 +339,7 @@ class TestDocumentTermDataSourceRecordFormat:
     async def test_entity_id_computed(self):
         """Test that entity_id is computed for each term."""
         source = MockDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
-        wrapper = DocumentTermDataSource(data_source=source)
+        wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
         async for term in wrapper.fetch("document_term"):
@@ -348,7 +354,7 @@ class TestDocumentTermDataSourceRecordFormat:
     async def test_entity_id_uniqueness(self):
         """Test that entity_ids are unique for different terms."""
         source = MockDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
-        wrapper = DocumentTermDataSource(data_source=source)
+        wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
         async for term in wrapper.fetch("document_term"):
@@ -362,8 +368,8 @@ class TestDocumentTermDataSourceRecordFormat:
         """Test that entity_id is deterministic for same inputs."""
         source1 = MockDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
         source2 = MockDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
-        wrapper1 = DocumentTermDataSource(data_source=source1)
-        wrapper2 = DocumentTermDataSource(data_source=source2)
+        wrapper1 = PublicationTermDataSource(data_source=source1)
+        wrapper2 = PublicationTermDataSource(data_source=source2)
 
         terms1 = []
         async for term in wrapper1.fetch("document_term"):
@@ -382,7 +388,7 @@ class TestDocumentTermDataSourceRecordFormat:
     async def test_mesh_id_preserved(self):
         """Test that mesh_id is preserved in term records."""
         source = MockDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
-        wrapper = DocumentTermDataSource(data_source=source)
+        wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
         async for term in wrapper.fetch("document_term"):
@@ -395,13 +401,13 @@ class TestDocumentTermDataSourceRecordFormat:
 
 
 @pytest.mark.unit
-class TestDocumentTermDataSourceDelegation:
+class TestPublicationTermDataSourceDelegation:
     """Tests for method delegation to wrapped data source."""
 
     @pytest.mark.asyncio
     async def test_health_check_delegates(self, mock_data_source):
         """Test health_check delegates to wrapped data source."""
-        wrapper = DocumentTermDataSource(data_source=mock_data_source)
+        wrapper = PublicationTermDataSource(data_source=mock_data_source)
 
         result = await wrapper.health_check()
 
@@ -411,7 +417,7 @@ class TestDocumentTermDataSourceDelegation:
     @pytest.mark.asyncio
     async def test_aclose_delegates(self, mock_data_source):
         """Test aclose delegates to wrapped data source."""
-        wrapper = DocumentTermDataSource(data_source=mock_data_source)
+        wrapper = PublicationTermDataSource(data_source=mock_data_source)
 
         await wrapper.aclose()
 
@@ -419,7 +425,7 @@ class TestDocumentTermDataSourceDelegation:
 
 
 @pytest.mark.unit
-class TestDocumentTermDataSourceEdgeCases:
+class TestPublicationTermDataSourceEdgeCases:
     """Tests for edge cases and error handling."""
 
     @pytest.mark.asyncio
@@ -430,7 +436,7 @@ class TestDocumentTermDataSourceEdgeCases:
                 {"title": "No ID document", "mesh_terms": [], "keywords": ["test"]}
             ]
         )
-        wrapper = DocumentTermDataSource(data_source=source)
+        wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
         async for term in wrapper.fetch("document_term"):
@@ -450,7 +456,7 @@ class TestDocumentTermDataSourceEdgeCases:
                 }
             ]
         )
-        wrapper = DocumentTermDataSource(data_source=source)
+        wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
         async for term in wrapper.fetch("document_term"):
@@ -478,7 +484,7 @@ class TestDocumentTermDataSourceEdgeCases:
                 },
             ]
         )
-        wrapper = DocumentTermDataSource(data_source=source)
+        wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
         async for term in wrapper.fetch("document_term"):
@@ -509,7 +515,7 @@ class TestDocumentTermDataSourceEdgeCases:
                 }
             ]
         )
-        wrapper = DocumentTermDataSource(data_source=source)
+        wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
         async for term in wrapper.fetch(

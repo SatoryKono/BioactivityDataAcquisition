@@ -1,4 +1,4 @@
-"""Unit tests for ChEMBL Document Similarity Transformer."""
+"""Unit tests for ChEMBL Publication Similarity Transformer."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.pipelines.chembl.document_similarity_transformer import (
-    DocumentSimilarityTransformer,
+from bioetl.application.pipelines.chembl.publication_similarity_transformer import (
+    PublicationSimilarityTransformer,
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
@@ -28,13 +28,13 @@ def mock_context():
 
 
 @pytest.mark.unit
-class TestDocumentSimilarityTransformer:
-    """Tests for DocumentSimilarityTransformer."""
+class TestPublicationSimilarityTransformer:
+    """Tests for PublicationSimilarityTransformer."""
 
     @pytest.fixture
     def transformer(self):
-        """Create DocumentSimilarityTransformer instance."""
-        return DocumentSimilarityTransformer(provider="chembl")
+        """Create PublicationSimilarityTransformer instance."""
+        return PublicationSimilarityTransformer(provider="chembl")
 
     @pytest.mark.asyncio
     async def test_transform_valid_record(self, transformer, mock_context):
@@ -260,7 +260,7 @@ class TestDocumentSimilarityTransformer:
     @pytest.mark.asyncio
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
-        transformer = DocumentSimilarityTransformer(provider="custom_provider")
+        transformer = PublicationSimilarityTransformer(provider="custom_provider")
         record = {
             "sim_id": 1,
             "doc_1": 100,

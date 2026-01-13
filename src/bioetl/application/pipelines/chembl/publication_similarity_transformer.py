@@ -1,7 +1,10 @@
-"""ChEMBL Document Similarity Transformer.
+"""ChEMBL Publication Similarity Transformer.
 
 Transforms Bronze records to Silver format (DocumentSimilarity entity).
 Computes derived Tanimoto metrics (avg_tani, max_tani).
+
+.. versionchanged:: 2.0.0
+    Renamed from document_similarity_transformer to publication_similarity_transformer (ADR-024).
 """
 
 from __future__ import annotations
@@ -19,12 +22,15 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
 
 
-class DocumentSimilarityTransformer(BaseChemblTransformer):
-    """Transforms ChEMBL document similarity records.
+class PublicationSimilarityTransformer(BaseChemblTransformer):
+    """Transforms ChEMBL publication similarity records.
 
     Computes derived metrics:
     - avg_tani: average of tid_tani and mol_tani
     - max_tani: maximum of tid_tani and mol_tani
+
+    .. versionchanged:: 2.0.0
+        Renamed from DocumentSimilarityTransformer (ADR-024).
     """
 
     entity_class = DocumentSimilarity
@@ -49,7 +55,7 @@ class DocumentSimilarityTransformer(BaseChemblTransformer):
         record: BronzeRecord,
         primary_id: Any,
     ) -> dict[str, Any]:
-        """Extract DocumentSimilarity business data from bronze record.
+        """Extract PublicationSimilarity business data from bronze record.
 
         Args:
             record: Raw Bronze record from ChEMBL API.
@@ -93,3 +99,7 @@ class DocumentSimilarityTransformer(BaseChemblTransformer):
             "avg_tani": avg_tani,
             "max_tani": max_tani,
         }
+
+
+# Backward-compatible alias (deprecated, ADR-024)
+DocumentSimilarityTransformer = PublicationSimilarityTransformer

@@ -1,17 +1,20 @@
-"""Document Term Data Source wrapper.
+"""Publication Term Data Source wrapper.
 
-Wraps a DataSourcePort to extract terms from ChEMBL document records.
-This is a derived entity pattern - document_term entities are extracted
-from the nested mesh_terms and keywords fields in document records.
+Wraps a DataSourcePort to extract terms from ChEMBL publication records.
+This is a derived entity pattern - publication_term entities are extracted
+from the nested mesh_terms and keywords fields in publication records.
 
 Architecture:
     ChEMBL API (document endpoint)
            ↓
-    DocumentTermDataSource (wrapper)
+    PublicationTermDataSource (wrapper)
       - fetch("document_term") → wrapped.fetch("document")
-      - transforms each document → yields term records
+      - transforms each publication → yields term records
            ↓
     Pipeline receives term records
+
+.. versionchanged:: 2.0.0
+    Renamed from DocumentTermDataSource to PublicationTermDataSource (ADR-024).
 """
 
 from __future__ import annotations
@@ -26,11 +29,11 @@ if TYPE_CHECKING:
     from bioetl.domain.types import HealthStatus
 
 
-class DocumentTermDataSource:
-    """Wraps a DataSourcePort to extract terms from document records.
+class PublicationTermDataSource:
+    """Wraps a DataSourcePort to extract terms from publication records.
 
-    This is a Decorator pattern implementation that transforms the document
-    entity into derived document_term entities. For each document fetched
+    This is a Decorator pattern implementation that transforms the publication
+    entity into derived publication_term entities. For each publication fetched
     from the wrapped adapter, multiple term records are extracted and yielded.
 
     Term types extracted:
@@ -40,34 +43,36 @@ class DocumentTermDataSource:
 
     The wrapper:
     1. Intercepts fetch("document_term") calls
-    2. Fetches documents from the wrapped adapter via fetch("document")
-    3. Extracts terms from each document (1:M relationship)
+    2. Fetches publications from the wrapped adapter via fetch("document")
+    3. Extracts terms from each publication (1:M relationship)
     4. Yields individual term records with computed entity_id
     5. Delegates all other operations to the wrapped adapter
 
     Example:
-        >>> wrapped = DocumentTermDataSource(chembl_adapter)
+        >>> wrapped = PublicationTermDataSource(chembl_adapter)
         >>> async with wrapped:
         ...     async for term in wrapped.fetch("document_term", limit=100):
         ...         process_term(term)  # term has keys: term, term_type, etc.
 
+    .. versionchanged:: 2.0.0
+        Renamed from DocumentTermDataSource (ADR-024).
     """
 
     # Source entity type to fetch from wrapped adapter
     SOURCE_ENTITY_TYPE = "document"
     # Target entity type this wrapper provides
     TARGET_ENTITY_TYPE = "document_term"
-    # Multiplier for document limit estimation.
-    # Not all documents have terms (mesh_terms/keywords may be empty).
-    # Analysis shows ~20-30% of ChEMBL documents have terms.
-    # Using 50x multiplier ensures we fetch enough documents to satisfy term limit.
-    DOCUMENT_LIMIT_MULTIPLIER = 50
+    # Multiplier for publication limit estimation.
+    # Not all publications have terms (mesh_terms/keywords may be empty).
+    # Analysis shows ~20-30% of ChEMBL publications have terms.
+    # Using 50x multiplier ensures we fetch enough publications to satisfy term limit.
+    PUBLICATION_LIMIT_MULTIPLIER = 50
 
     def __init__(
         self,
         data_source: DataSourcePort,
     ) -> None:
-        """Initialize document term data source wrapper.
+        """Initialize publication term data source wrapper.
 
         Args:
             data_source: The underlying data source adapter to wrap (ChemblAdapter).
@@ -124,8 +129,8 @@ class DocumentTermDataSource:
 
         """
         if entity_type == self.TARGET_ENTITY_TYPE:
-            # Fetch documents and extract terms
-            async for term in self._fetch_document_terms(
+            # Fetch publications and extract terms
+            async for term in self._fetch_publication_terms(
                 limit, filter_ids, filter_field
             ):
                 yield term
@@ -140,44 +145,46 @@ class DocumentTermDataSource:
             ):
                 yield record
 
-    async def _fetch_document_terms(
+    async def _fetch_publication_terms(
         self,
         limit: int | None,
         filter_ids: list[str] | None,
         filter_field: str | None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch documents and extract terms.
+        """Fetch publications and extract terms.
 
         Args:
             limit: Maximum number of term records to yield.
-            filter_ids: Optional document IDs to filter by.
+            filter_ids: Optional publication IDs to filter by.
             filter_field: Optional field for filtering (typically document_chembl_id).
 
         Yields:
-            Term records extracted from documents.
+            Term records extracted from publications.
 
         """
         term_count = 0
 
-        # Estimate document limit based on term limit.
-        # We need to fetch more documents than terms because:
-        # 1. Not all documents have terms (mesh_terms/keywords may be empty)
-        # 2. Each document yields variable number of terms (~2-5 on average)
-        # Using multiplier ensures we fetch enough documents to satisfy term limit.
-        document_limit = limit * self.DOCUMENT_LIMIT_MULTIPLIER if limit else None
+        # Estimate publication limit based on term limit.
+        # We need to fetch more publications than terms because:
+        # 1. Not all publications have terms (mesh_terms/keywords may be empty)
+        # 2. Each publication yields variable number of terms (~2-5 on average)
+        # Using multiplier ensures we fetch enough publications to satisfy term limit.
+        publication_limit = limit * self.PUBLICATION_LIMIT_MULTIPLIER if limit else None
 
-        async for document in self._data_source.fetch(
+        async for publication in self._data_source.fetch(
             entity_type=self.SOURCE_ENTITY_TYPE,
-            limit=document_limit,
+            limit=publication_limit,
             filter_ids=filter_ids,
             filter_field=filter_field,
         ):
-            document_chembl_id = document.get("document_chembl_id")
+            document_chembl_id = publication.get("document_chembl_id")
             if not document_chembl_id:
                 continue
 
-            # Extract terms from document
-            terms = self._extract_terms_from_document(document, document_chembl_id)
+            # Extract terms from publication
+            terms = self._extract_terms_from_publication(
+                publication, document_chembl_id
+            )
 
             for term in terms:
                 yield term
@@ -186,18 +193,18 @@ class DocumentTermDataSource:
                 if limit and term_count >= limit:
                     return
 
-    def _extract_terms_from_document(
+    def _extract_terms_from_publication(
         self,
         record: dict[str, Any],
         document_chembl_id: str,
     ) -> list[dict[str, Any]]:
-        """Extract and flatten all terms from a Document record.
+        """Extract and flatten all terms from a Publication record.
 
-        Extracts multiple term records from one document (1:M relationship).
+        Extracts multiple term records from one publication (1:M relationship).
 
         Args:
-            record: Raw document record from ChEMBL API.
-            document_chembl_id: Document ChEMBL ID.
+            record: Raw publication record from ChEMBL API.
+            document_chembl_id: Publication ChEMBL ID.
 
         Returns:
             List of term dictionaries.
@@ -323,3 +330,7 @@ class DocumentTermDataSource:
     async def aclose(self) -> None:
         """Delegate close to wrapped adapter."""
         await self._data_source.aclose()
+
+
+# Backward-compatible alias (deprecated, ADR-024)
+DocumentTermDataSource = PublicationTermDataSource
