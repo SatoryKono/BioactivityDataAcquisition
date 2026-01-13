@@ -45,6 +45,12 @@ See also:
 - RULES.md §2.8: Entity ID - stable identifiers
 """
 
+from bioetl.domain.value_objects.academic_ids import (
+    ISSN,
+    ORCID,
+    OpenAlexId,
+    SemanticScholarId,
+)
 from bioetl.domain.value_objects.activity import (
     ActivityValue,
     ConfidenceScore,
@@ -77,11 +83,7 @@ from bioetl.domain.value_objects.identifiers import (
 )
 from bioetl.domain.value_objects.publications import (
     DOI,
-    ISSN,
-    ORCID,
-    OpenAlexId,
     PubMedId,
-    SemanticScholarId,
 )
 from bioetl.domain.value_objects.taxonomy_id import TaxonomyId
 
