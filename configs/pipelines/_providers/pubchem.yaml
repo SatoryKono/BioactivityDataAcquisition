@@ -1,0 +1,61 @@
+# configs/pipelines/_providers/pubchem.yaml
+# =============================================================================
+# PubChem Provider-Specific Configuration
+# =============================================================================
+#
+# Provider: NCBI PubChem
+# API Documentation: https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest
+# Data License: Public Domain
+#
+# =============================================================================
+
+provider: pubchem
+
+# -----------------------------------------------------------------------------
+# API Configuration
+# -----------------------------------------------------------------------------
+api:
+  base_url: https://pubchem.ncbi.nlm.nih.gov/rest/pug
+  auth_type: public  # No authentication required
+
+  # Health check: lightweight compound query
+  health_check:
+    method: "Lightweight compound query"
+    timeout: 10
+
+# -----------------------------------------------------------------------------
+# Rate Limiting
+# -----------------------------------------------------------------------------
+# PubChem enforces 5 requests/second for PUG REST API
+rate_limit:
+  requests_per_second: 5
+  burst: 10
+  notes: |
+    NCBI PubChem PUG REST API has a limit of 5 requests per second.
+    Exceeding this limit results in temporary IP blocking.
+
+# -----------------------------------------------------------------------------
+# Retry Configuration
+# -----------------------------------------------------------------------------
+retry:
+  max_retries: 3
+  use_retry_after: true  # PubChem returns Retry-After on 429
+
+# -----------------------------------------------------------------------------
+# Available Entities
+# -----------------------------------------------------------------------------
+entities:
+  - compound  # Chemical compounds with properties
+
+# -----------------------------------------------------------------------------
+# Entity-Specific Notes
+# -----------------------------------------------------------------------------
+entity_notes:
+  compound:
+    description: "Chemical compounds with computed properties"
+    typical_volume: "Depends on input filter (SMILES-based)"
+    input_mode: "SMILES-based search"
+    batch_size: 1  # SMILES search is per-compound
+    notes: |
+      PubChem compound pipeline uses SMILES-based filtering.
+      Each SMILES is searched individually due to API limitations.

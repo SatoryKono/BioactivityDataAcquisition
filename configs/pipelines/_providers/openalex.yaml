@@ -1,0 +1,66 @@
+# configs/pipelines/_providers/openalex.yaml
+# =============================================================================
+# OpenAlex Provider-Specific Configuration
+# =============================================================================
+#
+# Provider: OpenAlex (OurResearch)
+# API Documentation: https://docs.openalex.org
+# Data License: CC0 (Public Domain)
+#
+# =============================================================================
+
+provider: openalex
+
+# -----------------------------------------------------------------------------
+# API Configuration
+# -----------------------------------------------------------------------------
+api:
+  base_url: https://api.openalex.org
+  auth_type: email  # Email for polite pool access
+  email_env: BIOETL_OPENALEX_EMAIL
+
+  # Health check
+  health_check:
+    endpoint: /works
+    params:
+      per-page: 1
+    timeout: 5
+
+# -----------------------------------------------------------------------------
+# Rate Limiting
+# -----------------------------------------------------------------------------
+# OpenAlex polite pool: 10 req/sec with mailto parameter
+rate_limit:
+  requests_per_second: 10
+  burst: 20
+  polite_pool: true
+  notes: |
+    OpenAlex provides access to polite pool with email identification.
+    Set BIOETL_OPENALEX_EMAIL to get 10 req/sec rate limit.
+    Without email: shared pool with lower priority.
+
+# -----------------------------------------------------------------------------
+# Retry Configuration
+# -----------------------------------------------------------------------------
+retry:
+  max_retries: 3
+  use_retry_after: true
+
+# -----------------------------------------------------------------------------
+# Available Entities
+# -----------------------------------------------------------------------------
+entities:
+  - publication  # Scholarly works (papers, articles)
+
+# -----------------------------------------------------------------------------
+# Entity-Specific Notes
+# -----------------------------------------------------------------------------
+entity_notes:
+  publication:
+    description: "Scholarly works metadata via DOI resolution"
+    input_mode: "CSV file with DOIs"
+    fallback: "Title search when DOI not found"
+    batch_size: 50  # Recommended by OpenAlex
+    notes: |
+      OpenAlex Works API supports batch DOI resolution.
+      Falls back to title search for records without DOI.
