@@ -45,7 +45,7 @@ paths = [
     '''site/''',
 
     # Audit documentation (contains commit hashes, not secrets)
-    '''docs/audit/''',
+    '''docs/archived/audits/''',
 
     # Data fixtures may contain biological sequences that look like tokens
     '''data/input/''',
