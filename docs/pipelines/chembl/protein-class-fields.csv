@@ -1,0 +1,20 @@
+field_name,api_path,type,nullable,normalization,validation,dq_level,failure_action,in_hash,description
+protein_class_id,protein_class_id,int,false,cast_to_int,>= 1,CRITICAL,quarantine,true,Primary key
+parent_id,parent_id,int,true,cast_to_int_or_none,>= 1 or None,WARNING,log,true,FK to parent classification
+replaced_by,replaced_by,int,true,cast_to_int_or_none,>= 1 or None,WARNING,log,true,FK to replacement classification
+pref_name,pref_name,str,true,strip,none,INFO,log,true,Preferred name
+short_name,short_name,str,true,strip,none,INFO,log,true,Short name
+protein_class_desc,protein_class_desc,str,true,strip,none,INFO,log,true,Description
+definition,definition,str,true,strip,none,INFO,log,true,Definition
+class_level,class_level,int,true,cast_to_int,>= 1,WARNING,log,true,Hierarchy level (1-8)
+sort_order,sort_order,int,true,cast_to_int,none,INFO,log,true,Display sort order
+downgraded,downgraded,int,true,cast_to_int,isin [0 1],WARNING,log,true,Deprecated flag
+entity_id,derived,str,false,from protein_class_id,regex ^[0-9]+$,CRITICAL,quarantine,false,Unique business identifier
+content_hash,derived,str,false,sha256,regex ^[a-f0-9]{64}$,CRITICAL,quarantine,false,SHA256 hash
+_run_id,system,uuid,false,generated,uuid format,CRITICAL,quarantine,false,Pipeline run ID
+_run_type,system,str,false,from config,isin [incremental backfill rebuild],CRITICAL,quarantine,false,Run type
+_source_batch_id,system,uuid,true,generated,uuid format,INFO,log,false,Batch context ID
+_ingestion_ts,system,datetime,false,generated utc,valid timestamp,CRITICAL,quarantine,false,Ingestion timestamp
+_dq_warn,system,bool,false,from validation,boolean,INFO,log,false,DQ warning flag
+_dq_error,system,bool,false,from validation,boolean,INFO,log,false,DQ error flag
+_index,system,int,false,generated,>= 0,INFO,log,false,Record index
