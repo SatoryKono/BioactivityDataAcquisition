@@ -64,7 +64,7 @@ class TestGoldSchemaContracts:
             "See ADR-018 for Gold strict validation requirements."
         )
 
-    @pytest.mark.parametrize("schema_name", REQUIRED_SCHEMAS)
+    @pytest.mark.parametrize("schema_name", sorted(REQUIRED_SCHEMAS))
     def test_schema_is_valid_json(self, contracts_path: Path, schema_name: str) -> None:
         """Each Gold schema contract MUST be valid JSON."""
         schema_path = contracts_path / schema_name
@@ -78,7 +78,7 @@ class TestGoldSchemaContracts:
         except json.JSONDecodeError as e:
             pytest.fail(f"Invalid JSON in {schema_name}: {e}")
 
-    @pytest.mark.parametrize("schema_name", REQUIRED_SCHEMAS)
+    @pytest.mark.parametrize("schema_name", sorted(REQUIRED_SCHEMAS))
     def test_schema_has_required_properties(
         self, contracts_path: Path, schema_name: str
     ) -> None:
@@ -97,7 +97,7 @@ class TestGoldSchemaContracts:
             f"  - {p}" for p in sorted(missing)
         )
 
-    @pytest.mark.parametrize("schema_name", REQUIRED_SCHEMAS)
+    @pytest.mark.parametrize("schema_name", sorted(REQUIRED_SCHEMAS))
     def test_schema_version_is_1_0_0(
         self, contracts_path: Path, schema_name: str
     ) -> None:
@@ -117,7 +117,7 @@ class TestGoldSchemaContracts:
             f"Expected: 1.0.0 for v1.0 schema files."
         )
 
-    @pytest.mark.parametrize("schema_name", REQUIRED_SCHEMAS)
+    @pytest.mark.parametrize("schema_name", sorted(REQUIRED_SCHEMAS))
     def test_schema_uses_draft_07(self, contracts_path: Path, schema_name: str) -> None:
         """Gold schemas MUST use JSON Schema draft-07."""
         schema_path = contracts_path / schema_name
@@ -135,7 +135,7 @@ class TestGoldSchemaContracts:
             f"All Gold contracts must use draft-07 for consistency."
         )
 
-    @pytest.mark.parametrize("schema_name", REQUIRED_SCHEMAS)
+    @pytest.mark.parametrize("schema_name", sorted(REQUIRED_SCHEMAS))
     def test_schema_has_lineage_fields(
         self, contracts_path: Path, schema_name: str
     ) -> None:
