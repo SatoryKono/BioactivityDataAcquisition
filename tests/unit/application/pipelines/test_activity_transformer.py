@@ -132,7 +132,7 @@ class TestActivityTransformerTransform:
             "parent_molecule_chembl_id": "CHEMBL25",
             "target_pref_name": "Cyclooxygenase-2",
             "target_organism": "Homo sapiens",
-            "target_tax_id": 9606,
+            "target_tax_id": 9606,  # Source API field name
             "assay_type": "B",
             "assay_description": "Binding assay",
         }
@@ -144,6 +144,7 @@ class TestActivityTransformerTransform:
         assert result["molecule_pref_name"] == "ASPIRIN"
         assert result["target_pref_name"] == "Cyclooxygenase-2"
         assert result["target_organism"] == "Homo sapiens"
+        assert result["target_taxonomy_id"] == "9606"  # Standardized output (string)
         assert result["assay_type"] == "B"
 
     @pytest.mark.asyncio

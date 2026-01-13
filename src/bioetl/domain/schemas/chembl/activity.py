@@ -177,7 +177,10 @@ class ActivitySchema(ETLRecordSchema):
     parent_molecule_chembl_id: Series[str] | None = pa.Field(nullable=True)
     target_pref_name: Series[str] | None = pa.Field(nullable=True)
     target_organism: Series[str] | None = pa.Field(nullable=True)
-    target_tax_id: Series[str] | None = pa.Field(nullable=True)
+    target_taxonomy_id: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Target taxonomy ID. Standardized name (was target_tax_id).",
+    )
     assay_type: Series[str] | None = pa.Field(nullable=True)
     assay_description: Series[str] | None = pa.Field(nullable=True)
     assay_variant_accession: Series[str] | None = pa.Field(nullable=True)

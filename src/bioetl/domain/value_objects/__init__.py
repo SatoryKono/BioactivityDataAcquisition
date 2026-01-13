@@ -6,6 +6,7 @@ and business rules. They provide type safety and self-validation.
 Categories:
 - Identifiers: ChemblId, UniProtId, DOI, PubMedId, PubChemCid, CompoundId, AssayId
 - Chemical: InChIKey, SMILES
+- Biological: TaxonomyId (NCBI Taxonomy)
 - Metadata: PublicationYear
 - Activity Values: Concentration, ActivityType, PChemblValue, ActivityValue
 - Activity: ConfidenceScore, RelationOperator
@@ -76,6 +77,7 @@ from bioetl.domain.value_objects.publications import (
     DOI,
     PubMedId,
 )
+from bioetl.domain.value_objects.taxonomy_id import TaxonomyId
 
 __all__ = [
     "DOI",
@@ -98,6 +100,7 @@ __all__ = [
     "PubMedId",
     "PublicationYear",
     "RelationOperator",
+    "TaxonomyId",
     "UniProtId",
     "ValueObject",
 ]

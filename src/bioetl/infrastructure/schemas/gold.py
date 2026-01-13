@@ -36,7 +36,7 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     # Target data
     target_pref_name: Series[str] = pa.Field(nullable=True)
     target_organism: Series[str] = pa.Field(nullable=True)
-    target_tax_id: Series[str] = pa.Field(nullable=True)
+    target_taxonomy_id: Series[str] = pa.Field(nullable=True)  # Standardized name
 
     # Assay data
     assay_type: Series[str] = pa.Field(nullable=True)
@@ -265,7 +265,9 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     assay_test_type: Series[str] = pa.Field(nullable=True)
     assay_group: Series[str] = pa.Field(nullable=True)
     assay_organism: Series[str] = pa.Field(nullable=True)
-    assay_tax_id: Series[float] = pa.Field(nullable=True, coerce=True)
+    assay_taxonomy_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # Standardized name
     assay_cell_type: Series[str] = pa.Field(nullable=True)
     assay_tissue: Series[str] = pa.Field(nullable=True)
     assay_strain: Series[str] = pa.Field(nullable=True)
@@ -284,7 +286,9 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     variant_mutation: Series[str] = pa.Field(nullable=True)
     variant_organism: Series[str] = pa.Field(nullable=True)
     variant_sequence: Series[str] = pa.Field(nullable=True)
-    variant_tax_id: Series[float] = pa.Field(nullable=True, coerce=True)
+    variant_taxonomy_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # Standardized name
     variant_sequence_json: Series[str] = pa.Field(nullable=True)
     assay_classifications: Series[str] = pa.Field(nullable=True)
     assay_parameters: Series[str] = pa.Field(nullable=True)
@@ -309,7 +313,9 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     pref_name: Series[str] = pa.Field(nullable=True)
     target_type: Series[str] = pa.Field(nullable=True)
     organism: Series[str] = pa.Field(nullable=True)
-    tax_id: Series[float] = pa.Field(nullable=True, coerce=True)
+    taxonomy_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # Standardized name
     species_group_flag: Series[bool] = pa.Field(nullable=True)
     description: Series[str] = pa.Field(nullable=True)
     downgraded: Series[bool] = pa.Field(nullable=True, coerce=True)
@@ -325,7 +331,9 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     component_relationships: Series[object] = pa.Field(nullable=True)  # list[str]
     component_descriptions: Series[object] = pa.Field(nullable=True)  # list[str]
     component_organisms: Series[object] = pa.Field(nullable=True)  # list[str]
-    component_tax_ids: Series[object] = pa.Field(nullable=True)  # list[int]
+    component_taxonomy_ids: Series[object] = pa.Field(
+        nullable=True
+    )  # Standardized name, list[int]
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -348,7 +356,9 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     component_type: Series[str] = pa.Field(nullable=True)
     description: Series[str] = pa.Field(nullable=True)
     organism: Series[str] = pa.Field(nullable=True)
-    tax_id: Series[float] = pa.Field(nullable=True, coerce=True)
+    taxonomy_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # Standardized name
     target_component_synonyms: Series[str] = pa.Field(nullable=True)
     target_component_xrefs: Series[str] = pa.Field(nullable=True)
     protein_classifications: Series[str] = pa.Field(nullable=True)
@@ -371,7 +381,7 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
     document_chembl_id: Series[str] = pa.Field(nullable=False)
-    pubmed_id: Series[str] = pa.Field(nullable=True)  # Numeric string (matches Silver)
+    pmid: Series[str] = pa.Field(nullable=True)  # Standardized name, numeric string
     doi: Series[str] = pa.Field(nullable=True)
     patent_id: Series[str] = pa.Field(nullable=True)
     title: Series[str] = pa.Field(nullable=True)
@@ -552,7 +562,9 @@ class ChEMBLCellLineGoldSchema(pa.DataFrameModel):
     # Source information
     cell_source_tissue: Series[str] = pa.Field(nullable=True)
     cell_source_organism: Series[str] = pa.Field(nullable=True)
-    cell_source_tax_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    cell_source_taxonomy_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # Standardized name
 
     # External identifiers
     cellosaurus_id: Series[str] = pa.Field(nullable=True)

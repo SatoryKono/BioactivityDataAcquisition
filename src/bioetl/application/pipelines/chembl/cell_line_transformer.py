@@ -7,14 +7,14 @@ Note: Business logic functions are delegated to domain layer per REFACTOR-004.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import CellLine
 from bioetl.domain.normalization import normalize_to_string
-from bioetl.domain.validation import validate_positive_int
+from bioetl.domain.value_objects import TaxonomyId
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
@@ -50,6 +50,13 @@ class CellLineTransformer(BaseChemblTransformer):
         # Get cell_name with strip normalization using domain function
         cell_name = normalize_to_string(record.get("cell_name"))
 
+        # Validate taxonomy_id using TaxonomyId Value Object
+        raw_tax_id = record.get("cell_source_tax_id")
+        taxonomy_id_vo = TaxonomyId.from_raw(
+            cast("str | int | None", raw_tax_id) if raw_tax_id is not None else None
+        )
+        cell_source_taxonomy_id = taxonomy_id_vo.value if taxonomy_id_vo else None
+
         return {
             # Primary identifier
             "cell_chembl_id": str(primary_id),
@@ -59,10 +66,8 @@ class CellLineTransformer(BaseChemblTransformer):
             # Source information
             "cell_source_tissue": record.get("cell_source_tissue"),
             "cell_source_organism": record.get("cell_source_organism"),
-            # Use domain validation for tax_id (must be positive)
-            "cell_source_tax_id": validate_positive_int(
-                record.get("cell_source_tax_id")
-            ),
+            # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
+            "cell_source_taxonomy_id": cell_source_taxonomy_id,
             # Cell type classification
             "cell_type": normalize_to_string(record.get("cell_type")),
             # External identifiers (strip, NULL if empty) using domain normalization

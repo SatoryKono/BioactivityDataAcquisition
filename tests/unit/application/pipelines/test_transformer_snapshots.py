@@ -150,7 +150,7 @@ class TestAssayTransformerSnapshot:
             "assay_type": "B",
             "assay_type_description": "Binding",
             "assay_organism": "Homo sapiens",
-            "assay_tax_id": 9606,
+            "assay_tax_id": 9606,  # Source API field name
             "description": "Test assay description",
             "confidence_score": 9,
             "bao_format": "BAO_0000357",
@@ -185,7 +185,7 @@ class TestPublicationTransformerSnapshot:
     def sample_record(self) -> dict[str, Any]:
         return {
             "document_chembl_id": "CHEMBL1234567",
-            "pubmed_id": "12345678",
+            "pubmed_id": "12345678",  # Source API field name
             "doi": "10.1000/test.doi",
             "title": "Test Document Title",
             "authors": "Test Author, Another Author",
@@ -286,7 +286,7 @@ class TestTargetTransformerSnapshot:
             "pref_name": "Cyclooxygenase-2",
             "target_type": "SINGLE PROTEIN",
             "organism": "Homo sapiens",
-            "tax_id": 9606,
+            "tax_id": 9606,  # Source API field name
             "description": "Prostaglandin G/H synthase 2",
             "target_components": [
                 {
@@ -294,7 +294,7 @@ class TestTargetTransformerSnapshot:
                     "component_id": 123,
                     "component_type": "PROTEIN",
                     "organism": "Homo sapiens",
-                    "tax_id": 9606,
+                    "tax_id": 9606,  # Source API field name
                     "target_component_xrefs": [
                         {"xref_id": "P35354", "xref_src_db": "UniProt"},
                     ],
@@ -332,7 +332,7 @@ class TestTargetComponentTransformerSnapshot:
             "component_type": "PROTEIN",
             "description": "Test protein component",
             "organism": "Homo sapiens",
-            "tax_id": 9606,
+            "tax_id": 9606,  # Source API field name
             "target_component_synonyms": [
                 {"synonym": "Gene1"},
                 {"synonym": "Protein1"},

@@ -94,7 +94,8 @@ class Bioactivity(BaseEntity):
     # Target data
     target_pref_name: str | None = None
     target_organism: str | None = None
-    target_tax_id: str | None = None
+    # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
+    target_taxonomy_id: str | None = None
 
     # Assay data
     assay_type: str | None = None
@@ -238,7 +239,10 @@ class Bioactivity(BaseEntity):
             # Target data
             target_pref_name=_safe_str(raw_data.get("target_pref_name")),
             target_organism=_safe_str(raw_data.get("target_organism")),
-            target_tax_id=_safe_str(raw_data.get("target_tax_id")),
+            # Supports both old 'target_tax_id' and new 'target_taxonomy_id' keys
+            target_taxonomy_id=_safe_str(
+                raw_data.get("target_taxonomy_id") or raw_data.get("target_tax_id")
+            ),
             # Assay data
             assay_type=_safe_str(raw_data.get("assay_type")),
             assay_description=_safe_str(raw_data.get("assay_description")),
