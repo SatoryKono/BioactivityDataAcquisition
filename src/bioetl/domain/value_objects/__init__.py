@@ -5,6 +5,7 @@ and business rules. They provide type safety and self-validation.
 
 Categories:
 - Identifiers: ChemblId, UniProtId, DOI, PubMedId, PubChemCid, CompoundId, AssayId
+- Publication: OpenAlexId, SemanticScholarId, ISSN, ORCID
 - Chemical: InChIKey, SMILES, MolecularWeight
 - Biological: TaxonomyId (NCBI Taxonomy)
 - Metadata: PublicationYear
@@ -44,6 +45,12 @@ See also:
 - RULES.md §2.8: Entity ID - stable identifiers
 """
 
+from bioetl.domain.value_objects.academic_ids import (
+    ISSN,
+    ORCID,
+    OpenAlexId,
+    SemanticScholarId,
+)
 from bioetl.domain.value_objects.activity import (
     ActivityValue,
     ConfidenceScore,
@@ -82,6 +89,8 @@ from bioetl.domain.value_objects.taxonomy_id import TaxonomyId
 
 __all__ = [
     "DOI",
+    "ISSN",
+    "ORCID",
     "SMILES",
     "ActivityType",
     "ActivityValue",
@@ -97,11 +106,13 @@ __all__ = [
     "DQResult",
     "InChIKey",
     "MolecularWeight",
+    "OpenAlexId",
     "PChemblValue",
     "PubChemCid",
     "PubMedId",
     "PublicationYear",
     "RelationOperator",
+    "SemanticScholarId",
     "TaxonomyId",
     "UniProtId",
     "ValueObject",
