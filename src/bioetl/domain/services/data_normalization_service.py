@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 _WHITESPACE_PATTERN = re.compile(r"\s+")
 _DATE_FORMATS = {3: "{0:04d}-{1:02d}-{2:02d}", 2: "{0:04d}-{1:02d}", 1: "{0:04d}"}
+_DOI_URL_PREFIXES = ("https://doi.org/", "http://doi.org/", "doi:")
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,8 +33,32 @@ class DefaultDataNormalizationService:
     config: DataNormalizationConfig = field(default_factory=DataNormalizationConfig)
 
     def normalize_doi(self, doi: str | None) -> str | None:
-        """Normalize DOI to lowercase, stripped format."""
-        return doi.strip().lower() if doi else None
+        """Normalize DOI to lowercase, stripped format.
+
+        Handles DOIs in various formats:
+        - Bare DOI: "10.1038/nature12373"
+        - HTTPS URL: "https://doi.org/10.1038/nature12373"
+        - HTTP URL: "http://doi.org/10.1038/nature12373"
+        - doi: prefix: "doi:10.1038/nature12373"
+
+        Args:
+            doi: DOI string in any supported format.
+
+        Returns:
+            Normalized bare DOI (lowercase, stripped) or None if input is None/empty.
+        """
+        if not doi:
+            return None
+        stripped = self._strip_doi_prefix(doi)
+        result = stripped.strip().lower()
+        return result if result else None
+
+    def _strip_doi_prefix(self, doi: str) -> str:
+        """Strip known DOI URL prefixes (https://doi.org/, http://doi.org/, doi:)."""
+        for prefix in _DOI_URL_PREFIXES:
+            if doi.startswith(prefix):
+                return doi[len(prefix) :]
+        return doi
 
     def normalize_pmid(self, pmid: str | int | None) -> str | None:
         """Normalize PubMed ID to string format. Returns None for invalid inputs."""

@@ -38,7 +38,7 @@ class TestFileSizeLimits:
         "entities.py": 600,  # 569 LOC
         "chembl.py": 720,  # 714 LOC - ChEMBL entity DTOs with many fields
         "normalization.py": 350,  # 341 LOC - Pure domain normalization functions
-        "validation.py": 330,  # 326 LOC - Pure domain validation functions (SMILES, DOI, InChI Key, year)
+        "validation.py": 385,  # 381 LOC - Pure domain validation functions (SMILES, DOI, InChI Key, year, molecular weight)
         "activity_aggregator.py": 400,  # 392 LOC - Activity aggregation with multiple strategies
         "normalization_service.py": 420,  # 411 LOC - Normalization service with validation
         "value_validator.py": 360,  # 351 LOC - Value objects validation

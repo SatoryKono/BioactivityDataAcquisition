@@ -21,14 +21,12 @@ from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.openalex.extractors import (
     extract_authors,
     extract_concepts,
-    extract_doi,
     extract_journal_info,
     extract_open_access_info,
     extract_openalex_id,
     reconstruct_abstract,
 )
 from bioetl.domain.entities.openalex import OPENALEX_TYPE_MAP, OpenAlexPublicationEntity
-from bioetl.domain.normalization import strip_html_tags
 from bioetl.domain.services import DataNormalizationService, IdentityService
 from bioetl.domain.validation import validate_year_range
 
@@ -124,14 +122,15 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         # Extract OpenAlex ID from URL
         openalex_id = extract_openalex_id(rec.get("id"))
 
-        # Extract bare DOI from URL, then normalize (lowercase, stripped)
-        # for cross-provider consistency
-        raw_doi = extract_doi(rec.get("doi"))
-        doi = self._data_normalizer.normalize_doi(raw_doi)
+        # Normalize DOI (handles URL prefix stripping + lowercase/strip)
+        # OpenAlex stores DOIs as full URLs (e.g., "https://doi.org/10.1038/...")
+        doi = self._data_normalizer.normalize_doi(rec.get("doi"))
 
         # Reconstruct abstract from inverted index (then strip HTML for cleaning)
         abstract_index = rec.get("abstract_inverted_index")
-        abstract = strip_html_tags(reconstruct_abstract(abstract_index))
+        abstract = self._data_normalizer.strip_html_tags(
+            reconstruct_abstract(abstract_index)
+        )
 
         # Extract and hash authors (PII)
         # Authors stored as JSON-serialized list for unified format across providers

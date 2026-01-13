@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from bioetl.domain.entities.base import BaseEntity
+from bioetl.domain.validation import MAX_PUBLICATION_YEAR, MIN_PUBLICATION_YEAR
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -25,7 +26,7 @@ class ChemblPublication(BaseEntity):
     document_chembl_id: str
 
     # Publication identifiers
-    pubmed_id: int | None = None
+    pubmed_id: str | None = None  # Numeric string for cross-provider consistency
     doi: str | None = None
     patent_id: str | None = None
 
@@ -54,8 +55,13 @@ class ChemblPublication(BaseEntity):
     def _validate_invariants(self) -> None:
         if not self.document_chembl_id:
             raise ValueError("ChemblPublication document_chembl_id is required")
-        if self.year is not None and (self.year < 1800 or self.year > 2100):
-            raise ValueError(f"Year must be between 1800-2100, got {self.year}")
+        if self.year is not None and not (
+            MIN_PUBLICATION_YEAR <= self.year <= MAX_PUBLICATION_YEAR
+        ):
+            raise ValueError(
+                f"Year must be between {MIN_PUBLICATION_YEAR}-{MAX_PUBLICATION_YEAR}, "
+                f"got {self.year}"
+            )
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -353,8 +359,8 @@ class DocumentSimilarity(BaseEntity):
     doc_2: int
 
     # === PubMed Identifiers ===
-    pubmed_id1: int | None = None
-    pubmed_id2: int | None = None
+    pubmed_id1: str | None = None  # Numeric string for cross-provider consistency
+    pubmed_id2: str | None = None  # Numeric string for cross-provider consistency
 
     # === Tanimoto Coefficients ===
     tid_tani: float | None = None  # Target-based
