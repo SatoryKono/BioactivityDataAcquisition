@@ -15,10 +15,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.field_specs import (
+    PMID,
     FieldGroup,
+    FieldSpec,
     int_fields,
     map_field_groups,
-    pmid_fields,
     simple_fields,
 )
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
@@ -26,7 +27,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.entities import ChemblPublication
 from bioetl.domain.services import DataNormalizationService, IdentityService
-from bioetl.domain.value_objects import DOI
+from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig
@@ -43,7 +44,8 @@ if TYPE_CHECKING:
 _PUBLICATION_IDS = FieldGroup(
     name="publication_ids",
     fields=(
-        *pmid_fields("pubmed_id"),
+        # Rename pubmed_id -> pmid for cross-provider consistency (PMID standardization)
+        FieldSpec("pubmed_id", target="pmid", converter=PMID),
         *simple_fields("doi", "patent_id"),
     ),
 )
@@ -159,6 +161,10 @@ class PublicationTransformer(BaseChemblTransformer):
         # Validate DOI using Value Object (returns None for invalid/empty)
         doi = DOI.from_raw(data.get("doi"))
         data["doi"] = str(doi) if doi else None
+
+        # Validate year using PublicationYear Value Object
+        year_vo = PublicationYear.from_raw(data.get("year"))
+        data["year"] = year_vo.value if year_vo else None
 
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON

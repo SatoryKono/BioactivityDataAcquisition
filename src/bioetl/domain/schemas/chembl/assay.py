@@ -54,8 +54,9 @@ class AssaySchema(ETLRecordSchema):
     assay_organism: Series[str] | None = pa.Field(
         nullable=True, description="Organism."
     )
-    assay_tax_id: Series[int] | None = pa.Field(
-        nullable=True, description="NCBI Taxonomy ID."
+    assay_taxonomy_id: Series[int] | None = pa.Field(
+        nullable=True,
+        description="NCBI Taxonomy ID. Standardized name (was assay_tax_id).",
     )
     assay_strain: Series[str] | None = pa.Field(nullable=True, description="Strain.")
     assay_tissue: Series[str] | None = pa.Field(nullable=True, description="Tissue.")
@@ -172,7 +173,10 @@ class AssaySchema(ETLRecordSchema):
     variant_mutation: Series[str] | None = pa.Field(nullable=True)
     variant_organism: Series[str] | None = pa.Field(nullable=True)
     variant_sequence: Series[str] | None = pa.Field(nullable=True)
-    variant_tax_id: Series[int] | None = pa.Field(nullable=True)
+    variant_taxonomy_id: Series[int] | None = pa.Field(
+        nullable=True,
+        description="Variant taxonomy ID. Standardized name (was variant_tax_id).",
+    )
     variant_sequence_json: Series[str] | None = pa.Field(nullable=True)
 
     # === Complex Fields (JSON) ===

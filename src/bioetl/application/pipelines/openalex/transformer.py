@@ -28,7 +28,7 @@ from bioetl.application.pipelines.openalex.extractors import (
 )
 from bioetl.domain.entities.openalex import OPENALEX_TYPE_MAP, OpenAlexPublicationEntity
 from bioetl.domain.services import DataNormalizationService, IdentityService
-from bioetl.domain.validation import validate_year_range
+from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig
@@ -122,9 +122,10 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         # Extract OpenAlex ID from URL
         openalex_id = extract_openalex_id(rec.get("id"))
 
-        # Normalize DOI (handles URL prefix stripping + lowercase/strip)
+        # Validate DOI using Value Object (returns None for invalid/empty)
         # OpenAlex stores DOIs as full URLs (e.g., "https://doi.org/10.1038/...")
-        doi = self._data_normalizer.normalize_doi(rec.get("doi"))
+        doi_vo = DOI.from_raw(rec.get("doi"))
+        doi = str(doi_vo) if doi_vo else None
 
         # Reconstruct abstract from inverted index (then strip HTML for cleaning)
         abstract_index = rec.get("abstract_inverted_index")
@@ -146,10 +147,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         # Extract Open Access info
         oa_info = extract_open_access_info(rec.get("open_access", {}))
 
-        # Validate year
-        year = rec.get("publication_year")
-        if year is not None and not validate_year_range(year):
-            year = None
+        # Validate year using PublicationYear Value Object
+        year_vo = PublicationYear.from_raw(rec.get("publication_year"))
+        year = year_vo.value if year_vo else None
 
         # Map document type
         raw_type = rec.get("type", "")

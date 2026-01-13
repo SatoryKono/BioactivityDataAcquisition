@@ -15,6 +15,7 @@ from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities import PubchemMolecule
 from bioetl.domain.services import IdentityService
 from bioetl.domain.validation import validate_molecular_weight
+from bioetl.domain.value_objects import InChIKey
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -91,6 +92,14 @@ class PubChemCompoundTransformer(BaseTransformer):
         # Step 2: Build business data dictionary
         # Validate and convert molecular_weight (handles string→float, range, precision)
         mol_weight = validate_molecular_weight(record.get("molecular_weight"))
+
+        # Validate InChI Key using Value Object (returns None for invalid/empty)
+        raw_inchikey = record.get("inchikey")
+        inchikey_vo = InChIKey.from_raw(
+            str(raw_inchikey) if raw_inchikey is not None else None
+        )
+        inchikey = str(inchikey_vo) if inchikey_vo else None
+
         business_data: dict[str, Any] = {
             "cid": str(cid),
             "molecular_formula": record.get("molecular_formula"),
@@ -98,7 +107,7 @@ class PubChemCompoundTransformer(BaseTransformer):
             "canonical_smiles": record.get("canonical_smiles"),
             "isomeric_smiles": record.get("isomeric_smiles"),
             "inchi": record.get("inchi"),
-            "inchikey": record.get("inchikey"),
+            "inchikey": inchikey,
             "iupac_name": record.get("iupac_name"),
         }
 

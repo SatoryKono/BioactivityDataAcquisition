@@ -46,10 +46,10 @@ class CellLineSchema(ETLRecordSchema):
         nullable=True,
         description="Source organism (e.g., Homo sapiens).",
     )
-    cell_source_tax_id: Series[int] | None = pa.Field(
+    cell_source_taxonomy_id: Series[int] | None = pa.Field(
         nullable=True,
         ge=1,
-        description="NCBI Taxonomy ID for source organism.",
+        description="NCBI Taxonomy ID for source organism. Standardized name (was cell_source_tax_id).",
     )
 
     # === Cell Type Classification ===

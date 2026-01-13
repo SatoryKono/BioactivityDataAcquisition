@@ -4,15 +4,21 @@ Contains Value Objects for chemical structure identifiers:
 - InChIKey: InChI Key identifiers (BSYNRYMUTXBXSQ-UHFFFAOYSA-N)
 - SMILES: SMILES notation strings
 - PublicationYear: Publication year with validation
+- MolecularWeight: Molecular weight with validation and precision
 
 These Value Objects encapsulate validation and normalization rules.
 """
 
 from __future__ import annotations
 
+import math
 import re
+from typing import TYPE_CHECKING
 
 from bioetl.domain.value_objects.base import ValueObject
+
+if TYPE_CHECKING:
+    from bioetl.domain.config import ValidationConfig
 
 
 class InChIKey(ValueObject[str]):
@@ -238,37 +244,99 @@ class SMILES(ValueObject[str]):
 class PublicationYear(ValueObject[int]):
     """Publication year value object with validation.
 
-    Validates that the year falls within a reasonable range for
+    Validates that the year falls within a configurable range for
     scientific publications.
+
+    The validation range can be customized via ValidationConfig:
+    - Default range: [1800, 2100] for standard scientific publications
+    - Semantic Scholar: [1500, 2100] for historical publications
 
     Examples: 1953 (Watson & Crick), 2020 (COVID papers)
 
     Invariants:
-        - Must be between MIN_YEAR (1800) and MAX_YEAR (2100)
+        - Must be between config.min_publication_year and config.max_publication_year
         - Must be a positive integer
+
+    Attributes:
+        _config: ValidationConfig for year range validation.
     """
 
-    __slots__ = ()
+    __slots__ = ("_config",)
     _value: int
+    _config: ValidationConfig
 
-    _MIN_YEAR = 1800  # Reasonable minimum for scientific publications
-    _MAX_YEAR = 2100  # Reasonable maximum allowing for future publications
+    # Class-level defaults for backward compatibility
+    _DEFAULT_MIN_YEAR = 1800
+    _DEFAULT_MAX_YEAR = 2100
+
+    def __init__(
+        self,
+        value: int | str,
+        *,
+        config: ValidationConfig | None = None,
+    ) -> None:
+        """Create PublicationYear with validated value.
+
+        Args:
+            value: Raw year value (int or string).
+            config: Optional ValidationConfig for custom ranges.
+                If None, uses DEFAULT_VALIDATION_CONFIG.
+
+        Raises:
+            ValueError: If year is outside valid range.
+
+        Example:
+            >>> year = PublicationYear(2020)
+            >>> year.value
+            2020
+            >>> # With custom config for Semantic Scholar
+            >>> from bioetl.domain.config import ValidationConfig
+            >>> ss_config = ValidationConfig(min_publication_year=1500)
+            >>> year = PublicationYear(1600, config=ss_config)
+
+        """
+        # Import here to avoid circular dependency
+        from bioetl.domain.config import DEFAULT_VALIDATION_CONFIG
+
+        resolved_config = config or DEFAULT_VALIDATION_CONFIG
+        object.__setattr__(self, "_config", resolved_config)
+        validated = self._validate(value)
+        object.__setattr__(self, "_value", validated)
 
     def _coerce_to_int(self, value: int | str) -> int:
-        """Coerce value to int, raising ValueError on failure."""
+        """Coerce value to int, raising ValueError on failure.
+
+        Also supports extracting year from date string format (YYYY-MM-DD).
+
+        Args:
+            value: Raw value to coerce.
+
+        Returns:
+            Integer year value.
+
+        Raises:
+            ValueError: If coercion fails.
+        """
         if isinstance(value, bool):
             raise ValueError(f"PublicationYear must be int, got {type(value).__name__}")
         if isinstance(value, int):
             return value
         if isinstance(value, str):
+            stripped = value.strip()
+            # Support date string format: "2024-01-15" → 2024
+            if len(stripped) >= 4 and stripped[4:5] in ("-", "/", ""):
+                try:
+                    return int(stripped[:4])
+                except ValueError:
+                    pass
             try:
-                return int(value.strip())
+                return int(stripped)
             except ValueError:
                 raise ValueError(f"Invalid publication year: {value!r}") from None
         raise ValueError(f"PublicationYear must be int, got {type(value).__name__}")
 
-    def _validate(self, value: int) -> int:
-        """Validate publication year.
+    def _validate(self, value: int | str) -> int:
+        """Validate publication year against config range.
 
         Args:
             value: Raw year value.
@@ -280,12 +348,23 @@ class PublicationYear(ValueObject[int]):
             ValueError: If year is outside valid range.
         """
         int_value = self._coerce_to_int(value)
-        if not self._MIN_YEAR <= int_value <= self._MAX_YEAR:
+        min_year = self._config.min_publication_year
+        max_year = self._config.max_publication_year
+        if not min_year <= int_value <= max_year:
             raise ValueError(
-                f"Year {int_value} outside valid range "
-                f"[{self._MIN_YEAR}, {self._MAX_YEAR}]"
+                f"Year {int_value} outside valid range [{min_year}, {max_year}]"
             )
         return int_value
+
+    @property
+    def min_year(self) -> int:
+        """Get the minimum valid year from config."""
+        return self._config.min_publication_year
+
+    @property
+    def max_year(self) -> int:
+        """Get the maximum valid year from config."""
+        return self._config.max_publication_year
 
     @property
     def decade(self) -> int:
@@ -306,21 +385,191 @@ class PublicationYear(ValueObject[int]):
         return (self._value // 100) + 1
 
     @classmethod
-    def from_raw(cls, raw: int | str | None) -> PublicationYear | None:
+    def from_raw(
+        cls,
+        raw: int | str | None,
+        *,
+        config: ValidationConfig | None = None,
+    ) -> PublicationYear | None:
         """Create PublicationYear from raw value with normalization.
 
         Args:
             raw: Raw year integer, string, or None.
+            config: Optional ValidationConfig for custom ranges.
 
         Returns:
             PublicationYear if valid, None if input is None, empty, or invalid.
+
+        Example:
+            >>> PublicationYear.from_raw("2020")
+            PublicationYear(2020)
+            >>> PublicationYear.from_raw("2024-01-15")  # Date string
+            PublicationYear(2024)
+            >>> PublicationYear.from_raw(None)
+            None
+
         """
         if raw is None:
             return None
         if isinstance(raw, str) and not raw.strip():
             return None
         try:
-            # int() is idempotent on ints, converts str to int
-            return cls(int(raw))
+            return cls(raw, config=config)
         except ValueError:
             return None
+
+    def __eq__(self, other: object) -> bool:
+        """Compare by value only (ignoring config)."""
+        if not isinstance(other, PublicationYear):
+            return NotImplemented
+        return bool(self._value == other._value)
+
+    def __hash__(self) -> int:
+        """Hash based on class and value only (ignoring config)."""
+        return hash((self.__class__.__name__, self._value))
+
+
+class MolecularWeight(ValueObject[float]):
+    """Molecular weight value object with validation.
+
+    Validates molecular weight against configurable range and rounds
+    to specified precision per RULES.md §2.8.1.
+
+    Default validation range: (10.0, 10000.0) Da - covers small molecules
+    to large peptides. Range is exclusive (open interval).
+
+    Attributes:
+        _config: ValidationConfig for range and precision.
+
+    Invariants:
+        - Must be between config.min_molecular_weight and max_molecular_weight
+        - Rounded to config.molecular_weight_precision decimals
+        - Cannot be NaN or Inf
+
+    Example:
+        >>> mw = MolecularWeight(180.156)
+        >>> mw.value
+        180.156
+        >>> # Rounding to precision
+        >>> mw = MolecularWeight(180.15600000001)
+        >>> mw.value
+        180.156
+
+    """
+
+    __slots__ = ("_config",)
+    _value: float
+    _config: ValidationConfig
+
+    def __init__(
+        self,
+        value: float | int | str,
+        *,
+        config: ValidationConfig | None = None,
+    ) -> None:
+        """Create MolecularWeight with validated value.
+
+        Args:
+            value: Raw molecular weight value.
+            config: Optional ValidationConfig for custom ranges.
+                If None, uses DEFAULT_VALIDATION_CONFIG.
+
+        Raises:
+            ValueError: If MW is outside valid range or invalid.
+
+        """
+        # Import here to avoid circular dependency
+        from bioetl.domain.config import DEFAULT_VALIDATION_CONFIG
+
+        resolved_config = config or DEFAULT_VALIDATION_CONFIG
+        object.__setattr__(self, "_config", resolved_config)
+        validated = self._validate(value)
+        object.__setattr__(self, "_value", validated)
+
+    def _validate(self, value: float | int | str) -> float:
+        """Validate and normalize molecular weight.
+
+        Args:
+            value: Raw molecular weight value.
+
+        Returns:
+            Validated and rounded float.
+
+        Raises:
+            ValueError: If MW is invalid or outside range.
+        """
+        # Convert to float
+        try:
+            float_value = float(value)
+        except (ValueError, TypeError) as e:
+            raise ValueError(f"Invalid molecular weight: {value!r}") from e
+
+        # Check for NaN/Inf
+        if math.isnan(float_value) or math.isinf(float_value):
+            raise ValueError(f"Invalid molecular weight: {value} (NaN or Inf)")
+
+        # Validate range (exclusive bounds)
+        min_mw = self._config.min_molecular_weight
+        max_mw = self._config.max_molecular_weight
+        if not min_mw < float_value < max_mw:
+            raise ValueError(
+                f"Molecular weight {float_value} outside range ({min_mw}, {max_mw})"
+            )
+
+        # Round to precision
+        precision = self._config.molecular_weight_precision
+        return round(float_value, precision)
+
+    @property
+    def min_weight(self) -> float:
+        """Get the minimum valid molecular weight from config."""
+        return self._config.min_molecular_weight
+
+    @property
+    def max_weight(self) -> float:
+        """Get the maximum valid molecular weight from config."""
+        return self._config.max_molecular_weight
+
+    @classmethod
+    def from_raw(
+        cls,
+        raw: float | int | str | None,
+        *,
+        config: ValidationConfig | None = None,
+    ) -> MolecularWeight | None:
+        """Create MolecularWeight from raw value with normalization.
+
+        Args:
+            raw: Raw molecular weight value or None.
+            config: Optional ValidationConfig for custom ranges.
+
+        Returns:
+            MolecularWeight if valid, None if input is None or invalid.
+
+        Example:
+            >>> MolecularWeight.from_raw(180.156)
+            MolecularWeight(180.156)
+            >>> MolecularWeight.from_raw("342.30")  # String from API
+            MolecularWeight(342.3)
+            >>> MolecularWeight.from_raw(None)
+            None
+
+        """
+        if raw is None:
+            return None
+        if isinstance(raw, str) and not raw.strip():
+            return None
+        try:
+            return cls(raw, config=config)
+        except ValueError:
+            return None
+
+    def __eq__(self, other: object) -> bool:
+        """Compare by value only (ignoring config)."""
+        if not isinstance(other, MolecularWeight):
+            return NotImplemented
+        return bool(self._value == other._value)
+
+    def __hash__(self) -> int:
+        """Hash based on class and value only (ignoring config)."""
+        return hash((self.__class__.__name__, self._value))

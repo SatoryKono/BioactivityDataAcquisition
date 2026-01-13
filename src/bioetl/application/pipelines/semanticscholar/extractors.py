@@ -9,7 +9,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from bioetl.domain.validation import validate_year_range
+from bioetl.domain.config import ValidationConfig
+from bioetl.domain.value_objects import PublicationYear
+
+# Semantic Scholar-specific config with min_year=1500 for historical publications
+_SS_VALIDATION_CONFIG = ValidationConfig(min_publication_year=1500)
 
 
 def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
@@ -227,10 +231,10 @@ def extract_fields_of_study(
 
 
 def validate_year(year: int | None) -> int | None:
-    """Validate publication year using domain validation.
+    """Validate publication year using PublicationYear Value Object.
 
-    Delegates to domain.validation.validate_year_range() with
-    Semantic Scholar-specific minimum year of 1500.
+    Uses Semantic Scholar-specific ValidationConfig with min_year=1500
+    to support historical publications.
 
     Args:
         year: Year from S2 response.
@@ -241,6 +245,5 @@ def validate_year(year: int | None) -> int | None:
     """
     if year is None:
         return None
-    if validate_year_range(year, min_year=1500):
-        return year
-    return None
+    year_vo = PublicationYear.from_raw(year, config=_SS_VALIDATION_CONFIG)
+    return year_vo.value if year_vo else None
