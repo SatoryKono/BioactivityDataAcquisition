@@ -27,17 +27,17 @@ gold_filters:
 # Entity-specific sink overrides (custom paths)
 sink:
   bronze:
-    path: "data/output/bronze/uniprot/protein"
+    path: "data/bronze/uniprot/protein"
   silver:
-    path: "data/output/silver/uniprot/protein"
+    path: "data/silver/uniprot/protein"
     primary_key: ["accession"]
     partition_by: ["organism"]
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/csv/silver/uniprot/protein"
   gold:
-    path: "data/output/gold/uniprot/protein"
+    path: "data/gold/uniprot/protein"
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/csv/gold/uniprot/protein"
 
 # Entity-specific input filter (disabled by default)
 input_filter:

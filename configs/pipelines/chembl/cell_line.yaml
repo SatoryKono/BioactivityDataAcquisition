@@ -23,23 +23,23 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze"
+    path: "data/bronze/chembl/cell_line"
   silver:
-    path: "data/output/silver"
+    path: "data/silver/chembl/cell_line"
     primary_key: ["cell_chembl_id"]
     partition_by: []
     sort_by:
       columns: ["cell_chembl_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/csv/silver/chembl/cell_line"
   gold:
-    path: "data/output/gold"
+    path: "data/gold/chembl/cell_line"
     sort_by:
       columns: ["cell_chembl_id", "cell_name"]
       ascending: true
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/csv/gold/chembl/cell_line"
 
 # Entity-specific input filter
 input_filter:

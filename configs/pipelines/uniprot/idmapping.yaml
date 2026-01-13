@@ -46,15 +46,15 @@ sink:
     # ID Mapping doesn't write Bronze (data comes from API, not raw files)
     enabled: false
   silver:
-    path: "data/output/silver/uniprot/idmapping"
+    path: "data/silver/uniprot/idmapping"
     primary_key: ["target_chembl_id"]
     partition_by: []  # No partitioning - small dataset
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/csv/silver/uniprot/idmapping"
   gold:
-    path: "data/output/gold/uniprot/idmapping"
+    path: "data/gold/uniprot/idmapping"
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/csv/gold/uniprot/idmapping"
 
 # Gold filters - pass all records (including not_found)
 # Users may want to filter in downstream analysis

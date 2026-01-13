@@ -973,55 +973,175 @@ make run-local    # запуск сэмплового пайплайна на ф
 | >20% DQ errors | Batch fail | Проверить источник; возможно API вернул ошибку в теле ответа | 
 | Lock timeout | Alert "Lock expired" | Проверить зомби-процессы; `make release-lock PIPELINE=...` | 
  
-## Приложение D: Схема Конфигурации Пайплайна 
-```yaml 
-# configs/pipelines/chembl_activity.yaml 
-pipeline: 
-  name: chembl_activity 
-  provider: chembl 
-  entity: activity 
- 
-source: 
-  type: api  # api | csv | parquet 
-  load_strategy: incremental  # incremental | full 
-  watermark_field: updated_at 
- 
-transform: 
-  version: "1.2.0" 
-  steps: 
-    - normalize_units 
-    - validate_smiles 
-    - deduplicate 
- 
-sink: 
-  silver: 
-    path: s3://bioetl/silver/chembl/activity/ 
-    format: delta          # Использовать Delta Lake 
-    mode: merge            # Стратегия Upsert 
-    primary_key: [id]      # Ключ для merge 
-    partition_by: [year, month] 
-    classification: public 
-    forensic_retention: false  # true = 30 days for Critical tables
-    # Example for Critical table (Core Data):
-    # forensic_retention: true 
- 
-  gold: 
-    path: s3://bioetl/gold/chembl/activity_aggregated/ 
-    format: delta 
-    mode: overwrite        # Витрины часто перезаписываются целиком или партициями 
- 
-dq_rules: 
-  soft_fail_threshold: 0.05  # 5% 
-  hard_fail_threshold: 0.20  # 20% (Strict) 
- 
-circuit_breaker: 
-  failure_threshold: 5 
-  recovery_timeout: 300      # 5 min 
- 
-rate_limit: 
-  requests_per_second: 5 
-  burst: 10 
-``` 
+## Приложение D: Схема Конфигурации Пайплайна
+
+### D.1. Трёхуровневая Архитектура Конфигурации
+
+BioETL использует **трёхуровневую иерархию конфигураций** для соблюдения DRY:
+
+```
+configs/pipelines/_defaults.yaml      → Глобальные defaults (dq_rules, sink, maintenance)
+           │
+configs/sources/<provider>.yaml       → Настройки провайдера (rate_limit, client, circuit_breaker)
+           │
+configs/pipelines/<provider>/<entity>.yaml → Настройки сущности (gold_filters, primary_keys)
+```
+
+**Принцип наследования:**
+- Entity config наследует от `_defaults.yaml`
+- Provider-specific настройки вынесены в `configs/sources/*.yaml`
+- Entity config ссылается на source через `source_file`
+
+### D.2. Defaults Schema (`_defaults.yaml`)
+
+```yaml
+# configs/pipelines/_defaults.yaml
+defaults_version: "1.1.0"
+
+dq_rules:
+  soft_fail_threshold: 0.05  # 5% - Warning
+  hard_fail_threshold: 0.20  # 20% - Fail Batch
+
+circuit_breaker:
+  failure_threshold: 5
+  recovery_timeout: 300      # 5 min
+
+sink:
+  bronze:
+    format: jsonl
+    save_json: true
+    deterministic: true
+
+  silver:
+    format: delta            # MUST: Delta Lake для ACID
+    mode: merge
+    on_schema_mismatch: evolve
+    classification: public
+    forensic_retention: true
+    deterministic: true
+    csv_export:
+      enabled: true
+
+  gold:
+    enabled: true
+    validation:
+      strict: true
+    format: delta
+    mode: overwrite
+    deterministic: true
+
+maintenance:
+  auto_vacuum: false
+  vacuum_retention_days: 7
+
+input_filter:
+  enabled: false
+  batch_size: 100
+```
+
+### D.3. Source Schema (`configs/sources/<provider>.yaml`)
+
+```yaml
+# configs/sources/chembl.yaml
+source:
+  type: api                  # api | file
+  load_strategy: full        # full | incremental
+  batch_size: 20
+
+  provider_config:
+    provider: chembl
+    base_url: https://www.ebi.ac.uk/chembl/api/data
+    client:
+      timeout_sec: 60.0
+      max_retries: 3
+    batch_size: 20
+    page_size: 1000
+
+  circuit_breaker:
+    failure_threshold: 5
+    recovery_timeout: 300
+
+  rate_limit:
+    requests_per_second: 5
+    burst: 10
+```
+
+### D.4. Entity Schema (`configs/pipelines/<provider>/<entity>.yaml`)
+
+```yaml
+# configs/pipelines/chembl/activity.yaml
+
+# REQUIRED FIELDS (MUST)
+pipeline_name: chembl_activity      # Уникальный идентификатор
+provider: chembl                    # Имя провайдера (lowercase)
+entity_type: activity               # Тип сущности
+primary_keys: ["activity_id"]       # Primary key для merge
+silver_table: "chembl_activity"     # Имя Silver таблицы
+source_file: ../../sources/chembl.yaml  # Ссылка на source config
+
+# OPTIONAL FIELDS (inherit defaults or omit)
+version: "1.1.0"                    # Версия конфигурации
+gold_table: "chembl_activity"       # Имя Gold таблицы (default: silver_table)
+description: "Extract biological activity records from ChEMBL API"
+
+# Gold Layer Filters
+gold_filters:
+  columns:
+    standard_type: [IC50, Ki]
+    standard_units: [nM]
+  ranges:
+    standard_value:
+      min: 0
+      include_min: false
+  required_fields:
+    - standard_type
+    - standard_value
+
+# Entity-specific Sink Overrides
+sink:
+  bronze:
+    path: "data/bronze/chembl/activity"
+  silver:
+    path: "data/silver/chembl/activity"
+    primary_key: ["activity_id"]
+    partition_by: []
+  gold:
+    path: "data/gold/chembl/activity"
+
+# Input Filter (optional)
+input_filter:
+  enabled: true
+  source_path: "data/input/activity.csv"
+  column_name: "activity_id"
+  filter_field: "activity_id"
+  batch_size: 20
+```
+
+### D.5. DQ Rules Override Example
+
+```yaml
+# configs/pipelines/uniprot/idmapping.yaml
+# ID Mapping с повышенными порогами (многие ID не найдутся)
+dq_rules:
+  soft_fail_threshold: 0.30  # 30% not_found допустимо
+  hard_fail_threshold: 0.80  # 80% - критический сбой
+```
+
+### D.6. Референсные файлы провайдеров
+
+Документация provider-specific настроек: `configs/pipelines/_providers/*.yaml`
+
+| Provider | Rate Limit | Auth | Особенности |
+|----------|-----------|------|-------------|
+| **ChEMBL** | 5 req/sec | Public | Нет официального лимита, self-imposed |
+| **PubChem** | 5 req/sec | Public | Retry-After support |
+| **UniProt** | 10 req/sec | API Key (opt) | Higher limits with key |
+| **CrossRef** | 50 req/sec | Email (polite) | Polite pool required |
+| **OpenAlex** | 10 req/sec | Email (polite) | 100K req/day |
+| **PubMed** | 3/10 req/sec | API Key (opt) | 10 req/sec with key |
+| **SemanticScholar** | 100 req/5min | API Key (opt) | Sliding window |
+
+**См. также:** [ADR-025](02-architecture/decisions/ADR-025-pipeline-config-unification.md) 
  
 ## Приложение E: Примеры Schema Evolution 
  
@@ -1086,8 +1206,14 @@ fields:
 | [ADR-018](02-architecture/decisions/ADR-018-gold-strict-validation.md) | Gold Strict Validation | Accepted | 2025-12-28 |
 | [ADR-019](02-architecture/decisions/ADR-019-observability-port-enforcement.md) | Observability Port Enforcement | Accepted | 2025-12-26 |
 | [ADR-020](02-architecture/decisions/ADR-020-basepipeline-decomposition.md) | BasePipeline Decomposition | Accepted | 2025-12-16 |
+| [ADR-021](02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md) | DDD Aggregates Adoption | Accepted | 2025-12-28 |
+| [ADR-022](02-architecture/decisions/ADR-022-tracing-noop.md) | Tracing NoOp Pattern | Accepted | 2025-12-29 |
+| [ADR-023](02-architecture/decisions/ADR-023-entity-type-patterns.md) | Entity Type Patterns | Accepted | 2025-12-30 |
+| [ADR-024](02-architecture/decisions/ADR-024-entity-naming-unification.md) | Entity Naming Unification | Accepted | 2026-01-02 |
+| [ADR-025](02-architecture/decisions/ADR-025-pipeline-config-unification.md) | Pipeline Config Unification | Accepted | 2026-01-13 |
 
 ## История Изменений (Changelog)
+- **5.11** (2026-01-13): Pipeline Config Unification (ADR-025). Полностью переписано Приложение D с трёхуровневой архитектурой конфигурации. Добавлены референсные файлы провайдеров в `configs/pipelines/_providers/`. Реестр ADR расширен (021-025).
 - **5.10** (2026-01-06): TTL/Heartbeat Values Correction. Исправлены значения Lock TTL (90s) и Heartbeat (30s) в §3.3 для соответствия реализации в `domain/config.py:238,241`. Синхронизация всех документов.
 - **5.9** (2026-01-01): TTL/Heartbeat Sync Fix. Добавлены явные значения Lock TTL и Heartbeat в §3.3.
 - **5.8** (2025-12-29): TTL/Heartbeat Sync. Добавлены явные значения Lock TTL и Heartbeat в §3.3 "Текущая реализация". Синхронизация с CLAUDE.md §5.

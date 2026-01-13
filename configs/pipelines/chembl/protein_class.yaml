@@ -39,14 +39,14 @@ sink:
       columns: ["protein_class_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/csv/silver/chembl/protein_class"
   gold:
     path: data/gold/chembl/protein_class
     sort_by:
       columns: ["class_level", "sort_order", "protein_class_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/csv/gold/chembl/protein_class"
 
 # No input filter for reference table (full load)
 input_filter:

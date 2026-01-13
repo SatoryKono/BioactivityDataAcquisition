@@ -31,17 +31,17 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze/pubmed/publication"
+    path: "data/bronze/pubmed/publication"
   silver:
-    path: "data/output/silver/pubmed/publication"
+    path: "data/silver/pubmed/publication"
     primary_key: ["pmid"]
     partition_by: ["pub_year"]
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/csv/silver/pubmed/publication"
   gold:
-    path: "data/output/gold/pubmed/publication"
+    path: "data/gold/pubmed/publication"
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/csv/gold/pubmed/publication"
 
 # Entity-specific input filter
 # NOTE: Disabled - PubMed adapter does not implement FilterableDataSourcePort

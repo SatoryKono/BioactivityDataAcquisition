@@ -29,19 +29,17 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze"
+    path: "data/bronze/crossref/publication"
   silver:
-    path: "data/output/silver"
+    path: "data/silver/crossref/publication"
     primary_key: ["doi"]
     partition_by: []
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/csv/silver/crossref/publication"
   gold:
-    path: "data/output/gold"
-
-
+    path: "data/gold/crossref/publication"
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/csv/gold/crossref/publication"
 
 # Entity-specific input filter for batch DOI resolution
 input_filter:

@@ -27,23 +27,23 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze"
+    path: "data/bronze/chembl/compound_record"
   silver:
-    path: "data/output/silver"
+    path: "data/silver/chembl/compound_record"
     primary_key: ["record_id"]
     partition_by: []
     sort_by:
       columns: ["record_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/csv/silver/chembl/compound_record"
   gold:
-    path: "data/output/gold"
+    path: "data/gold/chembl/compound_record"
     sort_by:
       columns: ["molecule_chembl_id", "document_chembl_id", "record_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/csv/gold/chembl/compound_record"
 
 # Entity-specific input filter
 # NOTE: Disabled because ChEMBL API doesn't support filtering by record_id.

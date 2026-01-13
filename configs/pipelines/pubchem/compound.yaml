@@ -25,17 +25,17 @@ gold_filters:
 # Entity-specific sink overrides (custom paths)
 sink:
   bronze:
-    path: "data/output/bronze/pubchem/compound"
+    path: "data/bronze/pubchem/compound"
   silver:
-    path: "data/output/silver/pubchem/compound"
+    path: "data/silver/pubchem/compound"
     primary_key: ["cid"]
     partition_by: ["batch_date"]
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/csv/silver/pubchem/compound"
   gold:
-    path: "data/output/gold/pubchem/compound"
+    path: "data/gold/pubchem/compound"
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/csv/gold/pubchem/compound"
 
 # Entity-specific input filter - SMILES-based filtering (primary mode)
 input_filter:

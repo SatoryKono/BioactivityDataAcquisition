@@ -30,17 +30,17 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze"
+    path: "data/bronze/chembl/document_term"
   silver:
-    path: "data/output/silver"
+    path: "data/silver/chembl/document_term"
     primary_key: ["entity_id"]
     partition_by: ["term_type"]
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/csv/silver/chembl/document_term"
   gold:
-    path: "data/output/gold"
+    path: "data/gold/chembl/document_term"
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/csv/gold/chembl/document_term"
 
 # Entity-specific input filter (optional)
 # NOTE: Disabled because DocumentTermDataSource (derived entity wrapper)

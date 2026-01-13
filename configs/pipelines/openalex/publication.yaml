@@ -42,11 +42,11 @@ sink:
     primary_key: ["openalex_id"]
     partition_by: ["year"]
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/csv/silver/openalex/publication"
   gold:
     path: "data/gold/openalex/publication"
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/csv/gold/openalex/publication"
 
 # Input filter for batch DOI resolution with title fallback
 input_filter:

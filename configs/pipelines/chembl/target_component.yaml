@@ -30,11 +30,11 @@ sink:
     primary_key: ["component_id"]
     partition_by: ["organism"]
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/csv/silver/chembl/target_component"
   gold:
     path: data/gold/chembl/target_component
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/csv/gold/chembl/target_component"
 
 # Entity-specific input filter
 input_filter:

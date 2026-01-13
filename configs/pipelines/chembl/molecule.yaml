@@ -27,17 +27,17 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze"
+    path: "data/bronze/chembl/molecule"
   silver:
-    path: "data/output/silver"
+    path: "data/silver/chembl/molecule"
     primary_key: ["molecule_chembl_id"]
     partition_by: ["molecule_type"]
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/csv/silver/chembl/molecule"
   gold:
-    path: "data/output/gold"
+    path: "data/gold/chembl/molecule"
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/csv/gold/chembl/molecule"
 
 # Entity-specific input filter
 input_filter:
