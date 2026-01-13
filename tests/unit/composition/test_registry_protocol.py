@@ -197,13 +197,11 @@ class TestUnifiedAPIConsistency:
         assert callable(self.registry.get)
         assert callable(DataSourceRegistry.get)
 
-    def test_both_registries_have_register(self):
-        """Both registries should have register() method."""
-        from bioetl.composition.factories.data_source_factory import (
-            DataSourceRegistry,
-        )
+    def test_pipeline_registry_has_register(self):
+        """PipelineRegistry should have register() method.
 
+        Note: DataSourceRegistry.register() was removed as deprecated.
+        New registrations should use ProviderRegistry.register() instead.
+        """
         assert hasattr(self.registry, "register")
-        assert hasattr(DataSourceRegistry, "register")
         assert callable(self.registry.register)
-        assert callable(DataSourceRegistry.register)

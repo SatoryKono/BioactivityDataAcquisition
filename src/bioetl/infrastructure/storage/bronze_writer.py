@@ -456,50 +456,6 @@ class BronzeWriter:
             lambda: atomic_write_bytes(json_full_path, jsonl_content),
         )
 
-    def _compress_records(self, records: Iterator[bytes]) -> tuple[bytes, int, int]:
-        """Compress JSONL records using zstandard.
-
-        Deprecated: Use _write_atomic_stream for direct-to-disk streaming.
-        Kept for backward compatibility if needed, but not used by main path.
-
-        Returns:
-            Tuple of (compressed_data, record_count, uncompressed_size).
-        """
-        # This method is no longer used by write_bronze but kept for interface stability if any
-        # tests call it directly.
-        from io import BytesIO
-
-        output = BytesIO()
-        compressor = zstd.ZstdCompressor(
-            level=self.COMPRESSION_LEVEL,
-            threads=self.COMPRESSION_THREADS,
-            write_content_size=True,
-        )
-
-        chunk_buffer = bytearray()
-        record_count = 0
-        uncompressed_size = 0
-
-        with compressor.stream_writer(
-            output, closefd=False, write_size=self.COMPRESSION_CHUNK_SIZE
-        ) as writer:
-            for record in records:
-                chunk_buffer.extend(record)
-                record_count += 1
-                uncompressed_size += len(record)
-
-                if len(chunk_buffer) >= self.COMPRESSION_CHUNK_SIZE:
-                    writer.write(chunk_buffer)
-                    chunk_buffer.clear()
-
-            if chunk_buffer:
-                writer.write(chunk_buffer)
-
-            if record_count == 0:
-                raise ValueError("No records provided for compression")
-
-        return output.getvalue(), record_count, uncompressed_size
-
     async def read_bronze(self, path: str) -> AsyncIterator[dict[str, Any]]:
         """Read and decompress Bronze file (for testing/debugging)."""
         full_path = self.base_path / path
