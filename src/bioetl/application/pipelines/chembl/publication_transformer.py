@@ -82,11 +82,14 @@ _PUBLICATION_GROUPS: tuple[FieldGroup, ...] = (
 )
 
 
-class DocumentTransformer(BaseChemblTransformer):
-    """Transforms ChEMBL bronze document records to silver.
+class PublicationTransformer(BaseChemblTransformer):
+    """Transforms ChEMBL bronze publication records to silver.
 
     Uses ChemblPublication entity (canonical name).
     Uses DataNormalizationService for text normalization (DI pattern).
+
+    .. versionchanged:: 2.0.0
+        Renamed from DocumentTransformer to PublicationTransformer (ADR-024).
     """
 
     entity_class = ChemblPublication
@@ -103,7 +106,7 @@ class DocumentTransformer(BaseChemblTransformer):
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
     ) -> None:
-        """Initialize ChEMBL Document transformer.
+        """Initialize ChEMBL Publication transformer.
 
         Args:
             provider: Data provider identifier. Defaults to 'chembl'.
@@ -169,3 +172,7 @@ class DocumentTransformer(BaseChemblTransformer):
             data["authors"] = None
 
         return data
+
+
+# Backward-compatible alias (deprecated, ADR-024)
+DocumentTransformer = PublicationTransformer

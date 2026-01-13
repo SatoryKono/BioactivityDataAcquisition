@@ -47,20 +47,6 @@ from bioetl.application.pipelines.chembl.compound_record import (
 from bioetl.application.pipelines.chembl.compound_record_transformer import (
     CompoundRecordTransformer,
 )
-from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
-from bioetl.application.pipelines.chembl.document_similarity import (
-    ChEMBLDocumentSimilarityPipeline,
-)
-from bioetl.application.pipelines.chembl.document_similarity_transformer import (
-    DocumentSimilarityTransformer,
-)
-from bioetl.application.pipelines.chembl.document_term import ChEMBLDocumentTermPipeline
-from bioetl.application.pipelines.chembl.document_term_transformer import (
-    DocumentTermTransformer,
-)
-from bioetl.application.pipelines.chembl.document_transformer import (
-    DocumentTransformer,
-)
 from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
 from bioetl.application.pipelines.chembl.molecule_transformer import (
     MoleculeTransformer,
@@ -70,6 +56,32 @@ from bioetl.application.pipelines.chembl.protein_class import (
 )
 from bioetl.application.pipelines.chembl.protein_class_transformer import (
     ProteinClassTransformer,
+)
+
+# Publication pipelines (canonical names, ADR-024)
+from bioetl.application.pipelines.chembl.publication import (
+    ChEMBLDocumentPipeline,  # Deprecated alias
+    ChEMBLPublicationPipeline,
+)
+from bioetl.application.pipelines.chembl.publication_similarity import (
+    ChEMBLDocumentSimilarityPipeline,  # Deprecated alias
+    ChEMBLPublicationSimilarityPipeline,
+)
+from bioetl.application.pipelines.chembl.publication_similarity_transformer import (
+    DocumentSimilarityTransformer,  # Deprecated alias
+    PublicationSimilarityTransformer,
+)
+from bioetl.application.pipelines.chembl.publication_term import (
+    ChEMBLDocumentTermPipeline,  # Deprecated alias
+    ChEMBLPublicationTermPipeline,
+)
+from bioetl.application.pipelines.chembl.publication_term_transformer import (
+    DocumentTermTransformer,  # Deprecated alias
+    PublicationTermTransformer,
+)
+from bioetl.application.pipelines.chembl.publication_transformer import (
+    DocumentTransformer,  # Deprecated alias
+    PublicationTransformer,
 )
 from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
 from bioetl.application.pipelines.chembl.target_component import (
@@ -91,11 +103,16 @@ __all__ = [
     "ChEMBLAssayPipeline",
     "ChEMBLCellLinePipeline",
     "ChEMBLCompoundRecordPipeline",
+    # Deprecated aliases (ADR-024)
     "ChEMBLDocumentPipeline",
     "ChEMBLDocumentSimilarityPipeline",
     "ChEMBLDocumentTermPipeline",
     "ChEMBLMoleculePipeline",
     "ChEMBLProteinClassPipeline",
+    # New canonical names (ADR-024)
+    "ChEMBLPublicationPipeline",
+    "ChEMBLPublicationSimilarityPipeline",
+    "ChEMBLPublicationTermPipeline",
     "ChEMBLTargetComponentPipeline",
     "ChEMBLTargetPipeline",
     "CompoundRecordTransformer",
@@ -104,6 +121,9 @@ __all__ = [
     "DocumentTransformer",
     "MoleculeTransformer",
     "ProteinClassTransformer",
+    "PublicationSimilarityTransformer",
+    "PublicationTermTransformer",
+    "PublicationTransformer",
     "TargetComponentTransformer",
     "TargetTransformer",
 ]

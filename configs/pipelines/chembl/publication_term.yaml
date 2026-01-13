@@ -1,20 +1,21 @@
-# configs/pipelines/chembl/document_terms.yaml
-# Pipeline configuration for ChEMBL Document Term entity.
+# configs/pipelines/chembl/publication_term.yaml
+# Pipeline configuration for ChEMBL Publication Term entity.
 #
-# Derived entity: Extracts and flattens terms from Document records.
+# Derived entity: Extracts and flattens terms from Publication records.
 # Inherits defaults from ../_defaults.yaml
+# Note: entity_type=document_term maps to ChEMBL API /document endpoint (derived entity)
 
-pipeline_name: chembl_document_term
+pipeline_name: chembl_publication_term
 provider: chembl
 entity_type: document_term
-version: "1.1.0"
-description: "Extract document terms (MeSH, keywords) from ChEMBL Document records"
+version: "2.0.0"
+description: "Extract publication terms (MeSH, keywords) from ChEMBL Publication records"
 
 # Composite primary key (document_chembl_id + term_type + term)
 # entity_id is generated as SHA256 hash of composite key
 primary_keys: ["entity_id"]
-silver_table: "chembl_document_term"
-gold_table: "chembl_document_term"
+silver_table: "chembl_publication_term"
+gold_table: "chembl_publication_term"
 
 source_file: ../../sources/chembl.yaml
 

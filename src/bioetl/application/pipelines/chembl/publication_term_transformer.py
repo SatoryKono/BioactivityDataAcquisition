@@ -1,10 +1,13 @@
-"""ChEMBL Document Term Transformer.
+"""ChEMBL Publication Term Transformer.
 
-Transforms Document records to extract and flatten associated terms.
+Transforms Publication records to extract and flatten associated terms.
 This is a derived entity transformer - it extracts nested term data
-from Document API responses and flattens the 1:M relationship.
+from Publication (ChEMBL Document) API responses and flattens the 1:M relationship.
 
 Uses declarative field_specs DSL for mapping.
+
+.. versionchanged:: 2.0.0
+    Renamed from document_term_transformer to publication_term_transformer (ADR-024).
 """
 
 from __future__ import annotations
@@ -21,11 +24,11 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
 
 
-class DocumentTermTransformer(BaseChemblTransformer):
-    """Transforms ChEMBL document records to extract flattened term records.
+class PublicationTermTransformer(BaseChemblTransformer):
+    """Transforms ChEMBL publication records to extract flattened term records.
 
-    This transformer extracts nested term data from Document API responses
-    and flattens the 1:M relationship (one Document → multiple Terms).
+    This transformer extracts nested term data from Publication (ChEMBL Document)
+    API responses and flattens the 1:M relationship (one Publication → multiple Terms).
 
     Term types extracted:
     - MESH_HEADING: MeSH descriptor terms from mesh_terms array
@@ -35,8 +38,11 @@ class DocumentTermTransformer(BaseChemblTransformer):
     Entity ID is computed as SHA256 hash of composite key:
     (document_chembl_id, term_type, normalized_term)
 
-    Note: This transformer returns multiple records from a single Document,
+    Note: This transformer returns multiple records from a single Publication,
     unlike standard transformers that have 1:1 input/output mapping.
+
+    .. versionchanged:: 2.0.0
+        Renamed from DocumentTermTransformer (ADR-024).
     """
 
     entity_class = DocumentTerm
@@ -61,8 +67,8 @@ class DocumentTermTransformer(BaseChemblTransformer):
         """Extract term data from the record.
 
         Handles two cases:
-        1. Pre-extracted term records (from DocumentTermDataSource) - pass through
-        2. Raw document records - extract terms from mesh_terms/keywords arrays
+        1. Pre-extracted term records (from PublicationTermDataSource) - pass through
+        2. Raw publication records - extract terms from mesh_terms/keywords arrays
 
         Args:
             record: Bronze record (either term record or document record).
@@ -101,9 +107,9 @@ class DocumentTermTransformer(BaseChemblTransformer):
         record: BronzeRecord,
         document_chembl_id: str,
     ) -> list[dict[str, Any]]:
-        """Extract and flatten all terms from a Document record.
+        """Extract and flatten all terms from a Publication record.
 
-        Yields multiple term records from one document.
+        Yields multiple term records from one publication.
         This is the primary method for derived entity extraction.
 
         Args:
@@ -220,3 +226,7 @@ class DocumentTermTransformer(BaseChemblTransformer):
         normalized_term = term.lower().strip() if term else ""
         composite = f"{document_chembl_id}:{term_type}:{normalized_term}"
         return hashlib.sha256(composite.encode()).hexdigest()[:16]
+
+
+# Backward-compatible alias (deprecated, ADR-024)
+DocumentTermTransformer = PublicationTermTransformer
