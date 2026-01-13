@@ -192,21 +192,6 @@ class DataSourceRegistry:
         return creator
 
     @classmethod
-    def register(cls, provider: str, creator: DataSourceCreator) -> None:
-        """Register a new data source creator.
-
-        Note: This method is deprecated. Use ProviderRegistry.register() instead
-        with a ProviderConfig that includes data_source_creator.
-
-        Args:
-            provider: Provider name
-            creator: Creator function
-        """
-        # For backward compatibility, store locally
-        # New registrations should go through ProviderRegistry
-        cls._creators[provider] = creator
-
-    @classmethod
     def list_providers(cls) -> list[str]:
         """List all registered providers.
 
