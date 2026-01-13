@@ -5,8 +5,10 @@ Verifies the CLI can be invoked as a module.
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -38,13 +40,19 @@ class TestCliMainModule:
 
     def test_module_runnable_with_help(self) -> None:
         """Test module can be run with --help flag."""
+        # Set PYTHONPATH to include src directory for subprocess
+        src_path = Path(__file__).parent.parent.parent.parent.parent / "src"
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(src_path)
+
         result = subprocess.run(
             [sys.executable, "-m", "bioetl.interfaces.cli", "--help"],
             capture_output=True,
             text=True,
             timeout=30,
+            env=env,
         )
 
         # Help should exit with 0 and show usage info
-        assert result.returncode == 0
+        assert result.returncode == 0, f"stderr: {result.stderr}"
         assert "Usage" in result.stdout or "usage" in result.stdout.lower()

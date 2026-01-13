@@ -17,8 +17,11 @@ if TYPE_CHECKING:
 
 # VCR.py imports (for API recording)
 try:
-    VCR_AVAILABLE = bool(__import__("vcr"))
+    import vcr
+
+    VCR_AVAILABLE = True
 except ImportError:
+    vcr = None  # type: ignore[assignment]
     VCR_AVAILABLE = False
 
 # Query parameters to ignore when matching VCR requests
@@ -34,7 +37,7 @@ def _parse_query_params(uri: str) -> dict[str, list[str]]:
     return parse_qs(parsed.query)
 
 
-def _query_matcher_ignoring_params(r1: "Request", r2: "Request") -> bool:
+def _query_matcher_ignoring_params(r1: Request, r2: Request) -> bool:
     """Custom VCR query matcher that ignores certain parameters.
 
     Ignores email, api_key parameters which vary between test runs
@@ -49,6 +52,20 @@ def _query_matcher_ignoring_params(r1: "Request", r2: "Request") -> bool:
         params2.pop(param, None)
 
     return params1 == params2
+
+
+# Register custom matcher with VCR at module level
+# Monkey-patch the VCR class to include our custom matcher in default matchers
+if VCR_AVAILABLE and vcr is not None:
+    # Store original __init__ to chain call
+    _original_vcr_init = vcr.VCR.__init__
+
+    def _patched_vcr_init(self: Any, *args: Any, **kwargs: Any) -> None:
+        _original_vcr_init(self, *args, **kwargs)
+        # Register custom matcher on each VCR instance
+        self.register_matcher("query_ignore_email", _query_matcher_ignoring_params)
+
+    vcr.VCR.__init__ = _patched_vcr_init
 
 
 def _is_plugin_available(module_name: str) -> bool:
@@ -341,7 +358,7 @@ def vcr_config(project_root: Path) -> dict[str, Any]:
             "host",
             "port",
             "path",
-            _query_matcher_ignoring_params,
+            "query_ignore_email",
         ],
         "before_record_request": _sanitize_request,
         "before_record_response": _sanitize_response,
