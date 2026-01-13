@@ -182,7 +182,9 @@ class PublicationTermDataSource:
                 continue
 
             # Extract terms from publication
-            terms = self._extract_terms_from_publication(publication, document_chembl_id)
+            terms = self._extract_terms_from_publication(
+                publication, document_chembl_id
+            )
 
             for term in terms:
                 yield term

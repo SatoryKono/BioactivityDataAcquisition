@@ -22,7 +22,9 @@ pytest.importorskip("syrupy", reason="syrupy package required for snapshot tests
 
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
-from bioetl.application.pipelines.chembl.publication_transformer import PublicationTransformer
+from bioetl.application.pipelines.chembl.publication_transformer import (
+    PublicationTransformer,
+)
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,

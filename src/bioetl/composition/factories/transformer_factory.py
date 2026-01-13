@@ -181,7 +181,9 @@ def register_all_transformers() -> None:
     register_transformer("chembl", "cell_line", CellLineTransformer)
     register_transformer("chembl", "compound_record", CompoundRecordTransformer)
     register_transformer("chembl", "document", PublicationTransformer)
-    register_transformer("chembl", "document_similarity", PublicationSimilarityTransformer)
+    register_transformer(
+        "chembl", "document_similarity", PublicationSimilarityTransformer
+    )
     register_transformer("chembl", "document_term", PublicationTermTransformer)
     register_transformer("chembl", "molecule", MoleculeTransformer)
     register_transformer("chembl", "protein_class", ProteinClassTransformer)
