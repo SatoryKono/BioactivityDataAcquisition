@@ -24,18 +24,18 @@ gold_filters:
   columns:
     reviewed: ["true"]  # Swiss-Prot (reviewed) only
 
-# Entity-specific sink overrides (custom paths)
+# Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze/uniprot/protein"
+    path: "data/output/bronze"
   silver:
-    path: "data/output/silver/uniprot/protein"
+    path: "data/output/silver"
     primary_key: ["accession"]
     partition_by: ["organism"]
     csv_export:
       path: "data/output/csv/silver"
   gold:
-    path: "data/output/gold/uniprot/protein"
+    path: "data/output/gold"
     csv_export:
       path: "data/output/csv/gold"
 

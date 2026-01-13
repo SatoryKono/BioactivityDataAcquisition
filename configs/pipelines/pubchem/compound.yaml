@@ -22,18 +22,18 @@ gold_filters:
     - molecular_formula
   columns: {}
 
-# Entity-specific sink overrides (custom paths)
+# Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze/pubchem/compound"
+    path: "data/output/bronze"
   silver:
-    path: "data/output/silver/pubchem/compound"
+    path: "data/output/silver"
     primary_key: ["cid"]
     partition_by: ["batch_date"]
     csv_export:
       path: "data/output/csv/silver"
   gold:
-    path: "data/output/gold/pubchem/compound"
+    path: "data/output/gold"
     csv_export:
       path: "data/output/csv/gold"
 

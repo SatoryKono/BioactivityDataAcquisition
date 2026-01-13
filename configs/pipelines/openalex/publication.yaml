@@ -36,15 +36,15 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/bronze/openalex/publication"
+    path: "data/output/bronze"
   silver:
-    path: "data/silver/openalex/publication"
+    path: "data/output/silver"
     primary_key: ["openalex_id"]
     partition_by: ["year"]
     csv_export:
       path: "data/output/csv/silver"
   gold:
-    path: "data/gold/openalex/publication"
+    path: "data/output/gold"
     csv_export:
       path: "data/output/csv/gold"
 
