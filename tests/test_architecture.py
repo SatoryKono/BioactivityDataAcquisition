@@ -592,8 +592,12 @@ def test_pipeline_configs_schema(project_root: Path):
         return
 
     for yaml_file in config_dir.rglob("*.yaml"):
-        # Skip defaults file (it is a partial config meant to be merged)
-        if yaml_file.name == "_defaults.yaml":
+        # Skip internal files starting with '_' (defaults, base schema, etc.)
+        if yaml_file.name.startswith("_"):
+            continue
+        # Skip internal directories starting with '_' (like _providers/)
+        relative_parts = yaml_file.relative_to(config_dir).parts
+        if any(part.startswith("_") for part in relative_parts[:-1]):
             continue
         # Skip source configs
         if "sources" in yaml_file.parts:

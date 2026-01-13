@@ -1,7 +1,7 @@
 # Pipeline Configuration Discrepancy Report
 
 *Generated: 2026-01-13*
-*Reference Schema: RULES.md v5.0, Appendix D*
+*Reference Schema: RULES.md v5.10, Appendix D*
 *Total Configurations Analyzed: 19 pipeline configs + 1 defaults file + 7 source configs*
 
 ---

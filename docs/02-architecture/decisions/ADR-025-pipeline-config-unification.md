@@ -11,7 +11,7 @@ BioETL uses YAML configuration files for pipeline definitions. The project has e
 to include 19 pipeline configs across 7 providers, plus defaults and source configs.
 
 A configuration audit was requested to:
-1. Analyze compliance with the reference schema (RULES.md v5.0, Appendix D)
+1. Analyze compliance with the reference schema (RULES.md v5.10, Appendix D)
 2. Identify inconsistencies and violations
 3. Propose a unified configuration structure
 4. Create a migration plan
@@ -145,7 +145,7 @@ Merge all provider configs into one large file.
 
 ## References
 
-- [RULES.md v5.0, Appendix D](../../../RULES.md) - Reference schema
+- [RULES.md v5.10, Appendix D](../../../RULES.md) - Reference schema
 - [reports/pipeline-config-matrix.csv](../../../reports/pipeline-config-matrix.csv) - Compliance matrix
 - [reports/pipeline-config-issues.md](../../../reports/pipeline-config-issues.md) - Detailed analysis
 - [reports/pipeline-config-migration-plan.md](../../../reports/pipeline-config-migration-plan.md) - Migration plan
