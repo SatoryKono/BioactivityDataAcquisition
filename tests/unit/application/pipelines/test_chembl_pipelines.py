@@ -11,7 +11,9 @@ from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
 from bioetl.application.pipelines.chembl.publication import ChEMBLPublicationPipeline
-from bioetl.application.pipelines.chembl.publication_transformer import PublicationTransformer
+from bioetl.application.pipelines.chembl.publication_transformer import (
+    PublicationTransformer,
+)
 from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
 from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline

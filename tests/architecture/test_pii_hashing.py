@@ -173,15 +173,15 @@ class TestPiiFieldsInTransformers:
             "PubMedPublicationTransformer MUST use hash_pii_list() for authors field"
         )
 
-    def test_chembl_document_transformer_hashes_authors(self) -> None:
-        """DocumentTransformer MUST hash authors field."""
+    def test_chembl_publication_transformer_hashes_authors(self) -> None:
+        """PublicationTransformer MUST hash authors field."""
         transformer_path = Path(
-            "src/bioetl/application/pipelines/chembl/document_transformer.py"
+            "src/bioetl/application/pipelines/chembl/publication_transformer.py"
         )
         content = transformer_path.read_text()
 
         # ChEMBL parses concatenated string to list and uses hash_pii_list
         # (unified authors format across all providers)
         assert "hash_pii_list" in content, (
-            "ChEMBL DocumentTransformer MUST use hash_pii_list() for authors field"
+            "ChEMBL PublicationTransformer MUST use hash_pii_list() for authors field"
         )

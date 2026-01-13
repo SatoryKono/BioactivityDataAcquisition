@@ -6,7 +6,9 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from bioetl.application.core.publication_term_data_source import PublicationTermDataSource
+from bioetl.application.core.publication_term_data_source import (
+    PublicationTermDataSource,
+)
 from bioetl.domain.types import HealthStatus
 
 
@@ -163,7 +165,9 @@ class TestPublicationTermDataSourceFetch:
         self, mock_data_source_single_document
     ):
         """Test fetch('document_term') extracts terms from documents."""
-        wrapper = PublicationTermDataSource(data_source=mock_data_source_single_document)
+        wrapper = PublicationTermDataSource(
+            data_source=mock_data_source_single_document
+        )
 
         terms = []
         async for term in wrapper.fetch("document_term"):
@@ -183,7 +187,9 @@ class TestPublicationTermDataSourceFetch:
         self, mock_data_source_single_document
     ):
         """Test fetch('document_term') respects limit parameter."""
-        wrapper = PublicationTermDataSource(data_source=mock_data_source_single_document)
+        wrapper = PublicationTermDataSource(
+            data_source=mock_data_source_single_document
+        )
 
         terms = []
         async for term in wrapper.fetch("document_term", limit=3):
