@@ -8,7 +8,7 @@ To build a robust, scalable, and maintainable data pipeline for acquiring and pr
 
 ## Quick Links
 
-*   [**Documentation Index**](INDEX.md): Structured navigation for all documentation.
+*   [**Documentation Index**](00-map.md): Structured navigation for all documentation.
 *   [**Quick Reference**](quick-reference/rules-summary.md): Key rules at a glance.
 *   [**Project Navigator**](00-map.md): Full documentation map with links to all resources.
 *   [**Project Rules**](RULES.md): The constitution of our project (SSOT). All contributions **MUST** adhere to these rules.
