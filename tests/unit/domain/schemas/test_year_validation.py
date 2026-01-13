@@ -184,7 +184,7 @@ class TestChemblYearValidation:
             **base_etl_fields,
             "entity_id": "chembl:publication:CHEMBL1234567",
             "document_chembl_id": "CHEMBL1234567",
-            "pubmed_id": 12345678,
+            "pubmed_id": "12345678",
             "doi": "10.1038/nature12373",
             "patent_id": None,
             "src_id": 1,

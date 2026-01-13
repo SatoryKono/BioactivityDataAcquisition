@@ -539,7 +539,9 @@ class DocumentRecord(BaseModel):
     document_chembl_id: str = Field(description="Unique document ChEMBL ID")
 
     # Publication identifiers
-    pubmed_id: int | None = Field(default=None, description="PubMed ID")
+    pubmed_id: str | None = Field(
+        default=None, description="PubMed ID (numeric string)"
+    )
     doi: str | None = Field(default=None, description="Digital Object Identifier")
     patent_id: str | None = Field(default=None, description="Patent ID")
 
