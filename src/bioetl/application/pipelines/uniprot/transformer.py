@@ -54,6 +54,23 @@ class UniProtProteinTransformer(BaseTransformer):
     - ExtractorUtils: protein names and utilities
     """
 
+    # Pre-defined paths for optimized extraction
+    _PROTEIN_DESC_FLAG_PATH = ("proteinDescription", "flag")
+    _ORGANISM_SCIENTIFIC_PATH = ("organism", "scientificName")
+    _ORGANISM_COMMON_PATH = ("organism", "commonName")
+    _ORGANISM_TAXON_ID_PATH = ("organism", "taxonId")
+    _ORGANISM_LINEAGE_PATH = ("organism", "lineage")
+    _SEQUENCE_VALUE_PATH = ("sequence", "value")
+    _SEQUENCE_LENGTH_PATH = ("sequence", "length")
+    _SEQUENCE_MOL_WEIGHT_PATH = ("sequence", "molWeight")
+    _SEQUENCE_CRC64_PATH = ("sequence", "crc64")
+    _PROTEIN_NAME_PATH = (
+        "proteinDescription",
+        "recommendedName",
+        "fullName",
+        "value",
+    )
+
     def __init__(
         self,
         provider: str = "uniprot",
@@ -172,7 +189,7 @@ class UniProtProteinTransformer(BaseTransformer):
             protein_desc
         )
         data["protein_ec_numbers"] = ExtractorUtils.extract_ec_numbers(recommended_name)
-        data["flag"] = self._extract_nested(record, "proteinDescription.flag")
+        data["flag"] = self._extract_by_path(record, self._PROTEIN_DESC_FLAG_PATH)
 
     def _add_gene_data(self, record: BronzeRecord, data: dict[str, Any]) -> None:
         """Add gene-related fields."""
@@ -184,13 +201,15 @@ class UniProtProteinTransformer(BaseTransformer):
 
     def _add_organism_data(self, record: BronzeRecord, data: dict[str, Any]) -> None:
         """Add organism and taxonomy fields."""
-        data["organism_scientific"] = self._extract_nested(
-            record, "organism.scientificName"
+        data["organism_scientific"] = self._extract_by_path(
+            record, self._ORGANISM_SCIENTIFIC_PATH
         )
-        data["organism_common"] = self._extract_nested(record, "organism.commonName")
-        data["taxonomy_id"] = self._extract_nested(record, "organism.taxonId")
+        data["organism_common"] = self._extract_by_path(
+            record, self._ORGANISM_COMMON_PATH
+        )
+        data["taxonomy_id"] = self._extract_by_path(record, self._ORGANISM_TAXON_ID_PATH)
         data["lineage"] = ExtractorUtils.serialize_list(
-            self._extract_nested(record, "organism.lineage")
+            self._extract_by_path(record, self._ORGANISM_LINEAGE_PATH)
         )
 
     def _add_evidence_data(self, record: BronzeRecord, data: dict[str, Any]) -> None:
@@ -203,10 +222,16 @@ class UniProtProteinTransformer(BaseTransformer):
 
     def _add_sequence_data(self, record: BronzeRecord, data: dict[str, Any]) -> None:
         """Add sequence fields."""
-        data["sequence"] = self._extract_nested(record, "sequence.value")
-        data["sequence_length"] = self._extract_nested(record, "sequence.length")
-        data["sequence_mass"] = self._extract_nested(record, "sequence.molWeight")
-        data["sequence_checksum"] = self._extract_nested(record, "sequence.crc64")
+        data["sequence"] = self._extract_by_path(record, self._SEQUENCE_VALUE_PATH)
+        data["sequence_length"] = self._extract_by_path(
+            record, self._SEQUENCE_LENGTH_PATH
+        )
+        data["sequence_mass"] = self._extract_by_path(
+            record, self._SEQUENCE_MOL_WEIGHT_PATH
+        )
+        data["sequence_checksum"] = self._extract_by_path(
+            record, self._SEQUENCE_CRC64_PATH
+        )
 
     def _add_functional_annotations(
         self, record: BronzeRecord, data: dict[str, Any]
@@ -269,8 +294,8 @@ class UniProtProteinTransformer(BaseTransformer):
 
     def _extract_protein_name(self, record: BronzeRecord) -> str | None:
         """Extract protein name (optional field)."""
-        protein_name = self._extract_nested(
+        protein_name = self._extract_by_path(
             record,
-            "proteinDescription.recommendedName.fullName.value",
+            self._PROTEIN_NAME_PATH,
         )
         return str(protein_name) if protein_name else None
