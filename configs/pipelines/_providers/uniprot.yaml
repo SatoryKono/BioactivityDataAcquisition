@@ -1,0 +1,73 @@
+# configs/pipelines/_providers/uniprot.yaml
+# =============================================================================
+# UniProt Provider-Specific Configuration
+# =============================================================================
+#
+# Provider: UniProt Consortium
+# API Documentation: https://www.uniprot.org/help/api
+# Data License: CC BY 4.0
+#
+# =============================================================================
+
+provider: uniprot
+
+# -----------------------------------------------------------------------------
+# API Configuration
+# -----------------------------------------------------------------------------
+api:
+  base_url: https://rest.uniprot.org
+  auth_type: api_key  # Optional API key for higher rate limits
+  api_key_env: BIOETL_UNIPROT_API_KEY
+
+  # Health check: search probe
+  health_check:
+    method: "Search probe query"
+    timeout: 10
+
+# -----------------------------------------------------------------------------
+# Rate Limiting
+# -----------------------------------------------------------------------------
+# UniProt allows 100 requests/second with API key
+rate_limit:
+  requests_per_second: 10   # Conservative default
+  burst: 20
+  with_api_key:
+    requests_per_second: 100
+    burst: 200
+  notes: |
+    UniProt API key provides higher rate limits (100 req/sec).
+    Without key, use conservative limits to avoid blocking.
+
+# -----------------------------------------------------------------------------
+# Retry Configuration
+# -----------------------------------------------------------------------------
+retry:
+  max_retries: 3
+  use_retry_after: true
+
+# -----------------------------------------------------------------------------
+# Available Entities
+# -----------------------------------------------------------------------------
+entities:
+  - protein     # UniProt protein entries
+  - idmapping   # ChEMBL -> UniProt ID mapping
+
+# -----------------------------------------------------------------------------
+# Entity-Specific Notes
+# -----------------------------------------------------------------------------
+entity_notes:
+  protein:
+    description: "UniProt protein entries (Swiss-Prot reviewed)"
+    typical_volume: "~570K reviewed entries"
+    gold_filter_recommendation: "Filter by reviewed=true for Swiss-Prot"
+
+  idmapping:
+    description: "Maps ChEMBL target IDs to UniProt accessions"
+    input_mode: "CSV file with target_chembl_id"
+    dq_thresholds:
+      soft_fail: 0.30  # Higher threshold - many targets lack UniProt mapping
+      hard_fail: 0.80
+    notes: |
+      ID Mapping has elevated DQ thresholds because many ChEMBL
+      targets may not have corresponding UniProt entries.
+      This is expected behavior, not a data quality issue.

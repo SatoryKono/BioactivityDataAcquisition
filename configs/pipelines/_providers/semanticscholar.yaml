@@ -1,0 +1,97 @@
+# configs/pipelines/_providers/semanticscholar.yaml
+# =============================================================================
+# Semantic Scholar Provider-Specific Configuration
+# =============================================================================
+#
+# Provider: Semantic Scholar (Allen Institute for AI)
+# API Documentation: https://api.semanticscholar.org/api-docs/
+# Data License: Semantic Scholar Dataset License
+#
+# =============================================================================
+
+provider: semanticscholar
+
+# -----------------------------------------------------------------------------
+# API Configuration
+# -----------------------------------------------------------------------------
+api:
+  base_url: https://api.semanticscholar.org/graph/v1
+  auth_type: api_key  # Recommended for stable access
+  api_key_env: BIOETL_SEMANTICSCHOLAR_API_KEY
+
+  # Health check
+  health_check:
+    endpoint: /paper/search
+    params:
+      query: test
+      limit: 1
+      fields: paperId
+    timeout: 30
+    skip_on_429: true  # Don't fail health check on rate limit
+
+# -----------------------------------------------------------------------------
+# Rate Limiting
+# -----------------------------------------------------------------------------
+# IMPORTANT: Semantic Scholar has aggressive rate limiting!
+# Without API key: Shared pool with unpredictable limits
+# With API key: Guaranteed 1 req/sec (stable)
+rate_limit:
+  requests_per_second: 0.1  # Very conservative without key
+  burst: 1
+  with_api_key:
+    requests_per_second: 1.0
+    burst: 5
+  window: 300  # 5-minute sliding window
+  notes: |
+    CRITICAL: Semantic Scholar API is highly rate-limited!
+
+    Without API key:
+    - Shared pool with aggressive throttling
+    - Frequent 429 errors
+    - Use very conservative rate (0.1 req/sec)
+
+    With API key (RECOMMENDED):
+    - Guaranteed 1 req/sec per endpoint
+    - Stable and predictable
+    - Get key at: https://www.semanticscholar.org/product/api
+
+# -----------------------------------------------------------------------------
+# Circuit Breaker
+# -----------------------------------------------------------------------------
+# More tolerant settings for S2's rate limit behavior
+circuit_breaker:
+  failure_threshold: 10    # More failures before opening
+  recovery_timeout: 600    # 10 min recovery (rate limit cooldown)
+  notes: |
+    Extended circuit breaker settings to handle frequent 429 responses.
+    S2 rate limits can persist for several minutes.
+
+# -----------------------------------------------------------------------------
+# Retry Configuration
+# -----------------------------------------------------------------------------
+retry:
+  max_retries: 5          # More retries for 429 recovery
+  delay_sec: 10.0         # Longer delay between retries
+  use_retry_after: true
+
+# -----------------------------------------------------------------------------
+# Available Entities
+# -----------------------------------------------------------------------------
+entities:
+  - publication  # Semantic Scholar papers
+
+# -----------------------------------------------------------------------------
+# Entity-Specific Notes
+# -----------------------------------------------------------------------------
+entity_notes:
+  publication:
+    description: "Semantic Scholar paper metadata via DOI resolution"
+    input_mode: "CSV file with DOIs"
+    fallback: "Title search when DOI not found"
+    batch_size: 100  # Reduced for rate limit safety
+    notes: |
+      Semantic Scholar provides rich citation metadata.
+      Falls back to title search for records without DOI.
+
+      RECOMMENDATION: Apply for API key before production use.
+      Contact: https://www.semanticscholar.org/product/api
