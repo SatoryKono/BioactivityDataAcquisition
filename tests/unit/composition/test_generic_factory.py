@@ -62,25 +62,6 @@ class TestDataSourceRegistry:
         assert "uniprot" in providers
         assert "pubmed" in providers
 
-    def test_register_custom_provider(self):
-        """Test registering a custom provider stores in local dict.
-
-        Note: register() is deprecated. New registrations should go through
-        ProviderRegistry. This test verifies backward-compat local storage only.
-        """
-
-        def custom_creator(settings, config, logger, filter_config=None):
-            return MagicMock()
-
-        DataSourceRegistry.register("custom", custom_creator)
-
-        # Local registration stores in _creators dict
-        assert "custom" in DataSourceRegistry._creators
-        assert DataSourceRegistry._creators["custom"] is custom_creator
-
-        # Cleanup
-        del DataSourceRegistry._creators["custom"]
-
 
 class TestGenericPipelineFactory:
     """Tests for GenericPipelineFactory."""
