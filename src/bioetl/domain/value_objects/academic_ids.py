@@ -156,9 +156,7 @@ class ISSN(ValueObject[str]):
 
         match = self._PATTERN.match(normalized)
         if not match:
-            raise ValueError(
-                f"Invalid ISSN format: {value!r}. Expected: XXXX-XXXX"
-            )
+            raise ValueError(f"Invalid ISSN format: {value!r}. Expected: XXXX-XXXX")
 
         first_part = match.group(1)
         second_part = match.group(2).upper()
@@ -225,8 +223,7 @@ class ORCID(ValueObject[str]):
         match = self._PATTERN.match(normalized)
         if not match:
             raise ValueError(
-                f"Invalid ORCID format: {value!r}. "
-                f"Expected: XXXX-XXXX-XXXX-XXXX"
+                f"Invalid ORCID format: {value!r}. Expected: XXXX-XXXX-XXXX-XXXX"
             )
 
         parts = [match.group(i) for i in range(1, 5)]
