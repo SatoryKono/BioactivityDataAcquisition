@@ -32,10 +32,16 @@ sink:
     path: "data/output/silver/uniprot/protein"
     primary_key: ["accession"]
     partition_by: ["organism"]
+    sort_by:
+      columns: ["accession"]
+      ascending: true
     csv_export:
       path: "data/output/csv/silver/uniprot/protein"
   gold:
     path: "data/output/gold/uniprot/protein"
+    sort_by:
+      columns: ["accession"]
+      ascending: true
     csv_export:
       path: "data/output/csv/gold/uniprot/protein"
 
