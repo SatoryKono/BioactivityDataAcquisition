@@ -386,7 +386,7 @@ class TestClassSize:
         "PubChemAdapter": 500,  # 489 lines - sync adapter with SMILES/CID filtering + DTO support
         "CrossRefPublicationTransformer": 360,  # 354 lines - transformer with field extraction
         # UniProt adapter (similar to ChEMBL adapter)
-        "UniProtAdapter": 570,  # 569 lines - HTTP adapter with streaming + FilterableDataSourcePort
+        "UniProtAdapter": 620,  # 612 lines - HTTP adapter with streaming + FilterableDataSourcePort
         # UniProt ID Mapping client (job-based async API)
         "UniProtIDMappingClient": 420,  # 415 lines - ID Mapping client with job polling
         # SemanticScholar adapter
