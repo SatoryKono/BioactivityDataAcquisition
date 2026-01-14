@@ -4,12 +4,12 @@ Implements RULES.md Section 4.1 HTTP client requirements:
 - Async support (httpx)
 - Rate limiting (RateLimiterPort)
 - Circuit breaker (CircuitBreakerPort)
-- Exponential backoff with jitter (RetryPolicy)
+- Exponential backoff with jitter (RetryConfig)
 
 SRP Compliance:
 - RateLimiterPort: Handles rate limiting (injected)
 - CircuitBreakerPort: Handles fault tolerance (injected)
-- RetryPolicy: Handles retry configuration (domain value object)
+- RetryConfig: Handles retry configuration (domain value object)
 - UnifiedHTTPClient: Coordinates HTTP communication
 """
 
@@ -38,12 +38,8 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunID
 
 
-# Backward compatibility aliases
-RetryPolicy = RetryConfig
-
 __all__ = [
     "RetryConfig",
-    "RetryPolicy",
     "UnifiedHTTPClient",
 ]
 

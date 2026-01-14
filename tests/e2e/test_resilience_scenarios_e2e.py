@@ -326,9 +326,9 @@ async def test_retry_policy_deterministic_jitter():
     - Jitter should be deterministic for debugging
     - Same inputs should produce same delay
     """
-    from bioetl.domain.resilience import RetryPolicy
+    from bioetl.domain.resilience import RetryConfig
 
-    policy = RetryPolicy(
+    policy = RetryConfig(
         max_attempts=3,
         base_delay=1.0,
         multiplier=2.0,
@@ -350,9 +350,9 @@ async def test_retry_policy_exponential_backoff():
 
     Delays should increase exponentially with each attempt.
     """
-    from bioetl.domain.resilience import RetryPolicy
+    from bioetl.domain.resilience import RetryConfig
 
-    policy = RetryPolicy(
+    policy = RetryConfig(
         max_attempts=5,
         base_delay=1.0,
         multiplier=2.0,

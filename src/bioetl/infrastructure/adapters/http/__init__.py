@@ -4,7 +4,7 @@ Provides:
 - TokenBucket: Rate limiting (implements RateLimiterPort)
 - CircuitBreaker: Fault tolerance (implements CircuitBreakerPort)
 - UnifiedHTTPClient: Async HTTP client with rate limiting and circuit breaker
-- RetryConfig: Backward compatibility alias for RetryPolicy
+- RetryConfig: Configuration for retry strategies
 - ProviderHealthMonitor: Centralized provider health monitoring (RULES.md §3.5)
 - ProviderHealthTracker: Per-provider health state machine wrapper
 - HealthAdjustedConfig: Health-based client configuration adjustments
@@ -22,11 +22,7 @@ from bioetl.infrastructure.adapters.http.health_monitor import (
 )
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
-# Backward compatibility alias
-AdjustedClientConfig = HealthAdjustedConfig
-
 __all__ = [
-    "AdjustedClientConfig",  # Backward compatibility alias
     "CircuitBreaker",
     "HealthAdjustedConfig",
     "ProviderHealthMonitor",
