@@ -34,14 +34,14 @@ sink:
       columns: ["cid"]
       ascending: true
     csv_export:
-      path: "data/output/csv/silver/pubchem/compound"
+      path: "data/output/silver/pubchem/compound"
   gold:
     path: "data/output/gold/pubchem/compound"
     sort_by:
       columns: ["cid"]
       ascending: true
     csv_export:
-      path: "data/output/csv/gold/pubchem/compound"
+      path: "data/output/gold/pubchem/compound"
 
 # Entity-specific input filter - SMILES-based filtering (primary mode)
 input_filter:

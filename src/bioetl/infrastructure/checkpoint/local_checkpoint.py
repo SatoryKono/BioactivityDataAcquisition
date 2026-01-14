@@ -74,7 +74,7 @@ class LocalCheckpoint:
             suffix=".tmp",
         )
         try:
-            with os.fdopen(fd, "w") as f:
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
                 f.write(checkpoint_json)
             # Use Path.replace for cross-platform atomic overwrite
             Path(temp_path).replace(full_path)
@@ -93,7 +93,7 @@ class LocalCheckpoint:
         if not full_path.exists():
             return None
 
-        with open(full_path) as f:
+        with open(full_path, encoding="utf-8") as f:
             checkpoint_json = f.read()
 
         checkpoint_data = deserialize_from_json(checkpoint_json)

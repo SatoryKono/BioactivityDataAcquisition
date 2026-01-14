@@ -36,14 +36,14 @@ sink:
       columns: ["record_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/silver/chembl/compound_record"
+      path: "data/output/silver/chembl/compound_record"
   gold:
     path: "data/output/gold/chembl/compound_record"
     sort_by:
       columns: ["molecule_chembl_id", "document_chembl_id", "record_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/gold/chembl/compound_record"
+      path: "data/output/gold/chembl/compound_record"
 
 # Entity-specific input filter
 # NOTE: Disabled because ChEMBL API doesn't support filtering by record_id.

@@ -54,14 +54,14 @@ sink:
       columns: ["target_chembl_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/silver/uniprot/idmapping"
+      path: "data/output/silver/uniprot/idmapping"
   gold:
     path: "data/output/gold/uniprot/idmapping"
     sort_by:
       columns: ["target_chembl_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/gold/uniprot/idmapping"
+      path: "data/output/gold/uniprot/idmapping"
 
 # Gold filters - pass all records (including not_found)
 # Users may want to filter in downstream analysis

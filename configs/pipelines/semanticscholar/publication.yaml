@@ -40,14 +40,14 @@ sink:
       columns: ["paper_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/silver/semanticscholar/publication"
+      path: "data/output/silver/semanticscholar/publication"
   gold:
     path: "data/output/gold/semanticscholar/publication"
     sort_by:
       columns: ["paper_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/gold/semanticscholar/publication"
+      path: "data/output/gold/semanticscholar/publication"
 
 # Input filter for batch DOI resolution with title fallback
 input_filter:
