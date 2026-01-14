@@ -17,7 +17,7 @@ gold_table: chembl_protein_class
 source_file: ../../sources/chembl.yaml
 
 # Full load for reference table
-batch_size: 500
+batch_size: 500  # Reference table (~1.5K records), full load
 checkpoint_interval: 500
 
 # Entity-specific gold filters - exclude deprecated records

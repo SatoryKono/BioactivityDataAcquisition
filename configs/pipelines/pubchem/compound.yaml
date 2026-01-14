@@ -49,4 +49,4 @@ input_filter:
   source_path: "data/input/molecule.csv"
   column_name: "canonical_smiles"
   filter_field: "smiles"
-  batch_size: 1  # SMILES search is per-compound due to API limitations
+  batch_size: 1  # SMILES search is per-compound due to PubChem API limitations

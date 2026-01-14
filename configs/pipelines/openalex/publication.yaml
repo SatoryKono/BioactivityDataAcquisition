@@ -21,7 +21,7 @@ source_file: ../../sources/openalex.yaml
 # Pipeline-specific source configuration
 source:
   email: "${BIOETL_OPENALEX_EMAIL}"  # Required for polite pool
-  batch_size: 50
+  batch_size: 50  # Polite pool API - conservative batch size
 
 # Entity-specific gold filters
 gold_filters:
@@ -60,5 +60,5 @@ input_filter:
   source_path: "data/input/dois.csv"
   column_name: "doi"
   filter_field: "doi"
-  batch_size: 50
+  batch_size: 50  # Polite pool API - conservative batch size
   fallback_column: "title"  # Search by title if DOI not found or empty
