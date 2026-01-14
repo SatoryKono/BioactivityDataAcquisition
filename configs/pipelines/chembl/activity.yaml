@@ -38,17 +38,23 @@ gold_filters:
 # Entity-specific sink overrides (paths and primary_key)
 sink:
   bronze:
-    path: "data/output/bronze"
+    path: "data/output/bronze/chembl/activity"
   silver:
-    path: "data/output/silver"
+    path: "data/output/silver/chembl/activity"
     primary_key: ["activity_id"]
     partition_by: []
+    sort_by:
+      columns: ["activity_id"]
+      ascending: true
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/output/csv/silver/chembl/activity"
   gold:
-    path: "data/output/gold"
+    path: "data/output/gold/chembl/activity"
+    sort_by:
+      columns: ["activity_id"]
+      ascending: true
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/output/csv/gold/chembl/activity"
 
 # Entity-specific input filter
 input_filter:

@@ -113,6 +113,65 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             async for record in strategy(query=query, limit=limit):
                 yield record
 
+    async def _fetch_non_protein_filtered(
+        self,
+        strategy: Any,
+        filter_ids: list[str],
+        limit: int | None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch non-protein entities by iterating through individual IDs.
+
+        Args:
+            strategy: The fetch strategy function to use.
+            filter_ids: List of IDs to fetch.
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Dictionary records for each ID.
+        """
+        fetched = 0
+        for acc_id in filter_ids:
+            if limit and fetched >= limit:
+                break
+            async for record in strategy(query=acc_id, limit=1):
+                yield record
+                fetched += 1
+                if limit and fetched >= limit:
+                    break
+
+    async def _fetch_proteins_batched(
+        self,
+        strategy: Any,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch proteins using batched OR-queries.
+
+        Args:
+            strategy: The protein fetch strategy function.
+            filter_ids: List of accession IDs to fetch.
+            filter_field: Field name for filtering (typically 'accession').
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Dictionary records matching the filter criteria.
+        """
+        fetched = 0
+        for batch_start in range(0, len(filter_ids), UNIPROT_BATCH_SIZE):
+            if limit and fetched >= limit:
+                break
+
+            batch = filter_ids[batch_start : batch_start + UNIPROT_BATCH_SIZE]
+            or_query = " OR ".join(f"{filter_field}:{acc}" for acc in batch)
+
+            batch_limit = (limit - fetched) if limit else None
+            async for record in strategy(query=or_query, limit=batch_limit):
+                yield record
+                fetched += 1
+                if limit and fetched >= limit:
+                    return
+
     async def fetch_filtered(
         self,
         entity_type: str,
@@ -147,36 +206,16 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 f"Supported: {', '.join(self._fetch_strategies.keys())}"
             )
 
-        # For non-protein entities, delegate to strategy with accession query
         if entity_type != "protein":
-            # Feature and sequence fetches use accession directly
-            fetched = 0
-            for acc_id in filter_ids:
-                if limit and fetched >= limit:
-                    break
-                async for record in strategy(query=acc_id, limit=1):
-                    yield record
-                    fetched += 1
-                    if limit and fetched >= limit:
-                        break
-            return
-
-        # For proteins: build OR-query in batches
-        fetched = 0
-        for batch_start in range(0, len(filter_ids), UNIPROT_BATCH_SIZE):
-            if limit and fetched >= limit:
-                break
-
-            batch = filter_ids[batch_start : batch_start + UNIPROT_BATCH_SIZE]
-            # Build OR-query: accession:P12345 OR accession:Q67890
-            or_query = " OR ".join(f"{filter_field}:{acc}" for acc in batch)
-
-            batch_limit = (limit - fetched) if limit else None
-            async for record in strategy(query=or_query, limit=batch_limit):
+            async for record in self._fetch_non_protein_filtered(
+                strategy, filter_ids, limit
+            ):
                 yield record
-                fetched += 1
-                if limit and fetched >= limit:
-                    return
+        else:
+            async for record in self._fetch_proteins_batched(
+                strategy, filter_ids, filter_field, limit
+            ):
+                yield record
 
     async def fetch_multi_filtered(
         self,
@@ -226,6 +265,91 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         async for record in strategy(query=combined_query, limit=limit):
             yield record
 
+    async def _do_fallback_search(
+        self,
+        entity_type: str,
+        missing_ids: list[str],
+        fallback_mapping: dict[str, str],
+        limit: int | None,
+        already_fetched: int,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Search for missing IDs using fallback values.
+
+        Args:
+            entity_type: Type of entity to fetch.
+            missing_ids: IDs not found in primary lookup.
+            fallback_mapping: Mapping from primary ID to fallback value.
+            limit: Maximum total records to fetch.
+            already_fetched: Number of records already yielded.
+
+        Yields:
+            Dictionary records found via fallback search.
+        """
+        strategy = self._fetch_strategies.get(entity_type)
+        if not strategy:
+            return
+
+        fetched = already_fetched
+        for missing_id in missing_ids:
+            if limit and fetched >= limit:
+                break
+
+            fallback_value = fallback_mapping.get(missing_id)
+            if not fallback_value:
+                continue
+
+            async for record in strategy(query=fallback_value, limit=1):
+                yield record
+                fetched += 1
+                if limit and fetched >= limit:
+                    return
+
+    async def _do_primary_fetch(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None,
+    ) -> AsyncIterator[tuple[dict[str, Any], str | None]]:
+        """Perform primary fetch and yield records with their accessions.
+
+        Args:
+            entity_type: Type of entity to fetch.
+            filter_ids: List of primary IDs to filter by.
+            filter_field: Field name for primary filtering.
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Tuples of (record, accession) for each fetched record.
+        """
+        async for record in self.fetch_filtered(
+            entity_type=entity_type,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            limit=limit,
+        ):
+            yield record, record.get("accession")
+
+    def _should_do_fallback(
+        self,
+        filter_ids: list[str],
+        found_ids: set[str],
+        fallback_mapping: dict[str, str],
+    ) -> list[str]:
+        """Determine which IDs need fallback search.
+
+        Args:
+            filter_ids: Original list of IDs requested.
+            found_ids: Set of IDs successfully found.
+            fallback_mapping: Mapping for fallback values.
+
+        Returns:
+            List of missing IDs that have fallback values, or empty list.
+        """
+        if not fallback_mapping:
+            return []
+        return [fid for fid in filter_ids if fid not in found_ids]
+
     async def fetch_filtered_with_fallback(
         self,
         entity_type: str,
@@ -259,42 +383,24 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         fetched = 0
         found_ids: set[str] = set()
 
-        # First: try primary lookup
-        async for record in self.fetch_filtered(
-            entity_type=entity_type,
-            filter_ids=filter_ids,
-            filter_field=filter_field,
-            limit=limit,
+        async for record, accession in self._do_primary_fetch(
+            entity_type, filter_ids, filter_field, limit
         ):
             yield record
             fetched += 1
-            # Track found IDs for fallback
-            if acc := record.get("accession"):
-                found_ids.add(acc)
+            if accession:
+                found_ids.add(accession)
             if limit and fetched >= limit:
                 return
 
-        # Second: fallback search for missing IDs
-        missing_ids = [fid for fid in filter_ids if fid not in found_ids]
-        if not missing_ids or not fallback_mapping:
+        missing_ids = self._should_do_fallback(filter_ids, found_ids, fallback_mapping)
+        if not missing_ids:
             return
 
-        for missing_id in missing_ids:
-            if limit and fetched >= limit:
-                break
-
-            fallback_value = fallback_mapping.get(missing_id)
-            if not fallback_value:
-                continue
-
-            # Search by fallback value (e.g., gene name)
-            strategy = self._fetch_strategies.get(entity_type)
-            if strategy:
-                async for record in strategy(query=fallback_value, limit=1):
-                    yield record
-                    fetched += 1
-                    if limit and fetched >= limit:
-                        return
+        async for record in self._do_fallback_search(
+            entity_type, missing_ids, fallback_mapping, limit, fetched
+        ):
+            yield record
 
     def _build_protein_fetch_params(
         self, query: str, size: int, fetched: int, limit: int | None, cursor: str | None

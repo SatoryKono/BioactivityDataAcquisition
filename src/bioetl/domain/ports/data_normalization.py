@@ -16,7 +16,7 @@ All ports follow the Ports & Adapters pattern per RULES.md §1.1.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -209,6 +209,30 @@ class DataNormalizationPort(Protocol):
             >>> normalize_string("  hello  ")
             'hello'
             >>> normalize_string("   ")
+            None
+        """
+        ...
+
+    def normalize_to_string(self, value: Any) -> str | None:
+        """Convert value to string, strip whitespace, return None if empty.
+
+        Handles arbitrary types by converting to string first, then normalizing.
+        Useful for API responses where field types may vary.
+
+        Args:
+            value: Any value to convert and normalize.
+
+        Returns:
+            Stripped string representation, or None if input is None/empty.
+
+        Example:
+            >>> normalize_to_string(123)
+            '123'
+            >>> normalize_to_string("  hello  ")
+            'hello'
+            >>> normalize_to_string(None)
+            None
+            >>> normalize_to_string("")
             None
         """
         ...

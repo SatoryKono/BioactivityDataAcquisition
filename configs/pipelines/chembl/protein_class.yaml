@@ -17,7 +17,7 @@ gold_table: chembl_protein_class
 source_file: ../../sources/chembl.yaml
 
 # Full load for reference table
-batch_size: 500
+batch_size: 500  # Reference table (~1.5K records), full load
 checkpoint_interval: 500
 
 # Entity-specific gold filters - exclude deprecated records
@@ -30,23 +30,23 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze"
+    path: "data/output/bronze/chembl/protein_class"
   silver:
-    path: "data/output/silver"
+    path: "data/output/silver/chembl/protein_class"
     primary_key: ["protein_class_id"]
     partition_by: ["class_level"]
     sort_by:
       columns: ["protein_class_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/output/csv/silver/chembl/protein_class"
   gold:
-    path: "data/output/gold"
+    path: "data/output/gold/chembl/protein_class"
     sort_by:
       columns: ["class_level", "sort_order", "protein_class_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/output/csv/gold/chembl/protein_class"
 
 # No input filter for reference table (full load)
 input_filter:

@@ -27,7 +27,7 @@ from bioetl.application.pipelines.openalex.extractors import (
     reconstruct_abstract,
 )
 from bioetl.domain.entities.openalex import OPENALEX_TYPE_MAP, OpenAlexPublicationEntity
-from bioetl.domain.services import DataNormalizationService, IdentityService
+from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
@@ -97,8 +97,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
+            data_normalizer=data_normalizer,
         )
-        self._data_normalizer = data_normalizer or DataNormalizationService()
 
     # ========================================================================
     # Field Extraction Methods (Orchestration - delegates to extractors)

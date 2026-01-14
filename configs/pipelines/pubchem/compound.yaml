@@ -25,17 +25,23 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze"
+    path: "data/output/bronze/pubchem/compound"
   silver:
-    path: "data/output/silver"
+    path: "data/output/silver/pubchem/compound"
     primary_key: ["cid"]
     partition_by: ["batch_date"]
+    sort_by:
+      columns: ["cid"]
+      ascending: true
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/output/csv/silver/pubchem/compound"
   gold:
-    path: "data/output/gold"
+    path: "data/output/gold/pubchem/compound"
+    sort_by:
+      columns: ["cid"]
+      ascending: true
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/output/csv/gold/pubchem/compound"
 
 # Entity-specific input filter - SMILES-based filtering (primary mode)
 input_filter:
@@ -43,4 +49,4 @@ input_filter:
   source_path: "data/input/molecule.csv"
   column_name: "canonical_smiles"
   filter_field: "smiles"
-  batch_size: 1  # SMILES search is per-compound due to API limitations
+  batch_size: 1  # SMILES search is per-compound due to PubChem API limitations

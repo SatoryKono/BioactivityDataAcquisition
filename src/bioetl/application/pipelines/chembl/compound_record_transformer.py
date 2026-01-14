@@ -13,7 +13,6 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import CompoundRecord
-from bioetl.domain.normalization import normalize_to_string
 from bioetl.domain.transformations import safe_int
 
 if TYPE_CHECKING:
@@ -47,6 +46,8 @@ class CompoundRecordTransformer(BaseChemblTransformer):
             Dictionary of CompoundRecord business fields.
 
         """
+        normalizer = self._data_normalizer
+
         # Get record_id as int
         record_id = safe_int(primary_id)
 
@@ -54,9 +55,13 @@ class CompoundRecordTransformer(BaseChemblTransformer):
         src_id = safe_int(record.get("src_id"))
 
         # Get molecule_chembl_id and document_chembl_id - required fields
-        # Use domain normalization function
-        molecule_chembl_id = normalize_to_string(record.get("molecule_chembl_id"))
-        document_chembl_id = normalize_to_string(record.get("document_chembl_id"))
+        # Use DI normalization service
+        molecule_chembl_id = normalizer.normalize_to_string(
+            record.get("molecule_chembl_id")
+        )
+        document_chembl_id = normalizer.normalize_to_string(
+            record.get("document_chembl_id")
+        )
 
         return {
             # Primary identifier
@@ -65,9 +70,13 @@ class CompoundRecordTransformer(BaseChemblTransformer):
             "molecule_chembl_id": molecule_chembl_id,
             "document_chembl_id": document_chembl_id,
             # Original compound names (strip whitespace, NULL if empty)
-            "compound_key": normalize_to_string(record.get("compound_key")),
-            "compound_name": normalize_to_string(record.get("compound_name")),
+            "compound_key": normalizer.normalize_to_string(record.get("compound_key")),
+            "compound_name": normalizer.normalize_to_string(
+                record.get("compound_name")
+            ),
             # Source information
             "src_id": src_id,
-            "src_compound_id": normalize_to_string(record.get("src_compound_id")),
+            "src_compound_id": normalizer.normalize_to_string(
+                record.get("src_compound_id")
+            ),
         }

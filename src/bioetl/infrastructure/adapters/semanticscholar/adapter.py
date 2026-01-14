@@ -208,6 +208,109 @@ class SemanticScholarAdapter(BaseHttpAdapter):
                 if limit and fetched >= limit:
                     return
 
+    async def _batch_doi_phase(
+        self,
+        valid_dois: list[str],
+        resolved_dois: set[str],
+        limit: int | None,
+        start_count: int,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Phase 1: Batch DOI lookup via POST /paper/batch.
+
+        Args:
+            valid_dois: List of valid DOIs to lookup.
+            resolved_dois: Set to track resolved DOIs (mutated).
+            limit: Maximum records to fetch.
+            start_count: Number of records already fetched.
+
+        Yields:
+            Publication records with _lookup_method field.
+        """
+        count = start_count
+        for i in range(0, len(valid_dois), self.batch_size):
+            if limit and count >= limit:
+                return
+
+            batch = valid_dois[i : i + self.batch_size]
+            batch_results = await self._fetch_batch_with_nulls(batch)
+
+            for doi, record in zip(batch, batch_results, strict=True):
+                if record is not None:
+                    resolved_dois.add(doi.lower())
+                    record["_lookup_method"] = "doi"
+                    count += 1
+                    yield record
+                    if limit and count >= limit:
+                        return
+
+    async def _title_fallback_phase(
+        self,
+        unresolved_dois: list[str],
+        fallback_mapping: dict[str, str],
+        limit: int | None,
+        start_count: int,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Phase 2: Fallback by title for unresolved DOIs.
+
+        Args:
+            unresolved_dois: DOIs not found in batch lookup.
+            fallback_mapping: Mapping from DOI to title.
+            limit: Maximum records to fetch.
+            start_count: Number of records already fetched.
+
+        Yields:
+            Publication records with _lookup_method field.
+        """
+        count = start_count
+        for doi in unresolved_dois:
+            if limit and count >= limit:
+                return
+
+            title = fallback_mapping.get(doi)
+            if not title:
+                self.logger.warning("no_fallback_title", doi=doi)
+                continue
+
+            async for record in self._search_by_title(title):
+                record["_lookup_method"] = "title_fallback"
+                record["_original_doi"] = doi
+                count += 1
+                yield record
+                break
+
+    async def _title_only_phase(
+        self,
+        title_only_entries: list[str],
+        fallback_mapping: dict[str, str],
+        limit: int | None,
+        start_count: int,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Phase 3: Title-only entries (empty DOIs).
+
+        Args:
+            title_only_entries: List of empty DOI entries.
+            fallback_mapping: Mapping from DOI to title.
+            limit: Maximum records to fetch.
+            start_count: Number of records already fetched.
+
+        Yields:
+            Publication records with _lookup_method field.
+        """
+        count = start_count
+        for empty_doi in title_only_entries:
+            if limit and count >= limit:
+                return
+
+            title = fallback_mapping.get(empty_doi, fallback_mapping.get(""))
+            if not title:
+                continue
+
+            async for record in self._search_by_title(title):
+                record["_lookup_method"] = "title_only"
+                count += 1
+                yield record
+                break
+
     async def fetch_filtered_with_fallback(
         self,
         entity_type: str,
@@ -237,62 +340,33 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         fetched = 0
         resolved_dois: set[str] = set()
 
-        # Separate DOIs from title-only entries
         valid_dois = [d for d in filter_ids if d and d.strip()]
         title_only_entries = [d for d in filter_ids if not d or not d.strip()]
 
         # Phase 1: Batch DOI lookup
-        for i in range(0, len(valid_dois), self.batch_size):
-            batch = valid_dois[i : i + self.batch_size]
-
-            # Batch returns results in same order, with null for not found
-            batch_results = await self._fetch_batch_with_nulls(batch)
-
-            for doi, record in zip(batch, batch_results, strict=True):
-                if record is not None:
-                    resolved_dois.add(doi.lower())
-                    record["_lookup_method"] = "doi"
-                    yield record
-                    fetched += 1
-                    if limit and fetched >= limit:
-                        return
+        async for record in self._batch_doi_phase(
+            valid_dois, resolved_dois, limit, fetched
+        ):
+            yield record
+            fetched += 1
+            if limit and fetched >= limit:
+                return
 
         # Phase 2: Fallback by title for unresolved DOIs
         unresolved_dois = [d for d in valid_dois if d.lower() not in resolved_dois]
-
-        for doi in unresolved_dois:
+        async for record in self._title_fallback_phase(
+            unresolved_dois, fallback_mapping, limit, fetched
+        ):
+            yield record
+            fetched += 1
             if limit and fetched >= limit:
                 return
 
-            title = fallback_mapping.get(doi)
-            if not title:
-                self.logger.warning(
-                    "no_fallback_title",
-                    doi=doi,
-                )
-                continue
-
-            async for record in self._search_by_title(title):
-                record["_lookup_method"] = "title_fallback"
-                record["_original_doi"] = doi
-                yield record
-                fetched += 1
-                break  # Take first match only
-
-        # Phase 3: Title-only entries (empty DOIs)
-        for empty_doi in title_only_entries:
-            if limit and fetched >= limit:
-                return
-
-            title = fallback_mapping.get(empty_doi, fallback_mapping.get(""))
-            if not title:
-                continue
-
-            async for record in self._search_by_title(title):
-                record["_lookup_method"] = "title_only"
-                yield record
-                fetched += 1
-                break
+        # Phase 3: Title-only entries
+        async for record in self._title_only_phase(
+            title_only_entries, fallback_mapping, limit, fetched
+        ):
+            yield record
 
     async def fetch_multi_filtered(
         self,

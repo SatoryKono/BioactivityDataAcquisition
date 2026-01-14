@@ -25,17 +25,23 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze"
+    path: "data/output/bronze/chembl/assay_parameters"
   silver:
-    path: "data/output/silver"
+    path: "data/output/silver/chembl/assay_parameters"
     primary_key: ["assay_param_id"]
     partition_by: ["type"]
+    sort_by:
+      columns: ["assay_param_id"]
+      ascending: true
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/output/csv/silver/chembl/assay_parameters"
   gold:
-    path: "data/output/gold"
+    path: "data/output/gold/chembl/assay_parameters"
+    sort_by:
+      columns: ["assay_param_id"]
+      ascending: true
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/output/csv/gold/chembl/assay_parameters"
 
 # Entity-specific input filter
 input_filter:
@@ -43,4 +49,4 @@ input_filter:
   source_path: "data/input/assay_parameters.csv"
   column_name: "assay_param_id"
   filter_field: "assay_param_id"
-  batch_size: 1000
+  batch_size: 1000  # Reference table, full load - high batch for speed

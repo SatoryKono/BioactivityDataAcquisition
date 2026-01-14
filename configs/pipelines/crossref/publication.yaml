@@ -29,19 +29,23 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze"
+    path: "data/output/bronze/crossref/work"
   silver:
-    path: "data/output/silver"
+    path: "data/output/silver/crossref/work"
     primary_key: ["doi"]
     partition_by: []
+    sort_by:
+      columns: ["doi"]
+      ascending: true
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/output/csv/silver/crossref/work"
   gold:
-    path: "data/output/gold"
-
-
+    path: "data/output/gold/crossref/work"
+    sort_by:
+      columns: ["doi"]
+      ascending: true
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/output/csv/gold/crossref/work"
 
 # Entity-specific input filter for batch DOI resolution
 input_filter:
@@ -49,6 +53,6 @@ input_filter:
   source_path: "data/input/dois.csv"
   column_name: "doi"
   filter_field: "doi"
-  batch_size: 50
+  batch_size: 50  # Polite pool API - conservative batch size
   fallback_column: "title"  # Search by title if DOI not found (404)
 

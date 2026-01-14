@@ -13,7 +13,7 @@ Uses declarative field_specs DSL for mapping.
 from __future__ import annotations
 
 import hashlib
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any
 
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
@@ -47,17 +47,6 @@ class PublicationTermTransformer(BaseChemblTransformer):
 
     entity_class = DocumentTerm
     primary_id_field = "document_chembl_id"
-
-    # Fields to exclude from content hash
-    HASH_EXCLUDE_FIELDS: ClassVar[frozenset[str]] = frozenset(
-        {
-            "_run_id",
-            "_run_type",
-            "_source_batch_id",
-            "_ingestion_ts",
-            "_index",
-        }
-    )
 
     def _extract_business_data(
         self,

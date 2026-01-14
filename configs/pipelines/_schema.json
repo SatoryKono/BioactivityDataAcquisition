@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bioetl/pipeline-config-schema-v2",
+  "title": "BioETL Pipeline Configuration Schema v2.0",
+  "type": "object",
+  "required": [
+    "pipeline_name",
+    "provider",
+    "entity_type",
+    "version",
+    "primary_keys",
+    "silver_table",
+    "gold_table",
+    "sink"
+  ],
+  "properties": {
+    "pipeline_name": {
+      "type": "string",
+      "pattern": "^[a-z]+_[a-z_]+$",
+      "description": "Unique pipeline identifier in format {provider}_{entity}"
+    },
+    "provider": {
+      "type": "string",
+      "enum": ["chembl", "pubchem", "uniprot", "pubmed", "crossref", "openalex", "semanticscholar"],
+      "description": "Data provider name"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Entity type (e.g., activity, assay, molecule)"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version of config"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the pipeline"
+    },
+    "primary_keys": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1,
+      "description": "Primary key field(s) for entity"
+    },
+    "silver_table": {
+      "type": "string",
+      "description": "Silver layer table name"
+    },
+    "gold_table": {
+      "type": "string",
+      "description": "Gold layer table name"
+    },
+    "source_file": {
+      "type": "string",
+      "description": "Reference to source configuration file"
+    },
+    "source": {
+      "type": "object",
+      "description": "Pipeline-specific source configuration"
+    },
+    "dq_rules": {
+      "type": "object",
+      "properties": {
+        "soft_fail_threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.05
+        },
+        "hard_fail_threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.20
+        }
+      }
+    },
+    "sink": {
+      "type": "object",
+      "required": ["bronze", "silver", "gold"],
+      "properties": {
+        "bronze": {
+          "type": "object",
+          "required": ["path"],
+          "properties": {
+            "path": {"type": "string"}
+          }
+        },
+        "silver": {
+          "type": "object",
+          "required": ["path", "primary_key"],
+          "properties": {
+            "path": {"type": "string"},
+            "primary_key": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "partition_by": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "sort_by": {
+              "type": "object",
+              "properties": {
+                "columns": {
+                  "type": "array",
+                  "items": {"type": "string"}
+                },
+                "ascending": {"type": "boolean"}
+              }
+            },
+            "csv_export": {
+              "type": "object",
+              "properties": {
+                "path": {"type": "string"}
+              }
+            }
+          }
+        },
+        "gold": {
+          "type": "object",
+          "required": ["path"],
+          "properties": {
+            "path": {"type": "string"},
+            "sort_by": {
+              "type": "object",
+              "properties": {
+                "columns": {
+                  "type": "array",
+                  "items": {"type": "string"}
+                },
+                "ascending": {"type": "boolean"}
+              }
+            },
+            "csv_export": {
+              "type": "object",
+              "properties": {
+                "path": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "input_filter": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "source_path": {"type": "string"},
+        "column_name": {"type": "string"},
+        "filter_field": {"type": "string"},
+        "batch_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "fallback_column": {"type": "string"}
+      }
+    },
+    "gold_filters": {
+      "type": "object",
+      "properties": {
+        "required_fields": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "columns": {"type": "object"},
+        "ranges": {"type": "object"}
+      }
+    }
+  }
+}

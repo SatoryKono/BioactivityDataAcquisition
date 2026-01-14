@@ -117,6 +117,85 @@ class FileAuditAdapter:
             records_count=entry.records_count,
         )
 
+    def _process_audit_line(
+        self,
+        line: str,
+        run_id: RunID | None,
+        layer: AuditLayer | None,
+        table_name: str | None,
+        start_time: datetime | None,
+        end_time: datetime | None,
+    ) -> AuditEntry | None:
+        """Process a single audit log line and return entry if it matches filters.
+
+        Args:
+            line: Raw JSON line from audit file.
+            run_id: Filter by pipeline run ID.
+            layer: Filter by Medallion layer.
+            table_name: Filter by target table name.
+            start_time: Filter entries after this time.
+            end_time: Filter entries before this time.
+
+        Returns:
+            AuditEntry if line is valid and matches filters, None otherwise.
+        """
+        if not line.strip():
+            return None
+
+        try:
+            data = deserialize_from_json(line)
+            if not isinstance(data, dict):
+                return None
+            entry = self._parse_entry(data)
+            if self._matches_filters(
+                entry, run_id, layer, table_name, start_time, end_time
+            ):
+                return entry
+            return None
+        except (ValueError, KeyError):
+            return None
+
+    def _process_audit_file(
+        self,
+        file_path: Path,
+        run_id: RunID | None,
+        layer: AuditLayer | None,
+        table_name: str | None,
+        start_time: datetime | None,
+        end_time: datetime | None,
+        limit: int,
+        current_count: int,
+    ) -> list[AuditEntry]:
+        """Process a single audit file and return matching entries.
+
+        Args:
+            file_path: Path to the audit file.
+            run_id: Filter by pipeline run ID.
+            layer: Filter by Medallion layer.
+            table_name: Filter by target table name.
+            start_time: Filter entries after this time.
+            end_time: Filter entries before this time.
+            limit: Maximum total entries to collect.
+            current_count: Number of entries already collected.
+
+        Returns:
+            List of matching audit entries from this file.
+        """
+        entries: list[AuditEntry] = []
+        try:
+            with open(file_path, encoding="utf-8") as f:
+                for line in f:
+                    entry = self._process_audit_line(
+                        line, run_id, layer, table_name, start_time, end_time
+                    )
+                    if entry is not None:
+                        entries.append(entry)
+                        if current_count + len(entries) >= limit:
+                            break
+        except OSError:
+            pass
+        return entries
+
     def _read_entries_sync(
         self,
         run_id: RunID | None,
@@ -144,45 +223,23 @@ class FileAuditAdapter:
         if not self.base_path.exists():
             return entries
 
-        # Get all audit files sorted by date descending (newest first)
-        audit_files = sorted(
-            self.base_path.glob("audit_*.jsonl"),
-            reverse=True,
-        )
+        audit_files = sorted(self.base_path.glob("audit_*.jsonl"), reverse=True)
 
         for file_path in audit_files:
             if len(entries) >= limit:
                 break
+            file_entries = self._process_audit_file(
+                file_path,
+                run_id,
+                layer,
+                table_name,
+                start_time,
+                end_time,
+                limit,
+                len(entries),
+            )
+            entries.extend(file_entries)
 
-            try:
-                with open(file_path, encoding="utf-8") as f:
-                    for line in f:
-                        if not line.strip():
-                            continue
-
-                        try:
-                            data = deserialize_from_json(line)
-                            if not isinstance(data, dict):
-                                continue
-                            entry = self._parse_entry(data)
-
-                            # Apply filters
-                            if not self._matches_filters(
-                                entry, run_id, layer, table_name, start_time, end_time
-                            ):
-                                continue
-
-                            entries.append(entry)
-                            if len(entries) >= limit:
-                                break
-                        except (ValueError, KeyError):
-                            # Skip malformed entries
-                            continue
-            except OSError:
-                # Skip files we can't read
-                continue
-
-        # Sort by timestamp descending (newest first)
         entries.sort(key=lambda e: e.timestamp, reverse=True)
         return entries[:limit]
 

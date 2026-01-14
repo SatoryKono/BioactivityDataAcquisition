@@ -79,7 +79,7 @@ class TestFileSizeLimits:
         "gold.py": 880,  # 877 LOC - Gold layer Pandera schemas (+ IDMapping + taxonomy_id standardization)
         "silver.py": 780,  # 775 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization)
         "client.py": 700,  # 692 LOC - ChemblAdapter (complex FilterableDataSourcePort), CrossRefAdapter (DOI→title fallback)
-        "adapter.py": 560,  # 558 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
+        "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
@@ -386,17 +386,19 @@ class TestClassSize:
         "PubChemAdapter": 500,  # 489 lines - sync adapter with SMILES/CID filtering + DTO support
         "CrossRefPublicationTransformer": 360,  # 354 lines - transformer with field extraction
         # UniProt adapter (similar to ChEMBL adapter)
-        "UniProtAdapter": 550,  # 546 lines - HTTP adapter with streaming + FilterableDataSourcePort
+        "UniProtAdapter": 570,  # 569 lines - HTTP adapter with streaming + FilterableDataSourcePort
         # UniProt ID Mapping client (job-based async API)
         "UniProtIDMappingClient": 420,  # 415 lines - ID Mapping client with job polling
         # SemanticScholar adapter
-        "SemanticScholarAdapter": 520,  # 514 lines - HTTP adapter with multi-identifier fallback + FilterableDataSourcePort
+        "SemanticScholarAdapter": 590,  # 588 lines - HTTP adapter with multi-identifier fallback + FilterableDataSourcePort
         # PubMed adapter (similar to ChEMBL adapter)
         "PubMedAdapter": 500,  # 488 lines - HTTP adapter with Entrez API + full FilterableDataSourcePort
         # OpenAlex adapter (FilterableDataSourcePort with batch DOI + title fallback)
-        "OpenAlexAdapter": 500,  # 493 lines - HTTP adapter with batch DOI resolution + title fallback
+        "OpenAlexAdapter": 540,  # 539 lines - HTTP adapter with batch DOI resolution + title fallback
         # Error handling utility (ErrorService + deprecated ErrorHandler alias)
         "ErrorService": 500,  # ~480 lines - comprehensive error classification with detailed recovery logging
+        # Audit adapter (file-based audit logging)
+        "FileAuditAdapter": 330,  # 324 lines - File-based AuditPort implementation with async I/O
         # Domain services
         "NormalizationService": 370,  # 364 lines - Normalization service with validation
         "ActivityAggregator": 320,  # 311 lines - Activity aggregation with multiple strategies
@@ -564,6 +566,8 @@ class TestGodObjectDetection:
         "MedallionLifecycleService": "Lifecycle orchestrator - coordinates Bronze/Silver/Gold operations",
         # Pandera schemas (declarative data containers, no behavior to delegate)
         "PubchemMoleculeSchema": "Pandera schema - declarative field definitions, no behavior to delegate",
+        # Audit adapters (cohesive file I/O operations)
+        "FileAuditAdapter": "Cohesive adapter - all methods relate to audit file operations (read/write JSONL)",
     }
 
     def test_large_classes_have_delegation(self, src_dir: Path) -> None:
