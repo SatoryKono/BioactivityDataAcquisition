@@ -499,7 +499,7 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     # Flattened Structures (unified naming without structure_ prefix)
     canonical_smiles: Series[str] = pa.Field(nullable=True)
     standard_inchi: Series[str] = pa.Field(nullable=True)
-    inchi_key: Series[str] = pa.Field(nullable=True)
+    inchikey: Series[str] = pa.Field(nullable=True)
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
