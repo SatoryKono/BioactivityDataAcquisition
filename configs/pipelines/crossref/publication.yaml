@@ -38,14 +38,14 @@ sink:
       columns: ["doi"]
       ascending: true
     csv_export:
-      path: "data/output/csv/silver/crossref/work"
+      path: "data/output/silver/crossref/work"
   gold:
     path: "data/output/gold/crossref/work"
     sort_by:
       columns: ["doi"]
       ascending: true
     csv_export:
-      path: "data/output/csv/gold/crossref/work"
+      path: "data/output/gold/crossref/work"
 
 # Entity-specific input filter for batch DOI resolution
 input_filter:

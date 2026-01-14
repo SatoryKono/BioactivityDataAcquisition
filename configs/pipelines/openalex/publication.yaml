@@ -45,14 +45,14 @@ sink:
       columns: ["openalex_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/silver/openalex/publication"
+      path: "data/output/silver/openalex/publication"
   gold:
     path: "data/output/gold/openalex/publication"
     sort_by:
       columns: ["openalex_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/gold/openalex/publication"
+      path: "data/output/gold/openalex/publication"
 
 # Input filter for batch DOI resolution with title fallback
 input_filter:

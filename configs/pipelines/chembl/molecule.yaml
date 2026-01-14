@@ -36,14 +36,14 @@ sink:
       columns: ["molecule_chembl_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/silver/chembl/molecule"
+      path: "data/output/silver/chembl/molecule"
   gold:
     path: "data/output/gold/chembl/molecule"
     sort_by:
       columns: ["molecule_chembl_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/gold/chembl/molecule"
+      path: "data/output/gold/chembl/molecule"
 
 # Entity-specific input filter
 input_filter:

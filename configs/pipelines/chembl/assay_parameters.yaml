@@ -34,14 +34,14 @@ sink:
       columns: ["assay_param_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/silver/chembl/assay_parameters"
+      path: "data/output/silver/chembl/assay_parameters"
   gold:
     path: "data/output/gold/chembl/assay_parameters"
     sort_by:
       columns: ["assay_param_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/gold/chembl/assay_parameters"
+      path: "data/output/gold/chembl/assay_parameters"
 
 # Entity-specific input filter
 input_filter:

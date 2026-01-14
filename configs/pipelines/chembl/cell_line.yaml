@@ -32,14 +32,14 @@ sink:
       columns: ["cell_chembl_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/silver/chembl/cell_line"
+      path: "data/output/silver/chembl/cell_line"
   gold:
     path: "data/output/gold/chembl/cell_line"
     sort_by:
       columns: ["cell_chembl_id", "cell_name"]
       ascending: true
     csv_export:
-      path: "data/output/csv/gold/chembl/cell_line"
+      path: "data/output/gold/chembl/cell_line"
 
 # Entity-specific input filter
 input_filter:

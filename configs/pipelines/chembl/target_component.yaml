@@ -33,14 +33,14 @@ sink:
       columns: ["component_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/silver/chembl/target_component"
+      path: "data/output/silver/chembl/target_component"
   gold:
     path: "data/output/gold/chembl/target_component"
     sort_by:
       columns: ["component_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/gold/chembl/target_component"
+      path: "data/output/gold/chembl/target_component"
 
 # Entity-specific input filter
 input_filter:

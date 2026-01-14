@@ -40,14 +40,14 @@ sink:
       columns: ["sim_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/silver/chembl/document_similarity"
+      path: "data/output/silver/chembl/document_similarity"
   gold:
     path: "data/output/gold/chembl/document_similarity"
     sort_by:
       columns: ["sim_id"]
       ascending: true
     csv_export:
-      path: "data/output/csv/gold/chembl/document_similarity"
+      path: "data/output/gold/chembl/document_similarity"
 
 # No input filter needed - load full dataset
 input_filter:
