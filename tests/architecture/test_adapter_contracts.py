@@ -36,7 +36,9 @@ class TestAdapterHealthCheck:
         # Files that define adapter classes (not __init__.py or base classes)
         # Exclude HTTP infrastructure utilities that are not DataSourcePort adapters
         excluded_files = {
-            "base.py",
+            "base.py",  # BaseHttpAdapter - base class providing health_check
+            "sync_base.py",  # BaseSyncAdapter - base class providing health_check
+            "health_check_mixin.py",  # HealthCheckProviderMixin - provides health_check
             "base_metrics.py",  # Base class for metrics adapters
             "types.py",
             "exceptions.py",
@@ -64,12 +66,17 @@ class TestAdapterHealthCheck:
             if "class " not in content:
                 continue
 
-            # Check for health_check method definition OR inheritance from BaseHttpAdapter
-            # BaseHttpAdapter provides health_check() via Template Method pattern
+            # Check for health_check method definition OR inheritance from base adapters
+            # BaseHttpAdapter and BaseSyncAdapter provide health_check()
+            # via HealthCheckProviderMixin (Template Method pattern)
             has_health_check = (
                 "def health_check" in content
                 or "async def health_check" in content
                 or "(BaseHttpAdapter)" in content  # Inherits health_check from base
+                or "(BaseSyncAdapter)"
+                in content  # Inherits health_check from sync base
+                or "HealthCheckProviderMixin"
+                in content  # Uses health check mixin directly
             )
 
             if not has_health_check:
