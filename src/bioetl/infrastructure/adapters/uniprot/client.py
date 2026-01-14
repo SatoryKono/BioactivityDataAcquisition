@@ -304,6 +304,52 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 if limit and fetched >= limit:
                     return
 
+    async def _do_primary_fetch(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None,
+    ) -> AsyncIterator[tuple[dict[str, Any], str | None]]:
+        """Perform primary fetch and yield records with their accessions.
+
+        Args:
+            entity_type: Type of entity to fetch.
+            filter_ids: List of primary IDs to filter by.
+            filter_field: Field name for primary filtering.
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Tuples of (record, accession) for each fetched record.
+        """
+        async for record in self.fetch_filtered(
+            entity_type=entity_type,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            limit=limit,
+        ):
+            yield record, record.get("accession")
+
+    def _should_do_fallback(
+        self,
+        filter_ids: list[str],
+        found_ids: set[str],
+        fallback_mapping: dict[str, str],
+    ) -> list[str]:
+        """Determine which IDs need fallback search.
+
+        Args:
+            filter_ids: Original list of IDs requested.
+            found_ids: Set of IDs successfully found.
+            fallback_mapping: Mapping for fallback values.
+
+        Returns:
+            List of missing IDs that have fallback values, or empty list.
+        """
+        if not fallback_mapping:
+            return []
+        return [fid for fid in filter_ids if fid not in found_ids]
+
     async def fetch_filtered_with_fallback(
         self,
         entity_type: str,
@@ -337,21 +383,18 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         fetched = 0
         found_ids: set[str] = set()
 
-        async for record in self.fetch_filtered(
-            entity_type=entity_type,
-            filter_ids=filter_ids,
-            filter_field=filter_field,
-            limit=limit,
+        async for record, accession in self._do_primary_fetch(
+            entity_type, filter_ids, filter_field, limit
         ):
             yield record
             fetched += 1
-            if acc := record.get("accession"):
-                found_ids.add(acc)
+            if accession:
+                found_ids.add(accession)
             if limit and fetched >= limit:
                 return
 
-        missing_ids = [fid for fid in filter_ids if fid not in found_ids]
-        if not missing_ids or not fallback_mapping:
+        missing_ids = self._should_do_fallback(filter_ids, found_ids, fallback_mapping)
+        if not missing_ids:
             return
 
         async for record in self._do_fallback_search(
