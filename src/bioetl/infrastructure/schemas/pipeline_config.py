@@ -334,6 +334,10 @@ class SinkLayerConfig(BaseModel):
     format: Literal["jsonl", "delta", "parquet"] = "delta"
     mode: str | None = None
     save_json: bool = False
+    save_metadata: bool = Field(
+        default=False,
+        description="Save _metadata.yaml sidecar file with lineage and QC info",
+    )
     csv_export: CsvExportConfig = Field(default_factory=CsvExportConfig)
     # Deterministic write settings
     primary_key: list[str] = Field(default_factory=list)

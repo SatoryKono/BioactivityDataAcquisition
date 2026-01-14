@@ -42,9 +42,11 @@ from bioetl.domain.ports.health_check import (
 from bioetl.domain.ports.idmapping import IDMappingPort
 from bioetl.domain.ports.locking import LockPort
 from bioetl.domain.ports.memory import MemoryMonitorPort, MemoryStats
+from bioetl.domain.ports.metadata import MetadataWriterPort
 from bioetl.domain.ports.noop import (
     NoOpAudit,
     NoOpMemoryMonitor,
+    NoOpMetadataWriter,
     NoOpMetrics,
     NoOpPiiHasher,
     NoOpTracing,
@@ -99,10 +101,12 @@ __all__ = [
     "LoggerPort",
     "MemoryMonitorPort",
     "MemoryStats",
+    "MetadataWriterPort",
     "MetricsExtractorPort",
     "MetricsPort",
     "NoOpAudit",
     "NoOpMemoryMonitor",
+    "NoOpMetadataWriter",
     "NoOpMetrics",
     "NoOpPiiHasher",
     "NoOpTracing",
