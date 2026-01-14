@@ -21,18 +21,18 @@ from bioetl.domain.entities.base import BaseEntity
 # === Pydantic DTO Model ===
 
 
-class PubChemCompoundRecord(BaseModel):
-    """Chemical compound DTO from PubChem.
+class PubchemMoleculeRecord(BaseModel):
+    """Chemical molecule DTO from PubChem.
 
-    Represents a compound from PubChem API via pubchempy.
+    Represents a molecule (compound) from PubChem API via pubchempy.
     Required field: cid.
     At least one structural identifier (SMILES/InChI) should be present.
 
-    Note: Named PubChemCompoundRecord to avoid conflict with
-    ChEMBL's CompoundRecord (which links molecules to documents).
+    Note: Renamed from PubChemCompoundRecord to align with Ubiquitous Language
+    (ADR-024). 'Molecule' is the canonical term for chemical compounds.
 
     Example:
-        >>> record = PubChemCompoundRecord(
+        >>> record = PubchemMoleculeRecord(
         ...     cid="2244",
         ...     molecular_formula="C9H8O4",
         ...     canonical_smiles="CC(=O)OC1=CC=CC=C1C(=O)O",
@@ -119,4 +119,15 @@ class PubchemMolecule(BaseEntity):
             )
 
 
-__all__ = ["PubChemCompoundRecord", "PubchemMolecule"]
+# === Deprecated Alias (ADR-024 backward compatibility) ===
+# Will be removed in v3.0
+PubChemCompoundRecord = PubchemMoleculeRecord
+
+
+__all__ = [
+    # Deprecated alias (backward compatibility)
+    "PubChemCompoundRecord",
+    "PubchemMolecule",
+    # Canonical names (ADR-024)
+    "PubchemMoleculeRecord",
+]
