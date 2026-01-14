@@ -126,6 +126,13 @@ class DefaultDataNormalizationService:
         stripped = value.strip()
         return stripped if stripped else None
 
+    def normalize_to_string(self, value: Any) -> str | None:
+        """Convert value to string, strip whitespace, return None if empty."""
+        if value is None:
+            return None
+        str_value = str(value).strip()
+        return str_value if str_value else None
+
     def parse_authors_to_list(self, authors: list[str] | str | None) -> list[str]:
         """Parse various author formats into a list of names."""
         if authors is None:
