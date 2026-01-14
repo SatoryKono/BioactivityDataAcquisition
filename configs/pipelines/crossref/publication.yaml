@@ -47,6 +47,6 @@ input_filter:
   source_path: "data/input/dois.csv"
   column_name: "doi"
   filter_field: "doi"
-  batch_size: 50
+  batch_size: 50  # Polite pool API - conservative batch size
   fallback_column: "title"  # Search by title if DOI not found (404)
 
