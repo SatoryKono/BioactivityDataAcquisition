@@ -43,10 +43,16 @@ sink:
     path: "data/output/silver/chembl/activity"
     primary_key: ["activity_id"]
     partition_by: []
+    sort_by:
+      columns: ["activity_id"]
+      ascending: true
     csv_export:
       path: "data/output/csv/silver/chembl/activity"
   gold:
     path: "data/output/gold/chembl/activity"
+    sort_by:
+      columns: ["activity_id"]
+      ascending: true
     csv_export:
       path: "data/output/csv/gold/chembl/activity"
 

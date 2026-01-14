@@ -33,10 +33,16 @@ sink:
     path: "data/output/silver/chembl/assay"
     primary_key: ["assay_chembl_id"]
     partition_by: ["assay_type"]
+    sort_by:
+      columns: ["assay_chembl_id"]
+      ascending: true
     csv_export:
       path: "data/output/csv/silver/chembl/assay"
   gold:
     path: "data/output/gold/chembl/assay"
+    sort_by:
+      columns: ["assay_chembl_id"]
+      ascending: true
     csv_export:
       path: "data/output/csv/gold/chembl/assay"
 
