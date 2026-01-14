@@ -10,8 +10,12 @@ from bioetl.infrastructure.adapters.pubchem.models import (
     PUBCHEM_RECORD_MODELS,
     PubChemAssayRecord,
     PubChemBioactivityRecord,
+    # Deprecated aliases (backward compatibility)
     PubChemCompoundDetailRecord,
     PubChemCompoundRecord,
+    # Canonical names (ADR-024)
+    PubchemMoleculeDetailRecord,
+    PubchemMoleculeRecord,
     PubChemSubstanceRecord,
 )
 
@@ -22,8 +26,11 @@ __all__ = [
     "PubChemAdapter",
     "PubChemAssayRecord",
     "PubChemBioactivityRecord",
+    # Deprecated aliases (backward compatibility)
     "PubChemCompoundDetailRecord",
-    # Record Models
     "PubChemCompoundRecord",
     "PubChemSubstanceRecord",
+    # Canonical names (ADR-024)
+    "PubchemMoleculeDetailRecord",
+    "PubchemMoleculeRecord",
 ]
