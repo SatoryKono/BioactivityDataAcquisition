@@ -21,7 +21,7 @@ source_file: ../../sources/openalex.yaml
 # Pipeline-specific source configuration
 source:
   email: "${BIOETL_OPENALEX_EMAIL}"  # Required for polite pool
-  batch_size: 50
+  batch_size: 50  # Polite pool API - conservative batch size
 
 # Entity-specific gold filters
 gold_filters:
@@ -36,17 +36,23 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze"
+    path: "data/output/bronze/openalex/publication"
   silver:
-    path: "data/output/silver"
+    path: "data/output/silver/openalex/publication"
     primary_key: ["openalex_id"]
     partition_by: ["year"]
+    sort_by:
+      columns: ["openalex_id"]
+      ascending: true
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/output/csv/silver/openalex/publication"
   gold:
-    path: "data/output/gold"
+    path: "data/output/gold/openalex/publication"
+    sort_by:
+      columns: ["openalex_id"]
+      ascending: true
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/output/csv/gold/openalex/publication"
 
 # Input filter for batch DOI resolution with title fallback
 input_filter:
@@ -54,5 +60,5 @@ input_filter:
   source_path: "data/input/dois.csv"
   column_name: "doi"
   filter_field: "doi"
-  batch_size: 50
+  batch_size: 50  # Polite pool API - conservative batch size
   fallback_column: "title"  # Search by title if DOI not found or empty

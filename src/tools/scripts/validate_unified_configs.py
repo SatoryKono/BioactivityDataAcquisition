@@ -36,7 +36,7 @@ def validate_config(path: Path) -> list[str]:
     if config is None:
         return [f"{path}: Empty config"]
 
-    # Skip _defaults.yaml
+    # Skip _defaults.yaml (base config file, not a pipeline)
     if path.name == "_defaults.yaml":
         return []
 

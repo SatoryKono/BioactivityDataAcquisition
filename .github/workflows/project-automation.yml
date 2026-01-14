@@ -30,7 +30,7 @@ jobs:
             -   name: Run Tests (Coverage)
                 run: |
                     pytest tests -m "not e2e" --ignore=tests/e2e --ignore=tests/contract \
-                      --cov=src --cov-report=term-missing --cov-fail-under=85
+                      --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
 
             # /render-diagrams command
             -   name: Render Diagrams & Check Consistency

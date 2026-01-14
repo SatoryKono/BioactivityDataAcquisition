@@ -13,7 +13,6 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import CellLine
-from bioetl.domain.normalization import normalize_to_string
 from bioetl.domain.value_objects import TaxonomyId
 
 if TYPE_CHECKING:
@@ -47,8 +46,10 @@ class CellLineTransformer(BaseChemblTransformer):
             Dictionary of CellLine business fields.
 
         """
-        # Get cell_name with strip normalization using domain function
-        cell_name = normalize_to_string(record.get("cell_name"))
+        normalizer = self._data_normalizer
+
+        # Get cell_name with strip normalization using DI service
+        cell_name = normalizer.normalize_to_string(record.get("cell_name"))
 
         # Validate taxonomy_id using TaxonomyId Value Object
         raw_tax_id = record.get("cell_source_tax_id")
@@ -69,10 +70,12 @@ class CellLineTransformer(BaseChemblTransformer):
             # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
             "cell_source_taxonomy_id": cell_source_taxonomy_id,
             # Cell type classification
-            "cell_type": normalize_to_string(record.get("cell_type")),
-            # External identifiers (strip, NULL if empty) using domain normalization
-            "cellosaurus_id": normalize_to_string(record.get("cellosaurus_id")),
-            "clo_id": normalize_to_string(record.get("clo_id")),
-            "cl_lincs_id": normalize_to_string(record.get("cl_lincs_id")),
-            "efo_id": normalize_to_string(record.get("efo_id")),
+            "cell_type": normalizer.normalize_to_string(record.get("cell_type")),
+            # External identifiers (strip, NULL if empty) using DI normalization
+            "cellosaurus_id": normalizer.normalize_to_string(
+                record.get("cellosaurus_id")
+            ),
+            "clo_id": normalizer.normalize_to_string(record.get("clo_id")),
+            "cl_lincs_id": normalizer.normalize_to_string(record.get("cl_lincs_id")),
+            "efo_id": normalizer.normalize_to_string(record.get("efo_id")),
         }

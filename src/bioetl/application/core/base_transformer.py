@@ -564,6 +564,35 @@ class BaseTransformer(ABC):
         return value
 
     @staticmethod
+    def _extract_by_path(
+        record: BronzeRecord,
+        keys: Sequence[str],
+        default: Any = None,
+    ) -> Any:
+        """Safely extract a value from nested dictionaries using a sequence of keys.
+
+        Optimized version of _extract_nested that avoids string splitting.
+        Useful when paths are constant and can be pre-defined.
+
+        Args:
+            record: Bronze record dictionary.
+            keys: Sequence of keys to traverse.
+            default: Value to return if path is not found.
+
+        Returns:
+            Extracted value or default.
+
+        """
+        current = record
+        for key in keys:
+            if not isinstance(current, dict):
+                return default
+            current = current.get(key)
+            if current is None:
+                return default
+        return current
+
+    @staticmethod
     def _extract_nested(
         record: BronzeRecord,
         path: str,
@@ -590,16 +619,7 @@ class BaseTransformer(ABC):
 
         """
         keys = path.split(".")
-        current = record
-
-        for key in keys:
-            if not isinstance(current, dict):
-                return default
-            current = current.get(key)
-            if current is None:
-                return default
-
-        return current
+        return BaseTransformer._extract_by_path(record, keys, default)
 
     def _create_entity(
         self,
@@ -651,26 +671,3 @@ class BaseTransformer(ABC):
             _index=index,
             **business_data,
         )
-
-    @staticmethod
-    def _safe_get(
-        record: BronzeRecord,
-        field: str,
-        default: Any = None,
-    ) -> Any:
-        """Get a field value with default fallback.
-
-        Simple wrapper around dict.get() for consistency with other helper methods.
-        Provided for API completeness alongside _get_required_field().
-
-        Args:
-            record: Bronze record dictionary.
-            field: Name of the field to extract.
-            default: Default value if field is missing or None.
-
-        Returns:
-            Field value or default.
-
-        """
-        value = record.get(field)
-        return value if value is not None else default

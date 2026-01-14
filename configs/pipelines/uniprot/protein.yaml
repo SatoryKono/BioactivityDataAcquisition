@@ -27,17 +27,23 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze"
+    path: "data/output/bronze/uniprot/protein"
   silver:
-    path: "data/output/silver"
+    path: "data/output/silver/uniprot/protein"
     primary_key: ["accession"]
     partition_by: ["organism"]
+    sort_by:
+      columns: ["accession"]
+      ascending: true
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/output/csv/silver/uniprot/protein"
   gold:
-    path: "data/output/gold"
+    path: "data/output/gold/uniprot/protein"
+    sort_by:
+      columns: ["accession"]
+      ascending: true
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/output/csv/gold/uniprot/protein"
 
 # Entity-specific input filter
 # UniProt adapter implements FilterableDataSourcePort with OR-query batching

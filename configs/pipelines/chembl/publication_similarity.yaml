@@ -31,17 +31,23 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze"
+    path: "data/output/bronze/chembl/document_similarity"
   silver:
-    path: "data/output/silver"
+    path: "data/output/silver/chembl/document_similarity"
     primary_key: ["sim_id"]
     partition_by: []  # No good partition key
+    sort_by:
+      columns: ["sim_id"]
+      ascending: true
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/output/csv/silver/chembl/document_similarity"
   gold:
-    path: "data/output/gold"
+    path: "data/output/gold/chembl/document_similarity"
+    sort_by:
+      columns: ["sim_id"]
+      ascending: true
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/output/csv/gold/chembl/document_similarity"
 
 # No input filter needed - load full dataset
 input_filter:

@@ -95,7 +95,7 @@ jobs:
         run: |
           pytest tests --ignore=tests/integration --ignore=tests/architecture \
             --ignore=tests/e2e --ignore=tests/contract \
-            --cov=src --cov-report=xml:coverage-unit.xml --cov-report=term-missing
+            --cov=src/bioetl --cov-report=xml:coverage-unit.xml --cov-report=term-missing
 
       - name: Enforce coverage thresholds
         run: |
