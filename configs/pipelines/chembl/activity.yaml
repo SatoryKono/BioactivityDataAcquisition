@@ -1,7 +1,7 @@
 # configs/pipelines/chembl/activity.yaml
 # Pipeline configuration for ChEMBL Activity entity.
 #
-# Inherits defaults from ../_defaults.yaml:
+# Inherits defaults from ../_base.yaml:
 # - dq_rules, circuit_breaker, sink structure, maintenance, input_filter
 
 pipeline_name: chembl_activity

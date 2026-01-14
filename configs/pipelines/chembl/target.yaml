@@ -1,7 +1,7 @@
 # configs/pipelines/chembl/target.yaml
 # Pipeline configuration for ChEMBL Target entity.
 #
-# Inherits defaults from ../_defaults.yaml
+# Inherits defaults from ../_base.yaml
 
 pipeline_name: chembl_target
 provider: chembl
