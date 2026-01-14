@@ -36,8 +36,8 @@ def validate_config(path: Path) -> list[str]:
     if config is None:
         return [f"{path}: Empty config"]
 
-    # Skip _defaults.yaml (base config file, not a pipeline)
-    if path.name == "_defaults.yaml":
+    # Skip _base.yaml (base config file, not a pipeline)
+    if path.name == "_base.yaml":
         return []
 
     rel_path = path.relative_to(Path("configs/pipelines"))
@@ -128,7 +128,7 @@ def main():
                 print(f"  [ERROR] {e}")
         else:
             rel_path = yaml_file.relative_to(configs_dir)
-            if yaml_file.name != "_defaults.yaml":
+            if yaml_file.name != "_base.yaml":
                 print(f"  [OK] {rel_path}")
 
     print()

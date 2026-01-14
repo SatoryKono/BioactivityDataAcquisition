@@ -1,7 +1,7 @@
 # configs/pipelines/pubmed/publications.yaml
 # Pipeline configuration for PubMed Publication entity.
 #
-# Inherits defaults from ../_defaults.yaml
+# Inherits defaults from ../_base.yaml
 
 pipeline_name: pubmed_publications
 provider: pubmed

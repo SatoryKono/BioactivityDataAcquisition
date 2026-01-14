@@ -1,7 +1,7 @@
 # configs/pipelines/chembl/molecule.yaml
 # Pipeline configuration for ChEMBL Molecule entity.
 #
-# Inherits defaults from ../_defaults.yaml
+# Inherits defaults from ../_base.yaml
 
 pipeline_name: chembl_molecule
 provider: chembl

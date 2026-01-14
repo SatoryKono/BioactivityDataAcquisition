@@ -1,7 +1,7 @@
 # configs/pipelines/pubchem/compound.yaml
 # Pipeline configuration for PubChem Compound entity.
 #
-# Inherits defaults from ../_defaults.yaml
+# Inherits defaults from ../_base.yaml
 
 pipeline_name: pubchem_compound
 provider: pubchem

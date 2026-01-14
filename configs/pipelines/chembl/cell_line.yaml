@@ -1,7 +1,7 @@
 # configs/pipelines/chembl/cell_line.yaml
 # Pipeline configuration for ChEMBL Cell Line entity.
 #
-# Inherits defaults from ../_defaults.yaml
+# Inherits defaults from ../_base.yaml
 
 pipeline_name: chembl_cell_line
 provider: chembl

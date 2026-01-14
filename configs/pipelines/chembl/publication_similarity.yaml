@@ -1,7 +1,7 @@
 # configs/pipelines/chembl/publication_similarity.yaml
 # Pipeline configuration for ChEMBL Publication Similarity entity.
 #
-# Inherits defaults from ../_defaults.yaml
+# Inherits defaults from ../_base.yaml
 # Note: entity_type=document_similarity maps to ChEMBL API /document_similarity endpoint
 
 pipeline_name: chembl_publication_similarity
