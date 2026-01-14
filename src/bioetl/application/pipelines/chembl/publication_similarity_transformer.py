@@ -9,7 +9,7 @@ Computes derived Tanimoto metrics (avg_tani, max_tani).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.field_specs import normalize_pmid
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
@@ -35,20 +35,6 @@ class PublicationSimilarityTransformer(BaseChemblTransformer):
 
     entity_class = DocumentSimilarity
     primary_id_field = "sim_id"
-
-    HASH_EXCLUDE_FIELDS: ClassVar[frozenset[str]] = frozenset(
-        {
-            "_run_id",
-            "_run_type",
-            "_source_batch_id",
-            "_ingestion_ts",
-            "_index",
-            "_content_hash",
-            # Exclude derived fields from hash
-            "avg_tani",
-            "max_tani",
-        }
-    )
 
     def _extract_business_data(
         self,
