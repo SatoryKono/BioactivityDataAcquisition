@@ -207,7 +207,9 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             )
 
         if entity_type != "protein":
-            async for record in self._fetch_non_protein_filtered(strategy, filter_ids, limit):
+            async for record in self._fetch_non_protein_filtered(
+                strategy, filter_ids, limit
+            ):
                 yield record
         else:
             async for record in self._fetch_proteins_batched(
