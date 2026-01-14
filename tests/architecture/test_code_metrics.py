@@ -369,7 +369,6 @@ class TestClassSize:
         "SilverWriter": 830,  # 822 lines - includes schema drift detection (M4) + audit + lock validation + validation
         "GoldWriter": 720,  # 709 lines - includes SCD Type 2 with ingestion_ts per ADR-014 + lock validation
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
-        "LineageTracker": 400,
         "ChemblAdapter": 650,  # 630 lines - complex API adapter implementing full FilterableDataSourcePort
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
         "UniProtProteinTransformer": 800,  # 772 lines - complex protein data extraction with many fields
@@ -551,7 +550,6 @@ class TestGodObjectDetection:
         "GenericPipelineFactory": "Factory pattern - creates objects, not behavior delegation",
         # Observer/Tracker classes (cohesive observability responsibility)
         "PipelineObserver": "Unified observability - all methods relate to pipeline observation",
-        "LineageTracker": "Cohesive tracker - all methods relate to lineage tracking",
         # Runner (orchestrator that delegates to services)
         "PipelineRunner": "Thin orchestrator - delegates to preflight, postrun, lifecycle services",
         # Extracted validators (REFACTOR-003)
