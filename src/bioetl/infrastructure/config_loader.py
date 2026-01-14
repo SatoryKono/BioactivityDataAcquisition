@@ -28,18 +28,18 @@ def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
     return result
 
 
-def _load_defaults(config_path: Path) -> dict[str, Any]:
-    """Load pipeline defaults from _defaults.yaml."""
-    defaults_path = config_path.parent.parent / "_defaults.yaml"
+def _load_base_config(config_path: Path) -> dict[str, Any]:
+    """Load pipeline base configuration from _base.yaml."""
+    base_path = config_path.parent.parent / "_base.yaml"
 
-    if not defaults_path.exists():
-        defaults_path = config_path.parent / "_defaults.yaml"
+    if not base_path.exists():
+        base_path = config_path.parent / "_base.yaml"
 
-    if defaults_path.exists():
-        with open(defaults_path, encoding="utf-8") as f:
-            defaults = yaml.safe_load(f) or {}
-            defaults.pop("defaults_version", None)
-            return defaults
+    if base_path.exists():
+        with open(base_path, encoding="utf-8") as f:
+            base_config = yaml.safe_load(f) or {}
+            base_config.pop("schema_version", None)
+            return base_config
 
     return {}
 
@@ -74,7 +74,7 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     if not config_path.exists():
         raise ValueError(f"Configuration file not found: {config_path}")
 
-    defaults = _load_defaults(config_path)
+    defaults = _load_base_config(config_path)
 
     with open(config_path, encoding="utf-8") as f:
         entity_config = yaml.safe_load(f) or {}
