@@ -37,10 +37,16 @@ sink:
     path: "data/output/silver/chembl/document"
     primary_key: ["document_chembl_id"]
     partition_by: ["doc_type"]
+    sort_by:
+      columns: ["document_chembl_id"]
+      ascending: true
     csv_export:
       path: "data/output/csv/silver/chembl/document"
   gold:
     path: "data/output/gold/chembl/document"
+    sort_by:
+      columns: ["document_chembl_id"]
+      ascending: true
     csv_export:
       path: "data/output/csv/gold/chembl/document"
 
