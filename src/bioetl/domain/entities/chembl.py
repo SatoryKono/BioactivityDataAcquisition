@@ -1,24 +1,9 @@
 """ChEMBL DTO models for type-safe data transfer.
 
 These Pydantic models provide strict validation at domain boundaries.
-Unlike infrastructure models (extra='ignore'), these use extra='forbid'
-to detect API changes early.
-
-Design:
-- DTOs are pure data containers (no lineage fields like run_id)
-- Adapters return DTOs, transformers convert to Domain Entities
-- frozen=True ensures immutability
-- extra='forbid' rejects unknown fields for early API change detection
-
-Usage:
-    # In adapter (with validation)
-    record = ActivityRecord.model_validate(api_response)
-
-    # For trusted data (skip validation for performance)
-    record = ActivityRecord.model_construct(**trusted_dict)
-
-    # Convert to dict for storage
-    data = record.model_dump()
+DTOs are pure data containers (no lineage fields). Adapters return DTOs,
+transformers convert to Domain Entities. frozen=True ensures immutability,
+extra='forbid' rejects unknown fields for early API change detection.
 
 See RULES.md §8.2 for JSON response modeling guidelines.
 """
