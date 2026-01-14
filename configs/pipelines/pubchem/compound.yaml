@@ -30,10 +30,16 @@ sink:
     path: "data/output/silver/pubchem/compound"
     primary_key: ["cid"]
     partition_by: ["batch_date"]
+    sort_by:
+      columns: ["cid"]
+      ascending: true
     csv_export:
       path: "data/output/csv/silver/pubchem/compound"
   gold:
     path: "data/output/gold/pubchem/compound"
+    sort_by:
+      columns: ["cid"]
+      ascending: true
     csv_export:
       path: "data/output/csv/gold/pubchem/compound"
 
