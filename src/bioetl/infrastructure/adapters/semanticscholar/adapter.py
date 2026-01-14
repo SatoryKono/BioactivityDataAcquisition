@@ -344,7 +344,9 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         title_only_entries = [d for d in filter_ids if not d or not d.strip()]
 
         # Phase 1: Batch DOI lookup
-        async for record in self._batch_doi_phase(valid_dois, resolved_dois, limit, fetched):
+        async for record in self._batch_doi_phase(
+            valid_dois, resolved_dois, limit, fetched
+        ):
             yield record
             fetched += 1
             if limit and fetched >= limit:

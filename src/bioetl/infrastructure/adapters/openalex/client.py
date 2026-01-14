@@ -267,7 +267,9 @@ class OpenAlexAdapter(BaseHttpAdapter):
         title_only_entries = [d for d in filter_ids if not d or not d.strip()]
 
         # Phase 1: Batch DOI lookup
-        async for work in self._batch_doi_lookup(valid_dois, found_dois, limit, fetched):
+        async for work in self._batch_doi_lookup(
+            valid_dois, found_dois, limit, fetched
+        ):
             yield work
             fetched += 1
             if limit and fetched >= limit:
