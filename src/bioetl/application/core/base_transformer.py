@@ -671,26 +671,3 @@ class BaseTransformer(ABC):
             _index=index,
             **business_data,
         )
-
-    @staticmethod
-    def _safe_get(
-        record: BronzeRecord,
-        field: str,
-        default: Any = None,
-    ) -> Any:
-        """Get a field value with default fallback.
-
-        Simple wrapper around dict.get() for consistency with other helper methods.
-        Provided for API completeness alongside _get_required_field().
-
-        Args:
-            record: Bronze record dictionary.
-            field: Name of the field to extract.
-            default: Default value if field is missing or None.
-
-        Returns:
-            Field value or default.
-
-        """
-        value = record.get(field)
-        return value if value is not None else default
