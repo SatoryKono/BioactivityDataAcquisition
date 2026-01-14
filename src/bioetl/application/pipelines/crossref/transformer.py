@@ -24,7 +24,7 @@ from bioetl.domain.normalization import (
     extract_first_string,
     parse_page_range,
 )
-from bioetl.domain.services import DataNormalizationService, IdentityService
+from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
@@ -86,8 +86,8 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
+            data_normalizer=data_normalizer,
         )
-        self._data_normalizer = data_normalizer or DataNormalizationService()
 
     # ========================================================================
     # Field Extraction Methods (Orchestration - delegates to domain)
