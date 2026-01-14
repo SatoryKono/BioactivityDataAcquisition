@@ -36,17 +36,17 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze"
+    path: "data/output/bronze/openalex/publication"
   silver:
-    path: "data/output/silver"
+    path: "data/output/silver/openalex/publication"
     primary_key: ["openalex_id"]
     partition_by: ["year"]
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/output/csv/silver/openalex/publication"
   gold:
-    path: "data/output/gold"
+    path: "data/output/gold/openalex/publication"
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/output/csv/gold/openalex/publication"
 
 # Input filter for batch DOI resolution with title fallback
 input_filter:

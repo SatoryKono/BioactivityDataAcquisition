@@ -31,17 +31,17 @@ gold_filters:
 # Entity-specific sink configuration
 sink:
   bronze:
-    path: "data/output/bronze"
+    path: "data/output/bronze/semanticscholar/publication"
   silver:
-    path: "data/output/silver"
+    path: "data/output/silver/semanticscholar/publication"
     primary_key: ["paper_id"]
     partition_by: ["year"]
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/output/csv/silver/semanticscholar/publication"
   gold:
-    path: "data/output/gold"
+    path: "data/output/gold/semanticscholar/publication"
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/output/csv/gold/semanticscholar/publication"
 
 # Input filter for batch DOI resolution with title fallback
 input_filter:
