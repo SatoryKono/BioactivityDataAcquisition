@@ -207,7 +207,9 @@ class UniProtProteinTransformer(BaseTransformer):
         data["organism_common"] = self._extract_by_path(
             record, self._ORGANISM_COMMON_PATH
         )
-        data["taxonomy_id"] = self._extract_by_path(record, self._ORGANISM_TAXON_ID_PATH)
+        data["taxonomy_id"] = self._extract_by_path(
+            record, self._ORGANISM_TAXON_ID_PATH
+        )
         data["lineage"] = ExtractorUtils.serialize_list(
             self._extract_by_path(record, self._ORGANISM_LINEAGE_PATH)
         )
