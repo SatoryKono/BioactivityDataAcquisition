@@ -693,7 +693,11 @@ class SilverWriter(BaseDeltaWriter):
 
         # Build lineage from records
         source_batch_ids = list(
-            {r.get("_source_batch_id", "") for r in records if r.get("_source_batch_id")}
+            {
+                r.get("_source_batch_id", "")
+                for r in records
+                if r.get("_source_batch_id")
+            }
         )
         lineage = LineageMetadata(
             source_batch_ids=source_batch_ids,
@@ -701,7 +705,9 @@ class SilverWriter(BaseDeltaWriter):
 
         # Build Delta metrics
         # Map SilverWriteMode to DeltaMetrics operation (Literal type)
-        operation_map: dict[SilverWriteMode, Literal["merge", "overwrite", "append"]] = {
+        operation_map: dict[
+            SilverWriteMode, Literal["merge", "overwrite", "append"]
+        ] = {
             SilverWriteMode.MERGE: "merge",
             SilverWriteMode.APPEND: "append",
             SilverWriteMode.DELETE: "overwrite",  # DELETE mode uses overwrite
