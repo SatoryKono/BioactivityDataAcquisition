@@ -34,7 +34,9 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 
 ### Architecture Decision Records (ADRs)
 
-24 ADRs documenting key architectural decisions:
+See [decisions/README.md](decisions/README.md) for full index with categories.
+
+25 ADRs documenting key architectural decisions:
 
 | ADR | Topic | RULES.md Reference |
 |-----|-------|-------------------|
@@ -62,6 +64,7 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 | [ADR-022](decisions/ADR-022-tracing-noop.md) | Tracing NoOp | - |
 | [ADR-023](decisions/ADR-023-entity-type-patterns.md) | Entity Type Patterns | - |
 | [ADR-024](decisions/ADR-024-entity-naming-unification.md) | Entity Naming Unification | - |
+| [ADR-025](decisions/ADR-025-pipeline-config-unification.md) | Pipeline Config Unification | - |
 
 ---
 
