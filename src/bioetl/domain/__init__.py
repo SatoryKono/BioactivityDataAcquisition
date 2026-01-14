@@ -50,6 +50,8 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     CellLine,
     CellLineRecord,
     ChemblPublication,
+    ChemblPublicationRecord,
+    ChemblPublicationTermRecord,
     CompoundRecord,
     DocumentRecord,
     DocumentSimilarity,
@@ -60,6 +62,7 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     ProteinClassification,
     PubChemCompoundRecord,
     PubchemMolecule,
+    PubchemMoleculeRecord,
     Publication,
     PublicationEntity,
     PublicationRecord,
@@ -295,10 +298,17 @@ __all__ = [
     "ArticleRecord",
     "AssayRecord",
     "CellLineRecord",
+    # Canonical DTO names (ADR-024)
+    "ChemblPublicationRecord",
+    "ChemblPublicationTermRecord",
+    # Deprecated aliases (backward compatibility)
     "DocumentRecord",
     "DocumentTermRecord",
     "MoleculeRecord",
+    # Deprecated alias
     "PubChemCompoundRecord",
+    # Canonical DTO name (ADR-024)
+    "PubchemMoleculeRecord",
     "PublicationRecord",
     "TargetComponentRecord",
     "TargetRecord",
