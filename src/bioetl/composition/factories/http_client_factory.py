@@ -10,7 +10,7 @@ Configuration Priority:
 
 SRP Compliance:
 - Creates UnifiedHTTPClient with injected RateLimiterPort and CircuitBreakerPort
-- RetryPolicy is configured via domain value object
+- RetryConfig is configured via domain value object
 - Observability components (tracer, metrics, logger) are injected for correlation
 """
 

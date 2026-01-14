@@ -197,7 +197,7 @@ from bioetl.domain.ports import (
 )
 
 # Resilience (domain value objects)
-from bioetl.domain.resilience import CircuitBreakerConfig, RetryConfig, RetryPolicy
+from bioetl.domain.resilience import CircuitBreakerConfig, RetryConfig
 
 # Serialization (centralized JSON per RULES.md §2.8.1)
 from bioetl.domain.serialization import (
@@ -430,7 +430,6 @@ __all__ = [
     # Resilience
     "CircuitBreakerConfig",
     "RetryConfig",
-    "RetryPolicy",
     # Services
     "IdentityService",
     # Serialization (centralized JSON)
