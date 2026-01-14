@@ -4,7 +4,7 @@
 # Resolves DOIs from input CSV to enrich with publication metadata.
 # Falls back to title search when DOI is not found or empty.
 #
-# Inherits defaults from ../_defaults.yaml
+# Inherits defaults from ../_base.yaml
 
 pipeline_name: semanticscholar_publication
 provider: semanticscholar

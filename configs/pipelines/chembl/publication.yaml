@@ -1,7 +1,7 @@
 # configs/pipelines/chembl/publication.yaml
 # Pipeline configuration for ChEMBL Publication entity.
 #
-# Inherits defaults from ../_defaults.yaml
+# Inherits defaults from ../_base.yaml
 # Note: entity_type=document maps to ChEMBL API /document endpoint
 
 pipeline_name: chembl_publication

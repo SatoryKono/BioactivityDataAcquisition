@@ -1,7 +1,7 @@
 # configs/pipelines/chembl/assay_parameters.yaml
 # Pipeline configuration for ChEMBL AssayParameters entity.
 #
-# Inherits defaults from ../_defaults.yaml
+# Inherits defaults from ../_base.yaml
 # Endpoint: /assay_parameters
 
 pipeline_name: chembl_assay_parameters

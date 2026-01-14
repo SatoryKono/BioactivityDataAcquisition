@@ -1,7 +1,7 @@
 # configs/pipelines/uniprot/protein.yaml
 # Pipeline configuration for UniProt Protein entity.
 #
-# Inherits defaults from ../_defaults.yaml
+# Inherits defaults from ../_base.yaml
 
 pipeline_name: uniprot_protein
 provider: uniprot

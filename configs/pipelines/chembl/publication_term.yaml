@@ -2,7 +2,7 @@
 # Pipeline configuration for ChEMBL Publication Term entity.
 #
 # Derived entity: Extracts and flattens terms from Publication records.
-# Inherits defaults from ../_defaults.yaml
+# Inherits defaults from ../_base.yaml
 # Note: entity_type=document_term maps to ChEMBL API /document endpoint (derived entity)
 
 pipeline_name: chembl_publication_term

@@ -4,7 +4,7 @@
 # Compound records link molecules to documents. Contains the original
 # compound name as it appears in the publication.
 #
-# Inherits defaults from ../_defaults.yaml
+# Inherits defaults from ../_base.yaml
 
 pipeline_name: chembl_compound_record
 provider: chembl

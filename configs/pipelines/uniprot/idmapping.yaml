@@ -5,7 +5,7 @@
 # Input: CSV file with target_chembl_id column
 # Output: Silver/Gold records with mapping results (null for not_found)
 #
-# Inherits defaults from ../_defaults.yaml
+# Inherits defaults from ../_base.yaml
 
 pipeline_name: uniprot_idmapping
 provider: uniprot

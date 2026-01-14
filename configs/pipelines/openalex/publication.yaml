@@ -4,7 +4,7 @@
 # Reads DOIs from CSV input file, resolves metadata from OpenAlex Works API.
 # Falls back to title search when DOI resolution fails.
 #
-# Inherits defaults from ../_defaults.yaml
+# Inherits defaults from ../_base.yaml
 
 pipeline_name: openalex_publication
 provider: openalex
