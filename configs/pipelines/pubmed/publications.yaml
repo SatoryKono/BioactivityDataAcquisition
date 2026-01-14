@@ -36,10 +36,16 @@ sink:
     path: "data/output/silver/pubmed/publication"
     primary_key: ["pmid"]
     partition_by: ["pub_year"]
+    sort_by:
+      columns: ["pmid"]
+      ascending: true
     csv_export:
       path: "data/output/csv/silver/pubmed/publication"
   gold:
     path: "data/output/gold/pubmed/publication"
+    sort_by:
+      columns: ["pmid"]
+      ascending: true
     csv_export:
       path: "data/output/csv/gold/pubmed/publication"
 

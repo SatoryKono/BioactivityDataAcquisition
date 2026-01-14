@@ -41,10 +41,16 @@ sink:
     path: "data/output/silver/openalex/publication"
     primary_key: ["openalex_id"]
     partition_by: ["year"]
+    sort_by:
+      columns: ["openalex_id"]
+      ascending: true
     csv_export:
       path: "data/output/csv/silver/openalex/publication"
   gold:
     path: "data/output/gold/openalex/publication"
+    sort_by:
+      columns: ["openalex_id"]
+      ascending: true
     csv_export:
       path: "data/output/csv/gold/openalex/publication"
 

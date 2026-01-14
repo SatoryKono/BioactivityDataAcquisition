@@ -50,10 +50,16 @@ sink:
     path: "data/output/silver/uniprot/idmapping"
     primary_key: ["target_chembl_id"]
     partition_by: []  # No partitioning - small dataset
+    sort_by:
+      columns: ["target_chembl_id"]
+      ascending: true
     csv_export:
       path: "data/output/csv/silver/uniprot/idmapping"
   gold:
     path: "data/output/gold/uniprot/idmapping"
+    sort_by:
+      columns: ["target_chembl_id"]
+      ascending: true
     csv_export:
       path: "data/output/csv/gold/uniprot/idmapping"
 

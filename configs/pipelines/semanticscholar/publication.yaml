@@ -36,10 +36,16 @@ sink:
     path: "data/output/silver/semanticscholar/publication"
     primary_key: ["paper_id"]
     partition_by: ["year"]
+    sort_by:
+      columns: ["paper_id"]
+      ascending: true
     csv_export:
       path: "data/output/csv/silver/semanticscholar/publication"
   gold:
     path: "data/output/gold/semanticscholar/publication"
+    sort_by:
+      columns: ["paper_id"]
+      ascending: true
     csv_export:
       path: "data/output/csv/gold/semanticscholar/publication"
 
