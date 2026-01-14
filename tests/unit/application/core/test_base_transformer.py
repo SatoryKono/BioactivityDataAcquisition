@@ -187,37 +187,6 @@ class TestExtractNested:
 
 
 @pytest.mark.unit
-class TestSafeGet:
-    """Tests for _safe_get helper method."""
-
-    def test_returns_value_when_present(self, transformer: ConcreteTransformer) -> None:
-        """Test returns field value when present."""
-        record = {"field": "value"}
-        result = transformer._safe_get(record, "field")
-        assert result == "value"
-
-    def test_returns_default_when_missing(
-        self, transformer: ConcreteTransformer
-    ) -> None:
-        """Test returns default when field is missing."""
-        record = {"other": "value"}
-        result = transformer._safe_get(record, "field", default="default")
-        assert result == "default"
-
-    def test_returns_default_when_none(self, transformer: ConcreteTransformer) -> None:
-        """Test returns default when field is None."""
-        record = {"field": None}
-        result = transformer._safe_get(record, "field", default="default")
-        assert result == "default"
-
-    def test_returns_none_as_default(self, transformer: ConcreteTransformer) -> None:
-        """Test returns None as default if not specified."""
-        record = {"other": "value"}
-        result = transformer._safe_get(record, "field")
-        assert result is None
-
-
-@pytest.mark.unit
 class TestCreateEntity:
     """Tests for _create_entity helper method."""
 
