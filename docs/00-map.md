@@ -1,13 +1,12 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.10 | Last updated: 2026-01-07*
+*Synced with RULES.md v5.10 | Last updated: 2026-01-14*
 
-> **Documentation Cleanup Completed:** 2026-01-07
-> - Consolidated audit directories into single `audit/` folder
-> - Archived 42 historical audit files to `archived/audits/`
+> **Documentation Audit Completed:** 2026-01-14
+> - All audit files consolidated in `archived/audits/`
 > - Removed duplicate CHANGELOG.md from docs/
-> - Moved prompts to `.claude/prompts/`
-> - See: [audit/documentation-audit-2026-01-06.md](audit/documentation-audit-2026-01-06.md)
+> - Quick reference moved to `quick-reference/`
+> - See: [archived/audits/](archived/audits/) for historical audits
 
 ## Quick Links
 
@@ -50,13 +49,11 @@ docs/
 │   └── refactoring-plan.md     # Archived refactoring roadmap
 │
 ├── 00-project_rules/            # Project governance
-│   ├── 00-rules-summary.md      # TL;DR of RULES.md
-│   ├── 02-user-rules.md         # Guidelines for contributors
 │   ├── 03-file-policy.md        # File/directory structure
-│   ├── 04-extending-bioetl.md   # How to add providers/pipelines
-│   ├── 05-cleanup-policy.md     # Cleanup and retention
-│   ├── 06-rules-mapping.md      # RULES.md to docs mapping
-│   └── 07-consistency-check.md  # Consistency verification guide
+│   └── 04-extending-bioetl.md   # How to add providers/pipelines
+│
+├── quick-reference/             # Quick reference documents
+│   └── rules-summary.md         # TL;DR of RULES.md
 │
 ├── 02-architecture/             # System architecture
 │   ├── 00-overview.md           # Architecture overview & navigation
@@ -98,19 +95,11 @@ docs/
 │   ├── runbooks/                # 16 incident response playbooks
 │   └── performance-baselines.md # Performance metrics
 │
-├── audit/                       # Architecture audits (consolidated)
-│   ├── architecture-audit-2026-01-06.md   # Architecture audit
-│   ├── application-layer-audit-2026-01-06.md  # Application layer
-│   ├── domain-layer-audit-2026-01-06.md   # Domain layer
-│   ├── infrastructure-layer-audit-2026-01-06.md # Infrastructure layer
-│   ├── documentation-audit-2026-01-06.md  # Documentation audit
-│   ├── security-audit-2026-01-06.md       # Security audit
-│   └── false_positives.md                 # Documented false positives
-│
 ├── archived/                    # Historical documents
-│   ├── audits/                  # 42 historical audit files (2025-2026)
+│   ├── audits/                  # Audit files (2025-2026)
 │   ├── plans/                   # Archived planning documents
-│   └── deprecated/              # Deprecated documentation
+│   ├── project_rules/           # Deprecated project rules
+│   └── refactoring-plan.md      # Archived refactoring roadmap
 │
 ├── domain/schemas/              # Schema documentation
 │   └── chembl/                  # ChEMBL entity schemas (4 files)
@@ -133,8 +122,8 @@ docs/
 ### Getting Started
 
 1. [RULES.md](RULES.md) - Project rules (start here)
-2. [00-rules-summary.md](00-project_rules/00-rules-summary.md) - Quick reference
-3. [02-user-rules.md](00-project_rules/02-user-rules.md) - Contributor guidelines
+2. [rules-summary.md](quick-reference/rules-summary.md) - Quick reference
+3. [04-extending-bioetl.md](00-project_rules/04-extending-bioetl.md) - Adding providers/pipelines
 
 ### Architecture
 
@@ -199,7 +188,7 @@ docs/
 | DQ Metrics        | [RULES.md](RULES.md#34-data-quality-метрики)                                    | §3.4     |
 | Graceful Shutdown | [ADR-008](02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)      | §5.3     |
 | DR Procedures     | [runbooks/index.md](05-operations/runbooks/index.md)                            | §5.5     |
-| Cleanup           | [05-cleanup-policy.md](00-project_rules/05-cleanup-policy.md)                   | §2.1.1   |
+| Cleanup           | [cleanup-policy.md](03-guides/cleanup-policy.md)                                | §2.1.1   |
 
 ### Development
 
@@ -210,7 +199,7 @@ docs/
 | Pipeline Review  | [pipeline-review-checklist.md](templates/pipeline-review-checklist.md)                          | §4.2     |
 | Testing          | [testing.md](03-guides/testing.md)                                                              | §4.2     |
 | E2E Testing      | [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md)                           | §4.2.3   |
-| Code Style       | [02-user-rules.md](00-project_rules/02-user-rules.md)                                           | §4       |
+| Code Style       | [RULES.md §4](RULES.md#4-качество-кода-и-тестирование)                                          | §4       |
 
 ---
 
@@ -345,15 +334,15 @@ graph TD
 | RULES.md                 | 2026-01-06   | v5.10 (TTL/Heartbeat Values) |
 | REQUIREMENTS.md          | 2025-12-27   | v1.2 (127 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
-| 00-map.md                | 2026-01-13   | v6.5 Docs structure cleanup  |
-| 00-rules-summary.md      | 2026-01-06   | v5.10 Synced                 |
-| 03-guides/               | 2025-12-31   | Consolidated (10 guides)     |
-| ADR-001..024             | 2026-01-06   | All 24 ADRs documented       |
+| 00-map.md                | 2026-01-14   | v6.6 Fixed broken links      |
+| rules-summary.md         | 2026-01-06   | v5.10 Synced                 |
+| 03-guides/               | 2025-12-31   | Consolidated (11 guides)     |
+| ADR-001..025             | 2026-01-14   | All 25 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
-| audit/                   | 2026-01-07   | 11 current files, 42 archived |
+| archived/audits/         | 2026-01-14   | Historical audit files       |
 | 02-architecture/diagrams/| 2025-12-31   | 34 Mermaid diagrams          |
 
 ---
 
-*Last updated: 2026-01-07. Documentation structure finalized.*
+*Last updated: 2026-01-14. Documentation audit completed.*
