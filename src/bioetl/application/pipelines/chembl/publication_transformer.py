@@ -26,7 +26,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import ChemblPublication
-from bioetl.domain.services import DataNormalizationService, IdentityService
+from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
@@ -130,8 +130,8 @@ class PublicationTransformer(BaseChemblTransformer):
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
+            data_normalizer=data_normalizer,
         )
-        self._data_normalizer = data_normalizer or DataNormalizationService()
 
     def _extract_business_data(
         self,

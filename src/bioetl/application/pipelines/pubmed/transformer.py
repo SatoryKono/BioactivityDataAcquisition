@@ -21,7 +21,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
 )
 from bioetl.application.pipelines.pubmed.xml_utils import get_text
 from bioetl.domain.entities import Publication
-from bioetl.domain.services import DataNormalizationService, IdentityService
+from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects import DOI, PublicationYear, PubMedId
 
 if TYPE_CHECKING:
@@ -85,9 +85,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
+            data_normalizer=data_normalizer,
         )
         self._cached_xml_root = None
-        self._data_normalizer = data_normalizer or DataNormalizationService()
 
     def _pre_extract_validation(
         self,

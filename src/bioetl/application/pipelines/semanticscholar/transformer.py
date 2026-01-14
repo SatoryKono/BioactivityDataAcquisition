@@ -20,7 +20,6 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     validate_year,
 )
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
-from bioetl.domain.services import DataNormalizationService
 from bioetl.domain.value_objects import DOI, PubMedId
 
 if TYPE_CHECKING:
@@ -101,8 +100,8 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
+            data_normalizer=data_normalizer,
         )
-        self._data_normalizer = data_normalizer or DataNormalizationService()
 
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
         """Extract and normalize fields from Semantic Scholar record.
