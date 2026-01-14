@@ -34,10 +34,16 @@ sink:
     path: "data/output/silver/crossref/work"
     primary_key: ["doi"]
     partition_by: []
+    sort_by:
+      columns: ["doi"]
+      ascending: true
     csv_export:
       path: "data/output/csv/silver/crossref/work"
   gold:
     path: "data/output/gold/crossref/work"
+    sort_by:
+      columns: ["doi"]
+      ascending: true
     csv_export:
       path: "data/output/csv/gold/crossref/work"
 
