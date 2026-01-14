@@ -230,7 +230,10 @@ class TestSemanticScholarId:
     def test_repr(self) -> None:
         """Test string representation."""
         s2id = SemanticScholarId("649def34f8be52c8b66281af98ae884c09aef38b")
-        assert repr(s2id) == "SemanticScholarId('649def34f8be52c8b66281af98ae884c09aef38b')"
+        assert (
+            repr(s2id)
+            == "SemanticScholarId('649def34f8be52c8b66281af98ae884c09aef38b')"
+        )
 
     def test_str(self) -> None:
         """Test string conversion."""
