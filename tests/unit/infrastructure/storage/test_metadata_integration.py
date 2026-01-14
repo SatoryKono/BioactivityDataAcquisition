@@ -30,9 +30,7 @@ class MockMetadataWriter:
         self.silver_calls: list[tuple[str | Path, SilverMetadata]] = []
         self.gold_calls: list[tuple[str | Path, GoldMetadata]] = []
 
-    async def write_bronze_metadata(
-        self, base_path: str | Path, metadata: Any
-    ) -> str:
+    async def write_bronze_metadata(self, base_path: str | Path, metadata: Any) -> str:
         """Mock Bronze metadata write."""
         return ""
 
@@ -95,14 +93,16 @@ def sample_records() -> list[dict[str, Any]]:
 @pytest.fixture
 def silver_schema() -> pa.Schema:
     """Create sample PyArrow schema for Silver layer."""
-    return pa.schema([
-        pa.field("id", pa.string()),
-        pa.field("value", pa.int64()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-    ])
+    return pa.schema(
+        [
+            pa.field("id", pa.string()),
+            pa.field("value", pa.int64()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ]
+    )
 
 
 class TestSilverWriterMetadataIntegration:

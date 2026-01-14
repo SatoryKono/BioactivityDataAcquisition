@@ -188,9 +188,7 @@ class LineageMetadata(BaseModel):
     bronze_paths: list[str] = Field(
         default_factory=list, description="Source Bronze file paths"
     )
-    transform_version: str | None = Field(
-        default=None, description="Transform version"
-    )
+    transform_version: str | None = Field(default=None, description="Transform version")
     transform_steps: list[str] = Field(
         default_factory=list, description="Transform steps applied"
     )

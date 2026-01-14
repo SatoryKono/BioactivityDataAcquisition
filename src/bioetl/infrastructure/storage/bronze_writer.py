@@ -29,7 +29,14 @@ import orjson
 import zstandard as zstd
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
+    from bioetl.domain.models.metadata import BronzeMetadata
+    from bioetl.domain.ports import (
+        AuditPort,
+        LoggerPort,
+        MetadataWriterPort,
+        MetricsPort,
+        TracingPort,
+    )
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import BatchID, RunID, RunType
@@ -62,6 +69,8 @@ class BronzeWriter:
         json_path: str | None = None,
         validate_json: bool = True,
         audit: AuditPort | None = None,
+        metadata_writer: MetadataWriterPort | None = None,
+        save_metadata: bool = False,
     ) -> None:
         """Initialize Bronze writer.
 
@@ -80,6 +89,11 @@ class BronzeWriter:
                           Default is True for data integrity.
             audit: Optional AuditPort for write operation traceability.
                   Use NoOpAudit from composition layer if audit disabled.
+            metadata_writer: Optional MetadataWriterPort for writing _metadata.yaml
+                           sidecar files with lineage and QC information.
+                           Use NoOpMetadataWriter if metadata disabled.
+            save_metadata: If True, write _metadata.yaml sidecar file alongside
+                         data files with rich lineage information.
 
         Note:
             Lock validation is now performed at Application layer (BatchWriter)
@@ -92,6 +106,12 @@ class BronzeWriter:
 
             tracing = NoOpTracing()
 
+        # Use NoOpMetadataWriter if not provided (Null Object pattern)
+        if metadata_writer is None:
+            from bioetl.domain.ports.noop import NoOpMetadataWriter
+
+            metadata_writer = NoOpMetadataWriter()
+
         self.base_path = Path(base_path)
         self.logger = logger
         self._metrics = metrics
@@ -100,6 +120,8 @@ class BronzeWriter:
         self.validate_json = validate_json
         self._audit = audit
         self._tracing: TracingPort = tracing
+        self._metadata_writer: MetadataWriterPort = metadata_writer
+        self._save_metadata = save_metadata
 
     def _validate_bronze_names(self, provider: str, entity: str) -> None:
         """Validate provider and entity names (alphanumeric + underscores only)."""
@@ -204,6 +226,94 @@ class BronzeWriter:
             "entity": entity,
             "batch_id": str(batch_id),
         }
+
+    def _build_full_bronze_metadata(
+        self,
+        run_id: RunID,
+        run_type: RunType,
+        provider: str,
+        entity: str,
+        batch_id: BatchID,
+        record_count: int,
+        compressed_size: int,
+        output_path: str,
+        started_at: datetime,
+        completed_at: datetime,
+        duration_seconds: float,
+    ) -> BronzeMetadata:
+        """Build rich BronzeMetadata for sidecar file.
+
+        Args:
+            run_id: Pipeline run identifier.
+            run_type: Type of run (incremental, backfill, rebuild).
+            provider: Provider name (e.g., 'chembl').
+            entity: Entity type (e.g., 'activity').
+            batch_id: Unique identifier for this batch.
+            record_count: Number of records written.
+            compressed_size: Size of compressed file in bytes.
+            output_path: Relative path to the written file.
+            started_at: UTC timestamp when write started.
+            completed_at: UTC timestamp when write completed.
+            duration_seconds: Duration of write operation.
+
+        Returns:
+            BronzeMetadata instance for sidecar file.
+        """
+        import platform
+        import socket
+
+        from bioetl import __version__
+        from bioetl.domain.models.metadata import (
+            BronzeMetadata,
+            EnvironmentMetadata,
+            FileOutputMetadata,
+            OutputMetadata,
+            PipelineMetadata,
+            RuntimeMetadata,
+            RunTypeEnum,
+            SourceMetadata,
+        )
+
+        # Map domain RunType to metadata RunTypeEnum
+        run_type_map = {
+            RunType.INCREMENTAL: RunTypeEnum.INCREMENTAL,
+            RunType.BACKFILL: RunTypeEnum.BACKFILL,
+            RunType.REBUILD: RunTypeEnum.REBUILD,
+        }
+
+        return BronzeMetadata(
+            runtime=RuntimeMetadata(
+                run_id=str(run_id),
+                run_type=run_type_map.get(run_type, RunTypeEnum.INCREMENTAL),
+                started_at_utc=started_at,
+                completed_at_utc=completed_at,
+                duration_seconds=duration_seconds,
+            ),
+            pipeline=PipelineMetadata(
+                name=f"{provider}_{entity}",
+                provider=provider,
+                entity=entity,
+            ),
+            source=SourceMetadata(
+                type="api",
+            ),
+            output=OutputMetadata(
+                files=[
+                    FileOutputMetadata(
+                        path=output_path,
+                        size_bytes=compressed_size,
+                        record_count=record_count,
+                    )
+                ],
+                total_records=record_count,
+                total_bytes=compressed_size,
+            ),
+            environment=EnvironmentMetadata(
+                hostname=socket.gethostname(),
+                python_version=platform.python_version(),
+                bioetl_version=__version__,
+            ),
+        )
 
     def _write_atomic_stream(
         self,
@@ -427,6 +537,36 @@ class BronzeWriter:
                     },
                 )
                 await self._audit.log_write(audit_entry)
+
+            # Write rich metadata sidecar file if enabled
+            if self._save_metadata:
+                # Calculate completed_at from ingestion_ts + duration
+                # (avoids datetime.now() per ADR-014)
+                completed_at = ingestion_ts + timedelta(seconds=duration)
+                bronze_metadata = self._build_full_bronze_metadata(
+                    run_id=run_id,
+                    run_type=run_type,
+                    provider=provider,
+                    entity=entity,
+                    batch_id=batch_id,
+                    record_count=record_count,
+                    compressed_size=compressed_size,
+                    output_path=relative_path,
+                    started_at=ingestion_ts,
+                    completed_at=completed_at,
+                    duration_seconds=duration,
+                )
+                # Write to batch directory (same level as data file)
+                metadata_base_path = full_path.parent
+                await self._metadata_writer.write_bronze_metadata(
+                    base_path=metadata_base_path,
+                    metadata=bronze_metadata,
+                )
+                self.logger.debug(
+                    "bronze_metadata_written",
+                    metadata_path=str(metadata_base_path / "_metadata.yaml"),
+                    run_id=str(run_id),
+                )
 
             span.set_attribute("record_count", record_count)
             span.set_attribute("compressed_size", compressed_size)

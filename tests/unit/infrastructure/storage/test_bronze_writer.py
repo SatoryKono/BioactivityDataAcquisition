@@ -2033,3 +2033,232 @@ class TestBronzeWriterCleanup:
         # Should remove from all 4 provider/entity combinations
         assert result["files_removed"] == 4
         assert result["directories_removed"] == 4
+
+
+@pytest.mark.unit
+class TestBronzeWriterMetadataSidecar:
+    """Tests for BronzeWriter rich metadata sidecar integration."""
+
+    @pytest.mark.asyncio
+    async def test_metadata_writer_called_when_save_metadata_enabled(
+        self,
+        tmp_path,
+        noop_logger,
+        noop_metrics,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test that MetadataWriter is called when save_metadata=True."""
+        from unittest.mock import AsyncMock
+
+        mock_metadata_writer = AsyncMock()
+        mock_metadata_writer.write_bronze_metadata = AsyncMock(
+            return_value="/path/to/_metadata.yaml"
+        )
+
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=noop_metrics,
+            metadata_writer=mock_metadata_writer,
+            save_metadata=True,
+        )
+
+        await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=ingestion_ts,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+
+        # Verify metadata writer was called
+        mock_metadata_writer.write_bronze_metadata.assert_called_once()
+        call_args = mock_metadata_writer.write_bronze_metadata.call_args
+
+        # Verify correct arguments were passed
+        assert "base_path" in call_args.kwargs
+        assert "metadata" in call_args.kwargs
+
+        # Verify metadata structure
+        metadata = call_args.kwargs["metadata"]
+        assert metadata.runtime.run_id == str(run_id)
+        assert metadata.pipeline.provider == "chembl"
+        assert metadata.pipeline.entity == "activity"
+        assert metadata.output.total_records == len(sample_records)
+
+    @pytest.mark.asyncio
+    async def test_metadata_writer_not_called_when_save_metadata_disabled(
+        self,
+        tmp_path,
+        noop_logger,
+        noop_metrics,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test that MetadataWriter is NOT called when save_metadata=False."""
+        from unittest.mock import AsyncMock
+
+        mock_metadata_writer = AsyncMock()
+        mock_metadata_writer.write_bronze_metadata = AsyncMock()
+
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=noop_metrics,
+            metadata_writer=mock_metadata_writer,
+            save_metadata=False,  # Disabled
+        )
+
+        await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=ingestion_ts,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+
+        # Verify metadata writer was NOT called
+        mock_metadata_writer.write_bronze_metadata.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_noop_metadata_writer_used_by_default(
+        self,
+        tmp_path,
+        noop_logger,
+        noop_metrics,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test that NoOpMetadataWriter is used when not provided."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=noop_metrics,
+            # No metadata_writer provided - should use NoOp
+            save_metadata=True,  # Enabled but with NoOp
+        )
+
+        # Should not raise even though save_metadata=True
+        result = await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=ingestion_ts,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+
+        # Verify data was written
+        assert result.endswith(".jsonl.zst")
+        assert (tmp_path / result).exists()
+
+    @pytest.mark.asyncio
+    async def test_build_full_bronze_metadata_structure(
+        self,
+        tmp_path,
+        noop_logger,
+        noop_metrics,
+        batch_id: BatchID,
+        run_id: RunID,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test _build_full_bronze_metadata creates correct structure."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=noop_metrics,
+        )
+
+        metadata = writer._build_full_bronze_metadata(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            provider="chembl",
+            entity="activity",
+            batch_id=batch_id,
+            record_count=100,
+            compressed_size=5000,
+            output_path="v1/chembl/activity/2024-01-15/batch_abc.jsonl.zst",
+            started_at=ingestion_ts,
+            completed_at=ingestion_ts,
+            duration_seconds=1.5,
+        )
+
+        # Verify runtime metadata
+        assert metadata.runtime.run_id == str(run_id)
+        assert metadata.runtime.run_type.value == "incremental"
+        assert metadata.runtime.started_at_utc == ingestion_ts
+        assert metadata.runtime.duration_seconds == 1.5
+
+        # Verify pipeline metadata
+        assert metadata.pipeline.name == "chembl_activity"
+        assert metadata.pipeline.provider == "chembl"
+        assert metadata.pipeline.entity == "activity"
+
+        # Verify output metadata
+        assert metadata.output.total_records == 100
+        assert metadata.output.total_bytes == 5000
+        assert len(metadata.output.files) == 1
+        assert metadata.output.files[0].record_count == 100
+        assert metadata.output.files[0].size_bytes == 5000
+
+        # Verify environment metadata exists
+        assert metadata.environment.hostname is not None
+        assert metadata.environment.python_version is not None
+        assert metadata.environment.bioetl_version is not None
+
+    @pytest.mark.asyncio
+    async def test_metadata_run_type_mapping(
+        self,
+        tmp_path,
+        noop_logger,
+        noop_metrics,
+        batch_id: BatchID,
+        run_id: RunID,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test that all RunType values are correctly mapped in metadata."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=noop_metrics,
+        )
+
+        run_type_mappings = [
+            (RunType.INCREMENTAL, "incremental"),
+            (RunType.BACKFILL, "backfill"),
+            (RunType.REBUILD, "rebuild"),
+        ]
+
+        for run_type, expected_value in run_type_mappings:
+            metadata = writer._build_full_bronze_metadata(
+                run_id=run_id,
+                run_type=run_type,
+                provider="chembl",
+                entity="activity",
+                batch_id=batch_id,
+                record_count=10,
+                compressed_size=100,
+                output_path="test.jsonl.zst",
+                started_at=ingestion_ts,
+                completed_at=ingestion_ts,
+                duration_seconds=0.1,
+            )
+            assert metadata.runtime.run_type.value == expected_value
