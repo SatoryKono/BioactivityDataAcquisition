@@ -102,3 +102,13 @@ repos:
         stages: [pre-commit]
         # Skip if pip-audit not installed (CI will handle this)
         verbose: true
+
+      - id: validate-pipeline-configs
+        name: Validate pipeline YAML configs
+        entry: python scripts/validate_pipeline_configs.py
+        language: python
+        files: ^configs/pipelines/.*\.yaml$
+        pass_filenames: false
+        additional_dependencies:
+          - jsonschema>=4.0.0
+          - pyyaml>=6.0
