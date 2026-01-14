@@ -143,10 +143,6 @@ class CircuitBreakerConfig:
     recovery_timeout: int = 300  # 5 minutes
 
 
-# Backward compatibility alias
-RetryPolicy = RetryConfig
-
-
 @dataclass(frozen=True, slots=True)
 class AdapterConfig:
     """Configuration for data source adapters.
