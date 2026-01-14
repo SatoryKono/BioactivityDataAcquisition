@@ -14,9 +14,11 @@
 - **Пайплайны (12)**: Полностью унифицированы, соответствуют DI-паттерну (REQ-ARCH-DI-007)
 - **Трансформеры (18)**: Стандартизированная сигнатура с 8 параметрами
 - **Критических расхождений**: 0
-- **Минорных несоответствий**: 2 (документированы ниже)
+- **Минорных несоответствий**: 1 оставшееся (MINOR-002), 1 исправлено (MINOR-001)
 
 **Общая оценка**: Архитектура интерфейсов **соответствует** требованиям RULES.md и ADR.
+
+> **Обновление**: MINOR-001 исправлено в commit acfd4c8 (2026-01-14)
 
 ---
 
@@ -131,18 +133,20 @@ BaseTransformer (application/core/base_transformer.py:64) - 674 строки
 | gold_filters | GoldFilterConfig\|None = None | None default | ✅ |
 | identity_service | IdentityService\|None = None | Новый экземпляр | ✅ |
 | pii_hasher | PiiHasherPort\|None = None | NoOpPiiHasher default | ✅ |
-| data_normalizer | DataNormalizationPort\|None = None | DataNormalizationService | ⚠️ |
+| data_normalizer | DataNormalizationPort\|None = None | DataNormalizationService | ✅ |
 
 ---
 
 ## 3. Выявленные расхождения
 
-### 3.1. [MINOR-001] Несогласованная обработка `data_normalizer`
+### 3.1. [MINOR-001] ~~Несогласованная обработка `data_normalizer`~~ — ИСПРАВЛЕНО
+
+**Статус**: ✅ RESOLVED (commit acfd4c8)
 
 **Компоненты**: PubMedPublicationTransformer, CrossRefPublicationTransformer, OpenAlexPublicationTransformer, SemanticScholarPublicationTransformer, ChEMBL PublicationTransformer
 
 **Тип**: Поведение
-**Серьёзность**: Minor (P4)
+**Серьёзность**: Minor (P4) — **ИСПРАВЛЕНО**
 
 **Файлы**:
 - `pubmed/transformer.py:80-90`
@@ -250,13 +254,15 @@ entity_type: str = "compound"  # или "publication", "protein"
 | Template Method | Корректно реализован |
 | DI-контракт | Соблюдается |
 
-### 5.2. Опциональные улучшения (P4)
+### 5.2. Выполненные улучшения
 
-| ID | Задача | Сложность | Приоритет |
-|----|--------|-----------|-----------|
-| MINOR-001 | Унифицировать обработку data_normalizer в publication transformers | Low | P4 |
+| ID | Задача | Статус | Commit |
+|----|--------|--------|--------|
+| MINOR-001 | Унифицировать обработку data_normalizer в publication transformers | ✅ DONE | acfd4c8 |
 
-**Оценка трудозатрат**: ~30 минут (5 файлов × 2 строки изменений + тесты)
+### 5.3. Оставшиеся (опционально)
+
+MINOR-002 (различия в типе entity_type) — оставлено как есть, оба подхода валидны и покрыты тестами.
 
 ---
 
@@ -272,10 +278,10 @@ entity_type: str = "compound"  # или "publication", "protein"
    - ~50 параметризованных тестов для трансформеров
    - Все ключевые контракты проверяются
 
-3. **Критические расхождения отсутствуют**
+3. **Расхождения**
    - Выявлено 2 минорных несоответствия (P4)
-   - Функциональность не затронута
-   - Исправление опционально
+   - MINOR-001: ✅ Исправлено (commit acfd4c8)
+   - MINOR-002: Оставлено (валидный паттерн)
 
 ---
 
