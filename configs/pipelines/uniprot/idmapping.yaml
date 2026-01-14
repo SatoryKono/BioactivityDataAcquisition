@@ -44,7 +44,8 @@ dq_rules:
 sink:
   bronze:
     # ID Mapping doesn't write Bronze (data comes from API, not raw files)
-    enabled: false
+    # NOTE: enabled: false is not yet implemented in code, so Bronze is still written
+    path: "data/output/bronze"
   silver:
     path: "data/output/silver"
     primary_key: ["target_chembl_id"]
