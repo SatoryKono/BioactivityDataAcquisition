@@ -6,7 +6,7 @@ Implements baseline comparison and threshold-based detection for:
 - Error rate anomalies
 - Data quality score degradation
 
-Uses statistical methods (Z-score, IQR, MAD) with Strategy pattern.
+Uses Z-score statistical method with Strategy pattern.
 
 Usage:
     detector = AnomalyDetector(baseline_window=7)
@@ -25,8 +25,6 @@ from __future__ import annotations
 from bioetl.infrastructure.observability.anomaly.detector import AnomalyDetector
 from bioetl.infrastructure.observability.anomaly.detectors import (
     DetectorStrategy,
-    IQRDetector,
-    MADDetector,
     ZScoreDetector,
 )
 from bioetl.infrastructure.observability.anomaly.monitor import DataQualityMonitor
@@ -43,7 +41,5 @@ __all__ = [
     "AnomalyType",
     "DataQualityMonitor",
     "DetectorStrategy",
-    "IQRDetector",
-    "MADDetector",
     "ZScoreDetector",
 ]
