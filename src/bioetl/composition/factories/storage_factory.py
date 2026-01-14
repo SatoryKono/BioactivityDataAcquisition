@@ -13,10 +13,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 from .storage_adapter import StorageAdapter
@@ -76,6 +78,8 @@ class StorageFactory:
         silver_path: Path,
         gold_path: Path,
         bronze_config: Any,
+        silver_config: Any,
+        gold_config: Any,
         silver_csv_exporter: CsvExporter | None,
         gold_csv_exporter: CsvExporter | None,
         logger: LoggerPort,
@@ -98,6 +102,21 @@ class StorageFactory:
             tracing if tracing is not None else NoOpTracing()
         )
 
+        # Create metadata writers based on config
+        # Silver metadata writer
+        silver_metadata_writer: MetadataWriter | NoOpMetadataWriter
+        if silver_config and silver_config.save_metadata:
+            silver_metadata_writer = MetadataWriter(logger=logger)
+        else:
+            silver_metadata_writer = NoOpMetadataWriter()
+
+        # Gold metadata writer
+        gold_metadata_writer: MetadataWriter | NoOpMetadataWriter
+        if gold_config and gold_config.save_metadata:
+            gold_metadata_writer = MetadataWriter(logger=logger)
+        else:
+            gold_metadata_writer = NoOpMetadataWriter()
+
         return StorageAdapter(
             bronze_writer=BronzeWriter(
                 base_path=bronze_path,
@@ -112,12 +131,14 @@ class StorageFactory:
                 logger=logger,
                 tracing=effective_tracing,
                 csv_exporter=silver_csv_exporter,
+                metadata_writer=silver_metadata_writer,
             ),
             gold_writer=GoldWriter(
                 base_path=gold_path,
                 logger=logger,
                 tracing=effective_tracing,
                 csv_exporter=gold_csv_exporter,
+                metadata_writer=gold_metadata_writer,
             ),
         )
 
@@ -185,6 +206,8 @@ class StorageFactory:
             silver_path=silver_path,
             gold_path=gold_path,
             bronze_config=bronze_config,
+            silver_config=silver_config,
+            gold_config=gold_config,
             silver_csv_exporter=silver_csv_exporter,
             gold_csv_exporter=gold_csv_exporter,
             logger=logger,
