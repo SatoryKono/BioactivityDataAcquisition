@@ -147,7 +147,9 @@ class FileAuditAdapter:
             if not isinstance(data, dict):
                 return None
             entry = self._parse_entry(data)
-            if self._matches_filters(entry, run_id, layer, table_name, start_time, end_time):
+            if self._matches_filters(
+                entry, run_id, layer, table_name, start_time, end_time
+            ):
                 return entry
             return None
         except (ValueError, KeyError):
@@ -227,7 +229,14 @@ class FileAuditAdapter:
             if len(entries) >= limit:
                 break
             file_entries = self._process_audit_file(
-                file_path, run_id, layer, table_name, start_time, end_time, limit, len(entries)
+                file_path,
+                run_id,
+                layer,
+                table_name,
+                start_time,
+                end_time,
+                limit,
+                len(entries),
             )
             entries.extend(file_entries)
 
