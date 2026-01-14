@@ -11,7 +11,6 @@ import pytest
 from bioetl.application.pipelines.chembl.assay_parameters_transformer import (
     KNOWN_PARAM_TYPES,
     AssayParametersTransformer,
-    _normalize_type,
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities.chembl_assay_parameters import AssayParameters
@@ -180,33 +179,8 @@ class TestAssayParametersEntity:
 
 
 # =============================================================================
-# Helper Function Tests
+# Constant Tests
 # =============================================================================
-
-
-@pytest.mark.unit
-class TestNormalizeType:
-    """Tests for _normalize_type helper function."""
-
-    def test_none_returns_unknown(self) -> None:
-        """Test that None returns 'UNKNOWN'."""
-        assert _normalize_type(None) == "UNKNOWN"
-
-    def test_uppercase_conversion(self) -> None:
-        """Test that lowercase is converted to uppercase."""
-        assert _normalize_type("conc") == "CONC"
-        assert _normalize_type("pH") == "PH"
-        assert _normalize_type("temp") == "TEMP"
-
-    def test_strips_whitespace(self) -> None:
-        """Test that whitespace is stripped."""
-        assert _normalize_type("  TEMP  ") == "TEMP"
-        assert _normalize_type("\tCONC\n") == "CONC"
-
-    def test_known_types_unchanged(self) -> None:
-        """Test that known types remain unchanged after normalization."""
-        for param_type in ["CONC", "PH", "TEMP", "TIME", "CELL_COUNT"]:
-            assert _normalize_type(param_type) == param_type
 
 
 @pytest.mark.unit

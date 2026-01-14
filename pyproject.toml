@@ -463,4 +463,5 @@ dev = [
     # Note: osv-scanner is preferred for vulnerability scanning (Go binary)
     # Docstring style checking
     "pydocstyle>=6.3",
+    "autoflake>=2.3.1",
 ]
