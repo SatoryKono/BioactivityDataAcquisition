@@ -1,4 +1,4 @@
-# configs/pipelines/_base.yaml
+# configs/pipelines/_defaults.yaml
 # =============================================================================
 # Unified Base Schema for BioETL Pipeline Configurations
 # =============================================================================
@@ -20,7 +20,7 @@
 #   - input_filter configuration
 #
 # Inheritance Chain:
-#   _base.yaml (this file) -> <provider>/<entity>.yaml
+#   _defaults.yaml (this file) -> <provider>/<entity>.yaml
 #
 # =============================================================================
 
