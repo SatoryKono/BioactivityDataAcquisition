@@ -120,3 +120,4 @@ coverage_summary.txt
 htmlcov/
 tests.zip
 coverage-*.xml
+configs/pipelines.zip
