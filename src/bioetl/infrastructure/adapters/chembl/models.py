@@ -445,16 +445,20 @@ class ChemblTargetResponse(BaseModel):
     )
 
 
-# === Document Models ===
+# === Publication Models (ChEMBL API: /document endpoint) ===
 
 
-class ChemblDocumentRecord(BaseModel):
-    """Individual document record from ChEMBL API."""
+class ChemblPublicationRecord(BaseModel):
+    """Individual publication record from ChEMBL API.
+
+    Note: ChEMBL API uses 'document' as the endpoint name.
+    Renamed from ChemblDocumentRecord per ADR-024 (Ubiquitous Language).
+    """
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
     # Primary Key
-    document_chembl_id: str = Field(description="ChEMBL ID of the document")
+    document_chembl_id: str = Field(description="ChEMBL ID of the publication")
 
     # Core Fields
     doc_type: str | None = Field(default=None, description="Document type")
@@ -482,13 +486,17 @@ class ChemblDocumentRecord(BaseModel):
     src_id: int | None = Field(default=None, description="Source ID")
 
 
-class ChemblDocumentResponse(BaseModel):
-    """Complete ChEMBL Document API response."""
+class ChemblPublicationResponse(BaseModel):
+    """Complete ChEMBL Publication API response.
+
+    Note: ChEMBL API uses 'document' as the endpoint name.
+    Renamed from ChemblDocumentResponse per ADR-024.
+    """
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
-    documents: list[ChemblDocumentRecord] = Field(
-        default_factory=list, description="List of document records"
+    documents: list[ChemblPublicationRecord] = Field(
+        default_factory=list, description="List of publication records"
     )
     page_meta: ChemblPageMeta | None = Field(
         default=None, description="Pagination metadata"
@@ -590,9 +598,16 @@ class ChemblStatusResponse(BaseModel):
     chembl_release_date: str | None = Field(default=None)
 
 
+# === Deprecated Aliases (ADR-024 backward compatibility) ===
+# Will be removed in v3.0
+ChemblDocumentRecord = ChemblPublicationRecord
+ChemblDocumentResponse = ChemblPublicationResponse
+
+
 # === Response Type Mapping ===
 
 # Mapping from entity type to response class for factory usage
+# Note: Keys match ChEMBL API endpoint names, not Ubiquitous Language
 CHEMBL_RESPONSE_MODELS: dict[str, type[BaseModel]] = {
     "activity": ChemblActivityResponse,
     "assay": ChemblAssayResponse,
@@ -600,7 +615,7 @@ CHEMBL_RESPONSE_MODELS: dict[str, type[BaseModel]] = {
     "compound": ChemblMoleculeResponse,
     "target": ChemblTargetResponse,
     "target_component": ChemblTargetComponentResponse,
-    "document": ChemblDocumentResponse,
+    "document": ChemblPublicationResponse,  # ADR-024: Publication is canonical
     "cell_line": ChemblCellLineResponse,
 }
 
@@ -612,6 +627,6 @@ CHEMBL_RECORD_MODELS: dict[str, type[BaseModel]] = {
     "compound": ChemblMoleculeRecord,
     "target": ChemblTargetRecord,
     "target_component": ChemblTargetComponentRecord,
-    "document": ChemblDocumentRecord,
+    "document": ChemblPublicationRecord,  # ADR-024: Publication is canonical
     "cell_line": ChemblCellLineRecord,
 }

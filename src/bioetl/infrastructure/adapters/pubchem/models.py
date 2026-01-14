@@ -16,11 +16,14 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class PubChemCompoundRecord(BaseModel):
-    """Normalized compound record from PubChem.
+class PubchemMoleculeRecord(BaseModel):
+    """Normalized molecule record from PubChem.
 
     Represents data extracted from a pubchempy.Compound object
     via the adapter's _compound_to_dict method.
+
+    Note: Renamed from PubChemCompoundRecord per ADR-024.
+    'Molecule' is the canonical term for chemical compounds.
     """
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
@@ -117,13 +120,15 @@ class PubChemAssayRecord(BaseModel):
     )
 
 
-# === Extended Compound Record with Additional Fields ===
+# === Extended Molecule Record with Additional Fields ===
 
 
-class PubChemCompoundDetailRecord(BaseModel):
-    """Extended compound record with additional computed properties.
+class PubchemMoleculeDetailRecord(BaseModel):
+    """Extended molecule record with additional computed properties.
 
     Used when fetching detailed compound information from PubChem PUG REST API.
+
+    Note: Renamed from PubChemCompoundDetailRecord per ADR-024.
     """
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
@@ -216,11 +221,19 @@ class PubChemBioactivityRecord(BaseModel):
     )
 
 
+# === Deprecated Aliases (ADR-024 backward compatibility) ===
+# Will be removed in v3.0
+PubChemCompoundRecord = PubchemMoleculeRecord
+PubChemCompoundDetailRecord = PubchemMoleculeDetailRecord
+
+
 # === Record Type Mapping ===
 
 # Mapping from entity type to record model
+# Note: Keys match PubChem entity types, not Ubiquitous Language
 PUBCHEM_RECORD_MODELS: dict[str, type[BaseModel]] = {
-    "compound": PubChemCompoundRecord,
+    "compound": PubchemMoleculeRecord,  # ADR-024: Molecule is canonical
+    "molecule": PubchemMoleculeRecord,  # Canonical alias
     "substance": PubChemSubstanceRecord,
     "assay": PubChemAssayRecord,
 }
