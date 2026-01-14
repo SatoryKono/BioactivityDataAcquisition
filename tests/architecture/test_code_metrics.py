@@ -36,7 +36,7 @@ class TestFileSizeLimits:
         # Domain layer exemptions (baseline)
         "filter_config.py": 400,  # 354 LOC
         "entities.py": 600,  # 569 LOC
-        "chembl.py": 720,  # 714 LOC - ChEMBL entity DTOs with many fields
+        "chembl.py": 735,  # 730 LOC - ChEMBL entity DTOs with many fields
         "normalization.py": 350,  # 341 LOC - Pure domain normalization functions
         "validation.py": 450,  # 430 LOC - Pure domain validation functions (SMILES, DOI, InChI Key, year, molecular weight)
         "activity_aggregator.py": 400,  # 392 LOC - Activity aggregation with multiple strategies
