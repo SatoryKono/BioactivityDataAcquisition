@@ -161,6 +161,75 @@ class OpenAlexAdapter(BaseHttpAdapter):
             "Use fetch_filtered() with filter_field='doi' instead."
         )
 
+    async def _batch_doi_lookup(
+        self,
+        valid_dois: list[str],
+        found_dois: set[str],
+        limit: int | None,
+        start_count: int,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Phase 1: Batch DOI lookup for valid DOIs.
+
+        Args:
+            valid_dois: List of valid DOIs to lookup.
+            found_dois: Set to track found DOIs (mutated).
+            limit: Maximum records to fetch.
+            start_count: Number of records already fetched.
+
+        Yields:
+            Work records with _lookup_method field.
+        """
+        count = start_count
+        for i in range(0, len(valid_dois), self.batch_size):
+            if limit and count >= limit:
+                return
+
+            batch = valid_dois[i : i + self.batch_size]
+            async for work in self._fetch_by_dois(batch):
+                doi = self._extract_doi_from_record(work)
+                if doi:
+                    found_dois.add(doi.lower())
+                work["_lookup_method"] = "doi"
+                count += 1
+                yield work
+                if limit and count >= limit:
+                    return
+
+    async def _title_only_lookup(
+        self,
+        title_only_entries: list[str],
+        fallback_mapping: dict[str, str],
+        limit: int | None,
+        start_count: int,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Phase 3: Title-only entries lookup (empty DOIs).
+
+        Args:
+            title_only_entries: List of empty DOI entries.
+            fallback_mapping: Mapping from DOI to title for fallback.
+            limit: Maximum records to fetch.
+            start_count: Number of records already fetched.
+
+        Yields:
+            Work records with _lookup_method field.
+        """
+        count = start_count
+        for empty_doi in title_only_entries:
+            if limit and count >= limit:
+                return
+
+            title = fallback_mapping.get(empty_doi, fallback_mapping.get(""))
+            if not title:
+                continue
+
+            self.logger.info("openalex_title_only_search", title=title[:50])
+
+            found_work = await self._search_by_title(title, limit=1)
+            if found_work:
+                found_work["_lookup_method"] = "title_only"
+                count += 1
+                yield found_work
+
     async def fetch_filtered_with_fallback(
         self,
         entity_type: str,
@@ -194,25 +263,15 @@ class OpenAlexAdapter(BaseHttpAdapter):
         fetched = 0
         found_dois: set[str] = set()
 
-        # Separate valid DOIs from title-only entries
         valid_dois = [d for d in filter_ids if d and d.strip()]
         title_only_entries = [d for d in filter_ids if not d or not d.strip()]
 
-        # Phase 1: Batch DOI lookup for valid DOIs
-        for i in range(0, len(valid_dois), self.batch_size):
+        # Phase 1: Batch DOI lookup
+        async for work in self._batch_doi_lookup(valid_dois, found_dois, limit, fetched):
+            yield work
+            fetched += 1
             if limit and fetched >= limit:
                 return
-
-            batch = valid_dois[i : i + self.batch_size]
-            async for work in self._fetch_by_dois(batch):
-                doi = self._extract_doi_from_record(work)
-                if doi:
-                    found_dois.add(doi.lower())
-                work["_lookup_method"] = "doi"
-                yield work
-                fetched += 1
-                if limit and fetched >= limit:
-                    return
 
         # Phase 2: Fallback by title for unresolved DOIs
         async for work in self._fallback_handler.process_missing_dois(
@@ -228,26 +287,11 @@ class OpenAlexAdapter(BaseHttpAdapter):
             if limit and fetched >= limit:
                 return
 
-        # Phase 3: Title-only entries (empty DOIs)
-        for empty_doi in title_only_entries:
-            if limit and fetched >= limit:
-                return
-
-            # Get title from fallback_mapping (may use "" as key for empty DOIs)
-            title = fallback_mapping.get(empty_doi, fallback_mapping.get(""))
-            if not title:
-                continue
-
-            self.logger.info(
-                "openalex_title_only_search",
-                title=title[:50],
-            )
-
-            found_work = await self._search_by_title(title, limit=1)
-            if found_work:
-                found_work["_lookup_method"] = "title_only"
-                yield found_work
-                fetched += 1
+        # Phase 3: Title-only entries
+        async for work in self._title_only_lookup(
+            title_only_entries, fallback_mapping, limit, fetched
+        ):
+            yield work
 
     async def fetch(
         self,
