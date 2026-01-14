@@ -322,18 +322,34 @@ class PublicationYear(ValueObject[int]):
         if isinstance(value, int):
             return value
         if isinstance(value, str):
-            stripped = value.strip()
-            # Support date string format: "2024-01-15" → 2024
-            if len(stripped) >= 4 and stripped[4:5] in ("-", "/", ""):
-                try:
-                    return int(stripped[:4])
-                except ValueError:
-                    pass
-            try:
-                return int(stripped)
-            except ValueError:
-                raise ValueError(f"Invalid publication year: {value!r}") from None
+            return self._parse_year_from_string(value)
         raise ValueError(f"PublicationYear must be int, got {type(value).__name__}")
+
+    def _parse_year_from_string(self, value: str) -> int:
+        """Parse year from string value.
+
+        Supports direct integer strings and date formats (YYYY-MM-DD).
+
+        Args:
+            value: String value to parse.
+
+        Returns:
+            Parsed integer year.
+
+        Raises:
+            ValueError: If parsing fails.
+        """
+        stripped = value.strip()
+        # Support date string format: "2024-01-15" → 2024
+        if len(stripped) >= 4 and stripped[4:5] in ("-", "/", ""):
+            try:
+                return int(stripped[:4])
+            except ValueError:
+                pass
+        try:
+            return int(stripped)
+        except ValueError:
+            raise ValueError(f"Invalid publication year: {value!r}") from None
 
     def _validate(self, value: int | str) -> int:
         """Validate publication year against config range.
