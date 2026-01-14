@@ -25,17 +25,17 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze"
+    path: "data/output/bronze/chembl/assay_parameters"
   silver:
-    path: "data/output/silver"
+    path: "data/output/silver/chembl/assay_parameters"
     primary_key: ["assay_param_id"]
     partition_by: ["type"]
     csv_export:
-      path: "data/output/csv/silver"
+      path: "data/output/csv/silver/chembl/assay_parameters"
   gold:
-    path: "data/output/gold"
+    path: "data/output/gold/chembl/assay_parameters"
     csv_export:
-      path: "data/output/csv/gold"
+      path: "data/output/csv/gold/chembl/assay_parameters"
 
 # Entity-specific input filter
 input_filter:
