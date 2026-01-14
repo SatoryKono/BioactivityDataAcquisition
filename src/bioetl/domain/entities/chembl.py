@@ -526,11 +526,15 @@ class TargetRecord(BaseModel):
     )
 
 
-class DocumentRecord(BaseModel):
-    """Scientific document DTO from ChEMBL.
+class ChemblPublicationRecord(BaseModel):
+    """Scientific publication DTO from ChEMBL.
 
-    Represents a publication/document from ChEMBL API.
+    Represents a publication from ChEMBL API (/document endpoint).
     Required field: document_chembl_id.
+
+    Note: Previously named DocumentRecord. The ChEMBL API uses 'document'
+    as the endpoint name, but we use 'Publication' for Ubiquitous Language
+    alignment per ADR-024.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -568,14 +572,16 @@ class DocumentRecord(BaseModel):
     src_id: int | None = Field(default=None, description="Data source ID")
 
 
-class DocumentTermRecord(BaseModel):
-    """Document term DTO from ChEMBL.
+class ChemblPublicationTermRecord(BaseModel):
+    """Publication term DTO from ChEMBL.
 
     Represents a term (MeSH heading, keyword, concept) associated with
-    a ChEMBL document. This is a derived entity extracted from Document
+    a ChEMBL publication. This is a derived entity extracted from Publication
     records by flattening the 1:M relationship.
 
     Required fields: document_chembl_id, term, term_type.
+
+    Note: Previously named DocumentTermRecord per ADR-024.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -701,10 +707,20 @@ class ProteinClassRecord(BaseModel):
     )
 
 
+# === Deprecated Aliases (ADR-024 backward compatibility) ===
+# These will be removed in v3.0
+DocumentRecord = ChemblPublicationRecord
+DocumentTermRecord = ChemblPublicationTermRecord
+
+
 __all__ = [
     "ActivityRecord",
     "AssayRecord",
     "CellLineRecord",
+    # Canonical names (ADR-024)
+    "ChemblPublicationRecord",
+    "ChemblPublicationTermRecord",
+    # Deprecated aliases (backward compatibility)
     "DocumentRecord",
     "DocumentTermRecord",
     "MoleculeRecord",
