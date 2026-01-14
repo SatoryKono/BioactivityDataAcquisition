@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from prometheus_client import CollectorRegistry
@@ -13,7 +13,6 @@ from bioetl.infrastructure.observability.anomaly import (
     AnomalySeverity,
     AnomalyType,
 )
-from bioetl.infrastructure.observability.lineage import LineageTracker
 from bioetl.infrastructure.observability.metrics import MetricsCollector
 
 
@@ -27,13 +26,6 @@ def mock_logger() -> MagicMock:
 def metrics_registry():
     """Fixture for a fresh Prometheus registry."""
     return CollectorRegistry()
-
-
-@pytest.fixture
-def mock_write_deltalake():
-    """Fixture for mocking deltalake.write_deltalake."""
-    with patch("bioetl.infrastructure.observability.lineage.write_deltalake") as mock:
-        yield mock
 
 
 @pytest.mark.unit
@@ -64,44 +56,6 @@ class TestMetricsCollector:
             registry=metrics_registry,
         )
         collector.record_error(error_code="VALIDATION_ERROR")
-
-
-@pytest.mark.unit
-class TestLineageTracker:
-    """Test LineageTracker functionality."""
-
-    def test_lineage_tracker_initialization(self, tmp_path, mock_logger):
-        """Test LineageTracker can be initialized."""
-        tracker = LineageTracker(
-            delta_path=tmp_path, pipeline_name="test_pipeline", logger=mock_logger
-        )
-        assert tracker.pipeline_name == "test_pipeline"
-        assert tracker.delta_path == tmp_path
-
-    def test_record_bronze_creates_batch_lineage(
-        self, tmp_path, mock_write_deltalake, mock_logger
-    ):
-        """Test that record_bronze creates proper batch lineage."""
-        tracker = LineageTracker(
-            delta_path=tmp_path, pipeline_name="test_pipeline", logger=mock_logger
-        )
-
-        # Record bronze layer ingestion
-        tracker.record_bronze(
-            batch_id="batch-123",
-            run_id="run-456",
-            provider="chembl",
-            entity_type="activity",
-            record_count=100,
-            file_path="s3://bucket/bronze/file.jsonl.zst",
-            timestamp=datetime.now(UTC),
-            watermark="2024-01-01",
-        )
-
-        # Verify write_deltalake was called
-        mock_write_deltalake.assert_called_once()
-        # Verify batch_lineage table path is set correctly
-        assert tracker.batch_table_path == tmp_path / "batch_lineage"
 
 
 @pytest.mark.unit

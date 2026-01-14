@@ -29,20 +29,13 @@ INFRASTRUCTURE_DIR = Path("src/bioetl/infrastructure")
 # REFACTORED (no longer need datetime.now()):
 # - operations.py: Now accepts `now: datetime` parameter from caller
 # - gold_writer.py: Now accepts `ingestion_ts: datetime` parameter for SCD2
+# REMOVED (dead code cleanup):
+# - lineage.py: Removed - unused in production
+# - iqr.py, mad.py: Removed - unused detector strategies
 ALLOWED_FILES: set[str] = {
-    # infrastructure/observability/lineage.py
-    # Uses datetime.now(UTC) for provenance tracking in record_run_start(),
-    # record_run_end(), and for filtering lineage records by date range.
-    "lineage.py",
     # infrastructure/observability/anomaly/detector.py
     # Uses datetime.now(UTC) for timestamp in AnomalyResult when critical anomalies detected.
     "detector.py",
-    # infrastructure/observability/anomaly/detectors/iqr.py
-    # IQR-based anomaly detector: timestamp in detection result for monitoring.
-    "iqr.py",
-    # infrastructure/observability/anomaly/detectors/mad.py
-    # MAD-based anomaly detector: timestamp in detection result for monitoring.
-    "mad.py",
     # infrastructure/observability/anomaly/detectors/zscore.py
     # Z-score anomaly detector: timestamp in detection result for monitoring.
     "zscore.py",
