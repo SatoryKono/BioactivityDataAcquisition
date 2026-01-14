@@ -29,11 +29,11 @@ def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
 
 
 def _load_base_config(config_path: Path) -> dict[str, Any]:
-    """Load pipeline base configuration from _defaults.yaml."""
-    base_path = config_path.parent.parent / "_defaults.yaml"
+    """Load pipeline base configuration from _base.yaml."""
+    base_path = config_path.parent.parent / "_base.yaml"
 
     if not base_path.exists():
-        base_path = config_path.parent / "_defaults.yaml"
+        base_path = config_path.parent / "_base.yaml"
 
     if base_path.exists():
         with open(base_path, encoding="utf-8") as f:
