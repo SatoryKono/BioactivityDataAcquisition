@@ -7,9 +7,9 @@
 # All entity-specific configs MUST inherit these defaults unless explicitly
 # overriding with documented justification.
 #
-# Version: 1.0.0
+# Version: 2.0.0
 # Reference: RULES.md v5.10, Appendix D
-# Last Updated: 2026-01-13
+# Last Updated: 2026-01-14
 #
 # Usage:
 #   Entity configs specify only entity-specific fields:
@@ -20,14 +20,14 @@
 #   - input_filter configuration
 #
 # Inheritance Chain:
-#   _base.yaml (this file) -> _defaults.yaml -> <provider>/<entity>.yaml
+#   _base.yaml (this file) -> <provider>/<entity>.yaml
 #
 # =============================================================================
 
 # -----------------------------------------------------------------------------
 # Schema Version
 # -----------------------------------------------------------------------------
-schema_version: "1.0.0"
+schema_version: "2.0.0"
 
 # -----------------------------------------------------------------------------
 # Pipeline Identification (MUST be overridden in entity config)
@@ -143,9 +143,9 @@ sink:
     classification: public
 
     # Forensic data retention
-    # true: 30-day retention for critical tables
-    # false: 7-day default retention
-    forensic_retention: false
+    # false: 7-day default retention (default)
+    # true: 30-day retention for critical tables (requires justification)
+    forensic_retention: false  # true только для Critical tables (требует обоснования)
 
     # MUST: No random elements in writes (ADR-014)
     deterministic: true
