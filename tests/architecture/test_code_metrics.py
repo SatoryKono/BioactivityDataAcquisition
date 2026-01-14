@@ -297,7 +297,6 @@ class TestFunctionLength:
         "_log_silver_audit": 75,  # Silver audit logging
         # FilterableDataSourcePort implementations
         "fetch_filtered": 70,  # Batch filtering with OR-query (UniProt)
-        "fetch_filtered_with_fallback": 70,  # Primary lookup + fallback search
         "fetch_multi_filtered": 60,  # Multi-field AND filtering
     }
 
