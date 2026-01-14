@@ -19,7 +19,6 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities.chembl_assay_parameters import AssayParameters
-from bioetl.domain.normalization import normalize_to_string
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
@@ -80,21 +79,6 @@ _ASSAY_PARAMS_GROUPS: tuple[FieldGroup, ...] = (
 )
 
 
-def _normalize_type(param_type: Any) -> str:
-    """Normalize parameter type to uppercase.
-
-    Args:
-        param_type: Raw parameter type from API (may be Any type).
-
-    Returns:
-        Normalized uppercase type or "UNKNOWN".
-    """
-    if param_type is None:
-        return "UNKNOWN"
-    normalized = normalize_to_string(param_type)
-    return normalized.upper() if normalized else "UNKNOWN"
-
-
 class AssayParametersTransformer(BaseChemblTransformer):
     """Transforms ChEMBL assay_parameters bronze records to silver.
 
@@ -112,6 +96,22 @@ class AssayParametersTransformer(BaseChemblTransformer):
     entity_class = AssayParameters
     primary_id_field = "assay_param_id"
 
+    def _normalize_type(self, param_type: Any) -> str:
+        """Normalize parameter type to uppercase.
+
+        Uses DataNormalizationService via DI for consistent normalization.
+
+        Args:
+            param_type: Raw parameter type from API (may be Any type).
+
+        Returns:
+            Normalized uppercase type or "UNKNOWN".
+        """
+        if param_type is None:
+            return "UNKNOWN"
+        normalized = self._data_normalizer.normalize_to_string(param_type)
+        return normalized.upper() if normalized else "UNKNOWN"
+
     def _extract_business_data(
         self,
         record: BronzeRecord,
@@ -128,7 +128,7 @@ class AssayParametersTransformer(BaseChemblTransformer):
         """
         # Normalize type
         raw_type = record.get("type")
-        normalized_type = _normalize_type(raw_type)
+        normalized_type = self._normalize_type(raw_type)
 
         # Build business data dictionary
         business_data: dict[str, Any] = {
