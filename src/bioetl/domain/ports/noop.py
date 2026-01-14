@@ -21,8 +21,14 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Self
 
 if TYPE_CHECKING:
+    from pathlib import Path
     from types import TracebackType
 
+    from bioetl.domain.models.metadata import (
+        BronzeMetadata,
+        GoldMetadata,
+        SilverMetadata,
+    )
     from bioetl.domain.ports.audit import AuditEntry, AuditLayer
     from bioetl.domain.ports.memory import MemoryStats
     from bioetl.domain.types import RunID
@@ -368,3 +374,74 @@ class NoOpMemoryMonitor:
 
         """
         return 10000
+
+
+class NoOpMetadataWriter:
+    """No-op implementation of MetadataWriterPort.
+
+    Used when save_metadata is disabled or for testing.
+    All operations are silently ignored and return empty strings.
+
+    Implements:
+        MetadataWriterPort: Domain port for metadata sidecar files.
+
+    Example:
+        >>> writer = NoOpMetadataWriter()
+        >>> await writer.write_bronze_metadata(path, metadata)  # returns ""
+        ''
+
+    """
+
+    async def write_bronze_metadata(
+        self,
+        base_path: str | Path,  # noqa: ARG002
+        metadata: BronzeMetadata,  # noqa: ARG002
+    ) -> str:
+        """Write Bronze metadata (no-op).
+
+        Args:
+            base_path: Base path (ignored).
+            metadata: Metadata (ignored).
+
+        Returns:
+            Empty string.
+
+        """
+        return ""
+
+    async def write_silver_metadata(
+        self,
+        base_path: str | Path,  # noqa: ARG002
+        metadata: SilverMetadata,  # noqa: ARG002
+    ) -> str:
+        """Write Silver metadata (no-op).
+
+        Args:
+            base_path: Base path (ignored).
+            metadata: Metadata (ignored).
+
+        Returns:
+            Empty string.
+
+        """
+        return ""
+
+    async def write_gold_metadata(
+        self,
+        base_path: str | Path,  # noqa: ARG002
+        metadata: GoldMetadata,  # noqa: ARG002
+    ) -> str:
+        """Write Gold metadata (no-op).
+
+        Args:
+            base_path: Base path (ignored).
+            metadata: Metadata (ignored).
+
+        Returns:
+            Empty string.
+
+        """
+        return ""
+
+    async def aclose(self) -> None:
+        """No-op close. Idempotent."""
