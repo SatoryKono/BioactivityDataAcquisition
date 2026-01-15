@@ -7,9 +7,9 @@
 # All entity-specific configs MUST inherit these defaults unless explicitly
 # overriding with documented justification.
 #
-# Version: 2.0.0
+# Version: 3.0.0
 # Reference: RULES.md v5.10, Appendix D
-# Last Updated: 2026-01-14
+# Last Updated: 2026-01-15
 #
 # Usage:
 #   Entity configs specify only entity-specific fields:
@@ -18,6 +18,7 @@
 #   - gold_filters
 #   - sink path overrides
 #   - input_filter configuration
+#   - column_checks (entity-specific DQ checks)
 #
 # Inheritance Chain:
 #   _base.yaml (this file) -> <provider>/<entity>.yaml
@@ -27,7 +28,7 @@
 # -----------------------------------------------------------------------------
 # Schema Version
 # -----------------------------------------------------------------------------
-schema_version: "2.0.0"
+schema_version: "3.0.0"
 
 # -----------------------------------------------------------------------------
 # Pipeline Identification (MUST be overridden in entity config)
@@ -36,6 +37,61 @@ schema_version: "2.0.0"
 # provider: <provider>                 # MUST: chembl | pubchem | uniprot | ...
 # entity_type: <entity>                # MUST: activity | assay | molecule | ...
 # version: "1.0.0"                     # MUST: Semantic version of config
+
+# -----------------------------------------------------------------------------
+# Metadata Configuration (Lineage, Provenance, Content Hash, Schema)
+# Reference: RULES.md §2.3, §2.4, §2.8.1, §7.1
+# -----------------------------------------------------------------------------
+metadata:
+  # ---------------------------------------------------------------------------
+  # Lineage Tracking (§2.3)
+  # ---------------------------------------------------------------------------
+  lineage:
+    enabled: true
+    log_table: sys.lineage_log
+    track_bronze_paths: true
+    track_transform_version: true
+
+  # ---------------------------------------------------------------------------
+  # Provenance Fields (§2.4)
+  # MUST: These fields are required for backfill and audit
+  # ---------------------------------------------------------------------------
+  provenance:
+    run_id_field: _run_id                 # MUST: UUID identifying the pipeline run
+    run_type_field: _run_type             # MUST: incremental | backfill | rebuild
+    batch_id_field: _source_batch_id      # MUST: FK to lineage_log
+    ingestion_ts_field: _ingestion_ts     # Timestamp of record ingestion
+
+  # ---------------------------------------------------------------------------
+  # Content Hash Configuration (§2.8.1)
+  # Used for deduplication and idempotent writes
+  # ---------------------------------------------------------------------------
+  content_hash:
+    algorithm: sha256
+    include_provider_prefix: true
+    excluded_fields:
+      - _ingestion_ts
+      - _run_id
+      - _run_type
+      - _source_batch_id
+      - _dq_score
+      - _dq_flags
+    normalization:
+      float_precision: 10
+      nan_to_null: true
+      inf_to_null: true
+      date_format: "YYYY-MM-DD"
+      strip_strings: true
+
+  # ---------------------------------------------------------------------------
+  # Schema Versioning (§7.1)
+  # ---------------------------------------------------------------------------
+  schema:
+    # Schema version follows semver (MUST be overridden in entity config)
+    # version: "1.0.0"
+    # contract_path: docs/contracts/gold/<entity>.json
+    deprecation_period_days: 14
+    evolution_strategy: backward_compatible
 
 # -----------------------------------------------------------------------------
 # Source Configuration
@@ -73,19 +129,106 @@ transform:
   #   - enrich_metadata      # Add computed fields
 
 # -----------------------------------------------------------------------------
-# Data Quality Rules
+# Data Quality Configuration
+# Reference: RULES.md §3.1.2, §3.4, §3.4.1, §2.6
 # -----------------------------------------------------------------------------
+dq_config:
+  # ---------------------------------------------------------------------------
+  # Thresholds (§3.1.2)
+  # ---------------------------------------------------------------------------
+  thresholds:
+    # Soft threshold - triggers WARNING but continues processing
+    # MUST: Default 5% error rate before warning
+    soft_fail_percent: 5.0
+
+    # Hard threshold - triggers FAILURE and stops batch
+    # MUST: Default 20% error rate before failure
+    hard_fail_percent: 20.0
+
+    # Scope of threshold evaluation
+    scope:
+      - record_error_rate           # % of invalid records in batch
+      - entity_error_rate           # % of invalid unique entities
+
+  # ---------------------------------------------------------------------------
+  # Anomaly Detection (§3.4.1)
+  # ---------------------------------------------------------------------------
+  anomaly_detection:
+    enabled: true
+    baseline:
+      type: moving_average
+      window_days: 30
+    alerts:
+      # Null rate thresholds (multiplier of baseline)
+      null_rate_warning_multiplier: 2.0
+      null_rate_critical_multiplier: 5.0
+      # Record count thresholds (% of baseline)
+      record_count_warning_percent: 70    # Alert if <70% of baseline
+      record_count_critical_percent: 50   # Critical if <50% of baseline
+      # Freshness thresholds
+      freshness_warning_hours: 24
+      freshness_critical_hours: 72
+    cold_start:
+      # Initial period with no alerts
+      silence_days: 7
+      # Period with warnings only (days 8-30)
+      warning_only_days: 30
+      # Full alerting after this period
+      full_alerting_after_days: 30
+
+  # ---------------------------------------------------------------------------
+  # Per-Column Checks
+  # Entity-specific column checks SHOULD be defined in entity configs
+  # ---------------------------------------------------------------------------
+  column_checks: {}
+  # Example structure:
+  #   <column_name>:
+  #     nullable: true/false
+  #     unique: true/false
+  #     pattern: "<regex>"
+  #     range:
+  #       min: <value>
+  #       max: <value>
+  #     allowed_values: [<value1>, <value2>]
+
+  # ---------------------------------------------------------------------------
+  # Quarantine Configuration (§2.6)
+  # ---------------------------------------------------------------------------
+  quarantine:
+    enabled: true
+    table: common.quarantine
+    payload_max_bytes: 65536            # 64KB truncation for large records
+    retention_days: 30
+    error_codes:
+      - SCHEMA_VIOLATION
+      - NULL_REQUIRED_FIELD
+      - PATTERN_MISMATCH
+      - RANGE_VIOLATION
+      - DUPLICATE_RECORD
+      - TRANSFORM_ERROR
+
+  # ---------------------------------------------------------------------------
+  # DQ Metrics Export (§3.4)
+  # ---------------------------------------------------------------------------
+  metrics:
+    export_format: prometheus
+    labels:
+      - pipeline
+      - entity
+      - provider
+      - column
+      - check_type
+    metrics:
+      - dq_validation_score           # Overall DQ score (0-1)
+      - data_freshness_seconds        # Time since last update
+      - quarantine_records_total      # Total quarantined records
+      - dq_soft_threshold_exceeded    # Counter for soft threshold breaches
+      - dq_check_duration_ms          # Histogram for check latency
+
+# Legacy compatibility alias (DEPRECATED - use dq_config.thresholds)
 dq_rules:
-  # Soft threshold - triggers WARNING but continues processing
-  # MUST: Default 5% error rate before warning
   soft_fail_threshold: 0.05
-
-  # Hard threshold - triggers FAILURE and stops batch
-  # MUST: Default 20% error rate before failure
   hard_fail_threshold: 0.20
-
-  # Deviations from defaults MUST be documented with justification
-  # Example: ID mapping may have higher not_found rates (0.30/0.80)
 
 # -----------------------------------------------------------------------------
 # Circuit Breaker Configuration

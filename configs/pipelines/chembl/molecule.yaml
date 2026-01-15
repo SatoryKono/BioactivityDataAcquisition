@@ -1,12 +1,15 @@
 # configs/pipelines/chembl/molecule.yaml
 # Pipeline configuration for ChEMBL Molecule entity.
 #
-# Inherits defaults from ../_base.yaml
+# Inherits defaults from ../_base.yaml:
+# - metadata (lineage, provenance, content_hash)
+# - dq_config (thresholds, anomaly_detection, quarantine, metrics)
+# - circuit_breaker, sink structure, maintenance, input_filter
 
 pipeline_name: chembl_molecule
 provider: chembl
 entity_type: molecule
-version: "1.1.0"
+version: "2.0.0"
 description: "Extract molecules/compounds from ChEMBL API"
 
 primary_keys: ["molecule_chembl_id"]
@@ -14,6 +17,160 @@ silver_table: "chembl_molecule"
 gold_table: "chembl_molecule"
 
 source_file: ../../sources/chembl.yaml
+
+# -----------------------------------------------------------------------------
+# Entity-Specific Metadata
+# -----------------------------------------------------------------------------
+metadata:
+  schema:
+    version: "1.0.0"
+    contract_path: docs/contracts/gold/chembl_molecule.json
+
+# -----------------------------------------------------------------------------
+# Entity-Specific DQ Configuration
+# -----------------------------------------------------------------------------
+dq_config:
+  # Column-level validation rules
+  column_checks:
+    molecule_chembl_id:
+      nullable: false
+      unique: true
+      pattern: "^CHEMBL\\d+$"
+    pref_name:
+      nullable: true
+    molecule_type:
+      nullable: true
+      allowed_values: ["Small molecule", "Protein", "Oligosaccharide", "Oligonucleotide", "Cell", "Antibody", "Enzyme", "Unknown"]
+    structure_type:
+      nullable: true
+      allowed_values: ["MOL", "NONE", "SEQ", "BOTH"]
+    canonical_smiles:
+      nullable: true
+    standard_inchi:
+      nullable: true
+    standard_inchi_key:
+      nullable: true
+      pattern: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
+    full_mwt:
+      nullable: true
+      range:
+        min: 0.0
+    alogp:
+      nullable: true
+      range:
+        min: -10.0
+        max: 20.0
+    hba:
+      nullable: true
+      range:
+        min: 0
+    hbd:
+      nullable: true
+      range:
+        min: 0
+    psa:
+      nullable: true
+      range:
+        min: 0.0
+    rtb:
+      nullable: true
+      range:
+        min: 0
+    ro3_pass:
+      nullable: true
+      allowed_values: ["Y", "N"]
+    num_ro5_violations:
+      nullable: true
+      range:
+        min: 0
+        max: 4
+    cx_most_apka:
+      nullable: true
+    cx_most_bpka:
+      nullable: true
+    cx_logp:
+      nullable: true
+    cx_logd:
+      nullable: true
+    aromatic_rings:
+      nullable: true
+      range:
+        min: 0
+    heavy_atoms:
+      nullable: true
+      range:
+        min: 0
+    qed_weighted:
+      nullable: true
+      range:
+        min: 0.0
+        max: 1.0
+    mw_freebase:
+      nullable: true
+      range:
+        min: 0.0
+    mw_monoisotopic:
+      nullable: true
+      range:
+        min: 0.0
+    full_molformula:
+      nullable: true
+    inorganic_flag:
+      nullable: true
+      allowed_values: ["0", "1", "-1"]
+    polymer_flag:
+      nullable: true
+      allowed_values: ["0", "1"]
+    therapeutic_flag:
+      nullable: true
+      allowed_values: ["0", "1"]
+    natural_product:
+      nullable: true
+      allowed_values: ["0", "1", "-1"]
+    max_phase:
+      nullable: true
+      range:
+        min: 0
+        max: 4
+    first_approval:
+      nullable: true
+      range:
+        min: 1900
+        max: 2100
+    oral:
+      nullable: true
+      allowed_values: ["0", "1"]
+    parenteral:
+      nullable: true
+      allowed_values: ["0", "1"]
+    topical:
+      nullable: true
+      allowed_values: ["0", "1"]
+    black_box_warning:
+      nullable: true
+      allowed_values: ["0", "1"]
+    availability_type:
+      nullable: true
+      allowed_values: ["-2", "-1", "0", "1", "2"]
+    chirality:
+      nullable: true
+      allowed_values: ["-1", "0", "1", "2"]
+    prodrug:
+      nullable: true
+      allowed_values: ["0", "1", "-1"]
+    indication_class:
+      nullable: true
+    withdrawn_flag:
+      nullable: true
+      allowed_values: ["0", "1"]
+    withdrawn_year:
+      nullable: true
+    withdrawn_country:
+      nullable: true
+    withdrawn_reason:
+      nullable: true
+    withdrawn_class:
+      nullable: true
 
 # Entity-specific gold filters
 gold_filters:
