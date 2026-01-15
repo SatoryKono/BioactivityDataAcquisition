@@ -258,6 +258,9 @@ class TestDomainComplexity:
             "validate_activity_value": 10,  # Activity value validation
             # Value coercion with type handling
             "_coerce_to_int": 10,  # CC=8 - Integer coercion with multiple type checks
+            # Composite pipeline domain models (ADR-026)
+            "DQOverrideConfig": 10,  # CC=9 - DQ override validation with threshold checks
+            "from_dict": 8,  # CC=6 - Dictionary parsing with type conversions
         }
 
         violations = []
