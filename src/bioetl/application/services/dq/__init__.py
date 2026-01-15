@@ -1,6 +1,6 @@
 """DQ (Data Quality) analysis services.
 
-Provides domain services for analyzing data quality across
+Provides application services for analyzing data quality across
 Medallion Architecture layers (Bronze, Silver, Gold).
 
 Components:
@@ -10,10 +10,10 @@ Components:
 - DQReportSerializer: Report serialization to JSON/YAML/HTML
 """
 
-from bioetl.domain.services.dq.bronze_analyzer import BronzeDQAnalyzer
-from bioetl.domain.services.dq.gold_analyzer import GoldDQAnalyzer
-from bioetl.domain.services.dq.report_serializer import DQReportSerializer
-from bioetl.domain.services.dq.silver_analyzer import SilverDQAnalyzer
+from bioetl.application.services.dq.bronze_analyzer import BronzeDQAnalyzer
+from bioetl.application.services.dq.gold_analyzer import GoldDQAnalyzer
+from bioetl.application.services.dq.silver_analyzer import SilverDQAnalyzer
+from bioetl.domain.services.dq_serializer import DQReportSerializer
 
 __all__ = [
     "BronzeDQAnalyzer",

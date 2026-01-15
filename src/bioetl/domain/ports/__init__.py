@@ -32,6 +32,11 @@ from bioetl.domain.ports.data_source import (
     DataSourcePort,
     FilterableDataSourcePort,
 )
+from bioetl.domain.ports.dq_config import (
+    BronzeDQConfigPort,
+    GoldDQConfigPort,
+    SilverDQConfigPort,
+)
 from bioetl.domain.ports.dq_report import (
     BronzeDQAnalyzerPort,
     DQReportWriterPort,
@@ -90,6 +95,7 @@ __all__ = [
     "AuditOperation",
     "AuditPort",
     "BronzeDQAnalyzerPort",
+    "BronzeDQConfigPort",
     "CheckpointPort",
     "CircuitBreakerPort",
     "DQMonitorPort",
@@ -98,6 +104,7 @@ __all__ = [
     "DataSourcePort",
     "FilterableDataSourcePort",
     "GoldDQAnalyzerPort",
+    "GoldDQConfigPort",
     "GoldValidatorPort",
     "HealthCheckPort",
     "HealthCheckResult",
@@ -128,6 +135,7 @@ __all__ = [
     "RunnerFactoryPort",
     "ShutdownPort",
     "SilverDQAnalyzerPort",
+    "SilverDQConfigPort",
     "SilverValidatorPort",
     "StoragePort",
     "TracingPort",

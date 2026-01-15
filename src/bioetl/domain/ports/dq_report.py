@@ -17,20 +17,22 @@ if TYPE_CHECKING:
     from datetime import datetime
     from pathlib import Path
 
-    import polars as pl
-    import pyarrow as pa
-
+    from bioetl.domain.ports.dq_config import (
+        BronzeDQConfigPort,
+        GoldDQConfigPort,
+        SilverDQConfigPort,
+    )
     from bioetl.domain.value_objects.dq_report import (
         BronzeDQReport,
         DQReportFormat,
         GoldDQReport,
         SilverDQReport,
     )
-    from bioetl.infrastructure.schemas.dq_report_config import (
-        BronzeDQReportConfig,
-        GoldDQReportConfig,
-        SilverDQReportConfig,
-    )
+
+# Type aliases for data containers (polars/pyarrow)
+# Using Any to avoid infrastructure imports in domain layer
+DataContainer = Any  # polars.DataFrame | pyarrow.Table
+DataContainerDict = dict[str, Any]  # dict[str, polars.DataFrame | pyarrow.Table]
 
 
 @runtime_checkable
@@ -49,7 +51,7 @@ class BronzeDQAnalyzerPort(Protocol):
         pipeline: str,
         batch_id: str,
         source_file: str,
-        config: BronzeDQReportConfig,
+        config: BronzeDQConfigPort,
         timestamp: datetime,
     ) -> BronzeDQReport:
         """Analyze Bronze data and generate DQ report.
@@ -79,13 +81,13 @@ class SilverDQAnalyzerPort(Protocol):
 
     def analyze(
         self,
-        data: pl.DataFrame | pa.Table,
+        data: DataContainer,
         *,
         run_id: str,
         pipeline: str,
         target_table: str,
         source_batch_ids: list[str],
-        config: SilverDQReportConfig,
+        config: SilverDQConfigPort,
         timestamp: datetime,
         primary_keys: list[str],
         soft_fail_threshold: float = 0.05,
@@ -127,17 +129,17 @@ class GoldDQAnalyzerPort(Protocol):
 
     def analyze(
         self,
-        data: pl.DataFrame | pa.Table,
+        data: DataContainer,
         *,
         run_id: str,
         pipeline: str,
         target_table: str,
-        config: GoldDQReportConfig,
+        config: GoldDQConfigPort,
         timestamp: datetime,
         required_fields: list[str] | None = None,
         completeness_threshold: float = 0.90,
         business_rules: list[dict[str, Any]] | None = None,
-        reference_tables: dict[str, pl.DataFrame | pa.Table] | None = None,
+        reference_tables: DataContainerDict | None = None,
         baseline_stats: dict[str, Any] | None = None,
         scd_config: dict[str, Any] | None = None,
     ) -> GoldDQReport:
