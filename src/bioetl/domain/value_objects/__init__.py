@@ -126,7 +126,11 @@ from bioetl.domain.value_objects.publications import (
     DOI,
     PubMedId,
 )
-from bioetl.domain.value_objects.taxonomy_id import TaxonomyId
+from bioetl.domain.value_objects.taxonomy_id import (
+    TaxonomyId,
+    validate_taxonomy_id,
+    validate_taxonomy_id_str,
+)
 
 __all__ = [
     "DOI",
@@ -196,4 +200,6 @@ __all__ = [
     "UniquenessResult",
     "ValueDistributionResult",
     "ValueObject",
+    "validate_taxonomy_id",
+    "validate_taxonomy_id_str",
 ]
