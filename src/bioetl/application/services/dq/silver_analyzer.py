@@ -21,6 +21,7 @@ from typing import Any
 import polars as pl
 import pyarrow as pa
 
+from bioetl.domain.ports.dq_config import SilverDQConfigPort
 from bioetl.domain.value_objects.dq_report import (
     CategoricalDistribution,
     ContentHashIntegrityResult,
@@ -41,7 +42,6 @@ from bioetl.domain.value_objects.dq_report import (
     UniquenessResult,
     ValueDistributionResult,
 )
-from bioetl.infrastructure.schemas.dq_report_config import SilverDQReportConfig
 
 
 class SilverDQAnalyzer:
@@ -59,7 +59,7 @@ class SilverDQAnalyzer:
         pipeline: str,
         target_table: str,
         source_batch_ids: list[str],
-        config: SilverDQReportConfig,
+        config: SilverDQConfigPort,
         timestamp: datetime,
         primary_keys: list[str],
         soft_fail_threshold: float = 0.05,
@@ -89,7 +89,10 @@ class SilverDQAnalyzer:
             SilverDQReport: Complete DQ report for Silver layer.
         """
         # Convert PyArrow to Polars for consistent processing
-        df = pl.from_arrow(data) if isinstance(data, pa.Table) else data
+        if isinstance(data, pa.Table):
+            df: pl.DataFrame = pl.from_arrow(data)  # type: ignore[assignment]
+        else:
+            df = data
 
         enabled_checks = set(config.get_checks_enums())
 
@@ -100,12 +103,12 @@ class SilverDQAnalyzer:
 
         # Record count check
         if SilverDQCheckType.RECORD_COUNT in enabled_checks:
-            result = self._check_record_count(
+            record_count_result = self._check_record_count(
                 df, input_record_count, quarantined_count
             )
-            checks["record_count"] = self._result_to_dict(result)
+            checks["record_count"] = self._result_to_dict(record_count_result)
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                record_count_result.status, passed, failed, warnings
             )
 
         # Null rate check
@@ -122,50 +125,54 @@ class SilverDQAnalyzer:
 
         # Uniqueness check
         if SilverDQCheckType.UNIQUENESS in enabled_checks:
-            result = self._check_uniqueness(df, primary_keys)
-            checks["uniqueness"] = self._result_to_dict(result)
+            uniqueness_result = self._check_uniqueness(df, primary_keys)
+            checks["uniqueness"] = self._result_to_dict(uniqueness_result)
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                uniqueness_result.status, passed, failed, warnings
             )
 
         # Type conformance check
         if SilverDQCheckType.TYPE_CONFORMANCE in enabled_checks:
-            result = self._check_type_conformance(df)
-            checks["type_conformance"] = self._result_to_dict(result)
+            type_conformance_result = self._check_type_conformance(df)
+            checks["type_conformance"] = self._result_to_dict(type_conformance_result)
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                type_conformance_result.status, passed, failed, warnings
             )
 
         # Value distribution
         if SilverDQCheckType.VALUE_DISTRIBUTION in enabled_checks:
-            result = self._check_value_distribution(df)
-            checks["value_distribution"] = self._distribution_to_dict(result)
+            distribution_result = self._check_value_distribution(df)
+            checks["value_distribution"] = self._distribution_to_dict(
+                distribution_result
+            )
             passed += 1
 
         # Schema drift
         if SilverDQCheckType.SCHEMA_DRIFT in enabled_checks:
-            result = self._check_schema_drift(df, previous_schema)
-            checks["schema_drift"] = self._result_to_dict(result)
+            schema_drift_result = self._check_schema_drift(df, previous_schema)
+            checks["schema_drift"] = self._result_to_dict(schema_drift_result)
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                schema_drift_result.status, passed, failed, warnings
             )
 
         # Deduplication stats
         if SilverDQCheckType.DEDUPLICATION_STATS in enabled_checks:
-            result = self._check_deduplication(
+            dedup_result = self._check_deduplication(
                 df, primary_keys, input_record_count or len(df)
             )
-            checks["deduplication_stats"] = self._result_to_dict(result)
+            checks["deduplication_stats"] = self._result_to_dict(dedup_result)
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                dedup_result.status, passed, failed, warnings
             )
 
         # Content hash integrity
         if SilverDQCheckType.CONTENT_HASH_INTEGRITY in enabled_checks:
-            result = self._check_content_hash_integrity(df)
-            checks["content_hash_integrity"] = self._result_to_dict(result)
+            hash_integrity_result = self._check_content_hash_integrity(df)
+            checks["content_hash_integrity"] = self._result_to_dict(
+                hash_integrity_result
+            )
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                hash_integrity_result.status, passed, failed, warnings
             )
 
         total_checks = passed + failed + warnings
@@ -244,9 +251,7 @@ class SilverDQAnalyzer:
             quarantine_rate=round(quarantine_rate, 4),
         )
 
-    def _check_null_rates(
-        self, df: pl.DataFrame
-    ) -> tuple[list[NullRateResult], float]:
+    def _check_null_rates(self, df: pl.DataFrame) -> tuple[list[NullRateResult], float]:
         """Calculate null rates per column."""
         results = []
         total_nulls = 0
@@ -296,7 +301,7 @@ class SilverDQAnalyzer:
                 total_count=len(df),
                 duplicate_rate=0.0,
                 status=DQCheckStatus.WARN,
-                column_stats={"note": "Primary key columns not found"},
+                column_stats={"_note": {"message": "Primary key columns not found"}},
             )
 
         pk_name = ",".join(existing_keys)
@@ -364,16 +369,18 @@ class SilverDQAnalyzer:
                 try:
                     stats = df[col].drop_nulls()
                     if len(stats) > 0:
+                        min_val = stats.min()
+                        max_val = stats.max()
+                        mean_val = stats.mean()
+                        std_val = stats.std()
+                        median_val = stats.median()
+                        # Type narrowing: values are numeric due to dtype check above
                         numeric_cols[col] = NumericDistribution(
-                            min=float(stats.min()) if stats.min() is not None else None,
-                            max=float(stats.max()) if stats.max() is not None else None,
-                            mean=float(stats.mean())
-                            if stats.mean() is not None
-                            else None,
-                            std=float(stats.std()) if stats.std() is not None else None,
-                            median=float(stats.median())
-                            if stats.median() is not None
-                            else None,
+                            min=float(min_val) if min_val is not None else None,  # type: ignore[arg-type]
+                            max=float(max_val) if max_val is not None else None,  # type: ignore[arg-type]
+                            mean=float(mean_val) if mean_val is not None else None,  # type: ignore[arg-type]
+                            std=float(std_val) if std_val is not None else None,  # type: ignore[arg-type]
+                            median=float(median_val) if median_val is not None else None,  # type: ignore[arg-type]
                         )
                 except Exception:
                     pass
@@ -457,7 +464,7 @@ class SilverDQAnalyzer:
     def _check_deduplication(
         self,
         df: pl.DataFrame,
-        primary_keys: list[str],  # noqa: ARG002 - kept for interface consistency
+        primary_keys: list[str],
         input_count: int,
     ) -> DeduplicationStatsResult:
         """Calculate deduplication statistics."""
@@ -531,13 +538,13 @@ class SilverDQAnalyzer:
             "status": result.status.value,
         }
 
-        for col, dist in result.numeric_columns.items():
-            output["numeric_columns"][col] = self._result_to_dict(dist)
+        for col, numeric_dist in result.numeric_columns.items():
+            output["numeric_columns"][col] = self._result_to_dict(numeric_dist)
 
-        for col, dist in result.categorical_columns.items():
+        for col, categorical_dist in result.categorical_columns.items():
             output["categorical_columns"][col] = {
-                "top_values": list(dist.top_values),
-                "cardinality": dist.cardinality,
+                "top_values": list(categorical_dist.top_values),
+                "cardinality": categorical_dist.cardinality,
             }
 
         return output
