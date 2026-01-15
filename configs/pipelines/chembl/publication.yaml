@@ -1,17 +1,13 @@
 # configs/pipelines/chembl/publication.yaml
 # Pipeline configuration for ChEMBL Publication entity.
 #
-# Inherits defaults from ../_base.yaml:
-# - metadata (lineage, provenance, content_hash)
-# - dq_config (thresholds, anomaly_detection, quarantine, metrics)
-# - circuit_breaker, sink structure, maintenance, input_filter
-#
+# Inherits defaults from ../_base.yaml
 # Note: entity_type=document maps to ChEMBL API /document endpoint
 
 pipeline_name: chembl_publication
 provider: chembl
 entity_type: document
-version: "3.0.0"
+version: "2.0.0"
 description: "Extract scientific publications from ChEMBL API"
 
 primary_keys: ["document_chembl_id"]
@@ -19,56 +15,6 @@ silver_table: "chembl_publication"
 gold_table: "chembl_publication"
 
 source_file: ../../sources/chembl.yaml
-
-# -----------------------------------------------------------------------------
-# Entity-Specific Metadata
-# -----------------------------------------------------------------------------
-metadata:
-  schema:
-    version: "1.0.0"
-    contract_path: docs/contracts/gold/chembl_publication.json
-
-# -----------------------------------------------------------------------------
-# Entity-Specific DQ Configuration
-# -----------------------------------------------------------------------------
-dq_config:
-  # Column-level validation rules
-  column_checks:
-    document_chembl_id:
-      nullable: false
-      unique: true
-      pattern: "^CHEMBL\\d+$"
-    doc_type:
-      nullable: false
-      allowed_values: ["PUBLICATION", "BOOK", "DATASET", "PATENT"]
-    title:
-      nullable: false
-    pubmed_id:
-      nullable: true
-      range:
-        min: 1
-    doi:
-      nullable: true
-      pattern: "^10\\.\\d{4,}/[^\\s]+$"
-    journal:
-      nullable: true
-    year:
-      nullable: true
-      range:
-        min: 1900
-        max: 2100
-    volume:
-      nullable: true
-    issue:
-      nullable: true
-    first_page:
-      nullable: true
-    last_page:
-      nullable: true
-    authors:
-      nullable: true
-    abstract:
-      nullable: true
 
 # Entity-specific gold filters
 gold_filters:
