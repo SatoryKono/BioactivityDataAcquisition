@@ -7,7 +7,7 @@
 pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
-version: "1.1.0"
+version: "1.2.0"
 description: "Extract biological activity records from ChEMBL API"
 
 primary_keys: ["activity_id"]
@@ -16,6 +16,79 @@ gold_table: "chembl_activity"
 
 # Reference to source configuration file
 source_file: ../../sources/chembl.yaml
+
+# -----------------------------------------------------------------------------
+# Data Quality Rules (entity-specific overrides)
+# -----------------------------------------------------------------------------
+dq_rules:
+  # Thresholds (inherit from _base.yaml defaults: soft=0.05, hard=0.20)
+
+  # Field-level validations
+  field_validations:
+    - field: "activity_id"
+      type: "range"
+      min: 1
+      nullable: false
+      error_message: "activity_id must be a positive integer"
+    - field: "molecule_chembl_id"
+      type: "pattern"
+      pattern: "^CHEMBL\\d+$"
+      nullable: false
+      error_message: "molecule_chembl_id must match CHEMBL format"
+    - field: "target_chembl_id"
+      type: "pattern"
+      pattern: "^CHEMBL\\d+$"
+      nullable: true
+      error_message: "target_chembl_id must match CHEMBL format"
+    - field: "assay_chembl_id"
+      type: "pattern"
+      pattern: "^CHEMBL\\d+$"
+      nullable: true
+      error_message: "assay_chembl_id must match CHEMBL format"
+    - field: "standard_value"
+      type: "range"
+      min: 0
+      max: 1000000000
+      nullable: true
+      error_message: "standard_value must be non-negative"
+    - field: "standard_type"
+      type: "enum"
+      allowed: ["IC50", "Ki", "Kd", "EC50", "AC50", "GI50", "ED50", "MIC", "CC50"]
+      nullable: true
+    - field: "standard_units"
+      type: "enum"
+      allowed: ["nM", "uM", "mM", "pM", "M", "ug.mL-1", "mg.kg-1"]
+      nullable: true
+    - field: "assay_type"
+      type: "enum"
+      allowed: ["B", "F", "A", "T", "P", "U"]
+      nullable: true
+    - field: "pchembl_value"
+      type: "range"
+      min: 0
+      max: 15
+      nullable: true
+      error_message: "pchembl_value must be between 0 and 15"
+
+  # Cross-field validations
+  cross_field_validations:
+    - name: "activity_completeness"
+      fields: ["standard_value", "standard_units", "standard_type"]
+      condition: "all_present"
+      error_message: "Complete activity data requires value, units, and type"
+
+  # Conditional validations
+  conditional_validations:
+    - name: "ic50_range_check"
+      condition_field: "standard_type"
+      condition_value: "IC50"
+      condition_operator: "eq"
+      then_validations:
+        - field: "standard_value"
+          type: "range"
+          min: 0.001
+          max: 100000
+          nullable: false
 
 # Entity-specific gold filters
 gold_filters:

@@ -115,19 +115,155 @@ DEFAULT_VALIDATION_CONFIG = ValidationConfig()
 
 
 @dataclass(frozen=True, slots=True)
+class FieldValidation:
+    """Configuration for a single field validation rule.
+
+    Supports multiple validation types:
+    - range: Numeric range validation (min/max)
+    - pattern: Regex pattern matching
+    - enum: Allowed values validation
+    - custom: Custom validator function reference
+
+    Attributes:
+        field: Field name to validate.
+        validation_type: Type of validation (range, pattern, enum, custom).
+        nullable: Whether field can be null/None. Default: True.
+        min_value: Minimum value for range validation.
+        max_value: Maximum value for range validation.
+        pattern: Regex pattern for pattern validation.
+        allowed: Allowed values for enum validation.
+        validator: Validator function name for custom validation.
+        error_message: Custom error message template.
+    """
+
+    field: str
+    validation_type: Literal["range", "pattern", "enum", "custom"]
+    nullable: bool = True
+    # Range validation
+    min_value: float | None = None
+    max_value: float | None = None
+    # Pattern validation
+    pattern: str | None = None
+    # Enum validation
+    allowed: tuple[str, ...] = ()
+    # Custom validation
+    validator: str | None = None
+    # Custom error message
+    error_message: str | None = None
+
+    def __post_init__(self) -> None:
+        """Convert lists to tuples for immutability."""
+        if isinstance(self.allowed, list):
+            object.__setattr__(self, "allowed", tuple(self.allowed))
+
+
+@dataclass(frozen=True, slots=True)
+class CrossFieldValidation:
+    """Configuration for cross-field validation rule.
+
+    Validates relationships between multiple fields.
+
+    Attributes:
+        name: Unique name for the validation rule.
+        fields: Fields involved in the validation.
+        condition: Validation condition type.
+        error_message: Custom error message template.
+    """
+
+    name: str
+    fields: tuple[str, ...]
+    condition: Literal[
+        "all_present",  # All fields must be non-null
+        "any_present",  # At least one field must be non-null
+        "mutually_exclusive",  # Only one field can be non-null
+        "conditional_required",  # If field A present, field B required
+        "custom",  # Custom validation function
+    ]
+    # For conditional_required: (trigger_field, required_field)
+    trigger_field: str | None = None
+    required_field: str | None = None
+    # Custom validation
+    validator: str | None = None
+    error_message: str | None = None
+
+    def __post_init__(self) -> None:
+        """Convert lists to tuples for immutability."""
+        if isinstance(self.fields, list):
+            object.__setattr__(self, "fields", tuple(self.fields))
+
+
+@dataclass(frozen=True, slots=True)
+class ConditionalValidation:
+    """Configuration for conditional validation rule.
+
+    Applies validation only when a condition is met.
+
+    Attributes:
+        name: Unique name for the validation rule.
+        condition_field: Field to check for condition.
+        condition_value: Value that triggers the validation.
+        condition_operator: Comparison operator (eq, ne, in, not_in).
+        then_validations: Field validations to apply when condition is true.
+    """
+
+    name: str
+    condition_field: str
+    condition_value: str | tuple[str, ...]
+    condition_operator: Literal["eq", "ne", "in", "not_in"] = "eq"
+    then_validations: tuple[FieldValidation, ...] = ()
+
+    def __post_init__(self) -> None:
+        """Convert lists to tuples for immutability."""
+        if isinstance(self.condition_value, list):
+            object.__setattr__(self, "condition_value", tuple(self.condition_value))
+        if isinstance(self.then_validations, list):
+            object.__setattr__(self, "then_validations", tuple(self.then_validations))
+
+
+@dataclass(frozen=True, slots=True)
+class DQReportConfig:
+    """Configuration for DQ report generation.
+
+    Attributes:
+        enabled: Whether to generate DQ reports. Default: True.
+        format: Report format (json, yaml, csv). Default: json.
+        include_sample_failures: Include sample failed records. Default: True.
+        sample_size: Number of sample failures to include. Default: 10.
+        output_path: Path for report output. None = use pipeline output dir.
+    """
+
+    enabled: bool = True
+    format: Literal["json", "yaml", "csv"] = "json"
+    include_sample_failures: bool = True
+    sample_size: int = 10
+    output_path: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class DQConfig:
-    """Configuration for Data Quality thresholds.
+    """Configuration for Data Quality thresholds and validations.
 
     Attributes:
         soft_fail_threshold: Error rate threshold for warnings (0.0-1.0).
         hard_fail_threshold: Error rate threshold for failures (0.0-1.0).
         strict_validation: If True, apply stricter validation rules that may
             reject more records. Use with caution in production. Default: False.
+        field_validations: Field-level validation rules.
+        cross_field_validations: Cross-field validation rules.
+        conditional_validations: Conditional validation rules.
+        invalid_record_policy: Policy for handling invalid records.
+        report: DQ report configuration.
     """
 
     soft_fail_threshold: float = 0.05
     hard_fail_threshold: float = 0.20
     strict_validation: bool = False
+    # Extended DQ configuration
+    field_validations: tuple[FieldValidation, ...] = ()
+    cross_field_validations: tuple[CrossFieldValidation, ...] = ()
+    conditional_validations: tuple[ConditionalValidation, ...] = ()
+    invalid_record_policy: Literal["quarantine", "skip", "fail"] = "quarantine"
+    report: DQReportConfig = field(default_factory=DQReportConfig)
 
     def __post_init__(self) -> None:
         """Validate threshold invariants on creation."""
@@ -135,6 +271,20 @@ class DQConfig:
             soft_fail_threshold=self.soft_fail_threshold,
             hard_fail_threshold=self.hard_fail_threshold,
         )
+        self._ensure_immutability()
+
+    def _ensure_immutability(self) -> None:
+        """Convert lists to tuples for immutability."""
+        if isinstance(self.field_validations, list):
+            object.__setattr__(self, "field_validations", tuple(self.field_validations))
+        if isinstance(self.cross_field_validations, list):
+            object.__setattr__(
+                self, "cross_field_validations", tuple(self.cross_field_validations)
+            )
+        if isinstance(self.conditional_validations, list):
+            object.__setattr__(
+                self, "conditional_validations", tuple(self.conditional_validations)
+            )
 
     @staticmethod
     def validate_thresholds(

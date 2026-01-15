@@ -9,7 +9,7 @@
 pipeline_name: chembl_compound_record
 provider: chembl
 entity_type: compound_record
-version: "1.1.0"
+version: "1.2.0"
 description: "Extract compound records from ChEMBL API"
 
 primary_keys: ["record_id"]
@@ -17,6 +17,36 @@ silver_table: "chembl_compound_record"
 gold_table: "chembl_compound_record"
 
 source_file: ../../sources/chembl.yaml
+
+# -----------------------------------------------------------------------------
+# Data Quality Rules (entity-specific overrides)
+# -----------------------------------------------------------------------------
+dq_rules:
+  field_validations:
+    - field: "record_id"
+      type: "range"
+      min: 1
+      nullable: false
+    - field: "molecule_chembl_id"
+      type: "pattern"
+      pattern: "^CHEMBL\\d+$"
+      nullable: false
+      error_message: "molecule_chembl_id must match CHEMBL format"
+    - field: "document_chembl_id"
+      type: "pattern"
+      pattern: "^CHEMBL\\d+$"
+      nullable: false
+      error_message: "document_chembl_id must match CHEMBL format"
+    - field: "src_id"
+      type: "range"
+      min: 1
+      nullable: true
+
+  cross_field_validations:
+    - name: "record_linkage"
+      fields: ["molecule_chembl_id", "document_chembl_id"]
+      condition: "all_present"
+      error_message: "Both molecule and document IDs are required"
 
 # Entity-specific gold filters
 gold_filters:

@@ -7,7 +7,7 @@
 pipeline_name: crossref_publication
 provider: crossref
 entity_type: work
-version: "1.1.0"
+version: "1.2.0"
 description: "Enrich publication records with CrossRef metadata via DOI resolution"
 
 primary_keys: ["doi"]
@@ -15,6 +15,40 @@ silver_table: "crossref_publication"
 gold_table: "crossref_publication"
 
 source_file: ../../sources/crossref.yaml
+
+# -----------------------------------------------------------------------------
+# Data Quality Rules (entity-specific overrides)
+# -----------------------------------------------------------------------------
+dq_rules:
+  field_validations:
+    - field: "doi"
+      type: "pattern"
+      pattern: "^10\\.\\d{4,}/.*$"
+      nullable: false
+      error_message: "DOI must start with 10. prefix"
+    - field: "title"
+      type: "pattern"
+      pattern: "^.{1,2000}$"
+      nullable: true
+    - field: "year"
+      type: "range"
+      min: 1800
+      max: 2100
+      nullable: true
+    - field: "type"
+      type: "enum"
+      allowed: ["journal-article", "book-chapter", "proceedings-article", "posted-content", "book", "report", "dataset", "standard"]
+      nullable: true
+    - field: "is_referenced_by_count"
+      type: "range"
+      min: 0
+      nullable: true
+
+  cross_field_validations:
+    - name: "publication_identifiable"
+      fields: ["doi", "title"]
+      condition: "all_present"
+      error_message: "Publication must have DOI and title"
 
 # Entity-specific gold filters
 gold_filters:
