@@ -9,7 +9,7 @@
 pipeline_name: openalex_publication
 provider: openalex
 entity_type: publication
-version: "1.1.0"
+version: "1.2.0"
 description: "Batch DOI resolution via OpenAlex with title fallback"
 
 primary_keys: ["openalex_id"]
@@ -22,6 +22,45 @@ source_file: ../../sources/openalex.yaml
 source:
   email: "${BIOETL_OPENALEX_EMAIL}"  # Required for polite pool
   batch_size: 50  # Polite pool API - conservative batch size
+
+# -----------------------------------------------------------------------------
+# Data Quality Rules (entity-specific overrides)
+# -----------------------------------------------------------------------------
+dq_rules:
+  field_validations:
+    - field: "openalex_id"
+      type: "pattern"
+      pattern: "^W\\d+$"
+      nullable: false
+      error_message: "OpenAlex ID must start with W followed by digits"
+    - field: "doi"
+      type: "pattern"
+      pattern: "^10\\.\\d{4,}/.*$"
+      nullable: true
+      error_message: "DOI must start with 10. prefix"
+    - field: "title"
+      type: "pattern"
+      pattern: "^.{1,2000}$"
+      nullable: true
+    - field: "year"
+      type: "range"
+      min: 1500
+      max: 2100
+      nullable: true
+    - field: "type"
+      type: "enum"
+      allowed: ["article", "book-chapter", "book", "dataset", "dissertation", "editorial", "letter", "review", "preprint", "other"]
+      nullable: true
+    - field: "cited_by_count"
+      type: "range"
+      min: 0
+      nullable: true
+
+  cross_field_validations:
+    - name: "publication_identifiable"
+      fields: ["openalex_id", "title"]
+      condition: "all_present"
+      error_message: "Publication must have OpenAlex ID and title"
 
 # Entity-specific gold filters
 gold_filters:

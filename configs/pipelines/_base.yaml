@@ -84,8 +84,100 @@ dq_rules:
   # MUST: Default 20% error rate before failure
   hard_fail_threshold: 0.20
 
+  # Apply stricter validation rules (feature flag)
+  strict_validation: false
+
   # Deviations from defaults MUST be documented with justification
   # Example: ID mapping may have higher not_found rates (0.30/0.80)
+
+  # ---------------------------------------------------------------------------
+  # Field-Level Validations (Extended DQ)
+  # ---------------------------------------------------------------------------
+  # Define validation rules for specific fields. Types:
+  # - range: Numeric range validation (min/max)
+  # - pattern: Regex pattern matching
+  # - enum: Allowed values validation
+  # - custom: Custom validator function reference
+  #
+  # Example:
+  # field_validations:
+  #   - field: "standard_value"
+  #     type: "range"
+  #     min: 0
+  #     max: 1000000000
+  #     nullable: false
+  #   - field: "molecule_chembl_id"
+  #     type: "pattern"
+  #     pattern: "^CHEMBL\\d+$"
+  #     nullable: false
+  #   - field: "assay_type"
+  #     type: "enum"
+  #     allowed: ["B", "F", "A", "T", "P"]
+  #     nullable: true
+  #   - field: "smiles"
+  #     type: "custom"
+  #     validator: "smiles_validator"
+  #     nullable: true
+  field_validations: []
+
+  # ---------------------------------------------------------------------------
+  # Cross-Field Validations
+  # ---------------------------------------------------------------------------
+  # Validate relationships between multiple fields. Conditions:
+  # - all_present: All fields must be non-null
+  # - any_present: At least one field must be non-null
+  # - mutually_exclusive: Only one field can be non-null
+  # - conditional_required: If field A present, field B required
+  # - custom: Custom validation function
+  #
+  # Example:
+  # cross_field_validations:
+  #   - name: "activity_completeness"
+  #     fields: ["standard_value", "standard_units", "standard_type"]
+  #     condition: "all_present"
+  #   - name: "identifier_present"
+  #     fields: ["doi", "pmid", "title"]
+  #     condition: "any_present"
+  cross_field_validations: []
+
+  # ---------------------------------------------------------------------------
+  # Conditional Validations
+  # ---------------------------------------------------------------------------
+  # Apply validations only when a condition is met.
+  # Operators: eq, ne, in, not_in
+  #
+  # Example:
+  # conditional_validations:
+  #   - name: "ic50_range_check"
+  #     condition_field: "standard_type"
+  #     condition_value: "IC50"
+  #     condition_operator: "eq"
+  #     then_validations:
+  #       - field: "standard_value"
+  #         type: "range"
+  #         min: 0.001
+  #         max: 100000
+  #         nullable: false
+  conditional_validations: []
+
+  # ---------------------------------------------------------------------------
+  # Invalid Record Policy
+  # ---------------------------------------------------------------------------
+  # Policy for handling records that fail validation:
+  # - quarantine: Send to quarantine for manual review (default)
+  # - skip: Log and skip the record silently
+  # - fail: Fail the batch immediately
+  invalid_record_policy: "quarantine"
+
+  # ---------------------------------------------------------------------------
+  # DQ Report Configuration
+  # ---------------------------------------------------------------------------
+  # Configuration for DQ report generation
+  report:
+    enabled: true
+    format: "json"  # json | yaml | csv
+    include_sample_failures: true
+    sample_size: 10
 
 # -----------------------------------------------------------------------------
 # Circuit Breaker Configuration
@@ -117,6 +209,22 @@ sink:
 
     # MUST: No random elements in writes (ADR-014)
     deterministic: true
+
+    # Save _metadata.yaml sidecar file (disabled by default)
+    save_metadata: false
+
+    # Metadata configuration (when save_metadata: true)
+    # metadata:
+    #   lineage:
+    #     source_system: "<provider>"
+    #     source_version: "<version>"
+    #     extraction_method: "api"
+    #   owner: "data-team"
+    #   steward: "<pipeline>-owner"
+    #   description: "Raw <provider> <entity> data"
+    #   tags: ["<provider>", "<entity>", "raw"]
+    #   retention_days: 90
+    #   sla_freshness_hours: 24
 
     # Path template (overridden per entity)
     # path: data/output/bronze
@@ -150,6 +258,20 @@ sink:
     # MUST: No random elements in writes (ADR-014)
     deterministic: true
 
+    # Save _metadata.yaml sidecar file (disabled by default)
+    save_metadata: false
+
+    # Metadata configuration (when save_metadata: true)
+    # metadata:
+    #   lineage:
+    #     source_layer: "bronze"
+    #     transformations: ["deduplication", "normalization", "dq_validation"]
+    #   quality_expectations:
+    #     completeness: 0.95
+    #     accuracy: 0.99
+    #   description: "Cleansed <provider> <entity> data"
+    #   tags: ["<provider>", "<entity>", "silver", "validated"]
+
     # CSV export configuration
     csv_export:
       enabled: true
@@ -181,6 +303,19 @@ sink:
 
     # MUST: No random elements in writes (ADR-014)
     deterministic: true
+
+    # Save _metadata.yaml sidecar file (disabled by default)
+    save_metadata: false
+
+    # Metadata configuration (when save_metadata: true)
+    # metadata:
+    #   lineage:
+    #     source_layer: "silver"
+    #     filters_applied: true
+    #   business_domain: "drug-discovery"
+    #   use_cases: ["ml-training", "reporting", "analytics"]
+    #   description: "Business-ready <provider> <entity> data"
+    #   tags: ["<provider>", "<entity>", "gold", "ml-ready"]
 
     # CSV export configuration
     csv_export:

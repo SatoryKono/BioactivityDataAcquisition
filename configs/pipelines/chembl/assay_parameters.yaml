@@ -7,7 +7,7 @@
 pipeline_name: chembl_assay_parameters
 provider: chembl
 entity_type: assay_parameters
-version: "1.1.0"
+version: "1.2.0"
 description: "Extract experimental assay parameters from ChEMBL API"
 
 primary_keys: ["assay_param_id"]
@@ -15,6 +15,32 @@ silver_table: "chembl_assay_parameters"
 gold_table: "chembl_assay_parameters"
 
 source_file: ../../sources/chembl.yaml
+
+# -----------------------------------------------------------------------------
+# Data Quality Rules (entity-specific overrides)
+# -----------------------------------------------------------------------------
+dq_rules:
+  field_validations:
+    - field: "assay_param_id"
+      type: "range"
+      min: 1
+      nullable: false
+    - field: "assay_chembl_id"
+      type: "pattern"
+      pattern: "^CHEMBL\\d+$"
+      nullable: false
+      error_message: "assay_chembl_id must match CHEMBL format"
+    - field: "type"
+      type: "pattern"
+      pattern: "^.{1,100}$"
+      nullable: false
+      error_message: "type is required"
+
+  cross_field_validations:
+    - name: "param_linkage"
+      fields: ["assay_param_id", "assay_chembl_id"]
+      condition: "all_present"
+      error_message: "Both param ID and assay ID are required"
 
 # Entity-specific gold filters
 gold_filters:

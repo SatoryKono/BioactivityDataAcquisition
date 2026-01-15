@@ -34,6 +34,82 @@ if TYPE_CHECKING:
     )
 
 
+class FieldValidationConfig(BaseModel):
+    """Configuration for a single field validation rule.
+
+    Supports: range, pattern, enum, custom validation types.
+    """
+
+    field: str = Field(description="Field name to validate")
+    type: Literal["range", "pattern", "enum", "custom"] = Field(
+        description="Validation type"
+    )
+    nullable: bool = Field(default=True, description="Whether field can be null")
+    # Range validation
+    min: float | None = Field(default=None, description="Minimum value (range)")
+    max: float | None = Field(default=None, description="Maximum value (range)")
+    # Pattern validation
+    pattern: str | None = Field(default=None, description="Regex pattern")
+    # Enum validation
+    allowed: list[str] = Field(default_factory=list, description="Allowed values")
+    # Custom validation
+    validator: str | None = Field(default=None, description="Custom validator name")
+    # Error message
+    error_message: str | None = Field(default=None, description="Custom error message")
+
+
+class CrossFieldValidationConfig(BaseModel):
+    """Configuration for cross-field validation rule."""
+
+    name: str = Field(description="Unique validation rule name")
+    fields: list[str] = Field(description="Fields involved in validation")
+    condition: Literal[
+        "all_present",
+        "any_present",
+        "mutually_exclusive",
+        "conditional_required",
+        "custom",
+    ] = Field(description="Validation condition type")
+    trigger_field: str | None = Field(
+        default=None, description="Field that triggers conditional requirement"
+    )
+    required_field: str | None = Field(
+        default=None, description="Field required when trigger is present"
+    )
+    validator: str | None = Field(default=None, description="Custom validator name")
+    error_message: str | None = Field(default=None, description="Custom error message")
+
+
+class ConditionalValidationConfig(BaseModel):
+    """Configuration for conditional validation rule."""
+
+    name: str = Field(description="Unique validation rule name")
+    condition_field: str = Field(description="Field to check for condition")
+    condition_value: str | list[str] = Field(description="Value(s) that trigger")
+    condition_operator: Literal["eq", "ne", "in", "not_in"] = Field(
+        default="eq", description="Comparison operator"
+    )
+    then_validations: list[FieldValidationConfig] = Field(
+        default_factory=list, description="Validations to apply when condition is true"
+    )
+
+
+class DQReportConfig(BaseModel):
+    """Configuration for DQ report generation."""
+
+    enabled: bool = Field(default=True, description="Generate DQ reports")
+    format: Literal["json", "yaml", "csv"] = Field(
+        default="json", description="Report format"
+    )
+    include_sample_failures: bool = Field(
+        default=True, description="Include sample failed records"
+    )
+    sample_size: int = Field(
+        default=10, ge=1, le=100, description="Number of sample failures"
+    )
+    output_path: str | None = Field(default=None, description="Custom output path")
+
+
 class DQConfig(BaseModel):
     """Data Quality configuration.
 
@@ -44,7 +120,11 @@ class DQConfig(BaseModel):
         hard_fail_threshold: Error rate threshold for failures (0.0-1.0).
         strict_validation: If True, apply stricter validation rules.
             Use with caution as it may reject more records.
-
+        field_validations: Field-level validation rules.
+        cross_field_validations: Cross-field validation rules.
+        conditional_validations: Conditional validation rules.
+        invalid_record_policy: Policy for invalid records (quarantine/skip/fail).
+        report: DQ report configuration.
     """
 
     soft_fail_threshold: float = Field(default=0.05)
@@ -52,6 +132,22 @@ class DQConfig(BaseModel):
     strict_validation: bool = Field(
         default=False,
         description="Apply stricter validation rules (feature flag)",
+    )
+    # Extended DQ configuration
+    field_validations: list[FieldValidationConfig] = Field(
+        default_factory=list, description="Field-level validation rules"
+    )
+    cross_field_validations: list[CrossFieldValidationConfig] = Field(
+        default_factory=list, description="Cross-field validation rules"
+    )
+    conditional_validations: list[ConditionalValidationConfig] = Field(
+        default_factory=list, description="Conditional validation rules"
+    )
+    invalid_record_policy: Literal["quarantine", "skip", "fail"] = Field(
+        default="quarantine", description="Policy for invalid records"
+    )
+    report: DQReportConfig = Field(
+        default_factory=DQReportConfig, description="DQ report configuration"
     )
 
     @model_validator(mode="after")
@@ -69,10 +165,92 @@ class DQConfig(BaseModel):
         Returns:
             DomainDQConfig: Immutable domain configuration.
         """
+        from bioetl.domain.config import (
+            ConditionalValidation as DomainConditionalValidation,
+        )
+        from bioetl.domain.config import (
+            CrossFieldValidation as DomainCrossFieldValidation,
+        )
+        from bioetl.domain.config import DQReportConfig as DomainDQReportConfig
+        from bioetl.domain.config import FieldValidation as DomainFieldValidation
+
+        # Convert field validations
+        field_validations = tuple(
+            DomainFieldValidation(
+                field=fv.field,
+                validation_type=fv.type,
+                nullable=fv.nullable,
+                min_value=fv.min,
+                max_value=fv.max,
+                pattern=fv.pattern,
+                allowed=tuple(fv.allowed),
+                validator=fv.validator,
+                error_message=fv.error_message,
+            )
+            for fv in self.field_validations
+        )
+
+        # Convert cross-field validations
+        cross_field_validations = tuple(
+            DomainCrossFieldValidation(
+                name=cfv.name,
+                fields=tuple(cfv.fields),
+                condition=cfv.condition,
+                trigger_field=cfv.trigger_field,
+                required_field=cfv.required_field,
+                validator=cfv.validator,
+                error_message=cfv.error_message,
+            )
+            for cfv in self.cross_field_validations
+        )
+
+        # Convert conditional validations
+        conditional_validations = tuple(
+            DomainConditionalValidation(
+                name=cv.name,
+                condition_field=cv.condition_field,
+                condition_value=(
+                    tuple(cv.condition_value)
+                    if isinstance(cv.condition_value, list)
+                    else cv.condition_value
+                ),
+                condition_operator=cv.condition_operator,
+                then_validations=tuple(
+                    DomainFieldValidation(
+                        field=tv.field,
+                        validation_type=tv.type,
+                        nullable=tv.nullable,
+                        min_value=tv.min,
+                        max_value=tv.max,
+                        pattern=tv.pattern,
+                        allowed=tuple(tv.allowed),
+                        validator=tv.validator,
+                        error_message=tv.error_message,
+                    )
+                    for tv in cv.then_validations
+                ),
+            )
+            for cv in self.conditional_validations
+        )
+
+        # Convert report config
+        report_config = DomainDQReportConfig(
+            enabled=self.report.enabled,
+            format=self.report.format,
+            include_sample_failures=self.report.include_sample_failures,
+            sample_size=self.report.sample_size,
+            output_path=self.report.output_path,
+        )
+
         return DomainDQConfig(
             soft_fail_threshold=self.soft_fail_threshold,
             hard_fail_threshold=self.hard_fail_threshold,
             strict_validation=self.strict_validation,
+            field_validations=field_validations,
+            cross_field_validations=cross_field_validations,
+            conditional_validations=conditional_validations,
+            invalid_record_policy=self.invalid_record_policy,
+            report=report_config,
         )
 
 

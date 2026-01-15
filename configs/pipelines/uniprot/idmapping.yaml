@@ -34,11 +34,40 @@ source:
     from_db: ChEMBL
     to_db: UniProtKB
 
-# DQ rules - elevated thresholds for ID mapping
+# -----------------------------------------------------------------------------
+# Data Quality Rules - elevated thresholds for ID mapping
 # Many ChEMBL targets may not have UniProt mappings (expected behavior)
+# -----------------------------------------------------------------------------
 dq_rules:
   soft_fail_threshold: 0.30  # 30% not_found is acceptable
   hard_fail_threshold: 0.80  # 80% not_found triggers hard failure
+
+  field_validations:
+    - field: "target_chembl_id"
+      type: "pattern"
+      pattern: "^CHEMBL\\d+$"
+      nullable: false
+      error_message: "target_chembl_id must match CHEMBL format"
+    - field: "mapping_status"
+      type: "enum"
+      allowed: ["found", "not_found", "error"]
+      nullable: false
+    - field: "uniprot_accession"
+      type: "pattern"
+      pattern: "^[A-Z0-9]{6,10}$"
+      nullable: true
+      error_message: "UniProt accession must be 6-10 alphanumeric chars"
+
+  conditional_validations:
+    - name: "found_has_accession"
+      condition_field: "mapping_status"
+      condition_value: "found"
+      condition_operator: "eq"
+      then_validations:
+        - field: "uniprot_accession"
+          type: "pattern"
+          pattern: "^[A-Z0-9]{6,10}$"
+          nullable: false
 
 # Sink configuration
 sink:
