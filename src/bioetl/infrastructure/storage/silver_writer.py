@@ -52,6 +52,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import (
         AuditPort,
         LoggerPort,
+        MetadataWriterPort,
         MetricsPort,
         SilverValidatorPort,
         TracingPort,
@@ -85,6 +86,7 @@ class SilverWriter(BaseDeltaWriter):
         metrics: MetricsPort | None = None,
         audit: AuditPort | None = None,
         silver_validator: SilverValidatorPort | None = None,
+        metadata_writer: MetadataWriterPort | None = None,
     ) -> None:
         """Initialize Silver writer.
 
@@ -102,6 +104,8 @@ class SilverWriter(BaseDeltaWriter):
                   Use NoOpAudit from composition layer if audit disabled.
             silver_validator: Optional SilverValidatorPort for Pandera validation.
                             Use NoOpSilverValidator if validation is not required.
+            metadata_writer: Optional MetadataWriterPort for writing _metadata.yaml
+                           sidecar files. Use NoOpMetadataWriter if disabled.
 
         Note:
             LoggerPort is required per RULES.md DI requirements.
@@ -131,6 +135,13 @@ class SilverWriter(BaseDeltaWriter):
 
             silver_validator = NoOpSilverValidator()
         self._silver_validator: SilverValidatorPort = silver_validator
+
+        # Use NoOpMetadataWriter if not provided (metadata is optional)
+        if metadata_writer is None:
+            from bioetl.domain.ports.noop import NoOpMetadataWriter
+
+            metadata_writer = NoOpMetadataWriter()
+        self._metadata_writer: MetadataWriterPort = metadata_writer
 
     def _prepare_arrow_data(
         self,
@@ -511,6 +522,14 @@ class SilverWriter(BaseDeltaWriter):
                     mode=validated_mode,
                 )
 
+            # Write metadata sidecar file if configured
+            await self._write_silver_metadata(
+                table_path=table_path,
+                records=records,
+                primary_keys=primary_keys,
+                mode=validated_mode,
+            )
+
     async def _log_silver_audit(
         self,
         table_name: str,
@@ -581,6 +600,156 @@ class SilverWriter(BaseDeltaWriter):
             },
         )
         await self._audit.log_write(audit_entry)
+
+    async def _get_delta_version(self, table_path: str) -> int | None:
+        """Get current Delta table version.
+
+        Args:
+            table_path: Full path to the Delta table.
+
+        Returns:
+            Current version number, or None if table doesn't exist.
+        """
+        loop = asyncio.get_running_loop()
+        try:
+            dt = await loop.run_in_executor(
+                None,
+                lambda: DeltaTable(table_path),
+            )
+            version: int = dt.version()
+            return version
+        except DeltaTableNotFoundError:
+            return None
+
+    async def _write_silver_metadata(
+        self,
+        table_path: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str],
+        mode: SilverWriteMode,
+    ) -> None:
+        """Write Silver layer metadata sidecar file.
+
+        Args:
+            table_path: Full path to the Delta table.
+            records: List of records written.
+            primary_keys: Primary key columns used.
+            mode: Write mode used (merge, append, delete).
+        """
+        from datetime import UTC, datetime
+        from importlib.metadata import version as pkg_version
+        from platform import node as hostname
+        from platform import python_version
+
+        from bioetl.domain.models.metadata import (
+            DeltaMetrics,
+            DQSummary,
+            EnvironmentMetadata,
+            LineageMetadata,
+            PipelineMetadata,
+            RuntimeMetadata,
+            RunTypeEnum,
+            SilverMetadata,
+            SilverOutputMetadata,
+        )
+
+        if not records:
+            return
+
+        # Extract run context from first record
+        first_record = records[0]
+        run_id = first_record.get("_run_id", "")
+        run_type_str = first_record.get("_run_type", "incremental")
+
+        # Map run_type string to enum
+        try:
+            run_type = RunTypeEnum(run_type_str)
+        except ValueError:
+            run_type = RunTypeEnum.INCREMENTAL
+
+        # Get Delta version after write
+        version_after = await self._get_delta_version(table_path)
+
+        # Build runtime metadata
+        now = datetime.now(UTC)
+        runtime = RuntimeMetadata(
+            run_id=run_id,
+            run_type=run_type,
+            started_at_utc=now,
+            completed_at_utc=now,
+        )
+
+        # Extract pipeline info from table path
+        # table_path format: {base_path}/{provider}/{entity}
+        path_parts = table_path.rstrip("/").split("/")
+        entity = path_parts[-1] if path_parts else "unknown"
+        provider = path_parts[-2] if len(path_parts) > 1 else "unknown"
+
+        pipeline = PipelineMetadata(
+            name=f"{provider}_{entity}",
+            provider=provider,
+            entity=entity,
+        )
+
+        # Build lineage from records
+        source_batch_ids = list(
+            {r.get("_source_batch_id", "") for r in records if r.get("_source_batch_id")}
+        )
+        lineage = LineageMetadata(
+            source_batch_ids=source_batch_ids,
+        )
+
+        # Build Delta metrics
+        # Map SilverWriteMode to DeltaMetrics operation (Literal type)
+        operation_map: dict[SilverWriteMode, Literal["merge", "overwrite", "append"]] = {
+            SilverWriteMode.MERGE: "merge",
+            SilverWriteMode.APPEND: "append",
+            SilverWriteMode.DELETE: "overwrite",  # DELETE mode uses overwrite
+        }
+        delta = DeltaMetrics(
+            table_path=table_path,
+            operation=operation_map[mode],
+            primary_key=primary_keys,
+            version_after=version_after,
+            rows_inserted=len(records),
+        )
+
+        # Build DQ summary (basic metrics)
+        dq_summary = DQSummary(
+            total_records=len(records),
+            valid_records=len(records),
+        )
+
+        # Build output metrics
+        output = SilverOutputMetadata(
+            record_count=len(records),
+        )
+
+        # Build environment info
+        try:
+            bioetl_version = pkg_version("bioetl")
+        except Exception:
+            bioetl_version = "unknown"
+
+        environment = EnvironmentMetadata(
+            hostname=hostname(),
+            python_version=python_version(),
+            bioetl_version=bioetl_version,
+        )
+
+        # Build complete metadata
+        metadata = SilverMetadata(
+            runtime=runtime,
+            pipeline=pipeline,
+            lineage=lineage,
+            delta=delta,
+            dq_summary=dq_summary,
+            output=output,
+            environment=environment,
+        )
+
+        # Write metadata sidecar file
+        await self._metadata_writer.write_silver_metadata(table_path, metadata)
 
     async def _merge_records(
         self,
