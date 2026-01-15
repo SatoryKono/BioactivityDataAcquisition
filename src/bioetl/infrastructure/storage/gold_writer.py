@@ -39,7 +39,12 @@ if TYPE_CHECKING:
 
     from pandera.polars import DataFrameSchema
 
-    from bioetl.domain.ports import AuditPort, LoggerPort, TracingPort
+    from bioetl.domain.ports import (
+        AuditPort,
+        LoggerPort,
+        MetadataWriterPort,
+        TracingPort,
+    )
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
@@ -66,6 +71,7 @@ class GoldWriter(BaseDeltaWriter):
         tracing: TracingPort | None = None,
         csv_exporter: CsvExporter | None = None,
         audit: AuditPort | None = None,
+        metadata_writer: MetadataWriterPort | None = None,
     ) -> None:
         """Initialize Gold writer.
 
@@ -78,6 +84,8 @@ class GoldWriter(BaseDeltaWriter):
             csv_exporter: Optional CsvExporter for CSV output (None to disable)
             audit: Optional AuditPort for write operation traceability.
                   Use NoOpAudit from composition layer if audit disabled.
+            metadata_writer: Optional MetadataWriterPort for writing _metadata.yaml
+                           sidecar files. Use NoOpMetadataWriter if disabled.
 
         Note:
             LoggerPort is required per RULES.md DI requirements.
@@ -97,6 +105,13 @@ class GoldWriter(BaseDeltaWriter):
         self.csv_exporter = csv_exporter
         self._audit = audit
         self._tracing: TracingPort = tracing
+
+        # Use NoOpMetadataWriter if not provided (metadata is optional)
+        if metadata_writer is None:
+            from bioetl.domain.ports.noop import NoOpMetadataWriter
+
+            metadata_writer = NoOpMetadataWriter()
+        self._metadata_writer: MetadataWriterPort = metadata_writer
 
     async def write_gold(
         self,
@@ -168,6 +183,17 @@ class GoldWriter(BaseDeltaWriter):
                     ingestion_ts=ingestion_ts,
                     run_id=run_id,
                 )
+
+            # Write metadata sidecar file if configured
+            await self._write_gold_metadata(
+                table_path=table_path,
+                table_name=table_name,
+                records=records,
+                mode=validated_mode,
+                scd_config=scd_config,
+                ingestion_ts=ingestion_ts,
+                run_id=run_id,
+            )
 
     def _validate_write_mode(self, mode: str) -> GoldWriteMode:
         """Validate and return the write mode enum."""
@@ -324,6 +350,138 @@ class GoldWriter(BaseDeltaWriter):
             "_log_gold_audit called without audit configured"
         )
         await self._audit.log_write(audit_entry)
+
+    async def _get_delta_version(self, table_path: str) -> int | None:
+        """Get current Delta table version.
+
+        Args:
+            table_path: Full path to the Delta table.
+
+        Returns:
+            Current version number, or None if table doesn't exist.
+        """
+        try:
+            dt = await self._run_in_executor(lambda: DeltaTable(table_path))
+            version: int = dt.version()
+            return version
+        except TableNotFoundError:
+            return None
+
+    async def _write_gold_metadata(
+        self,
+        table_path: str,
+        table_name: str,
+        records: list[dict[str, Any]],
+        mode: GoldWriteMode,
+        scd_config: dict[str, Any] | None,
+        ingestion_ts: datetime | None,
+        run_id: RunID | None,
+    ) -> None:
+        """Write Gold layer metadata sidecar file.
+
+        Args:
+            table_path: Full path to the Delta table.
+            table_name: Table name.
+            records: List of records written.
+            mode: Write mode used (overwrite, append, scd2).
+            scd_config: SCD2 configuration if applicable.
+            ingestion_ts: Ingestion timestamp.
+            run_id: Run identifier.
+        """
+        from datetime import UTC
+        from importlib.metadata import version as pkg_version
+        from platform import node as hostname
+        from platform import python_version
+
+        from bioetl.domain.models.metadata import (
+            DQSummary,
+            EnvironmentMetadata,
+            GoldMetadata,
+            GoldOutputMetadata,
+            LineageMetadata,
+            PipelineMetadata,
+            RuntimeMetadata,
+            RunTypeEnum,
+            SCDMetadata,
+        )
+
+        if not records:
+            return
+
+        # Build runtime metadata
+        now = ingestion_ts or datetime.now(UTC)
+        runtime = RuntimeMetadata(
+            run_id=str(run_id) if run_id else "",
+            run_type=RunTypeEnum.INCREMENTAL,  # Gold is always incremental
+            started_at_utc=now,
+            completed_at_utc=now,
+        )
+
+        # Extract pipeline info from table name
+        # table_name format: {provider}.{entity} or just {entity}
+        parts = table_name.split(".")
+        if len(parts) >= 2:
+            provider = parts[0]
+            entity = parts[1]
+        else:
+            provider = "unknown"
+            entity = parts[0] if parts else "unknown"
+
+        pipeline = PipelineMetadata(
+            name=f"{provider}_{entity}",
+            provider=provider,
+            entity=entity,
+        )
+
+        # Build lineage (Gold layer sources from Silver)
+        lineage = LineageMetadata()
+
+        # Build DQ summary (basic metrics)
+        dq_summary = DQSummary(
+            total_records=len(records),
+            valid_records=len(records),
+        )
+
+        # Build output metrics
+        output = GoldOutputMetadata(
+            record_count=len(records),
+        )
+
+        # Build SCD metadata if applicable
+        scd = None
+        if mode == GoldWriteMode.SCD2 and scd_config:
+            scd = SCDMetadata(
+                enabled=True,
+                effective_date_column=scd_config.get("valid_from_col", "_valid_from"),
+                end_date_column=scd_config.get("valid_to_col", "_valid_to"),
+                current_flag_column=scd_config.get("current_flag_col", "_is_current"),
+            )
+
+        # Build environment info
+        try:
+            bioetl_version = pkg_version("bioetl")
+        except Exception:
+            bioetl_version = "unknown"
+
+        environment = EnvironmentMetadata(
+            hostname=hostname(),
+            python_version=python_version(),
+            bioetl_version=bioetl_version,
+        )
+
+        # Build complete metadata
+        metadata = GoldMetadata(
+            runtime=runtime,
+            pipeline=pipeline,
+            lineage=lineage,
+            dq_summary=dq_summary,
+            output=output,
+            scd=scd,
+            environment=environment,
+        )
+
+        # Write metadata sidecar file
+        await self._metadata_writer.write_gold_metadata(table_path, metadata)
 
     async def _run_in_executor(self, func: Callable[..., T], *args: Any) -> T:
         """Run a function in the executor."""
