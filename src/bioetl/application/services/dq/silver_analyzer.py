@@ -380,9 +380,9 @@ class SilverDQAnalyzer:
                             max=float(max_val) if max_val is not None else None,  # type: ignore[arg-type]
                             mean=float(mean_val) if mean_val is not None else None,  # type: ignore[arg-type]
                             std=float(std_val) if std_val is not None else None,  # type: ignore[arg-type]
-                            median=float(median_val)
+                            median=float(median_val)  # type: ignore[arg-type]
                             if median_val is not None
-                            else None,  # type: ignore[arg-type]
+                            else None,
                         )
                 except Exception:
                     pass
