@@ -1,15 +1,12 @@
 # configs/pipelines/pubchem/compound.yaml
 # Pipeline configuration for PubChem Compound entity.
 #
-# Inherits defaults from ../_base.yaml:
-# - metadata (lineage, provenance, content_hash)
-# - dq_config (thresholds, anomaly_detection, quarantine, metrics)
-# - circuit_breaker, sink structure, maintenance, input_filter
+# Inherits defaults from ../_base.yaml
 
 pipeline_name: pubchem_compound
 provider: pubchem
 entity_type: compound
-version: "2.0.0"
+version: "1.1.0"
 description: "Pipeline for ingesting PubChem compounds"
 
 primary_keys: ["cid"]
@@ -17,107 +14,6 @@ silver_table: "pubchem_compound"
 gold_table: "pubchem_compound"
 
 source_file: ../../sources/pubchem.yaml
-
-# -----------------------------------------------------------------------------
-# Entity-Specific Metadata
-# -----------------------------------------------------------------------------
-metadata:
-  schema:
-    version: "1.0.0"
-    contract_path: docs/contracts/gold/pubchem_compound.json
-
-# -----------------------------------------------------------------------------
-# Entity-Specific DQ Configuration
-# -----------------------------------------------------------------------------
-dq_config:
-  # Column-level validation rules
-  column_checks:
-    cid:
-      nullable: false
-      unique: true
-      range:
-        min: 1
-    molecular_formula:
-      nullable: false
-    molecular_weight:
-      nullable: true
-      range:
-        min: 0.0
-    canonical_smiles:
-      nullable: true
-    isomeric_smiles:
-      nullable: true
-    inchi:
-      nullable: true
-      pattern: "^InChI=.*$"
-    inchikey:
-      nullable: true
-      pattern: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
-    iupac_name:
-      nullable: true
-    xlogp:
-      nullable: true
-      range:
-        min: -10.0
-        max: 20.0
-    exact_mass:
-      nullable: true
-      range:
-        min: 0.0
-    monoisotopic_mass:
-      nullable: true
-      range:
-        min: 0.0
-    tpsa:
-      nullable: true
-      range:
-        min: 0.0
-    complexity:
-      nullable: true
-      range:
-        min: 0.0
-    charge:
-      nullable: true
-    h_bond_donor_count:
-      nullable: true
-      range:
-        min: 0
-    h_bond_acceptor_count:
-      nullable: true
-      range:
-        min: 0
-    rotatable_bond_count:
-      nullable: true
-      range:
-        min: 0
-    heavy_atom_count:
-      nullable: true
-      range:
-        min: 0
-    isotope_atom_count:
-      nullable: true
-      range:
-        min: 0
-    atom_stereo_count:
-      nullable: true
-      range:
-        min: 0
-    defined_atom_stereo_count:
-      nullable: true
-      range:
-        min: 0
-    undefined_atom_stereo_count:
-      nullable: true
-      range:
-        min: 0
-    bond_stereo_count:
-      nullable: true
-      range:
-        min: 0
-    covalent_unit_count:
-      nullable: true
-      range:
-        min: 0
 
 # Entity-specific gold filters
 gold_filters:

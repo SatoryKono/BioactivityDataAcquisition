@@ -1,15 +1,12 @@
 # configs/pipelines/uniprot/protein.yaml
 # Pipeline configuration for UniProt Protein entity.
 #
-# Inherits defaults from ../_base.yaml:
-# - metadata (lineage, provenance, content_hash)
-# - dq_config (thresholds, anomaly_detection, quarantine, metrics)
-# - circuit_breaker, sink structure, maintenance, input_filter
+# Inherits defaults from ../_base.yaml
 
 pipeline_name: uniprot_protein
 provider: uniprot
 entity_type: protein
-version: "2.0.0"
+version: "1.1.0"
 description: "Pipeline for ingesting UniProt proteins"
 
 primary_keys: ["accession"]
@@ -17,71 +14,6 @@ silver_table: "uniprot_protein"
 gold_table: "uniprot_protein"
 
 source_file: ../../sources/uniprot.yaml
-
-# -----------------------------------------------------------------------------
-# Entity-Specific Metadata
-# -----------------------------------------------------------------------------
-metadata:
-  schema:
-    version: "1.0.0"
-    contract_path: docs/contracts/gold/uniprot_protein.json
-
-# -----------------------------------------------------------------------------
-# Entity-Specific DQ Configuration
-# -----------------------------------------------------------------------------
-dq_config:
-  # Column-level validation rules
-  column_checks:
-    accession:
-      nullable: false
-      unique: true
-      pattern: "^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$"
-    entry_name:
-      nullable: false
-      pattern: "^[A-Z0-9]+_[A-Z0-9]+$"
-    organism:
-      nullable: false
-    organism_id:
-      nullable: true
-      range:
-        min: 1
-    protein_name:
-      nullable: true
-    gene_names:
-      nullable: true
-    ec_number:
-      nullable: true
-      pattern: "^\\d+\\.\\d+\\.\\d+\\.\\d+$"
-    reviewed:
-      nullable: false
-      allowed_values: ["true", "false"]
-    sequence:
-      nullable: true
-    sequence_length:
-      nullable: true
-      range:
-        min: 1
-    mass:
-      nullable: true
-      range:
-        min: 0
-    existence:
-      nullable: true
-      allowed_values: ["1", "2", "3", "4", "5"]
-    go_terms:
-      nullable: true
-    keywords:
-      nullable: true
-    features:
-      nullable: true
-    cross_references:
-      nullable: true
-    date_created:
-      nullable: true
-    date_modified:
-      nullable: true
-    date_sequence_modified:
-      nullable: true
 
 # Entity-specific gold filters
 gold_filters:
