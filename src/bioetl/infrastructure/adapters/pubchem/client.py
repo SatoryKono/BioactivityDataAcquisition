@@ -31,6 +31,7 @@ from pydantic import BaseModel
 from bioetl.domain.entities.pubchem import PubChemCompoundRecord
 from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.filterable_mixin import FilterableStubMixin
 from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
 from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
     PubChemFetchStrategies,
@@ -51,13 +52,17 @@ PUBCHEM_DTO_MODELS: dict[str, type[BaseModel]] = {
 }
 
 
-class PubChemAdapter(BaseSyncAdapter):
+class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
     """PubChem API adapter implementing DataSourcePort.
 
     Provides access to chemical compound data from PubChem database.
     Uses pubchempy library which is synchronous, so runs in ThreadPoolExecutor.
 
     All dependencies are injected via constructor (Composition Root pattern).
+
+    Uses FilterableStubMixin for:
+    - fetch_multi_filtered: Not supported by PubChem API
+    - fetch_filtered_with_fallback: Delegates to fetch_filtered (CIDs are stable)
 
     Example:
         >>> # Dependencies created in Composition Root
@@ -175,60 +180,8 @@ class PubChemAdapter(BaseSyncAdapter):
         else:
             raise ValueError(f"Unsupported filter_field: {filter_field}")
 
-    async def fetch_multi_filtered(
-        self,
-        entity_type: str,
-        filters: dict[str, list[str]],
-        limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Multi-field filtering not supported by PubChem API.
-
-        PubChem API only supports single-field filtering (by CID, SMILES, or name).
-        Use fetch_filtered() for single-field filtering instead.
-
-        Raises:
-            NotImplementedError: Always, as PubChem doesn't support multi-field filtering.
-        """
-        # AsyncIterator requires yield before raise for proper generator creation
-        if False:  # pragma: no cover
-            yield {}  # Required for AsyncIterator type signature
-        raise NotImplementedError(
-            "PubChem API does not support multi-field filtering. "
-            "Use fetch_filtered() with a single filter_field instead."
-        )
-
-    async def fetch_filtered_with_fallback(
-        self,
-        entity_type: str,
-        filter_ids: list[str],
-        filter_field: str,
-        fallback_mapping: dict[str, str],
-        limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records with fallback (not applicable for PubChem).
-
-        Implements FilterableDataSourcePort.fetch_filtered_with_fallback().
-
-        PubChem uses CID/SMILES for filtering which are always resolvable,
-        so fallback is not needed. This method simply delegates to fetch_filtered()
-        and ignores the fallback_mapping parameter.
-
-        Args:
-            entity_type: Type of entity to fetch
-            filter_ids: List of IDs to filter by
-            filter_field: Field name to filter on
-            fallback_mapping: Ignored - PubChem doesn't need fallback search
-            limit: Maximum number of records to fetch
-
-        Yields:
-            Dictionary records matching the filter criteria
-
-        """
-        _ = fallback_mapping  # Unused - PubChem IDs are always resolvable
-        async for record in self.fetch_filtered(
-            entity_type, filter_ids, filter_field, limit
-        ):
-            yield record
+    # fetch_multi_filtered and fetch_filtered_with_fallback are provided
+    # by FilterableStubMixin (see class inheritance)
 
     async def fetch_as_models(
         self,
