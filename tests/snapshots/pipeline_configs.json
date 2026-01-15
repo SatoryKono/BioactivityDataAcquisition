@@ -3,7 +3,177 @@
     "batch_size": 100,
     "checkpoint_interval": 1000,
     "dq": {
+      "conditional_validations": [
+        {
+          "condition_field": "standard_type",
+          "condition_operator": "eq",
+          "condition_value": "IC50",
+          "name": "ic50_range_check",
+          "then_validations": [
+            {
+              "allowed": [],
+              "error_message": null,
+              "field": "standard_value",
+              "max_value": 100000.0,
+              "min_value": 0.001,
+              "nullable": false,
+              "pattern": null,
+              "validation_type": "range",
+              "validator": null
+            }
+          ]
+        }
+      ],
+      "cross_field_validations": [
+        {
+          "condition": "all_present",
+          "error_message": "Complete activity data requires value, units, and type",
+          "fields": [
+            "standard_value",
+            "standard_units",
+            "standard_type"
+          ],
+          "name": "activity_completeness",
+          "required_field": null,
+          "trigger_field": null,
+          "validator": null
+        }
+      ],
+      "field_validations": [
+        {
+          "allowed": [],
+          "error_message": "activity_id must be a positive integer",
+          "field": "activity_id",
+          "max_value": null,
+          "min_value": 1.0,
+          "nullable": false,
+          "pattern": null,
+          "validation_type": "range",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": "molecule_chembl_id must match CHEMBL format",
+          "field": "molecule_chembl_id",
+          "max_value": null,
+          "min_value": null,
+          "nullable": false,
+          "pattern": "^CHEMBL\\d+$",
+          "validation_type": "pattern",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": "target_chembl_id must match CHEMBL format",
+          "field": "target_chembl_id",
+          "max_value": null,
+          "min_value": null,
+          "nullable": true,
+          "pattern": "^CHEMBL\\d+$",
+          "validation_type": "pattern",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": "assay_chembl_id must match CHEMBL format",
+          "field": "assay_chembl_id",
+          "max_value": null,
+          "min_value": null,
+          "nullable": true,
+          "pattern": "^CHEMBL\\d+$",
+          "validation_type": "pattern",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": "standard_value must be non-negative",
+          "field": "standard_value",
+          "max_value": 1000000000.0,
+          "min_value": 0.0,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "range",
+          "validator": null
+        },
+        {
+          "allowed": [
+            "IC50",
+            "Ki",
+            "Kd",
+            "EC50",
+            "AC50",
+            "GI50",
+            "ED50",
+            "MIC",
+            "CC50"
+          ],
+          "error_message": null,
+          "field": "standard_type",
+          "max_value": null,
+          "min_value": null,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "enum",
+          "validator": null
+        },
+        {
+          "allowed": [
+            "nM",
+            "uM",
+            "mM",
+            "pM",
+            "M",
+            "ug.mL-1",
+            "mg.kg-1"
+          ],
+          "error_message": null,
+          "field": "standard_units",
+          "max_value": null,
+          "min_value": null,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "enum",
+          "validator": null
+        },
+        {
+          "allowed": [
+            "B",
+            "F",
+            "A",
+            "T",
+            "P",
+            "U"
+          ],
+          "error_message": null,
+          "field": "assay_type",
+          "max_value": null,
+          "min_value": null,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "enum",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": "pchembl_value must be between 0 and 15",
+          "field": "pchembl_value",
+          "max_value": 15.0,
+          "min_value": 0.0,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "range",
+          "validator": null
+        }
+      ],
       "hard_fail_threshold": 0.2,
+      "invalid_record_policy": "quarantine",
+      "report": {
+        "enabled": true,
+        "format": "json",
+        "include_sample_failures": true,
+        "output_path": null,
+        "sample_size": 10
+      },
       "soft_fail_threshold": 0.05,
       "strict_validation": false
     },
@@ -186,7 +356,132 @@
     "batch_size": 100,
     "checkpoint_interval": 1000,
     "dq": {
+      "conditional_validations": [],
+      "cross_field_validations": [
+        {
+          "condition": "any_present",
+          "error_message": "At least one structure identifier required",
+          "fields": [
+            "canonical_smiles",
+            "inchi",
+            "inchikey"
+          ],
+          "name": "structure_present",
+          "required_field": null,
+          "trigger_field": null,
+          "validator": null
+        }
+      ],
+      "field_validations": [
+        {
+          "allowed": [],
+          "error_message": "CID must be a positive integer",
+          "field": "cid",
+          "max_value": null,
+          "min_value": 1.0,
+          "nullable": false,
+          "pattern": null,
+          "validation_type": "range",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": "Molecular formula must start with uppercase letter",
+          "field": "molecular_formula",
+          "max_value": null,
+          "min_value": null,
+          "nullable": true,
+          "pattern": "^[A-Z][A-Za-z0-9]*$",
+          "validation_type": "pattern",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": null,
+          "field": "molecular_weight",
+          "max_value": 10000.0,
+          "min_value": 10.0,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "range",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": null,
+          "field": "canonical_smiles",
+          "max_value": null,
+          "min_value": null,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "custom",
+          "validator": "smiles_validator"
+        },
+        {
+          "allowed": [],
+          "error_message": null,
+          "field": "isomeric_smiles",
+          "max_value": null,
+          "min_value": null,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "custom",
+          "validator": "smiles_validator"
+        },
+        {
+          "allowed": [],
+          "error_message": null,
+          "field": "xlogp",
+          "max_value": 30.0,
+          "min_value": -20.0,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "range",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": null,
+          "field": "tpsa",
+          "max_value": 1000.0,
+          "min_value": 0.0,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "range",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": null,
+          "field": "h_bond_donor_count",
+          "max_value": 50.0,
+          "min_value": 0.0,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "range",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": null,
+          "field": "h_bond_acceptor_count",
+          "max_value": 50.0,
+          "min_value": 0.0,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "range",
+          "validator": null
+        }
+      ],
       "hard_fail_threshold": 0.2,
+      "invalid_record_policy": "quarantine",
+      "report": {
+        "enabled": true,
+        "format": "json",
+        "include_sample_failures": true,
+        "output_path": null,
+        "sample_size": 10
+      },
       "soft_fail_threshold": 0.05,
       "strict_validation": false
     },
@@ -219,7 +514,121 @@
     "batch_size": 100,
     "checkpoint_interval": 1000,
     "dq": {
+      "conditional_validations": [],
+      "cross_field_validations": [
+        {
+          "condition": "all_present",
+          "error_message": "Publication must have PMID and title",
+          "fields": [
+            "pmid",
+            "title"
+          ],
+          "name": "publication_identifiable",
+          "required_field": null,
+          "trigger_field": null,
+          "validator": null
+        },
+        {
+          "condition": "any_present",
+          "error_message": "At least one identifier required",
+          "fields": [
+            "pmid",
+            "doi",
+            "pmc_id"
+          ],
+          "name": "has_identifier",
+          "required_field": null,
+          "trigger_field": null,
+          "validator": null
+        }
+      ],
+      "field_validations": [
+        {
+          "allowed": [],
+          "error_message": "PMID must be a positive integer",
+          "field": "pmid",
+          "max_value": 100000000.0,
+          "min_value": 1.0,
+          "nullable": false,
+          "pattern": null,
+          "validation_type": "range",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": null,
+          "field": "title",
+          "max_value": null,
+          "min_value": null,
+          "nullable": true,
+          "pattern": "^.{1,2000}$",
+          "validation_type": "pattern",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": "DOI must start with 10. prefix",
+          "field": "doi",
+          "max_value": null,
+          "min_value": null,
+          "nullable": true,
+          "pattern": "^10\\.\\d{4,}/.*$",
+          "validation_type": "pattern",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": null,
+          "field": "pub_year",
+          "max_value": 2100.0,
+          "min_value": 1800.0,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "range",
+          "validator": null
+        },
+        {
+          "allowed": [
+            "Journal Article",
+            "Review",
+            "Letter",
+            "Editorial",
+            "Clinical Trial",
+            "Meta-Analysis",
+            "Case Reports",
+            "Comparative Study",
+            "Evaluation Study"
+          ],
+          "error_message": null,
+          "field": "pub_type",
+          "max_value": null,
+          "min_value": null,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "enum",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": "PMC ID must start with PMC followed by digits",
+          "field": "pmc_id",
+          "max_value": null,
+          "min_value": null,
+          "nullable": true,
+          "pattern": "^PMC\\d+$",
+          "validation_type": "pattern",
+          "validator": null
+        }
+      ],
       "hard_fail_threshold": 0.2,
+      "invalid_record_policy": "quarantine",
+      "report": {
+        "enabled": true,
+        "format": "json",
+        "include_sample_failures": true,
+        "output_path": null,
+        "sample_size": 10
+      },
       "soft_fail_threshold": 0.05,
       "strict_validation": false
     },
@@ -252,7 +661,98 @@
     "batch_size": 100,
     "checkpoint_interval": 1000,
     "dq": {
+      "conditional_validations": [],
+      "cross_field_validations": [
+        {
+          "condition": "all_present",
+          "error_message": "Protein must have accession and entry name",
+          "fields": [
+            "accession",
+            "entry_name"
+          ],
+          "name": "protein_identifiable",
+          "required_field": null,
+          "trigger_field": null,
+          "validator": null
+        }
+      ],
+      "field_validations": [
+        {
+          "allowed": [],
+          "error_message": "UniProt accession must be 6-10 alphanumeric chars",
+          "field": "accession",
+          "max_value": null,
+          "min_value": null,
+          "nullable": false,
+          "pattern": "^[A-Z0-9]{6,10}$",
+          "validation_type": "pattern",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": null,
+          "field": "entry_name",
+          "max_value": null,
+          "min_value": null,
+          "nullable": true,
+          "pattern": "^[A-Z0-9_]+$",
+          "validation_type": "pattern",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": "Organism should be in binomial nomenclature",
+          "field": "organism",
+          "max_value": null,
+          "min_value": null,
+          "nullable": true,
+          "pattern": "^[A-Z][a-z]+ [a-z]+.*$",
+          "validation_type": "pattern",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": null,
+          "field": "taxonomy_id",
+          "max_value": 10000000.0,
+          "min_value": 1.0,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "range",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": null,
+          "field": "sequence_length",
+          "max_value": 100000.0,
+          "min_value": 1.0,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "range",
+          "validator": null
+        },
+        {
+          "allowed": [],
+          "error_message": null,
+          "field": "mass",
+          "max_value": 10000000.0,
+          "min_value": 100.0,
+          "nullable": true,
+          "pattern": null,
+          "validation_type": "range",
+          "validator": null
+        }
+      ],
       "hard_fail_threshold": 0.2,
+      "invalid_record_policy": "quarantine",
+      "report": {
+        "enabled": true,
+        "format": "json",
+        "include_sample_failures": true,
+        "output_path": null,
+        "sample_size": 10
+      },
       "soft_fail_threshold": 0.05,
       "strict_validation": false
     },
