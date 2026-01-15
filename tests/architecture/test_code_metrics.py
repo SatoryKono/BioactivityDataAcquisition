@@ -199,10 +199,25 @@ class TestFunctionComplexity:
         "_coerce_to_int": 10,  # CC=8 - Integer coercion with multiple type checks
         # FilterableDataSourcePort batch filtering
         "fetch_filtered": 20,  # CC=18 - Batch filtering with OR-query and entity type handling
+        # DQ serializer domain functions
+        "_dataclass_to_dict": 13,  # CC=12 - Recursive dataclass conversion
+        "_dict_to_yaml": 7,  # CC=6 - YAML dictionary serialization
+        "_yaml_value": 8,  # CC=7 - YAML value formatting
+        "_render_check_details": 9,  # CC=8 - DQ check details rendering
+        # Gold/Silver analyzer application functions
+        "analyze": 21,  # CC=14-20 - Layer analysis with multiple checks
+        "_check_business_rules": 23,  # CC=22 - Business rule validation
+        "_check_referential_integrity": 13,  # CC=12 - FK integrity checks
+        "_check_statistical_profile": 16,  # CC=15 - Statistical analysis
+        "_check_anomaly_detection": 12,  # CC=11 - Anomaly detection
+        "_check_scd_integrity": 16,  # CC=15 - SCD Type 2 integrity
+        "_check_value_distribution": 18,  # CC=17 - Value distribution analysis
+        "_check_schema_drift": 14,  # CC=13 - Schema drift detection
         # Composite pipeline merge service
         "_apply_explicit_rules": 18,  # CC=16 - Explicit field priority rules with column reordering
         # Composite pipeline domain models (ADR-026)
         "DQOverrideConfig": 10,  # CC=9 - DQ override validation with threshold checks
+        "from_dict": 8,  # CC=6 - Dictionary parsing with type conversions
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
