@@ -169,6 +169,8 @@ def test_domain_no_infrastructure_types_in_all() -> None:
         # Metadata ports - "Writer" is for interface, not implementation
         "MetadataWriterPort",  # Domain port for metadata sidecar files
         "NoOpMetadataWriter",  # NoOp implementation of MetadataWriterPort
+        # DQ Report ports - domain interface for quality reports
+        "DQReportWriterPort",  # Domain port for DQ report writing
     }
 
     for symbol in domain.__all__:
