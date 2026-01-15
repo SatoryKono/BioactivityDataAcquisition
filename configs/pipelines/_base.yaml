@@ -211,20 +211,20 @@ sink:
     deterministic: true
 
     # Save _metadata.yaml sidecar file (disabled by default)
-    save_metadata: false
+    save_metadata: true
 
     # Metadata configuration (when save_metadata: true)
-    # metadata:
-    #   lineage:
-    #     source_system: "<provider>"
-    #     source_version: "<version>"
-    #     extraction_method: "api"
-    #   owner: "data-team"
-    #   steward: "<pipeline>-owner"
-    #   description: "Raw <provider> <entity> data"
-    #   tags: ["<provider>", "<entity>", "raw"]
-    #   retention_days: 90
-    #   sla_freshness_hours: 24
+    metadata:
+       lineage:
+         source_system: "<provider>"
+         source_version: "<version>"
+         extraction_method: "api"
+       owner: "data-team"
+       steward: "<pipeline>-owner"
+       description: "Raw <provider> <entity> data"
+       tags: ["<provider>", "<entity>", "raw"]
+       retention_days: 90
+       sla_freshness_hours: 24
 
     # Path template (overridden per entity)
     # path: data/output/bronze
@@ -259,18 +259,18 @@ sink:
     deterministic: true
 
     # Save _metadata.yaml sidecar file (disabled by default)
-    save_metadata: false
+    save_metadata: true
 
     # Metadata configuration (when save_metadata: true)
-    # metadata:
-    #   lineage:
-    #     source_layer: "bronze"
-    #     transformations: ["deduplication", "normalization", "dq_validation"]
-    #   quality_expectations:
-    #     completeness: 0.95
-    #     accuracy: 0.99
-    #   description: "Cleansed <provider> <entity> data"
-    #   tags: ["<provider>", "<entity>", "silver", "validated"]
+    metadata:
+       lineage:
+         source_layer: "bronze"
+         transformations: ["deduplication", "normalization", "dq_validation"]
+       quality_expectations:
+         completeness: 0.95
+         accuracy: 0.99
+       description: "Cleansed <provider> <entity> data"
+       tags: ["<provider>", "<entity>", "silver", "validated"]
 
     # CSV export configuration
     csv_export:
@@ -305,17 +305,17 @@ sink:
     deterministic: true
 
     # Save _metadata.yaml sidecar file (disabled by default)
-    save_metadata: false
+    save_metadata: true
 
     # Metadata configuration (when save_metadata: true)
-    # metadata:
-    #   lineage:
-    #     source_layer: "silver"
-    #     filters_applied: true
-    #   business_domain: "drug-discovery"
-    #   use_cases: ["ml-training", "reporting", "analytics"]
-    #   description: "Business-ready <provider> <entity> data"
-    #   tags: ["<provider>", "<entity>", "gold", "ml-ready"]
+    metadata:
+        lineage:
+        source_layer: "silver"
+        filters_applied: true
+        business_domain: "drug-discovery"
+        use_cases: ["ml-training", "reporting", "analytics"]
+        description: "Business-ready <provider> <entity> data"
+        tags: ["<provider>", "<entity>", "gold", "ml-ready"]
 
     # CSV export configuration
     csv_export:
