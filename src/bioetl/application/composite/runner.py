@@ -8,11 +8,11 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
-import asyncio
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Callable
-from uuid import uuid4
+from typing import TYPE_CHECKING, cast
+from uuid import UUID, uuid4
 
 from bioetl.domain.composite.result import (
     CompositeResult,
@@ -21,6 +21,7 @@ from bioetl.domain.composite.result import (
     SeedResult,
 )
 from bioetl.domain.events import PipelineEvent
+from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
     import polars as pl
@@ -35,7 +36,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.composite.result import EnrichmentResult
-    from bioetl.domain.ports import LoggerPort, LockPort
+    from bioetl.domain.ports import LockPort, LoggerPort
 
 
 @dataclass(frozen=True, slots=True)
@@ -135,13 +136,14 @@ class CompositePipelineRunner:
         self._checkpoint_manager = checkpoint_manager
         self._logger = logger
         self._lock = lock
-        self._run_id = run_id or str(uuid4())
+        self._run_id_str = run_id or str(uuid4())
+        self._run_id: RunID = cast(RunID, UUID(self._run_id_str))
         self._started_at: datetime | None = None
 
     @property
     def run_id(self) -> str:
-        """Get the run ID."""
-        return self._run_id
+        """Get the run ID as string."""
+        return self._run_id_str
 
     @property
     def config(self) -> CompositeConfig:
@@ -170,7 +172,7 @@ class CompositePipelineRunner:
         self._logger.info(
             PipelineEvent.START,
             composite=self._config.name,
-            run_id=self._run_id,
+            run_id=self._run_id_str,
             stage="composite_start",
         )
 
@@ -194,9 +196,9 @@ class CompositePipelineRunner:
 
         except Exception as e:
             self._logger.error(
-                PipelineEvent.ERROR,
+                PipelineEvent.FAILED,
                 composite=self._config.name,
-                run_id=self._run_id,
+                run_id=self._run_id_str,
                 error=str(e),
             )
             raise
@@ -268,7 +270,7 @@ class CompositePipelineRunner:
                 seed_table=self._config.seed.silver_table,
                 enrichers=self._config.enrichers,
                 enrichment_results=enrichment_results,
-                run_id=self._run_id,
+                run_id=self._run_id_str,
             )
 
             self._logger.info(
@@ -281,18 +283,19 @@ class CompositePipelineRunner:
         await self._checkpoint_manager.delete()
 
         completed_at = datetime.now()
-        total_duration = (completed_at - self._started_at).total_seconds()
+        started = self._started_at or completed_at  # Fallback if not set
+        total_duration = (completed_at - started).total_seconds()
 
         self._logger.info(
             PipelineEvent.COMPLETE,
             composite=self._config.name,
-            run_id=self._run_id,
+            run_id=self._run_id_str,
             duration_seconds=total_duration,
         )
 
         return CompositeResult(
             composite_name=self._config.name,
-            composite_run_id=self._run_id,
+            composite_run_id=self._run_id_str,
             seed_result=seed_result,
             enrichment_results=enrichment_results,
             merge_result=merge_result,
@@ -341,18 +344,22 @@ class CompositePipelineRunner:
 
         for enricher in self._config.enrichers:
             # Skip if already completed (unless forced)
-            if enricher.pipeline in state.completed_enrichers:
-                if self._runtime.force_enricher != enricher.pipeline:
-                    continue
+            if (
+                enricher.pipeline in state.completed_enrichers
+                and self._runtime.force_enricher != enricher.pipeline
+            ):
+                continue
 
             # Skip optional enrichers if required_only
             if self._runtime.required_only and not enricher.required:
                 continue
 
             # Filter to specific enrichers if enrich_only
-            if self._runtime.enrich_only:
-                if enricher.pipeline not in self._runtime.enrich_only:
-                    continue
+            if (
+                self._runtime.enrich_only
+                and enricher.pipeline not in self._runtime.enrich_only
+            ):
+                continue
 
             enrichers_to_run.append(enricher)
 

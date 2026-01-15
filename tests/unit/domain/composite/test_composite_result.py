@@ -87,7 +87,7 @@ class TestEnrichmentResult:
 
     def test_invalid_dq_error_rate_raises(self):
         """DQ error rate outside 0-1 should raise ValueError."""
-        with pytest.raises(ValueError, match="dq_error_rate must be between"):
+        with pytest.raises(ValueError, match="dq_error_rate must be 0.0-1.0"):
             EnrichmentResult(
                 enricher_name="test",
                 status=EnrichmentStatus.SUCCESS,
@@ -96,7 +96,7 @@ class TestEnrichmentResult:
 
     def test_negative_duration_raises(self):
         """Negative duration should raise ValueError."""
-        with pytest.raises(ValueError, match="duration_seconds must be non-negative"):
+        with pytest.raises(ValueError, match="duration_seconds must be >= 0"):
             EnrichmentResult(
                 enricher_name="test",
                 status=EnrichmentStatus.SUCCESS,

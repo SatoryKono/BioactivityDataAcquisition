@@ -21,7 +21,7 @@ from bioetl.domain.composite.strategy import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.config import DQConfig
+    pass
 
 
 @dataclass(frozen=True, slots=True)
@@ -240,18 +240,22 @@ class DQOverrideConfig:
 
     def __post_init__(self) -> None:
         """Validate threshold values."""
-        if self.soft_fail_threshold is not None:
-            if not 0.0 <= self.soft_fail_threshold <= 1.0:
-                raise ValueError(
-                    f"soft_fail_threshold must be between 0.0 and 1.0, "
-                    f"got {self.soft_fail_threshold}"
-                )
-        if self.hard_fail_threshold is not None:
-            if not 0.0 <= self.hard_fail_threshold <= 1.0:
-                raise ValueError(
-                    f"hard_fail_threshold must be between 0.0 and 1.0, "
-                    f"got {self.hard_fail_threshold}"
-                )
+        if (
+            self.soft_fail_threshold is not None
+            and not 0.0 <= self.soft_fail_threshold <= 1.0
+        ):
+            raise ValueError(
+                f"soft_fail_threshold must be between 0.0 and 1.0, "
+                f"got {self.soft_fail_threshold}"
+            )
+        if (
+            self.hard_fail_threshold is not None
+            and not 0.0 <= self.hard_fail_threshold <= 1.0
+        ):
+            raise ValueError(
+                f"hard_fail_threshold must be between 0.0 and 1.0, "
+                f"got {self.hard_fail_threshold}"
+            )
         if (
             self.soft_fail_threshold is not None
             and self.hard_fail_threshold is not None

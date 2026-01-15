@@ -264,12 +264,14 @@ class CompositeCheckpointManager:
         """
         if self._resume:
             # Try to load existing checkpoint
-            checkpoint_path = self._checkpoint_path
-            if not checkpoint_path.exists():
+            checkpoint_path: Path | None = None
+            if self._checkpoint_path.exists():
+                checkpoint_path = self._checkpoint_path
+            else:
                 # Try to find latest checkpoint for this composite
                 checkpoint_path = self._get_latest_checkpoint_path()
 
-            if checkpoint_path and checkpoint_path.exists():
+            if checkpoint_path is not None and checkpoint_path.exists():
                 try:
                     data = json.loads(checkpoint_path.read_text())
                     state = CompositeCheckpointState.from_dict(data)
