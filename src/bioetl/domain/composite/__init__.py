@@ -36,23 +36,19 @@ from bioetl.domain.composite.strategy import (
 )
 
 __all__ = [
-    # Config
     "CompositeConfig",
-    "EnricherConfig",
-    "MergeConfig",
-    "SeedConfig",
-    # Results
     "CompositeResult",
+    "ConflictResolution",
+    "EnricherConfig",
     "EnrichmentResult",
     "EnrichmentStatus",
-    "MergeResult",
-    "SeedResult",
-    # Strategy
-    "ConflictResolution",
-    "FallbackStrategy",
-    "MergeStrategy",
-    # Lineage
     "EnrichmentStatusRecord",
+    "FallbackStrategy",
     "FieldSource",
     "LineageMetadata",
+    "MergeConfig",
+    "MergeResult",
+    "MergeStrategy",
+    "SeedConfig",
+    "SeedResult",
 ]

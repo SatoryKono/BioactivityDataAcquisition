@@ -1,19 +1,15 @@
-"""Merge Service.
-
-Application Service that merges enriched data from multiple sources.
-Implements join strategies and conflict resolution with lineage tracking.
-
-See ADR-026 for architectural decisions.
-"""
+"""Merge Service for composite pipelines. See ADR-026."""
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import datetime
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, Literal
 
-from bioetl.domain.composite.lineage import LineageBuilder, LineageMetadata
-from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus, MergeResult
+from bioetl.domain.composite.result import EnrichmentResult, MergeResult
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
+
+JoinHow = Literal["inner", "left", "right", "full", "semi", "anti", "cross", "outer"]
 
 if TYPE_CHECKING:
     import polars as pl
@@ -23,36 +19,7 @@ if TYPE_CHECKING:
 
 
 class MergeService:
-    """Merges enriched data from multiple sources.
-
-    Implements join strategies and conflict resolution.
-    Preserves lineage metadata for traceability.
-
-    This service is responsible for:
-    - Reading seed and enricher Silver tables
-    - Applying join strategy (LEFT OUTER, INNER, UNION)
-    - Resolving field conflicts between sources
-    - Adding lineage metadata to each record
-    - Writing merged data to Silver and Gold
-
-    Attributes:
-        merge_config: Merge configuration with strategy and paths.
-        storage: Storage port for reading/writing tables.
-        logger: Structured logger.
-
-    Example:
-        >>> merger = MergeService(
-        ...     merge_config=merge_config,
-        ...     storage=storage,
-        ...     logger=logger,
-        ... )
-        >>> result = await merger.merge(
-        ...     seed_table="silver/chembl/publication",
-        ...     enrichers=enricher_configs,
-        ...     enrichment_results=results,
-        ...     run_id="abc-123",
-        ... )
-    """
+    """Merges enriched data with conflict resolution and lineage tracking."""
 
     def __init__(
         self,
@@ -60,13 +27,6 @@ class MergeService:
         storage: StoragePort,
         logger: LoggerPort,
     ) -> None:
-        """Initialize merge service.
-
-        Args:
-            merge_config: Merge configuration.
-            storage: Storage port for I/O.
-            logger: Structured logger.
-        """
         self._config = merge_config
         self._storage = storage
         self._logger = logger
@@ -78,34 +38,7 @@ class MergeService:
         enrichment_results: dict[str, EnrichmentResult],
         run_id: str,
     ) -> MergeResult:
-        """Merge seed and enricher data into unified output.
-
-        Execution flow:
-        1. Read seed Silver table
-        2. For each successful enricher, read and join
-        3. Apply conflict resolution
-        4. Add lineage metadata
-        5. Write to Silver and Gold
-
-        Args:
-            seed_table: Path to seed Silver table.
-            enrichers: Enricher configurations.
-            enrichment_results: Results from enrichment phase.
-            run_id: Composite run ID for lineage.
-
-        Returns:
-            MergeResult with statistics and paths.
-
-        Example:
-            >>> result = await merger.merge(
-            ...     seed_table="silver/chembl/publication",
-            ...     enrichers=enricher_configs,
-            ...     enrichment_results={"crossref": success_result},
-            ...     run_id="abc-123",
-            ... )
-            >>> result.records_merged
-            100
-        """
+        """Merge seed and enricher data into unified output."""
         started_at = datetime.now()
 
         # Step 1: Read seed data
@@ -174,28 +107,22 @@ class MergeService:
         records_enriched = self._count_enriched_records(merged_df, enrichers)
 
         # Step 6: Write to Silver
+        # TODO: Integrate with StoragePort properly - needs schema and primary keys
         self._logger.info(
             "Writing merged Silver table",
             path=self._config.output_silver_path,
             records=records_merged,
         )
-        await self._storage.write_silver(
-            df=merged_df,
-            path=self._config.output_silver_path,
-            mode="overwrite",
-        )
+        await self._write_merged_silver(merged_df)
 
         # Step 7: Write to Gold (with filtering if needed)
+        # TODO: Integrate with StoragePort properly - needs schema validation
         self._logger.info(
             "Writing merged Gold table",
             path=self._config.output_gold_path,
             records=records_merged,
         )
-        await self._storage.write_gold(
-            df=merged_df,
-            path=self._config.output_gold_path,
-            mode="overwrite",
-        )
+        await self._write_merged_gold(merged_df)
 
         completed_at = datetime.now()
         duration = (completed_at - started_at).total_seconds()
@@ -220,8 +147,49 @@ class MergeService:
         )
 
     async def _read_silver_table(self, path: str) -> pl.DataFrame:
-        """Read a Silver table using storage port."""
-        return await self._storage.read_silver(path)
+        """Read a Silver table.
+
+        TODO: This requires a DeltaReaderPort extension to StoragePort.
+        Current implementation uses direct deltalake access (infrastructure dependency).
+        """
+        import polars as pl
+        from deltalake import DeltaTable
+
+        # Read Delta table directly (to be replaced with port call)
+        table = DeltaTable(path)
+        result = pl.from_arrow(table.to_pyarrow_table())
+        # from_arrow may return Series for single-column tables
+        if isinstance(result, pl.Series):
+            return result.to_frame()
+        return result
+
+    async def _write_merged_silver(self, df: pl.DataFrame) -> None:
+        """Write merged data to Silver layer.
+
+        TODO: Integrate with StoragePort.write_silver - needs proper schema.
+        """
+        from deltalake import write_deltalake
+
+        # Direct write for now (to be replaced with port call)
+        write_deltalake(
+            self._config.output_silver_path,
+            df.to_arrow(),
+            mode="overwrite",
+        )
+
+    async def _write_merged_gold(self, df: pl.DataFrame) -> None:
+        """Write merged data to Gold layer.
+
+        TODO: Integrate with StoragePort.write_gold - needs Pandera schema.
+        """
+        from deltalake import write_deltalake
+
+        # Direct write for now (to be replaced with port call)
+        write_deltalake(
+            self._config.output_gold_path,
+            df.to_arrow(),
+            mode="overwrite",
+        )
 
     def _infer_silver_table(self, pipeline_name: str) -> str:
         """Infer Silver table path from pipeline name."""
@@ -238,22 +206,7 @@ class MergeService:
         enricher_dfs: dict[str, pl.DataFrame],
         enrichers: Sequence[EnricherConfig],
     ) -> pl.DataFrame:
-        """Apply join strategy to combine DataFrames.
-
-        Uses the configured merge strategy:
-        - LEFT_OUTER: All seed records, enrichments nullable
-        - INNER: Only matched records
-        - UNION: All records from any source
-
-        Args:
-            seed_df: Seed DataFrame.
-            enricher_dfs: Mapping of enricher name to DataFrame.
-            enrichers: Enricher configurations with join keys.
-
-        Returns:
-            Merged DataFrame.
-        """
-        import polars as pl
+        """Apply join strategy (LEFT_OUTER/INNER/UNION) to combine DataFrames."""
 
         merged = seed_df
 
@@ -303,7 +256,7 @@ class MergeService:
 
         return merged
 
-    def _get_polars_join_type(self) -> str:
+    def _get_polars_join_type(self) -> JoinHow:
         """Convert MergeStrategy to Polars join type."""
         match self._config.strategy:
             case MergeStrategy.LEFT_OUTER:
@@ -321,20 +274,7 @@ class MergeService:
         enricher_dfs: dict[str, pl.DataFrame],
         enrichers: Sequence[EnricherConfig],
     ) -> pl.DataFrame:
-        """Apply conflict resolution strategy.
-
-        When multiple sources provide the same field, resolve conflicts
-        according to the configured strategy.
-
-        Args:
-            df: Merged DataFrame with potential conflicts.
-            enricher_dfs: Source DataFrames for reference.
-            enrichers: Enricher configurations.
-
-        Returns:
-            DataFrame with conflicts resolved.
-        """
-        import polars as pl
+        """Apply conflict resolution based on configured strategy."""
 
         match self._config.conflict_resolution:
             case ConflictResolution.SEED_PRIORITY:
@@ -450,19 +390,7 @@ class MergeService:
         run_id: str,
         sources_used: list[str],
     ) -> pl.DataFrame:
-        """Add lineage metadata to each record.
-
-        Adds columns tracking composite run, sources, and enrichment status.
-
-        Args:
-            df: Merged DataFrame.
-            enrichment_results: Enrichment results for status.
-            run_id: Composite run ID.
-            sources_used: List of sources that contributed.
-
-        Returns:
-            DataFrame with lineage columns.
-        """
+        """Add lineage metadata columns to DataFrame."""
         import polars as pl
 
         # Build enrichment status dict

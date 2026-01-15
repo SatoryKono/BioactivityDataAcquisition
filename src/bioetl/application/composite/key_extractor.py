@@ -8,7 +8,8 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Sequence
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import polars as pl
@@ -51,6 +52,22 @@ class KeyExtractorService:
         self._storage = storage
         self._logger = logger
 
+    async def _read_silver_table(self, path: str) -> pl.DataFrame:
+        """Read a Silver table.
+
+        TODO: This requires a DeltaReaderPort extension to StoragePort.
+        Current implementation uses direct deltalake access.
+        """
+        import polars as pl
+        from deltalake import DeltaTable
+
+        table = DeltaTable(path)
+        result = pl.from_arrow(table.to_pyarrow_table())
+        # from_arrow may return Series for single-column tables
+        if isinstance(result, pl.Series):
+            return result.to_frame()
+        return result
+
     async def extract(
         self,
         silver_table: str,
@@ -87,8 +104,9 @@ class KeyExtractorService:
             keys=list(keys),
         )
 
-        # Read full table (could optimize with column projection if supported)
-        full_df = await self._storage.read_silver(silver_table)
+        # Read full table
+        # TODO: Use DeltaReaderPort when available
+        full_df = await self._read_silver_table(silver_table)
 
         if len(full_df) == 0:
             raise ValueError(f"Seed Silver table is empty: {silver_table}")
@@ -150,7 +168,6 @@ class KeyExtractorService:
             ...     filter_condition="pmid IS NOT NULL",
             ... )
         """
-        import polars as pl
 
         # First extract all keys
         keys_df = await self.extract(silver_table, enricher_join_keys)
@@ -180,16 +197,16 @@ class KeyExtractorService:
         condition = condition.strip()
 
         if " IS NOT NULL" in condition.upper():
-            field = condition.upper().replace(" IS NOT NULL", "").strip()
-            field = self._find_column_ci(df, field)
-            if field:
-                return df.filter(pl.col(field).is_not_null())
+            raw_field = condition.upper().replace(" IS NOT NULL", "").strip()
+            matched = self._find_column_ci(df, raw_field)
+            if matched:
+                return df.filter(pl.col(matched).is_not_null())
 
         if " IS NULL" in condition.upper():
-            field = condition.upper().replace(" IS NULL", "").strip()
-            field = self._find_column_ci(df, field)
-            if field:
-                return df.filter(pl.col(field).is_null())
+            raw_field = condition.upper().replace(" IS NULL", "").strip()
+            matched = self._find_column_ci(df, raw_field)
+            if matched:
+                return df.filter(pl.col(matched).is_null())
 
         self._logger.warning(
             "Unsupported filter condition",

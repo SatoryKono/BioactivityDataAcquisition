@@ -48,6 +48,9 @@ def test_registry_completeness():
                     # Skip internal directories (documentation, templates, etc.)
                     if provider.startswith("_"):
                         continue
+                    # Skip composite pipelines (different factory mechanism, see ADR-026)
+                    if provider == "composite":
+                        continue
                     entity = os.path.splitext(parts[1])[0]
                     pipeline_name = f"{provider}_{entity}"
                     found_configs.append(pipeline_name)

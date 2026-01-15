@@ -193,6 +193,8 @@ class TestFunctionComplexity:
         "_coerce_to_int": 10,  # CC=8 - Integer coercion with multiple type checks
         # FilterableDataSourcePort batch filtering
         "fetch_filtered": 20,  # CC=18 - Batch filtering with OR-query and entity type handling
+        # Composite pipeline merge service
+        "_apply_explicit_rules": 18,  # CC=16 - Explicit field priority rules with column reordering
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -567,6 +569,10 @@ class TestGodObjectDetection:
         "PubchemMoleculeSchema": "Pandera schema - declarative field definitions, no behavior to delegate",
         # Audit adapters (cohesive file I/O operations)
         "FileAuditAdapter": "Cohesive adapter - all methods relate to audit file operations (read/write JSONL)",
+        # Composite pipeline services (ADR-026)
+        "MergeService": "Cohesive service - all methods relate to merge operations and conflict resolution",
+        "EnrichmentCoordinator": "Cohesive service - all methods relate to enricher orchestration",
+        "CompositePipelineRunner": "Thin orchestrator - delegates to coordinator, merger, checkpoint services",
     }
 
     def test_large_classes_have_delegation(self, src_dir: Path) -> None:

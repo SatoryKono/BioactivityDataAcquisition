@@ -9,8 +9,9 @@ See ADR-026 for architectural decisions.
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable, Sequence
 from datetime import datetime
-from typing import TYPE_CHECKING, Callable, Sequence
+from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
 
@@ -182,16 +183,16 @@ class EnrichmentCoordinator:
             condition = enricher.filter_condition.strip()
 
             if " IS NOT NULL" in condition.upper():
-                field = condition.upper().replace(" IS NOT NULL", "").strip()
-                field = self._find_column_case_insensitive(keys, field)
-                if field:
-                    return keys.filter(pl.col(field).is_not_null())
+                raw_field = condition.upper().replace(" IS NOT NULL", "").strip()
+                matched = self._find_column_case_insensitive(keys, raw_field)
+                if matched:
+                    return keys.filter(pl.col(matched).is_not_null())
 
             if " IS NULL" in condition.upper():
-                field = condition.upper().replace(" IS NULL", "").strip()
-                field = self._find_column_case_insensitive(keys, field)
-                if field:
-                    return keys.filter(pl.col(field).is_null())
+                raw_field = condition.upper().replace(" IS NULL", "").strip()
+                matched = self._find_column_case_insensitive(keys, raw_field)
+                if matched:
+                    return keys.filter(pl.col(matched).is_null())
 
             # For complex conditions, try SQL expression
             # This is a simplified implementation
@@ -334,7 +335,7 @@ class EnrichmentCoordinator:
                     completed_at=completed_at,
                 )
 
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 duration = (datetime.now() - started_at).total_seconds()
                 self._logger.warning(
                     "Enricher timed out",
@@ -386,7 +387,7 @@ class EnrichmentCoordinator:
         """
         processed: dict[str, EnrichmentResult] = {}
 
-        for name, result in zip(enricher_names, results):
+        for name, result in zip(enricher_names, results, strict=True):
             if isinstance(result, BaseException):
                 # Should not happen for required (already re-raised)
                 processed[name] = EnrichmentResult.failed(

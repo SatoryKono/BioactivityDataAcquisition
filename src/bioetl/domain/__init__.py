@@ -10,9 +10,13 @@ This module provides a clean public API for the domain layer, exposing:
 - Configuration (Domain config objects)
 - Transformations (Pure functions for hashing, schema drift, DQ)
 - Error classification (Pure domain logic for error categorization)
+- Composite (Composite pipeline domain models, ADR-026)
 """
 
 from __future__ import annotations
+
+# Composite pipeline subpackage (ADR-026)
+from bioetl.domain import composite
 
 # Configuration objects
 from bioetl.domain.config import (
@@ -288,6 +292,8 @@ from bioetl.domain.value_objects import (
 )
 
 __all__ = [
+    # Composite pipeline (subpackage)
+    "composite",
     # Configuration
     "DEFAULT_VALIDATION_CONFIG",
     "DQConfig",
