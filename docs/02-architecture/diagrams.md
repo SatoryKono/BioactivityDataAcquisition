@@ -209,7 +209,7 @@ flowchart LR
     end
 
     subgraph Silver["Silver Layer"]
-        DW[DeltaWriter]
+        DW[SilverWriter]
         SD[("Delta Lake")]
     end
 
