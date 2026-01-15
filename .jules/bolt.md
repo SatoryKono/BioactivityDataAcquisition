@@ -1,3 +1,3 @@
-## 2026-05-24 - [Dictionary Copy Overhead in Hot Loops]
-**Learning:** `dict.copy()` in Python is relatively fast but adds up significantly in tight loops (e.g., 50k+ iterations). When creating "enriched" records for storage (like adding `_source_batch_id`), copying every record just to add one field is wasteful if the source list is transient.
-**Action:** Verify if the list of records is used elsewhere. If not (and it's passed by value/reference solely for this operation), modify the dictionaries in-place. This reduces memory pressure and execution time (~35% speedup observed).
+## 2026-05-23 - [Optimized Checkpoint Serialization]
+**Learning:** Replacing `json` with `orjson` in `CompositeCheckpointManager` improved serialization speed. Importantly, `orjson.dumps` returns `bytes`, so file I/O operations must switch from `write_text/read_text` to `write_bytes/read_bytes`. Also, `orjson` is strict about UTF-8, which aligns well with modern systems.
+**Action:** When migrating from `json` to `orjson`, always check if the surrounding I/O code expects strings or bytes and update accordingly. Ensure `orjson` is listed in project dependencies (it was already present here).

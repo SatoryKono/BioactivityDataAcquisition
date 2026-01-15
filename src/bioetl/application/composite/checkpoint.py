@@ -14,6 +14,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+import orjson
+
 from bioetl.domain.composite.result import (
     EnrichmentResult,
     EnrichmentStatus,
@@ -273,7 +275,8 @@ class CompositeCheckpointManager:
 
             if checkpoint_path is not None and checkpoint_path.exists():
                 try:
-                    data = json.loads(checkpoint_path.read_text())
+                    # Optimized: Use orjson for faster loading
+                    data = orjson.loads(checkpoint_path.read_bytes())
                     state = CompositeCheckpointState.from_dict(data)
                     self._logger.info(
                         "Loaded checkpoint",
@@ -311,7 +314,14 @@ class CompositeCheckpointManager:
         # Write to temp file then rename (atomic)
         temp_path = self._checkpoint_path.with_suffix(".tmp")
         try:
-            temp_path.write_text(json.dumps(state.to_dict(), indent=2))
+            # Optimized: Use orjson for faster serialization
+            # Using OPT_INDENT_2 to match previous indent=2 behavior for readability
+            # and OPT_SORT_KEYS for deterministic output
+            json_bytes = orjson.dumps(
+                state.to_dict(),
+                option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS
+            )
+            temp_path.write_bytes(json_bytes)
             temp_path.rename(self._checkpoint_path)
 
             self._logger.debug(
