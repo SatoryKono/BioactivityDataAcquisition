@@ -7,7 +7,7 @@
 pipeline_name: chembl_publication
 provider: chembl
 entity_type: document
-version: "2.0.0"
+version: "2.1.0"
 description: "Extract scientific publications from ChEMBL API"
 
 primary_keys: ["document_chembl_id"]
@@ -15,6 +15,42 @@ silver_table: "chembl_publication"
 gold_table: "chembl_publication"
 
 source_file: ../../sources/chembl.yaml
+
+# -----------------------------------------------------------------------------
+# Data Quality Rules (entity-specific overrides)
+# -----------------------------------------------------------------------------
+dq_rules:
+  field_validations:
+    - field: "document_chembl_id"
+      type: "pattern"
+      pattern: "^CHEMBL\\d+$"
+      nullable: false
+      error_message: "document_chembl_id must match CHEMBL format"
+    - field: "doc_type"
+      type: "enum"
+      allowed: ["PUBLICATION", "BOOK", "DATASET", "PATENT"]
+      nullable: true
+    - field: "year"
+      type: "range"
+      min: 1800
+      max: 2100
+      nullable: true
+    - field: "pubmed_id"
+      type: "range"
+      min: 1
+      max: 100000000
+      nullable: true
+    - field: "doi"
+      type: "pattern"
+      pattern: "^10\\.\\d{4,}/.*$"
+      nullable: true
+      error_message: "DOI must start with 10. prefix"
+
+  cross_field_validations:
+    - name: "publication_identifiable"
+      fields: ["pubmed_id", "doi", "title"]
+      condition: "any_present"
+      error_message: "Publication must have at least one identifier"
 
 # Entity-specific gold filters
 gold_filters:

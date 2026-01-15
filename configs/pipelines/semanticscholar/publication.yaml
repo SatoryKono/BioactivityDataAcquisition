@@ -9,7 +9,7 @@
 pipeline_name: semanticscholar_publication
 provider: semanticscholar
 entity_type: publication
-version: "1.1.0"
+version: "1.2.0"
 description: "Batch DOI resolution via Semantic Scholar with title fallback"
 
 primary_keys: ["paper_id"]
@@ -17,6 +17,49 @@ silver_table: "semanticscholar_publication"
 gold_table: "semanticscholar_publication"
 
 source_file: ../../sources/semanticscholar.yaml
+
+# -----------------------------------------------------------------------------
+# Data Quality Rules (entity-specific overrides)
+# -----------------------------------------------------------------------------
+dq_rules:
+  field_validations:
+    - field: "paper_id"
+      type: "pattern"
+      pattern: "^[a-f0-9]{40}$"
+      nullable: false
+      error_message: "paper_id must be a 40-char hex string"
+    - field: "doi"
+      type: "pattern"
+      pattern: "^10\\.\\d{4,}/.*$"
+      nullable: true
+      error_message: "DOI must start with 10. prefix"
+    - field: "title"
+      type: "pattern"
+      pattern: "^.{1,2000}$"
+      nullable: true
+    - field: "year"
+      type: "range"
+      min: 1500
+      max: 2100
+      nullable: true
+    - field: "citation_count"
+      type: "range"
+      min: 0
+      nullable: true
+    - field: "reference_count"
+      type: "range"
+      min: 0
+      nullable: true
+    - field: "influential_citation_count"
+      type: "range"
+      min: 0
+      nullable: true
+
+  cross_field_validations:
+    - name: "publication_identifiable"
+      fields: ["paper_id", "title"]
+      condition: "all_present"
+      error_message: "Publication must have paper_id and title"
 
 # Entity-specific gold filters
 gold_filters:
