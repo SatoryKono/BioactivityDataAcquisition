@@ -33,6 +33,12 @@ from bioetl.domain.services.data_normalization_config import DataNormalizationCo
 from bioetl.domain.services.data_normalization_service import (
     DefaultDataNormalizationService,
 )
+from bioetl.domain.services.dq import (
+    BronzeDQAnalyzer,
+    DQReportSerializer,
+    GoldDQAnalyzer,
+    SilverDQAnalyzer,
+)
 from bioetl.domain.services.identity_service import IdentityService
 from bioetl.domain.services.normalization_config import NormalizationConfig
 from bioetl.domain.services.normalization_service import NormalizationService
@@ -44,12 +50,16 @@ DataNormalizationService = DefaultDataNormalizationService
 
 __all__ = [
     "ActivityAggregator",
+    "BronzeDQAnalyzer",
+    "DQReportSerializer",
     "DataNormalizationConfig",
     "DataNormalizationService",
     "DefaultDataNormalizationService",
+    "GoldDQAnalyzer",
     "IdentityService",
     "NormalizationConfig",
     "NormalizationService",
+    "SilverDQAnalyzer",
     "UnitConverter",
     "ValueValidator",
 ]
