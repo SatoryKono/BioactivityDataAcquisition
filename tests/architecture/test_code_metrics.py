@@ -447,6 +447,10 @@ class TestClassSize:
         "ErrorService": 500,  # ~480 lines - comprehensive error classification with detailed recovery logging
         # Audit adapter (file-based audit logging)
         "FileAuditAdapter": 330,  # 324 lines - File-based AuditPort implementation with async I/O
+        # DQ analyzers (comprehensive data quality analysis)
+        "DQReportSerializer": 400,  # 383 lines - DQ report serialization with multiple formats
+        "GoldDQAnalyzer": 770,  # 752 lines - Gold layer DQ analysis with business rules
+        "SilverDQAnalyzer": 540,  # 521 lines - Silver layer DQ analysis with schema drift
         # Domain services
         "NormalizationService": 370,  # 364 lines - Normalization service with validation
         "ActivityAggregator": 320,  # 311 lines - Activity aggregation with multiple strategies
@@ -615,6 +619,10 @@ class TestGodObjectDetection:
         "PubchemMoleculeSchema": "Pandera schema - declarative field definitions, no behavior to delegate",
         # Audit adapters (cohesive file I/O operations)
         "FileAuditAdapter": "Cohesive adapter - all methods relate to audit file operations (read/write JSONL)",
+        # DQ analyzers (cohesive analysis responsibility)
+        "DQReportSerializer": "Cohesive serializer - all methods relate to DQ report serialization",
+        "GoldDQAnalyzer": "Cohesive analyzer - all methods relate to Gold layer DQ analysis",
+        "SilverDQAnalyzer": "Cohesive analyzer - all methods relate to Silver layer DQ analysis",
     }
 
     def test_large_classes_have_delegation(self, src_dir: Path) -> None:
