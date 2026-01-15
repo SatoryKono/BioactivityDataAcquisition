@@ -59,10 +59,15 @@ class TestFileSizeLimits:
         # Domain Pandera schemas (declarative field definitions)
         "compound.py": 380,  # 377 LOC - PubChem molecule schema + deprecated alias (v2.0)
         "protein.py": 360,  # 354 LOC - UniProt target schema + deprecated alias (v2.0)
+        # Domain DQ models (data quality reports and serialization)
+        "dq_serializer.py": 420,  # 409 LOC - DQ report serialization logic
+        "dq_report.py": 660,  # 646 LOC - DQ report models with validation rules
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
         "batch_executor.py": 650,  # 610 LOC - unified executor for batch processing
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
+        "gold_analyzer.py": 820,  # 800 LOC - Gold layer analysis with DQ rules
+        "silver_analyzer.py": 590,  # 570 LOC - Silver layer analysis with validation
         # Composition layer exemptions
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "entrypoints.py": 720,  # 703 LOC - pipeline entrypoints (run_pipeline expanded + services)
@@ -81,6 +86,7 @@ class TestFileSizeLimits:
         "silver.py": 780,  # 775 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization)
         "client.py": 700,  # 692 LOC - ChemblAdapter (complex FilterableDataSourcePort), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
+        "pipeline_config.py": 730,  # 716 LOC - Pipeline configuration loading and validation
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
