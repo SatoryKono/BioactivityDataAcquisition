@@ -476,6 +476,10 @@ class TestClassSize:
         "PubchemMoleculeSchema": 350,  # 345 lines - PubChem molecule schema with many chemical fields
         # Derived entity data source wrappers (comprehensive docstrings)
         "PublicationTermDataSource": 570,  # 566 lines - Wrapper with FilterableDataSourcePort delegation
+        # Composite pipeline services (ADR-026)
+        "MergeService": 450,  # 427 lines - Composite merge service with conflict resolution
+        "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
+        "CompositePipelineRunner": 350,  # 313 lines - Composite pipeline orchestrator
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:
@@ -628,6 +632,10 @@ class TestGodObjectDetection:
         "MergeService": "Cohesive service - all methods relate to merge operations and conflict resolution",
         "EnrichmentCoordinator": "Cohesive service - all methods relate to enricher orchestration",
         "CompositePipelineRunner": "Thin orchestrator - delegates to coordinator, merger, checkpoint services",
+        # DQ analyzers (cohesive data quality analysis with many validation methods)
+        "GoldDQAnalyzer": "Cohesive analyzer - all methods relate to Gold layer data quality analysis",
+        "SilverDQAnalyzer": "Cohesive analyzer - all methods relate to Silver layer data quality analysis",
+        "DQReportSerializer": "Cohesive serializer - all methods relate to DQ report serialization formats",
     }
 
     def test_large_classes_have_delegation(self, src_dir: Path) -> None:

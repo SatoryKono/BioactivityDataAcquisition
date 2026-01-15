@@ -82,9 +82,7 @@ class LineageMetadata:
     @classmethod
     def from_dict(cls, data: dict[str, object]) -> LineageMetadata:
         """Create LineageMetadata from dictionary."""
-        enrichment_status = _parse_enrichment_status(
-            data.get("_enrichment_status", {})
-        )
+        enrichment_status = _parse_enrichment_status(data.get("_enrichment_status", {}))
         enrichment_timestamps = _parse_timestamps(
             data.get("_enrichment_timestamps", {})
         )
