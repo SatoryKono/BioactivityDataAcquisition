@@ -60,7 +60,7 @@ class TestFileSizeLimits:
         "compound.py": 380,  # 377 LOC - PubChem molecule schema + deprecated alias (v2.0)
         "protein.py": 360,  # 354 LOC - UniProt target schema + deprecated alias (v2.0)
         # Domain DQ models (data quality reports and serialization)
-        "dq_serializer.py": 420,  # 409 LOC - DQ report serialization logic
+        "dq_serializer.py": 435,  # 429 LOC - DQ report serialization logic (increased for CC reduction)
         "dq_report.py": 660,  # 646 LOC - DQ report models with validation rules
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
@@ -453,7 +453,7 @@ class TestClassSize:
         # Audit adapter (file-based audit logging)
         "FileAuditAdapter": 330,  # 324 lines - File-based AuditPort implementation with async I/O
         # DQ analyzers (comprehensive data quality analysis)
-        "DQReportSerializer": 400,  # 383 lines - DQ report serialization with multiple formats
+        "DQReportSerializer": 410,  # 403 lines - DQ report serialization with multiple formats (increased for CC reduction)
         "GoldDQAnalyzer": 770,  # 752 lines - Gold layer DQ analysis with business rules
         "SilverDQAnalyzer": 540,  # 521 lines - Silver layer DQ analysis with schema drift
         # Domain services

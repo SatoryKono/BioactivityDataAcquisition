@@ -86,31 +86,16 @@ class LineageMetadata:
         enrichment_timestamps = _parse_timestamps(
             data.get("_enrichment_timestamps", {})
         )
-        raw_providers = data.get("_source_providers", [])
-        source_providers: tuple[str, ...] = (
-            tuple(str(p) for p in raw_providers)
-            if isinstance(raw_providers, (list, tuple))
-            else ()
-        )
-        raw_field_sources = data.get("_field_sources", {})
-        field_sources: dict[str, str] = (
-            {str(k): str(v) for k, v in raw_field_sources.items()}
-            if isinstance(raw_field_sources, dict)
-            else {}
-        )
-        created_at = _parse_datetime(data.get("_lineage_created_at"))
-        raw_seed_id = data.get("_seed_record_id")
-        seed_record_id: str | None = str(raw_seed_id) if raw_seed_id else None
 
         return cls(
             composite_run_id=str(data.get("_composite_run_id", "")),
             composite_name=str(data.get("_composite_name", "")),
-            source_providers=source_providers,
+            source_providers=_parse_providers(data.get("_source_providers", [])),
             enrichment_status=enrichment_status,
             enrichment_timestamps=enrichment_timestamps,
-            field_sources=field_sources,
-            seed_record_id=seed_record_id,
-            created_at=created_at,
+            field_sources=_parse_field_sources(data.get("_field_sources", {})),
+            seed_record_id=_parse_seed_id(data.get("_seed_record_id")),
+            created_at=_parse_datetime(data.get("_lineage_created_at")),
         )
 
 
@@ -149,3 +134,22 @@ def _parse_datetime(raw: object) -> datetime | None:
     if isinstance(raw, datetime):
         return raw
     return None
+
+
+def _parse_providers(raw: object) -> tuple[str, ...]:
+    """Parse source providers from raw value."""
+    if isinstance(raw, (list, tuple)):
+        return tuple(str(p) for p in raw)
+    return ()
+
+
+def _parse_field_sources(raw: object) -> dict[str, str]:
+    """Parse field sources from raw value."""
+    if isinstance(raw, dict):
+        return {str(k): str(v) for k, v in raw.items()}
+    return {}
+
+
+def _parse_seed_id(raw: object) -> str | None:
+    """Parse seed record ID from raw value."""
+    return str(raw) if raw else None
