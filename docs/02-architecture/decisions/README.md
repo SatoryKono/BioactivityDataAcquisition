@@ -31,6 +31,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-023](ADR-023-entity-type-patterns.md) | Entity Type Patterns | Accepted | Observability | 2026-01-06 |
 | [ADR-024](ADR-024-entity-naming-unification.md) | Entity Naming Unification | Accepted | Architecture | 2026-01-07 |
 | [ADR-025](ADR-025-pipeline-config-unification.md) | Pipeline Config Unification | Accepted | Configuration | 2026-01-14 |
+| [ADR-026](ADR-026-composite-pipeline-pattern.md) | Composite Pipeline Pattern | Accepted | Architecture | 2026-01-15 |
 
 ## ADRs by Category
 
@@ -39,6 +40,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-005](ADR-005-composition-layer-separation.md): Composition Layer Separation (DI)
 - [ADR-020](ADR-020-basepipeline-decomposition.md): BasePipeline Decomposition (God Object removal)
 - [ADR-024](ADR-024-entity-naming-unification.md): Entity Naming Unification
+- [ADR-026](ADR-026-composite-pipeline-pattern.md): Composite Pipeline Pattern
 
 ### Storage
 - [ADR-001](ADR-001-delta-lake-vs-parquet.md): Delta Lake vs Parquet
