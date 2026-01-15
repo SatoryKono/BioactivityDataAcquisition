@@ -20,14 +20,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.entities import TargetComponent
 from bioetl.domain.transformations import safe_int
-from bioetl.domain.value_objects import TaxonomyId
-
-
-def _validate_taxonomy_id(value: Any) -> int | None:
-    """Validate taxonomy ID using TaxonomyId Value Object."""
-    vo = TaxonomyId.from_raw(value)
-    return vo.value if vo else None
-
+from bioetl.domain.value_objects import validate_taxonomy_id
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
@@ -46,7 +39,7 @@ _CORE_METADATA = FieldGroup(
     fields=(
         *simple_fields("accession", "component_type", "description", "organism"),
         # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
-        FieldSpec("tax_id", target="taxonomy_id", converter=_validate_taxonomy_id),
+        FieldSpec("tax_id", target="taxonomy_id", converter=validate_taxonomy_id),
     ),
 )
 
