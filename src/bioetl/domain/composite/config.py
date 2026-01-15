@@ -58,14 +58,10 @@ class SeedConfig:
 
     def _validate(self) -> None:
         """Validate configuration invariants."""
-        if not self.pipeline:
-            raise ValueError("seed pipeline name cannot be empty")
-        if not self.output_keys:
-            raise ValueError("seed output_keys cannot be empty")
-        if not self.silver_table:
-            raise ValueError("seed silver_table cannot be empty")
-        if self.limit is not None and self.limit <= 0:
-            raise ValueError(f"seed limit must be positive, got {self.limit}")
+        _require_non_empty(self.pipeline, "seed pipeline name")
+        _require_non_empty(self.output_keys, "seed output_keys")
+        _require_non_empty(self.silver_table, "seed silver_table")
+        _validate_positive_limit(self.limit, "seed")
 
 
 @dataclass(frozen=True, slots=True)
@@ -118,19 +114,12 @@ class EnricherConfig:
 
     def _validate(self) -> None:
         """Validate configuration invariants."""
-        if not self.pipeline:
-            raise ValueError("enricher pipeline name cannot be empty")
-        if not self.join_keys:
-            raise ValueError(f"enricher {self.pipeline} join_keys cannot be empty")
-        if self.timeout_seconds <= 0:
-            raise ValueError(
-                f"enricher {self.pipeline} timeout_seconds must be positive, "
-                f"got {self.timeout_seconds}"
-            )
-        if self.limit is not None and self.limit <= 0:
-            raise ValueError(
-                f"enricher {self.pipeline} limit must be positive, got {self.limit}"
-            )
+        _require_non_empty(self.pipeline, "enricher pipeline name")
+        _require_non_empty(self.join_keys, f"enricher {self.pipeline} join_keys")
+        _validate_positive(
+            self.timeout_seconds, f"enricher {self.pipeline} timeout_seconds"
+        )
+        _validate_positive_limit(self.limit, f"enricher {self.pipeline}")
 
     @property
     def primary_join_key(self) -> str:
@@ -178,24 +167,35 @@ class MergeConfig:
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
+        self._convert_strategy()
+        self._convert_conflict_resolution()
+        self._convert_field_priorities()
+        self._validate()
+
+    def _convert_strategy(self) -> None:
+        """Convert strategy string to enum if needed."""
         if isinstance(self.strategy, str):
             object.__setattr__(
                 self, "strategy", MergeStrategy.from_string(self.strategy)
             )
+
+    def _convert_conflict_resolution(self) -> None:
+        """Convert conflict_resolution string to enum if needed."""
         if isinstance(self.conflict_resolution, str):
             object.__setattr__(
                 self,
                 "conflict_resolution",
                 ConflictResolution.from_string(self.conflict_resolution),
             )
-        # Convert list values in field_priorities to tuples
+
+    def _convert_field_priorities(self) -> None:
+        """Convert list values in field_priorities to tuples."""
         if self.field_priorities:
             converted = {
                 k: tuple(v) if isinstance(v, list) else v
                 for k, v in self.field_priorities.items()
             }
             object.__setattr__(self, "field_priorities", converted)
-        self._validate()
 
     def _validate(self) -> None:
         """Validate configuration invariants."""
@@ -240,30 +240,9 @@ class DQOverrideConfig:
 
     def __post_init__(self) -> None:
         """Validate threshold values."""
-        if (
-            self.soft_fail_threshold is not None
-            and not 0.0 <= self.soft_fail_threshold <= 1.0
-        ):
-            raise ValueError(
-                f"soft_fail_threshold must be between 0.0 and 1.0, "
-                f"got {self.soft_fail_threshold}"
-            )
-        if (
-            self.hard_fail_threshold is not None
-            and not 0.0 <= self.hard_fail_threshold <= 1.0
-        ):
-            raise ValueError(
-                f"hard_fail_threshold must be between 0.0 and 1.0, "
-                f"got {self.hard_fail_threshold}"
-            )
-        if (
-            self.soft_fail_threshold is not None
-            and self.hard_fail_threshold is not None
-            and self.soft_fail_threshold >= self.hard_fail_threshold
-        ):
-            raise ValueError(
-                "soft_fail_threshold must be less than hard_fail_threshold"
-            )
+        _validate_optional_threshold(self.soft_fail_threshold, "soft_fail_threshold")
+        _validate_optional_threshold(self.hard_fail_threshold, "hard_fail_threshold")
+        _validate_threshold_order(self.soft_fail_threshold, self.hard_fail_threshold)
 
 
 @dataclass(frozen=True, slots=True)
@@ -499,3 +478,36 @@ class CompositeConfig:
                 "output_gold_path": self.merge.output_gold_path,
             },
         }
+
+
+# Helper validation functions to reduce cyclomatic complexity
+
+
+def _require_non_empty(value: object, field_name: str) -> None:
+    """Validate that a value is not empty."""
+    if not value:
+        raise ValueError(f"{field_name} cannot be empty")
+
+
+def _validate_positive(value: int | float, field_name: str) -> None:
+    """Validate that a value is positive."""
+    if value <= 0:
+        raise ValueError(f"{field_name} must be positive, got {value}")
+
+
+def _validate_positive_limit(limit: int | None, context: str) -> None:
+    """Validate that an optional limit is positive if provided."""
+    if limit is not None and limit <= 0:
+        raise ValueError(f"{context} limit must be positive, got {limit}")
+
+
+def _validate_optional_threshold(value: float | None, name: str) -> None:
+    """Validate that an optional threshold is in [0.0, 1.0] range."""
+    if value is not None and not 0.0 <= value <= 1.0:
+        raise ValueError(f"{name} must be between 0.0 and 1.0, got {value}")
+
+
+def _validate_threshold_order(soft: float | None, hard: float | None) -> None:
+    """Validate that soft threshold is less than hard threshold."""
+    if soft is not None and hard is not None and soft >= hard:
+        raise ValueError("soft_fail_threshold must be less than hard_fail_threshold")
