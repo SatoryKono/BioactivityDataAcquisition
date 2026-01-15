@@ -44,6 +44,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "filtering",
         "locking",
         "medallion",
+        "models",  # Metadata models (BronzeMetadata, etc.)
         "normalization",  # REFACTOR-004: functions are re-exported, not module
         "ports",
         "resilience",
@@ -165,6 +166,9 @@ def test_domain_no_infrastructure_types_in_all() -> None:
         "DeltaSchemaValidationError",  # Domain exception for schema validation
         "DeltaTransactionError",  # Domain exception for transaction failures
         "DeltaWriteConflictError",  # Domain exception for concurrent write conflicts
+        # Metadata ports - "Writer" is for interface, not implementation
+        "MetadataWriterPort",  # Domain port for metadata sidecar files
+        "NoOpMetadataWriter",  # NoOp implementation of MetadataWriterPort
     }
 
     for symbol in domain.__all__:
