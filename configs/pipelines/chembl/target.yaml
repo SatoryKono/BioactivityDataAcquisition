@@ -1,15 +1,12 @@
 # configs/pipelines/chembl/target.yaml
 # Pipeline configuration for ChEMBL Target entity.
 #
-# Inherits defaults from ../_base.yaml:
-# - metadata (lineage, provenance, content_hash)
-# - dq_config (thresholds, anomaly_detection, quarantine, metrics)
-# - circuit_breaker, sink structure, maintenance, input_filter
+# Inherits defaults from ../_base.yaml
 
 pipeline_name: chembl_target
 provider: chembl
 entity_type: target
-version: "2.0.0"
+version: "1.1.0"
 description: "Extract biological targets from ChEMBL API"
 
 primary_keys: ["target_chembl_id"]
@@ -17,39 +14,6 @@ silver_table: "chembl_target"
 gold_table: "chembl_target"
 
 source_file: ../../sources/chembl.yaml
-
-# -----------------------------------------------------------------------------
-# Entity-Specific Metadata
-# -----------------------------------------------------------------------------
-metadata:
-  schema:
-    version: "1.0.0"
-    contract_path: docs/contracts/gold/chembl_target.json
-
-# -----------------------------------------------------------------------------
-# Entity-Specific DQ Configuration
-# -----------------------------------------------------------------------------
-dq_config:
-  # Column-level validation rules
-  column_checks:
-    target_chembl_id:
-      nullable: false
-      unique: true
-      pattern: "^CHEMBL\\d+$"
-    pref_name:
-      nullable: false
-    organism:
-      nullable: false
-    target_type:
-      nullable: false
-      allowed_values: ["SINGLE PROTEIN", "PROTEIN COMPLEX", "PROTEIN FAMILY", "SELECTIVITY GROUP", "CELL-LINE", "TISSUE", "ORGANISM", "UNCHECKED", "NO TARGET", "CHIMERIC PROTEIN", "PROTEIN-PROTEIN INTERACTION", "LIPID", "METAL", "NUCLEIC-ACID", "SUBCELLULAR", "UNKNOWN"]
-    tax_id:
-      nullable: true
-      range:
-        min: 1
-    species_group_flag:
-      nullable: true
-      allowed_values: ["0", "1"]
 
 # Entity-specific gold filters
 gold_filters:
