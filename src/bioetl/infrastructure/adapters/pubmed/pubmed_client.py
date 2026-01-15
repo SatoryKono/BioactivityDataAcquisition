@@ -22,6 +22,7 @@ from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.error_handling import ErrorService
+from bioetl.infrastructure.adapters.filterable_mixin import FilterableStubMixin
 from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
 
 if TYPE_CHECKING:
@@ -40,14 +41,18 @@ PUBMED_DTO_MODELS: dict[str, type[BaseModel]] = {
 
 
 @dataclass
-class PubMedAdapter(BaseHttpAdapter):
+class PubMedAdapter(FilterableStubMixin, BaseHttpAdapter):
     """PubMed adapter using UnifiedHTTPClient.
 
     Inherits from BaseHttpAdapter for standardized lifecycle management
-    and Template Method pattern for health checks.
+    and Template Method pattern for health checks (HealthCheckProviderMixin).
 
     Implements DataSourcePort and FilterableDataSourcePort for PubMed data extraction
     with optional server-side filtering by PMID lists.
+
+    Uses FilterableStubMixin for:
+    - fetch_multi_filtered: Not supported by PubMed API
+    - fetch_filtered_with_fallback: Delegates to fetch_filtered (PMIDs are stable)
 
     Args:
         http_client: UnifiedHTTPClient instance for making HTTP requests.
@@ -206,63 +211,8 @@ class PubMedAdapter(BaseHttpAdapter):
         async for record in self._yield_articles_from_pmids(filter_ids, limit):
             yield record
 
-    async def fetch_multi_filtered(
-        self,
-        entity_type: str,
-        filters: dict[str, list[str]],
-        limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Multi-field filtering not supported by PubMed API.
-
-        PubMed only supports single-field filtering by PMID.
-        Use fetch_filtered() for PMID-based filtering instead.
-
-        Raises:
-            NotImplementedError: Always, as PubMed doesn't support multi-field filtering.
-        """
-        # AsyncIterator requires yield before raise for proper generator creation
-        if False:  # pragma: no cover
-            yield {}  # Required for AsyncIterator type signature
-        raise NotImplementedError(
-            "PubMed API does not support multi-field filtering. "
-            "Use fetch_filtered() with filter_field='pmid' instead."
-        )
-
-    async def fetch_filtered_with_fallback(
-        self,
-        entity_type: str,
-        filter_ids: list[str],
-        filter_field: str,
-        fallback_mapping: dict[str, str],
-        limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records with fallback (not applicable for PubMed).
-
-        Implements FilterableDataSourcePort.fetch_filtered_with_fallback().
-
-        PubMed uses PMIDs which are stable identifiers, so fallback is not needed.
-        This method simply delegates to fetch_filtered() and ignores the
-        fallback_mapping parameter.
-
-        Args:
-            entity_type: Must be 'publication'.
-            filter_ids: List of PMIDs to fetch.
-            filter_field: Field name (expected 'pmid').
-            fallback_mapping: Ignored - PMIDs are always resolvable.
-            limit: Maximum number of records to fetch.
-
-        Yields:
-            Dictionary records for each article.
-
-        """
-        _ = fallback_mapping  # Unused - PMIDs are stable identifiers
-        async for record in self.fetch_filtered(
-            entity_type=entity_type,
-            filter_ids=filter_ids,
-            filter_field=filter_field,
-            limit=limit,
-        ):
-            yield record
+    # fetch_multi_filtered and fetch_filtered_with_fallback are provided
+    # by FilterableStubMixin (see class inheritance)
 
     async def fetch(
         self,
