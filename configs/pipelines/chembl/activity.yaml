@@ -2,12 +2,14 @@
 # Pipeline configuration for ChEMBL Activity entity.
 #
 # Inherits defaults from ../_base.yaml:
-# - dq_rules, circuit_breaker, sink structure, maintenance, input_filter
+# - metadata (lineage, provenance, content_hash)
+# - dq_config (thresholds, anomaly_detection, quarantine, metrics)
+# - circuit_breaker, sink structure, maintenance, input_filter
 
 pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
-version: "1.1.0"
+version: "2.0.0"
 description: "Extract biological activity records from ChEMBL API"
 
 primary_keys: ["activity_id"]
@@ -16,6 +18,57 @@ gold_table: "chembl_activity"
 
 # Reference to source configuration file
 source_file: ../../sources/chembl.yaml
+
+# -----------------------------------------------------------------------------
+# Entity-Specific Metadata
+# -----------------------------------------------------------------------------
+metadata:
+  schema:
+    version: "1.0.0"
+    contract_path: docs/contracts/gold/chembl_activity.json
+
+# -----------------------------------------------------------------------------
+# Entity-Specific DQ Configuration
+# -----------------------------------------------------------------------------
+dq_config:
+  # Column-level validation rules
+  column_checks:
+    activity_id:
+      nullable: false
+      unique: true
+    molecule_chembl_id:
+      nullable: false
+      pattern: "^CHEMBL\\d+$"
+    target_chembl_id:
+      nullable: true
+      pattern: "^CHEMBL\\d+$"
+    assay_chembl_id:
+      nullable: false
+      pattern: "^CHEMBL\\d+$"
+    standard_value:
+      nullable: true
+      range:
+        min: 0.0
+    standard_units:
+      nullable: true
+      allowed_values: ["nM", "uM", "pM", "mM", "%", "ug.mL-1"]
+    standard_type:
+      nullable: true
+      allowed_values: ["IC50", "Ki", "EC50", "Kd", "AC50", "GI50", "MIC", "Potency"]
+    standard_relation:
+      nullable: true
+      allowed_values: ["=", ">", "<", ">=", "<=", "~"]
+    pchembl_value:
+      nullable: true
+      range:
+        min: 0.0
+        max: 15.0
+    assay_type:
+      nullable: true
+      allowed_values: ["B", "F", "A", "T", "P", "U"]
+    potential_duplicate:
+      nullable: true
+      allowed_values: ["0", "1"]
 
 # Entity-specific gold filters
 gold_filters:
