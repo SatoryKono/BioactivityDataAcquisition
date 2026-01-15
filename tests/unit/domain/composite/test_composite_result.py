@@ -5,8 +5,6 @@ Tests for EnrichmentResult, MergeResult, CompositeResult.
 
 from __future__ import annotations
 
-from datetime import datetime
-
 import pytest
 
 from bioetl.domain.composite.result import (
@@ -87,7 +85,7 @@ class TestEnrichmentResult:
 
     def test_invalid_dq_error_rate_raises(self):
         """DQ error rate outside 0-1 should raise ValueError."""
-        with pytest.raises(ValueError, match="dq_error_rate must be 0.0-1.0"):
+        with pytest.raises(ValueError, match=r"dq_error_rate must be 0\.0-1\.0"):
             EnrichmentResult(
                 enricher_name="test",
                 status=EnrichmentStatus.SUCCESS,

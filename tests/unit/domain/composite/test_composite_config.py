@@ -12,8 +12,6 @@ from bioetl.domain.composite.config import (
     CompositeConfig,
     DQOverrideConfig,
     EnricherConfig,
-    ExecutionConfig,
-    LineageConfig,
     MergeConfig,
     SeedConfig,
 )
