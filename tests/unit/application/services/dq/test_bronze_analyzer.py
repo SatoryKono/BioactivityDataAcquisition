@@ -1,11 +1,11 @@
 """Unit tests for Bronze DQ analyzer."""
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 import orjson
 import pytest
 
-from bioetl.domain.services.dq import BronzeDQAnalyzer
+from bioetl.application.services.dq import BronzeDQAnalyzer
 from bioetl.domain.value_objects.dq_report import (
     BronzeDQCheckType,
     DQCheckStatus,
@@ -37,7 +37,7 @@ class TestBronzeDQAnalyzer:
             orjson.dumps({"id": 3, "name": "test3", "value": None}),
         ]
 
-        timestamp = datetime.now(timezone.utc)
+        timestamp = datetime.now(UTC)
 
         report = analyzer.analyze(
             records=iter(records),
@@ -80,7 +80,7 @@ class TestBronzeDQAnalyzer:
             checks=[BronzeDQCheckType.RECORD_COUNT.value],
         )
 
-        timestamp = datetime.now(timezone.utc)
+        timestamp = datetime.now(UTC)
 
         report = analyzer.analyze(
             records=iter([]),
@@ -109,7 +109,7 @@ class TestBronzeDQAnalyzer:
             b'{"name": "test2"}',
         ]
 
-        timestamp = datetime.now(timezone.utc)
+        timestamp = datetime.now(UTC)
 
         report = analyzer.analyze(
             records=iter(records),
@@ -123,7 +123,9 @@ class TestBronzeDQAnalyzer:
 
         assert "encoding_validation" in report.checks
         assert report.checks["encoding_validation"]["encoding_errors"] == 0
-        assert report.checks["encoding_validation"]["status"] == DQCheckStatus.PASS.value
+        assert (
+            report.checks["encoding_validation"]["status"] == DQCheckStatus.PASS.value
+        )
 
     def test_analyze_field_presence(self) -> None:
         """Test field presence check."""
@@ -138,7 +140,7 @@ class TestBronzeDQAnalyzer:
             orjson.dumps({"id": 2, "name": "test2"}),  # Missing optional
         ]
 
-        timestamp = datetime.now(timezone.utc)
+        timestamp = datetime.now(UTC)
 
         report = analyzer.analyze(
             records=iter(records),
