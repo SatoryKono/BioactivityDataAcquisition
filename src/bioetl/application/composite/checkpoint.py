@@ -12,7 +12,7 @@ import json
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.composite.result import (
     EnrichmentResult,
@@ -99,7 +99,7 @@ class CompositeCheckpointState:
         """Check if this checkpoint can be resumed."""
         return self.seed_completed or bool(self.completed_enrichers)
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary for JSON serialization."""
         return {
             "composite_name": self.composite_name,
@@ -112,7 +112,7 @@ class CompositeCheckpointState:
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
 
-    def _serialize_seed_result(self) -> dict | None:
+    def _serialize_seed_result(self) -> dict[str, object] | None:
         """Serialize seed result for JSON."""
         if not self.seed_result:
             return None
@@ -125,7 +125,7 @@ class CompositeCheckpointState:
             "resumed": self.seed_result.resumed,
         }
 
-    def _serialize_enrichment_results(self) -> dict[str, dict]:
+    def _serialize_enrichment_results(self) -> dict[str, dict[str, object]]:
         """Serialize enrichment results for JSON."""
         return {
             name: {
@@ -143,7 +143,7 @@ class CompositeCheckpointState:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> CompositeCheckpointState:
+    def from_dict(cls, data: dict[str, Any]) -> CompositeCheckpointState:
         """Create state from dictionary."""
         seed_result = None
         if data.get("seed_result"):

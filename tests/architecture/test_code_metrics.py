@@ -201,6 +201,8 @@ class TestFunctionComplexity:
         "fetch_filtered": 20,  # CC=18 - Batch filtering with OR-query and entity type handling
         # Composite pipeline merge service
         "_apply_explicit_rules": 18,  # CC=16 - Explicit field priority rules with column reordering
+        # Composite pipeline domain models (ADR-026)
+        "DQOverrideConfig": 10,  # CC=9 - DQ override validation with threshold checks
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:

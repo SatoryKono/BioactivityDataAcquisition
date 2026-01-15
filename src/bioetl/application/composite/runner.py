@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.composite.merger import MergeService
     from bioetl.application.core.runner import PipelineRunner
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
     from bioetl.domain.composite.result import EnrichmentResult
     from bioetl.domain.ports import LockPort, LoggerPort
 
@@ -336,10 +336,8 @@ class CompositePipelineRunner:
 
     def _get_enrichers_to_run(
         self, state: CompositeCheckpointState
-    ) -> list:
+    ) -> list[EnricherConfig]:
         """Determine which enrichers should be run."""
-        from bioetl.domain.composite.config import EnricherConfig
-
         enrichers_to_run: list[EnricherConfig] = []
 
         for enricher in self._config.enrichers:
