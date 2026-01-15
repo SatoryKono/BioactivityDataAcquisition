@@ -1,12 +1,15 @@
 # configs/pipelines/chembl/assay.yaml
 # Pipeline configuration for ChEMBL Assay entity.
 #
-# Inherits defaults from ../_base.yaml
+# Inherits defaults from ../_base.yaml:
+# - metadata (lineage, provenance, content_hash)
+# - dq_config (thresholds, anomaly_detection, quarantine, metrics)
+# - circuit_breaker, sink structure, maintenance, input_filter
 
 pipeline_name: chembl_assay
 provider: chembl
 entity_type: assay
-version: "1.1.0"
+version: "2.0.0"
 description: "Extract bioassay definitions from ChEMBL API"
 
 primary_keys: ["assay_chembl_id"]
@@ -14,6 +17,52 @@ silver_table: "chembl_assay"
 gold_table: "chembl_assay"
 
 source_file: ../../sources/chembl.yaml
+
+# -----------------------------------------------------------------------------
+# Entity-Specific Metadata
+# -----------------------------------------------------------------------------
+metadata:
+  schema:
+    version: "1.0.0"
+    contract_path: docs/contracts/gold/chembl_assay.json
+
+# -----------------------------------------------------------------------------
+# Entity-Specific DQ Configuration
+# -----------------------------------------------------------------------------
+dq_config:
+  # Column-level validation rules
+  column_checks:
+    assay_chembl_id:
+      nullable: false
+      unique: true
+      pattern: "^CHEMBL\\d+$"
+    assay_type:
+      nullable: false
+      allowed_values: ["B", "F", "A", "T", "P", "U"]
+    description:
+      nullable: false
+    confidence_score:
+      nullable: true
+      range:
+        min: 0
+        max: 9
+    relationship_type:
+      nullable: true
+      allowed_values: ["D", "H", "M", "N", "U"]
+    target_chembl_id:
+      nullable: true
+      pattern: "^CHEMBL\\d+$"
+    assay_organism:
+      nullable: true
+    assay_strain:
+      nullable: true
+    assay_tissue:
+      nullable: true
+    assay_cell_type:
+      nullable: true
+    bao_format:
+      nullable: true
+      pattern: "^BAO_\\d+$"
 
 # Entity-specific gold filters
 gold_filters:
