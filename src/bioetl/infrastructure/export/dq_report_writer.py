@@ -10,7 +10,7 @@ import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.services.dq.report_serializer import DQReportSerializer
+from bioetl.domain.services.dq_serializer import DQReportSerializer
 from bioetl.domain.value_objects.dq_report import (
     BronzeDQReport,
     DQReportFormat,

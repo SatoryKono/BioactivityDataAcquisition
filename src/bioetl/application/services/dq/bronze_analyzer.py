@@ -20,6 +20,7 @@ from typing import Any
 
 import orjson
 
+from bioetl.domain.ports.dq_config import BronzeDQConfigPort
 from bioetl.domain.value_objects.dq_report import (
     BronzeDQCheckType,
     BronzeDQReport,
@@ -32,7 +33,6 @@ from bioetl.domain.value_objects.dq_report import (
     RecordCountResult,
     SchemaSnapshotResult,
 )
-from bioetl.infrastructure.schemas.dq_report_config import BronzeDQReportConfig
 
 
 class BronzeDQAnalyzer:
@@ -50,7 +50,7 @@ class BronzeDQAnalyzer:
         pipeline: str,
         batch_id: str,
         source_file: str,
-        config: BronzeDQReportConfig,
+        config: BronzeDQConfigPort,
         timestamp: datetime,
     ) -> BronzeDQReport:
         """Analyze Bronze data and generate DQ report.
@@ -78,41 +78,41 @@ class BronzeDQAnalyzer:
 
         # Record count check
         if BronzeDQCheckType.RECORD_COUNT in enabled_checks:
-            result = self._check_record_count(record_list)
-            checks["record_count"] = self._result_to_dict(result)
+            record_count_result = self._check_record_count(record_list)
+            checks["record_count"] = self._result_to_dict(record_count_result)
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                record_count_result.status, passed, failed, warnings
             )
 
         # File integrity check
         if BronzeDQCheckType.FILE_INTEGRITY in enabled_checks:
-            result = self._check_file_integrity(record_list)
-            checks["file_integrity"] = self._result_to_dict(result)
+            file_integrity_result = self._check_file_integrity(record_list)
+            checks["file_integrity"] = self._result_to_dict(file_integrity_result)
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                file_integrity_result.status, passed, failed, warnings
             )
 
         # Schema snapshot
         if BronzeDQCheckType.SCHEMA_SNAPSHOT in enabled_checks:
-            result = self._check_schema_snapshot(record_list)
-            checks["schema_snapshot"] = self._result_to_dict(result)
+            schema_snapshot_result = self._check_schema_snapshot(record_list)
+            checks["schema_snapshot"] = self._result_to_dict(schema_snapshot_result)
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                schema_snapshot_result.status, passed, failed, warnings
             )
 
         # Raw field presence
         if BronzeDQCheckType.RAW_FIELD_PRESENCE in enabled_checks:
-            result = self._check_field_presence(record_list)
-            checks["raw_field_presence"] = result  # Already a dict
+            field_presence_result = self._check_field_presence(record_list)
+            checks["raw_field_presence"] = field_presence_result  # Already a dict
             # Count as pass (info only)
             passed += 1
 
         # Encoding validation
         if BronzeDQCheckType.ENCODING_VALIDATION in enabled_checks:
-            result = self._check_encoding(record_list)
-            checks["encoding_validation"] = self._result_to_dict(result)
+            encoding_result = self._check_encoding(record_list)
+            checks["encoding_validation"] = self._result_to_dict(encoding_result)
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                encoding_result.status, passed, failed, warnings
             )
 
         total_checks = passed + failed + warnings

@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import asdict, is_dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import Any, cast
 
 import orjson
 
@@ -61,11 +61,9 @@ class DQReportSerializer:
         Returns:
             Dictionary representation of report.
         """
-        return self._dataclass_to_dict(report)
+        return cast(dict[str, Any], self._dataclass_to_dict(report))
 
-    def _to_json(
-        self, report: BronzeDQReport | SilverDQReport | GoldDQReport
-    ) -> str:
+    def _to_json(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
         """Serialize to JSON with pretty formatting."""
         data = self._dataclass_to_dict(report)
         return orjson.dumps(
@@ -73,9 +71,7 @@ class DQReportSerializer:
             option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS,
         ).decode("utf-8")
 
-    def _to_yaml(
-        self, report: BronzeDQReport | SilverDQReport | GoldDQReport
-    ) -> str:
+    def _to_yaml(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
         """Serialize to YAML format.
 
         Uses simple YAML serialization without external dependencies.
@@ -84,9 +80,7 @@ class DQReportSerializer:
         data = self._dataclass_to_dict(report)
         return self._dict_to_yaml(data)
 
-    def _to_html(
-        self, report: BronzeDQReport | SilverDQReport | GoldDQReport
-    ) -> str:
+    def _to_html(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
         """Serialize to HTML report.
 
         Generates a simple HTML report with styling.
@@ -97,9 +91,7 @@ class DQReportSerializer:
     def _dataclass_to_dict(self, obj: Any) -> Any:
         """Recursively convert dataclass to dict with enum/datetime handling."""
         if is_dataclass(obj) and not isinstance(obj, type):
-            return {
-                k: self._dataclass_to_dict(v) for k, v in asdict(obj).items()
-            }
+            return {k: self._dataclass_to_dict(v) for k, v in asdict(obj).items()}
         elif isinstance(obj, Enum):
             return obj.value
         elif isinstance(obj, datetime):
@@ -285,9 +277,9 @@ class DQReportSerializer:
             <span class="status-badge status-{status}">{status}</span>
         </div>
         <div class="meta">
-            <span><strong>Pipeline:</strong> {data.get('pipeline', 'N/A')}</span>
-            <span><strong>Run ID:</strong> {data.get('run_id', 'N/A')}</span>
-            <span><strong>Timestamp:</strong> {data.get('timestamp', 'N/A')}</span>
+            <span><strong>Pipeline:</strong> {data.get("pipeline", "N/A")}</span>
+            <span><strong>Run ID:</strong> {data.get("run_id", "N/A")}</span>
+            <span><strong>Timestamp:</strong> {data.get("timestamp", "N/A")}</span>
         </div>
     </div>
 
@@ -295,25 +287,25 @@ class DQReportSerializer:
         <h2>Summary</h2>
         <div class="summary-grid">
             <div class="summary-item">
-                <div class="value">{summary.get('total_checks', 0)}</div>
+                <div class="value">{summary.get("total_checks", 0)}</div>
                 <div class="label">Total Checks</div>
             </div>
             <div class="summary-item">
-                <div class="value" style="color: #28a745;">{summary.get('passed', 0)}</div>
+                <div class="value" style="color: #28a745;">{summary.get("passed", 0)}</div>
                 <div class="label">Passed</div>
             </div>
             <div class="summary-item">
-                <div class="value" style="color: #ffc107;">{summary.get('warnings', 0)}</div>
+                <div class="value" style="color: #ffc107;">{summary.get("warnings", 0)}</div>
                 <div class="label">Warnings</div>
             </div>
             <div class="summary-item">
-                <div class="value" style="color: #dc3545;">{summary.get('failed', 0)}</div>
+                <div class="value" style="color: #dc3545;">{summary.get("failed", 0)}</div>
                 <div class="label">Failed</div>
             </div>
         </div>
     </div>
 
-    {self._render_thresholds_html(thresholds) if thresholds else ''}
+    {self._render_thresholds_html(thresholds) if thresholds else ""}
 
     <div class="card">
         <h2>Check Results</h2>
@@ -352,7 +344,7 @@ class DQReportSerializer:
                 html_parts.append(f"""
                 <div class="check-item {status_class}">
                     <h3>
-                        <span>{check_name.replace('_', ' ').title()}</span>
+                        <span>{check_name.replace("_", " ").title()}</span>
                         <span class="status-badge status-{status_class}">{status}</span>
                     </h3>
                     <div class="check-details">
@@ -363,7 +355,7 @@ class DQReportSerializer:
             else:
                 html_parts.append(f"""
                 <div class="check-item pass">
-                    <h3>{check_name.replace('_', ' ').title()}</h3>
+                    <h3>{check_name.replace("_", " ").title()}</h3>
                     <div class="check-details">{check_data}</div>
                 </div>
                 """)
@@ -382,7 +374,9 @@ class DQReportSerializer:
                 value_str = ", ".join(str(v) for v in value) if value else "[]"
             else:
                 value_str = str(value)
-            rows.append(f"<tr><td><strong>{key.replace('_', ' ').title()}</strong></td><td>{value_str}</td></tr>")
+            rows.append(
+                f"<tr><td><strong>{key.replace('_', ' ').title()}</strong></td><td>{value_str}</td></tr>"
+            )
 
         if not rows:
             return "<p>No details available.</p>"
@@ -402,9 +396,9 @@ class DQReportSerializer:
         <h2>DQ Thresholds</h2>
         <div class="check-item {status_class}">
             <table>
-                <tr><td><strong>Soft Fail Threshold</strong></td><td>{thresholds.get('soft_fail_threshold', 'N/A')}</td></tr>
-                <tr><td><strong>Hard Fail Threshold</strong></td><td>{thresholds.get('hard_fail_threshold', 'N/A')}</td></tr>
-                <tr><td><strong>Current Error Rate</strong></td><td>{thresholds.get('current_error_rate', 'N/A')}</td></tr>
+                <tr><td><strong>Soft Fail Threshold</strong></td><td>{thresholds.get("soft_fail_threshold", "N/A")}</td></tr>
+                <tr><td><strong>Hard Fail Threshold</strong></td><td>{thresholds.get("hard_fail_threshold", "N/A")}</td></tr>
+                <tr><td><strong>Current Error Rate</strong></td><td>{thresholds.get("current_error_rate", "N/A")}</td></tr>
                 <tr><td><strong>Status</strong></td><td><span class="status-badge status-{status_class}">{status}</span></td></tr>
             </table>
         </div>

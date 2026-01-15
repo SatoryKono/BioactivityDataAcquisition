@@ -20,6 +20,7 @@ from typing import Any
 import polars as pl
 import pyarrow as pa
 
+from bioetl.domain.ports.dq_config import GoldDQConfigPort
 from bioetl.domain.value_objects.dq_report import (
     AnomalyDetectionResult,
     AnomalyMetric,
@@ -40,7 +41,6 @@ from bioetl.domain.value_objects.dq_report import (
     StatisticalMetric,
     StatisticalProfileResult,
 )
-from bioetl.infrastructure.schemas.dq_report_config import GoldDQReportConfig
 
 
 class GoldDQAnalyzer:
@@ -65,7 +65,7 @@ class GoldDQAnalyzer:
         run_id: str,
         pipeline: str,
         target_table: str,
-        config: GoldDQReportConfig,
+        config: GoldDQConfigPort,
         timestamp: datetime,
         required_fields: list[str] | None = None,
         completeness_threshold: float = 0.90,
@@ -94,7 +94,10 @@ class GoldDQAnalyzer:
             GoldDQReport: Complete DQ report for Gold layer.
         """
         # Convert PyArrow to Polars for consistent processing
-        df = pl.from_arrow(data) if isinstance(data, pa.Table) else data
+        if isinstance(data, pa.Table):
+            df: pl.DataFrame = pl.from_arrow(data)  # type: ignore[assignment]
+        else:
+            df = data
 
         enabled_checks = set(config.get_checks_enums())
 
@@ -105,60 +108,68 @@ class GoldDQAnalyzer:
 
         # Record count check
         if GoldDQCheckType.RECORD_COUNT in enabled_checks:
-            result = self._check_record_count(df, baseline_stats)
-            checks["record_count"] = self._result_to_dict(result)
+            record_count_result = self._check_record_count(df, baseline_stats)
+            checks["record_count"] = self._result_to_dict(record_count_result)
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                record_count_result.status, passed, failed, warnings
             )
 
         # Completeness check
         if GoldDQCheckType.COMPLETENESS in enabled_checks:
-            result = self._check_completeness(
+            completeness_result = self._check_completeness(
                 df, required_fields or [], completeness_threshold
             )
-            checks["completeness"] = self._result_to_dict(result)
+            checks["completeness"] = self._result_to_dict(completeness_result)
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                completeness_result.status, passed, failed, warnings
             )
 
         # Business rules check
         if GoldDQCheckType.BUSINESS_RULES in enabled_checks:
-            result = self._check_business_rules(df, business_rules or [])
-            checks["business_rules"] = self._business_rules_to_dict(result)
+            business_rules_result = self._check_business_rules(df, business_rules or [])
+            checks["business_rules"] = self._business_rules_to_dict(
+                business_rules_result
+            )
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                business_rules_result.status, passed, failed, warnings
             )
 
         # Referential integrity check
         if GoldDQCheckType.REFERENTIAL_INTEGRITY in enabled_checks:
-            result = self._check_referential_integrity(df, reference_tables or {})
-            checks["referential_integrity"] = self._ref_integrity_to_dict(result)
+            ref_integrity_result = self._check_referential_integrity(
+                df, reference_tables or {}
+            )
+            checks["referential_integrity"] = self._ref_integrity_to_dict(
+                ref_integrity_result
+            )
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                ref_integrity_result.status, passed, failed, warnings
             )
 
         # Statistical profile check
         if GoldDQCheckType.STATISTICAL_PROFILE in enabled_checks:
-            result = self._check_statistical_profile(df, baseline_stats)
-            checks["statistical_profile"] = self._stat_profile_to_dict(result)
+            stat_profile_result = self._check_statistical_profile(df, baseline_stats)
+            checks["statistical_profile"] = self._stat_profile_to_dict(
+                stat_profile_result
+            )
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                stat_profile_result.status, passed, failed, warnings
             )
 
         # Anomaly detection
         if GoldDQCheckType.ANOMALY_DETECTION in enabled_checks:
-            result = self._check_anomaly_detection(df, baseline_stats)
-            checks["anomaly_detection"] = self._anomaly_to_dict(result)
+            anomaly_result = self._check_anomaly_detection(df, baseline_stats)
+            checks["anomaly_detection"] = self._anomaly_to_dict(anomaly_result)
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                anomaly_result.status, passed, failed, warnings
             )
 
         # SCD integrity check
         if GoldDQCheckType.SCD_INTEGRITY in enabled_checks:
-            result = self._check_scd_integrity(df, scd_config)
-            checks["scd_integrity"] = self._result_to_dict(result)
+            scd_result = self._check_scd_integrity(df, scd_config)
+            checks["scd_integrity"] = self._result_to_dict(scd_result)
             passed, failed, warnings = self._update_counts(
-                result.status, passed, failed, warnings
+                scd_result.status, passed, failed, warnings
             )
 
         total_checks = passed + failed + warnings
@@ -249,7 +260,9 @@ class GoldDQAnalyzer:
 
         overall_score = total_rate / count if count > 0 else 0.0
 
-        status = DQCheckStatus.PASS if overall_score >= threshold else DQCheckStatus.FAIL
+        status = (
+            DQCheckStatus.PASS if overall_score >= threshold else DQCheckStatus.FAIL
+        )
 
         return CompletenessResult(
             required_fields=field_rates,
@@ -372,7 +385,7 @@ class GoldDQAnalyzer:
 
             # Convert reference table to Polars if needed
             if isinstance(ref_table, pa.Table):
-                ref_df = pl.from_arrow(ref_table)
+                ref_df: pl.DataFrame = pl.from_arrow(ref_table)  # type: ignore[assignment]
             else:
                 ref_df = ref_table
 
@@ -384,7 +397,7 @@ class GoldDQAnalyzer:
             ref_values = ref_df[ref_col].unique()
 
             total_refs = len(local_values)
-            valid_refs = local_values.is_in(ref_values).sum()
+            valid_refs = int(local_values.is_in(ref_values).sum())
             orphans = total_refs - valid_refs
 
             if orphans > 0:
@@ -437,7 +450,9 @@ class GoldDQAnalyzer:
             baseline_null_rate = baseline_stats["null_rate_ma30"]
 
             ratio = (
-                current_null_rate / baseline_null_rate if baseline_null_rate > 0 else 1.0
+                current_null_rate / baseline_null_rate
+                if baseline_null_rate > 0
+                else 1.0
             )
 
             if ratio > self.NULL_RATE_CRITICAL_MULTIPLIER:
@@ -617,7 +632,7 @@ class GoldDQAnalyzer:
 
         # Entities with multiple versions
         version_counts = df.group_by(entity_key).agg(pl.count().alias("versions"))
-        entities_with_history = (version_counts["versions"] > 1).sum()
+        entities_with_history = int((version_counts["versions"] > 1).sum())
         avg_versions = total_records / unique_entities if unique_entities > 0 else 1.0
 
         # Check temporal integrity if columns exist
@@ -647,9 +662,7 @@ class GoldDQAnalyzer:
             except Exception:
                 pass
 
-        status = (
-            DQCheckStatus.PASS if overlapping == 0 else DQCheckStatus.WARN
-        )
+        status = DQCheckStatus.PASS if overlapping == 0 else DQCheckStatus.WARN
 
         return SCDIntegrityResult(
             scd_type=scd_type,
@@ -762,7 +775,9 @@ class GoldDQAnalyzer:
             "current_day": result.current_day,
             "cold_start_mode": result.cold_start_mode,
             "anomalies_detected": list(result.anomalies_detected),
-            "metrics_monitored": [self._result_to_dict(m) for m in result.metrics_monitored],
+            "metrics_monitored": [
+                self._result_to_dict(m) for m in result.metrics_monitored
+            ],
             "status": result.status.value,
         }
 
