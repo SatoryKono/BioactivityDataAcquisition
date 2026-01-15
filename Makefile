@@ -20,6 +20,9 @@ else
 	VENV_PIP := $(VENV_BIN)/pip
 endif
 
+# Clear PYTHONPATH to avoid conflicts with other projects
+export PYTHONPATH :=
+
 # Use uv run if available, otherwise use venv python
 ifdef UV_EXISTS
 	RUN := uv run
