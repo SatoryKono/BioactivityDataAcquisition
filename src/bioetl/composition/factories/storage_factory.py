@@ -49,6 +49,15 @@ class StorageFactory:
     """Factory for creating configured StorageAdapters for local deployment."""
 
     @staticmethod
+    def _create_metadata_writer(
+        enabled: bool, logger: LoggerPort
+    ) -> MetadataWriter | NoOpMetadataWriter:
+        """Create a MetadataWriter or NoOp based on configuration."""
+        if enabled:
+            return MetadataWriter(logger=logger)
+        return NoOpMetadataWriter()
+
+    @staticmethod
     def _create_csv_exporter_from_config(
         csv_cfg: Any, logger: LoggerPort
     ) -> CsvExporter | None:
@@ -94,36 +103,26 @@ class StorageFactory:
         """
         save_json = bronze_config.save_json if bronze_config else False
         bronze_save_metadata = bronze_config.save_metadata if bronze_config else False
-        json_path = None
-        if bronze_config and bronze_config.save_json:
-            json_path = str(bronze_path.parent / "json")
-
-        # Ensure tracing is always explicitly provided (DI pattern)
-        effective_tracing: TracingPort = (
-            tracing if tracing is not None else NoOpTracing()
+        json_path = (
+            str(bronze_path.parent / "json") if save_json else None
         )
 
-        # Create metadata writers based on config (Null Object pattern)
-        # Bronze metadata writer
-        bronze_metadata_writer: MetadataWriter | NoOpMetadataWriter
-        if bronze_save_metadata:
-            bronze_metadata_writer = MetadataWriter(logger=logger)
-        else:
-            bronze_metadata_writer = NoOpMetadataWriter()
+        # Ensure tracing is always explicitly provided (DI pattern)
+        effective_tracing: TracingPort = tracing or NoOpTracing()
 
-        # Silver metadata writer
-        silver_metadata_writer: MetadataWriter | NoOpMetadataWriter
-        if silver_config and silver_config.save_metadata:
-            silver_metadata_writer = MetadataWriter(logger=logger)
-        else:
-            silver_metadata_writer = NoOpMetadataWriter()
+        # Create metadata writers using Null Object pattern
+        silver_save_metadata = silver_config.save_metadata if silver_config else False
+        gold_save_metadata = gold_config.save_metadata if gold_config else False
 
-        # Gold metadata writer
-        gold_metadata_writer: MetadataWriter | NoOpMetadataWriter
-        if gold_config and gold_config.save_metadata:
-            gold_metadata_writer = MetadataWriter(logger=logger)
-        else:
-            gold_metadata_writer = NoOpMetadataWriter()
+        bronze_metadata_writer = StorageFactory._create_metadata_writer(
+            bronze_save_metadata, logger
+        )
+        silver_metadata_writer = StorageFactory._create_metadata_writer(
+            silver_save_metadata, logger
+        )
+        gold_metadata_writer = StorageFactory._create_metadata_writer(
+            gold_save_metadata, logger
+        )
 
         return StorageAdapter(
             bronze_writer=BronzeWriter(
