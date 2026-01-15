@@ -330,7 +330,10 @@ class TestMetadataWriter:
         content = yaml.safe_load(metadata_path.read_text())
 
         assert "schema" in content
-        assert content["schema"]["contract_path"] == "docs/contracts/gold/activity_v1.0.json"
+        assert (
+            content["schema"]["contract_path"]
+            == "docs/contracts/gold/activity_v1.0.json"
+        )
         assert content["schema"]["validation"] == "strict"
 
     @pytest.mark.asyncio

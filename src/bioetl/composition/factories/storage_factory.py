@@ -93,6 +93,7 @@ class StorageFactory:
             per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
         """
         save_json = bronze_config.save_json if bronze_config else False
+        bronze_save_metadata = bronze_config.save_metadata if bronze_config else False
         json_path = None
         if bronze_config and bronze_config.save_json:
             json_path = str(bronze_path.parent / "json")
@@ -102,7 +103,14 @@ class StorageFactory:
             tracing if tracing is not None else NoOpTracing()
         )
 
-        # Create metadata writers based on config
+        # Create metadata writers based on config (Null Object pattern)
+        # Bronze metadata writer
+        bronze_metadata_writer: MetadataWriter | NoOpMetadataWriter
+        if bronze_save_metadata:
+            bronze_metadata_writer = MetadataWriter(logger=logger)
+        else:
+            bronze_metadata_writer = NoOpMetadataWriter()
+
         # Silver metadata writer
         silver_metadata_writer: MetadataWriter | NoOpMetadataWriter
         if silver_config and silver_config.save_metadata:
@@ -125,6 +133,8 @@ class StorageFactory:
                 tracing=effective_tracing,
                 save_json=save_json,
                 json_path=json_path,
+                metadata_writer=bronze_metadata_writer,
+                save_metadata=bronze_save_metadata,
             ),
             silver_writer=SilverWriter(
                 base_path=silver_path,
@@ -197,8 +207,17 @@ class StorageFactory:
         if bronze_config and bronze_config.save_json:
             json_path = str(bronze_path.parent / "json")
 
+        bronze_save_metadata = bronze_config.save_metadata if bronze_config else False
+        silver_save_metadata = silver_config.save_metadata if silver_config else False
+        gold_save_metadata = gold_config.save_metadata if gold_config else False
         StorageFactory._log_export_status(
-            logger, json_path, silver_csv_exporter, gold_csv_exporter
+            logger,
+            json_path,
+            silver_csv_exporter,
+            gold_csv_exporter,
+            bronze_save_metadata,
+            silver_save_metadata,
+            gold_save_metadata,
         )
 
         adapter = StorageFactory._create_storage_adapter(
@@ -229,10 +248,19 @@ class StorageFactory:
         json_path: str | None,
         silver_csv_exporter: CsvExporter | None,
         gold_csv_exporter: CsvExporter | None,
+        bronze_save_metadata: bool = False,
+        silver_save_metadata: bool = False,
+        gold_save_metadata: bool = False,
     ) -> None:
         """Log export configuration status."""
         if json_path:
             logger.info("JSON export enabled for Bronze layer")
+        if bronze_save_metadata:
+            logger.info("metadata_export_enabled", layer="bronze")
+        if silver_save_metadata:
+            logger.info("metadata_export_enabled", layer="silver")
+        if gold_save_metadata:
+            logger.info("metadata_export_enabled", layer="gold")
         if silver_csv_exporter:
             logger.info(
                 "csv_export_enabled",

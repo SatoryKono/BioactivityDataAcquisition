@@ -54,7 +54,8 @@ class TestFileSizeLimits:
         "chemical.py": 600,  # 575 LOC - Chemical structure Value Objects (InChIKey, SMILES, PublicationYear)
         "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
         # Domain ports NoOp implementations
-        "noop.py": 400,  # 383 LOC - NoOp implementations for Null Object Pattern (+ NoOpPiiHasher)
+        "noop.py": 450,  # 447 LOC - NoOp implementations for Null Object Pattern (+ NoOpMetadataWriter)
+        "metadata.py": 500,  # 478 LOC - Metadata models for Medallion layer sidecar files
         # Domain Pandera schemas (declarative field definitions)
         "compound.py": 380,  # 377 LOC - PubChem molecule schema + deprecated alias (v2.0)
         "protein.py": 360,  # 354 LOC - UniProt target schema + deprecated alias (v2.0)
@@ -74,7 +75,7 @@ class TestFileSizeLimits:
         "services_factory.py": 600,  # 562 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
         # Infrastructure layer exemptions
         "silver_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
-        "gold_writer.py": 770,  # 759 LOC - SCD Type 2 + audit logging + lock validation
+        "gold_writer.py": 820,  # 808 LOC - SCD Type 2 + metadata sidecar integration
         "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
         "gold.py": 880,  # 877 LOC - Gold layer Pandera schemas (+ IDMapping + taxonomy_id standardization)
         "silver.py": 780,  # 775 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization)
@@ -301,8 +302,8 @@ class TestFunctionLength:
     }
 
     # Maximum allowed violations (for tracking technical debt)
-    # Baseline updated 2026-01-13: 72 violations (FilterableDataSourcePort implementations)
-    MAX_VIOLATIONS = 72
+    # Baseline updated 2026-01-15: 74 violations (metadata sidecar integration)
+    MAX_VIOLATIONS = 74
 
     def test_functions_under_50_lines(self, src_dir: Path) -> None:
         """All functions must be under 50 lines (with exemptions)."""
@@ -367,14 +368,14 @@ class TestClassSize:
         "StorageAdapter": 520,  # 510 lines - storage adapter with writers
         "BaseTransformer": 620,  # 605 lines - Template Method with helpers (tracing + PII hashing + serialize_json_list)
         "SilverWriter": 830,  # 822 lines - includes schema drift detection (M4) + audit + lock validation + validation
-        "GoldWriter": 720,  # 709 lines - includes SCD Type 2 with ingestion_ts per ADR-014 + lock validation
+        "GoldWriter": 760,  # 753 lines - SCD Type 2 + metadata sidecar integration
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
         "ChemblAdapter": 650,  # 630 lines - complex API adapter implementing full FilterableDataSourcePort
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
         "UniProtProteinTransformer": 800,  # 772 lines - complex protein data extraction with many fields
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
-        "BronzeWriter": 600,  # 500+ lines - JSONL + zstd streaming compression + validation + tests
+        "BronzeWriter": 680,  # 654 lines - JSONL + zstd + metadata sidecar integration
         "BatchExecutor": 600,  # 581 lines - unified executor for batch processing
         "BatchWriter": 350,  # 338 lines - batch writing with Safety Guard §4.6 lock validation
         # Application core classes
