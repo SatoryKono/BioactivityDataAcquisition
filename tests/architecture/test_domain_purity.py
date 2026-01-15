@@ -258,6 +258,11 @@ class TestDomainComplexity:
             "validate_activity_value": 10,  # Activity value validation
             # Value coercion with type handling
             "_coerce_to_int": 10,  # CC=8 - Integer coercion with multiple type checks
+            # DQ serializer domain functions
+            "_dataclass_to_dict": 13,  # CC=12 - Recursive dataclass conversion
+            "_dict_to_yaml": 7,  # CC=6 - YAML dictionary serialization
+            "_yaml_value": 8,  # CC=7 - YAML value formatting
+            "_render_check_details": 9,  # CC=8 - DQ check details rendering
         }
 
         violations = []
