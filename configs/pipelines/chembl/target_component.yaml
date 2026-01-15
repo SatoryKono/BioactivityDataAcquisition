@@ -6,7 +6,7 @@
 pipeline_name: chembl_target_component
 provider: chembl
 entity_type: target_component
-version: "1.1.0"
+version: "1.2.0"
 description: "ChEMBL Target Components (protein sequences, etc.)"
 
 primary_keys: ["component_id"]
@@ -14,6 +14,36 @@ silver_table: chembl_target_component
 gold_table: chembl_target_component
 
 source_file: ../../sources/chembl.yaml
+
+# -----------------------------------------------------------------------------
+# Data Quality Rules (entity-specific overrides)
+# -----------------------------------------------------------------------------
+dq_rules:
+  field_validations:
+    - field: "component_id"
+      type: "range"
+      min: 1
+      nullable: false
+    - field: "component_type"
+      type: "enum"
+      allowed: ["PROTEIN", "DNA", "RNA"]
+      nullable: true
+    - field: "accession"
+      type: "pattern"
+      pattern: "^[A-Z0-9]{6,10}$"
+      nullable: true
+      error_message: "accession should be UniProt format"
+    - field: "tax_id"
+      type: "range"
+      min: 1
+      max: 10000000
+      nullable: true
+
+  cross_field_validations:
+    - name: "component_identifiable"
+      fields: ["component_id", "accession"]
+      condition: "any_present"
+      error_message: "Component must have ID or accession"
 
 # Entity-specific gold filters
 gold_filters:

@@ -7,7 +7,7 @@
 pipeline_name: chembl_publication_similarity
 provider: chembl
 entity_type: document_similarity
-version: "2.0.0"
+version: "2.1.0"
 description: "Extract publication similarity data (Tanimoto coefficients) from ChEMBL API"
 
 primary_keys: ["sim_id"]
@@ -15,6 +15,42 @@ silver_table: "chembl_publication_similarity"
 gold_table: "chembl_publication_similarity"
 
 source_file: ../../sources/chembl.yaml
+
+# -----------------------------------------------------------------------------
+# Data Quality Rules (entity-specific overrides)
+# -----------------------------------------------------------------------------
+dq_rules:
+  field_validations:
+    - field: "sim_id"
+      type: "range"
+      min: 1
+      nullable: false
+    - field: "doc_1"
+      type: "range"
+      min: 1
+      nullable: false
+    - field: "doc_2"
+      type: "range"
+      min: 1
+      nullable: false
+    - field: "max_tani"
+      type: "range"
+      min: 0
+      max: 1
+      nullable: true
+      error_message: "Tanimoto coefficient must be between 0 and 1"
+    - field: "avg_tani"
+      type: "range"
+      min: 0
+      max: 1
+      nullable: true
+      error_message: "Average Tanimoto must be between 0 and 1"
+
+  cross_field_validations:
+    - name: "similarity_pair"
+      fields: ["doc_1", "doc_2"]
+      condition: "all_present"
+      error_message: "Both document IDs are required"
 
 # Entity-specific gold filters
 gold_filters:

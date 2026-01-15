@@ -6,7 +6,7 @@
 pipeline_name: chembl_assay
 provider: chembl
 entity_type: assay
-version: "1.1.0"
+version: "1.2.0"
 description: "Extract bioassay definitions from ChEMBL API"
 
 primary_keys: ["assay_chembl_id"]
@@ -14,6 +14,45 @@ silver_table: "chembl_assay"
 gold_table: "chembl_assay"
 
 source_file: ../../sources/chembl.yaml
+
+# -----------------------------------------------------------------------------
+# Data Quality Rules (entity-specific overrides)
+# -----------------------------------------------------------------------------
+dq_rules:
+  field_validations:
+    - field: "assay_chembl_id"
+      type: "pattern"
+      pattern: "^CHEMBL\\d+$"
+      nullable: false
+      error_message: "assay_chembl_id must match CHEMBL format"
+    - field: "assay_type"
+      type: "enum"
+      allowed: ["B", "F", "A", "T", "P", "U"]
+      nullable: false
+      error_message: "assay_type must be one of B, F, A, T, P, U"
+    - field: "confidence_score"
+      type: "range"
+      min: 0
+      max: 9
+      nullable: true
+    - field: "target_chembl_id"
+      type: "pattern"
+      pattern: "^CHEMBL\\d+$"
+      nullable: true
+    - field: "document_chembl_id"
+      type: "pattern"
+      pattern: "^CHEMBL\\d+$"
+      nullable: true
+    - field: "relationship_type"
+      type: "enum"
+      allowed: ["D", "H", "M", "N", "S", "U"]
+      nullable: true
+
+  cross_field_validations:
+    - name: "assay_identifiable"
+      fields: ["assay_chembl_id", "description"]
+      condition: "all_present"
+      error_message: "Assay must have ID and description"
 
 # Entity-specific gold filters
 gold_filters:

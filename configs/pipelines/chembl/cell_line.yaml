@@ -6,7 +6,7 @@
 pipeline_name: chembl_cell_line
 provider: chembl
 entity_type: cell_line
-version: "1.1.0"
+version: "1.2.0"
 description: "Extract cell lines from ChEMBL API"
 
 primary_keys: ["cell_chembl_id"]
@@ -14,6 +14,32 @@ silver_table: "chembl_cell_line"
 gold_table: "chembl_cell_line"
 
 source_file: ../../sources/chembl.yaml
+
+# -----------------------------------------------------------------------------
+# Data Quality Rules (entity-specific overrides)
+# -----------------------------------------------------------------------------
+dq_rules:
+  field_validations:
+    - field: "cell_chembl_id"
+      type: "pattern"
+      pattern: "^CHEMBL\\d+$"
+      nullable: false
+      error_message: "cell_chembl_id must match CHEMBL format"
+    - field: "cell_name"
+      type: "pattern"
+      pattern: "^.{1,200}$"
+      nullable: false
+      error_message: "cell_name is required and must not exceed 200 chars"
+    - field: "cellosaurus_id"
+      type: "pattern"
+      pattern: "^CVCL_[A-Z0-9]+$"
+      nullable: true
+      error_message: "cellosaurus_id must match CVCL format"
+    - field: "cell_source_tax_id"
+      type: "range"
+      min: 1
+      max: 10000000
+      nullable: true
 
 # Entity-specific gold filters
 gold_filters:

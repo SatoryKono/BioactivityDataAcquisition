@@ -6,7 +6,7 @@
 pipeline_name: uniprot_protein
 provider: uniprot
 entity_type: protein
-version: "1.1.0"
+version: "1.2.0"
 description: "Pipeline for ingesting UniProt proteins"
 
 primary_keys: ["accession"]
@@ -14,6 +14,47 @@ silver_table: "uniprot_protein"
 gold_table: "uniprot_protein"
 
 source_file: ../../sources/uniprot.yaml
+
+# -----------------------------------------------------------------------------
+# Data Quality Rules (entity-specific overrides)
+# -----------------------------------------------------------------------------
+dq_rules:
+  field_validations:
+    - field: "accession"
+      type: "pattern"
+      pattern: "^[A-Z0-9]{6,10}$"
+      nullable: false
+      error_message: "UniProt accession must be 6-10 alphanumeric chars"
+    - field: "entry_name"
+      type: "pattern"
+      pattern: "^[A-Z0-9_]+$"
+      nullable: true
+    - field: "organism"
+      type: "pattern"
+      pattern: "^[A-Z][a-z]+ [a-z]+.*$"
+      nullable: true
+      error_message: "Organism should be in binomial nomenclature"
+    - field: "taxonomy_id"
+      type: "range"
+      min: 1
+      max: 10000000
+      nullable: true
+    - field: "sequence_length"
+      type: "range"
+      min: 1
+      max: 100000
+      nullable: true
+    - field: "mass"
+      type: "range"
+      min: 100
+      max: 10000000
+      nullable: true
+
+  cross_field_validations:
+    - name: "protein_identifiable"
+      fields: ["accession", "entry_name"]
+      condition: "all_present"
+      error_message: "Protein must have accession and entry name"
 
 # Entity-specific gold filters
 gold_filters:
