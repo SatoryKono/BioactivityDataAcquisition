@@ -213,6 +213,11 @@ class TestFunctionComplexity:
         "_check_scd_integrity": 16,  # CC=15 - SCD Type 2 integrity
         "_check_value_distribution": 18,  # CC=17 - Value distribution analysis
         "_check_schema_drift": 14,  # CC=13 - Schema drift detection
+        # Composite pipeline merge service
+        "_apply_explicit_rules": 18,  # CC=16 - Explicit field priority rules with column reordering
+        # Composite pipeline domain models (ADR-026)
+        "DQOverrideConfig": 10,  # CC=9 - DQ override validation with threshold checks
+        "from_dict": 8,  # CC=6 - Dictionary parsing with type conversions
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -619,10 +624,10 @@ class TestGodObjectDetection:
         "PubchemMoleculeSchema": "Pandera schema - declarative field definitions, no behavior to delegate",
         # Audit adapters (cohesive file I/O operations)
         "FileAuditAdapter": "Cohesive adapter - all methods relate to audit file operations (read/write JSONL)",
-        # DQ analyzers (cohesive analysis responsibility)
-        "DQReportSerializer": "Cohesive serializer - all methods relate to DQ report serialization",
-        "GoldDQAnalyzer": "Cohesive analyzer - all methods relate to Gold layer DQ analysis",
-        "SilverDQAnalyzer": "Cohesive analyzer - all methods relate to Silver layer DQ analysis",
+        # Composite pipeline services (ADR-026)
+        "MergeService": "Cohesive service - all methods relate to merge operations and conflict resolution",
+        "EnrichmentCoordinator": "Cohesive service - all methods relate to enricher orchestration",
+        "CompositePipelineRunner": "Thin orchestrator - delegates to coordinator, merger, checkpoint services",
     }
 
     def test_large_classes_have_delegation(self, src_dir: Path) -> None:
