@@ -46,7 +46,9 @@ class EnrichmentResult:
         if not 0.0 <= self.dq_error_rate <= 1.0:
             raise ValueError(f"dq_error_rate must be 0.0-1.0, got {self.dq_error_rate}")
         if self.duration_seconds < 0.0:
-            raise ValueError(f"duration_seconds must be >= 0, got {self.duration_seconds}")
+            raise ValueError(
+                f"duration_seconds must be >= 0, got {self.duration_seconds}"
+            )
 
     @property
     def is_success(self) -> bool:
@@ -61,50 +63,76 @@ class EnrichmentResult:
     @property
     def not_found_rate(self) -> float:
         """Calculate not-found rate (0.0-1.0)."""
-        return self.records_not_found / self.records_input if self.records_input else 0.0
+        return (
+            self.records_not_found / self.records_input if self.records_input else 0.0
+        )
 
     @classmethod
     def success(
-        cls, enricher_name: str, records_input: int, records_enriched: int,
-        records_not_found: int = 0, duration_seconds: float = 0.0,
-        started_at: datetime | None = None, completed_at: datetime | None = None,
+        cls,
+        enricher_name: str,
+        records_input: int,
+        records_enriched: int,
+        records_not_found: int = 0,
+        duration_seconds: float = 0.0,
+        started_at: datetime | None = None,
+        completed_at: datetime | None = None,
     ) -> EnrichmentResult:
         """Factory for successful enrichment result."""
         return cls(
-            enricher_name=enricher_name, status=EnrichmentStatus.SUCCESS,
-            records_input=records_input, records_enriched=records_enriched,
-            records_not_found=records_not_found, duration_seconds=duration_seconds,
-            started_at=started_at, completed_at=completed_at,
+            enricher_name=enricher_name,
+            status=EnrichmentStatus.SUCCESS,
+            records_input=records_input,
+            records_enriched=records_enriched,
+            records_not_found=records_not_found,
+            duration_seconds=duration_seconds,
+            started_at=started_at,
+            completed_at=completed_at,
         )
 
     @classmethod
     def failed(
-        cls, enricher_name: str, error_message: str,
-        records_input: int = 0, duration_seconds: float = 0.0,
+        cls,
+        enricher_name: str,
+        error_message: str,
+        records_input: int = 0,
+        duration_seconds: float = 0.0,
     ) -> EnrichmentResult:
         """Factory for failed enrichment result."""
         return cls(
-            enricher_name=enricher_name, status=EnrichmentStatus.FAILED,
-            records_input=records_input, error_message=error_message,
+            enricher_name=enricher_name,
+            status=EnrichmentStatus.FAILED,
+            records_input=records_input,
+            error_message=error_message,
             duration_seconds=duration_seconds,
         )
 
     @classmethod
     def skipped(
-        cls, enricher_name: str, reason: str = "Filter excluded all records",
+        cls,
+        enricher_name: str,
+        reason: str = "Filter excluded all records",
     ) -> EnrichmentResult:
         """Factory for skipped enrichment result."""
-        return cls(enricher_name=enricher_name, status=EnrichmentStatus.SKIPPED,
-                   error_message=reason)
+        return cls(
+            enricher_name=enricher_name,
+            status=EnrichmentStatus.SKIPPED,
+            error_message=reason,
+        )
 
     @classmethod
     def timeout(
-        cls, enricher_name: str, timeout_seconds: float, records_input: int = 0,
+        cls,
+        enricher_name: str,
+        timeout_seconds: float,
+        records_input: int = 0,
     ) -> EnrichmentResult:
         """Factory for timeout enrichment result."""
         return cls(
-            enricher_name=enricher_name, status=EnrichmentStatus.TIMEOUT,
-            records_input=records_input, error_message=f"Timeout after {timeout_seconds}s",
+            enricher_name=enricher_name,
+            status=EnrichmentStatus.TIMEOUT,
+            records_input=records_input,
+            error_message=f"Timeout after {timeout_seconds}s",
             duration_seconds=timeout_seconds,
         )
 
@@ -151,7 +179,9 @@ class MergeResult:
     @property
     def enrichment_rate(self) -> float:
         """Calculate overall enrichment rate."""
-        return self.records_enriched / self.records_merged if self.records_merged else 0.0
+        return (
+            self.records_enriched / self.records_merged if self.records_merged else 0.0
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -197,8 +227,11 @@ class CompositeResult:
     @property
     def failed_enrichers(self) -> list[str]:
         """List of enrichers that failed."""
-        return [n for n, r in self.enrichment_results.items()
-                if r.status == EnrichmentStatus.FAILED]
+        return [
+            n
+            for n, r in self.enrichment_results.items()
+            if r.status == EnrichmentStatus.FAILED
+        ]
 
     @property
     def total_records_enriched(self) -> int:
@@ -215,6 +248,8 @@ class CompositeResult:
             "enrichers_run": len(self.enrichment_results),
             "enrichers_succeeded": len(self.successful_enrichers),
             "enrichers_failed": len(self.failed_enrichers),
-            "records_merged": self.merge_result.records_merged if self.merge_result else 0,
+            "records_merged": self.merge_result.records_merged
+            if self.merge_result
+            else 0,
             "total_duration_seconds": self.total_duration_seconds,
         }

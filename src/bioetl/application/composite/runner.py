@@ -326,7 +326,9 @@ class CompositePipelineRunner:
 
         return SeedResult(
             pipeline_name=self._config.seed.pipeline,
-            records_extracted=records_extracted.records_fetched if records_extracted else 0,
+            records_extracted=records_extracted.records_fetched
+            if records_extracted
+            else 0,
             records_silver=records_silver,
             keys_generated=records_silver,  # Approximate
             duration_seconds=(completed_at - started_at).total_seconds(),
@@ -370,9 +372,7 @@ class CompositePipelineRunner:
         for enricher_name in self._config.required_enrichers:
             result = enrichment_results.get(enricher_name)
             if result is None:
-                raise RuntimeError(
-                    f"Required enricher '{enricher_name}' did not run"
-                )
+                raise RuntimeError(f"Required enricher '{enricher_name}' did not run")
             if not result.is_success:
                 raise RuntimeError(
                     f"Required enricher '{enricher_name}' failed: "

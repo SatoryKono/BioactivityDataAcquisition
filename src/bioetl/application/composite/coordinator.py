@@ -123,11 +123,7 @@ class EnrichmentCoordinator:
                     filter_condition=enricher.filter_condition,
                 )
                 # Create skipped result synchronously
-                tasks.append(
-                    asyncio.create_task(
-                        self._return_skipped(enricher)
-                    )
-                )
+                tasks.append(asyncio.create_task(self._return_skipped(enricher)))
                 enricher_names.append(enricher.pipeline)
                 continue
 
@@ -327,7 +323,9 @@ class EnrichmentCoordinator:
                     status=status,
                     records_input=records_input,
                     records_enriched=records_enriched,
-                    records_not_found=records_input - records_enriched - records_errored,
+                    records_not_found=records_input
+                    - records_enriched
+                    - records_errored,
                     records_errored=records_errored,
                     dq_error_rate=dq_error_rate,
                     duration_seconds=duration,

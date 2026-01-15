@@ -224,9 +224,9 @@ class MergeService:
 
             # Rename common columns in enricher with prefix
             prefix = f"{enricher.pipeline}_"
-            enricher_df = enricher_df.rename({
-                col: f"{prefix}{col}" for col in common_cols
-            })
+            enricher_df = enricher_df.rename(
+                {col: f"{prefix}{col}" for col in common_cols}
+            )
 
             # Apply join based on strategy
             how = self._get_polars_join_type()
@@ -302,7 +302,7 @@ class MergeService:
             prefix = f"{enricher.pipeline}_"
             for col in df.columns:
                 if col.startswith(prefix):
-                    base_col = col[len(prefix):]
+                    base_col = col[len(prefix) :]
                     if base_col in df.columns:
                         # Coalesce seed (base) over enricher
                         result = result.with_columns(
@@ -321,7 +321,7 @@ class MergeService:
             prefix = f"{enricher.pipeline}_"
             for col in df.columns:
                 if col.startswith(prefix):
-                    base_col = col[len(prefix):]
+                    base_col = col[len(prefix) :]
                     if base_col in df.columns:
                         # Coalesce enricher over seed (base)
                         result = result.with_columns(
@@ -395,17 +395,18 @@ class MergeService:
 
         # Build enrichment status dict
         status_dict = {
-            name: result.status.value
-            for name, result in enrichment_results.items()
+            name: result.status.value for name, result in enrichment_results.items()
         }
 
         # Add lineage columns
-        return df.with_columns([
-            pl.lit(run_id).alias("_composite_run_id"),
-            pl.lit(str(sources_used)).alias("_source_providers"),
-            pl.lit(str(status_dict)).alias("_enrichment_status"),
-            pl.lit(datetime.now().isoformat()).alias("_lineage_created_at"),
-        ])
+        return df.with_columns(
+            [
+                pl.lit(run_id).alias("_composite_run_id"),
+                pl.lit(str(sources_used)).alias("_source_providers"),
+                pl.lit(str(status_dict)).alias("_enrichment_status"),
+                pl.lit(datetime.now().isoformat()).alias("_lineage_created_at"),
+            ]
+        )
 
     def _count_enriched_records(
         self, df: pl.DataFrame, enrichers: Sequence[EnricherConfig]
@@ -421,8 +422,7 @@ class MergeService:
                 # Check first enricher column for non-null
                 col = enricher_cols[0]
                 enriched_count = max(
-                    enriched_count,
-                    len(df.filter(df[col].is_not_null()))
+                    enriched_count, len(df.filter(df[col].is_not_null()))
                 )
         return enriched_count
 
