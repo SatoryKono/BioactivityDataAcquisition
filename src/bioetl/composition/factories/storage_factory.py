@@ -103,9 +103,7 @@ class StorageFactory:
         """
         save_json = bronze_config.save_json if bronze_config else False
         bronze_save_metadata = bronze_config.save_metadata if bronze_config else False
-        json_path = (
-            str(bronze_path.parent / "json") if save_json else None
-        )
+        json_path = str(bronze_path.parent / "json") if save_json else None
 
         # Ensure tracing is always explicitly provided (DI pattern)
         effective_tracing: TracingPort = tracing or NoOpTracing()
