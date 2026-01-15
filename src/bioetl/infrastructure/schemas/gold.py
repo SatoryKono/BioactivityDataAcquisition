@@ -112,6 +112,8 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -143,6 +145,8 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -166,6 +170,8 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -200,6 +206,8 @@ class UniProtIDMappingGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -243,6 +251,8 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -301,6 +311,8 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -343,6 +355,8 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -372,6 +386,8 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -405,6 +421,8 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -436,6 +454,8 @@ class ChEMBLDocumentTermGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -509,6 +529,8 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -542,6 +564,8 @@ class ChEMBLCompoundRecordGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -579,6 +603,8 @@ class ChEMBLCellLineGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -619,6 +645,8 @@ class ChEMBLDocumentSimilarityGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -684,6 +712,8 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -734,6 +764,8 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -788,6 +820,8 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -828,6 +862,8 @@ class ChEMBLProteinClassGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
 
 
@@ -874,4 +910,6 @@ class ChEMBLAssayParametersGoldSchema(pa.DataFrameModel):
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
     class Config:
+        """Pandera configuration for strict schema validation."""
+
         strict = True
