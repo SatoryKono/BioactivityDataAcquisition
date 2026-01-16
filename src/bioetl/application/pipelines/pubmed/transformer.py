@@ -20,7 +20,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
     IdentifierExtractor,
 )
 from bioetl.application.pipelines.pubmed.xml_utils import get_text
-from bioetl.domain.entities import Publication
+from bioetl.domain.entities.pubmed import PubMedPublicationEntity
 from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects import DOI, PublicationYear, PubMedId
 
@@ -205,10 +205,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         """Return the domain entity class for PubMed publications.
 
         Returns:
-            Publication class.
+            PubMedPublicationEntity class.
 
         """
-        return cast("type[BaseEntity]", Publication)
+        return cast("type[BaseEntity]", PubMedPublicationEntity)
 
     def _should_log_fallback_lookup(self) -> bool:
         """Disable fallback lookup logging for PubMed.
