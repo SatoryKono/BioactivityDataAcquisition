@@ -236,6 +236,57 @@ class GoldWriter(BaseDeltaWriter):
         if not is_strict:
             raise ValueError("Gold layer requires strict=True schema validation")
 
+    async def write_gold_merged(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str] | None = None,
+    ) -> None:
+        """Write merged records to Gold layer without Pandera schema.
+
+        Used by composite pipelines where schema is dynamically determined
+        by the merge operation. No Pandera validation is performed.
+
+        Args:
+            table_name: The name of the table to write to.
+            records: A list of dictionaries representing merged records.
+            primary_keys: Optional list of column names for sorting.
+        """
+        if not records:
+            self.logger.warning(
+                "No records to write for merged Gold",
+                table_name=table_name,
+            )
+            return
+
+        # Convert to Arrow and sort if primary keys provided
+        arrow_table = pa.Table.from_pylist(records)
+
+        if primary_keys:
+            valid_keys = [pk for pk in primary_keys if pk in arrow_table.schema.names]
+            if valid_keys:
+                arrow_table = arrow_table.sort_by(
+                    [(pk, "ascending") for pk in valid_keys]
+                )
+
+        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+
+        self.logger.info(
+            "Writing merged Gold records",
+            table_name=table_name,
+            path=table_path,
+            records=len(records),
+        )
+
+        await self._run_in_executor(
+            lambda: write_deltalake(
+                table_path,
+                arrow_table,
+                mode="overwrite",
+                schema_mode="overwrite",
+            ),
+        )
+
     async def _validate_records_against_schema(
         self, records: list[dict[str, Any]], schema: DataFrameSchema
     ) -> None:

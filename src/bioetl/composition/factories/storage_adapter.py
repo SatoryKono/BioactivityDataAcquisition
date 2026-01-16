@@ -155,6 +155,59 @@ class StorageAdapter:
             run_id=run_id,
         )
 
+    async def read_silver(
+        self,
+        table_name: str,
+        columns: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Read records from a Silver layer Delta table.
+
+        Args:
+            table_name: The name of the table to read (e.g., 'chembl/activity').
+            columns: Optional list of columns to select. If None, reads all columns.
+
+        Returns:
+            List of dictionaries, where each dictionary represents a record.
+
+        Raises:
+            FileNotFoundError: If the table does not exist.
+        """
+        return await self.silver.read_silver(table_name, columns=columns)
+
+    async def write_silver_merged(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str] | None = None,
+    ) -> None:
+        """Write merged records to Silver layer without explicit schema.
+
+        Used by composite pipelines where schema is dynamically determined.
+
+        Args:
+            table_name: The name of the table to write to.
+            records: A list of dictionaries representing merged records.
+            primary_keys: Optional list of column names for sorting.
+        """
+        await self.silver.write_silver_merged(table_name, records, primary_keys)
+
+    async def write_gold_merged(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str] | None = None,
+    ) -> None:
+        """Write merged records to Gold layer without Pandera schema.
+
+        Used by composite pipelines where schema is dynamically determined.
+
+        Args:
+            table_name: The name of the table to write to.
+            records: A list of dictionaries representing merged records.
+            primary_keys: Optional list of column names for sorting.
+        """
+        await self.gold.write_gold_merged(table_name, records, primary_keys)
+
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Silver layer data for a specific table.
 

@@ -18,6 +18,22 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, StoragePort
 
 
+def _path_to_table_name(path: str) -> str:
+    """Convert a full path to a table name by stripping layer prefix.
+
+    Args:
+        path: Path like "silver/chembl/activity" or "gold/publication_enriched"
+
+    Returns:
+        Table name like "chembl/activity" or "publication_enriched"
+    """
+    # Strip common layer prefixes
+    for prefix in ("silver/", "gold/", "bronze/"):
+        if path.startswith(prefix):
+            return path[len(prefix) :]
+    return path
+
+
 class MergeService:
     """Merges enriched data with conflict resolution and lineage tracking."""
 
@@ -106,8 +122,7 @@ class MergeService:
         records_merged = len(merged_df)
         records_enriched = self._count_enriched_records(merged_df, enrichers)
 
-        # Step 6: Write to Silver
-        # TODO: Integrate with StoragePort properly - needs schema and primary keys
+        # Step 6: Write to Silver via StoragePort
         self._logger.info(
             "Writing merged Silver table",
             path=self._config.output_silver_path,
@@ -115,8 +130,7 @@ class MergeService:
         )
         await self._write_merged_silver(merged_df)
 
-        # Step 7: Write to Gold (with filtering if needed)
-        # TODO: Integrate with StoragePort properly - needs schema validation
+        # Step 7: Write to Gold via StoragePort
         self._logger.info(
             "Writing merged Gold table",
             path=self._config.output_gold_path,
@@ -147,49 +161,57 @@ class MergeService:
         )
 
     async def _read_silver_table(self, path: str) -> pl.DataFrame:
-        """Read a Silver table.
+        """Read a Silver table via StoragePort.
 
-        TODO: This requires a DeltaReaderPort extension to StoragePort.
-        Current implementation uses direct deltalake access (infrastructure dependency).
+        Args:
+            path: Table path like "silver/chembl/activity".
+
+        Returns:
+            Polars DataFrame with table contents.
         """
         import polars as pl
-        from deltalake import DeltaTable
 
-        # Read Delta table directly (to be replaced with port call)
-        table = DeltaTable(path)
-        result = pl.from_arrow(table.to_pyarrow_table())
-        # from_arrow may return Series for single-column tables
-        if isinstance(result, pl.Series):
-            return result.to_frame()
-        return result
+        # Convert path to table name by stripping layer prefix
+        table_name = _path_to_table_name(path)
+
+        # Read via StoragePort
+        records = await self._storage.read_silver(table_name)
+
+        # Convert to Polars DataFrame
+        if not records:
+            return pl.DataFrame()
+
+        return pl.DataFrame(records)
 
     async def _write_merged_silver(self, df: pl.DataFrame) -> None:
-        """Write merged data to Silver layer.
+        """Write merged data to Silver layer via StoragePort.
 
-        TODO: Integrate with StoragePort.write_silver - needs proper schema.
+        Args:
+            df: Polars DataFrame to write.
         """
-        from deltalake import write_deltalake
+        # Convert path to table name by stripping layer prefix
+        table_name = _path_to_table_name(self._config.output_silver_path)
 
-        # Direct write for now (to be replaced with port call)
-        write_deltalake(
-            self._config.output_silver_path,
-            df.to_arrow(),
-            mode="overwrite",
-        )
+        # Convert DataFrame to list of dicts
+        records = df.to_dicts()
+
+        # Write via StoragePort
+        await self._storage.write_silver_merged(table_name, records)
 
     async def _write_merged_gold(self, df: pl.DataFrame) -> None:
-        """Write merged data to Gold layer.
+        """Write merged data to Gold layer via StoragePort.
 
-        TODO: Integrate with StoragePort.write_gold - needs Pandera schema.
+        Args:
+            df: Polars DataFrame to write.
         """
-        from deltalake import write_deltalake
+        # Convert path to table name by stripping layer prefix
+        table_name = _path_to_table_name(self._config.output_gold_path)
 
-        # Direct write for now (to be replaced with port call)
-        write_deltalake(
-            self._config.output_gold_path,
-            df.to_arrow(),
-            mode="overwrite",
-        )
+        # Convert DataFrame to list of dicts
+        records = df.to_dicts()
+
+        # Write via StoragePort
+        await self._storage.write_gold_merged(table_name, records)
 
     def _infer_silver_table(self, pipeline_name: str) -> str:
         """Infer Silver table path from pipeline name."""

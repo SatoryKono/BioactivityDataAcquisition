@@ -259,3 +259,59 @@ async def test_get_history(gold_writer):
         assert len(history) == 2
         mock_arrow_table.filter.assert_called_once()
         mock_arrow_table.sort_by.assert_called_once()
+
+
+async def test_write_gold_merged_no_records(gold_writer, noop_logger):
+    """Test write_gold_merged handles empty records gracefully."""
+    # Should not raise, just log warning
+    await gold_writer.write_gold_merged(
+        table_name="test_empty",
+        records=[],
+    )
+
+
+async def test_write_gold_merged_calls_write_deltalake(gold_writer, valid_records):
+    """Test write_gold_merged writes data with overwrite mode."""
+    with patch(
+        "bioetl.infrastructure.storage.gold_writer.write_deltalake"
+    ) as mock_write:
+        await gold_writer.write_gold_merged(
+            table_name="test_merged",
+            records=valid_records,
+            primary_keys=["id"],
+        )
+
+        mock_write.assert_called_once()
+        # Check positional args and kwargs
+        call_args, call_kwargs = mock_write.call_args
+        # First positional arg is the path
+        assert call_args[0] == "s3://test-bucket/gold/test_merged"
+        # Mode should be in kwargs
+        assert call_kwargs["mode"] == "overwrite"
+
+
+async def test_write_gold_merged_sorts_by_primary_keys(gold_writer):
+    """Test write_gold_merged sorts records by primary keys."""
+    records = [
+        {"id": "3", "value": 30},
+        {"id": "1", "value": 10},
+        {"id": "2", "value": 20},
+    ]
+
+    with patch(
+        "bioetl.infrastructure.storage.gold_writer.write_deltalake"
+    ) as mock_write:
+        await gold_writer.write_gold_merged(
+            table_name="test_sorted",
+            records=records,
+            primary_keys=["id"],
+        )
+
+        mock_write.assert_called_once()
+        # Second positional arg is the arrow table
+        call_args, _call_kwargs = mock_write.call_args
+        written_data = call_args[1]
+        # Data should be sorted by id
+        written_list = written_data.to_pylist()
+        ids = [r["id"] for r in written_list]
+        assert ids == ["1", "2", "3"]

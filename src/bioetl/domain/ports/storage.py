@@ -130,6 +130,69 @@ class StoragePort(Protocol):
         """
         ...
 
+    async def read_silver(
+        self,
+        table_name: str,
+        columns: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Read records from a Silver layer Delta table.
+
+        Args:
+            table_name: The name of the table to read (e.g., 'chembl/activity').
+            columns: Optional list of columns to select. If None, reads all columns.
+
+        Returns:
+            List of dictionaries, where each dictionary represents a record.
+
+        Raises:
+            FileNotFoundError: If the table does not exist.
+        """
+        ...
+
+    async def write_silver_merged(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str] | None = None,
+    ) -> None:
+        """Write merged records to Silver layer without explicit schema.
+
+        Used by composite pipelines where schema is dynamically determined
+        by the merge operation. Schema is inferred from the records.
+
+        Args:
+            table_name: The name of the table to write to.
+            records: A list of dictionaries representing merged records.
+            primary_keys: Optional list of column names for sorting.
+
+        Note:
+            This method bypasses strict schema validation since merged data
+            has a dynamically determined schema from multiple sources.
+        """
+        ...
+
+    async def write_gold_merged(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str] | None = None,
+    ) -> None:
+        """Write merged records to Gold layer without Pandera schema.
+
+        Used by composite pipelines where schema is dynamically determined
+        by the merge operation. No Pandera validation is performed.
+
+        Args:
+            table_name: The name of the table to write to.
+            records: A list of dictionaries representing merged records.
+            primary_keys: Optional list of column names for sorting.
+
+        Note:
+            This method bypasses Pandera validation since merged data
+            has a dynamically determined schema from multiple sources.
+        """
+        ...
+
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Silver layer data for a specific table.
 

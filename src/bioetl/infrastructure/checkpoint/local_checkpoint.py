@@ -60,9 +60,7 @@ class LocalCheckpoint:
         Uses run_in_executor to avoid blocking the event loop.
         """
         loop = asyncio.get_running_loop()
-        await loop.run_in_executor(
-            None, self._save_sync, pipeline, run_id, metadata
-        )
+        await loop.run_in_executor(None, self._save_sync, pipeline, run_id, metadata)
 
     def _save_sync(
         self,
