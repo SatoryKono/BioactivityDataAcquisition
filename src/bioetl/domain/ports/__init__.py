@@ -55,6 +55,12 @@ from bioetl.domain.ports.idmapping import IDMappingPort
 from bioetl.domain.ports.locking import LockPort
 from bioetl.domain.ports.memory import MemoryMonitorPort, MemoryStats
 from bioetl.domain.ports.metadata import MetadataWriterPort
+from bioetl.domain.ports.metadata_coordinator import (
+    BronzeMetadataInput,
+    GoldMetadataInput,
+    MetadataCoordinatorPort,
+    SilverMetadataInput,
+)
 from bioetl.domain.ports.noop import (
     NoOpAudit,
     NoOpMemoryMonitor,
@@ -97,6 +103,7 @@ __all__ = [
     "AuditPort",
     "BronzeDQAnalyzerPort",
     "BronzeDQConfigPort",
+    "BronzeMetadataInput",
     "CheckpointPort",
     "CircuitBreakerPort",
     "DQMonitorPort",
@@ -106,6 +113,7 @@ __all__ = [
     "FilterableDataSourcePort",
     "GoldDQAnalyzerPort",
     "GoldDQConfigPort",
+    "GoldMetadataInput",
     "GoldValidatorPort",
     "HealthCheckPort",
     "HealthCheckResult",
@@ -119,6 +127,7 @@ __all__ = [
     "LoggerPort",
     "MemoryMonitorPort",
     "MemoryStats",
+    "MetadataCoordinatorPort",
     "MetadataWriterPort",
     "MetricsExtractorPort",
     "MetricsPort",
@@ -138,6 +147,7 @@ __all__ = [
     "ShutdownPort",
     "SilverDQAnalyzerPort",
     "SilverDQConfigPort",
+    "SilverMetadataInput",
     "SilverValidatorPort",
     "StoragePort",
     "TracingPort",
