@@ -76,7 +76,6 @@ class TestFileSizeLimits:
         "registration.py": 720,  # 705 LOC - provider registration with data source creators (OpenAlex + SemanticScholar + UniProt IDMapping)
         "storage_adapter.py": 610,  # 601 LOC - storage adapter with Bronze/Silver/Gold writers + read_silver, write_*_merged
         # Consolidated factory files (v5.2)
-        "storage.py": 700,  # 640 LOC - merged storage_factory + storage_adapter
         "pipeline_factory.py": 560,  # 557 LOC - merged generic_factory + runner_assembly + entity_type helper
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
         "services_factory.py": 600,  # 562 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
