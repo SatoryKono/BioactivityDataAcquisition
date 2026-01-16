@@ -104,8 +104,76 @@ class EnvironmentMetadata(BaseModel):
 # =============================================================================
 
 
+class RateLimitInfo(BaseModel):
+    """Rate limit information from API response headers.
+
+    Attributes:
+        remaining: Remaining requests in current window (X-RateLimit-Remaining).
+        limit: Maximum requests allowed in window (X-RateLimit-Limit).
+        reset_at: Timestamp when rate limit resets (X-RateLimit-Reset).
+        retry_after_seconds: Seconds to wait before retry (Retry-After header).
+    """
+
+    remaining: int | None = Field(
+        default=None, description="Remaining requests in current window"
+    )
+    limit: int | None = Field(
+        default=None, description="Maximum requests allowed in window"
+    )
+    reset_at: datetime | None = Field(
+        default=None, description="Timestamp when rate limit resets"
+    )
+    retry_after_seconds: float | None = Field(
+        default=None, description="Seconds to wait before retry"
+    )
+
+
+class APIRequestDetails(BaseModel):
+    """Detailed API request information for audit and debugging.
+
+    Captures per-request metadata including endpoint, parameters,
+    response size, timing, and rate limit status.
+
+    Attributes:
+        endpoint: API endpoint path (e.g., "/chembl/api/data/activity").
+        base_url: Base URL of the API (e.g., "https://www.ebi.ac.uk").
+        query_params: Query parameters used in request.
+        http_method: HTTP method (GET, POST).
+        response_size_bytes: Size of response body in bytes.
+        request_duration_ms: Request duration in milliseconds.
+        status_code: HTTP response status code.
+        rate_limit: Rate limit information from response headers.
+        timestamp: UTC timestamp when request was made.
+    """
+
+    endpoint: str = Field(description="API endpoint path")
+    base_url: str = Field(description="Base URL of the API")
+    query_params: dict[str, str | int | float | bool | None] = Field(
+        default_factory=dict, description="Query parameters"
+    )
+    http_method: Literal["GET", "POST", "HEAD"] = Field(
+        default="GET", description="HTTP method"
+    )
+    response_size_bytes: int = Field(
+        default=0, description="Size of response body in bytes"
+    )
+    request_duration_ms: float = Field(
+        default=0.0, description="Request duration in milliseconds"
+    )
+    status_code: int = Field(default=200, description="HTTP response status code")
+    rate_limit: RateLimitInfo | None = Field(
+        default=None, description="Rate limit information"
+    )
+    timestamp: datetime | None = Field(
+        default=None, description="UTC timestamp when request was made"
+    )
+
+
 class SourceMetadata(BaseModel):
     """Data source information for Bronze layer.
+
+    Extended to include detailed API request tracking for audit,
+    debugging, and monitoring purposes.
 
     Attributes:
         type: Source type (api, csv, parquet).
@@ -114,6 +182,10 @@ class SourceMetadata(BaseModel):
         watermark_before: Previous watermark timestamp.
         watermark_after: New watermark timestamp after ingestion.
         api_version: Provider API version.
+        api_requests: List of detailed API request information.
+        total_requests: Total number of API requests made.
+        total_response_bytes: Total bytes received from all requests.
+        avg_request_duration_ms: Average request duration in milliseconds.
     """
 
     type: Literal["api", "csv", "parquet"] = Field(
@@ -128,6 +200,16 @@ class SourceMetadata(BaseModel):
         default=None, description="New watermark after ingestion"
     )
     api_version: str | None = Field(default=None, description="Provider API version")
+    api_requests: list[APIRequestDetails] = Field(
+        default_factory=list, description="Detailed API request information"
+    )
+    total_requests: int = Field(default=0, description="Total number of API requests")
+    total_response_bytes: int = Field(
+        default=0, description="Total bytes received from all requests"
+    )
+    avg_request_duration_ms: float = Field(
+        default=0.0, description="Average request duration in milliseconds"
+    )
 
 
 class FileOutputMetadata(BaseModel):
