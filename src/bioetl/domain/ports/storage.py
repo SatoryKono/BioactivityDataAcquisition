@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from datetime import datetime
-from typing import Any, Literal, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 
 from bioetl.domain.types import (
     ArrowSchema,
@@ -22,6 +22,9 @@ from bioetl.domain.types import (
     RunType,
 )
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+
+if TYPE_CHECKING:
+    from bioetl.domain.models.metadata import SourceMetadata
 
 
 @runtime_checkable
@@ -43,6 +46,7 @@ class StoragePort(Protocol):
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
+        source_metadata: SourceMetadata | None = None,
     ) -> BronzeWriteResult:
         """Write raw records to the Bronze layer.
 
@@ -56,6 +60,9 @@ class StoragePort(Protocol):
             run_type: The type of pipeline run (incremental, backfill, rebuild).
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required.
+            source_metadata: Optional pre-built SourceMetadata with API request
+                           details for rich lineage tracking. If None, a minimal
+                           SourceMetadata is created with type="api".
 
         Returns:
             BronzeWriteResult: Result containing path, record count, sizes,

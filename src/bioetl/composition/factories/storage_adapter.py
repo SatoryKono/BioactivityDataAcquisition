@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
     from datetime import datetime
 
+    from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.types import ArrowSchema, BatchID, RunID, RunType
 
 
@@ -62,6 +63,7 @@ class StorageAdapter:
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
+        source_metadata: SourceMetadata | None = None,
     ) -> BronzeWriteResult:
         """Write raw records to Bronze layer.
 
@@ -75,6 +77,9 @@ class StorageAdapter:
             run_type: Type of run.
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required.
+            source_metadata: Optional pre-built SourceMetadata with API request
+                           details for rich lineage tracking. If None, a minimal
+                           SourceMetadata is created with type="api".
 
         Returns:
             BronzeWriteResult: Result containing path, record count, sizes,
@@ -93,6 +98,7 @@ class StorageAdapter:
             run_id=run_id,
             run_type=run_type,
             ingestion_ts=ingestion_ts,
+            source_metadata=source_metadata,
         )
 
     async def write_silver(
