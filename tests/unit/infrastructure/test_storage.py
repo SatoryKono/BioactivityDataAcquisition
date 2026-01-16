@@ -402,6 +402,9 @@ class TestSilverWriter:
         mock_merge.when_matched_update_all.return_value = mock_merge
         mock_merge.when_not_matched_insert_all.return_value = mock_merge
 
+        # Mock version() to return an integer for SilverWriteResult
+        mock_table_instance.version.return_value = 1
+
         writer = SilverWriter(base_path="/tmp/delta", logger=noop_logger)
 
         records = [

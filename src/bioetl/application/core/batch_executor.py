@@ -374,8 +374,9 @@ class BatchExecutor:
 
             # Write to Silver with bronze_refs for lineage tracking (REQ-LINEAGE-001)
             bronze_refs = [bronze_result] if bronze_result else None
+            silver_result = None
             if result.silver_records:
-                await self._execute_with_span(
+                silver_result = await self._execute_with_span(
                     "write_silver",
                     self._writer.write_silver(
                         result.silver_records,
@@ -390,11 +391,14 @@ class BatchExecutor:
                     ),
                 )
 
-            # Write to Gold
+            # Write to Gold with silver_refs for lineage tracking (REQ-LINEAGE-002)
+            silver_refs = [silver_result] if silver_result else None
             if result.gold_records:
                 await self._execute_with_span(
                     "write_gold",
-                    self._writer.write_gold(result.gold_records),
+                    self._writer.write_gold(
+                        result.gold_records, silver_refs=silver_refs
+                    ),
                     batch_id,
                     len(result.gold_records),
                     on_error=lambda e: self._writer.log_and_track_write_error(
