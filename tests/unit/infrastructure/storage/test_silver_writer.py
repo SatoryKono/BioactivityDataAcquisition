@@ -1618,3 +1618,203 @@ class TestSilverWriterCsvExport:
 
             assert len(export_calls) == 1
             assert export_calls[0]["primary_keys"] == ["entity_id"]
+
+
+@pytest.mark.unit
+class TestSilverWriterLineage:
+    """Tests for SilverWriter lineage tracking (REQ-LINEAGE-001)."""
+
+    @pytest.mark.asyncio
+    async def test_write_silver_without_bronze_refs(self, noop_logger, valid_records):
+        """Test write_silver works without bronze_refs (backward compatibility)."""
+        import pyarrow as pa
+        from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
+
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
+
+        with (
+            patch(
+                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+                side_effect=DeltaTableNotFoundError("Not found"),
+            ),
+            patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
+        ):
+            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+
+            # Should not raise when bronze_refs not provided
+            await writer.write_silver(
+                table_name="test.table",
+                records=valid_records,
+                primary_keys=["entity_id"],
+                schema=schema,
+                mode="merge",
+            )
+
+    @pytest.mark.asyncio
+    async def test_write_silver_with_bronze_refs(self, noop_logger, valid_records):
+        """Test write_silver accepts bronze_refs parameter."""
+        from uuid import uuid4
+
+        import pyarrow as pa
+        from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
+
+        from bioetl.domain.types import BatchID
+        from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
+
+        bronze_result = BronzeWriteResult(
+            batch_id=BatchID(uuid4()),
+            relative_path="v1/chembl/activity/2024-01-15/batch_123.jsonl.zst",
+            absolute_path="/data/bronze/v1/chembl/activity/2024-01-15/batch_123.jsonl.zst",
+            record_count=100,
+            compressed_size=5000,
+            uncompressed_size=20000,
+            checksum_blake2="abc123def456",
+        )
+
+        with (
+            patch(
+                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+                side_effect=DeltaTableNotFoundError("Not found"),
+            ),
+            patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
+        ):
+            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+
+            # Should not raise with bronze_refs
+            await writer.write_silver(
+                table_name="test.table",
+                records=valid_records,
+                primary_keys=["entity_id"],
+                schema=schema,
+                mode="merge",
+                bronze_refs=[bronze_result],
+            )
+
+    @pytest.mark.asyncio
+    async def test_write_silver_metadata_includes_bronze_paths(
+        self, noop_logger, valid_records
+    ):
+        """Test _write_silver_metadata populates bronze_paths from bronze_refs."""
+        from uuid import uuid4
+
+        from bioetl.domain.types import BatchID
+        from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+        from bioetl.infrastructure.storage.silver_writer import (
+            SilverWriteMode,
+            SilverWriter,
+        )
+
+        bronze_result_1 = BronzeWriteResult(
+            batch_id=BatchID(uuid4()),
+            relative_path="v1/chembl/activity/2024-01-15/batch_001.jsonl.zst",
+            absolute_path="/data/bronze/v1/chembl/activity/2024-01-15/batch_001.jsonl.zst",
+            record_count=50,
+            compressed_size=2500,
+            uncompressed_size=10000,
+            checksum_blake2="abc123",
+        )
+
+        bronze_result_2 = BronzeWriteResult(
+            batch_id=BatchID(uuid4()),
+            relative_path="v1/chembl/activity/2024-01-15/batch_002.jsonl.zst",
+            absolute_path="/data/bronze/v1/chembl/activity/2024-01-15/batch_002.jsonl.zst",
+            record_count=50,
+            compressed_size=2500,
+            uncompressed_size=10000,
+            checksum_blake2="def456",
+        )
+
+        mock_metadata_writer = MagicMock()
+        write_calls = []
+
+        async def capture_write(table_path, metadata):
+            write_calls.append({"table_path": table_path, "metadata": metadata})
+
+        mock_metadata_writer.write_silver_metadata = capture_write
+
+        writer = SilverWriter(
+            base_path="/tmp/silver",
+            logger=noop_logger,
+            metadata_writer=mock_metadata_writer,
+        )
+
+        await writer._write_silver_metadata(
+            table_path="/tmp/silver/test/table",
+            records=valid_records,
+            primary_keys=["entity_id"],
+            mode=SilverWriteMode.MERGE,
+            bronze_refs=[bronze_result_1, bronze_result_2],
+        )
+
+        # Verify metadata writer was called with bronze_paths
+        assert len(write_calls) == 1
+        metadata = write_calls[0]["metadata"]
+        lineage = metadata.lineage
+        assert len(lineage.bronze_paths) == 2
+        assert (
+            "v1/chembl/activity/2024-01-15/batch_001.jsonl.zst" in lineage.bronze_paths
+        )
+        assert (
+            "v1/chembl/activity/2024-01-15/batch_002.jsonl.zst" in lineage.bronze_paths
+        )
+
+    @pytest.mark.asyncio
+    async def test_write_silver_metadata_empty_bronze_paths_when_no_refs(
+        self, noop_logger, valid_records
+    ):
+        """Test _write_silver_metadata has empty bronze_paths when bronze_refs=None."""
+        from bioetl.infrastructure.storage.silver_writer import (
+            SilverWriteMode,
+            SilverWriter,
+        )
+
+        mock_metadata_writer = MagicMock()
+        write_calls = []
+
+        async def capture_write(table_path, metadata):
+            write_calls.append({"table_path": table_path, "metadata": metadata})
+
+        mock_metadata_writer.write_silver_metadata = capture_write
+
+        writer = SilverWriter(
+            base_path="/tmp/silver",
+            logger=noop_logger,
+            metadata_writer=mock_metadata_writer,
+        )
+
+        await writer._write_silver_metadata(
+            table_path="/tmp/silver/test/table",
+            records=valid_records,
+            primary_keys=["entity_id"],
+            mode=SilverWriteMode.MERGE,
+            bronze_refs=None,  # No bronze refs
+        )
+
+        # Verify metadata writer was called with empty bronze_paths
+        assert len(write_calls) == 1
+        metadata = write_calls[0]["metadata"]
+        lineage = metadata.lineage
+        assert lineage.bronze_paths == []

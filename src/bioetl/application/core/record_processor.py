@@ -104,8 +104,8 @@ class RecordProcessor:
         """Process batch through Bronze -> Silver -> Gold with tracing."""
         ingestion_ts = self._context.started_at
 
-        # Write to Bronze
-        await self._execute_with_span(
+        # Write to Bronze and capture result for lineage tracking (REQ-LINEAGE-001)
+        bronze_result = await self._execute_with_span(
             "write_bronze",
             self._writer.write_bronze(records, batch_id, ingestion_ts),
             batch_id,
@@ -127,12 +127,16 @@ class RecordProcessor:
         )
         self._batch_metrics.track_processed_records("gold", len(result.gold_records))
 
-        # Write to Silver
+        # Write to Silver with bronze_refs for lineage tracking (REQ-LINEAGE-001)
+        bronze_refs = [bronze_result] if bronze_result else None
         if result.silver_records:
             await self._execute_with_span(
                 "write_silver",
                 self._writer.write_silver(
-                    result.silver_records, batch_id, ingestion_ts
+                    result.silver_records,
+                    batch_id,
+                    ingestion_ts,
+                    bronze_refs=bronze_refs,
                 ),
                 batch_id,
                 len(result.silver_records),
