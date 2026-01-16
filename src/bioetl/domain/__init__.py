@@ -57,16 +57,25 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     ChemblPublicationRecord,
     ChemblPublicationTermRecord,
     CompoundRecord,
+    # CrossRef (current + deprecated alias)
+    CrossRefPublicationEntity,
     DocumentSimilarity,
     DocumentTerm,
     Molecule,
     MoleculeRecord,
+    # OpenAlex
+    OpenAlexPublicationEntity,
     ProteinClassification,
     PubchemMolecule,
     PubchemMoleculeRecord,
-    Publication,
-    PublicationEntity,
+    # PubMed (current + deprecated alias)
+    PubMedPublicationEntity,
+    Publication,  # Deprecated alias for PubMedPublicationEntity
+    PublicationEntity,  # Deprecated alias for CrossRefPublicationEntity
+    # Publication Base (for composite pipelines, ADR-024)
+    PublicationEntityBase,
     PublicationRecord,
+    # SemanticScholar
     SemanticScholarPublicationEntity,
     Target,
     TargetComponent,
@@ -331,13 +340,22 @@ __all__ = [
     "CellLine",
     "ChemblPublication",
     "CompoundRecord",
+    # CrossRef (current + deprecated alias)
+    "CrossRefPublicationEntity",
     "DocumentSimilarity",
     "DocumentTerm",
     "Molecule",
+    # OpenAlex
+    "OpenAlexPublicationEntity",
     "ProteinClassification",
     "PubchemMolecule",
-    "Publication",
-    "PublicationEntity",
+    # PubMed (current + deprecated alias)
+    "PubMedPublicationEntity",
+    "Publication",  # Deprecated alias for PubMedPublicationEntity
+    "PublicationEntity",  # Deprecated alias for CrossRefPublicationEntity
+    # Publication Base (for composite pipelines, ADR-024)
+    "PublicationEntityBase",
+    # SemanticScholar
     "SemanticScholarPublicationEntity",
     "Target",
     "TargetComponent",

@@ -14,6 +14,9 @@ Terminology:
 - OpenAlex API term "Work" is mapped to "Publication" for Ubiquitous Language
 
 Used for batch DOI resolution and publication metadata enrichment.
+
+Note: OpenAlexPublicationEntity inherits common fields from PublicationEntityBase.
+Provider-specific fields (openalex_id, concepts) are defined here.
 """
 
 from __future__ import annotations
@@ -23,7 +26,7 @@ from dataclasses import dataclass, field
 from pydantic import BaseModel, ConfigDict
 from pydantic import Field as PydanticField
 
-from bioetl.domain.entities.base import BaseEntity
+from bioetl.domain.entities.publication_base import PublicationEntityBase
 
 # Document type mapping from OpenAlex types to internal types
 OPENALEX_TYPE_MAP = {
@@ -156,89 +159,45 @@ class OpenAlexPublicationRecord(BaseModel):
 
 
 @dataclass(frozen=True, kw_only=True)
-class OpenAlexPublicationEntity(BaseEntity):
+class OpenAlexPublicationEntity(PublicationEntityBase):
     """Represents a scholarly publication from OpenAlex.
 
     Domain entity with lineage fields (run_id, content_hash, etc.).
+    Inherits common publication fields from PublicationEntityBase.
     For DTO without lineage, use OpenAlexPublicationRecord.
 
     Terminology:
     - Uses "Publication" instead of OpenAlex API term "Work" for Ubiquitous Language
     - Business analysts can understand the model without knowing OpenAlex API specifics
 
-    Attributes:
-        openalex_id: OpenAlex Work ID (e.g., W2148763428).
-        doi: Digital Object Identifier (normalized: lowercase, stripped).
-        title: Publication title.
-        abstract: Publication abstract (reconstructed from inverted index).
-        authors: JSON-serialized list of hashed author names (PII compliance).
-        journal: Source name (journal/venue).
-        issn: ISSN-L identifier.
-        publisher: Host organization name.
-        year: Publication year.
-        publication_date: Publication date (YYYY-MM-DD).
-        doc_type: Document type (PUBLICATION, PREPRINT, etc.).
-        is_oa: Whether the work is Open Access.
-        oa_status: OA status (gold, green, hybrid, bronze, closed).
-        citation_count: Number of citations (from OpenAlex cited_by_count).
+    Inherited from PublicationEntityBase:
+        doi, pmid, title, abstract, authors, journal, issn, publisher,
+        year, publication_date, citation_count, doc_type, language, is_oa,
+        oa_status, _lookup_method, _original_doi, source.
+
+    OpenAlex-specific Attributes:
+        openalex_id: OpenAlex Work ID (e.g., W2148763428). REQUIRED.
         concepts: Top concept names from OpenAlex.
-        language: Publication language code.
-        _lookup_method: How record was resolved (doi, title_fallback, title_only).
-        _original_doi: Original DOI from input CSV (for fallback records).
-        source: Data source identifier (default: "openalex").
+
+    Note: openalex_id is required for OpenAlex publications.
 
     See: https://docs.openalex.org/api-entities/works
     """
 
-    # Primary identifier (OpenAlex Work ID)
+    # Primary identifier (OpenAlex Work ID) - REQUIRED
     openalex_id: str
 
-    # DOI (may be None for some works)
-    doi: str | None = None
-
-    # Core metadata
-    title: str | None = None
-    abstract: str | None = None
-
-    # Authors (JSON-serialized list of hashed names for PII compliance)
-    authors: str | None = None
-
-    # Journal information
-    journal: str | None = None
-    issn: str | None = None
-    publisher: str | None = None
-
-    # Dates
-    year: int | None = None
-    publication_date: str | None = None
-
-    # Document type (mapped from OpenAlex type)
-    doc_type: str = "PUBLICATION"
-
-    # Open Access status
-    is_oa: bool | None = None
-    oa_status: str | None = None
-
-    # Citation metrics
-    # OpenAlex source field: cited_by_count
-    # Unified BioETL field: citation_count (standardized across all providers)
-    citation_count: int | None = None
-
-    # Concepts (top-level only)
+    # OpenAlex-specific: Concepts (top-level only)
     concepts: list[str] = field(default_factory=list)
 
-    # Additional metadata
-    language: str | None = None
-
-    # Lookup metadata (from adapter)
-    _lookup_method: str = "unknown"
-    _original_doi: str | None = None
-
-    # Source tracking
+    # Override: Default source for OpenAlex
     source: str = "openalex"
 
     def __post_init__(self) -> None:
-        """Post-initialization validation."""
+        """Post-initialization validation.
+
+        Validates that openalex_id is provided (required for OpenAlex publications).
+        """
         super().__post_init__()
         if not self.openalex_id:
             raise ValueError("OpenAlex Publication ID is required")
