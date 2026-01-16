@@ -113,7 +113,7 @@ class TestBronzeWriter:
         # Note: BronzeWriter returns relative path without 'bronze/' prefix (base_path already contains it)
         # Normalize path separators for cross-platform compatibility
         expected_path = "v1/test_provider/test_entity/2023-01-01/batch_12345678-1234-5678-1234-567812345678.jsonl.zst"
-        assert str(result.relative_path).replace("\\", "/") == expected_path
+        assert result.relative_path.replace("\\", "/") == expected_path
 
     async def test_write_bronze_compresses_with_zstd(self, tmp_path, noop_logger):
         """REQ-DATA-001: Test that data is compressed with zstandard."""

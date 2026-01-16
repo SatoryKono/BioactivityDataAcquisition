@@ -132,6 +132,7 @@ from bioetl.domain.value_objects.publications import (
     DOI,
     PubMedId,
 )
+from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.domain.value_objects.taxonomy_id import (
     TaxonomyId,
     validate_taxonomy_id,
@@ -195,6 +196,7 @@ __all__ = [
     "RecordCountResult",
     "ReferentialIntegrityResult",
     "RelationOperator",
+    "RunContext",
     "SCDIntegrityResult",
     "SchemaDriftInfo",
     "SchemaDriftResult",

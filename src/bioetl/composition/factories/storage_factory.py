@@ -26,6 +26,7 @@ from .storage_adapter import StorageAdapter
 if TYPE_CHECKING:
     from typing import Any
 
+    from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -94,6 +95,7 @@ class StorageFactory:
         logger: LoggerPort,
         metrics: MetricsPort,
         tracing: TracingPort | None,
+        metadata_coordinator: MetadataCoordinator | None = None,
     ) -> StorageAdapter:
         """Create StorageAdapter with all writers configured.
 
@@ -132,6 +134,7 @@ class StorageFactory:
                 json_path=json_path,
                 metadata_writer=bronze_metadata_writer,
                 save_metadata=bronze_save_metadata,
+                metadata_coordinator=metadata_coordinator,
             ),
             silver_writer=SilverWriter(
                 base_path=silver_path,
@@ -139,6 +142,7 @@ class StorageFactory:
                 tracing=effective_tracing,
                 csv_exporter=silver_csv_exporter,
                 metadata_writer=silver_metadata_writer,
+                metadata_coordinator=metadata_coordinator,
             ),
             gold_writer=GoldWriter(
                 base_path=gold_path,
@@ -146,6 +150,7 @@ class StorageFactory:
                 tracing=effective_tracing,
                 csv_exporter=gold_csv_exporter,
                 metadata_writer=gold_metadata_writer,
+                metadata_coordinator=metadata_coordinator,
             ),
         )
 
@@ -156,6 +161,7 @@ class StorageFactory:
         logger: LoggerPort,
         metrics: MetricsPort,
         tracing: TracingPort | None = None,
+        metadata_coordinator: MetadataCoordinator | None = None,
     ) -> StorageContext:
         """Create a StorageAdapter for local deployment.
 
@@ -165,6 +171,9 @@ class StorageFactory:
             logger: Structured logger
             metrics: Metrics port for Bronze observability (MUST be injected).
             tracing: Optional TracingPort for distributed tracing.
+            metadata_coordinator: Optional MetadataCoordinator for centralized
+                                metadata creation. If provided, ensures consistent
+                                run_id and timestamps across Bronze, Silver, Gold.
 
         Returns:
             StorageContext with adapter and paths
@@ -229,6 +238,7 @@ class StorageFactory:
             logger=logger,
             metrics=metrics,
             tracing=tracing,
+            metadata_coordinator=metadata_coordinator,
         )
 
         return StorageContext(
