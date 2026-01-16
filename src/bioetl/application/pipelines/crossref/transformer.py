@@ -19,13 +19,18 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
-from bioetl.domain.entities.crossref import CROSSREF_TYPE_MAP, CrossRefPublicationEntity
-from bioetl.domain.normalization import (
-    extract_first_string,
-    parse_page_range,
+from bioetl.application.pipelines.crossref.extractors import (
+    extract_authors,
+    extract_dates,
+    extract_journal_info,
+    extract_license_url,
+    extract_page_info,
+    extract_year,
 )
+from bioetl.domain.entities.crossref import CROSSREF_TYPE_MAP, CrossRefPublicationEntity
+from bioetl.domain.normalization import extract_first_string
 from bioetl.domain.services import IdentityService
-from bioetl.domain.value_objects import DOI, PublicationYear
+from bioetl.domain.value_objects import DOI
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -89,85 +94,11 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             data_normalizer=data_normalizer,
         )
 
-    # ========================================================================
-    # Field Extraction Methods (Orchestration - delegates to domain)
-    # ========================================================================
-
-    @staticmethod
-    def _extract_authors(publication: dict[str, Any]) -> list[str]:
-        """Extract author names in 'given family' format.
-
-        This is CrossRef-specific extraction logic (not generic normalization).
-
-        Args:
-            publication: CrossRef publication record.
-
-        Returns:
-            List of author names.
-
-        """
-        authors = []
-        for author in publication.get("author", []):
-            given = author.get("given", "").strip()
-            family = author.get("family", "").strip()
-            if given and family:
-                authors.append(f"{given} {family}")
-            elif family:
-                authors.append(family)
-            elif given:
-                authors.append(given)
-        return authors
-
-    @staticmethod
-    def _extract_year(publication: dict[str, Any]) -> int | None:
-        """Extract publication year from date-parts.
-
-        Tries published-print, then published-online, then issued.
-        Validates using PublicationYear Value Object for consistent range checking.
-
-        Args:
-            publication: CrossRef publication record.
-
-        Returns:
-            Publication year or None.
-
-        """
-        for date_field in ["published-print", "published-online", "issued"]:
-            date_info = publication.get(date_field, {})
-            date_parts = date_info.get("date-parts", [[]])
-            if date_parts and date_parts[0] and len(date_parts[0]) > 0:
-                raw_year = date_parts[0][0]
-                if isinstance(raw_year, int):
-                    year_vo = PublicationYear.from_raw(raw_year)
-                    if year_vo:
-                        return year_vo.value
-        return None
-
-    @staticmethod
-    def _extract_license_url(publication: dict[str, Any]) -> str | None:
-        """Extract license URL from publication.
-
-        Args:
-            publication: CrossRef publication record.
-
-        Returns:
-            First license URL or None.
-
-        """
-        licenses = publication.get("license", [])
-        if licenses and len(licenses) > 0:
-            url: str | None = licenses[0].get("URL")
-            return url
-        return None
-
-    # ========================================================================
-    # Main Transformation
-    # ========================================================================
-
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
         """Extract Publication business data from bronze record.
 
-        Delegates normalization to DataNormalizationService per DI pattern.
+        Delegates field extraction to extractors module and normalization
+        to DataNormalizationService per DI pattern.
 
         Args:
             record: Raw Bronze record from CrossRef API.
@@ -184,21 +115,19 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         doi_vo = DOI.from_raw(rec.get("DOI"))
         doi = str(doi_vo) if doi_vo else ""
 
-        # Use DataNormalizationService for other normalization tasks
-        normalizer = self._data_normalizer
-        first_page, last_page = parse_page_range(rec.get("page"))
-
-        # Extract date fields using normalizer service
-        published_print = rec.get("published-print", {})
-        published_online = rec.get("published-online", {})
+        # Use extractors for structured field extraction
+        journal_info = extract_journal_info(rec)
+        page_info = extract_page_info(rec)
+        dates = extract_dates(rec)
 
         # Extract abstract with HTML stripping via normalizer service
+        normalizer = self._data_normalizer
         abstract_raw = rec.get("abstract", "")
         abstract = normalizer.strip_html_tags(abstract_raw) if abstract_raw else None
 
         # Extract and hash PII fields (RULES.md §5.4)
         # Authors stored as JSON-serialized list for unified format across providers
-        raw_authors = self._extract_authors(rec)
+        raw_authors = extract_authors(rec)
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
         return {
@@ -206,29 +135,15 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "title": extract_first_string(rec.get("title", [])),
             "abstract": abstract,
             "authors": self.serialize_json_list(hashed_authors),
-            "journal": extract_first_string(rec.get("container-title", [])),
-            "issn": rec.get("ISSN", []),
-            "publisher": rec.get("publisher"),
-            "volume": rec.get("volume"),
-            "issue": rec.get("issue"),
-            "first_page": first_page,
-            "last_page": last_page,
-            "year": self._extract_year(rec),
-            "published_print": normalizer.format_date_parts(
-                published_print.get("date-parts")
-                if isinstance(published_print, dict)
-                else None
-            ),
-            "published_online": normalizer.format_date_parts(
-                published_online.get("date-parts")
-                if isinstance(published_online, dict)
-                else None
-            ),
+            **journal_info,
+            **page_info,
+            **dates,
+            "year": extract_year(rec),
             "doc_type": CROSSREF_TYPE_MAP.get(rec.get("type", ""), "PUBLICATION"),
             "citation_count": rec.get("is-referenced-by-count"),
             "reference_count": rec.get("references-count"),
             "language": rec.get("language"),
-            "license_url": self._extract_license_url(rec),
+            "license_url": extract_license_url(rec),
             "subjects": rec.get("subject", []),
             "source": "crossref",
         }
