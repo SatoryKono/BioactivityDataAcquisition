@@ -48,6 +48,7 @@ __all__ = [
     "get_quarantine_service",
     "get_quarantine_store",
     "get_bronze_cleanup_service",
+    "get_export_service",
     "get_vacuum_service",
     # Maintenance operations
     "vacuum_table",
@@ -64,6 +65,7 @@ from bioetl.composition._bootstrap import (
     bootstrap_bronze_cleanup_service,
     bootstrap_checkpoint_service,
     bootstrap_config_service,
+    bootstrap_export_service,
     bootstrap_health_server_dependencies,
     bootstrap_health_service,
     bootstrap_lock_service,
@@ -96,6 +98,7 @@ if TYPE_CHECKING:
         CheckpointService,
         CleanupResult,
         ConfigService,
+        ExportService,
         HealthService,
         MetricsService,
         PipelineRunnerService,
@@ -541,6 +544,25 @@ def get_vacuum_service() -> VacuumService:
     """
     _ensure_registrations()
     return bootstrap_vacuum_service()
+
+
+def get_export_service() -> ExportService:
+    """Get an export service for exporting Delta Lake tables.
+
+    Used for exporting Silver/Gold Delta tables to CSV, XLSX, and TSV formats.
+    This is the recommended way to export tables from CLI.
+
+    Returns:
+        ExportService instance.
+
+    Example:
+        >>> service = get_export_service()
+        >>> tables = service.list_tables(layer="silver")
+        >>> result = await service.export("chembl.activity", layer="silver")
+        >>> logger.info("export_complete", output=result.output_path)
+    """
+    _ensure_registrations()
+    return bootstrap_export_service()
 
 
 def get_lock_service() -> LockService:

@@ -29,6 +29,14 @@ from bioetl.application.services.config_service import (
     SettingsInfo,
 )
 from bioetl.application.services.data_quality_service import DataQualityService
+from bioetl.application.services.export_service import (
+    ColumnInfo,
+    ExportOptions,
+    ExportResult,
+    ExportService,
+    TableInfo,
+    TablePreview,
+)
 from bioetl.application.services.health_service import (
     HealthCheckSummary,
     HealthResult,
@@ -78,8 +86,12 @@ __all__ = [
     "CheckpointService",
     "CleanupResult",
     "ClearResult",
+    "ColumnInfo",
     "ConfigService",
     "DataQualityService",
+    "ExportOptions",
+    "ExportResult",
+    "ExportService",
     "HealthCheckSummary",
     "HealthResult",
     "HealthService",
@@ -104,6 +116,8 @@ __all__ = [
     "ShutdownService",
     "StartResult",
     "TableCollectorPort",
+    "TableInfo",
+    "TablePreview",
     "TableVacuumResult",
     "VacuumAllResult",
     "VacuumService",

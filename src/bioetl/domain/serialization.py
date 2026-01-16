@@ -24,7 +24,10 @@ Usage:
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    import pyarrow as pa
 
 # Try importing orjson for high-performance JSON serialization
 try:
@@ -207,8 +210,67 @@ def is_orjson_available() -> bool:
     return _ORJSON_AVAILABLE
 
 
+def flatten_arrow_table_for_export(table: pa.Table) -> pa.Table:
+    """Convert complex PyArrow types (list, struct) to JSON strings for export.
+
+    This function prepares Arrow tables for export to formats that don't support
+    complex nested types (CSV, TSV, XLSX). List and struct columns are serialized
+    to JSON strings.
+
+    Args:
+        table: PyArrow Table with potentially complex types.
+
+    Returns:
+        PyArrow Table with complex types converted to JSON strings.
+
+    Example:
+        >>> import pyarrow as pa
+        >>> table = pa.table({"ids": [[1, 2], [3]], "name": ["a", "b"]})
+        >>> flat = flatten_arrow_table_for_export(table)
+        >>> flat.column("ids").to_pylist()
+        ['[1,2]', '[3]']
+    """
+    import pyarrow as pa
+
+    def is_complex_type(field_type: pa.DataType) -> bool:
+        """Check if a PyArrow type is complex (list or struct)."""
+        return bool(
+            pa.types.is_list(field_type)
+            or pa.types.is_large_list(field_type)
+            or pa.types.is_struct(field_type)
+        )
+
+    def serialize_column_to_json(col: pa.ChunkedArray) -> pa.Array:
+        """Serialize a column of complex values to JSON strings."""
+        vals = [
+            serialize_to_json(v.as_py()) if v.as_py() is not None else None for v in col
+        ]
+        return pa.array(vals, type=pa.string())
+
+    new_columns = []
+    for i, field in enumerate(table.schema):
+        col = table.column(i)
+        if is_complex_type(field.type):
+            new_columns.append(serialize_column_to_json(col))
+        else:
+            new_columns.append(col)
+
+    new_schema = pa.schema(
+        [
+            pa.field(
+                f.name,
+                pa.string() if is_complex_type(f.type) else f.type,
+                f.nullable,
+            )
+            for f in table.schema
+        ]
+    )
+    return pa.Table.from_arrays(new_columns, schema=new_schema)
+
+
 __all__ = [
     "deserialize_from_json",
+    "flatten_arrow_table_for_export",
     "is_orjson_available",
     "serialize_to_json",
     "serialize_to_json_canonical",

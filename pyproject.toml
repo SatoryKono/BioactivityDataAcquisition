@@ -53,6 +53,10 @@ performance = [
     # Explicit performance extra to ensure optional installs include optimized JSON
     "orjson>=3.11.0,<4.0",
 ]
+export = [
+    # Excel export support (required for XLSX format)
+    "openpyxl>=3.1",
+]
 tests = [
     # Testing frameworks
     "pytest>=8.0",
