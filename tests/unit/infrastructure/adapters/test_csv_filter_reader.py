@@ -299,3 +299,297 @@ class TestCsvFilterReaderLogging:
 
         assert result.has_duplicates is True
         assert result.unique_count == 3
+
+
+@pytest.mark.unit
+class TestCsvFilterReaderLoadFilterWithFallback:
+    """Tests for CsvFilterReader.load_filter_with_fallback method."""
+
+    @pytest.fixture
+    def csv_with_fallback_data(self):
+        """Create a CSV file with primary and fallback columns."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+            f.write("doi,title,author\n")
+            f.write("10.1000/abc123,First Paper Title,Author A\n")
+            f.write("10.1000/def456,Second Paper Title,Author B\n")
+            f.write("10.1000/ghi789,Third Paper Title,Author C\n")
+            f.write("10.1000/abc123,Duplicate DOI Title,Author D\n")  # Duplicate
+            path = f.name
+        yield path
+        Path(path).unlink(missing_ok=True)
+
+    async def test_load_filter_with_fallback_returns_tuple(
+        self, csv_reader, csv_with_fallback_data
+    ):
+        """Test that load_filter_with_fallback returns tuple of result and mapping."""
+        result, mapping = await csv_reader.load_filter_with_fallback(
+            csv_with_fallback_data, "doi", "title"
+        )
+
+        assert isinstance(result, FilterLoadResult)
+        assert isinstance(mapping, dict)
+
+    async def test_load_filter_with_fallback_loads_primary_ids(
+        self, csv_reader, csv_with_fallback_data
+    ):
+        """Test that load_filter_with_fallback loads primary IDs correctly."""
+        result, _ = await csv_reader.load_filter_with_fallback(
+            csv_with_fallback_data, "doi", "title"
+        )
+
+        assert result.unique_count == 3
+        assert "10.1000/abc123" in result.ids
+        assert "10.1000/def456" in result.ids
+        assert "10.1000/ghi789" in result.ids
+
+    async def test_load_filter_with_fallback_builds_mapping(
+        self, csv_reader, csv_with_fallback_data
+    ):
+        """Test that load_filter_with_fallback builds correct fallback mapping."""
+        _, mapping = await csv_reader.load_filter_with_fallback(
+            csv_with_fallback_data, "doi", "title"
+        )
+
+        # Mapping is keyed by unique primary IDs, so 3 entries (not 4)
+        assert len(mapping) == 3
+        # The last value for duplicate key wins
+        assert mapping["10.1000/abc123"] == "Duplicate DOI Title"
+        assert mapping["10.1000/def456"] == "Second Paper Title"
+        assert mapping["10.1000/ghi789"] == "Third Paper Title"
+
+    async def test_load_filter_with_fallback_reports_duplicates(
+        self, csv_reader, csv_with_fallback_data
+    ):
+        """Test that load_filter_with_fallback reports duplicates."""
+        result, _ = await csv_reader.load_filter_with_fallback(
+            csv_with_fallback_data, "doi", "title"
+        )
+
+        assert result.has_duplicates is True
+        assert result.duplicate_count == 1
+        assert "10.1000/abc123" in result.duplicates
+
+    async def test_load_filter_with_fallback_missing_fallback_column(
+        self, csv_reader_with_logger, mock_logger, csv_with_fallback_data
+    ):
+        """Test behavior when fallback column is missing."""
+        result, mapping = await csv_reader_with_logger.load_filter_with_fallback(
+            csv_with_fallback_data, "doi", "nonexistent_column"
+        )
+
+        assert result.unique_count == 3  # Primary IDs still loaded
+        assert len(mapping) == 0  # Empty mapping when column missing
+        mock_logger.warning.assert_called()
+        call_args = mock_logger.warning.call_args
+        assert call_args[0][0] == "fallback_column_not_found"
+
+    async def test_load_filter_with_fallback_logs_success(
+        self, csv_reader_with_logger, mock_logger, csv_with_fallback_data
+    ):
+        """Test that successful loading logs info message."""
+        await csv_reader_with_logger.load_filter_with_fallback(
+            csv_with_fallback_data, "doi", "title"
+        )
+
+        mock_logger.info.assert_called()
+        call_args = mock_logger.info.call_args
+        assert call_args[0][0] == "fallback_mapping_loaded"
+        # Mapping count is 3 (unique keys), not 4 (total rows)
+        assert call_args[1]["mapping_count"] == 3
+
+    async def test_load_filter_with_fallback_handles_empty_values(self, csv_reader):
+        """Test that empty primary/fallback values are handled."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+            f.write("doi,title\n")
+            f.write("10.1000/valid,Valid Title\n")
+            f.write(",Empty DOI\n")  # Empty primary
+            f.write("10.1000/notitle,\n")  # Empty fallback
+            path = f.name
+
+        try:
+            result, mapping = await csv_reader.load_filter_with_fallback(
+                path, "doi", "title"
+            )
+
+            # Empty DOI should be excluded from IDs
+            assert "" not in result.ids
+            # Mapping should only include rows with both values
+            assert "10.1000/valid" in mapping
+            assert "10.1000/notitle" not in mapping  # No fallback value
+        finally:
+            Path(path).unlink(missing_ok=True)
+
+
+@pytest.mark.unit
+class TestCsvFilterReaderLoadMultiColumnFilter:
+    """Tests for CsvFilterReader.load_multi_column_filter method."""
+
+    @pytest.fixture
+    def multi_column_csv(self):
+        """Create a CSV file with multiple filter columns."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+            f.write("target_id,assay_id,compound_id\n")
+            f.write("T001,A001,C001\n")
+            f.write("T001,A002,C002\n")
+            f.write("T002,A001,C003\n")
+            f.write("T002,A003,C001\n")
+            path = f.name
+        yield path
+        Path(path).unlink(missing_ok=True)
+
+    async def test_load_multi_column_filter_returns_filter_load_result(
+        self, csv_reader, multi_column_csv
+    ):
+        """Test that load_multi_column_filter returns FilterLoadResult."""
+        from bioetl.domain.filtering import FilterColumn
+
+        columns = [
+            FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
+            FilterColumn(column_name="assay_id", filter_field="assay_chembl_id"),
+        ]
+
+        result = await csv_reader.load_multi_column_filter(multi_column_csv, columns)
+
+        assert isinstance(result, FilterLoadResult)
+
+    async def test_load_multi_column_filter_extracts_column_ids(
+        self, csv_reader, multi_column_csv
+    ):
+        """Test that load_multi_column_filter extracts unique IDs per column."""
+        from bioetl.domain.filtering import FilterColumn
+
+        columns = [
+            FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
+            FilterColumn(column_name="assay_id", filter_field="assay_chembl_id"),
+        ]
+
+        result = await csv_reader.load_multi_column_filter(multi_column_csv, columns)
+
+        assert "target_chembl_id" in result.column_ids
+        assert "assay_chembl_id" in result.column_ids
+        assert set(result.column_ids["target_chembl_id"]) == {"T001", "T002"}
+        assert set(result.column_ids["assay_chembl_id"]) == {"A001", "A002", "A003"}
+
+    async def test_load_multi_column_filter_builds_valid_combinations(
+        self, csv_reader, multi_column_csv
+    ):
+        """Test that load_multi_column_filter builds valid row combinations."""
+        from bioetl.domain.filtering import FilterColumn
+
+        columns = [
+            FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
+            FilterColumn(column_name="assay_id", filter_field="assay_chembl_id"),
+        ]
+
+        result = await csv_reader.load_multi_column_filter(multi_column_csv, columns)
+
+        assert result.valid_combinations is not None
+        assert len(result.valid_combinations) == 4
+        assert ("T001", "A001") in result.valid_combinations
+        assert ("T001", "A002") in result.valid_combinations
+        assert ("T002", "A001") in result.valid_combinations
+        assert ("T002", "A003") in result.valid_combinations
+        # Invalid combination should not be present
+        assert ("T001", "A003") not in result.valid_combinations
+
+    async def test_load_multi_column_filter_sets_filter_fields(
+        self, csv_reader, multi_column_csv
+    ):
+        """Test that load_multi_column_filter sets filter_fields tuple."""
+        from bioetl.domain.filtering import FilterColumn
+
+        columns = [
+            FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
+            FilterColumn(column_name="assay_id", filter_field="assay_chembl_id"),
+        ]
+
+        result = await csv_reader.load_multi_column_filter(multi_column_csv, columns)
+
+        assert result.filter_fields == ("target_chembl_id", "assay_chembl_id")
+
+    async def test_load_multi_column_filter_sets_total_count(
+        self, csv_reader, multi_column_csv
+    ):
+        """Test that load_multi_column_filter sets total_count correctly."""
+        from bioetl.domain.filtering import FilterColumn
+
+        columns = [
+            FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
+        ]
+
+        result = await csv_reader.load_multi_column_filter(multi_column_csv, columns)
+
+        assert result.total_count == 4  # 4 rows in the CSV
+
+    async def test_load_multi_column_filter_handles_empty_values(self, csv_reader):
+        """Test that load_multi_column_filter handles rows with empty values."""
+        from bioetl.domain.filtering import FilterColumn
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+            f.write("target_id,assay_id\n")
+            f.write("T001,A001\n")
+            f.write(",A002\n")  # Empty target
+            f.write("T002,\n")  # Empty assay
+            f.write("T003,A003\n")
+            path = f.name
+
+        try:
+            columns = [
+                FilterColumn(column_name="target_id", filter_field="target"),
+                FilterColumn(column_name="assay_id", filter_field="assay"),
+            ]
+
+            result = await csv_reader.load_multi_column_filter(path, columns)
+
+            # Valid combinations should exclude rows with empty values
+            assert len(result.valid_combinations) == 2
+            assert ("T001", "A001") in result.valid_combinations
+            assert ("T003", "A003") in result.valid_combinations
+        finally:
+            Path(path).unlink(missing_ok=True)
+
+    async def test_load_multi_column_filter_logs_info(
+        self, csv_reader_with_logger, mock_logger, multi_column_csv
+    ):
+        """Test that load_multi_column_filter logs info message."""
+        from bioetl.domain.filtering import FilterColumn
+
+        columns = [
+            FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
+            FilterColumn(column_name="assay_id", filter_field="assay_chembl_id"),
+        ]
+
+        await csv_reader_with_logger.load_multi_column_filter(multi_column_csv, columns)
+
+        mock_logger.info.assert_called()
+        call_args = mock_logger.info.call_args
+        assert call_args[0][0] == "multi_column_filter_loaded"
+        assert call_args[1]["total_rows"] == 4
+        assert call_args[1]["valid_combinations"] == 4
+
+    async def test_load_multi_column_filter_no_logger(
+        self, csv_reader, multi_column_csv
+    ):
+        """Test that load_multi_column_filter works without logger."""
+        from bioetl.domain.filtering import FilterColumn
+
+        columns = [
+            FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
+        ]
+
+        # Should not raise any exception
+        result = await csv_reader.load_multi_column_filter(multi_column_csv, columns)
+        assert result.total_count == 4
+
+    async def test_load_multi_column_filter_column_not_found(
+        self, csv_reader, multi_column_csv
+    ):
+        """Test that load_multi_column_filter raises for missing column."""
+        from bioetl.domain.filtering import FilterColumn
+
+        columns = [
+            FilterColumn(column_name="nonexistent", filter_field="field"),
+        ]
+
+        with pytest.raises(ValueError, match="Column 'nonexistent' not found"):
+            await csv_reader.load_multi_column_filter(multi_column_csv, columns)

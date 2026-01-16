@@ -341,8 +341,9 @@ def test_no_orphan_directories(src_dir: Path) -> None:
     )
 
 
+@pytest.mark.slow
 def test_dead_code_vulture(src_dir: Path) -> None:
-    """Detect dead code using vulture static analysis.
+    """Detect dead code using vulture static analysis (slow).
 
     REQ-ARCH-013: No unused code should exist in the codebase.
     """
