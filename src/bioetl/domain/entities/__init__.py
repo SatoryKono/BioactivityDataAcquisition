@@ -50,7 +50,14 @@ from bioetl.domain.entities.chembl_structures import (
 )
 
 # CrossRef DTO + Entity
-from bioetl.domain.entities.crossref import PublicationEntity, PublicationRecord
+from bioetl.domain.entities.crossref import (
+    CrossRefPublicationEntity,
+    PublicationEntity,  # Deprecated alias
+    PublicationRecord,
+)
+
+# OpenAlex Entity
+from bioetl.domain.entities.openalex import OpenAlexPublicationEntity
 
 # PubChem DTO + Entity
 from bioetl.domain.entities.pubchem import (
@@ -58,8 +65,15 @@ from bioetl.domain.entities.pubchem import (
     PubchemMoleculeRecord,
 )
 
+# Publication Base (for type hints in composite pipelines)
+from bioetl.domain.entities.publication_base import PublicationEntityBase
+
 # PubMed DTO + Entity
-from bioetl.domain.entities.pubmed import ArticleRecord, Publication
+from bioetl.domain.entities.pubmed import (
+    ArticleRecord,
+    Publication,  # Deprecated alias
+    PubMedPublicationEntity,
+)
 
 # Semantic Scholar Entity
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
@@ -82,15 +96,19 @@ __all__ = [
     "ChemblPublicationRecord",
     "ChemblPublicationTermRecord",
     "CompoundRecord",
+    "CrossRefPublicationEntity",
     "DocumentSimilarity",
     "DocumentTerm",
     "Molecule",
     "MoleculeRecord",
+    "OpenAlexPublicationEntity",
     "ProteinClassification",
+    "PubMedPublicationEntity",
     "PubchemMolecule",
     "PubchemMoleculeRecord",
     "Publication",
     "PublicationEntity",
+    "PublicationEntityBase",
     "PublicationRecord",
     "SemanticScholarPublicationEntity",
     "Target",
