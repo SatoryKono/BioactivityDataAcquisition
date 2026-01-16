@@ -21,6 +21,7 @@ from bioetl.domain.types import (
     RunID,
     RunType,
 )
+from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
 
 @runtime_checkable
@@ -42,7 +43,7 @@ class StoragePort(Protocol):
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
-    ) -> str:
+    ) -> BronzeWriteResult:
         """Write raw records to the Bronze layer.
 
         Args:
@@ -57,7 +58,8 @@ class StoragePort(Protocol):
                          (single source of time per ADR-014). Required.
 
         Returns:
-            str: Relative path to the written file.
+            BronzeWriteResult: Result containing path, record count, sizes,
+                and checksum for downstream lineage tracking.
 
         Note:
             Lock validation is performed at Application layer (BatchWriter)
@@ -74,6 +76,7 @@ class StoragePort(Protocol):
         mode: Literal["merge", "append", "delete"] = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        bronze_refs: list[BronzeWriteResult] | None = None,
     ) -> None:
         """Write transformed records to the Silver layer.
 
@@ -88,6 +91,9 @@ class StoragePort(Protocol):
                 - 'error': Raise SchemaEvolutionError (default)
                 - 'evolve': Allow schema evolution (add new columns)
                 - 'ignore': Proceed without changes (filter to existing schema)
+            bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
+                If provided, bronze_paths will be populated in Silver metadata
+                for complete lineage tracking (REQ-LINEAGE-001).
 
         Raises:
             SchemaEvolutionError: If schema drift detected and on_schema_mismatch='error'
