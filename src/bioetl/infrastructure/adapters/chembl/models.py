@@ -598,12 +598,6 @@ class ChemblStatusResponse(BaseModel):
     chembl_release_date: str | None = Field(default=None)
 
 
-# === Deprecated Aliases (ADR-024 backward compatibility) ===
-# Will be removed in v3.0
-ChemblDocumentRecord = ChemblPublicationRecord
-ChemblDocumentResponse = ChemblPublicationResponse
-
-
 # === Response Type Mapping ===
 
 # Mapping from entity type to response class for factory usage

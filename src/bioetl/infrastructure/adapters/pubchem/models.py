@@ -221,12 +221,6 @@ class PubChemBioactivityRecord(BaseModel):
     )
 
 
-# === Deprecated Aliases (ADR-024 backward compatibility) ===
-# Will be removed in v3.0
-PubChemCompoundRecord = PubchemMoleculeRecord
-PubChemCompoundDetailRecord = PubchemMoleculeDetailRecord
-
-
 # === Record Type Mapping ===
 
 # Mapping from entity type to record model
