@@ -28,7 +28,7 @@ from typing import TYPE_CHECKING, Any
 import pubchempy as pcp
 from pydantic import BaseModel
 
-from bioetl.domain.entities.pubchem import PubChemCompoundRecord
+from bioetl.domain.entities.pubchem import PubchemMoleculeRecord
 from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.filterable_mixin import FilterableStubMixin
@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 
 # Mapping from entity_type to DTO model class
 PUBCHEM_DTO_MODELS: dict[str, type[BaseModel]] = {
-    "compound": PubChemCompoundRecord,
+    "compound": PubchemMoleculeRecord,
 }
 
 
