@@ -57,6 +57,7 @@ if TYPE_CHECKING:
         SilverValidatorPort,
         TracingPort,
     )
+    from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
@@ -440,6 +441,7 @@ class SilverWriter(BaseDeltaWriter):
         mode: str = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        bronze_refs: list[BronzeWriteResult] | None = None,
     ) -> None:
         """Write normalized records to Silver layer (Delta Lake merge/upsert).
 
@@ -454,6 +456,9 @@ class SilverWriter(BaseDeltaWriter):
                 - 'error': Raise SchemaEvolutionError (default)
                 - 'evolve': Allow schema evolution (add new columns)
                 - 'ignore': Proceed without changes (filter to existing schema)
+            bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
+                If provided, bronze_paths will be populated in Silver metadata
+                for complete lineage tracking (REQ-LINEAGE-001).
 
         Raises:
             ValueError: If mode is invalid or records are missing required fields
@@ -528,6 +533,7 @@ class SilverWriter(BaseDeltaWriter):
                 records=records,
                 primary_keys=primary_keys,
                 mode=validated_mode,
+                bronze_refs=bronze_refs,
             )
 
     async def _log_silver_audit(
@@ -627,6 +633,7 @@ class SilverWriter(BaseDeltaWriter):
         records: list[dict[str, Any]],
         primary_keys: list[str],
         mode: SilverWriteMode,
+        bronze_refs: list[BronzeWriteResult] | None = None,
     ) -> None:
         """Write Silver layer metadata sidecar file.
 
@@ -635,6 +642,9 @@ class SilverWriter(BaseDeltaWriter):
             records: List of records written.
             primary_keys: Primary key columns used.
             mode: Write mode used (merge, append, delete).
+            bronze_refs: Optional list of BronzeWriteResult for lineage tracking.
+                If provided, bronze_paths will be populated from relative_path
+                of each BronzeWriteResult (REQ-LINEAGE-001).
         """
         from datetime import UTC, datetime
         from importlib.metadata import version as pkg_version
@@ -691,7 +701,7 @@ class SilverWriter(BaseDeltaWriter):
             entity=entity,
         )
 
-        # Build lineage from records
+        # Build lineage from records and bronze_refs
         source_batch_ids = list(
             {
                 r.get("_source_batch_id", "")
@@ -699,8 +709,15 @@ class SilverWriter(BaseDeltaWriter):
                 if r.get("_source_batch_id")
             }
         )
+
+        # Extract bronze paths from bronze_refs for complete lineage (REQ-LINEAGE-001)
+        bronze_paths: list[str] = []
+        if bronze_refs:
+            bronze_paths = [ref.relative_path for ref in bronze_refs]
+
         lineage = LineageMetadata(
             source_batch_ids=source_batch_ids,
+            bronze_paths=bronze_paths,
         )
 
         # Build Delta metrics

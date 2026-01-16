@@ -63,6 +63,7 @@ from bioetl.domain.value_objects.activity_values import (
     PChemblValue,
 )
 from bioetl.domain.value_objects.base import ValueObject
+from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.chemical import (
     SMILES,
     InChIKey,
@@ -138,6 +139,7 @@ __all__ = [
     "ORCID",
     "SMILES",
     "ActivityType",
+    "BronzeWriteResult",
     "ActivityValue",
     "AnomalyDetectionResult",
     "AnomalyMetric",
