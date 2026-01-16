@@ -8,6 +8,7 @@ with detailed health status information including latency and error tracking.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal, Protocol, runtime_checkable
@@ -146,6 +147,24 @@ HealthStatusLiteral = Literal["healthy", "degraded", "unhealthy"]
 
 
 @runtime_checkable
+class HealthStatePort(Protocol):
+    """Protocol for provider health state.
+
+    Provides a read-only view of health state for monitoring/debugging.
+    """
+
+    @property
+    def status(self) -> HealthStatus:
+        """Current health status."""
+        ...
+
+    @property
+    def consecutive_errors(self) -> int:
+        """Number of consecutive errors."""
+        ...
+
+
+@runtime_checkable
 class HealthMonitorPort(Protocol):
     """Port for centralized health monitoring across providers.
 
@@ -199,6 +218,15 @@ class HealthMonitorPort(Protocol):
 
         Returns:
             Current HealthStatus after recording error.
+
+        """
+        ...
+
+    def get_all_states(self) -> Mapping[str, HealthStatePort]:
+        """Get all provider health states for monitoring/debugging.
+
+        Returns:
+            Mapping of provider name to HealthStatePort.
 
         """
         ...

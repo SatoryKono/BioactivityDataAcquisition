@@ -16,6 +16,7 @@ State transitions per RULES.md §3.5:
 from __future__ import annotations
 
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -257,11 +258,11 @@ class ProviderHealthMonitor:
             labels={"provider": state.provider},
         )
 
-    def get_all_states(self) -> dict[str, ProviderHealthState]:
+    def get_all_states(self) -> Mapping[str, ProviderHealthState]:
         """Get all provider states for monitoring/debugging.
 
         Returns:
-            Dictionary of provider name to ProviderHealthState.
+            Mapping of provider name to ProviderHealthState.
         """
         return dict(self._states)
 
