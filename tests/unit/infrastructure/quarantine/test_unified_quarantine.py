@@ -11,6 +11,7 @@ import pytest
 
 from bioetl.domain.types import BatchID, QuarantineRecordStatus
 from bioetl.infrastructure.quarantine import UnifiedQuarantine, quote_literal
+from bioetl.infrastructure.quarantine.helpers import calculate_hash
 
 # Fixed timestamp for test reproducibility
 TEST_INGESTION_TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
@@ -532,28 +533,28 @@ class TestUnifiedQuarantineAclose:
 
 
 @pytest.mark.unit
-class TestUnifiedQuarantineCalculateHash:
-    """Tests for UnifiedQuarantine._calculate_hash method."""
+class TestCalculateHash:
+    """Tests for calculate_hash helper function."""
 
-    def test_calculate_hash_returns_sha256(self, quarantine):
-        """Test _calculate_hash returns SHA256 hex digest."""
-        result = quarantine._calculate_hash('{"id": 1}')
+    def test_calculate_hash_returns_sha256(self):
+        """Test calculate_hash returns SHA256 hex digest."""
+        result = calculate_hash('{"id": 1}')
 
         assert len(result) == 64
         assert all(c in "0123456789abcdef" for c in result)
 
-    def test_calculate_hash_is_deterministic(self, quarantine):
-        """Test _calculate_hash returns same result for same input."""
+    def test_calculate_hash_is_deterministic(self):
+        """Test calculate_hash returns same result for same input."""
         payload = '{"id": 1, "value": "test"}'
 
-        result1 = quarantine._calculate_hash(payload)
-        result2 = quarantine._calculate_hash(payload)
+        result1 = calculate_hash(payload)
+        result2 = calculate_hash(payload)
 
         assert result1 == result2
 
-    def test_calculate_hash_differs_for_different_input(self, quarantine):
-        """Test _calculate_hash returns different results for different inputs."""
-        result1 = quarantine._calculate_hash('{"id": 1}')
-        result2 = quarantine._calculate_hash('{"id": 2}')
+    def test_calculate_hash_differs_for_different_input(self):
+        """Test calculate_hash returns different results for different inputs."""
+        result1 = calculate_hash('{"id": 1}')
+        result2 = calculate_hash('{"id": 2}')
 
         assert result1 != result2
