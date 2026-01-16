@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.composition.builders import FilterConfigBuilder
-from bioetl.domain.filtering import FilterColumn, InputFilterConfig
+from bioetl.domain.filtering import InputFilterConfig
 
 
 @pytest.fixture
