@@ -31,6 +31,9 @@ from pydantic import BaseModel
 from bioetl.domain.entities.pubchem import PubchemMoleculeRecord
 from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.filterable_mixin import FilterableStubMixin
 from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
 from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
@@ -38,9 +41,13 @@ from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
 )
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
+# PubChem REST API base URL
+PUBCHEM_API_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
+
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
+    from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
@@ -111,6 +118,7 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
             strict_error_handling=strict_error_handling,
         )
         self._mapper = PubChemEntityMapper()
+        self._request_collector = APIRequestCollector()
         self._strategies = PubChemFetchStrategies(
             logger=logger,
             rate_limiter=rate_limiter,
@@ -118,6 +126,7 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
             mapper=self._mapper,
             run_in_executor=self._run_in_executor,
             provider_name=self.provider_name,
+            request_collector=self._request_collector,
         )
 
     async def _fetch_compound(
@@ -289,3 +298,45 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
     def __repr__(self) -> str:
         """Return string representation."""
         return f"PubChemAdapter(rate={self.rate_limiter.rate})"
+
+    def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
+        """Get accumulated API request metadata for Bronze layer enrichment.
+
+        Returns SourceMetadata with all recorded API requests and aggregated
+        statistics (total_requests, avg_duration, total_bytes).
+
+        The collector is cleared after calling this method to prepare for
+        the next batch.
+
+        Note:
+            Since pubchempy doesn't expose raw HTTP response objects,
+            metadata is based on estimated values (e.g., response sizes).
+
+        Args:
+            api_version: Optional API version to include in metadata.
+
+        Returns:
+            SourceMetadata with api_requests, total_requests, avg_request_duration_ms,
+            and total_response_bytes populated from collected requests.
+
+        """
+        metadata = self._request_collector.to_source_metadata(
+            source_type="api",
+            url=PUBCHEM_API_BASE,
+            api_version=api_version,
+        )
+        self._request_collector.clear()
+        return metadata
+
+    def clear_request_collector(self) -> None:
+        """Clear the API request collector without generating metadata.
+
+        Use this to reset the collector when metadata is not needed,
+        for example during health checks or error recovery.
+        """
+        self._request_collector.clear()
+
+    @property
+    def request_count(self) -> int:
+        """Get the number of recorded API requests since last clear."""
+        return self._request_collector.request_count
