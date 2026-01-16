@@ -7,6 +7,8 @@ DTO support via fetch_as_models() returning typed Pydantic models.
 
 from __future__ import annotations
 
+import contextlib
+import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, NoReturn
 
@@ -29,8 +31,12 @@ from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.chembl.entity_mapper import (
+    CHEMBL_API_BASE,
     CHEMBL_STATUS_URL,
     ChemblEntityMapper,
+)
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.http.health import (
@@ -43,6 +49,7 @@ if TYPE_CHECKING:
 
     from httpx import Response
 
+    from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
@@ -84,6 +91,11 @@ class ChemblAdapter(BaseHttpAdapter):
 
     # Entity mapper for URL and key resolution
     _mapper: ChemblEntityMapper = field(init=False, default_factory=ChemblEntityMapper)
+
+    # API request collector for metadata enrichment
+    _request_collector: APIRequestCollector = field(
+        init=False, default_factory=APIRequestCollector
+    )
 
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
@@ -191,10 +203,21 @@ class ChemblAdapter(BaseHttpAdapter):
 
         Note: Success/failure tracking is handled by the circuit breaker
         in UnifiedHTTPClient, no duplicate tracking needed here.
+
+        Records request metadata via APIRequestCollector for Bronze layer enrichment.
         """
         try:
+            start_time = time.perf_counter()
             with self._adapter_metrics.measure_request(f"/{entity_type}"):
                 response = await self.http_client.get(url, params=params)
+            duration_ms = (time.perf_counter() - start_time) * 1000
+
+            # Record request for metadata enrichment (gracefully handle mocked responses)
+            # Skip recording if response doesn't have expected attributes
+            # (e.g., during testing with mocked responses or validation errors)
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
+
             records, has_next = self._process_response(response, entity_type)
             return records, has_next
         except Exception as e:
@@ -275,26 +298,7 @@ class ChemblAdapter(BaseHttpAdapter):
                 break
 
     def _handle_error(self, e: Exception, context: str = "fetch") -> NoReturn:
-        """Handle fetch errors with unified classification and logging.
-
-        Uses ErrorHandler for consistent error handling across all adapters.
-        Error tracking is handled by the circuit breaker in UnifiedHTTPClient.
-
-        On adapter boundary, provider-specific errors are translated to
-        domain ExternalServiceError hierarchy for application layer consumption.
-
-        Args:
-            e: The exception that occurred
-            context: Operation context for logging (e.g., "fetch", "health_check")
-
-        Raises:
-            CriticalError: For auth failures and other critical errors
-            ExternalServiceError: For recoverable and other errors
-
-        Note:
-            Application layer should catch ExternalServiceError.
-
-        """
+        """Handle errors with unified classification. Translates to domain exceptions."""
         # Build context with circuit breaker info
         failure_count = self.http_client.circuit_breaker.get_failure_count()
         health_status = self._get_health_status()
@@ -492,25 +496,7 @@ class ChemblAdapter(BaseHttpAdapter):
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records with fallback (not applicable for ChEMBL).
-
-        Implements FilterableDataSourcePort.fetch_filtered_with_fallback().
-
-        ChEMBL uses ChEMBL IDs for filtering which are always resolvable,
-        so fallback is not needed. This method simply delegates to fetch_filtered()
-        and ignores the fallback_mapping parameter.
-
-        Args:
-            entity_type: Type of entity to fetch
-            filter_ids: Sorted list of IDs to filter by
-            filter_field: Field name to filter on
-            fallback_mapping: Ignored - ChEMBL doesn't need fallback search
-            limit: Maximum number of records to fetch
-
-        Yields:
-            Dictionary records matching the filter criteria
-
-        """
+        """Fetch with fallback (ChEMBL IDs always resolvable, fallback ignored)."""
         _ = fallback_mapping  # Unused - ChEMBL IDs are always resolvable
         async for record in self._fetch_filtered(
             entity_type, limit, filter_ids, filter_field
@@ -665,10 +651,7 @@ class ChemblAdapter(BaseHttpAdapter):
     def reset_circuit_breaker(self) -> None:
         """Reset circuit breaker (e.g., after successful recovery)."""
         self.http_client.circuit_breaker.reset()
-        self.logger.info(
-            "chembl_circuit_breaker_reset",
-            provider="chembl",
-        )
+        self.logger.info("chembl_circuit_breaker_reset", provider="chembl")
 
     async def get_entity_count(self, entity_type: str) -> int:
         """Get total count of entities."""
@@ -680,3 +663,20 @@ class ChemblAdapter(BaseHttpAdapter):
         page_meta = data.get("page_meta", {})
         total_count: int = page_meta.get("total_count", 0)
         return total_count
+
+    def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
+        """Get API request metadata and clear collector."""
+        metadata = self._request_collector.to_source_metadata(
+            source_type="api", url=CHEMBL_API_BASE, api_version=api_version
+        )
+        self._request_collector.clear()
+        return metadata
+
+    def clear_request_collector(self) -> None:
+        """Clear the collector without returning metadata."""
+        self._request_collector.clear()
+
+    @property
+    def request_count(self) -> int:
+        """Number of recorded API requests since last clear."""
+        return self._request_collector.request_count
