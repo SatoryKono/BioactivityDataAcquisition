@@ -13,7 +13,13 @@ import click
 
 if TYPE_CHECKING:
     from bioetl.application.core.cleanup_service import CleanupPreview
-    from bioetl.application.services import TableVacuumResult, VacuumAllResult
+    from bioetl.application.services import (
+        ExportResult,
+        TableInfo,
+        TablePreview,
+        TableVacuumResult,
+        VacuumAllResult,
+    )
 
 
 def format_bytes(b: int) -> str:
@@ -146,3 +152,83 @@ def echo_dry_run_prefix(message: str) -> None:
         message: Message to prefix with [DRY-RUN].
     """
     click.echo(f"[DRY-RUN] {message}")
+
+
+# =============================================================================
+# Export formatters
+# =============================================================================
+
+
+def echo_table_list(tables: list[TableInfo]) -> None:
+    """Output list of available Delta tables.
+
+    Args:
+        tables: List of TableInfo objects to display.
+    """
+    click.echo("\nAvailable Delta tables:\n")
+
+    current_layer = ""
+    for table in tables:
+        if table.layer != current_layer:
+            current_layer = table.layer
+            click.echo(f"  {current_layer.upper()}:")
+
+        click.echo(f"    {table.name}")
+
+    click.echo()
+
+
+def echo_export_preview(preview: TablePreview) -> None:
+    """Output table preview with schema and sample data.
+
+    Args:
+        preview: TablePreview with schema and sample rows.
+    """
+    click.echo(f"\nTable: {preview.table_name} ({preview.layer})")
+    click.echo(f"Rows: {preview.row_count:,}")
+    click.echo(f"\nSchema ({len(preview.columns)} columns):")
+
+    for col in preview.columns:
+        nullable = " (nullable)" if col.nullable else ""
+        click.echo(f"  {col.name}: {col.type}{nullable}")
+
+    if preview.sample_rows:
+        click.echo(f"\nSample data ({len(preview.sample_rows)} rows):")
+        click.echo("-" * 60)
+
+        # Get column names for header
+        if preview.columns:
+            col_names = [c.name for c in preview.columns[:5]]  # First 5 cols
+            if len(preview.columns) > 5:
+                col_names.append("...")
+            click.echo(" | ".join(col_names))
+            click.echo("-" * 60)
+
+        # Display sample rows
+        for row in preview.sample_rows:
+            values = []
+            for col in preview.columns[:5]:
+                val = row.get(col.name, "")
+                # Truncate long values
+                val_str = str(val)[:30]
+                if len(str(val)) > 30:
+                    val_str += "..."
+                values.append(val_str)
+            if len(preview.columns) > 5:
+                values.append("...")
+            click.echo(" | ".join(values))
+
+    click.echo()
+
+
+def echo_export_result(result: ExportResult) -> None:
+    """Output export operation result.
+
+    Args:
+        result: ExportResult with export outcome.
+    """
+    if result.success:
+        click.echo(f"\nExported {result.row_count:,} rows to {result.format.upper()}")
+        click.echo(f"Output: {result.output_path}")
+    else:
+        click.echo(f"\nExport failed: {result.error}", err=True)

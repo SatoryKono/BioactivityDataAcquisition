@@ -168,6 +168,7 @@ from bioetl.domain.ports import (
     DQReportWriterPort,
     DataNormalizationPort,
     DataSourcePort,
+    DeltaReaderPort,
     FilterableDataSourcePort,
     GoldDQAnalyzerPort,
     GoldDQConfigPort,
@@ -215,6 +216,7 @@ from bioetl.domain.resilience import CircuitBreakerConfig, RetryConfig
 # Serialization (centralized JSON per RULES.md §2.8.1)
 from bioetl.domain.serialization import (
     deserialize_from_json,
+    flatten_arrow_table_for_export,
     is_orjson_available,
     serialize_to_json,
     serialize_to_json_canonical,
@@ -412,6 +414,7 @@ __all__ = [
     "DQReportWriterPort",
     "DataNormalizationPort",
     "DataSourcePort",
+    "DeltaReaderPort",
     "FilterableDataSourcePort",
     "GoldDQAnalyzerPort",
     "GoldDQConfigPort",
@@ -458,6 +461,7 @@ __all__ = [
     "IdentityService",
     # Serialization (centralized JSON)
     "deserialize_from_json",
+    "flatten_arrow_table_for_export",
     "is_orjson_available",
     "serialize_to_json",
     "serialize_to_json_canonical",

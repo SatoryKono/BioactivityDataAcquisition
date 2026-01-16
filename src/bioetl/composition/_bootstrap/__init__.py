@@ -43,6 +43,7 @@ from bioetl.composition._bootstrap.runner import bootstrap_pipeline_runner_servi
 from bioetl.composition._bootstrap.storage import (
     bootstrap_bronze_cleanup_service,
     bootstrap_cleanup,
+    bootstrap_export_service,
     bootstrap_lifecycle_service,
     bootstrap_storage,
     bootstrap_vacuum_service,
@@ -58,6 +59,7 @@ __all__ = [
     "bootstrap_cleanup",
     "bootstrap_config_service",
     "bootstrap_dq_monitor",
+    "bootstrap_export_service",
     "bootstrap_health_server_dependencies",
     "bootstrap_health_service",
     "bootstrap_lifecycle_service",

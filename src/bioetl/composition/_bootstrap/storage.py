@@ -20,7 +20,11 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 if TYPE_CHECKING:
     from bioetl.application.core.cleanup_service import CleanupService
-    from bioetl.application.services import BronzeCleanupService, VacuumService
+    from bioetl.application.services import (
+        BronzeCleanupService,
+        ExportService,
+        VacuumService,
+    )
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
@@ -28,6 +32,7 @@ if TYPE_CHECKING:
 __all__ = [
     "bootstrap_bronze_cleanup_service",
     "bootstrap_cleanup",
+    "bootstrap_export_service",
     "bootstrap_lifecycle_service",
     "bootstrap_storage",
     "bootstrap_vacuum_service",
@@ -209,3 +214,41 @@ def _create_table_collector(
         return tables
 
     return collect_tables
+
+
+def bootstrap_export_service() -> ExportService:
+    """Bootstrap ExportService for CLI export commands.
+
+    Creates an ExportService for exporting Delta Lake tables to
+    CSV, XLSX, and TSV formats.
+
+    Returns:
+        ExportService configured for the current environment.
+    """
+    from pathlib import Path
+
+    from bioetl.application.services import ExportService
+    from bioetl.infrastructure.storage.delta_reader import DeltaReader
+
+    settings = get_settings()
+    noop_logger = NoOpLogger()
+
+    # Use data/output/ subdirectory for actual data paths (matches pipeline configs)
+    # The pipeline configs use data/output/silver, data/output/gold
+    output_dir = Path(settings.data_dir) / "output"
+    silver_path = output_dir / "silver"
+    gold_path = output_dir / "gold"
+
+    # Create Delta reader for Silver and Gold paths
+    reader = DeltaReader(
+        base_path=silver_path,  # Base path for relative paths
+        logger=noop_logger,
+    )
+
+    return ExportService(
+        reader=reader,
+        logger=noop_logger,
+        silver_path=silver_path,
+        gold_path=gold_path,
+        export_path=output_dir / "exports",
+    )

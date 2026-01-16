@@ -18,6 +18,7 @@ This package contains all port definitions organized by domain:
 - memory: MemoryMonitorPort for adaptive batch sizing
 - normalization: UnitConverterPort, ValueValidatorPort, ActivityAggregatorPort
 - data_normalization: DataNormalizationPort for text/data normalization
+- delta_reader: DeltaReaderPort for read-only Delta table access
 """
 
 from bioetl.domain.ports.audit import (
@@ -32,6 +33,7 @@ from bioetl.domain.ports.data_source import (
     DataSourcePort,
     FilterableDataSourcePort,
 )
+from bioetl.domain.ports.delta_reader import DeltaReaderPort
 from bioetl.domain.ports.dq_config import (
     BronzeDQConfigPort,
     GoldDQConfigPort,
@@ -102,6 +104,7 @@ __all__ = [
     "DQReportWriterPort",
     "DataNormalizationPort",
     "DataSourcePort",
+    "DeltaReaderPort",
     "FilterableDataSourcePort",
     "GoldDQAnalyzerPort",
     "GoldDQConfigPort",

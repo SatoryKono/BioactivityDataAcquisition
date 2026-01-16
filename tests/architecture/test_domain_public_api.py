@@ -166,6 +166,8 @@ def test_domain_no_infrastructure_types_in_all() -> None:
         "DeltaSchemaValidationError",  # Domain exception for schema validation
         "DeltaTransactionError",  # Domain exception for transaction failures
         "DeltaWriteConflictError",  # Domain exception for concurrent write conflicts
+        # Delta reader port - domain interface for read-only table access
+        "DeltaReaderPort",  # Domain port for Delta table reading
         # Metadata ports - "Writer" is for interface, not implementation
         "MetadataWriterPort",  # Domain port for metadata sidecar files
         "NoOpMetadataWriter",  # NoOp implementation of MetadataWriterPort
