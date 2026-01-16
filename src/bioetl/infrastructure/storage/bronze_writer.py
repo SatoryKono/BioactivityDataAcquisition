@@ -40,6 +40,7 @@ if TYPE_CHECKING:
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.storage._atomic import atomic_write_bytes
 
 
@@ -393,28 +394,11 @@ class BronzeWriter:
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
-    ) -> str:
+    ) -> BronzeWriteResult:
         """Write raw records to Bronze layer (JSONL + zstd).
 
-        Streams records through zstd compressor directly to disk.
-
-        Args:
-            records: Iterator of JSON-encoded record bytes.
-            provider: Provider name (e.g., 'chembl').
-            entity: Entity type (e.g., 'activity').
-            date: Date for path partitioning.
-            batch_id: Unique identifier for this batch.
-            run_id: Pipeline run identifier.
-            run_type: Type of run (incremental, backfill, etc.).
-            ingestion_ts: Ingestion timestamp from application layer
-                         (single source of time per ADR-014).
-
-        Returns:
-            Relative path to the written file.
-
-        Note:
-            Lock validation is performed at Application layer (BatchWriter)
-            per RULES.md §4.6 Safety Guard.
+        Returns BronzeWriteResult with path, sizes, and checksum for lineage.
+        Lock validation is performed at Application layer per §4.6 Safety Guard.
         """
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_bronze") as span:
@@ -571,7 +555,31 @@ class BronzeWriter:
             span.set_attribute("record_count", record_count)
             span.set_attribute("compressed_size", compressed_size)
 
-            return relative_path
+            # Calculate BLAKE2b checksum for integrity verification
+            checksum = await self._calculate_checksum(full_path)
+
+            return BronzeWriteResult(
+                batch_id=batch_id,
+                relative_path=relative_path,
+                absolute_path=str(full_path),
+                record_count=record_count,
+                compressed_size=compressed_size,
+                uncompressed_size=uncompressed_size,
+                checksum_blake2=checksum,
+            )
+
+    async def _calculate_checksum(self, file_path: Path) -> str:
+        """Calculate BLAKE2b checksum of a file asynchronously."""
+        import hashlib
+
+        def _compute() -> str:
+            h = hashlib.blake2b()
+            with open(file_path, "rb") as f:
+                for chunk in iter(lambda: f.read(65536), b""):
+                    h.update(chunk)
+            return h.hexdigest()
+
+        return await asyncio.get_running_loop().run_in_executor(None, _compute)
 
     async def _write_json_copy(
         self,
@@ -660,15 +668,7 @@ class BronzeWriter:
     async def cleanup_old_files(
         self, cutoff_date: datetime, dry_run: bool = False
     ) -> dict[str, int]:
-        """Remove Bronze files older than cutoff date (RULES.md §2.1 retention).
-
-        Args:
-            cutoff_date: Files older than this will be removed (UTC, per ADR-014).
-            dry_run: If True, only count files without removing them.
-
-        Returns:
-            Dict with files_removed, bytes_freed, directories_removed counts.
-        """
+        """Remove Bronze files older than cutoff date (RULES.md §2.1 retention)."""
         cutoff_str = cutoff_date.strftime("%Y-%m-%d")
         files, bytes_total, dirs = 0, 0, 0
 

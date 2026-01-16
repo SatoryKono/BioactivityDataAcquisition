@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.ports import GoldValidatorPort, StoragePort, TracingPort
     from bioetl.domain.types import BatchID
+    from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
 
 class BatchWriter:
@@ -181,7 +182,7 @@ class BatchWriter:
 
     async def write_bronze(
         self, records: list[dict[str, Any]], batch_id: BatchID, ingestion_ts: datetime
-    ) -> None:
+    ) -> BronzeWriteResult:
         """Write records to Bronze layer.
 
         Serializes records to JSON with deterministic key ordering,
@@ -191,6 +192,10 @@ class BatchWriter:
             records: Raw records to write.
             batch_id: Identifier for the current batch.
             ingestion_ts: Ingestion timestamp from context.
+
+        Returns:
+            BronzeWriteResult with path, record count, sizes, and checksum
+            for downstream lineage tracking (REQ-LINEAGE-001).
 
         Raises:
             LockNotHeldError: If lock is no longer held (Safety Guard §4.6).
@@ -213,7 +218,7 @@ class BatchWriter:
             # Create generator for bytes with newlines
             record_bytes = (b + b"\n" for b in json_bytes_list)
 
-            await self._storage.write_bronze(
+            bronze_result = await self._storage.write_bronze(
                 records=record_bytes,
                 provider=self._provider,
                 entity=self._entity_type,
@@ -224,12 +229,17 @@ class BatchWriter:
                 ingestion_ts=ingestion_ts,
             )
             self._end_span(span)
+            return bronze_result
         except Exception as e:
             self._end_span(span, e)
             raise
 
     async def write_silver(
-        self, records: list[dict[str, Any]], batch_id: BatchID, ingestion_ts: datetime
+        self,
+        records: list[dict[str, Any]],
+        batch_id: BatchID,
+        ingestion_ts: datetime,
+        bronze_refs: list[BronzeWriteResult] | None = None,
     ) -> None:
         """Write records to Silver layer with metadata.
 
@@ -239,6 +249,9 @@ class BatchWriter:
             records: Transformed Silver records.
             batch_id: Identifier for the source batch.
             ingestion_ts: Ingestion timestamp from context.
+            bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
+                If provided, bronze_paths will be populated in Silver metadata
+                for complete lineage tracking (REQ-LINEAGE-001).
 
         Raises:
             LockNotHeldError: If lock is no longer held (Safety Guard §4.6).
@@ -269,6 +282,7 @@ class BatchWriter:
                 schema=self._silver_schema,
                 mode=self._silver_mode,
                 on_schema_mismatch=self._table_config.on_schema_mismatch,
+                bronze_refs=bronze_refs,
             )
             self._end_span(span)
         except Exception as e:
