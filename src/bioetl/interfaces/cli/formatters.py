@@ -94,9 +94,10 @@ def echo_quarantine_record(record: dict[str, Any]) -> None:
     Args:
         record: Dictionary with quarantine record data.
     """
-    error_code = record.get("error_code", "UNKNOWN")
-    payload = record.get("payload", "N/A")
-    click.echo(f"Error: {error_code} | Payload: {payload}")
+    error_code = record.get("error_code") or "UNKNOWN"
+    payload = record.get("payload")
+    payload_display = payload if payload is not None else "—"
+    click.echo(f"Error: {error_code} | Payload: {payload_display}")
 
 
 def echo_checkpoint(checkpoint: str) -> None:

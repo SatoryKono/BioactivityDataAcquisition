@@ -342,7 +342,7 @@ class BusinessRuleResult:
     name: str
     description: str
     passed: bool
-    violations: int
+    violations: int | None  # None indicates unknown (e.g., exception during check)
 
 
 @dataclass(frozen=True, slots=True)

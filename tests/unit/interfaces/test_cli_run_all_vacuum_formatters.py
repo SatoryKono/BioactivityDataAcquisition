@@ -745,13 +745,14 @@ class TestEchoFunctions:
         assert '{"id": 1}' in result.output
 
     def test_echo_quarantine_record_with_defaults(self, cli_runner):
-        """Test echo_quarantine_record with missing fields."""
+        """Test echo_quarantine_record with missing fields uses proper None handling."""
         record = {}
         result = cli_runner.invoke(
             click.command()(lambda: echo_quarantine_record(record)), []
         )
         assert "UNKNOWN" in result.output
-        assert "N/A" in result.output
+        # Uses em-dash for missing values instead of sentinel "N/A"
+        assert "—" in result.output
 
 
 @pytest.mark.unit
