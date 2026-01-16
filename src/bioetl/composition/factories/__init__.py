@@ -14,6 +14,7 @@ Consolidated modules (v5.2):
 - services_factory: BaseServicesFactory, ServicesBuilder
 - data_source_factory: DataSourceFactory, DataSourceRegistry
 - storage: StorageAdapter, StorageContext, StorageFactory
+- dq_factory: DQServicesFactory for DQ report components
 """
 
 # Data source factory and registry
@@ -22,6 +23,9 @@ from bioetl.composition.factories.data_source_factory import (
     DataSourceFactory,
     DataSourceRegistry,
 )
+
+# DQ services factory
+from bioetl.composition.factories.dq_factory import DQServicesFactory
 
 # Import to trigger pipeline registration
 from bioetl.composition.factories.pipeline_factories import (
@@ -63,6 +67,7 @@ from bioetl.composition.factories.transformer_factory import (
 
 __all__ = [
     "BaseServicesFactory",
+    "DQServicesFactory",
     "DataSourceCreator",
     "DataSourceFactory",
     "DataSourceRegistry",
