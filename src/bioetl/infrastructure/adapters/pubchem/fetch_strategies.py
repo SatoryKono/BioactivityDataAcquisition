@@ -6,6 +6,7 @@ Contains helper functions for different fetch modes.
 
 from __future__ import annotations
 
+import time
 from typing import TYPE_CHECKING, Any
 
 import pubchempy as pcp
@@ -14,9 +15,16 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable
 
     from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
     from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
+
+
+# PubChem REST API base URL for request metadata
+PUBCHEM_API_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
 
 
 class PubChemFetchStrategies:
@@ -24,6 +32,7 @@ class PubChemFetchStrategies:
 
     Provides fetch methods for different entity types and fetch modes.
     Delegates entity conversion to PubChemEntityMapper.
+    Records API request metadata for Bronze layer enrichment.
     """
 
     def __init__(
@@ -34,22 +43,75 @@ class PubChemFetchStrategies:
         mapper: PubChemEntityMapper,
         run_in_executor: Callable[..., Any],
         provider_name: str = "pubchem",
+        request_collector: APIRequestCollector | None = None,
     ) -> None:
-        """Initialize fetch strategies."""
+        """Initialize fetch strategies.
+
+        Args:
+            logger: LoggerPort instance for structured logging.
+            rate_limiter: Token bucket rate limiter.
+            circuit_breaker: Circuit breaker for resilience.
+            mapper: Entity mapper for PubChem responses.
+            run_in_executor: Callable to run sync code in executor.
+            provider_name: Provider identifier.
+            request_collector: Optional collector for API request metadata.
+
+        """
         self._logger = logger
         self._rate_limiter = rate_limiter
         self._circuit_breaker = circuit_breaker
         self._mapper = mapper
         self._run_in_executor = run_in_executor
         self._provider_name = provider_name
+        self._request_collector = request_collector
+
+    def _record_request(
+        self,
+        endpoint: str,
+        duration_ms: float,
+        status_code: int = 200,
+        result_count: int = 0,
+    ) -> None:
+        """Record a PubChem API request for metadata enrichment.
+
+        Since pubchempy doesn't expose raw HTTP response objects,
+        we record requests with estimated metadata based on the call.
+
+        Args:
+            endpoint: The API endpoint path (e.g., /compound/name/aspirin/JSON).
+            duration_ms: Request duration in milliseconds.
+            status_code: HTTP status code (200 for success, estimated).
+            result_count: Number of results returned (used for size estimation).
+
+        """
+        if self._request_collector is None:
+            return
+
+        # Estimate response size based on result count (rough approximation)
+        # Average compound JSON is ~2KB, substance ~1KB, assay ~3KB
+        estimated_size = result_count * 2000
+
+        self._request_collector.record_request(
+            url=f"{PUBCHEM_API_BASE}{endpoint}",
+            method="GET",
+            response_size=estimated_size,
+            duration_ms=duration_ms,
+            status_code=status_code,
+        )
 
     async def fetch_by_query(
         self, query: str, limit: int | None
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch compounds by query (name search)."""
         await self._rate_limiter.acquire()
+        start_time = time.perf_counter()
         compounds = await self._circuit_breaker.call(
             self._run_in_executor, pcp.get_compounds, query, "name"
+        )
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        result_count = len(compounds) if compounds else 0
+        self._record_request(
+            f"/compound/name/{query}/JSON", duration_ms, result_count=result_count
         )
         for i, compound in enumerate(compounds or []):
             if limit and i >= limit:
@@ -59,8 +121,14 @@ class PubChemFetchStrategies:
     async def _fetch_single_smiles(self, smiles: str) -> list[dict[str, Any]]:
         """Fetch compounds for a single SMILES string."""
         await self._rate_limiter.acquire()
+        start_time = time.perf_counter()
         compounds = await self._circuit_breaker.call(
             self._run_in_executor, pcp.get_compounds, smiles.strip(), "smiles"
+        )
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        result_count = len(compounds) if compounds else 0
+        self._record_request(
+            "/compound/smiles/JSON", duration_ms, result_count=result_count
         )
         return [self._mapper.compound_to_dict(c) for c in (compounds or [])]
 
@@ -105,8 +173,16 @@ class PubChemFetchStrategies:
     async def _fetch_cid_batch(self, batch: list[int]) -> list[dict[str, Any]]:
         """Fetch a batch of compounds by CID."""
         await self._rate_limiter.acquire()
+        start_time = time.perf_counter()
         compounds = await self._circuit_breaker.call(
             self._run_in_executor, pcp.get_compounds, batch, "cid"
+        )
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        result_count = len(compounds) if compounds else 0
+        self._record_request(
+            f"/compound/cid/{','.join(map(str, batch[:3]))},.../JSON",
+            duration_ms,
+            result_count=result_count,
         )
         return [self._mapper.compound_to_dict(c) for c in (compounds or [])]
 
@@ -146,8 +222,14 @@ class PubChemFetchStrategies:
             raise ValueError("Query is required for substance search")
 
         await self._rate_limiter.acquire()
+        start_time = time.perf_counter()
         substances = await self._circuit_breaker.call(
             self._run_in_executor, pcp.get_substances, query, "name"
+        )
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        result_count = len(substances) if substances else 0
+        self._record_request(
+            f"/substance/name/{query}/JSON", duration_ms, result_count=result_count
         )
 
         fetched = 0
@@ -165,8 +247,14 @@ class PubChemFetchStrategies:
             raise ValueError("Query is required for assay search")
 
         await self._rate_limiter.acquire()
+        start_time = time.perf_counter()
         assays = await self._circuit_breaker.call(
             self._run_in_executor, pcp.get_assays, query
+        )
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        result_count = len(assays) if assays else 0
+        self._record_request(
+            f"/assay/aid/{query}/JSON", duration_ms, result_count=result_count
         )
 
         fetched = 0

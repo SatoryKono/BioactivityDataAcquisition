@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
+    from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import (
         GoldValidatorPort,
         LoggerPort,
@@ -297,6 +298,32 @@ class BatchExecutor:
             quarantined_count=self.records_quarantined,
         )
 
+    def _get_source_metadata(self) -> SourceMetadata | None:
+        """Get source metadata from data source if available.
+
+        Checks if the data source has a `get_source_metadata()` method
+        and calls it to retrieve accumulated API request metadata for
+        Bronze layer enrichment.
+
+        Returns:
+            SourceMetadata with API request details, or None if not available.
+
+        """
+        data_source = self._services.data_source
+        get_metadata = getattr(data_source, "get_source_metadata", None)
+        if get_metadata is not None and callable(get_metadata):
+            try:
+                result = get_metadata()
+                # Import SourceMetadata for runtime type check
+                from bioetl.domain.models.metadata import SourceMetadata
+
+                if isinstance(result, SourceMetadata):
+                    return result
+            except Exception:
+                # Gracefully handle any errors in metadata collection
+                pass
+        return None
+
     async def _process_batch(
         self, records: list[dict[str, Any]], start_index: int
     ) -> None:
@@ -313,6 +340,9 @@ class BatchExecutor:
         batch_id = BatchID(uuid4())
         ingestion_ts = self._context.started_at
 
+        # Get source metadata from data source (if available)
+        source_metadata = self._get_source_metadata()
+
         # Start batch tracing span
         span = self._tracing.start_batch_span(batch_id, len(records), start_index)
 
@@ -320,7 +350,9 @@ class BatchExecutor:
             # Write to Bronze and capture result for lineage tracking (REQ-LINEAGE-001)
             bronze_result = await self._execute_with_span(
                 "write_bronze",
-                self._writer.write_bronze(records, batch_id, ingestion_ts),
+                self._writer.write_bronze(
+                    records, batch_id, ingestion_ts, source_metadata=source_metadata
+                ),
                 batch_id,
                 len(records),
                 on_error=lambda e: self._writer.log_and_track_write_error(

@@ -7,6 +7,8 @@ DTO support via fetch_as_models() returning typed Pydantic models.
 
 from __future__ import annotations
 
+import contextlib
+import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, NoReturn
 
@@ -29,8 +31,12 @@ from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.chembl.entity_mapper import (
+    CHEMBL_API_BASE,
     CHEMBL_STATUS_URL,
     ChemblEntityMapper,
+)
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.http.health import (
@@ -43,6 +49,7 @@ if TYPE_CHECKING:
 
     from httpx import Response
 
+    from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
@@ -84,6 +91,11 @@ class ChemblAdapter(BaseHttpAdapter):
 
     # Entity mapper for URL and key resolution
     _mapper: ChemblEntityMapper = field(init=False, default_factory=ChemblEntityMapper)
+
+    # API request collector for metadata enrichment
+    _request_collector: APIRequestCollector = field(
+        init=False, default_factory=APIRequestCollector
+    )
 
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
@@ -191,10 +203,21 @@ class ChemblAdapter(BaseHttpAdapter):
 
         Note: Success/failure tracking is handled by the circuit breaker
         in UnifiedHTTPClient, no duplicate tracking needed here.
+
+        Records request metadata via APIRequestCollector for Bronze layer enrichment.
         """
         try:
+            start_time = time.perf_counter()
             with self._adapter_metrics.measure_request(f"/{entity_type}"):
                 response = await self.http_client.get(url, params=params)
+            duration_ms = (time.perf_counter() - start_time) * 1000
+
+            # Record request for metadata enrichment (gracefully handle mocked responses)
+            # Skip recording if response doesn't have expected attributes
+            # (e.g., during testing with mocked responses or validation errors)
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
+
             records, has_next = self._process_response(response, entity_type)
             return records, has_next
         except Exception as e:
@@ -680,3 +703,46 @@ class ChemblAdapter(BaseHttpAdapter):
         page_meta = data.get("page_meta", {})
         total_count: int = page_meta.get("total_count", 0)
         return total_count
+
+    def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
+        """Get accumulated API request metadata for Bronze layer enrichment.
+
+        Returns SourceMetadata with all recorded API requests and aggregated
+        statistics (total_requests, avg_duration, total_bytes).
+
+        The collector is cleared after calling this method to prepare for
+        the next batch.
+
+        Args:
+            api_version: Optional API version to include in metadata.
+
+        Returns:
+            SourceMetadata with api_requests, total_requests, avg_request_duration_ms,
+            and total_response_bytes populated from collected requests.
+
+        Example:
+            >>> # After fetching records
+            >>> metadata = adapter.get_source_metadata(api_version="1.0")
+            >>> bronze_writer.write_bronze(records, batch_id, ts, source_metadata=metadata)
+
+        """
+        metadata = self._request_collector.to_source_metadata(
+            source_type="api",
+            url=CHEMBL_API_BASE,
+            api_version=api_version,
+        )
+        self._request_collector.clear()
+        return metadata
+
+    def clear_request_collector(self) -> None:
+        """Clear the API request collector without generating metadata.
+
+        Use this to reset the collector when metadata is not needed,
+        for example during health checks or error recovery.
+        """
+        self._request_collector.clear()
+
+    @property
+    def request_count(self) -> int:
+        """Get the number of recorded API requests since last clear."""
+        return self._request_collector.request_count

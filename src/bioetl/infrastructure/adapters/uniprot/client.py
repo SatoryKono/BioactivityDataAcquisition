@@ -14,6 +14,8 @@ Documentation: https://www.uniprot.org/help/api
 from __future__ import annotations
 
 import asyncio
+import contextlib
+import time
 from typing import TYPE_CHECKING, Any
 
 from typing_extensions import override
@@ -22,6 +24,9 @@ from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 from bioetl.infrastructure.adapters.uniprot.fasta_parser import FastaParser
 
@@ -30,6 +35,7 @@ if TYPE_CHECKING:
 
     import httpx
 
+    from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
@@ -72,6 +78,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         self.strict_error_handling = strict_error_handling
         metrics_port = metrics if metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
+        self._request_collector = APIRequestCollector()
         self._fetch_strategies = {
             "protein": self._fetch_proteins,
             "feature": self._fetch_features,
@@ -458,10 +465,15 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 query, size, fetched, limit, cursor
             )
             try:
+                start_time = time.perf_counter()
                 with self._adapter_metrics.measure_request("/uniprotkb/search"):
                     response = await self.http_client.get(
                         f"{self.base_url}/uniprotkb/search", params=params
                     )
+                duration_ms = (time.perf_counter() - start_time) * 1000
+                # Record request (gracefully handle mocked responses in tests)
+                with contextlib.suppress(Exception):
+                    self._request_collector.record_from_response(response, duration_ms)
                 return self._parse_response(response)
             except Exception as e:
                 self._handle_fetch_error("protein", query, cursor, error=e)
@@ -522,10 +534,15 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
     async def _get_features_json(self, query: str) -> list[dict[str, Any]]:
         """Retrieve features JSON."""
         try:
+            start_time = time.perf_counter()
             with self._adapter_metrics.measure_request("/uniprotkb/features"):
                 response = await self.http_client.get(
                     f"{self.base_url}/uniprotkb/{query}.json"
                 )
+            duration_ms = (time.perf_counter() - start_time) * 1000
+            # Record request (gracefully handle mocked responses in tests)
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
             if response.status_code == 200:
                 features: list[dict[str, Any]] = response.json().get("features", [])
                 return features
@@ -561,11 +578,16 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
     async def _get_sequence_fasta(self, query: str) -> str | None:
         """Retrieve FASTA sequence."""
         try:
+            start_time = time.perf_counter()
             with self._adapter_metrics.measure_request("/uniprotkb/stream"):
                 response = await self.http_client.get(
                     f"{self.base_url}/uniprotkb/stream",
                     params={"query": query, "format": "fasta"},
                 )
+            duration_ms = (time.perf_counter() - start_time) * 1000
+            # Record request (gracefully handle mocked responses in tests)
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
             if response.status_code == 200:
                 text: str = response.text
                 return text
@@ -650,3 +672,41 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         """Return string representation."""
         has_key = "with API key" if self.api_key else "without API key"
         return f"UniProtAdapter(base_url='{self.base_url}', {has_key})"
+
+    def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
+        """Get accumulated API request metadata for Bronze layer enrichment.
+
+        Returns SourceMetadata with all recorded API requests and aggregated
+        statistics (total_requests, avg_duration, total_bytes).
+
+        The collector is cleared after calling this method to prepare for
+        the next batch.
+
+        Args:
+            api_version: Optional API version to include in metadata.
+
+        Returns:
+            SourceMetadata with api_requests, total_requests, avg_request_duration_ms,
+            and total_response_bytes populated from collected requests.
+
+        """
+        metadata = self._request_collector.to_source_metadata(
+            source_type="api",
+            url=self.base_url,
+            api_version=api_version,
+        )
+        self._request_collector.clear()
+        return metadata
+
+    def clear_request_collector(self) -> None:
+        """Clear the API request collector without generating metadata.
+
+        Use this to reset the collector when metadata is not needed,
+        for example during health checks or error recovery.
+        """
+        self._request_collector.clear()
+
+    @property
+    def request_count(self) -> int:
+        """Get the number of recorded API requests since last clear."""
+        return self._request_collector.request_count
