@@ -15,8 +15,7 @@ from bioetl.domain.types import HealthStatus
 from bioetl.interfaces.http.types import HealthResponse
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
+    from bioetl.domain.ports import HealthMonitorPort, LoggerPort
 
 
 class HealthServer:
@@ -29,7 +28,7 @@ class HealthServer:
         self,
         host: str = "0.0.0.0",
         port: int = 8080,
-        health_monitor: ProviderHealthMonitor | None = None,
+        health_monitor: HealthMonitorPort | None = None,
         logger: LoggerPort | None = None,
     ) -> None:
         """Initialize health server."""
@@ -286,7 +285,7 @@ class HealthServer:
 async def run_health_server(
     host: str = "0.0.0.0",
     port: int = 8080,
-    health_monitor: ProviderHealthMonitor | None = None,
+    health_monitor: HealthMonitorPort | None = None,
     logger: LoggerPort | None = None,
 ) -> None:
     """Run the health server until interrupted."""

@@ -478,3 +478,74 @@ class TestChemblAdapterHealthTransitions:
         assert len(records) == 1
         # Verify circuit breaker state was consulted
         mock_http_client.circuit_breaker.get_state.assert_called()
+
+
+@pytest.mark.unit
+class TestChemblAdapterRequestCollector:
+    """Tests for APIRequestCollector integration."""
+
+    @pytest.mark.asyncio
+    async def test_request_count_starts_at_zero(self, mock_http_client, mock_logger):
+        """Test that request_count starts at zero."""
+        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+        assert adapter.request_count == 0
+
+    @pytest.mark.asyncio
+    async def test_get_source_metadata_returns_source_metadata(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that get_source_metadata returns a SourceMetadata object."""
+        from bioetl.domain.models.metadata import SourceMetadata
+
+        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+        metadata = adapter.get_source_metadata()
+
+        assert isinstance(metadata, SourceMetadata)
+        assert metadata.type == "api"
+        assert "ebi.ac.uk" in (metadata.url or "")
+
+    @pytest.mark.asyncio
+    async def test_get_source_metadata_clears_collector(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that get_source_metadata clears the collector."""
+        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+
+        # Manually record a request to simulate activity
+        adapter._request_collector.record_request(
+            url="https://example.com/test",
+            method="GET",
+            duration_ms=100,
+        )
+        assert adapter.request_count == 1
+
+        # Get metadata (should clear)
+        adapter.get_source_metadata()
+        assert adapter.request_count == 0
+
+    @pytest.mark.asyncio
+    async def test_clear_request_collector(self, mock_http_client, mock_logger):
+        """Test that clear_request_collector clears without returning metadata."""
+        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+
+        # Manually record a request
+        adapter._request_collector.record_request(
+            url="https://example.com/test",
+            method="GET",
+            duration_ms=100,
+        )
+        assert adapter.request_count == 1
+
+        # Clear
+        adapter.clear_request_collector()
+        assert adapter.request_count == 0
+
+    @pytest.mark.asyncio
+    async def test_source_metadata_includes_api_version(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that api_version is included in source metadata."""
+        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+        metadata = adapter.get_source_metadata(api_version="1.0")
+
+        assert metadata.api_version == "1.0"

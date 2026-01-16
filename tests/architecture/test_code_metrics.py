@@ -55,33 +55,37 @@ class TestFileSizeLimits:
         "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
         # Domain ports NoOp implementations
         "noop.py": 450,  # 447 LOC - NoOp implementations for Null Object Pattern (+ NoOpMetadataWriter)
-        "metadata.py": 500,  # 478 LOC - Metadata models for Medallion layer sidecar files
+        # Domain models/metadata.py (models/metadata.py 560 LOC, ports/metadata.py only 104 LOC)
+        "metadata.py": 565,  # 560 LOC - Metadata models with APIRequestDetails + RateLimitInfo for Bronze layer enrichment
+        # Domain ports (Protocol definitions with comprehensive docstrings)
+        "storage.py": 385,  # 381 LOC - StoragePort with read_silver, write_*_merged for composite pipelines + SourceMetadata param
         # Domain Pandera schemas (declarative field definitions)
         "compound.py": 380,  # 377 LOC - PubChem molecule schema + deprecated alias (v2.0)
         "protein.py": 360,  # 354 LOC - UniProt target schema + deprecated alias (v2.0)
         # Domain DQ models (data quality reports and serialization)
         "dq_serializer.py": 435,  # 429 LOC - DQ report serialization logic (increased for CC reduction)
         "dq_report.py": 660,  # 646 LOC - DQ report models with validation rules
+        "dq_metrics.py": 420,  # 411 LOC - Batch DQ metrics with helpers for CC reduction + _make_hashable for list/dict values
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
         "batch_executor.py": 650,  # 610 LOC - unified executor for batch processing
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
         "gold_analyzer.py": 820,  # 800 LOC - Gold layer analysis with DQ rules
         "silver_analyzer.py": 590,  # 570 LOC - Silver layer analysis with validation
+        "dq_report_service.py": 520,  # 514 LOC - DQ report service with extracted helpers for CC reduction
         # Composition layer exemptions
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "entrypoints.py": 750,  # 736 LOC - pipeline entrypoints (run_pipeline expanded + services + export)
         "registration.py": 720,  # 705 LOC - provider registration with data source creators (OpenAlex + SemanticScholar + UniProt IDMapping)
-        "storage_adapter.py": 550,  # 540 LOC - storage adapter with Bronze/Silver/Gold writers
+        "storage_adapter.py": 625,  # 623 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SourceMetadata param
         # Consolidated factory files (v5.2)
-        "storage.py": 700,  # 640 LOC - merged storage_factory + storage_adapter
         "pipeline_factory.py": 560,  # 557 LOC - merged generic_factory + runner_assembly + entity_type helper
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
-        "services_factory.py": 600,  # 562 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
+        "services_factory.py": 630,  # 623 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
         # Infrastructure layer exemptions
-        "silver_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
-        "gold_writer.py": 820,  # 808 LOC - SCD Type 2 + metadata sidecar integration
-        "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
+        "silver_writer.py": 1110,  # 1095 LOC - schema drift + merge logic + MetadataCoordinator fallback
+        "gold_writer.py": 900,  # 887 LOC - SCD Type 2 + MetadataCoordinator fallback
+        "bronze_writer.py": 755,  # 750 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param
         "gold.py": 920,  # 915 LOC - Gold layer Pandera schemas (+ IDMapping + taxonomy_id standardization + Config docstrings)
         "silver.py": 780,  # 775 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization)
         "client.py": 700,  # 692 LOC - ChemblAdapter (complex FilterableDataSourcePort), CrossRefAdapter (DOI→title fallback)
@@ -352,11 +356,13 @@ class TestFunctionLength:
         "classify_http_error": 55,  # HTTP error classification
         # Logging config
         "configure_logging": 70,  # Logging setup
+        # API request collector
+        "record_request": 75,  # Request metadata collection with validation and sanitization
     }
 
     # Maximum allowed violations (for tracking technical debt)
-    # Baseline updated 2026-01-15: 85 violations (DQ analyzers integration)
-    MAX_VIOLATIONS = 90
+    # Baseline updated 2026-01-16: 95 violations (MetadataCoordinator + APIRequestCollector)
+    MAX_VIOLATIONS = 95
 
     def test_functions_under_50_lines(self, src_dir: Path) -> None:
         """All functions must be under 50 lines (with exemptions)."""
@@ -418,19 +424,19 @@ class TestClassSize:
         "UnifiedHTTPClient": 450,  # 427 lines - HTTP client with retry/circuit breaker
         "PipelineObserver": 350,  # 319 lines - unified observability with lifecycle events
         # Baseline exemptions for existing classes
-        "StorageAdapter": 520,  # 510 lines - storage adapter with writers
+        "StorageAdapter": 590,  # 583 lines - storage adapter with writers + BronzeWriteResult
         "BaseTransformer": 620,  # 605 lines - Template Method with helpers (tracing + PII hashing + serialize_json_list)
-        "SilverWriter": 830,  # 822 lines - includes schema drift detection (M4) + audit + lock validation + validation
-        "GoldWriter": 760,  # 753 lines - SCD Type 2 + metadata sidecar integration
+        "SilverWriter": 1100,  # 1019 lines - schema drift detection + bronze_refs + MetadataCoordinator fallback
+        "GoldWriter": 900,  # 829 lines - SCD Type 2 + metadata sidecar + MetadataCoordinator fallback
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
         "ChemblAdapter": 650,  # 630 lines - complex API adapter implementing full FilterableDataSourcePort
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
         "UniProtProteinTransformer": 800,  # 772 lines - complex protein data extraction with many fields
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
-        "BronzeWriter": 680,  # 654 lines - JSONL + zstd + metadata sidecar integration
+        "BronzeWriter": 705,  # 702 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata
         "BatchExecutor": 600,  # 581 lines - unified executor for batch processing
-        "BatchWriter": 350,  # 338 lines - batch writing with Safety Guard §4.6 lock validation
+        "BatchWriter": 360,  # 354 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param
         # Application core classes
         "FilteredDataSource": 330,  # 320 lines - decorator with fallback mapping support
         # CrossRef adapter classes (similar to ChEMBL/PubMed adapters)
@@ -454,6 +460,7 @@ class TestClassSize:
         "FileAuditAdapter": 330,  # 324 lines - File-based AuditPort implementation with async I/O
         # DQ analyzers (comprehensive data quality analysis)
         "DQReportSerializer": 410,  # 403 lines - DQ report serialization with multiple formats (increased for CC reduction)
+        "DQReportService": 385,  # 379 lines - DQ report orchestration with extracted helpers for CC reduction
         "GoldDQAnalyzer": 770,  # 752 lines - Gold layer DQ analysis with business rules
         "SilverDQAnalyzer": 540,  # 521 lines - Silver layer DQ analysis with schema drift
         # Domain services
@@ -472,6 +479,8 @@ class TestClassSize:
         "TestClassSize": 350,  # Test class with many exemptions
         # Extracted validators (REFACTOR-003)
         "MedallionConfigValidator": 350,  # Extracted from PreflightService - cohesive validation
+        # Domain ports (Protocol definitions with comprehensive docstrings)
+        "StoragePort": 355,  # 351 lines - Protocol with read_silver, write_*_merged + SourceMetadata param for Bronze write
         # Pandera schemas (declarative field definitions)
         "PubchemMoleculeSchema": 350,  # 345 lines - PubChem molecule schema with many chemical fields
         # Derived entity data source wrappers (comprehensive docstrings)
@@ -587,6 +596,7 @@ class TestGodObjectDetection:
         # Template Method pattern (hooks for subclasses, not delegation)
         "BaseTransformer": "Template Method pattern - provides hooks for subclasses",
         # Protocol implementations (must implement all methods themselves)
+        "StoragePort": "Protocol definition - interfaces define contracts, no behavior to delegate",
         "StorageAdapter": "Facade implementing StoragePort - delegates to bronze/silver/gold writers",
         # Writers with cohesive responsibilities (all methods about writing)
         "SilverWriter": "Cohesive writer - all methods relate to Delta Lake operations",

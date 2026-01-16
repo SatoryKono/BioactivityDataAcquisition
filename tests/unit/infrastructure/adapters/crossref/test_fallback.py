@@ -380,3 +380,135 @@ async def test_process_missing_dois_logs_not_found(mock_logger):
 
     assert len(results) == 0
     mock_logger.warning.assert_called()  # Should log fallback not found
+
+
+# =============================================================================
+# Phase 3: Title-Only Entry Tests
+# =============================================================================
+
+
+def test_title_only_event_names(mock_logger, mock_search_fn):
+    """Test that title-only event names are correctly prefixed."""
+    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
+
+    assert handler._event_title_only_attempt == "crossref_title_only_attempt"
+    assert handler._event_title_only_success == "crossref_title_only_success"
+    assert handler._event_title_only_not_found == "crossref_title_only_not_found"
+
+
+def test_process_found_result_adds_metadata(mock_logger, mock_search_fn):
+    """Test that process_found_result adds lookup method metadata."""
+    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
+
+    result = {"DOI": "10.1038/nature12373", "title": ["Test Paper"]}
+    processed = handler._process_found_result(result, "10.1234/original")
+
+    assert processed["_lookup_method"] == "title_fallback"
+    assert processed["_original_doi"] == "10.1234/original"
+
+
+@pytest.mark.asyncio
+async def test_process_title_only_entries_success(mock_logger):
+    """Test processing title-only entries with successful search."""
+
+    async def mock_search(query, limit):
+        yield {
+            "DOI": "10.1038/nature12373",
+            "title": ["Crystal structure of rhodopsin"],
+        }
+
+    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+
+    fallback_mapping = {
+        "": "Crystal structure of rhodopsin",
+    }
+
+    results = []
+    async for pub in handler.process_title_only_entries(
+        entries=[""],
+        fallback_mapping=fallback_mapping,
+        limit=None,
+        fetched=0,
+    ):
+        results.append(pub)
+
+    assert len(results) == 1
+    assert results[0]["DOI"] == "10.1038/nature12373"
+    assert results[0]["_lookup_method"] == "title_only"
+    mock_logger.info.assert_called()  # Should log title-only attempt and success
+
+
+@pytest.mark.asyncio
+async def test_process_title_only_entries_no_mapping(mock_logger):
+    """Test title-only processing with no title mapping."""
+
+    async def mock_search(query, limit):
+        return
+        yield
+
+    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+
+    results = []
+    async for pub in handler.process_title_only_entries(
+        entries=[""],
+        fallback_mapping={},  # No mapping
+        limit=None,
+        fetched=0,
+    ):
+        results.append(pub)
+
+    assert len(results) == 0
+
+
+@pytest.mark.asyncio
+async def test_process_title_only_entries_respects_limit(mock_logger):
+    """Test that limit is respected during title-only processing."""
+
+    async def mock_search(query, limit):
+        yield {"DOI": "10.found/1", "title": ["Title 1"]}
+
+    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+
+    fallback_mapping = {
+        "": "Title 1",
+        " ": "Title 2",
+    }
+
+    results = []
+    async for pub in handler.process_title_only_entries(
+        entries=["", " "],
+        fallback_mapping=fallback_mapping,
+        limit=2,
+        fetched=1,  # Already fetched 1
+    ):
+        results.append(pub)
+
+    # Should only process 1 more (limit=2, fetched=1)
+    assert len(results) == 1
+
+
+@pytest.mark.asyncio
+async def test_process_title_only_entries_not_found(mock_logger):
+    """Test title-only processing when search returns no results."""
+
+    async def mock_search(query, limit):
+        return
+        yield
+
+    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+
+    fallback_mapping = {
+        "": "Some title",
+    }
+
+    results = []
+    async for pub in handler.process_title_only_entries(
+        entries=[""],
+        fallback_mapping=fallback_mapping,
+        limit=None,
+        fetched=0,
+    ):
+        results.append(pub)
+
+    assert len(results) == 0
+    mock_logger.debug.assert_called()  # Should log title-only not found

@@ -25,8 +25,18 @@ class BronzeDQConfigPort(Protocol):
     """Protocol for Bronze layer DQ report configuration.
 
     Defines the interface that configuration objects must implement
-    to be usable by BronzeDQAnalyzer.
+    to be usable by BronzeDQAnalyzer and DQReportService.
     """
+
+    @property
+    def enabled(self) -> bool:
+        """Whether DQ report generation is enabled."""
+        ...
+
+    @property
+    def output_path(self) -> str | None:
+        """Output path for report. None = alongside data files."""
+        ...
 
     def get_checks_enums(self) -> list[BronzeDQCheckType]:
         """Get list of enabled check types.
@@ -50,8 +60,18 @@ class SilverDQConfigPort(Protocol):
     """Protocol for Silver layer DQ report configuration.
 
     Defines the interface that configuration objects must implement
-    to be usable by SilverDQAnalyzer.
+    to be usable by SilverDQAnalyzer and DQReportService.
     """
+
+    @property
+    def enabled(self) -> bool:
+        """Whether DQ report generation is enabled."""
+        ...
+
+    @property
+    def output_path(self) -> str | None:
+        """Output path for report. None = alongside data files."""
+        ...
 
     def get_checks_enums(self) -> list[SilverDQCheckType]:
         """Get list of enabled check types.
@@ -75,8 +95,18 @@ class GoldDQConfigPort(Protocol):
     """Protocol for Gold layer DQ report configuration.
 
     Defines the interface that configuration objects must implement
-    to be usable by GoldDQAnalyzer.
+    to be usable by GoldDQAnalyzer and DQReportService.
     """
+
+    @property
+    def enabled(self) -> bool:
+        """Whether DQ report generation is enabled."""
+        ...
+
+    @property
+    def output_path(self) -> str | None:
+        """Output path for report. None = alongside data files."""
+        ...
 
     def get_checks_enums(self) -> list[GoldDQCheckType]:
         """Get list of enabled check types.

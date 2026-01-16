@@ -19,7 +19,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
-from bioetl.domain.entities.crossref import CROSSREF_TYPE_MAP, PublicationEntity
+from bioetl.domain.entities.crossref import CROSSREF_TYPE_MAP, CrossRefPublicationEntity
 from bioetl.domain.normalization import (
     extract_first_string,
     parse_page_range,
@@ -242,14 +242,14 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         """
         return "doi"
 
-    def _get_entity_class(self) -> type[PublicationEntity]:
+    def _get_entity_class(self) -> type[CrossRefPublicationEntity]:
         """Return the domain entity class for CrossRef publications.
 
         Returns:
-            PublicationEntity class.
+            CrossRefPublicationEntity class.
 
         """
-        return PublicationEntity
+        return CrossRefPublicationEntity
 
     def _pre_extract_validation(
         self,

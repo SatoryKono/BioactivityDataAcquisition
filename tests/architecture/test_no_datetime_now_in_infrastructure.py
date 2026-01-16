@@ -48,6 +48,10 @@ ALLOWED_FILES: set[str] = {
     # infrastructure/storage/gold_writer.py
     # Uses datetime.now(UTC) for audit logging timestamps.
     "gold_writer.py",
+    # infrastructure/adapters/common/api_request_collector.py
+    # Uses datetime.now(UTC) for request timestamp when caller doesn't provide one.
+    # This is for audit/debugging metadata, not Bronze/Silver/Gold data determinism.
+    "api_request_collector.py",
 }
 
 

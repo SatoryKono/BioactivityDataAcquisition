@@ -1,13 +1,16 @@
 """Fallback search utilities for OpenAlex DOI resolution.
 
 Provides title-based search fallback when DOI resolution fails.
+Supports three-phase fallback strategy:
+- Phase 2: Title fallback for unresolved DOIs
+- Phase 3: Title-only lookup for entries without DOIs
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler
+from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -19,6 +22,7 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
     """Handles fallback search by title when DOI lookup fails.
 
     Extracts fallback logic to reduce main class size and cyclomatic complexity.
+    Uses title matching to validate search results and reduce false positives.
     """
 
     def __init__(
@@ -55,17 +59,46 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
         """Return log event name for failed fallback."""
         return "openalex_title_fallback_not_found"
 
+    @property
+    def _event_title_only_attempt(self) -> str:
+        """Return log event name for title-only lookup attempt."""
+        return "openalex_title_only_attempt"
+
+    @property
+    def _event_title_only_success(self) -> str:
+        """Return log event name for successful title-only lookup."""
+        return "openalex_title_only_success"
+
+    @property
+    def _event_title_only_not_found(self) -> str:
+        """Return log event name for failed title-only lookup."""
+        return "openalex_title_only_not_found"
+
     async def _search_by_title(self, title: str) -> dict[str, Any] | None:
         """Search for work by title using OpenAlex API.
+
+        Validates results using title matching to reduce false positives.
 
         Args:
             title: Publication title to search for.
 
         Returns:
-            Work record if found, None otherwise.
+            Work record if found and title matches, None otherwise.
         """
         result = await self._search_fn(title, 3)
-        return cast(dict[str, Any] | None, result)
+        if result is None:
+            return None
+
+        # Validate title match to reduce false positives
+        found_title = result.get("title", "")
+        if found_title and titles_match(title, found_title):
+            return cast(dict[str, Any], result)
+
+        # If no title in result, return it anyway
+        if not found_title:
+            return cast(dict[str, Any], result)
+
+        return None
 
     def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:
         """Return OpenAlex work ID for logging."""

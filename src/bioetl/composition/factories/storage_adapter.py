@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from bioetl.domain.types import HealthStatus
+from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -25,6 +26,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
     from datetime import datetime
 
+    from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.types import ArrowSchema, BatchID, RunID, RunType
 
 
@@ -61,7 +63,8 @@ class StorageAdapter:
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
-    ) -> str:
+        source_metadata: SourceMetadata | None = None,
+    ) -> BronzeWriteResult:
         """Write raw records to Bronze layer.
 
         Args:
@@ -74,9 +77,13 @@ class StorageAdapter:
             run_type: Type of run.
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required.
+            source_metadata: Optional pre-built SourceMetadata with API request
+                           details for rich lineage tracking. If None, a minimal
+                           SourceMetadata is created with type="api".
 
         Returns:
-            str: Relative path to the written file.
+            BronzeWriteResult: Result containing path, record count, sizes,
+                and checksum for downstream lineage tracking.
 
         Note:
             Lock validation is performed at Application layer (BatchWriter)
@@ -91,6 +98,7 @@ class StorageAdapter:
             run_id=run_id,
             run_type=run_type,
             ingestion_ts=ingestion_ts,
+            source_metadata=source_metadata,
         )
 
     async def write_silver(
@@ -102,8 +110,21 @@ class StorageAdapter:
         mode: Literal["merge", "append", "delete"] = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        bronze_refs: list[BronzeWriteResult] | None = None,
     ) -> None:
         """Write transformed records to Silver layer.
+
+        Args:
+            table_name: The name of the table to write to.
+            records: A list of dictionaries, where each dictionary is a transformed record.
+            primary_keys: A list of column names that form the primary key.
+            schema: The PyArrow schema definition for the records (ArrowSchema alias).
+            mode: The write mode (e.g., 'merge', 'append', 'delete').
+            partition_cols: Optional list of columns to partition by.
+            on_schema_mismatch: How to handle schema drift.
+            bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
+                If provided, bronze_paths will be populated in Silver metadata
+                for complete lineage tracking (REQ-LINEAGE-001).
 
         Note:
             Lock validation is performed at Application layer (BatchWriter)
@@ -117,6 +138,7 @@ class StorageAdapter:
             mode=mode,
             partition_cols=partition_cols,
             on_schema_mismatch=on_schema_mismatch,
+            bronze_refs=bronze_refs,
         )
 
     async def write_gold(
@@ -154,6 +176,59 @@ class StorageAdapter:
             ingestion_ts=ingestion_ts,
             run_id=run_id,
         )
+
+    async def read_silver(
+        self,
+        table_name: str,
+        columns: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Read records from a Silver layer Delta table.
+
+        Args:
+            table_name: The name of the table to read (e.g., 'chembl/activity').
+            columns: Optional list of columns to select. If None, reads all columns.
+
+        Returns:
+            List of dictionaries, where each dictionary represents a record.
+
+        Raises:
+            FileNotFoundError: If the table does not exist.
+        """
+        return await self.silver.read_silver(table_name, columns=columns)
+
+    async def write_silver_merged(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str] | None = None,
+    ) -> None:
+        """Write merged records to Silver layer without explicit schema.
+
+        Used by composite pipelines where schema is dynamically determined.
+
+        Args:
+            table_name: The name of the table to write to.
+            records: A list of dictionaries representing merged records.
+            primary_keys: Optional list of column names for sorting.
+        """
+        await self.silver.write_silver_merged(table_name, records, primary_keys)
+
+    async def write_gold_merged(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str] | None = None,
+    ) -> None:
+        """Write merged records to Gold layer without Pandera schema.
+
+        Used by composite pipelines where schema is dynamically determined.
+
+        Args:
+            table_name: The name of the table to write to.
+            records: A list of dictionaries representing merged records.
+            primary_keys: Optional list of column names for sorting.
+        """
+        await self.gold.write_gold_merged(table_name, records, primary_keys)
 
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Silver layer data for a specific table.

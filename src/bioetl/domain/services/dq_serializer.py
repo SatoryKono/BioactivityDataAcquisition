@@ -292,9 +292,9 @@ class DQReportSerializer:
             <span class="status-badge status-{status}">{status}</span>
         </div>
         <div class="meta">
-            <span><strong>Pipeline:</strong> {data.get("pipeline", "N/A")}</span>
-            <span><strong>Run ID:</strong> {data.get("run_id", "N/A")}</span>
-            <span><strong>Timestamp:</strong> {data.get("timestamp", "N/A")}</span>
+            <span><strong>Pipeline:</strong> {data.get("pipeline") or "—"}</span>
+            <span><strong>Run ID:</strong> {data.get("run_id") or "—"}</span>
+            <span><strong>Timestamp:</strong> {data.get("timestamp") or "—"}</span>
         </div>
     </div>
 
@@ -411,14 +411,18 @@ class DQReportSerializer:
         status = thresholds.get("threshold_status", "pass")
         status_class = self._status_color(status)
 
+        soft_threshold = thresholds.get("soft_fail_threshold")
+        hard_threshold = thresholds.get("hard_fail_threshold")
+        error_rate = thresholds.get("current_error_rate")
+
         return f"""
     <div class="card">
         <h2>DQ Thresholds</h2>
         <div class="check-item {status_class}">
             <table>
-                <tr><td><strong>Soft Fail Threshold</strong></td><td>{thresholds.get("soft_fail_threshold", "N/A")}</td></tr>
-                <tr><td><strong>Hard Fail Threshold</strong></td><td>{thresholds.get("hard_fail_threshold", "N/A")}</td></tr>
-                <tr><td><strong>Current Error Rate</strong></td><td>{thresholds.get("current_error_rate", "N/A")}</td></tr>
+                <tr><td><strong>Soft Fail Threshold</strong></td><td>{soft_threshold if soft_threshold is not None else "—"}</td></tr>
+                <tr><td><strong>Hard Fail Threshold</strong></td><td>{hard_threshold if hard_threshold is not None else "—"}</td></tr>
+                <tr><td><strong>Current Error Rate</strong></td><td>{error_rate if error_rate is not None else "—"}</td></tr>
                 <tr><td><strong>Status</strong></td><td><span class="status-badge status-{status_class}">{status}</span></td></tr>
             </table>
         </div>

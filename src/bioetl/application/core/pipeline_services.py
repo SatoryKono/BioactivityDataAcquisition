@@ -4,6 +4,7 @@ Part of BasePipeline decomposition (ADR-0005).
 Separates I/O port dependencies from pipeline logic.
 
 Logger and Metrics are formalized as ports (ADR-005).
+DQ report services added for optional DQ report generation.
 """
 
 from __future__ import annotations
@@ -11,7 +12,7 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 from types import TracebackType
-from typing import Self
+from typing import TYPE_CHECKING, Self
 
 from bioetl.domain.ports import (
     CheckpointPort,
@@ -24,6 +25,15 @@ from bioetl.domain.ports import (
     StoragePort,
     TracingPort,
 )
+
+if TYPE_CHECKING:
+    from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.domain.ports import (
+        BronzeDQAnalyzerPort,
+        DQReportWriterPort,
+        GoldDQAnalyzerPort,
+        SilverDQAnalyzerPort,
+    )
 
 
 @dataclass(frozen=True)
@@ -46,6 +56,11 @@ class PipelineServices:
         tracing: Port for distributed tracing.
         logger: Structured logger for pipeline events.
         dq_monitor: Optional data quality monitor for anomaly detection.
+        bronze_dq_analyzer: Optional Bronze layer DQ analyzer for report generation.
+        silver_dq_analyzer: Optional Silver layer DQ analyzer for report generation.
+        gold_dq_analyzer: Optional Gold layer DQ analyzer for report generation.
+        dq_report_writer: Optional DQ report writer for persisting reports.
+        dq_report_service: Optional orchestration service for DQ reports.
 
     Example:
         >>> services = PipelineServices(
@@ -69,6 +84,13 @@ class PipelineServices:
     tracing: TracingPort
     logger: LoggerPort
     dq_monitor: DQMonitorPort | None = None
+
+    # DQ Report services (optional, created only if any layer has dq_report enabled)
+    bronze_dq_analyzer: BronzeDQAnalyzerPort | None = None
+    silver_dq_analyzer: SilverDQAnalyzerPort | None = None
+    gold_dq_analyzer: GoldDQAnalyzerPort | None = None
+    dq_report_writer: DQReportWriterPort | None = None
+    dq_report_service: DQReportService | None = None
 
     def __post_init__(self) -> None:
         """Validate that all services are provided."""

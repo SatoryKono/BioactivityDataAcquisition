@@ -152,8 +152,10 @@ def quarantine_replay(
     if dry_run:
         click.echo(f"\nWould replay {len(records)} record(s):\n")
         for i, rec in enumerate(records[:10], 1):
+            payload_hash = rec.get("payload_hash")
+            hash_display = payload_hash[:16] if payload_hash else "—"
             click.echo(
-                f"  {i}. Error: {rec.get('error_code')} | Hash: {rec.get('payload_hash', 'N/A')[:16]}..."
+                f"  {i}. Error: {rec.get('error_code')} | Hash: {hash_display}..."
             )
         if len(records) > 10:
             click.echo(f"  ... and {len(records) - 10} more")

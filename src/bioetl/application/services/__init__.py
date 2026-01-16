@@ -29,6 +29,11 @@ from bioetl.application.services.config_service import (
     SettingsInfo,
 )
 from bioetl.application.services.data_quality_service import DataQualityService
+from bioetl.application.services.dq_report_service import (
+    DQReportContext,
+    DQReportResult,
+    DQReportService,
+)
 from bioetl.application.services.export_service import (
     ColumnInfo,
     ExportOptions,
@@ -88,6 +93,9 @@ __all__ = [
     "ClearResult",
     "ColumnInfo",
     "ConfigService",
+    "DQReportContext",
+    "DQReportResult",
+    "DQReportService",
     "DataQualityService",
     "ExportOptions",
     "ExportResult",

@@ -42,6 +42,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import (
         AuditPort,
         LoggerPort,
+        MetadataCoordinatorPort,
         MetadataWriterPort,
         TracingPort,
     )
@@ -72,6 +73,7 @@ class GoldWriter(BaseDeltaWriter):
         csv_exporter: CsvExporter | None = None,
         audit: AuditPort | None = None,
         metadata_writer: MetadataWriterPort | None = None,
+        metadata_coordinator: MetadataCoordinatorPort | None = None,
     ) -> None:
         """Initialize Gold writer.
 
@@ -86,6 +88,10 @@ class GoldWriter(BaseDeltaWriter):
                   Use NoOpAudit from composition layer if audit disabled.
             metadata_writer: Optional MetadataWriterPort for writing _metadata.yaml
                            sidecar files. Use NoOpMetadataWriter if disabled.
+            metadata_coordinator: Optional MetadataCoordinator for centralized
+                                metadata creation. If provided, uses coordinator
+                                instead of local _write_gold_metadata() logic.
+                                Ensures consistent run_id across layers.
 
         Note:
             LoggerPort is required per RULES.md DI requirements.
@@ -112,6 +118,9 @@ class GoldWriter(BaseDeltaWriter):
 
             metadata_writer = NoOpMetadataWriter()
         self._metadata_writer: MetadataWriterPort = metadata_writer
+        self._metadata_coordinator: MetadataCoordinatorPort | None = (
+            metadata_coordinator
+        )
 
     async def write_gold(
         self,
@@ -235,6 +244,57 @@ class GoldWriter(BaseDeltaWriter):
         )
         if not is_strict:
             raise ValueError("Gold layer requires strict=True schema validation")
+
+    async def write_gold_merged(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str] | None = None,
+    ) -> None:
+        """Write merged records to Gold layer without Pandera schema.
+
+        Used by composite pipelines where schema is dynamically determined
+        by the merge operation. No Pandera validation is performed.
+
+        Args:
+            table_name: The name of the table to write to.
+            records: A list of dictionaries representing merged records.
+            primary_keys: Optional list of column names for sorting.
+        """
+        if not records:
+            self.logger.warning(
+                "No records to write for merged Gold",
+                table_name=table_name,
+            )
+            return
+
+        # Convert to Arrow and sort if primary keys provided
+        arrow_table = pa.Table.from_pylist(records)
+
+        if primary_keys:
+            valid_keys = [pk for pk in primary_keys if pk in arrow_table.schema.names]
+            if valid_keys:
+                arrow_table = arrow_table.sort_by(
+                    [(pk, "ascending") for pk in valid_keys]
+                )
+
+        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+
+        self.logger.info(
+            "Writing merged Gold records",
+            table_name=table_name,
+            path=table_path,
+            records=len(records),
+        )
+
+        await self._run_in_executor(
+            lambda: write_deltalake(
+                table_path,
+                arrow_table,
+                mode="overwrite",
+                schema_mode="overwrite",
+            ),
+        )
 
     async def _validate_records_against_schema(
         self, records: list[dict[str, Any]], schema: DataFrameSchema
@@ -388,6 +448,28 @@ class GoldWriter(BaseDeltaWriter):
             ingestion_ts: Ingestion timestamp.
             run_id: Run identifier.
         """
+        if not records:
+            return
+
+        # Use MetadataCoordinator if available (centralized metadata)
+        if self._metadata_coordinator is not None:
+            from bioetl.domain.ports.metadata_coordinator import (
+                GoldMetadataInput,
+            )
+
+            gold_input = GoldMetadataInput(
+                table_path=table_path,
+                table_name=table_name,
+                records=records,
+                mode=mode,
+                scd_config=scd_config,
+                completed_at=ingestion_ts,
+            )
+            metadata = self._metadata_coordinator.create_gold_metadata(gold_input)
+            await self._metadata_writer.write_gold_metadata(table_path, metadata)
+            return
+
+        # Fallback to local metadata building (backward compatibility)
         from datetime import UTC
         from importlib.metadata import version as pkg_version
         from platform import node as hostname
@@ -404,9 +486,6 @@ class GoldWriter(BaseDeltaWriter):
             RunTypeEnum,
             SCDMetadata,
         )
-
-        if not records:
-            return
 
         # Build runtime metadata
         now = ingestion_ts or datetime.now(UTC)
