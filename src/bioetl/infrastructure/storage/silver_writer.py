@@ -58,6 +58,10 @@ if TYPE_CHECKING:
         TracingPort,
     )
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+    from bioetl.domain.value_objects.dq_metrics import (
+        BatchDQMetrics,
+        SchemaDriftInfo,
+    )
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
@@ -432,6 +436,53 @@ class SilverWriter(BaseDeltaWriter):
         # "evolve" will let Delta Lake handle schema evolution via schema_mode
         # "ignore" will filter records to match existing schema
 
+    async def _detect_schema_drift(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+    ) -> SchemaDriftInfo | None:
+        """Detect schema drift between existing table and incoming records.
+
+        Non-raising version used for DQ metrics computation.
+
+        Args:
+            table_name: Target table name.
+            records: List of records to check.
+
+        Returns:
+            SchemaDriftInfo if drift detected, None otherwise.
+        """
+        from bioetl.domain.value_objects.dq_metrics import SchemaDriftInfo
+
+        existing_schema = await self._get_table_schema(table_name)
+        if existing_schema is None or not records:
+            return None
+
+        incoming_fields = set(records[0].keys())
+        existing_fields = set(existing_schema.names)
+
+        new_fields = incoming_fields - existing_fields
+        missing_fields = existing_fields - incoming_fields
+
+        if not new_fields and not missing_fields:
+            return None
+
+        # Determine drift severity
+        # Critical: missing required fields (starts with no underscore = business field)
+        critical_missing = [f for f in missing_fields if not f.startswith("_")]
+        if critical_missing:
+            status = "critical"
+        elif len(new_fields) > 3:
+            status = "warn"
+        else:
+            status = "info"
+
+        return SchemaDriftInfo(
+            status=status,
+            new_fields=tuple(sorted(new_fields)),
+            missing_fields=tuple(sorted(missing_fields)),
+        )
+
     async def write_silver(
         self,
         table_name: str,
@@ -527,6 +578,9 @@ class SilverWriter(BaseDeltaWriter):
                     mode=validated_mode,
                 )
 
+            # Compute DQ metrics for metadata (REQ-DQ-001)
+            dq_metrics = await self._compute_dq_metrics(table_name, records)
+
             # Write metadata sidecar file if configured
             await self._write_silver_metadata(
                 table_path=table_path,
@@ -534,7 +588,40 @@ class SilverWriter(BaseDeltaWriter):
                 primary_keys=primary_keys,
                 mode=validated_mode,
                 bronze_refs=bronze_refs,
+                dq_metrics=dq_metrics,
             )
+
+    async def _compute_dq_metrics(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+    ) -> BatchDQMetrics:
+        """Compute DQ metrics for the batch of records.
+
+        Calculates column statistics, detects schema drift, and creates
+        a BatchDQMetrics value object for metadata persistence.
+
+        Args:
+            table_name: Target table name for schema drift detection.
+            records: List of records to analyze.
+
+        Returns:
+            BatchDQMetrics with computed column stats and schema drift info.
+        """
+        from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
+
+        # Detect schema drift (non-raising, for metrics only)
+        schema_drift = await self._detect_schema_drift(table_name, records)
+
+        # Create BatchDQMetrics with column statistics
+        # Currently all records passed validation (errors were quarantined earlier)
+        return BatchDQMetrics.from_records(
+            records=records,
+            error_count=0,  # Records here passed validation
+            warning_count=0,
+            validation_errors=None,
+            schema_drift=schema_drift,
+        )
 
     async def _log_silver_audit(
         self,
@@ -634,6 +721,7 @@ class SilverWriter(BaseDeltaWriter):
         primary_keys: list[str],
         mode: SilverWriteMode,
         bronze_refs: list[BronzeWriteResult] | None = None,
+        dq_metrics: BatchDQMetrics | None = None,
     ) -> None:
         """Write Silver layer metadata sidecar file.
 
@@ -645,6 +733,9 @@ class SilverWriter(BaseDeltaWriter):
             bronze_refs: Optional list of BronzeWriteResult for lineage tracking.
                 If provided, bronze_paths will be populated from relative_path
                 of each BronzeWriteResult (REQ-LINEAGE-001).
+            dq_metrics: Optional BatchDQMetrics with computed DQ metrics.
+                If provided, dq_summary will contain real column metrics,
+                schema drift info, and error rates (REQ-DQ-001).
         """
         from datetime import UTC, datetime
         from importlib.metadata import version as pkg_version
@@ -737,11 +828,16 @@ class SilverWriter(BaseDeltaWriter):
             rows_inserted=len(records),
         )
 
-        # Build DQ summary (basic metrics)
-        dq_summary = DQSummary(
-            total_records=len(records),
-            valid_records=len(records),
-        )
+        # Build DQ summary from computed metrics or use basic fallback
+        if dq_metrics is not None:
+            # Use real DQ metrics with column stats, schema drift, error rates
+            dq_summary = dq_metrics.to_dq_summary()
+        else:
+            # Fallback to basic metrics (backward compatibility)
+            dq_summary = DQSummary(
+                total_records=len(records),
+                valid_records=len(records),
+            )
 
         # Build output metrics
         output = SilverOutputMetadata(

@@ -117,6 +117,11 @@ from bioetl.domain.value_objects.dq_report import (
     UniquenessResult,
     ValueDistributionResult,
 )
+from bioetl.domain.value_objects.dq_metrics import (
+    BatchDQMetrics,
+    ColumnStats,
+    SchemaDriftInfo,
+)
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 from bioetl.domain.value_objects.identifiers import (
     ChemblId,
@@ -139,6 +144,7 @@ __all__ = [
     "ORCID",
     "SMILES",
     "ActivityType",
+    "BatchDQMetrics",
     "BronzeWriteResult",
     "ActivityValue",
     "AnomalyDetectionResult",
@@ -150,6 +156,7 @@ __all__ = [
     "BusinessRulesResult",
     "CategoricalDistribution",
     "ChemblId",
+    "ColumnStats",
     "CompletenessResult",
     "CompoundId",
     "CompoundIdUnion",
@@ -189,6 +196,7 @@ __all__ = [
     "ReferentialIntegrityResult",
     "RelationOperator",
     "SCDIntegrityResult",
+    "SchemaDriftInfo",
     "SchemaDriftResult",
     "SchemaSnapshotResult",
     "SemanticScholarId",
