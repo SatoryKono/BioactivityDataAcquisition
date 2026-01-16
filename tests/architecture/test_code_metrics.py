@@ -64,7 +64,7 @@ class TestFileSizeLimits:
         # Domain DQ models (data quality reports and serialization)
         "dq_serializer.py": 435,  # 429 LOC - DQ report serialization logic (increased for CC reduction)
         "dq_report.py": 660,  # 646 LOC - DQ report models with validation rules
-        "dq_metrics.py": 390,  # 387 LOC - Batch DQ metrics with extracted helpers for CC reduction
+        "dq_metrics.py": 420,  # 411 LOC - Batch DQ metrics with helpers for CC reduction + _make_hashable for list/dict values
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
         "batch_executor.py": 650,  # 610 LOC - unified executor for batch processing
