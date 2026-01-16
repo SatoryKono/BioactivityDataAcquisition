@@ -186,42 +186,67 @@ class CrossRefAdapter(BaseHttpAdapter):
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch with fallback search by title when DOI returns 404.
 
+        Strategy (three-phase fallback):
+        1. Batch DOI lookup for valid DOIs
+        2. For DOIs not found -> search by title from fallback_mapping
+        3. For empty DOIs (in filter_ids as "") -> search by title only
+
         Args:
             entity_type: Must be 'work' or 'publication'.
-            filter_ids: List of DOIs to resolve.
+            filter_ids: List of DOIs to resolve (may include empty strings).
             filter_field: Field name for filtering ('doi').
             fallback_mapping: Mapping {doi: title} for fallback search.
             limit: Maximum number of records to fetch.
 
         Yields:
-            Publication records.
+            Publication records with `_lookup_method` field indicating resolution method.
         """
         if entity_type not in ("work", "publication"):
             raise ValueError(
                 f"CrossRefAdapter supports 'work'/'publication', got: {entity_type}"
             )
 
-        dois = filter_ids[:limit] if limit else filter_ids
         fetched = 0
         found_dois: set[str] = set()
 
-        # Batch fetch (primary path)
-        for i in range(0, len(dois), self.batch_size):
-            batch = dois[i : i + self.batch_size]
+        # Split DOIs into valid and title-only entries
+        valid_dois = [d for d in filter_ids if d and d.strip()]
+        title_only_entries = [d for d in filter_ids if not d or not d.strip()]
+
+        # Apply limit to valid DOIs
+        if limit:
+            valid_dois = valid_dois[:limit]
+
+        # Phase 1: Batch fetch (primary path)
+        for i in range(0, len(valid_dois), self.batch_size):
+            batch = valid_dois[i : i + self.batch_size]
             async for publication in self._batch_fetcher.fetch_batch(batch):
                 doi = publication.get("DOI", "").lower()
                 found_dois.add(doi)
+                publication["_lookup_method"] = "doi"
                 yield publication
                 fetched += 1
                 if limit and fetched >= limit:
                     return
 
-        # Fallback for not-found DOIs using handler
+        # Phase 2: Fallback for not-found DOIs using handler
         async for pub in self._fallback_handler.process_missing_dois(
-            dois=dois,
+            dois=valid_dois,
             found_dois=found_dois,
             fallback_mapping=fallback_mapping,
             normalize_fn=normalize_doi,
+            limit=limit,
+            fetched=fetched,
+        ):
+            yield pub
+            fetched += 1
+            if limit and fetched >= limit:
+                return
+
+        # Phase 3: Title-only entries (no DOI provided)
+        async for pub in self._fallback_handler.process_title_only_entries(
+            entries=title_only_entries,
+            fallback_mapping=fallback_mapping,
             limit=limit,
             fetched=fetched,
         ):

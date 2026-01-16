@@ -125,6 +125,7 @@ class TestStorageAdapter:
             mode="merge",
             partition_cols=None,
             on_schema_mismatch="error",
+            bronze_refs=None,
         )
 
     async def test_write_gold_delegates(self, storage_adapter, mock_gold_writer):
