@@ -42,6 +42,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import (
         AuditPort,
         LoggerPort,
+        MetadataCoordinatorPort,
         MetadataWriterPort,
         TracingPort,
     )
@@ -72,6 +73,7 @@ class GoldWriter(BaseDeltaWriter):
         csv_exporter: CsvExporter | None = None,
         audit: AuditPort | None = None,
         metadata_writer: MetadataWriterPort | None = None,
+        metadata_coordinator: MetadataCoordinatorPort | None = None,
     ) -> None:
         """Initialize Gold writer.
 
@@ -86,6 +88,10 @@ class GoldWriter(BaseDeltaWriter):
                   Use NoOpAudit from composition layer if audit disabled.
             metadata_writer: Optional MetadataWriterPort for writing _metadata.yaml
                            sidecar files. Use NoOpMetadataWriter if disabled.
+            metadata_coordinator: Optional MetadataCoordinator for centralized
+                                metadata creation. If provided, uses coordinator
+                                instead of local _write_gold_metadata() logic.
+                                Ensures consistent run_id across layers.
 
         Note:
             LoggerPort is required per RULES.md DI requirements.
@@ -112,6 +118,9 @@ class GoldWriter(BaseDeltaWriter):
 
             metadata_writer = NoOpMetadataWriter()
         self._metadata_writer: MetadataWriterPort = metadata_writer
+        self._metadata_coordinator: MetadataCoordinatorPort | None = (
+            metadata_coordinator
+        )
 
     async def write_gold(
         self,
@@ -439,6 +448,28 @@ class GoldWriter(BaseDeltaWriter):
             ingestion_ts: Ingestion timestamp.
             run_id: Run identifier.
         """
+        if not records:
+            return
+
+        # Use MetadataCoordinator if available (centralized metadata)
+        if self._metadata_coordinator is not None:
+            from bioetl.domain.ports.metadata_coordinator import (
+                GoldMetadataInput,
+            )
+
+            gold_input = GoldMetadataInput(
+                table_path=table_path,
+                table_name=table_name,
+                records=records,
+                mode=mode,
+                scd_config=scd_config,
+                completed_at=ingestion_ts,
+            )
+            metadata = self._metadata_coordinator.create_gold_metadata(gold_input)
+            await self._metadata_writer.write_gold_metadata(table_path, metadata)
+            return
+
+        # Fallback to local metadata building (backward compatibility)
         from datetime import UTC
         from importlib.metadata import version as pkg_version
         from platform import node as hostname
@@ -455,9 +486,6 @@ class GoldWriter(BaseDeltaWriter):
             RunTypeEnum,
             SCDMetadata,
         )
-
-        if not records:
-            return
 
         # Build runtime metadata
         now = ingestion_ts or datetime.now(UTC)
