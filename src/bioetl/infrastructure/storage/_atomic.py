@@ -229,6 +229,17 @@ class AtomicWriteGroup:
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
+        """Exit context manager, rolling back on exception.
+
+        If an exception occurred within the context, all pending temp files
+        are cleaned up via rollback(). If no exception, user should have
+        called commit() explicitly before exiting.
+
+        Args:
+            exc_type: Exception type if an exception was raised, None otherwise.
+            exc_val: Exception instance if an exception was raised, None otherwise.
+            exc_tb: Traceback if an exception was raised, None otherwise.
+        """
         if exc_type is not None:
             self.rollback()
         # If no exception, user should have called commit()
