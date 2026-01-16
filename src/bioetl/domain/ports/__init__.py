@@ -48,6 +48,7 @@ from bioetl.domain.ports.health_check import (
     HealthCheckPort,
     HealthCheckResult,
     HealthMonitorPort,
+    HealthStatePort,
     HealthStatusLiteral,
 )
 from bioetl.domain.ports.idmapping import IDMappingPort
@@ -109,6 +110,7 @@ __all__ = [
     "HealthCheckPort",
     "HealthCheckResult",
     "HealthMonitorPort",
+    "HealthStatePort",
     "HealthStatusLiteral",
     "IDMappingPort",
     "InputFilterPort",
