@@ -76,6 +76,11 @@ from bioetl.domain.value_objects.compound_ids import (
     CompoundIdUnion,
     CompoundSource,
 )
+from bioetl.domain.value_objects.dq_metrics import (
+    BatchDQMetrics,
+    ColumnStats,
+    SchemaDriftInfo,
+)
 from bioetl.domain.value_objects.dq_report import (
     AnomalyDetectionResult,
     AnomalyMetric,
@@ -117,11 +122,6 @@ from bioetl.domain.value_objects.dq_report import (
     UniquenessResult,
     ValueDistributionResult,
 )
-from bioetl.domain.value_objects.dq_metrics import (
-    BatchDQMetrics,
-    ColumnStats,
-    SchemaDriftInfo,
-)
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 from bioetl.domain.value_objects.identifiers import (
     ChemblId,
@@ -144,14 +144,14 @@ __all__ = [
     "ORCID",
     "SMILES",
     "ActivityType",
-    "BatchDQMetrics",
-    "BronzeWriteResult",
     "ActivityValue",
     "AnomalyDetectionResult",
     "AnomalyMetric",
     "AssayId",
+    "BatchDQMetrics",
     "BronzeDQCheckType",
     "BronzeDQReport",
+    "BronzeWriteResult",
     "BusinessRuleResult",
     "BusinessRulesResult",
     "CategoricalDistribution",
