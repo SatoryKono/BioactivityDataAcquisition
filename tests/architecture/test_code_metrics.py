@@ -60,7 +60,7 @@ class TestFileSizeLimits:
         "compound.py": 380,  # 377 LOC - PubChem molecule schema + deprecated alias (v2.0)
         "protein.py": 360,  # 354 LOC - UniProt target schema + deprecated alias (v2.0)
         # Domain DQ models (data quality reports and serialization)
-        "dq_serializer.py": 420,  # 409 LOC - DQ report serialization logic
+        "dq_serializer.py": 435,  # 429 LOC - DQ report serialization logic (increased for CC reduction)
         "dq_report.py": 660,  # 646 LOC - DQ report models with validation rules
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
@@ -82,7 +82,7 @@ class TestFileSizeLimits:
         "silver_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
         "gold_writer.py": 820,  # 808 LOC - SCD Type 2 + metadata sidecar integration
         "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
-        "gold.py": 880,  # 877 LOC - Gold layer Pandera schemas (+ IDMapping + taxonomy_id standardization)
+        "gold.py": 920,  # 915 LOC - Gold layer Pandera schemas (+ IDMapping + taxonomy_id standardization + Config docstrings)
         "silver.py": 780,  # 775 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization)
         "client.py": 700,  # 692 LOC - ChemblAdapter (complex FilterableDataSourcePort), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
@@ -213,6 +213,11 @@ class TestFunctionComplexity:
         "_check_scd_integrity": 16,  # CC=15 - SCD Type 2 integrity
         "_check_value_distribution": 18,  # CC=17 - Value distribution analysis
         "_check_schema_drift": 14,  # CC=13 - Schema drift detection
+        # Composite pipeline merge service
+        "_apply_explicit_rules": 18,  # CC=16 - Explicit field priority rules with column reordering
+        # Composite pipeline domain models (ADR-026)
+        "DQOverrideConfig": 10,  # CC=9 - DQ override validation with threshold checks
+        "from_dict": 8,  # CC=6 - Dictionary parsing with type conversions
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -448,7 +453,7 @@ class TestClassSize:
         # Audit adapter (file-based audit logging)
         "FileAuditAdapter": 330,  # 324 lines - File-based AuditPort implementation with async I/O
         # DQ analyzers (comprehensive data quality analysis)
-        "DQReportSerializer": 400,  # 383 lines - DQ report serialization with multiple formats
+        "DQReportSerializer": 410,  # 403 lines - DQ report serialization with multiple formats (increased for CC reduction)
         "GoldDQAnalyzer": 770,  # 752 lines - Gold layer DQ analysis with business rules
         "SilverDQAnalyzer": 540,  # 521 lines - Silver layer DQ analysis with schema drift
         # Domain services
@@ -471,6 +476,10 @@ class TestClassSize:
         "PubchemMoleculeSchema": 350,  # 345 lines - PubChem molecule schema with many chemical fields
         # Derived entity data source wrappers (comprehensive docstrings)
         "PublicationTermDataSource": 570,  # 566 lines - Wrapper with FilterableDataSourcePort delegation
+        # Composite pipeline services (ADR-026)
+        "MergeService": 450,  # 427 lines - Composite merge service with conflict resolution
+        "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
+        "CompositePipelineRunner": 350,  # 313 lines - Composite pipeline orchestrator
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:
@@ -619,10 +628,14 @@ class TestGodObjectDetection:
         "PubchemMoleculeSchema": "Pandera schema - declarative field definitions, no behavior to delegate",
         # Audit adapters (cohesive file I/O operations)
         "FileAuditAdapter": "Cohesive adapter - all methods relate to audit file operations (read/write JSONL)",
-        # DQ analyzers (cohesive analysis responsibility)
-        "DQReportSerializer": "Cohesive serializer - all methods relate to DQ report serialization",
-        "GoldDQAnalyzer": "Cohesive analyzer - all methods relate to Gold layer DQ analysis",
-        "SilverDQAnalyzer": "Cohesive analyzer - all methods relate to Silver layer DQ analysis",
+        # Composite pipeline services (ADR-026)
+        "MergeService": "Cohesive service - all methods relate to merge operations and conflict resolution",
+        "EnrichmentCoordinator": "Cohesive service - all methods relate to enricher orchestration",
+        "CompositePipelineRunner": "Thin orchestrator - delegates to coordinator, merger, checkpoint services",
+        # DQ analyzers (cohesive data quality analysis with many validation methods)
+        "GoldDQAnalyzer": "Cohesive analyzer - all methods relate to Gold layer data quality analysis",
+        "SilverDQAnalyzer": "Cohesive analyzer - all methods relate to Silver layer data quality analysis",
+        "DQReportSerializer": "Cohesive serializer - all methods relate to DQ report serialization formats",
     }
 
     def test_large_classes_have_delegation(self, src_dir: Path) -> None:

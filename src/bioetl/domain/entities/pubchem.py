@@ -119,15 +119,7 @@ class PubchemMolecule(BaseEntity):
             )
 
 
-# === Deprecated Alias (ADR-024 backward compatibility) ===
-# Will be removed in v3.0
-PubChemCompoundRecord = PubchemMoleculeRecord
-
-
 __all__ = [
-    # Deprecated alias (backward compatibility)
-    "PubChemCompoundRecord",
     "PubchemMolecule",
-    # Canonical names (ADR-024)
     "PubchemMoleculeRecord",
 ]

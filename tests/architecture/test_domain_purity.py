@@ -263,6 +263,9 @@ class TestDomainComplexity:
             "_dict_to_yaml": 7,  # CC=6 - YAML dictionary serialization
             "_yaml_value": 8,  # CC=7 - YAML value formatting
             "_render_check_details": 9,  # CC=8 - DQ check details rendering
+            # Composite pipeline domain models (ADR-026)
+            "DQOverrideConfig": 10,  # CC=9 - DQ override validation with threshold checks
+            "from_dict": 8,  # CC=6 - Dictionary parsing with type conversions
         }
 
         violations = []

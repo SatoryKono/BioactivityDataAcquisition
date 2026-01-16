@@ -602,6 +602,9 @@ def test_pipeline_configs_schema(project_root: Path):
         # Skip source configs
         if "sources" in yaml_file.parts:
             continue
+        # Skip composite configs (different schema, see ADR-026)
+        if "composite" in yaml_file.parts:
+            continue
 
         with yaml_file.open(encoding="utf-8") as f:
             data = yaml.safe_load(f)

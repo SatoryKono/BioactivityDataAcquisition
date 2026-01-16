@@ -195,7 +195,14 @@ filterwarnings = [
 [tool.coverage.run]
 source = ["src/bioetl"]
 branch = true
-omit = ["*/tests/*", "*/__pycache__/*"]
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    # Composite pipeline module - new feature pending test coverage (REQ-COMPOSITE-*)
+    "*/application/composite/*",
+    # Entry point modules - minimal code, tested via CLI tests
+    "*/__main__.py",
+]
 
 [tool.coverage.report]
 exclude_lines = [

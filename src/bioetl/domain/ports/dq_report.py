@@ -29,10 +29,18 @@ if TYPE_CHECKING:
         SilverDQReport,
     )
 
-# Type aliases for data containers (polars/pyarrow)
-# Using Any to avoid infrastructure imports in domain layer
-DataContainer = Any  # polars.DataFrame | pyarrow.Table
-DataContainerDict = dict[str, Any]  # dict[str, polars.DataFrame | pyarrow.Table]
+DataContainer = Any
+"""Type alias for data containers (polars.DataFrame or pyarrow.Table).
+
+Uses Any to avoid infrastructure imports in domain layer per Ports & Adapters.
+"""
+
+DataContainerDict = dict[str, Any]
+"""Type alias for dictionary of named data containers.
+
+Maps table names to polars.DataFrame or pyarrow.Table instances.
+Uses Any to avoid infrastructure imports in domain layer.
+"""
 
 
 @runtime_checkable

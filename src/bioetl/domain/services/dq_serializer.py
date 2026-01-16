@@ -92,18 +92,23 @@ class DQReportSerializer:
         """Recursively convert dataclass to dict with enum/datetime handling."""
         if is_dataclass(obj) and not isinstance(obj, type):
             return {k: self._dataclass_to_dict(v) for k, v in asdict(obj).items()}
-        elif isinstance(obj, Enum):
+        return self._convert_value(obj)
+
+    def _convert_value(self, obj: Any) -> Any:
+        """Convert a single value to serializable format."""
+        if isinstance(obj, Enum):
             return obj.value
-        elif isinstance(obj, datetime):
+        if isinstance(obj, datetime):
             return obj.isoformat()
-        elif isinstance(obj, tuple):
+        return self._convert_collection(obj)
+
+    def _convert_collection(self, obj: Any) -> Any:
+        """Convert collection types to serializable format."""
+        if isinstance(obj, (tuple, list)):
             return [self._dataclass_to_dict(item) for item in obj]
-        elif isinstance(obj, dict):
+        if isinstance(obj, dict):
             return {k: self._dataclass_to_dict(v) for k, v in obj.items()}
-        elif isinstance(obj, list):
-            return [self._dataclass_to_dict(item) for item in obj]
-        else:
-            return obj
+        return obj
 
     def _dict_to_yaml(self, data: dict[str, Any], indent: int = 0) -> str:
         """Simple YAML serialization without external dependencies."""
@@ -111,34 +116,44 @@ class DQReportSerializer:
         prefix = "  " * indent
 
         for key, value in data.items():
-            if isinstance(value, dict):
-                lines.append(f"{prefix}{key}:")
-                lines.append(self._dict_to_yaml(value, indent + 1))
-            elif isinstance(value, list):
-                lines.append(f"{prefix}{key}:")
-                for item in value:
-                    if isinstance(item, dict):
-                        lines.append(f"{prefix}  -")
-                        lines.append(self._dict_to_yaml(item, indent + 2))
-                    else:
-                        lines.append(f"{prefix}  - {self._yaml_value(item)}")
-            else:
-                lines.append(f"{prefix}{key}: {self._yaml_value(value)}")
+            lines.extend(self._yaml_entry(key, value, prefix, indent))
 
         return "\n".join(lines)
+
+    def _yaml_entry(self, key: str, value: Any, prefix: str, indent: int) -> list[str]:
+        """Convert a single key-value pair to YAML lines."""
+        if isinstance(value, dict):
+            return [f"{prefix}{key}:", self._dict_to_yaml(value, indent + 1)]
+        if isinstance(value, list):
+            return [f"{prefix}{key}:", *self._yaml_list(value, prefix, indent)]
+        return [f"{prefix}{key}: {self._yaml_value(value)}"]
+
+    def _yaml_list(self, items: list[Any], prefix: str, indent: int) -> list[str]:
+        """Convert a list to YAML lines."""
+        lines = []
+        for item in items:
+            if isinstance(item, dict):
+                lines.append(f"{prefix}  -")
+                lines.append(self._dict_to_yaml(item, indent + 2))
+            else:
+                lines.append(f"{prefix}  - {self._yaml_value(item)}")
+        return lines
 
     def _yaml_value(self, value: Any) -> str:
         """Format a single value for YAML."""
         if value is None:
             return "null"
-        elif isinstance(value, bool):
+        if isinstance(value, bool):
             return str(value).lower()
-        elif isinstance(value, str):
-            if "\n" in value or ":" in value or "#" in value:
-                return f'"{value}"'
-            return value
-        else:
-            return str(value)
+        if isinstance(value, str):
+            return self._quote_yaml_string(value)
+        return str(value)
+
+    def _quote_yaml_string(self, value: str) -> str:
+        """Quote YAML string if it contains special characters."""
+        if "\n" in value or ":" in value or "#" in value:
+            return f'"{value}"'
+        return value
 
     def _generate_html(
         self,
@@ -368,12 +383,7 @@ class DQReportSerializer:
         for key, value in data.items():
             if key == "status":
                 continue
-            if isinstance(value, dict):
-                value_str = f"<pre>{orjson.dumps(value, option=orjson.OPT_INDENT_2).decode()}</pre>"
-            elif isinstance(value, (list, tuple)):
-                value_str = ", ".join(str(v) for v in value) if value else "[]"
-            else:
-                value_str = str(value)
+            value_str = self._format_detail_value(value)
             rows.append(
                 f"<tr><td><strong>{key.replace('_', ' ').title()}</strong></td><td>{value_str}</td></tr>"
             )
@@ -382,6 +392,16 @@ class DQReportSerializer:
             return "<p>No details available.</p>"
 
         return f"<table>{''.join(rows)}</table>"
+
+    def _format_detail_value(self, value: Any) -> str:
+        """Format a detail value for HTML display."""
+        if isinstance(value, dict):
+            return (
+                f"<pre>{orjson.dumps(value, option=orjson.OPT_INDENT_2).decode()}</pre>"
+            )
+        if isinstance(value, (list, tuple)):
+            return ", ".join(str(v) for v in value) if value else "[]"
+        return str(value)
 
     def _render_thresholds_html(self, thresholds: dict[str, Any]) -> str:
         """Render thresholds card as HTML."""

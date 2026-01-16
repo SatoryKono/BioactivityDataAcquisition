@@ -5,7 +5,7 @@ sequenceDiagram
     participant WorkerB as Worker B (owner_b_uuid)
     participant Lock as MemoryLock
     participant HeartbeatA as Heartbeat Thread A
-    participant Storage as DeltaWriter
+    participant Storage as SilverWriter
 
     Note over Lock: Lock Key: lock:chembl_activity, TTL: 90s, Heartbeat: 30s
 

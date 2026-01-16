@@ -1,6 +1,8 @@
 name: Commit Lint
 
-on: [pull_request]
+on:
+  pull_request:
+    branches: [main, master]
 
 jobs:
   commit-lint:
@@ -10,3 +12,6 @@ jobs:
         with:
           fetch-depth: 0
       - uses: wagoid/commitlint-github-action@v5
+        with:
+          configFile: commitlint.config.js
+          helpURL: https://www.conventionalcommits.org/

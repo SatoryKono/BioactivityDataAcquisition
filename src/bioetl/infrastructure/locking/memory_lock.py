@@ -158,7 +158,17 @@ class MemoryLock(LockPort):
         owner_id: RunID,
         exclusive: bool = False,
     ) -> bool:
-        """Release a lock."""
+        """Release a lock held by the specified owner.
+
+        Args:
+            key: Lock key to release.
+            owner_id: Owner identifier (must match the owner that acquired the lock).
+            exclusive: Exclusive lock flag (unused in memory lock).
+
+        Returns:
+            True if lock was released, False if lock not found or owner mismatch.
+
+        """
         async with self._global_lock:
             if key not in self._locks:
                 return False

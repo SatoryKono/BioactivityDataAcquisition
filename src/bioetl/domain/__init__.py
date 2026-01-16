@@ -10,9 +10,13 @@ This module provides a clean public API for the domain layer, exposing:
 - Configuration (Domain config objects)
 - Transformations (Pure functions for hashing, schema drift, DQ)
 - Error classification (Pure domain logic for error categorization)
+- Composite (Composite pipeline domain models, ADR-026)
 """
 
 from __future__ import annotations
+
+# Composite pipeline subpackage (ADR-026)
+from bioetl.domain import composite
 
 # Configuration objects
 from bioetl.domain.config import (
@@ -53,14 +57,11 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     ChemblPublicationRecord,
     ChemblPublicationTermRecord,
     CompoundRecord,
-    DocumentRecord,
     DocumentSimilarity,
     DocumentTerm,
-    DocumentTermRecord,
     Molecule,
     MoleculeRecord,
     ProteinClassification,
-    PubChemCompoundRecord,
     PubchemMolecule,
     PubchemMoleculeRecord,
     Publication,
@@ -288,6 +289,8 @@ from bioetl.domain.value_objects import (
 )
 
 __all__ = [
+    # Composite pipeline (subpackage)
+    "composite",
     # Configuration
     "DEFAULT_VALIDATION_CONFIG",
     "DQConfig",
@@ -307,16 +310,9 @@ __all__ = [
     "ArticleRecord",
     "AssayRecord",
     "CellLineRecord",
-    # Canonical DTO names (ADR-024)
     "ChemblPublicationRecord",
     "ChemblPublicationTermRecord",
-    # Deprecated aliases (backward compatibility)
-    "DocumentRecord",
-    "DocumentTermRecord",
     "MoleculeRecord",
-    # Deprecated alias
-    "PubChemCompoundRecord",
-    # Canonical DTO name (ADR-024)
     "PubchemMoleculeRecord",
     "PublicationRecord",
     "TargetComponentRecord",
