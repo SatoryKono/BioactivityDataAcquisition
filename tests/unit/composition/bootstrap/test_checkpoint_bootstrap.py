@@ -53,7 +53,8 @@ class TestBootstrapQuarantine:
 
         # Verify it's a valid UnifiedQuarantine instance with correct path
         assert isinstance(result, UnifiedQuarantine)
-        assert "common/quarantine" in result.base_path
+        # Use Path for cross-platform comparison (Windows uses backslashes)
+        assert Path(result.base_path).match("*/common/quarantine")
 
 
 @pytest.mark.unit
