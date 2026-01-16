@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
@@ -168,7 +168,7 @@ class CompositePipelineRunner:
         Raises:
             CriticalError: If seed or required enricher fails.
         """
-        self._started_at = datetime.now()
+        self._started_at = datetime.now(tz=UTC)
         self._logger.info(
             PipelineEvent.START,
             composite=self._config.name,
@@ -282,7 +282,7 @@ class CompositePipelineRunner:
         # Step 7: Cleanup checkpoint on success
         await self._checkpoint_manager.delete()
 
-        completed_at = datetime.now()
+        completed_at = datetime.now(tz=UTC)
         started = self._started_at or completed_at  # Fallback if not set
         total_duration = (completed_at - started).total_seconds()
 
@@ -313,10 +313,10 @@ class CompositePipelineRunner:
             seed_pipeline=self._config.seed.pipeline,
         )
 
-        started_at = datetime.now()
+        started_at = datetime.now(tz=UTC)
         runner = self._seed_runner_factory()
         await runner.run()
-        completed_at = datetime.now()
+        completed_at = datetime.now(tz=UTC)
 
         # Extract stats from runner (if available)
         records_extracted = getattr(runner, "_executor", None)
