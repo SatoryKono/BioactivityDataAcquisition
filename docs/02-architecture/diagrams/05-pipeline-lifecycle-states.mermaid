@@ -83,7 +83,7 @@ stateDiagram-v2
         [*] --> ValidateLock
         ValidateLock: validate_owner() safety guard
         ValidateLock --> MergeSilver
-        MergeSilver: DeltaWriter.merge()
+        MergeSilver: SilverWriter.merge()
         MergeSilver: Upsert by content_hash
         MergeSilver --> WriteGold
         WriteGold: GoldWriter.write_gold()
