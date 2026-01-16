@@ -70,7 +70,7 @@ class TestBronzeWriter:
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
         date = datetime(2023, 1, 1, tzinfo=UTC)
 
-        path = await writer.write_bronze(
+        result = await writer.write_bronze(
             records=iter(records),
             provider="test_provider",
             entity="test_entity",
@@ -81,7 +81,7 @@ class TestBronzeWriter:
             ingestion_ts=TEST_INGESTION_TS,
         )
 
-        expected_file = tmp_path / path
+        expected_file = tmp_path / result.relative_path
         assert expected_file.exists()
 
     async def test_write_bronze_generates_correct_key(self, tmp_path, noop_logger):
@@ -98,7 +98,7 @@ class TestBronzeWriter:
         date = datetime(2023, 1, 1, tzinfo=UTC)
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
 
-        path = await writer.write_bronze(
+        result = await writer.write_bronze(
             records=iter(records),
             provider=provider,
             entity=entity,
@@ -113,7 +113,7 @@ class TestBronzeWriter:
         # Note: BronzeWriter returns relative path without 'bronze/' prefix (base_path already contains it)
         # Normalize path separators for cross-platform compatibility
         expected_path = "v1/test_provider/test_entity/2023-01-01/batch_12345678-1234-5678-1234-567812345678.jsonl.zst"
-        assert str(path).replace("\\", "/") == expected_path
+        assert str(result.relative_path).replace("\\", "/") == expected_path
 
     async def test_write_bronze_compresses_with_zstd(self, tmp_path, noop_logger):
         """REQ-DATA-001: Test that data is compressed with zstandard."""
@@ -127,7 +127,7 @@ class TestBronzeWriter:
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
         date = datetime(2023, 1, 1, tzinfo=UTC)
 
-        path = await writer.write_bronze(
+        result = await writer.write_bronze(
             records=iter(records),
             provider="test",
             entity="test",
@@ -138,7 +138,7 @@ class TestBronzeWriter:
             ingestion_ts=TEST_INGESTION_TS,
         )
 
-        file_path = tmp_path / path
+        file_path = tmp_path / result.relative_path
         with open(file_path, "rb") as f:
             compressed_data = f.read()
 
@@ -299,7 +299,7 @@ class TestBronzeWriter:
         batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
         date = datetime(2023, 1, 1, tzinfo=UTC)
 
-        path = await writer.write_bronze(
+        result = await writer.write_bronze(
             records=iter(records),
             provider="test_provider",
             entity="test_entity",
@@ -311,7 +311,7 @@ class TestBronzeWriter:
         )
 
         # Check metadata file was created
-        meta_path = (tmp_path / path).with_suffix(".zst.meta.json")
+        meta_path = (tmp_path / result.relative_path).with_suffix(".zst.meta.json")
         assert meta_path.exists()
 
         # Verify metadata content
