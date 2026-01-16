@@ -217,7 +217,8 @@ class TestProcessMissingDois:
             "10.1038/test2": "Title 2",
             "10.1038/test3": "Title 3",
         }
-        mock_search_fn.return_value = {"id": "W123", "title": "Found"}
+        # Mock should return title matching the first DOI's mapping
+        mock_search_fn.return_value = {"id": "W123", "title": "Title 1"}
 
         results = []
         async for work in handler.process_missing_dois(
