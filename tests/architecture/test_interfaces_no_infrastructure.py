@@ -428,29 +428,27 @@ class TestHttpInterfaceNoInfrastructure:
             "Use TYPE_CHECKING for type hints or Application services instead."
         )
 
-    def test_http_type_checking_imports_documented(self):
-        """Document TYPE_CHECKING imports from infrastructure in http/.
+    def test_http_type_checking_imports_use_domain_ports(self):
+        """Verify TYPE_CHECKING imports use domain ports, not infrastructure.
 
-        TYPE_CHECKING imports are allowed for type hints.
-        This test documents them for awareness and tracking.
+        health_server.py should import from domain.ports for type hints,
+        following correct layer dependencies (interfaces -> domain).
         """
         server_path = SRC_PATH / "interfaces" / "http" / "health_server.py"
 
         if not server_path.exists():
             pytest.skip("health_server.py not found")
 
-        # Expected TYPE_CHECKING imports from infrastructure
-        # These are allowed because they're only used for type hints
-        expected_type_checking_imports = [
-            "bioetl.infrastructure.adapters.http.health_monitor",
-        ]
-
         with open(server_path) as f:
             content = f.read()
 
-        # Verify expected TYPE_CHECKING imports exist
-        for expected in expected_type_checking_imports:
-            assert expected in content, (
-                f"Expected TYPE_CHECKING import '{expected}' not found. "
-                f"Was it refactored? Update this test if intentional."
-            )
+        # Verify correct domain port imports are used
+        assert "from bioetl.domain.ports import" in content, (
+            "health_server.py should import from bioetl.domain.ports for type hints"
+        )
+
+        # Verify no infrastructure imports in TYPE_CHECKING block
+        assert "bioetl.infrastructure.adapters.http.health_monitor" not in content, (
+            "health_server.py should not import from infrastructure. "
+            "Use domain ports instead."
+        )
