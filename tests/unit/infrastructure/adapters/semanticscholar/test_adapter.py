@@ -216,10 +216,10 @@ class TestFetchFilteredWithFallback:
             None,  # Not found by DOI
         ]
 
-        # Second call - title search
+        # Second call - title search (title must match fallback_mapping value)
         search_response = MagicMock()
         search_response.json.return_value = {
-            "data": [{"paperId": "b" * 40, "title": "Found by Title"}]
+            "data": [{"paperId": "b" * 40, "title": "Title 2"}]  # Matches fallback
         }
 
         mock_http_client.post.return_value = batch_response
@@ -250,10 +250,12 @@ class TestFetchFilteredWithFallback:
         mock_http_client: MagicMock,
     ) -> None:
         """Test handling of empty DOI entries (title-only)."""
-        # No batch call needed for empty DOIs
+        # Search response must return title matching fallback_mapping value
         search_response = MagicMock()
         search_response.json.return_value = {
-            "data": [{"paperId": "c" * 40, "title": "Found by Title Only"}]
+            "data": [
+                {"paperId": "c" * 40, "title": "Title Only Paper"}
+            ]  # Matches fallback
         }
         mock_http_client.get_once.return_value = search_response
 
