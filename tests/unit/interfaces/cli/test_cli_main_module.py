@@ -31,15 +31,15 @@ class TestCliMainModule:
 
     def test_module_has_correct_imports(self) -> None:
         """Test module imports from cli.main."""
-        from bioetl.interfaces.cli.main import main as main_from_module
-
         from bioetl.interfaces.cli.__main__ import main
+        from bioetl.interfaces.cli.main import main as main_from_module
 
         # They should be the same function
         assert main is main_from_module
 
+    @pytest.mark.slow
     def test_module_runnable_with_help(self) -> None:
-        """Test module can be run with --help flag."""
+        """Test module can be run with --help flag (subprocess-based, slow)."""
         # Set PYTHONPATH to include src directory for subprocess
         src_path = Path(__file__).parent.parent.parent.parent.parent / "src"
         env = os.environ.copy()
