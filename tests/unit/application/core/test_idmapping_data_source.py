@@ -290,7 +290,7 @@ class TestIDMappingDataSourceReadChEMBLIds:
             logger=mock_logger,
         )
 
-        ids = data_source._read_chembl_ids()
+        ids = data_source._read_chembl_ids_sync()
         assert ids == ["CHEMBL204", "CHEMBL205"]
 
     def test_read_chembl_ids_file_not_found(
@@ -309,7 +309,7 @@ class TestIDMappingDataSourceReadChEMBLIds:
         )
 
         with pytest.raises(FileNotFoundError, match="Input file not found"):
-            data_source._read_chembl_ids()
+            data_source._read_chembl_ids_sync()
 
     def test_read_chembl_ids_missing_column(
         self,
@@ -328,7 +328,7 @@ class TestIDMappingDataSourceReadChEMBLIds:
         )
 
         with pytest.raises(ValueError, match="Missing required column"):
-            data_source._read_chembl_ids()
+            data_source._read_chembl_ids_sync()
 
     def test_read_chembl_ids_skips_empty(
         self,
@@ -352,7 +352,7 @@ class TestIDMappingDataSourceReadChEMBLIds:
             logger=mock_logger,
         )
 
-        ids = data_source._read_chembl_ids()
+        ids = data_source._read_chembl_ids_sync()
         assert ids == ["CHEMBL204", "CHEMBL205"]
 
     def test_read_chembl_ids_strips_whitespace(
@@ -373,7 +373,7 @@ class TestIDMappingDataSourceReadChEMBLIds:
             logger=mock_logger,
         )
 
-        ids = data_source._read_chembl_ids()
+        ids = data_source._read_chembl_ids_sync()
         assert ids == ["CHEMBL204", "CHEMBL205"]
 
 
