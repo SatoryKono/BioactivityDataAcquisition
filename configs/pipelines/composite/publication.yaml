@@ -1,0 +1,189 @@
+# configs/pipelines/composite/publication.yaml
+# =============================================================================
+# Composite Publication Pipeline Configuration
+# =============================================================================
+#
+# Combines publication data from multiple sources:
+# - Seed: ChEMBL publications
+# - Enrichers: CrossRef (citations), OpenAlex (concepts), PubMed (MeSH),
+#              SemanticScholar (embeddings)
+#
+# Version: 1.0.0
+# Reference: ADR-026 Composite Pipeline Pattern
+# Last Updated: 2026-01-15
+#
+# =============================================================================
+
+schema_version: "2.0.0"
+
+# -----------------------------------------------------------------------------
+# Composite Pipeline Configuration
+# -----------------------------------------------------------------------------
+composite:
+  name: composite_publication
+  version: "1.0.0"
+
+  # ---------------------------------------------------------------------------
+  # Seed Pipeline Configuration
+  # ---------------------------------------------------------------------------
+  # The seed pipeline extracts primary entities from ChEMBL.
+  # Its output provides join keys (doi, pmid) for enrichment.
+  seed:
+    pipeline: chembl_publication
+    output_keys:
+      - document_id      # ChEMBL document ID (primary key)
+      - doi              # Digital Object Identifier
+      - pmid             # PubMed ID
+    silver_table: silver/chembl/publication
+
+  # ---------------------------------------------------------------------------
+  # Enricher Pipelines
+  # ---------------------------------------------------------------------------
+  # Each enricher fetches supplemental data from an external source.
+  # Enrichers can run in parallel up to max_concurrency limit.
+  enrichers:
+    # CrossRef: Citation and reference data
+    # REQUIRED: Failure causes composite to fail
+    - pipeline: crossref_publication
+      join_keys:
+        - doi            # Primary join key
+      required: true     # Composite fails if this enricher fails
+      timeout_seconds: 900
+      silver_table: silver/crossref/publication
+
+    # OpenAlex: Academic concepts and institutions
+    # OPTIONAL: Failure logged, composite continues
+    - pipeline: openalex_publication
+      join_keys:
+        - doi            # Primary key
+        - pmid           # Fallback key if doi not found
+      required: false
+      filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
+      timeout_seconds: 600
+      silver_table: silver/openalex/publication
+
+    # PubMed: MeSH terms and medical metadata
+    # OPTIONAL: Only processes records with pmid
+    - pipeline: pubmed_publication
+      join_keys:
+        - pmid           # PubMed-specific identifier
+      required: false
+      filter_condition: "pmid IS NOT NULL"
+      timeout_seconds: 600
+      silver_table: silver/pubmed/publication
+
+    # Semantic Scholar: AI/ML embeddings and TLDR
+    # OPTIONAL: Higher rate limits, ok to skip
+    - pipeline: semanticscholar_publication
+      join_keys:
+        - doi
+        - pmid
+      required: false
+      filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
+      timeout_seconds: 1200
+      fallback_strategy: skip  # Skip on failure (high rate limits)
+      silver_table: silver/semanticscholar/publication
+
+  # ---------------------------------------------------------------------------
+  # Merge Configuration
+  # ---------------------------------------------------------------------------
+  # Defines how enriched data is combined into the final output.
+  merge:
+    # Join strategy: left_outer preserves all seed records
+    strategy: left_outer
+
+    # Conflict resolution: seed values take priority
+    conflict_resolution: seed_priority
+
+    # Field-level priority overrides (when using explicit_rules)
+    # Maps field name to ordered list of source preferences
+    field_priorities:
+      title:
+        - chembl         # ChEMBL title is authoritative
+        - crossref
+        - openalex
+      abstract:
+        - pubmed         # PubMed has best abstracts
+        - openalex
+        - chembl
+      citations_count:
+        - crossref       # CrossRef is citation authority
+        - openalex
+      mesh_terms:
+        - pubmed         # PubMed MeSH is authoritative
+      concepts:
+        - openalex       # OpenAlex concepts are unique
+      tldr:
+        - semanticscholar  # S2-only field
+
+    # Output paths
+    output:
+      silver: silver/composite/publication
+      gold: gold/publication_enriched
+
+  # ---------------------------------------------------------------------------
+  # Data Quality Configuration
+  # ---------------------------------------------------------------------------
+  dq_rules:
+    # Composite-level thresholds (applied to merge result)
+    soft_fail_threshold: 0.10  # 10% errors = warning
+    hard_fail_threshold: 0.30  # 30% errors = failure
+
+    # Per-enricher threshold overrides
+    enricher_overrides:
+      # Semantic Scholar has higher rate limits, allow more errors
+      semanticscholar_publication:
+        soft_fail_threshold: 0.20
+        hard_fail_threshold: 0.50
+      # PubMed may have many pmid-less records filtered
+      pubmed_publication:
+        soft_fail_threshold: 0.15
+        hard_fail_threshold: 0.40
+
+    # Required fields in final Gold output
+    required_fields:
+      - document_id
+      - title
+
+  # ---------------------------------------------------------------------------
+  # Execution Options
+  # ---------------------------------------------------------------------------
+  execution:
+    # Maximum concurrent enrichers
+    max_concurrency: 4
+
+    # Enable checkpointing for resume capability
+    checkpoint_enabled: true
+
+    # Retry configuration for recoverable errors
+    retry:
+      max_attempts: 3
+      backoff_multiplier: 2.0
+
+  # ---------------------------------------------------------------------------
+  # Lineage Configuration
+  # ---------------------------------------------------------------------------
+  lineage:
+    # Track which source provided each field value
+    track_field_sources: true
+
+    # Include timestamps for each enrichment
+    track_timestamps: true
+
+    # Include per-record enrichment status
+    track_status: true
+
+# -----------------------------------------------------------------------------
+# Gold Filters (applied to merged output)
+# -----------------------------------------------------------------------------
+gold_filters:
+  # Only include publications with title
+  required_fields:
+    - title
+
+# -----------------------------------------------------------------------------
+# Maintenance Configuration
+# -----------------------------------------------------------------------------
+maintenance:
+  auto_vacuum: false
+  vacuum_retention_days: 7

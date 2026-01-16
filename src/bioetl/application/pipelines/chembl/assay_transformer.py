@@ -24,14 +24,7 @@ from bioetl.domain.transformations import (
     safe_float,
     safe_str,
 )
-from bioetl.domain.value_objects import TaxonomyId
-
-
-def _validate_taxonomy_id(value: Any) -> int | None:
-    """Validate taxonomy ID using TaxonomyId Value Object."""
-    vo = TaxonomyId.from_raw(value)
-    return vo.value if vo else None
-
+from bioetl.domain.value_objects import validate_taxonomy_id
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
@@ -45,7 +38,7 @@ _VARIANT_FIELDS: dict[str, Any] = {
     "mutation": safe_str,
     "organism": safe_str,
     "sequence": safe_str,
-    "tax_id": _validate_taxonomy_id,  # Will be renamed to taxonomy_id
+    "tax_id": validate_taxonomy_id,  # Will be renamed to taxonomy_id
 }
 
 # Rename mapping for variant fields (tax_id -> taxonomy_id for NCBI consistency)
@@ -115,7 +108,7 @@ _BIOLOGICAL_CONTEXT = FieldGroup(
         ),
         # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
         FieldSpec(
-            "assay_tax_id", target="assay_taxonomy_id", converter=_validate_taxonomy_id
+            "assay_tax_id", target="assay_taxonomy_id", converter=validate_taxonomy_id
         ),
     ),
 )

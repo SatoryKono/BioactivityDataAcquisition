@@ -27,12 +27,8 @@ from bioetl.domain.entities.chembl import (
     ActivityRecord,
     AssayRecord,
     CellLineRecord,
-    # Canonical names (ADR-024)
     ChemblPublicationRecord,
     ChemblPublicationTermRecord,
-    # Deprecated aliases (backward compatibility)
-    DocumentRecord,
-    DocumentTermRecord,
     MoleculeRecord,
     TargetComponentRecord,
     TargetRecord,
@@ -58,10 +54,7 @@ from bioetl.domain.entities.crossref import PublicationEntity, PublicationRecord
 
 # PubChem DTO + Entity
 from bioetl.domain.entities.pubchem import (
-    # Deprecated alias (backward compatibility)
-    PubChemCompoundRecord,
     PubchemMolecule,
-    # Canonical names (ADR-024)
     PubchemMoleculeRecord,
 )
 
@@ -86,22 +79,15 @@ __all__ = [
     "CellLine",
     "CellLineRecord",
     "ChemblPublication",
-    # Canonical DTO names (ADR-024)
     "ChemblPublicationRecord",
     "ChemblPublicationTermRecord",
     "CompoundRecord",
-    # Deprecated aliases (backward compatibility)
-    "DocumentRecord",
     "DocumentSimilarity",
     "DocumentTerm",
-    "DocumentTermRecord",
     "Molecule",
     "MoleculeRecord",
     "ProteinClassification",
-    # Deprecated alias
-    "PubChemCompoundRecord",
     "PubchemMolecule",
-    # Canonical DTO name (ADR-024)
     "PubchemMoleculeRecord",
     "Publication",
     "PublicationEntity",

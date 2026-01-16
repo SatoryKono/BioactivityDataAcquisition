@@ -392,7 +392,7 @@ sha256(provider + canonical_json(record))
 
 ### 4.5. Архитектурные Решения (ADR)
 
-**24 ADR** определяют ключевые архитектурные решения проекта:
+**26 ADR** определяют ключевые архитектурные решения проекта:
 
 | ADR | Название | Описание |
 |-----|----------|----------|
@@ -420,6 +420,8 @@ sha256(provider + canonical_json(record))
 | 022 | Tracing NoOp | NoOp для трассировки |
 | 023 | Entity Type Patterns | Паттерны типов сущностей |
 | 024 | Entity Naming Unification | Унификация именования сущностей |
+| 025 | Pipeline Config Unification | Унификация конфигурации пайплайнов |
+| 026 | Composite Pipeline Pattern | Паттерн композитного пайплайна |
 
 Документы: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
 
@@ -804,7 +806,7 @@ git commit -m "..."
 | `docs/RULES.md` | Конституция проекта v5.10 |
 | `docs/REQUIREMENTS.md` | 127 тестируемых требований |
 | `docs/CHANGELOG.md` | История изменений |
-| `docs/02-architecture/decisions/` | ADR (001-024) — 24 архитектурных решения |
+| `docs/02-architecture/decisions/` | ADR (001-026) — 26 архитектурных решений |
 | `AGENT.md` | Детальные инструкции для агента v2.2 |
 | `.claude/PROJECT_CONTEXT.md` | Компактный контекст |
 

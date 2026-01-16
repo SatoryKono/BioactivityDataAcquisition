@@ -13,7 +13,23 @@ if TYPE_CHECKING:
 
 
 class BatchMetricsRecorder:
-    """Helper to record metrics for a batch processing cycle."""
+    """Helper to record metrics for a batch processing cycle.
+
+    Encapsulates all metrics recording logic for batch ETL operations,
+    providing a consistent interface for tracking:
+    - Batch sizes at each processing stage
+    - Record counts per stage
+    - Error occurrences by type
+    - Quarantined record counts
+
+    All methods are safe to call with metrics=None (no-op).
+
+    Attributes:
+        _metrics: Metrics port instance (may be None).
+        _pipeline_label: Label identifying the pipeline.
+        _run_type_label: Label for the run type.
+
+    """
 
     def __init__(
         self,
@@ -34,7 +50,15 @@ class BatchMetricsRecorder:
         self._run_type_label = run_type_label
 
     def track_batch_size(self, stage: str, size: int) -> None:
-        """Record the size of a batch at a specific stage."""
+        """Record the size of a batch at a specific stage.
+
+        Records a histogram observation for batch_size_records metric.
+
+        Args:
+            stage: Processing stage name (e.g., 'bronze', 'silver', 'gold').
+            size: Number of records in the batch.
+
+        """
         if self._metrics:
             self._metrics.observe_histogram(
                 "batch_size_records",
@@ -43,7 +67,16 @@ class BatchMetricsRecorder:
             )
 
     def track_processed_records(self, stage: str, count: int) -> None:
-        """Record number of processed records at a specific stage."""
+        """Record number of processed records at a specific stage.
+
+        Increments the records_processed_total counter with pipeline,
+        stage, and run_type labels.
+
+        Args:
+            stage: Processing stage name (e.g., 'bronze', 'silver', 'gold', 'quarantined').
+            count: Number of records processed.
+
+        """
         if self._metrics:
             self._metrics.increment_counter(
                 "records_processed_total",
@@ -56,7 +89,16 @@ class BatchMetricsRecorder:
             )
 
     def track_error(self, stage: str, error_type: ErrorType) -> None:
-        """Record an error occurrence."""
+        """Record an error occurrence at a specific stage.
+
+        Increments the errors_total counter with pipeline, stage,
+        and error_code labels.
+
+        Args:
+            stage: Processing stage where error occurred (e.g., 'transform', 'write').
+            error_type: Classification of the error.
+
+        """
         if self._metrics:
             self._metrics.increment_counter(
                 "errors_total",

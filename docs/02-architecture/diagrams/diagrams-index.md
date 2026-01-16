@@ -4,6 +4,8 @@
 
 This directory contains 34 Mermaid diagram source files documenting the BioETL architecture.
 
+> **Note**: `DeltaWriter` was renamed to `SilverWriter` (see `silver_writer.py`). Some older diagrams may reference the old name.
+
 ## Diagram Overview
 
 | # | File | Description |

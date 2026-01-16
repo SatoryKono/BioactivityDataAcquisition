@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.10 | Last updated: 2026-01-14*
+*Synced with RULES.md v5.10 | Last updated: 2026-01-15*
 
 > **Documentation Audit Completed:** 2026-01-14
 > - All audit files consolidated in `archived/audits/`
@@ -68,7 +68,7 @@ docs/
 │   ├── data-layers.md           # Bronze/Silver/Gold layer details
 │   ├── observability-layers.md  # Observability architecture
 │   ├── diagrams.md              # Mermaid diagrams collection
-│   ├── decisions/               # ADR-001..024 (24 records)
+│   ├── decisions/               # ADR-001..026 (26 records)
 │   └── diagrams/                # 34 Mermaid diagram files + render_diagrams.py
 │
 ├── 03-guides/                   # How-to guides (10 guides)
@@ -92,8 +92,11 @@ docs/
 │   └── pipelines/               # Pipeline-specific reference
 │
 ├── 05-operations/               # Operational runbooks
+│   ├── README.md                # Operations overview
 │   ├── runbooks/                # 16 incident response playbooks
-│   └── performance-baselines.md # Performance metrics
+│   ├── performance-baselines.md # Performance metrics
+│   ├── vacuum-retention.md      # VACUUM retention policies
+│   └── RELEASE_CHECKLIST.md     # Release checklist
 │
 ├── archived/                    # Historical documents
 │   ├── audits/                  # Audit files (2025-2026)
@@ -105,10 +108,18 @@ docs/
 │   └── chembl/                  # ChEMBL entity schemas (4 files)
 │
 ├── providers/                   # Provider-specific documentation
-│   ├── chembl/                  # ChEMBL (6 entities)
+│   ├── README.md                # Provider overview
+│   ├── chembl/                  # ChEMBL (12 entities)
 │   ├── pubchem/                 # PubChem (1 entity)
 │   ├── uniprot/                 # UniProt (1 entity)
-│   └── pubmed/                  # PubMed (1 entity)
+│   ├── pubmed/                  # PubMed (1 entity)
+│   ├── crossref/                # CrossRef (1 entity)
+│   ├── openalex/                # OpenAlex (1 entity)
+│   └── semanticscholar/         # SemanticScholar (1 entity)
+│
+├── refactoring/                 # Active refactoring documentation
+│   ├── README.md                # Refactoring overview
+│   └── duplication-analysis-2026-01.md # Recent analysis
 │
 ├── contracts/gold/              # Gold layer JSON schemas
 │
@@ -157,6 +168,8 @@ docs/
 | [ADR-022: Tracing NoOp](02-architecture/decisions/ADR-022-tracing-noop.md) | NoOp for tracing              | -        |
 | [ADR-023: Entity Type Patterns](02-architecture/decisions/ADR-023-entity-type-patterns.md) | Entity type patterns          | -        |
 | [ADR-024: Entity Naming Unification](02-architecture/decisions/ADR-024-entity-naming-unification.md) | Entity naming unification     | -        |
+| [ADR-025: Pipeline Config Unification](02-architecture/decisions/ADR-025-pipeline-config-unification.md) | Pipeline config unification   | -        |
+| [ADR-026: Composite Pipeline Pattern](02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) | Composite pipeline pattern    | -        |
 
 ### Data Management
 

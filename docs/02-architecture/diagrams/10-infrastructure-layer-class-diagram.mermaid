@@ -117,7 +117,7 @@ classDiagram
             -_build_path(provider, entity, date) str
         }
 
-        class DeltaWriter {
+        class SilverWriter {
             -_base_path: str
             -_logger: LoggerPort
             -_metrics: MetricsPort
@@ -230,7 +230,7 @@ classDiagram
     PubmedAdapter ..|> DataSourcePort : implements
 
     BronzeWriter ..|> StoragePort : implements
-    DeltaWriter ..|> StoragePort : implements
+    SilverWriter ..|> StoragePort : implements
     GoldWriter ..|> StoragePort : implements
 
     MemoryLock ..|> LockPort : implements
@@ -253,5 +253,5 @@ classDiagram
     UnifiedHTTPClient --> TokenBucket
     UnifiedHTTPClient --> RetryPolicy
 
-    DeltaWriter --> CsvExporter
+    SilverWriter --> CsvExporter
     GoldWriter --> CsvExporter

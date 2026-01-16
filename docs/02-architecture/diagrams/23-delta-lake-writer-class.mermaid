@@ -14,7 +14,7 @@ classDiagram
         +health_check() bool
     }
 
-    class DeltaWriter {
+    class SilverWriter {
         -_base_path: str
         -_logger: LoggerPort
         -_metrics: MetricsPort | None
@@ -95,23 +95,23 @@ classDiagram
     }
 
     %% Relationships
-    StoragePort <|.. DeltaWriter : implements
+    StoragePort <|.. SilverWriter : implements
 
-    DeltaWriter --> WriteResult : returns
-    DeltaWriter --> MergeResult : uses
-    DeltaWriter --> WriteModePolicy : uses
-    DeltaWriter --> CsvExporter : optional
-    DeltaWriter --> SilverWriteMode : uses
-    DeltaWriter ..> LockNotHeldError : throws
+    SilverWriter --> WriteResult : returns
+    SilverWriter --> MergeResult : uses
+    SilverWriter --> WriteModePolicy : uses
+    SilverWriter --> CsvExporter : optional
+    SilverWriter --> SilverWriteMode : uses
+    SilverWriter ..> LockNotHeldError : throws
 
     WriteModePolicy --> SilverWriteMode : contains
 
     %% External dependencies
-    DeltaWriter ..> deltalake : "uses delta-rs"
-    DeltaWriter ..> pyarrow : "uses pa.Table"
-    DeltaWriter ..> polars : "uses pl.DataFrame"
+    SilverWriter ..> deltalake : "uses delta-rs"
+    SilverWriter ..> pyarrow : "uses pa.Table"
+    SilverWriter ..> polars : "uses pl.DataFrame"
 
-    note for DeltaWriter "Silver Layer Writer\n━━━━━━━━━━━━━━━━━━━━━━\nACID transactions via delta-rs\n\nKey Features:\n• Merge/Upsert by content_hash\n• Optimistic concurrency\n• Pre/post write lock validation\n• Optional CSV export\n\nDefault Parameters:\n• require_lock: True\n• writer_version: 2\n• reader_version: 1"
+    note for SilverWriter "Silver Layer Writer\n━━━━━━━━━━━━━━━━━━━━━━\nACID transactions via delta-rs\n\nKey Features:\n• Merge/Upsert by content_hash\n• Optimistic concurrency\n• Pre/post write lock validation\n• Optional CSV export\n\nDefault Parameters:\n• require_lock: True\n• writer_version: 2\n• reader_version: 1"
 
     note for WriteResult "Returned by all write operations.\nContains:\n• Transaction version\n• Files added\n• Duration metrics\n• Error details if failed"
 
