@@ -22,7 +22,8 @@ from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.error_handling import ErrorService
-from bioetl.infrastructure.adapters.filterable_mixin import FilterableStubMixin
+from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin
+from bioetl.infrastructure.adapters.pubmed.fallback import TitleFallbackHandler
 from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
 
 if TYPE_CHECKING:
@@ -41,7 +42,7 @@ PUBMED_DTO_MODELS: dict[str, type[BaseModel]] = {
 
 
 @dataclass
-class PubMedAdapter(FilterableStubMixin, BaseHttpAdapter):
+class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
     """PubMed adapter using UnifiedHTTPClient.
 
     Inherits from BaseHttpAdapter for standardized lifecycle management
@@ -50,9 +51,10 @@ class PubMedAdapter(FilterableStubMixin, BaseHttpAdapter):
     Implements DataSourcePort and FilterableDataSourcePort for PubMed data extraction
     with optional server-side filtering by PMID lists.
 
-    Uses FilterableStubMixin for:
-    - fetch_multi_filtered: Not supported by PubMed API
-    - fetch_filtered_with_fallback: Delegates to fetch_filtered (PMIDs are stable)
+    Uses NotSupportedMultiFilterMixin for fetch_multi_filtered (not supported by PubMed API).
+
+    Supports title-based fallback search via fetch_filtered_with_fallback() when
+    primary PMID lookup fails.
 
     Args:
         http_client: UnifiedHTTPClient instance for making HTTP requests.
@@ -78,13 +80,24 @@ class PubMedAdapter(FilterableStubMixin, BaseHttpAdapter):
     provider_name: str = field(init=False, default="pubmed")
     """Provider identifier (required by DataSourcePort)."""
 
+    _fallback_handler: TitleFallbackHandler | None = field(
+        default=None, init=False, repr=False
+    )
+    """Title fallback handler for resolving publications when PMID lookup fails."""
+
     def __post_init__(self) -> None:
-        """Initialize adapter metrics and error handler after dataclass init."""
+        """Initialize adapter metrics, error handler and fallback handler."""
         # Initialize error handler from base class
         self._error_handler = ErrorService(self.logger)
 
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
+
+        # Initialize fallback handler for title-based search
+        self._fallback_handler = TitleFallbackHandler(
+            logger=self.logger,
+            search_fn=self._search_by_title,
+        )
 
     async def _get_pmids(self, search_term: str, max_count: int) -> list[str]:
         """Get PMIDs for a search term."""
@@ -211,8 +224,133 @@ class PubMedAdapter(FilterableStubMixin, BaseHttpAdapter):
         async for record in self._yield_articles_from_pmids(filter_ids, limit):
             yield record
 
-    # fetch_multi_filtered and fetch_filtered_with_fallback are provided
-    # by FilterableStubMixin (see class inheritance)
+    # fetch_multi_filtered is provided by NotSupportedMultiFilterMixin
+
+    async def _search_by_title(
+        self, title: str, limit: int = 3
+    ) -> list[dict[str, Any]]:
+        """Search PubMed by title using esearch + efetch.
+
+        Args:
+            title: Publication title to search for.
+            limit: Maximum results to return.
+
+        Returns:
+            List of publication records matching the title.
+        """
+        # PubMed title search syntax: "title text"[Title]
+        # Escape quotes in title and limit length
+        clean_title = title.replace('"', "'").strip()[:200]
+        search_term = f'"{clean_title}"[Title]'
+
+        self.logger.debug(
+            "pubmed_title_search",
+            title=clean_title[:50],
+        )
+
+        try:
+            # Step 1: esearch to get PMIDs
+            pmids = await self._get_pmids(search_term, limit)
+
+            if not pmids:
+                return []
+
+            # Step 2: efetch to get full records
+            results: list[dict[str, Any]] = []
+            async for record in self._yield_articles_from_pmids(pmids, limit):
+                results.append(record)
+
+            return results
+
+        except Exception as e:
+            self.logger.debug(
+                "pubmed_title_search_failed",
+                title=clean_title[:50],
+                error=str(e),
+            )
+            return []
+
+    async def fetch_filtered_with_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch with fallback to title search when PMID/DOI lookup fails.
+
+        Three-phase strategy:
+        1. Try PMID lookup for valid PMIDs
+        2. For PMIDs not found → search by title from fallback_mapping
+        3. For empty PMIDs (in filter_ids as "") → search by title only
+
+        Args:
+            entity_type: Must be 'publication'.
+            filter_ids: List of PMIDs (may include empty strings for title-only).
+            filter_field: Expected 'pmid' or 'doi'.
+            fallback_mapping: Mapping {pmid/doi: title} for fallback search.
+            limit: Maximum records to return.
+
+        Yields:
+            Publication records with `_lookup_method` field indicating resolution method.
+
+        Raises:
+            ValueError: If entity_type is not 'publication'.
+        """
+        if entity_type != "publication":
+            raise ValueError("PubMedAdapter only supports 'publication'")
+
+        # Separate valid IDs from title-only entries
+        valid_ids = [id_ for id_ in filter_ids if id_.strip()]
+        title_only_entries = [id_ for id_ in filter_ids if not id_.strip()]
+
+        fetched = 0
+        found_ids: set[str] = set()
+
+        # Phase 1: Try primary PMID lookup
+        if valid_ids:
+            async for record in self.fetch_filtered(
+                entity_type=entity_type,
+                filter_ids=valid_ids,
+                filter_field=filter_field,
+                limit=limit,
+            ):
+                record["_lookup_method"] = "primary"
+                found_id = str(record.get("pmid", ""))
+                if found_id:
+                    found_ids.add(found_id.lower())
+                fetched += 1
+                yield record
+
+                if limit and fetched >= limit:
+                    return
+
+        # Phase 2: Fallback for unresolved IDs
+        if self._fallback_handler:
+            async for record in self._fallback_handler.process_missing_dois(
+                dois=valid_ids,
+                found_dois=found_ids,
+                fallback_mapping=fallback_mapping,
+                normalize_fn=lambda x: x.lower().strip(),
+                limit=limit,
+                fetched=fetched,
+            ):
+                fetched += 1
+                yield record
+
+                if limit and fetched >= limit:
+                    return
+
+        # Phase 3: Title-only entries (using handler)
+        if self._fallback_handler:
+            async for record in self._fallback_handler.process_title_only_entries(
+                entries=title_only_entries,
+                fallback_mapping=fallback_mapping,
+                limit=limit,
+                fetched=fetched,
+            ):
+                yield record
 
     async def fetch(
         self,
