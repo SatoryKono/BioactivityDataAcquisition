@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import (
         AuditPort,
         LoggerPort,
+        MetadataCoordinatorPort,
         MetadataWriterPort,
         MetricsPort,
         TracingPort,
@@ -72,6 +73,7 @@ class BronzeWriter:
         audit: AuditPort | None = None,
         metadata_writer: MetadataWriterPort | None = None,
         save_metadata: bool = False,
+        metadata_coordinator: MetadataCoordinatorPort | None = None,
     ) -> None:
         """Initialize Bronze writer.
 
@@ -95,6 +97,10 @@ class BronzeWriter:
                            Use NoOpMetadataWriter if metadata disabled.
             save_metadata: If True, write _metadata.yaml sidecar file alongside
                          data files with rich lineage information.
+            metadata_coordinator: Optional MetadataCoordinator for centralized
+                                metadata creation. If provided, uses coordinator
+                                instead of local _build_full_bronze_metadata().
+                                Ensures consistent run_id across layers.
 
         Note:
             Lock validation is now performed at Application layer (BatchWriter)
@@ -123,6 +129,9 @@ class BronzeWriter:
         self._tracing: TracingPort = tracing
         self._metadata_writer: MetadataWriterPort = metadata_writer
         self._save_metadata = save_metadata
+        self._metadata_coordinator: MetadataCoordinatorPort | None = (
+            metadata_coordinator
+        )
 
     def _validate_bronze_names(self, provider: str, entity: str) -> None:
         """Validate provider and entity names (alphanumeric + underscores only)."""
@@ -527,19 +536,40 @@ class BronzeWriter:
                 # Calculate completed_at from ingestion_ts + duration
                 # (avoids datetime.now() per ADR-014)
                 completed_at = ingestion_ts + timedelta(seconds=duration)
-                bronze_metadata = self._build_full_bronze_metadata(
-                    run_id=run_id,
-                    run_type=run_type,
-                    provider=provider,
-                    entity=entity,
-                    batch_id=batch_id,
-                    record_count=record_count,
-                    compressed_size=compressed_size,
-                    output_path=relative_path,
-                    started_at=ingestion_ts,
-                    completed_at=completed_at,
-                    duration_seconds=duration,
-                )
+
+                # Use MetadataCoordinator if available (centralized metadata)
+                if self._metadata_coordinator is not None:
+                    from bioetl.domain.ports.metadata_coordinator import (
+                        BronzeMetadataInput,
+                    )
+
+                    bronze_input = BronzeMetadataInput(
+                        batch_id=batch_id,
+                        record_count=record_count,
+                        compressed_size=compressed_size,
+                        output_path=relative_path,
+                        started_at=ingestion_ts,
+                        completed_at=completed_at,
+                    )
+                    bronze_metadata = self._metadata_coordinator.create_bronze_metadata(
+                        bronze_input
+                    )
+                else:
+                    # Fallback to local metadata building (backward compatibility)
+                    bronze_metadata = self._build_full_bronze_metadata(
+                        run_id=run_id,
+                        run_type=run_type,
+                        provider=provider,
+                        entity=entity,
+                        batch_id=batch_id,
+                        record_count=record_count,
+                        compressed_size=compressed_size,
+                        output_path=relative_path,
+                        started_at=ingestion_ts,
+                        completed_at=completed_at,
+                        duration_seconds=duration,
+                    )
+
                 # Write to batch directory (same level as data file)
                 metadata_base_path = full_path.parent
                 await self._metadata_writer.write_bronze_metadata(

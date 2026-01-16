@@ -52,6 +52,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import (
         AuditPort,
         LoggerPort,
+        MetadataCoordinatorPort,
         MetadataWriterPort,
         MetricsPort,
         SilverValidatorPort,
@@ -92,6 +93,7 @@ class SilverWriter(BaseDeltaWriter):
         audit: AuditPort | None = None,
         silver_validator: SilverValidatorPort | None = None,
         metadata_writer: MetadataWriterPort | None = None,
+        metadata_coordinator: MetadataCoordinatorPort | None = None,
     ) -> None:
         """Initialize Silver writer.
 
@@ -111,6 +113,10 @@ class SilverWriter(BaseDeltaWriter):
                             Use NoOpSilverValidator if validation is not required.
             metadata_writer: Optional MetadataWriterPort for writing _metadata.yaml
                            sidecar files. Use NoOpMetadataWriter if disabled.
+            metadata_coordinator: Optional MetadataCoordinator for centralized
+                                metadata creation. If provided, uses coordinator
+                                instead of local _write_silver_metadata() logic.
+                                Ensures consistent run_id across layers.
 
         Note:
             LoggerPort is required per RULES.md DI requirements.
@@ -147,6 +153,9 @@ class SilverWriter(BaseDeltaWriter):
 
             metadata_writer = NoOpMetadataWriter()
         self._metadata_writer: MetadataWriterPort = metadata_writer
+        self._metadata_coordinator: MetadataCoordinatorPort | None = (
+            metadata_coordinator
+        )
 
     def _prepare_arrow_data(
         self,
@@ -737,6 +746,32 @@ class SilverWriter(BaseDeltaWriter):
                 If provided, dq_summary will contain real column metrics,
                 schema drift info, and error rates (REQ-DQ-001).
         """
+        if not records:
+            return
+
+        # Use MetadataCoordinator if available (centralized metadata)
+        if self._metadata_coordinator is not None:
+            from bioetl.domain.ports.metadata_coordinator import (
+                SilverMetadataInput,
+            )
+
+            # Get Delta version after write
+            version_after = await self._get_delta_version(table_path)
+
+            silver_input = SilverMetadataInput(
+                table_path=table_path,
+                records=records,
+                primary_keys=primary_keys,
+                mode=mode,
+                bronze_refs=bronze_refs,
+                dq_metrics=dq_metrics,
+                version_after=version_after,
+            )
+            metadata = self._metadata_coordinator.create_silver_metadata(silver_input)
+            await self._metadata_writer.write_silver_metadata(table_path, metadata)
+            return
+
+        # Fallback to local metadata building (backward compatibility)
         from datetime import UTC, datetime
         from importlib.metadata import version as pkg_version
         from platform import node as hostname
@@ -753,9 +788,6 @@ class SilverWriter(BaseDeltaWriter):
             SilverMetadata,
             SilverOutputMetadata,
         )
-
-        if not records:
-            return
 
         # Extract run context from first record
         first_record = records[0]
