@@ -241,6 +241,42 @@ class BaseDeltaWriter:
 
         return Path(self.base_path) / table_name.replace(".", "/")
 
+    async def read_table(
+        self,
+        table_name: str,
+        columns: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Read records from a Delta table.
+
+        Args:
+            table_name: Table name in dot notation (e.g., 'chembl.activity').
+            columns: Optional list of columns to select. If None, reads all columns.
+
+        Returns:
+            List of dictionaries, where each dictionary represents a record.
+
+        Raises:
+            FileNotFoundError: If the table does not exist.
+        """
+        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+        loop = asyncio.get_running_loop()
+
+        try:
+            dt = await loop.run_in_executor(
+                None,
+                lambda: DeltaTable(table_path),
+            )
+        except DeltaTableNotFoundError as e:
+            raise FileNotFoundError(f"Table not found: {table_name}") from e
+
+        # Read as PyArrow and convert to list of dicts
+        def _read_table() -> list[dict[str, Any]]:
+            arrow_table = dt.to_pyarrow_table(columns=columns)
+            result: list[dict[str, Any]] = arrow_table.to_pylist()
+            return result
+
+        return await loop.run_in_executor(None, _read_table)
+
     def clear(self, table_name: str | None = None, dry_run: bool = False) -> int:
         """Clear Delta table(s) by removing their directories.
 
