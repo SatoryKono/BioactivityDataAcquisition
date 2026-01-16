@@ -178,10 +178,12 @@ pipeline_id_format:
     - chembl_assay
     - chembl_target
     - chembl_molecule
-    - chembl_document
+    - chembl_publication  # Renamed from chembl_document per ADR-024
+    - chembl_publication_similarity
+    - chembl_publication_term
     - chembl_target_component
-    - pubchem_compound
-    - uniprot_protein
+    - pubchem_compound   # Uses API term per glossary.md CLI conventions
+    - uniprot_protein    # Uses API term per glossary.md CLI conventions
     - pubmed_publications
 
 # Notes on enforcement

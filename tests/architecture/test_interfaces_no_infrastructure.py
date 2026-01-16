@@ -286,3 +286,171 @@ class TestEntrypointsExportServices:
         assert "get_checkpoint_service" in entrypoints.__all__
         assert "get_quarantine_service" in entrypoints.__all__
         assert "get_bronze_cleanup_service" in entrypoints.__all__
+
+
+def get_runtime_imports_from_file(file_path: Path) -> list[str]:
+    """Extract only runtime import statements from a Python file.
+
+    Excludes imports inside TYPE_CHECKING blocks.
+
+    Args:
+        file_path: Path to Python file.
+
+    Returns:
+        List of imported module paths (runtime only).
+    """
+    with open(file_path) as f:
+        try:
+            tree = ast.parse(f.read(), filename=str(file_path))
+        except SyntaxError:
+            return []
+
+    imports = []
+    type_checking_imports: set[int] = set()
+
+    # First pass: find line numbers inside TYPE_CHECKING blocks
+    for node in ast.walk(tree):
+        if isinstance(node, ast.If):
+            # Check if this is `if TYPE_CHECKING:`
+            if isinstance(node.test, ast.Name) and node.test.id == "TYPE_CHECKING":
+                for stmt in ast.walk(node):
+                    if isinstance(stmt, (ast.Import, ast.ImportFrom)):
+                        type_checking_imports.add(stmt.lineno)
+
+    # Second pass: collect imports NOT in TYPE_CHECKING
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            if node.lineno not in type_checking_imports:
+                for alias in node.names:
+                    imports.append(alias.name)
+        elif isinstance(node, ast.ImportFrom):
+            if node.lineno not in type_checking_imports and node.module:
+                imports.append(node.module)
+
+    return imports
+
+
+@pytest.mark.architecture
+class TestHttpInterfaceNoInfrastructure:
+    """Test that HTTP interface module doesn't have runtime infrastructure imports."""
+
+    def test_http_init_no_runtime_infrastructure_imports(self):
+        """Test that http/__init__.py doesn't import infrastructure at runtime."""
+        init_path = SRC_PATH / "interfaces" / "http" / "__init__.py"
+
+        if not init_path.exists():
+            pytest.skip("http/__init__.py not found")
+
+        imports = get_runtime_imports_from_file(init_path)
+
+        infrastructure_imports = [
+            imp for imp in imports if "bioetl.infrastructure" in imp
+        ]
+
+        assert infrastructure_imports == [], (
+            f"http/__init__.py should not import from infrastructure at runtime. "
+            f"Found: {infrastructure_imports}. "
+            f"Use TYPE_CHECKING for type hints or Application services instead."
+        )
+
+    def test_http_types_no_runtime_infrastructure_imports(self):
+        """Test that http/types.py doesn't import infrastructure at runtime."""
+        types_path = SRC_PATH / "interfaces" / "http" / "types.py"
+
+        if not types_path.exists():
+            pytest.skip("http/types.py not found")
+
+        imports = get_runtime_imports_from_file(types_path)
+
+        infrastructure_imports = [
+            imp for imp in imports if "bioetl.infrastructure" in imp
+        ]
+
+        assert infrastructure_imports == [], (
+            f"http/types.py should not import from infrastructure at runtime. "
+            f"Found: {infrastructure_imports}. "
+            f"Types should be independent of infrastructure layer."
+        )
+
+    def test_health_server_no_runtime_infrastructure_imports(self):
+        """Test that health_server.py doesn't import infrastructure at runtime.
+
+        TYPE_CHECKING imports are allowed for type hints, but runtime imports
+        from infrastructure should go through Application services.
+        """
+        server_path = SRC_PATH / "interfaces" / "http" / "health_server.py"
+
+        if not server_path.exists():
+            pytest.skip("health_server.py not found")
+
+        imports = get_runtime_imports_from_file(server_path)
+
+        infrastructure_imports = [
+            imp for imp in imports if "bioetl.infrastructure" in imp
+        ]
+
+        assert infrastructure_imports == [], (
+            f"health_server.py should not import from infrastructure at runtime. "
+            f"Found: {infrastructure_imports}. "
+            f"Use TYPE_CHECKING for type hints or Application services instead."
+        )
+
+    def test_all_http_files_no_runtime_infrastructure_imports(self):
+        """Test that ALL files in http/ don't import infrastructure at runtime.
+
+        Per architecture best practices, interfaces should not directly
+        access infrastructure adapters at runtime. TYPE_CHECKING imports
+        for type hints are allowed.
+        """
+        http_dir = SRC_PATH / "interfaces" / "http"
+
+        if not http_dir.exists():
+            pytest.skip("http/ directory not found")
+
+        violations = []
+
+        for py_file in http_dir.glob("*.py"):
+            # Skip __init__.py - it typically just re-exports
+            if py_file.name == "__init__.py":
+                continue
+
+            imports = get_runtime_imports_from_file(py_file)
+            infrastructure_imports = [
+                imp for imp in imports if "bioetl.infrastructure" in imp
+            ]
+
+            if infrastructure_imports:
+                violations.append(f"{py_file.name}: {infrastructure_imports}")
+
+        assert violations == [], (
+            "HTTP interface files should not import from infrastructure at runtime. "
+            "Found violations:\n  - " + "\n  - ".join(violations) + "\n"
+            "Use TYPE_CHECKING for type hints or Application services instead."
+        )
+
+    def test_http_type_checking_imports_documented(self):
+        """Document TYPE_CHECKING imports from infrastructure in http/.
+
+        TYPE_CHECKING imports are allowed for type hints.
+        This test documents them for awareness and tracking.
+        """
+        server_path = SRC_PATH / "interfaces" / "http" / "health_server.py"
+
+        if not server_path.exists():
+            pytest.skip("health_server.py not found")
+
+        # Expected TYPE_CHECKING imports from infrastructure
+        # These are allowed because they're only used for type hints
+        expected_type_checking_imports = [
+            "bioetl.infrastructure.adapters.http.health_monitor",
+        ]
+
+        with open(server_path) as f:
+            content = f.read()
+
+        # Verify expected TYPE_CHECKING imports exist
+        for expected in expected_type_checking_imports:
+            assert expected in content, (
+                f"Expected TYPE_CHECKING import '{expected}' not found. "
+                f"Was it refactored? Update this test if intentional."
+            )
