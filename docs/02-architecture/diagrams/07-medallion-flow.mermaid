@@ -19,10 +19,10 @@ flowchart LR
 
     subgraph Silver["Silver Layer"]
         direction TB
-        DeltaWriter[DeltaWriter]
+        SilverWriter[SilverWriter]
         SilverData[("Delta Lake<br/>Merge/Upsert<br/>ACID transactions")]
 
-        DeltaWriter --> SilverData
+        SilverWriter --> SilverData
     end
 
     subgraph Gold["Gold Layer"]
@@ -39,7 +39,7 @@ flowchart LR
     UniProt --> BronzeWriter
     PubMed --> BronzeWriter
 
-    BronzeData --> |Transform| DeltaWriter
+    BronzeData --> |Transform| SilverWriter
     SilverData --> |Validate| GoldWriter
 
     %% Annotations
@@ -57,5 +57,5 @@ flowchart LR
 
     class ChEMBL,PubChem,UniProt,PubMed source
     class BronzeWriter,BronzeData bronze
-    class DeltaWriter,SilverData silver
+    class SilverWriter,SilverData silver
     class GoldWriter,GoldData gold
