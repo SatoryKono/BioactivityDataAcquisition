@@ -15,7 +15,7 @@ flowchart LR
 
     subgraph Silver_Layer["Silver Layer"]
         direction TB
-        DeltaWriter["DeltaWriter"]
+        SilverWriter["SilverWriter"]
         Silver[("Silver Storage\n━━━━━━━━━━━━━━━\n📁 Format: Delta Lake\n⏱️ Retention: Permanent\n✅ Validation: Pandera (soft)\n🔄 Strategy: Merge/Upsert\n🔑 Key: content_hash")]
     end
 
@@ -41,9 +41,9 @@ flowchart LR
     PubMed --> BronzeWriter
 
     BronzeWriter --> Bronze
-    Bronze --> DeltaWriter
+    Bronze --> SilverWriter
 
-    DeltaWriter --> DQValidator
+    SilverWriter --> DQValidator
     DQValidator -->|"✅ Pass"| Silver
     DQValidator -->|"❌ Fail"| Quarantine
 
