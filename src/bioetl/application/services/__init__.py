@@ -29,6 +29,11 @@ from bioetl.application.services.config_service import (
     SettingsInfo,
 )
 from bioetl.application.services.data_quality_service import DataQualityService
+from bioetl.application.services.dq_report_service import (
+    DQReportContext,
+    DQReportResult,
+    DQReportService,
+)
 from bioetl.application.services.health_service import (
     HealthCheckSummary,
     HealthResult,
@@ -79,6 +84,9 @@ __all__ = [
     "CleanupResult",
     "ClearResult",
     "ConfigService",
+    "DQReportContext",
+    "DQReportResult",
+    "DQReportService",
     "DataQualityService",
     "HealthCheckSummary",
     "HealthResult",
