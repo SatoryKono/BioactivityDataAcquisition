@@ -489,25 +489,9 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         cursor: str | None = None,
         error: Exception | None = None,
     ) -> None:
-        """Handle fetch errors with unified error handling.
-
-        Uses ErrorHandler for consistent error classification and logging
-        across all adapters.
-
-        Args:
-            entity_type: Type of entity being fetched.
-            query: Query string if applicable.
-            cursor: Pagination cursor if applicable.
-            error: The exception that occurred.
-        """
-        context = {
-            "query": query,
-            "cursor": cursor,
-            "entity_type": entity_type,
-        }
-
+        """Handle fetch errors with unified error handling."""
+        context = {"query": query, "cursor": cursor, "entity_type": entity_type}
         if error is not None:
-            # Use unified error handler for logging
             self._error_handler.log_error(
                 provider=self.provider_name,
                 operation=f"{entity_type}_fetch",
@@ -515,19 +499,15 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 context=context,
             )
         else:
-            # Fallback to simple logging if no exception provided
             self.logger.error(
                 "external_api_error",
                 provider=self.provider_name,
                 operation=f"{entity_type}_fetch",
                 **context,
             )
-
         if self.strict_error_handling and error is not None:
-            # Wrap and raise using unified handler
             wrapped = self._error_handler.wrap_error(
-                error=error,
-                provider=self.provider_name,
+                error=error, provider=self.provider_name
             )
             raise wrapped from error
 
@@ -623,17 +603,8 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
 
     @override
     async def _probe_health(self) -> HealthStatus:
-        """Perform UniProt-specific health probe.
-
-        Overrides BaseHttpAdapter._probe_health() to use lightweight
-        search query (Ubiquitin P62988) for health assessment.
-
-        Returns:
-            HealthStatus based on probe response or circuit breaker state.
-
-        """
+        """Perform health probe using Ubiquitin P62988 query."""
         try:
-            # Lightweight search probe: Ubiquitin (P62988)
             params = {"query": "accession:P62988", "size": 1, "format": "json"}
             with self._adapter_metrics.measure_request("/health"):
                 resp = await self.http_client.get_once(
@@ -647,7 +618,6 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                     status_code=resp.status_code,
                 )
                 return HealthStatus.DEGRADED
-            # On success, return circuit breaker assessment (original behavior)
             return self._fallback_health_status()
         except Exception as e:
             error_type = self._error_handler.get_error_type(e)
@@ -657,56 +627,29 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 error_type=error_type.value,
                 error=str(e),
             )
-            raise  # Base class catches and returns _fallback_health_status()
+            raise
 
     def _get_health_endpoint(self) -> str:
-        """Get the health check endpoint for UniProt.
-
-        Returns:
-            UniProt search endpoint used for health probe.
-
-        """
+        """Return health check endpoint."""
         return "/uniprotkb/search"
 
     def __repr__(self) -> str:
-        """Return string representation."""
-        has_key = "with API key" if self.api_key else "without API key"
-        return f"UniProtAdapter(base_url='{self.base_url}', {has_key})"
+        key_info = "with API key" if self.api_key else "without API key"
+        return f"UniProtAdapter(base_url='{self.base_url}', {key_info})"
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
-        """Get accumulated API request metadata for Bronze layer enrichment.
-
-        Returns SourceMetadata with all recorded API requests and aggregated
-        statistics (total_requests, avg_duration, total_bytes).
-
-        The collector is cleared after calling this method to prepare for
-        the next batch.
-
-        Args:
-            api_version: Optional API version to include in metadata.
-
-        Returns:
-            SourceMetadata with api_requests, total_requests, avg_request_duration_ms,
-            and total_response_bytes populated from collected requests.
-
-        """
+        """Get API request metadata and clear collector."""
         metadata = self._request_collector.to_source_metadata(
-            source_type="api",
-            url=self.base_url,
-            api_version=api_version,
+            source_type="api", url=self.base_url, api_version=api_version
         )
         self._request_collector.clear()
         return metadata
 
     def clear_request_collector(self) -> None:
-        """Clear the API request collector without generating metadata.
-
-        Use this to reset the collector when metadata is not needed,
-        for example during health checks or error recovery.
-        """
+        """Clear the collector without returning metadata."""
         self._request_collector.clear()
 
     @property
     def request_count(self) -> int:
-        """Get the number of recorded API requests since last clear."""
+        """Number of recorded API requests since last clear."""
         return self._request_collector.request_count

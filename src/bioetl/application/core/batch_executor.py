@@ -327,15 +327,11 @@ class BatchExecutor:
     async def _process_batch(
         self, records: list[dict[str, Any]], start_index: int
     ) -> None:
-        """Process a batch through Bronze → Silver → Gold with tracing.
-
-        Creates a span for the batch and delegates to internal components
-        for transformation and writing.
+        """Process batch through Bronze → Silver → Gold with tracing.
 
         Args:
             records: Raw records to process.
             start_index: Starting index for records in this batch.
-
         """
         batch_id = BatchID(uuid4())
         ingestion_ts = self._context.started_at
