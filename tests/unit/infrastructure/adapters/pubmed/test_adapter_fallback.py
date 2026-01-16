@@ -132,9 +132,7 @@ class TestSearchByTitle:
         """Test returns records when PMIDs are found and fetched."""
         # Mock esearch response
         esearch_response = MagicMock()
-        esearch_response.json.return_value = {
-            "esearchresult": {"idlist": ["12345678"]}
-        }
+        esearch_response.json.return_value = {"esearchresult": {"idlist": ["12345678"]}}
 
         # Mock efetch response
         efetch_response = MagicMock()
@@ -160,7 +158,10 @@ class TestSearchByTitle:
 
     @pytest.mark.asyncio
     async def test_handles_exception_gracefully(
-        self, adapter: PubMedAdapter, mock_http_client: AsyncMock, mock_logger: MagicMock
+        self,
+        adapter: PubMedAdapter,
+        mock_http_client: AsyncMock,
+        mock_logger: MagicMock,
     ) -> None:
         """Test returns empty list and logs on exception."""
         mock_http_client.get.side_effect = Exception("Network error")
@@ -211,9 +212,7 @@ class TestFetchFilteredWithFallback:
                 pass
 
     @pytest.mark.asyncio
-    async def test_separates_valid_ids_from_empty(
-        self, adapter: PubMedAdapter
-    ) -> None:
+    async def test_separates_valid_ids_from_empty(self, adapter: PubMedAdapter) -> None:
         """Test correctly separates valid IDs from empty/whitespace entries."""
         captured_ids: list[str] = []
 
