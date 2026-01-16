@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from bioetl.domain.types import HealthStatus
+from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -61,7 +62,7 @@ class StorageAdapter:
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
-    ) -> str:
+    ) -> BronzeWriteResult:
         """Write raw records to Bronze layer.
 
         Args:
@@ -76,7 +77,8 @@ class StorageAdapter:
                          (single source of time per ADR-014). Required.
 
         Returns:
-            str: Relative path to the written file.
+            BronzeWriteResult: Result containing path, record count, sizes,
+                and checksum for downstream lineage tracking.
 
         Note:
             Lock validation is performed at Application layer (BatchWriter)
@@ -102,8 +104,21 @@ class StorageAdapter:
         mode: Literal["merge", "append", "delete"] = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        bronze_refs: list[BronzeWriteResult] | None = None,
     ) -> None:
         """Write transformed records to Silver layer.
+
+        Args:
+            table_name: The name of the table to write to.
+            records: A list of dictionaries, where each dictionary is a transformed record.
+            primary_keys: A list of column names that form the primary key.
+            schema: The PyArrow schema definition for the records (ArrowSchema alias).
+            mode: The write mode (e.g., 'merge', 'append', 'delete').
+            partition_cols: Optional list of columns to partition by.
+            on_schema_mismatch: How to handle schema drift.
+            bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
+                If provided, bronze_paths will be populated in Silver metadata
+                for complete lineage tracking (REQ-LINEAGE-001).
 
         Note:
             Lock validation is performed at Application layer (BatchWriter)
@@ -117,6 +132,7 @@ class StorageAdapter:
             mode=mode,
             partition_cols=partition_cols,
             on_schema_mismatch=on_schema_mismatch,
+            bronze_refs=bronze_refs,
         )
 
     async def write_gold(

@@ -8,7 +8,6 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import pytest
 
 from bioetl.composition.factories.dq_factory import DQServicesFactory
 from bioetl.domain.ports import (
