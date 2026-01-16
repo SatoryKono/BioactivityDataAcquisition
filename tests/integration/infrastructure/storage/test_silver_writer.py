@@ -181,3 +181,104 @@ async def test_write_silver_partitioning(
     base_path = Path(temp_delta_path) / "test_partition"
     assert (base_path / "val=A").exists()
     assert (base_path / "val=B").exists()
+
+
+@pytest.mark.asyncio
+async def test_read_silver_returns_records(
+    silver_writer, temp_delta_path, sample_records, sample_schema
+):
+    """Test read_silver returns records from existing table."""
+    # First write some records
+    await silver_writer.write_silver(
+        table_name="test_read",
+        records=sample_records,
+        primary_keys=["id"],
+        schema=sample_schema,
+    )
+
+    # Then read them back
+    records = await silver_writer.read_silver("test_read")
+
+    assert len(records) == 2
+    assert any(r["id"] == "1" and r["val"] == "A" for r in records)
+    assert any(r["id"] == "2" and r["val"] == "B" for r in records)
+
+
+@pytest.mark.asyncio
+async def test_read_silver_with_columns(
+    silver_writer, temp_delta_path, sample_records, sample_schema
+):
+    """Test read_silver with column selection."""
+    await silver_writer.write_silver(
+        table_name="test_read_cols",
+        records=sample_records,
+        primary_keys=["id"],
+        schema=sample_schema,
+    )
+
+    # Read only specific columns
+    records = await silver_writer.read_silver("test_read_cols", columns=["id", "val"])
+
+    assert len(records) == 2
+    # Should only have selected columns
+    assert set(records[0].keys()) == {"id", "val"}
+
+
+@pytest.mark.asyncio
+async def test_read_silver_table_not_found(silver_writer):
+    """Test read_silver raises FileNotFoundError for missing table."""
+    with pytest.raises(FileNotFoundError, match="Table not found"):
+        await silver_writer.read_silver("nonexistent_table")
+
+
+@pytest.mark.asyncio
+async def test_write_silver_merged_creates_table(silver_writer, temp_delta_path):
+    """Test write_silver_merged creates table with inferred schema."""
+    records = [
+        {"id": "1", "name": "Test1", "value": 100},
+        {"id": "2", "name": "Test2", "value": 200},
+    ]
+
+    await silver_writer.write_silver_merged(
+        table_name="test_merged",
+        records=records,
+        primary_keys=["id"],
+    )
+
+    # Verify table was created
+    dt = DeltaTable(f"{temp_delta_path}/test_merged")
+    df = dt.to_pandas()
+    assert len(df) == 2
+    assert set(df.columns) == {"id", "name", "value"}
+
+
+@pytest.mark.asyncio
+async def test_write_silver_merged_overwrites_existing(silver_writer, temp_delta_path):
+    """Test write_silver_merged overwrites existing data."""
+    # Write initial records
+    await silver_writer.write_silver_merged(
+        table_name="test_merged_overwrite",
+        records=[{"id": "1", "val": "A"}],
+    )
+
+    # Overwrite with new records
+    await silver_writer.write_silver_merged(
+        table_name="test_merged_overwrite",
+        records=[{"id": "2", "val": "B"}, {"id": "3", "val": "C"}],
+    )
+
+    # Should only have new records
+    dt = DeltaTable(f"{temp_delta_path}/test_merged_overwrite")
+    df = dt.to_pandas()
+    assert len(df) == 2
+    assert set(df["id"]) == {"2", "3"}
+
+
+@pytest.mark.asyncio
+async def test_write_silver_merged_empty_records(silver_writer, noop_logger):
+    """Test write_silver_merged handles empty records gracefully."""
+    # Should not raise, just log warning
+    await silver_writer.write_silver_merged(
+        table_name="test_empty",
+        records=[],
+    )

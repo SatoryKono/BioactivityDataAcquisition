@@ -874,3 +874,77 @@ class SilverWriter(BaseDeltaWriter):
         return await self._retention_manager.time_travel(
             table_name, version=version, timestamp=timestamp
         )
+
+    async def read_silver(
+        self,
+        table_name: str,
+        columns: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Read records from a Silver layer Delta table.
+
+        Args:
+            table_name: The name of the table to read (e.g., 'chembl/activity').
+            columns: Optional list of columns to select. If None, reads all columns.
+
+        Returns:
+            List of dictionaries, where each dictionary represents a record.
+
+        Raises:
+            FileNotFoundError: If the table does not exist.
+        """
+        return await self.read_table(table_name, columns=columns)
+
+    async def write_silver_merged(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str] | None = None,
+    ) -> None:
+        """Write merged records to Silver layer without explicit schema.
+
+        Used by composite pipelines where schema is dynamically determined.
+        Schema is inferred from the records using PyArrow type inference.
+
+        Args:
+            table_name: The name of the table to write to.
+            records: A list of dictionaries representing merged records.
+            primary_keys: Optional list of column names for sorting.
+        """
+        if not records:
+            self.logger.warning(
+                "No records to write for merged Silver",
+                table_name=table_name,
+            )
+            return
+
+        # Infer schema from records using PyArrow
+        arrow_table = pa.Table.from_pylist(records)
+        schema = arrow_table.schema
+
+        # Sort by primary keys if provided for deterministic writes
+        if primary_keys:
+            valid_keys = [pk for pk in primary_keys if pk in schema.names]
+            if valid_keys:
+                arrow_table = arrow_table.sort_by(
+                    [(pk, "ascending") for pk in valid_keys]
+                )
+
+        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+
+        self.logger.info(
+            "Writing merged Silver records",
+            table_name=table_name,
+            path=table_path,
+            records=len(records),
+        )
+
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: write_deltalake(
+                table_path,
+                arrow_table,
+                mode="overwrite",
+                schema_mode="overwrite",
+            ),
+        )
