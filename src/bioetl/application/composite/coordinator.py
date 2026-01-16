@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Sequence
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
@@ -247,7 +247,7 @@ class EnrichmentCoordinator:
             EnrichmentResult with execution outcome.
         """
         async with self._semaphore:
-            started_at = datetime.now()
+            started_at = datetime.now(tz=UTC)
             records_input = len(keys)
 
             self._logger.info(
@@ -263,7 +263,7 @@ class EnrichmentCoordinator:
                     runner = runner_factory(enricher.pipeline, keys)
                     await runner.run()
 
-                completed_at = datetime.now()
+                completed_at = datetime.now(tz=UTC)
                 duration = (completed_at - started_at).total_seconds()
 
                 # Extract stats from runner
@@ -334,7 +334,7 @@ class EnrichmentCoordinator:
                 )
 
             except TimeoutError:
-                duration = (datetime.now() - started_at).total_seconds()
+                duration = (datetime.now(tz=UTC) - started_at).total_seconds()
                 self._logger.warning(
                     "Enricher timed out",
                     enricher=enricher.pipeline,
@@ -347,7 +347,7 @@ class EnrichmentCoordinator:
                 )
 
             except Exception as e:
-                duration = (datetime.now() - started_at).total_seconds()
+                duration = (datetime.now(tz=UTC) - started_at).total_seconds()
                 self._logger.error(
                     "Enricher failed",
                     enricher=enricher.pipeline,
