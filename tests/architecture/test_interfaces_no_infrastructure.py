@@ -428,29 +428,31 @@ class TestHttpInterfaceNoInfrastructure:
             "Use TYPE_CHECKING for type hints or Application services instead."
         )
 
-    def test_http_type_checking_imports_documented(self):
-        """Document TYPE_CHECKING imports from infrastructure in http/.
+    def test_http_type_checking_uses_domain_ports(self):
+        """Verify http/ uses domain ports, not infrastructure imports.
 
-        TYPE_CHECKING imports are allowed for type hints.
-        This test documents them for awareness and tracking.
+        After refactoring (PR #1542), health_server.py imports from
+        domain ports instead of infrastructure adapters.
+        This is the correct architectural approach.
         """
         server_path = SRC_PATH / "interfaces" / "http" / "health_server.py"
 
         if not server_path.exists():
             pytest.skip("health_server.py not found")
 
-        # Expected TYPE_CHECKING imports from infrastructure
-        # These are allowed because they're only used for type hints
-        expected_type_checking_imports = [
-            "bioetl.infrastructure.adapters.http.health_monitor",
-        ]
-
         with open(server_path) as f:
             content = f.read()
 
-        # Verify expected TYPE_CHECKING imports exist
-        for expected in expected_type_checking_imports:
-            assert expected in content, (
-                f"Expected TYPE_CHECKING import '{expected}' not found. "
-                f"Was it refactored? Update this test if intentional."
-            )
+        # Verify domain port imports are used (correct architecture)
+        assert "from bioetl.domain.ports import" in content, (
+            "health_server.py should import from domain ports, not infrastructure"
+        )
+        assert "HealthMonitorPort" in content, (
+            "health_server.py should use HealthMonitorPort from domain"
+        )
+
+        # Verify no infrastructure imports remain
+        assert "bioetl.infrastructure.adapters.http.health_monitor" not in content, (
+            "health_server.py should not import from infrastructure. "
+            "Use domain ports instead."
+        )
