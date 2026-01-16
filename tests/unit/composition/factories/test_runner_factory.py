@@ -64,11 +64,14 @@ class TestRunnerFactory:
         """Test _ensure_registrations is idempotent."""
         factory = RunnerFactory()
 
-        with patch(
-            "bioetl.composition.factories.runner_factory.register_all_providers"
-        ) as mock_providers, patch(
-            "bioetl.composition.factories.runner_factory.register_all_pipelines"
-        ) as mock_pipelines:
+        with (
+            patch(
+                "bioetl.composition.factories.runner_factory.register_all_providers"
+            ) as mock_providers,
+            patch(
+                "bioetl.composition.factories.runner_factory.register_all_pipelines"
+            ) as mock_pipelines,
+        ):
             # First call
             factory._ensure_registrations()
             assert factory._registrations_done is True
@@ -85,11 +88,12 @@ class TestRunnerFactory:
         custom_registry = PipelineRegistry()
         factory = RunnerFactory(registry=custom_registry)
 
-        with patch(
-            "bioetl.composition.factories.runner_factory.register_all_providers"
-        ), patch(
-            "bioetl.composition.factories.runner_factory.register_all_pipelines"
-        ) as mock_pipelines:
+        with (
+            patch("bioetl.composition.factories.runner_factory.register_all_providers"),
+            patch(
+                "bioetl.composition.factories.runner_factory.register_all_pipelines"
+            ) as mock_pipelines,
+        ):
             factory._ensure_registrations()
 
             mock_pipelines.assert_called_once_with(registry=custom_registry)
@@ -117,13 +121,13 @@ class TestRunnerFactoryCreate:
         factory = RunnerFactory()
         mock_runner = MagicMock()
 
-        with patch(
-            "bioetl.composition.factories.runner_factory.register_all_providers"
-        ), patch(
-            "bioetl.composition.factories.runner_factory.register_all_pipelines"
-        ), patch(
-            "bioetl.composition.bootstrap.bootstrap_pipeline",
-            return_value=mock_runner,
+        with (
+            patch("bioetl.composition.factories.runner_factory.register_all_providers"),
+            patch("bioetl.composition.factories.runner_factory.register_all_pipelines"),
+            patch(
+                "bioetl.composition.bootstrap.bootstrap_pipeline",
+                return_value=mock_runner,
+            ),
         ):
             result = factory.create(mock_context)
 
@@ -135,14 +139,14 @@ class TestRunnerFactoryCreate:
         factory = RunnerFactory(registry=custom_registry)
         mock_runner = MagicMock()
 
-        with patch(
-            "bioetl.composition.factories.runner_factory.register_all_providers"
-        ), patch(
-            "bioetl.composition.factories.runner_factory.register_all_pipelines"
-        ), patch(
-            "bioetl.composition.bootstrap.bootstrap_pipeline",
-            return_value=mock_runner,
-        ) as mock_bootstrap:
+        with (
+            patch("bioetl.composition.factories.runner_factory.register_all_providers"),
+            patch("bioetl.composition.factories.runner_factory.register_all_pipelines"),
+            patch(
+                "bioetl.composition.bootstrap.bootstrap_pipeline",
+                return_value=mock_runner,
+            ) as mock_bootstrap,
+        ):
             factory.create(mock_context)
 
             # Verify bootstrap_pipeline was called with the custom registry
@@ -163,10 +167,9 @@ class TestRunnerFactoryListPipelines:
 
         factory = RunnerFactory(registry=mock_registry)
 
-        with patch(
-            "bioetl.composition.factories.runner_factory.register_all_providers"
-        ), patch(
-            "bioetl.composition.factories.runner_factory.register_all_pipelines"
+        with (
+            patch("bioetl.composition.factories.runner_factory.register_all_providers"),
+            patch("bioetl.composition.factories.runner_factory.register_all_pipelines"),
         ):
             result = factory.list_pipelines()
 
@@ -180,11 +183,14 @@ class TestRunnerFactoryListPipelines:
 
         factory = RunnerFactory(registry=mock_registry)
 
-        with patch(
-            "bioetl.composition.factories.runner_factory.register_all_providers"
-        ) as mock_providers, patch(
-            "bioetl.composition.factories.runner_factory.register_all_pipelines"
-        ) as mock_pipelines:
+        with (
+            patch(
+                "bioetl.composition.factories.runner_factory.register_all_providers"
+            ) as mock_providers,
+            patch(
+                "bioetl.composition.factories.runner_factory.register_all_pipelines"
+            ) as mock_pipelines,
+        ):
             factory.list_pipelines()
 
             mock_providers.assert_called_once()
@@ -202,10 +208,9 @@ class TestRunnerFactoryContains:
 
         factory = RunnerFactory(registry=mock_registry)
 
-        with patch(
-            "bioetl.composition.factories.runner_factory.register_all_providers"
-        ), patch(
-            "bioetl.composition.factories.runner_factory.register_all_pipelines"
+        with (
+            patch("bioetl.composition.factories.runner_factory.register_all_providers"),
+            patch("bioetl.composition.factories.runner_factory.register_all_pipelines"),
         ):
             result = factory.contains("existing_pipeline")
 
@@ -219,10 +224,9 @@ class TestRunnerFactoryContains:
 
         factory = RunnerFactory(registry=mock_registry)
 
-        with patch(
-            "bioetl.composition.factories.runner_factory.register_all_providers"
-        ), patch(
-            "bioetl.composition.factories.runner_factory.register_all_pipelines"
+        with (
+            patch("bioetl.composition.factories.runner_factory.register_all_providers"),
+            patch("bioetl.composition.factories.runner_factory.register_all_pipelines"),
         ):
             result = factory.contains("nonexistent_pipeline")
 

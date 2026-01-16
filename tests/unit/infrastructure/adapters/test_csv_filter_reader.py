@@ -567,7 +567,9 @@ class TestCsvFilterReaderLoadMultiColumnFilter:
         assert call_args[1]["total_rows"] == 4
         assert call_args[1]["valid_combinations"] == 4
 
-    async def test_load_multi_column_filter_no_logger(self, csv_reader, multi_column_csv):
+    async def test_load_multi_column_filter_no_logger(
+        self, csv_reader, multi_column_csv
+    ):
         """Test that load_multi_column_filter works without logger."""
         from bioetl.domain.filtering import FilterColumn
 

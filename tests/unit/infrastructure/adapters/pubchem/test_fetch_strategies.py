@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -307,9 +307,7 @@ class TestParseValidCids:
 
         assert result == [2244, 3672, 5988]
 
-    def test_parse_valid_cids_skips_invalid_cids(
-        self, fetch_strategies, mock_logger
-    ):
+    def test_parse_valid_cids_skips_invalid_cids(self, fetch_strategies, mock_logger):
         """Test that _parse_valid_cids skips invalid CIDs and logs warning."""
         cid_list = ["2244", "invalid", "3672", ""]
 
@@ -349,7 +347,7 @@ class TestFetchByCids:
 
         # Create list with more CIDs than batch size
         cid_list = [str(i) for i in range(120)]
-        results = await collect_async_iterator(
+        await collect_async_iterator(
             fetch_strategies.fetch_by_cids(cid_list, limit=None, batch_size=50)
         )
 
