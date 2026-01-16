@@ -12,8 +12,11 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.pipelines.crossref.transformer import (
+from bioetl.application.pipelines.crossref import (
     CrossRefPublicationTransformer,
+    extract_authors,
+    extract_license_url,
+    extract_year,
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities.crossref import CROSSREF_TYPE_MAP
@@ -96,16 +99,16 @@ def test_extract_title(sample_publication):
     assert extract_first_string([]) is None
 
 
-def test_extract_authors(transformer, sample_publication):
+def test_extract_authors(sample_publication):
     """Test author extraction (CrossRef-specific logic)."""
-    authors = transformer._extract_authors(sample_publication)
+    authors = extract_authors(sample_publication)
     assert authors == ["John Doe", "Jane Smith", "Anonymous"]
 
 
-def test_extract_year(transformer, sample_publication):
+def test_extract_year(sample_publication):
     """Test year extraction (CrossRef-specific logic)."""
-    assert transformer._extract_year(sample_publication) == 2023
-    assert transformer._extract_year({}) is None
+    assert extract_year(sample_publication) == 2023
+    assert extract_year({}) is None
 
 
 def test_map_doc_type():
@@ -211,80 +214,80 @@ def test_entity_type_is_publication(transformer):
 # =============================================================================
 
 
-def test_extract_authors_with_only_given_name(transformer):
+def test_extract_authors_with_only_given_name():
     """Test author extraction with only given name (no family)."""
     publication = {"author": [{"given": "Madonna"}]}
-    authors = transformer._extract_authors(publication)
+    authors = extract_authors(publication)
     assert authors == ["Madonna"]
 
 
-def test_extract_authors_empty_list(transformer):
+def test_extract_authors_empty_list():
     """Test author extraction with empty author list."""
     publication = {"author": []}
-    authors = transformer._extract_authors(publication)
+    authors = extract_authors(publication)
     assert authors == []
 
 
-def test_extract_authors_missing_key(transformer):
+def test_extract_authors_missing_key():
     """Test author extraction when 'author' key is missing."""
     publication = {}
-    authors = transformer._extract_authors(publication)
+    authors = extract_authors(publication)
     assert authors == []
 
 
-def test_extract_authors_with_whitespace(transformer):
+def test_extract_authors_with_whitespace():
     """Test author extraction strips whitespace from names."""
     publication = {"author": [{"given": "  John  ", "family": "  Doe  "}]}
-    authors = transformer._extract_authors(publication)
+    authors = extract_authors(publication)
     assert authors == ["John Doe"]
 
 
-def test_extract_year_from_published_online(transformer):
+def test_extract_year_from_published_online():
     """Test year extraction falls back to published-online."""
     publication = {"published-online": {"date-parts": [[2022, 3, 15]]}}
-    assert transformer._extract_year(publication) == 2022
+    assert extract_year(publication) == 2022
 
 
-def test_extract_year_from_issued(transformer):
+def test_extract_year_from_issued():
     """Test year extraction falls back to issued field."""
     publication = {"issued": {"date-parts": [[2021, 1, 1]]}}
-    assert transformer._extract_year(publication) == 2021
+    assert extract_year(publication) == 2021
 
 
-def test_extract_year_priority_order(transformer):
+def test_extract_year_priority_order():
     """Test year extraction prefers published-print over others."""
     publication = {
         "published-print": {"date-parts": [[2023, 6, 1]]},
         "published-online": {"date-parts": [[2023, 5, 1]]},
         "issued": {"date-parts": [[2023, 4, 1]]},
     }
-    assert transformer._extract_year(publication) == 2023
+    assert extract_year(publication) == 2023
 
 
-def test_extract_year_invalid_year_format(transformer):
+def test_extract_year_invalid_year_format():
     """Test year extraction with invalid year format."""
     publication = {"published-print": {"date-parts": [[]]}}
-    assert transformer._extract_year(publication) is None
+    assert extract_year(publication) is None
 
 
-def test_extract_year_non_integer_year(transformer):
+def test_extract_year_non_integer_year():
     """Test year extraction with non-integer year."""
     publication = {"published-print": {"date-parts": [["2023"]]}}
-    assert transformer._extract_year(publication) is None
+    assert extract_year(publication) is None
 
 
-def test_extract_year_out_of_range(transformer):
+def test_extract_year_out_of_range():
     """Test year extraction with year out of valid range."""
     # Year 1799 is below min_year=1800 in validate_year_range
     publication = {"published-print": {"date-parts": [[1799]]}}
-    assert transformer._extract_year(publication) is None
+    assert extract_year(publication) is None
 
     # Year 2101 is above max_year=2100
     publication2 = {"published-print": {"date-parts": [[2101]]}}
-    assert transformer._extract_year(publication2) is None
+    assert extract_year(publication2) is None
 
 
-def test_extract_license_url_multiple_licenses(transformer):
+def test_extract_license_url_multiple_licenses():
     """Test license URL extraction returns first license."""
     publication = {
         "license": [
@@ -292,19 +295,19 @@ def test_extract_license_url_multiple_licenses(transformer):
             {"URL": "https://license2.com"},
         ]
     }
-    assert transformer._extract_license_url(publication) == "https://license1.com"
+    assert extract_license_url(publication) == "https://license1.com"
 
 
-def test_extract_license_url_missing_url(transformer):
+def test_extract_license_url_missing_url():
     """Test license URL extraction when URL is missing."""
     publication = {"license": [{"other": "data"}]}
-    assert transformer._extract_license_url(publication) is None
+    assert extract_license_url(publication) is None
 
 
-def test_extract_license_url_empty_list(transformer):
+def test_extract_license_url_empty_list():
     """Test license URL extraction with empty license list."""
     publication = {"license": []}
-    assert transformer._extract_license_url(publication) is None
+    assert extract_license_url(publication) is None
 
 
 def test_extract_business_data_page_range(transformer):
