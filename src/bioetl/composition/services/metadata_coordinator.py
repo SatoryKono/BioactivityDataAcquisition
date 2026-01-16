@@ -287,8 +287,14 @@ class MetadataCoordinator:
         if not input_data.records:
             raise ValueError("Cannot create Gold metadata without records")
 
-        # Build lineage (Gold layer sources from Silver)
-        lineage = LineageMetadata()
+        # Build lineage from Silver refs (REQ-LINEAGE-002: Silver → Gold tracking)
+        source_tables: dict[str, int] = {}
+        if input_data.silver_refs:
+            source_tables = {
+                ref.table_name: ref.delta_version for ref in input_data.silver_refs
+            }
+
+        lineage = LineageMetadata(source_tables=source_tables)
 
         # Build DQ summary (basic metrics)
         dq_summary = DQSummary(
