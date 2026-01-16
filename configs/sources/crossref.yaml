@@ -1,6 +1,10 @@
 # configs/sources/crossref.yaml
 # Configuration for CrossRef API data source.
 # Provides publication metadata via DOI resolution.
+#
+# Provider: CrossRef
+# API Documentation: https://api.crossref.org/swagger-ui/index.html
+# Data License: CC0 metadata, varies for full text
 
 source:
     type: api
@@ -9,6 +13,7 @@ source:
     provider_config:
         provider: crossref
         base_url: https://api.crossref.org
+        auth_type: email  # Email for polite pool access
         mailto: ${BIOETL_CROSSREF_EMAIL}  # Required for polite pool access
         client:
             timeout_sec: 30.0
@@ -16,19 +21,35 @@ source:
         batch_size: 50  # DOIs per batch
         cursor_pagination: true  # Uses cursor-based pagination
 
-    # Circuit breaker settings (per ADR-007)
     circuit_breaker:
         failure_threshold: 5
         recovery_timeout: 300
 
-    # Rate limits for polite pool (50 req/sec with mailto)
+    # CrossRef polite pool: 50 req/sec with mailto parameter.
+    # Set BIOETL_CROSSREF_EMAIL to access higher rate limits.
+    # Without email: shared pool with aggressive rate limiting.
     rate_limit:
         requests_per_second: 50
         burst: 100
+        polite_pool: true
 
-    # Health check configuration
     health_check:
         endpoint: /works
         params:
             rows: 1
         timeout: 5
+
+    retry:
+        use_retry_after: true
+
+# Available entities for this provider
+entities:
+    - publication  # CrossRef works (DOI metadata)
+
+# Entity-specific notes for documentation
+entity_notes:
+    publication:
+        description: "Publication metadata via DOI resolution"
+        input_mode: "CSV file with DOIs"
+        fallback: "Title search when DOI not found (404)"
+        batch_size: 50
