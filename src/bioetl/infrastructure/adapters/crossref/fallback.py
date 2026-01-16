@@ -1,13 +1,16 @@
 """Fallback search utilities for CrossRef DOI resolution.
 
 Provides title-based search fallback when DOI resolution fails.
+Supports three-phase fallback strategy:
+- Phase 2: Title fallback for unresolved DOIs
+- Phase 3: Title-only lookup for entries without DOIs
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler
+from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable
@@ -15,26 +18,8 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-def titles_match(query_title: str, found_title: str, threshold: float = 0.8) -> bool:
-    """Check if titles match (case-insensitive, normalized).
-
-    Args:
-        query_title: The title we're searching for.
-        found_title: The title found in CrossRef.
-        threshold: Unused, reserved for future fuzzy matching.
-
-    Returns:
-        True if titles match, False otherwise.
-    """
-    q = query_title.lower().strip()
-    f = found_title.lower().strip()
-
-    # Exact match
-    if q == f:
-        return True
-
-    # Substring match (title may be truncated)
-    return q in f or f in q
+# Re-export titles_match for backwards compatibility
+__all__ = ["TitleFallbackHandler", "titles_match"]
 
 
 class TitleFallbackHandler(BaseTitleFallbackHandler):
@@ -76,6 +61,37 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
     def _event_fallback_not_found(self) -> str:
         """Return log event name for failed fallback."""
         return "crossref_title_fallback_not_found"
+
+    @property
+    def _event_title_only_attempt(self) -> str:
+        """Return log event name for title-only lookup attempt."""
+        return "crossref_title_only_attempt"
+
+    @property
+    def _event_title_only_success(self) -> str:
+        """Return log event name for successful title-only lookup."""
+        return "crossref_title_only_success"
+
+    @property
+    def _event_title_only_not_found(self) -> str:
+        """Return log event name for failed title-only lookup."""
+        return "crossref_title_only_not_found"
+
+    def _process_found_result(
+        self, result: dict[str, Any], original_doi: str
+    ) -> dict[str, Any]:
+        """Add lookup method metadata to found publication.
+
+        Args:
+            result: The found publication record.
+            original_doi: The DOI that was originally searched.
+
+        Returns:
+            Publication with _lookup_method and _original_doi added.
+        """
+        result["_lookup_method"] = "title_fallback"
+        result["_original_doi"] = original_doi
+        return result
 
     async def _search_by_title(self, title: str) -> dict[str, Any] | None:
         """Search for a publication by title.

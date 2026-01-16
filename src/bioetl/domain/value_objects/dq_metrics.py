@@ -316,6 +316,24 @@ def _calculate_null_rate(values: list[Any], total: int) -> float:
     return round(null_count / total, 4)
 
 
+def _make_hashable(value: Any) -> Any:
+    """Convert a value to a hashable representation.
+
+    Args:
+        value: Value to convert.
+
+    Returns:
+        Hashable representation of the value.
+    """
+    if isinstance(value, dict):
+        # Convert dict to a frozenset of key-value tuples (recursively)
+        return frozenset((k, _make_hashable(v)) for k, v in value.items())
+    if isinstance(value, list):
+        # Convert list to tuple (recursively)
+        return tuple(_make_hashable(item) for item in value)
+    return value
+
+
 def _calculate_unique_count(values: list[Any]) -> int:
     """Calculate the count of unique values.
 
@@ -325,7 +343,13 @@ def _calculate_unique_count(values: list[Any]) -> int:
     Returns:
         Number of unique values, or 0 if empty.
     """
-    return len(set(values)) if values else 0
+    if not values:
+        return 0
+    try:
+        return len(set(values))
+    except TypeError:
+        # Handle unhashable types (lists, dicts) by converting to hashable
+        return len({_make_hashable(v) for v in values})
 
 
 def _compute_numeric_stats(

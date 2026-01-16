@@ -285,8 +285,9 @@ class TestSemanticScholarAdapterIntegration:
                 logger=mock_logger,
             )
 
+            # Title must match what VCR cassette returns for title validation
             fallback_mapping = {
-                "": "Machine Learning Drug Discovery",
+                "": "Machine learning for drug discovery",
             }
 
             records: list[dict[str, Any]] = []
