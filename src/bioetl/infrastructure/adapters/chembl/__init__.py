@@ -14,13 +14,9 @@ from bioetl.infrastructure.adapters.chembl.models import (
     ChemblActivityResponse,
     ChemblAssayRecord,
     ChemblAssayResponse,
-    # Deprecated aliases (backward compatibility)
-    ChemblDocumentRecord,
-    ChemblDocumentResponse,
     ChemblMoleculeRecord,
     ChemblMoleculeResponse,
     ChemblPageMeta,
-    # Canonical names (ADR-024)
     ChemblPublicationRecord,
     ChemblPublicationResponse,
     ChemblTargetComponentRecord,
@@ -30,27 +26,17 @@ from bioetl.infrastructure.adapters.chembl.models import (
 )
 
 __all__ = [
-    # Model Mappings
     "CHEMBL_RECORD_MODELS",
     "CHEMBL_RESPONSE_MODELS",
-    # Record Models
     "ChemblActivityRecord",
-    # Response Models
     "ChemblActivityResponse",
-    # Adapter
     "ChemblAdapter",
     "ChemblAssayRecord",
     "ChemblAssayResponse",
-    # Deprecated aliases (backward compatibility)
-    "ChemblDocumentRecord",
-    # Deprecated alias
-    "ChemblDocumentResponse",
     "ChemblMoleculeRecord",
     "ChemblMoleculeResponse",
     "ChemblPageMeta",
-    # Canonical names (ADR-024)
     "ChemblPublicationRecord",
-    # Canonical name (ADR-024)
     "ChemblPublicationResponse",
     "ChemblTargetComponentRecord",
     "ChemblTargetComponentResponse",
