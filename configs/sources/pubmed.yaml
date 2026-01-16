@@ -1,24 +1,54 @@
 # configs/sources/pubmed.yaml
-# Конфигурация источника данных PubMed (NCBI Entrez E-utilities).
+# Configuration for PubMed (NCBI Entrez E-utilities) data source.
+#
+# Provider: NCBI PubMed (Entrez E-utilities)
+# API Documentation: https://www.ncbi.nlm.nih.gov/books/NBK25500/
+# Data License: Public Domain (US Government)
 
 source:
     type: api
     load_strategy: full
-    # PubMed не имеет простого watermark поля как ID, используем параметры поиска
     batch_size: 100
     provider_config:
         provider: pubmed
         base_url: https://eutils.ncbi.nlm.nih.gov/entrez/eutils
+        auth_type: api_key  # Optional API key for higher rate limits
+        api_key_env: BIOETL_NCBI_API_KEY
+        email_env: BIOETL_NCBI_EMAIL  # Required by NCBI guidelines
         client:
             timeout_sec: 60.0
             max_retries: 3
-        # Email is required by NCBI guidelines, injected via env var usually but good to have default placeholder
-        default_email: "bioetl-bot@example.com" 
-        
+        default_email: "bioetl-bot@example.com"
+
     circuit_breaker:
         failure_threshold: 5
         recovery_timeout: 300
 
+    # PubMed E-utilities: 3 req/sec without key, 10 req/sec with key.
+    # NCBI requires email identification for all E-utilities requests.
+    # API key (free) increases rate limit from 3 to 10 req/sec.
+    # Register at: https://www.ncbi.nlm.nih.gov/account/
     rate_limit:
-        requests_per_second: 3.0 # Default without API key
+        requests_per_second: 3.0  # Default without API key
         burst: 5
+        with_api_key:
+            requests_per_second: 10
+            burst: 20
+
+    health_check:
+        endpoint: /einfo.fcgi
+        timeout: 10
+
+    retry:
+        use_retry_after: true
+
+# Available entities for this provider
+entities:
+    - publication  # PubMed article metadata
+
+# Entity-specific notes for documentation
+entity_notes:
+    publication:
+        description: "PubMed article metadata via Entrez"
+        input_mode: "Search term or PMID list"
+        search_syntax: "PubMed boolean queries supported"

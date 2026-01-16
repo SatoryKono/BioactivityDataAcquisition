@@ -1,5 +1,9 @@
 # configs/sources/pubchem.yaml
-# Конфигурация источника данных PubChem PUG REST API.
+# Configuration for PubChem PUG REST API data source.
+#
+# Provider: NCBI PubChem
+# API Documentation: https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest
+# Data License: Public Domain
 
 source:
     type: api
@@ -8,16 +12,37 @@ source:
     provider_config:
         provider: pubchem
         base_url: https://pubchem.ncbi.nlm.nih.gov/rest/pug
+        auth_type: public  # No authentication required
         client:
             timeout_sec: 30.0
             max_retries: 3
-        # PubChem specific limits
-        batch_size: 50 # PUG REST often limits batch sizes
-        
+        batch_size: 50  # PUG REST often limits batch sizes
+
     circuit_breaker:
         failure_threshold: 5
         recovery_timeout: 300
 
+    # PubChem enforces 5 requests/second for PUG REST API.
+    # Exceeding this limit results in temporary IP blocking.
     rate_limit:
         requests_per_second: 5.0
         burst: 10
+
+    health_check:
+        method: "Lightweight compound query"
+        timeout: 10
+
+    retry:
+        use_retry_after: true  # PubChem returns Retry-After on 429
+
+# Available entities for this provider
+entities:
+    - compound  # Chemical compounds with properties
+
+# Entity-specific notes for documentation
+entity_notes:
+    compound:
+        description: "Chemical compounds with computed properties"
+        typical_volume: "Depends on input filter (SMILES-based)"
+        input_mode: "SMILES-based search"
+        batch_size: 1  # SMILES search is per-compound

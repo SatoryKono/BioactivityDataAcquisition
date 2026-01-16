@@ -27,10 +27,15 @@ already implements the DRY principle effectively. No critical violations were fo
 - [x] Compliance matrix (`reports/pipeline-config-matrix.csv`)
 - [x] Discrepancy report (`reports/pipeline-config-issues.md`)
 - [x] Unified base schema (`configs/pipelines/_base.yaml`)
-- [x] Provider-specific documentation (`configs/pipelines/_providers/`)
+- [x] Provider-specific documentation (consolidated into `configs/sources/`)
 - [x] ADR-025: Pipeline Configuration Unification
 
 **Status**: COMPLETED
+
+**Note (2026-01-16)**: Provider documentation from `configs/pipelines/_providers/` was
+consolidated into `configs/sources/*.yaml` to eliminate duplication. The `_providers/`
+directory was removed. Each source config now contains: `entities`, `entity_notes`,
+`documentation` (url, license), and `rate_limit.with_api_key` where applicable.
 
 ---
 
@@ -252,17 +257,30 @@ If migration causes issues:
 | File | Purpose |
 |------|---------|
 | `configs/pipelines/_base.yaml` | Unified base schema documentation |
-| `configs/pipelines/_providers/chembl.yaml` | ChEMBL provider documentation |
-| `configs/pipelines/_providers/pubchem.yaml` | PubChem provider documentation |
-| `configs/pipelines/_providers/uniprot.yaml` | UniProt provider documentation |
-| `configs/pipelines/_providers/crossref.yaml` | CrossRef provider documentation |
-| `configs/pipelines/_providers/openalex.yaml` | OpenAlex provider documentation |
-| `configs/pipelines/_providers/pubmed.yaml` | PubMed provider documentation |
-| `configs/pipelines/_providers/semanticscholar.yaml` | Semantic Scholar provider documentation |
 | `reports/pipeline-config-matrix.csv` | Compliance matrix |
 | `reports/pipeline-config-issues.md` | Discrepancy report |
 | `reports/pipeline-config-migration-plan.md` | This document |
 | `docs/02-architecture/decisions/ADR-025-pipeline-config-unification.md` | ADR |
+
+### Files Updated (2026-01-16)
+
+Provider documentation was consolidated into source configs:
+
+| File | Changes |
+|------|---------|
+| `configs/sources/chembl.yaml` | Added: entities, entity_notes, documentation, health_check, retry |
+| `configs/sources/pubchem.yaml` | Added: entities, entity_notes, documentation, health_check, retry |
+| `configs/sources/uniprot.yaml` | Added: entities, entity_notes, documentation, rate_limit.with_api_key, health_check, retry |
+| `configs/sources/crossref.yaml` | Added: entities, entity_notes, documentation, rate_limit.polite_pool, retry |
+| `configs/sources/openalex.yaml` | Added: entities, entity_notes, documentation, rate_limit.polite_pool, retry |
+| `configs/sources/pubmed.yaml` | Added: entities, entity_notes, documentation, rate_limit.with_api_key, health_check, retry |
+| `configs/sources/semanticscholar.yaml` | Added: entities, entity_notes, rate_limit.with_api_key, retry |
+
+### Files Removed (2026-01-16)
+
+| File | Reason |
+|------|--------|
+| `configs/pipelines/_providers/*.yaml` (7 files) | Content consolidated into `configs/sources/` |
 
 ### Existing Files - No Changes Required
 

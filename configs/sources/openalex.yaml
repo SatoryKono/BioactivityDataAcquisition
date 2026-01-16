@@ -2,8 +2,9 @@
 # Configuration for OpenAlex API data source.
 # Provides open scholarly metadata via Works API.
 #
-# OpenAlex is an open catalog of scholarly works, authors, venues, and concepts.
-# See: https://docs.openalex.org
+# Provider: OpenAlex (OurResearch)
+# API Documentation: https://docs.openalex.org
+# Data License: CC0 (Public Domain)
 
 source:
     type: api
@@ -12,6 +13,7 @@ source:
     provider_config:
         provider: openalex
         base_url: https://api.openalex.org
+        auth_type: email  # Email for polite pool access
         mailto: ${BIOETL_OPENALEX_EMAIL}  # Required for polite pool access
         client:
             timeout_sec: 30.0
@@ -19,20 +21,35 @@ source:
         batch_size: 50  # DOIs per batch
         cursor_pagination: true  # Uses cursor-based pagination
 
-    # Circuit breaker settings (per ADR-007)
     circuit_breaker:
         failure_threshold: 5
         recovery_timeout: 300
 
-    # Rate limits for polite pool (10 req/sec with mailto)
-    # See: https://docs.openalex.org/how-to-use-the-api/rate-limits-and-authentication
+    # OpenAlex polite pool: 10 req/sec with mailto parameter.
+    # Set BIOETL_OPENALEX_EMAIL to get higher rate limits.
+    # Without email: shared pool with lower priority.
     rate_limit:
         requests_per_second: 10
         burst: 20
+        polite_pool: true
 
-    # Health check configuration
     health_check:
         endpoint: /works
         params:
             per-page: 1
         timeout: 5
+
+    retry:
+        use_retry_after: true
+
+# Available entities for this provider
+entities:
+    - publication  # Scholarly works (papers, articles)
+
+# Entity-specific notes for documentation
+entity_notes:
+    publication:
+        description: "Scholarly works metadata via DOI resolution"
+        input_mode: "CSV file with DOIs"
+        fallback: "Title search when DOI not found"
+        batch_size: 50  # Recommended by OpenAlex
