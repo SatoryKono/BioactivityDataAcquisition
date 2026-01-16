@@ -72,7 +72,7 @@ flowchart TB
         end
         subgraph Storage["Storage Writers"]
             BronzeWriter["BronzeWriter"]
-            DeltaWriter["DeltaWriter\n(Silver)"]
+            SilverWriter["SilverWriter\n(Silver)"]
             GoldWriter["GoldWriter"]
         end
         subgraph Locking["Locking"]
@@ -136,5 +136,5 @@ flowchart TB
 
     %% Storage writes
     BronzeWriter --> Bronze
-    DeltaWriter --> Silver
+    SilverWriter --> Silver
     GoldWriter --> Gold
