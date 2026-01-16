@@ -176,6 +176,13 @@ class MetadataCoordinator:
         """
         duration = (input_data.completed_at - input_data.started_at).total_seconds()
 
+        # Use provided source_metadata or create minimal default
+        source = (
+            input_data.source_metadata
+            if input_data.source_metadata is not None
+            else SourceMetadata(type="api")
+        )
+
         return BronzeMetadata(
             runtime=self._build_runtime_metadata(
                 started_at=input_data.started_at,
@@ -183,7 +190,7 @@ class MetadataCoordinator:
                 duration_seconds=duration,
             ),
             pipeline=self._build_pipeline_metadata(),
-            source=SourceMetadata(type="api"),
+            source=source,
             output=OutputMetadata(
                 files=[
                     FileOutputMetadata(

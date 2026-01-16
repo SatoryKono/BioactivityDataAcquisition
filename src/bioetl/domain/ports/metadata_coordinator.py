@@ -17,6 +17,7 @@ if TYPE_CHECKING:
         BronzeMetadata,
         GoldMetadata,
         SilverMetadata,
+        SourceMetadata,
     )
     from bioetl.domain.types import BatchID
 
@@ -32,6 +33,8 @@ class BronzeMetadataInput:
         output_path: Relative path to the written file.
         started_at: UTC timestamp when write started.
         completed_at: UTC timestamp when write completed.
+        source_metadata: Optional pre-built SourceMetadata with API request
+                        details for rich lineage tracking.
     """
 
     batch_id: BatchID
@@ -40,6 +43,7 @@ class BronzeMetadataInput:
     output_path: str
     started_at: datetime
     completed_at: datetime
+    source_metadata: SourceMetadata | None = None
 
 
 @dataclass(frozen=True, slots=True)
