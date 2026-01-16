@@ -57,14 +57,11 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     ChemblPublicationRecord,
     ChemblPublicationTermRecord,
     CompoundRecord,
-    DocumentRecord,
     DocumentSimilarity,
     DocumentTerm,
-    DocumentTermRecord,
     Molecule,
     MoleculeRecord,
     ProteinClassification,
-    PubChemCompoundRecord,
     PubchemMolecule,
     PubchemMoleculeRecord,
     Publication,
@@ -313,16 +310,9 @@ __all__ = [
     "ArticleRecord",
     "AssayRecord",
     "CellLineRecord",
-    # Canonical DTO names (ADR-024)
     "ChemblPublicationRecord",
     "ChemblPublicationTermRecord",
-    # Deprecated aliases (backward compatibility)
-    "DocumentRecord",
-    "DocumentTermRecord",
     "MoleculeRecord",
-    # Deprecated alias
-    "PubChemCompoundRecord",
-    # Canonical DTO name (ADR-024)
     "PubchemMoleculeRecord",
     "PublicationRecord",
     "TargetComponentRecord",

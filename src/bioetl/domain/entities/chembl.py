@@ -692,22 +692,12 @@ class ProteinClassRecord(BaseModel):
     )
 
 
-# === Deprecated Aliases (ADR-024 backward compatibility) ===
-# These will be removed in v3.0
-DocumentRecord = ChemblPublicationRecord
-DocumentTermRecord = ChemblPublicationTermRecord
-
-
 __all__ = [
     "ActivityRecord",
     "AssayRecord",
     "CellLineRecord",
-    # Canonical names (ADR-024)
     "ChemblPublicationRecord",
     "ChemblPublicationTermRecord",
-    # Deprecated aliases (backward compatibility)
-    "DocumentRecord",
-    "DocumentTermRecord",
     "MoleculeRecord",
     "ProteinClassRecord",
     "TargetComponentRecord",

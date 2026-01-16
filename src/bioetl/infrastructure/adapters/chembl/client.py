@@ -16,7 +16,7 @@ from bioetl.domain.entities.chembl import (
     ActivityRecord,
     AssayRecord,
     CellLineRecord,
-    DocumentRecord,
+    ChemblPublicationRecord,
     MoleculeRecord,
     ProteinClassRecord,
     TargetComponentRecord,
@@ -55,7 +55,7 @@ CHEMBL_DTO_MODELS: dict[str, type[BaseModel]] = {
     "compound": MoleculeRecord,  # Alias for molecule
     "target": TargetRecord,
     "target_component": TargetComponentRecord,
-    "document": DocumentRecord,
+    "document": ChemblPublicationRecord,
     "cell_line": CellLineRecord,
     "protein_class": ProteinClassRecord,
 }
