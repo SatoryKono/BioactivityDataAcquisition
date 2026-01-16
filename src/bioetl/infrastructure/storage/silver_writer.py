@@ -164,41 +164,28 @@ class SilverWriter(BaseDeltaWriter):
         primary_keys: list[str],
     ) -> pa.Table:
         """Prepare Arrow table from records with schema filtering and sorting."""
-        schema_fields = set(schema.names)
         string_fields = {
             field.name
             for field in schema
             if pa.types.is_string(field.type) or pa.types.is_large_string(field.type)
         }
 
-        def serialize_value(key: str, value: Any) -> Any:
-            """Serialize complex values to JSON strings for PyArrow compatibility.
+        # Optimization: Modify records in-place (on copies) instead of creating new dicts
+        # via comprehension. PyArrow.from_pylist filters extra fields automatically.
+        prepared_records = []
+        dumps = orjson.dumps
+        OPT_SORT_KEYS = orjson.OPT_SORT_KEYS
 
-            Args:
-                key: Field name to check against string_fields.
-                value: Value to potentially serialize.
+        for rec in records:
+            r_copy = rec.copy()
+            # Only iterate over fields that might need serialization
+            for k in string_fields:
+                val = r_copy.get(k)
+                if val is not None and (val.__class__ is dict or val.__class__ is list):
+                    r_copy[k] = dumps(val, option=OPT_SORT_KEYS).decode("utf-8")
+            prepared_records.append(r_copy)
 
-            Returns:
-                JSON string if value is dict/list and field is string type,
-                otherwise the original value unchanged.
-
-            Note:
-                Uses OPT_SORT_KEYS for deterministic serialization (§2.8.1).
-                Complex objects in Gold layer are flattened; Silver preserves
-                JSON for forensic purposes.
-            """
-            if value is None:
-                return None
-            if key in string_fields and isinstance(value, (dict, list)):
-                # orjson.dumps returns bytes, but PyArrow string columns expect str
-                return orjson.dumps(value, option=orjson.OPT_SORT_KEYS).decode("utf-8")
-            return value
-
-        filtered_records = [
-            {k: serialize_value(k, v) for k, v in rec.items() if k in schema_fields}
-            for rec in records
-        ]
-        arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
+        arrow_data = pa.Table.from_pylist(prepared_records, schema=schema)
 
         if primary_keys:
             arrow_data = arrow_data.sort_by([(pk, "ascending") for pk in primary_keys])
