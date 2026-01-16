@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -74,7 +74,7 @@ class CompositeCheckpointState:
             completed_enrichers=self.completed_enrichers,
             enrichment_results=self.enrichment_results,
             created_at=self.created_at,
-            updated_at=datetime.now(),
+            updated_at=datetime.now(tz=UTC),
         )
 
     def with_enricher_completed(
@@ -91,7 +91,7 @@ class CompositeCheckpointState:
             completed_enrichers=frozenset(new_completed),
             enrichment_results=new_results,
             created_at=self.created_at,
-            updated_at=datetime.now(),
+            updated_at=datetime.now(tz=UTC),
         )
 
     @property
@@ -294,7 +294,7 @@ class CompositeCheckpointManager:
         return CompositeCheckpointState(
             composite_name=self._composite_name,
             run_id=self._run_id,
-            created_at=datetime.now(),
+            created_at=datetime.now(tz=UTC),
         )
 
     async def save(self, state: CompositeCheckpointState) -> None:
