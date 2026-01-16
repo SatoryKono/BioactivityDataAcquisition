@@ -153,6 +153,32 @@ class TestStoragePortProtocol:
                 schema: Any,
                 primary_keys: list[str] | None = None,
                 mode: Literal["overwrite", "append", "scd2"] = "overwrite",
+                *,
+                ingestion_ts: Any = None,
+                run_id: Any = None,
+            ) -> None:
+                pass
+
+            async def read_silver(
+                self,
+                table_name: str,
+                columns: list[str] | None = None,
+            ) -> list[dict[str, Any]]:
+                return []
+
+            async def write_silver_merged(
+                self,
+                table_name: str,
+                records: list[dict[str, Any]],
+                primary_keys: list[str] | None = None,
+            ) -> None:
+                pass
+
+            async def write_gold_merged(
+                self,
+                table_name: str,
+                records: list[dict[str, Any]],
+                primary_keys: list[str] | None = None,
             ) -> None:
                 pass
 
