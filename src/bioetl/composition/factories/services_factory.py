@@ -21,6 +21,7 @@ from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.record_processor import RecordProcessor
+from bioetl.composition.factories.dq_factory import DQServicesFactory
 from bioetl.composition.factories.storage import StorageContext, StorageFactory
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -160,6 +161,13 @@ class BaseServicesFactory:
 
             tracer = NoOpTracing()
 
+        # Create DQ services if any layer has dq_report enabled
+        dq_services = cls._create_dq_services(
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=logger,
+        )
+
         return PipelineServices(
             data_source=data_source,
             storage=storage_ctx.adapter,
@@ -170,6 +178,11 @@ class BaseServicesFactory:
             tracing=tracer,
             logger=logger,
             dq_monitor=dq_monitor,
+            bronze_dq_analyzer=dq_services.get("bronze_analyzer"),
+            silver_dq_analyzer=dq_services.get("silver_analyzer"),
+            gold_dq_analyzer=dq_services.get("gold_analyzer"),
+            dq_report_writer=dq_services.get("report_writer"),
+            dq_report_service=dq_services.get("report_service"),
         )
 
     @staticmethod
@@ -197,6 +210,114 @@ class BaseServicesFactory:
         if settings.metrics_enabled:
             return PrometheusMetrics()
         return NoOpMetrics()
+
+    @classmethod
+    def _create_dq_services(
+        cls,
+        settings: Settings,
+        pipeline_config: PipelineYamlConfig,
+        logger: LoggerPort,
+    ) -> dict[str, Any]:
+        """Create DQ services if any layer has dq_report enabled.
+
+        Args:
+            settings: Application settings.
+            pipeline_config: Pipeline YAML configuration.
+            logger: Structured logger.
+
+        Returns:
+            Dictionary with DQ services (empty if none enabled).
+        """
+        # Check if any DQ report is enabled in sink config
+        dq_enabled = cls._is_dq_report_enabled(pipeline_config)
+
+        if not dq_enabled:
+            return {}
+
+        # Create DQ analyzers
+        bronze_analyzer = DQServicesFactory.create_bronze_analyzer()
+        silver_analyzer = DQServicesFactory.create_silver_analyzer()
+        gold_analyzer = DQServicesFactory.create_gold_analyzer()
+
+        # Create report writer with data directory from settings
+        report_writer = DQServicesFactory.create_report_writer(
+            base_path=settings.data_dir,
+            logger=logger,
+        )
+
+        # Create DQ report service
+        from bioetl.application.services.dq_report_service import DQReportService
+
+        report_service = DQReportService(
+            logger=logger,
+            bronze_analyzer=bronze_analyzer,
+            silver_analyzer=silver_analyzer,
+            gold_analyzer=gold_analyzer,
+            report_writer=report_writer,
+        )
+
+        return {
+            "bronze_analyzer": bronze_analyzer,
+            "silver_analyzer": silver_analyzer,
+            "gold_analyzer": gold_analyzer,
+            "report_writer": report_writer,
+            "report_service": report_service,
+        }
+
+    @staticmethod
+    def _is_dq_report_enabled(config: PipelineYamlConfig) -> bool:
+        """Check if any DQ report is enabled in pipeline config.
+
+        Args:
+            config: Pipeline YAML configuration.
+
+        Returns:
+            True if any layer has dq_report.enabled = true.
+        """
+        from bioetl.infrastructure.schemas.dq_report_config import (
+            BronzeSinkConfig,
+            GoldSinkConfig,
+            SilverSinkConfig,
+        )
+
+        sink = config.sink
+
+        # Check Bronze
+        bronze_config = sink.get("bronze")
+        if bronze_config:
+            # Try to parse as BronzeSinkConfig to check dq_report
+            try:
+                bronze_sink = BronzeSinkConfig.model_validate(
+                    bronze_config.model_dump()
+                )
+                if bronze_sink.dq_report.enabled:
+                    return True
+            except Exception:
+                pass
+
+        # Check Silver
+        silver_config = sink.get("silver")
+        if silver_config:
+            try:
+                silver_sink = SilverSinkConfig.model_validate(
+                    silver_config.model_dump()
+                )
+                if silver_sink.dq_report.enabled:
+                    return True
+            except Exception:
+                pass
+
+        # Check Gold
+        gold_config = sink.get("gold")
+        if gold_config:
+            try:
+                gold_sink = GoldSinkConfig.model_validate(gold_config.model_dump())
+                if gold_sink.dq_report.enabled:
+                    return True
+            except Exception:
+                pass
+
+        return False
 
 
 # =============================================================================

@@ -63,6 +63,7 @@ from bioetl.domain.value_objects.activity_values import (
     PChemblValue,
 )
 from bioetl.domain.value_objects.base import ValueObject
+from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.chemical import (
     SMILES,
     InChIKey,
@@ -74,6 +75,11 @@ from bioetl.domain.value_objects.compound_ids import (
     CompoundId,
     CompoundIdUnion,
     CompoundSource,
+)
+from bioetl.domain.value_objects.dq_metrics import (
+    BatchDQMetrics,
+    ColumnStats,
+    SchemaDriftInfo,
 )
 from bioetl.domain.value_objects.dq_report import (
     AnomalyDetectionResult,
@@ -126,6 +132,7 @@ from bioetl.domain.value_objects.publications import (
     DOI,
     PubMedId,
 )
+from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.domain.value_objects.taxonomy_id import (
     TaxonomyId,
     validate_taxonomy_id,
@@ -142,12 +149,15 @@ __all__ = [
     "AnomalyDetectionResult",
     "AnomalyMetric",
     "AssayId",
+    "BatchDQMetrics",
     "BronzeDQCheckType",
     "BronzeDQReport",
+    "BronzeWriteResult",
     "BusinessRuleResult",
     "BusinessRulesResult",
     "CategoricalDistribution",
     "ChemblId",
+    "ColumnStats",
     "CompletenessResult",
     "CompoundId",
     "CompoundIdUnion",
@@ -186,7 +196,9 @@ __all__ = [
     "RecordCountResult",
     "ReferentialIntegrityResult",
     "RelationOperator",
+    "RunContext",
     "SCDIntegrityResult",
+    "SchemaDriftInfo",
     "SchemaDriftResult",
     "SchemaSnapshotResult",
     "SemanticScholarId",

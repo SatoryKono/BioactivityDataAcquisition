@@ -14,6 +14,7 @@ import zstandard as zstd
 
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -486,7 +487,7 @@ class TestBronzeWriterWriteLocal:
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
-        path = await writer.write_bronze(
+        result = await writer.write_bronze(
             records=iter(sample_records),
             provider="chembl",
             entity="activity",
@@ -497,15 +498,23 @@ class TestBronzeWriterWriteLocal:
             ingestion_ts=ingestion_ts,
         )
 
+        # Verify BronzeWriteResult structure
+        assert result.batch_id == batch_id
+        assert result.record_count == len(sample_records)
+        assert result.compressed_size > 0
+        assert result.uncompressed_size > 0
+        assert result.checksum_blake2  # Non-empty checksum
+
         # Verify path format (normalize for cross-platform)
-        path_str = str(path).replace("\\", "/")
+        path_str = result.relative_path.replace("\\", "/")
         assert "v1/chembl/activity/2024-01-15" in path_str
-        assert str(batch_id) in str(path)
-        assert str(path).endswith(".jsonl.zst")
+        assert str(batch_id) in result.relative_path
+        assert result.relative_path.endswith(".jsonl.zst")
 
         # Verify file exists
-        full_path = tmp_path / path
+        full_path = tmp_path / result.relative_path
         assert full_path.exists()
+        assert result.absolute_path == str(full_path)
 
         # Verify metadata file exists
         meta_path = full_path.with_suffix(".zst.meta.json")
@@ -529,6 +538,13 @@ class TestBronzeWriterWriteLocal:
             decompressed = reader.read()
         expected = b"".join(sample_records)
         assert decompressed == expected
+
+        # Verify checksum matches file content
+        import hashlib
+
+        h = hashlib.blake2b()
+        h.update(compressed_data)
+        assert result.checksum_blake2 == h.hexdigest()
 
     @pytest.mark.asyncio
     async def test_write_bronze_local_async(
@@ -555,7 +571,7 @@ class TestBronzeWriterWriteLocal:
             "run_in_executor",
             wraps=asyncio.get_running_loop().run_in_executor,
         ) as mock_executor:
-            path = await writer.write_bronze(
+            result = await writer.write_bronze(
                 records=iter(sample_records),
                 provider="test_provider",
                 entity="test_entity",
@@ -570,7 +586,7 @@ class TestBronzeWriterWriteLocal:
             assert mock_executor.call_count >= 1
 
             # Verify file existence and content
-            full_path = tmp_path / path
+            full_path = tmp_path / result.relative_path
             assert full_path.exists()
             assert full_path.with_suffix(".zst.meta.json").exists()
 
@@ -671,7 +687,7 @@ class TestBronzeWriterReadLocal:
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
         # Write first
-        path = await writer.write_bronze(
+        result = await writer.write_bronze(
             records=iter(sample_records),
             provider="chembl",
             entity="activity",
@@ -684,7 +700,7 @@ class TestBronzeWriterReadLocal:
 
         # Read back
         records = []
-        async for record in writer.read_bronze(str(path)):
+        async for record in writer.read_bronze(result.relative_path):
             records.append(record)
 
         assert len(records) == 3
@@ -881,7 +897,7 @@ class TestBronzeWriterAtomicWrite:
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
         # Successful write
-        path = await writer.write_bronze(
+        result = await writer.write_bronze(
             records=iter(sample_records),
             provider="chembl",
             entity="activity",
@@ -892,7 +908,7 @@ class TestBronzeWriterAtomicWrite:
             ingestion_ts=ingestion_ts,
         )
 
-        full_path = tmp_path / path
+        full_path = tmp_path / result.relative_path
         meta_path = full_path.with_suffix(".zst.meta.json")
 
         # Both files must exist
@@ -1101,7 +1117,7 @@ class TestBronzeWriterMetadataDeterminism:
         batch_id_1 = BatchID(uuid4())
         batch_id_2 = BatchID(uuid4())
 
-        path_1 = await writer.write_bronze(
+        result_1 = await writer.write_bronze(
             records=iter(sample_records),
             provider="chembl",
             entity="activity",
@@ -1112,7 +1128,7 @@ class TestBronzeWriterMetadataDeterminism:
             ingestion_ts=ingestion_ts,
         )
 
-        path_2 = await writer.write_bronze(
+        result_2 = await writer.write_bronze(
             records=iter(sample_records),
             provider="chembl",
             entity="activity",
@@ -1124,8 +1140,8 @@ class TestBronzeWriterMetadataDeterminism:
         )
 
         # Read both metadata files
-        meta_path_1 = (tmp_path / path_1).with_suffix(".zst.meta.json")
-        meta_path_2 = (tmp_path / path_2).with_suffix(".zst.meta.json")
+        meta_path_1 = (tmp_path / result_1.relative_path).with_suffix(".zst.meta.json")
+        meta_path_2 = (tmp_path / result_2.relative_path).with_suffix(".zst.meta.json")
 
         with open(meta_path_1, "rb") as f:
             meta_bytes_1 = f.read()
@@ -1664,7 +1680,7 @@ class TestBronzeWriterJsonValidation:
         ]
 
         # Should not raise - writes the bytes as-is
-        path = await writer.write_bronze(
+        result = await writer.write_bronze(
             records=iter(invalid_records),
             provider="test",
             entity="data",
@@ -1676,7 +1692,7 @@ class TestBronzeWriterJsonValidation:
         )
 
         # Verify file was written
-        full_path = tmp_path / path
+        full_path = tmp_path / result.relative_path
         assert full_path.exists()
 
     @pytest.mark.asyncio
@@ -1699,7 +1715,7 @@ class TestBronzeWriterJsonValidation:
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
-        path = await writer.write_bronze(
+        result = await writer.write_bronze(
             records=iter(sample_records),
             provider="chembl",
             entity="activity",
@@ -1711,12 +1727,12 @@ class TestBronzeWriterJsonValidation:
         )
 
         # Verify file was written successfully
-        full_path = tmp_path / path
+        full_path = tmp_path / result.relative_path
         assert full_path.exists()
 
         # Verify we can read back the records
         records_read = []
-        async for record in writer.read_bronze(str(path)):
+        async for record in writer.read_bronze(result.relative_path):
             records_read.append(record)
 
         assert len(records_read) == len(sample_records)
@@ -1831,7 +1847,7 @@ class TestBronzeWriterAudit:
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
         # Should not raise
-        path = await writer.write_bronze(
+        result = await writer.write_bronze(
             records=iter(sample_records),
             provider="chembl",
             entity="activity",
@@ -1842,7 +1858,8 @@ class TestBronzeWriterAudit:
             ingestion_ts=ingestion_ts,
         )
 
-        assert path is not None
+        assert result is not None
+        assert result.relative_path is not None
 
 
 @pytest.mark.unit
@@ -2167,8 +2184,8 @@ class TestBronzeWriterMetadataSidecar:
         )
 
         # Verify data was written
-        assert result.endswith(".jsonl.zst")
-        assert (tmp_path / result).exists()
+        assert result.relative_path.endswith(".jsonl.zst")
+        assert (tmp_path / result.relative_path).exists()
 
     @pytest.mark.asyncio
     async def test_build_full_bronze_metadata_structure(
@@ -2262,3 +2279,128 @@ class TestBronzeWriterMetadataSidecar:
                 duration_seconds=0.1,
             )
             assert metadata.runtime.run_type.value == expected_value
+
+
+@pytest.mark.unit
+class TestBronzeWriteResult:
+    """Tests for BronzeWriteResult value object (REQ-LINEAGE-001)."""
+
+    def test_bronze_write_result_creation(self, batch_id: BatchID) -> None:
+        """Test valid BronzeWriteResult creation."""
+        result = BronzeWriteResult(
+            batch_id=batch_id,
+            relative_path="v1/chembl/activity/2024-01-15/batch_123.jsonl.zst",
+            absolute_path="/data/bronze/v1/chembl/activity/2024-01-15/batch_123.jsonl.zst",
+            record_count=100,
+            compressed_size=5000,
+            uncompressed_size=20000,
+            checksum_blake2="abc123def456",
+        )
+
+        assert result.batch_id == batch_id
+        assert result.record_count == 100
+        assert result.compressed_size == 5000
+        assert result.uncompressed_size == 20000
+
+    def test_bronze_write_result_is_frozen(self, batch_id: BatchID) -> None:
+        """Test BronzeWriteResult is immutable (frozen dataclass)."""
+        result = BronzeWriteResult(
+            batch_id=batch_id,
+            relative_path="v1/test/path.jsonl.zst",
+            absolute_path="/data/bronze/v1/test/path.jsonl.zst",
+            record_count=10,
+            compressed_size=100,
+            uncompressed_size=500,
+            checksum_blake2="abc123",
+        )
+
+        with pytest.raises(Exception):  # FrozenInstanceError
+            result.record_count = 50  # type: ignore[misc]
+
+    def test_bronze_write_result_compression_ratio(self, batch_id: BatchID) -> None:
+        """Test compression_ratio property calculation."""
+        result = BronzeWriteResult(
+            batch_id=batch_id,
+            relative_path="v1/test/path.jsonl.zst",
+            absolute_path="/data/bronze/v1/test/path.jsonl.zst",
+            record_count=10,
+            compressed_size=1000,
+            uncompressed_size=4000,
+            checksum_blake2="abc123",
+        )
+
+        assert result.compression_ratio == 4.0  # 4000 / 1000
+
+    def test_bronze_write_result_compression_ratio_zero_uncompressed(
+        self, batch_id: BatchID
+    ) -> None:
+        """Test compression_ratio returns 1.0 for zero uncompressed_size."""
+        result = BronzeWriteResult(
+            batch_id=batch_id,
+            relative_path="v1/test/path.jsonl.zst",
+            absolute_path="/data/bronze/v1/test/path.jsonl.zst",
+            record_count=0,
+            compressed_size=100,
+            uncompressed_size=0,
+            checksum_blake2="abc123",
+        )
+
+        assert result.compression_ratio == 1.0
+
+    def test_bronze_write_result_validation_negative_record_count(
+        self, batch_id: BatchID
+    ) -> None:
+        """Test BronzeWriteResult rejects negative record_count."""
+        with pytest.raises(ValueError, match="record_count must be non-negative"):
+            BronzeWriteResult(
+                batch_id=batch_id,
+                relative_path="v1/test/path.jsonl.zst",
+                absolute_path="/data/bronze/v1/test/path.jsonl.zst",
+                record_count=-1,
+                compressed_size=100,
+                uncompressed_size=500,
+                checksum_blake2="abc123",
+            )
+
+    def test_bronze_write_result_validation_negative_compressed_size(
+        self, batch_id: BatchID
+    ) -> None:
+        """Test BronzeWriteResult rejects negative compressed_size."""
+        with pytest.raises(ValueError, match="compressed_size must be non-negative"):
+            BronzeWriteResult(
+                batch_id=batch_id,
+                relative_path="v1/test/path.jsonl.zst",
+                absolute_path="/data/bronze/v1/test/path.jsonl.zst",
+                record_count=10,
+                compressed_size=-100,
+                uncompressed_size=500,
+                checksum_blake2="abc123",
+            )
+
+    def test_bronze_write_result_validation_empty_path(self, batch_id: BatchID) -> None:
+        """Test BronzeWriteResult rejects empty paths."""
+        with pytest.raises(ValueError, match="relative_path cannot be empty"):
+            BronzeWriteResult(
+                batch_id=batch_id,
+                relative_path="",
+                absolute_path="/data/bronze/v1/test/path.jsonl.zst",
+                record_count=10,
+                compressed_size=100,
+                uncompressed_size=500,
+                checksum_blake2="abc123",
+            )
+
+    def test_bronze_write_result_validation_empty_checksum(
+        self, batch_id: BatchID
+    ) -> None:
+        """Test BronzeWriteResult rejects empty checksum."""
+        with pytest.raises(ValueError, match="checksum_blake2 cannot be empty"):
+            BronzeWriteResult(
+                batch_id=batch_id,
+                relative_path="v1/test/path.jsonl.zst",
+                absolute_path="/data/bronze/v1/test/path.jsonl.zst",
+                record_count=10,
+                compressed_size=100,
+                uncompressed_size=500,
+                checksum_blake2="",
+            )

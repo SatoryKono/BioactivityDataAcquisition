@@ -295,7 +295,7 @@ class GoldDQAnalyzer:
             column = rule.get("column")
             condition = rule.get("condition")
 
-            violations = 0
+            violations: int | None = 0
             passed = True
 
             try:
@@ -326,7 +326,7 @@ class GoldDQAnalyzer:
                         passed = violations == 0
             except Exception:
                 passed = False
-                violations = -1  # Unknown
+                violations = None  # Unknown due to exception
 
             if passed:
                 rules_passed += 1

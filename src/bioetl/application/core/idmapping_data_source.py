@@ -6,6 +6,7 @@ Reads ChEMBL target IDs from CSV and maps them to UniProt accessions.
 
 from __future__ import annotations
 
+import asyncio
 import csv
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self
@@ -126,8 +127,8 @@ class IDMappingDataSource:
                 received=entity_type,
             )
 
-        # Step 1: Read ChEMBL IDs from CSV
-        chembl_ids = self._read_chembl_ids()
+        # Step 1: Read ChEMBL IDs from CSV (async to avoid blocking event loop)
+        chembl_ids = await self._read_chembl_ids_async()
 
         # Apply limit if specified
         if limit is not None:
@@ -169,8 +170,10 @@ class IDMappingDataSource:
             not_mapped=len(chembl_ids) - found_count,
         )
 
-    def _read_chembl_ids(self) -> list[str]:
-        """Read ChEMBL target IDs from input CSV file.
+    async def _read_chembl_ids_async(self) -> list[str]:
+        """Read ChEMBL target IDs from input CSV file asynchronously.
+
+        Uses run_in_executor to avoid blocking the event loop.
 
         Returns:
             List of ChEMBL target IDs.
@@ -179,6 +182,11 @@ class IDMappingDataSource:
             FileNotFoundError: If input file doesn't exist.
             ValueError: If required column is missing.
         """
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, self._read_chembl_ids_sync)
+
+    def _read_chembl_ids_sync(self) -> list[str]:
+        """Synchronous implementation of ChEMBL ID reading from CSV."""
         if not self._input_path.exists():
             raise FileNotFoundError(f"Input file not found: {self._input_path}")
 
@@ -215,8 +223,10 @@ class IDMappingDataSource:
         Returns:
             HealthStatus indicating overall health.
         """
-        # Check input file
-        if not self._input_path.exists():
+        # Check input file (async to avoid blocking event loop)
+        loop = asyncio.get_running_loop()
+        file_exists = await loop.run_in_executor(None, self._input_path.exists)
+        if not file_exists:
             self._logger.warning(
                 "health_check_failed",
                 reason="input_file_missing",

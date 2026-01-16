@@ -4,6 +4,11 @@
 Implements FilterableDataSourcePort for batch DOI resolution with title fallback.
 Uses POST /paper/batch for efficient batch DOI lookup.
 
+Supports three-phase fallback strategy:
+- Phase 1: Batch DOI lookup via POST /paper/batch
+- Phase 2: Title fallback for unresolved DOIs
+- Phase 3: Title-only lookup for entries without DOIs
+
 Rate Limits:
 - Without API key: Shared pool of 1000 req/sec (unstable)
 - With API key: Guaranteed 1 req/sec per endpoint
@@ -24,6 +29,7 @@ from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+from bioetl.infrastructure.adapters.semanticscholar.fallback import TitleFallbackHandler
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -76,9 +82,15 @@ class SemanticScholarAdapter(BaseHttpAdapter):
     """Provider identifier (required by DataSourcePort)."""
 
     def __post_init__(self) -> None:
-        """Initialize adapter metrics."""
+        """Initialize adapter metrics and helper components."""
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
+
+        # Initialize helper component for fallback handling
+        self._fallback_handler = TitleFallbackHandler(
+            logger=self.logger,
+            search_fn=self._search_by_title,
+        )
 
     def _build_headers(self) -> dict[str, str]:
         """Build request headers with API key if available."""
@@ -243,74 +255,6 @@ class SemanticScholarAdapter(BaseHttpAdapter):
                     if limit and count >= limit:
                         return
 
-    async def _title_fallback_phase(
-        self,
-        unresolved_dois: list[str],
-        fallback_mapping: dict[str, str],
-        limit: int | None,
-        start_count: int,
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Phase 2: Fallback by title for unresolved DOIs.
-
-        Args:
-            unresolved_dois: DOIs not found in batch lookup.
-            fallback_mapping: Mapping from DOI to title.
-            limit: Maximum records to fetch.
-            start_count: Number of records already fetched.
-
-        Yields:
-            Publication records with _lookup_method field.
-        """
-        count = start_count
-        for doi in unresolved_dois:
-            if limit and count >= limit:
-                return
-
-            title = fallback_mapping.get(doi)
-            if not title:
-                self.logger.warning("no_fallback_title", doi=doi)
-                continue
-
-            async for record in self._search_by_title(title):
-                record["_lookup_method"] = "title_fallback"
-                record["_original_doi"] = doi
-                count += 1
-                yield record
-                break
-
-    async def _title_only_phase(
-        self,
-        title_only_entries: list[str],
-        fallback_mapping: dict[str, str],
-        limit: int | None,
-        start_count: int,
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Phase 3: Title-only entries (empty DOIs).
-
-        Args:
-            title_only_entries: List of empty DOI entries.
-            fallback_mapping: Mapping from DOI to title.
-            limit: Maximum records to fetch.
-            start_count: Number of records already fetched.
-
-        Yields:
-            Publication records with _lookup_method field.
-        """
-        count = start_count
-        for empty_doi in title_only_entries:
-            if limit and count >= limit:
-                return
-
-            title = fallback_mapping.get(empty_doi, fallback_mapping.get(""))
-            if not title:
-                continue
-
-            async for record in self._search_by_title(title):
-                record["_lookup_method"] = "title_only"
-                count += 1
-                yield record
-                break
-
     async def fetch_filtered_with_fallback(
         self,
         entity_type: str,
@@ -321,7 +265,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch with fallback to title search when DOI not found.
 
-        Strategy:
+        Strategy (three-phase fallback):
         1. Batch DOI lookup via POST /paper/batch
         2. For null responses → search by title via GET /paper/search
         3. For empty DOIs (in filter_ids as "") → search by title only
@@ -352,19 +296,26 @@ class SemanticScholarAdapter(BaseHttpAdapter):
             if limit and fetched >= limit:
                 return
 
-        # Phase 2: Fallback by title for unresolved DOIs
-        unresolved_dois = [d for d in valid_dois if d.lower() not in resolved_dois]
-        async for record in self._title_fallback_phase(
-            unresolved_dois, fallback_mapping, limit, fetched
+        # Phase 2: Fallback by title for unresolved DOIs (using handler)
+        async for record in self._fallback_handler.process_missing_dois(
+            dois=valid_dois,
+            found_dois=resolved_dois,
+            fallback_mapping=fallback_mapping,
+            normalize_fn=lambda x: x,  # DOIs already normalized
+            limit=limit,
+            fetched=fetched,
         ):
             yield record
             fetched += 1
             if limit and fetched >= limit:
                 return
 
-        # Phase 3: Title-only entries
-        async for record in self._title_only_phase(
-            title_only_entries, fallback_mapping, limit, fetched
+        # Phase 3: Title-only entries (using handler)
+        async for record in self._fallback_handler.process_title_only_entries(
+            entries=title_only_entries,
+            fallback_mapping=fallback_mapping,
+            limit=limit,
+            fetched=fetched,
         ):
             yield record
 

@@ -413,7 +413,7 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
         b'{"id": 2, "value": "test2"}',
     ]
 
-    path_str = await writer.write_bronze(
+    result = await writer.write_bronze(
         records=iter(records),
         provider=provider,
         entity=entity,
@@ -424,8 +424,8 @@ async def test_bronze_writer_atomic_writes(e2e_data_dir: Path):
         ingestion_ts=datetime.now(UTC),
     )
 
-    # write_bronze returns relative path from base_path, so join them
-    path = (e2e_data_dir / "bronze") / path_str
+    # write_bronze returns BronzeWriteResult with relative_path
+    path = (e2e_data_dir / "bronze") / result.relative_path
     assert path.exists(), f"Bronze file should exist at {path}"
     assert path.suffix == ".zst", "Should be zstd compressed"
 

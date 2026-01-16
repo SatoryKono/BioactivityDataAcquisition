@@ -52,10 +52,16 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import (
         AuditPort,
         LoggerPort,
+        MetadataCoordinatorPort,
         MetadataWriterPort,
         MetricsPort,
         SilverValidatorPort,
         TracingPort,
+    )
+    from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+    from bioetl.domain.value_objects.dq_metrics import (
+        BatchDQMetrics,
+        SchemaDriftInfo,
     )
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
@@ -87,6 +93,7 @@ class SilverWriter(BaseDeltaWriter):
         audit: AuditPort | None = None,
         silver_validator: SilverValidatorPort | None = None,
         metadata_writer: MetadataWriterPort | None = None,
+        metadata_coordinator: MetadataCoordinatorPort | None = None,
     ) -> None:
         """Initialize Silver writer.
 
@@ -106,6 +113,10 @@ class SilverWriter(BaseDeltaWriter):
                             Use NoOpSilverValidator if validation is not required.
             metadata_writer: Optional MetadataWriterPort for writing _metadata.yaml
                            sidecar files. Use NoOpMetadataWriter if disabled.
+            metadata_coordinator: Optional MetadataCoordinator for centralized
+                                metadata creation. If provided, uses coordinator
+                                instead of local _write_silver_metadata() logic.
+                                Ensures consistent run_id across layers.
 
         Note:
             LoggerPort is required per RULES.md DI requirements.
@@ -142,6 +153,9 @@ class SilverWriter(BaseDeltaWriter):
 
             metadata_writer = NoOpMetadataWriter()
         self._metadata_writer: MetadataWriterPort = metadata_writer
+        self._metadata_coordinator: MetadataCoordinatorPort | None = (
+            metadata_coordinator
+        )
 
     def _prepare_arrow_data(
         self,
@@ -431,6 +445,53 @@ class SilverWriter(BaseDeltaWriter):
         # "evolve" will let Delta Lake handle schema evolution via schema_mode
         # "ignore" will filter records to match existing schema
 
+    async def _detect_schema_drift(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+    ) -> SchemaDriftInfo | None:
+        """Detect schema drift between existing table and incoming records.
+
+        Non-raising version used for DQ metrics computation.
+
+        Args:
+            table_name: Target table name.
+            records: List of records to check.
+
+        Returns:
+            SchemaDriftInfo if drift detected, None otherwise.
+        """
+        from bioetl.domain.value_objects.dq_metrics import SchemaDriftInfo
+
+        existing_schema = await self._get_table_schema(table_name)
+        if existing_schema is None or not records:
+            return None
+
+        incoming_fields = set(records[0].keys())
+        existing_fields = set(existing_schema.names)
+
+        new_fields = incoming_fields - existing_fields
+        missing_fields = existing_fields - incoming_fields
+
+        if not new_fields and not missing_fields:
+            return None
+
+        # Determine drift severity
+        # Critical: missing required fields (starts with no underscore = business field)
+        critical_missing = [f for f in missing_fields if not f.startswith("_")]
+        if critical_missing:
+            status = "critical"
+        elif len(new_fields) > 3:
+            status = "warn"
+        else:
+            status = "info"
+
+        return SchemaDriftInfo(
+            status=status,
+            new_fields=tuple(sorted(new_fields)),
+            missing_fields=tuple(sorted(missing_fields)),
+        )
+
     async def write_silver(
         self,
         table_name: str,
@@ -440,6 +501,7 @@ class SilverWriter(BaseDeltaWriter):
         mode: str = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        bronze_refs: list[BronzeWriteResult] | None = None,
     ) -> None:
         """Write normalized records to Silver layer (Delta Lake merge/upsert).
 
@@ -454,6 +516,9 @@ class SilverWriter(BaseDeltaWriter):
                 - 'error': Raise SchemaEvolutionError (default)
                 - 'evolve': Allow schema evolution (add new columns)
                 - 'ignore': Proceed without changes (filter to existing schema)
+            bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
+                If provided, bronze_paths will be populated in Silver metadata
+                for complete lineage tracking (REQ-LINEAGE-001).
 
         Raises:
             ValueError: If mode is invalid or records are missing required fields
@@ -522,13 +587,50 @@ class SilverWriter(BaseDeltaWriter):
                     mode=validated_mode,
                 )
 
+            # Compute DQ metrics for metadata (REQ-DQ-001)
+            dq_metrics = await self._compute_dq_metrics(table_name, records)
+
             # Write metadata sidecar file if configured
             await self._write_silver_metadata(
                 table_path=table_path,
                 records=records,
                 primary_keys=primary_keys,
                 mode=validated_mode,
+                bronze_refs=bronze_refs,
+                dq_metrics=dq_metrics,
             )
+
+    async def _compute_dq_metrics(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+    ) -> BatchDQMetrics:
+        """Compute DQ metrics for the batch of records.
+
+        Calculates column statistics, detects schema drift, and creates
+        a BatchDQMetrics value object for metadata persistence.
+
+        Args:
+            table_name: Target table name for schema drift detection.
+            records: List of records to analyze.
+
+        Returns:
+            BatchDQMetrics with computed column stats and schema drift info.
+        """
+        from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
+
+        # Detect schema drift (non-raising, for metrics only)
+        schema_drift = await self._detect_schema_drift(table_name, records)
+
+        # Create BatchDQMetrics with column statistics
+        # Currently all records passed validation (errors were quarantined earlier)
+        return BatchDQMetrics.from_records(
+            records=records,
+            error_count=0,  # Records here passed validation
+            warning_count=0,
+            validation_errors=None,
+            schema_drift=schema_drift,
+        )
 
     async def _log_silver_audit(
         self,
@@ -627,6 +729,8 @@ class SilverWriter(BaseDeltaWriter):
         records: list[dict[str, Any]],
         primary_keys: list[str],
         mode: SilverWriteMode,
+        bronze_refs: list[BronzeWriteResult] | None = None,
+        dq_metrics: BatchDQMetrics | None = None,
     ) -> None:
         """Write Silver layer metadata sidecar file.
 
@@ -635,7 +739,39 @@ class SilverWriter(BaseDeltaWriter):
             records: List of records written.
             primary_keys: Primary key columns used.
             mode: Write mode used (merge, append, delete).
+            bronze_refs: Optional list of BronzeWriteResult for lineage tracking.
+                If provided, bronze_paths will be populated from relative_path
+                of each BronzeWriteResult (REQ-LINEAGE-001).
+            dq_metrics: Optional BatchDQMetrics with computed DQ metrics.
+                If provided, dq_summary will contain real column metrics,
+                schema drift info, and error rates (REQ-DQ-001).
         """
+        if not records:
+            return
+
+        # Use MetadataCoordinator if available (centralized metadata)
+        if self._metadata_coordinator is not None:
+            from bioetl.domain.ports.metadata_coordinator import (
+                SilverMetadataInput,
+            )
+
+            # Get Delta version after write
+            version_after = await self._get_delta_version(table_path)
+
+            silver_input = SilverMetadataInput(
+                table_path=table_path,
+                records=records,
+                primary_keys=primary_keys,
+                mode=mode,
+                bronze_refs=bronze_refs,
+                dq_metrics=dq_metrics,
+                version_after=version_after,
+            )
+            metadata = self._metadata_coordinator.create_silver_metadata(silver_input)
+            await self._metadata_writer.write_silver_metadata(table_path, metadata)
+            return
+
+        # Fallback to local metadata building (backward compatibility)
         from datetime import UTC, datetime
         from importlib.metadata import version as pkg_version
         from platform import node as hostname
@@ -652,9 +788,6 @@ class SilverWriter(BaseDeltaWriter):
             SilverMetadata,
             SilverOutputMetadata,
         )
-
-        if not records:
-            return
 
         # Extract run context from first record
         first_record = records[0]
@@ -691,7 +824,7 @@ class SilverWriter(BaseDeltaWriter):
             entity=entity,
         )
 
-        # Build lineage from records
+        # Build lineage from records and bronze_refs
         source_batch_ids = list(
             {
                 r.get("_source_batch_id", "")
@@ -699,8 +832,15 @@ class SilverWriter(BaseDeltaWriter):
                 if r.get("_source_batch_id")
             }
         )
+
+        # Extract bronze paths from bronze_refs for complete lineage (REQ-LINEAGE-001)
+        bronze_paths: list[str] = []
+        if bronze_refs:
+            bronze_paths = [ref.relative_path for ref in bronze_refs]
+
         lineage = LineageMetadata(
             source_batch_ids=source_batch_ids,
+            bronze_paths=bronze_paths,
         )
 
         # Build Delta metrics
@@ -720,11 +860,16 @@ class SilverWriter(BaseDeltaWriter):
             rows_inserted=len(records),
         )
 
-        # Build DQ summary (basic metrics)
-        dq_summary = DQSummary(
-            total_records=len(records),
-            valid_records=len(records),
-        )
+        # Build DQ summary from computed metrics or use basic fallback
+        if dq_metrics is not None:
+            # Use real DQ metrics with column stats, schema drift, error rates
+            dq_summary = dq_metrics.to_dq_summary()
+        else:
+            # Fallback to basic metrics (backward compatibility)
+            dq_summary = DQSummary(
+                total_records=len(records),
+                valid_records=len(records),
+            )
 
         # Build output metrics
         output = SilverOutputMetadata(
@@ -873,4 +1018,78 @@ class SilverWriter(BaseDeltaWriter):
         """
         return await self._retention_manager.time_travel(
             table_name, version=version, timestamp=timestamp
+        )
+
+    async def read_silver(
+        self,
+        table_name: str,
+        columns: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Read records from a Silver layer Delta table.
+
+        Args:
+            table_name: The name of the table to read (e.g., 'chembl/activity').
+            columns: Optional list of columns to select. If None, reads all columns.
+
+        Returns:
+            List of dictionaries, where each dictionary represents a record.
+
+        Raises:
+            FileNotFoundError: If the table does not exist.
+        """
+        return await self.read_table(table_name, columns=columns)
+
+    async def write_silver_merged(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str] | None = None,
+    ) -> None:
+        """Write merged records to Silver layer without explicit schema.
+
+        Used by composite pipelines where schema is dynamically determined.
+        Schema is inferred from the records using PyArrow type inference.
+
+        Args:
+            table_name: The name of the table to write to.
+            records: A list of dictionaries representing merged records.
+            primary_keys: Optional list of column names for sorting.
+        """
+        if not records:
+            self.logger.warning(
+                "No records to write for merged Silver",
+                table_name=table_name,
+            )
+            return
+
+        # Infer schema from records using PyArrow
+        arrow_table = pa.Table.from_pylist(records)
+        schema = arrow_table.schema
+
+        # Sort by primary keys if provided for deterministic writes
+        if primary_keys:
+            valid_keys = [pk for pk in primary_keys if pk in schema.names]
+            if valid_keys:
+                arrow_table = arrow_table.sort_by(
+                    [(pk, "ascending") for pk in valid_keys]
+                )
+
+        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+
+        self.logger.info(
+            "Writing merged Silver records",
+            table_name=table_name,
+            path=table_path,
+            records=len(records),
+        )
+
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: write_deltalake(
+                table_path,
+                arrow_table,
+                mode="overwrite",
+                schema_mode="overwrite",
+            ),
         )

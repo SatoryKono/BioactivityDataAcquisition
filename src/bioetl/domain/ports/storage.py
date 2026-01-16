@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from datetime import datetime
-from typing import Any, Literal, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 
 from bioetl.domain.types import (
     ArrowSchema,
@@ -21,6 +21,10 @@ from bioetl.domain.types import (
     RunID,
     RunType,
 )
+from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+
+if TYPE_CHECKING:
+    from bioetl.domain.models.metadata import SourceMetadata
 
 
 @runtime_checkable
@@ -42,7 +46,8 @@ class StoragePort(Protocol):
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
-    ) -> str:
+        source_metadata: SourceMetadata | None = None,
+    ) -> BronzeWriteResult:
         """Write raw records to the Bronze layer.
 
         Args:
@@ -55,9 +60,13 @@ class StoragePort(Protocol):
             run_type: The type of pipeline run (incremental, backfill, rebuild).
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required.
+            source_metadata: Optional pre-built SourceMetadata with API request
+                           details for rich lineage tracking. If None, a minimal
+                           SourceMetadata is created with type="api".
 
         Returns:
-            str: Relative path to the written file.
+            BronzeWriteResult: Result containing path, record count, sizes,
+                and checksum for downstream lineage tracking.
 
         Note:
             Lock validation is performed at Application layer (BatchWriter)
@@ -74,6 +83,7 @@ class StoragePort(Protocol):
         mode: Literal["merge", "append", "delete"] = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        bronze_refs: list[BronzeWriteResult] | None = None,
     ) -> None:
         """Write transformed records to the Silver layer.
 
@@ -88,6 +98,9 @@ class StoragePort(Protocol):
                 - 'error': Raise SchemaEvolutionError (default)
                 - 'evolve': Allow schema evolution (add new columns)
                 - 'ignore': Proceed without changes (filter to existing schema)
+            bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
+                If provided, bronze_paths will be populated in Silver metadata
+                for complete lineage tracking (REQ-LINEAGE-001).
 
         Raises:
             SchemaEvolutionError: If schema drift detected and on_schema_mismatch='error'
@@ -127,6 +140,69 @@ class StoragePort(Protocol):
         Note:
             Lock validation is performed at Application layer (BatchWriter)
             per RULES.md §4.6 Safety Guard.
+        """
+        ...
+
+    async def read_silver(
+        self,
+        table_name: str,
+        columns: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Read records from a Silver layer Delta table.
+
+        Args:
+            table_name: The name of the table to read (e.g., 'chembl/activity').
+            columns: Optional list of columns to select. If None, reads all columns.
+
+        Returns:
+            List of dictionaries, where each dictionary represents a record.
+
+        Raises:
+            FileNotFoundError: If the table does not exist.
+        """
+        ...
+
+    async def write_silver_merged(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str] | None = None,
+    ) -> None:
+        """Write merged records to Silver layer without explicit schema.
+
+        Used by composite pipelines where schema is dynamically determined
+        by the merge operation. Schema is inferred from the records.
+
+        Args:
+            table_name: The name of the table to write to.
+            records: A list of dictionaries representing merged records.
+            primary_keys: Optional list of column names for sorting.
+
+        Note:
+            This method bypasses strict schema validation since merged data
+            has a dynamically determined schema from multiple sources.
+        """
+        ...
+
+    async def write_gold_merged(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str] | None = None,
+    ) -> None:
+        """Write merged records to Gold layer without Pandera schema.
+
+        Used by composite pipelines where schema is dynamically determined
+        by the merge operation. No Pandera validation is performed.
+
+        Args:
+            table_name: The name of the table to write to.
+            records: A list of dictionaries representing merged records.
+            primary_keys: Optional list of column names for sorting.
+
+        Note:
+            This method bypasses Pandera validation since merged data
+            has a dynamically determined schema from multiple sources.
         """
         ...
 

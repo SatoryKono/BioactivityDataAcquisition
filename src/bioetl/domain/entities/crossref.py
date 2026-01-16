@@ -2,7 +2,7 @@
 
 Contains:
 - PublicationRecord: DTO (Pydantic) for type-safe data transfer at boundaries
-- PublicationEntity: Domain entity (dataclass) with lineage fields
+- CrossRefPublicationEntity: Domain entity (dataclass) with lineage fields
 
 DTO Design:
 - Uses extra='forbid' to detect API changes early
@@ -14,6 +14,9 @@ Terminology:
 - All layers use "publication" to refer to scholarly works (articles, preprints, etc.)
 
 Used for enriching publication records with DOI resolution and citation metadata.
+
+Note: CrossRefPublicationEntity inherits common fields from PublicationEntityBase.
+Provider-specific fields (volume, issue, pages, etc.) are defined here.
 """
 
 from __future__ import annotations
@@ -23,7 +26,7 @@ from dataclasses import dataclass, field
 from pydantic import BaseModel, ConfigDict
 from pydantic import Field as PydanticField
 
-from bioetl.domain.entities.base import BaseEntity
+from bioetl.domain.entities.publication_base import PublicationEntityBase
 
 # Document type mapping from CrossRef types to internal types
 CROSSREF_TYPE_MAP = {
@@ -127,88 +130,82 @@ class PublicationRecord(BaseModel):
 
 
 @dataclass(frozen=True, kw_only=True)
-class PublicationEntity(BaseEntity):
-    """Represents a scholarly publication from CrossRef or other bibliographic sources.
+class CrossRefPublicationEntity(PublicationEntityBase):
+    """Represents a scholarly publication from CrossRef.
 
     Domain entity with lineage fields (run_id, content_hash, etc.).
+    Inherits common publication fields from PublicationEntityBase.
     For DTO without lineage, use PublicationRecord.
 
     Terminology:
     - Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
     - Business analysts can understand the model without knowing CrossRef API specifics
 
-    Attributes:
-        doi: Digital Object Identifier (normalized: lowercase, stripped).
-        title: Publication title.
-        abstract: Publication abstract (HTML tags stripped).
-        authors: JSON-serialized list of hashed author names (PII compliance).
-        journal: Journal name (container-title from CrossRef).
-        issn: List of ISSNs.
-        publisher: Publisher name.
+    Inherited from PublicationEntityBase:
+        doi, pmid, title, abstract, authors, journal, issn (str), publisher,
+        year, publication_date, citation_count, doc_type, language, is_oa,
+        oa_status, _lookup_method, _original_doi, source.
+
+    CrossRef-specific Attributes:
+        issn: List of ISSNs (overrides base str|None with list[str]).
         volume: Volume number.
         issue: Issue number.
         first_page: First page number.
         last_page: Last page number.
-        year: Publication year.
         published_print: Print publication date (ISO format).
         published_online: Online publication date (ISO format).
-        doc_type: Document type (PUBLICATION or PREPRINT).
-        citation_count: Number of citations (is-referenced-by-count from CrossRef).
         reference_count: Number of references in the publication.
-        language: Publication language code.
         license_url: License URL.
         subjects: Subject areas.
-        source: Data source identifier (default: "crossref").
+
+    Note: doi is required for CrossRef publications and validated in __post_init__.
 
     See: https://api.crossref.org/swagger-ui/index.html
     """
 
-    # Primary identifier (normalized DOI - lowercase, stripped)
+    # Override: DOI is REQUIRED for CrossRef (base has Optional)
     doi: str
 
-    # Core metadata
-    title: str | None = None
-    abstract: str | None = None
+    # Override: ISSN as list (base has str|None)
+    # CrossRef returns multiple ISSNs (print/electronic), other providers return single ISSN
+    issn: list[str] = field(default_factory=list)  # type: ignore[assignment]
 
-    # Authors (JSON-serialized list of hashed names for PII compliance)
-    authors: str | None = None
-
-    # Journal information
-    journal: str | None = None  # container-title[0]
-    issn: list[str] = field(default_factory=list)  # ISSN list
-    publisher: str | None = None
-
-    # Publication details
+    # CrossRef-specific publication details
     volume: str | None = None
     issue: str | None = None
     first_page: str | None = None
     last_page: str | None = None
 
-    # Dates
-    year: int | None = None  # Published year
+    # CrossRef-specific dates
     published_print: str | None = None  # ISO date: YYYY-MM-DD or YYYY-MM or YYYY
     published_online: str | None = None  # ISO date
 
-    # Document type (mapped from CrossRef type)
-    doc_type: str = "PUBLICATION"  # PUBLICATION or PREPRINT
-
-    # Citation metrics
-    citation_count: int | None = None  # is-referenced-by-count
+    # CrossRef-specific metrics
     reference_count: int | None = None  # references-count
 
-    # Additional metadata
-    language: str | None = None
+    # CrossRef-specific metadata
     license_url: str | None = None
     subjects: list[str] = field(default_factory=list)
 
-    # Source tracking
+    # Override: Default source for CrossRef
     source: str = "crossref"
 
     def __post_init__(self) -> None:
-        """Post-initialization validation."""
+        """Post-initialization validation.
+
+        Validates that DOI is provided (required for CrossRef publications).
+        """
         super().__post_init__()
         if not self.doi:
-            raise ValueError("Publication DOI is required")
+            raise ValueError("CrossRef Publication DOI is required")
 
 
-__all__ = ["CROSSREF_TYPE_MAP", "PublicationEntity", "PublicationRecord"]
+# Deprecated alias for backward compatibility
+PublicationEntity = CrossRefPublicationEntity
+
+__all__ = [
+    "CROSSREF_TYPE_MAP",
+    "CrossRefPublicationEntity",
+    "PublicationEntity",
+    "PublicationRecord",
+]
