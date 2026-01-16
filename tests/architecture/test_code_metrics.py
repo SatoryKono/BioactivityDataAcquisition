@@ -56,6 +56,8 @@ class TestFileSizeLimits:
         # Domain ports NoOp implementations
         "noop.py": 450,  # 447 LOC - NoOp implementations for Null Object Pattern (+ NoOpMetadataWriter)
         "metadata.py": 500,  # 478 LOC - Metadata models for Medallion layer sidecar files
+        # Domain ports (Protocol definitions with comprehensive docstrings)
+        "storage.py": 380,  # 368 LOC - StoragePort with read_silver, write_*_merged for composite pipelines
         # Domain Pandera schemas (declarative field definitions)
         "compound.py": 380,  # 377 LOC - PubChem molecule schema + deprecated alias (v2.0)
         "protein.py": 360,  # 354 LOC - UniProt target schema + deprecated alias (v2.0)
@@ -72,15 +74,15 @@ class TestFileSizeLimits:
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "entrypoints.py": 720,  # 703 LOC - pipeline entrypoints (run_pipeline expanded + services)
         "registration.py": 720,  # 705 LOC - provider registration with data source creators (OpenAlex + SemanticScholar + UniProt IDMapping)
-        "storage_adapter.py": 550,  # 540 LOC - storage adapter with Bronze/Silver/Gold writers
+        "storage_adapter.py": 610,  # 601 LOC - storage adapter with Bronze/Silver/Gold writers + read_silver, write_*_merged
         # Consolidated factory files (v5.2)
         "storage.py": 700,  # 640 LOC - merged storage_factory + storage_adapter
         "pipeline_factory.py": 560,  # 557 LOC - merged generic_factory + runner_assembly + entity_type helper
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
         "services_factory.py": 600,  # 562 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
         # Infrastructure layer exemptions
-        "silver_writer.py": 900,  # 887 LOC - schema drift detection + merge logic + audit + validation
-        "gold_writer.py": 820,  # 808 LOC - SCD Type 2 + metadata sidecar integration
+        "silver_writer.py": 960,  # 950 LOC - schema drift detection + merge logic + audit + validation + read_silver, write_silver_merged
+        "gold_writer.py": 870,  # 859 LOC - SCD Type 2 + metadata sidecar integration + write_gold_merged
         "bronze_writer.py": 700,  # 600+ LOC - added streaming compression + validation
         "gold.py": 920,  # 915 LOC - Gold layer Pandera schemas (+ IDMapping + taxonomy_id standardization + Config docstrings)
         "silver.py": 780,  # 775 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization)
@@ -418,10 +420,10 @@ class TestClassSize:
         "UnifiedHTTPClient": 450,  # 427 lines - HTTP client with retry/circuit breaker
         "PipelineObserver": 350,  # 319 lines - unified observability with lifecycle events
         # Baseline exemptions for existing classes
-        "StorageAdapter": 520,  # 510 lines - storage adapter with writers
+        "StorageAdapter": 580,  # 568 lines - storage adapter with writers + read_silver, write_*_merged
         "BaseTransformer": 620,  # 605 lines - Template Method with helpers (tracing + PII hashing + serialize_json_list)
-        "SilverWriter": 830,  # 822 lines - includes schema drift detection (M4) + audit + lock validation + validation
-        "GoldWriter": 760,  # 753 lines - SCD Type 2 + metadata sidecar integration
+        "SilverWriter": 900,  # 882 lines - includes schema drift detection (M4) + audit + lock validation + validation + read_silver, write_silver_merged
+        "GoldWriter": 820,  # 804 lines - SCD Type 2 + metadata sidecar integration + write_gold_merged
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
         "ChemblAdapter": 650,  # 630 lines - complex API adapter implementing full FilterableDataSourcePort
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
@@ -472,6 +474,8 @@ class TestClassSize:
         "TestClassSize": 350,  # Test class with many exemptions
         # Extracted validators (REFACTOR-003)
         "MedallionConfigValidator": 350,  # Extracted from PreflightService - cohesive validation
+        # Domain ports (Protocol definitions with comprehensive docstrings)
+        "StoragePort": 350,  # 342 lines - Protocol with read_silver, write_*_merged for composite pipelines
         # Pandera schemas (declarative field definitions)
         "PubchemMoleculeSchema": 350,  # 345 lines - PubChem molecule schema with many chemical fields
         # Derived entity data source wrappers (comprehensive docstrings)
@@ -587,6 +591,7 @@ class TestGodObjectDetection:
         # Template Method pattern (hooks for subclasses, not delegation)
         "BaseTransformer": "Template Method pattern - provides hooks for subclasses",
         # Protocol implementations (must implement all methods themselves)
+        "StoragePort": "Protocol definition - interfaces define contracts, no behavior to delegate",
         "StorageAdapter": "Facade implementing StoragePort - delegates to bronze/silver/gold writers",
         # Writers with cohesive responsibilities (all methods about writing)
         "SilverWriter": "Cohesive writer - all methods relate to Delta Lake operations",
