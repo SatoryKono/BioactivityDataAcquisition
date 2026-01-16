@@ -29,7 +29,7 @@ import orjson
 import zstandard as zstd
 
 if TYPE_CHECKING:
-    from bioetl.domain.models.metadata import BronzeMetadata
+    from bioetl.domain.models.metadata import BronzeMetadata, SourceMetadata
     from bioetl.domain.ports import (
         AuditPort,
         LoggerPort,
@@ -250,6 +250,7 @@ class BronzeWriter:
         started_at: datetime,
         completed_at: datetime,
         duration_seconds: float,
+        source_metadata: SourceMetadata | None = None,
     ) -> BronzeMetadata:
         """Build rich BronzeMetadata for sidecar file.
 
@@ -265,6 +266,8 @@ class BronzeWriter:
             started_at: UTC timestamp when write started.
             completed_at: UTC timestamp when write completed.
             duration_seconds: Duration of write operation.
+            source_metadata: Optional pre-built SourceMetadata with API request
+                           details. If None, a minimal SourceMetadata is created.
 
         Returns:
             BronzeMetadata instance for sidecar file.
@@ -281,8 +284,8 @@ class BronzeWriter:
             PipelineMetadata,
             RuntimeMetadata,
             RunTypeEnum,
-            SourceMetadata,
         )
+        from bioetl.domain.models.metadata import SourceMetadata as SourceMetadataModel
 
         # Map domain RunType to metadata RunTypeEnum
         run_type_map = {
@@ -290,6 +293,10 @@ class BronzeWriter:
             RunType.BACKFILL: RunTypeEnum.BACKFILL,
             RunType.REBUILD: RunTypeEnum.REBUILD,
         }
+
+        # Use provided source_metadata or create minimal default
+        if source_metadata is None:
+            source_metadata = SourceMetadataModel(type="api")
 
         return BronzeMetadata(
             runtime=RuntimeMetadata(
@@ -304,9 +311,7 @@ class BronzeWriter:
                 provider=provider,
                 entity=entity,
             ),
-            source=SourceMetadata(
-                type="api",
-            ),
+            source=source_metadata,
             output=OutputMetadata(
                 files=[
                     FileOutputMetadata(
@@ -403,11 +408,24 @@ class BronzeWriter:
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
+        source_metadata: SourceMetadata | None = None,
     ) -> BronzeWriteResult:
         """Write raw records to Bronze layer (JSONL + zstd).
 
         Returns BronzeWriteResult with path, sizes, and checksum for lineage.
         Lock validation is performed at Application layer per §4.6 Safety Guard.
+
+        Args:
+            records: Iterator of bytes records (JSON-encoded).
+            provider: Provider name (e.g., 'chembl').
+            entity: Entity type (e.g., 'activity').
+            date: Date for partitioning.
+            batch_id: Unique identifier for this batch.
+            run_id: Pipeline run identifier.
+            run_type: Type of run (incremental, backfill, rebuild).
+            ingestion_ts: UTC timestamp for ingestion.
+            source_metadata: Optional pre-built SourceMetadata with API request
+                           details for rich lineage tracking.
         """
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_bronze") as span:
@@ -550,6 +568,7 @@ class BronzeWriter:
                         output_path=relative_path,
                         started_at=ingestion_ts,
                         completed_at=completed_at,
+                        source_metadata=source_metadata,
                     )
                     bronze_metadata = self._metadata_coordinator.create_bronze_metadata(
                         bronze_input
@@ -568,6 +587,7 @@ class BronzeWriter:
                         started_at=ingestion_ts,
                         completed_at=completed_at,
                         duration_seconds=duration,
+                        source_metadata=source_metadata,
                     )
 
                 # Write to batch directory (same level as data file)

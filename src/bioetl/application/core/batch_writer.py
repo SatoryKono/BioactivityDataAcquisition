@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
+    from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import GoldValidatorPort, StoragePort, TracingPort
     from bioetl.domain.types import BatchID
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
@@ -181,7 +182,11 @@ class BatchWriter:
         span.__exit__(None, None, None)
 
     async def write_bronze(
-        self, records: list[dict[str, Any]], batch_id: BatchID, ingestion_ts: datetime
+        self,
+        records: list[dict[str, Any]],
+        batch_id: BatchID,
+        ingestion_ts: datetime,
+        source_metadata: SourceMetadata | None = None,
     ) -> BronzeWriteResult:
         """Write records to Bronze layer.
 
@@ -192,6 +197,9 @@ class BatchWriter:
             records: Raw records to write.
             batch_id: Identifier for the current batch.
             ingestion_ts: Ingestion timestamp from context.
+            source_metadata: Optional pre-built SourceMetadata with API request
+                           details for rich lineage tracking. If provided,
+                           it will be included in the Bronze metadata sidecar.
 
         Returns:
             BronzeWriteResult with path, record count, sizes, and checksum
@@ -227,6 +235,7 @@ class BatchWriter:
                 run_id=self._context.run_id,
                 run_type=self._context.run_type,
                 ingestion_ts=ingestion_ts,
+                source_metadata=source_metadata,
             )
             self._end_span(span)
             return bronze_result
