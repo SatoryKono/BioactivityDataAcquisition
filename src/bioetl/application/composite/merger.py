@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.domain.composite.result import EnrichmentResult, MergeResult
@@ -39,7 +39,7 @@ class MergeService:
         run_id: str,
     ) -> MergeResult:
         """Merge seed and enricher data into unified output."""
-        started_at = datetime.now()
+        started_at = datetime.now(tz=UTC)
 
         # Step 1: Read seed data
         self._logger.info(
@@ -124,7 +124,7 @@ class MergeService:
         )
         await self._write_merged_gold(merged_df)
 
-        completed_at = datetime.now()
+        completed_at = datetime.now(tz=UTC)
         duration = (completed_at - started_at).total_seconds()
 
         self._logger.info(
@@ -404,7 +404,7 @@ class MergeService:
                 pl.lit(run_id).alias("_composite_run_id"),
                 pl.lit(str(sources_used)).alias("_source_providers"),
                 pl.lit(str(status_dict)).alias("_enrichment_status"),
-                pl.lit(datetime.now().isoformat()).alias("_lineage_created_at"),
+                pl.lit(datetime.now(tz=UTC).isoformat()).alias("_lineage_created_at"),
             ]
         )
 
