@@ -195,41 +195,6 @@ class OpenAlexAdapter(BaseHttpAdapter):
                 if limit and count >= limit:
                     return
 
-    async def _title_only_lookup(
-        self,
-        title_only_entries: list[str],
-        fallback_mapping: dict[str, str],
-        limit: int | None,
-        start_count: int,
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Phase 3: Title-only entries lookup (empty DOIs).
-
-        Args:
-            title_only_entries: List of empty DOI entries.
-            fallback_mapping: Mapping from DOI to title for fallback.
-            limit: Maximum records to fetch.
-            start_count: Number of records already fetched.
-
-        Yields:
-            Work records with _lookup_method field.
-        """
-        count = start_count
-        for empty_doi in title_only_entries:
-            if limit and count >= limit:
-                return
-
-            title = fallback_mapping.get(empty_doi, fallback_mapping.get(""))
-            if not title:
-                continue
-
-            self.logger.info("openalex_title_only_search", title=title[:50])
-
-            found_work = await self._search_by_title(title, limit=1)
-            if found_work:
-                found_work["_lookup_method"] = "title_only"
-                count += 1
-                yield found_work
-
     async def fetch_filtered_with_fallback(
         self,
         entity_type: str,
@@ -289,9 +254,12 @@ class OpenAlexAdapter(BaseHttpAdapter):
             if limit and fetched >= limit:
                 return
 
-        # Phase 3: Title-only entries
-        async for work in self._title_only_lookup(
-            title_only_entries, fallback_mapping, limit, fetched
+        # Phase 3: Title-only entries (using handler)
+        async for work in self._fallback_handler.process_title_only_entries(
+            entries=title_only_entries,
+            fallback_mapping=fallback_mapping,
+            limit=limit,
+            fetched=fetched,
         ):
             yield work
 

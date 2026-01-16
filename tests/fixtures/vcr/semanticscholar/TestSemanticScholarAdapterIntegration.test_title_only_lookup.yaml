@@ -14,7 +14,7 @@ interactions:
       User-Agent:
       - BioETL/1.0
     method: GET
-    uri: https://api.semanticscholar.org/graph/v1/paper/search?query=Machine+Learning+Drug+Discovery&fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal&limit=5
+    uri: https://api.semanticscholar.org/graph/v1/paper/search?query=Machine+learning+for+drug+discovery&fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal&limit=5
   response:
     body:
       string: |
