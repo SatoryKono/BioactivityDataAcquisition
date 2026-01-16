@@ -287,7 +287,9 @@ class BaseServicesFactory:
         if bronze_config:
             # Try to parse as BronzeSinkConfig to check dq_report
             try:
-                bronze_sink = BronzeSinkConfig.model_validate(bronze_config.model_dump())
+                bronze_sink = BronzeSinkConfig.model_validate(
+                    bronze_config.model_dump()
+                )
                 if bronze_sink.dq_report.enabled:
                     return True
             except Exception:
@@ -297,7 +299,9 @@ class BaseServicesFactory:
         silver_config = sink.get("silver")
         if silver_config:
             try:
-                silver_sink = SilverSinkConfig.model_validate(silver_config.model_dump())
+                silver_sink = SilverSinkConfig.model_validate(
+                    silver_config.model_dump()
+                )
                 if silver_sink.dq_report.enabled:
                     return True
             except Exception:

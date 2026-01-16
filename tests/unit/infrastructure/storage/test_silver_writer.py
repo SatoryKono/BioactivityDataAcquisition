@@ -2023,7 +2023,9 @@ class TestSilverWriterDQMetrics:
             assert result.status == "warn"
 
     @pytest.mark.asyncio
-    async def test_write_silver_metadata_with_dq_metrics(self, noop_logger, valid_records):
+    async def test_write_silver_metadata_with_dq_metrics(
+        self, noop_logger, valid_records
+    ):
         """Test _write_silver_metadata uses DQ metrics when provided."""
         from bioetl.domain.value_objects.dq_metrics import (
             BatchDQMetrics,

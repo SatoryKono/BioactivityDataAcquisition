@@ -5,7 +5,7 @@ Tests the DQReportService orchestration of DQ report generation.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
@@ -18,7 +18,6 @@ from bioetl.application.services.dq_report_service import (
 )
 from bioetl.domain.value_objects.dq_report import (
     DQReportStatus,
-    DQReportSummary,
     MedallionLayer,
 )
 
@@ -111,7 +110,7 @@ def dq_context() -> DQReportContext:
     return DQReportContext(
         run_id="run-001",
         pipeline_name="test_pipeline",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         bronze_source_file="bronze/test/batch_001.jsonl.zst",
         bronze_batch_id="batch-001",
         bronze_records=[b'{"id": 1}', b'{"id": 2}'],
@@ -195,7 +194,7 @@ class TestDQReportContext:
         context = DQReportContext(
             run_id="run-001",
             pipeline_name="test",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )
 
         with pytest.raises(AttributeError):
@@ -206,7 +205,7 @@ class TestDQReportContext:
         context = DQReportContext(
             run_id="run-001",
             pipeline_name="test",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )
 
         assert context.bronze_source_file is None
@@ -456,7 +455,7 @@ class TestDQReportService:
         context = DQReportContext(
             run_id="run-001",
             pipeline_name="test",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             # No bronze data
         )
 

@@ -17,15 +17,13 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
         BronzeDQAnalyzerPort,
+        BronzeDQConfigPort,
         DQReportWriterPort,
         GoldDQAnalyzerPort,
+        GoldDQConfigPort,
         LoggerPort,
         SilverDQAnalyzerPort,
-    )
-    from bioetl.infrastructure.schemas.dq_report_config import (
-        BronzeDQReportConfig,
-        GoldDQReportConfig,
-        SilverDQReportConfig,
+        SilverDQConfigPort,
     )
 
 
@@ -168,9 +166,9 @@ class DQReportService:
     async def generate_reports(
         self,
         context: DQReportContext,
-        bronze_config: BronzeDQReportConfig | None = None,
-        silver_config: SilverDQReportConfig | None = None,
-        gold_config: GoldDQReportConfig | None = None,
+        bronze_config: BronzeDQConfigPort | None = None,
+        silver_config: SilverDQConfigPort | None = None,
+        gold_config: GoldDQConfigPort | None = None,
     ) -> DQReportResult:
         """Generate DQ reports for all enabled layers.
 
@@ -183,33 +181,21 @@ class DQReportService:
         Returns:
             DQReportResult with paths to generated reports.
         """
-        bronze_path: Path | None = None
-        silver_path: Path | None = None
-        gold_path: Path | None = None
+        bronze_enabled = self._is_config_enabled(bronze_config)
+        silver_enabled = self._is_config_enabled(silver_config)
+        gold_enabled = self._is_config_enabled(gold_config)
 
-        bronze_enabled = bronze_config is not None and bronze_config.enabled
-        silver_enabled = silver_config is not None and silver_config.enabled
-        gold_enabled = gold_config is not None and gold_config.enabled
-
-        self._logger.debug(
-            "dq_report_generation_started",
-            run_id=context.run_id,
-            bronze_enabled=bronze_enabled,
-            silver_enabled=silver_enabled,
-            gold_enabled=gold_enabled,
+        self._log_generation_start(
+            context.run_id, bronze_enabled, silver_enabled, gold_enabled
         )
 
-        # Generate Bronze report if enabled
-        if bronze_enabled and bronze_config:
-            bronze_path = await self._generate_bronze_report(context, bronze_config)
-
-        # Generate Silver report if enabled
-        if silver_enabled and silver_config:
-            silver_path = await self._generate_silver_report(context, silver_config)
-
-        # Generate Gold report if enabled
-        if gold_enabled and gold_config:
-            gold_path = await self._generate_gold_report(context, gold_config)
+        bronze_path = await self._try_generate_bronze(
+            context, bronze_config, bronze_enabled
+        )
+        silver_path = await self._try_generate_silver(
+            context, silver_config, silver_enabled
+        )
+        gold_path = await self._try_generate_gold(context, gold_config, gold_enabled)
 
         result = DQReportResult(
             bronze_report_path=bronze_path,
@@ -220,22 +206,85 @@ class DQReportService:
             gold_enabled=gold_enabled,
         )
 
-        if result.any_generated:
-            self._logger.info(
-                "dq_reports_generated",
-                run_id=context.run_id,
-                reports_count=result.reports_count,
-                bronze_path=str(bronze_path) if bronze_path else None,
-                silver_path=str(silver_path) if silver_path else None,
-                gold_path=str(gold_path) if gold_path else None,
-            )
-
+        self._log_generation_result(context.run_id, result)
         return result
+
+    @staticmethod
+    def _is_config_enabled(config: Any) -> bool:
+        """Check if a config is present and enabled."""
+        return config is not None and config.enabled
+
+    def _log_generation_start(
+        self,
+        run_id: str,
+        bronze_enabled: bool,
+        silver_enabled: bool,
+        gold_enabled: bool,
+    ) -> None:
+        """Log the start of DQ report generation."""
+        self._logger.debug(
+            "dq_report_generation_started",
+            run_id=run_id,
+            bronze_enabled=bronze_enabled,
+            silver_enabled=silver_enabled,
+            gold_enabled=gold_enabled,
+        )
+
+    def _log_generation_result(self, run_id: str, result: DQReportResult) -> None:
+        """Log the result of DQ report generation if any were generated."""
+        if not result.any_generated:
+            return
+        self._logger.info(
+            "dq_reports_generated",
+            run_id=run_id,
+            reports_count=result.reports_count,
+            bronze_path=self._path_to_str(result.bronze_report_path),
+            silver_path=self._path_to_str(result.silver_report_path),
+            gold_path=self._path_to_str(result.gold_report_path),
+        )
+
+    @staticmethod
+    def _path_to_str(path: Path | None) -> str | None:
+        """Convert path to string or None."""
+        return str(path) if path else None
+
+    async def _try_generate_bronze(
+        self,
+        context: DQReportContext,
+        config: BronzeDQConfigPort | None,
+        enabled: bool,
+    ) -> Path | None:
+        """Try to generate Bronze report if enabled."""
+        if enabled and config:
+            return await self._generate_bronze_report(context, config)
+        return None
+
+    async def _try_generate_silver(
+        self,
+        context: DQReportContext,
+        config: SilverDQConfigPort | None,
+        enabled: bool,
+    ) -> Path | None:
+        """Try to generate Silver report if enabled."""
+        if enabled and config:
+            return await self._generate_silver_report(context, config)
+        return None
+
+    async def _try_generate_gold(
+        self,
+        context: DQReportContext,
+        config: GoldDQConfigPort | None,
+        enabled: bool,
+    ) -> Path | None:
+        """Try to generate Gold report if enabled."""
+        if enabled and config:
+            return await self._generate_gold_report(context, config)
+        return None
 
     async def _generate_bronze_report(
         self,
         context: DQReportContext,
-        config: BronzeDQReportConfig,
+        config: BronzeDQConfigPort,
     ) -> Path | None:
         """Generate Bronze DQ report.
 
@@ -302,7 +351,7 @@ class DQReportService:
     async def _generate_silver_report(
         self,
         context: DQReportContext,
-        config: SilverDQReportConfig,
+        config: SilverDQConfigPort,
     ) -> Path | None:
         """Generate Silver DQ report.
 
@@ -375,7 +424,7 @@ class DQReportService:
     async def _generate_gold_report(
         self,
         context: DQReportContext,
-        config: GoldDQReportConfig,
+        config: GoldDQConfigPort,
     ) -> Path | None:
         """Generate Gold DQ report.
 
@@ -443,9 +492,9 @@ class DQReportService:
 
     def is_any_report_enabled(
         self,
-        bronze_config: BronzeDQReportConfig | None = None,
-        silver_config: SilverDQReportConfig | None = None,
-        gold_config: GoldDQReportConfig | None = None,
+        bronze_config: BronzeDQConfigPort | None = None,
+        silver_config: SilverDQConfigPort | None = None,
+        gold_config: GoldDQConfigPort | None = None,
     ) -> bool:
         """Check if any DQ report generation is enabled.
 

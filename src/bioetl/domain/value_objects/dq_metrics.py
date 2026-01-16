@@ -238,50 +238,134 @@ def _compute_column_stats(records: list[dict[str, Any]]) -> dict[str, ColumnStat
     if not records:
         return {}
 
-    # Get all column names from records
+    all_columns = _collect_all_columns(records)
+    public_columns = [col for col in all_columns if not col.startswith("_")]
+
+    return {
+        col_name: _compute_single_column_stats(records, col_name)
+        for col_name in public_columns
+    }
+
+
+def _collect_all_columns(records: list[dict[str, Any]]) -> set[str]:
+    """Collect all unique column names from records.
+
+    Args:
+        records: List of record dictionaries.
+
+    Returns:
+        Set of column names.
+    """
     all_columns: set[str] = set()
     for record in records:
         all_columns.update(record.keys())
+    return all_columns
 
-    total_records = len(records)
-    result: dict[str, ColumnStats] = {}
 
-    for col_name in all_columns:
-        # Skip internal metadata fields from column metrics
-        if col_name.startswith("_"):
-            continue
+def _compute_single_column_stats(
+    records: list[dict[str, Any]], col_name: str
+) -> ColumnStats:
+    """Compute statistics for a single column.
 
-        # Collect values for this column
-        values = [record.get(col_name) for record in records]
+    Args:
+        records: List of record dictionaries.
+        col_name: Name of the column to analyze.
 
-        # Calculate null rate
-        null_count = sum(1 for v in values if v is None)
-        null_rate = null_count / total_records
+    Returns:
+        ColumnStats for the column.
+    """
+    values = [record.get(col_name) for record in records]
+    non_null_values = _filter_non_null(values)
 
-        # Calculate unique count (excluding nulls)
-        non_null_values = [v for v in values if v is not None]
-        unique_count = len(set(non_null_values)) if non_null_values else 0
+    null_rate = _calculate_null_rate(values, len(records))
+    unique_count = _calculate_unique_count(non_null_values)
+    min_val, max_val, mean_val = _compute_numeric_stats(non_null_values)
 
-        # Calculate numeric stats if applicable
-        numeric_values = _extract_numeric_values(non_null_values)
-        min_value: float | None = None
-        max_value: float | None = None
-        mean_value: float | None = None
+    return ColumnStats(
+        null_rate=null_rate,
+        unique_count=unique_count,
+        min_value=min_val,
+        max_value=max_val,
+        mean_value=mean_val,
+    )
 
-        if numeric_values:
-            min_value = min(numeric_values)
-            max_value = max(numeric_values)
-            mean_value = sum(numeric_values) / len(numeric_values)
 
-        result[col_name] = ColumnStats(
-            null_rate=round(null_rate, 4),
-            unique_count=unique_count,
-            min_value=round(min_value, 6) if min_value is not None else None,
-            max_value=round(max_value, 6) if max_value is not None else None,
-            mean_value=round(mean_value, 6) if mean_value is not None else None,
-        )
+def _filter_non_null(values: list[Any]) -> list[Any]:
+    """Filter out None values from a list.
 
-    return result
+    Args:
+        values: List of values.
+
+    Returns:
+        List of non-None values.
+    """
+    return [v for v in values if v is not None]
+
+
+def _calculate_null_rate(values: list[Any], total: int) -> float:
+    """Calculate the null rate for a list of values.
+
+    Args:
+        values: List of values.
+        total: Total number of records.
+
+    Returns:
+        Null rate rounded to 4 decimal places.
+    """
+    null_count = sum(1 for v in values if v is None)
+    return round(null_count / total, 4)
+
+
+def _calculate_unique_count(values: list[Any]) -> int:
+    """Calculate the count of unique values.
+
+    Args:
+        values: List of non-null values.
+
+    Returns:
+        Number of unique values, or 0 if empty.
+    """
+    return len(set(values)) if values else 0
+
+
+def _compute_numeric_stats(
+    values: list[Any],
+) -> tuple[float | None, float | None, float | None]:
+    """Compute numeric statistics (min, max, mean) for values.
+
+    Args:
+        values: List of values (may contain non-numeric).
+
+    Returns:
+        Tuple of (min, max, mean), all None if no numeric values.
+    """
+    numeric_values = _extract_numeric_values(values)
+    if not numeric_values:
+        return None, None, None
+
+    return (
+        round(min(numeric_values), 6),
+        round(max(numeric_values), 6),
+        round(sum(numeric_values) / len(numeric_values), 6),
+    )
+
+
+def _is_valid_numeric(v: Any) -> bool:
+    """Check if value is a valid numeric (not bool, NaN, or Inf).
+
+    Args:
+        v: Value to check.
+
+    Returns:
+        True if value is a valid finite number.
+    """
+    if not isinstance(v, (int, float)):
+        return False
+    if isinstance(v, bool):
+        return False
+    if v != v:  # NaN check: NaN != NaN
+        return False
+    return abs(v) != float("inf")
 
 
 def _extract_numeric_values(values: list[Any]) -> list[float]:
@@ -293,17 +377,7 @@ def _extract_numeric_values(values: list[Any]) -> list[float]:
     Returns:
         List of float values.
     """
-    result: list[float] = []
-    for v in values:
-        # Filter: must be numeric (not bool), not NaN (v == v check), not Inf
-        if (
-            isinstance(v, (int, float))
-            and not isinstance(v, bool)
-            and v == v  # NaN check: NaN != NaN
-            and abs(v) != float("inf")
-        ):
-            result.append(float(v))
-    return result
+    return [float(v) for v in values if _is_valid_numeric(v)]
 
 
 __all__ = [

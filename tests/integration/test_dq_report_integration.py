@@ -9,7 +9,7 @@ Tests the end-to-end flow of DQ report generation including:
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -50,7 +50,7 @@ def dq_context(bronze_records: list[bytes]) -> DQReportContext:
     return DQReportContext(
         run_id="test-run-001",
         pipeline_name="test_pipeline",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         bronze_source_file="bronze/v1/test/entity/2025-01-15/batch_001.jsonl.zst",
         bronze_batch_id="batch-001",
         bronze_records=bronze_records,
@@ -314,7 +314,9 @@ class TestDQReportIntegration:
 
         # Bronze disabled
         bronze_config_disabled = BronzeDQReportConfig(enabled=False)
-        assert service.is_any_report_enabled(bronze_config=bronze_config_disabled) is False
+        assert (
+            service.is_any_report_enabled(bronze_config=bronze_config_disabled) is False
+        )
 
         # Silver enabled
         silver_config = SilverDQReportConfig(enabled=True)
@@ -325,10 +327,13 @@ class TestDQReportIntegration:
         assert service.is_any_report_enabled(gold_config=gold_config) is True
 
         # Mixed - one enabled should return True
-        assert service.is_any_report_enabled(
-            bronze_config=bronze_config_disabled,
-            silver_config=silver_config,
-        ) is True
+        assert (
+            service.is_any_report_enabled(
+                bronze_config=bronze_config_disabled,
+                silver_config=silver_config,
+            )
+            is True
+        )
 
 
 @pytest.mark.integration
@@ -392,5 +397,6 @@ class TestDQConfigParsing:
         # Valid checks should be converted
         assert len(enums) == 2  # invalid_check should be filtered
         from bioetl.domain.value_objects.dq_report import BronzeDQCheckType
+
         assert BronzeDQCheckType.RECORD_COUNT in enums
         assert BronzeDQCheckType.FILE_INTEGRITY in enums
