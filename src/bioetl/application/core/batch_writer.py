@@ -112,6 +112,9 @@ class BatchWriter:
             gold_mode_val.value if hasattr(gold_mode_val, "value") else gold_mode_val,
         )
 
+        # Pre-calculate gold schema columns to avoid repetitive introspection in hot paths
+        self._gold_schema_columns = self._get_schema_columns(self._gold_schema)
+
     async def _validate_lock(self, operation: str) -> None:
         """Validate lock ownership before write operation (Safety Guard §4.6).
 
@@ -319,9 +322,14 @@ class BatchWriter:
         try:
             # Filter records to only include columns defined in Gold schema
             # This ensures strict schema validation passes (REQ-DATA-009)
-            schema_columns = self._get_schema_columns(self._gold_schema)
-            if schema_columns:
-                records = [{k: r[k] for k in schema_columns if k in r} for r in records]
+            # OPTIMIZATION: Use pre-calculated columns and in-place modification
+            # to avoid expensive dictionary copying and schema introspection in hot loop.
+            if self._gold_schema_columns:
+                for r in records:
+                    # Create list of keys to remove to avoid runtime error during iteration
+                    keys_to_remove = [k for k in r if k not in self._gold_schema_columns]
+                    for k in keys_to_remove:
+                        del r[k]
 
             # Validate Gold records
             result = self._gold_validator.validate(records)
