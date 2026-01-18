@@ -148,9 +148,12 @@ class PipelineRunner:
                         query=self._runtime.query,
                     )
 
-                    # Post-run: DQ checks and VACUUM
-                    await self._postrun_service.run_dq_checks(self._executor)
-                    await self._postrun_service.run_vacuum_if_enabled()
+                    # Post-run: DQ checks, DQ reports, and VACUUM
+                    dq_context = self._executor.get_dq_context()
+                    await self._postrun_service.run(
+                        executor=self._executor,
+                        dq_context=dq_context,
+                    )
 
                     await self._checkpoint_manager.delete_checkpoint()
 

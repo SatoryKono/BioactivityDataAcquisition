@@ -2,11 +2,13 @@
 
 Application Service that handles post-pipeline execution tasks:
 - Data quality checks (delegated to DataQualityService)
+- DQ report generation (delegated to DQReportService)
 - VACUUM operations (delegated to MedallionLifecycleService)
 - Tracer cleanup
 
 Extracted from PipelineRunner to follow Single Responsibility Principle.
 DQ logic further extracted to DataQualityService (SRP refactoring).
+DQ report generation added for detailed data quality analysis.
 """
 
 from __future__ import annotations
@@ -19,11 +21,23 @@ from bioetl.application.services.medallion_lifecycle import VacuumResult
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
 if TYPE_CHECKING:
+    from bioetl.application.services.dq_report_service import (
+        DQReportContext,
+        DQReportResult,
+        DQReportService,
+    )
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
-    from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
+    from bioetl.domain.ports import (
+        BronzeDQConfigPort,
+        GoldDQConfigPort,
+        LoggerPort,
+        MetricsPort,
+        SilverDQConfigPort,
+        TracingPort,
+    )
 
 
 @runtime_checkable
@@ -46,10 +60,12 @@ class PostrunResult:
 
     Attributes:
         dq: Data quality evaluation result.
+        dq_reports: DQ report generation result (optional).
         vacuum: VACUUM operation result.
     """
 
     dq: DQResult
+    dq_reports: DQReportResult | None
     vacuum: VacuumResult
 
 
@@ -58,6 +74,7 @@ class PostrunService:
 
     Responsibilities:
     - Orchestrating DQ checks via DataQualityService
+    - DQ report generation via DQReportService (optional)
     - VACUUM operations via MedallionLifecycleService
     - Tracer cleanup
 
@@ -68,6 +85,10 @@ class PostrunService:
         _lifecycle_service: Medallion lifecycle service for VACUUM.
         _metrics: Optional metrics port.
         _logger: Structured logger.
+        _dq_report_service: Optional DQ report service for report generation.
+        _bronze_dq_config: Optional Bronze DQ report configuration.
+        _silver_dq_config: Optional Silver DQ report configuration.
+        _gold_dq_config: Optional Gold DQ report configuration.
     """
 
     def __init__(
@@ -78,6 +99,11 @@ class PostrunService:
         lifecycle_service: MedallionLifecycleService,
         metrics: MetricsPort | None,
         logger: LoggerPort,
+        # DQ Report parameters (optional)
+        dq_report_service: DQReportService | None = None,
+        bronze_dq_config: BronzeDQConfigPort | None = None,
+        silver_dq_config: SilverDQConfigPort | None = None,
+        gold_dq_config: GoldDQConfigPort | None = None,
     ) -> None:
         """Initialize postrun service.
 
@@ -88,6 +114,10 @@ class PostrunService:
             lifecycle_service: Medallion lifecycle service for VACUUM.
             metrics: Optional metrics port.
             logger: Structured logger.
+            dq_report_service: Optional DQ report service for report generation.
+            bronze_dq_config: Optional Bronze DQ report configuration.
+            silver_dq_config: Optional Silver DQ report configuration.
+            gold_dq_config: Optional Gold DQ report configuration.
         """
         self._config = config
         self._runtime = runtime
@@ -95,27 +125,35 @@ class PostrunService:
         self._lifecycle_service = lifecycle_service
         self._metrics = metrics
         self._logger = logger
+        # DQ Report services
+        self._dq_report_service = dq_report_service
+        self._bronze_dq_config = bronze_dq_config
+        self._silver_dq_config = silver_dq_config
+        self._gold_dq_config = gold_dq_config
 
     async def run(
         self,
         executor: ExecutorMetricsProtocol,
+        dq_context: DQReportContext | None = None,
     ) -> PostrunResult:
         """Run all post-execution operations.
 
-        Performs DQ checks and VACUUM in sequence.
+        Performs DQ checks, DQ report generation, and VACUUM in sequence.
 
         Args:
             executor: Pipeline executor with batch metrics.
+            dq_context: Optional DQ report context with data and metadata.
 
         Returns:
-            PostrunResult with DQ and VACUUM results.
+            PostrunResult with DQ, DQ reports, and VACUUM results.
 
         Raises:
             DataQualityThresholdError: If error rate exceeds hard threshold.
         """
         dq_result = await self.run_dq_checks(executor)
+        dq_reports = await self._generate_dq_reports(dq_context)
         vacuum_result = await self.run_vacuum_if_enabled()
-        return PostrunResult(dq=dq_result, vacuum=vacuum_result)
+        return PostrunResult(dq=dq_result, dq_reports=dq_reports, vacuum=vacuum_result)
 
     async def run_dq_checks(self, executor: ExecutorMetricsProtocol) -> DQResult:
         """Check data quality metrics and report anomalies.
@@ -170,6 +208,61 @@ class PostrunService:
                     "Failed to close tracer",
                     error=str(e),
                 )
+
+    async def _generate_dq_reports(
+        self,
+        context: DQReportContext | None,
+    ) -> DQReportResult | None:
+        """Generate DQ reports if enabled.
+
+        Delegates to DQReportService for generating Bronze, Silver, and Gold
+        DQ reports based on configuration.
+
+        Args:
+            context: DQ report context with data and metadata.
+
+        Returns:
+            DQReportResult with paths to generated reports, or None if:
+            - DQ report service is not available
+            - No context provided
+            - No reports are enabled in configuration
+        """
+        if self._dq_report_service is None:
+            return None
+
+        if context is None:
+            self._logger.debug(
+                "dq_report_skipped",
+                reason="no context provided",
+            )
+            return None
+
+        try:
+            result = await self._dq_report_service.generate_reports(
+                context=context,
+                bronze_config=self._bronze_dq_config,
+                silver_config=self._silver_dq_config,
+                gold_config=self._gold_dq_config,
+            )
+
+            if result.any_generated:
+                self._logger.info(
+                    "dq_reports_completed",
+                    reports_count=result.reports_count,
+                    bronze_enabled=result.bronze_enabled,
+                    silver_enabled=result.silver_enabled,
+                    gold_enabled=result.gold_enabled,
+                )
+
+            return result
+
+        except Exception as e:
+            # Log error but don't fail the pipeline
+            self._logger.error(
+                "dq_report_generation_failed",
+                error=str(e),
+            )
+            return None
 
     def _collect_batch_metrics(
         self, executor: ExecutorMetricsProtocol

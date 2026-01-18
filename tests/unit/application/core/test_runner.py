@@ -798,21 +798,24 @@ class TestPipelineRunnerCheckDataQuality:
             VacuumResult,
         )
 
+        from bioetl.application.core.postrun_service import PostrunResult
+
         services = create_mock_services()
 
         postrun_service = MagicMock(spec=PostrunService)
-        postrun_service.run_dq_checks = AsyncMock(
-            return_value=DQResult(
-                error_rate=0.0,
-                status=DQEvaluationStatus.PASSED,
-                anomalies=(),
-                has_critical=False,
-                check_duration_ms=0.0,
-            )
-        )
-        postrun_service.run_vacuum_if_enabled = AsyncMock(
-            return_value=VacuumResult(
-                silver_files_removed=0, gold_files_removed=0, skipped=True
+        postrun_service.run = AsyncMock(
+            return_value=PostrunResult(
+                dq=DQResult(
+                    error_rate=0.0,
+                    status=DQEvaluationStatus.PASSED,
+                    anomalies=(),
+                    has_critical=False,
+                    check_duration_ms=0.0,
+                ),
+                dq_reports=None,
+                vacuum=VacuumResult(
+                    silver_files_removed=0, gold_files_removed=0, skipped=True
+                ),
             )
         )
         postrun_service.cleanup = AsyncMock()
@@ -839,5 +842,5 @@ class TestPipelineRunnerCheckDataQuality:
 
         await runner.run()
 
-        # PostrunService.run_dq_checks should be called during run()
-        postrun_service.run_dq_checks.assert_called_once()
+        # PostrunService.run should be called during run() (includes DQ checks, DQ reports, and VACUUM)
+        postrun_service.run.assert_called_once()
