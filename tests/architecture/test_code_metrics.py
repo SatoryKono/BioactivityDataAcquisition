@@ -358,6 +358,13 @@ class TestFunctionLength:
         "configure_logging": 70,  # Logging setup
         # API request collector
         "record_request": 75,  # Request metadata collection with validation and sanitization
+        # Composite pipeline functions (ADR-026)
+        "merge": 120,  # MergeService.merge() - orchestrates seed/enricher join and Gold write
+        "_apply_joins": 60,  # MergeService join logic with multiple enrichers
+        "run_enrichers": 90,  # EnrichmentCoordinator parallel execution with async gather
+        "_apply_filter": 60,  # EnrichmentCoordinator filter condition parsing
+        "_run_single_enricher": 150,  # EnrichmentCoordinator single enricher with timeout/error handling
+        "_run_with_lock": 110,  # CompositePipelineRunner lock-held orchestration
     }
 
     # Maximum allowed violations (for tracking technical debt)
