@@ -195,7 +195,7 @@
   dict({
     '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
-    '_lookup_method': 'unknown',
+    '_lookup_method': 'pmid',
     '_original_doi': None,
     '_run_id': '<run_id>',
     '_run_type': 'incremental',
@@ -247,7 +247,7 @@
   dict({
     '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
-    '_lookup_method': 'unknown',
+    '_lookup_method': 'pmid',
     '_original_doi': None,
     '_run_id': '<run_id>',
     '_run_type': 'incremental',
