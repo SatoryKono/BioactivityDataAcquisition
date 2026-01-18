@@ -146,6 +146,9 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "license_url": extract_license_url(rec),
             "subjects": rec.get("subject", []),
             "source": "crossref",
+            # Lookup metadata (from adapter fallback handler)
+            "_lookup_method": rec.get("_lookup_method", "doi"),
+            "_original_doi": rec.get("_original_doi"),
         }
 
     def _get_primary_id_field(self) -> str:
