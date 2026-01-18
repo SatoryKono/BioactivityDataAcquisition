@@ -96,6 +96,8 @@ class StorageFactory:
         metrics: MetricsPort,
         tracing: TracingPort | None,
         metadata_coordinator: MetadataCoordinator | None = None,
+        transform_version: str | None = None,
+        transform_steps: tuple[str, ...] | None = None,
     ) -> StorageAdapter:
         """Create StorageAdapter with all writers configured.
 
@@ -143,6 +145,8 @@ class StorageFactory:
                 csv_exporter=silver_csv_exporter,
                 metadata_writer=silver_metadata_writer,
                 metadata_coordinator=metadata_coordinator,
+                transform_version=transform_version,
+                transform_steps=transform_steps,
             ),
             gold_writer=GoldWriter(
                 base_path=gold_path,
@@ -151,6 +155,8 @@ class StorageFactory:
                 csv_exporter=gold_csv_exporter,
                 metadata_writer=gold_metadata_writer,
                 metadata_coordinator=metadata_coordinator,
+                transform_version=transform_version,
+                transform_steps=transform_steps,
             ),
         )
 
@@ -226,6 +232,10 @@ class StorageFactory:
             gold_save_metadata,
         )
 
+        # Extract transform info for lineage tracking
+        transform_version = config.transform.version
+        transform_steps = tuple(config.transform.steps)
+
         adapter = StorageFactory._create_storage_adapter(
             bronze_path=bronze_path,
             silver_path=silver_path,
@@ -239,6 +249,8 @@ class StorageFactory:
             metrics=metrics,
             tracing=tracing,
             metadata_coordinator=metadata_coordinator,
+            transform_version=transform_version,
+            transform_steps=transform_steps,
         )
 
         return StorageContext(

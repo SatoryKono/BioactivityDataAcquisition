@@ -152,6 +152,10 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
     # Use to_domain() method for DQConfig conversion (consolidation pattern)
     dq_config = yaml_config.dq_rules.to_domain()
 
+    # Extract transform info for lineage tracking
+    transform_version = yaml_config.transform.version
+    transform_steps = tuple(yaml_config.transform.steps)
+
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,
         provider=yaml_config.provider,
@@ -167,6 +171,8 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         fields=tuple(source_fields),
         dq=dq_config,
         on_schema_mismatch=on_schema_mismatch,
+        transform_version=transform_version,
+        transform_steps=transform_steps,
     )
 
 

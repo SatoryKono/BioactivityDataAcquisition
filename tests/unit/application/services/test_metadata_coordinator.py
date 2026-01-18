@@ -16,6 +16,7 @@ from bioetl.composition.services.metadata_coordinator import (
     MetadataCoordinator,
     SilverMetadataInput,
 )
+from bioetl.domain.ports.metadata_coordinator import SilverRef
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
@@ -442,6 +443,257 @@ class TestGoldMetadata:
         metadata = coordinator.create_gold_metadata(input_data)
 
         assert metadata.output.record_count == 25
+
+    def test_gold_lineage_with_silver_refs(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Test Gold lineage metadata with Silver source references (REQ-LINEAGE-002)."""
+        records = [{"compound_id": "CMP123", "activity_value": 5.5}]
+        silver_refs = [
+            SilverRef(
+                table_name="chembl.activity",
+                table_path="/data/silver/chembl/activity",
+                delta_version=42,
+            )
+        ]
+
+        input_data = GoldMetadataInput(
+            table_path="/data/gold/chembl/activity",
+            table_name="chembl.activity",
+            records=records,
+            mode=GoldWriteMode.OVERWRITE,
+            silver_refs=silver_refs,
+        )
+
+        metadata = coordinator.create_gold_metadata(input_data)
+
+        assert metadata.lineage.source_tables == {"chembl.activity": 42}
+
+    def test_gold_lineage_without_silver_refs(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Test Gold lineage metadata is empty when no Silver refs provided (backward compat)."""
+        records = [{"id": 1}]
+
+        input_data = GoldMetadataInput(
+            table_path="/data/gold/chembl/activity",
+            table_name="chembl.activity",
+            records=records,
+            mode=GoldWriteMode.OVERWRITE,
+            silver_refs=None,
+        )
+
+        metadata = coordinator.create_gold_metadata(input_data)
+
+        assert metadata.lineage.source_tables == {}
+
+    def test_gold_lineage_with_multiple_silver_sources(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Test Gold lineage with multiple Silver table sources."""
+        records = [{"compound_id": "CMP123", "target_id": "TGT456", "activity": 1.0}]
+        silver_refs = [
+            SilverRef(
+                table_name="chembl.compound",
+                table_path="/data/silver/chembl/compound",
+                delta_version=10,
+            ),
+            SilverRef(
+                table_name="chembl.target",
+                table_path="/data/silver/chembl/target",
+                delta_version=20,
+            ),
+            SilverRef(
+                table_name="chembl.activity",
+                table_path="/data/silver/chembl/activity",
+                delta_version=30,
+            ),
+        ]
+
+        input_data = GoldMetadataInput(
+            table_path="/data/gold/chembl/compound_activity",
+            table_name="chembl.compound_activity",
+            records=records,
+            mode=GoldWriteMode.OVERWRITE,
+            silver_refs=silver_refs,
+        )
+
+        metadata = coordinator.create_gold_metadata(input_data)
+
+        assert metadata.lineage.source_tables == {
+            "chembl.compound": 10,
+            "chembl.target": 20,
+            "chembl.activity": 30,
+        }
+
+
+class TestTransformVersionTracking:
+    """Tests for transform version and steps tracking in metadata."""
+
+    def test_silver_lineage_includes_transform_version_from_input(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Test Silver lineage includes transform_version from SilverMetadataInput."""
+        records = [{"id": 1}]
+
+        input_data = SilverMetadataInput(
+            table_path="/data/silver/chembl/activity",
+            records=records,
+            primary_keys=["id"],
+            mode=SilverWriteMode.MERGE,
+            transform_version="1.0.0",
+            transform_steps=("normalize_values", "add_metadata"),
+        )
+
+        metadata = coordinator.create_silver_metadata(input_data)
+
+        assert metadata.lineage.transform_version == "1.0.0"
+        assert metadata.lineage.transform_steps == ["normalize_values", "add_metadata"]
+
+    def test_gold_lineage_includes_transform_version_from_input(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Test Gold lineage includes transform_version from GoldMetadataInput."""
+        records = [{"id": 1}]
+
+        input_data = GoldMetadataInput(
+            table_path="/data/gold/chembl/activity",
+            table_name="chembl.activity",
+            records=records,
+            mode=GoldWriteMode.OVERWRITE,
+            transform_version="2.1.0",
+            transform_steps=("flatten_json", "validate_schema"),
+        )
+
+        metadata = coordinator.create_gold_metadata(input_data)
+
+        assert metadata.lineage.transform_version == "2.1.0"
+        assert metadata.lineage.transform_steps == ["flatten_json", "validate_schema"]
+
+    def test_silver_uses_run_context_transform_when_input_none(self) -> None:
+        """Test Silver falls back to RunContext transform info when input is None."""
+        MetadataCoordinator.reset_environment_cache()
+
+        context = RunContext.create(
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime.now(UTC),
+            provider="chembl",
+            entity="activity",
+            transform_version="3.0.0",
+            transform_steps=("step1", "step2", "step3"),
+        )
+        coord = MetadataCoordinator(context)
+
+        records = [{"id": 1}]
+        input_data = SilverMetadataInput(
+            table_path="/data/silver/chembl/activity",
+            records=records,
+            primary_keys=["id"],
+            mode=SilverWriteMode.MERGE,
+            # transform_version and transform_steps are None
+        )
+
+        metadata = coord.create_silver_metadata(input_data)
+
+        # Should fall back to RunContext values
+        assert metadata.lineage.transform_version == "3.0.0"
+        assert metadata.lineage.transform_steps == ["step1", "step2", "step3"]
+
+    def test_gold_uses_run_context_transform_when_input_none(self) -> None:
+        """Test Gold falls back to RunContext transform info when input is None."""
+        MetadataCoordinator.reset_environment_cache()
+
+        context = RunContext.create(
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime.now(UTC),
+            provider="chembl",
+            entity="activity",
+            transform_version="4.0.0",
+            transform_steps=("transform_step_a", "transform_step_b"),
+        )
+        coord = MetadataCoordinator(context)
+
+        records = [{"id": 1}]
+        input_data = GoldMetadataInput(
+            table_path="/data/gold/chembl/activity",
+            table_name="chembl.activity",
+            records=records,
+            mode=GoldWriteMode.OVERWRITE,
+            # transform_version and transform_steps are None
+        )
+
+        metadata = coord.create_gold_metadata(input_data)
+
+        # Should fall back to RunContext values
+        assert metadata.lineage.transform_version == "4.0.0"
+        assert metadata.lineage.transform_steps == [
+            "transform_step_a",
+            "transform_step_b",
+        ]
+
+    def test_run_context_with_transform_info(self) -> None:
+        """Test RunContext can be created with transform version and steps."""
+        run_id = RunID(uuid4())
+        started_at = datetime.now(UTC)
+
+        context = RunContext.create(
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            started_at=started_at,
+            provider="chembl",
+            entity="activity",
+            transform_version="1.2.3",
+            transform_steps=("step1", "step2"),
+        )
+
+        assert context.transform_version == "1.2.3"
+        assert context.transform_steps == ("step1", "step2")
+
+    def test_run_context_defaults_empty_transform(self) -> None:
+        """Test RunContext defaults to None/empty for transform fields."""
+        context = RunContext.create(
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime.now(UTC),
+            provider="chembl",
+            entity="activity",
+        )
+
+        assert context.transform_version is None
+        assert context.transform_steps == ()
+
+    def test_silver_input_takes_precedence_over_run_context(self) -> None:
+        """Test that SilverMetadataInput values take precedence over RunContext."""
+        MetadataCoordinator.reset_environment_cache()
+
+        context = RunContext.create(
+            run_id=RunID(uuid4()),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime.now(UTC),
+            provider="chembl",
+            entity="activity",
+            transform_version="1.0.0",
+            transform_steps=("context_step",),
+        )
+        coord = MetadataCoordinator(context)
+
+        records = [{"id": 1}]
+        input_data = SilverMetadataInput(
+            table_path="/data/silver/chembl/activity",
+            records=records,
+            primary_keys=["id"],
+            mode=SilverWriteMode.MERGE,
+            transform_version="2.0.0",  # Different from context
+            transform_steps=("input_step1", "input_step2"),  # Different from context
+        )
+
+        metadata = coord.create_silver_metadata(input_data)
+
+        # Input values should take precedence
+        assert metadata.lineage.transform_version == "2.0.0"
+        assert metadata.lineage.transform_steps == ["input_step1", "input_step2"]
 
 
 class TestRunTypeMappings:

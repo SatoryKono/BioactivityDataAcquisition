@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from bioetl.domain.types import HealthStatus
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -111,7 +112,7 @@ class StorageAdapter:
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
         bronze_refs: list[BronzeWriteResult] | None = None,
-    ) -> None:
+    ) -> SilverWriteResult | None:
         """Write transformed records to Silver layer.
 
         Args:
@@ -126,11 +127,15 @@ class StorageAdapter:
                 If provided, bronze_paths will be populated in Silver metadata
                 for complete lineage tracking (REQ-LINEAGE-001).
 
+        Returns:
+            SilverWriteResult with table info and Delta version for Gold lineage tracking
+            (REQ-LINEAGE-002), or None if no records were written.
+
         Note:
             Lock validation is performed at Application layer (BatchWriter)
             per RULES.md §4.6 Safety Guard.
         """
-        await self.silver.write_silver(
+        return await self.silver.write_silver(
             table_name=table_name,
             records=records,
             primary_keys=primary_keys,
@@ -151,6 +156,7 @@ class StorageAdapter:
         *,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
+        silver_refs: list[Any] | None = None,
     ) -> None:
         """Write aggregated records to Gold layer.
 
@@ -162,6 +168,9 @@ class StorageAdapter:
             mode: Write mode
             ingestion_ts: Ingestion timestamp for audit (ADR-014)
             run_id: Run identifier for audit correlation
+            silver_refs: Optional list of SilverWriteResult from Silver writes.
+                If provided, source_tables will be populated in Gold metadata
+                for complete lineage tracking (REQ-LINEAGE-002).
 
         Note:
             Lock validation is performed at Application layer (BatchWriter)
@@ -175,6 +184,7 @@ class StorageAdapter:
             mode=mode,
             ingestion_ts=ingestion_ts,
             run_id=run_id,
+            silver_refs=silver_refs,
         )
 
     async def read_silver(

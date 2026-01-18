@@ -58,6 +58,8 @@ class SilverMetadataInput:
         bronze_refs: Optional list of BronzeWriteResult for lineage.
         dq_metrics: Optional BatchDQMetrics for DQ summary.
         version_after: Delta table version after write.
+        transform_version: Optional semver version of transform applied.
+        transform_steps: Optional list of transform step names applied.
     """
 
     table_path: str
@@ -67,6 +69,26 @@ class SilverMetadataInput:
     bronze_refs: Any | None = None  # list[BronzeWriteResult] | None
     dq_metrics: Any | None = None  # BatchDQMetrics | None
     version_after: int | None = None
+    transform_version: str | None = None
+    transform_steps: tuple[str, ...] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class SilverRef:
+    """Reference to a Silver table for Gold lineage tracking.
+
+    Captures the exact Silver source used for Gold transformation,
+    enabling full data lineage from Bronze → Silver → Gold.
+
+    Attributes:
+        table_name: Silver table name (e.g., "chembl.activity").
+        table_path: Full path to Silver Delta table.
+        delta_version: Delta version of Silver table when read.
+    """
+
+    table_name: str
+    table_path: str
+    delta_version: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,6 +102,9 @@ class GoldMetadataInput:
         mode: Write mode (overwrite, append, scd2).
         scd_config: SCD2 configuration if applicable.
         completed_at: UTC timestamp when write completed.
+        silver_refs: List of Silver source references for lineage tracking.
+        transform_version: Optional semver version of transform applied.
+        transform_steps: Optional list of transform step names applied.
     """
 
     table_path: str
@@ -88,6 +113,9 @@ class GoldMetadataInput:
     mode: Any  # GoldWriteMode - avoid circular import
     scd_config: dict[str, Any] | None = None
     completed_at: datetime | None = None
+    silver_refs: list[SilverRef] | None = None
+    transform_version: str | None = None
+    transform_steps: tuple[str, ...] | None = None
 
 
 @runtime_checkable

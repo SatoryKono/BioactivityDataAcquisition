@@ -398,6 +398,10 @@ class PipelineConfig:
     # Data Quality
     dq: DQConfig = field(default_factory=DQConfig)
 
+    # Transform versioning (lineage tracking)
+    transform_version: str | None = None
+    transform_steps: tuple[str, ...] = ()
+
     def __post_init__(self) -> None:
         """Convert lists to tuples and validate configuration on creation."""
         self._ensure_immutability()
@@ -412,6 +416,8 @@ class PipelineConfig:
             object.__setattr__(self, "partition_cols", tuple(self.partition_cols))
         if isinstance(self.fields, list):
             object.__setattr__(self, "fields", tuple(self.fields))
+        if isinstance(self.transform_steps, list):
+            object.__setattr__(self, "transform_steps", tuple(self.transform_steps))
 
     def _convert_write_modes(self) -> None:
         """Convert string write modes to enums (backward compatibility)."""

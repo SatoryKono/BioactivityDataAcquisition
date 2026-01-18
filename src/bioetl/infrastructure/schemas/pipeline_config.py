@@ -11,6 +11,7 @@ boundary between infrastructure (YAML parsing) and domain (business logic).
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, Literal
 
 from pydantic import (
@@ -610,6 +611,59 @@ class GoldFiltersConfig(BaseModel):
         )
 
 
+# Regex for semver validation (allows optional 'v' prefix)
+# Matches: 1.0.0, v1.0.0, 1.2.3-beta, 1.2.3+build, etc.
+SEMVER_PATTERN = re.compile(
+    r"^v?"  # Optional 'v' prefix
+    r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"  # Major.Minor.Patch
+    r"(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)"  # Pre-release
+    r"(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?"
+    r"(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"  # Build metadata
+)
+
+
+class TransformConfig(BaseModel):
+    """Configuration for transform versioning and steps.
+
+    Tracks the version and steps of the transformation applied to data,
+    enabling full lineage tracking in Silver/Gold metadata.
+
+    Attributes:
+        version: Semver-formatted version string (e.g., "1.0.0", "v2.1.0").
+        steps: List of transformation step names applied in order.
+
+    Example YAML:
+        transform:
+          version: "1.0.0"
+          steps:
+            - normalize_values
+            - add_metadata
+            - calculate_content_hash
+    """
+
+    version: str | None = Field(
+        default=None,
+        description="Transform version in semver format (e.g., '1.0.0')",
+    )
+    steps: list[str] = Field(
+        default_factory=list,
+        description="List of transformation steps applied",
+    )
+
+    @field_validator("version")
+    @classmethod
+    def validate_semver(cls, v: str | None) -> str | None:
+        """Validate that version follows semver format."""
+        if v is None:
+            return v
+        if not SEMVER_PATTERN.match(v):
+            raise ValueError(
+                f"Invalid semver format '{v}'. "
+                "Expected format: MAJOR.MINOR.PATCH (e.g., '1.0.0', 'v2.1.0')"
+            )
+        return v
+
+
 class PipelineYamlConfig(BaseModel):
     """Strict schema for pipeline YAML configuration.
 
@@ -646,6 +700,7 @@ class PipelineYamlConfig(BaseModel):
     source: SourceConfig = Field(default_factory=SourceConfig)
     input_filter: InputFilterConfig = Field(default_factory=InputFilterConfig)
     maintenance: MaintenanceConfig = Field(default_factory=MaintenanceConfig)
+    transform: TransformConfig = Field(default_factory=TransformConfig)
 
     @field_validator("batch_size")
     @classmethod

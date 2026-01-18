@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import GoldValidatorPort, StoragePort, TracingPort
     from bioetl.domain.types import BatchID
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+    from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
 class BatchWriter:
@@ -249,7 +250,7 @@ class BatchWriter:
         batch_id: BatchID,
         ingestion_ts: datetime,
         bronze_refs: list[BronzeWriteResult] | None = None,
-    ) -> None:
+    ) -> SilverWriteResult | None:
         """Write records to Silver layer with metadata.
 
         Enriches records with _run_id, _run_type, _source_batch_id, _ingestion_ts.
@@ -261,6 +262,10 @@ class BatchWriter:
             bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
                 If provided, bronze_paths will be populated in Silver metadata
                 for complete lineage tracking (REQ-LINEAGE-001).
+
+        Returns:
+            SilverWriteResult with table info and Delta version for Gold lineage tracking
+            (REQ-LINEAGE-002), or None if no records were written.
 
         Raises:
             LockNotHeldError: If lock is no longer held (Safety Guard §4.6).
@@ -284,7 +289,7 @@ class BatchWriter:
             for r in records:
                 r["_source_batch_id"] = batch_id_str
 
-            await self._storage.write_silver(
+            silver_result = await self._storage.write_silver(
                 table_name=self._silver_table_name,
                 records=records,
                 primary_keys=list(self._table_config.primary_keys),
@@ -294,11 +299,16 @@ class BatchWriter:
                 bronze_refs=bronze_refs,
             )
             self._end_span(span)
+            return silver_result
         except Exception as e:
             self._end_span(span, e)
             raise
 
-    async def write_gold(self, records: list[dict[str, Any]]) -> None:
+    async def write_gold(
+        self,
+        records: list[dict[str, Any]],
+        silver_refs: list[SilverWriteResult] | None = None,
+    ) -> None:
         """Write records to Gold layer with validation.
 
         Filters columns to match Gold schema, validates records.
@@ -306,6 +316,9 @@ class BatchWriter:
 
         Args:
             records: Transformed Gold records.
+            silver_refs: Optional list of SilverWriteResult from Silver writes.
+                If provided, source_tables will be populated in Gold metadata
+                for complete lineage tracking (REQ-LINEAGE-002).
 
         Raises:
             SchemaViolationError: If validation fails.
@@ -328,7 +341,7 @@ class BatchWriter:
             if not result.valid:
                 raise SchemaViolationError("gold", result.errors)
 
-            # Pass ingestion_ts and run_id for audit correlation (ADR-014)
+            # Pass ingestion_ts, run_id, and silver_refs for audit and lineage (ADR-014, REQ-LINEAGE-002)
             await self._storage.write_gold(
                 table_name=self._gold_table_name,
                 records=records,
@@ -337,6 +350,7 @@ class BatchWriter:
                 mode=self._gold_mode,
                 ingestion_ts=self._context.started_at,
                 run_id=self._context.run_id,
+                silver_refs=silver_refs,
             )
             self._end_span(span)
         except Exception as e:
