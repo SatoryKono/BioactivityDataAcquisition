@@ -48,6 +48,8 @@ class TestAdapterHealthCheck:
             "circuit_breaker.py",  # Circuit breaker utility
             "health_monitor.py",  # Health state utility, not a DataSourcePort adapter
             "error_handling.py",  # Error handling utility, not a DataSourcePort adapter
+            "fallback.py",  # Title fallback handler utility, not a DataSourcePort adapter
+            "base_title_fallback.py",  # Base class for title fallback handlers
         }
         adapter_files = []
         for py_file in adapters_path.rglob("*.py"):

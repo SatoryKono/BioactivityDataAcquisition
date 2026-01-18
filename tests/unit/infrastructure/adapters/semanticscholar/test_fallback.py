@@ -133,9 +133,7 @@ class TestSemanticScholarTitleFallbackHandler:
         # Case-insensitive match
         assert handler.titles_match("Crystal Structure", "crystal structure") is True
         # Partial match
-        assert (
-            handler.titles_match("Crystal", "Crystal structure of rhodopsin") is True
-        )
+        assert handler.titles_match("Crystal", "Crystal structure of rhodopsin") is True
         # No match
         assert handler.titles_match("Different topic", "Crystal structure") is False
 
