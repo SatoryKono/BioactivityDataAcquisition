@@ -87,7 +87,7 @@ class TestFileSizeLimits:
         "gold_writer.py": 920,  # 918 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage
         "bronze_writer.py": 755,  # 750 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param
         "gold.py": 920,  # 915 LOC - Gold layer Pandera schemas (+ IDMapping + taxonomy_id standardization + Config docstrings)
-        "silver.py": 780,  # 775 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization)
+        "silver.py": 785,  # 782 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata)
         "client.py": 700,  # 692 LOC - ChemblAdapter (complex FilterableDataSourcePort), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "pipeline_config.py": 775,  # 771 LOC - Pipeline configuration loading and validation + TransformConfig
