@@ -20,7 +20,11 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 # Re-export for backwards compatibility
-__all__ = ["SemanticScholarTitleFallbackHandler", "TitleFallbackHandler", "titles_match"]
+__all__ = [
+    "SemanticScholarTitleFallbackHandler",
+    "TitleFallbackHandler",
+    "titles_match",
+]
 
 # Semantic Scholar API configuration
 SEMANTICSCHOLAR_BASE_URL = "https://api.semanticscholar.org/graph/v1"
