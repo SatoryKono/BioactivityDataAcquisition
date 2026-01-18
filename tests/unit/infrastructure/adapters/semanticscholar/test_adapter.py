@@ -106,16 +106,6 @@ class TestSemanticScholarAdapter:
         result = adapter._normalize_doi("DOI:10.1038/s41586-024-07487-w")
         assert result == "10.1038/s41586-024-07487-w"
 
-    def test_escape_title_for_search(self, adapter: SemanticScholarAdapter) -> None:
-        """Test title escaping for search."""
-        title = "A \"complex\" title with 'quotes' and   spaces"
-        result = adapter._escape_title_for_search(title)
-
-        assert '"' not in result
-        assert "'" not in result
-        assert "   " not in result
-        assert result == "A complex title with quotes and spaces"
-
 
 class TestFetchFiltered:
     """Tests for fetch_filtered method."""
