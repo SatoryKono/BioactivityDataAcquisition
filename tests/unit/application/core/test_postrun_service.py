@@ -398,9 +398,10 @@ class TestPostrunResult:
             skipped=False,
         )
 
-        result = PostrunResult(dq=dq_result, vacuum=vacuum_result)
+        result = PostrunResult(dq=dq_result, dq_reports=None, vacuum=vacuum_result)
 
         assert result.dq == dq_result
+        assert result.dq_reports is None
         assert result.vacuum == vacuum_result
 
 

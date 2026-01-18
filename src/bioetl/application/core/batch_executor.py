@@ -2,12 +2,18 @@
 
 Combines extraction, transformation, and writing into a single component with
 adaptive batch sizing, checkpointing, and graceful shutdown handling.
+
+DQ Report Integration:
+- Accumulates data for DQ report generation when DQ report service is available
+- Provides get_dq_context() method for building DQ report context
 """
 
 from __future__ import annotations
 
+import json
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
@@ -31,6 +37,7 @@ if TYPE_CHECKING:
         GoldTransformCallback,
         TransformCallback,
     )
+    from bioetl.application.services.dq_report_service import DQReportContext
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.models.metadata import SourceMetadata
@@ -130,6 +137,14 @@ class BatchExecutor:
         self.records_silver = 0
         self.records_gold = 0
         self.records_quarantined = 0
+
+        # DQ Report data accumulation (only if DQ report service is available)
+        # Collecting data adds memory overhead, so only enabled when needed
+        self._bronze_records_for_dq: list[bytes] = []
+        self._silver_records_for_dq: list[dict[str, Any]] = []
+        self._gold_records_for_dq: list[dict[str, Any]] = []
+        self._source_batch_ids: list[str] = []
+        self._last_bronze_path: str | None = None
 
         # Create internal components (from RecordProcessor)
         pipeline_label = f"{config.provider}_{config.entity_type}"
@@ -412,6 +427,16 @@ class BatchExecutor:
             self.records_gold += len(result.gold_records)
             self.records_quarantined += result.quarantined_count
 
+            # Collect data for DQ reports (if enabled)
+            if self._should_collect_dq_data():
+                self._collect_dq_data(
+                    records=records,
+                    batch_id=batch_id,
+                    bronze_result=bronze_result,
+                    silver_records=result.silver_records,
+                    gold_records=result.gold_records,
+                )
+
             # Add result attributes to span
             self._tracing.set_batch_result(
                 span,
@@ -574,3 +599,138 @@ class BatchExecutor:
             query=query,
         ):
             yield record
+
+    # -------------------------------------------------------------------------
+    # DQ Report data collection
+    # -------------------------------------------------------------------------
+
+    def _should_collect_dq_data(self) -> bool:
+        """Check if DQ report service is available.
+
+        Returns:
+            True if DQ report service is configured and data should be collected.
+        """
+        return self._services.dq_report_service is not None
+
+    def _collect_dq_data(
+        self,
+        records: list[dict[str, Any]],
+        batch_id: BatchID,
+        bronze_result: Any,
+        silver_records: list[dict[str, Any]],
+        gold_records: list[dict[str, Any]],
+    ) -> None:
+        """Collect data from batch processing for DQ reports.
+
+        Args:
+            records: Raw Bronze records.
+            batch_id: Batch identifier.
+            bronze_result: Result from Bronze write operation (contains path).
+            silver_records: Transformed Silver records.
+            gold_records: Transformed Gold records.
+        """
+        # Collect Bronze records as bytes (JSON-encoded)
+        for record in records:
+            try:
+                self._bronze_records_for_dq.append(
+                    json.dumps(record, default=str).encode("utf-8")
+                )
+            except (TypeError, ValueError):
+                # Skip records that can't be serialized
+                pass
+
+        # Track batch ID
+        self._source_batch_ids.append(str(batch_id))
+
+        # Track Bronze file path if available
+        if bronze_result is not None and hasattr(bronze_result, "path"):
+            self._last_bronze_path = str(bronze_result.path)
+
+        # Collect Silver records
+        self._silver_records_for_dq.extend(silver_records)
+
+        # Collect Gold records
+        self._gold_records_for_dq.extend(gold_records)
+
+    def get_dq_context(self) -> DQReportContext | None:
+        """Build DQ report context from accumulated data.
+
+        Creates a DQReportContext containing all data collected during
+        batch processing. This context is used by PostrunService to
+        generate DQ reports for Bronze, Silver, and Gold layers.
+
+        Returns:
+            DQReportContext if DQ reporting is enabled and data is available,
+            None otherwise.
+
+        Note:
+            This method should be called after execute() completes.
+            The returned context contains snapshots of the accumulated data.
+        """
+        if not self._should_collect_dq_data():
+            return None
+
+        # Import here to avoid circular dependency
+        from bioetl.application.services.dq_report_service import DQReportContext
+
+        # Build Silver DataFrame if we have records
+        silver_data = None
+        if self._silver_records_for_dq:
+            try:
+                import polars as pl
+
+                silver_data = pl.DataFrame(self._silver_records_for_dq)
+            except Exception:
+                # If DataFrame creation fails, skip Silver DQ report
+                pass
+
+        # Build Gold DataFrame if we have records
+        gold_data = None
+        if self._gold_records_for_dq:
+            try:
+                import polars as pl
+
+                gold_data = pl.DataFrame(self._gold_records_for_dq)
+            except Exception:
+                # If DataFrame creation fails, skip Gold DQ report
+                pass
+
+        # Get table config for primary keys
+        primary_keys = list(self._config.table_config.primary_keys)
+
+        return DQReportContext(
+            run_id=str(self._context.run_id),
+            pipeline_name=self._config.pipeline_name,
+            timestamp=datetime.now(UTC),
+            # Bronze context
+            bronze_records=(
+                self._bronze_records_for_dq if self._bronze_records_for_dq else None
+            ),
+            bronze_batch_id=(
+                self._source_batch_ids[-1] if self._source_batch_ids else None
+            ),
+            bronze_source_file=self._last_bronze_path,
+            # Silver context
+            silver_data=silver_data,
+            silver_target_table=self._config.table_config.silver_table,
+            silver_source_batch_ids=(
+                self._source_batch_ids if self._source_batch_ids else None
+            ),
+            silver_primary_keys=primary_keys if primary_keys else None,
+            silver_input_count=self.records_fetched,
+            silver_quarantined_count=self.records_quarantined,
+            # Gold context
+            gold_data=gold_data,
+            gold_target_table=self._config.table_config.gold_table,
+            # DQ thresholds from config (use defaults if not configured)
+            dq_soft_threshold=(
+                self._config.dq_config.soft_fail_threshold
+                if self._config.dq_config
+                else 0.05
+            ),
+            dq_hard_threshold=(
+                self._config.dq_config.hard_fail_threshold
+                if self._config.dq_config
+                else 0.20
+            ),
+        )
