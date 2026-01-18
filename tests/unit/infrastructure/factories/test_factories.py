@@ -150,6 +150,7 @@ class TestStorageAdapter:
             mode="overwrite",
             ingestion_ts=None,
             run_id=None,
+            silver_refs=None,
         )
 
     async def test_aclose_completes(self, storage_adapter):

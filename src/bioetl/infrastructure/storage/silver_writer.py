@@ -63,6 +63,7 @@ if TYPE_CHECKING:
         BatchDQMetrics,
         SchemaDriftInfo,
     )
+    from bioetl.domain.value_objects.silver_result import SilverWriteResult
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
@@ -502,7 +503,7 @@ class SilverWriter(BaseDeltaWriter):
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
         bronze_refs: list[BronzeWriteResult] | None = None,
-    ) -> None:
+    ) -> SilverWriteResult | None:
         """Write normalized records to Silver layer (Delta Lake merge/upsert).
 
         Args:
@@ -519,6 +520,10 @@ class SilverWriter(BaseDeltaWriter):
             bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
                 If provided, bronze_paths will be populated in Silver metadata
                 for complete lineage tracking (REQ-LINEAGE-001).
+
+        Returns:
+            SilverWriteResult with table info and Delta version for Gold lineage tracking
+            (REQ-LINEAGE-002), or None if no records were written.
 
         Raises:
             ValueError: If mode is invalid or records are missing required fields
@@ -590,6 +595,9 @@ class SilverWriter(BaseDeltaWriter):
             # Compute DQ metrics for metadata (REQ-DQ-001)
             dq_metrics = await self._compute_dq_metrics(table_name, records)
 
+            # Get Delta version after write for lineage tracking (REQ-LINEAGE-002)
+            version_after = await self._get_delta_version(table_path)
+
             # Write metadata sidecar file if configured
             await self._write_silver_metadata(
                 table_path=table_path,
@@ -599,6 +607,18 @@ class SilverWriter(BaseDeltaWriter):
                 bronze_refs=bronze_refs,
                 dq_metrics=dq_metrics,
             )
+
+            # Return SilverWriteResult for Gold lineage tracking (REQ-LINEAGE-002)
+            if version_after is not None:
+                from bioetl.domain.value_objects.silver_result import SilverWriteResult
+
+                return SilverWriteResult(
+                    table_name=table_name,
+                    table_path=table_path,
+                    delta_version=version_after,
+                    record_count=len(records),
+                )
+            return None
 
     async def _compute_dq_metrics(
         self,

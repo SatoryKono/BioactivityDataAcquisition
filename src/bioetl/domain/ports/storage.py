@@ -22,6 +22,7 @@ from bioetl.domain.types import (
     RunType,
 )
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SourceMetadata
@@ -84,7 +85,7 @@ class StoragePort(Protocol):
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
         bronze_refs: list[BronzeWriteResult] | None = None,
-    ) -> None:
+    ) -> SilverWriteResult | None:
         """Write transformed records to the Silver layer.
 
         Args:
@@ -101,6 +102,10 @@ class StoragePort(Protocol):
             bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
                 If provided, bronze_paths will be populated in Silver metadata
                 for complete lineage tracking (REQ-LINEAGE-001).
+
+        Returns:
+            SilverWriteResult with table info and Delta version for Gold lineage tracking
+            (REQ-LINEAGE-002), or None if no records were written.
 
         Raises:
             SchemaEvolutionError: If schema drift detected and on_schema_mismatch='error'
@@ -121,6 +126,7 @@ class StoragePort(Protocol):
         *,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
+        silver_refs: list[Any] | None = None,
     ) -> None:
         """Write aggregated or validated records to the Gold layer.
 
@@ -133,6 +139,9 @@ class StoragePort(Protocol):
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required for audit.
             run_id: Run identifier for audit correlation across layers.
+            silver_refs: Optional list of SilverWriteResult from Silver writes.
+                If provided, source_tables will be populated in Gold metadata
+                for complete lineage tracking (REQ-LINEAGE-002).
 
         Raises:
             ValueError: If schema validation fails (strict=True required).
