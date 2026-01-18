@@ -74,6 +74,8 @@ class GoldWriter(BaseDeltaWriter):
         audit: AuditPort | None = None,
         metadata_writer: MetadataWriterPort | None = None,
         metadata_coordinator: MetadataCoordinatorPort | None = None,
+        transform_version: str | None = None,
+        transform_steps: tuple[str, ...] | None = None,
     ) -> None:
         """Initialize Gold writer.
 
@@ -92,6 +94,9 @@ class GoldWriter(BaseDeltaWriter):
                                 metadata creation. If provided, uses coordinator
                                 instead of local _write_gold_metadata() logic.
                                 Ensures consistent run_id across layers.
+            transform_version: Optional semver version of transform (e.g., '1.0.0')
+                             for lineage tracking in metadata.
+            transform_steps: Optional tuple of transform step names for lineage.
 
         Note:
             LoggerPort is required per RULES.md DI requirements.
@@ -121,6 +126,10 @@ class GoldWriter(BaseDeltaWriter):
         self._metadata_coordinator: MetadataCoordinatorPort | None = (
             metadata_coordinator
         )
+
+        # Transform version tracking for lineage metadata
+        self._transform_version = transform_version
+        self._transform_steps = transform_steps or ()
 
     async def write_gold(
         self,
@@ -484,6 +493,8 @@ class GoldWriter(BaseDeltaWriter):
                 scd_config=scd_config,
                 completed_at=ingestion_ts,
                 silver_refs=converted_refs,
+                transform_version=self._transform_version,
+                transform_steps=self._transform_steps,
             )
             metadata = self._metadata_coordinator.create_gold_metadata(gold_input)
             await self._metadata_writer.write_gold_metadata(table_path, metadata)
