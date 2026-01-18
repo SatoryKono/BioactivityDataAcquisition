@@ -243,6 +243,8 @@
     ],
     "provider": "chembl",
     "silver_table": "chembl_activity",
+    "transform_steps": [],
+    "transform_version": null,
     "write_mode": "merge"
   },
   "chembl_document": {
@@ -508,6 +510,8 @@
     ],
     "provider": "pubchem",
     "silver_table": "pubchem_compound",
+    "transform_steps": [],
+    "transform_version": null,
     "write_mode": "merge"
   },
   "pubmed_publications": {
@@ -655,6 +659,8 @@
     ],
     "provider": "pubmed",
     "silver_table": "pubmed_publication",
+    "transform_steps": [],
+    "transform_version": null,
     "write_mode": "merge"
   },
   "uniprot_protein": {
@@ -787,6 +793,8 @@
     ],
     "provider": "uniprot",
     "silver_table": "uniprot_protein",
+    "transform_steps": [],
+    "transform_version": null,
     "write_mode": "merge"
   }
 }

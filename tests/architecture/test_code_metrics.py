@@ -83,14 +83,14 @@ class TestFileSizeLimits:
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
         "services_factory.py": 630,  # 623 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
         # Infrastructure layer exemptions
-        "silver_writer.py": 1120,  # 1115 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return
-        "gold_writer.py": 915,  # 907 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage
+        "silver_writer.py": 1130,  # 1126 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage
+        "gold_writer.py": 920,  # 918 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage
         "bronze_writer.py": 755,  # 750 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param
         "gold.py": 920,  # 915 LOC - Gold layer Pandera schemas (+ IDMapping + taxonomy_id standardization + Config docstrings)
         "silver.py": 780,  # 775 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization)
         "client.py": 700,  # 692 LOC - ChemblAdapter (complex FilterableDataSourcePort), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
-        "pipeline_config.py": 730,  # 716 LOC - Pipeline configuration loading and validation
+        "pipeline_config.py": 775,  # 771 LOC - Pipeline configuration loading and validation + TransformConfig
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
@@ -647,6 +647,8 @@ class TestGodObjectDetection:
         "FileAuditAdapter": "Cohesive adapter - all methods relate to audit file operations (read/write JSONL)",
         # Composite pipeline services (ADR-026)
         "MergeService": "Cohesive service - all methods relate to merge operations and conflict resolution",
+        # Metadata coordination service
+        "MetadataCoordinator": "Cohesive service - all methods relate to metadata creation for Medallion layers",
         "EnrichmentCoordinator": "Cohesive service - all methods relate to enricher orchestration",
         "CompositePipelineRunner": "Thin orchestrator - delegates to coordinator, merger, checkpoint services",
         # DQ analyzers (cohesive data quality analysis with many validation methods)
