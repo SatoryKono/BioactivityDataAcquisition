@@ -29,7 +29,9 @@ from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
-from bioetl.infrastructure.adapters.semanticscholar.fallback import TitleFallbackHandler
+from bioetl.infrastructure.adapters.semanticscholar.fallback import (
+    SemanticScholarTitleFallbackHandler,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -87,9 +89,12 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
 
         # Initialize helper component for fallback handling
-        self._fallback_handler = TitleFallbackHandler(
+        self._fallback_handler = SemanticScholarTitleFallbackHandler(
+            http_client=self.http_client,
             logger=self.logger,
-            search_fn=self._search_by_title,
+            metrics=self._adapter_metrics,
+            api_key=self.api_key,
+            fields=self.fields,
         )
 
     def _build_headers(self) -> dict[str, str]:
@@ -428,46 +433,6 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         result: list[dict[str, Any] | None] = response.json()
         return result
 
-    async def _search_by_title(
-        self,
-        title: str,
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Search publications by title (fuzzy match).
-
-        Uses GET /paper/search with query for best title match.
-
-        Args:
-            title: Publication title to search for.
-
-        Yields:
-            Publication records matching the title.
-
-        """
-        # Clean title for search
-        cleaned_title = self._escape_title_for_search(title)
-
-        params: dict[str, Any] = {
-            "query": cleaned_title,
-            "fields": self.fields,
-            "limit": 5,  # Return top matches
-        }
-
-        self.logger.debug(
-            "semanticscholar_title_search",
-            title=title[:100],
-        )
-
-        url = f"{SEMANTICSCHOLAR_BASE_URL}/paper/search"
-        with self._adapter_metrics.measure_request("/paper/search"):
-            response = await self.http_client.get_once(
-                url, params=params, headers=self._build_headers()
-            )
-
-        data = response.json()
-
-        for record in data.get("data", []):
-            yield record
-
     @staticmethod
     def _normalize_doi(doi: str) -> str:
         """Normalize DOI by removing URL prefix."""
@@ -480,14 +445,6 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         if doi.startswith("DOI:"):
             return doi[4:]
         return doi
-
-    @staticmethod
-    def _escape_title_for_search(title: str) -> str:
-        """Escape title for Semantic Scholar search query."""
-        # Remove special characters that might break the query
-        cleaned = title.replace('"', " ").replace("'", " ")
-        # Normalize whitespace
-        return " ".join(cleaned.split())
 
     async def _probe_health(self) -> HealthStatus:
         """Probe Semantic Scholar API health.
