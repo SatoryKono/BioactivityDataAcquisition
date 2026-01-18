@@ -45,11 +45,14 @@ if TYPE_CHECKING:
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig
     from bioetl.domain.ports import (
+        BronzeDQConfigPort,
         DataSourcePort,
         DQMonitorPort,
+        GoldDQConfigPort,
         LoggerPort,
         MetricsPort,
         PiiHasherPort,
+        SilverDQConfigPort,
         TracingPort,
     )
     from bioetl.domain.services import IdentityService
@@ -506,6 +509,9 @@ def assemble_runner(
         pipeline_name=pipeline.config.pipeline_name,
     )
 
+    # Extract DQ configs from pipeline for DQ report generation
+    bronze_dq_config, silver_dq_config, gold_dq_config = _extract_dq_configs(pipeline)
+
     postrun_service = PostrunService(
         config=pipeline.config,
         runtime=pipeline.runtime,
@@ -513,6 +519,11 @@ def assemble_runner(
         lifecycle_service=lifecycle_service,
         metrics=pipeline.services.metrics,
         logger=logger_port,
+        # DQ Report parameters
+        dq_report_service=pipeline.services.dq_report_service,
+        bronze_dq_config=bronze_dq_config,
+        silver_dq_config=silver_dq_config,
+        gold_dq_config=gold_dq_config,
     )
 
     observer = PipelineObserver(
@@ -555,3 +566,78 @@ def assemble_runner(
         pipeline=pipeline,
         tracer=observability.tracer,
     )
+
+
+def _extract_dq_configs(
+    pipeline: BasePipeline,
+) -> tuple[
+    BronzeDQConfigPort | None,
+    SilverDQConfigPort | None,
+    GoldDQConfigPort | None,
+]:
+    """Extract DQ report configs for each layer from pipeline.
+
+    DQ configs are stored in the pipeline's original YAML config reference
+    if available. This function retrieves them for use in PostrunService.
+
+    Args:
+        pipeline: Pipeline instance with potential DQ config reference.
+
+    Returns:
+        Tuple of (bronze_config, silver_config, gold_config).
+        All values may be None if DQ reports are not configured.
+    """
+    from bioetl.infrastructure.schemas.dq_report_config import (
+        BronzeSinkConfig,
+        GoldSinkConfig,
+        SilverSinkConfig,
+    )
+
+    bronze_config: BronzeDQConfigPort | None = None
+    silver_config: SilverDQConfigPort | None = None
+    gold_config: GoldDQConfigPort | None = None
+
+    # Access original YAML config if available through pipeline
+    yaml_config = getattr(pipeline, "_yaml_config", None)
+    if yaml_config is None:
+        return bronze_config, silver_config, gold_config
+
+    sink = getattr(yaml_config, "sink", None)
+    if sink is None:
+        return bronze_config, silver_config, gold_config
+
+    # Extract Bronze DQ config
+    bronze_sink_config = sink.get("bronze")
+    if bronze_sink_config:
+        try:
+            bronze_sink = BronzeSinkConfig.model_validate(
+                bronze_sink_config.model_dump()
+            )
+            if bronze_sink.dq_report.enabled:
+                bronze_config = bronze_sink.dq_report
+        except Exception:
+            pass
+
+    # Extract Silver DQ config
+    silver_sink_config = sink.get("silver")
+    if silver_sink_config:
+        try:
+            silver_sink = SilverSinkConfig.model_validate(
+                silver_sink_config.model_dump()
+            )
+            if silver_sink.dq_report.enabled:
+                silver_config = silver_sink.dq_report
+        except Exception:
+            pass
+
+    # Extract Gold DQ config
+    gold_sink_config = sink.get("gold")
+    if gold_sink_config:
+        try:
+            gold_sink = GoldSinkConfig.model_validate(gold_sink_config.model_dump())
+            if gold_sink.dq_report.enabled:
+                gold_config = gold_sink.dq_report
+        except Exception:
+            pass
+
+    return bronze_config, silver_config, gold_config
