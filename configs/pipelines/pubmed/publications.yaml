@@ -102,3 +102,4 @@ input_filter:
   column_name: "pubmed_id"
   filter_field: "pmid"
   batch_size: 100
+  fallback_column: "title"  # Search by title if PMID not found or empty
