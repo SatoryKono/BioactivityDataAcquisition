@@ -133,6 +133,7 @@ from bioetl.domain.value_objects.publications import (
     PubMedId,
 )
 from bioetl.domain.value_objects.run_context import RunContext
+from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.domain.value_objects.taxonomy_id import (
     TaxonomyId,
     validate_taxonomy_id,
@@ -204,6 +205,7 @@ __all__ = [
     "SemanticScholarId",
     "SilverDQCheckType",
     "SilverDQReport",
+    "SilverWriteResult",
     "StatisticalMetric",
     "StatisticalProfileResult",
     "TaxonomyId",

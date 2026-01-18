@@ -230,9 +230,23 @@ class MetadataCoordinator:
         if input_data.bronze_refs:
             bronze_paths = [ref.relative_path for ref in input_data.bronze_refs]
 
+        # Get transform info: prioritize input_data, fallback to RunContext
+        transform_version = (
+            input_data.transform_version
+            if input_data.transform_version is not None
+            else self._context.transform_version
+        )
+        transform_steps = list(
+            input_data.transform_steps
+            if input_data.transform_steps is not None
+            else self._context.transform_steps
+        )
+
         lineage = LineageMetadata(
             source_batch_ids=source_batch_ids,
             bronze_paths=bronze_paths,
+            transform_version=transform_version,
+            transform_steps=transform_steps,
         )
 
         # Map SilverWriteMode to DeltaMetrics operation
@@ -287,8 +301,30 @@ class MetadataCoordinator:
         if not input_data.records:
             raise ValueError("Cannot create Gold metadata without records")
 
-        # Build lineage (Gold layer sources from Silver)
-        lineage = LineageMetadata()
+        # Build lineage from Silver refs (REQ-LINEAGE-002: Silver → Gold tracking)
+        source_tables: dict[str, int] = {}
+        if input_data.silver_refs:
+            source_tables = {
+                ref.table_name: ref.delta_version for ref in input_data.silver_refs
+            }
+
+        # Get transform info: prioritize input_data, fallback to RunContext
+        transform_version = (
+            input_data.transform_version
+            if input_data.transform_version is not None
+            else self._context.transform_version
+        )
+        transform_steps = list(
+            input_data.transform_steps
+            if input_data.transform_steps is not None
+            else self._context.transform_steps
+        )
+
+        lineage = LineageMetadata(
+            source_tables=source_tables,
+            transform_version=transform_version,
+            transform_steps=transform_steps,
+        )
 
         # Build DQ summary (basic metrics)
         dq_summary = DQSummary(

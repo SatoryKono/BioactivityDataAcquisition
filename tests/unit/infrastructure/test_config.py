@@ -249,3 +249,136 @@ class TestMedallionFormatValidation:
         # Bronze format is auto-corrected to jsonl (RULES.md §2.1)
         yaml_config = PipelineYamlConfig.model_validate(config_dict)
         assert yaml_config.sink["bronze"].format == "jsonl"
+
+
+@pytest.mark.unit
+class TestTransformConfig:
+    """Tests for TransformConfig schema validation (lineage tracking)."""
+
+    def test_transform_config_defaults(self):
+        """Test TransformConfig has correct defaults (None/empty)."""
+        from bioetl.infrastructure.schemas.pipeline_config import TransformConfig
+
+        config = TransformConfig()
+
+        assert config.version is None
+        assert config.steps == []
+
+    def test_transform_config_with_version_and_steps(self):
+        """Test TransformConfig accepts version and steps."""
+        from bioetl.infrastructure.schemas.pipeline_config import TransformConfig
+
+        config = TransformConfig(
+            version="1.0.0",
+            steps=["normalize_values", "add_metadata", "calculate_hash"],
+        )
+
+        assert config.version == "1.0.0"
+        assert config.steps == ["normalize_values", "add_metadata", "calculate_hash"]
+
+    def test_transform_config_semver_validation_valid(self):
+        """Test valid semver versions are accepted."""
+        from bioetl.infrastructure.schemas.pipeline_config import TransformConfig
+
+        valid_versions = [
+            "1.0.0",
+            "v1.0.0",
+            "2.1.3",
+            "0.0.1",
+            "10.20.30",
+            "1.0.0-alpha",
+            "1.0.0-beta.1",
+            "1.0.0+build.123",
+            "1.2.3-alpha.1+build.456",
+        ]
+
+        for version in valid_versions:
+            config = TransformConfig(version=version)
+            assert config.version == version
+
+    def test_transform_config_semver_validation_invalid(self):
+        """Test invalid semver versions are rejected."""
+        from pydantic import ValidationError
+
+        from bioetl.infrastructure.schemas.pipeline_config import TransformConfig
+
+        invalid_versions = [
+            "1.0",  # Missing patch
+            "1",  # Missing minor and patch
+            "a.b.c",  # Non-numeric
+            "1.0.0.0",  # Too many segments
+            "1.0.0-",  # Incomplete pre-release
+        ]
+
+        for version in invalid_versions:
+            with pytest.raises(ValidationError, match="Invalid semver format"):
+                TransformConfig(version=version)
+
+    def test_pipeline_yaml_config_has_transform_field(self):
+        """Test PipelineYamlConfig includes transform field with defaults."""
+        yaml_config = PipelineYamlConfig(
+            pipeline_name="test_pipeline",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="silver.test",
+        )
+
+        assert yaml_config.transform is not None
+        assert yaml_config.transform.version is None
+        assert yaml_config.transform.steps == []
+
+    def test_pipeline_yaml_config_transform_from_yaml(self):
+        """Test PipelineYamlConfig parses transform from YAML dict."""
+        config_dict = {
+            "pipeline_name": "test_pipeline",
+            "provider": "test",
+            "entity_type": "entity",
+            "primary_keys": ["id"],
+            "silver_table": "silver.test",
+            "transform": {
+                "version": "1.0.0",
+                "steps": ["step1", "step2"],
+            },
+        }
+
+        yaml_config = PipelineYamlConfig.model_validate(config_dict)
+
+        assert yaml_config.transform.version == "1.0.0"
+        assert yaml_config.transform.steps == ["step1", "step2"]
+
+    def test_yaml_config_to_domain_includes_transform(self):
+        """Test that yaml_config_to_domain extracts transform info."""
+        from bioetl.infrastructure.schemas.pipeline_config import TransformConfig
+
+        yaml_config = PipelineYamlConfig(
+            pipeline_name="test_pipeline",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="silver.test",
+            transform=TransformConfig(
+                version="2.0.0",
+                steps=["normalize", "validate", "hash"],
+            ),
+        )
+
+        domain_config = yaml_config_to_domain(yaml_config)
+
+        assert domain_config.transform_version == "2.0.0"
+        assert domain_config.transform_steps == ("normalize", "validate", "hash")
+
+    def test_yaml_config_to_domain_handles_empty_transform(self):
+        """Test yaml_config_to_domain handles empty transform config."""
+        yaml_config = PipelineYamlConfig(
+            pipeline_name="test_pipeline",
+            provider="test",
+            entity_type="entity",
+            primary_keys=["id"],
+            silver_table="silver.test",
+        )
+
+        domain_config = yaml_config_to_domain(yaml_config)
+
+        assert domain_config.transform_version is None
+        assert domain_config.transform_steps == ()

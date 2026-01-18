@@ -198,6 +198,10 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         # Additional metadata
         pa.field("language", pa.string()),
         pa.field("country", pa.string()),
+        pa.field("source", pa.string()),
+        # Lookup metadata
+        pa.field("_lookup_method", pa.string()),
+        pa.field("_original_id", pa.string()),
         # Lineage metadata
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
@@ -665,6 +669,9 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("license_url", pa.string()),
         pa.field("subjects", pa.list_(pa.string())),
         pa.field("source", pa.string()),
+        # Lookup metadata
+        pa.field("_lookup_method", pa.string()),
+        pa.field("_original_doi", pa.string()),
     ]
 )
 
