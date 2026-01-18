@@ -16,6 +16,7 @@ from bioetl.composition.services.metadata_coordinator import (
     MetadataCoordinator,
     SilverMetadataInput,
 )
+from bioetl.domain.ports.metadata_coordinator import SilverRef
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
@@ -442,6 +443,88 @@ class TestGoldMetadata:
         metadata = coordinator.create_gold_metadata(input_data)
 
         assert metadata.output.record_count == 25
+
+    def test_gold_lineage_with_silver_refs(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Test Gold lineage metadata with Silver source references (REQ-LINEAGE-002)."""
+        records = [{"compound_id": "CMP123", "activity_value": 5.5}]
+        silver_refs = [
+            SilverRef(
+                table_name="chembl.activity",
+                table_path="/data/silver/chembl/activity",
+                delta_version=42,
+            )
+        ]
+
+        input_data = GoldMetadataInput(
+            table_path="/data/gold/chembl/activity",
+            table_name="chembl.activity",
+            records=records,
+            mode=GoldWriteMode.OVERWRITE,
+            silver_refs=silver_refs,
+        )
+
+        metadata = coordinator.create_gold_metadata(input_data)
+
+        assert metadata.lineage.source_tables == {"chembl.activity": 42}
+
+    def test_gold_lineage_without_silver_refs(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Test Gold lineage metadata is empty when no Silver refs provided (backward compat)."""
+        records = [{"id": 1}]
+
+        input_data = GoldMetadataInput(
+            table_path="/data/gold/chembl/activity",
+            table_name="chembl.activity",
+            records=records,
+            mode=GoldWriteMode.OVERWRITE,
+            silver_refs=None,
+        )
+
+        metadata = coordinator.create_gold_metadata(input_data)
+
+        assert metadata.lineage.source_tables == {}
+
+    def test_gold_lineage_with_multiple_silver_sources(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Test Gold lineage with multiple Silver table sources."""
+        records = [{"compound_id": "CMP123", "target_id": "TGT456", "activity": 1.0}]
+        silver_refs = [
+            SilverRef(
+                table_name="chembl.compound",
+                table_path="/data/silver/chembl/compound",
+                delta_version=10,
+            ),
+            SilverRef(
+                table_name="chembl.target",
+                table_path="/data/silver/chembl/target",
+                delta_version=20,
+            ),
+            SilverRef(
+                table_name="chembl.activity",
+                table_path="/data/silver/chembl/activity",
+                delta_version=30,
+            ),
+        ]
+
+        input_data = GoldMetadataInput(
+            table_path="/data/gold/chembl/compound_activity",
+            table_name="chembl.compound_activity",
+            records=records,
+            mode=GoldWriteMode.OVERWRITE,
+            silver_refs=silver_refs,
+        )
+
+        metadata = coordinator.create_gold_metadata(input_data)
+
+        assert metadata.lineage.source_tables == {
+            "chembl.compound": 10,
+            "chembl.target": 20,
+            "chembl.activity": 30,
+        }
 
 
 class TestRunTypeMappings:

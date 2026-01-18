@@ -70,6 +70,24 @@ class SilverMetadataInput:
 
 
 @dataclass(frozen=True, slots=True)
+class SilverRef:
+    """Reference to a Silver table for Gold lineage tracking.
+
+    Captures the exact Silver source used for Gold transformation,
+    enabling full data lineage from Bronze → Silver → Gold.
+
+    Attributes:
+        table_name: Silver table name (e.g., "chembl.activity").
+        table_path: Full path to Silver Delta table.
+        delta_version: Delta version of Silver table when read.
+    """
+
+    table_name: str
+    table_path: str
+    delta_version: int
+
+
+@dataclass(frozen=True, slots=True)
 class GoldMetadataInput:
     """Input data for Gold metadata creation.
 
@@ -80,6 +98,7 @@ class GoldMetadataInput:
         mode: Write mode (overwrite, append, scd2).
         scd_config: SCD2 configuration if applicable.
         completed_at: UTC timestamp when write completed.
+        silver_refs: List of Silver source references for lineage tracking.
     """
 
     table_path: str
@@ -88,6 +107,7 @@ class GoldMetadataInput:
     mode: Any  # GoldWriteMode - avoid circular import
     scd_config: dict[str, Any] | None = None
     completed_at: datetime | None = None
+    silver_refs: list[SilverRef] | None = None
 
 
 @runtime_checkable

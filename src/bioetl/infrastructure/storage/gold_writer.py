@@ -134,6 +134,7 @@ class GoldWriter(BaseDeltaWriter):
         *,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
+        silver_refs: list[Any] | None = None,
     ) -> None:
         """Write validated records to Gold layer.
 
@@ -149,6 +150,8 @@ class GoldWriter(BaseDeltaWriter):
                          (single source of time per ADR-014). Required for SCD2 mode
                          and audit logging.
             run_id: Run identifier for audit correlation across layers.
+            silver_refs: List of SilverRef for Gold lineage tracking
+                        (Silver table name → Delta version mapping).
 
         Raises:
             ValueError: If mode is invalid, records empty, schema not strict,
@@ -202,6 +205,7 @@ class GoldWriter(BaseDeltaWriter):
                 scd_config=scd_config,
                 ingestion_ts=ingestion_ts,
                 run_id=run_id,
+                silver_refs=silver_refs,
             )
 
     def _validate_write_mode(self, mode: str) -> GoldWriteMode:
@@ -436,6 +440,7 @@ class GoldWriter(BaseDeltaWriter):
         scd_config: dict[str, Any] | None,
         ingestion_ts: datetime | None,
         run_id: RunID | None,
+        silver_refs: list[Any] | None = None,
     ) -> None:
         """Write Gold layer metadata sidecar file.
 
@@ -447,6 +452,7 @@ class GoldWriter(BaseDeltaWriter):
             scd_config: SCD2 configuration if applicable.
             ingestion_ts: Ingestion timestamp.
             run_id: Run identifier.
+            silver_refs: List of SilverRef for Gold lineage tracking.
         """
         if not records:
             return
@@ -455,7 +461,20 @@ class GoldWriter(BaseDeltaWriter):
         if self._metadata_coordinator is not None:
             from bioetl.domain.ports.metadata_coordinator import (
                 GoldMetadataInput,
+                SilverRef,
             )
+
+            # Convert silver_refs to SilverRef if they're SilverWriteResult
+            converted_refs: list[SilverRef] | None = None
+            if silver_refs:
+                converted_refs = [
+                    SilverRef(
+                        table_name=ref.table_name,
+                        table_path=ref.table_path,
+                        delta_version=ref.delta_version,
+                    )
+                    for ref in silver_refs
+                ]
 
             gold_input = GoldMetadataInput(
                 table_path=table_path,
@@ -464,6 +483,7 @@ class GoldWriter(BaseDeltaWriter):
                 mode=mode,
                 scd_config=scd_config,
                 completed_at=ingestion_ts,
+                silver_refs=converted_refs,
             )
             metadata = self._metadata_coordinator.create_gold_metadata(gold_input)
             await self._metadata_writer.write_gold_metadata(table_path, metadata)
