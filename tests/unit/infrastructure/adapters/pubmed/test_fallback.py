@@ -297,7 +297,7 @@ class TestProcessMissingDois:
         """Should skip PMID when no title in fallback mapping."""
         pmids = ["99999999"]
         found_pmids: set[str] = set()
-        fallback_mapping = {}  # No title for PMID
+        fallback_mapping: dict[str, str] = {}  # No title for PMID
 
         results = []
         async for pub in handler.process_missing_dois(
@@ -402,7 +402,7 @@ class TestProcessTitleOnlyEntries:
     ) -> None:
         """Should skip when no title in mapping."""
         entries = [""]
-        fallback_mapping = {}  # No title
+        fallback_mapping: dict[str, str] = {}  # No title
 
         results = []
         async for pub in handler.process_title_only_entries(
@@ -415,3 +415,133 @@ class TestProcessTitleOnlyEntries:
 
         assert len(results) == 0
         mock_search_fn.assert_not_called()
+
+
+class TestEventNamesUniqueness:
+    """Tests for event name uniqueness across all handlers."""
+
+    def test_all_event_names_are_unique(self, handler: TitleFallbackHandler) -> None:
+        """All 7 event names should be unique for proper log filtering."""
+        event_names = [
+            handler._event_no_fallback_title,
+            handler._event_fallback_attempt,
+            handler._event_fallback_success,
+            handler._event_fallback_not_found,
+            handler._event_title_only_attempt,
+            handler._event_title_only_success,
+            handler._event_title_only_not_found,
+        ]
+        assert len(event_names) == 7, "Should have exactly 7 event properties"
+        assert len(set(event_names)) == 7, "All event names should be unique"
+
+    def test_all_event_names_have_pubmed_prefix(
+        self, handler: TitleFallbackHandler
+    ) -> None:
+        """All event names should have 'pubmed_' prefix for log filtering."""
+        event_names = [
+            handler._event_no_fallback_title,
+            handler._event_fallback_attempt,
+            handler._event_fallback_success,
+            handler._event_fallback_not_found,
+            handler._event_title_only_attempt,
+            handler._event_title_only_success,
+            handler._event_title_only_not_found,
+        ]
+        for event_name in event_names:
+            assert event_name.startswith("pubmed_"), (
+                f"{event_name} should start with 'pubmed_'"
+            )
+
+
+class TestSearchByTitleMatchingPriority:
+    """Tests for title matching priority in _search_by_title."""
+
+    @pytest.mark.asyncio
+    async def test_prefers_matching_title_over_first_result(
+        self, mock_logger: MagicMock
+    ) -> None:
+        """Should prefer publication with matching title over first result."""
+        mock_search_fn = AsyncMock(
+            return_value=[
+                {"pmid": "11111111", "article_title": "Wrong Title First"},
+                {"pmid": "22222222", "article_title": "Exact Query Title"},
+                {"pmid": "33333333", "article_title": "Another Wrong Title"},
+            ]
+        )
+        handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
+
+        result = await handler._search_by_title("Exact Query Title")
+
+        assert result is not None
+        assert result["pmid"] == "22222222"
+        assert result["article_title"] == "Exact Query Title"
+
+    @pytest.mark.asyncio
+    async def test_handles_special_characters_in_title(
+        self, mock_logger: MagicMock
+    ) -> None:
+        """Should handle titles with special characters."""
+        mock_search_fn = AsyncMock(
+            return_value=[
+                {"pmid": "12345678", "article_title": "CRISPR-Cas9: A Review (2023)"}
+            ]
+        )
+        handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
+
+        result = await handler._search_by_title("CRISPR-Cas9: A Review (2023)")
+
+        assert result is not None
+        assert result["pmid"] == "12345678"
+
+    @pytest.mark.asyncio
+    async def test_handles_empty_article_title_in_results(
+        self, mock_logger: MagicMock
+    ) -> None:
+        """Should skip results with empty article_title when matching."""
+        mock_search_fn = AsyncMock(
+            return_value=[
+                {"pmid": "11111111", "article_title": ""},
+                {"pmid": "22222222", "article_title": "Test Publication Title"},
+            ]
+        )
+        handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
+
+        result = await handler._search_by_title("Test Publication Title")
+
+        # Should find the second result with matching title
+        assert result is not None
+        assert result["pmid"] == "22222222"
+
+    @pytest.mark.asyncio
+    async def test_returns_first_when_all_titles_empty(
+        self, mock_logger: MagicMock
+    ) -> None:
+        """Should return first result when all results have empty titles."""
+        mock_search_fn = AsyncMock(
+            return_value=[
+                {"pmid": "11111111", "article_title": ""},
+                {"pmid": "22222222", "article_title": ""},
+            ]
+        )
+        handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
+
+        result = await handler._search_by_title("Test Title")
+
+        # Falls back to first result
+        assert result is not None
+        assert result["pmid"] == "11111111"
+
+    @pytest.mark.asyncio
+    async def test_handles_whitespace_in_titles(self, mock_logger: MagicMock) -> None:
+        """Should match titles with extra whitespace."""
+        mock_search_fn = AsyncMock(
+            return_value=[
+                {"pmid": "12345678", "article_title": "Title  with   extra   spaces"}
+            ]
+        )
+        handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
+
+        result = await handler._search_by_title("Title with extra spaces")
+
+        assert result is not None
+        assert result["pmid"] == "12345678"
