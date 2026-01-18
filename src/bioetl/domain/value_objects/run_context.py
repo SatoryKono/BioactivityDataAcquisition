@@ -30,6 +30,8 @@ class RunContext:
         pipeline_name: Full pipeline name (e.g., 'chembl_activity').
         provider: Data provider name (e.g., 'chembl').
         entity: Entity type (e.g., 'activity').
+        transform_version: Optional semver version of transform (e.g., '1.0.0').
+        transform_steps: Tuple of transform step names applied.
 
     Example:
         >>> from datetime import UTC, datetime
@@ -41,6 +43,8 @@ class RunContext:
         ...     pipeline_name="chembl_activity",
         ...     provider="chembl",
         ...     entity="activity",
+        ...     transform_version="1.0.0",
+        ...     transform_steps=("normalize_values", "add_metadata"),
         ... )
     """
 
@@ -50,6 +54,8 @@ class RunContext:
     pipeline_name: str
     provider: str
     entity: str
+    transform_version: str | None = None
+    transform_steps: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         """Validate run context after initialization."""
@@ -76,6 +82,8 @@ class RunContext:
         started_at: datetime,
         provider: str,
         entity: str,
+        transform_version: str | None = None,
+        transform_steps: tuple[str, ...] | None = None,
     ) -> RunContext:
         """Factory method to create RunContext with derived pipeline_name.
 
@@ -85,6 +93,8 @@ class RunContext:
             started_at: UTC timestamp when run started.
             provider: Data provider name.
             entity: Entity type.
+            transform_version: Optional semver version of transform.
+            transform_steps: Optional tuple of transform step names.
 
         Returns:
             RunContext with pipeline_name derived as '{provider}_{entity}'.
@@ -96,4 +106,6 @@ class RunContext:
             pipeline_name=f"{provider}_{entity}",
             provider=provider,
             entity=entity,
+            transform_version=transform_version,
+            transform_steps=transform_steps or (),
         )

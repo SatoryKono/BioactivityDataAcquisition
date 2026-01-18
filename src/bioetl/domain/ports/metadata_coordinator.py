@@ -58,6 +58,8 @@ class SilverMetadataInput:
         bronze_refs: Optional list of BronzeWriteResult for lineage.
         dq_metrics: Optional BatchDQMetrics for DQ summary.
         version_after: Delta table version after write.
+        transform_version: Optional semver version of transform applied.
+        transform_steps: Optional list of transform step names applied.
     """
 
     table_path: str
@@ -67,6 +69,8 @@ class SilverMetadataInput:
     bronze_refs: Any | None = None  # list[BronzeWriteResult] | None
     dq_metrics: Any | None = None  # BatchDQMetrics | None
     version_after: int | None = None
+    transform_version: str | None = None
+    transform_steps: tuple[str, ...] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -99,6 +103,8 @@ class GoldMetadataInput:
         scd_config: SCD2 configuration if applicable.
         completed_at: UTC timestamp when write completed.
         silver_refs: List of Silver source references for lineage tracking.
+        transform_version: Optional semver version of transform applied.
+        transform_steps: Optional list of transform step names applied.
     """
 
     table_path: str
@@ -108,6 +114,8 @@ class GoldMetadataInput:
     scd_config: dict[str, Any] | None = None
     completed_at: datetime | None = None
     silver_refs: list[SilverRef] | None = None
+    transform_version: str | None = None
+    transform_steps: tuple[str, ...] | None = None
 
 
 @runtime_checkable
