@@ -284,9 +284,7 @@ class TestExtractAuthorNamesEdgeCases:
 
         The function only supports one level of nesting.
         """
-        items = [
-            {"outer": {"inner": {"name": "Deeply Nested"}}}
-        ]
+        items = [{"outer": {"inner": {"name": "Deeply Nested"}}}]
         # This won't work - only one level of nesting supported
         result = extract_author_names(items, name_field="name", nested_field="outer")
         # The "inner" dict doesn't have a "name" field directly
