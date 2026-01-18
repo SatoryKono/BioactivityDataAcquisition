@@ -190,6 +190,11 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 else None
             ),
             "pmc_id": IdentifierExtractor.extract_pmc_id(root),
+            # Lookup metadata (from adapter fallback handler)
+            "_lookup_method": cast("dict[str, Any]", record).get(
+                "_lookup_method", "pmid"
+            ),
+            "_original_doi": cast("dict[str, Any]", record).get("_original_doi"),
         }
 
     def _get_primary_id_field(self) -> str:

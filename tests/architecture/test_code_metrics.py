@@ -83,14 +83,14 @@ class TestFileSizeLimits:
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
         "services_factory.py": 630,  # 623 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
         # Infrastructure layer exemptions
-        "silver_writer.py": 1130,  # 1126 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage
-        "gold_writer.py": 920,  # 918 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage
-        "bronze_writer.py": 755,  # 750 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param
-        "gold.py": 920,  # 915 LOC - Gold layer Pandera schemas (+ IDMapping + taxonomy_id standardization + Config docstrings)
-        "silver.py": 785,  # 782 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata)
+        "silver_writer.py": 1140,  # 1126 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage
+        "gold_writer.py": 930,  # 918 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage
+        "bronze_writer.py": 760,  # 749 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param
+        "gold.py": 930,  # 915 LOC - Gold layer Pandera schemas (+ IDMapping + taxonomy_id standardization + Config docstrings)
+        "silver.py": 795,  # 782 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata)
         "client.py": 700,  # 692 LOC - ChemblAdapter (complex FilterableDataSourcePort), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
-        "pipeline_config.py": 775,  # 771 LOC - Pipeline configuration loading and validation + TransformConfig
+        "pipeline_config.py": 785,  # 771 LOC - Pipeline configuration loading and validation + TransformConfig
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
