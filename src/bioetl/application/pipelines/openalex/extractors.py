@@ -237,11 +237,14 @@ def extract_external_ids(ids: dict[str, Any] | None) -> dict[str, Any]:
     - pmcid: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC123456" -> "PMC123456"
     - mag: Microsoft Academic Graph ID (integer or string)
 
+    Note: Returns intermediate keys matching API names. Transformer maps
+    pmcid -> pmc_id for schema consistency.
+
     Args:
         ids: IDs object from OpenAlex work.
 
     Returns:
-        Dictionary with pmid, pmcid, mag_id fields.
+        Dictionary with pmid, pmcid (maps to pmc_id in transformer), mag_id fields.
 
     Example:
         >>> extract_external_ids({

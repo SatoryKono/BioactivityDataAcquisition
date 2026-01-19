@@ -164,7 +164,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "paper_id": paper_id,
             "doi": doi,
             "pmid": pmid,  # Use validated PMID from PubMedId Value Object
-            "pmcid": external_ids.get("pmcid"),
+            "pmc_id": external_ids.get("pmcid"),  # API uses "pmcid", we use "pmc_id"
             "arxiv_id": external_ids.get("arxiv"),
             "corpus_id": external_ids.get("corpus_id"),
             "title": rec.get("title"),

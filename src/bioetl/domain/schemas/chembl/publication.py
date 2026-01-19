@@ -31,11 +31,20 @@ class ChemblPublicationSchema(ETLRecordSchema):
         str_matches=r"^CHEMBL\d+$",
         description="ChEMBL ID.",
     )
+    # Cross-reference IDs for linking publications across providers
+    # pmid: PubMed ID (numeric string: "12345678")
     pmid: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=r"^\d+$",
-        description="PubMed identifier (numeric string). Standardized name (was pubmed_id).",
+        description="PubMed identifier (numeric string: '12345678').",
     )
+    # pmc_id: PubMed Central ID (format: "PMC1234567")
+    pmc_id: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=r"^PMC\d+$",
+        description="PubMed Central identifier (format: 'PMC1234567').",
+    )
+    # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
     doi: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=DOI_REGEX_PATTERN,

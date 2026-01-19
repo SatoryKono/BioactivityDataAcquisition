@@ -395,7 +395,12 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
     document_chembl_id: Series[str] = pa.Field(nullable=False)
-    pmid: Series[str] = pa.Field(nullable=True)  # Standardized name, numeric string
+    # Cross-reference IDs for linking publications across providers
+    # pmid: PubMed ID (numeric string: "12345678")
+    pmid: Series[str] = pa.Field(nullable=True)
+    # pmc_id: PubMed Central ID (format: "PMC1234567")
+    pmc_id: Series[str] = pa.Field(nullable=True)
+    # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
     doi: Series[str] = pa.Field(nullable=True)
     patent_id: Series[str] = pa.Field(nullable=True)
     title: Series[str] = pa.Field(nullable=True)
@@ -668,7 +673,9 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # External IDs
     doi: Series[str] = pa.Field(nullable=True)
     pmid: Series[str] = pa.Field(nullable=True)
-    pmcid: Series[str] = pa.Field(nullable=True)
+    # Cross-reference IDs for linking publications across providers
+    # pmc_id: PubMed Central ID (format: "PMC1234567")
+    pmc_id: Series[str] = pa.Field(nullable=True)
     arxiv_id: Series[str] = pa.Field(nullable=True)
     corpus_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
 
@@ -735,8 +742,13 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
 
-    # Primary key
+    # Cross-reference IDs for linking publications across providers
+    # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
     doi: Series[str] = pa.Field(nullable=False)
+    # pmid: PubMed ID (numeric string: "12345678")
+    pmid: Series[str] = pa.Field(nullable=True)
+    # pmc_id: PubMed Central ID (format: "PMC1234567")
+    pmc_id: Series[str] = pa.Field(nullable=True)
 
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
@@ -794,8 +806,13 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     # Primary key
     openalex_id: Series[str] = pa.Field(nullable=False)
 
-    # Core fields
+    # Cross-reference IDs for linking publications across providers
+    # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
     doi: Series[str] = pa.Field(nullable=True)
+    # pmid: PubMed ID (numeric string: "12345678")
+    pmid: Series[str] = pa.Field(nullable=True)
+    # pmc_id: PubMed Central ID (format: "PMC1234567")
+    pmc_id: Series[str] = pa.Field(nullable=True)
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
     authors: Series[object] = pa.Field(nullable=True)  # list[str]
