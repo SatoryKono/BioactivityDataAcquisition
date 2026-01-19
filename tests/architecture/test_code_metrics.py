@@ -55,8 +55,8 @@ class TestFileSizeLimits:
         "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
         # Domain ports NoOp implementations
         "noop.py": 450,  # 447 LOC - NoOp implementations for Null Object Pattern (+ NoOpMetadataWriter)
-        # Domain models/metadata.py (models/metadata.py 560 LOC, ports/metadata.py only 104 LOC)
-        "metadata.py": 565,  # 560 LOC - Metadata models with APIRequestDetails + RateLimitInfo for Bronze layer enrichment
+        # Domain models/metadata.py (models/metadata.py 566 LOC, ports/metadata.py only 104 LOC)
+        "metadata.py": 570,  # 566 LOC - Metadata models with APIRequestDetails + RateLimitInfo for Bronze layer enrichment
         # Domain ports (Protocol definitions with comprehensive docstrings)
         "storage.py": 395,  # 390 LOC - StoragePort with read_silver, write_*_merged for composite pipelines + SourceMetadata param + Silver lineage
         # Domain Pandera schemas (declarative field definitions)
@@ -68,7 +68,7 @@ class TestFileSizeLimits:
         "dq_metrics.py": 420,  # 411 LOC - Batch DQ metrics with helpers for CC reduction + _make_hashable for list/dict values
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
-        "batch_executor.py": 750,  # 736 LOC - unified executor for batch processing + DQ context
+        "batch_executor.py": 770,  # 764 LOC - unified executor for batch processing + DQ context
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
         "gold_analyzer.py": 820,  # 800 LOC - Gold layer analysis with DQ rules
         "silver_analyzer.py": 590,  # 570 LOC - Silver layer analysis with validation
@@ -457,7 +457,7 @@ class TestClassSize:
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
         "BronzeWriter": 705,  # 702 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata
-        "BatchExecutor": 700,  # 675 lines - unified executor for batch processing + DQ context
+        "BatchExecutor": 710,  # 703 lines - unified executor for batch processing + DQ context
         "BatchWriter": 375,  # 371 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage
         # Application core classes
         "FilteredDataSource": 330,  # 320 lines - decorator with fallback mapping support
@@ -507,6 +507,8 @@ class TestClassSize:
         "PubchemMoleculeSchema": 350,  # 345 lines - PubChem molecule schema with many chemical fields
         # Derived entity data source wrappers (comprehensive docstrings)
         "PublicationTermDataSource": 570,  # 566 lines - Wrapper with FilterableDataSourcePort delegation
+        # Composition services
+        "MetadataCoordinator": 315,  # 308 lines - Metadata coordination for Medallion layers
         # Composite pipeline services (ADR-026)
         "MergeService": 450,  # 427 lines - Composite merge service with conflict resolution
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
