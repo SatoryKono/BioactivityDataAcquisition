@@ -21,6 +21,11 @@ from bioetl.application.services import (
 )
 from bioetl.composition.entrypoints import get_pipeline_runner_service
 from bioetl.composition.registry import get_default_registry
+from bioetl.interfaces.cli.commands.health_server_integration import (
+    DEFAULT_HEALTH_SERVER_PORT,
+    echo_health_server_info,
+    health_server_context,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
@@ -30,16 +35,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class BatchRunResult:
-    """Result of running multiple pipelines.
-
-    Attributes:
-        total: Total number of pipelines.
-        succeeded: Number of successful runs.
-        failed: Number of failed runs.
-        skipped: Number of skipped runs (dry-run or shutdown).
-        results: List of individual run results.
-        failed_pipelines: Names of pipelines that failed.
-    """
+    """Result of running multiple pipelines."""
 
     total: int = 0
     succeeded: int = 0
@@ -55,90 +51,45 @@ class BatchRunResult:
 
 
 def _get_available_providers() -> list[str]:
-    """Get list of available providers from registered pipelines.
-
-    Returns:
-        Sorted list of unique provider names.
-    """
+    """Get sorted list of unique provider names from registered pipelines."""
     registry = get_default_registry()
     pipelines = registry.list_pipelines()
-    providers = set()
-    for pipeline in pipelines:
-        if "_" in pipeline:
-            provider = pipeline.split("_")[0]
-            providers.add(provider)
+    providers = {p.split("_")[0] for p in pipelines if "_" in p}
     return sorted(providers)
 
 
 def _filter_pipelines_by_provider(provider: str) -> list[str]:
-    """Filter registered pipelines by provider prefix.
-
-    Args:
-        provider: Provider name (e.g., 'chembl', 'pubchem').
-
-    Returns:
-        List of pipeline names matching the provider.
-    """
+    """Filter registered pipelines by provider prefix."""
     registry = get_default_registry()
     all_pipelines = registry.list_pipelines()
     return sorted([name for name in all_pipelines if name.startswith(f"{provider}_")])
 
 
 def _validate_provider(provider: str) -> tuple[bool, str | None]:
-    """Validate that the provider has registered pipelines.
-
-    Args:
-        provider: Provider name to validate.
-
-    Returns:
-        Tuple of (is_valid, error_message).
-    """
+    """Validate that the provider has registered pipelines."""
     available_providers = _get_available_providers()
     if not available_providers:
         return False, "No pipelines are registered."
-
     pipelines = _filter_pipelines_by_provider(provider)
     if not pipelines:
         return False, (
             f"No pipelines found for provider '{provider}'. "
             f"Available providers: {', '.join(available_providers)}"
         )
-
     return True, None
 
 
 async def _run_pipeline_async(
-    service: PipelineRunnerService,
-    pipeline: str,
-    options: RunOptions,
+    service: PipelineRunnerService, pipeline: str, options: RunOptions
 ) -> RunResult:
-    """Run a single pipeline asynchronously.
-
-    Args:
-        service: Pipeline runner service.
-        pipeline: Pipeline name.
-        options: Run options.
-
-    Returns:
-        RunResult with execution status.
-    """
+    """Run a single pipeline asynchronously."""
     return await service.run(pipeline, options=options)
 
 
-async def _run_all_pipelines_async(
-    pipelines: list[str],
-    options: RunOptions,
+async def _run_pipelines_batch(
+    service: PipelineRunnerService, pipelines: list[str], options: RunOptions
 ) -> BatchRunResult:
-    """Run all pipelines sequentially.
-
-    Args:
-        pipelines: List of pipeline names to run.
-        options: Run options.
-
-    Returns:
-        BatchRunResult with aggregated results.
-    """
-    service = get_pipeline_runner_service()
+    """Run pipelines sequentially within a service context."""
     batch_result = BatchRunResult(total=len(pipelines))
 
     for pipeline in pipelines:
@@ -176,13 +127,20 @@ async def _run_all_pipelines_async(
     return batch_result
 
 
-def _echo_batch_summary(result: BatchRunResult, dry_run: bool) -> None:
-    """Output batch run summary.
+async def _run_all_pipelines_async(
+    pipelines: list[str],
+    options: RunOptions,
+    health_server_enabled: bool = True,
+    health_port: int = DEFAULT_HEALTH_SERVER_PORT,
+) -> BatchRunResult:
+    """Run all pipelines sequentially with optional health server."""
+    async with health_server_context(enabled=health_server_enabled, port=health_port):
+        service = get_pipeline_runner_service()
+        return await _run_pipelines_batch(service, pipelines, options)
 
-    Args:
-        result: BatchRunResult with aggregated results.
-        dry_run: Whether this was a dry run.
-    """
+
+def _echo_batch_summary(result: BatchRunResult, dry_run: bool) -> None:
+    """Output batch run summary."""
     echo_info("")
     echo_info("=" * 50)
 
@@ -287,6 +245,20 @@ def _determine_exit_code(batch_result: BatchRunResult) -> ExitCode:
     is_flag=True,
     help="Enable DEBUG level logging",
 )
+@click.option(
+    "--health-server/--no-health-server",
+    "health_server",
+    default=True,
+    help="Enable/disable HTTP health server during execution.",
+    show_default=True,
+)
+@click.option(
+    "--health-port",
+    type=int,
+    default=DEFAULT_HEALTH_SERVER_PORT,
+    help="Port for the HTTP health server.",
+    show_default=True,
+)
 def run_all(
     source: str,
     run_type: str,
@@ -295,6 +267,8 @@ def run_all(
     yes: bool,
     list_only: bool,
     debug: bool,
+    health_server: bool,
+    health_port: int,
 ) -> None:
     """Run all ETL pipelines for a specific provider.
 
@@ -330,6 +304,9 @@ def run_all(
     # Show what we're about to do
     _show_run_preview(source, pipelines, dry_run)
 
+    # Display health server info
+    echo_health_server_info(health_server, health_port)
+
     # Build options and run pipelines
     options = RunOptions(
         run_type=run_type,
@@ -339,7 +316,14 @@ def run_all(
     )
 
     try:
-        batch_result = asyncio.run(_run_all_pipelines_async(pipelines, options))
+        batch_result = asyncio.run(
+            _run_all_pipelines_async(
+                pipelines,
+                options,
+                health_server_enabled=health_server,
+                health_port=health_port,
+            )
+        )
     except KeyboardInterrupt:
         echo_warning("Batch run interrupted by user (Ctrl+C)")
         sys.exit(ExitCode.SIGINT)
