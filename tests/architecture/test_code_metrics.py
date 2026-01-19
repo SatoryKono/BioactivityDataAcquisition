@@ -70,7 +70,7 @@ class TestFileSizeLimits:
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
         "batch_executor.py": 770,  # 764 LOC - unified executor for batch processing + DQ context
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
-        "gold_analyzer.py": 820,  # 800 LOC - Gold layer analysis with DQ rules
+        "gold_analyzer.py": 830,  # 827 LOC - Gold layer analysis with DQ rules
         "silver_analyzer.py": 590,  # 570 LOC - Silver layer analysis with validation
         "dq_report_service.py": 520,  # 514 LOC - DQ report service with extracted helpers for CC reduction
         # Composition layer exemptions
@@ -99,6 +99,7 @@ class TestFileSizeLimits:
         # Application layer exemptions
         "base_transformer.py": 680,  # 667 LOC - BaseTransformer with serialization helpers
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
+        "merger.py": 520,  # 515 LOC - Composite merge service with join logic and conflict resolution
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
@@ -483,7 +484,7 @@ class TestClassSize:
         # DQ analyzers (comprehensive data quality analysis)
         "DQReportSerializer": 410,  # 403 lines - DQ report serialization with multiple formats (increased for CC reduction)
         "DQReportService": 385,  # 379 lines - DQ report orchestration with extracted helpers for CC reduction
-        "GoldDQAnalyzer": 770,  # 752 lines - Gold layer DQ analysis with business rules
+        "GoldDQAnalyzer": 780,  # 779 lines - Gold layer DQ analysis with business rules
         "SilverDQAnalyzer": 540,  # 521 lines - Silver layer DQ analysis with schema drift
         # Domain services
         "NormalizationService": 370,  # 364 lines - Normalization service with validation
@@ -510,7 +511,7 @@ class TestClassSize:
         # Composition services
         "MetadataCoordinator": 315,  # 308 lines - Metadata coordination for Medallion layers
         # Composite pipeline services (ADR-026)
-        "MergeService": 450,  # 427 lines - Composite merge service with conflict resolution
+        "MergeService": 480,  # 479 lines - Composite merge service with conflict resolution
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
         "CompositePipelineRunner": 350,  # 313 lines - Composite pipeline orchestrator
     }

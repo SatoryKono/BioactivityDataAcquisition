@@ -31,10 +31,11 @@ composite:
   seed:
     pipeline: chembl_publication
     output_keys:
-      - document_id      # ChEMBL document ID (primary key)
-      - doi              # Digital Object Identifier
-      - pmid             # PubMed ID
-    silver_table: silver/chembl/publication
+      - document_chembl_id  # ChEMBL document ID (primary key)
+      - doi                 # Digital Object Identifier
+      - pmid                # PubMed ID
+      - title               # Publication title (for fallback joins)
+    silver_table: silver/chembl/publication/chembl_publication
 
   # ---------------------------------------------------------------------------
   # Enricher Pipelines
@@ -65,7 +66,7 @@ composite:
 
     # PubMed: MeSH terms and medical metadata
     # OPTIONAL: Only processes records with pmid
-    - pipeline: pubmed_publication
+    - pipeline: pubmed_publications
       join_keys:
         - pmid           # PubMed-specific identifier
         - doi
@@ -138,13 +139,13 @@ composite:
         soft_fail_threshold: 0.20
         hard_fail_threshold: 0.50
       # PubMed may have many pmid-less records filtered
-      pubmed_publication:
+      pubmed_publications:
         soft_fail_threshold: 0.15
         hard_fail_threshold: 0.40
 
     # Required fields in final Gold output
     required_fields:
-      - document_id
+      - document_chembl_id
       - title
 
   # ---------------------------------------------------------------------------

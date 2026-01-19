@@ -308,11 +308,11 @@ class CompositeCheckpointManager:
         # Ensure directory exists
         self._checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
-        # Write to temp file then rename (atomic)
+        # Write to temp file then replace (atomic on POSIX, handles existing file on Windows)
         temp_path = self._checkpoint_path.with_suffix(".tmp")
         try:
             temp_path.write_text(json.dumps(state.to_dict(), indent=2))
-            temp_path.rename(self._checkpoint_path)
+            temp_path.replace(self._checkpoint_path)
 
             self._logger.debug(
                 "Saved checkpoint",

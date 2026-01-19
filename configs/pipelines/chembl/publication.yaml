@@ -68,25 +68,25 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze/chembl/document"
+    path: "data/output/bronze/chembl/publication"
   silver:
-    path: "data/output/silver/chembl/document"
+    path: "data/output/silver/chembl/publication"
     primary_key: ["document_chembl_id"]
     partition_by: ["doc_type"]
     sort_by:
       columns: ["document_chembl_id"]
       ascending: true
     csv_export:
-      path: "data/output/silver/chembl/document"
+      path: "data/output/silver/chembl/publication"
   gold:
-    path: "data/output/gold/chembl/document"
+    path: "data/output/gold/chembl/publication"
     sort_by:
       columns: ["document_chembl_id"]
       ascending: true
     csv_export:
-      path: "data/output/gold/chembl/document"
+      path: "data/output/gold/chembl/publication"
 
-# Entity-specific input filter
+# Entity-specific input filterp
 input_filter:
   enabled: true
   source_path: "data/input/publication.csv"

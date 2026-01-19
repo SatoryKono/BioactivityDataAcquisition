@@ -325,9 +325,7 @@ class GoldDQAnalyzer:
         if condition == "not_null":
             return self._check_not_null_rule(df, column)
         if condition == "range":
-            return self._check_range_rule(
-                df, column, rule.get("min"), rule.get("max")
-            )
+            return self._check_range_rule(df, column, rule.get("min"), rule.get("max"))
         if condition == "in_list":
             return self._check_in_list_rule(df, column, rule.get("values", []))
         if condition == "regex":
