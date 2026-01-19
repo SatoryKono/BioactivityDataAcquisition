@@ -226,7 +226,7 @@ class MergeService:
         Args:
             df: Polars DataFrame to write.
         """
-        from deltalake import DeltaTable, write_deltalake
+        from deltalake import write_deltalake
 
         # Coerce null columns for Delta Lake compatibility
         df = self._coerce_null_columns(df)
