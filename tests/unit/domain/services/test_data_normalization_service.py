@@ -379,3 +379,68 @@ class TestHashPii:
         hash1 = service._hash_pii("John Doe", "salt")
         hash2 = service._hash_pii("Jane Smith", "salt")
         assert hash1 != hash2
+
+
+class TestParsePages:
+    """Tests for parse_pages method."""
+
+    @pytest.mark.parametrize(
+        "pages,expected",
+        [
+            # Standard range
+            ("123-456", ("123", "456")),
+            ("1-100", ("1", "100")),
+            # Electronic pages
+            ("e123-e456", ("e123", "e456")),
+            # Supplement pages
+            ("S1-S10", ("S1", "S10")),
+            # Single page
+            ("123", ("123", None)),
+            ("e123", ("e123", None)),
+            # Whitespace handling
+            ("  123-456  ", ("123", "456")),
+            ("123 - 456", ("123", "456")),
+            # None and empty
+            (None, (None, None)),
+            ("", (None, None)),
+            ("   ", (None, None)),
+            # Edge cases
+            ("-456", (None, "456")),  # Missing first page
+            ("123-", ("123", None)),  # Missing last page
+        ],
+    )
+    def test_parse_pages(
+        self, pages: str | None, expected: tuple[str | None, str | None]
+    ) -> None:
+        """Test page string parsing."""
+        service = DefaultDataNormalizationService()
+        assert service.parse_pages(pages) == expected
+
+
+class TestNormalizePmcId:
+    """Tests for normalize_pmc_id method."""
+
+    @pytest.mark.parametrize(
+        "pmc_id,expected",
+        [
+            # Standard format
+            ("PMC12345", "PMC12345"),
+            ("pmc12345", "PMC12345"),
+            ("Pmc12345", "PMC12345"),
+            # Without prefix
+            ("12345", "PMC12345"),
+            # With whitespace
+            ("  PMC12345  ", "PMC12345"),
+            ("  12345  ", "PMC12345"),
+            # None and empty
+            (None, None),
+            ("", None),
+            ("   ", None),
+        ],
+    )
+    def test_normalize_pmc_id(
+        self, pmc_id: str | None, expected: str | None
+    ) -> None:
+        """Test PMC ID normalization."""
+        service = DefaultDataNormalizationService()
+        assert service.normalize_pmc_id(pmc_id) == expected

@@ -187,3 +187,52 @@ class DefaultDataNormalizationService:
         parts = date_parts[0]
         fmt = _DATE_FORMATS.get(min(len(parts), 3))
         return fmt.format(*parts) if fmt else None
+
+    def parse_pages(self, pages: str | None) -> tuple[str | None, str | None]:
+        """Parse page string into first_page and last_page.
+
+        Handles formats like:
+        - "123-456" -> ("123", "456")
+        - "123" -> ("123", None)
+        - "e123-e456" -> ("e123", "e456")
+        - "S1-S10" -> ("S1", "S10")
+        - None or empty -> (None, None)
+
+        Args:
+            pages: Page string in "first-last" format.
+
+        Returns:
+            Tuple of (first_page, last_page).
+        """
+        if not pages or not pages.strip():
+            return None, None
+
+        pages = pages.strip()
+        if "-" in pages:
+            parts = pages.split("-", 1)
+            first = parts[0].strip() or None
+            last = parts[1].strip() if len(parts) > 1 and parts[1].strip() else None
+            return first, last
+
+        return pages, None
+
+    def normalize_pmc_id(self, pmc_id: str | None) -> str | None:
+        """Ensure PMC ID has 'PMC' prefix.
+
+        Normalizes PMC IDs to uppercase with 'PMC' prefix for consistency
+        across providers.
+
+        Args:
+            pmc_id: Raw PMC ID (may or may not have prefix).
+
+        Returns:
+            Normalized PMC ID with 'PMC' prefix, or None if input is empty.
+        """
+        if not pmc_id:
+            return None
+        pmc_id = pmc_id.strip()
+        if not pmc_id:
+            return None
+        if not pmc_id.upper().startswith("PMC"):
+            return f"PMC{pmc_id}"
+        return pmc_id.upper()

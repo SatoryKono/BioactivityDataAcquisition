@@ -192,7 +192,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 if medline
                 else None
             ),
-            "pmc_id": self._normalize_pmc_id(IdentifierExtractor.extract_pmc_id(root)),
+            "pmc_id": self._data_normalizer.normalize_pmc_id(
+                IdentifierExtractor.extract_pmc_id(root)
+            ),
             # Lookup metadata (from adapter fallback handler)
             "_lookup_method": cast("dict[str, Any]", record).get(
                 "_lookup_method", "pmid"
@@ -236,60 +238,11 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         """
         return True
 
-    def _parse_pages(self, pages: str | None) -> tuple[str | None, str | None]:
-        """Parse medline_pgn format into first_page and last_page.
-
-        Handles formats like:
-        - "123-456" -> ("123", "456")
-        - "123" -> ("123", None)
-        - "e123-e456" -> ("e123", "e456")
-        - "S1-S10" -> ("S1", "S10")
-        - None or empty -> (None, None)
-
-        Args:
-            pages: Page string in medline_pgn format.
-
-        Returns:
-            Tuple of (first_page, last_page).
-        """
-        if not pages or not pages.strip():
-            return None, None
-
-        pages = pages.strip()
-        # Split on hyphen, but handle cases like "e123-e456"
-        if "-" in pages:
-            parts = pages.split("-", 1)
-            first = parts[0].strip() or None
-            last = parts[1].strip() if len(parts) > 1 and parts[1].strip() else None
-            return first, last
-
-        # Single page number
-        return pages, None
-
-    def _normalize_pmc_id(self, pmc_id: str | None) -> str | None:
-        """Ensure PMC ID has 'PMC' prefix.
-
-        Normalizes PMC IDs to uppercase with 'PMC' prefix for consistency
-        across providers.
-
-        Args:
-            pmc_id: Raw PMC ID (may or may not have prefix).
-
-        Returns:
-            Normalized PMC ID with 'PMC' prefix, or None if input is empty.
-        """
-        if not pmc_id:
-            return None
-        pmc_id = pmc_id.strip()
-        if not pmc_id.upper().startswith("PMC"):
-            return f"PMC{pmc_id}"
-        return pmc_id.upper()
-
     def _extract_journal_data(self, article: ET.Element) -> dict[str, Any]:
         """Extract journal-related data from article XML."""
         journal = article.find(".//Journal")
         pages = get_text(article.find(".//Pagination/MedlinePgn"))
-        first_page, last_page = self._parse_pages(pages)
+        first_page, last_page = self._data_normalizer.parse_pages(pages)
 
         if not journal:
             return {

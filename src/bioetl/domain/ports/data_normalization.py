@@ -287,3 +287,53 @@ class DataNormalizationPort(Protocol):
             None
         """
         ...
+
+    def parse_pages(self, pages: str | None) -> tuple[str | None, str | None]:
+        """Parse page string into first_page and last_page.
+
+        Handles formats like:
+        - "123-456" -> ("123", "456")
+        - "123" -> ("123", None)
+        - "e123-e456" -> ("e123", "e456")
+        - "S1-S10" -> ("S1", "S10")
+        - None or empty -> (None, None)
+
+        Args:
+            pages: Page string in "first-last" format.
+
+        Returns:
+            Tuple of (first_page, last_page).
+
+        Example:
+            >>> parse_pages("123-456")
+            ('123', '456')
+            >>> parse_pages("123")
+            ('123', None)
+            >>> parse_pages(None)
+            (None, None)
+        """
+        ...
+
+    def normalize_pmc_id(self, pmc_id: str | None) -> str | None:
+        """Ensure PMC ID has 'PMC' prefix.
+
+        Normalizes PMC IDs to uppercase with 'PMC' prefix for consistency
+        across providers.
+
+        Args:
+            pmc_id: Raw PMC ID (may or may not have prefix).
+
+        Returns:
+            Normalized PMC ID with 'PMC' prefix, or None if input is empty.
+
+        Example:
+            >>> normalize_pmc_id("12345")
+            'PMC12345'
+            >>> normalize_pmc_id("pmc12345")
+            'PMC12345'
+            >>> normalize_pmc_id("PMC12345")
+            'PMC12345'
+            >>> normalize_pmc_id(None)
+            None
+        """
+        ...

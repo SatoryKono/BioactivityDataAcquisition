@@ -785,73 +785,25 @@ class TestPubMedTransformerDoiNormalization:
 
 @pytest.mark.unit
 class TestPubMedTransformerUnifiedPageFields:
-    """Tests for unified page field parsing (first_page, last_page)."""
+    """Tests for unified page field parsing (first_page, last_page).
+
+    Note: parse_pages() method was moved to DataNormalizationService.
+    Unit tests for the method itself are in test_data_normalization_service.py.
+    This class tests integration via the transformer.
+    """
 
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
         return PubMedPublicationTransformer(provider="pubmed")
 
-    def test_parse_pages_hyphenated(
+    def test_parse_pages_via_data_normalizer(
         self,
         transformer: PubMedPublicationTransformer,
     ) -> None:
-        """Test parsing of hyphenated page ranges."""
-        first, last = transformer._parse_pages("123-456")
-        assert first == "123"
-        assert last == "456"
-
-    def test_parse_pages_single_page(
-        self,
-        transformer: PubMedPublicationTransformer,
-    ) -> None:
-        """Test parsing of single page number."""
-        first, last = transformer._parse_pages("123")
-        assert first == "123"
-        assert last is None
-
-    def test_parse_pages_electronic_format(
-        self,
-        transformer: PubMedPublicationTransformer,
-    ) -> None:
-        """Test parsing of electronic article numbers (e123-e456)."""
-        first, last = transformer._parse_pages("e123-e456")
-        assert first == "e123"
-        assert last == "e456"
-
-    def test_parse_pages_supplement_format(
-        self,
-        transformer: PubMedPublicationTransformer,
-    ) -> None:
-        """Test parsing of supplement pages (S1-S10)."""
-        first, last = transformer._parse_pages("S1-S10")
-        assert first == "S1"
-        assert last == "S10"
-
-    def test_parse_pages_none(
-        self,
-        transformer: PubMedPublicationTransformer,
-    ) -> None:
-        """Test parsing of None input."""
-        first, last = transformer._parse_pages(None)
-        assert first is None
-        assert last is None
-
-    def test_parse_pages_empty_string(
-        self,
-        transformer: PubMedPublicationTransformer,
-    ) -> None:
-        """Test parsing of empty string."""
-        first, last = transformer._parse_pages("")
-        assert first is None
-        assert last is None
-
-    def test_parse_pages_whitespace(
-        self,
-        transformer: PubMedPublicationTransformer,
-    ) -> None:
-        """Test parsing with whitespace."""
-        first, last = transformer._parse_pages("  123 - 456  ")
+        """Test that transformer delegates parse_pages to data_normalizer."""
+        # Verify delegation to DataNormalizationService
+        first, last = transformer._data_normalizer.parse_pages("123-456")
         assert first == "123"
         assert last == "456"
 
