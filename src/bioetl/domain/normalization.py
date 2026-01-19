@@ -35,16 +35,59 @@ def normalize_doi(doi: str | None) -> str | None:
 
 
 # Date formatting helpers
-_DATE_FORMATS = {3: "{0:04d}-{1:02d}-{2:02d}", 2: "{0:04d}-{1:02d}", 1: "{0:04d}"}
+_DATE_FULL_FMT = "{0:04d}-{1:02d}-{2:02d}"
+
+
+def _get_last_day_of_month(year: int, month: int) -> int:
+    """Get the last day of the given month.
+
+    Args:
+        year: Year (used for leap year calculation in February).
+        month: Month (1-12).
+
+    Returns:
+        Last day of the month (28-31).
+    """
+    from calendar import monthrange
+
+    return monthrange(year, month)[1]
 
 
 def format_date_parts(date_parts: list[list[int]] | None) -> str | None:
-    """Format CrossRef date-parts [[year, month?, day?]] to ISO string."""
+    """Format CrossRef date-parts [[year, month?, day?]] to ISO YYYY-MM-DD string.
+
+    Uses end-of-period normalization for partial dates:
+    - Complete date [[2024, 3, 15]]: returns "2024-03-15"
+    - Month-only [[2024, 3]]: returns "2024-03-31" (last day of month)
+    - Year-only [[2024]]: returns "2024-12-31" (last day of year)
+
+    Args:
+        date_parts: CrossRef date-parts array [[year, month?, day?]].
+
+    Returns:
+        ISO date string (YYYY-MM-DD) or None if input is invalid.
+    """
     if not date_parts or not date_parts[0]:
         return None
     parts = date_parts[0]
-    fmt = _DATE_FORMATS.get(min(len(parts), 3))
-    return fmt.format(*parts) if fmt else None
+    num_parts = len(parts)
+
+    if num_parts == 0:
+        return None
+
+    year = parts[0]
+
+    if num_parts >= 3:
+        # Complete date: YYYY-MM-DD
+        return _DATE_FULL_FMT.format(year, parts[1], parts[2])
+    elif num_parts == 2:
+        # Month-only: use last day of month
+        month = parts[1]
+        last_day = _get_last_day_of_month(year, month)
+        return _DATE_FULL_FMT.format(year, month, last_day)
+    else:
+        # Year-only: use December 31st
+        return _DATE_FULL_FMT.format(year, 12, 31)
 
 
 def parse_date_field(value: str | None, fmt: str = "%Y-%m-%d") -> date | None:

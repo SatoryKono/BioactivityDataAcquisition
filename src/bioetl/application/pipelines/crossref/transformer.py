@@ -211,36 +211,19 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         published_print: str | None,
         published_online: str | None,
     ) -> str | None:
-        """Build unified publication_date, preferring print over online.
+        """Build unified publication_date (YYYY-MM-DD), preferring print.
 
-        CrossRef dates from extract_dates come as partial ISO strings
-        (YYYY-MM-DD, YYYY-MM, or YYYY). We normalize to YYYY-MM-DD format.
+        Input dates from format_date_parts() are already in YYYY-MM-DD format
+        (with end-of-period normalization for partial dates).
 
         Args:
-            published_print: Print publication date (may be partial).
-            published_online: Online publication date (may be partial).
+            published_print: Print publication date (YYYY-MM-DD).
+            published_online: Online publication date (YYYY-MM-DD).
 
         Returns:
             ISO date string (YYYY-MM-DD) or None.
         """
-        date_str = published_print or published_online
-        if not date_str:
-            return None
-
-        # If already full ISO format (YYYY-MM-DD), return as-is
-        if len(date_str) == 10 and date_str[4] == "-" and date_str[7] == "-":
-            return date_str
-
-        # Partial date: YYYY-MM -> YYYY-MM-01
-        if len(date_str) == 7 and date_str[4] == "-":
-            return f"{date_str}-01"
-
-        # Partial date: YYYY -> YYYY-01-01
-        if len(date_str) == 4 and date_str.isdigit():
-            return f"{date_str}-01-01"
-
-        # Unknown format, return as-is (shouldn't happen with extract_dates)
-        return date_str
+        return published_print or published_online
 
     def _should_log_fallback_lookup(self) -> bool:
         """Enable fallback lookup logging for CrossRef.
