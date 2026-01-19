@@ -16,6 +16,11 @@ from bioetl.application.services import (
     RunStatus,
 )
 from bioetl.composition.entrypoints import get_pipeline_runner_service
+from bioetl.interfaces.cli.commands.health_server_integration import (
+    DEFAULT_HEALTH_SERVER_PORT,
+    echo_health_server_info,
+    health_server_context,
+)
 from bioetl.interfaces.cli.commands.run_helpers import (
     get_runner_logger,
     handle_destructive_run_confirmation,
@@ -64,19 +69,27 @@ def _map_status_to_exit_code(status: RunStatus, error_type: str | None) -> ExitC
 async def _run_pipeline_async(
     pipeline: str,
     options: RunOptions,
+    health_server_enabled: bool = True,
+    health_port: int = DEFAULT_HEALTH_SERVER_PORT,
 ) -> tuple[RunStatus, str | None, str | None]:
     """Run pipeline asynchronously via service.
 
     Args:
         pipeline: Pipeline name.
         options: Run options.
+        health_server_enabled: Whether to enable health server.
+        health_port: Port for health server.
 
     Returns:
         Tuple of (status, error_message, error_type).
     """
-    service = get_pipeline_runner_service()
-    result = await service.run(pipeline, options=options)
-    return result.status, result.error_message, result.error_type
+    async with health_server_context(
+        enabled=health_server_enabled,
+        port=health_port,
+    ):
+        service = get_pipeline_runner_service()
+        result = await service.run(pipeline, options=options)
+        return result.status, result.error_message, result.error_type
 
 
 def _echo_run_result(status: RunStatus, error_message: str | None) -> None:
@@ -152,6 +165,20 @@ def _echo_run_result(status: RunStatus, error_message: str | None) -> None:
     is_flag=True,
     help="Enable DEBUG level logging for detailed output",
 )
+@click.option(
+    "--health-server/--no-health-server",
+    "health_server",
+    default=True,
+    help="Enable/disable HTTP health server during execution.",
+    show_default=True,
+)
+@click.option(
+    "--health-port",
+    type=int,
+    default=DEFAULT_HEALTH_SERVER_PORT,
+    help="Port for the HTTP health server.",
+    show_default=True,
+)
 def run(
     pipeline: str,
     run_type: str,
@@ -165,6 +192,8 @@ def run(
     vacuum_after_run: bool | None,
     vacuum_retention_days: int | None,
     debug: bool,
+    health_server: bool,
+    health_port: int,
 ) -> None:
     """Run an ETL pipeline."""
     # Handle confirmation for destructive operations (CLI responsibility)
@@ -185,10 +214,18 @@ def run(
         log_level="DEBUG" if debug else "INFO",
     )
 
+    # Display health server info
+    echo_health_server_info(health_server, health_port)
+
     # Run pipeline via service
     try:
         status, error_message, error_type = asyncio.run(
-            _run_pipeline_async(pipeline, options)
+            _run_pipeline_async(
+                pipeline,
+                options,
+                health_server_enabled=health_server,
+                health_port=health_port,
+            )
         )
     except PipelineNotFoundError as e:
         echo_error("Pipeline not found", str(e))

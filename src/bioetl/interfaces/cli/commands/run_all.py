@@ -21,6 +21,11 @@ from bioetl.application.services import (
 )
 from bioetl.composition.entrypoints import get_pipeline_runner_service
 from bioetl.composition.registry import get_default_registry
+from bioetl.interfaces.cli.commands.health_server_integration import (
+    DEFAULT_HEALTH_SERVER_PORT,
+    echo_health_server_info,
+    health_server_context,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
@@ -125,20 +130,21 @@ async def _run_pipeline_async(
     return await service.run(pipeline, options=options)
 
 
-async def _run_all_pipelines_async(
+async def _run_pipelines_batch(
+    service: PipelineRunnerService,
     pipelines: list[str],
     options: RunOptions,
 ) -> BatchRunResult:
-    """Run all pipelines sequentially.
+    """Run pipelines sequentially within a service context.
 
     Args:
+        service: Pipeline runner service.
         pipelines: List of pipeline names to run.
         options: Run options.
 
     Returns:
         BatchRunResult with aggregated results.
     """
-    service = get_pipeline_runner_service()
     batch_result = BatchRunResult(total=len(pipelines))
 
     for pipeline in pipelines:
@@ -174,6 +180,31 @@ async def _run_all_pipelines_async(
             echo_error(f"[FAIL] {pipeline}: unexpected error", str(e))
 
     return batch_result
+
+
+async def _run_all_pipelines_async(
+    pipelines: list[str],
+    options: RunOptions,
+    health_server_enabled: bool = True,
+    health_port: int = DEFAULT_HEALTH_SERVER_PORT,
+) -> BatchRunResult:
+    """Run all pipelines sequentially with optional health server.
+
+    Args:
+        pipelines: List of pipeline names to run.
+        options: Run options.
+        health_server_enabled: Whether to enable health server.
+        health_port: Port for health server.
+
+    Returns:
+        BatchRunResult with aggregated results.
+    """
+    async with health_server_context(
+        enabled=health_server_enabled,
+        port=health_port,
+    ):
+        service = get_pipeline_runner_service()
+        return await _run_pipelines_batch(service, pipelines, options)
 
 
 def _echo_batch_summary(result: BatchRunResult, dry_run: bool) -> None:
@@ -287,6 +318,20 @@ def _determine_exit_code(batch_result: BatchRunResult) -> ExitCode:
     is_flag=True,
     help="Enable DEBUG level logging",
 )
+@click.option(
+    "--health-server/--no-health-server",
+    "health_server",
+    default=True,
+    help="Enable/disable HTTP health server during execution.",
+    show_default=True,
+)
+@click.option(
+    "--health-port",
+    type=int,
+    default=DEFAULT_HEALTH_SERVER_PORT,
+    help="Port for the HTTP health server.",
+    show_default=True,
+)
 def run_all(
     source: str,
     run_type: str,
@@ -295,6 +340,8 @@ def run_all(
     yes: bool,
     list_only: bool,
     debug: bool,
+    health_server: bool,
+    health_port: int,
 ) -> None:
     """Run all ETL pipelines for a specific provider.
 
@@ -330,6 +377,9 @@ def run_all(
     # Show what we're about to do
     _show_run_preview(source, pipelines, dry_run)
 
+    # Display health server info
+    echo_health_server_info(health_server, health_port)
+
     # Build options and run pipelines
     options = RunOptions(
         run_type=run_type,
@@ -339,7 +389,14 @@ def run_all(
     )
 
     try:
-        batch_result = asyncio.run(_run_all_pipelines_async(pipelines, options))
+        batch_result = asyncio.run(
+            _run_all_pipelines_async(
+                pipelines,
+                options,
+                health_server_enabled=health_server,
+                health_port=health_port,
+            )
+        )
     except KeyboardInterrupt:
         echo_warning("Batch run interrupted by user (Ctrl+C)")
         sys.exit(ExitCode.SIGINT)
