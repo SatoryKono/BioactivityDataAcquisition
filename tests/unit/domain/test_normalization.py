@@ -14,6 +14,7 @@ from bioetl.domain.normalization import (
     extract_first_string,
     format_date_parts,
     normalize_doi,
+    normalize_pmc_id,
     normalize_string,
     normalize_to_string,
     parse_authors_to_list,
@@ -232,6 +233,34 @@ class TestParsePageRange:
     ) -> None:
         """Test page range parsing."""
         assert parse_page_range(page) == expected
+
+
+class TestNormalizePmcId:
+    """Tests for normalize_pmc_id function."""
+
+    @pytest.mark.parametrize(
+        "pmc_id,expected",
+        [
+            # Already has prefix - uppercase
+            ("PMC1234567", "PMC1234567"),
+            # Lowercase prefix - normalizes to uppercase
+            ("pmc1234567", "PMC1234567"),
+            # Mixed case prefix
+            ("Pmc1234567", "PMC1234567"),
+            # No prefix - adds PMC prefix
+            ("1234567", "PMC1234567"),
+            # With whitespace
+            ("  PMC1234567  ", "PMC1234567"),
+            ("  1234567  ", "PMC1234567"),
+            # Empty values
+            (None, None),
+            ("", None),
+            ("   ", None),
+        ],
+    )
+    def test_normalize_pmc_id(self, pmc_id: str | None, expected: str | None) -> None:
+        """Test PMC ID normalization."""
+        assert normalize_pmc_id(pmc_id) == expected
 
 
 class TestExtractFirstItem:

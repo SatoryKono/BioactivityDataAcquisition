@@ -421,57 +421,16 @@ class TestSemanticScholarDoiNormalization:
 
 
 class TestSemanticScholarUnifiedPageFields:
-    """Tests for unified page field parsing (first_page, last_page)."""
+    """Tests for unified page field parsing (first_page, last_page).
+
+    Note: The parse_page_range function tests are in tests/unit/domain/test_normalization.py.
+    These tests verify the integration with the transformer.
+    """
 
     @pytest.fixture
     def transformer(self) -> SemanticScholarPublicationTransformer:
         """Create a transformer instance."""
         return SemanticScholarPublicationTransformer()
-
-    def test_parse_pages_hyphenated(
-        self,
-        transformer: SemanticScholarPublicationTransformer,
-    ) -> None:
-        """Test parsing of hyphenated page ranges."""
-        first, last = transformer._parse_pages("123-456")
-        assert first == "123"
-        assert last == "456"
-
-    def test_parse_pages_single_page(
-        self,
-        transformer: SemanticScholarPublicationTransformer,
-    ) -> None:
-        """Test parsing of single page number."""
-        first, last = transformer._parse_pages("123")
-        assert first == "123"
-        assert last is None
-
-    def test_parse_pages_none(
-        self,
-        transformer: SemanticScholarPublicationTransformer,
-    ) -> None:
-        """Test parsing of None input."""
-        first, last = transformer._parse_pages(None)
-        assert first is None
-        assert last is None
-
-    def test_parse_pages_empty_string(
-        self,
-        transformer: SemanticScholarPublicationTransformer,
-    ) -> None:
-        """Test parsing of empty string."""
-        first, last = transformer._parse_pages("")
-        assert first is None
-        assert last is None
-
-    def test_parse_pages_electronic_format(
-        self,
-        transformer: SemanticScholarPublicationTransformer,
-    ) -> None:
-        """Test parsing of electronic article numbers (e123-e456)."""
-        first, last = transformer._parse_pages("e123-e456")
-        assert first == "e123"
-        assert last == "e456"
 
     @pytest.mark.asyncio
     async def test_unified_page_fields_in_transform(

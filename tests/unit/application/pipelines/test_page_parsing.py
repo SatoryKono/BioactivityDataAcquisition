@@ -1,29 +1,23 @@
-"""Tests for page parsing utilities across transformers.
+"""Tests for page parsing and PMC ID normalization domain functions.
 
-Tests the _parse_pages method implementations in PubMed and SemanticScholar
-transformers that parse medline_pgn and pages strings into first_page/last_page.
+Tests the parse_page_range and normalize_pmc_id functions from domain/normalization.py
+that are used by PubMed and SemanticScholar transformers for parsing page strings
+and normalizing PMC IDs.
+
+Note: These tests complement the tests in tests/unit/domain/test_normalization.py
+by testing additional edge cases relevant to publication transformers.
 """
 
 from __future__ import annotations
 
 import pytest
 
-from bioetl.application.pipelines.pubmed.transformer import (
-    PubMedPublicationTransformer,
-)
-from bioetl.application.pipelines.semanticscholar.transformer import (
-    SemanticScholarPublicationTransformer,
-)
+from bioetl.domain.normalization import normalize_pmc_id, parse_page_range
 
 
 @pytest.mark.unit
 class TestPubMedMedlinePgnParsing:
-    """Tests for PubMed medline_pgn parsing."""
-
-    @pytest.fixture
-    def transformer(self) -> PubMedPublicationTransformer:
-        """Create PubMed transformer with minimal dependencies."""
-        return PubMedPublicationTransformer(provider="pubmed")
+    """Tests for PubMed medline_pgn parsing using domain function."""
 
     @pytest.mark.parametrize(
         "pgn,expected_first,expected_last",
@@ -59,46 +53,34 @@ class TestPubMedMedlinePgnParsing:
     )
     def test_parse_medline_pgn(
         self,
-        transformer: PubMedPublicationTransformer,
         pgn: str | None,
         expected_first: str | None,
         expected_last: str | None,
     ) -> None:
         """Test various medline_pgn formats."""
-        first, last = transformer._parse_pages(pgn)
+        first, last = parse_page_range(pgn)
 
         assert first == expected_first, f"First page mismatch for '{pgn}'"
         assert last == expected_last, f"Last page mismatch for '{pgn}'"
 
-    def test_hyphen_only_returns_empty(
-        self,
-        transformer: PubMedPublicationTransformer,
-    ) -> None:
-        """Single hyphen should return None for last page."""
-        first, last = transformer._parse_pages("-")
+    def test_hyphen_only_returns_empty(self) -> None:
+        """Single hyphen should return None for both values."""
+        first, last = parse_page_range("-")
 
         assert first is None
         assert last is None
 
-    def test_parse_pages_immutability(
-        self,
-        transformer: PubMedPublicationTransformer,
-    ) -> None:
+    def test_parse_pages_immutability(self) -> None:
         """Parsing should not modify the original string."""
         original = "100-110"
-        _ = transformer._parse_pages(original)
+        _ = parse_page_range(original)
 
         assert original == "100-110"
 
 
 @pytest.mark.unit
 class TestSemanticScholarPagesParsing:
-    """Tests for Semantic Scholar pages parsing."""
-
-    @pytest.fixture
-    def transformer(self) -> SemanticScholarPublicationTransformer:
-        """Create SemanticScholar transformer with minimal dependencies."""
-        return SemanticScholarPublicationTransformer(provider="semanticscholar")
+    """Tests for Semantic Scholar pages parsing using domain function."""
 
     @pytest.mark.parametrize(
         "pages,expected_first,expected_last",
@@ -122,13 +104,12 @@ class TestSemanticScholarPagesParsing:
     )
     def test_parse_pages(
         self,
-        transformer: SemanticScholarPublicationTransformer,
         pages: str | None,
         expected_first: str | None,
         expected_last: str | None,
     ) -> None:
         """Test various pages formats from Semantic Scholar."""
-        first, last = transformer._parse_pages(pages)
+        first, last = parse_page_range(pages)
 
         assert first == expected_first, f"First page mismatch for '{pages}'"
         assert last == expected_last, f"Last page mismatch for '{pages}'"
@@ -136,17 +117,12 @@ class TestSemanticScholarPagesParsing:
 
 @pytest.mark.unit
 class TestPageParsingConsistency:
-    """Tests for consistency between transformer implementations."""
+    """Tests for consistency of page parsing across common formats.
 
-    @pytest.fixture
-    def pubmed_transformer(self) -> PubMedPublicationTransformer:
-        """Create PubMed transformer."""
-        return PubMedPublicationTransformer(provider="pubmed")
-
-    @pytest.fixture
-    def s2_transformer(self) -> SemanticScholarPublicationTransformer:
-        """Create SemanticScholar transformer."""
-        return SemanticScholarPublicationTransformer(provider="semanticscholar")
+    Since both PubMed and SemanticScholar transformers now use the same
+    domain function (parse_page_range), this test verifies the function
+    handles all common formats consistently.
+    """
 
     @pytest.mark.parametrize(
         "pages",
@@ -159,33 +135,23 @@ class TestPageParsingConsistency:
             "  100 - 200  ",
         ],
     )
-    def test_parsing_consistency_across_transformers(
-        self,
-        pubmed_transformer: PubMedPublicationTransformer,
-        s2_transformer: SemanticScholarPublicationTransformer,
-        pages: str | None,
-    ) -> None:
-        """Both transformers should parse common formats consistently."""
-        pubmed_first, pubmed_last = pubmed_transformer._parse_pages(pages)
-        s2_first, s2_last = s2_transformer._parse_pages(pages)
+    def test_parsing_consistency(self, pages: str | None) -> None:
+        """Domain function should parse common formats consistently."""
+        first, last = parse_page_range(pages)
 
-        assert pubmed_first == s2_first, f"First page inconsistent for '{pages}'"
-        assert pubmed_last == s2_last, f"Last page inconsistent for '{pages}'"
+        # Verify return type consistency
+        if pages and pages.strip():
+            # For non-empty input, first should always be populated
+            assert first is not None or pages.strip() == "-"
+        else:
+            # For empty/None input, both should be None
+            assert first is None
+            assert last is None
 
 
 @pytest.mark.unit
 class TestPmcIdNormalization:
-    """Tests for PMC ID normalization in transformers."""
-
-    @pytest.fixture
-    def pubmed_transformer(self) -> PubMedPublicationTransformer:
-        """Create PubMed transformer."""
-        return PubMedPublicationTransformer(provider="pubmed")
-
-    @pytest.fixture
-    def s2_transformer(self) -> SemanticScholarPublicationTransformer:
-        """Create SemanticScholar transformer."""
-        return SemanticScholarPublicationTransformer(provider="semanticscholar")
+    """Tests for PMC ID normalization using domain function."""
 
     @pytest.mark.parametrize(
         "raw_pmc_id,expected",
@@ -206,32 +172,32 @@ class TestPmcIdNormalization:
             ("  1234567  ", "PMC1234567"),
         ],
     )
-    def test_pubmed_pmc_id_normalization(
+    def test_pmc_id_normalization(
         self,
-        pubmed_transformer: PubMedPublicationTransformer,
         raw_pmc_id: str | None,
         expected: str | None,
     ) -> None:
-        """PubMed transformer should normalize PMC IDs correctly."""
-        result = pubmed_transformer._normalize_pmc_id(raw_pmc_id)
+        """Domain function should normalize PMC IDs correctly."""
+        result = normalize_pmc_id(raw_pmc_id)
         assert result == expected
 
-    @pytest.mark.parametrize(
-        "raw_pmc_id,expected",
-        [
-            ("PMC1234567", "PMC1234567"),
-            ("pmc1234567", "PMC1234567"),
-            ("1234567", "PMC1234567"),
-            (None, None),
-            ("", None),
-        ],
-    )
-    def test_s2_pmc_id_normalization(
-        self,
-        s2_transformer: SemanticScholarPublicationTransformer,
-        raw_pmc_id: str | None,
-        expected: str | None,
-    ) -> None:
-        """SemanticScholar transformer should normalize PMC IDs correctly."""
-        result = s2_transformer._normalize_pmc_id(raw_pmc_id)
-        assert result == expected
+
+@pytest.mark.unit
+class TestPmcIdNormalizationEdgeCases:
+    """Additional edge case tests for PMC ID normalization."""
+
+    def test_only_whitespace_returns_none(self) -> None:
+        """Only whitespace should return None."""
+        assert normalize_pmc_id("   ") is None
+
+    def test_pmc_prefix_variations(self) -> None:
+        """Test various PMC prefix capitalizations."""
+        assert normalize_pmc_id("PMC123") == "PMC123"
+        assert normalize_pmc_id("pmc123") == "PMC123"
+        assert normalize_pmc_id("Pmc123") == "PMC123"
+        assert normalize_pmc_id("pMc123") == "PMC123"
+
+    def test_numeric_only_input(self) -> None:
+        """Numeric-only input should get PMC prefix added."""
+        assert normalize_pmc_id("123") == "PMC123"
+        assert normalize_pmc_id("1234567890") == "PMC1234567890"
