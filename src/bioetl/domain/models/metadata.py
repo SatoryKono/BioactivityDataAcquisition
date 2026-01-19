@@ -179,6 +179,8 @@ class SourceMetadata(BaseModel):
         type: Source type (api, csv, parquet).
         url: API URL for API sources.
         file_path: File path for file sources.
+        query_string: Query string used for data source filtering
+            (e.g., 'assay_type=B&standard_type=IC50').
         watermark_before: Previous watermark timestamp.
         watermark_after: New watermark timestamp after ingestion.
         api_version: Provider API version.
@@ -193,6 +195,10 @@ class SourceMetadata(BaseModel):
     )
     url: str | None = Field(default=None, description="API URL")
     file_path: str | None = Field(default=None, description="Source file path")
+    query_string: str | None = Field(
+        default=None,
+        description="Query string used for data source filtering (e.g., 'assay_type=B')",
+    )
     watermark_before: datetime | None = Field(
         default=None, description="Previous watermark"
     )
