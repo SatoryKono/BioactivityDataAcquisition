@@ -38,12 +38,15 @@ class PublicationEntityBase(BaseEntity):
     Attributes:
         doi: Digital Object Identifier (normalized: lowercase, stripped).
         pmid: PubMed ID for biomedical literature.
+        pmc_id: PubMed Central ID (with PMC prefix).
         title: Publication title.
         abstract: Publication abstract (HTML tags stripped).
         authors: JSON-serialized list of author names (hashed for PII compliance).
         journal: Journal/venue name.
         issn: International Standard Serial Number.
         publisher: Publisher name.
+        first_page: First page number (unified across providers).
+        last_page: Last page number (unified across providers).
         year: Publication year.
         publication_date: Publication date (ISO format: YYYY-MM-DD).
         citation_count: Number of citations.
@@ -53,6 +56,8 @@ class PublicationEntityBase(BaseEntity):
         oa_status: OA status (gold, green, hybrid, bronze, closed).
         _lookup_method: How record was resolved (direct, doi, pmid, title_fallback, unknown).
         _original_id: Original identifier from input (for fallback records).
+        _dq_warn: Record has data quality warnings.
+        _dq_error: Record has data quality errors.
         source: Data source identifier (e.g., "crossref", "openalex").
 
     Note:
@@ -65,6 +70,7 @@ class PublicationEntityBase(BaseEntity):
     # Identifiers (all nullable - subclasses define their required primary key)
     doi: str | None = None
     pmid: str | None = None
+    pmc_id: str | None = None  # PubMed Central ID (with PMC prefix)
 
     # Core metadata
     title: str | None = None
@@ -76,9 +82,13 @@ class PublicationEntityBase(BaseEntity):
     issn: str | None = None
     publisher: str | None = None
 
+    # Pagination (unified across providers)
+    first_page: str | None = None
+    last_page: str | None = None
+
     # Dates
     year: int | None = None
-    publication_date: str | None = None
+    publication_date: str | None = None  # ISO format: YYYY-MM-DD
 
     # Metrics
     citation_count: int | None = None
@@ -94,6 +104,10 @@ class PublicationEntityBase(BaseEntity):
     # Lookup metadata (tracks resolution strategy)
     _lookup_method: str = "unknown"  # direct | doi | pmid | title_fallback | unknown
     _original_id: str | None = None
+
+    # DQ flags (Data Quality flags)
+    _dq_warn: bool = False  # Record has data quality warnings
+    _dq_error: bool = False  # Record has data quality errors
 
     # Source tracking (subclasses should override default)
     source: str = ""
