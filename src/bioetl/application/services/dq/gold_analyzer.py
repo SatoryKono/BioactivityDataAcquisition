@@ -271,6 +271,69 @@ class GoldDQAnalyzer:
             status=status,
         )
 
+    def _check_not_null_rule(
+        self, df: pl.DataFrame, column: str
+    ) -> tuple[bool, int | None]:
+        """Check not_null rule for a column."""
+        violations = df[column].null_count()
+        return violations == 0, violations
+
+    def _check_range_rule(
+        self,
+        df: pl.DataFrame,
+        column: str,
+        min_val: Any | None,
+        max_val: Any | None,
+    ) -> tuple[bool, int]:
+        """Check range rule for a column."""
+        violations = 0
+        col_data = df[column].drop_nulls()
+        if min_val is not None:
+            violations += (col_data < min_val).sum()
+        if max_val is not None:
+            violations += (col_data > max_val).sum()
+        return violations == 0, violations
+
+    def _check_in_list_rule(
+        self, df: pl.DataFrame, column: str, allowed: list[Any]
+    ) -> tuple[bool, int | None]:
+        """Check in_list rule for a column."""
+        if not allowed:
+            return True, 0
+        violations = int((~df[column].is_in(allowed)).sum())
+        return violations == 0, violations
+
+    def _check_regex_rule(
+        self, df: pl.DataFrame, column: str, pattern: str
+    ) -> tuple[bool, int | None]:
+        """Check regex rule for a column."""
+        if not pattern:
+            return True, 0
+        violations = int((~df[column].str.contains(pattern, literal=False)).sum())
+        return violations == 0, violations
+
+    def _evaluate_single_rule(
+        self, df: pl.DataFrame, rule: dict[str, Any]
+    ) -> tuple[bool, int | None]:
+        """Evaluate a single business rule."""
+        column = rule.get("column")
+        condition = rule.get("condition")
+
+        if not column or column not in df.columns:
+            return True, 0
+
+        if condition == "not_null":
+            return self._check_not_null_rule(df, column)
+        if condition == "range":
+            return self._check_range_rule(
+                df, column, rule.get("min"), rule.get("max")
+            )
+        if condition == "in_list":
+            return self._check_in_list_rule(df, column, rule.get("values", []))
+        if condition == "regex":
+            return self._check_regex_rule(df, column, rule.get("pattern", ""))
+        return True, 0
+
     def _check_business_rules(
         self, df: pl.DataFrame, rules: list[dict[str, Any]]
     ) -> BusinessRulesResult:
@@ -289,44 +352,10 @@ class GoldDQAnalyzer:
         rules_failed = 0
 
         for rule in rules:
-            rule_id = rule.get("rule_id", "")
-            name = rule.get("name", "")
-            description = rule.get("description", "")
-            column = rule.get("column")
-            condition = rule.get("condition")
-
-            violations: int | None = 0
-            passed = True
-
             try:
-                if condition == "not_null" and column and column in df.columns:
-                    violations = df[column].null_count()
-                    passed = violations == 0
-                elif condition == "range" and column and column in df.columns:
-                    min_val = rule.get("min")
-                    max_val = rule.get("max")
-                    col_data = df[column].drop_nulls()
-                    if min_val is not None:
-                        violations += (col_data < min_val).sum()
-                    if max_val is not None:
-                        violations += (col_data > max_val).sum()
-                    passed = violations == 0
-                elif condition == "in_list" and column and column in df.columns:
-                    allowed = rule.get("values", [])
-                    if allowed:
-                        violations = (~df[column].is_in(allowed)).sum()
-                        passed = violations == 0
-                elif condition == "regex" and column and column in df.columns:
-                    pattern = rule.get("pattern", "")
-                    if pattern:
-                        # Check non-matching rows
-                        violations = (
-                            ~df[column].str.contains(pattern, literal=False)
-                        ).sum()
-                        passed = violations == 0
+                passed, violations = self._evaluate_single_rule(df, rule)
             except Exception:
-                passed = False
-                violations = None  # Unknown due to exception
+                passed, violations = False, None
 
             if passed:
                 rules_passed += 1
@@ -335,9 +364,9 @@ class GoldDQAnalyzer:
 
             results.append(
                 BusinessRuleResult(
-                    rule_id=rule_id,
-                    name=name,
-                    description=description,
+                    rule_id=rule.get("rule_id", ""),
+                    name=rule.get("name", ""),
+                    description=rule.get("description", ""),
                     passed=passed,
                     violations=violations,
                 )
