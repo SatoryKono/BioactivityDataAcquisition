@@ -186,6 +186,9 @@ class BatchExecutor:
             adaptive_sizing_enabled=self._adaptive_batch_size_enabled,
         )
 
+        # Query string for metadata (stored during execute())
+        self._query_string: str | None = None
+
     @property
     def entity_type(self) -> str:
         """Get entity type being processed."""
@@ -219,6 +222,9 @@ class BatchExecutor:
             - records_quarantined: Records sent to quarantine
 
         """
+        # Store query string for metadata enrichment
+        self._query_string = query
+
         root_span = self._tracing.start_execution_span()
 
         try:
@@ -320,24 +326,46 @@ class BatchExecutor:
         and calls it to retrieve accumulated API request metadata for
         Bronze layer enrichment.
 
+        Also injects the query_string from execute() if not already set
+        in the source metadata.
+
         Returns:
-            SourceMetadata with API request details, or None if not available.
+            SourceMetadata with API request details and query_string,
+            or None if not available.
 
         """
+        # Import SourceMetadata for runtime type check and creation
+        from bioetl.domain.models.metadata import SourceMetadata
+
+        source_metadata: SourceMetadata | None = None
+
+        # Try to get metadata from data source
         data_source = self._services.data_source
         get_metadata = getattr(data_source, "get_source_metadata", None)
         if get_metadata is not None and callable(get_metadata):
             try:
                 result = get_metadata()
-                # Import SourceMetadata for runtime type check
-                from bioetl.domain.models.metadata import SourceMetadata
-
                 if isinstance(result, SourceMetadata):
-                    return result
+                    source_metadata = result
             except Exception:
                 # Gracefully handle any errors in metadata collection
                 pass
-        return None
+
+        # Inject query_string if we have one and it's not already set
+        if self._query_string:
+            if source_metadata is not None:
+                if source_metadata.query_string is None:
+                    source_metadata = source_metadata.model_copy(
+                        update={"query_string": self._query_string}
+                    )
+            else:
+                # Create minimal SourceMetadata with query_string
+                source_metadata = SourceMetadata(
+                    type="api",
+                    query_string=self._query_string,
+                )
+
+        return source_metadata
 
     async def _process_batch(
         self, records: list[dict[str, Any]], start_index: int

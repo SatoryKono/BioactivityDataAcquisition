@@ -24,6 +24,7 @@ from bioetl.domain.models.metadata import (
     LayerType,
     RunTypeEnum,
     SilverMetadata,
+    SourceMetadata,
 )
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
@@ -224,6 +225,128 @@ class TestBronzeMetadata:
         assert len(metadata.output.files) == 1
         assert metadata.output.files[0].path == input_data.output_path
         assert metadata.output.files[0].record_count == 500
+
+    def test_bronze_metadata_includes_query_string_from_input(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Bronze metadata should include query_string from BronzeMetadataInput."""
+        input_data = BronzeMetadataInput(
+            batch_id=BatchID(uuid4()),
+            record_count=100,
+            compressed_size=5000,
+            output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
+            started_at=datetime.now(UTC),
+            completed_at=datetime.now(UTC),
+            query_string="assay_type=B&standard_type=IC50",
+        )
+
+        metadata = coordinator.create_bronze_metadata(input_data)
+
+        assert metadata.source.query_string == "assay_type=B&standard_type=IC50"
+
+    def test_bronze_metadata_preserves_source_query_string(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Should preserve query_string from source_metadata if already set."""
+        source = SourceMetadata(
+            type="api",
+            url="https://www.ebi.ac.uk/chembl/api/data/activity",
+            query_string="original_query=value",
+        )
+        input_data = BronzeMetadataInput(
+            batch_id=BatchID(uuid4()),
+            record_count=100,
+            compressed_size=5000,
+            output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
+            started_at=datetime.now(UTC),
+            completed_at=datetime.now(UTC),
+            source_metadata=source,
+            query_string="override_query=should_be_ignored",
+        )
+
+        metadata = coordinator.create_bronze_metadata(input_data)
+
+        # Original query_string from source_metadata should be preserved
+        assert metadata.source.query_string == "original_query=value"
+
+    def test_bronze_metadata_injects_query_string_when_source_has_none(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Should inject query_string into source_metadata if source has query_string=None."""
+        source = SourceMetadata(
+            type="api",
+            url="https://www.ebi.ac.uk/chembl/api/data/activity",
+            # query_string is None by default
+        )
+        input_data = BronzeMetadataInput(
+            batch_id=BatchID(uuid4()),
+            record_count=100,
+            compressed_size=5000,
+            output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
+            started_at=datetime.now(UTC),
+            completed_at=datetime.now(UTC),
+            source_metadata=source,
+            query_string="injected_query=value",
+        )
+
+        metadata = coordinator.create_bronze_metadata(input_data)
+
+        # query_string should be injected from input_data
+        assert metadata.source.query_string == "injected_query=value"
+        # Other source_metadata fields should be preserved
+        assert metadata.source.url == "https://www.ebi.ac.uk/chembl/api/data/activity"
+
+    def test_bronze_metadata_query_string_defaults_to_none(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Bronze metadata query_string should default to None when not provided."""
+        input_data = BronzeMetadataInput(
+            batch_id=BatchID(uuid4()),
+            record_count=100,
+            compressed_size=5000,
+            output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
+            started_at=datetime.now(UTC),
+            completed_at=datetime.now(UTC),
+            # No query_string provided
+        )
+
+        metadata = coordinator.create_bronze_metadata(input_data)
+
+        assert metadata.source.query_string is None
+
+
+class TestSourceMetadataQueryString:
+    """Tests for SourceMetadata query_string field."""
+
+    def test_source_metadata_with_query_string(self) -> None:
+        """SourceMetadata should store query_string."""
+        source = SourceMetadata(
+            type="api",
+            url="https://www.ebi.ac.uk/chembl/api/data/activity",
+            query_string="assay_type=B&standard_type=IC50",
+        )
+
+        assert source.query_string == "assay_type=B&standard_type=IC50"
+        assert source.type == "api"
+
+    def test_source_metadata_query_string_default_none(self) -> None:
+        """SourceMetadata.query_string defaults to None."""
+        source = SourceMetadata(type="api")
+
+        assert source.query_string is None
+
+    def test_source_metadata_model_copy_with_query_string(self) -> None:
+        """SourceMetadata.model_copy should work with query_string update."""
+        source = SourceMetadata(
+            type="api",
+            url="https://example.com",
+        )
+
+        updated = source.model_copy(update={"query_string": "new_query=value"})
+
+        assert updated.query_string == "new_query=value"
+        assert updated.url == "https://example.com"  # Original preserved
+        assert source.query_string is None  # Original unchanged
 
 
 class TestSilverMetadata:
