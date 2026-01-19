@@ -83,7 +83,7 @@ class TestFileSizeLimits:
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
         "services_factory.py": 630,  # 623 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
         # Infrastructure layer exemptions
-        "silver_writer.py": 1140,  # 1126 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage
+        "silver_writer.py": 1141,  # 1126 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage + fromisoformat timezone validation
         "gold_writer.py": 930,  # 918 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage
         "bronze_writer.py": 760,  # 749 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param
         "gold.py": 970,  # 961 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + lookup metadata comments + publication schemas)

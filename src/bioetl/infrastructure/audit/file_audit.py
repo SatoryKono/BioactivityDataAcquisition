@@ -16,7 +16,7 @@ Requirements:
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -260,9 +260,13 @@ class FileAuditAdapter:
 
         from bioetl.domain.types import RunID
 
+        timestamp = datetime.fromisoformat(data["timestamp"])
+        if timestamp.tzinfo is None:
+            timestamp = timestamp.replace(tzinfo=UTC)
+
         return AuditEntry(
             run_id=RunID(UUID(data["run_id"])),
-            timestamp=datetime.fromisoformat(data["timestamp"]),
+            timestamp=timestamp,
             layer=AuditLayer(data["layer"]),
             table_name=data["table_name"],
             operation=AuditOperation(data["operation"]),
