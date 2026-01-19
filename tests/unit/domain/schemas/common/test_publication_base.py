@@ -308,9 +308,7 @@ class TestPublicationBaseSchemaMultipleRecords:
         with pytest.raises(pa.errors.SchemaError):
             PublicationBaseSchema.validate(df)
 
-    def test_lazy_validation_collects_all_errors(
-        self, valid_base_record: dict
-    ) -> None:
+    def test_lazy_validation_collects_all_errors(self, valid_base_record: dict) -> None:
         """Lazy validation should collect all errors."""
         record1 = valid_base_record.copy()
         record1["pmid"] = "INVALID1"  # Invalid PMID
