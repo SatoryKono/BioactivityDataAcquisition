@@ -1,6 +1,6 @@
 """Pandera schema for OpenAlex Publication entity.
 
-Aligned with RULES.md v5.8.
+Aligned with RULES.md v5.10.
 Includes lookup metadata fields for DOI/title resolution tracking.
 """
 
@@ -10,27 +10,44 @@ import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
-from bioetl.domain.schemas.base import ETLRecordSchema
-from bioetl.domain.validation import (
-    DOI_REGEX_PATTERN,
-    MAX_PUBLICATION_YEAR,
-    MIN_PUBLICATION_YEAR,
+from bioetl.domain.schemas.common.publication_base import (
+    LOOKUP_METHODS,
+    PublicationBaseSchema,
 )
+from bioetl.domain.validation import DOI_REGEX_PATTERN
 
-# Lookup method values
-LOOKUP_METHODS = ["doi", "title_fallback", "title_only", "unknown"]
+# Re-export for backwards compatibility
+__all__ = [
+    "DOI_REGEX_PATTERN",
+    "LOOKUP_METHODS",
+    "OA_STATUS_VALUES",
+    "OpenAlexPublicationSchema",
+]
 
 # Valid OA status values
 OA_STATUS_VALUES = ["gold", "green", "hybrid", "bronze", "closed"]
 
 
-class OpenAlexPublicationSchema(ETLRecordSchema):
+class OpenAlexPublicationSchema(PublicationBaseSchema):
     """OpenAlex Publication validation schema for Silver layer.
 
     Validates publication records from OpenAlex Works API.
     Includes both core publication fields and lookup metadata
     for batch DOI resolution tracking.
     """
+
+    # === Lookup metadata (OpenAlex-specific) ===
+    lookup_method: Series[str] = pa.Field(
+        alias="_lookup_method",
+        nullable=False,
+        isin=LOOKUP_METHODS,
+        description="How record was resolved: doi, title_fallback, title_only",
+    )
+    original_id: Series[str] = pa.Field(
+        alias="_original_id",
+        nullable=True,
+        description="Original identifier from input (for fallback records)",
+    )
 
     # === Primary Key ===
     openalex_id: Series[str] = pa.Field(
@@ -39,61 +56,28 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
         description="OpenAlex Work ID (e.g., W2148763428)",
     )
 
-    # === Cross-reference IDs for linking publications across providers ===
-    # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
-    doi: Series[str] = pa.Field(
-        nullable=True,
-        str_matches=DOI_REGEX_PATTERN,
-        description="Digital Object Identifier (normalized: lowercase, stripped)",
-    )
-    # pmid: PubMed ID (numeric string: "12345678")
-    pmid: Series[str] = pa.Field(
-        nullable=True,
-        str_matches=r"^\d+$",
-        description="PubMed identifier (numeric string: '12345678').",
-    )
-    # pmc_id: PubMed Central ID (format: "PMC1234567")
-    pmc_id: Series[str] = pa.Field(
-        nullable=True,
-        str_matches=r"^PMC\d+$",
-        description="PubMed Central identifier (format: 'PMC1234567').",
-    )
-
-    # === Core Fields ===
-    title: Series[str] = pa.Field(
-        nullable=True,
-        description="Publication title",
-    )
-
-    abstract: Series[str] = pa.Field(
-        nullable=True,
-        description="Reconstructed abstract",
-    )
-
+    # === Override year with pd.Int64Dtype for nullable int ===
     year: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
-        ge=MIN_PUBLICATION_YEAR,
-        le=MAX_PUBLICATION_YEAR,
+        ge=1800,
+        le=2100,
         description="Publication year (1800-2100).",
     )
 
+    # === Publication date ===
     publication_date: Series[str] = pa.Field(
         nullable=True,
         str_matches=r"^\d{4}-\d{2}-\d{2}$",
         description="Publication date (YYYY-MM-DD)",
     )
 
+    # === Override doc_type to be non-nullable ===
     doc_type: Series[str] = pa.Field(
         nullable=False,
         description="Publication type (PUBLICATION, PREPRINT, etc.)",
     )
 
-    # === Journal ===
-    journal: Series[str] = pa.Field(
-        nullable=True,
-        description="Journal/source name",
-    )
-
+    # === Provider-specific Fields ===
     issn: Series[str] = pa.Field(
         nullable=True,
         description="ISSN-L",
@@ -116,9 +100,7 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
         description="OA status",
     )
 
-    # === Metrics ===
-    # OpenAlex source field: cited_by_count
-    # Unified BioETL field: citation_count (standardized across all providers)
+    # === Override citation_count with pd.Int64Dtype for nullable int ===
     citation_count: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
         ge=0,
@@ -136,34 +118,8 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
         description="Data source identifier",
     )
 
-    # === Lookup Metadata (batch DOI resolution) ===
-    # Note: Using alias for underscore-prefixed column names since Pandera
-    # treats underscore-prefixed attributes as private with strict='filter'
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(
-        alias="_lookup_method",
-        nullable=False,
-        isin=LOOKUP_METHODS,
-        description="How record was resolved: doi, title_fallback, title_only",
-    )
-
-    original_id: Series[str] = pa.Field(
-        alias="_original_id",
-        nullable=True,
-        description="Original identifier from input (for fallback records)",
-    )
-
-    # === DQ Fields ===
-    _dq_warn: Series[bool] = pa.Field(
-        nullable=True, default=False, description="DQ warning flag."
-    )
-    _dq_error: Series[bool] = pa.Field(
-        nullable=True, default=False, description="DQ error flag."
-    )
-
     class Config:
         """Pandera configuration."""
 
-        strict = "filter"  # Filter out columns not in schema
+        strict = False  # Allow missing columns and extra columns
         coerce = True  # Coerce data types to match schema

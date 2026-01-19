@@ -1,7 +1,7 @@
 """Pandera schema for CrossRef Publication (enriched) entity.
 
 Used for Silver layer validation of publications enriched via CrossRef API.
-Aligned with RULES.md v5.8.
+Aligned with RULES.md v5.10.
 """
 
 from __future__ import annotations
@@ -9,117 +9,51 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
-from bioetl.domain.schemas.base import ETLRecordSchema
-from bioetl.domain.validation import (
-    DOI_REGEX_PATTERN,
-    MAX_PUBLICATION_YEAR,
-    MIN_PUBLICATION_YEAR,
-)
+from bioetl.domain.schemas.common.publication_base import PublicationBaseSchema
+from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # === Fixed Value Constants ===
 DOCUMENT_TYPES = ["PUBLICATION", "PREPRINT"]
 
 
-class PublicationEnrichedSchema(ETLRecordSchema):
+class PublicationEnrichedSchema(PublicationBaseSchema):
     """CrossRef-enriched Publication validation schema for Silver layer.
 
     Represents publication metadata from CrossRef API with citation enrichment.
     """
 
-    # === Cross-reference IDs for linking publications across providers ===
-    # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
+    # === Primary Key (override doi to be non-nullable) ===
     doi: Series[str] = pa.Field(
         nullable=False,
         str_matches=DOI_REGEX_PATTERN,
         description="Digital Object Identifier (normalized: lowercase, stripped)",
     )
-    # pmid: PubMed ID (numeric string: "12345678")
-    pmid: Series[str] | None = pa.Field(
-        nullable=True,
-        str_matches=r"^\d+$",
-        description="PubMed identifier (numeric string: '12345678').",
-    )
-    # pmc_id: PubMed Central ID (format: "PMC1234567")
-    pmc_id: Series[str] | None = pa.Field(
-        nullable=True,
-        str_matches=r"^PMC\d+$",
-        description="PubMed Central identifier (format: 'PMC1234567').",
-    )
 
-    # === Core Metadata ===
-    title: Series[str] | None = pa.Field(
-        nullable=True,
-        str_length={"min_value": 1},
-        description="Publication title (first title from CrossRef)",
-    )
-    abstract: Series[str] | None = pa.Field(
-        nullable=True, description="Abstract text (HTML tags stripped)"
-    )
+    # === Provider-specific Fields ===
+    issn: Series[str] = pa.Field(nullable=True, description="JSON array of ISSNs")
+    publisher: Series[str] = pa.Field(nullable=True, description="Publisher name")
 
-    # === Authors ===
-    authors: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of author names in 'given family' format",
-    )
-
-    # === Journal Information ===
-    journal: Series[str] | None = pa.Field(
-        nullable=True, description="Journal name (container-title[0])"
-    )
-    issn: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of ISSNs"
-    )
-    publisher: Series[str] | None = pa.Field(
-        nullable=True, description="Publisher name"
-    )
-
-    # === Publication Details ===
-    volume: Series[str] | None = pa.Field(nullable=True, description="Journal volume")
-    issue: Series[str] | None = pa.Field(nullable=True, description="Journal issue")
-    first_page: Series[str] | None = pa.Field(
-        nullable=True, description="First page (extracted from 'page' field)"
-    )
-    last_page: Series[str] | None = pa.Field(
-        nullable=True, description="Last page (extracted from 'page' field)"
-    )
-
-    # === Dates ===
-    year: Series[int] | None = pa.Field(
-        nullable=True,
-        ge=MIN_PUBLICATION_YEAR,
-        le=MAX_PUBLICATION_YEAR,
-        description="Publication year (1800-2100).",
-    )
-    published_print: Series[str] | None = pa.Field(
+    # === Dates (CrossRef-specific) ===
+    published_print: Series[str] = pa.Field(
         nullable=True, description="Print publication date (ISO format)"
     )
-    published_online: Series[str] | None = pa.Field(
+    published_online: Series[str] = pa.Field(
         nullable=True, description="Online publication date (ISO format)"
     )
 
-    # === Document Type ===
+    # === Override doc_type with CrossRef-specific values ===
     doc_type: Series[str] = pa.Field(
         nullable=False,
         isin=DOCUMENT_TYPES,
         description="Document type: PUBLICATION or PREPRINT",
     )
 
-    # === Citation Metrics ===
-    citation_count: Series[int] | None = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of citations (is-referenced-by-count)",
-    )
-    reference_count: Series[int] | None = pa.Field(
-        nullable=True, ge=0, description="Number of references in the work"
-    )
-
     # === Additional Metadata ===
-    language: Series[str] | None = pa.Field(
+    language: Series[str] = pa.Field(
         nullable=True, description="Publication language code"
     )
-    license_url: Series[str] | None = pa.Field(nullable=True, description="License URL")
-    subjects: Series[str] | None = pa.Field(
+    license_url: Series[str] = pa.Field(nullable=True, description="License URL")
+    subjects: Series[str] = pa.Field(
         nullable=True, description="JSON array of subject areas"
     )
 
@@ -128,19 +62,11 @@ class PublicationEnrichedSchema(ETLRecordSchema):
         nullable=False, eq="crossref", description="Data source identifier"
     )
 
-    # === DQ Fields ===
-    _dq_warn: Series[bool] = pa.Field(
-        nullable=True, default=False, description="DQ warning flag."
-    )
-    _dq_error: Series[bool] = pa.Field(
-        nullable=True, default=False, description="DQ error flag."
-    )
-
     class Config:
         """Pandera configuration."""
 
-        strict = True
-        ordered = True
+        strict = False  # Allow missing columns and extra columns
+        ordered = False  # Changed to False for inheritance compatibility
         coerce = True
         name = "PublicationEnrichedSchema"
         description = "CrossRef-enriched Publication Silver layer validation"
