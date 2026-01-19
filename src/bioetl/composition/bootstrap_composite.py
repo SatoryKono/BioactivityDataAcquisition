@@ -204,20 +204,48 @@ def bootstrap_composite_pipeline(
         ctx = build_pipeline_context(config.seed.pipeline, options)
         return bootstrap_pipeline(ctx)
 
+    # Build enricher config lookup for fast access
+    enricher_configs = {e.pipeline: e for e in config.enrichers}
+
     # Create enricher runner factory
     def enricher_runner_factory(
         pipeline_name: str, keys: pl.DataFrame
     ) -> PipelineRunner:
         # For enrichers in composite mode:
         # 1. Disable YAML input_filter - we don't want enrichers to use their
-        #    own filter files (e.g., data/input/dois.csv). Instead, they should
-        #    fetch all available data and MergeService will join only matching keys.
-        # 2. Future optimization: extract DOIs/PMIDs from keys and pass as filter_ids
-        #    to limit API calls to only relevant records.
+        #    own filter files (e.g., data/input/dois.csv).
+        # 2. Extract DOIs/PMIDs from keys DataFrame based on enricher's join_keys
+        #    and pass them as filter_ids to limit API calls.
+
+        # Get enricher config to determine join keys
+        enricher_cfg = enricher_configs.get(pipeline_name)
+        filter_ids: tuple[str, ...] | None = None
+        filter_field: str | None = None
+
+        if enricher_cfg and keys is not None and len(keys) > 0:
+            # Use the first join key (usually 'doi' or 'pmid')
+            join_keys = enricher_cfg.join_keys
+            for key in join_keys:
+                if key in keys.columns:
+                    # Extract unique non-null values from the keys DataFrame
+                    key_values = (
+                        keys.select(key)
+                        .drop_nulls()
+                        .unique()
+                        .to_series()
+                        .to_list()
+                    )
+                    if key_values:
+                        filter_ids = tuple(str(v) for v in key_values)
+                        filter_field = key
+                        break
+
         options = RunOptions(
             run_type="incremental",
             limit=len(keys) if keys is not None else None,
             ignore_yaml_filter=True,  # Disable YAML input_filter for composite mode
+            filter_ids=filter_ids,
+            filter_field=filter_field,
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline(ctx)
