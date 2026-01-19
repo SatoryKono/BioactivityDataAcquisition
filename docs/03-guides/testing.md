@@ -117,11 +117,13 @@ make test  # Использует -n auto --dist loadscope
 make test-serial
 ```
 
-**Производительность**:
+**Производительность** (verified 2026-01-19):
 
-- Serial: ~147s
-- Parallel (auto): ~54s
-- Улучшение: **~63%**
+- Serial: ~150-180s (зависит от hardware)
+- Parallel (auto): ~55-75s (зависит от hardware)
+- Улучшение: **~60-65%**
+
+**Статус pytest-xdist**: Работает корректно. Проблема с collection была решена в v5.9.0.
 
 ### 6.2. Hypothesis Профили
 
