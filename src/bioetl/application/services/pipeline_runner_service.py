@@ -162,7 +162,7 @@ class PipelineRunnerService:
     Stateless and thread-safe - creates runners per call via injected factory.
 
     This service can be used from:
-    - CLI (Click/Typer commands)
+    - CLI (Click commands)
     - REST API (FastAPI/Flask endpoints)
     - Schedulers (Airflow operators, Prefect flows)
     - Python scripts (direct programmatic access)
