@@ -459,7 +459,7 @@ class TestClassSize:
         "PostrunService": 355,  # 349 lines - postrun service
         "BronzeWriter": 705,  # 702 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata
         "BatchExecutor": 710,  # 703 lines - unified executor for batch processing + DQ context
-        "BatchWriter": 375,  # 371 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage
+        "BatchWriter": 380,  # 376 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage + DQ defaults
         # Application core classes
         "FilteredDataSource": 330,  # 320 lines - decorator with fallback mapping support
         # CrossRef adapter classes (similar to ChEMBL/PubMed adapters)
