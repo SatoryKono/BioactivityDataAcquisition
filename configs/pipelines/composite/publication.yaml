@@ -188,5 +188,5 @@ gold_filters:
 # Maintenance Configuration
 # -----------------------------------------------------------------------------
 maintenance:
-  auto_vacuum: false
+  auto_vacuum: true
   vacuum_retention_days: 7
