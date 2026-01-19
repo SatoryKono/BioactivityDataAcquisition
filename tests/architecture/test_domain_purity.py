@@ -267,8 +267,6 @@ class TestDomainComplexity:
             # Composite pipeline domain models (ADR-026)
             "DQOverrideConfig": 10,  # CC=9 - DQ override validation with threshold checks
             "from_dict": 8,  # CC=6 - Dictionary parsing with type conversions
-            # Domain filtering validation
-            "_validate_enabled_fields": 8,  # CC=7 - InputFilterConfig validation with multi-mode checks
         }
 
         violations = []
