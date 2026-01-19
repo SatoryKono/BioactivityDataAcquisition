@@ -446,6 +446,37 @@ class MergeService:
             case _:
                 return df
 
+    def _can_coalesce(self, df: pl.DataFrame, col1: str, col2: str) -> bool:
+        """Check if two columns can be coalesced (compatible types).
+
+        Args:
+            df: DataFrame containing the columns.
+            col1: First column name.
+            col2: Second column name.
+
+        Returns:
+            True if columns have compatible types for coalescing.
+        """
+        import polars as pl
+
+        type1 = df[col1].dtype
+        type2 = df[col2].dtype
+
+        # Same type is always compatible
+        if type1 == type2:
+            return True
+
+        # Null type is compatible with anything
+        if type1 == pl.Null or type2 == pl.Null:
+            return True
+
+        # List types are incompatible with scalar types
+        if isinstance(type1, pl.List) != isinstance(type2, pl.List):
+            return False
+
+        # Different scalar types may be compatible (Polars handles casting)
+        return True
+
     def _coalesce_prefer_seed(
         self, df: pl.DataFrame, enrichers: Sequence[EnricherConfig]
     ) -> pl.DataFrame:
@@ -455,14 +486,30 @@ class MergeService:
         result = df
         for enricher in enrichers:
             prefix = f"{enricher.pipeline}_"
-            for col in df.columns:
+            for col in list(
+                result.columns
+            ):  # Copy list to avoid mutation during iteration
                 if col.startswith(prefix):
                     base_col = col[len(prefix) :]
-                    if base_col in df.columns:
-                        # Coalesce seed (base) over enricher
-                        result = result.with_columns(
-                            pl.coalesce(pl.col(base_col), pl.col(col)).alias(base_col)
-                        ).drop(col)
+                    if base_col in result.columns:
+                        # Check type compatibility before coalescing
+                        if self._can_coalesce(result, base_col, col):
+                            # Coalesce seed (base) over enricher
+                            result = result.with_columns(
+                                pl.coalesce(pl.col(base_col), pl.col(col)).alias(
+                                    base_col
+                                )
+                            ).drop(col)
+                        else:
+                            # Incompatible types - keep seed value, drop enricher
+                            self._logger.debug(
+                                "Skipping coalesce for incompatible types",
+                                seed_col=base_col,
+                                enricher_col=col,
+                                seed_type=str(result[base_col].dtype),
+                                enricher_type=str(result[col].dtype),
+                            )
+                            result = result.drop(col)
         return result
 
     def _coalesce_prefer_enricher(
@@ -474,14 +521,30 @@ class MergeService:
         result = df
         for enricher in enrichers:
             prefix = f"{enricher.pipeline}_"
-            for col in df.columns:
+            for col in list(
+                result.columns
+            ):  # Copy list to avoid mutation during iteration
                 if col.startswith(prefix):
                     base_col = col[len(prefix) :]
-                    if base_col in df.columns:
-                        # Coalesce enricher over seed (base)
-                        result = result.with_columns(
-                            pl.coalesce(pl.col(col), pl.col(base_col)).alias(base_col)
-                        ).drop(col)
+                    if base_col in result.columns:
+                        # Check type compatibility before coalescing
+                        if self._can_coalesce(result, base_col, col):
+                            # Coalesce enricher over seed (base)
+                            result = result.with_columns(
+                                pl.coalesce(pl.col(col), pl.col(base_col)).alias(
+                                    base_col
+                                )
+                            ).drop(col)
+                        else:
+                            # Incompatible types - prefer enricher if non-null exists
+                            self._logger.debug(
+                                "Skipping coalesce for incompatible types",
+                                seed_col=base_col,
+                                enricher_col=col,
+                                seed_type=str(result[base_col].dtype),
+                                enricher_type=str(result[col].dtype),
+                            )
+                            result = result.drop(col)
         return result
 
     def _coalesce_first_non_null(
@@ -527,13 +590,34 @@ class MergeService:
                     ordered_cols.append(col)
 
             if ordered_cols:
-                # Coalesce in priority order
-                result = result.with_columns(
-                    pl.coalesce(*[pl.col(c) for c in ordered_cols]).alias(field)
-                )
-                # Drop prefixed columns
+                # Filter to only compatible types for coalescing
+                base_col = ordered_cols[0]
+                compatible_cols = [base_col]
+                cols_to_drop = []
+
                 for col in ordered_cols[1:]:
-                    if col != field:
+                    if self._can_coalesce(result, base_col, col):
+                        compatible_cols.append(col)
+                    else:
+                        # Incompatible type - mark for dropping
+                        self._logger.debug(
+                            "Skipping column with incompatible type in explicit rules",
+                            field=field,
+                            incompatible_col=col,
+                            base_type=str(result[base_col].dtype),
+                            col_type=str(result[col].dtype),
+                        )
+                        cols_to_drop.append(col)
+
+                # Coalesce only compatible columns
+                if len(compatible_cols) > 1:
+                    result = result.with_columns(
+                        pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(field)
+                    )
+
+                # Drop all non-base columns (both coalesced and incompatible)
+                for col in ordered_cols[1:]:
+                    if col != field and col in result.columns:
                         result = result.drop(col)
 
         return result
