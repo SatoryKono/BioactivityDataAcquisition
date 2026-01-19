@@ -18,6 +18,9 @@ from __future__ import annotations
 # Composite pipeline subpackage (ADR-026)
 from bioetl.domain import composite
 
+# Domain constants module
+from bioetl.domain import constants
+
 # Configuration objects
 from bioetl.domain.config import (
     DEFAULT_VALIDATION_CONFIG,
@@ -238,9 +241,11 @@ from bioetl.domain.serialization import (
 # Domain services
 from bioetl.domain.services import IdentityService
 
+# Domain constants
+from bioetl.domain.constants import META_FIELDS
+
 # Pure domain transformations
 from bioetl.domain.transformations import (
-    META_FIELDS,
     calculate_dq_score,
     canonical_json_dumps,
     detect_hash_collision,
@@ -306,6 +311,8 @@ from bioetl.domain.value_objects import (
 __all__ = [
     # Composite pipeline (subpackage)
     "composite",
+    # Constants
+    "constants",
     # Configuration
     "DEFAULT_VALIDATION_CONFIG",
     "DQConfig",
