@@ -356,7 +356,7 @@ sha256(provider + canonical_json(record))
 - Floats → `round(val, 10)`
 - Dates → ISO `YYYY-MM-DD`
 - Strings → `strip()`
-- **Исключить**: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`
+- **Исключить**: `_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_index`, `_dq_*`
 
 ---
 
