@@ -62,19 +62,20 @@ class InputFilterConfig:
         """Validate fields required when filtering is enabled."""
         if not self.enabled:
             return
-
-        # Direct filter IDs mode: only need filter_field
         if self.direct_filter_ids is not None:
-            if not self.filter_field:
-                raise ValueError(
-                    "filter_field is required when using direct_filter_ids"
-                )
-            return
+            self._validate_direct_ids_mode()
+        else:
+            self._validate_csv_mode()
 
-        # CSV-based mode: need source_path
+    def _validate_direct_ids_mode(self) -> None:
+        """Validate direct filter IDs mode configuration."""
+        if not self.filter_field:
+            raise ValueError("filter_field is required when using direct_filter_ids")
+
+    def _validate_csv_mode(self) -> None:
+        """Validate CSV-based filter configuration."""
         if not self.source_path:
             raise ValueError("source_path is required when filter is enabled")
-        # Either columns list or single column_name/filter_field must be provided
         if self.columns:
             self._validate_columns()
         elif not self._has_single_column_config():
