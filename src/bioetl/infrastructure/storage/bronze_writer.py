@@ -561,6 +561,11 @@ class BronzeWriter:
                         BronzeMetadataInput,
                     )
 
+                    # Extract query_string from source_metadata for BronzeMetadataInput
+                    # This allows MetadataCoordinator to include it in metadata sidecar
+                    query_string = (
+                        source_metadata.query_string if source_metadata else None
+                    )
                     bronze_input = BronzeMetadataInput(
                         batch_id=batch_id,
                         record_count=record_count,
@@ -569,6 +574,7 @@ class BronzeWriter:
                         started_at=ingestion_ts,
                         completed_at=completed_at,
                         source_metadata=source_metadata,
+                        query_string=query_string,
                     )
                     bronze_metadata = self._metadata_coordinator.create_bronze_metadata(
                         bronze_input
