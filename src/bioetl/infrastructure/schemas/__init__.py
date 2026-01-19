@@ -9,7 +9,15 @@ Components:
     common_config: Shared configuration types.
     silver: Silver layer schema definitions.
     gold: Gold layer schema definitions.
+    dq_config: Standalone DQ configuration file schemas.
 
 These schemas ensure type safety and validation when loading
 YAML configuration files from configs/pipelines/.
 """
+
+from bioetl.infrastructure.schemas.dq_config import DQConfigFile, ThresholdsConfig
+
+__all__ = [
+    "DQConfigFile",
+    "ThresholdsConfig",
+]
