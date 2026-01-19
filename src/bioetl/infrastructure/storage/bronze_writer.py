@@ -672,9 +672,9 @@ class BronzeWriter:
             with decompressor.stream_reader(compressed_data) as reader:
                 return reader.read()
 
-        loop = asyncio.get_running_loop()
-        decompressed_data = await loop.run_in_executor(None, _read_and_decompress)
-
+        decompressed_data = await asyncio.get_running_loop().run_in_executor(
+            None, _read_and_decompress
+        )
         for line in decompressed_data.decode("utf-8").splitlines():
             if line.strip():
                 yield orjson.loads(line)
