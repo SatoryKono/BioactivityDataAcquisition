@@ -144,6 +144,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
         for i in range(0, len(dois), self.batch_size):
             batch = dois[i : i + self.batch_size]
             async for work in self._fetch_by_dois(batch):
+                work["_lookup_method"] = "doi"
                 yield work
                 fetched += 1
                 if limit and fetched >= limit:
@@ -249,6 +250,16 @@ class OpenAlexAdapter(BaseHttpAdapter):
             fetched += 1
             if limit and fetched >= limit:
                 return
+
+        # Log Phase 1 summary
+        if valid_dois:
+            self.logger.info(
+                "openalex_doi_lookup_summary",
+                total_dois=len(valid_dois),
+                found_by_doi=len(found_dois),
+                missing_dois=len(valid_dois) - len(found_dois),
+                hit_rate_pct=round(len(found_dois) / len(valid_dois) * 100, 1),
+            )
 
         # Phase 2: Fallback by title for unresolved DOIs
         async for work in self._fallback_handler.process_missing_dois(
@@ -403,8 +414,18 @@ class OpenAlexAdapter(BaseHttpAdapter):
             self._request_collector.record_from_response(response, duration_ms)
 
         data = response.json()
+        results = data.get("results", [])
 
-        for work in data.get("results", []):
+        # Log hit rate for diagnostics
+        if len(results) < len(normalized):
+            self.logger.info(
+                "openalex_batch_partial_results",
+                requested=len(normalized),
+                found=len(results),
+                hit_rate=round(len(results) / len(normalized) * 100, 1),
+            )
+
+        for work in results:
             yield work
 
     async def _search_by_title(
