@@ -334,7 +334,16 @@ class BatchWriter:
             # This ensures strict schema validation passes (REQ-DATA-009)
             schema_columns = self._get_schema_columns(self._gold_schema)
             if schema_columns:
-                records = [{k: r[k] for k in schema_columns if k in r} for r in records]
+                # DQ columns with default values if missing (required by Gold schemas)
+                dq_defaults = {"_dq_warn": False, "_dq_error": False}
+                records = [
+                    {
+                        k: r.get(k, dq_defaults.get(k))
+                        for k in schema_columns
+                        if k in r or k in dq_defaults
+                    }
+                    for r in records
+                ]
 
             # Validate Gold records
             result = self._gold_validator.validate(records)
