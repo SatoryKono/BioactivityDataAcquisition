@@ -66,9 +66,15 @@ class ArticleRecord(BaseModel):
     issn: str | None = PydanticField(default=None, description="ISSN")
     volume: str | None = PydanticField(default=None, description="Volume number")
     issue: str | None = PydanticField(default=None, description="Issue number")
-    pages: str | None = PydanticField(default=None, description="Page numbers (medline_pgn)")
-    first_page: str | None = PydanticField(default=None, description="First page (unified)")
-    last_page: str | None = PydanticField(default=None, description="Last page (unified)")
+    pages: str | None = PydanticField(
+        default=None, description="Page numbers (medline_pgn)"
+    )
+    first_page: str | None = PydanticField(
+        default=None, description="First page (unified)"
+    )
+    last_page: str | None = PydanticField(
+        default=None, description="Last page (unified)"
+    )
 
     # Authors (JSON-serialized list of hashed names for PII compliance)
     authors: str | None = PydanticField(

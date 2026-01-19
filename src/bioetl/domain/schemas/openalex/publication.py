@@ -17,7 +17,12 @@ from bioetl.domain.schemas.common.publication_base import (
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Re-export for backwards compatibility
-__all__ = ["DOI_REGEX_PATTERN", "LOOKUP_METHODS", "OA_STATUS_VALUES", "OpenAlexPublicationSchema"]
+__all__ = [
+    "DOI_REGEX_PATTERN",
+    "LOOKUP_METHODS",
+    "OA_STATUS_VALUES",
+    "OpenAlexPublicationSchema",
+]
 
 # Valid OA status values
 OA_STATUS_VALUES = ["gold", "green", "hybrid", "bronze", "closed"]

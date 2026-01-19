@@ -86,8 +86,8 @@ class TestFileSizeLimits:
         "silver_writer.py": 1140,  # 1126 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage
         "gold_writer.py": 930,  # 918 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage
         "bronze_writer.py": 760,  # 749 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param
-        "gold.py": 960,  # 950 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + lookup metadata comments)
-        "silver.py": 795,  # 782 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata)
+        "gold.py": 970,  # 961 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + lookup metadata comments + publication schemas)
+        "silver.py": 810,  # 804 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas)
         "client.py": 700,  # 692 LOC - ChemblAdapter (complex FilterableDataSourcePort), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "pipeline_config.py": 785,  # 771 LOC - Pipeline configuration loading and validation + TransformConfig
@@ -475,6 +475,8 @@ class TestClassSize:
         "SemanticScholarAdapter": 590,  # 588 lines - HTTP adapter with multi-identifier fallback + FilterableDataSourcePort
         # PubMed adapter (similar to ChEMBL adapter)
         "PubMedAdapter": 500,  # 488 lines - HTTP adapter with Entrez API + full FilterableDataSourcePort
+        # PubMed transformer (complex XML extraction)
+        "PubMedPublicationTransformer": 320,  # 310 lines - XML extraction with multiple extractors
         # OpenAlex adapter (FilterableDataSourcePort with batch DOI + title fallback)
         "OpenAlexAdapter": 540,  # 539 lines - HTTP adapter with batch DOI resolution + title fallback
         # Error handling utility (ErrorService + deprecated ErrorHandler alias)
@@ -637,6 +639,7 @@ class TestGodObjectDetection:
         "UniProtProteinTransformer": "Transformer with comprehensive UniProt field extraction - single responsibility",
         "PubChemAdapter": "Sync adapter using ThreadPoolExecutor; delegates to BaseSyncAdapter, CircuitBreaker",
         "PubMedAdapter": "HTTP adapter with FilterableDataSourcePort implementation; delegates to BaseHttpAdapter",
+        "PubMedPublicationTransformer": "Transformer with XML extraction - delegates to extractors (Abstract, Author, Date, etc.)",
         "OpenAlexAdapter": "HTTP adapter with FilterableDataSourcePort; batch DOI resolution + title fallback",
         "SemanticScholarAdapter": "HTTP adapter with multi-identifier fallback; delegates to BaseHttpAdapter, CircuitBreaker",
         "UniProtIDMappingClient": "ID Mapping client with job-based async API; delegates to BaseHttpAdapter, AdapterMetrics",

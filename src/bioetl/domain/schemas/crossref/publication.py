@@ -30,12 +30,8 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     )
 
     # === Provider-specific Fields ===
-    issn: Series[str] = pa.Field(
-        nullable=True, description="JSON array of ISSNs"
-    )
-    publisher: Series[str] = pa.Field(
-        nullable=True, description="Publisher name"
-    )
+    issn: Series[str] = pa.Field(nullable=True, description="JSON array of ISSNs")
+    publisher: Series[str] = pa.Field(nullable=True, description="Publisher name")
 
     # === Dates (CrossRef-specific) ===
     published_print: Series[str] = pa.Field(
