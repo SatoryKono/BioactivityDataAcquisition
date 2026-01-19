@@ -229,9 +229,42 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         """
         return False
 
+    def _parse_pages(self, pages: str | None) -> tuple[str | None, str | None]:
+        """Parse medline_pgn format into first_page and last_page.
+
+        Handles formats like:
+        - "123-456" -> ("123", "456")
+        - "123" -> ("123", None)
+        - "e123-e456" -> ("e123", "e456")
+        - "S1-S10" -> ("S1", "S10")
+        - None or empty -> (None, None)
+
+        Args:
+            pages: Page string in medline_pgn format.
+
+        Returns:
+            Tuple of (first_page, last_page).
+        """
+        if not pages or not pages.strip():
+            return None, None
+
+        pages = pages.strip()
+        # Split on hyphen, but handle cases like "e123-e456"
+        if "-" in pages:
+            parts = pages.split("-", 1)
+            first = parts[0].strip() or None
+            last = parts[1].strip() if len(parts) > 1 and parts[1].strip() else None
+            return first, last
+
+        # Single page number
+        return pages, None
+
     def _extract_journal_data(self, article: ET.Element) -> dict[str, Any]:
         """Extract journal-related data from article XML."""
         journal = article.find(".//Journal")
+        pages = get_text(article.find(".//Pagination/MedlinePgn"))
+        first_page, last_page = self._parse_pages(pages)
+
         if not journal:
             return {
                 "journal": None,
@@ -239,7 +272,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 "issn": None,
                 "volume": None,
                 "issue": None,
-                "pages": get_text(article.find(".//Pagination/MedlinePgn")),
+                "pages": pages,
+                "first_page": first_page,
+                "last_page": last_page,
             }
 
         journal_issue = journal.find("JournalIssue")
@@ -249,8 +284,37 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "issn": get_text(journal.find("ISSN")),
             "volume": get_text(journal_issue.find("Volume")) if journal_issue else None,
             "issue": get_text(journal_issue.find("Issue")) if journal_issue else None,
-            "pages": get_text(article.find(".//Pagination/MedlinePgn")),
+            "pages": pages,
+            "first_page": first_page,
+            "last_page": last_page,
         }
+
+    def _compute_publication_date(
+        self, epub_date: str | None, pub_date: str | None, year: int | None
+    ) -> str | None:
+        """Compute unified publication_date with priority: epub_date > pub_date > year.
+
+        Args:
+            epub_date: Electronic publication date (YYYY-MM-DD or partial).
+            pub_date: Publication date (YYYY-MM-DD or partial).
+            year: Publication year.
+
+        Returns:
+            ISO date string (YYYY-MM-DD) or None.
+        """
+        # Priority 1: epub_date if it's a complete date (YYYY-MM-DD)
+        if epub_date and len(epub_date) >= 10:
+            return epub_date[:10]
+
+        # Priority 2: pub_date if it's a complete date
+        if pub_date and len(pub_date) >= 10:
+            return pub_date[:10]
+
+        # Priority 3: Construct from year (use Jan 1 as default)
+        if year:
+            return f"{year}-01-01"
+
+        return None
 
     def _extract_date_data(
         self, article: ET.Element, pubmed_data: ET.Element | None
@@ -266,12 +330,20 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         year_vo = PublicationYear.from_raw(raw_year)
         validated_year = year_vo.value if year_vo else None
 
+        epub_date = DateExtractor.extract_article_date(article, "Electronic")
+
+        # Compute unified publication_date
+        publication_date = self._compute_publication_date(
+            epub_date, pub_date, validated_year
+        )
+
         return {
             "pub_date": pub_date,
+            "publication_date": publication_date,
             "year": validated_year,
             "publication_year": validated_year,
             "accepted_date": DateExtractor.extract_history_date(history, "accepted"),
             "received_date": DateExtractor.extract_history_date(history, "received"),
             "revised_date": DateExtractor.extract_history_date(history, "revised"),
-            "epub_date": DateExtractor.extract_article_date(article, "Electronic"),
+            "epub_date": epub_date,
         }

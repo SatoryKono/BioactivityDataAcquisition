@@ -214,6 +214,7 @@
     'doi': '10.1234/test.2025.001',
     'entity_id': '<entity_id>',
     'epub_date': '2025-02-28',
+    'first_page': '123',
     'gene_symbols': list([
     ]),
     'is_oa': None,
@@ -226,6 +227,7 @@
       'python',
     ]),
     'language': 'eng',
+    'last_page': '145',
     'mesh_terms': list([
       'Software Testing',
     ]),
@@ -234,7 +236,7 @@
     'pmc_id': 'PMC1234567',
     'pmid': '98765432',
     'pub_date': '2025-03-15',
-    'publication_date': None,
+    'publication_date': '2025-02-28',
     'publication_types': list([
       'Journal Article',
       'Research Support',
@@ -272,6 +274,7 @@
     'doi': None,
     'entity_id': '<entity_id>',
     'epub_date': None,
+    'first_page': None,
     'gene_symbols': list([
     ]),
     'is_oa': None,
@@ -282,6 +285,7 @@
     'keywords': list([
     ]),
     'language': None,
+    'last_page': None,
     'mesh_terms': list([
     ]),
     'oa_status': None,
@@ -323,6 +327,7 @@
     'last_page': '110',
     'patent_id': None,
     'pmid': '12345678',
+    'publication_date': '2024-01-01',
     'src_id': 1,
     'title': 'Test Document Title',
     'volume': '10',
