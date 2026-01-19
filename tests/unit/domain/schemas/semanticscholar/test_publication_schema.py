@@ -76,17 +76,17 @@ class TestPmidValidation:
 class TestPmcidValidation:
     """Tests for PMCID field validation."""
 
-    def test_valid_pmcid_format(self) -> None:
+    def test_valid_pmc_id_format(self) -> None:
         """Test valid PMCID with PMC prefix."""
-        valid_pmcid = "PMC1234567"
+        valid_pmc_id = "PMC1234567"
         pattern = r"^PMC\d+$"
-        assert re.match(pattern, valid_pmcid) is not None
+        assert re.match(pattern, valid_pmc_id) is not None
 
-    def test_invalid_pmcid_no_prefix(self) -> None:
+    def test_invalid_pmc_id_no_prefix(self) -> None:
         """Test PMCID without PMC prefix fails."""
-        invalid_pmcid = "1234567"
+        invalid_pmc_id = "1234567"
         pattern = r"^PMC\d+$"
-        assert re.match(pattern, invalid_pmcid) is None
+        assert re.match(pattern, invalid_pmc_id) is None
 
 
 class TestYearValidation:
@@ -233,7 +233,7 @@ class TestSchemaFieldDefinitions:
             "paper_id",
             "doi",
             "pmid",
-            "pmcid",
+            "pmc_id",
             "arxiv_id",
             "corpus_id",
             "title",
@@ -280,7 +280,7 @@ class TestSchemaFieldDefinitions:
         nullable_fields = [
             "doi",
             "pmid",
-            "pmcid",
+            "pmc_id",
             "arxiv_id",
             "title",
             "abstract",

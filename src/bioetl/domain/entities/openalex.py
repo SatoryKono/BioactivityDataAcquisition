@@ -148,8 +148,9 @@ class OpenAlexPublicationRecord(BaseModel):
     )
 
     # External identifiers
-    pmcid: str | None = PydanticField(
-        default=None, description="PubMed Central ID (e.g., PMC7095418)"
+    # pmc_id: PubMed Central ID (format: "PMC1234567")
+    pmc_id: str | None = PydanticField(
+        default=None, description="PubMed Central ID (format: PMC1234567)"
     )
     mag_id: str | None = PydanticField(
         default=None, description="Microsoft Academic Graph ID"
@@ -206,7 +207,8 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     openalex_id: str
 
     # External identifiers (in addition to inherited doi, pmid)
-    pmcid: str | None = None  # PubMed Central ID (e.g., PMC7095418)
+    # pmc_id: PubMed Central ID (format: "PMC1234567")
+    pmc_id: str | None = None
     mag_id: str | None = None  # Microsoft Academic Graph ID
 
     # OpenAlex-specific: Concepts (top-level only)

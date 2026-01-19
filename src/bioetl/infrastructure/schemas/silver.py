@@ -396,9 +396,11 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("journal_full_title", pa.string()),
         pa.field("last_page", pa.string()),
         pa.field("patent_id", pa.string()),
-        pa.field(
-            "pmid", pa.string()
-        ),  # Standardized name (was pubmed_id), numeric string for cross-provider consistency
+        # Cross-reference IDs for linking publications across providers
+        # pmc_id: PubMed Central ID (format: "PMC1234567") - nullable, may not exist for all publications
+        pa.field("pmc_id", pa.string()),
+        # pmid: PubMed ID (numeric string: "12345678")
+        pa.field("pmid", pa.string()),
         pa.field("src_id", pa.int64()),
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
@@ -597,7 +599,10 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("pages", pa.string()),
         # Primary key
         pa.field("paper_id", pa.string()),
-        pa.field("pmcid", pa.string()),
+        # Cross-reference IDs for linking publications across providers
+        # pmc_id: PubMed Central ID (format: "PMC1234567")
+        pa.field("pmc_id", pa.string()),
+        # pmid: PubMed ID (numeric string: "12345678")
         pa.field("pmid", pa.string()),
         pa.field("publication_date", pa.string()),
         pa.field("publication_types", pa.string()),
@@ -639,7 +644,8 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("citation_count", pa.int64()),
         # Metadata
         pa.field("doc_type", pa.string()),
-        # Primary key
+        # Cross-reference IDs for linking publications across providers
+        # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
         pa.field("doi", pa.string()),
         pa.field("first_page", pa.string()),
         pa.field("issn", pa.list_(pa.string())),
@@ -649,6 +655,10 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("language", pa.string()),
         pa.field("last_page", pa.string()),
         pa.field("license_url", pa.string()),
+        # pmc_id: PubMed Central ID (format: "PMC1234567") - nullable, may not exist for all publications
+        pa.field("pmc_id", pa.string()),
+        # pmid: PubMed ID (numeric string: "12345678") - nullable, may not exist for all publications
+        pa.field("pmid", pa.string()),
         # Date fields
         pa.field("published_online", pa.string()),
         pa.field("published_print", pa.string()),
@@ -691,7 +701,8 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("concepts", pa.list_(pa.string())),
         # Metadata
         pa.field("doc_type", pa.string()),
-        # Core fields
+        # Cross-reference IDs for linking publications across providers
+        # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
         pa.field("doi", pa.string()),
         pa.field("is_oa", pa.bool_()),
         # Journal info
@@ -701,6 +712,10 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("oa_status", pa.string()),
         # Primary key
         pa.field("openalex_id", pa.string()),
+        # pmc_id: PubMed Central ID (format: "PMC1234567") - nullable, may not exist for all publications
+        pa.field("pmc_id", pa.string()),
+        # pmid: PubMed ID (numeric string: "12345678") - nullable, may not exist for all publications
+        pa.field("pmid", pa.string()),
         # Date fields
         pa.field("publication_date", pa.string()),
         pa.field("publisher", pa.string()),

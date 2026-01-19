@@ -26,11 +26,24 @@ class PublicationEnrichedSchema(ETLRecordSchema):
     Represents publication metadata from CrossRef API with citation enrichment.
     """
 
-    # === Primary Key (DOI) ===
+    # === Cross-reference IDs for linking publications across providers ===
+    # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
     doi: Series[str] = pa.Field(
         nullable=False,
         str_matches=DOI_REGEX_PATTERN,
         description="Digital Object Identifier (normalized: lowercase, stripped)",
+    )
+    # pmid: PubMed ID (numeric string: "12345678")
+    pmid: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=r"^\d+$",
+        description="PubMed identifier (numeric string: '12345678').",
+    )
+    # pmc_id: PubMed Central ID (format: "PMC1234567")
+    pmc_id: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=r"^PMC\d+$",
+        description="PubMed Central identifier (format: 'PMC1234567').",
     )
 
     # === Core Metadata ===

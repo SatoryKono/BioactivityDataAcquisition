@@ -39,13 +39,27 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
         description="OpenAlex Work ID (e.g., W2148763428)",
     )
 
-    # === Core Fields ===
+    # === Cross-reference IDs for linking publications across providers ===
+    # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
     doi: Series[str] = pa.Field(
         nullable=True,
         str_matches=DOI_REGEX_PATTERN,
-        description="Digital Object Identifier",
+        description="Digital Object Identifier (normalized: lowercase, stripped)",
+    )
+    # pmid: PubMed ID (numeric string: "12345678")
+    pmid: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^\d+$",
+        description="PubMed identifier (numeric string: '12345678').",
+    )
+    # pmc_id: PubMed Central ID (format: "PMC1234567")
+    pmc_id: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^PMC\d+$",
+        description="PubMed Central identifier (format: 'PMC1234567').",
     )
 
+    # === Core Fields ===
     title: Series[str] = pa.Field(
         nullable=True,
         description="Publication title",

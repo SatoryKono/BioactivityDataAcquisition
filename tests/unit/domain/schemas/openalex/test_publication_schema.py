@@ -37,7 +37,10 @@ def valid_record() -> dict:
         "_dq_error": False,
         "_index": 0,
         "openalex_id": "W2148763428",
+        # Cross-reference IDs for linking publications across providers
         "doi": "10.1038/s41586-024-07487-w",
+        "pmid": "12345678",  # PubMed ID (numeric string)
+        "pmc_id": "PMC1234567",  # PubMed Central ID (format: PMC1234567)
         "title": "Example Publication",
         "abstract": "This is an abstract",
         "year": 2024,
