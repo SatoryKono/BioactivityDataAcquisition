@@ -227,10 +227,6 @@ class TestFunctionComplexity:
         "from_dict": 8,  # CC=6 - Dictionary parsing with type conversions
         # BatchExecutor DQ context extraction
         "get_dq_context": 13,  # CC=12 - DQ context gathering with nullable field handling
-        # Domain filtering validation
-        "_validate_enabled_fields": 8,  # CC=7 - InputFilterConfig validation with multi-mode checks
-        # FilteredDataSource context manager
-        "__aenter__": 14,  # CC=13 - Data source initialization with provider/entity type dispatch
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
