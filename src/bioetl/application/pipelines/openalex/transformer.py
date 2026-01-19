@@ -58,8 +58,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
     - concepts: concepts (top-level only)
 
     Handles lookup metadata:
-    - _lookup_method: "doi" | "title_fallback" | "title_only"
-    - _original_doi: Original DOI for fallback records
+    - _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+    - _original_id: Original identifier used for lookup
 
     Subclasses BasePublicationTransformer to provide:
     - Unified transformation flow via Template Method
@@ -169,7 +169,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
         # Lookup metadata (from adapter)
         lookup_method = rec.get("_lookup_method", "unknown")
-        original_doi = rec.get("_original_doi")
+        original_id = rec.get("_original_id")
 
         return {
             "openalex_id": openalex_id,
@@ -196,7 +196,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "keywords": keywords,
             "language": rec.get("language"),
             "_lookup_method": lookup_method,
-            "_original_doi": original_doi,
+            "_original_id": original_id,
             "source": "openalex",
         }
 

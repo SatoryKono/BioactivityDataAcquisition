@@ -139,7 +139,7 @@ class TestSemanticScholarYearValidation:
             "authors": None,
             "source": "semanticscholar",
             "_lookup_method": "doi",
-            "_original_doi": None,
+            "_original_id": None,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:

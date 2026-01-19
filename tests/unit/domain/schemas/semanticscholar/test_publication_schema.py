@@ -276,7 +276,7 @@ class TestSchemaFieldDefinitions:
     def test_optional_fields_nullable(self) -> None:
         """Test optional string fields are nullable."""
         schema = SemanticScholarPublicationSchema.to_schema()
-        # Note: underscore-prefixed fields like _original_doi are not exposed
+        # Note: underscore-prefixed fields like _original_id are not exposed
         nullable_fields = [
             "doi",
             "pmid",

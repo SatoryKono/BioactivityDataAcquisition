@@ -144,7 +144,7 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     Inherited from PublicationEntityBase:
         doi, pmid, title, abstract, authors, journal, issn (str), publisher,
         year, publication_date, citation_count, doc_type, language, is_oa,
-        oa_status, _lookup_method, _original_doi, source.
+        oa_status, _lookup_method, _original_id, source.
 
     CrossRef-specific Attributes:
         issn: List of ISSNs (overrides base str|None with list[str]).
