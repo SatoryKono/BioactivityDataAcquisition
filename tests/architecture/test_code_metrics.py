@@ -45,7 +45,7 @@ class TestFileSizeLimits:
         "activity.py": 330,  # 327 LOC - Activity domain types with rich validation
         "types.py": 400,  # 396 LOC
         "chembl_structures.py": 470,  # ~469 LOC - ChEMBL structural entities + deprecated aliases (v2.0)
-        "config_types.py": 320,  # 313 LOC
+        "config_types.py": 430,  # 425 LOC - TypedDict definitions for YAML config parsing (DQ config extended)
         "exceptions.py": 550,  # 513 LOC
         # Domain value objects (rich domain models with validation)
         "batch.py": 550,  # 531 LOC - Batch aggregate with lifecycle methods
