@@ -7,10 +7,11 @@ See ADR-026 for architectural decisions.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 import yaml
+from pydantic import ValidationError
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointManager
 from bioetl.application.composite.coordinator import EnrichmentCoordinator
@@ -23,19 +24,10 @@ from bioetl.application.composite.runner import (
 from bioetl.composition._bootstrap import bootstrap_logger, bootstrap_storage
 from bioetl.composition.bootstrap import bootstrap_pipeline
 from bioetl.composition.entrypoints import RunOptions, build_pipeline_context
-from bioetl.domain.composite.config import (
-    CompositeConfig,
-    CompositeDQConfig,
-    DQOverrideConfig,
-    EnricherConfig,
-    ExecutionConfig,
-    LineageConfig,
-    MergeConfig,
-    SeedConfig,
-)
-from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
+from bioetl.domain.composite.config import CompositeConfig
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
+from bioetl.infrastructure.schemas.composite_config import CompositeConfigFileSchema
 
 if TYPE_CHECKING:
     import polars as pl
@@ -49,6 +41,9 @@ COMPOSITE_CONFIG_DIR = Path("configs/pipelines/composite")
 def load_composite_config(name: str) -> CompositeConfig:
     """Load and parse composite pipeline configuration from YAML.
 
+    Uses Pydantic schema validation (CompositeConfigFileSchema) to ensure
+    configuration is valid before converting to domain objects.
+
     Args:
         name: Composite pipeline name (e.g., 'publication').
 
@@ -57,7 +52,7 @@ def load_composite_config(name: str) -> CompositeConfig:
 
     Raises:
         FileNotFoundError: If config file doesn't exist.
-        ValueError: If config is invalid.
+        ValueError: If config is invalid (wraps Pydantic ValidationError).
     """
     config_path = COMPOSITE_CONFIG_DIR / f"{name}.yaml"
     if not config_path.exists():
@@ -66,102 +61,14 @@ def load_composite_config(name: str) -> CompositeConfig:
     with config_path.open() as f:
         raw = yaml.safe_load(f)
 
-    return _parse_composite_config(raw)
-
-
-def _parse_composite_config(raw: dict[str, Any]) -> CompositeConfig:
-    """Parse raw YAML dict into CompositeConfig.
-
-    Args:
-        raw: Raw YAML dictionary.
-
-    Returns:
-        CompositeConfig instance.
-    """
-    composite = raw.get("composite", {})
-
-    # Parse seed config
-    seed_raw = composite.get("seed", {})
-    seed = SeedConfig(
-        pipeline=seed_raw.get("pipeline", ""),
-        output_keys=tuple(seed_raw.get("output_keys", [])),
-        silver_table=seed_raw.get("silver_table", ""),
-    )
-
-    # Parse enrichers
-    enrichers_raw = composite.get("enrichers", [])
-    enrichers = tuple(
-        EnricherConfig(
-            pipeline=e.get("pipeline", ""),
-            join_keys=tuple(e.get("join_keys", [])),
-            required=e.get("required", False),
-            filter_condition=e.get("filter_condition"),
-            timeout_seconds=e.get("timeout_seconds", 600),
-            silver_table=e.get("silver_table", ""),
-            fallback_strategy=e.get("fallback_strategy", "fail"),
-        )
-        for e in enrichers_raw
-    )
-
-    # Parse merge config
-    merge_raw = composite.get("merge", {})
-    output_raw = merge_raw.get("output", {})
-    merge = MergeConfig(
-        strategy=MergeStrategy(merge_raw.get("strategy", "left_outer")),
-        conflict_resolution=ConflictResolution(
-            merge_raw.get("conflict_resolution", "seed_priority")
-        ),
-        field_priorities=merge_raw.get("field_priorities", {}),
-        output_silver_path=output_raw.get("silver", ""),
-        output_gold_path=output_raw.get("gold", ""),
-    )
-
-    # Parse DQ config
-    dq_raw = composite.get("dq_rules", {})
-    # Convert enricher_overrides from raw dicts to DQOverrideConfig objects
-    overrides_raw = dq_raw.get("enricher_overrides", {})
-    enricher_overrides = {
-        name: DQOverrideConfig(
-            soft_fail_threshold=override.get("soft_fail_threshold"),
-            hard_fail_threshold=override.get("hard_fail_threshold"),
-        )
-        for name, override in overrides_raw.items()
-    }
-    dq = CompositeDQConfig(
-        soft_fail_threshold=dq_raw.get("soft_fail_threshold", 0.10),
-        hard_fail_threshold=dq_raw.get("hard_fail_threshold", 0.30),
-        enricher_overrides=enricher_overrides,
-        required_fields=tuple(dq_raw.get("required_fields", [])),
-    )
-
-    # Parse execution config
-    exec_raw = composite.get("execution", {})
-    retry_raw = exec_raw.get("retry", {})
-    execution = ExecutionConfig(
-        max_concurrency=exec_raw.get("max_concurrency", 4),
-        checkpoint_enabled=exec_raw.get("checkpoint_enabled", True),
-        retry_max_attempts=retry_raw.get("max_attempts", 3),
-        retry_backoff_multiplier=retry_raw.get("backoff_multiplier", 2.0),
-    )
-
-    # Parse lineage config
-    lineage_raw = composite.get("lineage", {})
-    lineage = LineageConfig(
-        track_field_sources=lineage_raw.get("track_field_sources", True),
-        track_timestamps=lineage_raw.get("track_timestamps", True),
-        track_status=lineage_raw.get("track_status", True),
-    )
-
-    return CompositeConfig(
-        name=composite.get("name", ""),
-        version=composite.get("version", "1.0.0"),
-        seed=seed,
-        enrichers=enrichers,
-        merge=merge,
-        dq=dq,
-        execution=execution,
-        lineage=lineage,
-    )
+    try:
+        # Validate using Pydantic schema
+        schema = CompositeConfigFileSchema.model_validate(raw)
+        # Convert to immutable domain objects
+        return schema.to_domain()
+    except ValidationError as e:
+        # Convert Pydantic errors to ValueError for consistent API
+        raise ValueError(f"Invalid composite config '{name}': {e}") from e
 
 
 def bootstrap_composite_pipeline(
