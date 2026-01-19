@@ -178,7 +178,7 @@ class MergeService:
         return path
 
     async def _read_silver_table(self, path: str) -> pl.DataFrame:
-        """Read a Silver table via StoragePort.
+        """Read a Silver table directly from Delta Lake.
 
         Args:
             path: Table path like "silver/chembl/activity".
@@ -187,18 +187,15 @@ class MergeService:
             Polars DataFrame with table contents.
         """
         import polars as pl
+        from deltalake import DeltaTable
 
-        # Convert path to table name by stripping layer prefix
-        table_name = _path_to_table_name(path)
-
-        # Read via StoragePort
-        records = await self._storage.read_silver(table_name)
-
-        # Convert to DataFrame
-        if not records:
-            return pl.DataFrame()
-
-        return pl.DataFrame(records)
+        resolved_path = self._resolve_path(path)
+        table = DeltaTable(resolved_path)
+        result = pl.from_arrow(table.to_pyarrow_table())
+        # from_arrow may return Series for single-column tables
+        if isinstance(result, pl.Series):
+            return result.to_frame()
+        return result
 
     def _coerce_null_columns(self, df: pl.DataFrame) -> pl.DataFrame:
         """Coerce Null-typed columns to String for Delta Lake compatibility.
@@ -224,40 +221,48 @@ class MergeService:
         return df
 
     async def _write_merged_silver(self, df: pl.DataFrame) -> None:
-        """Write merged data to Silver layer via StoragePort.
+        """Write merged data to Silver layer directly to Delta Lake.
 
         Args:
             df: Polars DataFrame to write.
         """
+        from deltalake import DeltaTable, write_deltalake
+
         # Coerce null columns for Delta Lake compatibility
         df = self._coerce_null_columns(df)
 
-        # Convert path to table name by stripping layer prefix
-        table_name = _path_to_table_name(self._config.output_silver_path)
+        # Resolve output path
+        output_path = self._resolve_path(self._config.output_silver_path)
 
-        # Convert DataFrame to list of dicts
-        records = df.to_dicts()
-
-        # Write via StoragePort
-        await self._storage.write_silver_merged(table_name, records)
+        # Write directly to Delta Lake
+        write_deltalake(
+            output_path,
+            df.to_arrow(),
+            mode="overwrite",
+            schema_mode="overwrite",
+        )
 
     async def _write_merged_gold(self, df: pl.DataFrame) -> None:
-        """Write merged data to Gold layer via StoragePort.
+        """Write merged data to Gold layer directly to Delta Lake.
 
         Args:
             df: Polars DataFrame to write.
         """
+        from deltalake import write_deltalake
+
         # Coerce null columns for Delta Lake compatibility
         df = self._coerce_null_columns(df)
 
-        # Convert path to table name by stripping layer prefix
-        table_name = _path_to_table_name(self._config.output_gold_path)
+        # Resolve output path
+        output_path = self._resolve_path(self._config.output_gold_path)
 
-        # Convert DataFrame to list of dicts
-        records = df.to_dicts()
-
-        # Write via StoragePort
-        await self._storage.write_gold_merged(table_name, records)
+        # Write directly to Delta Lake
+        write_deltalake(
+            output_path,
+            df.to_arrow(),
+            mode="overwrite",
+            schema_mode="overwrite",
+        )
 
     def _infer_silver_table(self, pipeline_name: str) -> str:
         """Infer Silver table path from pipeline name."""

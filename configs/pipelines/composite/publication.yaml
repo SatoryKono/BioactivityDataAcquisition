@@ -51,7 +51,7 @@ composite:
         - title
       required: true     # Composite fails if this enricher fails
       timeout_seconds: 900
-      silver_table: silver/crossref/publication
+      silver_table: silver/crossref/crossref_publication
 
     # OpenAlex: Academic concepts and institutions
     # OPTIONAL: Failure logged, composite continues
@@ -62,7 +62,7 @@ composite:
       required: true
       filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
       timeout_seconds: 600
-      silver_table: silver/openalex/publication
+      silver_table: silver/openalex/publication/openalex_publication
 
     # PubMed: MeSH terms and medical metadata
     # OPTIONAL: Only processes records with pmid
@@ -73,7 +73,7 @@ composite:
       required: true
       filter_condition: "pmid IS NOT NULL"
       timeout_seconds: 600
-      silver_table: silver/pubmed/publication
+      silver_table: silver/pubmed/publication/pubmed_publication
 
     # Semantic Scholar: AI/ML embeddings and TLDR
     # OPTIONAL: Higher rate limits, ok to skip
@@ -85,7 +85,7 @@ composite:
       filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
       timeout_seconds: 1200
       fallback_strategy: skip  # Skip on failure (high rate limits)
-      silver_table: silver/semanticscholar/publication
+      silver_table: silver/semanticscholar/publication/semanticscholar_publication
 
   # ---------------------------------------------------------------------------
   # Merge Configuration
