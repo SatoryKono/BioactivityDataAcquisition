@@ -526,8 +526,8 @@ class TestSemanticScholarDateNormalization:
             "invalid",
             "2024/05/15",  # Wrong separator
             "15-05-2024",  # Wrong order
-            "2024-5-15",   # Missing zero-padding
-            "20240515",    # No separators
+            "2024-5-15",  # Missing zero-padding
+            "20240515",  # No separators
         ],
     )
     async def test_publication_date_invalid_format(

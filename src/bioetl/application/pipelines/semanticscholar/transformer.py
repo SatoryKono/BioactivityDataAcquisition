@@ -185,7 +185,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "last_page": last_page,  # Unified field
             "venue": rec.get("venue"),
             "year": year,
-            "publication_date": self._normalize_partial_date(rec.get("publicationDate")),
+            "publication_date": self._normalize_partial_date(
+                rec.get("publicationDate")
+            ),
             "citation_count": rec.get("citationCount"),
             "reference_count": rec.get("referenceCount"),
             "is_oa": oa_info.get("is_oa"),
