@@ -90,6 +90,11 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
     )
     """Title fallback handler for resolving publications when PMID lookup fails."""
 
+    _request_collector: APIRequestCollector = field(
+        init=False, default_factory=APIRequestCollector
+    )
+    """Collects API request metadata for Bronze layer enrichment."""
+
     def __post_init__(self) -> None:
         """Initialize adapter metrics, error handler and fallback handler."""
         # Initialize error handler from base class
@@ -120,8 +125,15 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
             params["api_key"] = self.api_key
 
         try:
+            start_time = time.perf_counter()
             with self._adapter_metrics.measure_request("/esearch"):
                 response = await self.http_client.get(search_url, params=params)
+            duration_ms = (time.perf_counter() - start_time) * 1000
+
+            # Record request for metadata enrichment
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
+
             data = response.json()
             idlist: list[str] = data.get("esearchresult", {}).get("idlist", [])
             return idlist
@@ -153,10 +165,17 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
         """Fetch a batch of articles and return parsed records."""
         params = self._build_fetch_params(id_batch)
         try:
+            start_time = time.perf_counter()
             with self._adapter_metrics.measure_request("/efetch"):
                 response = await self.http_client.get(
                     f"{ENTREZ_API_BASE}efetch.fcgi", params=params
                 )
+            duration_ms = (time.perf_counter() - start_time) * 1000
+
+            # Record request for metadata enrichment
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
+
             root = PubMedXmlProcessor.parse_response(response.text)
             if root is None:
                 self.logger.error(
@@ -531,6 +550,33 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
 
         """
         return "/entrez/eutils/esearch.fcgi"
+
+    def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
+        """Get API request metadata and clear collector.
+
+        Returns aggregated metadata from all API requests made since last clear.
+        Used by BatchExecutor to enrich Bronze layer metadata.
+
+        Args:
+            api_version: Optional API version string.
+
+        Returns:
+            SourceMetadata with request details and statistics.
+        """
+        metadata = self._request_collector.to_source_metadata(
+            source_type="api", url=ENTREZ_API_BASE, api_version=api_version
+        )
+        self._request_collector.clear()
+        return metadata
+
+    def clear_request_collector(self) -> None:
+        """Clear the collector without returning metadata."""
+        self._request_collector.clear()
+
+    @property
+    def request_count(self) -> int:
+        """Number of recorded API requests since last clear."""
+        return self._request_collector.request_count
 
     async def aclose(self) -> None:
         """Close adapter resources.

@@ -208,12 +208,16 @@ def bootstrap_composite_pipeline(
     def enricher_runner_factory(
         pipeline_name: str, keys: pl.DataFrame
     ) -> PipelineRunner:
-        # For enrichers, we need to pass the keys as filter
-        # This is a simplified version - full implementation would
-        # extract DOIs/PMIDs from keys and pass as filter_ids
+        # For enrichers in composite mode:
+        # 1. Disable YAML input_filter - we don't want enrichers to use their
+        #    own filter files (e.g., data/input/dois.csv). Instead, they should
+        #    fetch all available data and MergeService will join only matching keys.
+        # 2. Future optimization: extract DOIs/PMIDs from keys and pass as filter_ids
+        #    to limit API calls to only relevant records.
         options = RunOptions(
             run_type="incremental",
             limit=len(keys) if keys is not None else None,
+            ignore_yaml_filter=True,  # Disable YAML input_filter for composite mode
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline(ctx)

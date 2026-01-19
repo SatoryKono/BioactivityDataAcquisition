@@ -128,6 +128,7 @@ class RunOptions:
         vacuum_after_run: Enable automatic VACUUM after successful run.
         vacuum_retention_days: Minimum age of files to remove during VACUUM.
         log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
+        ignore_yaml_filter: Ignore input_filter from YAML config (for composite mode).
     """
 
     run_type: str = "incremental"
@@ -140,6 +141,7 @@ class RunOptions:
     vacuum_after_run: bool | None = None
     vacuum_retention_days: int | None = None
     log_level: str = "INFO"
+    ignore_yaml_filter: bool = False
 
 
 class PipelineNotFoundError(ValueError):
