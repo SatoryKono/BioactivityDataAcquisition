@@ -130,6 +130,25 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
 
         return pages, None
 
+    def _normalize_pmc_id(self, pmc_id: str | None) -> str | None:
+        """Ensure PMC ID has 'PMC' prefix.
+
+        Normalizes PMC IDs to uppercase with 'PMC' prefix for consistency
+        across providers.
+
+        Args:
+            pmc_id: Raw PMC ID (may or may not have prefix).
+
+        Returns:
+            Normalized PMC ID with 'PMC' prefix, or None if input is empty.
+        """
+        if not pmc_id:
+            return None
+        pmc_id = pmc_id.strip()
+        if not pmc_id.upper().startswith("PMC"):
+            return f"PMC{pmc_id}"
+        return pmc_id.upper()
+
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
         """Extract and normalize fields from Semantic Scholar record.
 
@@ -195,7 +214,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "paper_id": paper_id,
             "doi": doi,
             "pmid": pmid,  # Use validated PMID from PubMedId Value Object
-            "pmc_id": external_ids.get("pmcid"),  # API uses "pmcid", we use "pmc_id"
+            "pmc_id": self._normalize_pmc_id(
+                external_ids.get("pmcid")
+            ),  # API uses "pmcid", we use "pmc_id"
             "arxiv_id": external_ids.get("arxiv"),
             "corpus_id": external_ids.get("corpus_id"),
             "title": rec.get("title"),
@@ -221,6 +242,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             # Lookup metadata
             "_lookup_method": lookup_method,
             "_original_id": original_id,
+            # DQ flags (default: no warnings or errors)
+            "_dq_warn": False,
+            "_dq_error": False,
         }
 
     def _get_primary_id_field(self) -> str:

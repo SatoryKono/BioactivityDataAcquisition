@@ -130,6 +130,12 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         raw_authors = extract_authors(rec)
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
+        # Compute unified publication_date (prefer print over online)
+        publication_date = self._compute_publication_date(
+            dates.get("published_print"),
+            dates.get("published_online"),
+        )
+
         return {
             "doi": doi,
             "title": extract_first_string(rec.get("title", [])),
@@ -139,6 +145,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             **page_info,
             **dates,
             "year": extract_year(rec),
+            "publication_date": publication_date,
             "doc_type": CROSSREF_TYPE_MAP.get(rec.get("type", ""), "PUBLICATION"),
             "citation_count": rec.get("is-referenced-by-count"),
             "reference_count": rec.get("references-count"),
@@ -146,9 +153,15 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "license_url": extract_license_url(rec),
             "subjects": rec.get("subject", []),
             "source": "crossref",
+            # Cross-reference IDs (CrossRef doesn't provide PMID or PMC ID)
+            "pmid": None,
+            "pmc_id": None,
             # Lookup metadata (from adapter fallback handler)
             "_lookup_method": rec.get("_lookup_method", "doi"),
             "_original_id": rec.get("_original_id"),
+            # DQ flags (default: no warnings or errors)
+            "_dq_warn": False,
+            "_dq_error": False,
         }
 
     def _get_primary_id_field(self) -> str:
@@ -192,6 +205,42 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         doi = record.get("DOI")
         if not doi:
             raise ValueError("DOI is required for CrossRef Publication")
+
+    def _compute_publication_date(
+        self,
+        published_print: str | None,
+        published_online: str | None,
+    ) -> str | None:
+        """Build unified publication_date, preferring print over online.
+
+        CrossRef dates from extract_dates come as partial ISO strings
+        (YYYY-MM-DD, YYYY-MM, or YYYY). We normalize to YYYY-MM-DD format.
+
+        Args:
+            published_print: Print publication date (may be partial).
+            published_online: Online publication date (may be partial).
+
+        Returns:
+            ISO date string (YYYY-MM-DD) or None.
+        """
+        date_str = published_print or published_online
+        if not date_str:
+            return None
+
+        # If already full ISO format (YYYY-MM-DD), return as-is
+        if len(date_str) == 10 and date_str[4] == "-" and date_str[7] == "-":
+            return date_str
+
+        # Partial date: YYYY-MM -> YYYY-MM-01
+        if len(date_str) == 7 and date_str[4] == "-":
+            return f"{date_str}-01"
+
+        # Partial date: YYYY -> YYYY-01-01
+        if len(date_str) == 4 and date_str.isdigit():
+            return f"{date_str}-01-01"
+
+        # Unknown format, return as-is (shouldn't happen with extract_dates)
+        return date_str
 
     def _should_log_fallback_lookup(self) -> bool:
         """Disable fallback lookup logging for CrossRef.
