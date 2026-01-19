@@ -83,6 +83,18 @@ class FilteredDataSource:
         """Enter async context and load filter IDs if enabled."""
         await self._data_source.__aenter__()
 
+        # Check for direct filter IDs (composite mode - no CSV needed)
+        if self._filter_config.enabled and self._filter_config.direct_filter_ids:
+            self._filter_ids = list(self._filter_config.direct_filter_ids)
+            if self._logger:
+                self._logger.info(
+                    "direct_filter_ids_loaded",
+                    count=len(self._filter_ids),
+                    filter_field=self._filter_config.filter_field,
+                    pipeline=self._pipeline_name,
+                )
+            return self
+
         # Pre-load filter IDs from CSV
         if self._filter_config.enabled and self._filter_reader:
             source_path = self._filter_config.source_path

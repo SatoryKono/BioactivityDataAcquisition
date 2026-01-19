@@ -71,6 +71,23 @@ class FilterConfigBuilder:
         )
 
     @staticmethod
+    def from_direct_ids(
+        filter_ids: tuple[str, ...],
+        filter_field: str,
+        batch_size: int = 100,
+    ) -> InputFilterConfig:
+        """Build config for direct filter IDs mode (no CSV file).
+
+        Used for composite pipelines where IDs are passed programmatically.
+        """
+        return InputFilterConfig(
+            enabled=True,
+            filter_field=filter_field,
+            direct_filter_ids=filter_ids,
+            batch_size=batch_size,
+        )
+
+    @staticmethod
     def build(
         yaml_filter: YamlInputFilter,
         cli_csv: str | None = None,
@@ -78,31 +95,40 @@ class FilterConfigBuilder:
         cli_field: str | None = None,
         *,
         test_mode: bool = False,
+        direct_filter_ids: tuple[str, ...] | None = None,
     ) -> InputFilterConfig | None:
         """Build InputFilterConfig by merging YAML config and CLI overrides.
 
-        CLI arguments take precedence over YAML configuration for single-column mode.
-        Filter is enabled if either:
-        1. A CSV path is provided via CLI
-        2. The YAML config has enabled=True (ignored in test mode)
+        Priority:
+        1. direct_filter_ids: Direct IDs (highest priority, for composite mode)
+        2. cli_csv: CSV path from CLI
+        3. yaml_filter: YAML config (disabled in test_mode)
 
         Multi-column mode (columns list in YAML) is used as-is, CLI overrides ignored.
 
         Note:
             In test mode, YAML-based filters are disabled to allow E2E tests
-            to run without requiring actual filter CSV files. Only explicitly
-            provided CLI filters will be used in test mode.
+            to run without requiring actual filter CSV files.
 
         Args:
             yaml_filter: Filter configuration from pipeline YAML
             cli_csv: Optional CSV path from CLI (single-column mode only)
             cli_column: Optional column name from CLI (single-column mode only)
             cli_field: Optional filter field from CLI (single-column mode only)
-            test_mode: If True, YAML-based filters are disabled (from Settings.test_mode)
+            test_mode: If True, YAML-based filters are disabled
+            direct_filter_ids: Direct filter IDs (no CSV file, for composite mode)
 
         Returns:
             Configured InputFilterConfig or None if filtering is disabled
         """
+        # Direct filter IDs take highest priority (composite mode)
+        if direct_filter_ids is not None:
+            return FilterConfigBuilder.from_direct_ids(
+                filter_ids=direct_filter_ids,
+                filter_field=cli_field or yaml_filter.filter_field or "doi",
+                batch_size=yaml_filter.batch_size,
+            )
+
         if not FilterConfigBuilder._is_filter_enabled(yaml_filter, cli_csv, test_mode):
             return None
 

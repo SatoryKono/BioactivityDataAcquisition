@@ -158,9 +158,17 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         PipelineRunContext ready for bootstrap_pipeline.
     """
     # Build InputFilterContext from CLI options
-    # Allow partial CLI params - FilterConfigBuilder will merge with YAML defaults
-    # If only input_csv is provided, column_name and filter_field come from YAML
-    if options.input_csv:
+    # Priority: filter_ids > input_csv > disabled
+    # - filter_ids: Direct IDs for composite mode (no CSV file needed)
+    # - input_csv: CSV file path, column_name/filter_field from YAML defaults
+    if options.filter_ids:
+        # Direct IDs mode (composite pipelines)
+        input_filter = InputFilterContext.from_ids(
+            filter_ids=options.filter_ids,
+            filter_field=options.filter_field or "doi",  # Default to DOI for publications
+        )
+    elif options.input_csv:
+        # CSV-based filtering
         input_filter = InputFilterContext(
             enabled=True,
             source_path=options.input_csv,
