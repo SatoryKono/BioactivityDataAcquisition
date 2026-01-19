@@ -15,7 +15,7 @@ from bioetl.domain.schemas.common.publication_base import (
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Re-export for backwards compatibility
-__all__ = ["ChemblPublicationSchema", "DOI_REGEX_PATTERN", "LOOKUP_METHODS"]
+__all__ = ["DOI_REGEX_PATTERN", "LOOKUP_METHODS", "ChemblPublicationSchema"]
 
 
 class ChemblPublicationSchema(PublicationBaseSchema):

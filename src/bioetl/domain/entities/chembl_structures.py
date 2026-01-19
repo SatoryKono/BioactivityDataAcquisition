@@ -41,6 +41,7 @@ class ChemblPublication(BaseEntity):
     journal: str | None = None
     journal_full_title: str | None = None
     year: int | None = None
+    publication_date: str | None = None  # ISO format: YYYY-MM-DD (computed from year)
     volume: str | None = None
     issue: str | None = None
     first_page: str | None = None

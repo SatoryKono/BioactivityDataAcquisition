@@ -103,18 +103,14 @@ class ArticleSchema(PublicationBaseSchema):
             "Series[bool]", series.isna() | series.str.match(r"^\d{4}-\d{3}[\dX]$")
         )
 
-    journal_issn_type: Series[str] = pa.Field(
-        nullable=True, description="ISSN type"
-    )
+    journal_issn_type: Series[str] = pa.Field(nullable=True, description="ISSN type")
 
     @pa.check("journal_issn_type", name="journal_issn_type_values")
     def _check_journal_issn_type(cls, series: Series[str]) -> Series[bool]:
         """Validate ISSN type values."""
         return cast("Series[bool]", series.isna() | series.isin(ISSN_TYPES))
 
-    nlm_unique_id: Series[str] = pa.Field(
-        nullable=True, description="NLM catalog ID"
-    )
+    nlm_unique_id: Series[str] = pa.Field(nullable=True, description="NLM catalog ID")
     country: Series[str] = pa.Field(
         nullable=True, description="Journal country of publication"
     )
@@ -133,9 +129,7 @@ class ArticleSchema(PublicationBaseSchema):
             | ((series >= MIN_PUBLICATION_YEAR) & (series <= MAX_PUBLICATION_YEAR)),
         )
 
-    pub_month: Series[int] = pa.Field(
-        nullable=True, description="Publication month"
-    )
+    pub_month: Series[int] = pa.Field(nullable=True, description="Publication month")
 
     @pa.check("pub_month", name="pub_month_range")
     def _check_pub_month(cls, series: Series[int]) -> Series[bool]:
@@ -176,9 +170,7 @@ class ArticleSchema(PublicationBaseSchema):
     )
 
     # === Counts (denormalized for query efficiency) ===
-    author_count: Series[int] = pa.Field(
-        nullable=True, description="Number of authors"
-    )
+    author_count: Series[int] = pa.Field(nullable=True, description="Number of authors")
 
     @pa.check("author_count", name="author_count_non_negative")
     def _check_author_count(cls, series: Series[int]) -> Series[bool]:
@@ -203,9 +195,7 @@ class ArticleSchema(PublicationBaseSchema):
         """Validate keyword count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    grant_count: Series[int] = pa.Field(
-        nullable=True, description="Number of grants"
-    )
+    grant_count: Series[int] = pa.Field(nullable=True, description="Number of grants")
 
     @pa.check("grant_count", name="grant_count_non_negative")
     def _check_grant_count(cls, series: Series[int]) -> Series[bool]:
