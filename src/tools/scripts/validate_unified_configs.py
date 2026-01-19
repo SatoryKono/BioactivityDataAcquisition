@@ -40,6 +40,10 @@ def validate_config(path: Path) -> list[str]:
     if path.name == "_base.yaml":
         return []
 
+    # Skip composite configs (ADR-026: different structure)
+    if "composite" in config:
+        return []
+
     rel_path = path.relative_to(Path("configs/pipelines"))
 
     # Check top-level keys
@@ -121,15 +125,25 @@ def main():
         errors = validate_config(yaml_file)
         configs_validated += 1
 
+        rel_path = yaml_file.relative_to(configs_dir)
+
+        # Check if this was skipped
+        with open(yaml_file) as f:
+            config_check = yaml.safe_load(f) or {}
+
+        if yaml_file.name == "_base.yaml":
+            continue  # Silent skip for base
+        elif "composite" in config_check:
+            print(f"  [SKIP] {rel_path} (composite config - ADR-026)")
+            continue
+
         if errors:
             configs_with_errors += 1
             for e in errors:
                 all_errors.append(e)
                 print(f"  [ERROR] {e}")
         else:
-            rel_path = yaml_file.relative_to(configs_dir)
-            if yaml_file.name != "_base.yaml":
-                print(f"  [OK] {rel_path}")
+            print(f"  [OK] {rel_path}")
 
     print()
     print("=" * 80)
