@@ -203,13 +203,19 @@
     'abstract': 'This is the abstract of the test article.',
     'accepted_date': '2025-01-15',
     'authors': '["Smith, John","Doe, Jane"]',
+    'chemicals': list([
+    ]),
     'citation_count': None,
     'content_hash': '<content_hash>',
     'country': 'United States',
+    'databanks': list([
+    ]),
     'doc_type': 'PUBLICATION',
     'doi': '10.1234/test.2025.001',
     'entity_id': '<entity_id>',
     'epub_date': '2025-02-28',
+    'gene_symbols': list([
+    ]),
     'is_oa': None,
     'issn': '1234-5678',
     'issue': '3',
@@ -255,13 +261,19 @@
     'abstract': None,
     'accepted_date': None,
     'authors': None,
+    'chemicals': list([
+    ]),
     'citation_count': None,
     'content_hash': '<content_hash>',
     'country': None,
+    'databanks': list([
+    ]),
     'doc_type': 'PUBLICATION',
     'doi': None,
     'entity_id': '<entity_id>',
     'epub_date': None,
+    'gene_symbols': list([
+    ]),
     'is_oa': None,
     'issn': None,
     'issue': None,

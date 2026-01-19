@@ -734,7 +734,9 @@ class BatchExecutor:
             timestamp=datetime.now(UTC),
             # Bronze context
             bronze_records=self._bronze_records_for_dq or None,
-            bronze_batch_id=self._source_batch_ids[-1] if self._source_batch_ids else None,
+            bronze_batch_id=self._source_batch_ids[-1]
+            if self._source_batch_ids
+            else None,
             bronze_source_file=self._last_bronze_path,
             # Silver context
             silver_data=silver_data,
