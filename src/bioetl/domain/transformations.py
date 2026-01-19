@@ -18,23 +18,13 @@ from datetime import date, datetime
 from functools import singledispatch
 from typing import Any
 
+from .constants import META_FIELDS
 from .serialization import serialize_to_json_canonical
 from .types import ContentHash, DriftLevel, EntityID
 
 # =============================================================================
 # Content Hash Generation (RULES.md §2.8)
 # =============================================================================
-
-# Meta-fields to exclude from hash calculation
-META_FIELDS = {
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "_dq_warn",
-    "_dq_error",
-    "_source_batch_id",
-    "_index",
-}
 
 
 @singledispatch

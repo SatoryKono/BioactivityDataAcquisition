@@ -18,21 +18,9 @@ import math
 from datetime import date, datetime
 from typing import Any
 
+from bioetl.domain.constants import META_FIELDS
 from bioetl.domain.serialization import serialize_to_json_canonical
 from bioetl.domain.types import ContentHash, EntityID
-
-# Meta-fields to exclude from hash calculation (RULES.md §2.8.1)
-META_FIELDS: frozenset[str] = frozenset(
-    {
-        "_ingestion_ts",
-        "_run_id",
-        "_run_type",
-        "_dq_warn",
-        "_dq_error",
-        "_source_batch_id",
-        "_index",
-    }
-)
 
 
 class IdentityService:
