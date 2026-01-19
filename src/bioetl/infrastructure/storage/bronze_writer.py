@@ -663,14 +663,18 @@ class BronzeWriter:
     async def read_bronze(self, path: str) -> AsyncIterator[dict[str, Any]]:
         """Read and decompress Bronze file (for testing/debugging)."""
         full_path = self.base_path / path
-        with open(full_path, "rb") as f:
-            compressed_data = f.read()
 
-        decompressor = zstd.ZstdDecompressor()
-        # Use streaming decompression since content size may not be in frame header
-        with decompressor.stream_reader(compressed_data) as reader:
-            decompressed_data = reader.read()
+        def _read_and_decompress() -> bytes:
+            with open(full_path, "rb") as f:
+                compressed_data = f.read()
+            decompressor = zstd.ZstdDecompressor()
+            # Use streaming decompression since content size may not be in frame header
+            with decompressor.stream_reader(compressed_data) as reader:
+                return reader.read()
 
+        decompressed_data = await asyncio.get_running_loop().run_in_executor(
+            None, _read_and_decompress
+        )
         for line in decompressed_data.decode("utf-8").splitlines():
             if line.strip():
                 yield orjson.loads(line)

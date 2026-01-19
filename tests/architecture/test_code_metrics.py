@@ -488,7 +488,7 @@ class TestClassSize:
         "UniProtProteinTransformer": 800,  # 772 lines - complex protein data extraction with many fields
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
-        "BronzeWriter": 710,  # 708 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata + query_string extraction
+        "BronzeWriter": 715,  # 711 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata + query_string extraction + async read_bronze
         "BatchExecutor": 710,  # 703 lines - unified executor for batch processing + DQ context
         "BatchWriter": 380,  # 376 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage + DQ defaults
         # Application core classes
