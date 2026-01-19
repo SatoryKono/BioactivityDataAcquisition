@@ -193,6 +193,8 @@
 # ---
 # name: TestPubMedPublicationTransformerSnapshot.test_transform_full_snapshot
   dict({
+    '_dq_error': False,
+    '_dq_warn': False,
     '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_lookup_method': 'pmid',
@@ -253,6 +255,8 @@
 # ---
 # name: TestPubMedPublicationTransformerSnapshot.test_transform_minimal_snapshot
   dict({
+    '_dq_error': False,
+    '_dq_warn': False,
     '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_lookup_method': 'pmid',
@@ -308,8 +312,12 @@
 # ---
 # name: TestPublicationTransformerSnapshot.test_transform_snapshot
   dict({
+    '_dq_error': False,
+    '_dq_warn': False,
     '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
+    '_lookup_method': 'direct',
+    '_original_id': 'CHEMBL1234567',
     '_run_id': '<run_id>',
     '_run_type': 'incremental',
     '_source_batch_id': None,
@@ -326,6 +334,7 @@
     'journal_full_title': 'Full Test Journal Name',
     'last_page': '110',
     'patent_id': None,
+    'pmc_id': None,
     'pmid': '12345678',
     'publication_date': '2024-01-01',
     'src_id': 1,
