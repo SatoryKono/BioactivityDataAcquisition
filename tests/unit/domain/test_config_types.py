@@ -383,5 +383,7 @@ class TestModuleExports:
         from bioetl.domain import config_types
 
         # Verify we have the expected TypedDicts
-        expected_count = 20  # 20 TypedDicts defined in config_types.py
+        # 26 TypedDicts: original 20 + 6 DQ-related (DQConfigFileDict, DQReportDict,
+        # DQRulesDict, DQThresholdsDict, ConditionalValidationDict, CrossFieldValidationDict)
+        expected_count = 26
         assert len(config_types.__all__) == expected_count
