@@ -184,7 +184,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "issn": journal_info.get("issn"),
             "publisher": journal_info.get("publisher"),
             "year": year,
-            "publication_date": self._normalize_partial_date(rec.get("publication_date")),
+            "publication_date": self._normalize_partial_date(
+                rec.get("publication_date")
+            ),
             "doc_type": doc_type,
             "is_oa": oa_info.get("is_oa"),
             "oa_status": oa_info.get("oa_status"),
