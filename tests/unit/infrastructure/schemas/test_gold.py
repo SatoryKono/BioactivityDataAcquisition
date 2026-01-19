@@ -79,9 +79,7 @@ class TestGoldPublicationSchemaUnifiedFields:
     def test_schema_has_publication_date(self, schema_class, name):
         """All Gold publication schemas must have publication_date field."""
         fields = get_schema_fields(schema_class)
-        assert "publication_date" in fields, (
-            f"{name} missing publication_date field"
-        )
+        assert "publication_date" in fields, f"{name} missing publication_date field"
 
     @pytest.mark.parametrize(
         "schema_class,name",
@@ -210,7 +208,11 @@ class TestGoldPublicationSchemaPrimaryKeys:
             (CrossRefPublicationGoldSchema, "CrossRef Publication", "doi"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication", "openalex_id"),
             (PubMedPublicationGoldSchema, "PubMed Publication", "pmid"),
-            (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication", "paper_id"),
+            (
+                SemanticScholarPublicationGoldSchema,
+                "SemanticScholar Publication",
+                "paper_id",
+            ),
         ],
     )
     def test_schema_has_primary_key(self, schema_class, name, primary_key):

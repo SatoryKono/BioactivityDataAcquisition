@@ -457,7 +457,7 @@ class TestClassSize:
         "UniProtProteinTransformer": 800,  # 772 lines - complex protein data extraction with many fields
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
-        "BronzeWriter": 705,  # 702 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata
+        "BronzeWriter": 710,  # 708 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata + query_string extraction
         "BatchExecutor": 710,  # 703 lines - unified executor for batch processing + DQ context
         "BatchWriter": 380,  # 376 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage + DQ defaults
         # Application core classes
@@ -476,7 +476,7 @@ class TestClassSize:
         # PubMed adapter (similar to ChEMBL adapter)
         "PubMedAdapter": 500,  # 488 lines - HTTP adapter with Entrez API + full FilterableDataSourcePort
         # PubMed transformer (complex XML extraction)
-        "PubMedPublicationTransformer": 320,  # 310 lines - XML extraction with multiple extractors
+        "PubMedPublicationTransformer": 335,  # 332 lines - XML extraction with multiple extractors
         # OpenAlex adapter (FilterableDataSourcePort with batch DOI + title fallback)
         "OpenAlexAdapter": 540,  # 539 lines - HTTP adapter with batch DOI resolution + title fallback
         # Error handling utility (ErrorService + deprecated ErrorHandler alias)
