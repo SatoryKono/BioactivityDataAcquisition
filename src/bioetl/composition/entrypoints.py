@@ -192,6 +192,7 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         input_filter=input_filter,
         vacuum=vacuum,
         log_level=options.log_level,
+        ignore_yaml_filter=options.ignore_yaml_filter,
     )
 
 

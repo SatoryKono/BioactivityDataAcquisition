@@ -17,14 +17,19 @@ Polite Pool:
 
 from __future__ import annotations
 
+import contextlib
 import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.openalex.fallback import TitleFallbackHandler
 
 if TYPE_CHECKING:
@@ -66,6 +71,11 @@ class OpenAlexAdapter(BaseHttpAdapter):
 
     provider_name: str = field(init=False, default="openalex")
     """Provider identifier (required by DataSourcePort)."""
+
+    _request_collector: APIRequestCollector = field(
+        init=False, default_factory=APIRequestCollector
+    )
+    """Collects API request metadata for Bronze layer enrichment."""
 
     def __post_init__(self) -> None:
         """Initialize adapter metrics and helper components."""
@@ -322,10 +332,16 @@ class OpenAlexAdapter(BaseHttpAdapter):
             )
 
             url = f"{OPENALEX_API_BASE}/works"
+            start_time = time.perf_counter()
             with self._adapter_metrics.measure_request("/works"):
                 response = await self.http_client.get(
                     url, params=params, headers=self._build_headers()
                 )
+            duration_ms = (time.perf_counter() - start_time) * 1000
+
+            # Record request for metadata enrichment
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
 
             data = response.json()
             results = data.get("results", [])
@@ -375,10 +391,16 @@ class OpenAlexAdapter(BaseHttpAdapter):
         )
 
         url = f"{OPENALEX_API_BASE}/works"
+        start_time = time.perf_counter()
         with self._adapter_metrics.measure_request("/works"):
             response = await self.http_client.get(
                 url, params=params, headers=self._build_headers()
             )
+        duration_ms = (time.perf_counter() - start_time) * 1000
+
+        # Record request for metadata enrichment
+        with contextlib.suppress(Exception):
+            self._request_collector.record_from_response(response, duration_ms)
 
         data = response.json()
 
@@ -417,10 +439,16 @@ class OpenAlexAdapter(BaseHttpAdapter):
 
         try:
             url = f"{OPENALEX_API_BASE}/works"
+            start_time = time.perf_counter()
             with self._adapter_metrics.measure_request("/works"):
                 response = await self.http_client.get(
                     url, params=params, headers=self._build_headers()
                 )
+            duration_ms = (time.perf_counter() - start_time) * 1000
+
+            # Record request for metadata enrichment
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
 
             data = response.json()
             results: list[dict[str, Any]] = data.get("results", [])
@@ -535,6 +563,33 @@ class OpenAlexAdapter(BaseHttpAdapter):
 
         """
         return "/works"
+
+    def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
+        """Get API request metadata and clear collector.
+
+        Returns aggregated metadata from all API requests made since last clear.
+        Used by BatchExecutor to enrich Bronze layer metadata.
+
+        Args:
+            api_version: Optional API version string.
+
+        Returns:
+            SourceMetadata with request details and statistics.
+        """
+        metadata = self._request_collector.to_source_metadata(
+            source_type="api", url=OPENALEX_API_BASE, api_version=api_version
+        )
+        self._request_collector.clear()
+        return metadata
+
+    def clear_request_collector(self) -> None:
+        """Clear the collector without returning metadata."""
+        self._request_collector.clear()
+
+    @property
+    def request_count(self) -> int:
+        """Number of recorded API requests since last clear."""
+        return self._request_collector.request_count
 
     async def aclose(self) -> None:
         """Close adapter resources.

@@ -158,6 +158,7 @@ class PipelineRunContext:
     - Required: pipeline_name, run_id, run_type (no defaults)
     - Defaulted: resume, dry_run, vacuum, input_filter (explicit defaults, not None)
     - Optional: limit, query (truly optional runtime overrides)
+    - Composite mode: ignore_yaml_filter bypasses YAML input_filter config
     """
 
     # Required fields (no defaults)
@@ -179,6 +180,9 @@ class PipelineRunContext:
 
     # Logging configuration
     log_level: str = "INFO"
+
+    # Composite mode: ignore YAML input_filter config (use only CLI filter)
+    ignore_yaml_filter: bool = False
 
     @property
     def has_input_filter(self) -> bool:

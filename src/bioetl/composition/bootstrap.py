@@ -153,13 +153,15 @@ def bootstrap_pipeline(
     )
 
     # Build filter config using the dedicated builder or CLI input_filter
-    # In test mode, YAML-based filters are disabled to allow E2E tests to run
+    # In test mode or composite mode, YAML-based filters are disabled
+    # - test_mode: E2E tests run without requiring filter CSV files
+    # - ignore_yaml_filter: composite enrichers use seed keys, not YAML filter
     filter_config = FilterConfigBuilder.build(
         yaml_filter=yaml_config.input_filter,
         cli_csv=ctx.input_filter.source_path if ctx.input_filter.enabled else None,
         cli_column=ctx.input_filter.column_name if ctx.input_filter.enabled else None,
         cli_field=ctx.input_filter.filter_field if ctx.input_filter.enabled else None,
-        test_mode=settings.test_mode,
+        test_mode=settings.test_mode or ctx.ignore_yaml_filter,
     )
 
     if filter_config:

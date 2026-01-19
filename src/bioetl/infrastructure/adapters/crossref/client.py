@@ -21,11 +21,15 @@ import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.normalization import normalize_doi
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.crossref.batch import (
     DoiBatchProcessor,
     SearchPaginator,
@@ -72,6 +76,11 @@ class CrossRefAdapter(BaseHttpAdapter):
     provider_name: str = field(init=False, default="crossref")
     """Provider identifier (required by DataSourcePort)."""
 
+    _request_collector: APIRequestCollector = field(
+        init=False, default_factory=APIRequestCollector
+    )
+    """Collects API request metadata for Bronze layer enrichment."""
+
     def __post_init__(self) -> None:
         """Initialize adapter metrics and helper components."""
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
@@ -85,6 +94,7 @@ class CrossRefAdapter(BaseHttpAdapter):
             mailto=self.mailto,
             api_base=CROSSREF_API_BASE,
             headers_fn=self._build_headers,
+            request_collector=self._request_collector,
         )
         self._search_paginator = SearchPaginator(
             http=self.http_client,
@@ -93,6 +103,7 @@ class CrossRefAdapter(BaseHttpAdapter):
             mailto=self.mailto,
             api_base=CROSSREF_API_BASE,
             headers_fn=self._build_headers,
+            request_collector=self._request_collector,
         )
         self._fallback_handler = TitleFallbackHandler(
             logger=self.logger,
@@ -359,6 +370,33 @@ class CrossRefAdapter(BaseHttpAdapter):
 
         """
         return "/works"
+
+    def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
+        """Get API request metadata and clear collector.
+
+        Returns aggregated metadata from all API requests made since last clear.
+        Used by BatchExecutor to enrich Bronze layer metadata.
+
+        Args:
+            api_version: Optional API version string.
+
+        Returns:
+            SourceMetadata with request details and statistics.
+        """
+        metadata = self._request_collector.to_source_metadata(
+            source_type="api", url=CROSSREF_API_BASE, api_version=api_version
+        )
+        self._request_collector.clear()
+        return metadata
+
+    def clear_request_collector(self) -> None:
+        """Clear the collector without returning metadata."""
+        self._request_collector.clear()
+
+    @property
+    def request_count(self) -> int:
+        """Number of recorded API requests since last clear."""
+        return self._request_collector.request_count
 
     async def aclose(self) -> None:
         """Close adapter resources.

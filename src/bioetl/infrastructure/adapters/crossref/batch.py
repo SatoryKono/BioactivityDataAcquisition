@@ -5,6 +5,8 @@ Provides batch DOI resolution and pagination support.
 
 from __future__ import annotations
 
+import contextlib
+import time
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.normalization import normalize_doi
@@ -14,6 +16,9 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
 
 # Type aliases for helper class parameters
 HttpTransport = Any
@@ -34,6 +39,7 @@ class DoiBatchProcessor:
         mailto: str,
         api_base: str,
         headers_fn: Any,  # Callable returning dict[str, str]
+        request_collector: APIRequestCollector | None = None,
     ) -> None:
         """Initialize batch processor.
 
@@ -44,6 +50,7 @@ class DoiBatchProcessor:
             mailto: Email for polite pool access.
             api_base: CrossRef API base URL.
             headers_fn: Function to build request headers.
+            request_collector: Optional collector for API request metadata.
         """
         self._http = http
         self._logger = logger
@@ -51,6 +58,7 @@ class DoiBatchProcessor:
         self._mailto = mailto
         self._api_base = api_base
         self._headers_fn = headers_fn
+        self._request_collector = request_collector
 
     async def fetch_single(self, doi: str) -> dict[str, Any] | None:
         """Fetch a single publication by DOI.
@@ -68,8 +76,15 @@ class DoiBatchProcessor:
         url = f"{self._api_base}/works/{normalized_doi}"
 
         try:
+            start_time = time.perf_counter()
             with self._metrics.measure_request("/works/{doi}"):
                 response = await self._http.get(url, headers=self._headers_fn())
+            duration_ms = (time.perf_counter() - start_time) * 1000
+
+            # Record request for metadata enrichment
+            if self._request_collector:
+                with contextlib.suppress(Exception):
+                    self._request_collector.record_from_response(response, duration_ms)
 
             if response.status_code == 404:
                 self._logger.debug("crossref_doi_not_found", doi=normalized_doi)
@@ -136,10 +151,17 @@ class DoiBatchProcessor:
         }
 
         try:
+            start_time = time.perf_counter()
             with self._metrics.measure_request("/works?filter=doi"):
                 response = await self._http.get(
                     url, params=params, headers=self._headers_fn()
                 )
+            duration_ms = (time.perf_counter() - start_time) * 1000
+
+            # Record request for metadata enrichment
+            if self._request_collector:
+                with contextlib.suppress(Exception):
+                    self._request_collector.record_from_response(response, duration_ms)
 
             if response.status_code != 200:
                 self._logger.warning(
@@ -178,6 +200,7 @@ class SearchPaginator:
         mailto: str,
         api_base: str,
         headers_fn: Any,  # Callable returning dict[str, str]
+        request_collector: APIRequestCollector | None = None,
     ) -> None:
         """Initialize search paginator."""
         self._http = http
@@ -186,6 +209,7 @@ class SearchPaginator:
         self._mailto = mailto
         self._api_base = api_base
         self._headers_fn = headers_fn
+        self._request_collector = request_collector
 
     async def _fetch_page(
         self, query: str, rows: int, cursor: str
@@ -199,10 +223,17 @@ class SearchPaginator:
             "mailto": self._mailto,
         }
 
+        start_time = time.perf_counter()
         with self._metrics.measure_request("/works?query"):
             response = await self._http.get(
                 url, params=params, headers=self._headers_fn()
             )
+        duration_ms = (time.perf_counter() - start_time) * 1000
+
+        # Record request for metadata enrichment
+        if self._request_collector:
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
 
         if response.status_code != 200:
             raise CrossRefApiError(
