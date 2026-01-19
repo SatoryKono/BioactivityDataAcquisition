@@ -79,9 +79,7 @@ async def _run_pipeline_async(
     return result.status, result.error_message, result.error_type, result.run_id
 
 
-def _echo_run_result(
-    status: RunStatus, error_message: str | None, run_id: str
-) -> None:
+def _echo_run_result(status: RunStatus, error_message: str | None, run_id: str) -> None:
     """Output run result message based on status.
 
     Args:
