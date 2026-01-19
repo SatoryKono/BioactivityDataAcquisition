@@ -142,7 +142,7 @@ class TestDateExtractorEdgeCases:
         assert date_str == "2023-01" or date_str.startswith("2023")
 
     def test_year_with_invalid_text(self):
-        """Test handling of non-numeric year."""
+        """Test handling of non-numeric year (end-of-period: day 30)."""
         xml = """
         <PubDate>
             <Year>TBD</Year>
@@ -152,7 +152,8 @@ class TestDateExtractorEdgeCases:
         node = ET.fromstring(xml)
         date_str, year_int = DateExtractor.extract_date(node)
         # Year is not numeric, but it's still used in date_str
-        assert date_str == "TBD-03"
+        # End-of-period strategy adds day 30 for year+month without day
+        assert date_str == "TBD-03-30"
         assert year_int is None
 
     def test_partial_date_month_only_no_year(self):

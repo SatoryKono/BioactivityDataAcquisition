@@ -335,7 +335,7 @@ class TestExtractDateData:
         assert result["epub_date"] == "2023-03-10"
 
     def test_extract_date_data_year_only(self, transformer):
-        """Test extraction with year-only publication date."""
+        """Test extraction with year-only publication date (end-of-period: Dec 31)."""
         import xml.etree.ElementTree as ET
 
         article_xml = """
@@ -353,7 +353,8 @@ class TestExtractDateData:
 
         result = transformer._extract_date_data(article, None)
 
-        assert result["pub_date"] == "2023"
+        # End-of-period strategy: year-only → YYYY-12-31
+        assert result["pub_date"] == "2023-12-31"
         assert result["year"] == 2023
         assert result["publication_year"] == 2023
         assert result["accepted_date"] is None
