@@ -52,7 +52,6 @@ from bioetl.domain.entities.chembl_structures import (
 # CrossRef DTO + Entity
 from bioetl.domain.entities.crossref import (
     CrossRefPublicationEntity,
-    PublicationEntity,  # Deprecated alias
     PublicationRecord,
 )
 
@@ -71,7 +70,6 @@ from bioetl.domain.entities.publication_base import PublicationEntityBase
 # PubMed DTO + Entity
 from bioetl.domain.entities.pubmed import (
     ArticleRecord,
-    Publication,  # Deprecated alias
     PubMedPublicationEntity,
 )
 
@@ -106,8 +104,6 @@ __all__ = [
     "PubMedPublicationEntity",
     "PubchemMolecule",
     "PubchemMoleculeRecord",
-    "Publication",
-    "PublicationEntity",
     "PublicationEntityBase",
     "PublicationRecord",
     "SemanticScholarPublicationEntity",
