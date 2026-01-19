@@ -117,6 +117,7 @@ class TestMetaFieldExclusion:
             "_dq_warn",
             "_dq_error",
             "_source_batch_id",
+            "_index",
         ],
     )
     def test_meta_field_excluded_from_hash(self, meta_field: str) -> None:
@@ -140,6 +141,7 @@ class TestMetaFieldExclusion:
             "_dq_warn",
             "_dq_error",
             "_source_batch_id",
+            "_index",
         }
         assert META_FIELDS == expected
 
