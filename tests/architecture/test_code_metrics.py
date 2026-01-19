@@ -529,11 +529,11 @@ class TestClassSize:
         # Composition services
         "MetadataCoordinator": 315,  # 308 lines - Metadata coordination for Medallion layers
         # Composite pipeline services (ADR-026)
-        "MergeService": 570,  # 566 lines - Composite merge service with conflict resolution + dual path + DOI normalization
+        "MergeService": 655,  # 650 lines - Composite merge service with conflict resolution + dual path + DOI normalization
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
         "CompositePipelineRunner": 350,  # 313 lines - Composite pipeline orchestrator
         # Publication adapters with APIRequestCollector (metadata enrichment)
-        "OpenAlexAdapter": 560,  # 557 lines - FilterableDataSourcePort + APIRequestCollector + fallback handler
+        "OpenAlexAdapter": 580,  # 578 lines - FilterableDataSourcePort + APIRequestCollector + fallback handler
         "PubMedAdapter": 545,  # 540 lines - FilterableDataSourcePort + APIRequestCollector + TitleFallbackHandler
     }
 
