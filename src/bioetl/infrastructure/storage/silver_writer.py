@@ -174,6 +174,8 @@ class SilverWriter(BaseDeltaWriter):
         primary_keys: list[str],
     ) -> pa.Table:
         """Prepare Arrow table from records with schema filtering and sorting."""
+        from bioetl.domain.schemas.column_order import canonical_column_order
+
         schema_fields = set(schema.names)
         string_fields = {
             field.name
@@ -210,6 +212,11 @@ class SilverWriter(BaseDeltaWriter):
         ]
         arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
 
+        # Enforce canonical column order (ADR-014, RULES.md §2.4)
+        ordered_columns = canonical_column_order(list(arrow_data.column_names))
+        arrow_data = arrow_data.select(ordered_columns)
+
+        # Sort rows by primary keys for deterministic writes
         if primary_keys:
             arrow_data = arrow_data.sort_by([(pk, "ascending") for pk in primary_keys])
         return arrow_data
@@ -1086,6 +1093,8 @@ class SilverWriter(BaseDeltaWriter):
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
         """
+        from bioetl.domain.schemas.column_order import canonical_column_order
+
         if not records:
             self.logger.warning(
                 "No records to write for merged Silver",
@@ -1096,6 +1105,10 @@ class SilverWriter(BaseDeltaWriter):
         # Infer schema from records using PyArrow
         arrow_table = pa.Table.from_pylist(records)
         schema = arrow_table.schema
+
+        # Enforce canonical column order (ADR-014, RULES.md §2.4)
+        ordered_columns = canonical_column_order(list(arrow_table.column_names))
+        arrow_table = arrow_table.select(ordered_columns)
 
         # Sort by primary keys if provided for deterministic writes
         if primary_keys:
