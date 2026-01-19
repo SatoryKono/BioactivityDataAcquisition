@@ -1,0 +1,405 @@
+"""Pydantic schemas for composite pipeline configuration files.
+
+Validates composite pipeline YAML files (configs/pipelines/composite/*.yaml)
+before converting to domain objects. Implements ADR-026 Composite Pipeline Pattern.
+
+Usage:
+    >>> schema = CompositeConfigFileSchema.model_validate(yaml_data)
+    >>> domain_config = schema.to_domain()
+"""
+
+from __future__ import annotations
+
+from typing import Any, Literal
+
+from pydantic import BaseModel, Field, field_validator, model_validator
+
+from bioetl.domain.composite.config import (
+    CompositeConfig,
+    CompositeDQConfig,
+    DQOverrideConfig,
+    EnricherConfig,
+    ExecutionConfig,
+    LineageConfig,
+    MergeConfig,
+    SeedConfig,
+)
+from bioetl.domain.composite.strategy import (
+    ConflictResolution,
+    FallbackStrategy,
+    MergeStrategy,
+)
+
+
+class SeedSchema(BaseModel):
+    """Pydantic schema for seed pipeline configuration."""
+
+    pipeline: str = Field(..., min_length=1, description="Name of the seed pipeline")
+    output_keys: list[str] = Field(
+        ..., min_length=1, description="Keys to extract for enrichment"
+    )
+    silver_table: str = Field(
+        ..., min_length=1, description="Path to seed Silver table output"
+    )
+    limit: int | None = Field(
+        default=None, gt=0, description="Optional limit on records to extract"
+    )
+
+    @field_validator("output_keys")
+    @classmethod
+    def validate_output_keys_not_empty(cls, v: list[str]) -> list[str]:
+        """Ensure output_keys contains valid strings."""
+        if not v:
+            raise ValueError("output_keys cannot be empty")
+        for key in v:
+            if not key or not key.strip():
+                raise ValueError("output_keys cannot contain empty strings")
+        return v
+
+    def to_domain(self) -> SeedConfig:
+        """Convert to immutable domain SeedConfig."""
+        return SeedConfig(
+            pipeline=self.pipeline,
+            output_keys=tuple(self.output_keys),
+            silver_table=self.silver_table,
+            limit=self.limit,
+        )
+
+
+class EnricherSchema(BaseModel):
+    """Pydantic schema for enricher pipeline configuration."""
+
+    pipeline: str = Field(
+        ..., min_length=1, description="Name of the enricher pipeline"
+    )
+    join_keys: list[str] = Field(
+        ..., min_length=1, description="Keys to join on from seed"
+    )
+    required: bool = Field(
+        default=False, description="If True, failure causes composite failure"
+    )
+    filter_condition: str | None = Field(
+        default=None, description="SQL-like condition to filter keys"
+    )
+    timeout_seconds: int = Field(
+        default=600, gt=0, description="Maximum time for enricher execution in seconds"
+    )
+    fallback_strategy: Literal["skip", "use_cached", "fail"] = Field(
+        default="skip", description="Strategy when enricher fails"
+    )
+    silver_table: str | None = Field(
+        default=None, description="Path to enricher Silver table"
+    )
+    limit: int | None = Field(
+        default=None, gt=0, description="Optional limit on records to enrich"
+    )
+
+    @field_validator("join_keys")
+    @classmethod
+    def validate_join_keys_not_empty(cls, v: list[str]) -> list[str]:
+        """Ensure join_keys contains valid strings."""
+        if not v:
+            raise ValueError("join_keys cannot be empty")
+        for key in v:
+            if not key or not key.strip():
+                raise ValueError("join_keys cannot contain empty strings")
+        return v
+
+    def to_domain(self) -> EnricherConfig:
+        """Convert to immutable domain EnricherConfig."""
+        return EnricherConfig(
+            pipeline=self.pipeline,
+            join_keys=tuple(self.join_keys),
+            required=self.required,
+            filter_condition=self.filter_condition,
+            timeout_seconds=self.timeout_seconds,
+            fallback_strategy=FallbackStrategy.from_string(self.fallback_strategy),
+            silver_table=self.silver_table,
+            limit=self.limit,
+        )
+
+
+class MergeOutputSchema(BaseModel):
+    """Pydantic schema for merge output paths."""
+
+    silver: str = Field(..., min_length=1, description="Path for merged Silver table")
+    gold: str = Field(..., min_length=1, description="Path for merged Gold table")
+
+
+class MergeSchema(BaseModel):
+    """Pydantic schema for merge step configuration."""
+
+    strategy: Literal["left_outer", "inner", "union"] = Field(
+        default="left_outer", description="Join strategy for merging"
+    )
+    conflict_resolution: Literal[
+        "seed_priority",
+        "enricher_priority",
+        "latest_timestamp",
+        "explicit_rules",
+        "coalesce",
+    ] = Field(default="seed_priority", description="Strategy for field conflicts")
+    field_priorities: dict[str, list[str]] = Field(
+        default_factory=dict, description="Mapping of field to source priority list"
+    )
+    field_mappings: dict[str, str] = Field(
+        default_factory=dict, description="Mapping to rename fields during merge"
+    )
+    output: MergeOutputSchema = Field(
+        ..., description="Output paths for Silver and Gold tables"
+    )
+
+    @model_validator(mode="after")
+    def validate_explicit_rules_requires_priorities(self) -> MergeSchema:
+        """Ensure field_priorities is provided when using explicit_rules."""
+        if self.conflict_resolution == "explicit_rules" and not self.field_priorities:
+            raise ValueError(
+                "field_priorities required when using explicit_rules conflict resolution"
+            )
+        return self
+
+    def to_domain(self) -> MergeConfig:
+        """Convert to immutable domain MergeConfig."""
+        field_priorities_tuples = {
+            k: tuple(v) for k, v in self.field_priorities.items()
+        }
+        return MergeConfig(
+            strategy=MergeStrategy.from_string(self.strategy),
+            conflict_resolution=ConflictResolution.from_string(
+                self.conflict_resolution
+            ),
+            output_silver_path=self.output.silver,
+            output_gold_path=self.output.gold,
+            field_priorities=field_priorities_tuples,
+            field_mappings=self.field_mappings,
+        )
+
+
+class DQOverrideSchema(BaseModel):
+    """Pydantic schema for per-enricher DQ threshold override."""
+
+    soft_fail_threshold: float | None = Field(
+        default=None, ge=0.0, le=1.0, description="Override soft threshold (0.0-1.0)"
+    )
+    hard_fail_threshold: float | None = Field(
+        default=None, ge=0.0, le=1.0, description="Override hard threshold (0.0-1.0)"
+    )
+
+    @model_validator(mode="after")
+    def validate_threshold_order(self) -> DQOverrideSchema:
+        """Ensure soft_fail_threshold < hard_fail_threshold when both set."""
+        if (
+            self.soft_fail_threshold is not None
+            and self.hard_fail_threshold is not None
+            and self.soft_fail_threshold >= self.hard_fail_threshold
+        ):
+            raise ValueError(
+                "soft_fail_threshold must be less than hard_fail_threshold"
+            )
+        return self
+
+    def to_domain(self) -> DQOverrideConfig:
+        """Convert to immutable domain DQOverrideConfig."""
+        return DQOverrideConfig(
+            soft_fail_threshold=self.soft_fail_threshold,
+            hard_fail_threshold=self.hard_fail_threshold,
+        )
+
+
+class CompositeDQSchema(BaseModel):
+    """Pydantic schema for composite data quality configuration."""
+
+    soft_fail_threshold: float = Field(
+        default=0.10, ge=0.0, le=1.0, description="Default soft threshold (0.0-1.0)"
+    )
+    hard_fail_threshold: float = Field(
+        default=0.30, ge=0.0, le=1.0, description="Default hard threshold (0.0-1.0)"
+    )
+    enricher_overrides: dict[str, DQOverrideSchema] = Field(
+        default_factory=dict, description="Per-enricher DQ threshold overrides"
+    )
+    required_fields: list[str] = Field(
+        default_factory=list, description="Fields required in final Gold output"
+    )
+
+    @model_validator(mode="after")
+    def validate_threshold_order(self) -> CompositeDQSchema:
+        """Ensure soft_fail_threshold < hard_fail_threshold."""
+        if self.soft_fail_threshold >= self.hard_fail_threshold:
+            raise ValueError(
+                f"soft_fail_threshold ({self.soft_fail_threshold}) must be "
+                f"< hard_fail_threshold ({self.hard_fail_threshold})"
+            )
+        return self
+
+    def to_domain(self) -> CompositeDQConfig:
+        """Convert to immutable domain CompositeDQConfig."""
+        overrides = {
+            name: override.to_domain()
+            for name, override in self.enricher_overrides.items()
+        }
+        return CompositeDQConfig(
+            soft_fail_threshold=self.soft_fail_threshold,
+            hard_fail_threshold=self.hard_fail_threshold,
+            enricher_overrides=overrides,
+            required_fields=tuple(self.required_fields),
+        )
+
+
+class RetrySchema(BaseModel):
+    """Pydantic schema for retry configuration."""
+
+    max_attempts: int = Field(
+        default=3, ge=0, description="Maximum retry attempts per enricher"
+    )
+    backoff_multiplier: float = Field(
+        default=2.0, gt=0, description="Backoff multiplier for retries"
+    )
+
+
+class ExecutionSchema(BaseModel):
+    """Pydantic schema for execution options."""
+
+    max_concurrency: int = Field(
+        default=4, gt=0, description="Maximum concurrent enrichers"
+    )
+    checkpoint_enabled: bool = Field(
+        default=True, description="Enable checkpointing for resume"
+    )
+    retry: RetrySchema = Field(
+        default_factory=RetrySchema, description="Retry configuration"
+    )
+
+    def to_domain(self) -> ExecutionConfig:
+        """Convert to immutable domain ExecutionConfig."""
+        return ExecutionConfig(
+            max_concurrency=self.max_concurrency,
+            checkpoint_enabled=self.checkpoint_enabled,
+            retry_max_attempts=self.retry.max_attempts,
+            retry_backoff_multiplier=self.retry.backoff_multiplier,
+        )
+
+
+class LineageSchema(BaseModel):
+    """Pydantic schema for lineage tracking configuration."""
+
+    track_field_sources: bool = Field(
+        default=True, description="Track which source provided each field"
+    )
+    track_timestamps: bool = Field(
+        default=True, description="Include enrichment timestamps"
+    )
+    track_status: bool = Field(
+        default=True, description="Include per-record enrichment status"
+    )
+
+    def to_domain(self) -> LineageConfig:
+        """Convert to immutable domain LineageConfig."""
+        return LineageConfig(
+            track_field_sources=self.track_field_sources,
+            track_timestamps=self.track_timestamps,
+            track_status=self.track_status,
+        )
+
+
+class CompositeConfigSchema(BaseModel):
+    """Pydantic schema for complete composite pipeline configuration.
+
+    Validates the 'composite' section of YAML files and converts to
+    domain CompositeConfig. Includes cross-field validation for join keys
+    and enricher uniqueness.
+    """
+
+    name: str = Field(..., min_length=1, description="Composite pipeline name")
+    version: str = Field(
+        default="1.0.0", min_length=1, description="Configuration version (semver)"
+    )
+    seed: SeedSchema = Field(..., description="Seed pipeline configuration")
+    enrichers: list[EnricherSchema] = Field(
+        ..., min_length=1, description="List of enricher configurations"
+    )
+    merge: MergeSchema = Field(..., description="Merge step configuration")
+    dq_rules: CompositeDQSchema = Field(
+        default_factory=CompositeDQSchema, description="Data quality configuration"
+    )
+    execution: ExecutionSchema = Field(
+        default_factory=ExecutionSchema, description="Execution options"
+    )
+    lineage: LineageSchema = Field(
+        default_factory=LineageSchema, description="Lineage tracking configuration"
+    )
+
+    @model_validator(mode="after")
+    def validate_enricher_join_keys(self) -> CompositeConfigSchema:
+        """Validate that enricher join keys exist in seed output_keys."""
+        seed_keys = set(self.seed.output_keys)
+        for enricher in self.enrichers:
+            for key in enricher.join_keys:
+                if key not in seed_keys:
+                    raise ValueError(
+                        f"Enricher '{enricher.pipeline}' join_key '{key}' "
+                        f"not found in seed output_keys: {self.seed.output_keys}"
+                    )
+        return self
+
+    @model_validator(mode="after")
+    def validate_unique_enricher_names(self) -> CompositeConfigSchema:
+        """Validate that enricher pipeline names are unique."""
+        names = [e.pipeline for e in self.enrichers]
+        if len(names) != len(set(names)):
+            duplicates = {n for n in names if names.count(n) > 1}
+            raise ValueError(f"Duplicate enricher pipelines: {duplicates}")
+        return self
+
+    def to_domain(self) -> CompositeConfig:
+        """Convert to immutable domain CompositeConfig."""
+        return CompositeConfig(
+            name=self.name,
+            version=self.version,
+            seed=self.seed.to_domain(),
+            enrichers=tuple(e.to_domain() for e in self.enrichers),
+            merge=self.merge.to_domain(),
+            dq=self.dq_rules.to_domain(),
+            execution=self.execution.to_domain(),
+            lineage=self.lineage.to_domain(),
+        )
+
+
+class CompositeConfigFileSchema(BaseModel):
+    """Pydantic schema for complete composite configuration file.
+
+    Validates the entire YAML file structure including schema_version
+    and optional sections like gold_filters and maintenance.
+    """
+
+    schema_version: str = Field(
+        default="2.0.0", description="Schema version for file format"
+    )
+    composite: CompositeConfigSchema = Field(
+        ..., description="The composite pipeline configuration"
+    )
+    gold_filters: dict[str, Any] | None = Field(
+        default=None, description="Optional gold layer filters"
+    )
+    maintenance: dict[str, Any] | None = Field(
+        default=None, description="Optional maintenance configuration"
+    )
+
+    def to_domain(self) -> CompositeConfig:
+        """Convert to immutable domain CompositeConfig."""
+        return self.composite.to_domain()
+
+
+__all__ = [
+    "CompositeConfigFileSchema",
+    "CompositeConfigSchema",
+    "CompositeDQSchema",
+    "DQOverrideSchema",
+    "EnricherSchema",
+    "ExecutionSchema",
+    "LineageSchema",
+    "MergeOutputSchema",
+    "MergeSchema",
+    "RetrySchema",
+    "SeedSchema",
+]
