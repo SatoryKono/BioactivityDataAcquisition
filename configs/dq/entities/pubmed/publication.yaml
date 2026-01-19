@@ -1,0 +1,83 @@
+# configs/dq/entities/pubmed/publication.yaml
+# PubMed Publication-specific DQ rules
+# Inherits from: _defaults.yaml → providers/pubmed.yaml
+
+version: "1.0.0"
+provider: pubmed
+entity: publication
+
+# Thresholds: inherit from provider (soft 0.05, hard 0.15)
+
+# =============================================================================
+# Publication-Specific Field Validations
+# =============================================================================
+entity_field_validations:
+  - field: pmid
+    type: range
+    min: 1
+    max: 100000000
+    nullable: false
+    error_message: "PMID is required and must be a positive integer"
+
+  - field: title
+    type: pattern
+    pattern: '^.{1,2000}$'
+    nullable: true
+    error_message: "Title must not exceed 2000 chars"
+
+  - field: doi
+    type: pattern
+    pattern: '^10\.\d{4,}/.*$'
+    nullable: true
+    error_message: "DOI must start with 10. prefix"
+
+  - field: pub_year
+    type: range
+    min: 1800
+    max: 2100
+    nullable: true
+    error_message: "Publication year out of valid range"
+
+  - field: pub_type
+    type: enum
+    allowed:
+      - Journal Article
+      - Review
+      - Letter
+      - Editorial
+      - Clinical Trial
+      - Meta-Analysis
+      - Case Reports
+      - Comparative Study
+      - Evaluation Study
+    nullable: true
+
+  - field: pmc_id
+    type: pattern
+    pattern: '^PMC\d+$'
+    nullable: true
+    error_message: "PMC ID must start with PMC followed by digits"
+
+# =============================================================================
+# Cross-Field Validations
+# =============================================================================
+entity_cross_field_validations:
+  - name: publication_identifiable
+    fields:
+      - pmid
+      - title
+    condition: all_present
+    error_message: "Publication must have PMID and title"
+
+  - name: has_identifier
+    fields:
+      - pmid
+      - doi
+      - pmc_id
+    condition: any_present
+    error_message: "At least one identifier required"
+
+# =============================================================================
+# Conditional Validations
+# =============================================================================
+entity_conditional_validations: []

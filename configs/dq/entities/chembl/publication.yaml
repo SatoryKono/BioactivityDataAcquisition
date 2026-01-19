@@ -1,0 +1,65 @@
+# configs/dq/entities/chembl/publication.yaml
+# ChEMBL Publication (Document)-specific DQ rules
+# Inherits from: _defaults.yaml → providers/chembl.yaml
+
+version: "1.0.0"
+provider: chembl
+entity: publication
+
+# Thresholds: inherit from provider
+
+# =============================================================================
+# Publication-Specific Field Validations
+# =============================================================================
+entity_field_validations:
+  - field: document_chembl_id
+    type: pattern
+    pattern: '^CHEMBL\d+$'
+    nullable: false
+    error_message: "document_chembl_id must match CHEMBL format"
+
+  - field: doc_type
+    type: enum
+    allowed:
+      - PUBLICATION
+      - BOOK
+      - DATASET
+      - PATENT
+    nullable: true
+
+  - field: year
+    type: range
+    min: 1800
+    max: 2100
+    nullable: true
+    error_message: "Publication year must be between 1800 and 2100"
+
+  - field: pubmed_id
+    type: range
+    min: 1
+    max: 100000000
+    nullable: true
+    error_message: "PubMed ID must be a positive integer"
+
+  - field: doi
+    type: pattern
+    pattern: '^10\.\d{4,}/.*$'
+    nullable: true
+    error_message: "DOI must start with 10. prefix"
+
+# =============================================================================
+# Cross-Field Validations
+# =============================================================================
+entity_cross_field_validations:
+  - name: publication_identifiable
+    fields:
+      - pubmed_id
+      - doi
+      - title
+    condition: any_present
+    error_message: "Publication must have at least one identifier"
+
+# =============================================================================
+# Conditional Validations
+# =============================================================================
+entity_conditional_validations: []

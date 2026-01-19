@@ -1,0 +1,32 @@
+# configs/dq/providers/crossref.yaml
+# CrossRef-specific DQ rules
+# Inherits from: _defaults.yaml
+
+version: "1.0.0"
+provider: crossref
+
+# =============================================================================
+# Provider-Specific Thresholds
+# =============================================================================
+thresholds:
+  soft_fail: 0.10  # CrossRef has variable data completeness
+  hard_fail: 0.30
+
+# =============================================================================
+# CrossRef Common Field Validations
+# =============================================================================
+provider_field_validations:
+  # DOI format validation (applies to all CrossRef entities)
+  - field: doi
+    type: pattern
+    pattern: '^10\.\d{4,}/.*$'
+    nullable: true
+    error_message: "Invalid DOI format (must start with 10. prefix)"
+
+  # Year range validation
+  - field: year
+    type: range
+    min: 1800
+    max: 2100
+    nullable: true
+    error_message: "Publication year out of valid range"

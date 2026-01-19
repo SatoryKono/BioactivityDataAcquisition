@@ -1,0 +1,61 @@
+# configs/dq/entities/uniprot/idmapping.yaml
+# UniProt ID Mapping-specific DQ rules
+# Inherits from: _defaults.yaml → providers/uniprot.yaml
+
+version: "1.0.0"
+provider: uniprot
+entity: idmapping
+
+# =============================================================================
+# Elevated thresholds for ID mapping
+# Many ChEMBL targets may not have UniProt mappings (expected behavior)
+# =============================================================================
+thresholds:
+  soft_fail: 0.30  # 30% not_found is acceptable
+  hard_fail: 0.80  # 80% not_found triggers hard failure
+
+# =============================================================================
+# ID Mapping-Specific Field Validations
+# =============================================================================
+entity_field_validations:
+  - field: target_chembl_id
+    type: pattern
+    pattern: '^CHEMBL\d+$'
+    nullable: false
+    error_message: "target_chembl_id must match CHEMBL format"
+
+  - field: mapping_status
+    type: enum
+    allowed:
+      - found
+      - not_found
+      - error
+    nullable: false
+    error_message: "mapping_status is required and must be valid"
+
+  - field: uniprot_accession
+    type: pattern
+    pattern: '^[A-Z0-9]{6,10}$'
+    nullable: true
+    error_message: "UniProt accession must be 6-10 alphanumeric chars"
+
+# =============================================================================
+# Cross-Field Validations
+# =============================================================================
+entity_cross_field_validations: []
+
+# =============================================================================
+# Conditional Validations
+# =============================================================================
+entity_conditional_validations:
+  # When mapping_status is 'found', accession should be present
+  - name: found_has_accession
+    condition_field: mapping_status
+    condition_value: found
+    condition_operator: eq
+    then_validations:
+      - field: uniprot_accession
+        type: pattern
+        pattern: '^[A-Z0-9]{6,10}$'
+        nullable: false
+        error_message: "Found mappings must have UniProt accession"
