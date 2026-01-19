@@ -525,7 +525,7 @@ class TestClassSize:
         # Pandera schemas (declarative field definitions)
         "PubchemMoleculeSchema": 350,  # 345 lines - PubChem molecule schema with many chemical fields
         # Derived entity data source wrappers (comprehensive docstrings)
-        "PublicationTermDataSource": 570,  # 566 lines - Wrapper with FilterableDataSourcePort delegation
+        "PublicationTermDataSource": 585,  # 579 lines - Wrapper with FilterableDataSourcePort delegation + get_source_metadata
         # Composition services
         "MetadataCoordinator": 315,  # 308 lines - Metadata coordination for Medallion layers
         # Composite pipeline services (ADR-026)
