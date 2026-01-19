@@ -690,7 +690,7 @@ async with services:  # __aenter__ инициализирует ресурсы
 2. **Time Source**: `datetime.now()` **MUST NOT** вызываться в `infrastructure` слое (за исключением мониторинга реального времени). Все временные метки (`ingestion_ts`, `processing_ts`) **MUST** генерироваться в `Application` слое (`PipelineContext.started_at`) и передаваться вниз.
 3. **Retry Jitter**: При `deterministic=True`, jitter **MUST** вычисляться детерминистично (на основе хэша попытки и URL). Реализация: `domain/resilience.py:RetryPolicy.calculate_delay()` использует MD5-based jitter.
 4. **Ordering**: Запись в Delta Lake **MUST** происходить после сортировки данных по Primary Keys (Silver) или Business Keys (Gold).
-5. **Content Hash**: Исключать из расчёта хэша технические мета-поля: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`. Реализация: `domain/transformations.py:META_FIELDS`.
+5. **Content Hash**: Исключать из расчёта хэша технические мета-поля: `_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_index`, `_dq_*`. Реализация: `domain/transformations.py:META_FIELDS`.
 
 #### Архитектурные Тесты Детерминизма
 
