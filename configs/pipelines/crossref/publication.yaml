@@ -63,23 +63,23 @@ gold_filters:
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze/crossref/work"
+    path: "data/output/bronze/crossref/"
   silver:
-    path: "data/output/silver/crossref/work"
+    path: "data/output/silver/crossref/"
     primary_key: ["doi"]
     partition_by: []
     sort_by:
       columns: ["doi"]
       ascending: true
     csv_export:
-      path: "data/output/silver/crossref/work"
+      path: "data/output/silver/crossref/"
   gold:
-    path: "data/output/gold/crossref/work"
+    path: "data/output/gold/crossref/"
     sort_by:
       columns: ["doi"]
       ascending: true
     csv_export:
-      path: "data/output/gold/crossref/work"
+      path: "data/output/gold/crossref/"
 
 # Entity-specific input filter for batch DOI resolution
 input_filter:
