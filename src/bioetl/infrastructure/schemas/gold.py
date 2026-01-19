@@ -760,6 +760,12 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     # Note: CrossRef uses DOI as primary key; pmid/pmc_id come from PubMed, not CrossRef
     doi: Series[str] = pa.Field(nullable=False)
 
+    # Cross-reference IDs for linking publications across providers
+    # pmid: PubMed ID (numeric string: "12345678") - null for CrossRef native records
+    pmid: Series[str] = pa.Field(nullable=True)
+    # pmc_id: PubMed Central ID (format: "PMC1234567") - null for CrossRef native records
+    pmc_id: Series[str] = pa.Field(nullable=True)
+
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
@@ -792,6 +798,12 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     license_url: Series[str] = pa.Field(nullable=True)
     subjects: Series[object] = pa.Field(nullable=True)  # list[str]
     source: Series[str] = pa.Field(nullable=True)
+
+    # Lookup metadata
+    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+    # _original_id: Original identifier used for lookup
+    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
     dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
