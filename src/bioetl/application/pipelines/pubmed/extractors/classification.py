@@ -175,11 +175,11 @@ class ClassificationExtractor(BaseFieldExtractor):
         chemical_list = medline_citation.find(".//ChemicalList")
         if chemical_list is None:
             return []
-        raw = [
-            chem.find("NameOfSubstance").text
-            for chem in chemical_list.findall("Chemical")
-            if chem.find("NameOfSubstance") is not None
-        ]
+        raw: list[str | None] = []
+        for chem in chemical_list.findall("Chemical"):
+            name_elem = chem.find("NameOfSubstance")
+            if name_elem is not None:
+                raw.append(name_elem.text)
         return cls()._normalize_list(raw)
 
     @classmethod
