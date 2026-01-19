@@ -243,8 +243,12 @@ class ArticleSchema(ETLRecordSchema):
         return cast("Series[bool]", series.isna() | (series >= 0))
 
     # === DQ Fields ===
-    _dq_warn: Series[bool] = pa.Field(nullable=True, default=False, description="DQ warning flag.")
-    _dq_error: Series[bool] = pa.Field(nullable=True, default=False, description="DQ error flag.")
+    _dq_warn: Series[bool] = pa.Field(
+        nullable=True, default=False, description="DQ warning flag."
+    )
+    _dq_error: Series[bool] = pa.Field(
+        nullable=True, default=False, description="DQ error flag."
+    )
 
     class Config:
         """Pandera configuration."""
