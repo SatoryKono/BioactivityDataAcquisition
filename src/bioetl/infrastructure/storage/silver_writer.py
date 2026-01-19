@@ -183,31 +183,22 @@ class SilverWriter(BaseDeltaWriter):
             if pa.types.is_string(field.type) or pa.types.is_large_string(field.type)
         }
 
-        def serialize_value(key: str, value: Any) -> Any:
-            """Serialize complex values to JSON strings for PyArrow compatibility.
-
-            Args:
-                key: Field name to check against string_fields.
-                value: Value to potentially serialize.
-
-            Returns:
-                JSON string if value is dict/list and field is string type,
-                otherwise the original value unchanged.
-
-            Note:
-                Uses OPT_SORT_KEYS for deterministic serialization (§2.8.1).
-                Complex objects in Gold layer are flattened; Silver preserves
-                JSON for forensic purposes.
-            """
-            if value is None:
-                return None
-            if key in string_fields and isinstance(value, (dict, list)):
-                # orjson.dumps returns bytes, but PyArrow string columns expect str
-                return orjson.dumps(value, option=orjson.OPT_SORT_KEYS).decode("utf-8")
-            return value
-
+        # Optimized: Inline serialization logic to avoid function call overhead in loop
+        # Note: Uses OPT_SORT_KEYS for deterministic serialization (§2.8.1).
         filtered_records = [
-            {k: serialize_value(k, v) for k, v in rec.items() if k in schema_fields}
+            {
+                k: (
+                    orjson.dumps(v, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+                    if (
+                        k in string_fields
+                        and v is not None
+                        and isinstance(v, (dict, list))
+                    )
+                    else v
+                )
+                for k, v in rec.items()
+                if k in schema_fields
+            }
             for rec in records
         ]
         arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
