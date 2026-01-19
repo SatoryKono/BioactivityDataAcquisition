@@ -11,8 +11,8 @@
 | `_base.yaml` (was `_defaults.yaml`) | v2.0.0+ | ✅ | v2.0.0, 13271 bytes, named `_base.yaml` per ADR-025 |
 | `_schema.json` | exists | ✅ | v2.0, JSON Schema draft 2020-12, 4541 bytes |
 | `configs/dq/_defaults.yaml` | exists | ✅ | v1.0.0, defines thresholds (soft_fail: 0.05, hard_fail: 0.20) |
-| `configs/dq/providers/` | exists | ✅ | 3 providers: chembl, pubchem, uniprot |
-| `configs/dq/entities/` | exists | ✅ | 6 entity-specific DQ configs |
+| `configs/dq/providers/` | exists | ✅ | 7 providers: chembl, crossref, openalex, pubchem, pubmed, semanticscholar, uniprot |
+| `configs/dq/entities/` | exists | ✅ | 20 entity-specific DQ configs (full coverage) |
 | `validate_unified_configs.py` | exists | ✅ | 4465 bytes, validates against schema |
 | `DQConfigLoader` | implemented | ✅ | 9160 bytes, integrated with PipelineConfigLoader |
 
@@ -34,22 +34,29 @@
 
 ## DQ Configuration Inventory
 
-### DQ Provider Configs (configs/dq/providers/)
-| Provider | File Size | Notes |
-|----------|-----------|-------|
-| chembl | 1293 bytes | Provider-specific DQ rules |
-| pubchem | 778 bytes | Provider-specific DQ rules |
-| uniprot | 859 bytes | Provider-specific DQ rules |
+### DQ Provider Configs (configs/dq/providers/) - 7 providers
+| Provider | Notes |
+|----------|-------|
+| chembl | Stricter thresholds (soft 0.05, hard 0.15) |
+| crossref | Variable data completeness (soft 0.10, hard 0.30) |
+| openalex | Good data quality (soft 0.08, hard 0.25) |
+| pubchem | More variability (soft 0.08, hard 0.25) |
+| pubmed | High quality curated (soft 0.05, hard 0.15) |
+| semanticscholar | Higher tolerance for rate limits (soft 0.15, hard 0.40) |
+| uniprot | High quality (soft 0.03, hard 0.10) |
 
-### DQ Entity Configs (configs/dq/entities/)
-| Provider | Entity | File |
-|----------|--------|------|
-| chembl | activity | configs/dq/entities/chembl/activity.yaml |
-| chembl | assay | configs/dq/entities/chembl/assay.yaml |
-| chembl | molecule | configs/dq/entities/chembl/molecule.yaml |
-| chembl | target | configs/dq/entities/chembl/target.yaml |
-| pubchem | compound | configs/dq/entities/pubchem/compound.yaml |
-| uniprot | target | configs/dq/entities/uniprot/target.yaml |
+### DQ Entity Configs (configs/dq/entities/) - 20 entities (FULL COVERAGE)
+
+| Provider | Count | Entities |
+|----------|-------|----------|
+| chembl | 12 | activity, assay, assay_parameters, cell_line, compound_record, molecule, protein_class, publication, publication_similarity, publication_term, target, target_component |
+| crossref | 1 | publication |
+| openalex | 1 | publication |
+| pubchem | 1 | compound |
+| pubmed | 1 | publication |
+| semanticscholar | 1 | publication |
+| uniprot | 3 | idmapping, protein, target |
+| **Total** | **20** | |
 
 ## Validator Results
 
@@ -106,10 +113,10 @@ The composite pipeline uses a different schema structure per ADR-026:
    - Issue: Composite pipelines (ADR-026) use different schema structure
    - Recommendation: Add composite pipeline schema detection and validation
 
-2. **DQ entity configs incomplete**
-   - Only 6 of 20 pipelines have entity-specific DQ configs
-   - Missing entity DQ configs for: assay_parameters, cell_line, compound_record, protein_class, publication (chembl), publication_similarity, publication_term, target_component, idmapping (uniprot), all non-chembl providers' entities except pubchem/compound and uniprot/target
-   - Impact: These use default/provider-level thresholds (acceptable per ADR-027 hierarchy)
+2. ~~**DQ entity configs incomplete**~~ **RESOLVED**
+   - ✅ All 20 pipelines now have entity-specific DQ configs
+   - Added 18 new DQ config files (8 ChEMBL entities, 2 UniProt entities, 4 providers, 4 publication entities)
+   - Commit: `56cad9c feat(dq): add entity-specific DQ configs for all pipelines`
 
 ### Notes
 
@@ -139,8 +146,9 @@ The composite pipeline uses a different schema structure per ADR-026:
 
 1. **Proceed to next audit phase** - All prerequisites met
 2. **Optional improvement**: Update validator to support composite pipeline schema (ADR-026)
-3. **Optional improvement**: Add entity-specific DQ configs for remaining pipelines
+3. ~~**Optional improvement**: Add entity-specific DQ configs for remaining pipelines~~ **DONE**
 
 ---
 
 *Audit completed: 2026-01-19*
+*Updated: 2026-01-19 - Added full DQ config coverage (20 entities, 7 providers)*
