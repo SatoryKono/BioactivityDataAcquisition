@@ -58,9 +58,7 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     # Primary identifier (Semantic Scholar Paper ID) - REQUIRED
     paper_id: str
 
-    # SemanticScholar-specific external identifiers
-    # pmc_id: PubMed Central ID (format: "PMC1234567")
-    pmc_id: str | None = None
+    # SemanticScholar-specific external identifiers (in addition to inherited pmc_id)
     arxiv_id: str | None = None
     corpus_id: int | None = None
 
@@ -70,8 +68,7 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     # SemanticScholar-specific journal/venue information
     volume: str | None = None
     pages: str | None = None  # Legacy: "first-last" format
-    first_page: str | None = None  # Unified: parsed from pages
-    last_page: str | None = None  # Unified: parsed from pages
+    # first_page and last_page inherited from PublicationEntityBase
     venue: str | None = None
 
     # SemanticScholar-specific metrics

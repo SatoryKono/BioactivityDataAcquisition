@@ -47,8 +47,19 @@ class ChemblPublication(BaseEntity):
     first_page: str | None = None
     last_page: str | None = None
 
+    # Cross-reference IDs (ChEMBL doesn't provide PMC ID)
+    pmc_id: str | None = None
+
     # Source information
     src_id: int | None = None
+
+    # Lookup metadata (tracks resolution strategy)
+    _lookup_method: str = "direct"  # ChEMBL uses direct extraction
+    _original_id: str | None = None
+
+    # DQ flags (Data Quality flags)
+    _dq_warn: bool = False
+    _dq_error: bool = False
 
     def __post_init__(self) -> None:
         super().__post_init__()

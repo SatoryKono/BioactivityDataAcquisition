@@ -173,8 +173,7 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     # CrossRef-specific publication details
     volume: str | None = None
     issue: str | None = None
-    first_page: str | None = None
-    last_page: str | None = None
+    # first_page and last_page inherited from PublicationEntityBase
 
     # CrossRef-specific dates
     published_print: str | None = None  # ISO date: YYYY-MM-DD or YYYY-MM or YYYY

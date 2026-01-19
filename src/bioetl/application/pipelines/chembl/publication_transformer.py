@@ -181,4 +181,15 @@ class PublicationTransformer(BaseChemblTransformer):
         else:
             data["authors"] = None
 
+        # Lookup metadata (direct extraction, no enrichment)
+        data["_lookup_method"] = "direct"
+        data["_original_id"] = str(primary_id)
+
+        # Cross-reference IDs (ChEMBL API doesn't provide PMC ID)
+        data["pmc_id"] = None
+
+        # DQ flags (default: no warnings or errors)
+        data["_dq_warn"] = False
+        data["_dq_error"] = False
+
         return data
