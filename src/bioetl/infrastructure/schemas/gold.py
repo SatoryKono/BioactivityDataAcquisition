@@ -827,9 +827,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     issn: Series[str] = pa.Field(nullable=True)
     publisher: Series[str] = pa.Field(nullable=True)
 
-    # Unified page fields (OpenAlex doesn't provide pages, but added for consistency)
-    first_page: Series[str] = pa.Field(nullable=True)
-    last_page: Series[str] = pa.Field(nullable=True)
+    # Note: OpenAlex API doesn't provide page information (first_page, last_page)
 
     # Date fields
     year: Series[float] = pa.Field(nullable=True, ge=1500, le=2100, coerce=True)
