@@ -137,6 +137,24 @@ class OpenAlexPublicationRecord(BaseModel):
         default_factory=list, description="Top concept names"
     )
 
+    # MeSH terms (Medical Subject Headings)
+    mesh: list[str] = PydanticField(
+        default_factory=list, description="MeSH descriptor names"
+    )
+
+    # Keywords
+    keywords: list[str] = PydanticField(
+        default_factory=list, description="Author-assigned keywords"
+    )
+
+    # External identifiers
+    pmcid: str | None = PydanticField(
+        default=None, description="PubMed Central ID (e.g., PMC7095418)"
+    )
+    mag_id: str | None = PydanticField(
+        default=None, description="Microsoft Academic Graph ID"
+    )
+
     # Additional metadata
     language: str | None = PydanticField(default=None, description="Language code")
 
@@ -187,8 +205,18 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # Primary identifier (OpenAlex Work ID) - REQUIRED
     openalex_id: str
 
+    # External identifiers (in addition to inherited doi, pmid)
+    pmcid: str | None = None  # PubMed Central ID (e.g., PMC7095418)
+    mag_id: str | None = None  # Microsoft Academic Graph ID
+
     # OpenAlex-specific: Concepts (top-level only)
     concepts: list[str] = field(default_factory=list)
+
+    # MeSH terms (Medical Subject Headings)
+    mesh: list[str] = field(default_factory=list)
+
+    # Keywords (author-assigned)
+    keywords: list[str] = field(default_factory=list)
 
     # Override: Default source for OpenAlex
     source: str = "openalex"

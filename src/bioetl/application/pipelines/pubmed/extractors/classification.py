@@ -5,7 +5,7 @@ Handles extraction of keywords, MeSH terms, and publication types.
 
 from __future__ import annotations
 
-from typing import TypedDict
+from typing import Any, TypedDict
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
@@ -149,3 +149,109 @@ class ClassificationExtractor(BaseFieldExtractor):
         extractor = cls()
         raw = extractor._extract_pub_types_raw(article_node)
         return extractor._normalize_list(raw)
+
+    @classmethod
+    def parse_chemicals(cls, medline_citation: Element | None) -> list[str]:
+        """Extract chemical substance names from ChemicalList.
+
+        Extracts NameOfSubstance text from each Chemical element.
+
+        XML structure:
+            <ChemicalList>
+              <Chemical>
+                <RegistryNumber>0</RegistryNumber>
+                <NameOfSubstance UI="D000123">Aspirin</NameOfSubstance>
+              </Chemical>
+            </ChemicalList>
+
+        Args:
+            medline_citation: The MedlineCitation element.
+
+        Returns:
+            List of chemical substance names.
+        """
+        if medline_citation is None:
+            return []
+        chemical_list = medline_citation.find(".//ChemicalList")
+        if chemical_list is None:
+            return []
+        raw = [
+            chem.find("NameOfSubstance").text
+            for chem in chemical_list.findall("Chemical")
+            if chem.find("NameOfSubstance") is not None
+        ]
+        return cls()._normalize_list(raw)
+
+    @classmethod
+    def parse_gene_symbols(cls, medline_citation: Element | None) -> list[str]:
+        """Extract gene symbols from GeneSymbolList.
+
+        XML structure:
+            <GeneSymbolList>
+              <GeneSymbol>TP53</GeneSymbol>
+              <GeneSymbol>BRCA1</GeneSymbol>
+            </GeneSymbolList>
+
+        Args:
+            medline_citation: The MedlineCitation element.
+
+        Returns:
+            List of gene symbols.
+        """
+        if medline_citation is None:
+            return []
+        gene_list = medline_citation.find(".//GeneSymbolList")
+        if gene_list is None:
+            return []
+        raw = [gs.text for gs in gene_list.findall("GeneSymbol")]
+        return cls()._normalize_list(raw)
+
+    @classmethod
+    def parse_databanks(cls, medline_citation: Element | None) -> list[dict[str, Any]]:
+        """Extract data bank references from DataBankList.
+
+        Returns structured data with bank name and accession numbers.
+
+        XML structure:
+            <DataBankList>
+              <DataBank>
+                <DataBankName>ClinicalTrials.gov</DataBankName>
+                <AccessionNumberList>
+                  <AccessionNumber>NCT123456</AccessionNumber>
+                </AccessionNumberList>
+              </DataBank>
+            </DataBankList>
+
+        Args:
+            medline_citation: The MedlineCitation element.
+
+        Returns:
+            List of dicts with 'databank_name' and 'accession_numbers' keys.
+        """
+        if medline_citation is None:
+            return []
+        databank_list = medline_citation.find(".//DataBankList")
+        if databank_list is None:
+            return []
+
+        result: list[dict[str, Any]] = []
+        for databank in databank_list.findall("DataBank"):
+            name_elem = databank.find("DataBankName")
+            if name_elem is None or not name_elem.text:
+                continue
+
+            accession_list = databank.find("AccessionNumberList")
+            accessions: list[str] = []
+            if accession_list is not None:
+                accessions = [
+                    acc.text.strip()
+                    for acc in accession_list.findall("AccessionNumber")
+                    if acc.text and acc.text.strip()
+                ]
+
+            result.append({
+                "databank_name": name_elem.text.strip(),
+                "accession_numbers": accessions,
+            })
+
+        return result

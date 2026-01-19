@@ -227,3 +227,126 @@ def extract_open_access_info(open_access: dict[str, Any] | None) -> dict[str, An
         "is_oa": open_access.get("is_oa"),
         "oa_status": open_access.get("oa_status"),
     }
+
+
+def extract_external_ids(ids: dict[str, Any] | None) -> dict[str, Any]:
+    """Extract external identifiers from ids object.
+
+    OpenAlex stores external IDs as URLs or raw values:
+    - pmid: "https://pubmed.ncbi.nlm.nih.gov/12345678" -> "12345678"
+    - pmcid: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC123456" -> "PMC123456"
+    - mag: Microsoft Academic Graph ID (integer or string)
+
+    Args:
+        ids: IDs object from OpenAlex work.
+
+    Returns:
+        Dictionary with pmid, pmcid, mag_id fields.
+
+    Example:
+        >>> extract_external_ids({
+        ...     "pmid": "https://pubmed.ncbi.nlm.nih.gov/32015508",
+        ...     "pmcid": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7095418",
+        ...     "mag": "3006090887"
+        ... })
+        {'pmid': '32015508', 'pmcid': 'PMC7095418', 'mag_id': '3006090887'}
+        >>> extract_external_ids(None)
+        {'pmid': None, 'pmcid': None, 'mag_id': None}
+    """
+    if not ids or not isinstance(ids, dict):
+        return {"pmid": None, "pmcid": None, "mag_id": None}
+
+    # Extract PMID from URL
+    # Format: https://pubmed.ncbi.nlm.nih.gov/12345678
+    pmid = None
+    pmid_url = ids.get("pmid")
+    if pmid_url and isinstance(pmid_url, str):
+        pmid = pmid_url.rstrip("/").split("/")[-1] if "/" in pmid_url else pmid_url
+
+    # Extract PMCID from URL
+    # Format: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC123456
+    pmcid = None
+    pmcid_url = ids.get("pmcid")
+    if pmcid_url and isinstance(pmcid_url, str):
+        pmcid = pmcid_url.rstrip("/").split("/")[-1] if "/" in pmcid_url else pmcid_url
+
+    # Extract MAG ID (can be int or string)
+    mag_id = None
+    mag_raw = ids.get("mag")
+    if mag_raw is not None:
+        mag_id = str(mag_raw)
+
+    return {"pmid": pmid, "pmcid": pmcid, "mag_id": mag_id}
+
+
+def extract_mesh_terms(mesh: list[dict[str, Any]] | None) -> list[str]:
+    """Extract MeSH descriptor names from mesh array.
+
+    OpenAlex provides MeSH terms with descriptor and qualifier info.
+    This function extracts unique descriptor names.
+
+    Args:
+        mesh: List of MeSH term objects from OpenAlex.
+
+    Returns:
+        List of unique MeSH descriptor names.
+
+    Example:
+        >>> extract_mesh_terms([
+        ...     {"descriptor_ui": "D000818", "descriptor_name": "Animals"},
+        ...     {"descriptor_ui": "D006801", "descriptor_name": "Humans"},
+        ...     {"descriptor_ui": "D000818", "descriptor_name": "Animals"}
+        ... ])
+        ['Animals', 'Humans']
+        >>> extract_mesh_terms(None)
+        []
+    """
+    if not mesh or not isinstance(mesh, list):
+        return []
+
+    seen: set[str] = set()
+    result: list[str] = []
+
+    for term in mesh:
+        if not isinstance(term, dict):
+            continue
+        name = term.get("descriptor_name")
+        if name and isinstance(name, str) and name not in seen:
+            seen.add(name)
+            result.append(name)
+
+    return result
+
+
+def extract_keywords(keywords: list[dict[str, Any]] | None) -> list[str]:
+    """Extract keyword display names from keywords array.
+
+    OpenAlex provides keywords with display_name field.
+
+    Args:
+        keywords: List of keyword objects from OpenAlex.
+
+    Returns:
+        List of keyword display names.
+
+    Example:
+        >>> extract_keywords([
+        ...     {"id": "https://openalex.org/keywords/coronavirus", "display_name": "Coronavirus"},
+        ...     {"id": "https://openalex.org/keywords/pandemic", "display_name": "Pandemic"}
+        ... ])
+        ['Coronavirus', 'Pandemic']
+        >>> extract_keywords(None)
+        []
+    """
+    if not keywords or not isinstance(keywords, list):
+        return []
+
+    result: list[str] = []
+    for kw in keywords:
+        if not isinstance(kw, dict):
+            continue
+        name = kw.get("display_name")
+        if name and isinstance(name, str):
+            result.append(name.strip())
+
+    return result

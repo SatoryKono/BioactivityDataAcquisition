@@ -183,6 +183,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             ),
             "keywords": ClassificationExtractor.parse_keywords(medline),
             "mesh_terms": ClassificationExtractor.parse_mesh_terms(medline),
+            "chemicals": ClassificationExtractor.parse_chemicals(medline),
+            "gene_symbols": ClassificationExtractor.parse_gene_symbols(medline),
+            "databanks": ClassificationExtractor.parse_databanks(medline),
             "language": get_text(article.find(".//Language")),
             "country": (
                 get_text(medline.find(".//MedlineJournalInfo/Country"))

@@ -9,7 +9,10 @@ from bioetl.application.pipelines.openalex.extractors import (
     extract_authors,
     extract_concepts,
     extract_doi,
+    extract_external_ids,
     extract_journal_info,
+    extract_keywords,
+    extract_mesh_terms,
     extract_open_access_info,
     extract_openalex_id,
     reconstruct_abstract,
@@ -259,3 +262,169 @@ class TestExtractOpenAccessInfo:
         """Should return None values for empty dict."""
         result = extract_open_access_info({})
         assert result == {"is_oa": None, "oa_status": None}
+
+
+class TestExtractExternalIds:
+    """Tests for extract_external_ids function."""
+
+    def test_extract_external_ids_complete(self) -> None:
+        """Should extract all external IDs from URLs."""
+        ids = {
+            "pmid": "https://pubmed.ncbi.nlm.nih.gov/32015508",
+            "pmcid": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7095418",
+            "mag": "3006090887",
+        }
+        result = extract_external_ids(ids)
+        assert result == {
+            "pmid": "32015508",
+            "pmcid": "PMC7095418",
+            "mag_id": "3006090887",
+        }
+
+    def test_extract_external_ids_pmid_only(self) -> None:
+        """Should extract PMID from URL."""
+        ids = {"pmid": "https://pubmed.ncbi.nlm.nih.gov/12345678"}
+        result = extract_external_ids(ids)
+        assert result["pmid"] == "12345678"
+        assert result["pmcid"] is None
+        assert result["mag_id"] is None
+
+    def test_extract_external_ids_bare_pmid(self) -> None:
+        """Should handle bare PMID (no URL)."""
+        ids = {"pmid": "12345678"}
+        result = extract_external_ids(ids)
+        assert result["pmid"] == "12345678"
+
+    def test_extract_external_ids_pmcid_trailing_slash(self) -> None:
+        """Should handle trailing slash in PMCID URL."""
+        ids = {"pmcid": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7095418/"}
+        result = extract_external_ids(ids)
+        assert result["pmcid"] == "PMC7095418"
+
+    def test_extract_external_ids_mag_as_int(self) -> None:
+        """Should convert MAG ID to string."""
+        ids = {"mag": 3006090887}
+        result = extract_external_ids(ids)
+        assert result["mag_id"] == "3006090887"
+
+    def test_extract_external_ids_none(self) -> None:
+        """Should return None values for None input."""
+        result = extract_external_ids(None)
+        assert result == {"pmid": None, "pmcid": None, "mag_id": None}
+
+    def test_extract_external_ids_empty(self) -> None:
+        """Should return None values for empty dict."""
+        result = extract_external_ids({})
+        assert result == {"pmid": None, "pmcid": None, "mag_id": None}
+
+
+class TestExtractMeshTerms:
+    """Tests for extract_mesh_terms function."""
+
+    def test_extract_mesh_terms_basic(self) -> None:
+        """Should extract MeSH descriptor names."""
+        mesh = [
+            {"descriptor_ui": "D000818", "descriptor_name": "Animals"},
+            {"descriptor_ui": "D006801", "descriptor_name": "Humans"},
+        ]
+        result = extract_mesh_terms(mesh)
+        assert result == ["Animals", "Humans"]
+
+    def test_extract_mesh_terms_deduplication(self) -> None:
+        """Should deduplicate repeated descriptors."""
+        mesh = [
+            {"descriptor_ui": "D000818", "descriptor_name": "Animals"},
+            {"descriptor_ui": "D000818", "descriptor_name": "Animals"},  # Duplicate
+            {"descriptor_ui": "D006801", "descriptor_name": "Humans"},
+        ]
+        result = extract_mesh_terms(mesh)
+        assert result == ["Animals", "Humans"]
+
+    def test_extract_mesh_terms_preserves_order(self) -> None:
+        """Should preserve order of first occurrence."""
+        mesh = [
+            {"descriptor_name": "First"},
+            {"descriptor_name": "Second"},
+            {"descriptor_name": "First"},  # Duplicate
+            {"descriptor_name": "Third"},
+        ]
+        result = extract_mesh_terms(mesh)
+        assert result == ["First", "Second", "Third"]
+
+    def test_extract_mesh_terms_missing_name(self) -> None:
+        """Should skip terms without descriptor_name."""
+        mesh = [
+            {"descriptor_ui": "D000818"},  # No name
+            {"descriptor_name": "Humans"},
+        ]
+        result = extract_mesh_terms(mesh)
+        assert result == ["Humans"]
+
+    def test_extract_mesh_terms_none(self) -> None:
+        """Should return empty list for None input."""
+        result = extract_mesh_terms(None)
+        assert result == []
+
+    def test_extract_mesh_terms_empty(self) -> None:
+        """Should return empty list for empty list."""
+        result = extract_mesh_terms([])
+        assert result == []
+
+    def test_extract_mesh_terms_invalid_structure(self) -> None:
+        """Should handle invalid mesh structure gracefully."""
+        mesh = [
+            "not_a_dict",  # Invalid type
+            {"descriptor_name": "Valid"},
+        ]
+        result = extract_mesh_terms(mesh)  # type: ignore[arg-type]
+        assert result == ["Valid"]
+
+
+class TestExtractKeywords:
+    """Tests for extract_keywords function."""
+
+    def test_extract_keywords_basic(self) -> None:
+        """Should extract keyword display names."""
+        keywords = [
+            {"id": "https://openalex.org/keywords/coronavirus", "display_name": "Coronavirus"},
+            {"id": "https://openalex.org/keywords/pandemic", "display_name": "Pandemic"},
+        ]
+        result = extract_keywords(keywords)
+        assert result == ["Coronavirus", "Pandemic"]
+
+    def test_extract_keywords_strips_whitespace(self) -> None:
+        """Should strip whitespace from keywords."""
+        keywords = [
+            {"display_name": "  Coronavirus  "},
+            {"display_name": "Pandemic"},
+        ]
+        result = extract_keywords(keywords)
+        assert result == ["Coronavirus", "Pandemic"]
+
+    def test_extract_keywords_missing_display_name(self) -> None:
+        """Should skip keywords without display_name."""
+        keywords = [
+            {"id": "https://openalex.org/keywords/coronavirus"},  # No display_name
+            {"display_name": "Pandemic"},
+        ]
+        result = extract_keywords(keywords)
+        assert result == ["Pandemic"]
+
+    def test_extract_keywords_none(self) -> None:
+        """Should return empty list for None input."""
+        result = extract_keywords(None)
+        assert result == []
+
+    def test_extract_keywords_empty(self) -> None:
+        """Should return empty list for empty list."""
+        result = extract_keywords([])
+        assert result == []
+
+    def test_extract_keywords_invalid_structure(self) -> None:
+        """Should handle invalid keyword structure gracefully."""
+        keywords = [
+            "not_a_dict",  # Invalid type
+            {"display_name": "Valid"},
+        ]
+        result = extract_keywords(keywords)  # type: ignore[arg-type]
+        assert result == ["Valid"]
