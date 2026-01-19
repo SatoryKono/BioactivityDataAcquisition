@@ -220,9 +220,12 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     issn: Series[str] = pa.Field(nullable=True)
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)
-    pages: Series[str] = pa.Field(nullable=True)
+    pages: Series[str] = pa.Field(nullable=True)  # Legacy: medline_pgn format
+    first_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
+    last_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     authors: Series[object] = pa.Field(nullable=True)  # list[str]
     pub_date: Series[str] = pa.Field(nullable=True)
+    publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
     year: Series[float] = pa.Field(nullable=True, coerce=True)
     publication_year: Series[float] = pa.Field(
         nullable=True, coerce=True
@@ -410,6 +413,7 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     journal: Series[str] = pa.Field(nullable=True)
     journal_full_title: Series[str] = pa.Field(nullable=True)
     year: Series[float] = pa.Field(nullable=True, coerce=True)
+    publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)
     first_page: Series[str] = pa.Field(nullable=True)
@@ -689,7 +693,9 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # Journal/Venue
     journal: Series[str] = pa.Field(nullable=True)
     volume: Series[str] = pa.Field(nullable=True)
-    pages: Series[str] = pa.Field(nullable=True)
+    pages: Series[str] = pa.Field(nullable=True)  # Legacy: "first-last" format
+    first_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
+    last_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     venue: Series[str] = pa.Field(nullable=True)
 
     # Metrics
@@ -764,8 +770,9 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
 
     # Date fields
     year: Series[float] = pa.Field(nullable=True, ge=1900, le=2100, coerce=True)
-    published_print: Series[str] = pa.Field(nullable=True)
-    published_online: Series[str] = pa.Field(nullable=True)
+    publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
+    published_print: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
+    published_online: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
 
     # Metadata
     doc_type: Series[str] = pa.Field(nullable=True)
@@ -822,6 +829,10 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     journal: Series[str] = pa.Field(nullable=True)
     issn: Series[str] = pa.Field(nullable=True)
     publisher: Series[str] = pa.Field(nullable=True)
+
+    # Unified page fields (OpenAlex doesn't provide pages, but added for consistency)
+    first_page: Series[str] = pa.Field(nullable=True)
+    last_page: Series[str] = pa.Field(nullable=True)
 
     # Date fields
     year: Series[float] = pa.Field(nullable=True, ge=1500, le=2100, coerce=True)

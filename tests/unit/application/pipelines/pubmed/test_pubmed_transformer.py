@@ -781,3 +781,170 @@ class TestPubMedTransformerDoiNormalization:
         assert result_lower is not None
         # After normalization, content hashes should be identical
         assert result_upper["content_hash"] == result_lower["content_hash"]
+
+
+@pytest.mark.unit
+class TestPubMedTransformerUnifiedPageFields:
+    """Tests for unified page field parsing (first_page, last_page)."""
+
+    @pytest.fixture
+    def transformer(self) -> PubMedPublicationTransformer:
+        """Create PubMedPublicationTransformer instance."""
+        return PubMedPublicationTransformer(provider="pubmed")
+
+    def test_parse_pages_hyphenated(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test parsing of hyphenated page ranges."""
+        first, last = transformer._parse_pages("123-456")
+        assert first == "123"
+        assert last == "456"
+
+    def test_parse_pages_single_page(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test parsing of single page number."""
+        first, last = transformer._parse_pages("123")
+        assert first == "123"
+        assert last is None
+
+    def test_parse_pages_electronic_format(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test parsing of electronic article numbers (e123-e456)."""
+        first, last = transformer._parse_pages("e123-e456")
+        assert first == "e123"
+        assert last == "e456"
+
+    def test_parse_pages_supplement_format(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test parsing of supplement pages (S1-S10)."""
+        first, last = transformer._parse_pages("S1-S10")
+        assert first == "S1"
+        assert last == "S10"
+
+    def test_parse_pages_none(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test parsing of None input."""
+        first, last = transformer._parse_pages(None)
+        assert first is None
+        assert last is None
+
+    def test_parse_pages_empty_string(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test parsing of empty string."""
+        first, last = transformer._parse_pages("")
+        assert first is None
+        assert last is None
+
+    def test_parse_pages_whitespace(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test parsing with whitespace."""
+        first, last = transformer._parse_pages("  123 - 456  ")
+        assert first == "123"
+        assert last == "456"
+
+    @pytest.mark.asyncio
+    async def test_unified_page_fields_in_transform(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that unified page fields are present in transformed output."""
+        record: dict[str, Any] = {"_raw_xml": FULL_PUBMED_XML}
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["pages"] == "123-145"
+        assert result["first_page"] == "123"
+        assert result["last_page"] == "145"
+
+
+@pytest.mark.unit
+class TestPubMedTransformerUnifiedDateFields:
+    """Tests for unified publication_date field."""
+
+    @pytest.fixture
+    def transformer(self) -> PubMedPublicationTransformer:
+        """Create PubMedPublicationTransformer instance."""
+        return PubMedPublicationTransformer(provider="pubmed")
+
+    def test_compute_publication_date_from_epub(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test publication_date computed from epub_date (priority 1)."""
+        result = transformer._compute_publication_date(
+            epub_date="2025-02-28", pub_date="2025-03-15", year=2025
+        )
+        assert result == "2025-02-28"
+
+    def test_compute_publication_date_from_pub_date(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test publication_date computed from pub_date (priority 2)."""
+        result = transformer._compute_publication_date(
+            epub_date=None, pub_date="2025-03-15", year=2025
+        )
+        assert result == "2025-03-15"
+
+    def test_compute_publication_date_from_year(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test publication_date computed from year only (priority 3)."""
+        result = transformer._compute_publication_date(
+            epub_date=None, pub_date=None, year=2025
+        )
+        assert result == "2025-01-01"
+
+    def test_compute_publication_date_none(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test publication_date returns None when no date info available."""
+        result = transformer._compute_publication_date(
+            epub_date=None, pub_date=None, year=None
+        )
+        assert result is None
+
+    def test_compute_publication_date_partial_epub_date(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test that partial epub_date (YYYY-MM) falls back to pub_date."""
+        result = transformer._compute_publication_date(
+            epub_date="2025-02", pub_date="2025-03-15", year=2025
+        )
+        # epub_date is partial, so falls back to pub_date
+        assert result == "2025-03-15"
+
+    @pytest.mark.asyncio
+    async def test_unified_publication_date_in_transform(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that publication_date is present in transformed output."""
+        record: dict[str, Any] = {"_raw_xml": FULL_PUBMED_XML}
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        # epub_date is "2025-02-28" which takes priority
+        assert result["publication_date"] == "2025-02-28"
+        assert result["epub_date"] == "2025-02-28"
+        assert result["pub_date"] == "2025-03-15"
