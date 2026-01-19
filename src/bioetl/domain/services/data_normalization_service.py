@@ -19,8 +19,12 @@ if TYPE_CHECKING:
 
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 _WHITESPACE_PATTERN = re.compile(r"\s+")
-_DATE_FORMATS = {3: "{0:04d}-{1:02d}-{2:02d}", 2: "{0:04d}-{1:02d}", 1: "{0:04d}"}
 _DOI_URL_PREFIXES = ("https://doi.org/", "http://doi.org/", "doi:")
+
+# Partial date patterns for end of period normalization
+_FULL_DATE_LEN = 10  # YYYY-MM-DD
+_PARTIAL_MONTH_LEN = 7  # YYYY-MM
+_PARTIAL_YEAR_LEN = 4  # YYYY
 
 
 @dataclass(frozen=True, slots=True)
@@ -178,12 +182,76 @@ class DefaultDataNormalizationService:
         parts = text.split(delimiter) if delimiter in text else [text]
         return [a.strip() for a in parts if a.strip()]
 
+    def normalize_partial_date(self, date_str: str | None) -> str | None:
+        """Normalize partial date to full YYYY-MM-DD format (end of period).
+
+        Partial dates are normalized to the END of the period:
+        - YYYY-MM → YYYY-MM-30 (end of month, day 30 for simplicity)
+        - YYYY → YYYY-12-31 (end of year)
+        - YYYY-MM-DD → unchanged
+        - None/empty → None
+
+        Args:
+            date_str: Date string in partial or full ISO format.
+
+        Returns:
+            Full ISO date string (YYYY-MM-DD), or None if invalid.
+        """
+        if not date_str:
+            return None
+
+        date_str = date_str.strip()
+        if not date_str:
+            return None
+
+        # Already full format YYYY-MM-DD
+        if (
+            len(date_str) == _FULL_DATE_LEN
+            and date_str[4] == "-"
+            and date_str[7] == "-"
+        ):
+            return date_str
+
+        # Partial: YYYY-MM → YYYY-MM-30
+        if len(date_str) == _PARTIAL_MONTH_LEN and date_str[4] == "-":
+            return f"{date_str}-30"
+
+        # Partial: YYYY → YYYY-12-31
+        if len(date_str) == _PARTIAL_YEAR_LEN and date_str.isdigit():
+            return f"{date_str}-12-31"
+
+        # Unknown format - return None (will trigger DQ warning)
+        return None
+
     def format_date_parts(
         self, date_parts: Sequence[Sequence[int]] | None
     ) -> str | None:
-        """Format CrossRef date-parts [[year, month?, day?]] to ISO string."""
+        """Format CrossRef date-parts to full YYYY-MM-DD (end of period).
+
+        Partial dates are normalized to the END of the period:
+        - [year, month, day] → YYYY-MM-DD (full date)
+        - [year, month] → YYYY-MM-30 (end of month)
+        - [year] → YYYY-12-31 (end of year)
+
+        Args:
+            date_parts: Date parts in CrossRef format [[year, month?, day?]].
+
+        Returns:
+            Full ISO date string (YYYY-MM-DD), or None.
+        """
         if not date_parts or not date_parts[0]:
             return None
+
         parts = date_parts[0]
-        fmt = _DATE_FORMATS.get(min(len(parts), 3))
-        return fmt.format(*parts) if fmt else None
+
+        if len(parts) >= 3:
+            # Full date
+            return f"{parts[0]:04d}-{parts[1]:02d}-{parts[2]:02d}"
+        elif len(parts) == 2:
+            # Year-month only → end of month
+            return f"{parts[0]:04d}-{parts[1]:02d}-30"
+        elif len(parts) == 1:
+            # Year only → end of year
+            return f"{parts[0]:04d}-12-31"
+
+        return None
