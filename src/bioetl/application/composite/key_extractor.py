@@ -27,9 +27,12 @@ class KeyExtractorService:
     Attributes:
         storage: Storage port for reading Silver tables.
         logger: Structured logger.
+        base_path: Base path for resolving relative Silver table paths.
 
     Example:
-        >>> extractor = KeyExtractorService(storage=storage, logger=logger)
+        >>> extractor = KeyExtractorService(
+        ...     storage=storage, logger=logger, base_path="data/output"
+        ... )
         >>> keys_df = await extractor.extract(
         ...     silver_table="silver/chembl/publication",
         ...     keys=("document_id", "doi", "pmid"),
@@ -42,15 +45,34 @@ class KeyExtractorService:
         self,
         storage: StoragePort,
         logger: LoggerPort,
+        base_path: str | None = None,
     ) -> None:
         """Initialize key extractor service.
 
         Args:
             storage: Storage port for reading tables.
             logger: Structured logger.
+            base_path: Base path for resolving relative Silver table paths.
+                       If None, paths are used as-is.
         """
         self._storage = storage
         self._logger = logger
+        self._base_path = base_path
+
+    def _resolve_path(self, path: str) -> str:
+        """Resolve relative path using base_path if configured.
+
+        Args:
+            path: Relative or absolute path to Silver table.
+
+        Returns:
+            Resolved path (with base_path prefix if configured).
+        """
+        if self._base_path:
+            from pathlib import Path
+
+            return str(Path(self._base_path) / path)
+        return path
 
     async def _read_silver_table(self, path: str) -> pl.DataFrame:
         """Read a Silver table.
@@ -61,7 +83,8 @@ class KeyExtractorService:
         import polars as pl
         from deltalake import DeltaTable
 
-        table = DeltaTable(path)
+        resolved_path = self._resolve_path(path)
+        table = DeltaTable(resolved_path)
         result = pl.from_arrow(table.to_pyarrow_table())
         # from_arrow may return Series for single-column tables
         if isinstance(result, pl.Series):

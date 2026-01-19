@@ -19,6 +19,7 @@ from bioetl.interfaces.cli.commands.maintenance import maintenance
 from bioetl.interfaces.cli.commands.quarantine import quarantine
 from bioetl.interfaces.cli.commands.run import run
 from bioetl.interfaces.cli.commands.run_all import run_all
+from bioetl.interfaces.cli.commands.run_composite import run_composite
 
 
 @click.group()
@@ -30,6 +31,7 @@ def cli() -> None:
 # Register commands
 cli.add_command(run)
 cli.add_command(run_all)
+cli.add_command(run_composite)
 cli.add_command(export_command, name="export")
 cli.add_command(quarantine)
 cli.add_command(checkpoint)

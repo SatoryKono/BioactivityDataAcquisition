@@ -1,0 +1,166 @@
+"""Run composite pipeline command for BioETL CLI.
+
+Implements the composite pipeline execution command that orchestrates
+multiple data sources (seed + enrichers) into a unified dataset.
+
+See ADR-026 for architectural decisions.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import sys
+
+import click
+
+from bioetl.application.composite.runner import CompositeRuntimeConfig
+from bioetl.composition.bootstrap_composite import (
+    bootstrap_composite_pipeline,
+    load_composite_config,
+)
+from bioetl.interfaces.cli.exit_codes import ExitCode
+from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
+
+
+def _validate_composite_name(
+    ctx: click.Context, param: click.Parameter, value: str
+) -> str:
+    """Validate composite pipeline name."""
+    if not value:
+        raise click.BadParameter("Composite pipeline name is required")
+    return value
+
+
+async def _run_composite_async(
+    composite_name: str,
+    runtime: CompositeRuntimeConfig,
+) -> tuple[bool, str | None]:
+    """Run composite pipeline asynchronously.
+
+    Args:
+        composite_name: Name of composite pipeline (e.g., 'publication').
+        runtime: Runtime configuration.
+
+    Returns:
+        Tuple of (success, error_message).
+    """
+    try:
+        config = load_composite_config(composite_name)
+    except FileNotFoundError as e:
+        return False, str(e)
+    except ValueError as e:
+        return False, f"Invalid configuration: {e}"
+
+    runner = bootstrap_composite_pipeline(config, runtime)
+
+    try:
+        result = await runner.run()
+        if result.is_success:
+            return True, None
+        # Get error from failed enrichers if any
+        failed = result.failed_enrichers
+        if failed:
+            return False, f"Failed enrichers: {', '.join(failed)}"
+        return False, "Composite pipeline failed"
+    except Exception as e:
+        return False, str(e)
+
+
+@click.command(name="run-composite")
+@click.option(
+    "--composite",
+    callback=_validate_composite_name,
+    required=True,
+    help="Composite pipeline name (e.g., 'publication')",
+)
+@click.option(
+    "--resume",
+    is_flag=True,
+    help="Resume from last checkpoint",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Preview execution without writing data",
+)
+@click.option(
+    "--seed-limit",
+    type=int,
+    help="Maximum records for seed pipeline",
+)
+@click.option(
+    "--enrich-only",
+    type=str,
+    help="Run only specified enrichers (comma-separated)",
+)
+@click.option(
+    "--required-only",
+    is_flag=True,
+    help="Skip optional enrichers",
+)
+@click.option(
+    "--force-enricher",
+    type=str,
+    help="Force re-run of specified enricher (ignores checkpoint)",
+)
+@click.option(
+    "--debug",
+    is_flag=True,
+    help="Enable DEBUG level logging",
+)
+def run_composite(
+    composite: str,
+    resume: bool,
+    dry_run: bool,
+    seed_limit: int | None,
+    enrich_only: str | None,
+    required_only: bool,
+    force_enricher: str | None,
+    debug: bool,
+) -> None:
+    """Run a composite pipeline that combines multiple data sources.
+
+    Composite pipelines orchestrate a seed pipeline (e.g., ChEMBL publications)
+    with multiple enricher pipelines (CrossRef, OpenAlex, PubMed, etc.) to
+    create a unified, enriched dataset.
+
+    Example:
+        bioetl run-composite --composite publication --seed-limit 100
+    """
+    # Parse enrich_only into tuple
+    enrich_only_tuple: tuple[str, ...] | None = None
+    if enrich_only:
+        enrich_only_tuple = tuple(e.strip() for e in enrich_only.split(","))
+
+    runtime = CompositeRuntimeConfig(
+        resume=resume,
+        dry_run=dry_run,
+        enrich_only=enrich_only_tuple,
+        required_only=required_only,
+        force_enricher=force_enricher,
+        seed_limit=seed_limit,
+    )
+
+    echo_info(f"Starting composite pipeline: {composite}")
+
+    if dry_run:
+        echo_warning("Dry-run mode: no data will be written")
+
+    if resume:
+        echo_info("Resume mode: continuing from last checkpoint")
+
+    try:
+        success, error_message = asyncio.run(_run_composite_async(composite, runtime))
+    except KeyboardInterrupt:
+        echo_warning("Composite pipeline interrupted by user (Ctrl+C)")
+        sys.exit(ExitCode.SIGINT)
+    except Exception as e:
+        echo_error("Unexpected error during composite execution", str(e))
+        sys.exit(ExitCode.FAIL)
+
+    if success:
+        echo_info("Composite pipeline completed successfully")
+        sys.exit(ExitCode.OK)
+    else:
+        echo_error("Composite pipeline failed", error_message or "Unknown error")
+        sys.exit(ExitCode.PIPELINE_ERROR)

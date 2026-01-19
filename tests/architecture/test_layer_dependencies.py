@@ -400,6 +400,7 @@ def test_dead_code_vulture(src_dir: Path) -> None:
         "model_config",
         # Click CLI
         "main",
+        "param",  # Click callback signature requires param argument
         # Prefect task decorators
         "execute",
     }

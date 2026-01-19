@@ -42,10 +42,12 @@ class MergeService:
         merge_config: MergeConfig,
         storage: StoragePort,
         logger: LoggerPort,
+        base_path: str | None = None,
     ) -> None:
         self._config = merge_config
         self._storage = storage
         self._logger = logger
+        self._base_path = base_path
 
     async def merge(
         self,
@@ -160,6 +162,21 @@ class MergeService:
             output_gold_path=self._config.output_gold_path,
         )
 
+    def _resolve_path(self, path: str) -> str:
+        """Resolve relative path using base_path if configured.
+
+        Args:
+            path: Relative or absolute path to Silver table.
+
+        Returns:
+            Resolved path (with base_path prefix if configured).
+        """
+        if self._base_path:
+            from pathlib import Path
+
+            return str(Path(self._base_path) / path)
+        return path
+
     async def _read_silver_table(self, path: str) -> pl.DataFrame:
         """Read a Silver table via StoragePort.
 
@@ -177,11 +194,34 @@ class MergeService:
         # Read via StoragePort
         records = await self._storage.read_silver(table_name)
 
-        # Convert to Polars DataFrame
+        # Convert to DataFrame
         if not records:
             return pl.DataFrame()
 
         return pl.DataFrame(records)
+
+    def _coerce_null_columns(self, df: pl.DataFrame) -> pl.DataFrame:
+        """Coerce Null-typed columns to String for Delta Lake compatibility.
+
+        Delta Lake doesn't support Null type, so columns with all nulls
+        (which Polars infers as Null type) must be cast to a concrete type.
+
+        Args:
+            df: DataFrame that may have Null-typed columns.
+
+        Returns:
+            DataFrame with Null columns cast to String.
+        """
+        import polars as pl
+
+        null_cols = [col for col in df.columns if df[col].dtype == pl.Null]
+        if null_cols:
+            self._logger.debug(
+                "Coercing null columns to String",
+                columns=null_cols,
+            )
+            df = df.with_columns([pl.col(col).cast(pl.String) for col in null_cols])
+        return df
 
     async def _write_merged_silver(self, df: pl.DataFrame) -> None:
         """Write merged data to Silver layer via StoragePort.
@@ -189,6 +229,9 @@ class MergeService:
         Args:
             df: Polars DataFrame to write.
         """
+        # Coerce null columns for Delta Lake compatibility
+        df = self._coerce_null_columns(df)
+
         # Convert path to table name by stripping layer prefix
         table_name = _path_to_table_name(self._config.output_silver_path)
 
@@ -204,6 +247,9 @@ class MergeService:
         Args:
             df: Polars DataFrame to write.
         """
+        # Coerce null columns for Delta Lake compatibility
+        df = self._coerce_null_columns(df)
+
         # Convert path to table name by stripping layer prefix
         table_name = _path_to_table_name(self._config.output_gold_path)
 
