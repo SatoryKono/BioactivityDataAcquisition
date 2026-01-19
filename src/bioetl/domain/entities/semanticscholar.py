@@ -69,7 +69,9 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
 
     # SemanticScholar-specific journal/venue information
     volume: str | None = None
-    pages: str | None = None
+    pages: str | None = None  # Legacy: "first-last" format
+    first_page: str | None = None  # Unified: parsed from pages
+    last_page: str | None = None  # Unified: parsed from pages
     venue: str | None = None
 
     # SemanticScholar-specific metrics

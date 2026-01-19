@@ -164,7 +164,11 @@ class PublicationTransformer(BaseChemblTransformer):
 
         # Validate year using PublicationYear Value Object
         year_vo = PublicationYear.from_raw(data.get("year"))
-        data["year"] = year_vo.value if year_vo else None
+        validated_year = year_vo.value if year_vo else None
+        data["year"] = validated_year
+
+        # Compute unified publication_date from year (ChEMBL only provides year)
+        data["publication_date"] = f"{validated_year}-01-01" if validated_year else None
 
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON

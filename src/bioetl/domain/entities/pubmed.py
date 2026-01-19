@@ -66,7 +66,9 @@ class ArticleRecord(BaseModel):
     issn: str | None = PydanticField(default=None, description="ISSN")
     volume: str | None = PydanticField(default=None, description="Volume number")
     issue: str | None = PydanticField(default=None, description="Issue number")
-    pages: str | None = PydanticField(default=None, description="Page numbers")
+    pages: str | None = PydanticField(default=None, description="Page numbers (medline_pgn)")
+    first_page: str | None = PydanticField(default=None, description="First page (unified)")
+    last_page: str | None = PydanticField(default=None, description="Last page (unified)")
 
     # Authors (JSON-serialized list of hashed names for PII compliance)
     authors: str | None = PydanticField(
@@ -171,7 +173,9 @@ class PubMedPublicationEntity(PublicationEntityBase):
     journal_abbrev: str | None = None
     volume: str | None = None
     issue: str | None = None
-    pages: str | None = None
+    pages: str | None = None  # Legacy: medline_pgn format ("123-456")
+    first_page: str | None = None  # Unified: parsed from pages
+    last_page: str | None = None  # Unified: parsed from pages
 
     # PubMed-specific dates (stored as ISO strings YYYY-MM-DD or partial)
     pub_date: str | None = None  # Publication date
