@@ -568,6 +568,33 @@ def assemble_runner(
     )
 
 
+def _extract_single_dq_config(
+    sink: Any,
+    layer_name: str,
+    config_class: Any,
+) -> Any | None:
+    """Extract DQ config for a single layer.
+
+    Args:
+        sink: Sink configuration from YAML.
+        layer_name: Name of the layer ('bronze', 'silver', 'gold').
+        config_class: Pydantic config class for validation.
+
+    Returns:
+        DQ report config if enabled, None otherwise.
+    """
+    sink_config = sink.get(layer_name)
+    if not sink_config:
+        return None
+    try:
+        validated = config_class.model_validate(sink_config.model_dump())
+        if validated.dq_report.enabled:
+            return validated.dq_report
+    except Exception:
+        pass
+    return None
+
+
 def _extract_dq_configs(
     pipeline: BasePipeline,
 ) -> tuple[
@@ -593,51 +620,16 @@ def _extract_dq_configs(
         SilverSinkConfig,
     )
 
-    bronze_config: BronzeDQConfigPort | None = None
-    silver_config: SilverDQConfigPort | None = None
-    gold_config: GoldDQConfigPort | None = None
-
-    # Access original YAML config if available through pipeline
     yaml_config = getattr(pipeline, "_yaml_config", None)
     if yaml_config is None:
-        return bronze_config, silver_config, gold_config
+        return None, None, None
 
     sink = getattr(yaml_config, "sink", None)
     if sink is None:
-        return bronze_config, silver_config, gold_config
+        return None, None, None
 
-    # Extract Bronze DQ config
-    bronze_sink_config = sink.get("bronze")
-    if bronze_sink_config:
-        try:
-            bronze_sink = BronzeSinkConfig.model_validate(
-                bronze_sink_config.model_dump()
-            )
-            if bronze_sink.dq_report.enabled:
-                bronze_config = bronze_sink.dq_report
-        except Exception:
-            pass
-
-    # Extract Silver DQ config
-    silver_sink_config = sink.get("silver")
-    if silver_sink_config:
-        try:
-            silver_sink = SilverSinkConfig.model_validate(
-                silver_sink_config.model_dump()
-            )
-            if silver_sink.dq_report.enabled:
-                silver_config = silver_sink.dq_report
-        except Exception:
-            pass
-
-    # Extract Gold DQ config
-    gold_sink_config = sink.get("gold")
-    if gold_sink_config:
-        try:
-            gold_sink = GoldSinkConfig.model_validate(gold_sink_config.model_dump())
-            if gold_sink.dq_report.enabled:
-                gold_config = gold_sink.dq_report
-        except Exception:
-            pass
+    bronze_config = _extract_single_dq_config(sink, "bronze", BronzeSinkConfig)
+    silver_config = _extract_single_dq_config(sink, "silver", SilverSinkConfig)
+    gold_config = _extract_single_dq_config(sink, "gold", GoldSinkConfig)
 
     return bronze_config, silver_config, gold_config
