@@ -34,15 +34,16 @@ class TestPubMedDateBuilding:
             # pub_date used when epub_date is partial or missing
             (None, "2024-03-15", 2024, "2024-03-15"),
             ("2024-03", "2024-04-01", 2024, "2024-04-01"),  # partial epub falls back
-            # Year-only fallback
-            (None, None, 2024, "2024-01-01"),
-            (None, None, 1999, "1999-01-01"),
-            (None, None, 2025, "2025-01-01"),
+            # Year-only fallback (end of year)
+            (None, None, 2024, "2024-12-31"),
+            (None, None, 1999, "1999-12-31"),
+            (None, None, 2025, "2025-12-31"),
             # All None returns None
             (None, None, None, None),
-            # Partial dates (less than 10 chars) fall back
+            # Partial dates (less than 10 chars) fall back to pub_date normalization
             ("2024", "2024-06-15", 2024, "2024-06-15"),
-            ("2024-06", None, 2024, "2024-01-01"),
+            # Partial pub_date gets normalized (YYYY-MM → YYYY-MM-30)
+            ("2024-06", None, 2024, "2024-12-31"),  # partial epub, no pub_date → year
         ],
     )
     def test_compute_publication_date(
@@ -92,8 +93,8 @@ class TestPubMedDateBuilding:
             == "2024-02-15"
         )
 
-        # epub_date None, pub_date None -> use year
-        assert transformer._compute_publication_date(None, None, 2024) == "2024-01-01"
+        # epub_date None, pub_date None -> use year (end of year)
+        assert transformer._compute_publication_date(None, None, 2024) == "2024-12-31"
 
 
 @pytest.mark.unit

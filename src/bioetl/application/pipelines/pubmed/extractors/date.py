@@ -100,20 +100,33 @@ class DateExtractor(BaseFieldExtractor):
         month: str | None,
         day: str | None,
     ) -> str | None:
-        """Format date components into ISO date string (YYYY-MM-DD or partial)."""
+        """Format date components into ISO date string (YYYY-MM-DD).
+
+        Uses end-of-period strategy for partial dates:
+        - Year + Month + Day → YYYY-MM-DD
+        - Year + Month (no day) → YYYY-MM-30
+        - Year only → YYYY-12-31
+        """
         if not year:
             return None
 
-        parts = [year]
+        # Normalize month
         if month:
-            month_lower = month.lower()[:3]
-            month_num = self.MONTH_MAP.get(month_lower, month.zfill(2))
-            parts.append(month_num)
+            month_str = month.strip().lower()[:3]
+            month_num = self.MONTH_MAP.get(month_str)
+            if not month_num and month.isdigit():
+                month_num = month.zfill(2)
+            if not month_num:
+                # Unknown month format → treat as year-only
+                return f"{year}-12-31"
+        else:
+            # No month → year-only
+            return f"{year}-12-31"
 
-            if day:
-                parts.append(day.zfill(2))
+        # Normalize day (end of month if missing)
+        day_num = day.zfill(2) if day and day.isdigit() else "30"
 
-        return "-".join(parts)
+        return f"{year}-{month_num}-{day_num}"
 
     @classmethod
     def format_date(

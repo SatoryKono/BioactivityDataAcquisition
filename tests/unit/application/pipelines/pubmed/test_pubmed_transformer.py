@@ -495,7 +495,8 @@ class TestPubMedTransformerDateExtraction:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["pub_date"] == "2024"
+        # End-of-period strategy: year-only → YYYY-12-31
+        assert result["pub_date"] == "2024-12-31"
         assert result["year"] == 2024
 
     @pytest.mark.asyncio
@@ -528,7 +529,8 @@ class TestPubMedTransformerDateExtraction:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["pub_date"] == "2024-12"
+        # End-of-period strategy: year+month → YYYY-MM-30
+        assert result["pub_date"] == "2024-12-30"
         assert result["year"] == 2024
 
     @pytest.mark.asyncio
@@ -850,7 +852,8 @@ class TestPubMedTransformerUnifiedDateFields:
         result = transformer._compute_publication_date(
             epub_date=None, pub_date=None, year=2025
         )
-        assert result == "2025-01-01"
+        # End-of-period strategy: year-only → YYYY-12-31
+        assert result == "2025-12-31"
 
     def test_compute_publication_date_none(
         self,
