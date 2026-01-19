@@ -99,7 +99,7 @@ class TestFileSizeLimits:
         # Application layer exemptions
         "base_transformer.py": 680,  # 667 LOC - BaseTransformer with serialization helpers
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
-        "merger.py": 550,  # 549 LOC - Composite merge service with join logic and conflict resolution + dual path
+        "merger.py": 610,  # 602 LOC - Composite merge service with join logic and conflict resolution + dual path + DOI normalization
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
@@ -516,6 +516,9 @@ class TestClassSize:
         "MergeService": 570,  # 566 lines - Composite merge service with conflict resolution + dual path + DOI normalization
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
         "CompositePipelineRunner": 350,  # 313 lines - Composite pipeline orchestrator
+        # Publication adapters with APIRequestCollector (metadata enrichment)
+        "OpenAlexAdapter": 560,  # 557 lines - FilterableDataSourcePort + APIRequestCollector + fallback handler
+        "PubMedAdapter": 545,  # 540 lines - FilterableDataSourcePort + APIRequestCollector + TitleFallbackHandler
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:

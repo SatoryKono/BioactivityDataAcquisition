@@ -334,7 +334,8 @@ class MergeService:
         import polars as pl
 
         normalize_cols = [
-            key for key in join_keys
+            key
+            for key in join_keys
             if key in self._NORMALIZE_JOIN_KEYS and key in df.columns
         ]
 
@@ -342,10 +343,9 @@ class MergeService:
             return df
 
         # Apply lowercase normalization to identifier columns
-        return df.with_columns([
-            pl.col(col).str.to_lowercase().alias(col)
-            for col in normalize_cols
-        ])
+        return df.with_columns(
+            [pl.col(col).str.to_lowercase().alias(col) for col in normalize_cols]
+        )
 
     async def _apply_joins(
         self,

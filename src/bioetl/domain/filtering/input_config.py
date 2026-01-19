@@ -31,15 +31,17 @@ class InputFilterConfig:
     Supports both single-column and multi-column filtering modes:
     - Single-column: Use column_name and filter_field directly
     - Multi-column: Use columns list for AND-logic filtering
+    - Direct IDs: Use direct_filter_ids with filter_field (no CSV file)
 
     Attributes:
         enabled: Whether filtering is active.
         source_path: Path to the filter source (e.g., CSV file).
         column_name: Name of the column containing filter IDs (single-column mode).
-        filter_field: API field to filter by (single-column mode).
+        filter_field: API field to filter by (single-column mode or direct IDs).
         columns: Tuple of FilterColumn for multi-column filtering.
         batch_size: Number of IDs per API request (ChEMBL limit ~100).
         fallback_column: Optional column for fallback search (e.g., 'title' for DOI→title).
+        direct_filter_ids: Direct filter IDs without CSV (for composite mode).
     """
 
     enabled: bool = False
@@ -49,6 +51,7 @@ class InputFilterConfig:
     columns: tuple[FilterColumn, ...] = ()
     batch_size: int = 100
     fallback_column: str | None = None
+    direct_filter_ids: tuple[str, ...] | None = None
 
     def __post_init__(self) -> None:
         """Validate configuration consistency."""
@@ -59,6 +62,16 @@ class InputFilterConfig:
         """Validate fields required when filtering is enabled."""
         if not self.enabled:
             return
+
+        # Direct filter IDs mode: only need filter_field
+        if self.direct_filter_ids is not None:
+            if not self.filter_field:
+                raise ValueError(
+                    "filter_field is required when using direct_filter_ids"
+                )
+            return
+
+        # CSV-based mode: need source_path
         if not self.source_path:
             raise ValueError("source_path is required when filter is enabled")
         # Either columns list or single column_name/filter_field must be provided
@@ -89,6 +102,11 @@ class InputFilterConfig:
     def is_multi_column(self) -> bool:
         """Check if multi-column filtering mode is active."""
         return len(self.columns) > 1
+
+    @property
+    def is_direct_filter(self) -> bool:
+        """Check if direct filter IDs mode is active (no CSV file)."""
+        return self.direct_filter_ids is not None
 
     def get_columns(self) -> tuple[FilterColumn, ...]:
         """Get filter columns (resolves single-column to columns format).
