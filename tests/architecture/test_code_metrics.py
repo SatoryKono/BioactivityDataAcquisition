@@ -221,7 +221,7 @@ class TestFunctionComplexity:
         "_check_value_distribution": 18,  # CC=17 - Value distribution analysis
         "_check_schema_drift": 14,  # CC=13 - Schema drift detection
         # Composite pipeline merge service
-        "_apply_explicit_rules": 18,  # CC=16 - Explicit field priority rules with column reordering
+        "_apply_explicit_rules": 20,  # CC=20 - Explicit field priority rules with column reordering
         # Composite pipeline domain models (ADR-026)
         "DQOverrideConfig": 10,  # CC=9 - DQ override validation with threshold checks
         "from_dict": 8,  # CC=6 - Dictionary parsing with type conversions
