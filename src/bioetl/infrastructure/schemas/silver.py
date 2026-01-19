@@ -183,6 +183,8 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         # Primary identifiers
         pa.field("doi", pa.string()),
         pa.field("epub_date", pa.string()),
+        # Unified page fields (parsed from medline_pgn/pages)
+        pa.field("first_page", pa.string()),
         # Journal information
         pa.field("issn", pa.string()),
         pa.field("issue", pa.string()),
@@ -191,11 +193,13 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         # Classification
         pa.field("keywords", pa.list_(pa.string())),
         pa.field("language", pa.string()),
+        pa.field("last_page", pa.string()),
         pa.field("mesh_terms", pa.list_(pa.string())),
-        pa.field("pages", pa.string()),
+        pa.field("pages", pa.string()),  # Legacy: medline_pgn format
         pa.field("pmc_id", pa.string()),
         pa.field("pmid", pa.string()),
         pa.field("pub_date", pa.string()),
+        pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD format
         pa.field("publication_types", pa.list_(pa.string())),
         pa.field("publication_year", pa.int64()),  # Legacy alias for year
         pa.field("received_date", pa.string()),
@@ -401,6 +405,7 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("pmc_id", pa.string()),
         # pmid: PubMed ID (numeric string: "12345678")
         pa.field("pmid", pa.string()),
+        pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD (from year)
         pa.field("src_id", pa.int64()),
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
@@ -590,13 +595,16 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("corpus_id", pa.int64()),
         pa.field("doi", pa.string()),
         pa.field("fields_of_study", pa.string()),
+        # Unified page fields (parsed from pages)
+        pa.field("first_page", pa.string()),
         # Open Access
         pa.field("is_oa", pa.bool_()),
         # Journal/Venue
         pa.field("journal", pa.string()),
+        pa.field("last_page", pa.string()),
         pa.field("oa_status", pa.string()),
         pa.field("open_access_url", pa.string()),
-        pa.field("pages", pa.string()),
+        pa.field("pages", pa.string()),  # Legacy: "first-last" format
         # Primary key
         pa.field("paper_id", pa.string()),
         # Cross-reference IDs for linking publications across providers
@@ -660,8 +668,9 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         # pmid: PubMed ID (numeric string: "12345678") - nullable, may not exist for all publications
         pa.field("pmid", pa.string()),
         # Date fields
-        pa.field("published_online", pa.string()),
-        pa.field("published_print", pa.string()),
+        pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
+        pa.field("published_online", pa.string()),  # Legacy: provider-specific
+        pa.field("published_print", pa.string()),  # Legacy: provider-specific
         pa.field("publisher", pa.string()),
         pa.field("reference_count", pa.int64()),
         pa.field("source", pa.string()),
@@ -704,11 +713,14 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Cross-reference IDs for linking publications across providers
         # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
         pa.field("doi", pa.string()),
+        # Unified page fields (OpenAlex doesn't provide pages, but added for consistency)
+        pa.field("first_page", pa.string()),
         pa.field("is_oa", pa.bool_()),
         # Journal info
         pa.field("issn", pa.string()),
         pa.field("journal", pa.string()),
         pa.field("language", pa.string()),
+        pa.field("last_page", pa.string()),
         pa.field("oa_status", pa.string()),
         # Primary key
         pa.field("openalex_id", pa.string()),

@@ -103,6 +103,33 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             data_normalizer=data_normalizer,
         )
 
+    def _parse_pages(self, pages: str | None) -> tuple[str | None, str | None]:
+        """Parse pages string into first_page and last_page.
+
+        Handles formats like:
+        - "123-456" -> ("123", "456")
+        - "123" -> ("123", None)
+        - "e123-e456" -> ("e123", "e456")
+        - None or empty -> (None, None)
+
+        Args:
+            pages: Page string in "first-last" format.
+
+        Returns:
+            Tuple of (first_page, last_page).
+        """
+        if not pages or not pages.strip():
+            return None, None
+
+        pages = pages.strip()
+        if "-" in pages:
+            parts = pages.split("-", 1)
+            first = parts[0].strip() or None
+            last = parts[1].strip() if len(parts) > 1 and parts[1].strip() else None
+            return first, last
+
+        return pages, None
+
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
         """Extract and normalize fields from Semantic Scholar record.
 
@@ -141,6 +168,10 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             rec.get("venue"),
         )
 
+        # Parse pages into unified first_page/last_page
+        pages = journal_info.get("pages")
+        first_page, last_page = self._parse_pages(pages)
+
         # Open access info
         oa_info = extract_open_access_info(
             rec.get("isOpenAccess"),
@@ -173,7 +204,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "authors": self.serialize_json_list(hashed_authors),
             "journal": journal_info.get("journal_name"),
             "volume": journal_info.get("volume"),
-            "pages": journal_info.get("pages"),
+            "pages": pages,  # Legacy field
+            "first_page": first_page,  # Unified field
+            "last_page": last_page,  # Unified field
             "venue": rec.get("venue"),
             "year": year,
             "publication_date": rec.get("publicationDate"),
