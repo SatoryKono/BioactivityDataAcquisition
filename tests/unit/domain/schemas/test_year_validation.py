@@ -50,7 +50,9 @@ class TestCrossRefYearValidation:
         return {
             **base_etl_fields,
             "entity_id": "crossref:publication:10.1038/nature12373",
+            "pmid": None,  # Added for base schema compatibility
             "doi": "10.1038/nature12373",
+            "pmc_id": None,  # Added for base schema compatibility
             "title": "Test Publication",
             "abstract": None,
             "authors": None,
@@ -125,6 +127,7 @@ class TestSemanticScholarYearValidation:
             "tldr": None,
             "year": 2020,
             "publication_date": None,
+            "doc_type": None,  # Added for schema compatibility
             "journal": "Nature",
             "volume": None,
             "pages": None,
@@ -186,6 +189,7 @@ class TestChemblYearValidation:
             "document_chembl_id": "CHEMBL1234567",
             "pmid": "12345678",
             "doi": "10.1038/nature12373",
+            "pmc_id": None,  # Added for base schema compatibility
             "patent_id": None,
             "src_id": 1,
             "title": "Test Publication",
@@ -201,6 +205,8 @@ class TestChemblYearValidation:
             "last_page": "10",
             "_lookup_method": "direct",
             "_original_id": None,
+            "_dq_warn": False,
+            "_dq_error": False,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
