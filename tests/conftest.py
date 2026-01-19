@@ -516,3 +516,74 @@ def populated_isolated_registry(isolated_registry):
 
     register_all_pipelines(registry=isolated_registry)
     return isolated_registry
+
+
+# =============================================================================
+# DQ Config Test Fixtures
+# =============================================================================
+
+
+@pytest.fixture(scope="session")
+def test_dq_configs_path() -> Path:
+    """Path to test DQ config fixtures.
+
+    Returns:
+        Path to tests/fixtures/configs directory with test DQ configs.
+
+    Example:
+        def test_dq_loading(test_dq_configs_path):
+            loader = DQConfigLoader(test_dq_configs_path)
+            config = loader.load("test_provider", "test_entity")
+    """
+    return Path(__file__).parent / "fixtures" / "configs"
+
+
+@pytest.fixture
+def isolated_dq_loader(tmp_path: Path) -> Any:
+    """Create DQConfigLoader with isolated test configs.
+
+    Copies test fixtures to a temporary directory for test isolation.
+    Use this when tests need to modify configs without affecting other tests.
+
+    Args:
+        tmp_path: pytest tmp_path fixture.
+
+    Returns:
+        DQConfigLoader instance with isolated configs.
+
+    Example:
+        def test_dq_modification(isolated_dq_loader):
+            config = isolated_dq_loader.load("test_provider", "test_entity")
+            assert config.soft_fail_threshold == 0.05
+    """
+    import shutil
+
+    from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
+
+    # Copy fixtures to tmp_path for isolation
+    fixtures = Path(__file__).parent / "fixtures" / "configs" / "dq"
+    if fixtures.exists():
+        shutil.copytree(fixtures, tmp_path / "dq")
+
+    return DQConfigLoader(tmp_path)
+
+
+@pytest.fixture(scope="module")
+def real_dq_loader() -> Any:
+    """Create DQConfigLoader with real production configs.
+
+    Module-scoped for performance. Use for integration tests that need
+    to verify behavior against real config files.
+
+    Returns:
+        DQConfigLoader instance pointing to configs/ directory.
+
+    Example:
+        @pytest.mark.integration
+        def test_chembl_dq(real_dq_loader):
+            config = real_dq_loader.load("chembl", "activity")
+            assert config.hard_fail_threshold == 0.15
+    """
+    from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
+
+    return DQConfigLoader(Path("configs"))
