@@ -913,7 +913,11 @@ class TestAllPublicationSchemas:
             (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication", "doi"),
             (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication", "openalex_id"),
             (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication", "pmid"),
-            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication", "paper_id"),
+            (
+                SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
+                "SemanticScholar Publication",
+                "paper_id",
+            ),
         ],
     )
     def test_schema_has_primary_key(self, schema, name, primary_key):
