@@ -31,7 +31,7 @@ from pydantic_settings import (
     SettingsConfigDict,
 )
 
-from bioetl.domain.config import PipelineConfig
+from bioetl.domain.config import DQConfig, PipelineConfig
 from bioetl.domain.filtering import GoldFilterConfig
 from bioetl.infrastructure.config_loader import (
     load_pipeline_config,
@@ -121,7 +121,10 @@ def _build_gold_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:
     return yaml_config.gold_filters.to_domain()
 
 
-def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
+def yaml_config_to_domain(
+    yaml_config: PipelineYamlConfig,
+    resolved_dq_config: DQConfig | None = None,
+) -> PipelineConfig:
     """Map PipelineYamlConfig to domain PipelineConfig.
 
     This is the boundary mapping function that converts validated infrastructure
@@ -132,7 +135,10 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
     dataclasses, providing a clean boundary between infrastructure and domain.
 
     Args:
-        yaml_config: Validated PipelineYamlConfig from infrastructure layer
+        yaml_config: Validated PipelineYamlConfig from infrastructure layer.
+        resolved_dq_config: Optional pre-resolved DQConfig from ConfigLoader.
+            If provided, this is used instead of converting dq_rules.
+            This supports hierarchical DQ config loading via DQConfigLoader.
 
     Returns:
         PipelineConfig: Immutable domain configuration
@@ -149,8 +155,12 @@ def yaml_config_to_domain(yaml_config: PipelineYamlConfig) -> PipelineConfig:
         if silver_sink:
             on_schema_mismatch = silver_sink.on_schema_mismatch
 
-    # Use to_domain() method for DQConfig conversion (consolidation pattern)
-    dq_config = yaml_config.dq_rules.to_domain()
+    # Use pre-resolved DQConfig if provided, otherwise convert inline rules
+    dq_config: DQConfig
+    if resolved_dq_config is not None:
+        dq_config = resolved_dq_config
+    else:
+        dq_config = yaml_config.dq_rules.to_domain()
 
     # Extract transform info for lineage tracking
     transform_version = yaml_config.transform.version
@@ -183,6 +193,10 @@ def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
     Convenience function that loads and maps config in one step.
     Results are cached for efficiency.
 
+    Uses ConfigLoader to resolve DQ config from the hierarchical DQ system
+    when dq_config_file is specified or when DQ config files exist for the
+    provider/entity combination.
+
     Args:
         pipeline_name: Name of the pipeline (e.g., 'chembl_activity')
 
@@ -193,8 +207,15 @@ def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
         ValueError: If pipeline configuration not found
 
     """
+    from bioetl.infrastructure.config.pipeline_config_loader import ConfigLoader
+
     yaml_config = load_pipeline_config(pipeline_name)
-    return yaml_config_to_domain(yaml_config)
+
+    # Use ConfigLoader to resolve DQ config from hierarchy
+    config_loader = ConfigLoader(Path("configs"))
+    resolved_dq = config_loader.resolve_dq_config(yaml_config)
+
+    return yaml_config_to_domain(yaml_config, resolved_dq_config=resolved_dq)
 
 
 class ObservabilitySettings(BaseSettings):
