@@ -48,6 +48,28 @@ def _write_temp_pipeline_config(
         encoding="utf-8",
     )
 
+    # Create minimal DQ defaults file required by DQConfigLoader
+    dq_defaults_dir = base_path / "configs" / "dq"
+    dq_defaults_dir.mkdir(parents=True, exist_ok=True)
+    dq_defaults_path = dq_defaults_dir / "_defaults.yaml"
+    dq_defaults_path.write_text(
+        "\n".join(
+            [
+                "version: '1.0.0'",
+                "thresholds:",
+                "  soft_fail: 0.05",
+                "  hard_fail: 0.20",
+                "strict_validation: false",
+                "invalid_record_policy: quarantine",
+                "report:",
+                "  enabled: false",
+                "common_field_validations: []",
+                "common_cross_field_validations: []",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
     return config_path
 
 
