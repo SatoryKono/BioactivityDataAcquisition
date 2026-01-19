@@ -83,16 +83,31 @@ class TestNormalizeDoi:
 
 
 class TestFormatDateParts:
-    """Tests for format_date_parts function."""
+    """Tests for format_date_parts function.
+
+    Uses end-of-period normalization:
+    - Complete dates stay as-is
+    - Month-only dates use last day of month
+    - Year-only dates use December 31st
+    """
 
     @pytest.mark.parametrize(
         "date_parts,expected",
         [
+            # Complete dates (no normalization needed)
             ([[2024, 3, 15]], "2024-03-15"),
-            ([[2024, 3]], "2024-03"),
-            ([[2024]], "2024"),
             ([[2024, 1, 5]], "2024-01-05"),
             ([[2024, 12, 31]], "2024-12-31"),
+            # Month-only: end-of-period (last day of month)
+            ([[2024, 3]], "2024-03-31"),  # March has 31 days
+            ([[2024, 2]], "2024-02-29"),  # 2024 is leap year
+            ([[2023, 2]], "2023-02-28"),  # 2023 is not leap year
+            ([[2024, 4]], "2024-04-30"),  # April has 30 days
+            ([[2024, 1]], "2024-01-31"),  # January has 31 days
+            # Year-only: end-of-period (December 31st)
+            ([[2024]], "2024-12-31"),
+            ([[2023]], "2023-12-31"),
+            # Edge cases
             (None, None),
             ([], None),
             ([[]], None),
@@ -101,8 +116,16 @@ class TestFormatDateParts:
     def test_format_date_parts(
         self, date_parts: list[list[int]] | None, expected: str | None
     ) -> None:
-        """Test date-parts formatting."""
+        """Test date-parts formatting with end-of-period normalization."""
         assert format_date_parts(date_parts) == expected
+
+    def test_format_date_parts_leap_year(self) -> None:
+        """Test February end-of-period for leap vs non-leap years."""
+        # Leap years: divisible by 4, except centuries not divisible by 400
+        assert format_date_parts([[2000, 2]]) == "2000-02-29"  # Divisible by 400
+        assert format_date_parts([[1900, 2]]) == "1900-02-28"  # Century, not div by 400
+        assert format_date_parts([[2020, 2]]) == "2020-02-29"  # Leap year
+        assert format_date_parts([[2021, 2]]) == "2021-02-28"  # Not leap year
 
 
 class TestParseDateField:

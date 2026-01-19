@@ -456,7 +456,7 @@ async def test_transform_includes_run_metadata(transformer, pipeline_context):
 
 
 def test_extract_business_data_date_formatting(transformer):
-    """Test date formatting from date-parts."""
+    """Test date formatting from date-parts with end-of-period normalization."""
     publication = {
         "DOI": "10.1234/test",
         "published-print": {"date-parts": [[2023, 6, 15]]},
@@ -465,14 +465,14 @@ def test_extract_business_data_date_formatting(transformer):
     data = transformer._extract_business_data(publication)
 
     assert data["published_print"] == "2023-06-15"
-    assert data["published_online"] == "2023-05"
+    assert data["published_online"] == "2023-05-31"  # End-of-period: May has 31 days
 
 
 def test_extract_business_data_date_year_only(transformer):
-    """Test date formatting with year only."""
+    """Test date formatting with year only (end-of-period normalization)."""
     publication = {
         "DOI": "10.1234/test",
         "published-print": {"date-parts": [[2023]]},
     }
     data = transformer._extract_business_data(publication)
-    assert data["published_print"] == "2023"
+    assert data["published_print"] == "2023-12-31"  # End-of-period: December 31
