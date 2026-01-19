@@ -274,6 +274,8 @@ class GoldWriter(BaseDeltaWriter):
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
         """
+        from bioetl.domain.schemas.column_order import canonical_column_order
+
         if not records:
             self.logger.warning(
                 "No records to write for merged Gold",
@@ -281,8 +283,12 @@ class GoldWriter(BaseDeltaWriter):
             )
             return
 
-        # Convert to Arrow and sort if primary keys provided
+        # Convert to Arrow and apply canonical column order
         arrow_table = pa.Table.from_pylist(records)
+
+        # Enforce canonical column order (ADR-014, RULES.md §2.4)
+        ordered_columns = canonical_column_order(list(arrow_table.column_names))
+        arrow_table = arrow_table.select(ordered_columns)
 
         if primary_keys:
             valid_keys = [pk for pk in primary_keys if pk in arrow_table.schema.names]
@@ -626,11 +632,14 @@ class GoldWriter(BaseDeltaWriter):
         Delta Lake doesn't support null type, so we convert null columns to string.
         This includes nested null types (e.g., list<null>).
         """
+        from bioetl.domain.schemas.column_order import canonical_column_order
+
         arrow_data = pa.Table.from_pylist(records)
 
-        # Enforce deterministic column order
-        column_names = sorted(arrow_data.column_names)
-        arrow_data = arrow_data.select(column_names)
+        # Enforce canonical column order (not alphabetical!)
+        # Per ADR-014 Deterministic Writes and RULES.md §2.4
+        ordered_columns = canonical_column_order(list(arrow_data.column_names))
+        arrow_data = arrow_data.select(ordered_columns)
 
         # Check if schema needs sanitization (contains null types anywhere)
         # Use lowercase check since PyArrow may print "null" or "Null"

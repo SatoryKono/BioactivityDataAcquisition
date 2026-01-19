@@ -1,0 +1,192 @@
+"""Architecture tests for canonical column ordering.
+
+Verifies that all PyArrow schemas follow the canonical column order
+defined in domain/schemas/column_order.py.
+
+Per RULES.md §2.4 and ADR-014.
+"""
+
+from __future__ import annotations
+
+import pytest
+import pyarrow as pa
+
+from bioetl.domain.schemas.column_order import (
+    ALL_SYSTEM_FIELDS,
+    DQ_FIELDS_SUFFIX,
+    SYSTEM_FIELDS_PREFIX,
+    canonical_column_order,
+)
+from bioetl.infrastructure.schemas import silver as silver_schemas
+
+
+def get_all_pyarrow_schemas() -> list[tuple[str, pa.Schema]]:
+    """Collect all PyArrow schema constants from silver module."""
+    schemas = []
+    for name in dir(silver_schemas):
+        obj = getattr(silver_schemas, name)
+        if name.endswith("_SCHEMA") and isinstance(obj, pa.Schema):
+            schemas.append((name, obj))
+    return schemas
+
+
+class TestCanonicalColumnOrderFunction:
+    """Unit tests for canonical_column_order function."""
+
+    def test_reorders_prefix_first(self) -> None:
+        """System prefix fields should come first."""
+        columns = ["name", "_run_id", "entity_id", "content_hash"]
+        result = canonical_column_order(columns)
+        assert result[:3] == ["entity_id", "content_hash", "_run_id"]
+
+    def test_business_fields_sorted(self) -> None:
+        """Business fields should be sorted alphabetically."""
+        columns = ["entity_id", "zebra", "alpha", "content_hash"]
+        result = canonical_column_order(columns)
+        business = [c for c in result if c not in ALL_SYSTEM_FIELDS]
+        assert business == ["alpha", "zebra"]
+
+    def test_dq_suffix_last(self) -> None:
+        """DQ fields should come last."""
+        columns = ["_dq_warn", "name", "entity_id", "_dq_error"]
+        result = canonical_column_order(columns)
+        assert result[-2:] == ["_dq_warn", "_dq_error"]
+
+    def test_preserves_all_columns(self) -> None:
+        """All input columns should be in output."""
+        columns = ["a", "b", "entity_id", "_run_id", "_dq_warn"]
+        result = canonical_column_order(columns)
+        assert set(result) == set(columns)
+
+    def test_handles_tuple_input(self) -> None:
+        """Should accept tuple input."""
+        columns = ("entity_id", "name", "_run_id")
+        result = canonical_column_order(columns)
+        assert isinstance(result, list)
+        assert result == ["entity_id", "_run_id", "name"]
+
+    def test_empty_input(self) -> None:
+        """Should handle empty input."""
+        assert canonical_column_order([]) == []
+
+    def test_only_system_fields(self) -> None:
+        """Should handle input with only system fields."""
+        columns = ["_run_id", "entity_id", "_dq_warn"]
+        result = canonical_column_order(columns)
+        assert result == ["entity_id", "_run_id", "_dq_warn"]
+
+    def test_full_system_fields_order(self) -> None:
+        """Test complete ordering with all system fields."""
+        columns = [
+            "_dq_error",
+            "business_field",
+            "_index",
+            "_run_type",
+            "entity_id",
+            "_dq_warn",
+            "content_hash",
+            "_run_id",
+            "_source_batch_id",
+            "_ingestion_ts",
+        ]
+        result = canonical_column_order(columns)
+        expected = [
+            "entity_id",
+            "content_hash",
+            "_run_id",
+            "_run_type",
+            "_source_batch_id",
+            "_ingestion_ts",
+            "_index",
+            "business_field",
+            "_dq_warn",
+            "_dq_error",
+        ]
+        assert result == expected
+
+
+class TestSchemaColumnOrder:
+    """Tests for PyArrow schema column ordering."""
+
+    @pytest.mark.parametrize("schema_name,schema", get_all_pyarrow_schemas())
+    def test_prefix_fields_in_correct_order(
+        self, schema_name: str, schema: pa.Schema
+    ) -> None:
+        """System prefix fields MUST be in correct relative order."""
+        column_names = schema.names
+
+        # Get prefix fields that exist in this schema
+        prefix_in_schema = [c for c in column_names if c in SYSTEM_FIELDS_PREFIX]
+        expected_order = [c for c in SYSTEM_FIELDS_PREFIX if c in column_names]
+
+        # Check they appear in the right relative order
+        assert prefix_in_schema == expected_order, (
+            f"{schema_name}: System prefix fields out of order.\n"
+            f"Expected: {expected_order}\n"
+            f"Got: {prefix_in_schema}"
+        )
+
+    @pytest.mark.parametrize("schema_name,schema", get_all_pyarrow_schemas())
+    def test_prefix_fields_at_start(self, schema_name: str, schema: pa.Schema) -> None:
+        """System prefix fields MUST be at the start of schema."""
+        column_names = schema.names
+
+        prefix_in_schema = [c for c in SYSTEM_FIELDS_PREFIX if c in column_names]
+        if not prefix_in_schema:
+            pytest.skip(f"{schema_name} has no system prefix fields")
+
+        # First N columns should be the prefix fields
+        first_n = column_names[: len(prefix_in_schema)]
+        assert set(first_n) == set(prefix_in_schema), (
+            f"{schema_name}: System prefix fields not at start.\n"
+            f"Expected first {len(prefix_in_schema)} columns to be: {prefix_in_schema}\n"
+            f"Got: {first_n}"
+        )
+
+    @pytest.mark.parametrize("schema_name,schema", get_all_pyarrow_schemas())
+    def test_suffix_fields_at_end(self, schema_name: str, schema: pa.Schema) -> None:
+        """DQ suffix fields MUST be last (if present)."""
+        column_names = schema.names
+
+        suffix_in_schema = [c for c in column_names if c in DQ_FIELDS_SUFFIX]
+        if not suffix_in_schema:
+            pytest.skip(f"{schema_name} has no DQ suffix fields")
+
+        expected_suffix = [c for c in DQ_FIELDS_SUFFIX if c in column_names]
+        actual_suffix = column_names[-len(suffix_in_schema) :]
+
+        assert actual_suffix == expected_suffix, (
+            f"{schema_name}: DQ suffix fields not at end.\n"
+            f"Expected last columns: {expected_suffix}\n"
+            f"Got: {actual_suffix}"
+        )
+
+    @pytest.mark.parametrize("schema_name,schema", get_all_pyarrow_schemas())
+    def test_business_fields_sorted(self, schema_name: str, schema: pa.Schema) -> None:
+        """Business fields SHOULD be sorted alphabetically."""
+        column_names = schema.names
+
+        # Extract business fields (excluding system fields)
+        business_fields = [c for c in column_names if c not in ALL_SYSTEM_FIELDS]
+        sorted_business = sorted(business_fields)
+
+        assert business_fields == sorted_business, (
+            f"{schema_name}: Business fields not sorted alphabetically.\n"
+            f"Expected: {sorted_business[:5]}...\n"
+            f"Got: {business_fields[:5]}..."
+        )
+
+    @pytest.mark.parametrize("schema_name,schema", get_all_pyarrow_schemas())
+    def test_schema_matches_canonical_order(
+        self, schema_name: str, schema: pa.Schema
+    ) -> None:
+        """Schema column order MUST match canonical_column_order() output."""
+        column_names = schema.names
+        expected = canonical_column_order(column_names)
+
+        assert list(column_names) == expected, (
+            f"{schema_name}: Column order does not match canonical.\n"
+            f"Use canonical_column_order() to reorder.\n"
+            f"First mismatch at position "
+            f"{next(i for i, (a, b) in enumerate(zip(column_names, expected)) if a != b)}"
+        )
