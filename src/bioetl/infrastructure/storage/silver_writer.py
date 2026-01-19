@@ -707,15 +707,17 @@ class SilverWriter(BaseDeltaWriter):
             )
             return
 
-        # Parse timestamp
+        # Parse timestamp (ensure UTC-aware for consistency)
+        from datetime import UTC
+
         if isinstance(ingestion_ts_str, str):
             timestamp = datetime.fromisoformat(ingestion_ts_str)
         elif isinstance(ingestion_ts_str, datetime):
             timestamp = ingestion_ts_str
         else:
-            from datetime import UTC
-
             timestamp = datetime.now(UTC)
+        if timestamp.tzinfo is None:
+            timestamp = timestamp.replace(tzinfo=UTC)
 
         # Map SilverWriteMode to AuditOperation
         operation_map = {

@@ -174,10 +174,14 @@ class CompositeCheckpointState:
         created_at = None
         if data.get("created_at"):
             created_at = datetime.fromisoformat(data["created_at"])
+            if created_at.tzinfo is None:
+                created_at = created_at.replace(tzinfo=UTC)
 
         updated_at = None
         if data.get("updated_at"):
             updated_at = datetime.fromisoformat(data["updated_at"])
+            if updated_at.tzinfo is None:
+                updated_at = updated_at.replace(tzinfo=UTC)
 
         return cls(
             composite_name=data["composite_name"],
