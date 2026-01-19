@@ -64,9 +64,7 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     standard_relation: Series[str] = pa.Field(nullable=True)
     standard_upper_value: Series[float] = pa.Field(nullable=True, coerce=True)
     standard_text_value: Series[str] = pa.Field(nullable=True)
-    standard_flag: Series[float] = pa.Field(
-        nullable=True, coerce=True
-    )  # int64 in Silver
+    standard_flag: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
 
     # Derived metrics
     pchembl_value: Series[float] = pa.Field(nullable=True, coerce=True)
@@ -83,17 +81,13 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
 
     # Document/Publication data
     document_journal: Series[str] = pa.Field(nullable=True)
-    document_year: Series[float] = pa.Field(
-        nullable=True, coerce=True
-    )  # int64 in Silver
+    document_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
 
     # Quality annotations
     activity_comment: Series[str] = pa.Field(nullable=True)
     data_validity_comment: Series[str] = pa.Field(nullable=True)
     data_validity_description: Series[str] = pa.Field(nullable=True)
-    potential_duplicate: Series[float] = pa.Field(
-        nullable=True, coerce=True
-    )  # int64 in Silver
+    potential_duplicate: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
 
     # Action type
     action_type_action_type: Series[str] = pa.Field(nullable=True)
@@ -242,6 +236,10 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     mesh_terms: Series[object] = pa.Field(nullable=True)  # list[str]
     language: Series[str] = pa.Field(nullable=True)
     country: Series[str] = pa.Field(nullable=True)
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=True, alias="_dq_error")
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -412,6 +410,10 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     first_page: Series[str] = pa.Field(nullable=True)
     last_page: Series[str] = pa.Field(nullable=True)
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=True, alias="_dq_error")
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -701,8 +703,14 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     source: Series[str] = pa.Field(nullable=True)
 
     # Lookup metadata
+    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+    # _original_id: Original identifier used for lookup
     lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
-    original_doi: Series[str] = pa.Field(nullable=True, alias="_original_doi")
+    original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=True, alias="_dq_error")
 
     # Lineage metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -755,6 +763,10 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     license_url: Series[str] = pa.Field(nullable=True)
     subjects: Series[object] = pa.Field(nullable=True)  # list[str]
     source: Series[str] = pa.Field(nullable=True)
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=True, alias="_dq_error")
 
     # Lineage metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -809,8 +821,14 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     source: Series[str] = pa.Field(nullable=False)
 
     # Lookup metadata
+    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+    # _original_id: Original identifier used for lookup
     lookup_method: Series[str] = pa.Field(nullable=False, alias="_lookup_method")
-    original_doi: Series[str] = pa.Field(nullable=True, alias="_original_doi")
+    original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=True, alias="_dq_error")
 
     # Lineage metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")

@@ -191,7 +191,7 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     Inherited from PublicationEntityBase:
         doi, pmid, title, abstract, authors, journal, issn, publisher,
         year, publication_date, citation_count, doc_type, language, is_oa,
-        oa_status, _lookup_method, _original_doi, source.
+        oa_status, _lookup_method, _original_id, source.
 
     OpenAlex-specific Attributes:
         openalex_id: OpenAlex Work ID (e.g., W2148763428). REQUIRED.

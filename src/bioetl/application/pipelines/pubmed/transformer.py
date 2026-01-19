@@ -197,7 +197,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "_lookup_method": cast("dict[str, Any]", record).get(
                 "_lookup_method", "pmid"
             ),
-            "_original_doi": cast("dict[str, Any]", record).get("_original_doi"),
+            "_original_id": cast("dict[str, Any]", record).get("_original_id"),
         }
 
     def _get_primary_id_field(self) -> str:

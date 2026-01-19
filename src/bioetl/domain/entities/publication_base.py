@@ -17,7 +17,7 @@ Subclasses:
 Field Classification:
 - REQUIRED: entity_id, content_hash (inherited from BaseEntity)
 - API-OPTIONAL: All fields in this class (providers may not return all)
-- LOOKUP: _lookup_method, _original_doi (resolution tracking)
+- LOOKUP: _lookup_method, _original_id (resolution tracking)
 """
 
 from __future__ import annotations
@@ -51,8 +51,8 @@ class PublicationEntityBase(BaseEntity):
         language: Publication language code.
         is_oa: Whether the publication is Open Access.
         oa_status: OA status (gold, green, hybrid, bronze, closed).
-        _lookup_method: How record was resolved (doi, title_fallback, title_only, pmid).
-        _original_doi: Original DOI from input (for fallback records).
+        _lookup_method: How record was resolved (direct, doi, pmid, title_fallback, unknown).
+        _original_id: Original identifier from input (for fallback records).
         source: Data source identifier (e.g., "crossref", "openalex").
 
     Note:
@@ -91,9 +91,9 @@ class PublicationEntityBase(BaseEntity):
     is_oa: bool | None = None
     oa_status: str | None = None
 
-    # Lookup metadata (tracks DOI resolution strategy)
-    _lookup_method: str = "unknown"  # doi | title_fallback | title_only | pmid
-    _original_doi: str | None = None
+    # Lookup metadata (tracks resolution strategy)
+    _lookup_method: str = "unknown"  # direct | doi | pmid | title_fallback | unknown
+    _original_id: str | None = None
 
     # Source tracking (subclasses should override default)
     source: str = ""

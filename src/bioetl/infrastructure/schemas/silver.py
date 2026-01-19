@@ -204,6 +204,9 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
         pa.field("year", pa.int64()),
+        # === DQ suffix (MUST be last, per RULES.md §2.4) ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -377,6 +380,11 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
+        # Lookup metadata
+        # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+        # _original_id: Original identifier used for lookup (document_chembl_id for direct)
+        pa.field("_lookup_method", pa.string()),
+        pa.field("_original_id", pa.string()),
         pa.field("abstract", pa.string()),
         pa.field("authors", pa.string()),
         pa.field("doc_type", pa.string()),
@@ -395,6 +403,9 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
         pa.field("year", pa.int64()),
+        # === DQ suffix (MUST be last, per RULES.md §2.4) ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -563,8 +574,10 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
         # Lookup metadata
+        # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+        # _original_id: Original identifier used for lookup
         pa.field("_lookup_method", pa.string()),
-        pa.field("_original_doi", pa.string()),
+        pa.field("_original_id", pa.string()),
         pa.field("abstract", pa.string()),
         # External IDs
         pa.field("arxiv_id", pa.string()),
@@ -617,8 +630,10 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
         # Lookup metadata
+        # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+        # _original_id: Original identifier used for lookup
         pa.field("_lookup_method", pa.string()),
-        pa.field("_original_doi", pa.string()),
+        pa.field("_original_id", pa.string()),
         pa.field("abstract", pa.string()),
         pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("citation_count", pa.int64()),
@@ -644,6 +659,9 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
         pa.field("year", pa.int64()),
+        # === DQ suffix (MUST be last, per RULES.md §2.4) ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -661,8 +679,10 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
         # Lookup metadata
+        # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+        # _original_id: Original identifier used for lookup
         pa.field("_lookup_method", pa.string()),
-        pa.field("_original_doi", pa.string()),
+        pa.field("_original_id", pa.string()),
         pa.field("abstract", pa.string()),
         pa.field("authors", pa.string()),  # JSON-serialized list
         # OpenAlex source field: cited_by_count
@@ -687,6 +707,9 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("source", pa.string()),
         pa.field("title", pa.string()),
         pa.field("year", pa.int64()),
+        # === DQ suffix (MUST be last, per RULES.md §2.4) ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 

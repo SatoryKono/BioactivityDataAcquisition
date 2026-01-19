@@ -148,7 +148,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "source": "crossref",
             # Lookup metadata (from adapter fallback handler)
             "_lookup_method": rec.get("_lookup_method", "doi"),
-            "_original_doi": rec.get("_original_doi"),
+            "_original_id": rec.get("_original_id"),
         }
 
     def _get_primary_id_field(self) -> str:
