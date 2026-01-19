@@ -511,7 +511,7 @@ class TestClassSize:
         # Composition services
         "MetadataCoordinator": 315,  # 308 lines - Metadata coordination for Medallion layers
         # Composite pipeline services (ADR-026)
-        "MergeService": 480,  # 479 lines - Composite merge service with conflict resolution
+        "MergeService": 520,  # 513 lines - Composite merge service with conflict resolution + dual path
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
         "CompositePipelineRunner": 350,  # 313 lines - Composite pipeline orchestrator
     }
