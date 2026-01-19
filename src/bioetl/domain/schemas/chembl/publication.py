@@ -71,6 +71,10 @@ class ChemblPublicationSchema(ETLRecordSchema):
     #     nullable=True, description="Record index."
     # )
 
+    # === DQ Fields ===
+    _dq_warn: Series[bool] = pa.Field(nullable=True, default=False, description="DQ warning flag.")
+    _dq_error: Series[bool] = pa.Field(nullable=True, default=False, description="DQ error flag.")
+
     class Config:
         """Pandera configuration."""
 
