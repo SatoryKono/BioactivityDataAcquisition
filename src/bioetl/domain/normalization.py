@@ -107,6 +107,39 @@ def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
     return _to_none_if_empty(first), _to_none_if_empty(last) if sep else None
 
 
+def normalize_pmc_id(pmc_id: str | None) -> str | None:
+    """Normalize PMC ID to uppercase with 'PMC' prefix.
+
+    Ensures PMC IDs are consistently formatted across providers
+    for cross-referencing publications.
+
+    Args:
+        pmc_id: Raw PMC ID (may or may not have 'PMC' prefix).
+
+    Returns:
+        Normalized PMC ID with 'PMC' prefix in uppercase,
+        or None if input is empty.
+
+    Examples:
+        >>> normalize_pmc_id("PMC1234567")
+        'PMC1234567'
+        >>> normalize_pmc_id("1234567")
+        'PMC1234567'
+        >>> normalize_pmc_id("pmc1234567")
+        'PMC1234567'
+        >>> normalize_pmc_id(None)
+
+    """
+    if not pmc_id:
+        return None
+    pmc_id = pmc_id.strip()
+    if not pmc_id:
+        return None
+    if not pmc_id.upper().startswith("PMC"):
+        return f"PMC{pmc_id}"
+    return pmc_id.upper()
+
+
 def extract_first_item(items: list[Any] | None) -> Any | None:
     """Extract first non-None item from list."""
     if not items or not isinstance(items, list):
