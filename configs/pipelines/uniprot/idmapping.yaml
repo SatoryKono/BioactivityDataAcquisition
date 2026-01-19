@@ -35,13 +35,23 @@ source:
     to_db: UniProtKB
 
 # -----------------------------------------------------------------------------
-# Data Quality Rules - elevated thresholds for ID mapping
-# Many ChEMBL targets may not have UniProt mappings (expected behavior)
+# Data Quality Configuration
 # -----------------------------------------------------------------------------
-dq_rules:
-  soft_fail_threshold: 0.30  # 30% not_found is acceptable
-  hard_fail_threshold: 0.80  # 80% not_found triggers hard failure
+# DQ config is loaded from hierarchical files:
+#   1. configs/dq/_defaults.yaml (global defaults)
+#   2. configs/dq/providers/uniprot.yaml (provider-specific)
+#   3. configs/dq/entities/uniprot/idmapping.yaml (entity-specific)
+#
+# Reference to DQ config file (enables hierarchical loading)
+dq_config_file: ../../dq/entities/uniprot/idmapping.yaml
 
+# -----------------------------------------------------------------------------
+# Inline DQ Overrides (optional, applied on top of dq_config_file)
+# -----------------------------------------------------------------------------
+# Elevated thresholds for ID mapping defined in dq_config_file:
+# - soft_fail: 0.30 (30% not_found is acceptable)
+# - hard_fail: 0.80 (80% not_found triggers hard failure)
+dq_rules:
   field_validations:
     - field: "target_chembl_id"
       type: "pattern"
