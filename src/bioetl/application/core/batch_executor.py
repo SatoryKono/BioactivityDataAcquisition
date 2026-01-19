@@ -680,6 +680,28 @@ class BatchExecutor:
         # Collect Gold records
         self._gold_records_for_dq.extend(gold_records)
 
+    def _build_dataframe_from_records(
+        self, records: list[dict[str, Any]]
+    ) -> Any | None:
+        """Build a Polars DataFrame from records, returning None on failure."""
+        if not records:
+            return None
+        try:
+            import polars as pl
+
+            return pl.DataFrame(records)
+        except Exception:
+            return None
+
+    def _get_dq_thresholds(self) -> tuple[float, float]:
+        """Get DQ thresholds from config or defaults."""
+        if self._config.dq_config:
+            return (
+                self._config.dq_config.soft_fail_threshold,
+                self._config.dq_config.hard_fail_threshold,
+            )
+        return (0.05, 0.20)
+
     def get_dq_context(self) -> DQReportContext | None:
         """Build DQ report context from accumulated data.
 
@@ -701,64 +723,30 @@ class BatchExecutor:
         # Import here to avoid circular dependency
         from bioetl.application.services.dq_report_service import DQReportContext
 
-        # Build Silver DataFrame if we have records
-        silver_data = None
-        if self._silver_records_for_dq:
-            try:
-                import polars as pl
-
-                silver_data = pl.DataFrame(self._silver_records_for_dq)
-            except Exception:
-                # If DataFrame creation fails, skip Silver DQ report
-                pass
-
-        # Build Gold DataFrame if we have records
-        gold_data = None
-        if self._gold_records_for_dq:
-            try:
-                import polars as pl
-
-                gold_data = pl.DataFrame(self._gold_records_for_dq)
-            except Exception:
-                # If DataFrame creation fails, skip Gold DQ report
-                pass
-
-        # Get table config for primary keys
+        silver_data = self._build_dataframe_from_records(self._silver_records_for_dq)
+        gold_data = self._build_dataframe_from_records(self._gold_records_for_dq)
         primary_keys = list(self._config.table_config.primary_keys)
+        soft_threshold, hard_threshold = self._get_dq_thresholds()
 
         return DQReportContext(
             run_id=str(self._context.run_id),
             pipeline_name=self._config.pipeline_name,
             timestamp=datetime.now(UTC),
             # Bronze context
-            bronze_records=(
-                self._bronze_records_for_dq if self._bronze_records_for_dq else None
-            ),
-            bronze_batch_id=(
-                self._source_batch_ids[-1] if self._source_batch_ids else None
-            ),
+            bronze_records=self._bronze_records_for_dq or None,
+            bronze_batch_id=self._source_batch_ids[-1] if self._source_batch_ids else None,
             bronze_source_file=self._last_bronze_path,
             # Silver context
             silver_data=silver_data,
             silver_target_table=self._config.table_config.silver_table,
-            silver_source_batch_ids=(
-                self._source_batch_ids if self._source_batch_ids else None
-            ),
-            silver_primary_keys=primary_keys if primary_keys else None,
+            silver_source_batch_ids=self._source_batch_ids or None,
+            silver_primary_keys=primary_keys or None,
             silver_input_count=self.records_fetched,
             silver_quarantined_count=self.records_quarantined,
             # Gold context
             gold_data=gold_data,
             gold_target_table=self._config.table_config.gold_table,
             # DQ thresholds from config (use defaults if not configured)
-            dq_soft_threshold=(
-                self._config.dq_config.soft_fail_threshold
-                if self._config.dq_config
-                else 0.05
-            ),
-            dq_hard_threshold=(
-                self._config.dq_config.hard_fail_threshold
-                if self._config.dq_config
-                else 0.20
-            ),
+            dq_soft_threshold=soft_threshold,
+            dq_hard_threshold=hard_threshold,
         )
