@@ -669,6 +669,12 @@ class PipelineYamlConfig(BaseModel):
 
     Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
 
+    DQ Config Resolution:
+        The dq_config_file field references an external DQ configuration file
+        that is loaded through the DQConfigLoader hierarchy. If both dq_config_file
+        and dq_rules are present, dq_rules acts as inline overrides on top of
+        the file-based configuration.
+
     Note:
         The `to_domain()` method delegates to `yaml_config_to_domain()` in
         `bioetl.infrastructure.config` to avoid code duplication.
@@ -684,6 +690,15 @@ class PipelineYamlConfig(BaseModel):
     batch_size: int = Field(default=100, ge=1, le=5000)
     checkpoint_interval: int = Field(default=1000, ge=100)
 
+    # DQ Configuration
+    # - dq_config_file: Reference to external DQ config file (hierarchical loading)
+    # - dq_rules: Inline DQ rules (used as overrides if dq_config_file present)
+    dq_config_file: str | None = Field(
+        default=None,
+        description="Path to DQ config file relative to pipeline config. "
+        "When set, DQ config is loaded from the hierarchical DQ system. "
+        "Example: ../../dq/entities/chembl/activity.yaml",
+    )
     dq_rules: DQConfig = Field(
         default_factory=DQConfig,
         validation_alias=AliasChoices("dq_rules", "dq"),
