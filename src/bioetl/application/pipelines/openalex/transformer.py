@@ -150,7 +150,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         # Extract Open Access info
         oa_info = extract_open_access_info(rec.get("open_access", {}))
 
-        # Extract external IDs (pmid, pmcid, mag)
+        # Extract external IDs (pmid, pmc_id, mag)
         external_ids = extract_external_ids(rec.get("ids", {}))
 
         # Extract MeSH terms
@@ -175,7 +175,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "openalex_id": openalex_id,
             "doi": doi,
             "pmid": external_ids.get("pmid"),
-            "pmcid": external_ids.get("pmcid"),
+            "pmc_id": external_ids.get("pmcid"),  # API uses "pmcid", we use "pmc_id"
             "mag_id": external_ids.get("mag_id"),
             "title": rec.get("title"),
             "abstract": abstract,

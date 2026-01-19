@@ -117,7 +117,7 @@ class TestSemanticScholarYearValidation:
             "paper_id": "a" * 40,  # 40-char hex
             "doi": "10.1038/nature12373",
             "pmid": None,
-            "pmcid": None,
+            "pmc_id": None,
             "arxiv_id": None,
             "corpus_id": 12345,
             "title": "Test Publication",

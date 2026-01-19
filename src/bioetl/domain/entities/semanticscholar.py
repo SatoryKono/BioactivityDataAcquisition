@@ -10,7 +10,7 @@ Terminology:
 Used for DOI resolution and publication metadata enrichment via Semantic Scholar API.
 
 Note: SemanticScholarPublicationEntity inherits common fields from PublicationEntityBase.
-Provider-specific fields (paper_id, pmcid, arxiv_id, etc.) are defined here.
+Provider-specific fields (paper_id, pmc_id, arxiv_id, etc.) are defined here.
 """
 
 from __future__ import annotations
@@ -38,7 +38,7 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
 
     SemanticScholar-specific Attributes:
         paper_id: Semantic Scholar Paper ID (40-char hex S2 ID). REQUIRED.
-        pmcid: PubMed Central ID.
+        pmc_id: PubMed Central ID (format: PMC1234567).
         arxiv_id: ArXiv ID.
         corpus_id: Semantic Scholar Corpus ID.
         tldr: AI-generated summary (TL;DR).
@@ -59,7 +59,8 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     paper_id: str
 
     # SemanticScholar-specific external identifiers
-    pmcid: str | None = None
+    # pmc_id: PubMed Central ID (format: "PMC1234567")
+    pmc_id: str | None = None
     arxiv_id: str | None = None
     corpus_id: int | None = None
 

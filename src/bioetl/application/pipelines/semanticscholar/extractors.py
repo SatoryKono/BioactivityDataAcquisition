@@ -23,7 +23,7 @@ def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
         external_ids: Dict of external IDs from S2 response.
 
     Returns:
-        Dict with normalized keys: doi, pmid, pmcid, arxiv, corpus_id, mag, acl.
+        Dict with normalized keys: doi, pmid, pmcid (maps to pmc_id), arxiv, corpus_id, mag, acl.
 
     Example:
         >>> ids = {"DOI": "10.1038/...", "PubMed": "12345678", "CorpusId": 123}

@@ -51,10 +51,12 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
         description="PubMed ID",
     )
 
-    pmcid: Series[str] = pa.Field(
+    # Cross-reference IDs for linking publications across providers
+    # pmc_id: PubMed Central ID (format: "PMC1234567")
+    pmc_id: Series[str] = pa.Field(
         nullable=True,
         str_matches=r"^PMC\d+$",
-        description="PubMed Central ID",
+        description="PubMed Central ID (format: PMC1234567)",
     )
 
     arxiv_id: Series[str] = pa.Field(
