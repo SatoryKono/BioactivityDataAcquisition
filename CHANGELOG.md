@@ -149,6 +149,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Identified via vulture + autoflake static analysis
   - Verified no external consumers via grep search
 
+### Config Unification (ADR-014/025/027)
+
+- **Pipeline configs unified per ADR-025 requirements**:
+  - All 19 standard pipeline configs have consistent structure
+  - Added `sort_by` to all Silver/Gold sinks (ADR-014 compliance)
+  - Added missing required fields (`version`, `description`, `gold_table`)
+  - Composite pipeline config follows ADR-026 structure
+
+- **DQ rules externalized per ADR-027**:
+  - Migrated inline `dq_rules` thresholds to external files
+  - Created 20 entity-specific DQ config files in `configs/dq/entities/`
+  - Hierarchical DQ loading: `_defaults.yaml` → `providers/*.yaml` → `entities/*/*.yaml`
+
+- **New audit and validation tools**:
+  - Added `scripts/config_gap_analysis.py` - Config compliance checker
+  - Updated `src/tools/scripts/validate_unified_configs.py` - Skip composite configs (ADR-026)
+
+- **Documentation**:
+  - Added `docs/audits/config_gaps_final_2026-01-19.md`
+  - Added `docs/audits/config_unification_report_2026-01-19.md`
+
 ## [5.0.6] - 2025-12-29
 
 ### Added
