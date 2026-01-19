@@ -174,7 +174,7 @@ class BasePublicationTransformer(BaseTransformer):
                     "fallback_lookup_used",
                     **{primary_id_field: primary_id},
                     lookup_method=lookup_method,
-                    original_doi=business_data.get("_original_doi"),
+                    original_id=business_data.get("_original_id"),
                 )
 
         # 5. Generate entity ID

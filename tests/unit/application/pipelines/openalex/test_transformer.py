@@ -162,14 +162,14 @@ class TestOpenAlexPublicationTransformer:
             "doi": "https://doi.org/10.1016/j.cell.2024.01.005",
             "title": "Fallback Title",
             "_lookup_method": "title_fallback",
-            "_original_doi": "10.1016/j.invalid.doi",
+            "_original_id": "10.1016/j.invalid.doi",
         }
 
         result = await transformer.transform(pipeline_context, record, 0)
 
         assert result is not None
         assert result["_lookup_method"] == "title_fallback"
-        assert result["_original_doi"] == "10.1016/j.invalid.doi"
+        assert result["_original_id"] == "10.1016/j.invalid.doi"
 
     @pytest.mark.asyncio
     async def test_transform_invalid_year_is_filtered(

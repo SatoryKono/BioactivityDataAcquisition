@@ -121,7 +121,7 @@ class TestSemanticScholarTitleFallbackHandler:
         processed = handler._process_found_result(result, "10.1234/original")
 
         assert processed["_lookup_method"] == "title_fallback"
-        assert processed["_original_doi"] == "10.1234/original"
+        assert processed["_original_id"] == "10.1234/original"
 
     def test_titles_match_method(self, mock_logger, mock_http_client):
         """Test the titles_match instance method."""
@@ -335,7 +335,7 @@ class TestProcessMissingDois:
         assert len(results) == 1
         assert results[0]["paperId"] == "abc123"
         assert results[0]["_lookup_method"] == "title_fallback"
-        assert results[0]["_original_doi"] == "10.1234/notfound"
+        assert results[0]["_original_id"] == "10.1234/notfound"
 
     @pytest.mark.asyncio
     async def test_process_missing_dois_skips_found(

@@ -37,7 +37,7 @@ def handler(mock_logger: MagicMock, mock_search_fn: AsyncMock) -> TitleFallbackH
 class TestGetFallbackTitle:
     """Tests for _get_fallback_title method."""
 
-    def test_get_title_with_original_doi(self, handler: TitleFallbackHandler) -> None:
+    def test_get_title_with_original_id(self, handler: TitleFallbackHandler) -> None:
         """Should return title from original DOI."""
         fallback_mapping = {"10.1038/test": "Test Title"}
         result = handler._get_fallback_title(
@@ -148,7 +148,7 @@ class TestProcessMissingDois:
 
         assert len(results) == 1
         assert results[0]["_lookup_method"] == "title_fallback"
-        assert results[0]["_original_doi"] == "10.1038/missing"
+        assert results[0]["_original_id"] == "10.1038/missing"
         mock_search_fn.assert_called_once_with("Missing Title", 3)
 
     @pytest.mark.asyncio
