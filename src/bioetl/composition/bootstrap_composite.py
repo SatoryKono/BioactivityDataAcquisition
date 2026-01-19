@@ -229,11 +229,7 @@ def bootstrap_composite_pipeline(
                 if key in keys.columns:
                     # Extract unique non-null values from the keys DataFrame
                     key_values = (
-                        keys.select(key)
-                        .drop_nulls()
-                        .unique()
-                        .to_series()
-                        .to_list()
+                        keys.select(key).drop_nulls().unique().to_series().to_list()
                     )
                     if key_values:
                         filter_ids = tuple(str(v) for v in key_values)
