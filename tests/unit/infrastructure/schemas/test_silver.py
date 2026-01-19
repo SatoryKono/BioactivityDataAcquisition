@@ -15,8 +15,11 @@ from bioetl.infrastructure.schemas.silver import (
     CHEMBL_PUBLICATION_SCHEMA,
     CHEMBL_TARGET_COMPONENT_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
+    CROSSREF_PUBLICATION_SCHEMA,
+    OPENALEX_PUBLICATION_SCHEMA,
     PUBCHEM_COMPOUND_SCHEMA,
     PUBMED_PUBLICATION_SCHEMA,
+    SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
     UNIPROT_PROTEIN_SCHEMA,
 )
 
@@ -725,3 +728,229 @@ class TestSilverSchemaValidation:
 
         with pytest.raises((pa.ArrowInvalid, pa.ArrowTypeError)):
             pa.Table.from_pylist([record], schema=schema)
+
+
+# =============================================================================
+# Publication Schema Unification Tests
+# =============================================================================
+
+# Required fields for all publication schemas (unified across providers)
+PUBLICATION_DQ_FIELDS = frozenset({"_dq_warn", "_dq_error"})
+PUBLICATION_LOOKUP_FIELDS = frozenset({"_lookup_method", "_original_id"})
+PUBLICATION_CROSS_REF_FIELDS = frozenset({"pmid", "doi", "pmc_id"})
+PUBLICATION_UNIFIED_FIELDS = frozenset({"publication_date", "first_page", "last_page"})
+
+
+class TestPublicationSchemaDQFields:
+    """Test that all publication schemas have DQ fields."""
+
+    @pytest.mark.parametrize(
+        "schema,name",
+        [
+            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
+            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
+            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
+            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
+            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
+        ],
+    )
+    def test_schema_has_dq_fields(self, schema, name):
+        """All publication schemas must have _dq_warn and _dq_error fields."""
+        field_names = {f.name for f in schema}
+        missing = PUBLICATION_DQ_FIELDS - field_names
+        assert not missing, f"{name} missing DQ fields: {missing}"
+
+    @pytest.mark.parametrize(
+        "schema,name",
+        [
+            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
+            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
+            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
+            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
+            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
+        ],
+    )
+    def test_dq_fields_are_bool(self, schema, name):
+        """DQ fields must be boolean type."""
+        for field_name in PUBLICATION_DQ_FIELDS:
+            field = schema.field(field_name)
+            assert field.type == pa.bool_(), (
+                f"{name}.{field_name} should be bool, got {field.type}"
+            )
+
+
+class TestPublicationSchemaLookupFields:
+    """Test that all publication schemas have lookup metadata fields."""
+
+    @pytest.mark.parametrize(
+        "schema,name",
+        [
+            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
+            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
+            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
+            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
+            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
+        ],
+    )
+    def test_schema_has_lookup_fields(self, schema, name):
+        """All publication schemas must have _lookup_method and _original_id."""
+        field_names = {f.name for f in schema}
+        missing = PUBLICATION_LOOKUP_FIELDS - field_names
+        assert not missing, f"{name} missing lookup fields: {missing}"
+
+    @pytest.mark.parametrize(
+        "schema,name",
+        [
+            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
+            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
+            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
+            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
+            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
+        ],
+    )
+    def test_lookup_fields_are_string(self, schema, name):
+        """Lookup fields must be string type."""
+        for field_name in PUBLICATION_LOOKUP_FIELDS:
+            field = schema.field(field_name)
+            assert field.type == pa.string(), (
+                f"{name}.{field_name} should be string, got {field.type}"
+            )
+
+
+class TestPublicationSchemaCrossRefFields:
+    """Test that all publication schemas have cross-reference ID fields."""
+
+    @pytest.mark.parametrize(
+        "schema,name",
+        [
+            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
+            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
+            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
+            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
+            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
+        ],
+    )
+    def test_schema_has_cross_ref_fields(self, schema, name):
+        """All publication schemas must have pmid, doi, pmc_id."""
+        field_names = {f.name for f in schema}
+        missing = PUBLICATION_CROSS_REF_FIELDS - field_names
+        assert not missing, f"{name} missing cross-ref fields: {missing}"
+
+    @pytest.mark.parametrize(
+        "schema,name",
+        [
+            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
+            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
+            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
+            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
+            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
+        ],
+    )
+    def test_cross_ref_fields_are_string(self, schema, name):
+        """Cross-reference fields must be string type."""
+        for field_name in PUBLICATION_CROSS_REF_FIELDS:
+            field = schema.field(field_name)
+            assert field.type == pa.string(), (
+                f"{name}.{field_name} should be string, got {field.type}"
+            )
+
+
+class TestPublicationSchemaUnifiedDateAndPageFields:
+    """Test that all publication schemas have unified date and page fields."""
+
+    @pytest.mark.parametrize(
+        "schema,name",
+        [
+            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
+            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
+            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
+            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
+            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
+        ],
+    )
+    def test_schema_has_publication_date(self, schema, name):
+        """All publication schemas must have publication_date field."""
+        field_names = {f.name for f in schema}
+        assert "publication_date" in field_names, (
+            f"{name} missing publication_date field"
+        )
+        field = schema.field("publication_date")
+        assert field.type == pa.string(), (
+            f"{name}.publication_date should be string, got {field.type}"
+        )
+
+    @pytest.mark.parametrize(
+        "schema,name",
+        [
+            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
+            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
+            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
+            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
+            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
+        ],
+    )
+    def test_schema_has_page_fields(self, schema, name):
+        """All publication schemas must have first_page and last_page fields."""
+        field_names = {f.name for f in schema}
+        page_fields = {"first_page", "last_page"}
+        missing = page_fields - field_names
+        assert not missing, f"{name} missing page fields: {missing}"
+
+        for field_name in page_fields:
+            field = schema.field(field_name)
+            assert field.type == pa.string(), (
+                f"{name}.{field_name} should be string, got {field.type}"
+            )
+
+
+class TestAllPublicationSchemas:
+    """Test completeness of all publication schemas."""
+
+    @pytest.mark.parametrize(
+        "schema,name,primary_key",
+        [
+            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication", "document_chembl_id"),
+            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication", "doi"),
+            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication", "openalex_id"),
+            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication", "pmid"),
+            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication", "paper_id"),
+        ],
+    )
+    def test_schema_has_primary_key(self, schema, name, primary_key):
+        """Each publication schema must have its provider-specific primary key."""
+        field_names = {f.name for f in schema}
+        assert primary_key in field_names, f"{name} missing primary key: {primary_key}"
+
+    @pytest.mark.parametrize(
+        "schema,name",
+        [
+            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
+            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
+            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
+            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
+            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
+        ],
+    )
+    def test_schema_has_core_fields(self, schema, name):
+        """All publication schemas must have core content fields."""
+        field_names = {f.name for f in schema}
+        core_fields = {"title", "abstract", "authors", "year"}
+        missing = core_fields - field_names
+        assert not missing, f"{name} missing core fields: {missing}"
+
+    @pytest.mark.parametrize(
+        "schema,name",
+        [
+            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
+            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
+            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
+            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
+            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
+        ],
+    )
+    def test_schema_has_source_field(self, schema, name):
+        """All external publication schemas should have source field for provenance."""
+        field_names = {f.name for f in schema}
+        # ChEMBL doesn't need source field (it's an internal source)
+        if "ChEMBL" not in name:
+            assert "source" in field_names, f"{name} missing source field"
