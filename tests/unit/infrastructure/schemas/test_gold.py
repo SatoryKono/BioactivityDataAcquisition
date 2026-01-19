@@ -302,7 +302,7 @@ class TestGoldSchemaValidation:
             "pages": "100-110",
             "first_page": "100",
             "last_page": "110",
-            "authors": ["Author One", "Author Two"],
+            "authors": '["Author One", "Author Two"]',
             "pub_date": "2024-03-15",
             "publication_date": "2024-03-15",
             "year": 2024,
