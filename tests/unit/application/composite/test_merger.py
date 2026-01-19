@@ -139,6 +139,148 @@ class TestMergeServiceWritesViaStorage:
 
 
 @pytest.mark.unit
+class TestMergeServiceJoinKeyNormalization:
+    """Tests for join key normalization (case-insensitive DOI/PMID matching)."""
+
+    def test_normalize_doi_to_lowercase(self, merge_service):
+        """Test DOI column is normalized to lowercase."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "doi": ["10.1038/NATURE12373", "10.1000/ABC.DEF"],
+            "title": ["Title 1", "Title 2"],
+        })
+
+        result = merge_service._normalize_join_key_columns(df, ["doi"])
+
+        assert result["doi"].to_list() == ["10.1038/nature12373", "10.1000/abc.def"]
+        # Non-normalized columns should be unchanged
+        assert result["title"].to_list() == ["Title 1", "Title 2"]
+
+    def test_normalize_pmid_to_lowercase(self, merge_service):
+        """Test PMID column is normalized to lowercase."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "pmid": ["12345678", "PMC1234567"],
+            "title": ["Title 1", "Title 2"],
+        })
+
+        result = merge_service._normalize_join_key_columns(df, ["pmid"])
+
+        assert result["pmid"].to_list() == ["12345678", "pmc1234567"]
+
+    def test_normalize_pmc_id_to_lowercase(self, merge_service):
+        """Test PMC_ID column is normalized to lowercase."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "pmc_id": ["PMC1234567", "PMC7654321"],
+        })
+
+        result = merge_service._normalize_join_key_columns(df, ["pmc_id"])
+
+        assert result["pmc_id"].to_list() == ["pmc1234567", "pmc7654321"]
+
+    def test_normalize_skips_non_identifier_columns(self, merge_service):
+        """Test non-identifier columns are not normalized."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "title": ["UPPERCASE TITLE", "Another TITLE"],
+            "doi": ["10.1038/NATURE", "10.1000/ABC"],
+        })
+
+        result = merge_service._normalize_join_key_columns(df, ["title", "doi"])
+
+        # title is not in _NORMALIZE_JOIN_KEYS, so it should be unchanged
+        assert result["title"].to_list() == ["UPPERCASE TITLE", "Another TITLE"]
+        # doi should be normalized
+        assert result["doi"].to_list() == ["10.1038/nature", "10.1000/abc"]
+
+    def test_normalize_handles_null_values(self, merge_service):
+        """Test normalization handles null DOI values."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "doi": ["10.1038/NATURE", None, "10.1000/ABC"],
+        })
+
+        result = merge_service._normalize_join_key_columns(df, ["doi"])
+
+        assert result["doi"].to_list() == ["10.1038/nature", None, "10.1000/abc"]
+
+    def test_normalize_returns_unchanged_if_no_normalize_keys(self, merge_service):
+        """Test DataFrame is unchanged if no normalizable keys."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "id": ["ID1", "ID2"],
+            "name": ["Name1", "Name2"],
+        })
+
+        result = merge_service._normalize_join_key_columns(df, ["id", "name"])
+
+        # Neither id nor name are in _NORMALIZE_JOIN_KEYS
+        assert result["id"].to_list() == ["ID1", "ID2"]
+        assert result["name"].to_list() == ["Name1", "Name2"]
+
+    def test_normalize_handles_missing_columns(self, merge_service):
+        """Test normalization handles missing columns gracefully."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "title": ["Title 1"],
+        })
+
+        # Request normalization of doi which doesn't exist
+        result = merge_service._normalize_join_key_columns(df, ["doi", "title"])
+
+        # Should return unchanged since doi doesn't exist
+        assert result["title"].to_list() == ["Title 1"]
+
+    @pytest.mark.asyncio
+    async def test_apply_joins_normalizes_doi_for_matching(
+        self, merge_service, mock_storage
+    ):
+        """Test _apply_joins normalizes DOI for case-insensitive matching."""
+        import polars as pl
+
+        # Seed has uppercase DOI
+        seed_df = pl.DataFrame({
+            "id": ["1"],
+            "doi": ["10.1038/NATURE12373"],
+            "seed_value": ["from_seed"],
+        })
+
+        # Enricher has lowercase DOI
+        enricher_df = pl.DataFrame({
+            "doi": ["10.1038/nature12373"],
+            "enricher_value": ["from_enricher"],
+        })
+
+        enricher_config = EnricherConfig(
+            pipeline="crossref_publication",
+            join_keys=("doi",),
+            required=False,
+            silver_table="silver/crossref/publication",
+        )
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"crossref_publication": enricher_df},
+            enrichers=[enricher_config],
+        )
+
+        # Should successfully join despite case difference
+        assert len(result) == 1
+        assert "enricher_value" in result.columns
+        assert result["enricher_value"].to_list() == ["from_enricher"]
+        # DOI should be normalized to lowercase
+        assert result["doi"].to_list() == ["10.1038/nature12373"]
+
+
+@pytest.mark.unit
 class TestMergeServiceMergeOperation:
     """Tests for MergeService.merge operation."""
 

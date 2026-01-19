@@ -222,15 +222,19 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         return cast("type[BaseEntity]", PubMedPublicationEntity)
 
     def _should_log_fallback_lookup(self) -> bool:
-        """Disable fallback lookup logging for PubMed.
+        """Enable fallback lookup logging for PubMed.
 
-        PubMed uses PMID-only lookup without title fallback mechanism.
+        PubMed supports title-based fallback when PMID lookup fails.
+        Adapter uses TitleFallbackHandler for three-phase lookup:
+        1. PMID batch fetch
+        2. Title fallback for unresolved PMIDs
+        3. Title-only lookup for entries without PMIDs
 
         Returns:
-            False - no fallback logging needed.
+            True - log fallback lookups for observability.
 
         """
-        return False
+        return True
 
     def _parse_pages(self, pages: str | None) -> tuple[str | None, str | None]:
         """Parse medline_pgn format into first_page and last_page.

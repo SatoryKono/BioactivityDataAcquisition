@@ -37,6 +37,11 @@ def _path_to_table_name(path: str) -> str:
 class MergeService:
     """Merges enriched data with conflict resolution and lineage tracking."""
 
+    # Join keys that require case-insensitive matching (normalized to lowercase)
+    # DOI: Different providers may store in different cases (10.1038/NATURE vs 10.1038/nature)
+    # PMID: Typically numeric but may have inconsistent formatting
+    _NORMALIZE_JOIN_KEYS: frozenset[str] = frozenset({"doi", "pmid", "pmc_id"})
+
     def __init__(
         self,
         merge_config: MergeConfig,
@@ -302,14 +307,57 @@ class MergeService:
             return f"silver/{provider}/{entity}"
         return f"silver/{pipeline_name}"
 
+    def _normalize_join_key_columns(
+        self,
+        df: pl.DataFrame,
+        join_keys: list[str],
+    ) -> pl.DataFrame:
+        """Normalize join key columns for case-insensitive matching.
+
+        Converts DOI, PMID, and other identifier columns to lowercase
+        to ensure consistent joins across providers that may store
+        identifiers in different cases.
+
+        Args:
+            df: DataFrame to normalize.
+            join_keys: List of join key column names.
+
+        Returns:
+            DataFrame with normalized join key columns.
+
+        Example:
+            >>> df = pl.DataFrame({"doi": ["10.1038/NATURE12373"]})
+            >>> normalized = merger._normalize_join_key_columns(df, ["doi"])
+            >>> normalized["doi"][0]
+            '10.1038/nature12373'
+        """
+        import polars as pl
+
+        normalize_cols = [
+            key for key in join_keys
+            if key in self._NORMALIZE_JOIN_KEYS and key in df.columns
+        ]
+
+        if not normalize_cols:
+            return df
+
+        # Apply lowercase normalization to identifier columns
+        return df.with_columns([
+            pl.col(col).str.to_lowercase().alias(col)
+            for col in normalize_cols
+        ])
+
     async def _apply_joins(
         self,
         seed_df: pl.DataFrame,
         enricher_dfs: dict[str, pl.DataFrame],
         enrichers: Sequence[EnricherConfig],
     ) -> pl.DataFrame:
-        """Apply join strategy (LEFT_OUTER/INNER/UNION) to combine DataFrames."""
+        """Apply join strategy (LEFT_OUTER/INNER/UNION) to combine DataFrames.
 
+        Note: Join keys (doi, pmid, pmc_id) are normalized to lowercase before
+        joining to ensure case-insensitive matching across providers.
+        """
         merged = seed_df
 
         for enricher in enrichers:
@@ -318,6 +366,11 @@ class MergeService:
 
             enricher_df = enricher_dfs[enricher.pipeline]
             join_keys = list(enricher.join_keys)
+
+            # Normalize join key columns for case-insensitive matching
+            # This ensures DOIs like "10.1038/NATURE" match "10.1038/nature"
+            merged = self._normalize_join_key_columns(merged, join_keys)
+            enricher_df = self._normalize_join_key_columns(enricher_df, join_keys)
 
             # Find common columns to avoid duplicates
             seed_cols = set(merged.columns)
