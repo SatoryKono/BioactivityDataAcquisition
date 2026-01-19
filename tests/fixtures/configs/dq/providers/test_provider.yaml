@@ -1,0 +1,25 @@
+# Test provider DQ config
+# Used for unit testing hierarchical merge
+
+version: "1.0.0"
+provider: test_provider
+
+thresholds:
+  soft_fail: 0.05
+  hard_fail: 0.15  # Override default (stricter)
+
+provider_field_validations:
+  - field: provider_id
+    type: pattern
+    pattern: '^TEST\d+$'
+    nullable: true
+    error_message: "Invalid test provider ID format"
+
+  - field: provider_code
+    type: enum
+    allowed:
+      - A
+      - B
+      - C
+    nullable: true
+    error_message: "Invalid provider code"

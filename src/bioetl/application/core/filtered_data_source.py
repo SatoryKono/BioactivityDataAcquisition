@@ -83,75 +83,80 @@ class FilteredDataSource:
         """Enter async context and load filter IDs if enabled."""
         await self._data_source.__aenter__()
 
+        if not self._filter_config.enabled:
+            return self
+
         # Check for direct filter IDs (composite mode - no CSV needed)
-        if self._filter_config.enabled and self._filter_config.direct_filter_ids:
-            self._filter_ids = list(self._filter_config.direct_filter_ids)
-            if self._logger:
-                self._logger.info(
-                    "direct_filter_ids_loaded",
-                    count=len(self._filter_ids),
-                    filter_field=self._filter_config.filter_field,
-                    pipeline=self._pipeline_name,
-                )
+        if self._filter_config.direct_filter_ids:
+            self._load_direct_filter_ids()
             return self
 
         # Pre-load filter IDs from CSV
-        if self._filter_config.enabled and self._filter_reader:
-            source_path = self._filter_config.source_path
-            if not source_path:
-                return self
-
-            # Check if filter file exists - graceful degradation if missing
-            if not self._filter_file_exists(source_path):
-                return self
-
-            # Check if multi-column mode
-            columns = self._filter_config.get_columns()
-            if len(columns) > 1:
-                # Multi-column mode: load all columns
-                self._filter_result = (
-                    await self._filter_reader.load_multi_column_filter(
-                        source_path=source_path,
-                        columns=list(columns),
-                    )
-                )
-                # Convert to mutable dict for API calls
-                self._multi_filter_ids = {
-                    field: list(ids)
-                    for field, ids in self._filter_result.column_ids.items()
-                }
-                self._valid_combinations = self._filter_result.valid_combinations
-                self._filter_fields = self._filter_result.filter_fields
-
-                # Record metrics
-                self._record_multi_filter_metrics()
-            elif self._filter_config.column_name:
-                # Single-column mode (backward compatibility)
-                # Check if fallback column is configured and reader supports it
-                if self._filter_config.fallback_column and isinstance(
-                    self._filter_reader, InputFilterPort
-                ):
-                    # Load with fallback mapping
-                    (
-                        self._filter_result,
-                        self._fallback_mapping,
-                    ) = await self._filter_reader.load_filter_with_fallback(
-                        source_path=source_path,
-                        primary_column=self._filter_config.column_name,
-                        fallback_column=self._filter_config.fallback_column,
-                    )
-                else:
-                    # Standard loading without fallback
-                    self._filter_result = await self._filter_reader.load_filter_ids(
-                        source_path=source_path,
-                        column_name=self._filter_config.column_name,
-                    )
-                self._filter_ids = list(self._filter_result.ids)
-
-                # Record metrics
-                self._record_filter_metrics()
-
+        await self._load_csv_filter_ids()
         return self
+
+    def _load_direct_filter_ids(self) -> None:
+        """Load direct filter IDs from composite mode configuration."""
+        self._filter_ids = list(self._filter_config.direct_filter_ids or [])
+        if self._logger:
+            self._logger.info(
+                "direct_filter_ids_loaded",
+                count=len(self._filter_ids),
+                filter_field=self._filter_config.filter_field,
+                pipeline=self._pipeline_name,
+            )
+
+    async def _load_csv_filter_ids(self) -> None:
+        """Load filter IDs from CSV file."""
+        if not self._filter_reader:
+            return
+
+        source_path = self._filter_config.source_path
+        if not source_path or not self._filter_file_exists(source_path):
+            return
+
+        columns = self._filter_config.get_columns()
+        if len(columns) > 1:
+            await self._load_multi_column_filter(source_path, columns)
+        elif self._filter_config.column_name:
+            await self._load_single_column_filter(source_path)
+
+    async def _load_multi_column_filter(
+        self, source_path: str, columns: tuple[Any, ...]
+    ) -> None:
+        """Load multi-column filter from CSV."""
+        assert self._filter_reader is not None
+        self._filter_result = await self._filter_reader.load_multi_column_filter(
+            source_path=source_path,
+            columns=list(columns),
+        )
+        self._multi_filter_ids = {
+            field: list(ids) for field, ids in self._filter_result.column_ids.items()
+        }
+        self._valid_combinations = self._filter_result.valid_combinations
+        self._filter_fields = self._filter_result.filter_fields
+        self._record_multi_filter_metrics()
+
+    async def _load_single_column_filter(self, source_path: str) -> None:
+        """Load single-column filter from CSV."""
+        assert self._filter_reader is not None
+        assert self._filter_config.column_name is not None
+        if self._filter_config.fallback_column:
+            (
+                self._filter_result,
+                self._fallback_mapping,
+            ) = await self._filter_reader.load_filter_with_fallback(
+                source_path=source_path,
+                primary_column=self._filter_config.column_name,
+                fallback_column=self._filter_config.fallback_column,
+            )
+        else:
+            self._filter_result = await self._filter_reader.load_filter_ids(
+                source_path=source_path,
+                column_name=self._filter_config.column_name,
+            )
+        self._filter_ids = list(self._filter_result.ids)
+        self._record_filter_metrics()
 
     def _record_filter_metrics(self) -> None:
         """Record filter loading metrics."""
