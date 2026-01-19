@@ -121,3 +121,5 @@ htmlcov/
 tests.zip
 coverage-*.xml
 configs/pipelines.zip
+silver/composite/test/part-00000-948efb73-0e52-4037-9cf8-9615203fda36-c000.snappy.parquet
+gold/test_merged/part-00000-b6b05ee6-01a5-4345-976d-4cd349289aa1-c000.snappy.parquet
