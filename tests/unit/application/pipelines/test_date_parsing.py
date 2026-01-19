@@ -93,10 +93,7 @@ class TestPubMedDateBuilding:
         )
 
         # epub_date None, pub_date None -> use year
-        assert (
-            transformer._compute_publication_date(None, None, 2024)
-            == "2024-01-01"
-        )
+        assert transformer._compute_publication_date(None, None, 2024) == "2024-01-01"
 
 
 @pytest.mark.unit
@@ -153,10 +150,7 @@ class TestCrossRefDateBuilding:
         )
 
         # Print is None: use online
-        assert (
-            transformer._compute_publication_date(None, "2024-02-15")
-            == "2024-02-15"
-        )
+        assert transformer._compute_publication_date(None, "2024-02-15") == "2024-02-15"
 
     def test_crossref_partial_year_only(
         self,
@@ -238,9 +232,7 @@ class TestDateParsingEdgeCases:
     ) -> None:
         """Whitespace-only dates are not handled - use valid dates."""
         # Method takes dates as-is, no strip - caller should preprocess
-        result = pubmed_transformer._compute_publication_date(
-            "2024-03-15", None, 2024
-        )
+        result = pubmed_transformer._compute_publication_date("2024-03-15", None, 2024)
         assert result == "2024-03-15"
 
     def test_crossref_preserves_valid_iso_format(
@@ -248,9 +240,7 @@ class TestDateParsingEdgeCases:
         crossref_transformer: CrossRefPublicationTransformer,
     ) -> None:
         """Valid ISO dates should be preserved as-is."""
-        result = crossref_transformer._compute_publication_date(
-            "2024-12-31", None
-        )
+        result = crossref_transformer._compute_publication_date("2024-12-31", None)
         assert result == "2024-12-31"
 
     def test_date_output_is_always_string_or_none(
