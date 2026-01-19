@@ -197,7 +197,9 @@ class TestDQConfigLoaderInlineOverrides:
 
         assert config.strict_validation is True
 
-    def test_inline_override_flat_threshold_format(self, loader: DQConfigLoader) -> None:
+    def test_inline_override_flat_threshold_format(
+        self, loader: DQConfigLoader
+    ) -> None:
         """Inline overrides with flat threshold format should work."""
         config = loader.load(
             "test_provider",
@@ -467,9 +469,7 @@ class TestNormalizeToFileFormat:
         assert "field_validations" not in result
         assert len(result["entity_field_validations"]) == 1
 
-    def test_preserve_existing_entity_validations(
-        self, loader: DQConfigLoader
-    ) -> None:
+    def test_preserve_existing_entity_validations(self, loader: DQConfigLoader) -> None:
         """Existing entity validations should be preserved when adding flat ones."""
         merged: dict[str, Any] = {
             "entity_field_validations": [{"field": "existing", "type": "range"}],

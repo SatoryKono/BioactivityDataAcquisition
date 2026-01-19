@@ -165,7 +165,8 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         # Direct IDs mode (composite pipelines)
         input_filter = InputFilterContext.from_ids(
             filter_ids=options.filter_ids,
-            filter_field=options.filter_field or "doi",  # Default to DOI for publications
+            filter_field=options.filter_field
+            or "doi",  # Default to DOI for publications
         )
     elif options.input_csv:
         # CSV-based filtering
