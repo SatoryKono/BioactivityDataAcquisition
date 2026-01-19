@@ -246,6 +246,7 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
             )
 
         async for record in self._yield_articles_from_pmids(filter_ids, limit):
+            record["_lookup_method"] = "pmid"
             yield record
 
     # fetch_multi_filtered is provided by NotSupportedMultiFilterMixin
@@ -340,7 +341,8 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
                 filter_field=filter_field,
                 limit=limit,
             ):
-                record["_lookup_method"] = "primary"
+                # _lookup_method already set by fetch_filtered, but ensure it's "pmid"
+                record["_lookup_method"] = "pmid"
                 found_id = str(record.get("pmid", ""))
                 if found_id:
                     found_ids.add(found_id.lower())

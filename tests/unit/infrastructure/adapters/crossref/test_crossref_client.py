@@ -51,7 +51,8 @@ async def test_fetch_by_doi_success(adapter, mock_http_client):
     ]
 
     assert len(results) == 1
-    assert results[0] == {"title": ["Test Title"]}
+    assert results[0]["title"] == ["Test Title"]
+    assert results[0]["_lookup_method"] == "doi"
     mock_http_client.get.assert_called_once()
 
 

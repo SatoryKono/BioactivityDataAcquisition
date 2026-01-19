@@ -236,6 +236,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
             batch = dois[i : i + self.batch_size]
 
             async for record in self._fetch_by_dois(batch):
+                record["_lookup_method"] = "doi"
                 yield record
                 fetched += 1
                 if limit and fetched >= limit:

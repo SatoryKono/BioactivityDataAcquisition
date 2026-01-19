@@ -160,6 +160,7 @@ class CrossRefAdapter(BaseHttpAdapter):
         for i in range(0, len(dois), self.batch_size):
             batch = dois[i : i + self.batch_size]
             async for publication in self._batch_fetcher.fetch_batch(batch):
+                publication["_lookup_method"] = "doi"
                 yield publication
                 fetched += 1
                 if limit and fetched >= limit:
