@@ -246,8 +246,38 @@ def mock_preflight_service(call_recorder):
 
 @pytest.fixture
 def mock_postrun_service(call_recorder):
-    """Create a mock postrun service."""
+    """Create a mock postrun service.
+
+    The runner calls postrun_service.run(), which internally calls:
+    - run_dq_checks()
+    - run_vacuum_if_enabled()
+
+    We mock the run() method to record the expected calls.
+    """
+    from bioetl.application.core.postrun_service import PostrunResult
+    from bioetl.application.services.medallion_lifecycle import VacuumResult
+    from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
+
     service = MagicMock(spec=PostrunService)
+
+    async def run(executor, dq_context=None):
+        """Mock run that records DQ checks and vacuum calls."""
+        call_recorder.record("postrun.dq_checks")
+        call_recorder.record("postrun.vacuum")
+        return PostrunResult(
+            dq=DQResult(
+                status=DQEvaluationStatus.PASSED,
+                error_rate=0.01,
+                soft_threshold=0.05,
+                hard_threshold=0.20,
+            ),
+            dq_reports=None,
+            vacuum=VacuumResult(
+                silver_files_removed=0,
+                gold_files_removed=0,
+                skipped=False,
+            ),
+        )
 
     async def run_dq_checks(executor):
         call_recorder.record("postrun.dq_checks")
@@ -258,6 +288,7 @@ def mock_postrun_service(call_recorder):
     async def cleanup(tracer):
         call_recorder.record("postrun.cleanup")
 
+    service.run = AsyncMock(side_effect=run)
     service.run_dq_checks = AsyncMock(side_effect=run_dq_checks)
     service.run_vacuum_if_enabled = AsyncMock(side_effect=run_vacuum_if_enabled)
     service.cleanup = AsyncMock(side_effect=cleanup)
