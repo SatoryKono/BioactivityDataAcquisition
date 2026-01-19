@@ -64,7 +64,7 @@ def _map_status_to_exit_code(status: RunStatus, error_type: str | None) -> ExitC
 async def _run_pipeline_async(
     pipeline: str,
     options: RunOptions,
-) -> tuple[RunStatus, str | None, str | None]:
+) -> tuple[RunStatus, str | None, str | None, str]:
     """Run pipeline asynchronously via service.
 
     Args:
@@ -72,21 +72,39 @@ async def _run_pipeline_async(
         options: Run options.
 
     Returns:
-        Tuple of (status, error_message, error_type).
+        Tuple of (status, error_message, error_type, run_id).
     """
     service = get_pipeline_runner_service()
     result = await service.run(pipeline, options=options)
-    return result.status, result.error_message, result.error_type
+    return result.status, result.error_message, result.error_type, result.run_id
 
 
-def _echo_run_result(status: RunStatus, error_message: str | None) -> None:
-    """Output run result message based on status."""
+def _echo_run_result(
+    status: RunStatus, error_message: str | None, run_id: str
+) -> None:
+    """Output run result message based on status.
+
+    Args:
+        status: Run status from service.
+        error_message: Error message if failed.
+        run_id: Unique identifier for the pipeline run.
+    """
+    # Truncate run_id to first 8 chars for readability (like git short hash)
+    short_run_id = run_id[:8] if len(run_id) > 8 else run_id
+
     status_handlers = {
-        RunStatus.SUCCESS: lambda: echo_info("Pipeline completed successfully"),
-        RunStatus.DRY_RUN: lambda: echo_info("Dry-run completed (no changes made)"),
-        RunStatus.SHUTDOWN: lambda: echo_warning("Pipeline was gracefully shut down"),
+        RunStatus.SUCCESS: lambda: echo_info(
+            f"Pipeline completed successfully (run_id: {short_run_id})"
+        ),
+        RunStatus.DRY_RUN: lambda: echo_info(
+            f"Dry-run completed (no changes made) (run_id: {short_run_id})"
+        ),
+        RunStatus.SHUTDOWN: lambda: echo_warning(
+            f"Pipeline was gracefully shut down (run_id: {short_run_id})"
+        ),
         RunStatus.FAILED: lambda: echo_error(
-            "Pipeline failed", error_message or "Unknown error"
+            f"Pipeline failed (run_id: {short_run_id})",
+            error_message or "Unknown error",
         ),
     }
     handler = status_handlers.get(status)
@@ -187,7 +205,7 @@ def run(
 
     # Run pipeline via service
     try:
-        status, error_message, error_type = asyncio.run(
+        status, error_message, error_type, run_id = asyncio.run(
             _run_pipeline_async(pipeline, options)
         )
     except PipelineNotFoundError as e:
@@ -202,7 +220,7 @@ def run(
 
     # Map status to exit code and output result
     exit_code = _map_status_to_exit_code(status, error_type)
-    _echo_run_result(status, error_message)
+    _echo_run_result(status, error_message, run_id)
     sys.exit(exit_code)
 
 
