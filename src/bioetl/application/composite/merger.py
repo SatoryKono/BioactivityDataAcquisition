@@ -471,11 +471,8 @@ class MergeService:
             return True
 
         # List types are incompatible with scalar types
-        if isinstance(type1, pl.List) != isinstance(type2, pl.List):
-            return False
-
         # Different scalar types may be compatible (Polars handles casting)
-        return True
+        return isinstance(type1, pl.List) == isinstance(type2, pl.List)
 
     def _coalesce_prefer_seed(
         self, df: pl.DataFrame, enrichers: Sequence[EnricherConfig]
