@@ -383,5 +383,5 @@ class TestModuleExports:
         from bioetl.domain import config_types
 
         # Verify we have the expected TypedDicts
-        expected_count = 20  # 20 TypedDicts defined in config_types.py
+        expected_count = 26  # 26 TypedDicts defined in config_types.py
         assert len(config_types.__all__) == expected_count
