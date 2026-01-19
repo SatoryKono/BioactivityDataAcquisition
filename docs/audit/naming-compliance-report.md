@@ -1,24 +1,28 @@
 # Entity Naming Compliance Report
 
-**Audit Date:** 2026-01-16
+**Audit Date:** 2026-01-19 (Updated)
+**Previous Audit:** 2026-01-16
 **ADR Reference:** ADR-024 Entity Naming Unification
 **Auditor:** Claude Code
-**Status:** ✅ COMPLIANT (with minor observations)
+**Status:** ⚠️ PARTIALLY COMPLIANT (migration incomplete)
 
 ---
 
 ## Executive Summary
 
-The BioETL codebase is **compliant** with ADR-024 Entity Naming Unification. The migration from deprecated API-specific terms to canonical Ubiquitous Language terms has been completed successfully for domain entities and ChEMBL-related pipelines.
+The BioETL codebase is **partially compliant** with ADR-024 Entity Naming Unification. While domain entities and pipelines have been migrated successfully, several **schema class names** were not updated during the Phase 2 migration, leaving deprecated "Document" terminology in Gold and Pandera schemas.
 
-### Compliance Score: 95%
+### Compliance Score: 85%
 
 | Category | Status | Details |
 |----------|--------|---------|
 | Domain Entities | ✅ Compliant | Canonical names implemented |
 | ChEMBL Pipelines | ✅ Compliant | Renamed per ADR-024 |
-| PubChem/UniProt Pipelines | ✅ N/A | By design - uses API terms |
+| ChEMBL Transformers | ✅ Compliant | Renamed per ADR-024 |
+| Gold Schemas | ❌ Non-Compliant | Still using "Document" prefix |
+| Domain Pandera Schemas | ❌ Non-Compliant | Still using "Document" prefix |
 | Deprecated Aliases | ⚠️ Not Implemented | Missing but not blocking |
+| PubChem/UniProt Pipelines | ✅ N/A | By design - uses API terms |
 | Test File Naming | ✅ Compliant | Follows canonical names |
 | Config Files | ✅ Compliant | Properly structured |
 
@@ -85,6 +89,70 @@ grep -rn "from.*import.*\bProtein\b" src/   # No matches
 **Recommendation:** Either:
 1. Add the deprecated aliases per ADR-024 specification (for backward compatibility), OR
 2. Update ADR-024 to reflect that v2.0 migration is complete and aliases were never needed
+
+---
+
+## Phase 2.5: Schema Class Naming - ❌ NON-COMPLIANT (NEW FINDING)
+
+### Gold Schemas - Require Renaming
+
+The following Gold layer schema classes in `infrastructure/schemas/gold.py` still use deprecated "Document" terminology:
+
+| Current Name | Expected Name | Line | Status |
+|--------------|---------------|------|--------|
+| `ChEMBLDocumentGoldSchema` | `ChemblPublicationGoldSchema` | 395 | ❌ Not Renamed |
+| `ChEMBLDocumentTermGoldSchema` | `ChemblPublicationTermGoldSchema` | 440 | ❌ Not Renamed |
+| `ChEMBLDocumentSimilarityGoldSchema` | `ChemblPublicationSimilarityGoldSchema` | 622 | ❌ Not Renamed |
+
+**Verification:**
+```bash
+grep -n "class ChEMBLDocument.*GoldSchema" src/bioetl/infrastructure/schemas/gold.py
+# Output:
+# 395:class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
+# 440:class ChEMBLDocumentTermGoldSchema(pa.DataFrameModel):
+# 622:class ChEMBLDocumentSimilarityGoldSchema(pa.DataFrameModel):
+```
+
+**Impact:**
+- These schemas are imported and used in `composition/factories/pipeline_factories.py:94-96,208,222`
+- Breaking change if renamed without updating imports
+- Inconsistent with migrated transformer/pipeline names
+
+### Domain Pandera Schemas - Require Renaming
+
+The following Pandera schemas in domain layer still use deprecated terminology:
+
+| Current Name | Expected Name | File | Line | Status |
+|--------------|---------------|------|------|--------|
+| `DocumentTermSchema` | `PublicationTermSchema` | `schemas/chembl/publication_term.py` | 18 | ❌ Not Renamed |
+| `DocumentSimilaritySchema` | `PublicationSimilaritySchema` | `schemas/chembl/publication_similarity.py` | 14 | ❌ Not Renamed |
+
+**Note:** The file names were correctly renamed (`publication_term.py`, `publication_similarity.py`), but the class names inside were not updated.
+
+**Verification:**
+```bash
+grep -n "class Document.*Schema" src/bioetl/domain/schemas/chembl/
+# Output:
+# publication_term.py:18:class DocumentTermSchema(ETLRecordSchema):
+# publication_similarity.py:14:class DocumentSimilaritySchema(ETLRecordSchema):
+```
+
+### ADR-024 Scope Clarification Needed
+
+ADR-024 Phase 2 lists schema file renames but doesn't explicitly mention class name changes:
+
+> **Schema Files (renamed):**
+> - `src/bioetl/domain/schemas/chembl/document.py` → `publication.py`
+> - `src/bioetl/domain/schemas/chembl/document_similarity.py` → `publication_similarity.py`
+> - `src/bioetl/domain/schemas/chembl/document_term.py` → `publication_term.py`
+
+**Interpretation:** The intent was likely to rename both files AND classes, but only file renames were executed. Gold schemas were not explicitly mentioned.
+
+**Recommendation:** Complete the migration by:
+1. Renaming Gold schema classes to `ChemblPublicationGoldSchema`, etc.
+2. Renaming domain Pandera schema classes to `PublicationTermSchema`, etc.
+3. Updating all imports in `pipeline_factories.py`
+4. Adding deprecated aliases if backward compatibility needed
 
 ---
 
@@ -169,7 +237,15 @@ Running `scripts/lint_terminology.py` shows violations unrelated to ADR-024:
 
 ### High Priority
 
-None - codebase is compliant.
+1. **Complete Gold Schema Renaming** (ADR-024 Migration Gap)
+   - Rename `ChEMBLDocumentGoldSchema` → `ChemblPublicationGoldSchema`
+   - Rename `ChEMBLDocumentTermGoldSchema` → `ChemblPublicationTermGoldSchema`
+   - Rename `ChEMBLDocumentSimilarityGoldSchema` → `ChemblPublicationSimilarityGoldSchema`
+   - Update imports in `composition/factories/pipeline_factories.py`
+
+2. **Complete Domain Schema Class Renaming**
+   - Rename `DocumentTermSchema` → `PublicationTermSchema` in `publication_term.py`
+   - Rename `DocumentSimilaritySchema` → `PublicationSimilaritySchema` in `publication_similarity.py`
 
 ### Medium Priority
 
@@ -177,9 +253,13 @@ None - codebase is compliant.
    - Either implement the aliases as documented, OR
    - Update ADR-024 to indicate aliases were determined unnecessary
 
-2. **Update `naming_exceptions.yaml`**
-   - Remove `chembl_document` from pipeline_id_format examples (line 181)
-   - It was migrated to `chembl_publication`
+2. ~~**Update `naming_exceptions.yaml`**~~ ✅ Already Correct
+   - Line 181 already shows `chembl_publication` (not `chembl_document`)
+   - Comment documents the rename per ADR-024
+
+3. **Update ADR-024 Phase 2 documentation**
+   - Add Gold schema renames to the migration scope
+   - Clarify that both file names AND class names should be renamed
 
 ### Low Priority
 
@@ -218,13 +298,31 @@ None - codebase is compliant.
 
 ## Conclusion
 
-The ADR-024 entity naming migration has been **successfully completed**. The codebase properly distinguishes between:
+The ADR-024 entity naming migration is **85% complete**. The codebase properly distinguishes between:
 
 1. **Domain entity names** (Ubiquitous Language): `ChemblPublication`, `PubchemMolecule`, `UniprotTarget`
 2. **Pipeline/CLI names** (API terminology): `chembl_publication`, `pubchem_compound`, `uniprot_protein`
 
-The only notable observation is that deprecated aliases mentioned in ADR-024 were never implemented, but this has no practical impact as no code uses the deprecated import patterns.
+### Remaining Migration Items
+
+| Component | Count | Effort |
+|-----------|-------|--------|
+| Gold Schema Classes | 3 | Low - Search & Replace |
+| Domain Pandera Schema Classes | 2 | Low - Search & Replace |
+| Factory Imports | 4 | Low - Update imports |
+| **Total** | **9 items** | **~30 min** |
+
+### Notable Observations
+
+1. **Deprecated aliases** mentioned in ADR-024 were never implemented - no practical impact as no code uses deprecated import patterns
+2. **DocumentTerm** and **DocumentSimilarity** entity classes are intentionally retained (ChEMBL-derived entities, not publications)
+3. **Schema class naming** was overlooked during Phase 2 - only file names were renamed
+
+### Next Steps
+
+Complete the high-priority schema renaming to achieve 100% ADR-024 compliance.
 
 ---
 
 *Report generated: 2026-01-16*
+*Updated: 2026-01-19 - Added Phase 2.5 schema naming findings*
