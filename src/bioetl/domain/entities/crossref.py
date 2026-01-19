@@ -199,12 +199,8 @@ class CrossRefPublicationEntity(PublicationEntityBase):
             raise ValueError("CrossRef Publication DOI is required")
 
 
-# Deprecated alias for backward compatibility
-PublicationEntity = CrossRefPublicationEntity
-
 __all__ = [
     "CROSSREF_TYPE_MAP",
     "CrossRefPublicationEntity",
-    "PublicationEntity",
     "PublicationRecord",
 ]

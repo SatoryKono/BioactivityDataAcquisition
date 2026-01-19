@@ -217,7 +217,4 @@ class PubMedPublicationEntity(PublicationEntityBase):
             raise ValueError("PubMed Publication PMID is required")
 
 
-# Deprecated alias for backward compatibility
-Publication = PubMedPublicationEntity
-
-__all__ = ["ArticleRecord", "PubMedPublicationEntity", "Publication"]
+__all__ = ["ArticleRecord", "PubMedPublicationEntity"]

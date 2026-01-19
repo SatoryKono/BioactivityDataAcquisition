@@ -10,9 +10,9 @@ import pytest
 from bioetl.domain.entities import (
     Bioactivity,
     BioactivityState,
+    CrossRefPublicationEntity,
     DocumentSimilarity,
     PubchemMolecule,
-    PublicationEntity,
     UniprotTarget,
 )
 from bioetl.domain.types import ContentHash, EntityID, RunType
@@ -463,16 +463,16 @@ class TestUniprotTarget:
 
 
 @pytest.mark.unit
-class TestPublicationEntity:
-    """Tests for CrossRef PublicationEntity (formerly Work).
+class TestCrossRefPublicationEntity:
+    """Tests for CrossRef CrossRefPublicationEntity (formerly Work).
 
-    Tests the PublicationEntity domain entity which represents scholarly
+    Tests the CrossRefPublicationEntity domain entity which represents scholarly
     publications from CrossRef or other bibliographic sources.
     """
 
     def test_publication_creation_success(self, base_entity_kwargs):
-        """Test successful PublicationEntity creation."""
-        publication = PublicationEntity(
+        """Test successful CrossRefPublicationEntity creation."""
+        publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test.article",
         )
@@ -481,8 +481,8 @@ class TestPublicationEntity:
         assert publication.doc_type == "PUBLICATION"
 
     def test_publication_with_all_optional_fields(self, base_entity_kwargs):
-        """Test PublicationEntity with all optional fields."""
-        publication = PublicationEntity(
+        """Test CrossRefPublicationEntity with all optional fields."""
+        publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1038/nature12373",
             title="The complete genome sequence",
@@ -515,14 +515,14 @@ class TestPublicationEntity:
     def test_publication_requires_doi(self, base_entity_kwargs):
         """Test that empty doi raises ValueError."""
         with pytest.raises(ValueError, match="Publication DOI is required"):
-            PublicationEntity(
+            CrossRefPublicationEntity(
                 **base_entity_kwargs,
                 doi="",
             )
 
     def test_publication_preprint_doc_type(self, base_entity_kwargs):
-        """Test PublicationEntity with PREPRINT doc_type."""
-        publication = PublicationEntity(
+        """Test CrossRefPublicationEntity with PREPRINT doc_type."""
+        publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1101/2023.01.01.123456",
             doc_type="PREPRINT",
@@ -531,7 +531,7 @@ class TestPublicationEntity:
 
     def test_publication_default_authors_none(self, base_entity_kwargs):
         """Test that authors defaults to None (JSON string format)."""
-        publication = PublicationEntity(
+        publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
         )
@@ -539,7 +539,7 @@ class TestPublicationEntity:
 
     def test_publication_default_issn_empty_list(self, base_entity_kwargs):
         """Test that issn defaults to empty list."""
-        publication = PublicationEntity(
+        publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
         )
@@ -547,15 +547,15 @@ class TestPublicationEntity:
 
     def test_publication_default_subjects_empty_list(self, base_entity_kwargs):
         """Test that subjects defaults to empty list."""
-        publication = PublicationEntity(
+        publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
         )
         assert publication.subjects == []
 
     def test_publication_is_frozen(self, base_entity_kwargs):
-        """Test that PublicationEntity is immutable."""
-        publication = PublicationEntity(
+        """Test that CrossRefPublicationEntity is immutable."""
+        publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
         )
@@ -564,15 +564,15 @@ class TestPublicationEntity:
 
     def test_publication_default_source_is_crossref(self, base_entity_kwargs):
         """Test that source defaults to 'crossref'."""
-        publication = PublicationEntity(
+        publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
         )
         assert publication.source == "crossref"
 
     def test_publication_custom_source(self, base_entity_kwargs):
-        """Test PublicationEntity with custom source."""
-        publication = PublicationEntity(
+        """Test CrossRefPublicationEntity with custom source."""
+        publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
             source="pubmed",
@@ -580,8 +580,8 @@ class TestPublicationEntity:
         assert publication.source == "pubmed"
 
     def test_publication_with_citation_metrics(self, base_entity_kwargs):
-        """Test PublicationEntity with citation metrics."""
-        publication = PublicationEntity(
+        """Test CrossRefPublicationEntity with citation metrics."""
+        publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
             citation_count=150,
@@ -592,7 +592,7 @@ class TestPublicationEntity:
 
     def test_publication_citation_count_can_be_zero(self, base_entity_kwargs):
         """Test that citation_count can be zero."""
-        publication = PublicationEntity(
+        publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
             citation_count=0,
@@ -600,8 +600,8 @@ class TestPublicationEntity:
         assert publication.citation_count == 0
 
     def test_publication_with_date_fields(self, base_entity_kwargs):
-        """Test PublicationEntity date fields."""
-        publication = PublicationEntity(
+        """Test CrossRefPublicationEntity date fields."""
+        publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
             year=2023,
@@ -614,7 +614,7 @@ class TestPublicationEntity:
 
     def test_publication_year_can_be_none(self, base_entity_kwargs):
         """Test that year can be None for publications with unknown date."""
-        publication = PublicationEntity(
+        publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
             year=None,
@@ -622,8 +622,8 @@ class TestPublicationEntity:
         assert publication.year is None
 
     def test_publication_with_license_url(self, base_entity_kwargs):
-        """Test PublicationEntity with license URL."""
-        publication = PublicationEntity(
+        """Test CrossRefPublicationEntity with license URL."""
+        publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
             license_url="https://creativecommons.org/licenses/by/4.0/",
@@ -631,8 +631,8 @@ class TestPublicationEntity:
         assert publication.license_url == "https://creativecommons.org/licenses/by/4.0/"
 
     def test_publication_with_language(self, base_entity_kwargs):
-        """Test PublicationEntity with language code."""
-        publication = PublicationEntity(
+        """Test CrossRefPublicationEntity with language code."""
+        publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
             language="en",
