@@ -86,13 +86,13 @@ class TestGoldPublicationSchemaUnifiedFields:
         [
             (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
-            (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
+            # OpenAlex doesn't have page fields - they were removed as unused
             (PubMedPublicationGoldSchema, "PubMed Publication"),
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
     def test_schema_has_page_fields(self, schema_class, name):
-        """All Gold publication schemas must have first_page and last_page fields."""
+        """Gold publication schemas with page data must have first_page and last_page fields."""
         fields = get_schema_fields(schema_class)
         assert "first_page" in fields, f"{name} missing first_page field"
         assert "last_page" in fields, f"{name} missing last_page field"

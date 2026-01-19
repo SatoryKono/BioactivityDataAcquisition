@@ -6,7 +6,7 @@ Validates common fields: pmid, doi, pmc_id, title, abstract, year.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pandas as pd
 import pandera as pa
@@ -33,7 +33,7 @@ def valid_base_record() -> dict:
         "_run_id": "run-001",
         "_run_type": "incremental",
         "_source_batch_id": "batch-001",
-        "_ingestion_ts": datetime.now(timezone.utc),
+        "_ingestion_ts": datetime.now(UTC),
         "_dq_warn": False,
         "_dq_error": False,
         "_index": 0,
