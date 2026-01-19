@@ -146,10 +146,12 @@ class TestMergeServiceJoinKeyNormalization:
         """Test DOI column is normalized to lowercase."""
         import polars as pl
 
-        df = pl.DataFrame({
-            "doi": ["10.1038/NATURE12373", "10.1000/ABC.DEF"],
-            "title": ["Title 1", "Title 2"],
-        })
+        df = pl.DataFrame(
+            {
+                "doi": ["10.1038/NATURE12373", "10.1000/ABC.DEF"],
+                "title": ["Title 1", "Title 2"],
+            }
+        )
 
         result = merge_service._normalize_join_key_columns(df, ["doi"])
 
@@ -161,10 +163,12 @@ class TestMergeServiceJoinKeyNormalization:
         """Test PMID column is normalized to lowercase."""
         import polars as pl
 
-        df = pl.DataFrame({
-            "pmid": ["12345678", "PMC1234567"],
-            "title": ["Title 1", "Title 2"],
-        })
+        df = pl.DataFrame(
+            {
+                "pmid": ["12345678", "PMC1234567"],
+                "title": ["Title 1", "Title 2"],
+            }
+        )
 
         result = merge_service._normalize_join_key_columns(df, ["pmid"])
 
@@ -174,9 +178,11 @@ class TestMergeServiceJoinKeyNormalization:
         """Test PMC_ID column is normalized to lowercase."""
         import polars as pl
 
-        df = pl.DataFrame({
-            "pmc_id": ["PMC1234567", "PMC7654321"],
-        })
+        df = pl.DataFrame(
+            {
+                "pmc_id": ["PMC1234567", "PMC7654321"],
+            }
+        )
 
         result = merge_service._normalize_join_key_columns(df, ["pmc_id"])
 
@@ -186,10 +192,12 @@ class TestMergeServiceJoinKeyNormalization:
         """Test non-identifier columns are not normalized."""
         import polars as pl
 
-        df = pl.DataFrame({
-            "title": ["UPPERCASE TITLE", "Another TITLE"],
-            "doi": ["10.1038/NATURE", "10.1000/ABC"],
-        })
+        df = pl.DataFrame(
+            {
+                "title": ["UPPERCASE TITLE", "Another TITLE"],
+                "doi": ["10.1038/NATURE", "10.1000/ABC"],
+            }
+        )
 
         result = merge_service._normalize_join_key_columns(df, ["title", "doi"])
 
@@ -202,9 +210,11 @@ class TestMergeServiceJoinKeyNormalization:
         """Test normalization handles null DOI values."""
         import polars as pl
 
-        df = pl.DataFrame({
-            "doi": ["10.1038/NATURE", None, "10.1000/ABC"],
-        })
+        df = pl.DataFrame(
+            {
+                "doi": ["10.1038/NATURE", None, "10.1000/ABC"],
+            }
+        )
 
         result = merge_service._normalize_join_key_columns(df, ["doi"])
 
@@ -214,10 +224,12 @@ class TestMergeServiceJoinKeyNormalization:
         """Test DataFrame is unchanged if no normalizable keys."""
         import polars as pl
 
-        df = pl.DataFrame({
-            "id": ["ID1", "ID2"],
-            "name": ["Name1", "Name2"],
-        })
+        df = pl.DataFrame(
+            {
+                "id": ["ID1", "ID2"],
+                "name": ["Name1", "Name2"],
+            }
+        )
 
         result = merge_service._normalize_join_key_columns(df, ["id", "name"])
 
@@ -229,9 +241,11 @@ class TestMergeServiceJoinKeyNormalization:
         """Test normalization handles missing columns gracefully."""
         import polars as pl
 
-        df = pl.DataFrame({
-            "title": ["Title 1"],
-        })
+        df = pl.DataFrame(
+            {
+                "title": ["Title 1"],
+            }
+        )
 
         # Request normalization of doi which doesn't exist
         result = merge_service._normalize_join_key_columns(df, ["doi", "title"])
@@ -247,17 +261,21 @@ class TestMergeServiceJoinKeyNormalization:
         import polars as pl
 
         # Seed has uppercase DOI
-        seed_df = pl.DataFrame({
-            "id": ["1"],
-            "doi": ["10.1038/NATURE12373"],
-            "seed_value": ["from_seed"],
-        })
+        seed_df = pl.DataFrame(
+            {
+                "id": ["1"],
+                "doi": ["10.1038/NATURE12373"],
+                "seed_value": ["from_seed"],
+            }
+        )
 
         # Enricher has lowercase DOI
-        enricher_df = pl.DataFrame({
-            "doi": ["10.1038/nature12373"],
-            "enricher_value": ["from_enricher"],
-        })
+        enricher_df = pl.DataFrame(
+            {
+                "doi": ["10.1038/nature12373"],
+                "enricher_value": ["from_enricher"],
+            }
+        )
 
         enricher_config = EnricherConfig(
             pipeline="crossref_publication",

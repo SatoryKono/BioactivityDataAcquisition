@@ -125,6 +125,7 @@ class RunOptions:
         input_csv: Path to CSV file with filter IDs.
         filter_column: Column name in CSV containing filter IDs.
         filter_field: API field name to filter by.
+        filter_ids: Direct filter IDs (e.g., DOIs) without CSV file.
         vacuum_after_run: Enable automatic VACUUM after successful run.
         vacuum_retention_days: Minimum age of files to remove during VACUUM.
         log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
@@ -138,6 +139,7 @@ class RunOptions:
     input_csv: str | None = None
     filter_column: str | None = None
     filter_field: str | None = None
+    filter_ids: tuple[str, ...] | None = None  # Direct filter IDs (no CSV)
     vacuum_after_run: bool | None = None
     vacuum_retention_days: int | None = None
     log_level: str = "INFO"
