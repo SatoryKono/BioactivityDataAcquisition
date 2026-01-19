@@ -188,26 +188,27 @@ class DefaultDataNormalizationService:
         - Month-only [[2024, 3]]: returns "2024-03-31" (last day of month)
         - Year-only [[2024]]: returns "2024-12-31" (last day of year)
         """
-        if not date_parts or not date_parts[0]:
+        parts = self._extract_date_parts(date_parts)
+        if not parts:
+            return None
+        return self._format_parts_to_date(parts)
+
+    def _extract_date_parts(
+        self, date_parts: Sequence[Sequence[int]] | None
+    ) -> Sequence[int] | None:
+        """Extract first date-parts array if valid, else None."""
+        if not date_parts:
             return None
         parts = date_parts[0]
-        num_parts = len(parts)
+        return parts if parts else None
 
-        if num_parts == 0:
-            return None
+    def _format_parts_to_date(self, parts: Sequence[int]) -> str:
+        """Format date parts to YYYY-MM-DD with end-of-period normalization."""
+        from calendar import monthrange
 
         year = parts[0]
-
-        if num_parts >= 3:
-            # Complete date: YYYY-MM-DD
+        if len(parts) >= 3:
             return _DATE_FULL_FMT.format(year, parts[1], parts[2])
-        elif num_parts == 2:
-            # Month-only: use last day of month
-            from calendar import monthrange
-
-            month = parts[1]
-            last_day = monthrange(year, month)[1]
-            return _DATE_FULL_FMT.format(year, month, last_day)
-        else:
-            # Year-only: use December 31st
-            return _DATE_FULL_FMT.format(year, 12, 31)
+        if len(parts) == 2:
+            return _DATE_FULL_FMT.format(year, parts[1], monthrange(year, parts[1])[1])
+        return _DATE_FULL_FMT.format(year, 12, 31)
