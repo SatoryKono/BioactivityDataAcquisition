@@ -560,3 +560,20 @@ class PublicationTermDataSource:
                 limit=limit,
             ):
                 yield record
+
+    def get_source_metadata(self, api_version: str | None = None) -> Any:
+        """Delegate get_source_metadata to wrapped data source.
+
+        Returns API request metadata collected by the underlying adapter.
+        Used by BatchExecutor to enrich Bronze layer metadata.
+
+        Args:
+            api_version: Optional API version string.
+
+        Returns:
+            SourceMetadata with request details, or None if not supported.
+        """
+        get_metadata = getattr(self._data_source, "get_source_metadata", None)
+        if get_metadata is not None and callable(get_metadata):
+            return get_metadata(api_version)
+        return None
