@@ -1,6 +1,8 @@
 # serializer version: 1
 # name: TestActivityTransformerSnapshot.test_transform_snapshot
   dict({
+    '_dq_error': False,
+    '_dq_warn': False,
     '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_run_id': '<run_id>',
@@ -64,6 +66,8 @@
 # ---
 # name: TestAssayTransformerSnapshot.test_transform_snapshot
   dict({
+    '_dq_error': False,
+    '_dq_warn': False,
     '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_run_id': '<run_id>',
@@ -112,6 +116,8 @@
 # ---
 # name: TestMoleculeTransformerSnapshot.test_transform_snapshot
   dict({
+    '_dq_error': False,
+    '_dq_warn': False,
     '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_run_id': '<run_id>',
@@ -174,6 +180,8 @@
 # ---
 # name: TestPubChemCompoundTransformerSnapshot.test_transform_snapshot
   dict({
+    '_dq_error': False,
+    '_dq_warn': False,
     '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_run_id': '<run_id>',
@@ -345,6 +353,8 @@
 # ---
 # name: TestTargetComponentTransformerSnapshot.test_transform_snapshot
   dict({
+    '_dq_error': False,
+    '_dq_warn': False,
     '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_run_id': '<run_id>',
@@ -366,6 +376,8 @@
 # ---
 # name: TestTargetTransformerSnapshot.test_transform_snapshot
   dict({
+    '_dq_error': False,
+    '_dq_warn': False,
     '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_run_id': '<run_id>',
@@ -408,6 +420,8 @@
 # ---
 # name: TestUniProtProteinTransformerSnapshot.test_transform_snapshot
   dict({
+    '_dq_error': False,
+    '_dq_warn': False,
     '_index': 0,
     '_ingestion_ts': '<ingestion_ts>',
     '_run_id': '<run_id>',
