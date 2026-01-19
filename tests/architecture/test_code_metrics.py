@@ -227,6 +227,10 @@ class TestFunctionComplexity:
         "from_dict": 8,  # CC=6 - Dictionary parsing with type conversions
         # BatchExecutor DQ context extraction
         "get_dq_context": 13,  # CC=12 - DQ context gathering with nullable field handling
+        # Domain filtering validation
+        "_validate_enabled_fields": 8,  # CC=7 - InputFilterConfig validation with multi-mode checks
+        # FilteredDataSource context manager
+        "__aenter__": 14,  # CC=13 - Data source initialization with provider/entity type dispatch
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -383,6 +387,7 @@ class TestFunctionLength:
         "_apply_filter": 60,  # EnrichmentCoordinator filter condition parsing
         "_run_single_enricher": 150,  # EnrichmentCoordinator single enricher with timeout/error handling
         "_run_with_lock": 110,  # CompositePipelineRunner lock-held orchestration
+        # Composite pipeline bootstrap functions
         "_parse_composite_config": 95,  # 93 lines - Composite config parsing with validation
         "bootstrap_composite_pipeline": 135,  # 130 lines - Composite pipeline bootstrapping
         "run_composite": 60,  # 56 lines - Composite CLI entrypoint
@@ -397,10 +402,24 @@ class TestFunctionLength:
         "yaml_config_to_domain": 65,  # 63 lines - YAML to domain conversion
         # Builder functions
         "build": 60,  # 58 lines - Builder pattern
+        "_create_table_collector": 60,  # Storage factory table collector creation
+        # Observability functions
+        "bootstrap_observability": 65,  # Observability setup with OpenTelemetry
+        # Metadata coordinator functions
+        "create_silver_metadata": 85,  # Silver metadata creation with full audit info
+        "create_gold_metadata": 75,  # Gold metadata creation with audit info
+        # Provider registry functions
+        "create_adapter": 60,  # Provider adapter factory method
+        "_create_semanticscholar_data_source": 55,  # SemanticScholar data source factory
+        "_create_uniprot_idmapping_data_source": 70,  # UniProt ID mapping data source factory
+        "register_all_providers": 180,  # Provider registration with all adapters
+        # Services factory functions
+        "create_common_services": 65,  # Common services factory
+        "_create_dq_services": 55,  # DQ services factory
     }
 
     # Maximum allowed violations (for tracking technical debt)
-    # Baseline updated 2026-01-19: 92 violations (composite pipeline + APIRequestCollector)
+    # Baseline updated 2026-01-19: merged exemptions from both branches
     MAX_VIOLATIONS = 92
 
     def test_functions_under_50_lines(self, src_dir: Path) -> None:
@@ -489,12 +508,8 @@ class TestClassSize:
         "UniProtIDMappingClient": 420,  # 415 lines - ID Mapping client with job polling
         # SemanticScholar adapter
         "SemanticScholarAdapter": 590,  # 588 lines - HTTP adapter with multi-identifier fallback + FilterableDataSourcePort
-        # PubMed adapter (similar to ChEMBL adapter)
-        "PubMedAdapter": 500,  # 488 lines - HTTP adapter with Entrez API + full FilterableDataSourcePort
         # PubMed transformer (complex XML extraction)
         "PubMedPublicationTransformer": 350,  # 332 lines - XML extraction with multiple extractors
-        # OpenAlex adapter (FilterableDataSourcePort with batch DOI + title fallback)
-        "OpenAlexAdapter": 540,  # 539 lines - HTTP adapter with batch DOI resolution + title fallback
         # Error handling utility (ErrorService + deprecated ErrorHandler alias)
         "ErrorService": 500,  # ~480 lines - comprehensive error classification with detailed recovery logging
         # Audit adapter (file-based audit logging)
