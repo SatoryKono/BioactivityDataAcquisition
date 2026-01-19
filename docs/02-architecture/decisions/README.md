@@ -32,6 +32,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-024](ADR-024-entity-naming-unification.md) | Entity Naming Unification | Accepted | Architecture | 2026-01-07 |
 | [ADR-025](ADR-025-pipeline-config-unification.md) | Pipeline Config Unification | Accepted | Configuration | 2026-01-14 |
 | [ADR-026](ADR-026-composite-pipeline-pattern.md) | Composite Pipeline Pattern | Accepted | Architecture | 2026-01-15 |
+| [ADR-027](ADR-027-dq-rules-externalization.md) | DQ Rules Externalization | Accepted | Data Quality | 2026-01-19 |
 
 ## ADRs by Category
 
@@ -64,6 +65,7 @@ This directory contains Architecture Decision Records documenting significant ar
 
 ### Data Quality
 - [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation
+- [ADR-027](ADR-027-dq-rules-externalization.md): DQ Rules Externalization — Hierarchical DQ config
 
 ### Domain Model
 - [ADR-004](ADR-004-pydantic-vs-dataclasses.md): Pydantic vs Dataclasses
