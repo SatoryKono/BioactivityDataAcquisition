@@ -204,6 +204,9 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
         pa.field("year", pa.int64()),
+        # === DQ suffix (MUST be last, per RULES.md §2.4) ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -395,6 +398,9 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
         pa.field("year", pa.int64()),
+        # === DQ suffix (MUST be last, per RULES.md §2.4) ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -644,6 +650,9 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
         pa.field("year", pa.int64()),
+        # === DQ suffix (MUST be last, per RULES.md §2.4) ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -687,6 +696,9 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("source", pa.string()),
         pa.field("title", pa.string()),
         pa.field("year", pa.int64()),
+        # === DQ suffix (MUST be last, per RULES.md §2.4) ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
