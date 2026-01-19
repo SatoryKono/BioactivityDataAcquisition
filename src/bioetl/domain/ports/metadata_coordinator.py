@@ -35,6 +35,8 @@ class BronzeMetadataInput:
         completed_at: UTC timestamp when write completed.
         source_metadata: Optional pre-built SourceMetadata with API request
                         details for rich lineage tracking.
+        query_string: Query string from PipelineRunContext used for data
+                     source filtering (e.g., 'assay_type=B').
     """
 
     batch_id: BatchID
@@ -44,6 +46,7 @@ class BronzeMetadataInput:
     started_at: datetime
     completed_at: datetime
     source_metadata: SourceMetadata | None = None
+    query_string: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

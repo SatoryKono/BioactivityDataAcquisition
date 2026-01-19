@@ -176,12 +176,20 @@ class MetadataCoordinator:
         """
         duration = (input_data.completed_at - input_data.started_at).total_seconds()
 
-        # Use provided source_metadata or create minimal default
-        source = (
-            input_data.source_metadata
-            if input_data.source_metadata is not None
-            else SourceMetadata(type="api")
-        )
+        # Build source metadata with query_string
+        if input_data.source_metadata is not None:
+            source = input_data.source_metadata
+            # Inject query_string if provided and not already set in source_metadata
+            if input_data.query_string and source.query_string is None:
+                source = source.model_copy(
+                    update={"query_string": input_data.query_string}
+                )
+        else:
+            # Create minimal SourceMetadata with query_string
+            source = SourceMetadata(
+                type="api",
+                query_string=input_data.query_string,
+            )
 
         return BronzeMetadata(
             runtime=self._build_runtime_metadata(
