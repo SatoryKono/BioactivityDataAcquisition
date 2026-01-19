@@ -418,3 +418,93 @@ class TestSemanticScholarDoiNormalization:
         assert result_lower is not None
         # After normalization, content hashes should be identical
         assert result_upper["content_hash"] == result_lower["content_hash"]
+
+
+class TestSemanticScholarUnifiedPageFields:
+    """Tests for unified page field parsing (first_page, last_page)."""
+
+    @pytest.fixture
+    def transformer(self) -> SemanticScholarPublicationTransformer:
+        """Create a transformer instance."""
+        return SemanticScholarPublicationTransformer()
+
+    def test_parse_pages_hyphenated(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+    ) -> None:
+        """Test parsing of hyphenated page ranges."""
+        first, last = transformer._parse_pages("123-456")
+        assert first == "123"
+        assert last == "456"
+
+    def test_parse_pages_single_page(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+    ) -> None:
+        """Test parsing of single page number."""
+        first, last = transformer._parse_pages("123")
+        assert first == "123"
+        assert last is None
+
+    def test_parse_pages_none(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+    ) -> None:
+        """Test parsing of None input."""
+        first, last = transformer._parse_pages(None)
+        assert first is None
+        assert last is None
+
+    def test_parse_pages_empty_string(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+    ) -> None:
+        """Test parsing of empty string."""
+        first, last = transformer._parse_pages("")
+        assert first is None
+        assert last is None
+
+    def test_parse_pages_electronic_format(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+    ) -> None:
+        """Test parsing of electronic article numbers (e123-e456)."""
+        first, last = transformer._parse_pages("e123-e456")
+        assert first == "e123"
+        assert last == "e456"
+
+    @pytest.mark.asyncio
+    async def test_unified_page_fields_in_transform(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+        sample_record: dict[str, Any],
+    ) -> None:
+        """Test that unified page fields are present in transformed output."""
+        result = await transformer.transform(mock_context, sample_record, 0)
+
+        assert result is not None
+        # sample_record has journal.pages = "123-130"
+        assert result["pages"] == "123-130"
+        assert result["first_page"] == "123"
+        assert result["last_page"] == "130"
+
+    @pytest.mark.asyncio
+    async def test_unified_page_fields_no_pages(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test unified page fields when no pages in record."""
+        record = {
+            "paperId": "649def34f8be52c8b66281af98ae884c09aef38b",
+            "title": "Test Paper",
+            "year": 2024,
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["pages"] is None
+        assert result["first_page"] is None
+        assert result["last_page"] is None
