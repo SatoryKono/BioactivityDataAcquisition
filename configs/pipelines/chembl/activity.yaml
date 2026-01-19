@@ -18,8 +18,21 @@ gold_table: "chembl_activity"
 source_file: ../../sources/chembl.yaml
 
 # -----------------------------------------------------------------------------
-# Data Quality Rules (entity-specific overrides)
+# Data Quality Configuration
 # -----------------------------------------------------------------------------
+# DQ config is loaded from hierarchical files:
+#   1. configs/dq/_defaults.yaml (global defaults)
+#   2. configs/dq/providers/chembl.yaml (provider-specific)
+#   3. configs/dq/entities/chembl/activity.yaml (entity-specific)
+#
+# Reference to DQ config file (enables hierarchical loading)
+dq_config_file: ../../dq/entities/chembl/activity.yaml
+
+# -----------------------------------------------------------------------------
+# Inline DQ Overrides (optional, applied on top of dq_config_file)
+# -----------------------------------------------------------------------------
+# Use dq_rules for temporary overrides or pipeline-specific adjustments
+# that don't belong in the shared DQ config files.
 dq_rules:
   # Thresholds (inherit from _base.yaml defaults: soft=0.05, hard=0.20)
 

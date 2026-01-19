@@ -1,0 +1,42 @@
+# configs/dq/providers/chembl.yaml
+# ChEMBL-specific DQ rules
+# Inherits from: _defaults.yaml
+
+version: "1.0.0"
+provider: chembl
+
+# =============================================================================
+# Provider-Specific Thresholds
+# =============================================================================
+thresholds:
+  soft_fail: 0.05
+  hard_fail: 0.15      # Stricter: ChEMBL data should be cleaner
+
+# =============================================================================
+# ChEMBL Common Field Validations
+# =============================================================================
+provider_field_validations:
+  # ChEMBL ID format validation (applies to all ChEMBL entities)
+  - field: molecule_chembl_id
+    type: pattern
+    pattern: '^CHEMBL\d+$'
+    nullable: true
+    error_message: "Invalid ChEMBL molecule ID format"
+
+  - field: target_chembl_id
+    type: pattern
+    pattern: '^CHEMBL\d+$'
+    nullable: true
+    error_message: "Invalid ChEMBL target ID format"
+
+  - field: assay_chembl_id
+    type: pattern
+    pattern: '^CHEMBL\d+$'
+    nullable: true
+    error_message: "Invalid ChEMBL assay ID format"
+
+  - field: document_chembl_id
+    type: pattern
+    pattern: '^CHEMBL\d+$'
+    nullable: true
+    error_message: "Invalid ChEMBL document ID format"

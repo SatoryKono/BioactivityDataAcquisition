@@ -126,16 +126,121 @@ class TransformDict(TypedDict, total=False):
 
 
 # =============================================================================
-# DQ Rules Configuration TypedDict
+# DQ Configuration TypedDicts (Extended)
 # =============================================================================
 
 
-class DQRulesDict(TypedDict, total=False):
-    """YAML structure for data quality rules."""
+class DQThresholdsDict(TypedDict, total=False):
+    """YAML structure for DQ thresholds section."""
 
+    soft_fail: float  # 0.0-1.0, default 0.05
+    hard_fail: float  # 0.0-1.0, default 0.20
+
+
+class DQReportDict(TypedDict, total=False):
+    """YAML structure for DQ report configuration."""
+
+    enabled: bool
+    format: Literal["json", "yaml", "csv"]
+    include_sample_failures: bool
+    sample_size: int
+    output_path: str | None
+
+
+class FieldValidationDict(TypedDict, total=False):
+    """YAML structure for field validation rule."""
+
+    field: Required[str]
+    type: Required[Literal["required", "range", "pattern", "enum", "custom"]]
+    nullable: bool
+    min: float
+    max: float
+    pattern: str
+    allowed: list[str]
+    validator: str
+    error_message: str
+
+
+class CrossFieldValidationDict(TypedDict, total=False):
+    """YAML structure for cross-field validation rule."""
+
+    name: Required[str]
+    fields: Required[list[str]]
+    condition: Required[
+        Literal[
+            "all_present",
+            "any_present",
+            "mutually_exclusive",
+            "conditional_required",
+            "custom",
+        ]
+    ]
+    trigger_field: str
+    required_field: str
+    validator: str
+    error_message: str
+
+
+class ConditionalValidationDict(TypedDict, total=False):
+    """YAML structure for conditional validation rule."""
+
+    name: Required[str]
+    condition_field: Required[str]
+    condition_value: Required[str | list[str]]
+    condition_operator: Literal["eq", "ne", "in", "not_in"]
+    then_validations: list[FieldValidationDict]
+
+
+class DQRulesDict(TypedDict, total=False):
+    """YAML structure for data quality rules in pipeline config.
+
+    Supports two modes:
+    1. Inline: direct specification of thresholds/validations
+    2. File reference: dq_config_file points to external config
+
+    When dq_config_file is present, other fields serve as overrides.
+    """
+
+    # Inline thresholds (legacy, for backward compat)
     soft_fail_threshold: float  # 0.0-1.0
     hard_fail_threshold: float  # 0.0-1.0
     strict_validation: bool
+
+    # Extended inline (optional)
+    field_validations: list[FieldValidationDict]
+    cross_field_validations: list[CrossFieldValidationDict]
+    conditional_validations: list[ConditionalValidationDict]
+    invalid_record_policy: Literal["quarantine", "skip", "fail"]
+    report: DQReportDict
+
+
+class DQConfigFileDict(TypedDict, total=False):
+    """YAML structure for standalone DQ config file.
+
+    Used in configs/dq/_defaults.yaml, configs/dq/providers/*.yaml,
+    and configs/dq/entities/{provider}/*.yaml.
+    """
+
+    # Metadata
+    version: str
+    provider: str
+    entity: str
+
+    # Core settings
+    thresholds: DQThresholdsDict
+    strict_validation: bool
+    invalid_record_policy: Literal["quarantine", "skip", "fail"]
+    report: DQReportDict
+
+    # Hierarchical validations
+    common_field_validations: list[FieldValidationDict]
+    provider_field_validations: list[FieldValidationDict]
+    entity_field_validations: list[FieldValidationDict]
+
+    common_cross_field_validations: list[CrossFieldValidationDict]
+    entity_cross_field_validations: list[CrossFieldValidationDict]
+
+    entity_conditional_validations: list[ConditionalValidationDict]
 
 
 # =============================================================================
@@ -252,7 +357,10 @@ class PipelineConfigDict(TypedDict, total=False):
     # Sink
     sink: SinkDict
 
-    # Data Quality
+    # Data Quality - TWO options:
+    # 1. Reference to external file (recommended)
+    dq_config_file: str  # Relative path, e.g., "../../dq/entities/chembl/activity.yaml"
+    # 2. Inline rules (legacy, or for overrides)
     dq_rules: DQRulesDict
 
     # Circuit Breaker
@@ -291,8 +399,14 @@ __all__ = [
     "BronzeSinkDict",
     "CircuitBreakerDict",
     "ClientConfigDict",
+    "ConditionalValidationDict",
+    "CrossFieldValidationDict",
     "CsvExportDict",
+    "DQConfigFileDict",
+    "DQReportDict",
     "DQRulesDict",
+    "DQThresholdsDict",
+    "FieldValidationDict",
     "GoldColumnFilterDict",
     "GoldFiltersDict",
     "GoldRangeDict",
