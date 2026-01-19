@@ -267,7 +267,7 @@ class TestFetchFilteredWithFallback:
                 results.append(record)
 
         assert len(results) == 1
-        assert results[0]["_lookup_method"] == "primary"
+        assert results[0]["_lookup_method"] == "pmid"
 
     @pytest.mark.asyncio
     async def test_tracks_found_pmids_for_fallback(
