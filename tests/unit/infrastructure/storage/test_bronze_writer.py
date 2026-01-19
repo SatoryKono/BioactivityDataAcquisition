@@ -2371,7 +2371,6 @@ class TestBronzeWriterQueryString:
         from unittest.mock import AsyncMock, MagicMock
 
         from bioetl.domain.models.metadata import SourceMetadata
-        from bioetl.domain.ports.metadata_coordinator import BronzeMetadataInput
 
         mock_coordinator = MagicMock()
         mock_metadata = MagicMock()
@@ -2429,8 +2428,6 @@ class TestBronzeWriterQueryString:
     ) -> None:
         """Test query_string is None when source_metadata is not provided."""
         from unittest.mock import AsyncMock, MagicMock
-
-        from bioetl.domain.ports.metadata_coordinator import BronzeMetadataInput
 
         mock_coordinator = MagicMock()
         mock_metadata = MagicMock()
