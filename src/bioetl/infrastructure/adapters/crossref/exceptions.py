@@ -17,10 +17,6 @@ class CrossRefApiError(ExternalServiceError):
 
     Internal exception for CrossRef adapter. On adapter boundary, this
     should be translated to domain ExternalServiceError or its subclasses.
-
-    Note:
-        This is the canonical location for CrossRefApiError.
-        The version in domain.exceptions is deprecated.
     """
 
     error_type = ErrorType.NETWORK_ERROR

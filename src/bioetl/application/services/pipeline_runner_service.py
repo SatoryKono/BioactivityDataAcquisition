@@ -11,8 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
 from bioetl.domain.context import (
@@ -187,8 +186,6 @@ class PipelineRunnerService:
     async def run(
         self,
         pipeline_name: str,
-        config_path: Path | None = None,
-        overrides: dict[str, Any] | None = None,
         dry_run: bool = False,
         run_id: UUID | None = None,
         options: RunOptions | None = None,
@@ -204,8 +201,6 @@ class PipelineRunnerService:
 
         Args:
             pipeline_name: Name of the pipeline to run (e.g., 'chembl_activity').
-            config_path: Optional path to config file (not implemented yet).
-            overrides: Optional config overrides as dict (not implemented yet).
             dry_run: If True, only preview what would be done.
             run_id: Optional run ID. If None, a new UUID is generated.
             options: Optional RunOptions for detailed configuration.
