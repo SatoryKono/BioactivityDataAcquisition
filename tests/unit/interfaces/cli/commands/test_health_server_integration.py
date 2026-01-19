@@ -101,9 +101,7 @@ class TestHealthServerContext:
         mock_server.stop = AsyncMock()
         mock_server_cls.return_value = mock_server
 
-        async with health_server_context(
-            enabled=True, host="127.0.0.1", port=9090
-        ):
+        async with health_server_context(enabled=True, host="127.0.0.1", port=9090):
             # Verify server was created with correct host and port
             mock_server_cls.assert_called_once()
             call_kwargs = mock_server_cls.call_args.kwargs
@@ -117,6 +115,7 @@ class TestEchoHealthServerInfo:
 
     def test_echo_when_enabled(self) -> None:
         """Test that info is echoed when health server is enabled."""
+
         # Use click's echo with standalone mode to capture output
         @click.command()
         def test_cmd() -> None:
@@ -128,6 +127,7 @@ class TestEchoHealthServerInfo:
 
     def test_no_echo_when_disabled(self) -> None:
         """Test that nothing is echoed when health server is disabled."""
+
         @click.command()
         def test_cmd() -> None:
             echo_health_server_info(False, 8080)
@@ -138,6 +138,7 @@ class TestEchoHealthServerInfo:
 
     def test_echo_custom_port(self) -> None:
         """Test that custom port is displayed in output."""
+
         @click.command()
         def test_cmd() -> None:
             echo_health_server_info(True, 9090)
