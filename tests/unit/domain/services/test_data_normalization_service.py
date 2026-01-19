@@ -316,6 +316,8 @@ class TestNormalizePartialDate:
             # Invalid formats - return None
             ("2024/03/15", None),
             ("03-15-2024", None),
+            ("15-03-2024", None),  # DD-MM-YYYY format is invalid
+            ("March 2024", None),  # Text month format is invalid
             ("abc", None),
             ("20241", None),
             ("2024-3", None),  # Invalid: month should be 2 digits
