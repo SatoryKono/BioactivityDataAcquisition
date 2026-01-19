@@ -389,3 +389,146 @@ class TestOpenAlexDoiNormalization:
         assert result_lower is not None
         # After normalization, content hashes should be identical
         assert result_upper["content_hash"] == result_lower["content_hash"]
+
+
+class TestOpenAlexPublicationDateNormalization:
+    """Tests for publication_date normalization in OpenAlex transformer."""
+
+    @pytest.fixture
+    def transformer(self) -> OpenAlexPublicationTransformer:
+        """Create a transformer instance for testing."""
+        return OpenAlexPublicationTransformer()
+
+    @staticmethod
+    def _make_record_with_date(pub_date: str | None) -> dict[str, Any]:
+        """Create an OpenAlex record with a specific publication_date."""
+        return {
+            "id": "https://openalex.org/W2148763428",
+            "title": "Publication Date Normalization Test",
+            "publication_date": pub_date,
+            "_lookup_method": "doi",
+        }
+
+    @pytest.mark.asyncio
+    async def test_full_date_unchanged(
+        self,
+        transformer: OpenAlexPublicationTransformer,
+        pipeline_context: PipelineContext,
+    ) -> None:
+        """Test that full ISO date (YYYY-MM-DD) is returned unchanged."""
+        record = self._make_record_with_date("2024-05-15")
+
+        result = await transformer.transform(pipeline_context, record, 0)
+
+        assert result is not None
+        assert result["publication_date"] == "2024-05-15"
+
+    @pytest.mark.asyncio
+    async def test_partial_date_month_normalized_to_end(
+        self,
+        transformer: OpenAlexPublicationTransformer,
+        pipeline_context: PipelineContext,
+    ) -> None:
+        """Test that YYYY-MM is normalized to YYYY-MM-30 (end of month approximation)."""
+        record = self._make_record_with_date("2024-05")
+
+        result = await transformer.transform(pipeline_context, record, 0)
+
+        assert result is not None
+        assert result["publication_date"] == "2024-05-30"
+
+    @pytest.mark.asyncio
+    async def test_partial_date_year_normalized_to_end(
+        self,
+        transformer: OpenAlexPublicationTransformer,
+        pipeline_context: PipelineContext,
+    ) -> None:
+        """Test that YYYY is normalized to YYYY-12-31 (end of year)."""
+        record = self._make_record_with_date("2024")
+
+        result = await transformer.transform(pipeline_context, record, 0)
+
+        assert result is not None
+        assert result["publication_date"] == "2024-12-31"
+
+    @pytest.mark.asyncio
+    async def test_none_date_remains_none(
+        self,
+        transformer: OpenAlexPublicationTransformer,
+        pipeline_context: PipelineContext,
+    ) -> None:
+        """Test that None publication_date remains None."""
+        record = self._make_record_with_date(None)
+
+        result = await transformer.transform(pipeline_context, record, 0)
+
+        assert result is not None
+        assert result["publication_date"] is None
+
+    @pytest.mark.asyncio
+    async def test_empty_string_becomes_none(
+        self,
+        transformer: OpenAlexPublicationTransformer,
+        pipeline_context: PipelineContext,
+    ) -> None:
+        """Test that empty string publication_date becomes None."""
+        record = self._make_record_with_date("")
+
+        result = await transformer.transform(pipeline_context, record, 0)
+
+        assert result is not None
+        assert result["publication_date"] is None
+
+    @pytest.mark.asyncio
+    async def test_whitespace_date_becomes_none(
+        self,
+        transformer: OpenAlexPublicationTransformer,
+        pipeline_context: PipelineContext,
+    ) -> None:
+        """Test that whitespace-only publication_date becomes None."""
+        record = self._make_record_with_date("   ")
+
+        result = await transformer.transform(pipeline_context, record, 0)
+
+        assert result is not None
+        assert result["publication_date"] is None
+
+    @pytest.mark.asyncio
+    async def test_invalid_format_becomes_none(
+        self,
+        transformer: OpenAlexPublicationTransformer,
+        pipeline_context: PipelineContext,
+    ) -> None:
+        """Test that invalid date format becomes None."""
+        record = self._make_record_with_date("15-05-2024")  # DD-MM-YYYY format
+
+        result = await transformer.transform(pipeline_context, record, 0)
+
+        assert result is not None
+        assert result["publication_date"] is None
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "raw_date,expected",
+        [
+            ("2024-01-15", "2024-01-15"),  # Full date
+            ("2024-01", "2024-01-30"),  # Month precision
+            ("2024", "2024-12-31"),  # Year precision
+            ("1999-12", "1999-12-30"),  # Old date, month precision
+            ("1999", "1999-12-31"),  # Old date, year precision
+        ],
+    )
+    async def test_various_date_formats(
+        self,
+        transformer: OpenAlexPublicationTransformer,
+        pipeline_context: PipelineContext,
+        raw_date: str,
+        expected: str,
+    ) -> None:
+        """Test various date format normalizations."""
+        record = self._make_record_with_date(raw_date)
+
+        result = await transformer.transform(pipeline_context, record, 0)
+
+        assert result is not None
+        assert result["publication_date"] == expected
