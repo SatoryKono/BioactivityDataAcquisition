@@ -56,8 +56,8 @@ class PublicationEntityBase(BaseEntity):
         oa_status: OA status (gold, green, hybrid, bronze, closed).
         _lookup_method: How record was resolved (direct, doi, pmid, title_fallback, unknown).
         _original_id: Original identifier from input (for fallback records).
-        _dq_warn: Record has data quality warnings.
-        _dq_error: Record has data quality errors.
+        _dq_warn: Record has data quality warnings (inherited from BaseEntity).
+        _dq_error: Record has data quality errors (inherited from BaseEntity).
         source: Data source identifier (e.g., "crossref", "openalex").
 
     Note:
@@ -105,9 +105,7 @@ class PublicationEntityBase(BaseEntity):
     _lookup_method: str = "unknown"  # direct | doi | pmid | title_fallback | unknown
     _original_id: str | None = None
 
-    # DQ flags (Data Quality flags)
-    _dq_warn: bool = False  # Record has data quality warnings
-    _dq_error: bool = False  # Record has data quality errors
+    # Note: _dq_warn and _dq_error are inherited from BaseEntity
 
     # Source tracking (subclasses should override default)
     source: str = ""

@@ -57,9 +57,7 @@ class ChemblPublication(BaseEntity):
     _lookup_method: str = "direct"  # ChEMBL uses direct extraction
     _original_id: str | None = None
 
-    # DQ flags (Data Quality flags)
-    _dq_warn: bool = False
-    _dq_error: bool = False
+    # Note: _dq_warn and _dq_error are inherited from BaseEntity
 
     def __post_init__(self) -> None:
         super().__post_init__()
