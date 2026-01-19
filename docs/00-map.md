@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.10 | Last updated: 2026-01-15*
+*Synced with RULES.md v5.10 | Last updated: 2026-01-19*
 
 > **Documentation Audit Completed:** 2026-01-14
 > - All audit files consolidated in `archived/audits/`
@@ -68,7 +68,7 @@ docs/
 │   ├── data-layers.md           # Bronze/Silver/Gold layer details
 │   ├── observability-layers.md  # Observability architecture
 │   ├── diagrams.md              # Mermaid diagrams collection
-│   ├── decisions/               # ADR-001..026 (26 records)
+│   ├── decisions/               # ADR-001..027 (27 records)
 │   └── diagrams/                # 34 Mermaid diagram files + render_diagrams.py
 │
 ├── 03-guides/                   # How-to guides (10 guides)
@@ -119,7 +119,12 @@ docs/
 │
 ├── refactoring/                 # Active refactoring documentation
 │   ├── README.md                # Refactoring overview
-│   └── duplication-analysis-2026-01.md # Recent analysis
+│   ├── duplication-analysis-2026-01.md
+│   └── refactoring-plan-duplicate-logic.md
+│
+├── analysis/                    # Analysis reports
+│   ├── bioetl-interfaces-analysis-2026-01-14.md
+│   └── pipeline-interface-alignment-report.md
 │
 ├── contracts/gold/              # Gold layer JSON schemas
 │
@@ -170,6 +175,7 @@ docs/
 | [ADR-024: Entity Naming Unification](02-architecture/decisions/ADR-024-entity-naming-unification.md) | Entity naming unification     | -        |
 | [ADR-025: Pipeline Config Unification](02-architecture/decisions/ADR-025-pipeline-config-unification.md) | Pipeline config unification   | -        |
 | [ADR-026: Composite Pipeline Pattern](02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) | Composite pipeline pattern    | -        |
+| [ADR-027: DQ Rules Externalization](02-architecture/decisions/ADR-027-dq-rules-externalization.md) | Hierarchical DQ configuration | §3.1.2   |
 
 ### Data Management
 
@@ -350,7 +356,7 @@ graph TD
 | 00-map.md                | 2026-01-14   | v6.6 Fixed broken links      |
 | rules-summary.md         | 2026-01-06   | v5.10 Synced                 |
 | 03-guides/               | 2025-12-31   | Consolidated (11 guides)     |
-| ADR-001..025             | 2026-01-14   | All 25 ADRs documented       |
+| ADR-001..027             | 2026-01-19   | All 27 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
 | archived/audits/         | 2026-01-14   | Historical audit files       |
@@ -358,4 +364,4 @@ graph TD
 
 ---
 
-*Last updated: 2026-01-14. Documentation audit completed.*
+*Last updated: 2026-01-19. Documentation audit completed.*
