@@ -264,25 +264,57 @@ class DataNormalizationPort(Protocol):
         """
         ...
 
+    def normalize_partial_date(self, date_str: str | None) -> str | None:
+        """Normalize partial date to full YYYY-MM-DD format (end of period).
+
+        Partial dates are normalized to the END of the period:
+        - YYYY-MM → YYYY-MM-30 (end of month, day 30 for simplicity)
+        - YYYY → YYYY-12-31 (end of year)
+        - YYYY-MM-DD → unchanged
+        - None/empty → None
+
+        Args:
+            date_str: Date string in partial or full ISO format.
+
+        Returns:
+            Full ISO date string (YYYY-MM-DD), or None.
+
+        Example:
+            >>> normalize_partial_date("2024-03")
+            '2024-03-30'
+            >>> normalize_partial_date("2024")
+            '2024-12-31'
+            >>> normalize_partial_date("2024-03-15")
+            '2024-03-15'
+            >>> normalize_partial_date(None)
+            None
+        """
+        ...
+
     def format_date_parts(
         self,
         date_parts: Sequence[Sequence[int]] | None,
     ) -> str | None:
-        """Format CrossRef date-parts [[year, month?, day?]] to ISO string.
+        """Format CrossRef date-parts to full YYYY-MM-DD (end of period).
+
+        Partial dates are normalized to the END of the period:
+        - [year, month, day] → YYYY-MM-DD (full date)
+        - [year, month] → YYYY-MM-30 (end of month)
+        - [year] → YYYY-12-31 (end of year)
 
         Args:
-            date_parts: Date parts in CrossRef format.
+            date_parts: Date parts in CrossRef format [[year, month?, day?]].
 
         Returns:
-            ISO date string (YYYY-MM-DD, YYYY-MM, or YYYY), or None.
+            Full ISO date string (YYYY-MM-DD), or None.
 
         Example:
             >>> format_date_parts([[2024, 3, 15]])
             '2024-03-15'
             >>> format_date_parts([[2024, 3]])
-            '2024-03'
+            '2024-03-30'
             >>> format_date_parts([[2024]])
-            '2024'
+            '2024-12-31'
             >>> format_date_parts(None)
             None
         """

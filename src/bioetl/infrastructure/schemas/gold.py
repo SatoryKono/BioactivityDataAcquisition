@@ -9,6 +9,9 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
+# Regex pattern for date validation (YYYY-MM-DD format)
+DATE_REGEX = r"^\d{4}-\d{2}-\d{2}$"
+
 
 class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     """Schema for ChEMBL Activity in Gold layer."""
@@ -225,15 +228,17 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     last_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     authors: Series[object] = pa.Field(nullable=True)  # list[str]
     pub_date: Series[str] = pa.Field(nullable=True)
-    publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
+    publication_date: Series[str] = pa.Field(
+        nullable=True, str_matches=DATE_REGEX
+    )  # Unified: YYYY-MM-DD
     year: Series[float] = pa.Field(nullable=True, coerce=True)
     publication_year: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # Legacy alias
-    accepted_date: Series[str] = pa.Field(nullable=True)
-    received_date: Series[str] = pa.Field(nullable=True)
-    revised_date: Series[str] = pa.Field(nullable=True)
-    epub_date: Series[str] = pa.Field(nullable=True)
+    accepted_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
+    received_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
+    revised_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
+    epub_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
     publication_types: Series[object] = pa.Field(nullable=True)  # list[str]
     keywords: Series[object] = pa.Field(nullable=True)  # list[str]
     mesh_terms: Series[object] = pa.Field(nullable=True)  # list[str]
@@ -413,7 +418,9 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     journal: Series[str] = pa.Field(nullable=True)
     journal_full_title: Series[str] = pa.Field(nullable=True)
     year: Series[float] = pa.Field(nullable=True, coerce=True)
-    publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
+    publication_date: Series[str] = pa.Field(
+        nullable=True, str_matches=DATE_REGEX
+    )  # Unified: YYYY-MM-DD
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)
     first_page: Series[str] = pa.Field(nullable=True)
@@ -688,7 +695,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     abstract: Series[str] = pa.Field(nullable=True)
     tldr: Series[str] = pa.Field(nullable=True)
     year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    publication_date: Series[str] = pa.Field(nullable=True)
+    publication_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
 
     # Journal/Venue
     journal: Series[str] = pa.Field(nullable=True)
@@ -767,9 +774,15 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
 
     # Date fields
     year: Series[float] = pa.Field(nullable=True, ge=1900, le=2100, coerce=True)
-    publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
-    published_print: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
-    published_online: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
+    publication_date: Series[str] = pa.Field(
+        nullable=True, str_matches=DATE_REGEX
+    )  # Unified: YYYY-MM-DD
+    published_print: Series[str] = pa.Field(
+        nullable=True, str_matches=DATE_REGEX
+    )  # Legacy: provider-specific
+    published_online: Series[str] = pa.Field(
+        nullable=True, str_matches=DATE_REGEX
+    )  # Legacy: provider-specific
 
     # Metadata
     doc_type: Series[str] = pa.Field(nullable=True)
@@ -834,7 +847,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
 
     # Date fields
     year: Series[float] = pa.Field(nullable=True, ge=1500, le=2100, coerce=True)
-    publication_date: Series[str] = pa.Field(nullable=True)
+    publication_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
 
     # Metadata
     doc_type: Series[str] = pa.Field(nullable=False)

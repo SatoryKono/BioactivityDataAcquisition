@@ -28,14 +28,14 @@ class TestFormatDate:
         assert result == "2023-01-01"
 
     def test_year_month_only(self):
-        """Test formatting with year and month only."""
+        """Test formatting with year and month only (end-of-period: day 30)."""
         result = DateExtractor.format_date("2023", "06", None)
-        assert result == "2023-06"
+        assert result == "2023-06-30"
 
     def test_year_only(self):
-        """Test formatting with year only."""
+        """Test formatting with year only (end-of-period: Dec 31)."""
         result = DateExtractor.format_date("2023", None, None)
-        assert result == "2023"
+        assert result == "2023-12-31"
 
     def test_no_year_returns_none(self):
         """Test that missing year returns None."""
@@ -100,19 +100,19 @@ class TestExtractDate:
         assert year_int == 2023
 
     def test_year_month_only_element(self):
-        """Test extracting year-month date."""
+        """Test extracting year-month date (end-of-period: day 30)."""
         xml = "<PubDate><Year>2023</Year><Month>06</Month></PubDate>"
         node = ET.fromstring(xml)
         date_str, year_int = DateExtractor.extract_date(node)
-        assert date_str == "2023-06"
+        assert date_str == "2023-06-30"
         assert year_int == 2023
 
     def test_year_only_element(self):
-        """Test extracting year-only date."""
+        """Test extracting year-only date (end-of-period: Dec 31)."""
         xml = "<PubDate><Year>2023</Year></PubDate>"
         node = ET.fromstring(xml)
         date_str, year_int = DateExtractor.extract_date(node)
-        assert date_str == "2023"
+        assert date_str == "2023-12-31"
         assert year_int == 2023
 
     def test_none_node_returns_none_tuple(self):
