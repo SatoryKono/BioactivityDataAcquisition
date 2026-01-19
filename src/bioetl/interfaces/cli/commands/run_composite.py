@@ -18,6 +18,11 @@ from bioetl.composition.bootstrap_composite import (
     bootstrap_composite_pipeline,
     load_composite_config,
 )
+from bioetl.interfaces.cli.commands.health_server_integration import (
+    DEFAULT_HEALTH_SERVER_PORT,
+    echo_health_server_info,
+    health_server_context,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
@@ -31,11 +36,11 @@ def _validate_composite_name(
     return value
 
 
-async def _run_composite_async(
+async def _run_composite_inner(
     composite_name: str,
     runtime: CompositeRuntimeConfig,
 ) -> tuple[bool, str | None]:
-    """Run composite pipeline asynchronously.
+    """Run composite pipeline execution logic.
 
     Args:
         composite_name: Name of composite pipeline (e.g., 'publication').
@@ -64,6 +69,30 @@ async def _run_composite_async(
         return False, "Composite pipeline failed"
     except Exception as e:
         return False, str(e)
+
+
+async def _run_composite_async(
+    composite_name: str,
+    runtime: CompositeRuntimeConfig,
+    health_server_enabled: bool = True,
+    health_port: int = DEFAULT_HEALTH_SERVER_PORT,
+) -> tuple[bool, str | None]:
+    """Run composite pipeline asynchronously with optional health server.
+
+    Args:
+        composite_name: Name of composite pipeline (e.g., 'publication').
+        runtime: Runtime configuration.
+        health_server_enabled: Whether to enable health server.
+        health_port: Port for health server.
+
+    Returns:
+        Tuple of (success, error_message).
+    """
+    async with health_server_context(
+        enabled=health_server_enabled,
+        port=health_port,
+    ):
+        return await _run_composite_inner(composite_name, runtime)
 
 
 @click.command(name="run-composite")
@@ -108,6 +137,20 @@ async def _run_composite_async(
     is_flag=True,
     help="Enable DEBUG level logging",
 )
+@click.option(
+    "--health-server/--no-health-server",
+    "health_server",
+    default=True,
+    help="Enable/disable HTTP health server during execution.",
+    show_default=True,
+)
+@click.option(
+    "--health-port",
+    type=int,
+    default=DEFAULT_HEALTH_SERVER_PORT,
+    help="Port for the HTTP health server.",
+    show_default=True,
+)
 def run_composite(
     composite: str,
     resume: bool,
@@ -117,6 +160,8 @@ def run_composite(
     required_only: bool,
     force_enricher: str | None,
     debug: bool,
+    health_server: bool,
+    health_port: int,
 ) -> None:
     """Run a composite pipeline that combines multiple data sources.
 
@@ -149,8 +194,18 @@ def run_composite(
     if resume:
         echo_info("Resume mode: continuing from last checkpoint")
 
+    # Display health server info
+    echo_health_server_info(health_server, health_port)
+
     try:
-        success, error_message = asyncio.run(_run_composite_async(composite, runtime))
+        success, error_message = asyncio.run(
+            _run_composite_async(
+                composite,
+                runtime,
+                health_server_enabled=health_server,
+                health_port=health_port,
+            )
+        )
     except KeyboardInterrupt:
         echo_warning("Composite pipeline interrupted by user (Ctrl+C)")
         sys.exit(ExitCode.SIGINT)
