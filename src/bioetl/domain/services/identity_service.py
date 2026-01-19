@@ -30,6 +30,7 @@ META_FIELDS: frozenset[str] = frozenset(
         "_dq_warn",
         "_dq_error",
         "_source_batch_id",
+        "_index",
     }
 )
 
