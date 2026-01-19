@@ -64,9 +64,7 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     standard_relation: Series[str] = pa.Field(nullable=True)
     standard_upper_value: Series[float] = pa.Field(nullable=True, coerce=True)
     standard_text_value: Series[str] = pa.Field(nullable=True)
-    standard_flag: Series[float] = pa.Field(
-        nullable=True, coerce=True
-    )  # int64 in Silver
+    standard_flag: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
 
     # Derived metrics
     pchembl_value: Series[float] = pa.Field(nullable=True, coerce=True)
@@ -83,17 +81,13 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
 
     # Document/Publication data
     document_journal: Series[str] = pa.Field(nullable=True)
-    document_year: Series[float] = pa.Field(
-        nullable=True, coerce=True
-    )  # int64 in Silver
+    document_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
 
     # Quality annotations
     activity_comment: Series[str] = pa.Field(nullable=True)
     data_validity_comment: Series[str] = pa.Field(nullable=True)
     data_validity_description: Series[str] = pa.Field(nullable=True)
-    potential_duplicate: Series[float] = pa.Field(
-        nullable=True, coerce=True
-    )  # int64 in Silver
+    potential_duplicate: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
 
     # Action type
     action_type_action_type: Series[str] = pa.Field(nullable=True)
