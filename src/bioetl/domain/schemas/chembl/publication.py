@@ -71,6 +71,30 @@ class ChemblPublicationSchema(ETLRecordSchema):
     #     nullable=True, description="Record index."
     # )
 
+    # === Lookup Metadata ===
+    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+    # _original_id: Original identifier used for lookup (document_chembl_id for direct)
+    lookup_method: Series[str] = pa.Field(
+        alias="_lookup_method",
+        nullable=False,
+        isin=["direct", "doi", "pmid", "title_fallback", "unknown"],
+        description="How record was resolved: direct for ChEMBL ID lookup",
+    )
+
+    original_id: Series[str] = pa.Field(
+        alias="_original_id",
+        nullable=True,
+        description="Original identifier used for lookup (document_chembl_id)",
+    )
+
+    # === DQ Fields ===
+    _dq_warn: Series[bool] = pa.Field(
+        nullable=True, default=False, description="DQ warning flag."
+    )
+    _dq_error: Series[bool] = pa.Field(
+        nullable=True, default=False, description="DQ error flag."
+    )
+
     class Config:
         """Pandera configuration."""
 
