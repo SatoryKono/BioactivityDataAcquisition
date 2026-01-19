@@ -31,9 +31,10 @@ INFRASTRUCTURE_DIR = Path("src/bioetl/infrastructure")
 ALLOWED_COMPOSITION_FILES: set[str] = set()
 
 ALLOWED_INFRASTRUCTURE_FILES: set[str] = {
-    # config.py contains Settings class which is the centralized configuration.
-    # It uses pydantic-settings internally which accesses os.environ.
-    "config.py",
+    # _base.py (infrastructure/config/_base.py) contains Settings class which is
+    # the centralized configuration. It uses pydantic-settings internally which
+    # accesses os.environ. Previously was config.py, moved to config package.
+    "_base.py",
     # encoders.py reads BIOETL_JSON_ENCODER to select JSON encoder at import time.
     # This is infrastructure-level configuration for encoder selection.
     "encoders.py",
