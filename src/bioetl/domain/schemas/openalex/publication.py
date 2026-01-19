@@ -138,6 +138,10 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
         description="Original DOI from input CSV (for fallback records)",
     )
 
+    # === DQ Fields ===
+    _dq_warn: Series[bool] = pa.Field(nullable=True, default=False, description="DQ warning flag.")
+    _dq_error: Series[bool] = pa.Field(nullable=True, default=False, description="DQ error flag.")
+
     class Config:
         """Pandera configuration."""
 
