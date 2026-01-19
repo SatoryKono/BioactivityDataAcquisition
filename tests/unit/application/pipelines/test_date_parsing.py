@@ -98,7 +98,12 @@ class TestPubMedDateBuilding:
 
 @pytest.mark.unit
 class TestCrossRefDateBuilding:
-    """Tests for CrossRef publication date building."""
+    """Tests for CrossRef publication date building.
+
+    Note: format_date_parts() now normalizes partial dates to YYYY-MM-DD
+    with end-of-period, so _compute_publication_date() receives only
+    full dates or None. It simply returns the first non-None value.
+    """
 
     @pytest.fixture
     def transformer(self) -> CrossRefPublicationTransformer:
@@ -115,12 +120,11 @@ class TestCrossRefDateBuilding:
             (None, "2024-03-15", "2024-03-15"),
             # Full ISO date returned as-is
             ("2024-06-15", None, "2024-06-15"),
-            # Partial date YYYY-MM normalized to YYYY-MM-01
-            ("2024-06", None, "2024-06-01"),
-            (None, "2024-03", "2024-03-01"),
-            # Partial date YYYY normalized to YYYY-01-01
-            ("2024", None, "2024-01-01"),
-            (None, "2023", "2023-01-01"),
+            # End-of-period normalized dates (from format_date_parts)
+            ("2024-06-30", None, "2024-06-30"),  # Month-only becomes last day
+            (None, "2024-03-31", "2024-03-31"),
+            ("2024-12-31", None, "2024-12-31"),  # Year-only becomes Dec 31
+            (None, "2023-12-31", "2023-12-31"),
             # Both None returns None
             (None, None, None),
         ],
@@ -151,28 +155,6 @@ class TestCrossRefDateBuilding:
 
         # Print is None: use online
         assert transformer._compute_publication_date(None, "2024-02-15") == "2024-02-15"
-
-    def test_crossref_partial_year_only(
-        self,
-        transformer: CrossRefPublicationTransformer,
-    ) -> None:
-        """Year-only dates should be normalized to YYYY-01-01."""
-        result = transformer._compute_publication_date("2024", None)
-        assert result == "2024-01-01"
-
-        result = transformer._compute_publication_date(None, "2023")
-        assert result == "2023-01-01"
-
-    def test_crossref_partial_year_month(
-        self,
-        transformer: CrossRefPublicationTransformer,
-    ) -> None:
-        """Year-month dates should be normalized to YYYY-MM-01."""
-        result = transformer._compute_publication_date("2024-06", None)
-        assert result == "2024-06-01"
-
-        result = transformer._compute_publication_date(None, "2024-12")
-        assert result == "2024-12-01"
 
 
 @pytest.mark.unit
