@@ -206,9 +206,7 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # Primary identifier (OpenAlex Work ID) - REQUIRED
     openalex_id: str
 
-    # External identifiers (in addition to inherited doi, pmid)
-    # pmc_id: PubMed Central ID (format: "PMC1234567")
-    pmc_id: str | None = None
+    # External identifiers (in addition to inherited doi, pmid, pmc_id)
     mag_id: str | None = None  # Microsoft Academic Graph ID
 
     # OpenAlex-specific: Concepts (top-level only)

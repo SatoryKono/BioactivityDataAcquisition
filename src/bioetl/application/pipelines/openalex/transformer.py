@@ -195,9 +195,15 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "mesh": mesh_terms,
             "keywords": keywords,
             "language": rec.get("language"),
+            # Pages (OpenAlex doesn't provide page info in standard fields)
+            "first_page": None,
+            "last_page": None,
             "_lookup_method": lookup_method,
             "_original_id": original_id,
             "source": "openalex",
+            # DQ flags (default: no warnings or errors)
+            "_dq_warn": False,
+            "_dq_error": False,
         }
 
     def _get_primary_id_field(self) -> str:

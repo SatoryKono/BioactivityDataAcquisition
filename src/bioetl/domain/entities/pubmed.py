@@ -172,16 +172,14 @@ class PubMedPublicationEntity(PublicationEntityBase):
     # Override: PMID is REQUIRED for PubMed (base has Optional)
     pmid: str
 
-    # PubMed-specific identifiers
-    pmc_id: str | None = None  # PubMed Central ID
+    # PubMed-specific identifiers (pmc_id is now inherited from PublicationEntityBase)
 
     # PubMed-specific journal information
     journal_abbrev: str | None = None
     volume: str | None = None
     issue: str | None = None
     pages: str | None = None  # Legacy: medline_pgn format ("123-456")
-    first_page: str | None = None  # Unified: parsed from pages
-    last_page: str | None = None  # Unified: parsed from pages
+    # first_page and last_page inherited from PublicationEntityBase
 
     # PubMed-specific dates (stored as ISO strings YYYY-MM-DD or partial)
     pub_date: str | None = None  # Publication date
