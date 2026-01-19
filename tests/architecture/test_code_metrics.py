@@ -68,7 +68,7 @@ class TestFileSizeLimits:
         "dq_metrics.py": 420,  # 411 LOC - Batch DQ metrics with helpers for CC reduction + _make_hashable for list/dict values
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
-        "batch_executor.py": 650,  # 610 LOC - unified executor for batch processing
+        "batch_executor.py": 750,  # 736 LOC - unified executor for batch processing + DQ context
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
         "gold_analyzer.py": 820,  # 800 LOC - Gold layer analysis with DQ rules
         "silver_analyzer.py": 590,  # 570 LOC - Silver layer analysis with validation
@@ -79,7 +79,7 @@ class TestFileSizeLimits:
         "registration.py": 720,  # 705 LOC - provider registration with data source creators (OpenAlex + SemanticScholar + UniProt IDMapping)
         "storage_adapter.py": 640,  # 633 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
         # Consolidated factory files (v5.2)
-        "pipeline_factory.py": 560,  # 557 LOC - merged generic_factory + runner_assembly + entity_type helper
+        "pipeline_factory.py": 650,  # 643 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
         "services_factory.py": 630,  # 623 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
         # Infrastructure layer exemptions
@@ -222,6 +222,8 @@ class TestFunctionComplexity:
         # Composite pipeline domain models (ADR-026)
         "DQOverrideConfig": 10,  # CC=9 - DQ override validation with threshold checks
         "from_dict": 8,  # CC=6 - Dictionary parsing with type conversions
+        # BatchExecutor DQ context extraction
+        "get_dq_context": 13,  # CC=12 - DQ context gathering with nullable field handling
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -455,7 +457,7 @@ class TestClassSize:
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
         "BronzeWriter": 705,  # 702 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata
-        "BatchExecutor": 600,  # 581 lines - unified executor for batch processing
+        "BatchExecutor": 700,  # 675 lines - unified executor for batch processing + DQ context
         "BatchWriter": 375,  # 371 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage
         # Application core classes
         "FilteredDataSource": 330,  # 320 lines - decorator with fallback mapping support
