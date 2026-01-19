@@ -7,7 +7,7 @@ See ADR-026 for architectural decisions.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 @dataclass(frozen=True, slots=True)
@@ -114,6 +114,11 @@ def _parse_enrichment_status(
     return result
 
 
+def _ensure_utc(dt: datetime) -> datetime:
+    """Ensure datetime is UTC-aware."""
+    return dt.replace(tzinfo=UTC) if dt.tzinfo is None else dt
+
+
 def _parse_timestamps(raw: object) -> dict[str, datetime]:
     """Parse timestamps from raw dict."""
     result: dict[str, datetime] = {}
@@ -121,18 +126,18 @@ def _parse_timestamps(raw: object) -> dict[str, datetime]:
         return result
     for provider, ts in raw.items():
         if isinstance(ts, str):
-            result[provider] = datetime.fromisoformat(ts)
+            result[provider] = _ensure_utc(datetime.fromisoformat(ts))
         elif isinstance(ts, datetime):
-            result[provider] = ts
+            result[provider] = _ensure_utc(ts)
     return result
 
 
 def _parse_datetime(raw: object) -> datetime | None:
     """Parse optional datetime from raw value."""
     if isinstance(raw, str):
-        return datetime.fromisoformat(raw)
+        return _ensure_utc(datetime.fromisoformat(raw))
     if isinstance(raw, datetime):
-        return raw
+        return _ensure_utc(raw)
     return None
 
 
