@@ -420,6 +420,145 @@ class TestSemanticScholarDoiNormalization:
         assert result_upper["content_hash"] == result_lower["content_hash"]
 
 
+class TestSemanticScholarDateNormalization:
+    """Tests for publication_date normalization in Semantic Scholar transformer.
+
+    Semantic Scholar API may return partial dates (YYYY or YYYY-MM).
+    The transformer normalizes them to full ISO dates using end-of-period.
+    """
+
+    @pytest.fixture
+    def transformer(self) -> SemanticScholarPublicationTransformer:
+        """Create a transformer instance."""
+        return SemanticScholarPublicationTransformer()
+
+    @staticmethod
+    def _make_record_with_date(date_str: str | None) -> dict[str, Any]:
+        """Create a Semantic Scholar record with a specific publication date."""
+        record: dict[str, Any] = {
+            "paperId": "649def34f8be52c8b66281af98ae884c09aef38b",
+            "title": "Date Normalization Test",
+            "_lookup_method": "doi",
+        }
+        if date_str is not None:
+            record["publicationDate"] = date_str
+        return record
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "raw_date,expected",
+        [
+            # Full ISO date - unchanged
+            ("2024-05-15", "2024-05-15"),
+            ("2020-01-01", "2020-01-01"),
+            ("1999-12-31", "1999-12-31"),
+            # Year-month only -> day 30
+            ("2024-05", "2024-05-30"),
+            ("2020-01", "2020-01-30"),
+            ("1999-12", "1999-12-30"),
+            # Year only -> December 31
+            ("2024", "2024-12-31"),
+            ("2020", "2020-12-31"),
+            ("1999", "1999-12-31"),
+        ],
+    )
+    async def test_publication_date_normalization(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+        raw_date: str,
+        expected: str,
+    ) -> None:
+        """Test that partial dates are normalized to full ISO dates."""
+        record = self._make_record_with_date(raw_date)
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["publication_date"] == expected
+
+    @pytest.mark.asyncio
+    async def test_publication_date_none_handling(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that None publication_date remains None."""
+        record = self._make_record_with_date(None)
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["publication_date"] is None
+
+    @pytest.mark.asyncio
+    async def test_publication_date_empty_string(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that empty string publication_date becomes None."""
+        record = self._make_record_with_date("")
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["publication_date"] is None
+
+    @pytest.mark.asyncio
+    async def test_publication_date_whitespace_only(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that whitespace-only publication_date becomes None."""
+        record = self._make_record_with_date("   ")
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["publication_date"] is None
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "invalid_date",
+        [
+            "invalid",
+            "2024/05/15",  # Wrong separator
+            "15-05-2024",  # Wrong order
+            "2024-5-15",   # Missing zero-padding
+            "20240515",    # No separators
+        ],
+    )
+    async def test_publication_date_invalid_format(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+        invalid_date: str,
+    ) -> None:
+        """Test that invalid date formats become None."""
+        record = self._make_record_with_date(invalid_date)
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["publication_date"] is None
+
+    @pytest.mark.asyncio
+    async def test_publication_date_with_whitespace(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that dates with surrounding whitespace are stripped and normalized."""
+        record = self._make_record_with_date("  2024-05  ")
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["publication_date"] == "2024-05-30"
+
+
 class TestSemanticScholarUnifiedPageFields:
     """Tests for unified page field parsing (first_page, last_page).
 

@@ -185,7 +185,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "last_page": last_page,  # Unified field
             "venue": rec.get("venue"),
             "year": year,
-            "publication_date": rec.get("publicationDate"),
+            "publication_date": self._normalize_partial_date(rec.get("publicationDate")),
             "citation_count": rec.get("citationCount"),
             "reference_count": rec.get("referenceCount"),
             "is_oa": oa_info.get("is_oa"),
@@ -219,3 +219,39 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
 
         """
         return SemanticScholarPublicationEntity
+
+    def _normalize_partial_date(self, date_str: str | None) -> str | None:
+        """Normalize partial date to YYYY-MM-DD format.
+
+        Semantic Scholar API may return partial dates (YYYY or YYYY-MM).
+        This method normalizes them to full ISO dates using end-of-period:
+        - YYYY -> YYYY-12-31 (end of year)
+        - YYYY-MM -> YYYY-MM-30 (end of month, simplified)
+        - YYYY-MM-DD -> unchanged
+
+        Args:
+            date_str: Raw date string from API.
+
+        Returns:
+            Normalized YYYY-MM-DD date string or None if invalid/empty.
+
+        """
+        if not date_str:
+            return None
+
+        date_str = str(date_str).strip()
+
+        # Full ISO date (YYYY-MM-DD)
+        if len(date_str) == 10 and date_str[4] == "-" and date_str[7] == "-":
+            return date_str
+
+        # Year-month only (YYYY-MM) -> use day 30 as end-of-month
+        if len(date_str) == 7 and date_str[4] == "-":
+            return f"{date_str}-30"
+
+        # Year only (YYYY) -> use December 31 as end-of-year
+        if len(date_str) == 4 and date_str.isdigit():
+            return f"{date_str}-12-31"
+
+        # Invalid format - return None
+        return None
