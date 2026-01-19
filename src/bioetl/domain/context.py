@@ -27,16 +27,18 @@ def _now_utc() -> datetime:
 
 @dataclass(frozen=True, slots=True)
 class InputFilterContext:
-    """Input filter configuration for CSV-based ID filtering.
+    """Input filter configuration for CSV-based or direct ID filtering.
 
-    All fields are required when filtering is enabled.
-    Create via InputFilterContext.from_cli_args() or InputFilterContext.disabled().
+    All fields are required when filtering is enabled via CSV.
+    For direct IDs, only filter_ids and filter_field are required.
+    Create via InputFilterContext.from_csv(), from_ids(), or disabled().
     """
 
     enabled: bool
     source_path: str
     column_name: str
     filter_field: str
+    filter_ids: tuple[str, ...] | None = None
 
     @classmethod
     def disabled(cls) -> InputFilterContext:
@@ -46,6 +48,7 @@ class InputFilterContext:
             source_path="",
             column_name="",
             filter_field="",
+            filter_ids=None,
         )
 
     @classmethod
@@ -58,17 +61,43 @@ class InputFilterContext:
             source_path=source_path,
             column_name=column_name,
             filter_field=filter_field,
+            filter_ids=None,
+        )
+
+    @classmethod
+    def from_ids(
+        cls, filter_ids: tuple[str, ...], filter_field: str
+    ) -> InputFilterContext:
+        """Create an enabled filter context from direct IDs.
+
+        Used for composite mode where IDs are passed directly without CSV file.
+        """
+        return cls(
+            enabled=True,
+            source_path="",
+            column_name="",
+            filter_field=filter_field,
+            filter_ids=filter_ids,
         )
 
     def __post_init__(self) -> None:
         """Validate filter configuration."""
-        if self.enabled:
-            if not self.source_path:
-                raise ValueError("source_path is required when filter is enabled")
-            if not self.column_name:
-                raise ValueError("column_name is required when filter is enabled")
+        if not self.enabled:
+            return
+
+        # Direct IDs mode: only need filter_field
+        if self.filter_ids is not None:
             if not self.filter_field:
-                raise ValueError("filter_field is required when filter is enabled")
+                raise ValueError("filter_field is required when filter_ids is set")
+            return
+
+        # CSV mode: need all fields
+        if not self.source_path:
+            raise ValueError("source_path is required when filter is enabled")
+        if not self.column_name:
+            raise ValueError("column_name is required when filter is enabled")
+        if not self.filter_field:
+            raise ValueError("filter_field is required when filter is enabled")
 
 
 @dataclass(frozen=True, slots=True)
