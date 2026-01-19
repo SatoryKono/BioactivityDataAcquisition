@@ -23,7 +23,7 @@ BioETL demonstrates **exceptional architectural maturity** and adherence to RULE
 |-------|-------|---------------|------------|
 | **Domain** | 9.5/10 | Pure Protocol contracts, no I/O, clean services | None identified |
 | **Application** | 9.0/10 | Clean imports, well-structured pipelines, proper DQ | None identified |
-| **Infrastructure** | 9.0/10 | Delta Lake, JSONL+zstd, PII hashing | Using Click vs Typer (acceptable) |
+| **Infrastructure** | 9.0/10 | Delta Lake, JSONL+zstd, PII hashing | None identified |
 | **Interfaces** | 9.0/10 | Proper exit codes, minimal infra coupling | None identified |
 
 ---
@@ -388,10 +388,16 @@ main.py — click.group(), click.version_option()
 commands/*.py — click decorators
 ```
 
-**Note:** Project uses **Click** (not Typer as mentioned in prompt). Click is a valid and mature CLI framework.
+**Note:** Project uses **Click** as the CLI framework by design.
+
+**Rationale for Click over Typer:**
+1. **Maturity**: Click is battle-tested with extensive documentation and community support
+2. **Simplicity**: No additional type annotation requirements beyond standard decorators
+3. **Stability**: Fewer breaking changes between versions compared to Typer
+4. **No dependency overhead**: Typer depends on Click internally, so using Click directly reduces dependencies
 
 **Findings:**
-- ✅ Click-based CLI (acceptable alternative to Typer)
+- ✅ Click-based CLI (intentional design choice)
 - ✅ Proper command group structure
 
 #### 2.4.2. Commands Coverage
@@ -541,7 +547,7 @@ No immediate action required.
 
 | ID | Description | Impact | Recommendation |
 |----|-------------|--------|----------------|
-| OBS-001 | CLI uses Click instead of Typer | Very Low | Acceptable - Click is mature and functional |
+| OBS-001 | CLI uses Click (intentional choice) | None | Click is the project's CLI framework by design - mature, well-documented, and sufficient for project needs |
 | OBS-002 | VCR cassettes contain `Authorization` header names (not values) | None | Headers names in CORS list, values are redacted |
 
 ---
