@@ -404,7 +404,7 @@ def test_process_found_result_adds_metadata(mock_logger, mock_search_fn):
     processed = handler._process_found_result(result, "10.1234/original")
 
     assert processed["_lookup_method"] == "title_fallback"
-    assert processed["_original_doi"] == "10.1234/original"
+    assert processed["_original_id"] == "10.1234/original"
 
 
 @pytest.mark.asyncio

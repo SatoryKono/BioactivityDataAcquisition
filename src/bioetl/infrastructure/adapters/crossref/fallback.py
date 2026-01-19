@@ -87,10 +87,10 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
             original_doi: The DOI that was originally searched.
 
         Returns:
-            Publication with _lookup_method and _original_doi added.
+            Publication with _lookup_method and _original_id added.
         """
         result["_lookup_method"] = "title_fallback"
-        result["_original_doi"] = original_doi
+        result["_original_id"] = original_doi
         return result
 
     async def _search_by_title(self, title: str) -> dict[str, Any] | None:

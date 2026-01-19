@@ -41,7 +41,7 @@ class StubPublicationEntity(BaseEntity):
     year: int | None = None
     source: str | None = None
     _lookup_method: str | None = None
-    _original_doi: str | None = None
+    _original_id: str | None = None
 
 
 # =============================================================================
@@ -61,7 +61,7 @@ class StubPublicationTransformer(BasePublicationTransformer):
             "year": record.get("year"),
             "source": "test_provider",
             "_lookup_method": record.get("_lookup_method"),
-            "_original_doi": record.get("_original_doi"),
+            "_original_id": record.get("_original_id"),
         }
 
     def _get_primary_id_field(self) -> str:
@@ -226,7 +226,7 @@ class TestBasePublicationTransformerBasics:
             "id": "test-1",
             "title": "Same Title",
             "_lookup_method": "title_fallback",  # Different metadata
-            "_original_doi": "10.1234/failed",
+            "_original_id": "10.1234/failed",
         }
 
         result1 = await transformer.transform(mock_context, record1, 0)
@@ -317,7 +317,7 @@ class TestFallbackLookupLogging:
             "id": "test-123",
             "title": "Fallback Record",
             "_lookup_method": "title_fallback",
-            "_original_doi": "10.1234/failed",
+            "_original_id": "10.1234/failed",
         }
 
         result = await transformer.transform(mock_context, record, 0)
@@ -459,23 +459,23 @@ class TestLookupMetadataPreservation:
         assert result["_lookup_method"] == "title_fallback"
 
     @pytest.mark.asyncio
-    async def test_preserves_original_doi(
+    async def test_preserves_original_id(
         self,
         transformer: StubPublicationTransformer,
         mock_context: PipelineContext,
     ) -> None:
-        """Should preserve _original_doi in Silver record."""
+        """Should preserve _original_id in Silver record."""
         record = {
             "id": "test-123",
             "title": "Test",
             "_lookup_method": "title_fallback",
-            "_original_doi": "10.1234/original",
+            "_original_id": "10.1234/original",
         }
 
         result = await transformer.transform(mock_context, record, 0)
 
         assert result is not None
-        assert result["_original_doi"] == "10.1234/original"
+        assert result["_original_id"] == "10.1234/original"
 
 
 # =============================================================================

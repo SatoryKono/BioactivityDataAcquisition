@@ -185,13 +185,13 @@ class TestSemanticScholarPublicationTransformer:
     ) -> None:
         """Test transforming a record found via title fallback."""
         sample_record["_lookup_method"] = "title_fallback"
-        sample_record["_original_doi"] = "10.1016/invalid.doi"
+        sample_record["_original_id"] = "10.1016/invalid.doi"
 
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
         assert result["_lookup_method"] == "title_fallback"
-        assert result["_original_doi"] == "10.1016/invalid.doi"
+        assert result["_original_id"] == "10.1016/invalid.doi"
         # Should log fallback usage
         mock_context.logger.info.assert_called()
 

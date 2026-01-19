@@ -266,7 +266,7 @@ class TestSemanticScholarAdapterIntegration:
                 r for r in records if r.get("_lookup_method") == "title_fallback"
             )
             assert fallback_record is not None
-            assert fallback_record["_original_doi"] == "10.9999/notfound"
+            assert fallback_record["_original_id"] == "10.9999/notfound"
 
     @pytest.mark.vcr
     async def test_title_only_lookup(

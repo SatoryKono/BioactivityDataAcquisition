@@ -52,7 +52,7 @@ def valid_record() -> dict:
         "language": "en",
         "source": "openalex",
         "_lookup_method": "doi",
-        "_original_doi": None,
+        "_original_id": None,
     }
 
 
