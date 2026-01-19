@@ -79,8 +79,13 @@ class TestCliRunIncremental:
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
-            # _run_pipeline_async returns (status, error_message, error_type) tuple
-            mock_asyncio_run.return_value = (RunStatus.SUCCESS, None, None)
+            # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
+            mock_asyncio_run.return_value = (
+                RunStatus.SUCCESS,
+                None,
+                None,
+                "test-run-id",
+            )
 
             result = cli_runner.invoke(
                 cli,
@@ -101,8 +106,13 @@ class TestCliRunIncremental:
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
-            # _run_pipeline_async returns (status, error_message, error_type) tuple
-            mock_asyncio_run.return_value = (RunStatus.SUCCESS, None, None)
+            # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
+            mock_asyncio_run.return_value = (
+                RunStatus.SUCCESS,
+                None,
+                None,
+                "test-run-id",
+            )
 
             result = cli_runner.invoke(
                 cli,
@@ -189,8 +199,13 @@ class TestCliRunTypes:
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
-            # _run_pipeline_async returns (status, error_message, error_type) tuple
-            mock_asyncio_run.return_value = (RunStatus.SUCCESS, None, None)
+            # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
+            mock_asyncio_run.return_value = (
+                RunStatus.SUCCESS,
+                None,
+                None,
+                "test-run-id",
+            )
 
             result = cli_runner.invoke(
                 cli,
