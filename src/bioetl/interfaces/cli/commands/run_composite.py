@@ -23,7 +23,7 @@ from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
 
 def _validate_composite_name(
-    ctx: click.Context, param: click.Parameter, value: str
+    _ctx: click.Context, _param: click.Parameter, value: str
 ) -> str:
     """Validate composite pipeline name."""
     if not value:

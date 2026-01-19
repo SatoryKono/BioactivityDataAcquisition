@@ -17,10 +17,6 @@ class ChemblApiError(ExternalServiceError):
 
     Internal exception for ChEMBL adapter. On adapter boundary, this
     should be translated to domain ExternalServiceError or its subclasses.
-
-    Note:
-        This is the canonical location for ChemblApiError.
-        The version in domain.exceptions is deprecated.
     """
 
     error_type = ErrorType.NETWORK_ERROR
