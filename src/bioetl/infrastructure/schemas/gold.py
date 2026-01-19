@@ -245,6 +245,15 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     language: Series[str] = pa.Field(nullable=True)
     country: Series[str] = pa.Field(nullable=True)
 
+    # Source tracking
+    source: Series[str] = pa.Field(nullable=True)
+
+    # Lookup metadata
+    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+    # _original_id: Original identifier used for lookup
+    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+
     # DQ fields
     dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
     dq_error: Series[bool] = pa.Field(nullable=True, alias="_dq_error")
