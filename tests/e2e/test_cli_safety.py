@@ -58,7 +58,7 @@ def test_cli_rebuild_with_yes(cli_runner, mock_registry):
         ),
     ):
         # asyncio.run mock returns the tuple that _run_pipeline_async would return
-        mock_asyncio_run.return_value = (RunStatus.SUCCESS, None, None)
+        mock_asyncio_run.return_value = (RunStatus.SUCCESS, None, None, "test-run-id")
 
         result = cli_runner.invoke(
             cli, ["run", "--pipeline", "test_pipe", "--run-type", "rebuild", "--yes"]
