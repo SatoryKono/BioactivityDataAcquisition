@@ -150,6 +150,11 @@ def mock_executor_with_recorder(call_recorder):
 
     executor.execute = execute
     executor.records_fetched = 100
+    executor.records_bronze = 100
+    executor.records_silver = 95
+    executor.records_gold = 90
+    executor.records_quarantined = 5
+    executor.get_dq_context = MagicMock(return_value=None)
     return executor
 
 
@@ -266,10 +271,8 @@ def mock_postrun_service(call_recorder):
         call_recorder.record("postrun.vacuum")
         return PostrunResult(
             dq=DQResult(
-                status=DQEvaluationStatus.PASSED,
                 error_rate=0.01,
-                soft_threshold=0.05,
-                hard_threshold=0.20,
+                status=DQEvaluationStatus.PASSED,
             ),
             dq_reports=None,
             vacuum=VacuumResult(
@@ -882,15 +885,32 @@ class TestPipelineRunnerLifecycle:
         services_with_dq.__aenter__ = services_dq_aenter
         services_with_dq.__aexit__ = services_dq_aexit
 
-        # Mock postrun service to call DQ checks
-        async def run_dq_checks(executor):
+        # Mock postrun service to call DQ checks via run()
+        from bioetl.application.core.postrun_service import PostrunResult
+        from bioetl.application.services.medallion_lifecycle import VacuumResult
+        from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
+
+        async def run_with_dq(executor, dq_context=None):
             call_recorder.record("postrun.dq_checks")
             # Simulate DQ check logic
             anomalies = dq_monitor.check_quality()
             if anomalies:
                 mock_logger.warning("DQ anomaly detected")
+            call_recorder.record("postrun.vacuum")
+            return PostrunResult(
+                dq=DQResult(
+                    error_rate=0.25,
+                    status=DQEvaluationStatus.WARNING,
+                ),
+                dq_reports=None,
+                vacuum=VacuumResult(
+                    silver_files_removed=0,
+                    gold_files_removed=0,
+                    skipped=False,
+                ),
+            )
 
-        mock_postrun_service.run_dq_checks = AsyncMock(side_effect=run_dq_checks)
+        mock_postrun_service.run = AsyncMock(side_effect=run_with_dq)
 
         lock_manager = MagicMock()
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
@@ -957,13 +977,28 @@ class TestPipelineRunnerLifecycle:
             logger=mock_logger,
         )
 
-        # Mock postrun service to call vacuum
-        async def run_vacuum_if_enabled():
-            call_recorder.record("postrun.vacuum")
+        # Mock postrun service to call vacuum via run()
+        from bioetl.application.core.postrun_service import PostrunResult
+        from bioetl.application.services.medallion_lifecycle import VacuumResult
+        from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
-        mock_postrun_service.run_vacuum_if_enabled = AsyncMock(
-            side_effect=run_vacuum_if_enabled
-        )
+        async def run_with_vacuum(executor, dq_context=None):
+            call_recorder.record("postrun.dq_checks")
+            call_recorder.record("postrun.vacuum")
+            return PostrunResult(
+                dq=DQResult(
+                    error_rate=0.01,
+                    status=DQEvaluationStatus.PASSED,
+                ),
+                dq_reports=None,
+                vacuum=VacuumResult(
+                    silver_files_removed=5,
+                    gold_files_removed=3,
+                    skipped=False,
+                ),
+            )
+
+        mock_postrun_service.run = AsyncMock(side_effect=run_with_vacuum)
 
         lock_manager = MagicMock()
         lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
