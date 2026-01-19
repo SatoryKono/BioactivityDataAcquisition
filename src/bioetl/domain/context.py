@@ -84,14 +84,18 @@ class InputFilterContext:
         """Validate filter configuration."""
         if not self.enabled:
             return
-
-        # Direct IDs mode: only need filter_field
         if self.filter_ids is not None:
-            if not self.filter_field:
-                raise ValueError("filter_field is required when filter_ids is set")
-            return
+            self._validate_direct_ids_mode()
+        else:
+            self._validate_csv_mode()
 
-        # CSV mode: need all fields
+    def _validate_direct_ids_mode(self) -> None:
+        """Validate direct IDs mode configuration."""
+        if not self.filter_field:
+            raise ValueError("filter_field is required when filter_ids is set")
+
+    def _validate_csv_mode(self) -> None:
+        """Validate CSV-based filter configuration."""
         if not self.source_path:
             raise ValueError("source_path is required when filter is enabled")
         if not self.column_name:
