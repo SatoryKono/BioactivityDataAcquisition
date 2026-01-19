@@ -108,13 +108,19 @@ class TestDQConfigFile:
         """Config with field validations at different levels."""
         config = DQConfigFile(
             common_field_validations=[
-                FieldValidationConfig(field="common_field", type="required", nullable=False)
+                FieldValidationConfig(
+                    field="common_field", type="required", nullable=False
+                )
             ],
             provider_field_validations=[
-                FieldValidationConfig(field="provider_field", type="pattern", pattern="^TEST")
+                FieldValidationConfig(
+                    field="provider_field", type="pattern", pattern="^TEST"
+                )
             ],
             entity_field_validations=[
-                FieldValidationConfig(field="entity_field", type="range", min=0, max=100)
+                FieldValidationConfig(
+                    field="entity_field", type="range", min=0, max=100
+                )
             ],
         )
         assert len(config.common_field_validations) == 1
@@ -143,7 +149,9 @@ class TestDQConfigFile:
         )
         assert len(config.common_cross_field_validations) == 1
         assert len(config.entity_cross_field_validations) == 1
-        assert config.entity_cross_field_validations[0].condition == "conditional_required"
+        assert (
+            config.entity_cross_field_validations[0].condition == "conditional_required"
+        )
 
     def test_config_with_conditional_validations(self) -> None:
         """Config with conditional validations."""
@@ -155,7 +163,9 @@ class TestDQConfigFile:
                     condition_value="A",
                     condition_operator="eq",
                     then_validations=[
-                        FieldValidationConfig(field="code", type="required", nullable=False)
+                        FieldValidationConfig(
+                            field="code", type="required", nullable=False
+                        )
                     ],
                 )
             ],
@@ -283,7 +293,9 @@ class TestDQConfigFileToDomain:
                     condition_value=["A", "B"],
                     condition_operator="in",
                     then_validations=[
-                        FieldValidationConfig(field="code", type="required", nullable=False)
+                        FieldValidationConfig(
+                            field="code", type="required", nullable=False
+                        )
                     ],
                 )
             ],

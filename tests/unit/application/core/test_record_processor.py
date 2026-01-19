@@ -48,6 +48,21 @@ def _write_temp_pipeline_config(
         encoding="utf-8",
     )
 
+    # Create DQ defaults file (required by DQConfigLoader)
+    dq_dir = base_path / "configs" / "dq"
+    dq_dir.mkdir(parents=True, exist_ok=True)
+    dq_defaults_path = dq_dir / "_defaults.yaml"
+    dq_defaults_path.write_text(
+        "\n".join(
+            [
+                "# DQ defaults for tests",
+                f"soft_fail_threshold: {soft_threshold}",
+                f"hard_fail_threshold: {hard_threshold}",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
     return config_path
 
 
