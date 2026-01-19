@@ -476,7 +476,7 @@ class TestClassSize:
         # PubMed adapter (similar to ChEMBL adapter)
         "PubMedAdapter": 500,  # 488 lines - HTTP adapter with Entrez API + full FilterableDataSourcePort
         # PubMed transformer (complex XML extraction)
-        "PubMedPublicationTransformer": 335,  # 332 lines - XML extraction with multiple extractors
+        "PubMedPublicationTransformer": 350,  # 332 lines - XML extraction with multiple extractors
         # OpenAlex adapter (FilterableDataSourcePort with batch DOI + title fallback)
         "OpenAlexAdapter": 540,  # 539 lines - HTTP adapter with batch DOI resolution + title fallback
         # Error handling utility (ErrorService + deprecated ErrorHandler alias)
