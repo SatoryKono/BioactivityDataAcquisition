@@ -249,9 +249,11 @@ class ClassificationExtractor(BaseFieldExtractor):
                     if acc.text and acc.text.strip()
                 ]
 
-            result.append({
-                "databank_name": name_elem.text.strip(),
-                "accession_numbers": accessions,
-            })
+            result.append(
+                {
+                    "databank_name": name_elem.text.strip(),
+                    "accession_numbers": accessions,
+                }
+            )
 
         return result

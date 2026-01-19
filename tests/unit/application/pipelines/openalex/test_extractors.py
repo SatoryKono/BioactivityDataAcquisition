@@ -386,8 +386,14 @@ class TestExtractKeywords:
     def test_extract_keywords_basic(self) -> None:
         """Should extract keyword display names."""
         keywords = [
-            {"id": "https://openalex.org/keywords/coronavirus", "display_name": "Coronavirus"},
-            {"id": "https://openalex.org/keywords/pandemic", "display_name": "Pandemic"},
+            {
+                "id": "https://openalex.org/keywords/coronavirus",
+                "display_name": "Coronavirus",
+            },
+            {
+                "id": "https://openalex.org/keywords/pandemic",
+                "display_name": "Pandemic",
+            },
         ]
         result = extract_keywords(keywords)
         assert result == ["Coronavirus", "Pandemic"]
