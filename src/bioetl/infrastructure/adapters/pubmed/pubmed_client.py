@@ -10,6 +10,7 @@ DTO Support:
 
 from __future__ import annotations
 
+import contextlib
 import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -17,10 +18,14 @@ from typing import TYPE_CHECKING, Any
 from pydantic import BaseModel
 
 from bioetl.domain.entities.pubmed import ArticleRecord
+from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin
 from bioetl.infrastructure.adapters.pubmed.fallback import TitleFallbackHandler

@@ -243,12 +243,16 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         return date_str
 
     def _should_log_fallback_lookup(self) -> bool:
-        """Disable fallback lookup logging for CrossRef.
+        """Enable fallback lookup logging for CrossRef.
 
-        CrossRef uses DOI-only lookup without title fallback mechanism.
+        CrossRef supports title-based fallback when DOI lookup fails (404).
+        Adapter uses TitleFallbackHandler for three-phase lookup:
+        1. DOI batch fetch
+        2. Title fallback for unresolved DOIs
+        3. Title-only lookup for entries without DOIs
 
         Returns:
-            False - no fallback logging needed.
+            True - log fallback lookups for observability.
 
         """
-        return False
+        return True
