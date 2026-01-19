@@ -2282,6 +2282,194 @@ class TestBronzeWriterMetadataSidecar:
 
 
 @pytest.mark.unit
+class TestBronzeWriterQueryString:
+    """Tests for BronzeWriter query_string extraction for metadata."""
+
+    @pytest.mark.asyncio
+    async def test_query_string_extracted_from_source_metadata(
+        self,
+        tmp_path,
+        noop_logger,
+        noop_metrics,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test that query_string is extracted from source_metadata for BronzeMetadataInput."""
+        from unittest.mock import AsyncMock, MagicMock
+
+        from bioetl.domain.models.metadata import SourceMetadata
+        from bioetl.domain.ports.metadata_coordinator import BronzeMetadataInput
+
+        # Create mock metadata coordinator
+        mock_coordinator = MagicMock()
+        mock_metadata = MagicMock()
+        mock_coordinator.create_bronze_metadata.return_value = mock_metadata
+
+        # Create mock metadata writer
+        mock_metadata_writer = AsyncMock()
+        mock_metadata_writer.write_bronze_metadata = AsyncMock(
+            return_value="/path/to/_metadata.yaml"
+        )
+
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=noop_metrics,
+            metadata_writer=mock_metadata_writer,
+            save_metadata=True,
+            metadata_coordinator=mock_coordinator,
+        )
+
+        # Create source_metadata with query_string
+        source_metadata = SourceMetadata(
+            type="api",
+            url="https://www.ebi.ac.uk/chembl/api/data/activity",
+            query_string="assay_type=B&standard_type=IC50",
+        )
+
+        await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=ingestion_ts,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+            source_metadata=source_metadata,
+        )
+
+        # Verify create_bronze_metadata was called with BronzeMetadataInput
+        mock_coordinator.create_bronze_metadata.assert_called_once()
+        call_args = mock_coordinator.create_bronze_metadata.call_args
+
+        # Get the BronzeMetadataInput argument
+        bronze_input = call_args[0][0]
+        assert isinstance(bronze_input, BronzeMetadataInput)
+
+        # Verify query_string was extracted from source_metadata
+        assert bronze_input.query_string == "assay_type=B&standard_type=IC50"
+        # Also verify source_metadata was passed
+        assert bronze_input.source_metadata is source_metadata
+
+    @pytest.mark.asyncio
+    async def test_query_string_none_when_source_metadata_has_no_query(
+        self,
+        tmp_path,
+        noop_logger,
+        noop_metrics,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test query_string is None when source_metadata doesn't have query_string."""
+        from unittest.mock import AsyncMock, MagicMock
+
+        from bioetl.domain.models.metadata import SourceMetadata
+        from bioetl.domain.ports.metadata_coordinator import BronzeMetadataInput
+
+        mock_coordinator = MagicMock()
+        mock_metadata = MagicMock()
+        mock_coordinator.create_bronze_metadata.return_value = mock_metadata
+
+        mock_metadata_writer = AsyncMock()
+        mock_metadata_writer.write_bronze_metadata = AsyncMock()
+
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=noop_metrics,
+            metadata_writer=mock_metadata_writer,
+            save_metadata=True,
+            metadata_coordinator=mock_coordinator,
+        )
+
+        # Create source_metadata WITHOUT query_string
+        source_metadata = SourceMetadata(
+            type="api",
+            url="https://www.ebi.ac.uk/chembl/api/data/activity",
+            # No query_string - defaults to None
+        )
+
+        await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=ingestion_ts,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+            source_metadata=source_metadata,
+        )
+
+        # Verify create_bronze_metadata was called
+        mock_coordinator.create_bronze_metadata.assert_called_once()
+        bronze_input = mock_coordinator.create_bronze_metadata.call_args[0][0]
+
+        # query_string should be None
+        assert bronze_input.query_string is None
+
+    @pytest.mark.asyncio
+    async def test_query_string_none_when_no_source_metadata(
+        self,
+        tmp_path,
+        noop_logger,
+        noop_metrics,
+        sample_records: list[bytes],
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Test query_string is None when source_metadata is not provided."""
+        from unittest.mock import AsyncMock, MagicMock
+
+        from bioetl.domain.ports.metadata_coordinator import BronzeMetadataInput
+
+        mock_coordinator = MagicMock()
+        mock_metadata = MagicMock()
+        mock_coordinator.create_bronze_metadata.return_value = mock_metadata
+
+        mock_metadata_writer = AsyncMock()
+        mock_metadata_writer.write_bronze_metadata = AsyncMock()
+
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=noop_metrics,
+            metadata_writer=mock_metadata_writer,
+            save_metadata=True,
+            metadata_coordinator=mock_coordinator,
+        )
+
+        # No source_metadata provided
+        await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=ingestion_ts,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+            # source_metadata not passed - defaults to None
+        )
+
+        mock_coordinator.create_bronze_metadata.assert_called_once()
+        bronze_input = mock_coordinator.create_bronze_metadata.call_args[0][0]
+
+        # Both should be None
+        assert bronze_input.source_metadata is None
+        assert bronze_input.query_string is None
+
+
+@pytest.mark.unit
 class TestBronzeWriteResult:
     """Tests for BronzeWriteResult value object (REQ-LINEAGE-001)."""
 
