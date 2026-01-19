@@ -178,7 +178,7 @@ class MergeService:
         return path
 
     async def _read_silver_table(self, path: str) -> pl.DataFrame:
-        """Read a Silver table directly from Delta Lake.
+        """Read a Silver table via StoragePort.
 
         Args:
             path: Table path like "silver/chembl/activity".
@@ -187,82 +187,48 @@ class MergeService:
             Polars DataFrame with table contents.
         """
         import polars as pl
-        from deltalake import DeltaTable
 
-        resolved_path = self._resolve_path(path)
-        table = DeltaTable(resolved_path)
-        result = pl.from_arrow(table.to_pyarrow_table())
-        # from_arrow may return Series for single-column tables
-        if isinstance(result, pl.Series):
-            return result.to_frame()
-        return result
+        # Convert path to table name (strip layer prefix)
+        table_name = _path_to_table_name(path)
 
-    def _coerce_null_columns(self, df: pl.DataFrame) -> pl.DataFrame:
-        """Coerce Null-typed columns to String for Delta Lake compatibility.
+        # Read via StoragePort
+        records = await self._storage.read_silver(table_name)
 
-        Delta Lake doesn't support Null type, so columns with all nulls
-        (which Polars infers as Null type) must be cast to a concrete type.
+        # Convert to DataFrame
+        if not records:
+            return pl.DataFrame()
 
-        Args:
-            df: DataFrame that may have Null-typed columns.
-
-        Returns:
-            DataFrame with Null columns cast to String.
-        """
-        import polars as pl
-
-        null_cols = [col for col in df.columns if df[col].dtype == pl.Null]
-        if null_cols:
-            self._logger.debug(
-                "Coercing null columns to String",
-                columns=null_cols,
-            )
-            df = df.with_columns([pl.col(col).cast(pl.String) for col in null_cols])
-        return df
+        return pl.DataFrame(records)
 
     async def _write_merged_silver(self, df: pl.DataFrame) -> None:
-        """Write merged data to Silver layer directly to Delta Lake.
+        """Write merged data to Silver layer via StoragePort.
 
         Args:
             df: Polars DataFrame to write.
         """
-        from deltalake import write_deltalake
+        # Convert path to table name (strip layer prefix)
+        table_name = _path_to_table_name(self._config.output_silver_path)
 
-        # Coerce null columns for Delta Lake compatibility
-        df = self._coerce_null_columns(df)
+        # Convert DataFrame to list of dicts
+        records = df.to_dicts()
 
-        # Resolve output path
-        output_path = self._resolve_path(self._config.output_silver_path)
-
-        # Write directly to Delta Lake
-        write_deltalake(
-            output_path,
-            df.to_arrow(),
-            mode="overwrite",
-            schema_mode="overwrite",
-        )
+        # Write via StoragePort
+        await self._storage.write_silver_merged(table_name, records)
 
     async def _write_merged_gold(self, df: pl.DataFrame) -> None:
-        """Write merged data to Gold layer directly to Delta Lake.
+        """Write merged data to Gold layer via StoragePort.
 
         Args:
             df: Polars DataFrame to write.
         """
-        from deltalake import write_deltalake
+        # Convert path to table name (strip layer prefix)
+        table_name = _path_to_table_name(self._config.output_gold_path)
 
-        # Coerce null columns for Delta Lake compatibility
-        df = self._coerce_null_columns(df)
+        # Convert DataFrame to list of dicts
+        records = df.to_dicts()
 
-        # Resolve output path
-        output_path = self._resolve_path(self._config.output_gold_path)
-
-        # Write directly to Delta Lake
-        write_deltalake(
-            output_path,
-            df.to_arrow(),
-            mode="overwrite",
-            schema_mode="overwrite",
-        )
+        # Write via StoragePort
+        await self._storage.write_gold_merged(table_name, records)
 
     def _infer_silver_table(self, pipeline_name: str) -> str:
         """Infer Silver table path from pipeline name."""
