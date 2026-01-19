@@ -46,6 +46,8 @@ class BaseEntity:
         source_batch_id: Batch context ID (OPTIONAL, may be None)
         ingestion_ts: Ingestion timestamp from context (REQUIRED)
         _index: Sequential index of the record in the pipeline run.
+        _dq_warn: Data quality warning flag (default: False)
+        _dq_error: Data quality error flag (default: False)
     """
 
     # REQUIRED: Business identity
@@ -60,6 +62,11 @@ class BaseEntity:
 
     # OPTIONAL: Batch context (None when batch context unavailable)
     source_batch_id: BatchID | None = None
+
+    # DQ flags (Data Quality flags) - applied during transformation
+    # These fields track data quality warnings and errors at the record level
+    _dq_warn: bool = False  # Record has data quality warnings
+    _dq_error: bool = False  # Record has data quality errors
 
     def __post_init__(self) -> None:
         """Validate required fields are present and non-empty."""
