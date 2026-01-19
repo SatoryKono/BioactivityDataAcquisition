@@ -79,22 +79,20 @@ class TestGoldPublicationSchemaUnifiedFields:
     def test_schema_has_publication_date(self, schema_class, name):
         """All Gold publication schemas must have publication_date field."""
         fields = get_schema_fields(schema_class)
-        assert "publication_date" in fields, (
-            f"{name} missing publication_date field"
-        )
+        assert "publication_date" in fields, f"{name} missing publication_date field"
 
     @pytest.mark.parametrize(
         "schema_class,name",
         [
             (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
-            (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
+            # OpenAlex doesn't have page fields - they were removed as unused
             (PubMedPublicationGoldSchema, "PubMed Publication"),
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
     def test_schema_has_page_fields(self, schema_class, name):
-        """All Gold publication schemas must have first_page and last_page fields."""
+        """Gold publication schemas with page data must have first_page and last_page fields."""
         fields = get_schema_fields(schema_class)
         assert "first_page" in fields, f"{name} missing first_page field"
         assert "last_page" in fields, f"{name} missing last_page field"
@@ -210,7 +208,11 @@ class TestGoldPublicationSchemaPrimaryKeys:
             (CrossRefPublicationGoldSchema, "CrossRef Publication", "doi"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication", "openalex_id"),
             (PubMedPublicationGoldSchema, "PubMed Publication", "pmid"),
-            (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication", "paper_id"),
+            (
+                SemanticScholarPublicationGoldSchema,
+                "SemanticScholar Publication",
+                "paper_id",
+            ),
         ],
     )
     def test_schema_has_primary_key(self, schema_class, name, primary_key):
