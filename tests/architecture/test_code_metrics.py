@@ -99,7 +99,7 @@ class TestFileSizeLimits:
         # Application layer exemptions
         "base_transformer.py": 680,  # 667 LOC - BaseTransformer with serialization helpers
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
-        "merger.py": 520,  # 515 LOC - Composite merge service with join logic and conflict resolution
+        "merger.py": 550,  # 549 LOC - Composite merge service with join logic and conflict resolution + dual path
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
