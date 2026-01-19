@@ -21,7 +21,10 @@ from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.openalex.extractors import (
     extract_authors,
     extract_concepts,
+    extract_external_ids,
     extract_journal_info,
+    extract_keywords,
+    extract_mesh_terms,
     extract_open_access_info,
     extract_openalex_id,
     reconstruct_abstract,
@@ -147,6 +150,15 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         # Extract Open Access info
         oa_info = extract_open_access_info(rec.get("open_access", {}))
 
+        # Extract external IDs (pmid, pmcid, mag)
+        external_ids = extract_external_ids(rec.get("ids", {}))
+
+        # Extract MeSH terms
+        mesh_terms = extract_mesh_terms(rec.get("mesh", []))
+
+        # Extract keywords
+        keywords = extract_keywords(rec.get("keywords", []))
+
         # Validate year using PublicationYear Value Object
         year_vo = PublicationYear.from_raw(rec.get("publication_year"))
         year = year_vo.value if year_vo else None
@@ -162,6 +174,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         return {
             "openalex_id": openalex_id,
             "doi": doi,
+            "pmid": external_ids.get("pmid"),
+            "pmcid": external_ids.get("pmcid"),
+            "mag_id": external_ids.get("mag_id"),
             "title": rec.get("title"),
             "abstract": abstract,
             "authors": self.serialize_json_list(hashed_authors),
@@ -177,6 +192,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             # Unified BioETL field: citation_count (standardized across all providers)
             "citation_count": rec.get("cited_by_count"),
             "concepts": concepts,
+            "mesh": mesh_terms,
+            "keywords": keywords,
             "language": rec.get("language"),
             "_lookup_method": lookup_method,
             "_original_doi": original_doi,

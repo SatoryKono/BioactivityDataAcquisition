@@ -16,6 +16,7 @@ Provider-specific fields (pmc_id, journal_abbrev, etc.) are defined here.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 from pydantic import Field as PydanticField
@@ -95,6 +96,18 @@ class ArticleRecord(BaseModel):
         default_factory=list, description="MeSH terms"
     )
 
+    # Chemical and genetic data
+    chemicals: list[str] = PydanticField(
+        default_factory=list, description="Chemical substance names from ChemicalList"
+    )
+    gene_symbols: list[str] = PydanticField(
+        default_factory=list, description="Gene symbols from GeneSymbolList"
+    )
+    databanks: list[dict[str, Any]] = PydanticField(
+        default_factory=list,
+        description="Data bank references (list of {databank_name, accession_numbers})",
+    )
+
     # Additional metadata
     language: str | None = PydanticField(
         default=None, description="Primary language code"
@@ -171,6 +184,11 @@ class PubMedPublicationEntity(PublicationEntityBase):
     publication_types: list[str] = field(default_factory=list)
     keywords: list[str] = field(default_factory=list)
     mesh_terms: list[str] = field(default_factory=list)
+
+    # PubMed-specific chemical and genetic data
+    chemicals: list[str] = field(default_factory=list)  # ChemicalList/NameOfSubstance
+    gene_symbols: list[str] = field(default_factory=list)  # GeneSymbolList
+    databanks: list[dict[str, Any]] = field(default_factory=list)  # DataBankList
 
     # PubMed-specific metadata
     country: str | None = None
