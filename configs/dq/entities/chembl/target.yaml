@@ -1,0 +1,42 @@
+# configs/dq/entities/chembl/target.yaml
+# ChEMBL Target-specific DQ rules
+# Inherits from: _defaults.yaml → providers/chembl.yaml
+
+version: "1.0.0"
+provider: chembl
+entity: target
+
+# Thresholds: inherit from provider
+
+# =============================================================================
+# Target-Specific Field Validations
+# =============================================================================
+entity_field_validations:
+  - field: target_chembl_id
+    type: required
+    nullable: false
+    error_message: "Target ChEMBL ID is required"
+
+  - field: target_type
+    type: enum
+    allowed:
+      - SINGLE PROTEIN
+      - PROTEIN COMPLEX
+      - PROTEIN FAMILY
+      - ORGANISM
+      - TISSUE
+      - CELL-LINE
+      - SELECTIVITY GROUP
+      - UNKNOWN
+    nullable: true
+    error_message: "Invalid target_type value"
+
+# =============================================================================
+# Cross-Field Validations
+# =============================================================================
+entity_cross_field_validations: []
+
+# =============================================================================
+# Conditional Validations
+# =============================================================================
+entity_conditional_validations: []

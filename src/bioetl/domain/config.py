@@ -119,6 +119,7 @@ class FieldValidation:
     """Configuration for a single field validation rule.
 
     Supports multiple validation types:
+    - required: Field must be present and non-null
     - range: Numeric range validation (min/max)
     - pattern: Regex pattern matching
     - enum: Allowed values validation
@@ -126,7 +127,7 @@ class FieldValidation:
 
     Attributes:
         field: Field name to validate.
-        validation_type: Type of validation (range, pattern, enum, custom).
+        validation_type: Type of validation (required, range, pattern, enum, custom).
         nullable: Whether field can be null/None. Default: True.
         min_value: Minimum value for range validation.
         max_value: Maximum value for range validation.
@@ -137,7 +138,7 @@ class FieldValidation:
     """
 
     field: str
-    validation_type: Literal["range", "pattern", "enum", "custom"]
+    validation_type: Literal["required", "range", "pattern", "enum", "custom"]
     nullable: bool = True
     # Range validation
     min_value: float | None = None
