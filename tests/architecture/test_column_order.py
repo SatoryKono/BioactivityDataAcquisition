@@ -188,5 +188,5 @@ class TestSchemaColumnOrder:
             f"{schema_name}: Column order does not match canonical.\n"
             f"Use canonical_column_order() to reorder.\n"
             f"First mismatch at position "
-            f"{next(i for i, (a, b) in enumerate(zip(column_names, expected)) if a != b)}"
+            f"{next(i for i, (a, b) in enumerate(zip(column_names, expected, strict=True)) if a != b)}"
         )
