@@ -162,6 +162,62 @@ print(settings.bronze_path)  # Path("data/bronze")
 print(settings.silver_path)  # Path("data/silver")
 ```
 
+## Configs Structure
+
+*Reference: [ADR-027: DQ Rules Externalization](../02-architecture/decisions/ADR-027-dq-rules-externalization.md)*
+
+```
+configs/
+├── dq/                                # DQ Configuration Hierarchy (ADR-027)
+│   ├── _defaults.yaml                 # Global defaults (thresholds, common validations)
+│   ├── providers/
+│   │   ├── chembl.yaml                # ChEMBL provider overrides
+│   │   ├── pubchem.yaml               # PubChem provider overrides
+│   │   └── uniprot.yaml               # UniProt provider overrides
+│   └── entities/
+│       ├── chembl/
+│       │   ├── activity.yaml          # Activity-specific rules
+│       │   ├── assay.yaml
+│       │   ├── molecule.yaml
+│       │   └── target.yaml
+│       ├── pubchem/
+│       │   └── compound.yaml
+│       └── uniprot/
+│           └── target.yaml
+│
+├── pipelines/                         # Pipeline orchestration configs
+│   ├── _defaults.yaml                 # Base pipeline defaults
+│   ├── chembl/
+│   │   ├── activity.yaml              # References dq_config_file
+│   │   ├── assay.yaml
+│   │   ├── molecule.yaml
+│   │   └── target.yaml
+│   ├── pubchem/
+│   │   └── compound.yaml
+│   └── uniprot/
+│       └── target.yaml
+│
+├── sources/                           # Source connection configs
+│   ├── chembl.yaml
+│   ├── pubchem.yaml
+│   └── uniprot.yaml
+│
+└── env/
+    └── .env.example
+```
+
+### DQ Config Hierarchy
+
+| Level | Path | Purpose |
+|-------|------|---------|
+| Global | `dq/_defaults.yaml` | Base thresholds (0.05/0.20), common validations |
+| Provider | `dq/providers/{provider}.yaml` | Provider-specific overrides |
+| Entity | `dq/entities/{provider}/{entity}.yaml` | Entity-specific rules |
+
+**Merge order**: defaults → provider → entity → inline overrides
+
+See [DQ Configuration Guide](dq-configuration.md) for details.
+
 ## Migration from S3
 
 If migrating from a previous S3-based deployment:

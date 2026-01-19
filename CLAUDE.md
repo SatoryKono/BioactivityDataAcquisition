@@ -392,7 +392,7 @@ sha256(provider + canonical_json(record))
 
 ### 4.5. Архитектурные Решения (ADR)
 
-**26 ADR** определяют ключевые архитектурные решения проекта:
+**27 ADR** определяют ключевые архитектурные решения проекта:
 
 | ADR | Название | Описание |
 |-----|----------|----------|
@@ -422,6 +422,7 @@ sha256(provider + canonical_json(record))
 | 024 | Entity Naming Unification | Унификация именования сущностей |
 | 025 | Pipeline Config Unification | Унификация конфигурации пайплайнов |
 | 026 | Composite Pipeline Pattern | Паттерн композитного пайплайна |
+| 027 | DQ Rules Externalization | Иерархическая конфигурация DQ правил |
 
 Документы: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
 
