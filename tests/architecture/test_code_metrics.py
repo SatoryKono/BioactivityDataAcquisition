@@ -58,6 +58,7 @@ class TestFileSizeLimits:
         # Domain models/metadata.py (models/metadata.py 566 LOC, ports/metadata.py only 104 LOC)
         "metadata.py": 570,  # 566 LOC - Metadata models with APIRequestDetails + RateLimitInfo for Bronze layer enrichment
         # Domain ports (Protocol definitions with comprehensive docstrings)
+        "data_normalization.py": 330,  # 321 LOC - DataNormalizationPort with partial date normalization
         "storage.py": 395,  # 390 LOC - StoragePort with read_silver, write_*_merged for composite pipelines + SourceMetadata param + Silver lineage
         # Domain Pandera schemas (declarative field definitions)
         "compound.py": 380,  # 377 LOC - PubChem molecule schema + deprecated alias (v2.0)

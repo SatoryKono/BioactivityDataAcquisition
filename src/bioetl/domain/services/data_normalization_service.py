@@ -197,30 +197,45 @@ class DefaultDataNormalizationService:
         Returns:
             Full ISO date string (YYYY-MM-DD), or None if invalid.
         """
+        cleaned = self._clean_date_string(date_str)
+        if not cleaned:
+            return None
+        return self._normalize_by_length(cleaned)
+
+    def _clean_date_string(self, date_str: str | None) -> str | None:
+        """Strip whitespace from date string, return None if empty."""
         if not date_str:
             return None
+        stripped = date_str.strip()
+        return stripped if stripped else None
 
-        date_str = date_str.strip()
-        if not date_str:
-            return None
+    def _normalize_by_length(self, date_str: str) -> str | None:
+        """Normalize date string based on length pattern."""
+        length = len(date_str)
+        if length == _FULL_DATE_LEN:
+            return self._validate_full_date(date_str)
+        if length == _PARTIAL_MONTH_LEN:
+            return self._normalize_partial_month(date_str)
+        if length == _PARTIAL_YEAR_LEN:
+            return self._normalize_partial_year(date_str)
+        return None
 
-        # Already full format YYYY-MM-DD
-        if (
-            len(date_str) == _FULL_DATE_LEN
-            and date_str[4] == "-"
-            and date_str[7] == "-"
-        ):
+    def _validate_full_date(self, date_str: str) -> str | None:
+        """Validate YYYY-MM-DD format, return as-is if valid."""
+        if date_str[4] == "-" and date_str[7] == "-":
             return date_str
+        return None
 
-        # Partial: YYYY-MM → YYYY-MM-30
-        if len(date_str) == _PARTIAL_MONTH_LEN and date_str[4] == "-":
+    def _normalize_partial_month(self, date_str: str) -> str | None:
+        """Normalize YYYY-MM to YYYY-MM-30 (end of month)."""
+        if date_str[4] == "-":
             return f"{date_str}-30"
+        return None
 
-        # Partial: YYYY → YYYY-12-31
-        if len(date_str) == _PARTIAL_YEAR_LEN and date_str.isdigit():
+    def _normalize_partial_year(self, date_str: str) -> str | None:
+        """Normalize YYYY to YYYY-12-31 (end of year)."""
+        if date_str.isdigit():
             return f"{date_str}-12-31"
-
-        # Unknown format - return None (will trigger DQ warning)
         return None
 
     def format_date_parts(
@@ -241,17 +256,15 @@ class DefaultDataNormalizationService:
         """
         if not date_parts or not date_parts[0]:
             return None
+        return self._format_parts_list(date_parts[0])
 
-        parts = date_parts[0]
-
-        if len(parts) >= 3:
-            # Full date
+    def _format_parts_list(self, parts: Sequence[int]) -> str | None:
+        """Format a list of date parts to YYYY-MM-DD string."""
+        num_parts = len(parts)
+        if num_parts >= 3:
             return f"{parts[0]:04d}-{parts[1]:02d}-{parts[2]:02d}"
-        elif len(parts) == 2:
-            # Year-month only → end of month
+        if num_parts == 2:
             return f"{parts[0]:04d}-{parts[1]:02d}-30"
-        elif len(parts) == 1:
-            # Year only → end of year
+        if num_parts == 1:
             return f"{parts[0]:04d}-12-31"
-
         return None
