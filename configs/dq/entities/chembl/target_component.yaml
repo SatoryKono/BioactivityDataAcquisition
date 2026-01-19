@@ -1,0 +1,56 @@
+# configs/dq/entities/chembl/target_component.yaml
+# ChEMBL Target Component-specific DQ rules
+# Inherits from: _defaults.yaml → providers/chembl.yaml
+
+version: "1.0.0"
+provider: chembl
+entity: target_component
+
+# Thresholds: inherit from provider
+
+# =============================================================================
+# Target Component-Specific Field Validations
+# =============================================================================
+entity_field_validations:
+  - field: component_id
+    type: range
+    min: 1
+    nullable: false
+    error_message: "Component ID is required and must be positive"
+
+  - field: component_type
+    type: enum
+    allowed:
+      - PROTEIN
+      - DNA
+      - RNA
+    nullable: true
+
+  - field: accession
+    type: pattern
+    pattern: '^[A-Z0-9]{6,10}$'
+    nullable: true
+    error_message: "accession should be UniProt format (6-10 alphanumeric chars)"
+
+  - field: tax_id
+    type: range
+    min: 1
+    max: 10000000
+    nullable: true
+    error_message: "Taxonomy ID must be between 1 and 10,000,000"
+
+# =============================================================================
+# Cross-Field Validations
+# =============================================================================
+entity_cross_field_validations:
+  - name: component_identifiable
+    fields:
+      - component_id
+      - accession
+    condition: any_present
+    error_message: "Component must have ID or accession"
+
+# =============================================================================
+# Conditional Validations
+# =============================================================================
+entity_conditional_validations: []

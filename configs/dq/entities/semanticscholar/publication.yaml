@@ -1,0 +1,72 @@
+# configs/dq/entities/semanticscholar/publication.yaml
+# Semantic Scholar Publication-specific DQ rules
+# Inherits from: _defaults.yaml → providers/semanticscholar.yaml
+
+version: "1.0.0"
+provider: semanticscholar
+entity: publication
+
+# Thresholds: inherit from provider (soft 0.15, hard 0.40)
+
+# =============================================================================
+# Publication-Specific Field Validations
+# =============================================================================
+entity_field_validations:
+  - field: paper_id
+    type: pattern
+    pattern: '^[a-f0-9]{40}$'
+    nullable: false
+    error_message: "paper_id is required and must be a 40-char hex string"
+
+  - field: doi
+    type: pattern
+    pattern: '^10\.\d{4,}/.*$'
+    nullable: true
+    error_message: "DOI must start with 10. prefix"
+
+  - field: title
+    type: pattern
+    pattern: '^.{1,2000}$'
+    nullable: true
+    error_message: "Title must not exceed 2000 chars"
+
+  - field: year
+    type: range
+    min: 1500
+    max: 2100
+    nullable: true
+    error_message: "Publication year out of valid range"
+
+  - field: citation_count
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Citation count must be non-negative"
+
+  - field: reference_count
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Reference count must be non-negative"
+
+  - field: influential_citation_count
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Influential citation count must be non-negative"
+
+# =============================================================================
+# Cross-Field Validations
+# =============================================================================
+entity_cross_field_validations:
+  - name: publication_identifiable
+    fields:
+      - paper_id
+      - title
+    condition: all_present
+    error_message: "Publication must have paper_id and title"
+
+# =============================================================================
+# Conditional Validations
+# =============================================================================
+entity_conditional_validations: []
