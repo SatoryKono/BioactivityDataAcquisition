@@ -173,6 +173,8 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     )
 
     # === Lookup Metadata (batch DOI resolution) ===
+    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+    # _original_id: Original identifier used for lookup
     lookup_method: Series[str] = pa.Field(
         alias="_lookup_method",
         nullable=False,
@@ -180,10 +182,10 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
         description="How record was resolved: doi, title_fallback, title_only",
     )
 
-    original_doi: Series[str] = pa.Field(
-        alias="_original_doi",
+    original_id: Series[str] = pa.Field(
+        alias="_original_id",
         nullable=True,
-        description="Original DOI from input CSV (for fallback records)",
+        description="Original identifier from input (for fallback records)",
     )
 
     class Config:
