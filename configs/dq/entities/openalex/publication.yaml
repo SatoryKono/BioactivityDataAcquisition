@@ -1,0 +1,75 @@
+# configs/dq/entities/openalex/publication.yaml
+# OpenAlex Publication-specific DQ rules
+# Inherits from: _defaults.yaml → providers/openalex.yaml
+
+version: "1.0.0"
+provider: openalex
+entity: publication
+
+# Thresholds: inherit from provider (soft 0.08, hard 0.25)
+
+# =============================================================================
+# Publication-Specific Field Validations
+# =============================================================================
+entity_field_validations:
+  - field: openalex_id
+    type: pattern
+    pattern: '^W\d+$'
+    nullable: false
+    error_message: "OpenAlex ID is required and must start with W followed by digits"
+
+  - field: doi
+    type: pattern
+    pattern: '^10\.\d{4,}/.*$'
+    nullable: true
+    error_message: "DOI must start with 10. prefix"
+
+  - field: title
+    type: pattern
+    pattern: '^.{1,2000}$'
+    nullable: true
+    error_message: "Title must not exceed 2000 chars"
+
+  - field: year
+    type: range
+    min: 1500
+    max: 2100
+    nullable: true
+    error_message: "Publication year out of valid range"
+
+  - field: type
+    type: enum
+    allowed:
+      - article
+      - book-chapter
+      - book
+      - dataset
+      - dissertation
+      - editorial
+      - letter
+      - review
+      - preprint
+      - other
+    nullable: true
+
+  - field: cited_by_count
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Citation count must be non-negative"
+
+# =============================================================================
+# Cross-Field Validations
+# =============================================================================
+entity_cross_field_validations:
+  - name: publication_identifiable
+    fields:
+      - openalex_id
+      - title
+    condition: all_present
+    error_message: "Publication must have OpenAlex ID and title"
+
+# =============================================================================
+# Conditional Validations
+# =============================================================================
+entity_conditional_validations: []

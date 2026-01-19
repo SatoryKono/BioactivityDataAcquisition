@@ -1,0 +1,47 @@
+# configs/dq/providers/pubmed.yaml
+# PubMed-specific DQ rules
+# Inherits from: _defaults.yaml
+
+version: "1.0.0"
+provider: pubmed
+
+# =============================================================================
+# Provider-Specific Thresholds
+# =============================================================================
+thresholds:
+  soft_fail: 0.05  # PubMed has high quality curated data
+  hard_fail: 0.15
+
+# =============================================================================
+# PubMed Common Field Validations
+# =============================================================================
+provider_field_validations:
+  # PMID format validation
+  - field: pmid
+    type: range
+    min: 1
+    max: 100000000
+    nullable: true
+    error_message: "PMID must be a positive integer"
+
+  # PMC ID format validation
+  - field: pmc_id
+    type: pattern
+    pattern: '^PMC\d+$'
+    nullable: true
+    error_message: "PMC ID must start with PMC followed by digits"
+
+  # DOI format validation
+  - field: doi
+    type: pattern
+    pattern: '^10\.\d{4,}/.*$'
+    nullable: true
+    error_message: "Invalid DOI format (must start with 10. prefix)"
+
+  # Year range validation
+  - field: pub_year
+    type: range
+    min: 1800
+    max: 2100
+    nullable: true
+    error_message: "Publication year out of valid range"

@@ -1,0 +1,68 @@
+# configs/dq/entities/uniprot/protein.yaml
+# UniProt Protein-specific DQ rules
+# Inherits from: _defaults.yaml → providers/uniprot.yaml
+
+version: "1.0.0"
+provider: uniprot
+entity: protein
+
+# Thresholds: inherit from provider (stricter: soft 0.03, hard 0.10)
+
+# =============================================================================
+# Protein-Specific Field Validations
+# =============================================================================
+entity_field_validations:
+  - field: accession
+    type: pattern
+    pattern: '^[A-Z0-9]{6,10}$'
+    nullable: false
+    error_message: "UniProt accession must be 6-10 alphanumeric chars"
+
+  - field: entry_name
+    type: pattern
+    pattern: '^[A-Z0-9_]+$'
+    nullable: true
+    error_message: "Entry name must be alphanumeric with underscores"
+
+  - field: organism
+    type: pattern
+    pattern: '^[A-Z][a-z]+ [a-z]+.*$'
+    nullable: true
+    error_message: "Organism should be in binomial nomenclature"
+
+  - field: taxonomy_id
+    type: range
+    min: 1
+    max: 10000000
+    nullable: true
+    error_message: "Taxonomy ID must be positive"
+
+  - field: sequence_length
+    type: range
+    min: 1
+    max: 100000
+    nullable: true
+    error_message: "Sequence length must be between 1 and 100,000"
+
+  - field: mass
+    type: range
+    min: 100
+    max: 10000000
+    nullable: true
+    error_message: "Molecular mass must be between 100 and 10,000,000 Da"
+
+# =============================================================================
+# Cross-Field Validations
+# =============================================================================
+entity_cross_field_validations:
+  - name: protein_identifiable
+    fields:
+      - accession
+      - entry_name
+    condition: all_present
+    error_message: "Protein must have accession and entry name"
+
+# =============================================================================
+# Conditional Validations
+# =============================================================================
+entity_conditional_validations: []
