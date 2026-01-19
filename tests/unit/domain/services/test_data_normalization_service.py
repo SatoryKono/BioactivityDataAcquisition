@@ -287,6 +287,48 @@ class TestParseAuthorsToList:
         assert result == ["Doe, John", "Smith, Jane"]
 
 
+class TestNormalizePartialDate:
+    """Tests for normalize_partial_date method with end of period strategy."""
+
+    @pytest.mark.parametrize(
+        "date_str,expected",
+        [
+            # Full date YYYY-MM-DD - unchanged
+            ("2024-03-15", "2024-03-15"),
+            ("2024-01-01", "2024-01-01"),
+            ("2024-12-31", "2024-12-31"),
+            # Partial: YYYY-MM → YYYY-MM-30 (end of month)
+            ("2024-03", "2024-03-30"),
+            ("2024-01", "2024-01-30"),
+            ("2024-12", "2024-12-30"),
+            # Partial: YYYY → YYYY-12-31 (end of year)
+            ("2024", "2024-12-31"),
+            ("2000", "2000-12-31"),
+            ("1999", "1999-12-31"),
+            # Whitespace handling
+            ("  2024-03-15  ", "2024-03-15"),
+            ("  2024-03  ", "2024-03-30"),
+            ("  2024  ", "2024-12-31"),
+            # None/empty cases
+            (None, None),
+            ("", None),
+            ("   ", None),
+            # Invalid formats - return None
+            ("2024/03/15", None),
+            ("03-15-2024", None),
+            ("abc", None),
+            ("20241", None),
+            ("2024-3", None),  # Invalid: month should be 2 digits
+        ],
+    )
+    def test_normalize_partial_date(
+        self, date_str: str | None, expected: str | None
+    ) -> None:
+        """Test partial date normalization with end of period strategy."""
+        service = DefaultDataNormalizationService()
+        assert service.normalize_partial_date(date_str) == expected
+
+
 class TestFormatDateParts:
     """Tests for format_date_parts method.
 

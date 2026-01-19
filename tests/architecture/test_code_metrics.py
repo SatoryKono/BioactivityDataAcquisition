@@ -58,6 +58,7 @@ class TestFileSizeLimits:
         # Domain models/metadata.py (models/metadata.py 566 LOC, ports/metadata.py only 104 LOC)
         "metadata.py": 570,  # 566 LOC - Metadata models with APIRequestDetails + RateLimitInfo for Bronze layer enrichment
         # Domain ports (Protocol definitions with comprehensive docstrings)
+        "data_normalization.py": 330,  # 321 LOC - DataNormalizationPort with partial date normalization
         "storage.py": 395,  # 390 LOC - StoragePort with read_silver, write_*_merged for composite pipelines + SourceMetadata param + Silver lineage
         # Domain Pandera schemas (declarative field definitions)
         "compound.py": 380,  # 377 LOC - PubChem molecule schema + deprecated alias (v2.0)
@@ -86,7 +87,7 @@ class TestFileSizeLimits:
         "silver_writer.py": 1141,  # 1126 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage + fromisoformat timezone validation
         "gold_writer.py": 930,  # 918 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage
         "bronze_writer.py": 760,  # 749 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param
-        "gold.py": 970,  # 961 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + lookup metadata comments + publication schemas)
+        "gold.py": 975,  # 972 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + lookup metadata comments + publication schemas + DATE_REGEX validation)
         "silver.py": 810,  # 804 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas)
         "client.py": 700,  # 692 LOC - ChemblAdapter (complex FilterableDataSourcePort), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic

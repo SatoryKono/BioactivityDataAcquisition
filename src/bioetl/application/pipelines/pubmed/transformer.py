@@ -270,7 +270,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     def _compute_publication_date(
         self, epub_date: str | None, pub_date: str | None, year: int | None
     ) -> str | None:
-        """Compute unified publication_date with priority: epub_date > pub_date > year.
+        """Compute unified publication_date (YYYY-MM-DD).
+
+        Priority: epub_date > pub_date > year
+        All outputs normalized to full YYYY-MM-DD format using end-of-period strategy.
 
         Args:
             epub_date: Electronic publication date (YYYY-MM-DD or partial).
@@ -280,18 +283,39 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         Returns:
             ISO date string (YYYY-MM-DD) or None.
         """
-        # Priority 1: epub_date if it's a complete date (YYYY-MM-DD)
+        # Priority 1: epub_date if it's a complete date
         if epub_date and len(epub_date) >= 10:
             return epub_date[:10]
 
-        # Priority 2: pub_date if it's a complete date
-        if pub_date and len(pub_date) >= 10:
-            return pub_date[:10]
+        # Priority 2: pub_date (may be partial, normalize it)
+        if pub_date:
+            return self._normalize_partial_date(pub_date)
 
-        # Priority 3: Construct from year (use Jan 1 as default)
+        # Priority 3: Construct from year (end of year)
         if year:
-            return f"{year}-01-01"
+            return f"{year}-12-31"
 
+        return None
+
+    def _normalize_partial_date(self, date_str: str | None) -> str | None:
+        """Normalize partial date to YYYY-MM-DD (end of period).
+
+        Args:
+            date_str: Date string (YYYY, YYYY-MM, or YYYY-MM-DD).
+
+        Returns:
+            Full YYYY-MM-DD date or None.
+        """
+        if not date_str:
+            return None
+        if len(date_str) >= 10:
+            return date_str[:10]
+        if len(date_str) == 7:
+            # YYYY-MM → YYYY-MM-30
+            return f"{date_str}-30"
+        if len(date_str) == 4:
+            # YYYY → YYYY-12-31
+            return f"{date_str}-12-31"
         return None
 
     def _extract_date_data(
