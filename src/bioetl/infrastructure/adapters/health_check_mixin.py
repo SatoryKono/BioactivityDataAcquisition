@@ -24,9 +24,12 @@ from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 from bioetl.domain.types import HealthStatus
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, MetricsPort
-    from bioetl.domain.ports.health_check import HealthCheckResult
-    from bioetl.domain.ports.resilience import CircuitBreakerPort
+    from bioetl.domain.ports import (
+        CircuitBreakerPort,
+        HealthCheckResult,
+        LoggerPort,
+        MetricsPort,
+    )
 
 
 # Default health check timeout per RULES.md §11.3
@@ -108,7 +111,7 @@ class HealthCheckMixin:
             MetricsPort instance (never None).
 
         """
-        from bioetl.domain.ports.noop import NoOpMetrics
+        from bioetl.domain.ports import NoOpMetrics
 
         return self.metrics if self.metrics is not None else NoOpMetrics()
 
@@ -312,7 +315,7 @@ class HealthCheckProviderMixin(HealthCheckMixin):
 
         """
         # Import here to avoid circular imports
-        from bioetl.domain.ports.health_check import HealthCheckResult
+        from bioetl.domain.ports import HealthCheckResult
 
         ctx = self._start_health_check()
         last_error: str | None = None

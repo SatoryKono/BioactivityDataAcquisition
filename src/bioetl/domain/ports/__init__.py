@@ -62,6 +62,7 @@ from bioetl.domain.ports.metadata_coordinator import (
     GoldMetadataInput,
     MetadataCoordinatorPort,
     SilverMetadataInput,
+    SilverRef,
 )
 from bioetl.domain.ports.noop import (
     NoOpAudit,
@@ -151,6 +152,7 @@ __all__ = [
     "SilverDQAnalyzerPort",
     "SilverDQConfigPort",
     "SilverMetadataInput",
+    "SilverRef",
     "SilverValidatorPort",
     "StoragePort",
     "TracingPort",
