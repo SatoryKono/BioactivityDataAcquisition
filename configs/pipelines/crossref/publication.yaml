@@ -17,38 +17,13 @@ gold_table: "crossref_publication"
 source_file: ../../sources/crossref.yaml
 
 # -----------------------------------------------------------------------------
-# Data Quality Rules (entity-specific overrides)
+# Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
-dq_rules:
-  field_validations:
-    - field: "doi"
-      type: "pattern"
-      pattern: "^10\\.\\d{4,}/.*$"
-      nullable: false
-      error_message: "DOI must start with 10. prefix"
-    - field: "title"
-      type: "pattern"
-      pattern: "^.{1,2000}$"
-      nullable: true
-    - field: "year"
-      type: "range"
-      min: 1800
-      max: 2100
-      nullable: true
-    - field: "type"
-      type: "enum"
-      allowed: ["journal-article", "book-chapter", "proceedings-article", "posted-content", "book", "report", "dataset", "standard"]
-      nullable: true
-    - field: "is_referenced_by_count"
-      type: "range"
-      min: 0
-      nullable: true
-
-  cross_field_validations:
-    - name: "publication_identifiable"
-      fields: ["doi", "title"]
-      condition: "all_present"
-      error_message: "Publication must have DOI and title"
+# DQ rules are loaded from hierarchical config files:
+#   1. configs/dq/_defaults.yaml (global defaults)
+#   2. configs/dq/providers/crossref.yaml (provider-specific)
+#   3. configs/dq/entities/crossref/publication.yaml (entity-specific)
+dq_config_file: ../../dq/entities/crossref/publication.yaml
 
 # Entity-specific gold filters
 gold_filters:

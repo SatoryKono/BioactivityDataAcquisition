@@ -17,30 +17,13 @@ gold_table: "chembl_assay_parameters"
 source_file: ../../sources/chembl.yaml
 
 # -----------------------------------------------------------------------------
-# Data Quality Rules (entity-specific overrides)
+# Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
-dq_rules:
-  field_validations:
-    - field: "assay_param_id"
-      type: "range"
-      min: 1
-      nullable: false
-    - field: "assay_chembl_id"
-      type: "pattern"
-      pattern: "^CHEMBL\\d+$"
-      nullable: false
-      error_message: "assay_chembl_id must match CHEMBL format"
-    - field: "type"
-      type: "pattern"
-      pattern: "^.{1,100}$"
-      nullable: false
-      error_message: "type is required"
-
-  cross_field_validations:
-    - name: "param_linkage"
-      fields: ["assay_param_id", "assay_chembl_id"]
-      condition: "all_present"
-      error_message: "Both param ID and assay ID are required"
+# DQ rules are loaded from hierarchical config files:
+#   1. configs/dq/_defaults.yaml (global defaults)
+#   2. configs/dq/providers/chembl.yaml (provider-specific)
+#   3. configs/dq/entities/chembl/assay_parameters.yaml (entity-specific)
+dq_config_file: ../../dq/entities/chembl/assay_parameters.yaml
 
 # Entity-specific gold filters
 gold_filters:

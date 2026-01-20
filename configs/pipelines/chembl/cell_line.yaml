@@ -16,30 +16,13 @@ gold_table: "chembl_cell_line"
 source_file: ../../sources/chembl.yaml
 
 # -----------------------------------------------------------------------------
-# Data Quality Rules (entity-specific overrides)
+# Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
-dq_rules:
-  field_validations:
-    - field: "cell_chembl_id"
-      type: "pattern"
-      pattern: "^CHEMBL\\d+$"
-      nullable: false
-      error_message: "cell_chembl_id must match CHEMBL format"
-    - field: "cell_name"
-      type: "pattern"
-      pattern: "^.{1,200}$"
-      nullable: false
-      error_message: "cell_name is required and must not exceed 200 chars"
-    - field: "cellosaurus_id"
-      type: "pattern"
-      pattern: "^CVCL_[A-Z0-9]+$"
-      nullable: true
-      error_message: "cellosaurus_id must match CVCL format"
-    - field: "cell_source_tax_id"
-      type: "range"
-      min: 1
-      max: 10000000
-      nullable: true
+# DQ rules are loaded from hierarchical config files:
+#   1. configs/dq/_defaults.yaml (global defaults)
+#   2. configs/dq/providers/chembl.yaml (provider-specific)
+#   3. configs/dq/entities/chembl/cell_line.yaml (entity-specific)
+dq_config_file: ../../dq/entities/chembl/cell_line.yaml
 
 # Entity-specific gold filters
 gold_filters:

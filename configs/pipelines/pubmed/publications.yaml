@@ -22,49 +22,13 @@ source:
   api_key: "${BIOETL_NCBI_API_KEY}"
 
 # -----------------------------------------------------------------------------
-# Data Quality Rules (entity-specific overrides)
+# Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
-dq_rules:
-  field_validations:
-    - field: "pmid"
-      type: "range"
-      min: 1
-      max: 100000000
-      nullable: false
-      error_message: "PMID must be a positive integer"
-    - field: "title"
-      type: "pattern"
-      pattern: "^.{1,2000}$"
-      nullable: true
-    - field: "doi"
-      type: "pattern"
-      pattern: "^10\\.\\d{4,}/.*$"
-      nullable: true
-      error_message: "DOI must start with 10. prefix"
-    - field: "pub_year"
-      type: "range"
-      min: 1800
-      max: 2100
-      nullable: true
-    - field: "pub_type"
-      type: "enum"
-      allowed: ["Journal Article", "Review", "Letter", "Editorial", "Clinical Trial", "Meta-Analysis", "Case Reports", "Comparative Study", "Evaluation Study"]
-      nullable: true
-    - field: "pmc_id"
-      type: "pattern"
-      pattern: "^PMC\\d+$"
-      nullable: true
-      error_message: "PMC ID must start with PMC followed by digits"
-
-  cross_field_validations:
-    - name: "publication_identifiable"
-      fields: ["pmid", "title"]
-      condition: "all_present"
-      error_message: "Publication must have PMID and title"
-    - name: "has_identifier"
-      fields: ["pmid", "doi", "pmc_id"]
-      condition: "any_present"
-      error_message: "At least one identifier required"
+# DQ rules are loaded from hierarchical config files:
+#   1. configs/dq/_defaults.yaml (global defaults)
+#   2. configs/dq/providers/pubmed.yaml (provider-specific)
+#   3. configs/dq/entities/pubmed/publication.yaml (entity-specific)
+dq_config_file: ../../dq/entities/pubmed/publication.yaml
 
 # Entity-specific gold filters
 gold_filters:

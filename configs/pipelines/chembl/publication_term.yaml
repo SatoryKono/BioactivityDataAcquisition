@@ -20,35 +20,13 @@ gold_table: "chembl_publication_term"
 source_file: ../../sources/chembl.yaml
 
 # -----------------------------------------------------------------------------
-# Data Quality Rules (entity-specific overrides)
+# Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
-dq_rules:
-  field_validations:
-    - field: "entity_id"
-      type: "pattern"
-      pattern: "^[a-f0-9]{64}$"
-      nullable: false
-      error_message: "entity_id must be a 64-char SHA256 hash"
-    - field: "document_chembl_id"
-      type: "pattern"
-      pattern: "^CHEMBL\\d+$"
-      nullable: false
-      error_message: "document_chembl_id must match CHEMBL format"
-    - field: "term_type"
-      type: "enum"
-      allowed: ["MESH_HEADING", "KEYWORD", "AUTHOR", "INSTITUTION"]
-      nullable: false
-    - field: "term"
-      type: "pattern"
-      pattern: "^.{1,500}$"
-      nullable: false
-      error_message: "term is required"
-
-  cross_field_validations:
-    - name: "term_completeness"
-      fields: ["document_chembl_id", "term", "term_type"]
-      condition: "all_present"
-      error_message: "All term fields are required"
+# DQ rules are loaded from hierarchical config files:
+#   1. configs/dq/_defaults.yaml (global defaults)
+#   2. configs/dq/providers/chembl.yaml (provider-specific)
+#   3. configs/dq/entities/chembl/publication_term.yaml (entity-specific)
+dq_config_file: ../../dq/entities/chembl/publication_term.yaml
 
 # Entity-specific gold filters
 gold_filters:

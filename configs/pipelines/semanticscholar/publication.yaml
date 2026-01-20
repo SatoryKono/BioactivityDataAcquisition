@@ -19,47 +19,13 @@ gold_table: "semanticscholar_publication"
 source_file: ../../sources/semanticscholar.yaml
 
 # -----------------------------------------------------------------------------
-# Data Quality Rules (entity-specific overrides)
+# Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
-dq_rules:
-  field_validations:
-    - field: "paper_id"
-      type: "pattern"
-      pattern: "^[a-f0-9]{40}$"
-      nullable: false
-      error_message: "paper_id must be a 40-char hex string"
-    - field: "doi"
-      type: "pattern"
-      pattern: "^10\\.\\d{4,}/.*$"
-      nullable: true
-      error_message: "DOI must start with 10. prefix"
-    - field: "title"
-      type: "pattern"
-      pattern: "^.{1,2000}$"
-      nullable: true
-    - field: "year"
-      type: "range"
-      min: 1500
-      max: 2100
-      nullable: true
-    - field: "citation_count"
-      type: "range"
-      min: 0
-      nullable: true
-    - field: "reference_count"
-      type: "range"
-      min: 0
-      nullable: true
-    - field: "influential_citation_count"
-      type: "range"
-      min: 0
-      nullable: true
-
-  cross_field_validations:
-    - name: "publication_identifiable"
-      fields: ["paper_id", "title"]
-      condition: "all_present"
-      error_message: "Publication must have paper_id and title"
+# DQ rules are loaded from hierarchical config files:
+#   1. configs/dq/_defaults.yaml (global defaults)
+#   2. configs/dq/providers/semanticscholar.yaml (provider-specific)
+#   3. configs/dq/entities/semanticscholar/publication.yaml (entity-specific)
+dq_config_file: ../../dq/entities/semanticscholar/publication.yaml
 
 # Entity-specific gold filters
 gold_filters:

@@ -24,43 +24,13 @@ source:
   batch_size: 50  # Polite pool API - conservative batch size
 
 # -----------------------------------------------------------------------------
-# Data Quality Rules (entity-specific overrides)
+# Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
-dq_rules:
-  field_validations:
-    - field: "openalex_id"
-      type: "pattern"
-      pattern: "^W\\d+$"
-      nullable: false
-      error_message: "OpenAlex ID must start with W followed by digits"
-    - field: "doi"
-      type: "pattern"
-      pattern: "^10\\.\\d{4,}/.*$"
-      nullable: true
-      error_message: "DOI must start with 10. prefix"
-    - field: "title"
-      type: "pattern"
-      pattern: "^.{1,2000}$"
-      nullable: true
-    - field: "year"
-      type: "range"
-      min: 1500
-      max: 2100
-      nullable: true
-    - field: "type"
-      type: "enum"
-      allowed: ["article", "book-chapter", "book", "dataset", "dissertation", "editorial", "letter", "review", "preprint", "other"]
-      nullable: true
-    - field: "cited_by_count"
-      type: "range"
-      min: 0
-      nullable: true
-
-  cross_field_validations:
-    - name: "publication_identifiable"
-      fields: ["openalex_id", "title"]
-      condition: "all_present"
-      error_message: "Publication must have OpenAlex ID and title"
+# DQ rules are loaded from hierarchical config files:
+#   1. configs/dq/_defaults.yaml (global defaults)
+#   2. configs/dq/providers/openalex.yaml (provider-specific)
+#   3. configs/dq/entities/openalex/publication.yaml (entity-specific)
+dq_config_file: ../../dq/entities/openalex/publication.yaml
 
 # Entity-specific gold filters
 gold_filters:
