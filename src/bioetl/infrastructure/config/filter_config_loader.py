@@ -11,25 +11,24 @@ Implements ADR-028: Filter Rules Externalization.
 
 from __future__ import annotations
 
-import copy
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig
+from bioetl.infrastructure.config.base_config_loader import BaseConfigLoader
 from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
 
+# Keys whose lists should concatenate (not override)
+_FILTER_CONCAT_KEYS = frozenset({"required_fields", "exclude_if_present"})
 
-class FilterConfigLoader:
+
+class FilterConfigLoader(BaseConfigLoader[tuple[InputFilterConfig, GoldFilterConfig]]):
     """Loads and merges filter configurations from hierarchical files.
 
     Thread-safe with internal caching for performance.
 
     Attributes:
-        _configs_root: Root path to configs/ directory.
         _filter_root: Path to configs/filter/ directory.
-        _cache: Cache of loaded configs keyed by "provider:entity".
     """
 
     def __init__(self, configs_root: Path) -> None:
@@ -38,9 +37,8 @@ class FilterConfigLoader:
         Args:
             configs_root: Path to configs/ directory.
         """
-        self._configs_root = configs_root
+        super().__init__(configs_root)
         self._filter_root = configs_root / "filter"
-        self._cache: dict[str, tuple[InputFilterConfig, GoldFilterConfig]] = {}
 
     def load(
         self,
@@ -108,29 +106,6 @@ class FilterConfigLoader:
 
         return domain_configs
 
-    def clear_cache(self) -> None:
-        """Clear the configuration cache.
-
-        Call after modifying config files during development/testing.
-        """
-        self._cache.clear()
-
-    def _load_yaml(self, path: Path) -> dict[str, Any]:
-        """Load YAML file, return empty dict if not exists.
-
-        Args:
-            path: Path to YAML file.
-
-        Returns:
-            Parsed YAML content or empty dict.
-        """
-        if not path.exists():
-            return {}
-
-        with open(path, encoding="utf-8") as f:
-            content = yaml.safe_load(f)
-            return content if content is not None else {}
-
     def _deep_merge(
         self,
         base: dict[str, Any],
@@ -151,26 +126,7 @@ class FilterConfigLoader:
         Returns:
             Merged dict (new object, inputs unchanged).
         """
-        result = copy.deepcopy(base)
-
-        for key, override_value in override.items():
-            if key not in result:
-                result[key] = copy.deepcopy(override_value)
-            elif isinstance(override_value, dict) and isinstance(result[key], dict):
-                # Recursive merge for nested dicts (including gold_filters)
-                result[key] = self._deep_merge(result[key], override_value)
-            elif (
-                isinstance(override_value, list)
-                and isinstance(result[key], list)
-                and key in ("required_fields", "exclude_if_present")
-            ):
-                # Concatenate and deduplicate lists for these keys
-                result[key] = self._merge_string_lists(result[key], override_value)
-            else:
-                # Scalar or other list: override wins
-                result[key] = copy.deepcopy(override_value)
-
-        return result
+        return self._deep_merge_base(base, override, _FILTER_CONCAT_KEYS)
 
     def _merge_string_lists(
         self,
