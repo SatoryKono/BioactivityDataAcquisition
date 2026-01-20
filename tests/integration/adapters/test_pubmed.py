@@ -31,6 +31,7 @@ def vcr_config() -> dict[str, Any]:
         "decode_compressed_response": True,
     }
 
+
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
