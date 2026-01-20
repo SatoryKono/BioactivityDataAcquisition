@@ -105,8 +105,13 @@ class DefaultDataNormalizationService:
         return serialize_to_json(hashed, ensure_ascii=True)
 
     def _hash_pii(self, value: str, salt: str) -> str:
-        """Hash a PII value with salt using SHA-256."""
-        return hashlib.sha256(f"{salt}{value}".encode()).hexdigest()
+        """Hash a PII value with salt using SHA-256 per RULES.md §5.4.
+
+        Normalization: strip whitespace, lowercase before hashing.
+        Formula: sha256(lowercase(value) + SALT)
+        """
+        normalized = value.strip().lower()
+        return hashlib.sha256(f"{normalized}{salt}".encode()).hexdigest()
 
     def strip_html_tags(self, text: str | None) -> str | None:
         """Remove HTML tags, decode entities, normalize whitespace."""
