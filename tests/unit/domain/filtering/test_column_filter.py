@@ -16,7 +16,14 @@ class TestFilterOperator:
 
     def test_all_operators_defined(self) -> None:
         """Test that all operators are defined."""
-        expected = {"in", "not_in", "is_null", "is_not_null", "is_empty", "is_not_empty"}
+        expected = {
+            "in",
+            "not_in",
+            "is_null",
+            "is_not_null",
+            "is_empty",
+            "is_not_empty",
+        }
         actual = {op.value for op in FilterOperator}
         assert actual == expected
 

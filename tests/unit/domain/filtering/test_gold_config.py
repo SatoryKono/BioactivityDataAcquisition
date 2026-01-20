@@ -582,7 +582,9 @@ class TestGoldFilterConfigMixedOperators:
         """Test IS_NOT_EMPTY fails when column is missing."""
         cfg = GoldFilterConfig(
             column_filters=(
-                GoldColumnFilter(column="missing", operator=FilterOperator.IS_NOT_EMPTY),
+                GoldColumnFilter(
+                    column="missing", operator=FilterOperator.IS_NOT_EMPTY
+                ),
             )
         )
         # Missing column returns None, which is empty

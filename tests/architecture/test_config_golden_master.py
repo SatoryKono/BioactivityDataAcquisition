@@ -20,6 +20,7 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import asdict
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
@@ -43,6 +44,8 @@ PIPELINES = [
 
 def _convert_for_json(obj: Any) -> Any:
     """Convert non-JSON-serializable types for snapshotting."""
+    if isinstance(obj, Enum):
+        return obj.value  # Convert Enum to its value
     if isinstance(obj, frozenset):
         return sorted(obj)  # Convert to sorted list for stable comparisons
     if isinstance(obj, dict):

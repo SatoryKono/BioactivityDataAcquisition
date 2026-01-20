@@ -68,9 +68,7 @@ class GoldFilterConfig:
         """Проверяет соответствие значений колонок фильтрам."""
         return all(self._check_single_column(record, f) for f in self.column_filters)
 
-    def _check_single_column(
-        self, record: dict[str, Any], f: GoldColumnFilter
-    ) -> bool:
+    def _check_single_column(self, record: dict[str, Any], f: GoldColumnFilter) -> bool:
         """Проверяет одну колонку по оператору.
 
         Args:
@@ -253,7 +251,9 @@ class GoldFilterConfig:
 
 # Operator dispatch table - defined after class to reference methods
 # This mapping enables O(1) operator lookup with CC=1 per operator method
-_OPERATOR_CHECKERS: dict[FilterOperator, Callable[[GoldFilterConfig, Any, frozenset[str] | None], bool]] = {
+_OPERATOR_CHECKERS: dict[
+    FilterOperator, Callable[[GoldFilterConfig, Any, frozenset[str] | None], bool]
+] = {
     FilterOperator.IN: GoldFilterConfig._check_op_in,
     FilterOperator.NOT_IN: GoldFilterConfig._check_op_not_in,
     FilterOperator.IS_NULL: GoldFilterConfig._check_op_is_null,

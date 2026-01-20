@@ -1111,9 +1111,7 @@ class SilverWriter(BaseDeltaWriter):
         # Delta Lake doesn't support Null type - columns with all None values
         # must be cast to a concrete type (String is safe default)
         null_columns = [
-            field.name
-            for field in arrow_table.schema
-            if pa.types.is_null(field.type)
+            field.name for field in arrow_table.schema if pa.types.is_null(field.type)
         ]
         if null_columns:
             self.logger.debug(
