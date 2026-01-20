@@ -20,7 +20,7 @@ from typing import Any
 import polars as pl
 import pyarrow as pa
 
-from bioetl.domain.ports.dq_config import GoldDQConfigPort
+from bioetl.domain.ports import GoldDQConfigPort
 from bioetl.domain.value_objects.dq_report import (
     AnomalyDetectionResult,
     AnomalyMetric,

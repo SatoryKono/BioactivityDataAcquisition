@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 # Re-export MemoryStats from domain for backward compatibility
-from bioetl.domain.ports.memory import MemoryStats
+from bioetl.domain.ports import MemoryStats
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
