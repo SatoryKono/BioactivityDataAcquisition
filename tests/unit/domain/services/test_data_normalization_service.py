@@ -332,23 +332,28 @@ class TestNormalizePartialDate:
 
 
 class TestFormatDateParts:
-    """Tests for format_date_parts method with end of period strategy."""
+    """Tests for format_date_parts method.
+
+    Uses end-of-period normalization:
+    - Complete dates stay as-is
+    - Month-only dates use last day of month
+    - Year-only dates use December 31st
+    """
 
     @pytest.mark.parametrize(
         "date_parts,expected",
         [
-            # Full date - unchanged
+            # Complete dates (no normalization needed)
             ([[2024, 3, 15]], "2024-03-15"),
             ([[2024, 1, 5]], "2024-01-05"),
             ([[2024, 12, 31]], "2024-12-31"),
-            # Partial: year-month → end of month (day 30)
-            ([[2024, 3]], "2024-03-30"),
-            ([[2024, 1]], "2024-01-30"),
-            ([[2024, 12]], "2024-12-30"),
-            # Partial: year only → end of year (Dec 31)
+            # Month-only: end-of-period (last day of month)
+            ([[2024, 3]], "2024-03-31"),  # March has 31 days
+            ([[2024, 2]], "2024-02-29"),  # 2024 is leap year
+            ([[2023, 2]], "2023-02-28"),  # 2023 is not leap year
+            # Year-only: end-of-period (December 31st)
             ([[2024]], "2024-12-31"),
-            ([[2000]], "2000-12-31"),
-            # None/empty cases
+            # Edge cases
             (None, None),
             ([], None),
             ([[]], None),
@@ -357,7 +362,7 @@ class TestFormatDateParts:
     def test_format_date_parts(
         self, date_parts: list[list[int]] | None, expected: str | None
     ) -> None:
-        """Test date-parts formatting with end of period normalization."""
+        """Test date-parts formatting with end-of-period normalization."""
         service = DefaultDataNormalizationService()
         assert service.format_date_parts(date_parts) == expected
 

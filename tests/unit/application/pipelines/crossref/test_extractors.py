@@ -289,7 +289,12 @@ class TestExtractPageInfo:
 
 
 class TestExtractDates:
-    """Tests for extract_dates function."""
+    """Tests for extract_dates function.
+
+    Uses end-of-period normalization for partial dates:
+    - Month-only dates use last day of month
+    - Year-only dates use December 31st
+    """
 
     def test_extract_dates_complete(self) -> None:
         """Should extract both date fields."""
@@ -304,14 +309,14 @@ class TestExtractDates:
         }
 
     def test_extract_dates_partial_date(self) -> None:
-        """Should handle partial dates (year-month only)."""
+        """Should handle partial dates with end-of-period normalization."""
         publication = {
-            "published-print": {"date-parts": [[2023, 6]]},
-            "published-online": {"date-parts": [[2023]]},
+            "published-print": {"date-parts": [[2023, 6]]},  # June -> 30 days
+            "published-online": {"date-parts": [[2023]]},  # Year -> Dec 31
         }
         result = extract_dates(publication)
-        assert result["published_print"] == "2023-06"
-        assert result["published_online"] == "2023"
+        assert result["published_print"] == "2023-06-30"  # Last day of June
+        assert result["published_online"] == "2023-12-31"  # Last day of year
 
     def test_extract_dates_empty(self) -> None:
         """Should return None for empty publication."""

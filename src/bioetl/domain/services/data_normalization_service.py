@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 _WHITESPACE_PATTERN = re.compile(r"\s+")
+_DATE_FULL_FMT = "{0:04d}-{1:02d}-{2:02d}"
 _DOI_URL_PREFIXES = ("https://doi.org/", "http://doi.org/", "doi:")
 
 # Partial date patterns for end of period normalization
@@ -241,30 +242,34 @@ class DefaultDataNormalizationService:
     def format_date_parts(
         self, date_parts: Sequence[Sequence[int]] | None
     ) -> str | None:
-        """Format CrossRef date-parts to full YYYY-MM-DD (end of period).
+        """Format CrossRef date-parts [[year, month?, day?]] to ISO YYYY-MM-DD string.
 
-        Partial dates are normalized to the END of the period:
-        - [year, month, day] → YYYY-MM-DD (full date)
-        - [year, month] → YYYY-MM-30 (end of month)
-        - [year] → YYYY-12-31 (end of year)
-
-        Args:
-            date_parts: Date parts in CrossRef format [[year, month?, day?]].
-
-        Returns:
-            Full ISO date string (YYYY-MM-DD), or None.
+        Uses end-of-period normalization for partial dates:
+        - Complete date [[2024, 3, 15]]: returns "2024-03-15"
+        - Month-only [[2024, 3]]: returns "2024-03-31" (last day of month)
+        - Year-only [[2024]]: returns "2024-12-31" (last day of year)
         """
-        if not date_parts or not date_parts[0]:
+        parts = self._extract_date_parts(date_parts)
+        if not parts:
             return None
-        return self._format_parts_list(date_parts[0])
+        return self._format_parts_to_date(parts)
 
-    def _format_parts_list(self, parts: Sequence[int]) -> str | None:
-        """Format a list of date parts to YYYY-MM-DD string."""
-        num_parts = len(parts)
-        if num_parts >= 3:
-            return f"{parts[0]:04d}-{parts[1]:02d}-{parts[2]:02d}"
-        if num_parts == 2:
-            return f"{parts[0]:04d}-{parts[1]:02d}-30"
-        if num_parts == 1:
-            return f"{parts[0]:04d}-12-31"
-        return None
+    def _extract_date_parts(
+        self, date_parts: Sequence[Sequence[int]] | None
+    ) -> Sequence[int] | None:
+        """Extract first date-parts array if valid, else None."""
+        if not date_parts:
+            return None
+        parts = date_parts[0]
+        return parts if parts else None
+
+    def _format_parts_to_date(self, parts: Sequence[int]) -> str:
+        """Format date parts to YYYY-MM-DD with end-of-period normalization."""
+        from calendar import monthrange
+
+        year = parts[0]
+        if len(parts) >= 3:
+            return _DATE_FULL_FMT.format(year, parts[1], parts[2])
+        if len(parts) == 2:
+            return _DATE_FULL_FMT.format(year, parts[1], monthrange(year, parts[1])[1])
+        return _DATE_FULL_FMT.format(year, 12, 31)
