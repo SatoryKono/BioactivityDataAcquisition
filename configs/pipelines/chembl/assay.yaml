@@ -25,6 +25,15 @@ source_file: ../../sources/chembl.yaml
 dq_config_file: ../../dq/entities/chembl/assay.yaml
 
 # -----------------------------------------------------------------------------
+# Filter Configuration (ADR-028)
+# -----------------------------------------------------------------------------
+# Filter rules are loaded from hierarchical config files:
+#   1. configs/filter/_defaults.yaml (global defaults)
+#   2. configs/filter/providers/chembl.yaml (provider-specific)
+#   3. configs/filter/entities/chembl/assay.yaml (entity-specific)
+filter_config_file: ../../filter/entities/chembl/assay.yaml
+
+# -----------------------------------------------------------------------------
 # Inline DQ Overrides (applied on top of dq_config_file)
 # -----------------------------------------------------------------------------
 # Only overrides that EXTEND or DIFFER from entity DQ config are kept here.

@@ -1,0 +1,35 @@
+# configs/filter/entities/pubchem/compound.yaml
+# =============================================================================
+# PubChem Compound Filter Configuration
+# =============================================================================
+# Entity-specific filter rules for PubChem compound data.
+# Reference: ADR-028 (Filter Rules Externalization)
+
+version: "1.0.0"
+provider: pubchem
+entity: compound
+
+# -----------------------------------------------------------------------------
+# Input Filter
+# -----------------------------------------------------------------------------
+# Filter compounds by SMILES from CSV
+# NOTE: PubChem SMILES search is per-compound due to API limitations
+input_filter:
+  enabled: true
+  source_path: "data/input/molecule.csv"
+  column_name: "canonical_smiles"
+  filter_field: "smiles"
+  batch_size: 1  # SMILES search is per-compound
+
+# -----------------------------------------------------------------------------
+# Gold Filters
+# -----------------------------------------------------------------------------
+# Criteria for valid compounds
+gold_filters:
+  # Required fields
+  required_fields:
+    - cid
+    - molecular_formula
+
+  # Empty columns filter (use defaults)
+  columns: {}

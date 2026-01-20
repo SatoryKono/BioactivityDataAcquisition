@@ -1,0 +1,40 @@
+# configs/filter/entities/openalex/publication.yaml
+# =============================================================================
+# OpenAlex Publication Filter Configuration
+# =============================================================================
+# Entity-specific filter rules for OpenAlex publication data.
+# Reference: ADR-028 (Filter Rules Externalization)
+
+version: "1.0.0"
+provider: openalex
+entity: publication
+
+# -----------------------------------------------------------------------------
+# Input Filter
+# -----------------------------------------------------------------------------
+# Filter publications by DOI from CSV
+# Supports fallback to title search if DOI not found or empty
+input_filter:
+  enabled: true
+  source_path: "data/input/dois.csv"
+  column_name: "doi"
+  filter_field: "doi"
+  batch_size: 50  # Polite pool API - conservative batch size
+  fallback_column: "title"  # Search by title if DOI not found or empty
+
+# -----------------------------------------------------------------------------
+# Gold Filters
+# -----------------------------------------------------------------------------
+# Criteria for valid publications
+gold_filters:
+  # Numeric range filters
+  ranges:
+    # Reasonable year range
+    year:
+      min: 1900
+      max: 2100
+
+  # Required fields
+  required_fields:
+    - openalex_id
+    - title

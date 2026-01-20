@@ -1,0 +1,23 @@
+# configs/filter/providers/semanticscholar.yaml
+# =============================================================================
+# Semantic Scholar Provider Filter Configuration
+# =============================================================================
+# Provider-level defaults for Semantic Scholar entities.
+# Reference: ADR-028 (Filter Rules Externalization)
+
+version: "1.0.0"
+provider: semanticscholar
+
+# -----------------------------------------------------------------------------
+# Input Filter Defaults
+# -----------------------------------------------------------------------------
+# Semantic Scholar paper lookup batch size
+input_filter:
+  batch_size: 100
+
+# -----------------------------------------------------------------------------
+# Gold Filter Defaults
+# -----------------------------------------------------------------------------
+gold_filters:
+  required_fields: []
+  columns: {}

@@ -1,0 +1,23 @@
+# configs/filter/providers/uniprot.yaml
+# =============================================================================
+# UniProt Provider Filter Configuration
+# =============================================================================
+# Provider-level defaults for UniProt entities.
+# Reference: ADR-028 (Filter Rules Externalization)
+
+version: "1.0.0"
+provider: uniprot
+
+# -----------------------------------------------------------------------------
+# Input Filter Defaults
+# -----------------------------------------------------------------------------
+# UniProt adapter uses OR-query batching for efficient lookups
+input_filter:
+  batch_size: 100
+
+# -----------------------------------------------------------------------------
+# Gold Filter Defaults
+# -----------------------------------------------------------------------------
+gold_filters:
+  required_fields: []
+  columns: {}

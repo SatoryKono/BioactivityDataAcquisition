@@ -48,6 +48,15 @@ source:
 #   - Conditional validations: found_has_accession
 dq_config_file: ../../dq/entities/uniprot/idmapping.yaml
 
+# -----------------------------------------------------------------------------
+# Filter Configuration (ADR-028)
+# -----------------------------------------------------------------------------
+# Filter rules are loaded from hierarchical config files:
+#   1. configs/filter/_defaults.yaml (global defaults)
+#   2. configs/filter/providers/uniprot.yaml (provider-specific)
+#   3. configs/filter/entities/uniprot/idmapping.yaml (entity-specific)
+filter_config_file: ../../filter/entities/uniprot/idmapping.yaml
+
 # Sink configuration
 sink:
   bronze:

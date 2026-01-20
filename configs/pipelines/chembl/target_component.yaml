@@ -24,6 +24,15 @@ source_file: ../../sources/chembl.yaml
 #   3. configs/dq/entities/chembl/target_component.yaml (entity-specific)
 dq_config_file: ../../dq/entities/chembl/target_component.yaml
 
+# -----------------------------------------------------------------------------
+# Filter Configuration (ADR-028)
+# -----------------------------------------------------------------------------
+# Filter rules are loaded from hierarchical config files:
+#   1. configs/filter/_defaults.yaml (global defaults)
+#   2. configs/filter/providers/chembl.yaml (provider-specific)
+#   3. configs/filter/entities/chembl/target_component.yaml (entity-specific)
+filter_config_file: ../../filter/entities/chembl/target_component.yaml
+
 # Entity-specific gold filters
 gold_filters:
   required_fields: ["accession"]

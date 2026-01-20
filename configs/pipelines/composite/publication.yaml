@@ -183,5 +183,14 @@ gold_filters:
     - title
 
 # -----------------------------------------------------------------------------
+# Filter Configuration (ADR-028)
+# -----------------------------------------------------------------------------
+# Filter rules are loaded from hierarchical config files:
+#   1. configs/filter/_defaults.yaml (global defaults)
+#   2. configs/filter/providers/composite.yaml (provider-specific)
+#   3. configs/filter/entities/composite/publication.yaml (entity-specific)
+filter_config_file: ../../filter/entities/composite/publication.yaml
+
+# -----------------------------------------------------------------------------
 # Maintenance Configuration
 # -----------------------------------------------------------------------------

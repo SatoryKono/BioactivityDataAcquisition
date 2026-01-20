@@ -1,0 +1,32 @@
+# configs/filter/entities/chembl/assay_parameters.yaml
+# =============================================================================
+# ChEMBL Assay Parameters Filter Configuration
+# =============================================================================
+# Entity-specific filter rules for assay parameter data.
+# Reference: ADR-028 (Filter Rules Externalization)
+
+version: "1.0.0"
+provider: chembl
+entity: assay_parameters
+
+# -----------------------------------------------------------------------------
+# Input Filter
+# -----------------------------------------------------------------------------
+# Filter assay parameters by assay_param_id from CSV
+# Reference table - high batch size for speed
+input_filter:
+  enabled: true
+  source_path: "data/input/assay_parameters.csv"
+  column_name: "assay_param_id"
+  filter_field: "assay_param_id"
+  batch_size: 1000
+
+# -----------------------------------------------------------------------------
+# Gold Filters
+# -----------------------------------------------------------------------------
+# Criteria for valid assay parameters
+gold_filters:
+  # Required fields
+  required_fields:
+    - assay_chembl_id
+    - type

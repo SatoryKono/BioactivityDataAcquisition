@@ -29,6 +29,15 @@ checkpoint_interval: 500
 #   3. configs/dq/entities/chembl/protein_class.yaml (entity-specific)
 dq_config_file: ../../dq/entities/chembl/protein_class.yaml
 
+# -----------------------------------------------------------------------------
+# Filter Configuration (ADR-028)
+# -----------------------------------------------------------------------------
+# Filter rules are loaded from hierarchical config files:
+#   1. configs/filter/_defaults.yaml (global defaults)
+#   2. configs/filter/providers/chembl.yaml (provider-specific)
+#   3. configs/filter/entities/chembl/protein_class.yaml (entity-specific)
+filter_config_file: ../../filter/entities/chembl/protein_class.yaml
+
 # Entity-specific gold filters - exclude deprecated records
 gold_filters:
   required_fields:
