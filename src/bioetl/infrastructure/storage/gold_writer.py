@@ -286,6 +286,28 @@ class GoldWriter(BaseDeltaWriter):
         # Convert to Arrow and apply canonical column order
         arrow_table = pa.Table.from_pylist(records)
 
+        # Coerce Null-typed columns to String for Delta Lake compatibility
+        # Delta Lake doesn't support Null type - columns with all None values
+        # must be cast to a concrete type (String is safe default)
+        null_columns = [
+            field.name
+            for field in arrow_table.schema
+            if pa.types.is_null(field.type)
+        ]
+        if null_columns:
+            self.logger.debug(
+                "Coercing null columns to String for Delta Lake",
+                table_name=table_name,
+                columns=null_columns,
+            )
+            for col_name in null_columns:
+                col_idx = arrow_table.schema.get_field_index(col_name)
+                # Create a new column with String type (all nulls)
+                null_array = pa.nulls(arrow_table.num_rows, type=pa.string())
+                arrow_table = arrow_table.set_column(
+                    col_idx, pa.field(col_name, pa.string()), null_array
+                )
+
         # Enforce canonical column order (ADR-014, RULES.md §2.4)
         ordered_columns = canonical_column_order(list(arrow_table.column_names))
         arrow_table = arrow_table.select(ordered_columns)

@@ -1106,6 +1106,29 @@ class SilverWriter(BaseDeltaWriter):
 
         # Infer schema from records using PyArrow
         arrow_table = pa.Table.from_pylist(records)
+
+        # Coerce Null-typed columns to String for Delta Lake compatibility
+        # Delta Lake doesn't support Null type - columns with all None values
+        # must be cast to a concrete type (String is safe default)
+        null_columns = [
+            field.name
+            for field in arrow_table.schema
+            if pa.types.is_null(field.type)
+        ]
+        if null_columns:
+            self.logger.debug(
+                "Coercing null columns to String for Delta Lake",
+                table_name=table_name,
+                columns=null_columns,
+            )
+            for col_name in null_columns:
+                col_idx = arrow_table.schema.get_field_index(col_name)
+                # Create a new column with String type (all nulls)
+                null_array = pa.nulls(arrow_table.num_rows, type=pa.string())
+                arrow_table = arrow_table.set_column(
+                    col_idx, pa.field(col_name, pa.string()), null_array
+                )
+
         schema = arrow_table.schema
 
         # Enforce canonical column order (ADR-014, RULES.md §2.4)
