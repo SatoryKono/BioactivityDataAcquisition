@@ -182,7 +182,7 @@ class LockManager:
         # Clear shared context holder
         if self._context_holder is not None:
             self._context_holder.clear()
-        self._logger.info("Lock released", extra={"stage": "cleanup"})
+        self._logger.info("Lock released", stage="cleanup")
 
     def get_context(self) -> LockContext | None:
         """Get LockContext for passing to writers.
