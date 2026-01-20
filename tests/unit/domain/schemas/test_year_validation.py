@@ -31,7 +31,7 @@ def base_etl_fields() -> dict:
         "_run_id": uuid4(),
         "_run_type": "incremental",
         "_source_batch_id": None,
-        "_ingestion_ts": datetime.now(UTC),
+        "_ingestion_ts": datetime.now(UTC).isoformat(),
         "_dq_warn": False,
         "_dq_error": False,
         "_index": 0,

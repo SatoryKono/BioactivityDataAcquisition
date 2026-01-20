@@ -5,10 +5,14 @@ Contains common metadata fields required by RULES.md §2.4.
 
 from __future__ import annotations
 
-from datetime import datetime
-
 import pandera.pandas as pa
 from pandera.typing import Series
+
+# Regex pattern for ISO 8601 timestamp validation (YYYY-MM-DDTHH:MM:SS with optional subseconds and timezone)
+# Matches: 2024-01-15T10:30:00, 2024-01-15T10:30:00.123456, 2024-01-15T10:30:00+00:00
+ISO8601_TIMESTAMP_REGEX = (
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?([+-]\d{2}:\d{2}|Z)?$"
+)
 
 
 class ETLRecordSchema(pa.DataFrameModel):
@@ -42,10 +46,11 @@ class ETLRecordSchema(pa.DataFrameModel):
         nullable=True,
         description="Batch context ID from the source.",
     )
-    ingestion_ts: Series[datetime] = pa.Field(
+    ingestion_ts: Series[str] = pa.Field(
         alias="_ingestion_ts",
         nullable=False,
-        description="Timestamp when the record was ingested (UTC).",
+        str_matches=ISO8601_TIMESTAMP_REGEX,
+        description="Timestamp when the record was ingested (UTC, ISO 8601 format).",
     )
 
     dq_warn: Series[bool] = pa.Field(
