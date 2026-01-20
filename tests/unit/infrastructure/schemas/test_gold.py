@@ -354,6 +354,8 @@ class TestGoldSchemaValidation:
             "first_page": "100",
             "last_page": "110",
             "src_id": 1,
+            "_lookup_method": "direct",
+            "_original_id": "CHEMBL12345",
             "_dq_warn": False,
             "_dq_error": False,
             "_run_id": "run-001",
