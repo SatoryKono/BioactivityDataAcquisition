@@ -427,6 +427,12 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     last_page: Series[str] = pa.Field(nullable=True)
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)
 
+    # Lookup metadata
+    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+    # _original_id: Original identifier used for lookup (document_chembl_id for direct)
+    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+
     # DQ fields
     dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
     dq_error: Series[bool] = pa.Field(nullable=True, alias="_dq_error")
