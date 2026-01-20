@@ -173,9 +173,11 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "pmid": pmid,
             "doi": normalized_doi,
             "title": get_text(article.find(".//ArticleTitle")),
+            "vernacular_title": get_text(article.find(".//VernacularTitle")),
             "abstract": self._data_normalizer.strip_html_tags(
                 AbstractExtractor.extract_abstract(article)
             ),
+            "abstract_structured": AbstractExtractor.is_abstract_structured(article),
             "authors": self.serialize_json_list(hashed_authors),
             **journal_data,
             **date_data,

@@ -73,3 +73,29 @@ class AbstractExtractor(BaseFieldExtractor):
             Combined abstract text or None.
         """
         return cast("str | None", cls().process(article_node))
+
+    @classmethod
+    def is_abstract_structured(cls, article_node: Element | None) -> bool:
+        """Check if the abstract is structured (has labeled sections).
+
+        Structured abstracts have AbstractText elements with Label attributes
+        like "BACKGROUND", "METHODS", "RESULTS", "CONCLUSIONS".
+
+        Args:
+            article_node: The Article element.
+
+        Returns:
+            True if abstract has labeled sections, False otherwise.
+        """
+        if article_node is None:
+            return False
+
+        abstract_node = article_node.find(".//Abstract")
+        if abstract_node is None:
+            return False
+
+        # Check if any AbstractText has a Label attribute
+        for abstract_text in abstract_node.findall("AbstractText"):
+            if abstract_text.get("Label"):
+                return True
+        return False
