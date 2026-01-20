@@ -58,6 +58,9 @@ class TargetSchema(ETLRecordSchema):
     pref_name: Series[str] | None = pa.Field(
         nullable=True, description="Preferred name."
     )
+    description: Series[str] | None = pa.Field(
+        nullable=True, description="Target description."
+    )
     taxonomy_id: Series[int] | None = pa.Field(
         nullable=True, description="NCBI Taxonomy ID. Standardized name (was tax_id)."
     )
@@ -71,12 +74,26 @@ class TargetSchema(ETLRecordSchema):
         description="Downgraded flag.",
     )
 
+    # === Optional Target Fields ===
+    dap_id: Series[int] | None = pa.Field(
+        nullable=True, description="Drug affinity prediction ID."
+    )
+
     # === Complex Fields (JSON Strings) ===
     target_components: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of target components."
     )
     cross_references: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of cross references."
+    )
+    pipeline_stages: Series[str] | None = pa.Field(
+        nullable=True, description="JSON string of pipeline stages."
+    )
+    target_constraints: Series[str] | None = pa.Field(
+        nullable=True, description="JSON string of target constraints."
+    )
+    target_component_synonyms: Series[str] | None = pa.Field(
+        nullable=True, description="JSON string of aggregated component synonyms."
     )
 
     # === Flattened Component Fields (Lists) ===
@@ -95,6 +112,12 @@ class TargetSchema(ETLRecordSchema):
     )
     component_descriptions: Series[object] | None = pa.Field(
         nullable=True, description="List of component descriptions."
+    )
+    component_organisms: Series[object] | None = pa.Field(
+        nullable=True, description="List of component organisms."
+    )
+    component_taxonomy_ids: Series[object] | None = pa.Field(
+        nullable=True, description="List of component NCBI taxonomy IDs."
     )
 
     class Config:

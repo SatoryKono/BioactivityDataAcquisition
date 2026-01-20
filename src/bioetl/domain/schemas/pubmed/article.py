@@ -30,13 +30,17 @@ class ArticleSchema(PublicationBaseSchema):
     Represents a MEDLINE/PubMed citation record.
     """
 
-    # === Primary Key (overrides base pmid: str with int) ===
-    pmid: Series[int] = pa.Field(nullable=False, description="PubMed ID (PK)")
+    # === Primary Key (str for cross-provider consistency) ===
+    pmid: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=r"^\d+$",
+        description="PubMed ID (PK, numeric string)",
+    )
 
     @pa.check("pmid", name="pmid_positive")
-    def _check_pmid(cls, series: Series[int]) -> Series[bool]:
-        """Validate PMID is positive."""
-        return cast("Series[bool]", series >= 1)
+    def _check_pmid(cls, series: Series[str]) -> Series[bool]:
+        """Validate PMID represents a positive integer."""
+        return cast("Series[bool]", series.str.match(r"^[1-9]\d*$"))
 
     # === External Identifiers (override doi for check method) ===
     doi: Series[str] = pa.Field(

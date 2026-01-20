@@ -34,7 +34,20 @@ _ERROR_KEYWORDS: list[tuple[tuple[str, ...], ErrorType]] = [
         ("CircuitBreakerOpen", "Timeout", "TimeoutError", "504", "502"),
         ErrorType.TIMEOUT,
     ),
-    (("Upload", "NetworkError", "RetryExhausted"), ErrorType.NETWORK_ERROR),
+    (
+        (
+            "Upload",
+            "NetworkError",
+            "RetryExhausted",
+            "ReadError",
+            "WriteError",
+            "ConnectError",
+            "DecodingError",
+            "TransportError",
+            "StreamError",
+        ),
+        ErrorType.NETWORK_ERROR,
+    ),
     # Data quality errors (skip record)
     (("Schema", "Validation", "SchemaValidation"), ErrorType.SCHEMA_VIOLATION),
     (("Missing", "Required", "MissingRequired"), ErrorType.MISSING_REQUIRED_FIELD),
