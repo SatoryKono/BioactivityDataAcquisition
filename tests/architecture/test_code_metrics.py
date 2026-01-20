@@ -548,10 +548,6 @@ class TestClassSize:
         # Publication adapters with APIRequestCollector (metadata enrichment)
         "OpenAlexAdapter": 580,  # 578 lines - FilterableDataSourcePort + APIRequestCollector + fallback handler
         "PubMedAdapter": 545,  # 540 lines - FilterableDataSourcePort + APIRequestCollector + TitleFallbackHandler
-        # ChEMBL adapter with complex FilterableDataSourcePort
-        "ChemblAdapter": 780,  # 746 lines - FilterableDataSourcePort + health-aware batching + pagination + deduplication
-        # PubMed transformer with comprehensive field extraction
-        "PubMedPublicationTransformer": 450,  # 428 lines - Gold schema alignment with many extraction methods
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:
