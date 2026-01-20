@@ -158,6 +158,7 @@ UNIPROT_ID_MAPPING_SCHEMA = pa.schema(
 # Schema for PubMed Publication
 # Matches Publication entity from domain/entities.py
 # See: https://www.nlm.nih.gov/bsd/licensee/elements_descriptions.html
+# See also: https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_230101.dtd
 PUBMED_PUBLICATION_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
@@ -174,38 +175,66 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_original_id", pa.string()),
         # Title and abstract
         pa.field("abstract", pa.string()),
+        pa.field(
+            "abstract_structured", pa.bool_()
+        ),  # Whether abstract has NLM sections
         # Dates (ISO format strings)
         pa.field("accepted_date", pa.string()),
         # Authors
+        pa.field("author_count", pa.int64()),  # Denormalized count for query efficiency
         pa.field("authors", pa.string()),  # JSON-serialized list
+        # Counts (denormalized for query efficiency)
+        pa.field("chemical_count", pa.int64()),
+        pa.field("citation_subset", pa.string()),  # Citation subset codes (e.g., 'AIM')
         # Additional metadata
         pa.field("country", pa.string()),
+        # MEDLINE dates
+        pa.field("date_completed", pa.string()),  # MEDLINE processing completion date
+        pa.field("date_revised", pa.string()),  # Record revision date (MEDLINE)
         # Primary identifiers
         pa.field("doi", pa.string()),
         pa.field("epub_date", pa.string()),
         # Unified page fields (parsed from medline_pgn/pages)
         pa.field("first_page", pa.string()),
+        pa.field("grant_count", pa.int64()),  # Number of grants
         # Journal information
         pa.field("issn", pa.string()),
         pa.field("issue", pa.string()),
         pa.field("journal", pa.string()),
         pa.field("journal_abbrev", pa.string()),
+        # PubMed-specific journal fields (forensic retention)
+        pa.field("journal_iso_abbrev", pa.string()),  # ISO journal abbreviation
+        pa.field(
+            "journal_issn_type", pa.string()
+        ),  # ISSN type: Print/Electronic/Linking
+        pa.field("journal_title", pa.string()),  # Full journal name (PubMed source)
+        pa.field("keyword_count", pa.int64()),  # Number of keywords
         # Classification
         pa.field("keywords", pa.list_(pa.string())),
         pa.field("language", pa.string()),
         pa.field("last_page", pa.string()),
+        # Page numbers (MEDLINE format)
+        pa.field("medline_pgn", pa.string()),  # Original PubMed pagination
+        pa.field("mesh_heading_count", pa.int64()),  # Number of MeSH headings
         pa.field("mesh_terms", pa.list_(pa.string())),
+        pa.field("nlm_unique_id", pa.string()),  # NLM catalog ID
         pa.field("pages", pa.string()),  # Legacy: medline_pgn format
         pa.field("pmc_id", pa.string()),
         pa.field("pmid", pa.string()),
         pa.field("pub_date", pa.string()),
+        pa.field("pub_day", pa.int64()),  # Publication day (1-31)
+        pa.field("pub_month", pa.int64()),  # Publication month (1-12)
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD format
+        pa.field("publication_status", pa.string()),  # ppublish/epublish/aheadofprint
+        pa.field("publication_type_list", pa.string()),  # JSON array of pub types
         pa.field("publication_types", pa.list_(pa.string())),
         pa.field("publication_year", pa.int64()),  # Legacy alias for year
         pa.field("received_date", pa.string()),
+        pa.field("reference_count", pa.int64()),  # Number of references
         pa.field("revised_date", pa.string()),
         pa.field("source", pa.string()),
         pa.field("title", pa.string()),
+        pa.field("vernacular_title", pa.string()),  # Original non-English title
         pa.field("volume", pa.string()),
         pa.field("year", pa.int64()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
