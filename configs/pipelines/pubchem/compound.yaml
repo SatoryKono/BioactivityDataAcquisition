@@ -16,54 +16,68 @@ gold_table: "pubchem_compound"
 source_file: ../../sources/pubchem.yaml
 
 # -----------------------------------------------------------------------------
-# Data Quality Rules (entity-specific overrides)
+# Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
+# DQ rules are loaded from hierarchical config files:
+#   1. configs/dq/_defaults.yaml (global defaults)
+#   2. configs/dq/providers/pubchem.yaml (provider-specific)
+#   3. configs/dq/entities/pubchem/compound.yaml (entity-specific)
+dq_config_file: ../../dq/entities/pubchem/compound.yaml
+
+# -----------------------------------------------------------------------------
+# Inline DQ Overrides (applied on top of dq_config_file)
+# -----------------------------------------------------------------------------
+# Only overrides that EXTEND or DIFFER from entity DQ config are kept here.
 dq_rules:
   field_validations:
-    - field: "cid"
-      type: "range"
-      min: 1
-      nullable: false
-      error_message: "CID must be a positive integer"
+    # Unique: Not in entity config
     - field: "molecular_formula"
       type: "pattern"
       pattern: "^[A-Z][A-Za-z0-9]*$"
       nullable: true
       error_message: "Molecular formula must start with uppercase letter"
+    # Override: Entity has min:0 only, pipeline has stricter range 10-10000
     - field: "molecular_weight"
       type: "range"
       min: 10
       max: 10000
       nullable: true
+    # Unique: SMILES validation not in entity config
     - field: "canonical_smiles"
       type: "custom"
       validator: "smiles_validator"
       nullable: true
+    # Unique: SMILES validation not in entity config
     - field: "isomeric_smiles"
       type: "custom"
       validator: "smiles_validator"
       nullable: true
+    # Unique: Not in entity config
     - field: "xlogp"
       type: "range"
       min: -20
       max: 30
       nullable: true
+    # Unique: Not in entity config
     - field: "tpsa"
       type: "range"
       min: 0
       max: 1000
       nullable: true
+    # Unique: Not in entity config
     - field: "h_bond_donor_count"
       type: "range"
       min: 0
       max: 50
       nullable: true
+    # Unique: Not in entity config
     - field: "h_bond_acceptor_count"
       type: "range"
       min: 0
       max: 50
       nullable: true
 
+  # Unique cross-field validation (not in entity config)
   cross_field_validations:
     - name: "structure_present"
       fields: ["canonical_smiles", "inchi", "inchikey"]
