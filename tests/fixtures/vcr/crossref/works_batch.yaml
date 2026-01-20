@@ -1,0 +1,80 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - api.crossref.org
+      User-Agent:
+      - BioETL/1.0 (mailto:test@example.com)
+    method: GET
+    uri: https://api.crossref.org/works?filter=doi:10.1038/nature12373,10.1126/science.1242592&rows=2&mailto=test@example.com
+  response:
+    body:
+      string: '{"status":"ok","message-type":"work-list","message-version":"1.0.0","message":{"facets":{},"total-results":2,"items":[{"indexed":{"date-parts":[[2023,12,1]],"date-time":"2023-12-01T00:00:00Z","timestamp":1701388800000},"reference-count":50,"publisher":"Springer Science and Business Media LLC","issue":"7461","license":[{"start":{"date-parts":[[2013,7,25]],"date-time":"2013-07-25T00:00:00Z","timestamp":1374710400000},"content-version":"vor","delay-in-days":0,"URL":"http://www.springer.com/tdm"}],"content-domain":{"domain":[],"crossmark-restriction":false},"published-print":{"date-parts":[[2013,7,25]]},"DOI":"10.1038/nature12373","type":"journal-article","created":{"date-parts":[[2013,7,19]],"date-time":"2013-07-19T00:00:00Z","timestamp":1374192000000},"page":"480-485","source":"Crossref","is-referenced-by-count":2847,"title":["The complete genome sequence of a Neanderthal from the Altai Mountains"],"prefix":"10.1038","volume":"499","author":[{"given":"Kay","family":"Prüfer","sequence":"first","affiliation":[]},{"given":"Fernando","family":"Racimo","sequence":"additional","affiliation":[]}],"member":"297","container-title":["Nature"],"language":"en","link":[{"URL":"http://www.nature.com/articles/nature12373.pdf","content-type":"application/pdf","content-version":"vor","intended-application":"text-mining"}],"deposited":{"date-parts":[[2023,11,30]],"date-time":"2023-11-30T00:00:00Z","timestamp":1701302400000},"score":1,"resource":{"primary":{"URL":"https://www.nature.com/articles/nature12373"}},"issued":{"date-parts":[[2013,7,25]]},"references-count":50,"journal-issue":{"issue":"7461","published-print":{"date-parts":[[2013,7,25]]}},"ISSN":["0028-0836","1476-4687"],"subject":["Multidisciplinary"]},{"indexed":{"date-parts":[[2023,12,1]],"date-time":"2023-12-01T00:00:00Z","timestamp":1701388800000},"reference-count":44,"publisher":"American Association for the Advancement of Science (AAAS)","issue":"6146","license":[{"start":{"date-parts":[[2013,8,2]],"date-time":"2013-08-02T00:00:00Z","timestamp":1375401600000},"content-version":"vor","delay-in-days":0,"URL":"https://www.science.org/help/reprints-and-permissions"}],"content-domain":{"domain":[],"crossmark-restriction":false},"published-print":{"date-parts":[[2013,8,2]]},"DOI":"10.1126/science.1242592","type":"journal-article","created":{"date-parts":[[2013,8,1]],"date-time":"2013-08-01T00:00:00Z","timestamp":1375315200000},"page":"740-743","source":"Crossref","is-referenced-by-count":342,"title":["A Complete Skull from Dmanisi, Georgia, and the Evolutionary Biology of Early Homo"],"prefix":"10.1126","volume":"342","author":[{"given":"D.","family":"Lordkipanidze","sequence":"first","affiliation":[]},{"given":"M. S.","family":"Ponce de León","sequence":"additional","affiliation":[]}],"member":"221","container-title":["Science"],"language":"en","deposited":{"date-parts":[[2023,11,30]],"date-time":"2023-11-30T00:00:00Z","timestamp":1701302400000},"score":1,"resource":{"primary":{"URL":"https://www.science.org/doi/10.1126/science.1242592"}},"issued":{"date-parts":[[2013,8,2]]},"references-count":44,"journal-issue":{"issue":"6146","published-print":{"date-parts":[[2013,8,2]]}},"ISSN":["0036-8075","1095-9203"],"subject":["Multidisciplinary"]}],"items-per-page":2,"query":{"start-index":0,"search-terms":null}}}'
+    headers:
+      Access-Control-Allow-Headers:
+      - X-Requested-With, Accept, Accept-Encoding, Accept-Charset, Accept-Language,
+        Accept-Ranges, Cache-Control
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Link
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 29 Dec 2023 12:00:00 GMT
+      X-Rate-Limit-Interval:
+      - 1s
+      X-Rate-Limit-Limit:
+      - '50'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - api.crossref.org
+      User-Agent:
+      - BioETL/1.0 (mailto:test@example.com)
+    method: GET
+    uri: https://api.crossref.org/works/10.1038/nature12373
+  response:
+    body:
+      string: '{"status":"ok","message-type":"work","message-version":"1.0.0","message":{"indexed":{"date-parts":[[2023,12,1]],"date-time":"2023-12-01T00:00:00Z","timestamp":1701388800000},"reference-count":50,"publisher":"Springer Science and Business Media LLC","issue":"7461","license":[{"start":{"date-parts":[[2013,7,25]],"date-time":"2013-07-25T00:00:00Z","timestamp":1374710400000},"content-version":"vor","delay-in-days":0,"URL":"http://www.springer.com/tdm"}],"content-domain":{"domain":[],"crossmark-restriction":false},"published-print":{"date-parts":[[2013,7,25]]},"DOI":"10.1038/nature12373","type":"journal-article","created":{"date-parts":[[2013,7,19]],"date-time":"2013-07-19T00:00:00Z","timestamp":1374192000000},"page":"480-485","source":"Crossref","is-referenced-by-count":2847,"title":["The complete genome sequence of a Neanderthal from the Altai Mountains"],"prefix":"10.1038","volume":"499","author":[{"given":"Kay","family":"Prüfer","sequence":"first","affiliation":[]},{"given":"Fernando","family":"Racimo","sequence":"additional","affiliation":[]}],"member":"297","container-title":["Nature"],"language":"en","link":[{"URL":"http://www.nature.com/articles/nature12373.pdf","content-type":"application/pdf","content-version":"vor","intended-application":"text-mining"}],"deposited":{"date-parts":[[2023,11,30]],"date-time":"2023-11-30T00:00:00Z","timestamp":1701302400000},"score":1,"resource":{"primary":{"URL":"https://www.nature.com/articles/nature12373"}},"issued":{"date-parts":[[2013,7,25]]},"references-count":50,"journal-issue":{"issue":"7461","published-print":{"date-parts":[[2013,7,25]]}},"ISSN":["0028-0836","1476-4687"],"subject":["Multidisciplinary"]}}'
+    headers:
+      Access-Control-Allow-Headers:
+      - X-Requested-With, Accept, Accept-Encoding, Accept-Charset, Accept-Language,
+        Accept-Ranges, Cache-Control
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Link
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 29 Dec 2023 12:00:00 GMT
+      X-Rate-Limit-Interval:
+      - 1s
+      X-Rate-Limit-Limit:
+      - '50'
+    status:
+      code: 200
+      message: OK
+version: 1

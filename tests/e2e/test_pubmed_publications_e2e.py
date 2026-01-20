@@ -2,12 +2,16 @@
 
 Tests the complete pipeline execution from fetch to Gold layer.
 Uses VCR cassettes for HTTP requests and local file storage.
+
+Cassettes location: tests/fixtures/vcr/pubmed/
 """
 
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -34,11 +38,19 @@ PUBMED_DATE_FIELDS = [
     "revised_date",
 ]
 
+# VCR cassette directory for PubMed E2E tests
+CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "pubmed"
+
 
 @pytest.fixture(scope="module")
-def vcr_cassette_dir() -> Path:
-    """Path to VCR cassettes directory."""
-    return Path(__file__).parent.parent / "fixtures" / "vcr"
+def vcr_config() -> dict[str, Any]:
+    """Configure VCR for PubMed Publications E2E tests."""
+    return {
+        "cassette_library_dir": str(CASSETTE_DIR),
+        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
+        "match_on": ["method", "scheme", "host", "port", "path", "query"],
+        "decode_compressed_response": True,
+    }
 
 
 @pytest.mark.e2e

@@ -1,14 +1,34 @@
-"""Integration tests for ChEMBL Compound Record Pipeline."""
+"""Integration tests for ChEMBL Compound Record Pipeline.
+
+Cassettes location: tests/fixtures/vcr/chembl/
+"""
 
 from __future__ import annotations
 
 import glob
 import os
 from dataclasses import replace
+from pathlib import Path
+from typing import Any
 
 import pytest
 import structlog
 from deltalake import DeltaTable
+
+# VCR cassette directory for ChEMBL pipeline tests
+CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "chembl"
+
+
+@pytest.fixture(scope="module")
+def vcr_config() -> dict[str, Any]:
+    """Configure VCR for ChEMBL Compound Record pipeline tests."""
+    return {
+        "cassette_library_dir": str(CASSETTE_DIR),
+        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
+        "match_on": ["method", "scheme", "host", "port", "path", "query"],
+        "decode_compressed_response": True,
+    }
+
 
 from bioetl.composition.factories.pipeline_factories import (
     chembl_compound_record_factory,

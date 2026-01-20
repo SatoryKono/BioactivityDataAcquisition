@@ -3,6 +3,8 @@
 Tests the complete pipeline execution from fetch to Silver layer.
 Uses VCR cassettes for HTTP requests and local file storage.
 
+Cassettes location: tests/fixtures/vcr/chembl/
+
 Publication Term is a derived entity that extracts nested term data
 from Publication (ChEMBL Document) API responses and flattens the 1:M relationship.
 
@@ -12,7 +14,9 @@ from Publication (ChEMBL Document) API responses and flattens the 1:M relationsh
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -25,11 +29,19 @@ from .conftest import (
     get_silver_records,
 )
 
+# VCR cassette directory for ChEMBL E2E tests
+CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "chembl"
+
 
 @pytest.fixture(scope="module")
-def vcr_cassette_dir() -> Path:
-    """Path to VCR cassettes directory."""
-    return Path(__file__).parent.parent / "fixtures" / "vcr"
+def vcr_config() -> dict[str, Any]:
+    """Configure VCR for ChEMBL Publication Term E2E tests."""
+    return {
+        "cassette_library_dir": str(CASSETTE_DIR),
+        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
+        "match_on": ["method", "scheme", "host", "port", "path", "query"],
+        "decode_compressed_response": True,
+    }
 
 
 @pytest.mark.e2e
