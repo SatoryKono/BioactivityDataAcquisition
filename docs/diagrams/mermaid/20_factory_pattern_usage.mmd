@@ -1,0 +1,152 @@
+%%{init: {'theme':'base', 'themeVariables': { 'fontSize':'13px'}}}%%
+graph TB
+    Client["Client Code<br/>(bootstrap_pipeline)"] --> FactoryRegistry
+
+    subgraph factory_registry["Factory Registry"]
+        direction TB
+
+        PipelineFactory["PipelineFactory"]
+        RunnerFactory["RunnerFactory"]
+        ServicesFactory["ServicesFactory"]
+        StorageFactory["StorageFactory"]
+        HTTPClientFactory["HTTPClientFactory"]
+        DataSourceFactory["DataSourceFactory"]
+        TransformerFactory["TransformerFactory"]
+        DQFactory["DQFactory"]
+    end
+
+    subgraph pipeline_factory["PipelineFactory"]
+        direction TB
+        PF_Create["create(pipeline_name, config)"]
+        PF_Registry["Get from PipelineRegistry"]
+        PF_Return["Return Pipeline instance"]
+
+        PF_Create --> PF_Registry --> PF_Return
+    end
+
+    subgraph runner_factory["RunnerFactory"]
+        direction TB
+        RF_Create["create(services, config)"]
+        RF_Build["Build PipelineRunner"]
+        RF_Inject["Inject RunnerServices"]
+        RF_Return["Return PipelineRunner"]
+
+        RF_Create --> RF_Build --> RF_Inject --> RF_Return
+    end
+
+    subgraph services_factory["ServicesFactory"]
+        direction TB
+        SF_Create["create_bundle(...)"]
+        SF_Assemble["Assemble all ports:<br/>- DataSourcePort<br/>- StoragePort<br/>- LockPort<br/>- CheckpointPort<br/>- QuarantinePort<br/>- etc."]
+        SF_Return["Return PipelineServices"]
+
+        SF_Create --> SF_Assemble --> SF_Return
+    end
+
+    subgraph storage_factory["StorageFactory"]
+        direction TB
+        StF_Create["create(data_dir, logger)"]
+        StF_Bronze["Create BronzeWriter"]
+        StF_Silver["Create SilverWriter"]
+        StF_Gold["Create GoldWriter"]
+        StF_Composite["Create Composite StoragePort"]
+        StF_Return["Return StoragePort"]
+
+        StF_Create --> StF_Bronze
+        StF_Bronze --> StF_Silver
+        StF_Silver --> StF_Gold
+        StF_Gold --> StF_Composite
+        StF_Composite --> StF_Return
+    end
+
+    subgraph http_client_factory["HTTPClientFactory"]
+        direction TB
+        HF_Create["create(provider, rate_limit)"]
+        HF_Client["Create httpx.AsyncClient"]
+        HF_RateLimiter["Create RateLimiter"]
+        HF_CircuitBreaker["Create CircuitBreaker"]
+        HF_Wrap["Wrap in UnifiedHTTPClient"]
+        HF_Return["Return UnifiedHTTPClient"]
+
+        HF_Create --> HF_Client
+        HF_Client --> HF_RateLimiter
+        HF_RateLimiter --> HF_CircuitBreaker
+        HF_CircuitBreaker --> HF_Wrap
+        HF_Wrap --> HF_Return
+    end
+
+    subgraph datasource_factory["DataSourceFactory"]
+        direction TB
+        DF_Create["create(provider, http_client)"]
+        DF_Switch{"Provider?"}
+        DF_ChEMBL["ChemblAdapter"]
+        DF_PubChem["PubChemAdapter"]
+        DF_UniProt["UniProtAdapter"]
+        DF_Others["Other Adapters"]
+        DF_Return["Return DataSourcePort"]
+
+        DF_Create --> DF_Switch
+        DF_Switch -->|chembl| DF_ChEMBL
+        DF_Switch -->|pubchem| DF_PubChem
+        DF_Switch -->|uniprot| DF_UniProt
+        DF_Switch -->|others| DF_Others
+
+        DF_ChEMBL --> DF_Return
+        DF_PubChem --> DF_Return
+        DF_UniProt --> DF_Return
+        DF_Others --> DF_Return
+    end
+
+    subgraph transformer_factory["TransformerFactory"]
+        direction TB
+        TF_Create["create(transformer_class, services)"]
+        TF_Instantiate["Instantiate transformer_class"]
+        TF_Inject["Inject domain services:<br/>- DataNormalizationService<br/>- IdentityService<br/>- UnitConverter"]
+        TF_Return["Return BaseTransformer"]
+
+        TF_Create --> TF_Instantiate
+        TF_Instantiate --> TF_Inject
+        TF_Inject --> TF_Return
+    end
+
+    subgraph dq_factory["DQFactory"]
+        direction TB
+        DF2_Create["create(dq_config)"]
+        DF2_Bronze["Create BronzeDQAnalyzer"]
+        DF2_Silver["Create SilverDQAnalyzer"]
+        DF2_Gold["Create GoldDQAnalyzer"]
+        DF2_Report["Create DQReportWriter"]
+        DF2_Return["Return DQ components"]
+
+        DF2_Create --> DF2_Bronze
+        DF2_Bronze --> DF2_Silver
+        DF2_Silver --> DF2_Gold
+        DF2_Gold --> DF2_Report
+        DF2_Report --> DF2_Return
+    end
+
+    FactoryRegistry -.-> pipeline_factory
+    FactoryRegistry -.-> runner_factory
+    FactoryRegistry -.-> services_factory
+    FactoryRegistry -.-> storage_factory
+    FactoryRegistry -.-> http_client_factory
+    FactoryRegistry -.-> datasource_factory
+    FactoryRegistry -.-> transformer_factory
+    FactoryRegistry -.-> dq_factory
+
+    PF_Return --> Products
+    RF_Return --> Products
+    SF_Return --> Products
+    StF_Return --> Products
+    HF_Return --> Products
+    DF_Return --> Products
+    TF_Return --> Products
+    DF2_Return --> Products
+
+    Products["Products:<br/>✓ Fully configured objects<br/>✓ All dependencies injected<br/>✓ Ready to use<br/>✓ Testable (can inject mocks)"]
+
+    classDef factoryStyle fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef productStyle fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+
+    class factory_registry,PipelineFactory,RunnerFactory,ServicesFactory,StorageFactory,HTTPClientFactory,DataSourceFactory,TransformerFactory,DQFactory factoryStyle
+    class Products productStyle
