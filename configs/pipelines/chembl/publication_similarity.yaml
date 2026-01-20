@@ -17,40 +17,13 @@ gold_table: "chembl_publication_similarity"
 source_file: ../../sources/chembl.yaml
 
 # -----------------------------------------------------------------------------
-# Data Quality Rules (entity-specific overrides)
+# Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
-dq_rules:
-  field_validations:
-    - field: "sim_id"
-      type: "range"
-      min: 1
-      nullable: false
-    - field: "doc_1"
-      type: "range"
-      min: 1
-      nullable: false
-    - field: "doc_2"
-      type: "range"
-      min: 1
-      nullable: false
-    - field: "max_tani"
-      type: "range"
-      min: 0
-      max: 1
-      nullable: true
-      error_message: "Tanimoto coefficient must be between 0 and 1"
-    - field: "avg_tani"
-      type: "range"
-      min: 0
-      max: 1
-      nullable: true
-      error_message: "Average Tanimoto must be between 0 and 1"
-
-  cross_field_validations:
-    - name: "similarity_pair"
-      fields: ["doc_1", "doc_2"]
-      condition: "all_present"
-      error_message: "Both document IDs are required"
+# DQ rules are loaded from hierarchical config files:
+#   1. configs/dq/_defaults.yaml (global defaults)
+#   2. configs/dq/providers/chembl.yaml (provider-specific)
+#   3. configs/dq/entities/chembl/publication_similarity.yaml (entity-specific)
+dq_config_file: ../../dq/entities/chembl/publication_similarity.yaml
 
 # Entity-specific gold filters
 gold_filters:

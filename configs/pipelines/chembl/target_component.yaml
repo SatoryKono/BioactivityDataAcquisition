@@ -16,34 +16,13 @@ gold_table: chembl_target_component
 source_file: ../../sources/chembl.yaml
 
 # -----------------------------------------------------------------------------
-# Data Quality Rules (entity-specific overrides)
+# Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
-dq_rules:
-  field_validations:
-    - field: "component_id"
-      type: "range"
-      min: 1
-      nullable: false
-    - field: "component_type"
-      type: "enum"
-      allowed: ["PROTEIN", "DNA", "RNA"]
-      nullable: true
-    - field: "accession"
-      type: "pattern"
-      pattern: "^[A-Z0-9]{6,10}$"
-      nullable: true
-      error_message: "accession should be UniProt format"
-    - field: "tax_id"
-      type: "range"
-      min: 1
-      max: 10000000
-      nullable: true
-
-  cross_field_validations:
-    - name: "component_identifiable"
-      fields: ["component_id", "accession"]
-      condition: "any_present"
-      error_message: "Component must have ID or accession"
+# DQ rules are loaded from hierarchical config files:
+#   1. configs/dq/_defaults.yaml (global defaults)
+#   2. configs/dq/providers/chembl.yaml (provider-specific)
+#   3. configs/dq/entities/chembl/target_component.yaml (entity-specific)
+dq_config_file: ../../dq/entities/chembl/target_component.yaml
 
 # Entity-specific gold filters
 gold_filters:

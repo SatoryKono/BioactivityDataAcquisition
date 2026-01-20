@@ -19,34 +19,13 @@ gold_table: "chembl_compound_record"
 source_file: ../../sources/chembl.yaml
 
 # -----------------------------------------------------------------------------
-# Data Quality Rules (entity-specific overrides)
+# Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
-dq_rules:
-  field_validations:
-    - field: "record_id"
-      type: "range"
-      min: 1
-      nullable: false
-    - field: "molecule_chembl_id"
-      type: "pattern"
-      pattern: "^CHEMBL\\d+$"
-      nullable: false
-      error_message: "molecule_chembl_id must match CHEMBL format"
-    - field: "document_chembl_id"
-      type: "pattern"
-      pattern: "^CHEMBL\\d+$"
-      nullable: false
-      error_message: "document_chembl_id must match CHEMBL format"
-    - field: "src_id"
-      type: "range"
-      min: 1
-      nullable: true
-
-  cross_field_validations:
-    - name: "record_linkage"
-      fields: ["molecule_chembl_id", "document_chembl_id"]
-      condition: "all_present"
-      error_message: "Both molecule and document IDs are required"
+# DQ rules are loaded from hierarchical config files:
+#   1. configs/dq/_defaults.yaml (global defaults)
+#   2. configs/dq/providers/chembl.yaml (provider-specific)
+#   3. configs/dq/entities/chembl/compound_record.yaml (entity-specific)
+dq_config_file: ../../dq/entities/chembl/compound_record.yaml
 
 # Entity-specific gold filters
 gold_filters:
