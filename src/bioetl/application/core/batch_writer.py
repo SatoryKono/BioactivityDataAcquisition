@@ -113,6 +113,11 @@ class BatchWriter:
             gold_mode_val.value if hasattr(gold_mode_val, "value") else gold_mode_val,
         )
 
+        # Performance Optimization: Cache gold schema columns to avoid expensive to_schema() calls
+        # in the hot path (write_gold).
+        # Note: _get_schema_columns returns a set(), ensuring O(1) lookups during filtering.
+        self._gold_schema_columns = self._get_schema_columns(self._gold_schema)
+
     async def _validate_lock(self, operation: str) -> None:
         """Validate lock ownership before write operation (Safety Guard §4.6).
 
@@ -332,18 +337,26 @@ class BatchWriter:
         try:
             # Filter records to only include columns defined in Gold schema
             # This ensures strict schema validation passes (REQ-DATA-009)
-            schema_columns = self._get_schema_columns(self._gold_schema)
-            if schema_columns:
+            # OPTIMIZATION: Use cached schema columns and modify in-place to avoid
+            # dictionary copying overhead. This is safe as records are not reused.
+            # Note: Key order in records is irrelevant as GoldWriter enforces canonical column order.
+            if self._gold_schema_columns:
                 # DQ columns with default values if missing (required by Gold schemas)
                 dq_defaults = {"_dq_warn": False, "_dq_error": False}
-                records = [
-                    {
-                        k: r.get(k, dq_defaults.get(k))
-                        for k in schema_columns
-                        if k in r or k in dq_defaults
-                    }
-                    for r in records
-                ]
+
+                for r in records:
+                    # Remove keys not in schema
+                    # Use list() to create a copy of keys for iteration
+                    keys_to_remove = [
+                        k for k in r if k not in self._gold_schema_columns
+                    ]
+                    for k in keys_to_remove:
+                        del r[k]
+
+                    # Add missing defaults if they are part of the schema
+                    for k, v in dq_defaults.items():
+                        if k in self._gold_schema_columns and k not in r:
+                            r[k] = v
 
             # Validate Gold records
             result = self._gold_validator.validate(records)
