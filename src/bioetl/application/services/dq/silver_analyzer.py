@@ -21,7 +21,7 @@ from typing import Any
 import polars as pl
 import pyarrow as pa
 
-from bioetl.domain.ports.dq_config import SilverDQConfigPort
+from bioetl.domain.ports import SilverDQConfigPort
 from bioetl.domain.value_objects.dq_report import (
     CategoricalDistribution,
     ContentHashIntegrityResult,

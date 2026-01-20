@@ -158,7 +158,7 @@ def bootstrap_composite_pipeline(
     # Base path for resolving Silver table locations
     silver_base_path = str(Path(settings.data_dir) / "output")
 
-    # Create DeltaReader for reading Silver tables
+    # DeltaReader for reading Silver tables (implements DeltaReaderPort)
     delta_reader = DeltaReader(
         base_path=silver_base_path,
         logger=logger,
