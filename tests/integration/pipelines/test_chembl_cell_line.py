@@ -1,9 +1,30 @@
-"""Integration tests for ChEMBL Cell Line Pipeline."""
+"""Integration tests for ChEMBL Cell Line Pipeline.
+
+Cassettes location: tests/fixtures/vcr/chembl/
+"""
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
+from typing import Any
+
 import pytest
 import structlog
+
+# VCR cassette directory for ChEMBL pipeline tests
+CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "chembl"
+
+
+@pytest.fixture(scope="module")
+def vcr_config() -> dict[str, Any]:
+    """Configure VCR for ChEMBL Cell Line pipeline tests."""
+    return {
+        "cassette_library_dir": str(CASSETTE_DIR),
+        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
+        "match_on": ["method", "scheme", "host", "port", "path", "query"],
+        "decode_compressed_response": True,
+    }
 
 from bioetl.composition.factories.pipeline_factories import (
     chembl_cell_line_factory,
