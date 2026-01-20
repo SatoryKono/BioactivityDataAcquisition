@@ -87,8 +87,8 @@ class TestFileSizeLimits:
         "silver_writer.py": 1141,  # 1126 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage + fromisoformat timezone validation
         "gold_writer.py": 930,  # 918 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage
         "bronze_writer.py": 760,  # 749 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param
-        "gold.py": 1005,  # 999 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation)
-        "silver.py": 810,  # 804 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas)
+        "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
+        "silver.py": 840,  # 833 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields)
         "client.py": 700,  # 692 LOC - ChemblAdapter (complex FilterableDataSourcePort), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "pipeline_config.py": 790,  # 786 LOC - Pipeline configuration loading and validation + TransformConfig
