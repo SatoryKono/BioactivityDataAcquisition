@@ -312,6 +312,56 @@ class ChemblAdapter(BaseHttpAdapter):
             # Small delay between requests to be nice to the API
             await asyncio.sleep(0.5)
 
+    def _is_server_500_error(self, e: Exception) -> bool:
+        """Check if exception indicates a 500 server error.
+
+        Checks multiple sources since errors can be wrapped differently:
+        1. Direct status_code attribute (ExternalServiceError)
+        2. RetryExhaustedError.last_error (original httpx error)
+        3. __cause__ chain (exception chaining)
+        4. Error message fallback (contains '500')
+
+        Args:
+            e: The exception to check
+
+        Returns:
+            True if this is a 500 server error
+        """
+        import httpx
+
+        from bioetl.domain.exceptions import RetryExhaustedError
+
+        # 1. Check direct status_code (ExternalServiceError, ServiceUnavailableError)
+        if hasattr(e, "status_code") and e.status_code == 500:
+            return True
+
+        # 2. Check RetryExhaustedError.last_error
+        if isinstance(e, RetryExhaustedError) and e.last_error:
+            if isinstance(e.last_error, httpx.HTTPStatusError):
+                return e.last_error.response.status_code == 500
+            # Check if last_error has status_code
+            if hasattr(e.last_error, "status_code"):
+                return e.last_error.status_code == 500
+
+        # 3. Check __cause__ chain
+        cause = e.__cause__
+        while cause:
+            if isinstance(cause, httpx.HTTPStatusError):
+                return cause.response.status_code == 500
+            if hasattr(cause, "status_code") and cause.status_code == 500:
+                return True
+            if isinstance(cause, RetryExhaustedError) and cause.last_error:
+                if isinstance(cause.last_error, httpx.HTTPStatusError):
+                    return cause.last_error.response.status_code == 500
+            cause = getattr(cause, "__cause__", None)
+
+        # 4. Fallback: check error message for '500' pattern
+        error_msg = str(e)
+        if "500" in error_msg and ("Server error" in error_msg or "Internal Server Error" in error_msg):
+            return True
+
+        return False
+
     async def _fetch_with_filter(
         self,
         entity_type: str,
@@ -328,8 +378,6 @@ class ChemblAdapter(BaseHttpAdapter):
         If batch filter returns 500 (ChEMBL rate limiting disguised as server error),
         falls back to individual record fetching.
         """
-        import httpx
-
         url = self._mapper.get_resource_url(entity_type)
         offset = 0
         seen_ids: set[str] = set()
@@ -343,13 +391,7 @@ class ChemblAdapter(BaseHttpAdapter):
             records, has_next = await self._fetch_page(url, params, entity_type)
         except Exception as e:
             # Check if this is a 500 error (ChEMBL's rate limiting response)
-            is_server_error = False
-            if isinstance(e.__cause__, httpx.HTTPStatusError):
-                is_server_error = e.__cause__.response.status_code == 500
-            elif hasattr(e, "status_code"):
-                is_server_error = getattr(e, "status_code", 0) == 500
-
-            if is_server_error:
+            if self._is_server_500_error(e):
                 # Fallback to individual fetching
                 self.logger.warning(
                     "chembl_batch_filter_failed",

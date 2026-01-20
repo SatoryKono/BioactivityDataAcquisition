@@ -34,6 +34,8 @@ gold_filters:
       min: 1950
       include_min: false
   required_fields:
+    - document_chembl_id
+    - doc_type
     - title
     - pubmed_id
     - doi
