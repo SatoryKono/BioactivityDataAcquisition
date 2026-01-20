@@ -87,14 +87,12 @@ sink:
     partition_by: ["batch_date"]
     sort_by:
       columns: ["cid"]
-      ascending: true
     csv_export:
       path: "data/output/silver/pubchem/compound"
   gold:
     path: "data/output/gold/pubchem/compound"
     sort_by:
       columns: ["cid"]
-      ascending: true
     csv_export:
       path: "data/output/gold/pubchem/compound"
 
