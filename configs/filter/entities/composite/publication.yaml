@@ -1,0 +1,27 @@
+# configs/filter/entities/composite/publication.yaml
+# =============================================================================
+# Composite Publication Filter Configuration
+# =============================================================================
+# Entity-specific filter rules for composite publication pipeline.
+# Reference: ADR-028 (Filter Rules Externalization)
+
+version: "1.0.0"
+provider: composite
+entity: publication
+
+# -----------------------------------------------------------------------------
+# Input Filter
+# -----------------------------------------------------------------------------
+# No input filter for composite pipeline
+# Composite pipeline aggregates from multiple sources internally
+input_filter:
+  enabled: false
+
+# -----------------------------------------------------------------------------
+# Gold Filters
+# -----------------------------------------------------------------------------
+# Criteria for valid publications
+gold_filters:
+  # Only include publications with title
+  required_fields:
+    - title

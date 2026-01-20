@@ -1,0 +1,23 @@
+# configs/filter/providers/openalex.yaml
+# =============================================================================
+# OpenAlex Provider Filter Configuration
+# =============================================================================
+# Provider-level defaults for OpenAlex entities.
+# Reference: ADR-028 (Filter Rules Externalization)
+
+version: "1.0.0"
+provider: openalex
+
+# -----------------------------------------------------------------------------
+# Input Filter Defaults
+# -----------------------------------------------------------------------------
+# OpenAlex Polite pool - conservative batch size
+input_filter:
+  batch_size: 50
+
+# -----------------------------------------------------------------------------
+# Gold Filter Defaults
+# -----------------------------------------------------------------------------
+gold_filters:
+  required_fields: []
+  columns: {}

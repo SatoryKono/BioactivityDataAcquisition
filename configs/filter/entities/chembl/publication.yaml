@@ -1,0 +1,46 @@
+# configs/filter/entities/chembl/publication.yaml
+# =============================================================================
+# ChEMBL Publication Filter Configuration
+# =============================================================================
+# Entity-specific filter rules for scientific publication data.
+# Reference: ADR-028 (Filter Rules Externalization)
+
+version: "1.0.0"
+provider: chembl
+entity: publication
+
+# -----------------------------------------------------------------------------
+# Input Filter
+# -----------------------------------------------------------------------------
+# Filter publications by document_chembl_id from CSV
+input_filter:
+  enabled: true
+  source_path: "data/input/publication.csv"
+  column_name: "document_chembl_id"
+  filter_field: "document_chembl_id"
+  batch_size: 20
+
+# -----------------------------------------------------------------------------
+# Gold Filters
+# -----------------------------------------------------------------------------
+# Criteria for valid publications
+gold_filters:
+  # Column value filters
+  columns:
+    # Publications only (exclude patents, books, etc.)
+    doc_type: [PUBLICATION]
+
+  # Numeric range filters
+  ranges:
+    # Reasonable year range
+    year:
+      min: 1950
+      include_min: false
+
+  # Required fields
+  required_fields:
+    - document_chembl_id
+    - doc_type
+    - title
+    - pubmed_id
+    - doi

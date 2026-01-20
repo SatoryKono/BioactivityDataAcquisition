@@ -1,0 +1,53 @@
+# configs/filter/entities/chembl/target.yaml
+# =============================================================================
+# ChEMBL Target Filter Configuration
+# =============================================================================
+# Entity-specific filter rules for drug target data.
+# Reference: ADR-028 (Filter Rules Externalization)
+
+version: "1.0.0"
+provider: chembl
+entity: target
+
+# -----------------------------------------------------------------------------
+# Input Filter
+# -----------------------------------------------------------------------------
+# Filter targets by target_chembl_id from CSV
+input_filter:
+  enabled: true
+  source_path: "data/input/target.csv"
+  column_name: "target_chembl_id"
+  filter_field: "target_chembl_id"
+  batch_size: 20
+
+# -----------------------------------------------------------------------------
+# Gold Filters
+# -----------------------------------------------------------------------------
+# Criteria for single protein targets
+gold_filters:
+  # Column value filters
+  columns:
+    # Single protein targets only
+    target_type: [SINGLE PROTEIN]
+
+  # List length filters
+  list_lengths:
+    # Exactly one accession (single protein)
+    component_accessions:
+      min: 1
+      max: 1
+    # At least one component ID
+    component_ids:
+      min: 1
+
+  # List contains filters
+  list_contains:
+    # Must be protein components
+    component_types:
+      values: [PROTEIN]
+      mode: all
+
+  # Required fields
+  required_fields:
+    - pref_name
+    - organism

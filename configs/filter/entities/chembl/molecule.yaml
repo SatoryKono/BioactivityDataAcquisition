@@ -1,0 +1,39 @@
+# configs/filter/entities/chembl/molecule.yaml
+# =============================================================================
+# ChEMBL Molecule Filter Configuration
+# =============================================================================
+# Entity-specific filter rules for molecule/compound data.
+# Reference: ADR-028 (Filter Rules Externalization)
+
+version: "1.0.0"
+provider: chembl
+entity: molecule
+
+# -----------------------------------------------------------------------------
+# Input Filter
+# -----------------------------------------------------------------------------
+# Filter molecules by molecule_chembl_id from CSV
+input_filter:
+  enabled: true
+  source_path: "data/input/molecule.csv"
+  column_name: "molecule_chembl_id"
+  filter_field: "molecule_chembl_id"
+  batch_size: 20
+
+# -----------------------------------------------------------------------------
+# Gold Filters
+# -----------------------------------------------------------------------------
+# Criteria for drug-like small molecules
+gold_filters:
+  # Column value filters
+  columns:
+    # Small molecules only (exclude biologics)
+    molecule_type: [Small molecule]
+    # Must have MOL structure
+    structure_type: [MOL]
+    # Exclude inorganic compounds
+    inorganic_flag: ["0"]
+
+  # Required fields
+  required_fields:
+    - molecule_chembl_id
