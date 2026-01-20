@@ -24,7 +24,11 @@ from bioetl.domain.entities.chembl import (
     TargetComponentRecord,
     TargetRecord,
 )
-from bioetl.domain.exceptions import CriticalError
+from bioetl.domain.exceptions import (
+    CriticalError,
+    ExternalServiceError,
+    RetryExhaustedError,
+)
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.domain.types import HealthStatus
@@ -496,19 +500,34 @@ class ChemblAdapter(BaseHttpAdapter):
         )
         raise wrapped from e
 
-    async def _fetch_filtered(
+    def _is_retry_exhausted_error(self, e: Exception) -> bool:
+        """Check if exception is a retry exhausted error (direct or wrapped)."""
+        if isinstance(e, RetryExhaustedError):
+            return True
+        # Check if it's an ExternalServiceError wrapping RetryExhaustedError
+        return isinstance(e, ExternalServiceError) and isinstance(
+            e.__cause__, RetryExhaustedError
+        )
+
+    async def _fetch_batch_with_reduction(
         self,
         entity_type: str,
-        limit: int | None,
-        filter_ids: list[str],
+        id_batch: list[str],
         filter_field: str,
+        limit: int | None,
+        seen_ids: set[str],
+        pk_field: str,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Perform filtered fetch using ID batches with client-side deduplication."""
-        total_fetched = 0
-        seen_ids: set[str] = set()
-        pk_field = self._mapper.get_primary_key_field(entity_type)
+        """Fetch a batch of IDs with automatic batch size reduction on failures.
 
-        for id_batch in self._batch_ids(filter_ids, batch_size=self._filter_batch_size):
+        On RetryExhaustedError (e.g., 500 errors after 3 retries):
+        - If batch size > 1: split in half and retry each half recursively
+        - If batch size == 1: log warning and skip (graceful degradation)
+
+        This allows recovery when a large batch triggers server errors, by
+        narrowing down to problematic IDs and skipping only those.
+        """
+        try:
             async for record in self._fetch_with_filter(
                 entity_type, id_batch, filter_field, limit
             ):
@@ -517,9 +536,74 @@ class ChemblAdapter(BaseHttpAdapter):
                     if record_id:
                         seen_ids.add(record_id)
                     yield record
-                    total_fetched += 1
-                    if limit and total_fetched >= limit:
-                        return
+        except (RetryExhaustedError, ExternalServiceError) as e:
+            # Only handle retry exhausted errors (direct or wrapped)
+            if not self._is_retry_exhausted_error(e):
+                raise
+            if len(id_batch) > 1:
+                # Split batch in half and retry each part
+                mid = len(id_batch) // 2
+                first_half = id_batch[:mid]
+                second_half = id_batch[mid:]
+
+                self.logger.warning(
+                    "batch_reduction_retry",
+                    provider=self.provider_name,
+                    entity_type=entity_type,
+                    original_batch_size=len(id_batch),
+                    first_half_size=len(first_half),
+                    second_half_size=len(second_half),
+                    filter_field=filter_field,
+                    error=str(e),
+                )
+
+                # Recursively fetch each half
+                async for record in self._fetch_batch_with_reduction(
+                    entity_type, first_half, filter_field, limit, seen_ids, pk_field
+                ):
+                    yield record
+                async for record in self._fetch_batch_with_reduction(
+                    entity_type, second_half, filter_field, limit, seen_ids, pk_field
+                ):
+                    yield record
+            else:
+                # Single ID batch still failing - log and skip (graceful degradation)
+                failed_id = id_batch[0] if id_batch else "unknown"
+                self.logger.error(
+                    "single_id_fetch_failed",
+                    provider=self.provider_name,
+                    entity_type=entity_type,
+                    filter_field=filter_field,
+                    failed_id=failed_id,
+                    error=str(e),
+                    error_class=type(e).__name__,
+                )
+                # Skip this ID and continue with the rest
+
+    async def _fetch_filtered(
+        self,
+        entity_type: str,
+        limit: int | None,
+        filter_ids: list[str],
+        filter_field: str,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Perform filtered fetch using ID batches with client-side deduplication.
+
+        Uses batch reduction strategy: on failures, splits batch in half
+        and retries each part recursively until success or single-ID failure.
+        """
+        total_fetched = 0
+        seen_ids: set[str] = set()
+        pk_field = self._mapper.get_primary_key_field(entity_type)
+
+        for id_batch in self._batch_ids(filter_ids, batch_size=self._filter_batch_size):
+            async for record in self._fetch_batch_with_reduction(
+                entity_type, id_batch, filter_field, limit, seen_ids, pk_field
+            ):
+                yield record
+                total_fetched += 1
+                if limit and total_fetched >= limit:
+                    return
 
     async def _fetch_standard(
         self,
