@@ -16,54 +16,68 @@ gold_table: "chembl_molecule"
 source_file: ../../sources/chembl.yaml
 
 # -----------------------------------------------------------------------------
-# Data Quality Rules (entity-specific overrides)
+# Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
+# DQ rules are loaded from hierarchical config files:
+#   1. configs/dq/_defaults.yaml (global defaults)
+#   2. configs/dq/providers/chembl.yaml (provider-specific)
+#   3. configs/dq/entities/chembl/molecule.yaml (entity-specific)
+dq_config_file: ../../dq/entities/chembl/molecule.yaml
+
+# -----------------------------------------------------------------------------
+# Inline DQ Overrides (applied on top of dq_config_file)
+# -----------------------------------------------------------------------------
+# Only overrides that EXTEND or DIFFER from entity DQ config are kept here.
 dq_rules:
   field_validations:
-    - field: "molecule_chembl_id"
-      type: "pattern"
-      pattern: "^CHEMBL\\d+$"
-      nullable: false
-      error_message: "molecule_chembl_id must match CHEMBL format"
+    # Unique: Not in entity config
     - field: "molecule_type"
       type: "enum"
       allowed: ["Small molecule", "Protein", "Antibody", "Oligosaccharide", "Oligonucleotide", "Cell", "Enzyme", "Unknown"]
       nullable: true
+    # Unique: Not in entity config
     - field: "structure_type"
       type: "enum"
       allowed: ["MOL", "SEQ", "NONE", "BOTH"]
       nullable: true
+    # Override: Entity has min:0 only, pipeline has stricter range 10-10000
     - field: "full_mwt"
       type: "range"
       min: 10
       max: 10000
       nullable: true
       error_message: "Molecular weight must be between 10 and 10000 Da"
+    # Unique: SMILES validation not in entity config
     - field: "canonical_smiles"
       type: "custom"
       validator: "smiles_validator"
       nullable: true
+    # Override: Entity has min:-15, pipeline uses min:-10 (stricter)
     - field: "alogp"
       type: "range"
       min: -10
       max: 20
       nullable: true
+    # Unique: Not in entity config
     - field: "hba"
       type: "range"
       min: 0
       max: 50
       nullable: true
+    # Unique: Not in entity config
     - field: "hbd"
       type: "range"
       min: 0
       max: 30
       nullable: true
+    # Unique: Not in entity config
     - field: "psa"
       type: "range"
       min: 0
       max: 1000
       nullable: true
 
+  # Unique cross-field validation (not in entity config)
   cross_field_validations:
     - name: "structure_completeness"
       fields: ["canonical_smiles", "standard_inchi", "standard_inchi_key"]
