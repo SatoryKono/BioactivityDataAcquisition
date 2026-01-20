@@ -595,6 +595,7 @@ class TestChemblAdapterFallbackMode:
         self, mock_http_client, mock_logger
     ):
         """Test that fallback mode yields records one by one."""
+
         # Setup mock for individual record fetches
         def mock_get(url, params=None):
             response = MagicMock()
