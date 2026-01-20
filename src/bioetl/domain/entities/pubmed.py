@@ -200,6 +200,8 @@ class PubMedPublicationEntity(PublicationEntityBase):
 
     # PubMed-specific metadata
     country: str | None = None
+    vernacular_title: str | None = None  # Original non-English title
+    abstract_structured: bool = False  # Whether abstract has labeled sections (NLM)
 
     # Legacy field (kept for backward compatibility)
     publication_year: int | None = None  # Alias for year
