@@ -33,6 +33,7 @@ from bioetl.domain.filtering import (
 from bioetl.domain.filtering.input_config import FilterColumn as DomainFilterColumn
 from bioetl.infrastructure.schemas.pipeline_config import (
     FilterColumnSchema,
+    GoldColumnFilterConfig,
     GoldListContainsFilterConfig,
     GoldListLengthFilterConfig,
     GoldRangeFilterConfig,
@@ -128,8 +129,12 @@ class InputFilterFileConfig(BaseModel):
 class GoldFiltersFileConfig(BaseModel):
     """Gold filter configuration for standalone filter files.
 
+    Supports two formats for columns:
+    - Legacy format: {"column_name": ["value1", "value2"]} (IN operator)
+    - New format: {"column_name": {"operator": "in", "values": ["value1", "value2"]}}
+
     Attributes:
-        columns: Column value filters (inclusion lists).
+        columns: Column value filters with operator support.
         ranges: Numeric range filters.
         list_lengths: List length filters.
         list_contains: List contains filters.
@@ -137,7 +142,7 @@ class GoldFiltersFileConfig(BaseModel):
         exclude_if_present: Exclude if field has value.
     """
 
-    columns: dict[str, list[str]] = Field(default_factory=dict)
+    columns: dict[str, list[str] | GoldColumnFilterConfig] = Field(default_factory=dict)
     ranges: dict[str, GoldRangeFilterConfig] = Field(default_factory=dict)
     list_lengths: dict[str, GoldListLengthFilterConfig] = Field(default_factory=dict)
     list_contains: dict[str, GoldListContainsFilterConfig] = Field(default_factory=dict)
@@ -150,11 +155,31 @@ class GoldFiltersFileConfig(BaseModel):
         Returns:
             GoldFilterConfig: Immutable domain configuration.
         """
+        from bioetl.domain.filtering import FilterOperator
+
+        column_filters: list[GoldColumnFilter] = []
+        for col, cfg in self.columns.items():
+            if isinstance(cfg, list):
+                # Legacy format: list of values -> IN operator
+                column_filters.append(
+                    GoldColumnFilter(
+                        column=col,
+                        operator=FilterOperator.IN,
+                        values=frozenset(cfg),
+                    )
+                )
+            else:
+                # New format: GoldColumnFilterConfig
+                column_filters.append(
+                    GoldColumnFilter(
+                        column=col,
+                        operator=FilterOperator(cfg.operator),
+                        values=frozenset(cfg.values) if cfg.values else None,
+                    )
+                )
+
         return GoldFilterConfig(
-            column_filters=tuple(
-                GoldColumnFilter(column=col, values=frozenset(vals))
-                for col, vals in self.columns.items()
-            ),
+            column_filters=tuple(column_filters),
             range_filters=tuple(
                 GoldRangeFilter(
                     column=col,

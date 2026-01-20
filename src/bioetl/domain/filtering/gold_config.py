@@ -5,10 +5,11 @@ Provides the main GoldFilterConfig class that combines all filter types.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
-from bioetl.domain.filtering.column_filter import GoldColumnFilter
+from bioetl.domain.filtering.column_filter import FilterOperator, GoldColumnFilter
 from bioetl.domain.filtering.list_filters import (
     GoldListContainsFilter,
     GoldListLengthFilter,
@@ -64,8 +65,69 @@ class GoldFilterConfig:
         return all(record.get(fld) in (None, "") for fld in self.exclude_if_present)
 
     def _check_column_filters(self, record: dict[str, Any]) -> bool:
-        """Проверяет соответствие значений колонок допустимым."""
-        return all(str(record.get(f.column)) in f.values for f in self.column_filters)
+        """Проверяет соответствие значений колонок фильтрам."""
+        return all(self._check_single_column(record, f) for f in self.column_filters)
+
+    def _check_single_column(self, record: dict[str, Any], f: GoldColumnFilter) -> bool:
+        """Проверяет одну колонку по оператору.
+
+        Args:
+            record: Запись для проверки.
+            f: Фильтр колонки с оператором.
+
+        Returns:
+            True если значение колонки проходит фильтр.
+        """
+        val = record.get(f.column)
+        checker = _OPERATOR_CHECKERS.get(f.operator)
+        if checker is None:
+            return False  # Unknown operator - fail safe
+        return checker(self, val, f.values)
+
+    def _check_op_in(self, val: Any, values: frozenset[str] | None) -> bool:
+        """Проверяет оператор IN."""
+        return str(val) in values  # type: ignore[operator]
+
+    def _check_op_not_in(self, val: Any, values: frozenset[str] | None) -> bool:
+        """Проверяет оператор NOT_IN."""
+        return str(val) not in values  # type: ignore[operator]
+
+    def _check_op_is_null(self, val: Any, _values: frozenset[str] | None) -> bool:
+        """Проверяет оператор IS_NULL."""
+        return val is None or val == ""
+
+    def _check_op_is_not_null(self, val: Any, _values: frozenset[str] | None) -> bool:
+        """Проверяет оператор IS_NOT_NULL."""
+        return val is not None and val != ""
+
+    def _check_op_is_empty(self, val: Any, _values: frozenset[str] | None) -> bool:
+        """Проверяет оператор IS_EMPTY."""
+        return self._is_empty_value(val)
+
+    def _check_op_is_not_empty(self, val: Any, _values: frozenset[str] | None) -> bool:
+        """Проверяет оператор IS_NOT_EMPTY."""
+        return not self._is_empty_value(val)
+
+    @staticmethod
+    def _is_empty_value(val: Any) -> bool:
+        """Проверяет, является ли значение 'пустым'.
+
+        Пустым считается:
+        - None
+        - Пустая строка или строка из пробелов
+        - Пустой список, словарь или множество
+
+        Args:
+            val: Значение для проверки.
+
+        Returns:
+            True если значение "пустое".
+        """
+        if val is None:
+            return True
+        if isinstance(val, str) and val.strip() == "":
+            return True
+        return isinstance(val, (list, dict, set)) and len(val) == 0
 
     def _check_range_filters(self, record: dict[str, Any]) -> bool:
         """Проверяет попадание значений в диапазоны."""
@@ -185,3 +247,17 @@ class GoldFilterConfig:
             self.exclude_if_present,
         )
         return not any(all_filters)
+
+
+# Operator dispatch table - defined after class to reference methods
+# This mapping enables O(1) operator lookup with CC=1 per operator method
+_OPERATOR_CHECKERS: dict[
+    FilterOperator, Callable[[GoldFilterConfig, Any, frozenset[str] | None], bool]
+] = {
+    FilterOperator.IN: GoldFilterConfig._check_op_in,
+    FilterOperator.NOT_IN: GoldFilterConfig._check_op_not_in,
+    FilterOperator.IS_NULL: GoldFilterConfig._check_op_is_null,
+    FilterOperator.IS_NOT_NULL: GoldFilterConfig._check_op_is_not_null,
+    FilterOperator.IS_EMPTY: GoldFilterConfig._check_op_is_empty,
+    FilterOperator.IS_NOT_EMPTY: GoldFilterConfig._check_op_is_not_empty,
+}

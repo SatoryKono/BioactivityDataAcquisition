@@ -165,8 +165,82 @@
           "type": "array",
           "items": {"type": "string"}
         },
-        "columns": {"type": "object"},
-        "ranges": {"type": "object"}
+        "exclude_if_present": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "columns": {
+          "type": "object",
+          "description": "Column filters with operator support",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Legacy format: list of allowed values (IN operator)"
+              },
+              {
+                "type": "object",
+                "description": "Extended format with operator",
+                "required": ["operator"],
+                "properties": {
+                  "operator": {
+                    "type": "string",
+                    "enum": ["in", "not_in", "is_null", "is_not_null", "is_empty", "is_not_empty"]
+                  },
+                  "values": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Values for IN/NOT_IN operators"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "ranges": {
+          "type": "object",
+          "description": "Numeric range filters",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "min": {"type": "number"},
+              "max": {"type": "number"},
+              "include_min": {"type": "boolean", "default": true},
+              "include_max": {"type": "boolean", "default": true}
+            }
+          }
+        },
+        "list_lengths": {
+          "type": "object",
+          "description": "List length filters",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "min": {"type": "integer"},
+              "max": {"type": "integer"}
+            }
+          }
+        },
+        "list_contains": {
+          "type": "object",
+          "description": "List contains filters",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["values"],
+            "properties": {
+              "values": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "mode": {
+                "type": "string",
+                "enum": ["all", "any"],
+                "default": "all"
+              }
+            }
+          }
+        }
       }
     }
   }

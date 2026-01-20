@@ -110,6 +110,7 @@
       "column_filters": [
         {
           "column": "standard_type",
+          "operator": "in",
           "values": [
             "IC50",
             "Ki"
@@ -117,18 +118,21 @@
         },
         {
           "column": "standard_units",
+          "operator": "in",
           "values": [
             "nM"
           ]
         },
         {
           "column": "standard_relation",
+          "operator": "in",
           "values": [
             "="
           ]
         },
         {
           "column": "assay_type",
+          "operator": "in",
           "values": [
             "B",
             "F"
@@ -136,6 +140,7 @@
         },
         {
           "column": "potential_duplicate",
+          "operator": "in",
           "values": [
             "0"
           ]
@@ -501,6 +506,7 @@
       "column_filters": [
         {
           "column": "reviewed",
+          "operator": "in",
           "values": [
             "true"
           ]

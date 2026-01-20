@@ -91,7 +91,7 @@ class TestFileSizeLimits:
         "silver.py": 840,  # 833 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields)
         "client.py": 960,  # 941 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
-        "pipeline_config.py": 810,  # 802 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028)
+        "pipeline_config.py": 880,  # 877 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig (extended operators)
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
@@ -233,6 +233,9 @@ class TestFunctionComplexity:
         "from_dict": 8,  # CC=6 - Dictionary parsing with type conversions
         # BatchExecutor DQ context extraction
         "get_dq_context": 13,  # CC=12 - DQ context gathering with nullable field handling
+        # Storage writer merge operations with Null/List<Null> coercion
+        "write_silver_merged": 17,  # CC=16 - Silver merge with Null type coercion
+        "write_gold_merged": 17,  # CC=16 - Gold merge with Null type coercion
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
