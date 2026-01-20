@@ -549,3 +549,156 @@ class TestChemblAdapterRequestCollector:
         metadata = adapter.get_source_metadata(api_version="1.0")
 
         assert metadata.api_version == "1.0"
+
+
+@pytest.mark.unit
+class TestChemblAdapterFallbackMode:
+    """Tests for fallback mode when batch filter fails."""
+
+    @pytest.mark.asyncio
+    async def test_fetch_single_record_success(self, mock_http_client, mock_logger):
+        """Test fetching a single record by ID."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "document_chembl_id": "CHEMBL1121421",
+            "title": "Test Document",
+        }
+        mock_http_client.get.return_value = mock_response
+
+        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+        record = await adapter._fetch_single_record("document", "CHEMBL1121421")
+
+        assert record is not None
+        assert record["document_chembl_id"] == "CHEMBL1121421"
+        mock_http_client.get.assert_called_once()
+        # Verify URL includes record ID
+        call_args = mock_http_client.get.call_args
+        assert "CHEMBL1121421" in call_args.args[0]
+
+    @pytest.mark.asyncio
+    async def test_fetch_single_record_failure_returns_none(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that fetch_single_record returns None on failure."""
+        mock_http_client.get.side_effect = Exception("API Error")
+
+        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+        record = await adapter._fetch_single_record("document", "CHEMBL1121421")
+
+        assert record is None
+        mock_logger.warning.assert_called()
+        call_kwargs = mock_logger.warning.call_args.kwargs
+        assert call_kwargs.get("record_id") == "CHEMBL1121421"
+
+    @pytest.mark.asyncio
+    async def test_fetch_with_filter_fallback_yields_records(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that fallback mode yields records one by one."""
+        # Setup mock for individual record fetches
+        def mock_get(url, params=None):
+            response = MagicMock()
+            if "CHEMBL1121421" in url:
+                response.json.return_value = {
+                    "document_chembl_id": "CHEMBL1121421",
+                    "title": "Doc 1",
+                }
+            elif "CHEMBL1121493" in url:
+                response.json.return_value = {
+                    "document_chembl_id": "CHEMBL1121493",
+                    "title": "Doc 2",
+                }
+            else:
+                raise Exception("Not found")
+            return response
+
+        mock_http_client.get = AsyncMock(side_effect=mock_get)
+
+        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+        records = []
+        async for record in adapter._fetch_with_filter_fallback(
+            "document",
+            ["CHEMBL1121421", "CHEMBL1121493"],
+            "document_chembl_id",
+        ):
+            records.append(record)
+
+        assert len(records) == 2
+        assert records[0]["document_chembl_id"] == "CHEMBL1121421"
+        assert records[1]["document_chembl_id"] == "CHEMBL1121493"
+        # Verify fallback mode was logged
+        mock_logger.info.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_fetch_with_filter_falls_back_on_500(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that _fetch_with_filter falls back to individual fetches on 500."""
+        import httpx
+
+        # First call (batch filter) raises 500 error
+        http_error = httpx.HTTPStatusError(
+            "Server Error",
+            request=MagicMock(),
+            response=MagicMock(status_code=500),
+        )
+
+        # Track call count to return different results
+        call_count = 0
+
+        async def mock_get(url, params=None):
+            nonlocal call_count
+            call_count += 1
+
+            if call_count == 1:
+                # First call is batch filter - raise 500
+                raise http_error
+
+            # Subsequent calls are individual fetches
+            response = MagicMock()
+            if "CHEMBL1121421" in url:
+                response.json.return_value = {
+                    "document_chembl_id": "CHEMBL1121421",
+                    "title": "Doc 1",
+                }
+            elif "CHEMBL1121493" in url:
+                response.json.return_value = {
+                    "document_chembl_id": "CHEMBL1121493",
+                    "title": "Doc 2",
+                }
+            return response
+
+        mock_http_client.get = mock_get
+
+        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+
+        records = []
+        async for record in adapter._fetch_with_filter(
+            "document",
+            ["CHEMBL1121421", "CHEMBL1121493"],
+            "document_chembl_id",
+        ):
+            records.append(record)
+
+        assert len(records) == 2
+        # Verify fallback warning was logged
+        mock_logger.warning.assert_called()
+        warning_call = mock_logger.warning.call_args
+        assert warning_call.args[0] == "chembl_batch_filter_failed"
+
+    @pytest.mark.asyncio
+    async def test_fetch_with_filter_reraises_non_500_errors(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that non-500 errors are re-raised, not triggering fallback."""
+        mock_http_client.get.side_effect = Exception("Connection Error")
+
+        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+
+        with pytest.raises(ExternalServiceError):
+            async for _ in adapter._fetch_with_filter(
+                "document",
+                ["CHEMBL1121421"],
+                "document_chembl_id",
+            ):
+                pass

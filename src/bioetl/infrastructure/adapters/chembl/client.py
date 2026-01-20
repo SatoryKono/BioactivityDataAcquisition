@@ -248,6 +248,70 @@ class ChemblAdapter(BaseHttpAdapter):
             # Fix: increment by actual records fetched to handle dynamic limits correctly
             offset += len(records)
 
+    async def _fetch_single_record(
+        self,
+        entity_type: str,
+        record_id: str,
+    ) -> dict[str, Any] | None:
+        """Fetch a single record by ID using path-based URL.
+
+        This is used as fallback when batch __in filter returns 500.
+        ChEMBL API supports /entity/{id} format for single record fetches.
+
+        Args:
+            entity_type: Entity type (e.g., 'document', 'activity')
+            record_id: ChEMBL ID of the record (e.g., 'CHEMBL1121421')
+
+        Returns:
+            Record dict or None if not found/error
+        """
+        import asyncio
+
+        url = f"{self._mapper.get_resource_url(entity_type)}/{record_id}"
+        try:
+            with self._adapter_metrics.measure_request(f"/{entity_type}/{record_id}"):
+                response = await self.http_client.get(url, params={"format": "json"})
+            data = response.json()
+            # Single record response doesn't have plural wrapper
+            return data if isinstance(data, dict) else None
+        except Exception as e:
+            self.logger.warning(
+                "single_record_fetch_failed",
+                entity_type=entity_type,
+                record_id=record_id,
+                error=str(e),
+            )
+            # Add delay before next request to avoid overwhelming the API
+            await asyncio.sleep(1.0)
+            return None
+
+    async def _fetch_with_filter_fallback(
+        self,
+        entity_type: str,
+        id_batch: list[str],
+        filter_field: str,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fallback: fetch records one by one when batch filter fails.
+
+        Used when ChEMBL API returns 500 for __in filter queries (rate limiting).
+        This is slower but more resilient to API instability.
+        """
+        import asyncio
+
+        self.logger.info(
+            "chembl_fallback_mode",
+            entity_type=entity_type,
+            batch_size=len(id_batch),
+            message="Switching to individual record fetching due to API instability",
+        )
+
+        for record_id in id_batch:
+            record = await self._fetch_single_record(entity_type, record_id)
+            if record:
+                yield record
+            # Small delay between requests to be nice to the API
+            await asyncio.sleep(0.5)
+
     async def _fetch_with_filter(
         self,
         entity_type: str,
@@ -260,17 +324,92 @@ class ChemblAdapter(BaseHttpAdapter):
         ChEMBL API pagination can return duplicate records across pages
         when using filter parameters (e.g., assay_chembl_id__in).
         This method deduplicates records by primary key field.
+
+        If batch filter returns 500 (ChEMBL rate limiting disguised as server error),
+        falls back to individual record fetching.
         """
+        import httpx
+
         url = self._mapper.get_resource_url(entity_type)
         offset = 0
         seen_ids: set[str] = set()
         pk_field = self._mapper.get_primary_key_field(entity_type)
 
+        # First attempt: try batch filter
+        params = self._build_params(offset)
+        params[f"{filter_field}__in"] = ",".join(id_batch)
+
+        try:
+            records, has_next = await self._fetch_page(url, params, entity_type)
+        except Exception as e:
+            # Check if this is a 500 error (ChEMBL's rate limiting response)
+            is_server_error = False
+            if isinstance(e.__cause__, httpx.HTTPStatusError):
+                is_server_error = e.__cause__.response.status_code == 500
+            elif hasattr(e, "status_code"):
+                is_server_error = getattr(e, "status_code", 0) == 500
+
+            if is_server_error:
+                # Fallback to individual fetching
+                self.logger.warning(
+                    "chembl_batch_filter_failed",
+                    entity_type=entity_type,
+                    batch_size=len(id_batch),
+                    error=str(e),
+                    fallback="individual_fetch",
+                )
+                async for record in self._fetch_with_filter_fallback(
+                    entity_type, id_batch, filter_field
+                ):
+                    yield record
+                return
+            # Re-raise non-500 errors
+            raise
+
+        if not records:
+            return
+
+        for record in records:
+            record_id = str(record.get(pk_field, ""))
+            if record_id and record_id in seen_ids:
+                self.logger.debug(
+                    "skipping_duplicate_record",
+                    entity_type=entity_type,
+                    pk_field=pk_field,
+                    record_id=record_id,
+                    filter_field=filter_field,
+                )
+                continue
+            if record_id:
+                seen_ids.add(record_id)
+            yield record
+
+        if not has_next:
+            return
+
+        # Continue with pagination for remaining records
+        offset += len(records)
+
         while True:
+            if limit and offset >= limit:
+                break
+
             params = self._build_params(offset)
             params[f"{filter_field}__in"] = ",".join(id_batch)
 
-            records, has_next = await self._fetch_page(url, params, entity_type)
+            try:
+                records, has_next = await self._fetch_page(url, params, entity_type)
+            except Exception:
+                # If pagination fails, we've already yielded some records
+                # Log warning and return what we have
+                self.logger.warning(
+                    "chembl_pagination_interrupted",
+                    entity_type=entity_type,
+                    offset=offset,
+                    records_yielded=len(seen_ids),
+                )
+                return
+
             if not records:
                 break
 
@@ -291,11 +430,7 @@ class ChemblAdapter(BaseHttpAdapter):
 
             if not has_next:
                 break
-            # Fix: increment by actual records fetched
             offset += len(records)
-
-            if limit and offset >= limit:
-                break
 
     def _handle_error(self, e: Exception, context: str = "fetch") -> NoReturn:
         """Handle errors with unified classification. Translates to domain exceptions."""
