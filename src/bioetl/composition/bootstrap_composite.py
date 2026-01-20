@@ -28,6 +28,7 @@ from bioetl.domain.composite.config import CompositeConfig
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.schemas.composite_config import CompositeConfigFileSchema
+from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
 if TYPE_CHECKING:
     import polars as pl
@@ -156,10 +157,16 @@ def bootstrap_composite_pipeline(
     # Create services
     # Base path for resolving Silver table locations
     silver_base_path = str(Path(settings.data_dir) / "output")
-    key_extractor = KeyExtractorService(
-        storage=storage,
-        logger=logger,
+
+    # Create DeltaReader for reading Silver tables
+    delta_reader = DeltaReader(
         base_path=silver_base_path,
+        logger=logger,
+    )
+
+    key_extractor = KeyExtractorService(
+        delta_reader=delta_reader,
+        logger=logger,
     )
 
     coordinator = EnrichmentCoordinator(
@@ -172,7 +179,7 @@ def bootstrap_composite_pipeline(
         merge_config=config.merge,
         storage=storage,
         logger=logger,
-        base_path=silver_base_path,
+        delta_reader=delta_reader,
     )
 
     checkpoint_dir = Path(settings.data_dir) / "checkpoints" / "composite"

@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.domain.ports import LoggerPort, StoragePort
+    from bioetl.domain.ports import DeltaReaderPort, LoggerPort, StoragePort
 
 
 class KeyExtractorService:
@@ -25,13 +25,12 @@ class KeyExtractorService:
     when coordinating enrichers.
 
     Attributes:
-        storage: Storage port for reading Silver tables.
+        delta_reader: Delta reader port for reading Silver tables.
         logger: Structured logger.
-        base_path: Base path for resolving relative Silver table paths.
 
     Example:
         >>> extractor = KeyExtractorService(
-        ...     storage=storage, logger=logger, base_path="data/output"
+        ...     delta_reader=delta_reader, logger=logger
         ... )
         >>> keys_df = await extractor.extract(
         ...     silver_table="silver/chembl/publication",
@@ -43,49 +42,35 @@ class KeyExtractorService:
 
     def __init__(
         self,
-        storage: StoragePort,
+        delta_reader: DeltaReaderPort,
         logger: LoggerPort,
-        base_path: str | None = None,
+        storage: StoragePort | None = None,
     ) -> None:
         """Initialize key extractor service.
 
         Args:
-            storage: Storage port for reading tables.
+            delta_reader: Delta reader port for reading Silver tables.
             logger: Structured logger.
-            base_path: Base path for resolving relative Silver table paths.
-                       If None, paths are used as-is.
+            storage: Deprecated. Kept for backward compatibility, not used.
         """
-        self._storage = storage
+        self._delta_reader = delta_reader
         self._logger = logger
-        self._base_path = base_path
-
-    def _resolve_path(self, path: str) -> str:
-        """Resolve relative path using base_path if configured.
-
-        Args:
-            path: Relative or absolute path to Silver table.
-
-        Returns:
-            Resolved path (with base_path prefix if configured).
-        """
-        if self._base_path:
-            from pathlib import Path
-
-            return str(Path(self._base_path) / path)
-        return path
+        # storage is deprecated, kept for backward compatibility
+        self._storage = storage
 
     async def _read_silver_table(self, path: str) -> pl.DataFrame:
-        """Read a Silver table.
+        """Read a Silver table using DeltaReaderPort.
 
-        TODO: This requires a DeltaReaderPort extension to StoragePort.
-        Current implementation uses direct deltalake access.
+        Args:
+            path: Path to the Silver table (relative to delta_reader base_path).
+
+        Returns:
+            Polars DataFrame with table contents.
         """
         import polars as pl
-        from deltalake import DeltaTable
 
-        resolved_path = self._resolve_path(path)
-        table = DeltaTable(resolved_path)
-        result = pl.from_arrow(table.to_pyarrow_table())
+        arrow_table = await self._delta_reader.read_table(path)
+        result = pl.from_arrow(arrow_table)
         # from_arrow may return Series for single-column tables
         if isinstance(result, pl.Series):
             return result.to_frame()
@@ -127,8 +112,7 @@ class KeyExtractorService:
             keys=list(keys),
         )
 
-        # Read full table
-        # TODO: Use DeltaReaderPort when available
+        # Read full table via DeltaReaderPort
         full_df = await self._read_silver_table(silver_table)
 
         if len(full_df) == 0:
