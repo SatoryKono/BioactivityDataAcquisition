@@ -7,8 +7,9 @@ Extracted from chembl/client.py for better separation of concerns.
 from __future__ import annotations
 
 # ChEMBL API base URL
+# Note: ChEMBL API no longer supports .json extension - use format=json parameter instead
 CHEMBL_API_BASE = "https://www.ebi.ac.uk/chembl/api/data"
-CHEMBL_STATUS_URL = f"{CHEMBL_API_BASE}/status.json"
+CHEMBL_STATUS_URL = f"{CHEMBL_API_BASE}/status"
 
 # Entity type to ChEMBL resource mapping
 ENTITY_MAPPING: dict[str, str] = {
@@ -72,16 +73,20 @@ class ChemblEntityMapper:
             entity_type: Entity type (e.g., 'activity', 'assay', 'compound')
 
         Returns:
-            Full API URL for the entity resource
+            Full API URL for the entity resource (without .json extension)
 
         Raises:
             ValueError: If entity type is unknown
+
+        Note:
+            ChEMBL API no longer supports .json extension.
+            Use format=json query parameter instead (added by _build_params).
         """
         resource = ENTITY_MAPPING.get(entity_type)
         if resource is None:
             msg = f"Unknown entity type: {entity_type}"
             raise ValueError(msg)
-        return f"{CHEMBL_API_BASE}/{resource}.json"
+        return f"{CHEMBL_API_BASE}/{resource}"
 
     @staticmethod
     def get_plural_key(entity_type: str) -> str:
