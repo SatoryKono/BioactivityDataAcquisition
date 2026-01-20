@@ -41,7 +41,7 @@ docs/
 ├── 00-map.md                    # This file (Project Navigator)
 ├── index.md                     # Welcome page
 ├── glossary.md                  # Ubiquitous Language terminology
-├── RULES.md                     # Canonical rules document (v5.10)
+├── RULES.md                     # Canonical rules document (v5.11)
 ├── REQUIREMENTS.md              # 127 testable requirements
 │
 ├── archived/                    # Historical documents
@@ -353,7 +353,7 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2026-01-06   | v5.10 (TTL/Heartbeat Values) |
+| RULES.md                 | 2026-01-20   | v5.11 (Int→Float Coercion)   |
 | REQUIREMENTS.md          | 2025-12-27   | v1.2 (127 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
 | 00-map.md                | 2026-01-14   | v6.6 Fixed broken links      |
