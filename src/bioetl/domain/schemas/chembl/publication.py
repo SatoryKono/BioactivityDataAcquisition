@@ -1,6 +1,6 @@
 """Pandera schema for ChEMBL Publication entity.
 
-Aligned with RULES.md v5.10 and ChEMBL 34 schema.
+Aligned with RULES.md v5.10, ChEMBL 34 schema, and Publication Schema Unification spec.
 """
 
 from __future__ import annotations
@@ -19,35 +19,44 @@ __all__ = ["DOI_REGEX_PATTERN", "LOOKUP_METHODS", "ChemblPublicationSchema"]
 
 
 class ChemblPublicationSchema(PublicationBaseSchema):
-    """ChEMBL Publication validation schema for Silver layer."""
+    """ChEMBL Publication validation schema for Silver layer.
 
-    # === Lookup metadata (ChEMBL-specific) ===
+    Inherits common fields from PublicationBaseSchema:
+    - Cross-references: pmid, doi, pmc_id
+    - Core content: title, abstract, authors
+    - Metadata: journal, year, publication_date, doc_type (overridden), language
+    - Metrics: citation_count
+    - Open Access: is_oa
+    - Lookup tracking: lookup_method (overridden), original_id, source
+    """
+
+    # === Primary Key (ChEMBL-specific) ===
+    document_chembl_id: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=r"^CHEMBL\d+$",
+        description="ChEMBL Document ID.",
+    )
+
+    # === Override lookup_method to be non-nullable ===
     lookup_method: Series[str] = pa.Field(
         alias="_lookup_method",
         nullable=False,
         isin=LOOKUP_METHODS,
         description="How record was resolved: direct for ChEMBL ID lookup",
     )
-    original_id: Series[str] = pa.Field(
-        alias="_original_id",
-        nullable=True,
-        description="Original identifier used for lookup (document_chembl_id)",
-    )
 
-    # === Provider-specific Primary Key ===
-    document_chembl_id: Series[str] = pa.Field(
-        nullable=False,
-        str_matches=r"^CHEMBL\d+$",
-        description="ChEMBL ID.",
+    # === Override doc_type with ChEMBL-specific values ===
+    doc_type: Series[str] = pa.Field(
+        nullable=True,
+        isin=["PUBLICATION", "PATENT", "DATASET", "BOOK"],
+        description="Document type.",
     )
 
     # === Provider-specific Identifiers ===
     patent_id: Series[str] = pa.Field(nullable=True, description="Patent ID.")
     src_id: Series[int] = pa.Field(nullable=True, description="Source ID.")
 
-    # === Provider-specific Fields ===
-    authors: Series[str] = pa.Field(nullable=True, description="Authors.")
-    journal: Series[str] = pa.Field(nullable=True, description="Journal.")
+    # === Provider-specific Journal Fields ===
     journal_full_title: Series[str] = pa.Field(
         nullable=True, description="Full journal title."
     )
@@ -55,13 +64,6 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     issue: Series[str] = pa.Field(nullable=True, description="Issue.")
     first_page: Series[str] = pa.Field(nullable=True, description="First page.")
     last_page: Series[str] = pa.Field(nullable=True, description="Last page.")
-
-    # === Doc Type with ChEMBL-specific values ===
-    doc_type: Series[str] = pa.Field(
-        nullable=True,
-        isin=["PUBLICATION", "PATENT", "DATASET", "BOOK"],
-        description="Document type.",
-    )
 
     # === DQ Fields ===
     _dq_warn: Series[bool] = pa.Field(

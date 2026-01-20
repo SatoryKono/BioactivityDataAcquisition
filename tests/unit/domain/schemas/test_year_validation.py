@@ -50,29 +50,40 @@ class TestCrossRefYearValidation:
         return {
             **base_etl_fields,
             "entity_id": "crossref:publication:10.1038/nature12373",
-            "pmid": None,  # Added for base schema compatibility
+            # Cross-reference IDs
+            "pmid": None,
             "doi": "10.1038/nature12373",
-            "pmc_id": None,  # Added for base schema compatibility
+            "pmc_id": None,
+            # Core content
             "title": "Test Publication",
             "abstract": None,
-            "authors": None,
+            "authors": '["Author A", "Author B"]',  # JSON array
+            # Publication metadata
             "journal": "Nature",
+            "year": 2020,
+            "publication_date": "2020-06-15",  # Unified date field
+            "doc_type": DOCUMENT_TYPES[0],
+            "language": "en",
+            # Metrics
+            "citation_count": 100,
+            # Open Access
+            "is_oa": None,
+            # Lookup tracking
+            "_lookup_method": "doi",
+            "_original_id": "10.1038/nature12373",
+            "source": "crossref",
+            # CrossRef-specific fields
             "issn": None,
             "publisher": "Nature Publishing Group",
             "volume": "1",
             "issue": "1",
             "first_page": "1",
             "last_page": "10",
-            "year": 2020,
             "published_print": None,
             "published_online": None,
-            "doc_type": DOCUMENT_TYPES[0],
-            "citation_count": 100,
             "reference_count": 50,
-            "language": "en",
             "license_url": None,
             "subjects": None,
-            "source": "crossref",
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
@@ -116,33 +127,41 @@ class TestSemanticScholarYearValidation:
         return {
             **base_etl_fields,
             "entity_id": "semanticscholar:publication:abc123",
-            "paper_id": "a" * 40,  # 40-char hex
-            "doi": "10.1038/nature12373",
+            # Cross-reference IDs
             "pmid": None,
+            "doi": "10.1038/nature12373",
             "pmc_id": None,
-            "arxiv_id": None,
-            "corpus_id": 12345,
+            # Core content
             "title": "Test Publication",
             "abstract": None,
-            "tldr": None,
-            "year": 2020,
-            "publication_date": None,
-            "doc_type": None,  # Added for schema compatibility
+            "authors": '["Author A", "Author B"]',  # JSON array
+            # Publication metadata
             "journal": "Nature",
+            "year": 2020,
+            "publication_date": "2020-06-15",  # Unified date field
+            "doc_type": "PUBLICATION",
+            "language": None,
+            # Metrics
+            "citation_count": 100,
+            # Open Access
+            "is_oa": True,
+            # Lookup tracking
+            "_lookup_method": "doi",
+            "_original_id": None,
+            "source": "semanticscholar",
+            # SemanticScholar-specific fields
+            "paper_id": "a" * 40,  # 40-char hex
+            "arxiv_id": None,
+            "corpus_id": 12345,
+            "tldr": None,
             "volume": None,
             "pages": None,
             "venue": None,
-            "citation_count": 100,
             "reference_count": 50,
-            "is_oa": True,
             "open_access_url": None,
             "oa_status": None,
             "fields_of_study": None,
             "publication_types": None,
-            "authors": None,
-            "source": "semanticscholar",
-            "_lookup_method": "doi",
-            "_original_id": None,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
@@ -186,27 +205,37 @@ class TestChemblYearValidation:
         return {
             **base_etl_fields,
             "entity_id": "chembl:publication:CHEMBL1234567",
-            "document_chembl_id": "CHEMBL1234567",
+            # Cross-reference IDs
             "pmid": "12345678",
             "doi": "10.1038/nature12373",
-            "pmc_id": None,  # Added for base schema compatibility
+            "pmc_id": None,
+            # Core content
+            "title": "Test Publication",
+            "abstract": "Abstract text",
+            "authors": '["Author A", "Author B"]',  # JSON array
+            # Publication metadata
+            "journal": "Nature",
+            "year": 2020,
+            "publication_date": "2020-01-01",  # Unified date field
+            "doc_type": "PUBLICATION",
+            "language": None,
+            # Metrics
+            "citation_count": None,  # Not available from ChEMBL
+            # Open Access
+            "is_oa": None,
+            # Lookup tracking
+            "_lookup_method": "direct",
+            "_original_id": None,
+            "source": "chembl",
+            # ChEMBL-specific fields
+            "document_chembl_id": "CHEMBL1234567",
             "patent_id": None,
             "src_id": 1,
-            "title": "Test Publication",
-            "doc_type": "PUBLICATION",
-            "authors": "Author A, Author B",
-            "abstract": "Abstract text",
-            "journal": "Nature",
             "journal_full_title": "Nature Journal",
-            "year": 2020,
             "volume": "1",
             "issue": "1",
             "first_page": "1",
             "last_page": "10",
-            "_lookup_method": "direct",
-            "_original_id": None,
-            "_dq_warn": False,
-            "_dq_error": False,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
@@ -249,24 +278,38 @@ class TestPubMedYearValidation:
         return {
             **base_etl_fields,
             "entity_id": "pubmed:article:12345678",
+            # Cross-reference IDs (pmid is int for PubMed)
             "pmid": 12345678,
             "doi": "10.1038/nature12373",
             "pmc_id": None,
+            # Core content
             "title": "Test Article",
             "abstract": None,
+            "authors": '["Author A", "Author B"]',  # JSON array
+            # Publication metadata
+            "journal": "Nature",  # Unified journal field
+            "year": 2020,
+            "publication_date": "2020-05-15",  # Unified date field
+            "doc_type": "PUBLICATION",
+            "language": "eng",
+            # Metrics
+            "citation_count": None,  # Not available from PubMed
+            # Open Access
+            "is_oa": None,
+            # Lookup tracking
+            "_lookup_method": "pmid",
+            "_original_id": "12345678",
+            "source": "pubmed",
+            # PubMed-specific fields
             "abstract_structured": None,
             "vernacular_title": None,
-            "language": "eng",
             "journal_title": "Nature",
             "journal_iso_abbrev": "Nature",
             "journal_issn": "0028-0836",
             "journal_issn_type": "Print",
             "nlm_unique_id": None,
             "country": "United States",
-            "volume": "1",
-            "issue": "1",
             "medline_pgn": "1-10",
-            "year": 2020,
             "pub_month": 5,
             "pub_day": 15,
             "publication_status": "ppublish",
