@@ -25,6 +25,15 @@ source_file: ../../sources/crossref.yaml
 #   3. configs/dq/entities/crossref/publication.yaml (entity-specific)
 dq_config_file: ../../dq/entities/crossref/publication.yaml
 
+# -----------------------------------------------------------------------------
+# Filter Configuration (ADR-028)
+# -----------------------------------------------------------------------------
+# Filter rules are loaded from hierarchical config files:
+#   1. configs/filter/_defaults.yaml (global defaults)
+#   2. configs/filter/providers/crossref.yaml (provider-specific)
+#   3. configs/filter/entities/crossref/publication.yaml (entity-specific)
+filter_config_file: ../../filter/entities/crossref/publication.yaml
+
 # Entity-specific gold filters
 gold_filters:
   required_fields:

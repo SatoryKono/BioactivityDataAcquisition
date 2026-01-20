@@ -24,6 +24,15 @@ source_file: ../../sources/uniprot.yaml
 #   3. configs/dq/entities/uniprot/protein.yaml (entity-specific)
 dq_config_file: ../../dq/entities/uniprot/protein.yaml
 
+# -----------------------------------------------------------------------------
+# Filter Configuration (ADR-028)
+# -----------------------------------------------------------------------------
+# Filter rules are loaded from hierarchical config files:
+#   1. configs/filter/_defaults.yaml (global defaults)
+#   2. configs/filter/providers/uniprot.yaml (provider-specific)
+#   3. configs/filter/entities/uniprot/protein.yaml (entity-specific)
+filter_config_file: ../../filter/entities/uniprot/protein.yaml
+
 # Entity-specific gold filters
 gold_filters:
   required_fields:
