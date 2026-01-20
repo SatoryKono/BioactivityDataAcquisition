@@ -1,0 +1,208 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$version": "1.0.0",
+    "title": "PubChem Compound Data Contract",
+    "description": "Defines the schema for the gold 'PubChemCompound' entity, aligned with RULES.md §7.1. This contract is for data consumers. Chemical compound data from PubChem.",
+    "type": "object",
+    "properties": {
+        "cid": {
+            "type": "integer",
+            "description": "PubChem Compound ID (PK).",
+            "minimum": 1
+        },
+        "canonical_smiles": {
+            "type": ["string", "null"],
+            "description": "Canonical SMILES string.",
+            "maxLength": 10000
+        },
+        "isomeric_smiles": {
+            "type": ["string", "null"],
+            "description": "SMILES with stereochemistry.",
+            "maxLength": 10000
+        },
+        "inchi": {
+            "type": ["string", "null"],
+            "description": "IUPAC InChI identifier.",
+            "pattern": "^InChI=.*$"
+        },
+        "inchi_key": {
+            "type": ["string", "null"],
+            "description": "InChI hash key (27 chars).",
+            "pattern": "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
+        },
+        "molecular_formula": {
+            "type": ["string", "null"],
+            "description": "Molecular formula (e.g., C6H12O6)."
+        },
+        "iupac_name": {
+            "type": ["string", "null"],
+            "description": "IUPAC systematic name."
+        },
+        "molecular_weight": {
+            "type": ["number", "null"],
+            "description": "Molecular weight in g/mol.",
+            "minimum": 0,
+            "maximum": 100000
+        },
+        "exact_mass": {
+            "type": ["number", "null"],
+            "description": "Monoisotopic exact mass (Da).",
+            "minimum": 0
+        },
+        "xlogp": {
+            "type": ["number", "null"],
+            "description": "Computed octanol-water partition coefficient.",
+            "minimum": -20,
+            "maximum": 20
+        },
+        "tpsa": {
+            "type": ["number", "null"],
+            "description": "Topological polar surface area (A^2).",
+            "minimum": 0
+        },
+        "complexity": {
+            "type": ["number", "null"],
+            "description": "Structural complexity score.",
+            "minimum": 0
+        },
+        "charge": {
+            "type": ["integer", "null"],
+            "description": "Formal charge.",
+            "minimum": -10,
+            "maximum": 10
+        },
+        "heavy_atom_count": {
+            "type": ["integer", "null"],
+            "description": "Non-hydrogen atom count.",
+            "minimum": 1,
+            "maximum": 500
+        },
+        "h_bond_donor_count": {
+            "type": ["integer", "null"],
+            "description": "Hydrogen bond donor count.",
+            "minimum": 0,
+            "maximum": 50
+        },
+        "h_bond_acceptor_count": {
+            "type": ["integer", "null"],
+            "description": "Hydrogen bond acceptor count.",
+            "minimum": 0,
+            "maximum": 50
+        },
+        "rotatable_bond_count": {
+            "type": ["integer", "null"],
+            "description": "Rotatable bond count.",
+            "minimum": 0,
+            "maximum": 100
+        },
+        "atom_stereo_count": {
+            "type": ["integer", "null"],
+            "description": "Total stereocenters.",
+            "minimum": 0
+        },
+        "defined_atom_stereo_count": {
+            "type": ["integer", "null"],
+            "description": "Defined stereocenters.",
+            "minimum": 0
+        },
+        "undefined_atom_stereo_count": {
+            "type": ["integer", "null"],
+            "description": "Undefined stereocenters.",
+            "minimum": 0
+        },
+        "bond_stereo_count": {
+            "type": ["integer", "null"],
+            "description": "Total E/Z bonds.",
+            "minimum": 0
+        },
+        "defined_bond_stereo_count": {
+            "type": ["integer", "null"],
+            "description": "Defined E/Z bonds.",
+            "minimum": 0
+        },
+        "undefined_bond_stereo_count": {
+            "type": ["integer", "null"],
+            "description": "Undefined E/Z bonds.",
+            "minimum": 0
+        },
+        "isotope_atom_count": {
+            "type": ["integer", "null"],
+            "description": "Isotopic atom count.",
+            "minimum": 0
+        },
+        "covalent_unit_count": {
+            "type": ["integer", "null"],
+            "description": "Number of covalent units.",
+            "minimum": 1
+        },
+        "volume_3d": {
+            "type": ["number", "null"],
+            "description": "3D molecular volume (A^3).",
+            "minimum": 0
+        },
+        "conformer_count_3d": {
+            "type": ["integer", "null"],
+            "description": "Number of 3D conformers.",
+            "minimum": 0
+        },
+        "feature_acceptor_count_3d": {
+            "type": ["integer", "null"],
+            "description": "3D H-bond acceptor features.",
+            "minimum": 0
+        },
+        "feature_donor_count_3d": {
+            "type": ["integer", "null"],
+            "description": "3D H-bond donor features.",
+            "minimum": 0
+        },
+        "feature_anion_count_3d": {
+            "type": ["integer", "null"],
+            "description": "3D anion features.",
+            "minimum": 0
+        },
+        "feature_cation_count_3d": {
+            "type": ["integer", "null"],
+            "description": "3D cation features.",
+            "minimum": 0
+        },
+        "feature_ring_count_3d": {
+            "type": ["integer", "null"],
+            "description": "3D ring features.",
+            "minimum": 0
+        },
+        "feature_hydrophobe_count_3d": {
+            "type": ["integer", "null"],
+            "description": "3D hydrophobic features.",
+            "minimum": 0
+        },
+        "effective_rotor_count_3d": {
+            "type": ["number", "null"],
+            "description": "Effective rotatable bonds (3D).",
+            "minimum": 0
+        },
+        "conformer_rmsd_3d": {
+            "type": ["number", "null"],
+            "description": "Conformer model RMSD.",
+            "minimum": 0
+        },
+        "_source_batch_id": {
+            "type": "string",
+            "description": "Internal ID linking to the source Bronze batch for lineage.",
+            "format": "uuid"
+        },
+        "_content_hash": {
+            "type": "string",
+            "description": "SHA-256 hash of the record's content for versioning and deduplication."
+        },
+        "_ingestion_ts": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC timestamp of when the record was ingested."
+        }
+    },
+    "required": [
+        "cid",
+        "_content_hash",
+        "_ingestion_ts"
+    ]
+}

@@ -1,0 +1,53 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$version": "1.0.0",
+    "title": "Publication Term Data Contract",
+    "description": "Defines the schema for the gold 'PublicationTerm' entity, aligned with RULES.md §7.1. This contract is for data consumers. Terms (MeSH, keywords, concepts) associated with documents.",
+    "type": "object",
+    "properties": {
+        "document_chembl_id": {
+            "type": "string",
+            "description": "FK to Document ChEMBL ID (part of composite key).",
+            "pattern": "^CHEMBL\\d+$"
+        },
+        "term": {
+            "type": "string",
+            "description": "Term text (e.g., 'Aspirin', 'kinase inhibitor').",
+            "minLength": 1
+        },
+        "term_type": {
+            "type": "string",
+            "description": "Term type classification.",
+            "enum": ["MESH_HEADING", "MESH_QUALIFIER", "KEYWORD", "CONCEPT"]
+        },
+        "mesh_id": {
+            "type": ["string", "null"],
+            "description": "MeSH identifier (e.g., 'D001241')."
+        },
+        "qualifier": {
+            "type": ["string", "null"],
+            "description": "MeSH qualifier (e.g., 'pharmacology')."
+        },
+        "_source_batch_id": {
+            "type": "string",
+            "description": "Internal ID linking to the source Bronze batch for lineage.",
+            "format": "uuid"
+        },
+        "_content_hash": {
+            "type": "string",
+            "description": "SHA-256 hash of the record's content for versioning and deduplication."
+        },
+        "_ingestion_ts": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC timestamp of when the record was ingested."
+        }
+    },
+    "required": [
+        "document_chembl_id",
+        "term",
+        "term_type",
+        "_content_hash",
+        "_ingestion_ts"
+    ]
+}
