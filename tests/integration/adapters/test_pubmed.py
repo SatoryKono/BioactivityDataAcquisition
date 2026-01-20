@@ -8,9 +8,6 @@ Cassettes location: tests/fixtures/vcr/pubmed/
 
 from __future__ import annotations
 
-import os
-from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -18,19 +15,8 @@ import respx
 from httpx import Response
 
 # VCR cassette directory for PubMed adapter tests
-CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "pubmed"
-
-
-@pytest.fixture(scope="module")
-def vcr_config() -> dict[str, Any]:
-    """Configure VCR for PubMed adapter tests."""
-    return {
-        "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
-        "match_on": ["method", "scheme", "host", "port", "path", "query"],
-        "decode_compressed_response": True,
-    }
-
+# Note: cassette directory is resolved by conftest.py vcr_cassette_dir fixture
+# which looks for tests/fixtures/vcr/pubmed/ based on test filename
 
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
