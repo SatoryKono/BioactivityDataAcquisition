@@ -29,8 +29,12 @@ if TYPE_CHECKING:
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.ports import HealthMonitorPort, LoggerPort, MetricsPort
-    from bioetl.domain.ports.health_check import HealthCheckResult
+    from bioetl.domain.ports import (
+        HealthCheckResult,
+        HealthMonitorPort,
+        LoggerPort,
+        MetricsPort,
+    )
 
 
 # =============================================================================
