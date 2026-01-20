@@ -1,7 +1,8 @@
 """Tests for PublicationBaseSchema.
 
 Tests the base schema used by all publication entities across providers.
-Validates common fields: pmid, doi, pmc_id, title, abstract, year.
+Validates common fields: pmid, doi, pmc_id, title, abstract, authors, journal,
+year, publication_date, citation_count, is_oa, lookup_method, source, doc_type, language.
 """
 
 from __future__ import annotations
@@ -23,7 +24,7 @@ def valid_base_record() -> dict:
     """Create a valid record with all base publication fields.
 
     Includes all fields from ETLRecordSchema base class plus
-    PublicationBaseSchema specific fields.
+    PublicationBaseSchema specific fields for unified cross-provider analysis.
     """
     return {
         # === ETLRecordSchema fields ===
@@ -37,13 +38,28 @@ def valid_base_record() -> dict:
         "_dq_warn": False,
         "_dq_error": False,
         "_index": 0,
-        # === PublicationBaseSchema fields ===
+        # === Cross-reference IDs ===
         "pmid": "12345678",
         "doi": "10.1234/example.test",
         "pmc_id": "PMC1234567",
+        # === Core content ===
         "title": "Test Publication Title",
         "abstract": "This is a test abstract for the publication.",
+        "authors": '["John Doe", "Jane Smith"]',  # JSON array
+        # === Publication metadata ===
+        "journal": "Journal of Testing",
         "year": 2024,
+        "publication_date": "2024-06-15",
+        "doc_type": "PUBLICATION",
+        "language": "en",
+        # === Metrics ===
+        "citation_count": 10,
+        # === Open Access ===
+        "is_oa": True,
+        # === Lookup tracking (note: column names use _ prefix) ===
+        "_lookup_method": "doi",
+        "_original_id": "10.1234/example.test",
+        "source": "test_provider",
     }
 
 

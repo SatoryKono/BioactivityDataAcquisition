@@ -194,6 +194,11 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 else None
             ),
             "pmc_id": normalize_pmc_id(IdentifierExtractor.extract_pmc_id(root)),
+            # === Unified publication fields (cross-provider consistency) ===
+            "source": "pubmed",
+            "doc_type": "PUBLICATION",  # PubMed primarily contains publications
+            "citation_count": None,  # Not available from PubMed
+            "is_oa": None,  # Not available from PubMed
             # Lookup metadata (from adapter fallback handler)
             "_lookup_method": cast("dict[str, Any]", record).get(
                 "_lookup_method", "pmid"
