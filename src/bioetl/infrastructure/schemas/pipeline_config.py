@@ -554,13 +554,69 @@ class GoldListContainsFilterConfig(BaseModel):
     mode: Literal["all", "any"] = "all"
 
 
+class GoldColumnFilterConfig(BaseModel):
+    """Column filter config with operator support.
+
+    Supports extended operators for column filtering:
+    - in: value must be in the allowed list (default)
+    - not_in: value must not be in the excluded list
+    - is_null: value must be None or empty string
+    - is_not_null: value must not be None or empty string
+    - is_empty: value must be "empty" (None, "", [], {})
+    - is_not_empty: value must not be "empty"
+
+    Example YAML:
+        columns:
+          standard_type:
+            operator: in
+            values: ["IC50", "Ki"]
+          pchembl_value:
+            operator: is_not_null
+    """
+
+    operator: Literal[
+        "in", "not_in", "is_null", "is_not_null", "is_empty", "is_not_empty"
+    ] = "in"
+    values: list[str] | None = None
+
+    @model_validator(mode="after")
+    def validate_operator_values(self) -> GoldColumnFilterConfig:
+        """Validate that values are provided for IN/NOT_IN operators."""
+        if self.operator in ("in", "not_in") and not self.values:
+            raise ValueError(f"values required for operator '{self.operator}'")
+        if (
+            self.operator in ("is_null", "is_not_null", "is_empty", "is_not_empty")
+            and self.values is not None
+        ):
+            raise ValueError(f"values must be None for operator '{self.operator}'")
+        return self
+
+
 class GoldFiltersConfig(BaseModel):
     """Schema for gold_filters in YAML.
 
     Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
+
+    Supports two formats for columns:
+    - Legacy format: {"column_name": ["value1", "value2"]} (IN operator)
+    - New format: {"column_name": {"operator": "in", "values": ["value1", "value2"]}}
+
+    Example YAML (legacy format):
+        gold_filters:
+          columns:
+            standard_type: [IC50, Ki]
+
+    Example YAML (new format):
+        gold_filters:
+          columns:
+            standard_type:
+              operator: in
+              values: [IC50, Ki]
+            pchembl_value:
+              operator: is_not_null
     """
 
-    columns: dict[str, list[str]] = Field(default_factory=dict)
+    columns: dict[str, list[str] | GoldColumnFilterConfig] = Field(default_factory=dict)
     ranges: dict[str, GoldRangeFilterConfig] = Field(default_factory=dict)
     list_lengths: dict[str, GoldListLengthFilterConfig] = Field(default_factory=dict)
     list_contains: dict[str, GoldListContainsFilterConfig] = Field(default_factory=dict)
@@ -574,6 +630,7 @@ class GoldFiltersConfig(BaseModel):
             GoldFilterConfig: Immutable domain configuration.
         """
         from bioetl.domain.filtering import (
+            FilterOperator,
             GoldColumnFilter,
             GoldFilterConfig,
             GoldListContainsFilter,
@@ -581,11 +638,29 @@ class GoldFiltersConfig(BaseModel):
             GoldRangeFilter,
         )
 
+        column_filters: list[GoldColumnFilter] = []
+        for col, cfg in self.columns.items():
+            if isinstance(cfg, list):
+                # Legacy format: list of values -> IN operator
+                column_filters.append(
+                    GoldColumnFilter(
+                        column=col,
+                        operator=FilterOperator.IN,
+                        values=frozenset(cfg),
+                    )
+                )
+            else:
+                # New format: GoldColumnFilterConfig
+                column_filters.append(
+                    GoldColumnFilter(
+                        column=col,
+                        operator=FilterOperator(cfg.operator),
+                        values=frozenset(cfg.values) if cfg.values else None,
+                    )
+                )
+
         return GoldFilterConfig(
-            column_filters=tuple(
-                GoldColumnFilter(column=col, values=frozenset(vals))
-                for col, vals in self.columns.items()
-            ),
+            column_filters=tuple(column_filters),
             range_filters=tuple(
                 GoldRangeFilter(
                     column=col,
