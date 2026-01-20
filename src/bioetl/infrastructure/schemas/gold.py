@@ -209,7 +209,11 @@ class UniProtIDMappingGoldSchema(pa.DataFrameModel):
 
 
 class PubMedPublicationGoldSchema(pa.DataFrameModel):
-    """Schema for PubMed Publication in Gold layer."""
+    """Schema for PubMed Publication in Gold layer.
+
+    Includes PubMed-specific fields for forensic retention and detailed analysis.
+    See: https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_230101.dtd
+    """
 
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
@@ -218,16 +222,40 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     pmc_id: Series[str] = pa.Field(nullable=True)
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
+    abstract_structured: Series[bool] = pa.Field(
+        nullable=True
+    )  # Whether abstract has NLM sections
+    vernacular_title: Series[str] = pa.Field(
+        nullable=True
+    )  # Original non-English title
+
+    # Journal information
     journal: Series[str] = pa.Field(nullable=True)
     journal_abbrev: Series[str] = pa.Field(nullable=True)
+    # PubMed-specific journal fields (forensic retention)
+    journal_title: Series[str] = pa.Field(nullable=True)  # Full journal name (PubMed)
+    journal_iso_abbrev: Series[str] = pa.Field(nullable=True)  # ISO abbreviation
+    journal_issn_type: Series[str] = pa.Field(
+        nullable=True
+    )  # ISSN type: Print/Electronic/Linking
     issn: Series[str] = pa.Field(nullable=True)
+    nlm_unique_id: Series[str] = pa.Field(nullable=True)  # NLM catalog ID
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)
+
+    # Page information
     pages: Series[str] = pa.Field(nullable=True)  # Legacy: medline_pgn format
+    medline_pgn: Series[str] = pa.Field(nullable=True)  # Original PubMed pagination
     first_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     last_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
+
+    # Authors
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
+
+    # Date fields
     pub_date: Series[str] = pa.Field(nullable=True)
+    pub_month: Series[float] = pa.Field(nullable=True, coerce=True)  # Month (1-12)
+    pub_day: Series[float] = pa.Field(nullable=True, coerce=True)  # Day (1-31)
     publication_date: Series[str] = pa.Field(
         nullable=True, str_matches=DATE_REGEX
     )  # Unified: YYYY-MM-DD
@@ -239,11 +267,39 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     received_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
     revised_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
     epub_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
+    # MEDLINE-specific dates
+    date_completed: Series[str] = pa.Field(
+        nullable=True, str_matches=DATE_REGEX
+    )  # MEDLINE processing completion
+    date_revised: Series[str] = pa.Field(
+        nullable=True, str_matches=DATE_REGEX
+    )  # Record revision date (MEDLINE)
+
+    # Publication status and types
+    publication_status: Series[str] = pa.Field(
+        nullable=True
+    )  # ppublish/epublish/aheadofprint
+    publication_type_list: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array of pub types
     publication_types: Series[object] = pa.Field(nullable=True)  # list[str]
+
+    # Classification
     keywords: Series[object] = pa.Field(nullable=True)  # list[str]
     mesh_terms: Series[object] = pa.Field(nullable=True)  # list[str]
+    citation_subset: Series[str] = pa.Field(
+        nullable=True
+    )  # Citation subset codes (e.g., 'AIM')
     language: Series[str] = pa.Field(nullable=True)
     country: Series[str] = pa.Field(nullable=True)
+
+    # Counts (denormalized for query efficiency)
+    author_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    mesh_heading_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    keyword_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    grant_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    reference_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    chemical_count: Series[float] = pa.Field(nullable=True, coerce=True)
 
     # Source tracking
     source: Series[str] = pa.Field(nullable=True)
