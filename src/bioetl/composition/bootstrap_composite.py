@@ -179,7 +179,7 @@ def bootstrap_composite_pipeline(
         merge_config=config.merge,
         storage=storage,
         logger=logger,
-        base_path=silver_base_path,
+        delta_reader=delta_reader,
     )
 
     checkpoint_dir = Path(settings.data_dir) / "checkpoints" / "composite"

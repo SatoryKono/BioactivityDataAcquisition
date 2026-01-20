@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.domain.composite.config import EnricherConfig, MergeConfig
-    from bioetl.domain.ports import LoggerPort, StoragePort
+    from bioetl.domain.ports import DeltaReaderPort, LoggerPort, StoragePort
 
 
 def _path_to_table_name(path: str) -> str:
@@ -47,12 +47,12 @@ class MergeService:
         merge_config: MergeConfig,
         storage: StoragePort,
         logger: LoggerPort,
-        base_path: str | None = None,
+        delta_reader: DeltaReaderPort | None = None,
     ) -> None:
         self._config = merge_config
         self._storage = storage
         self._logger = logger
-        self._base_path = base_path
+        self._delta_reader = delta_reader
 
     async def merge(
         self,
@@ -167,26 +167,11 @@ class MergeService:
             output_gold_path=self._config.output_gold_path,
         )
 
-    def _resolve_path(self, path: str) -> str:
-        """Resolve relative path using base_path if configured.
-
-        Args:
-            path: Relative or absolute path to Silver table.
-
-        Returns:
-            Resolved path (with base_path prefix if configured).
-        """
-        if self._base_path:
-            from pathlib import Path
-
-            return str(Path(self._base_path) / path)
-        return path
-
     async def _read_silver_table(self, path: str) -> pl.DataFrame:
         """Read a Silver table.
 
-        Uses direct DeltaTable access when base_path is configured (actual operation),
-        or StoragePort when base_path is not set (for testing with mocks).
+        Uses DeltaReaderPort when configured (actual operation),
+        or StoragePort when delta_reader is not set (for testing with mocks).
 
         Args:
             path: Table path like "silver/chembl/activity".
@@ -196,13 +181,10 @@ class MergeService:
         """
         import polars as pl
 
-        # Use direct Delta access when base_path is configured
-        if self._base_path:
-            from deltalake import DeltaTable
-
-            resolved_path = self._resolve_path(path)
-            table = DeltaTable(resolved_path)
-            result = pl.from_arrow(table.to_pyarrow_table())
+        # Use DeltaReaderPort when configured
+        if self._delta_reader is not None:
+            arrow_table = await self._delta_reader.read_table(path)
+            result = pl.from_arrow(arrow_table)
             # from_arrow may return Series for single-column tables
             if isinstance(result, pl.Series):
                 return result.to_frame()
@@ -239,10 +221,7 @@ class MergeService:
         return df
 
     async def _write_merged_silver(self, df: pl.DataFrame) -> None:
-        """Write merged data to Silver layer.
-
-        Uses direct DeltaTable when base_path is configured (actual operation),
-        or StoragePort when base_path is not set (for testing with mocks).
+        """Write merged data to Silver layer via StoragePort.
 
         Args:
             df: Polars DataFrame to write.
@@ -250,29 +229,12 @@ class MergeService:
         # Coerce null columns for Delta Lake compatibility
         df = self._coerce_null_columns(df)
 
-        # Use direct Delta access when base_path is configured
-        if self._base_path:
-            from deltalake import write_deltalake
-
-            output_path = self._resolve_path(self._config.output_silver_path)
-            write_deltalake(
-                output_path,
-                df.to_arrow(),
-                mode="overwrite",
-                schema_mode="overwrite",
-            )
-            return
-
-        # Fall back to StoragePort (for testing with mocks)
         table_name = _path_to_table_name(self._config.output_silver_path)
         records = df.to_dicts()
         await self._storage.write_silver_merged(table_name, records)
 
     async def _write_merged_gold(self, df: pl.DataFrame) -> None:
-        """Write merged data to Gold layer.
-
-        Uses direct DeltaTable when base_path is configured (actual operation),
-        or StoragePort when base_path is not set (for testing with mocks).
+        """Write merged data to Gold layer via StoragePort.
 
         Args:
             df: Polars DataFrame to write.
@@ -280,20 +242,6 @@ class MergeService:
         # Coerce null columns for Delta Lake compatibility
         df = self._coerce_null_columns(df)
 
-        # Use direct Delta access when base_path is configured
-        if self._base_path:
-            from deltalake import write_deltalake
-
-            output_path = self._resolve_path(self._config.output_gold_path)
-            write_deltalake(
-                output_path,
-                df.to_arrow(),
-                mode="overwrite",
-                schema_mode="overwrite",
-            )
-            return
-
-        # Fall back to StoragePort (for testing with mocks)
         table_name = _path_to_table_name(self._config.output_gold_path)
         records = df.to_dicts()
         await self._storage.write_gold_merged(table_name, records)
