@@ -169,6 +169,37 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         doi_vo = DOI.from_raw(raw_doi)
         normalized_doi = str(doi_vo) if doi_vo else None
 
+        # Extract classification data
+        publication_types = ClassificationExtractor.parse_publication_types(article)
+        keywords = ClassificationExtractor.parse_keywords(medline)
+        mesh_terms = ClassificationExtractor.parse_mesh_terms(medline)
+        chemicals = ClassificationExtractor.parse_chemicals(medline)
+
+        # Extract MEDLINE metadata
+        medline_info = medline.find("MedlineJournalInfo") if medline else None
+        citation_subsets = (
+            [get_text(cs) for cs in medline.findall("CitationSubset")]
+            if medline
+            else []
+        )
+
+        # Extract publication status from PubmedData
+        pub_status = None
+        if pubmed_data is not None:
+            pub_status_elem = pubmed_data.find("PublicationStatus")
+            if pub_status_elem is not None:
+                pub_status = get_text(pub_status_elem)
+
+        # Extract grant count
+        grant_list = article.find(".//GrantList")
+        grant_count = len(grant_list.findall("Grant")) if grant_list is not None else 0
+
+        # Extract reference count
+        ref_list = pubmed_data.find("ReferenceList") if pubmed_data is not None else None
+        reference_count = (
+            len(ref_list.findall(".//Reference")) if ref_list is not None else 0
+        )
+
         return {
             "pmid": pmid,
             "doi": normalized_doi,
@@ -179,14 +210,18 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             ),
             "abstract_structured": AbstractExtractor.is_abstract_structured(article),
             "authors": self.serialize_json_list(hashed_authors),
+            "author_count": len(hashed_authors),
             **journal_data,
             **date_data,
-            "publication_types": ClassificationExtractor.parse_publication_types(
-                article
-            ),
-            "keywords": ClassificationExtractor.parse_keywords(medline),
-            "mesh_terms": ClassificationExtractor.parse_mesh_terms(medline),
-            "chemicals": ClassificationExtractor.parse_chemicals(medline),
+            # Classification
+            "publication_types": publication_types,
+            "publication_type_list": self.serialize_json_list(publication_types),
+            "keywords": keywords,
+            "keyword_count": len(keywords) if keywords else 0,
+            "mesh_terms": mesh_terms,
+            "mesh_heading_count": len(mesh_terms) if mesh_terms else 0,
+            "chemicals": chemicals,
+            "chemical_count": len(chemicals) if chemicals else 0,
             "gene_symbols": ClassificationExtractor.parse_gene_symbols(medline),
             "databanks": ClassificationExtractor.parse_databanks(medline),
             "language": get_text(article.find(".//Language")),
@@ -196,6 +231,19 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 else None
             ),
             "pmc_id": normalize_pmc_id(IdentifierExtractor.extract_pmc_id(root)),
+            # MEDLINE metadata
+            "nlm_unique_id": (
+                get_text(medline_info.find("NlmUniqueID"))
+                if medline_info is not None
+                else None
+            ),
+            "citation_subset": (
+                ",".join(cs for cs in citation_subsets if cs) if citation_subsets else None
+            ),
+            "publication_status": pub_status,
+            # Counts
+            "grant_count": grant_count,
+            "reference_count": reference_count,
             # === Unified publication fields (cross-provider consistency) ===
             "source": "pubmed",
             "doc_type": "PUBLICATION",  # PubMed primarily contains publications
@@ -253,23 +301,37 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         if not journal:
             return {
                 "journal": None,
+                "journal_title": None,
                 "journal_abbrev": None,
+                "journal_iso_abbrev": None,
+                "journal_issn_type": None,
                 "issn": None,
                 "volume": None,
                 "issue": None,
                 "pages": pages,
+                "medline_pgn": pages,
                 "first_page": first_page,
                 "last_page": last_page,
             }
 
         journal_issue = journal.find("JournalIssue")
+        journal_name = get_text(journal.find("Title"))
+        journal_abbrev = get_text(journal.find("ISOAbbreviation"))
+        issn_elem = journal.find("ISSN")
+        issn = get_text(issn_elem)
+        issn_type = issn_elem.get("IssnType") if issn_elem is not None else None
+
         return {
-            "journal": get_text(journal.find("Title")),
-            "journal_abbrev": get_text(journal.find("ISOAbbreviation")),
-            "issn": get_text(journal.find("ISSN")),
+            "journal": journal_name,
+            "journal_title": journal_name,  # Alias for Gold schema
+            "journal_abbrev": journal_abbrev,
+            "journal_iso_abbrev": journal_abbrev,  # Alias for Gold schema
+            "journal_issn_type": issn_type,
+            "issn": issn,
             "volume": get_text(journal_issue.find("Volume")) if journal_issue else None,
             "issue": get_text(journal_issue.find("Issue")) if journal_issue else None,
             "pages": pages,
+            "medline_pgn": pages,  # Alias for Gold schema
             "first_page": first_page,
             "last_page": last_page,
         }
@@ -335,6 +397,26 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         pub_date, raw_year = DateExtractor.extract_date(pub_date_node)
         history = pubmed_data.find("History") if pubmed_data else None
 
+        # Extract month and day from PubDate
+        pub_month: int | None = None
+        pub_day: int | None = None
+        if pub_date_node is not None:
+            month_text = get_text(pub_date_node.find("Month"))
+            day_text = get_text(pub_date_node.find("Day"))
+            if month_text:
+                # Convert month name to number if needed
+                month_lower = month_text.strip().lower()[:3]
+                month_map = {
+                    "jan": 1, "feb": 2, "mar": 3, "apr": 4,
+                    "may": 5, "jun": 6, "jul": 7, "aug": 8,
+                    "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+                }
+                pub_month = month_map.get(month_lower)
+                if pub_month is None and month_text.isdigit():
+                    pub_month = int(month_text)
+            if day_text and day_text.isdigit():
+                pub_day = int(day_text)
+
         # Validate year using PublicationYear Value Object
         year_vo = PublicationYear.from_raw(raw_year)
         validated_year = year_vo.value if year_vo else None
@@ -346,8 +428,15 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             epub_date, pub_date, validated_year
         )
 
+        # MEDLINE dates (DateCompleted, DateRevised) are not easily accessible
+        # from Article element in ET without root reference
+        date_completed: str | None = None
+        date_revised_medline: str | None = None
+
         return {
             "pub_date": pub_date,
+            "pub_month": pub_month,
+            "pub_day": pub_day,
             "publication_date": publication_date,
             "year": validated_year,
             "publication_year": validated_year,
@@ -355,4 +444,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "received_date": DateExtractor.extract_history_date(history, "received"),
             "revised_date": DateExtractor.extract_history_date(history, "revised"),
             "epub_date": epub_date,
+            "date_completed": date_completed,
+            "date_revised": date_revised_medline,
         }
