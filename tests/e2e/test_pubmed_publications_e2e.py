@@ -6,6 +6,7 @@ Uses VCR cassettes for HTTP requests and local file storage.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -18,6 +19,20 @@ from .conftest import (
     create_test_context,
     get_silver_records,
 )
+
+
+# YYYY-MM-DD pattern for date validation
+DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+# All date fields that must follow YYYY-MM-DD format when present
+PUBMED_DATE_FIELDS = [
+    "publication_date",
+    "pub_date",
+    "epub_date",
+    "accepted_date",
+    "received_date",
+    "revised_date",
+]
 
 
 @pytest.fixture(scope="module")
@@ -75,6 +90,8 @@ async def test_pubmed_publications_date_fields(e2e_data_dir: Path):
     - received_date: Date manuscript was received
     - revised_date: Date manuscript was revised
     - epub_date: Electronic publication date
+
+    All date fields (except year) must be in YYYY-MM-DD format.
     """
     # Arrange
     ctx = create_test_context("pubmed_publications", limit=5)
@@ -87,15 +104,23 @@ async def test_pubmed_publications_date_fields(e2e_data_dir: Path):
     records = get_silver_records(e2e_data_dir, "pubmed_publication")
 
     for record in records:
+        pmid = record.get("pmid")
         # PMID must always be present
-        assert record.get("pmid") is not None
+        assert pmid is not None
 
         # Most publications should have at least year
         year = record.get("year") or record.get("publication_year")
         if year is not None:
-            assert 1800 <= year <= 2100, (
-                f"Invalid year {year} for PMID {record.get('pmid')}"
-            )
+            assert 1800 <= year <= 2100, f"Invalid year {year} for PMID {pmid}"
+
+        # All date fields must be YYYY-MM-DD format when present
+        for field in PUBMED_DATE_FIELDS:
+            value = record.get(field)
+            if value is not None:
+                assert DATE_PATTERN.match(value), (
+                    f"Invalid {field} format: {value} for PMID {pmid}, "
+                    f"expected YYYY-MM-DD"
+                )
 
 
 @pytest.mark.e2e
