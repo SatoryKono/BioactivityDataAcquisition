@@ -918,5 +918,5 @@ def run(pipeline: str, enrich_only: str | None, required_only: bool, ...):
 - ADR-010: Local-Only Deployment
 - ADR-015: Pipeline Services Lifecycle
 - ADR-020: BasePipeline Decomposition
-- RULES.md v5.10 §2.4 (Backfill/Replay)
-- RULES.md v5.10 §3.3 (Concurrency & Locks)
+- RULES.md v5.11 §2.4 (Backfill/Replay)
+- RULES.md v5.11 §3.3 (Concurrency & Locks)

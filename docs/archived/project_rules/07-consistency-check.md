@@ -1,9 +1,9 @@
-# Consistency Check Guide (RULES.md v5.10)
+# Consistency Check Guide (RULES.md v5.11)
 
-*Синхронизировано с RULES.md v5.10 (2026-01-06)*
+*Синхронизировано с RULES.md v5.11 (2026-01-06)*
 *Обновлено: 2026-01-15 — обновлены пути после консолидации документации*
 
-Цель: описать автоматическую проверку согласованности документов `docs/*` с RULES.md v5.10.
+Цель: описать автоматическую проверку согласованности документов `docs/*` с RULES.md v5.11.
 
 ## Проверяемые инварианты
 
@@ -28,7 +28,7 @@
 
 ```bash
 # 1) Проверка версии RULES в ключевых документах
-grep -l "RULES.md v5.10" docs/quick-reference/rules-summary.md
+grep -l "RULES.md v5.11" docs/quick-reference/rules-summary.md
 
 # 2) Ключевые формулировки
 grep -R "Raw Parquet" docs/quick-reference/rules-summary.md

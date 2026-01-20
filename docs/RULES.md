@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.10 (TTL/Heartbeat Values Correction), 2026-01-06* 
+*Версия: 5.11 (Int→Float Coercion Documentation), 2026-01-20* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -205,8 +205,40 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 - `dq_status` (String): `NEW` | `IGNORED` | `REPROCESSED`. 
  
 - **Запрещено**: Sentinel values (-1, "N/A", 9999) **MUST NOT** использоваться.
-- **Pandera**: Поля, допускающие NULL, явно маркируются `nullable=True`. 
- 
+- **Pandera**: Поля, допускающие NULL, явно маркируются `nullable=True`.
+
+#### Int→Float Coercion для Nullable Integers
+
+**Контекст**: Gold-схемы используют `Series[float]` с `coerce=True` для полей, которые в Silver-схемах определены как `pa.int64()`. Это **осознанное архитектурное решение**, а не ошибка.
+
+**Причина**: Pandas/Polars исторически не поддерживали nullable integers без специального типа `Int64` (с заглавной I). Float — единственный способ представить `int + NULL` без потери данных для больших значений. `NaN` используется для отсутствующих значений.
+
+**Затронутые поля (34 occurrences)**:
+
+| Сущность | Поля |
+|----------|------|
+| ChEMBL Activity | `record_id`, `src_id`, `standard_flag`, `potential_duplicate`, `toid`, `document_year` |
+| ChEMBL Molecule | `first_approval`, `black_box_warning`, `max_phase`, `chirality`, `usan_year` и др. |
+| ChEMBL Assay | `src_id`, `assay_taxonomy_id`, `confidence_score`, `dap_id` |
+| ChEMBL Target | `taxonomy_id` |
+| UniProt Protein | `organism_id`, `sequence_length` |
+| Publications | `year`, `publication_year` |
+
+**Слои типизации**:
+
+| Слой | Тип | Пример |
+|------|-----|--------|
+| Domain | `Series[int]` или `Series[int] \| None` | Строгая типизация |
+| Silver | `pa.int64()` | Реальный формат хранения |
+| Gold | `Series[float]` + `coerce=True` | Nullable через NaN |
+
+**Требования к downstream-потребителям**:
+- **SHOULD** обрабатывать `NaN` как отсутствующее значение
+- **MAY** конвертировать `float → int` после проверки на `NaN` (если бизнес-логика требует)
+- **MUST NOT** предполагать, что все значения — целые числа
+
+**Реализация**: `src/bioetl/infrastructure/schemas/gold.py`
+
 #### Жизненный цикл Карантина 
 - **Retention**: 30 дней. Старые записи удаляются автоматически (S3 Lifecycle). 
 - **Triage**: Еженедельный пересмотр (Triage) ошибок аналитиками. Если ошибка системная — правим адаптер, если разовая — игнорируем. 
@@ -1088,6 +1120,7 @@ fields:
 | [ADR-020](02-architecture/decisions/ADR-020-basepipeline-decomposition.md) | BasePipeline Decomposition | Accepted | 2025-12-16 |
 
 ## История Изменений (Changelog)
+- **5.11** (2026-01-20): Int→Float Coercion Documentation. Добавлена §2.6 "Int→Float Coercion для Nullable Integers" — документация паттерна Gold-схем с `Series[float]` + `coerce=True` для nullable integer полей (34 occurrences). Это осознанное архитектурное решение для обработки nullable integers в Pandas/Polars.
 - **5.10** (2026-01-06): TTL/Heartbeat Values Correction. Исправлены значения Lock TTL (90s) и Heartbeat (30s) в §3.3 для соответствия реализации в `domain/config.py:238,241`. Синхронизация всех документов.
 - **5.9** (2026-01-01): TTL/Heartbeat Sync Fix. Добавлены явные значения Lock TTL и Heartbeat в §3.3.
 - **5.8** (2025-12-29): TTL/Heartbeat Sync. Добавлены явные значения Lock TTL и Heartbeat в §3.3 "Текущая реализация". Синхронизация с CLAUDE.md §5.
