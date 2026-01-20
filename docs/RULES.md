@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.10 (TTL/Heartbeat Values Correction), 2026-01-06* 
+*Версия: 5.11 (Int→Float Coercion Documentation), 2026-01-20* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 

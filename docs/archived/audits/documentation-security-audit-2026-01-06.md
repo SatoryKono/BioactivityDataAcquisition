@@ -88,7 +88,7 @@ The BioETL documentation and security posture demonstrates **production readines
 - `docs/REQUIREMENTS.md` lines 928-930: Historical changelog entries documenting when requirements were added
 - `docs/audit-reports/architecture-audit-2026-01-05.md`: Historical audit report
 
-**Result**: PASS - All active documentation synchronized with RULES.md v5.10
+**Result**: PASS - All active documentation synchronized with RULES.md v5.11
 
 ### 1.4 Duplicate Documents (Audit 2025-12-29)
 
@@ -262,7 +262,7 @@ Pipeline configs use inheritance from `_defaults.yaml` with entity-specific over
 
 This audit certifies that:
 
-- All documentation is synchronized with RULES.md v5.10
+- All documentation is synchronized with RULES.md v5.11
 - All 23 ADRs are in Accepted status
 - No security vulnerabilities detected in dependencies
 - No hardcoded secrets in codebase
@@ -275,4 +275,4 @@ This audit certifies that:
 
 ---
 
-*Audit completed: 2026-01-06 | Auditor: Claude (Opus 4.5) | RULES.md v5.10*
+*Audit completed: 2026-01-06 | Auditor: Claude (Opus 4.5) | RULES.md v5.11*

@@ -1,6 +1,6 @@
 # BioETL Pipeline Documentation
 
-*Generated: 2026-01-13 | Aligned with RULES.md v5.10*
+*Generated: 2026-01-13 | Aligned with RULES.md v5.11*
 
 This directory contains comprehensive documentation for all 17 BioETL pipelines.
 

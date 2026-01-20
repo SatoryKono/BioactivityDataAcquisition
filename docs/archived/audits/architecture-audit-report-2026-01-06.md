@@ -1,5 +1,5 @@
 # BioETL: Комплексный Архитектурный Аудит
-*Version: 2.0 | Target: RULES.md v5.10 | Date: 2026-01-06*
+*Version: 2.0 | Target: RULES.md v5.11 | Date: 2026-01-06*
 
 ---
 
@@ -7,7 +7,7 @@
 
 **Общая Оценка: 9.7/10 — PRODUCTION READY**
 
-Проект BioETL демонстрирует **превосходное соответствие** архитектурным требованиям RULES.md v5.10. Все четыре слоя (Domain, Application, Infrastructure, Interfaces) прошли аудит с высокими оценками.
+Проект BioETL демонстрирует **превосходное соответствие** архитектурным требованиям RULES.md v5.11. Все четыре слоя (Domain, Application, Infrastructure, Interfaces) прошли аудит с высокими оценками.
 
 | Слой | Оценка | Статус |
 |------|--------|--------|
@@ -142,7 +142,7 @@ grep "write_deltalake" src/bioetl/infrastructure/storage/ → Multiple hits
 #### 7. Documentation (10/10) ✅
 
 **Evidence:**
-- RULES.md v5.10 (77KB, comprehensive)
+- RULES.md v5.11 (77KB, comprehensive)
 - 23 ADR documents
 - REQUIREMENTS.md with 127 testable requirements
 - Glossary, provider docs, runbooks
@@ -251,7 +251,7 @@ grep "write_deltalake" src/bioetl/infrastructure/storage/ → Multiple hits
 
 ---
 
-## 4. Compliance Matrix (RULES.md v5.10)
+## 4. Compliance Matrix (RULES.md v5.11)
 
 ### 4.1. Architecture Requirements
 
@@ -461,7 +461,7 @@ observation:
 
 ## 9. Заключение
 
-**BioETL v5.9.0 полностью соответствует RULES.md v5.10 и готов к production.**
+**BioETL v5.9.0 полностью соответствует RULES.md v5.11 и готов к production.**
 
 ### Ключевые Достижения
 
