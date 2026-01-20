@@ -157,7 +157,6 @@ class MetadataWriter:
 
         No resources to release for filesystem-based writer.
         """
-        pass
 
 
 class NoOpMetadataWriter:
@@ -192,4 +191,3 @@ class NoOpMetadataWriter:
 
     async def aclose(self) -> None:
         """No-op close."""
-        pass
