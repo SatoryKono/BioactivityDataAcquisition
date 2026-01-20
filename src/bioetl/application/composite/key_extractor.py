@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.domain.ports import DeltaReaderPort, LoggerPort, StoragePort
+    from bioetl.domain.ports import DeltaReaderPort, LoggerPort
 
 
 class KeyExtractorService:
@@ -25,7 +25,7 @@ class KeyExtractorService:
     when coordinating enrichers.
 
     Attributes:
-        delta_reader: Delta reader port for reading Silver tables.
+        delta_reader: DeltaReaderPort for reading Silver tables.
         logger: Structured logger.
 
     Example:
@@ -44,33 +44,29 @@ class KeyExtractorService:
         self,
         delta_reader: DeltaReaderPort,
         logger: LoggerPort,
-        storage: StoragePort | None = None,
     ) -> None:
         """Initialize key extractor service.
 
         Args:
-            delta_reader: Delta reader port for reading Silver tables.
+            delta_reader: DeltaReaderPort for reading Delta tables.
             logger: Structured logger.
-            storage: Deprecated. Kept for backward compatibility, not used.
         """
         self._delta_reader = delta_reader
         self._logger = logger
-        # storage is deprecated, kept for backward compatibility
-        self._storage = storage
 
     async def _read_silver_table(self, path: str) -> pl.DataFrame:
-        """Read a Silver table using DeltaReaderPort.
+        """Read a Silver table via DeltaReaderPort.
 
         Args:
-            path: Path to the Silver table (relative to delta_reader base_path).
+            path: Path to Silver table (relative or absolute).
 
         Returns:
-            Polars DataFrame with table contents.
+            DataFrame with table contents.
         """
         import polars as pl
 
-        arrow_table = await self._delta_reader.read_table(path)
-        result = pl.from_arrow(arrow_table)
+        pa_table = await self._delta_reader.read_table(path)
+        result = pl.from_arrow(pa_table)
         # from_arrow may return Series for single-column tables
         if isinstance(result, pl.Series):
             return result.to_frame()
