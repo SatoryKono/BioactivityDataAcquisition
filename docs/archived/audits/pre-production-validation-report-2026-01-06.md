@@ -73,7 +73,7 @@ src/bioetl/
 
 ## 3. Блокировки (RULES.md §3.3) — КРИТИЧЕСКАЯ ВЕРИФИКАЦИЯ
 
-| Параметр | RULES.md v5.10 | Код | Статус |
+| Параметр | RULES.md v5.11 | Код | Статус |
 |----------|----------------|-----|--------|
 | Механизм | MemoryLock | `memory_lock.py` | ✅ |
 | Lock TTL | 90s (heartbeat × 3) | `domain/config.py:241`: `lock_ttl: int | None = 90` | ✅ |
@@ -100,7 +100,7 @@ def effective_lock_ttl(self) -> int:
 
 ## 4. Circuit Breaker (RULES.md §3.1.4)
 
-| Параметр | RULES.md v5.10 | Код | Статус |
+| Параметр | RULES.md v5.11 | Код | Статус |
 |----------|----------------|-----|--------|
 | Trigger | 5 consecutive errors | `domain/resilience.py:142`: `failure_threshold: int = 5` | ✅ |
 | Open Duration | 5 минут | `domain/resilience.py:143`: `recovery_timeout: int = 300` | ✅ |
@@ -117,7 +117,7 @@ recovery_timeout: int = 300  # 5 minutes
 
 ## 5. DQ Thresholds (RULES.md §3.4)
 
-| Порог | RULES.md v5.10 | Код | Статус |
+| Порог | RULES.md v5.11 | Код | Статус |
 |-------|----------------|-----|--------|
 | Soft | >5% → Warning | `domain/config.py:37`: `soft_fail_threshold: float = 0.05` | ✅ |
 | Hard | >20% → Fail | `domain/config.py:38`: `hard_fail_threshold: float = 0.20` | ✅ |
@@ -264,7 +264,7 @@ python -m pytest tests/unit/ tests/integration/ --cov=src/bioetl --cov-fail-unde
 **Количество блокеров**: 0
 **Количество рекомендаций**: 2
 
-### Сводка соответствия RULES.md v5.10
+### Сводка соответствия RULES.md v5.11
 
 - ✅ Архитектура слоёв (§1): Полное соответствие
 - ✅ Medallion Architecture (§2.1): Полное соответствие

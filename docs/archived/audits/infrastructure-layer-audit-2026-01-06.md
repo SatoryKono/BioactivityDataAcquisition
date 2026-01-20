@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-The Infrastructure Layer of BioETL has been audited against RULES.md v5.10 and corresponding ADR requirements. The audit identified **zero critical defects** and **zero blocking issues**. The layer demonstrates excellent architectural compliance with Ports & Adapters pattern.
+The Infrastructure Layer of BioETL has been audited against RULES.md v5.11 and corresponding ADR requirements. The audit identified **zero critical defects** and **zero blocking issues**. The layer demonstrates excellent architectural compliance with Ports & Adapters pattern.
 
 ### Key Findings
 

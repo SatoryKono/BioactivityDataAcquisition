@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.10 | Last updated: 2026-01-19*
+*Synced with RULES.md v5.11 | Last updated: 2026-01-19*
 
 > **Documentation Audit Completed:** 2026-01-14
 > - All audit files consolidated in `archived/audits/`
