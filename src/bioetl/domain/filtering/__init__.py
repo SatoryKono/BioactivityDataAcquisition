@@ -7,7 +7,7 @@ This package provides:
 All public classes are re-exported from this module for backwards compatibility.
 """
 
-from bioetl.domain.filtering.column_filter import GoldColumnFilter
+from bioetl.domain.filtering.column_filter import FilterOperator, GoldColumnFilter
 from bioetl.domain.filtering.gold_config import GoldFilterConfig
 from bioetl.domain.filtering.input_config import FilterColumn, InputFilterConfig
 from bioetl.domain.filtering.list_filters import (
@@ -20,6 +20,7 @@ from bioetl.domain.filtering.range_filter import GoldRangeFilter
 __all__ = [
     "FilterColumn",
     "FilterLoadResult",
+    "FilterOperator",
     "GoldColumnFilter",
     "GoldFilterConfig",
     "GoldListContainsFilter",

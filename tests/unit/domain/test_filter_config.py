@@ -155,7 +155,7 @@ class TestGoldColumnFilter:
 
     def test_empty_values_raises(self):
         """Test that empty values raises ValueError."""
-        with pytest.raises(ValueError, match=r"values for column .* cannot be empty"):
+        with pytest.raises(ValueError, match=r"values required for operator"):
             GoldColumnFilter(column="standard_type", values=frozenset())
 
     def test_filter_is_frozen(self):
@@ -189,8 +189,8 @@ class TestGoldFilterConfig:
 
     def test_config_with_column_filters(self):
         """Test creating config with column filters."""
-        filter1 = GoldColumnFilter("col1", frozenset(["a", "b"]))
-        filter2 = GoldColumnFilter("col2", frozenset(["x"]))
+        filter1 = GoldColumnFilter(column="col1", values=frozenset(["a", "b"]))
+        filter2 = GoldColumnFilter(column="col2", values=frozenset(["x"]))
 
         config = GoldFilterConfig(column_filters=(filter1, filter2))
 
@@ -275,7 +275,7 @@ class TestGoldFilterConfigShouldInclude:
 
     def test_column_filters_pass(self):
         """Test column filters - passes when value is in allowed set."""
-        filter_ = GoldColumnFilter("type", frozenset(["IC50", "Ki"]))
+        filter_ = GoldColumnFilter(column="type", values=frozenset(["IC50", "Ki"]))
         config = GoldFilterConfig(column_filters=(filter_,))
 
         assert config.should_include({"type": "IC50"}) is True
@@ -283,7 +283,7 @@ class TestGoldFilterConfigShouldInclude:
 
     def test_column_filters_fail(self):
         """Test column filters - fails when value is not in allowed set."""
-        filter_ = GoldColumnFilter("type", frozenset(["IC50", "Ki"]))
+        filter_ = GoldColumnFilter(column="type", values=frozenset(["IC50", "Ki"]))
         config = GoldFilterConfig(column_filters=(filter_,))
 
         assert config.should_include({"type": "EC50"}) is False
@@ -292,7 +292,7 @@ class TestGoldFilterConfigShouldInclude:
 
     def test_column_filters_convert_to_string(self):
         """Test column filters convert values to string for comparison."""
-        filter_ = GoldColumnFilter("score", frozenset(["8", "9"]))
+        filter_ = GoldColumnFilter(column="score", values=frozenset(["8", "9"]))
         config = GoldFilterConfig(column_filters=(filter_,))
 
         # Numeric value should be converted to string
@@ -302,7 +302,7 @@ class TestGoldFilterConfigShouldInclude:
 
     def test_all_filters_combined(self):
         """Test combination of all filter types."""
-        filter_ = GoldColumnFilter("type", frozenset(["IC50"]))
+        filter_ = GoldColumnFilter(column="type", values=frozenset(["IC50"]))
         config = GoldFilterConfig(
             column_filters=(filter_,),
             required_fields=("value",),
