@@ -341,7 +341,14 @@ class ChemblAdapter(BaseHttpAdapter):
 
         if has_next:
             async for record in self._paginate_filter_results(
-                url, id_batch, filter_field, entity_type, pk_field, seen_ids, len(records), limit
+                url,
+                id_batch,
+                filter_field,
+                entity_type,
+                pk_field,
+                seen_ids,
+                len(records),
+                limit,
             ):
                 yield record
 
