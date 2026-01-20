@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -50,7 +50,7 @@ class TablePreview:
     layer: str
     row_count: int
     columns: tuple[ColumnInfo, ...]
-    sample_rows: tuple[dict, ...]
+    sample_rows: tuple[dict[str, Any], ...]
 
 
 @dataclass(frozen=True, slots=True)
