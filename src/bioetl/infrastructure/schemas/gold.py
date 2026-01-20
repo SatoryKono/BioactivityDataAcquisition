@@ -255,8 +255,8 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=True, alias="_dq_error")
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -443,8 +443,8 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=True, alias="_dq_error")
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -744,8 +744,8 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=True, alias="_dq_error")
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
     # Lineage metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -821,8 +821,8 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=True, alias="_dq_error")
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
     # Lineage metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -893,8 +893,8 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=True, alias="_dq_error")
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
     # Lineage metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
