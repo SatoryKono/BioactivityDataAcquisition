@@ -1,7 +1,7 @@
 # src/bioetl/domain/schemas/semanticscholar/publication.py
 """Pandera schema for Semantic Scholar Publication entity.
 
-Aligned with RULES.md v5.10.
+Aligned with RULES.md v5.10 and Publication Schema Unification spec.
 Includes lookup metadata fields for DOI/title resolution tracking.
 """
 
@@ -12,6 +12,7 @@ from pandera.typing import Series
 
 from bioetl.domain.schemas.common.publication_base import (
     LOOKUP_METHODS,
+    OA_STATUS_VALUES,
     PublicationBaseSchema,
 )
 from bioetl.domain.validation import DOI_REGEX_PATTERN
@@ -24,35 +25,40 @@ __all__ = [
     "SemanticScholarPublicationSchema",
 ]
 
-# Open Access status values (normalized to lowercase for consistency with OpenAlex)
-OA_STATUS_VALUES = ["gold", "green", "hybrid", "bronze", "closed"]
-
 
 class SemanticScholarPublicationSchema(PublicationBaseSchema):
     """Semantic Scholar Publication validation schema for Silver layer.
 
     Validates publication records from Semantic Scholar Academic Graph API.
-    Includes lookup metadata for tracking DOI vs title resolution.
+    Inherits common fields from PublicationBaseSchema:
+    - Cross-references: pmid, doi, pmc_id
+    - Core content: title, abstract, authors
+    - Metadata: journal, year, publication_date, doc_type, language
+    - Metrics: citation_count
+    - Open Access: is_oa
+    - Lookup tracking: lookup_method (overridden), original_id, source (overridden)
     """
 
-    # === Lookup metadata (SemanticScholar-specific) ===
+    # === Primary Key (SemanticScholar-specific) ===
+    paper_id: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=r"^[a-f0-9]{40}$",
+        description="Semantic Scholar Paper ID (40-char hex)",
+    )
+
+    # === Override lookup_method to be non-nullable ===
     lookup_method: Series[str] = pa.Field(
         alias="_lookup_method",
         nullable=False,
         isin=LOOKUP_METHODS,
         description="How record was resolved: doi, title_fallback, title_only",
     )
-    original_id: Series[str] = pa.Field(
-        alias="_original_id",
-        nullable=True,
-        description="Original identifier from input (for fallback records)",
-    )
 
-    # === Primary Key ===
-    paper_id: Series[str] = pa.Field(
+    # === Override source to be non-nullable with fixed value ===
+    source: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^[a-f0-9]{40}$",
-        description="Semantic Scholar Paper ID (40-char hex)",
+        eq="semanticscholar",
+        description="Data source identifier",
     )
 
     # === Provider-specific Identifiers ===
@@ -72,27 +78,8 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         nullable=True,
         description="AI-generated summary (TLDR)",
     )
-    authors: Series[str] = pa.Field(
-        nullable=True,
-        description="JSON array of author names",
-    )
 
-    # === Publication metadata ===
-    publication_date: Series[str] = pa.Field(
-        nullable=True,
-        str_matches=r"^\d{4}-\d{2}-\d{2}$",
-        description="Publication date (YYYY-MM-DD)",
-    )
-    doc_type: Series[str] = pa.Field(
-        nullable=True,
-        description="Publication type",
-    )
-
-    # === Journal/Venue (provider-specific) ===
-    journal: Series[str] = pa.Field(
-        nullable=True,
-        description="Journal name",
-    )
+    # === Provider-specific Journal/Venue Fields ===
     volume: Series[str] = pa.Field(
         nullable=True,
         description="Volume",
@@ -101,30 +88,19 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         nullable=True,
         description="Page range",
     )
-
     venue: Series[str] = pa.Field(
         nullable=True,
         description="Publication venue",
     )
 
-    # === Metrics ===
-    citation_count: Series[int] = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of citations",
-    )
+    # === Provider-specific Metrics ===
     reference_count: Series[int] = pa.Field(
         nullable=True,
         ge=0,
         description="Number of references",
     )
 
-    # === Open Access ===
-    is_oa: Series[bool] = pa.Field(
-        nullable=True,
-        description="Is Open Access",
-    )
-
+    # === Provider-specific Open Access ===
     open_access_url: Series[str] = pa.Field(
         nullable=True,
         description="Direct link to OA PDF",
@@ -136,7 +112,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="Open Access status (normalized to lowercase).",
     )
 
-    # === Classification ===
+    # === Provider-specific Classification ===
     fields_of_study: Series[str] = pa.Field(
         nullable=True,
         description="Fields of study (JSON array)",
@@ -145,13 +121,6 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     publication_types: Series[str] = pa.Field(
         nullable=True,
         description="Publication types (JSON array)",
-    )
-
-    # === Source Tracking ===
-    source: Series[str] = pa.Field(
-        nullable=False,
-        eq="semanticscholar",
-        description="Data source identifier",
     )
 
     class Config:

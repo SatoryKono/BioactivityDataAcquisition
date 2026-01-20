@@ -41,18 +41,25 @@ def valid_record() -> dict:
         "doi": "10.1038/s41586-024-07487-w",
         "pmid": "12345678",  # PubMed ID (numeric string)
         "pmc_id": "PMC1234567",  # PubMed Central ID (format: PMC1234567)
+        # Core content
         "title": "Example Publication",
         "abstract": "This is an abstract",
+        "authors": '["John Doe", "Jane Smith"]',  # JSON array (unified format)
+        # Publication metadata
         "year": 2024,
         "publication_date": "2024-05-15",
         "doc_type": "PUBLICATION",
+        "language": "en",
+        # Journal info
         "journal": "Nature",
         "issn": "0028-0836",
         "publisher": "Springer Nature",
+        # Open Access
         "is_oa": True,
         "oa_status": "gold",
+        # Metrics
         "citation_count": 42,  # Unified field name (from OpenAlex cited_by_count)
-        "language": "en",
+        # Lookup tracking
         "source": "openalex",
         "_lookup_method": "doi",
         "_original_id": None,

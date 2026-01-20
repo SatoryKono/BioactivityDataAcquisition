@@ -153,6 +153,8 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "license_url": extract_license_url(rec),
             "subjects": rec.get("subject", []),
             "source": "crossref",
+            # Open Access (CrossRef doesn't provide this information directly)
+            "is_oa": None,
             # Cross-reference IDs (CrossRef doesn't provide PMID or PMC ID)
             "pmid": None,
             "pmc_id": None,

@@ -12,12 +12,18 @@ from typing import cast
 import pandera.pandas as pa
 from pandera.typing import Series
 
-from bioetl.domain.schemas.common.publication_base import PublicationBaseSchema
+from bioetl.domain.schemas.common.publication_base import (
+    LOOKUP_METHODS,
+    PublicationBaseSchema,
+)
 from bioetl.domain.validation import (
     DOI_REGEX_PATTERN,
     MAX_PUBLICATION_YEAR,
     MIN_PUBLICATION_YEAR,
 )
+
+# Re-export for backwards compatibility
+__all__ = ["LOOKUP_METHODS", "ArticleSchema"]
 
 # === Fixed Value Constants ===
 PUBLICATION_STATUSES = ["ppublish", "epublish", "aheadofprint"]

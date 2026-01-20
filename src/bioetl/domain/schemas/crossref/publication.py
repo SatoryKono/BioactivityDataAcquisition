@@ -1,7 +1,7 @@
 """Pandera schema for CrossRef Publication (enriched) entity.
 
 Used for Silver layer validation of publications enriched via CrossRef API.
-Aligned with RULES.md v5.10.
+Aligned with RULES.md v5.10 and Publication Schema Unification spec.
 """
 
 from __future__ import annotations
@@ -9,8 +9,14 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
-from bioetl.domain.schemas.common.publication_base import PublicationBaseSchema
+from bioetl.domain.schemas.common.publication_base import (
+    LOOKUP_METHODS,
+    PublicationBaseSchema,
+)
 from bioetl.domain.validation import DOI_REGEX_PATTERN
+
+# Re-export for backwards compatibility
+__all__ = ["DOI_REGEX_PATTERN", "LOOKUP_METHODS", "PublicationEnrichedSchema"]
 
 # === Fixed Value Constants ===
 DOCUMENT_TYPES = ["PUBLICATION", "PREPRINT"]
@@ -20,6 +26,13 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     """CrossRef-enriched Publication validation schema for Silver layer.
 
     Represents publication metadata from CrossRef API with citation enrichment.
+    Inherits common fields from PublicationBaseSchema:
+    - Cross-references: pmid, doi (overridden to non-nullable), pmc_id
+    - Core content: title, abstract, authors
+    - Metadata: journal, year, publication_date, doc_type (overridden), language
+    - Metrics: citation_count
+    - Open Access: is_oa
+    - Lookup tracking: _lookup_method, _original_id, source (overridden)
     """
 
     # === Primary Key (override doi to be non-nullable) ===
@@ -48,18 +61,15 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
         description="Document type: PUBLICATION or PREPRINT",
     )
 
-    # === Additional Metadata ===
-    language: Series[str] = pa.Field(
-        nullable=True, description="Publication language code"
+    # === Override source to be non-nullable with fixed value ===
+    source: Series[str] = pa.Field(
+        nullable=False, eq="crossref", description="Data source identifier"
     )
+
+    # === Additional Metadata (CrossRef-specific) ===
     license_url: Series[str] = pa.Field(nullable=True, description="License URL")
     subjects: Series[str] = pa.Field(
         nullable=True, description="JSON array of subject areas"
-    )
-
-    # === Source Tracking ===
-    source: Series[str] = pa.Field(
-        nullable=False, eq="crossref", description="Data source identifier"
     )
 
     class Config:
