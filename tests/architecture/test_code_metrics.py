@@ -84,8 +84,8 @@ class TestFileSizeLimits:
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
         "services_factory.py": 630,  # 623 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
         # Infrastructure layer exemptions
-        "silver_writer.py": 1170,  # 1164 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage + fromisoformat timezone validation
-        "gold_writer.py": 955,  # 949 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage
+        "silver_writer.py": 1190,  # 1180 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage + Null/List<Null> coercion
+        "gold_writer.py": 975,  # 965 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage + Null/List<Null> coercion
         "bronze_writer.py": 760,  # 749 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
         "silver.py": 840,  # 833 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields)
@@ -483,8 +483,8 @@ class TestClassSize:
         # Baseline exemptions for existing classes
         "StorageAdapter": 610,  # 603 lines - storage adapter with writers + BronzeWriteResult + SilverWriteResult
         "BaseTransformer": 620,  # 605 lines - Template Method with helpers (tracing + PII hashing + serialize_json_list)
-        "SilverWriter": 1170,  # 1162 lines - schema drift detection + bronze_refs + MetadataCoordinator fallback + Null column coercion
-        "GoldWriter": 955,  # 947 lines - SCD Type 2 + metadata sidecar + MetadataCoordinator fallback + Null column coercion
+        "SilverWriter": 1190,  # 1180 lines - schema drift detection + bronze_refs + MetadataCoordinator fallback + Null/List<Null> coercion
+        "GoldWriter": 975,  # 965 lines - SCD Type 2 + metadata sidecar + MetadataCoordinator fallback + Null/List<Null> coercion
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
         "UniProtProteinTransformer": 800,  # 772 lines - complex protein data extraction with many fields
