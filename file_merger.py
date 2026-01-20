@@ -36,6 +36,10 @@ Examples:
   # Configs merge mode (merges all configs/*.yaml into one file)
   python file_merger.py --merge_configs
   python file_merger.py --merge_configs -o my_configs.md
+
+  # Project structure mode (creates tree structure of all project files)
+  python file_merger.py --project_structure
+  python file_merger.py --project_structure -o structure.md
         """,
     )
 
@@ -100,6 +104,12 @@ Examples:
         "--merge_configs",
         action="store_true",
         help="Special mode: merge all YAML files from configs/ into one file (default: configs_merged.md)",
+    )
+
+    parser.add_argument(
+        "--project_structure",
+        action="store_true",
+        help="Special mode: create tree structure of all project files (default: project_structure.md)",
     )
 
     return parser.parse_args()
@@ -424,6 +434,132 @@ def merge_documentation(
     return 0
 
 
+def generate_tree_structure(
+    directory: Path,
+    exclude_dirs: set[str],
+    prefix: str = "",
+    is_last: bool = True,
+) -> List[str]:
+    """Generate tree structure lines for a directory.
+
+    Args:
+        directory: Directory to generate tree for.
+        exclude_dirs: Set of directory names to exclude.
+        prefix: Current line prefix for indentation.
+        is_last: Whether this is the last item in parent directory.
+
+    Returns:
+        List of formatted tree lines.
+    """
+    lines: List[str] = []
+
+    # Get directory name
+    dir_name = directory.name if directory.name else str(directory)
+
+    # Add current directory
+    if prefix == "":  # Root level
+        lines.append(f"{dir_name}/")
+    else:
+        connector = "└── " if is_last else "├── "
+        lines.append(f"{prefix}{connector}{dir_name}/")
+
+    # Get all items in directory
+    try:
+        items = sorted(directory.iterdir(), key=lambda p: (not p.is_dir(), p.name))
+    except PermissionError:
+        return lines
+
+    # Filter out excluded directories
+    items = [
+        item
+        for item in items
+        if not (item.is_dir() and item.name in exclude_dirs)
+    ]
+
+    # Process items
+    for idx, item in enumerate(items):
+        is_last_item = idx == len(items) - 1
+
+        if item.is_dir():
+            # Recursively process subdirectories
+            new_prefix = prefix + ("    " if is_last else "│   ")
+            sub_lines = generate_tree_structure(
+                item, exclude_dirs, new_prefix, is_last_item
+            )
+            lines.extend(sub_lines)
+        else:
+            # Add file
+            connector = "└── " if is_last_item else "├── "
+            extension = prefix + ("    " if is_last else "│   ")
+            lines.append(f"{extension}{connector}{item.name}")
+
+    return lines
+
+
+def create_project_structure(
+    output_file: Path, encoding: str, exclude_dirs: set[str]
+) -> int:
+    """Create a tree structure of all project files.
+
+    Creates a markdown file with ASCII tree representation of project structure.
+    Default output: project_structure.md
+
+    Args:
+        output_file: Output file path.
+        encoding: File encoding.
+        exclude_dirs: Set of directory names to exclude.
+
+    Returns:
+        Exit code (0 for success, 1 for error).
+    """
+    # Project root directory
+    root_dir = Path(".")
+
+    print("=" * 80)
+    print("PROJECT STRUCTURE MODE")
+    print("=" * 80)
+    print(f"Root directory: {root_dir.resolve()}")
+    print(f"Output file: {output_file}")
+    print(f"Excluding directories: {', '.join(sorted(exclude_dirs))}")
+    print("=" * 80)
+
+    print("\nGenerating project structure tree...")
+
+    # Generate tree structure
+    tree_lines = generate_tree_structure(root_dir, exclude_dirs)
+
+    # Count files and directories
+    total_lines = len(tree_lines)
+    file_count = sum(1 for line in tree_lines if not line.rstrip().endswith("/"))
+    dir_count = total_lines - file_count
+
+    # Write to output file
+    try:
+        with output_file.open("w", encoding=encoding) as f:
+            f.write("# Project Structure\n\n")
+            f.write(f"Generated: {Path('.').resolve()}\n\n")
+            f.write("```\n")
+            for line in tree_lines:
+                f.write(line + "\n")
+            f.write("```\n\n")
+            f.write(f"**Statistics:**\n")
+            f.write(f"- Directories: {dir_count}\n")
+            f.write(f"- Files: {file_count}\n")
+            f.write(f"- Total items: {total_lines}\n")
+
+        print(f"\nTree structure generated successfully!")
+        print(f"Directories: {dir_count}")
+        print(f"Files: {file_count}")
+        print(f"Total items: {total_lines}")
+        print(f"\nSuccessfully wrote to: {output_file}")
+
+        return 0
+
+    except Exception as e:
+        print(f"Error writing to file: {e}", file=sys.stderr)
+        return 1
+
+
 def merge_configs(
     output_file: Path, encoding: str, exclude_dirs: set[str], sort_method: str
 ) -> int:
@@ -524,6 +660,14 @@ def main() -> int:
         if output_file == Path("merged_output.txt"):  # User didn't specify output
             output_file = Path("configs_merged.md")
         return merge_configs(output_file, args.encoding, exclude_dirs, args.sort)
+
+    # Check if project structure mode is enabled
+    if args.project_structure:
+        # Set default output file if not specified
+        output_file = args.output
+        if output_file == Path("merged_output.txt"):  # User didn't specify output
+            output_file = Path("project_structure.md")
+        return create_project_structure(output_file, args.encoding, exclude_dirs)
 
     # Standard mode - validate input directory is required
     if not args.input_dir:
