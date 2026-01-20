@@ -29,68 +29,39 @@ source_file: ../../sources/chembl.yaml
 dq_config_file: ../../dq/entities/chembl/activity.yaml
 
 # -----------------------------------------------------------------------------
-# Inline DQ Overrides (optional, applied on top of dq_config_file)
+# Inline DQ Overrides (applied on top of dq_config_file)
 # -----------------------------------------------------------------------------
-# Use dq_rules for temporary overrides or pipeline-specific adjustments
-# that don't belong in the shared DQ config files.
+# Only overrides that EXTEND or DIFFER from entity DQ config are kept here.
+# Redundant rules (same as entity config) have been removed per ADR-027.
 dq_rules:
-  # Thresholds (inherit from _base.yaml defaults: soft=0.05, hard=0.20)
-
-  # Field-level validations
+  # Field-level overrides
   field_validations:
-    - field: "activity_id"
-      type: "range"
-      min: 1
-      nullable: false
-      error_message: "activity_id must be a positive integer"
-    - field: "molecule_chembl_id"
-      type: "pattern"
-      pattern: "^CHEMBL\\d+$"
-      nullable: false
-      error_message: "molecule_chembl_id must match CHEMBL format"
-    - field: "target_chembl_id"
-      type: "pattern"
-      pattern: "^CHEMBL\\d+$"
-      nullable: true
-      error_message: "target_chembl_id must match CHEMBL format"
-    - field: "assay_chembl_id"
-      type: "pattern"
-      pattern: "^CHEMBL\\d+$"
-      nullable: true
-      error_message: "assay_chembl_id must match CHEMBL format"
+    # Override: Entity has min:0 only, pipeline adds max for extreme outliers
     - field: "standard_value"
       type: "range"
       min: 0
       max: 1000000000
       nullable: true
-      error_message: "standard_value must be non-negative"
+      error_message: "standard_value must be non-negative and below 1B"
+    # Override: Extended enum with additional types (ED50, MIC, CC50)
     - field: "standard_type"
       type: "enum"
       allowed: ["IC50", "Ki", "Kd", "EC50", "AC50", "GI50", "ED50", "MIC", "CC50"]
       nullable: true
+    # Override: Extended enum with additional units (ug.mL-1, mg.kg-1)
     - field: "standard_units"
       type: "enum"
       allowed: ["nM", "uM", "mM", "pM", "M", "ug.mL-1", "mg.kg-1"]
       nullable: true
-    - field: "assay_type"
-      type: "enum"
-      allowed: ["B", "F", "A", "T", "P", "U"]
-      nullable: true
-    - field: "pchembl_value"
-      type: "range"
-      min: 0
-      max: 15
-      nullable: true
-      error_message: "pchembl_value must be between 0 and 15"
 
-  # Cross-field validations
+  # Unique cross-field validations (different from entity's value_requires_units)
   cross_field_validations:
     - name: "activity_completeness"
       fields: ["standard_value", "standard_units", "standard_type"]
       condition: "all_present"
       error_message: "Complete activity data requires value, units, and type"
 
-  # Conditional validations
+  # Unique conditional validations (entity has binding_requires_target)
   conditional_validations:
     - name: "ic50_range_check"
       condition_field: "standard_type"
