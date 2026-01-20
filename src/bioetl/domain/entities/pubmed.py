@@ -203,6 +203,32 @@ class PubMedPublicationEntity(PublicationEntityBase):
     vernacular_title: str | None = None  # Original non-English title
     abstract_structured: bool = False  # Whether abstract has labeled sections (NLM)
 
+    # Additional journal fields (Gold schema forensic retention)
+    journal_title: str | None = None  # Full journal name (alias for journal)
+    journal_iso_abbrev: str | None = None  # ISO abbreviation (alias for journal_abbrev)
+    journal_issn_type: str | None = None  # ISSN type: Print/Electronic/Linking
+    nlm_unique_id: str | None = None  # NLM catalog ID
+    medline_pgn: str | None = None  # Original PubMed pagination (alias for pages)
+
+    # Additional date fields
+    pub_month: int | None = None  # Publication month (1-12)
+    pub_day: int | None = None  # Publication day (1-31)
+    date_completed: str | None = None  # MEDLINE processing completion date
+    date_revised: str | None = None  # Record revision date (MEDLINE)
+
+    # Publication metadata
+    publication_status: str | None = None  # ppublish/epublish/aheadofprint
+    publication_type_list: str | None = None  # JSON array of pub types
+    citation_subset: str | None = None  # Citation subset codes (e.g., 'AIM')
+
+    # Denormalized counts (Gold schema)
+    author_count: int | None = None
+    mesh_heading_count: int | None = None
+    keyword_count: int | None = None
+    grant_count: int | None = None
+    reference_count: int | None = None
+    chemical_count: int | None = None
+
     # Legacy field (kept for backward compatibility)
     publication_year: int | None = None  # Alias for year
 
