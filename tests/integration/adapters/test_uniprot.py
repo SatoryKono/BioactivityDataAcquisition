@@ -2,14 +2,32 @@
 
 These tests use VCR.py to record/replay HTTP interactions.
 To record new cassettes: pytest --vcr-record=new_episodes
+
+Cassettes location: tests/fixtures/vcr/uniprot/
 """
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
+
+# VCR cassette directory for UniProt adapter tests
+CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "uniprot"
+
+
+@pytest.fixture(scope="module")
+def vcr_config() -> dict[str, Any]:
+    """Configure VCR for UniProt adapter tests."""
+    return {
+        "cassette_library_dir": str(CASSETTE_DIR),
+        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
+        "match_on": ["method", "scheme", "host", "port", "path", "query"],
+        "decode_compressed_response": True,
+    }
 
 
 @pytest.mark.integration

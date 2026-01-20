@@ -1,11 +1,22 @@
+"""Integration tests for PubMed adapter.
+
+These tests use VCR.py to record/replay HTTP interactions.
+To record new cassettes: pytest --vcr-record=new_episodes
+
+Cassettes location: tests/fixtures/vcr/pubmed/
+"""
+
 from __future__ import annotations
 
-# tests/integration/adapters/test_pubmed.py
 from unittest.mock import MagicMock
 
 import pytest
 import respx
 from httpx import Response
+
+# VCR cassette directory for PubMed adapter tests
+# Note: cassette directory is resolved by conftest.py vcr_cassette_dir fixture
+# which looks for tests/fixtures/vcr/pubmed/ based on test filename
 
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker

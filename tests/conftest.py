@@ -26,7 +26,7 @@ except ImportError:
 
 # Query parameters to ignore when matching VCR requests
 # These parameters vary between test runs but don't affect the response content
-_VCR_IGNORED_QUERY_PARAMS = {"email", "api_key", "apikey"}
+_VCR_IGNORED_QUERY_PARAMS = {"email", "api_key", "apikey", "retmode"}
 
 
 def _parse_query_params(uri: str) -> dict[str, list[str]]:
@@ -321,11 +321,46 @@ def _sanitize_response(response: dict[str, Any]) -> dict[str, Any]:
 
 @pytest.fixture(scope="module")
 def vcr_cassette_dir(request: pytest.FixtureRequest, project_root: Path) -> Path:
-    """Return the directory for VCR cassettes based on test module."""
-    # Create cassette directory based on test module path
+    """Return the directory for VCR cassettes based on test module.
+
+    Supports provider-specific cassette directories:
+    - tests/fixtures/vcr/chembl/ - ChEMBL adapter and pipeline tests
+    - tests/fixtures/vcr/uniprot/ - UniProt adapter tests
+    - tests/fixtures/vcr/pubmed/ - PubMed adapter tests
+    - tests/fixtures/vcr/pubchem/ - PubChem tests
+    - tests/fixtures/vcr/crossref/ - CrossRef tests
+    - tests/fixtures/vcr/openalex/ - OpenAlex tests
+    - tests/fixtures/vcr/semanticscholar/ - SemanticScholar tests
+    - tests/fixtures/vcr/ - Cross-provider and general E2E tests
+
+    Falls back to test module path if no provider-specific directory exists.
+    """
     test_file = Path(request.fspath)
+    test_filename = test_file.stem  # e.g., "test_pubmed" or "test_chembl_activity_e2e"
+
+    # Provider-specific directory mapping based on test filename
+    provider_dirs = {
+        "chembl": ["chembl", "test_chembl"],
+        "uniprot": ["uniprot", "test_uniprot"],
+        "pubmed": ["pubmed", "test_pubmed"],
+        "pubchem": ["pubchem", "test_pubchem"],
+        "crossref": ["crossref", "test_crossref"],
+        "openalex": ["openalex", "test_openalex"],
+        "semanticscholar": ["semanticscholar", "test_semantic"],
+    }
+
+    vcr_base = project_root / "tests" / "fixtures" / "vcr"
+
+    # Check for provider-specific directory
+    for provider, patterns in provider_dirs.items():
+        if any(pattern in test_filename.lower() for pattern in patterns):
+            provider_dir = vcr_base / provider
+            if provider_dir.exists():
+                return provider_dir
+
+    # Fallback to test module path structure
     relative_path = test_file.relative_to(project_root / "tests")
-    cassette_dir = project_root / "tests" / "fixtures" / "vcr" / relative_path.parent
+    cassette_dir = vcr_base / relative_path.parent
     cassette_dir.mkdir(parents=True, exist_ok=True)
     return cassette_dir
 
