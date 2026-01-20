@@ -75,14 +75,12 @@ sink:
     partition_by: ["doc_type"]
     sort_by:
       columns: ["document_chembl_id"]
-      ascending: true
     csv_export:
       path: "data/output/silver/chembl/publication"
   gold:
     path: "data/output/gold/chembl/publication"
     sort_by:
       columns: ["document_chembl_id"]
-      ascending: true
     csv_export:
       path: "data/output/gold/chembl/publication"
 

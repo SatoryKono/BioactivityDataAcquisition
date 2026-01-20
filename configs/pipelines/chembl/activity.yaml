@@ -125,53 +125,19 @@ gold_filters:
 sink:
   bronze:
     path: "data/output/bronze/chembl/activity"
-    # DQ report configuration (optional, disabled by default)
-    dq_report:
-      enabled: false          # Set to true to generate Bronze DQ reports
-      format: json            # Output format: json, yaml, or html
-      checks:
-        - record_count        # Count validation
-        - file_integrity      # BLAKE2 checksums
-        - schema_snapshot     # Schema inference
   silver:
     path: "data/output/silver/chembl/activity"
     primary_key: ["activity_id"]
-    partition_by: []
     sort_by:
       columns: ["activity_id"]
-      ascending: true
     csv_export:
       path: "data/output/silver/chembl/activity"
-    # DQ report configuration (optional, disabled by default)
-    dq_report:
-      enabled: false          # Set to true to generate Silver DQ reports
-      format: json            # Output format: json, yaml, or html
-      checks:
-        - record_count        # Count validation
-        - null_rate           # Per-column null analysis
-        - uniqueness          # Primary key uniqueness
-        - type_conformance    # Type validation
-        - value_distribution  # Distribution stats
-        - schema_drift        # Schema evolution detection
-        - deduplication_stats # Dedupe by hash/business key
   gold:
     path: "data/output/gold/chembl/activity"
     sort_by:
       columns: ["activity_id"]
-      ascending: true
     csv_export:
       path: "data/output/gold/chembl/activity"
-    # DQ report configuration (optional, disabled by default)
-    dq_report:
-      enabled: false          # Set to true to generate Gold DQ reports
-      format: json            # Output format: json, yaml, or html
-      checks:
-        - record_count        # Count validation
-        - completeness        # Required field fill rates
-        - business_rules      # Business rule validation
-        - referential_integrity # FK validation
-        - statistical_profile # Baseline comparison
-        - anomaly_detection   # Z-score anomalies
 
 # Entity-specific input filter
 input_filter:

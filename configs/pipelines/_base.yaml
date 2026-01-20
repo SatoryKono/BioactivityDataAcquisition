@@ -279,10 +279,19 @@ sink:
       header: true
       encoding: "utf-8"
 
+    # Partitioning (default: no partitioning)
+    # Override in entity config when partitioning is needed
+    partition_by: []
+
+    # Sort configuration (ADR-014: deterministic writes)
+    # ascending: true is the default for all entity configs
+    sort_by:
+      ascending: true
+      # columns: [<entity_id>]  # MUST be overridden in entity config
+
     # Entity-specific (MUST be overridden):
     # path: data/output/silver
     # primary_key: [<entity_id>]
-    # partition_by: [<partition_column>]  # SHOULD specify if applicable
 
   # ---------------------------------------------------------------------------
   # Gold Layer - Business-Ready Data
@@ -323,6 +332,12 @@ sink:
       delimiter: ","
       header: true
       encoding: "utf-8"
+
+    # Sort configuration (ADR-014: deterministic writes)
+    # ascending: true is the default for all entity configs
+    sort_by:
+      ascending: true
+      # columns: [<entity_id>]  # MUST be overridden in entity config
 
     # Entity-specific (MUST be overridden):
     # path: data/output/gold

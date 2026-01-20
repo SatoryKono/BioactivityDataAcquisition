@@ -74,14 +74,12 @@ sink:
     partition_by: []  # No good partition key
     sort_by:
       columns: ["sim_id"]
-      ascending: true
     csv_export:
       path: "data/output/silver/chembl/document_similarity"
   gold:
     path: "data/output/gold/chembl/document_similarity"
     sort_by:
       columns: ["sim_id"]
-      ascending: true
     csv_export:
       path: "data/output/gold/chembl/document_similarity"
 

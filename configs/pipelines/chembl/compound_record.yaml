@@ -61,17 +61,14 @@ sink:
   silver:
     path: "data/output/silver/chembl/compound_record"
     primary_key: ["record_id"]
-    partition_by: []
     sort_by:
       columns: ["record_id"]
-      ascending: true
     csv_export:
       path: "data/output/silver/chembl/compound_record"
   gold:
     path: "data/output/gold/chembl/compound_record"
     sort_by:
       columns: ["molecule_chembl_id", "document_chembl_id", "record_id"]
-      ascending: true
     csv_export:
       path: "data/output/gold/chembl/compound_record"
 
@@ -84,4 +81,3 @@ input_filter:
   column_name: "molecule_chembl_id"
   filter_field: "molecule_chembl_id"
   batch_size: 20
-
