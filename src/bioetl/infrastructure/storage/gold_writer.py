@@ -28,7 +28,7 @@ from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.medallion import GoldWriteMode
-from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
+from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
@@ -112,7 +112,7 @@ class GoldWriter(BaseDeltaWriter):
         # Use NoOpTracing if not provided (test convenience, production uses composition)
         # Import from domain.ports.noop to maintain proper layer separation
         if tracing is None:
-            from bioetl.domain.ports.noop import NoOpTracing
+            from bioetl.domain.ports import NoOpTracing
 
             tracing = NoOpTracing()
 
@@ -122,7 +122,7 @@ class GoldWriter(BaseDeltaWriter):
 
         # Use NoOpMetadataWriter if not provided (metadata is optional)
         if metadata_writer is None:
-            from bioetl.domain.ports.noop import NoOpMetadataWriter
+            from bioetl.domain.ports import NoOpMetadataWriter
 
             metadata_writer = NoOpMetadataWriter()
         self._metadata_writer: MetadataWriterPort = metadata_writer
@@ -480,10 +480,7 @@ class GoldWriter(BaseDeltaWriter):
 
         # Use MetadataCoordinator if available (centralized metadata)
         if self._metadata_coordinator is not None:
-            from bioetl.domain.ports.metadata_coordinator import (
-                GoldMetadataInput,
-                SilverRef,
-            )
+            from bioetl.domain.ports import GoldMetadataInput, SilverRef
 
             # Convert silver_refs to SilverRef if they're SilverWriteResult
             converted_refs: list[SilverRef] | None = None

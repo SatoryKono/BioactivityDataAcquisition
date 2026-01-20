@@ -39,7 +39,7 @@ if TYPE_CHECKING:
         TracingPort,
     )
 
-from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
+from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.storage._atomic import atomic_write_bytes
@@ -109,13 +109,13 @@ class BronzeWriter:
         # Use NoOpTracing if not provided (test convenience, production uses composition)
         # Import from domain.ports.noop to maintain proper layer separation
         if tracing is None:
-            from bioetl.domain.ports.noop import NoOpTracing
+            from bioetl.domain.ports import NoOpTracing
 
             tracing = NoOpTracing()
 
         # Use NoOpMetadataWriter if not provided (Null Object pattern)
         if metadata_writer is None:
-            from bioetl.domain.ports.noop import NoOpMetadataWriter
+            from bioetl.domain.ports import NoOpMetadataWriter
 
             metadata_writer = NoOpMetadataWriter()
 
@@ -557,9 +557,7 @@ class BronzeWriter:
 
                 # Use MetadataCoordinator if available (centralized metadata)
                 if self._metadata_coordinator is not None:
-                    from bioetl.domain.ports.metadata_coordinator import (
-                        BronzeMetadataInput,
-                    )
+                    from bioetl.domain.ports import BronzeMetadataInput
 
                     # Extract query_string from source_metadata for BronzeMetadataInput
                     # This allows MetadataCoordinator to include it in metadata sidecar
