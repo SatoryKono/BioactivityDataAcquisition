@@ -26,6 +26,7 @@ def vcr_config() -> dict[str, Any]:
         "decode_compressed_response": True,
     }
 
+
 from bioetl.composition.factories.pipeline_factories import chembl_activity_factory
 from tests.integration.pipelines.base import IntegrationPipelineTestCase
 
