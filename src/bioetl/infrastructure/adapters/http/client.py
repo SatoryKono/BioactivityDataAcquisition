@@ -106,7 +106,10 @@ class UnifiedHTTPClient:
         user_agent = self.user_agent
         if self.contact_email:
             user_agent = f"{user_agent} ({self.contact_email})"
-        headers: dict[str, str] = {"User-Agent": user_agent}
+        headers: dict[str, str] = {
+            "User-Agent": user_agent,
+            "Accept": "application/json",
+        }
         if self.run_id:
             headers["X-Correlation-ID"] = str(self.run_id)
 
