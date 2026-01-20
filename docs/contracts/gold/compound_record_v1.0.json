@@ -1,0 +1,63 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$version": "1.0.0",
+    "title": "Compound Record Data Contract",
+    "description": "Defines the schema for the gold 'CompoundRecord' entity, aligned with RULES.md §7.1. This contract is for data consumers. Links molecules to documents with original compound names.",
+    "type": "object",
+    "properties": {
+        "record_id": {
+            "type": "integer",
+            "description": "ChEMBL record ID (PK).",
+            "minimum": 1
+        },
+        "molecule_chembl_id": {
+            "type": "string",
+            "description": "FK to Molecule.",
+            "pattern": "^CHEMBL\\d+$"
+        },
+        "document_chembl_id": {
+            "type": "string",
+            "description": "FK to Publication.",
+            "pattern": "^CHEMBL\\d+$"
+        },
+        "src_id": {
+            "type": "integer",
+            "description": "FK to Source (data source).",
+            "minimum": 1
+        },
+        "compound_key": {
+            "type": ["string", "null"],
+            "description": "Original compound key in source document."
+        },
+        "compound_name": {
+            "type": ["string", "null"],
+            "description": "Original compound name in source document."
+        },
+        "src_compound_id": {
+            "type": ["string", "null"],
+            "description": "Compound ID in original data source."
+        },
+        "_source_batch_id": {
+            "type": "string",
+            "description": "Internal ID linking to the source Bronze batch for lineage.",
+            "format": "uuid"
+        },
+        "_content_hash": {
+            "type": "string",
+            "description": "SHA-256 hash of the record's content for versioning and deduplication."
+        },
+        "_ingestion_ts": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC timestamp of when the record was ingested."
+        }
+    },
+    "required": [
+        "record_id",
+        "molecule_chembl_id",
+        "document_chembl_id",
+        "src_id",
+        "_content_hash",
+        "_ingestion_ts"
+    ]
+}
