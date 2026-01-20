@@ -49,8 +49,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Project root
-PROJECT_ROOT = Path(__file__).parent.parent.parent
+# Project root (scripts/ is directly under project root)
+PROJECT_ROOT = Path(__file__).parent.parent
 
 
 # =============================================================================
