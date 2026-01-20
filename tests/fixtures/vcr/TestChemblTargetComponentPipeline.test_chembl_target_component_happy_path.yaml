@@ -13,10 +13,10 @@ interactions:
       User-Agent:
       - BioETL/0.1.0 (contact@example.com)
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/target_component.json?limit=1000&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/target_component?limit=1000&offset=0&format=json
   response:
     body:
-      string: '{"page_meta": {"limit": 1000, "next": "/chembl/api/data/target_component.json?limit=1000&offset=1000",
+      string: '{"page_meta": {"limit": 1000, "next": "/chembl/api/data/target_component?limit=1000&offset=1000",
         "offset": 0, "previous": null, "total_count": 12856}, "target_components":
         [{"accession": "O09028", "component_id": 1, "component_type": "PROTEIN", "description":
         "Gamma-aminobutyric acid receptor subunit pi", "go_slims": [{"go_id": "GO:0003674"},
@@ -104190,7 +104190,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/status.json
+    uri: https://www.ebi.ac.uk/chembl/api/data/status
   response:
     body:
       string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
@@ -104230,10 +104230,10 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/target_component.json?limit=10&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/target_component?limit=10&offset=0&format=json
   response:
     body:
-      string: '{"page_meta": {"limit": 10, "next": "/chembl/api/data/target_component.json?limit=10&offset=10",
+      string: '{"page_meta": {"limit": 10, "next": "/chembl/api/data/target_component?limit=10&offset=10",
         "offset": 0, "previous": null, "total_count": 12856}, "target_components":
         [{"accession": "O09028", "component_id": 1, "component_type": "PROTEIN", "description":
         "Gamma-aminobutyric acid receptor subunit pi", "go_slims": [{"go_id": "GO:0003674"},

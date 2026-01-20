@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/status.json
+    uri: https://www.ebi.ac.uk/chembl/api/data/status
   response:
     body:
       string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
@@ -53,7 +53,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/activity.json?limit=1000&offset=0&format=json&activity_id__in=1000146%2C1000342%2C1000344%2C1000762%2C1000855%2C1000856%2C1000883%2C1000884%2C1000885%2C1001016%2C1001017%2C1001019%2C1001020%2C1001021%2C1001112%2C1001114%2C1001121%2C1001123%2C1001132%2C1001313
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity?limit=1000&offset=0&format=json&activity_id__in=1000146%2C1000342%2C1000344%2C1000762%2C1000855%2C1000856%2C1000883%2C1000884%2C1000885%2C1001016%2C1001017%2C1001019%2C1001020%2C1001021%2C1001112%2C1001114%2C1001121%2C1001123%2C1001132%2C1001313
   response:
     body:
       string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
@@ -455,7 +455,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/status.json
+    uri: https://www.ebi.ac.uk/chembl/api/data/status
   response:
     body:
       string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
@@ -495,7 +495,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/activity.json?limit=1000&offset=0&format=json&activity_id__in=1000146%2C1000342%2C1000344%2C1000762%2C1000855%2C1000856%2C1000883%2C1000884%2C1000885%2C1001016%2C1001017%2C1001019%2C1001020%2C1001021%2C1001112%2C1001114%2C1001121%2C1001123%2C1001132%2C1001313
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity?limit=1000&offset=0&format=json&activity_id__in=1000146%2C1000342%2C1000344%2C1000762%2C1000855%2C1000856%2C1000883%2C1000884%2C1000885%2C1001016%2C1001017%2C1001019%2C1001020%2C1001021%2C1001112%2C1001114%2C1001121%2C1001123%2C1001132%2C1001313
   response:
     body:
       string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
@@ -897,7 +897,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/activity.json?limit=3&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity?limit=3&offset=0&format=json
   response:
     body:
       string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
@@ -952,7 +952,7 @@ interactions:
         "CHEMBL3879801", "target_organism": null, "target_pref_name": "NON-PROTEIN
         TARGET", "target_tax_id": null, "text_value": null, "toid": null, "type":
         "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null, "value":
-        "50.0"}], "page_meta": {"limit": 3, "next": "/chembl/api/data/activity.json?limit=3&offset=3",
+        "50.0"}], "page_meta": {"limit": 3, "next": "/chembl/api/data/activity?limit=3&offset=3",
         "offset": 0, "previous": null, "total_count": 24267312}}'
     headers:
       Cache-Control:
@@ -994,7 +994,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/activity.json?limit=2&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity?limit=2&offset=0&format=json
   response:
     body:
       string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
@@ -1032,7 +1032,7 @@ interactions:
         "CHEMBL3921", "target_organism": "Homo sapiens", "target_pref_name": "Heparanase",
         "target_tax_id": "9606", "text_value": null, "toid": null, "type": "IC50",
         "units": "uM", "uo_units": "UO_0000065", "upper_value": null, "value": "2.5"}],
-        "page_meta": {"limit": 2, "next": "/chembl/api/data/activity.json?limit=2&offset=2",
+        "page_meta": {"limit": 2, "next": "/chembl/api/data/activity?limit=2&offset=2",
         "offset": 0, "previous": null, "total_count": 24267312}}'
     headers:
       Cache-Control:

@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/status.json
+    uri: https://www.ebi.ac.uk/chembl/api/data/status
   response:
     body:
       string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
@@ -51,7 +51,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/cell_line.json?limit=50&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/cell_line?limit=50&offset=0&format=json
   response:
     body:
       string: '{"cell_lines": [{"cell_chembl_id": "CHEMBL3307241", "cell_description":
@@ -242,7 +242,7 @@ interactions:
         56, "cell_name": "QG-95", "cell_source_organism": "Homo sapiens", "cell_source_tax_id":
         9606, "cell_source_tissue": "Lung Carcinoma", "cellosaurus_id": "CVCL_S847",
         "cl_lincs_id": null, "clo_id": null, "efo_id": null}], "page_meta": {"limit":
-        50, "next": "/chembl/api/data/cell_line.json?limit=50&offset=50", "offset":
+        50, "next": "/chembl/api/data/cell_line?limit=50&offset=50", "offset":
         0, "previous": null, "total_count": 2215}}'
     headers:
       cache-control:

@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/status.json
+    uri: https://www.ebi.ac.uk/chembl/api/data/status
   response:
     body:
       string: "<!doctype html>\n<html lang=\"en\" class=\"vf-no-js\">\n  <head>\n
@@ -152,7 +152,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/cell_line.json?limit=10&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/cell_line?limit=10&offset=0&format=json
   response:
     body:
       string: "<!doctype html>\n<html lang=\"en\" class=\"vf-no-js\">\n  <head>\n
@@ -291,7 +291,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/cell_line.json?limit=10&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/cell_line?limit=10&offset=0&format=json
   response:
     body:
       string: '{"cell_lines": [{"cell_chembl_id": "CHEMBL3307241", "cell_description":
@@ -332,7 +332,7 @@ interactions:
         "WiDr-NTR", "cell_source_organism": "Homo sapiens", "cell_source_tax_id":
         9606, "cell_source_tissue": "Colon Adenocarcinoma", "cellosaurus_id": null,
         "cl_lincs_id": null, "clo_id": null, "efo_id": null}], "page_meta": {"limit":
-        10, "next": "/chembl/api/data/cell_line.json?limit=10&offset=10", "offset":
+        10, "next": "/chembl/api/data/cell_line?limit=10&offset=10", "offset":
         0, "previous": null, "total_count": 2215}}'
     headers:
       cache-control:

@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - BioETL/0.1.0 (contact@example.com)
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/activity.json?limit=10&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity?limit=10&offset=0&format=json
   response:
     body:
       string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
@@ -192,7 +192,7 @@ interactions:
         "Peroxisomal acyl-coenzyme A oxidase 1", "target_tax_id": "10116", "text_value":
         null, "toid": null, "type": "IC50", "units": "nM", "uo_units": "UO_0000065",
         "upper_value": null, "value": "180.0"}], "page_meta": {"limit": 10, "next":
-        "/chembl/api/data/activity.json?limit=10&offset=10", "offset": 0, "previous":
+        "/chembl/api/data/activity?limit=10&offset=10", "offset": 0, "previous":
         null, "total_count": 24267312}}'
     headers:
       Cache-Control:
@@ -234,7 +234,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/activity.json?limit=5&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity?limit=5&offset=0&format=json
   response:
     body:
       string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
@@ -324,7 +324,7 @@ interactions:
         "CHEMBL3879801", "target_organism": null, "target_pref_name": "NON-PROTEIN
         TARGET", "target_tax_id": null, "text_value": null, "toid": null, "type":
         "IC50", "units": "uM", "uo_units": "UO_0000065", "upper_value": null, "value":
-        null}], "page_meta": {"limit": 5, "next": "/chembl/api/data/activity.json?limit=5&offset=5",
+        null}], "page_meta": {"limit": 5, "next": "/chembl/api/data/activity?limit=5&offset=5",
         "offset": 0, "previous": null, "total_count": 24267312}}'
     headers:
       Cache-Control:

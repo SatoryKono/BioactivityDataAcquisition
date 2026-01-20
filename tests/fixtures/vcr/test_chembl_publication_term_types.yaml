@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - BioETL/0.1.0 (contact@example.com)
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document.json?limit=500&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?limit=500&offset=0&format=json
   response:
     body:
       string: '{"documents": [{"document_chembl_id": "CHEMBL1200001", "title": "Aspirin
@@ -116,7 +116,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/status.json
+    uri: https://www.ebi.ac.uk/chembl/api/data/status
   response:
     body:
       string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
