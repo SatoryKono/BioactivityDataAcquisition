@@ -1,0 +1,57 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$version": "1.0.0",
+    "title": "Target Component Data Contract",
+    "description": "Defines the schema for the gold 'TargetComponent' entity, aligned with RULES.md §7.1. This contract is for data consumers. Links targets to their component sequences.",
+    "type": "object",
+    "properties": {
+        "targcomp_id": {
+            "type": "integer",
+            "description": "Primary key."
+        },
+        "tid": {
+            "type": "integer",
+            "description": "FK to target (internal ChEMBL target ID)."
+        },
+        "component_id": {
+            "type": "integer",
+            "description": "FK to component_sequences table."
+        },
+        "relationship": {
+            "type": ["string", "null"],
+            "description": "Relationship type between target and component.",
+            "enum": ["SINGLE PROTEIN", "PROTEIN SUBUNIT", "RNA", "INTERACTING PROTEIN", null]
+        },
+        "stoichiometry": {
+            "type": ["integer", "null"],
+            "description": "Stoichiometry of the component in the target complex.",
+            "minimum": 1
+        },
+        "homologue": {
+            "type": ["integer", "null"],
+            "description": "Homologue flag (0 = exact, 1 = ortholog, 2 = paralog).",
+            "enum": [0, 1, 2, null]
+        },
+        "_source_batch_id": {
+            "type": "string",
+            "description": "Internal ID linking to the source Bronze batch for lineage.",
+            "format": "uuid"
+        },
+        "_content_hash": {
+            "type": "string",
+            "description": "SHA-256 hash of the record's content for versioning and deduplication."
+        },
+        "_ingestion_ts": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC timestamp of when the record was ingested."
+        }
+    },
+    "required": [
+        "targcomp_id",
+        "tid",
+        "component_id",
+        "_content_hash",
+        "_ingestion_ts"
+    ]
+}
