@@ -1,0 +1,93 @@
+%%{init: {'theme':'base', 'themeVariables': { 'fontSize':'13px'}}}%%
+sequenceDiagram
+    participant PipelineRunner
+    participant LockManager
+    participant MemoryLock
+    participant Heartbeat
+    participant Logger
+
+    PipelineRunner->>LockManager: acquire_lock(key, owner_id)
+
+    LockManager->>Logger: log("Attempting lock acquisition")
+
+    LockManager->>MemoryLock: acquire(key, owner_id, ttl=90s)
+
+    alt Lock Available
+        MemoryLock->>MemoryLock: _locks[key] = {owner, expiry, timestamp}
+        MemoryLock-->>LockManager: success=True
+
+        LockManager->>Heartbeat: start_heartbeat(key, owner_id, interval=30s)
+
+        loop Every 30 seconds
+            Heartbeat->>MemoryLock: heartbeat(key, owner_id)
+            MemoryLock->>MemoryLock: refresh_ttl(key, +90s)
+            MemoryLock-->>Heartbeat: success=True
+            Heartbeat->>Logger: log("Heartbeat sent")
+        end
+
+        LockManager->>Logger: log("Lock acquired successfully")
+        LockManager-->>PipelineRunner: Lock acquired
+
+        PipelineRunner->>PipelineRunner: execute_pipeline()
+
+        Note over PipelineRunner,Logger: Pipeline Execution
+
+        PipelineRunner->>LockManager: release_lock(key, owner_id)
+
+        LockManager->>Heartbeat: stop_heartbeat()
+        Heartbeat->>Heartbeat: Cancel heartbeat loop
+
+        LockManager->>MemoryLock: release(key, owner_id)
+
+        MemoryLock->>MemoryLock: validate_owner(key, owner_id)
+
+        alt Owner Valid
+            MemoryLock->>MemoryLock: del _locks[key]
+            MemoryLock-->>LockManager: success=True
+            LockManager->>Logger: log("Lock released")
+            LockManager-->>PipelineRunner: Lock released
+        else Owner Invalid
+            MemoryLock-->>LockManager: error=LockNotHeldError
+            LockManager->>Logger: error("Lock not held by owner")
+            LockManager-->>PipelineRunner: Error
+        end
+
+    else Lock Held by Another
+        MemoryLock-->>LockManager: success=False
+
+        alt wait=True
+            LockManager->>Logger: log("Lock held, waiting...")
+
+            loop Until timeout
+                LockManager->>LockManager: sleep(1s)
+                LockManager->>MemoryLock: acquire(key, owner_id, ttl)
+
+                alt Lock becomes available
+                    MemoryLock-->>LockManager: success=True
+                    LockManager->>Heartbeat: start_heartbeat()
+                    LockManager-->>PipelineRunner: Lock acquired
+                end
+            end
+
+            LockManager->>Logger: error("Wait timeout exceeded")
+            LockManager-->>PipelineRunner: TimeoutError
+
+        else wait=False
+            LockManager->>Logger: error("Lock held by another")
+            LockManager-->>PipelineRunner: LockAlreadyHeldError
+        end
+    end
+
+    Note over MemoryLock: TTL Auto-Expiration
+
+    MemoryLock->>MemoryLock: _ttl_checker_loop()
+
+    loop Every 5 seconds
+        MemoryLock->>MemoryLock: Check all locks
+        alt Lock expired (now > expiry)
+            MemoryLock->>MemoryLock: del _locks[key]
+            MemoryLock->>Logger: log("Lock auto-released (TTL)")
+        end
+    end
+
+    Note over MemoryLock,Logger: Lock Configuration:<br/>- TTL: 90 seconds<br/>- Heartbeat interval: 30s (TTL/3)<br/>- Wait timeout: 300s (5 min)<br/>- Lock type: In-memory (local process)
