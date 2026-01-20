@@ -23,8 +23,7 @@ from typing import TYPE_CHECKING
 from bioetl.domain.types import HealthStatus
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, MetricsPort
-    from bioetl.domain.ports.health_check import HealthCheckResult
+    from bioetl.domain.ports import HealthCheckResult, LoggerPort, MetricsPort
 
 
 @dataclass(frozen=True, slots=True)

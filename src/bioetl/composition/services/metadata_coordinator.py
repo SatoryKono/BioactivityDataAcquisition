@@ -43,7 +43,7 @@ from bioetl.domain.models.metadata import (
     SilverOutputMetadata,
     SourceMetadata,
 )
-from bioetl.domain.ports.metadata_coordinator import (
+from bioetl.domain.ports import (
     BronzeMetadataInput,
     GoldMetadataInput,
     SilverMetadataInput,

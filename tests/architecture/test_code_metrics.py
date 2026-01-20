@@ -207,6 +207,9 @@ class TestFunctionComplexity:
         "_coerce_to_int": 10,  # CC=8 - Integer coercion with multiple type checks
         # FilterableDataSourcePort batch filtering
         "fetch_filtered": 20,  # CC=18 - Batch filtering with OR-query and entity type handling
+        # Delta Lake writers with Null/List<Null> coercion
+        "write_silver_merged": 17,  # CC=16 - Silver merge with null coercion logic
+        "write_gold_merged": 17,  # CC=16 - Gold merge with null coercion logic
         "_fetch_with_filter": 25,  # CC=22 - ChEMBL pagination with deduplication and filter building
         "_is_server_500_error": 18,  # CC=16 - Error detection with multiple wrapping scenarios
         # DQ serializer domain functions
