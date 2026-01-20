@@ -195,7 +195,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         grant_count = len(grant_list.findall("Grant")) if grant_list is not None else 0
 
         # Extract reference count
-        ref_list = pubmed_data.find("ReferenceList") if pubmed_data is not None else None
+        ref_list = (
+            pubmed_data.find("ReferenceList") if pubmed_data is not None else None
+        )
         reference_count = (
             len(ref_list.findall(".//Reference")) if ref_list is not None else 0
         )
@@ -238,7 +240,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 else None
             ),
             "citation_subset": (
-                ",".join(cs for cs in citation_subsets if cs) if citation_subsets else None
+                ",".join(cs for cs in citation_subsets if cs)
+                if citation_subsets
+                else None
             ),
             "publication_status": pub_status,
             # Counts
@@ -387,6 +391,37 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             return f"{date_str}-12-31"
         return None
 
+    def _parse_month_day(
+        self, pub_date_node: ET.Element | None
+    ) -> tuple[int | None, int | None]:
+        """Extract month and day as integers from PubDate node."""
+        if pub_date_node is None:
+            return None, None
+
+        month_text = get_text(pub_date_node.find("Month"))
+        day_text = get_text(pub_date_node.find("Day"))
+
+        pub_month = self._parse_month(month_text)
+        pub_day = int(day_text) if day_text and day_text.isdigit() else None
+
+        return pub_month, pub_day
+
+    def _parse_month(self, month_text: str | None) -> int | None:
+        """Convert month text (name or number) to integer."""
+        if not month_text:
+            return None
+
+        month_lower = month_text.strip().lower()[:3]
+        month_map = {
+            "jan": 1, "feb": 2, "mar": 3, "apr": 4,
+            "may": 5, "jun": 6, "jul": 7, "aug": 8,
+            "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+        }
+        result = month_map.get(month_lower)
+        if result is None and month_text.isdigit():
+            result = int(month_text)
+        return result
+
     def _extract_date_data(
         self, article: ET.Element, pubmed_data: ET.Element | None
     ) -> dict[str, Any]:
@@ -397,41 +432,15 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         pub_date, raw_year = DateExtractor.extract_date(pub_date_node)
         history = pubmed_data.find("History") if pubmed_data else None
 
-        # Extract month and day from PubDate
-        pub_month: int | None = None
-        pub_day: int | None = None
-        if pub_date_node is not None:
-            month_text = get_text(pub_date_node.find("Month"))
-            day_text = get_text(pub_date_node.find("Day"))
-            if month_text:
-                # Convert month name to number if needed
-                month_lower = month_text.strip().lower()[:3]
-                month_map = {
-                    "jan": 1, "feb": 2, "mar": 3, "apr": 4,
-                    "may": 5, "jun": 6, "jul": 7, "aug": 8,
-                    "sep": 9, "oct": 10, "nov": 11, "dec": 12,
-                }
-                pub_month = month_map.get(month_lower)
-                if pub_month is None and month_text.isdigit():
-                    pub_month = int(month_text)
-            if day_text and day_text.isdigit():
-                pub_day = int(day_text)
+        pub_month, pub_day = self._parse_month_day(pub_date_node)
 
-        # Validate year using PublicationYear Value Object
         year_vo = PublicationYear.from_raw(raw_year)
         validated_year = year_vo.value if year_vo else None
 
         epub_date = DateExtractor.extract_article_date(article, "Electronic")
-
-        # Compute unified publication_date
         publication_date = self._compute_publication_date(
             epub_date, pub_date, validated_year
         )
-
-        # MEDLINE dates (DateCompleted, DateRevised) are not easily accessible
-        # from Article element in ET without root reference
-        date_completed: str | None = None
-        date_revised_medline: str | None = None
 
         return {
             "pub_date": pub_date,
