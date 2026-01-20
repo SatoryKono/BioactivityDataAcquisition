@@ -125,45 +125,109 @@ class MoleculeSchema(ETLRecordSchema):
     # )
 
     # === Other Properties ===
-    # availability_type: Optional[Series[int]] = pa.Field(
-    #     nullable=True, isin=[0, 1, 2], description="Availability type."
-    # )
-    # usan_year: Optional[Series[int]] = pa.Field(
-    #     nullable=True, description="USAN year."
-    # )
-    # usan_stem: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="USAN stem."
-    # )
-    # usan_substem: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="USAN substem."
-    # )
-    # usan_stem_definition: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="USAN stem definition."
-    # )
-    # indication_class: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="Indication class."
-    # )
-    # withdrawn_year: Optional[Series[int]] = pa.Field(
-    #     nullable=True, description="Withdrawn year."
-    # )
-    # withdrawn_country: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="Withdrawn country."
-    # )
-    # withdrawn_reason: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="Withdrawn reason."
-    # )
-    # withdrawn_class: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="Withdrawn class."
-    # )
-    # downgrade_reason: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="Downgrade reason."
-    # )
-    # replacement_mrn: Optional[Series[int]] = pa.Field(
-    #     nullable=True, description="Replacement molregno."
-    # )
-    # nomerge_reason: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="No merge reason."
-    # )
+    chirality: Series[int] | None = pa.Field(
+        nullable=True,
+        isin=[-1, 0, 1, 2],
+        description="Chirality flag: -1=unknown, 0=achiral, 1=single, 2=racemic.",
+    )
+    dosed_ingredient: Series[int] | None = pa.Field(
+        nullable=True, isin=[0, 1], description="Dosed ingredient flag."
+    )
+    availability_type: Series[int] | None = pa.Field(
+        nullable=True, isin=[-2, -1, 0, 1, 2], description="Availability type."
+    )
+    usan_year: Series[int] | None = pa.Field(
+        nullable=True, description="USAN approval year."
+    )
+    usan_stem: Series[str] | None = pa.Field(
+        nullable=True, description="USAN stem name."
+    )
+    usan_substem: Series[str] | None = pa.Field(
+        nullable=True, description="USAN substem name."
+    )
+    usan_stem_definition: Series[str] | None = pa.Field(
+        nullable=True, description="USAN stem definition."
+    )
+    helm_notation: Series[str] | None = pa.Field(
+        nullable=True, description="HELM notation for biopolymers."
+    )
+    molecule_species: Series[str] | None = pa.Field(
+        nullable=True, description="Species for biologics."
+    )
+
+    # === Hierarchy Fields (flattened from molecule_hierarchy) ===
+    hierarchy_parent_chembl_id: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=r"^CHEMBL\d+$",
+        description="Parent molecule ChEMBL ID in hierarchy.",
+    )
+    hierarchy_active_chembl_id: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=r"^CHEMBL\d+$",
+        description="Active molecule ChEMBL ID in hierarchy.",
+    )
+    hierarchy_child_chembl_id: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=r"^CHEMBL\d+$",
+        description="Child molecule ChEMBL ID in hierarchy.",
+    )
+
+    # === Property Fields (flattened from molecule_properties) ===
+    property_alogp: Series[float] | None = pa.Field(
+        nullable=True, description="Calculated ALogP (partition coefficient)."
+    )
+    property_mw_freebase: Series[float] | None = pa.Field(
+        nullable=True, description="Molecular weight of parent compound."
+    )
+    property_full_mwt: Series[float] | None = pa.Field(
+        nullable=True, description="Full molecular weight including salts."
+    )
+    property_hba: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Hydrogen bond acceptors count."
+    )
+    property_hbd: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Hydrogen bond donors count."
+    )
+    property_psa: Series[float] | None = pa.Field(
+        nullable=True, ge=0, description="Polar surface area (PSA)."
+    )
+    property_rtb: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Rotatable bonds count."
+    )
+    property_ro5_violations: Series[int] | None = pa.Field(
+        nullable=True,
+        ge=0,
+        le=4,
+        description="Number of Lipinski rule-of-5 violations.",
+    )
+    property_heavy_atoms: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Heavy (non-hydrogen) atoms count."
+    )
+    property_aromatic_rings: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Aromatic rings count."
+    )
+    property_qed_weighted: Series[float] | None = pa.Field(
+        nullable=True, ge=0, le=1, description="Quantitative Estimate of Drug-likeness."
+    )
+    property_full_molformula: Series[str] | None = pa.Field(
+        nullable=True, description="Full molecular formula."
+    )
+    property_ro3_pass: Series[str] | None = pa.Field(
+        nullable=True, isin=["Y", "N"], description="Rule-of-3 compliance (Y/N)."
+    )
+
+    # === Structure Fields (flattened from molecule_structures) ===
+    canonical_smiles: Series[str] | None = pa.Field(
+        nullable=True, description="Canonical SMILES representation."
+    )
+    standard_inchi: Series[str] | None = pa.Field(
+        nullable=True, description="Standard InChI representation."
+    )
+    inchikey: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=INCHI_KEY_REGEX_PATTERN,
+        description="Standard InChI Key (27 characters, XXXX-YYYY-Z format).",
+    )
 
     # === Complex Fields (JSON Strings) ===
     molecule_hierarchy: Series[str] | None = pa.Field(
