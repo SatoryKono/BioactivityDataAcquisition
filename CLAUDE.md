@@ -2,7 +2,7 @@
 
 Справочник для Claude Code при работе с репозиторием BioETL.
 
-*Синхронизировано с RULES.md v5.10 (2026-01-06) | Верификация метрик: 2026-01-06 | Версия проекта: 5.9.0*
+*Синхронизировано с RULES.md v5.11 (2026-01-20) | Верификация метрик: 2026-01-06 | Версия проекта: 5.9.0*
 
 ---
 
@@ -236,6 +236,14 @@ src/bioetl/
    - **Причины**: (1) Меньше зависимостей (Typer зависит от Click), (2) Обширная документация и community support, (3) Стабильность API между версиями
    - Реализация: `src/bioetl/interfaces/cli/` — все команды используют `@click.command()`, `@click.option()`
    - **НЕ** "альтернатива Typer", а продуманный выбор
+
+9. **Int→Float coercion в Gold-схемах для nullable integers**:
+   - Gold-схемы используют `Series[float]` с `coerce=True` для полей, которые в Silver — `pa.int64()`
+   - **Осознанное решение**: Pandas/Polars исторически не поддерживали nullable integers без `Int64` (capital I)
+   - Float — единственный способ представить `int + NULL` без потери данных; `NaN` = отсутствующее значение
+   - Затронуто ~34 поля: `record_id`, `src_id`, `taxonomy_id`, `year`, `first_approval` и др.
+   - См. `docs/RULES.md` §2.6 "Int→Float Coercion для Nullable Integers"
+   - **НЕ баг**, а паттерн для nullable integer handling
 
 ### 2.3.1. Причины Ложных Утверждений (Избегать!)
 
