@@ -71,7 +71,7 @@ docs/
 │   ├── decisions/               # ADR-001..027 (27 records)
 │   └── diagrams/                # 34 Mermaid diagram files + render_diagrams.py
 │
-├── 03-guides/                   # How-to guides (10 guides)
+├── 03-guides/                   # How-to guides (12 guides)
 │   ├── quick-start.md           # Quick start guide
 │   ├── getting-started.md       # Getting started
 │   ├── running-pipelines.md     # Running pipelines
@@ -81,7 +81,9 @@ docs/
 │   ├── registry-pattern.md      # Registry pattern guide
 │   ├── troubleshooting.md       # Troubleshooting
 │   ├── add-new-source.md        # Adding new data source
-│   └── add-pipeline-existing-source.md
+│   ├── add-pipeline-existing-source.md
+│   ├── date-handling.md         # Date normalization guide
+│   └── dq-configuration.md      # Data quality configuration
 │
 ├── 03-data-contracts/           # Data contracts
 │   └── gold-schemas.md          # Gold layer schema documentation
@@ -218,6 +220,7 @@ docs/
 | Pipeline Review  | [pipeline-review-checklist.md](templates/pipeline-review-checklist.md)                          | §4.2     |
 | Testing          | [testing.md](03-guides/testing.md)                                                              | §4.2     |
 | E2E Testing      | [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md)                           | §4.2.3   |
+| Date Handling    | [date-handling.md](03-guides/date-handling.md)                                                  | §2.4     |
 | Code Style       | [RULES.md §4](RULES.md#4-качество-кода-и-тестирование)                                          | §4       |
 
 ---
@@ -355,7 +358,7 @@ graph TD
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
 | 00-map.md                | 2026-01-14   | v6.6 Fixed broken links      |
 | rules-summary.md         | 2026-01-06   | v5.10 Synced                 |
-| 03-guides/               | 2025-12-31   | Consolidated (11 guides)     |
+| 03-guides/               | 2026-01-20   | Consolidated (12 guides)     |
 | ADR-001..027             | 2026-01-19   | All 27 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
