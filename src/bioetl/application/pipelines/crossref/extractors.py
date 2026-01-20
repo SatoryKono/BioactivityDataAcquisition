@@ -192,7 +192,11 @@ def extract_page_info(publication: dict[str, Any]) -> dict[str, Any]:
 def extract_dates(publication: dict[str, Any]) -> dict[str, Any]:
     """Extract publication dates from date-parts fields.
 
-    Formats date-parts [[year, month?, day?]] to ISO date strings.
+    Formats date-parts [[year, month?, day?]] to ISO date strings using
+    end-of-period normalization for partial dates:
+    - [[year, month, day]] -> "YYYY-MM-DD"
+    - [[year, month]] -> "YYYY-MM-DD" (last day of month)
+    - [[year]] -> "YYYY-12-31" (last day of year)
 
     Args:
         publication: CrossRef publication record.
@@ -205,7 +209,7 @@ def extract_dates(publication: dict[str, Any]) -> dict[str, Any]:
         ...     "published-print": {"date-parts": [[2023, 6, 15]]},
         ...     "published-online": {"date-parts": [[2023, 5]]}
         ... })
-        {'published_print': '2023-06-15', 'published_online': '2023-05'}
+        {'published_print': '2023-06-15', 'published_online': '2023-05-31'}
         >>> extract_dates({})
         {'published_print': None, 'published_online': None}
 
