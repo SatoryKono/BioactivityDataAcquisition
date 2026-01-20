@@ -215,10 +215,13 @@ class CircuitBreaker:
 def is_circuit_breaker_error(exc: Exception) -> bool:
     """Check if exception should trigger circuit breaker.
 
-    Only connection/timeout errors should trigger circuit breaker,
+    Only connection/timeout/read errors should trigger circuit breaker,
     not business logic errors (4xx responses except 429).
     """
-    if isinstance(exc, httpx.ConnectError | httpx.ConnectTimeout | httpx.ReadTimeout):
+    if isinstance(
+        exc,
+        httpx.ConnectError | httpx.ConnectTimeout | httpx.ReadTimeout | httpx.ReadError,
+    ):
         return True
 
     if isinstance(exc, httpx.HTTPStatusError):
