@@ -345,7 +345,7 @@ class ChemblAdapter(BaseHttpAdapter):
                 return e.last_error.response.status_code == 500
             # Check if last_error has status_code
             if hasattr(e.last_error, "status_code"):
-                return e.last_error.status_code == 500
+                return getattr(e.last_error, "status_code", None) == 500
 
         # 3. Check __cause__ chain
         cause = e.__cause__
