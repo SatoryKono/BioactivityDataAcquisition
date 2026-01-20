@@ -66,7 +66,7 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
-from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
+from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
 
 # Re-export SilverWriteMode for backward compatibility
 # Consumers importing from silver_writer will still work
@@ -155,7 +155,7 @@ class SilverWriter(BaseDeltaWriter):
 
         # Use NoOpMetadataWriter if not provided (metadata is optional)
         if metadata_writer is None:
-            from bioetl.domain.ports.noop import NoOpMetadataWriter
+            from bioetl.domain.ports import NoOpMetadataWriter
 
             metadata_writer = NoOpMetadataWriter()
         self._metadata_writer: MetadataWriterPort = metadata_writer
@@ -789,9 +789,7 @@ class SilverWriter(BaseDeltaWriter):
 
         # Use MetadataCoordinator if available (centralized metadata)
         if self._metadata_coordinator is not None:
-            from bioetl.domain.ports.metadata_coordinator import (
-                SilverMetadataInput,
-            )
+            from bioetl.domain.ports import SilverMetadataInput
 
             # Get Delta version after write
             version_after = await self._get_delta_version(table_path)
@@ -1111,9 +1109,7 @@ class SilverWriter(BaseDeltaWriter):
         # Delta Lake doesn't support Null type - columns with all None values
         # must be cast to a concrete type (String is safe default)
         null_columns = [
-            field.name
-            for field in arrow_table.schema
-            if pa.types.is_null(field.type)
+            field.name for field in arrow_table.schema if pa.types.is_null(field.type)
         ]
         if null_columns:
             self.logger.debug(

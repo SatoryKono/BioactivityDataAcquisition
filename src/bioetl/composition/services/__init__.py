@@ -11,7 +11,7 @@ Services:
 from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
 
 # Re-export input types from domain.ports for convenience
-from bioetl.domain.ports.metadata_coordinator import (
+from bioetl.domain.ports import (
     BronzeMetadataInput,
     GoldMetadataInput,
     SilverMetadataInput,

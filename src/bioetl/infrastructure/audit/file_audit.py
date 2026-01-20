@@ -20,7 +20,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
+from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.serialization import deserialize_from_json, serialize_to_json
 
 if TYPE_CHECKING:
