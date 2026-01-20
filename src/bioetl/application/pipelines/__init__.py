@@ -9,10 +9,10 @@ Main Components:
 - Provider-specific transformers: Implement Bronze→Silver transformation logic
 
 Usage:
-    # Recommended approach - use GenericPipeline via factory
-    from bioetl.composition.factories.pipeline_factories import get_factory
-    factory = get_factory("chembl_activity")
-    runner = factory.create_runner(...)
+    # From interfaces/CLI layer - use factory for pipeline instantiation:
+    # >>> from bioetl.composition.factories.pipeline_factories import get_factory
+    # >>> factory = get_factory("chembl_activity")
+    # >>> runner = factory.create_runner(...)
 
     # Direct instantiation (for testing)
     from bioetl.application.pipelines.generic import GenericPipeline
