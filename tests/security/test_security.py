@@ -326,6 +326,7 @@ class TestPIIHandling:
     # These are API identifiers required by external services
     KNOWN_TECHNICAL_EMAIL_FILES = frozenset(
         {
+            "_base.py",  # NCBI API tool identification (default_email in Settings)
             "config.py",  # NCBI API tool identification (default_email)
             "pubmed_client.py",  # NCBI API tool identification
             "pipeline_config.py",  # NCBI API source config
