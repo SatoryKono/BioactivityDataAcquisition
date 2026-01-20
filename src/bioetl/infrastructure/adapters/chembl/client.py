@@ -252,119 +252,6 @@ class ChemblAdapter(BaseHttpAdapter):
             # Fix: increment by actual records fetched to handle dynamic limits correctly
             offset += len(records)
 
-    async def _fetch_single_record(
-        self,
-        entity_type: str,
-        record_id: str,
-    ) -> dict[str, Any] | None:
-        """Fetch a single record by ID using path-based URL.
-
-        This is used as fallback when batch __in filter returns 500.
-        ChEMBL API supports /entity/{id} format for single record fetches.
-
-        Args:
-            entity_type: Entity type (e.g., 'document', 'activity')
-            record_id: ChEMBL ID of the record (e.g., 'CHEMBL1121421')
-
-        Returns:
-            Record dict or None if not found/error
-        """
-        import asyncio
-
-        url = f"{self._mapper.get_resource_url(entity_type)}/{record_id}"
-        try:
-            with self._adapter_metrics.measure_request(f"/{entity_type}/{record_id}"):
-                response = await self.http_client.get(url, params={"format": "json"})
-            data = response.json()
-            # Single record response doesn't have plural wrapper
-            return data if isinstance(data, dict) else None
-        except Exception as e:
-            self.logger.warning(
-                "single_record_fetch_failed",
-                entity_type=entity_type,
-                record_id=record_id,
-                error=str(e),
-            )
-            # Add delay before next request to avoid overwhelming the API
-            await asyncio.sleep(1.0)
-            return None
-
-    async def _fetch_with_filter_fallback(
-        self,
-        entity_type: str,
-        id_batch: list[str],
-        filter_field: str,
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Fallback: fetch records one by one when batch filter fails.
-
-        Used when ChEMBL API returns 500 for __in filter queries (rate limiting).
-        This is slower but more resilient to API instability.
-        """
-        import asyncio
-
-        self.logger.info(
-            "chembl_fallback_mode",
-            entity_type=entity_type,
-            batch_size=len(id_batch),
-            message="Switching to individual record fetching due to API instability",
-        )
-
-        for record_id in id_batch:
-            record = await self._fetch_single_record(entity_type, record_id)
-            if record:
-                yield record
-            # Small delay between requests to be nice to the API
-            await asyncio.sleep(0.5)
-
-    def _is_server_500_error(self, e: Exception) -> bool:
-        """Check if exception indicates a 500 server error.
-
-        Checks multiple sources since errors can be wrapped differently:
-        1. Direct status_code attribute (ExternalServiceError)
-        2. RetryExhaustedError.last_error (original httpx error)
-        3. __cause__ chain (exception chaining)
-        4. Error message fallback (contains '500')
-
-        Args:
-            e: The exception to check
-
-        Returns:
-            True if this is a 500 server error
-        """
-        import httpx
-
-        from bioetl.domain.exceptions import RetryExhaustedError
-
-        # 1. Check direct status_code (ExternalServiceError, ServiceUnavailableError)
-        if hasattr(e, "status_code") and e.status_code == 500:
-            return True
-
-        # 2. Check RetryExhaustedError.last_error
-        if isinstance(e, RetryExhaustedError) and e.last_error:
-            if isinstance(e.last_error, httpx.HTTPStatusError):
-                return e.last_error.response.status_code == 500
-            # Check if last_error has status_code
-            if hasattr(e.last_error, "status_code"):
-                return getattr(e.last_error, "status_code", None) == 500
-
-        # 3. Check __cause__ chain
-        cause = e.__cause__
-        while cause:
-            if isinstance(cause, httpx.HTTPStatusError):
-                return cause.response.status_code == 500
-            if hasattr(cause, "status_code") and cause.status_code == 500:
-                return True
-            if isinstance(cause, RetryExhaustedError) and cause.last_error:
-                if isinstance(cause.last_error, httpx.HTTPStatusError):
-                    return cause.last_error.response.status_code == 500
-            cause = getattr(cause, "__cause__", None)
-
-        # 4. Fallback: check error message for '500' pattern
-        error_msg = str(e)
-        return "500" in error_msg and (
-            "Server error" in error_msg or "Internal Server Error" in error_msg
-        )
-
     async def _fetch_with_filter(
         self,
         entity_type: str,
@@ -390,27 +277,9 @@ class ChemblAdapter(BaseHttpAdapter):
         params = self._build_params(offset)
         params[f"{filter_field}__in"] = ",".join(id_batch)
 
-        try:
-            records, has_next = await self._fetch_page(url, params, entity_type)
-        except Exception as e:
-            # Check if this is a 500 error (ChEMBL's rate limiting response)
-            # Handle multiple error wrapping scenarios via _is_server_500_error
-            if self._is_server_500_error(e):
-                # Fallback to individual fetching
-                self.logger.warning(
-                    "chembl_batch_filter_failed",
-                    entity_type=entity_type,
-                    batch_size=len(id_batch),
-                    error=str(e),
-                    fallback="individual_fetch",
-                )
-                async for record in self._fetch_with_filter_fallback(
-                    entity_type, id_batch, filter_field
-                ):
-                    yield record
-                return
-            # Re-raise non-500 errors
-            raise
+        # Let _fetch_batch_with_reduction handle errors via batch splitting
+        # (more efficient than single-record fallback for identifying problematic IDs)
+        records, has_next = await self._fetch_page(url, params, entity_type)
 
         if not records:
             return
