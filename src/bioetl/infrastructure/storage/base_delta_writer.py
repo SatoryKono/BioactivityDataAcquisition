@@ -88,6 +88,50 @@ def _get_string_fields(schema: pa.Schema) -> set[str]:
     }
 
 
+def coerce_null_types_for_delta(table: pa.Table) -> pa.Table:
+    """Coerce Null-typed columns to concrete types for Delta Lake compatibility.
+
+    Delta Lake doesn't support Null type in any form:
+    - Top-level null columns (all values are None) -> String
+    - List columns with null item type (list<item: null>) -> List<String>
+
+    This function modifies the table schema to use concrete types while
+    preserving the null values.
+
+    Args:
+        table: PyArrow Table that may have Null-typed columns.
+
+    Returns:
+        PyArrow Table with Null columns coerced to String types.
+
+    Example:
+        >>> records = [{'id': '1', 'empty_list': [], 'null_col': None}]
+        >>> table = pa.Table.from_pylist(records)
+        >>> table.schema  # list<item: null>, null
+        >>> fixed = coerce_null_types_for_delta(table)
+        >>> fixed.schema  # list<item: string>, string
+    """
+    for field in table.schema:
+        if pa.types.is_null(field.type):
+            # Top-level null column -> String with all nulls
+            col_idx = table.schema.get_field_index(field.name)
+            null_array = pa.nulls(table.num_rows, type=pa.string())
+            table = table.set_column(
+                col_idx, pa.field(field.name, pa.string()), null_array
+            )
+        elif pa.types.is_list(field.type) and pa.types.is_null(field.type.value_type):
+            # list<null> -> list<string> with empty lists
+            col_idx = table.schema.get_field_index(field.name)
+            empty_lists = pa.array(
+                [[] for _ in range(table.num_rows)],
+                type=pa.list_(pa.string()),
+            )
+            table = table.set_column(
+                col_idx, pa.field(field.name, pa.list_(pa.string())), empty_lists
+            )
+    return table
+
+
 class BaseDeltaWriter:
     """Base class with common functionality for Delta Lake writers.
 

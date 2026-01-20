@@ -30,7 +30,10 @@ from deltalake.exceptions import TableNotFoundError
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports.audit import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import RunID
-from bioetl.infrastructure.storage.base_delta_writer import BaseDeltaWriter
+from bioetl.infrastructure.storage.base_delta_writer import (
+    BaseDeltaWriter,
+    coerce_null_types_for_delta,
+)
 
 T = TypeVar("T")
 
@@ -286,43 +289,8 @@ class GoldWriter(BaseDeltaWriter):
         # Convert to Arrow and apply canonical column order
         arrow_table = pa.Table.from_pylist(records)
 
-        # Coerce Null-typed columns to String for Delta Lake compatibility
-        # Delta Lake doesn't support Null type in any form:
-        # - Top-level null columns (all values are None)
-        # - List columns with null item type (list<item: null>)
-        # Both must be cast to concrete types (String is safe default)
-        columns_to_fix: list[tuple[str, str]] = []  # (col_name, issue_type)
-        for field in arrow_table.schema:
-            if pa.types.is_null(field.type):
-                columns_to_fix.append((field.name, "null"))
-            elif pa.types.is_list(field.type) and pa.types.is_null(
-                field.type.value_type
-            ):
-                columns_to_fix.append((field.name, "list<null>"))
-
-        if columns_to_fix:
-            self.logger.debug(
-                "Coercing null-typed columns for Delta Lake",
-                table_name=table_name,
-                columns=[(c, t) for c, t in columns_to_fix],
-            )
-            for col_name, issue_type in columns_to_fix:
-                col_idx = arrow_table.schema.get_field_index(col_name)
-                if issue_type == "null":
-                    # Top-level null column -> String with all nulls
-                    null_array = pa.nulls(arrow_table.num_rows, type=pa.string())
-                    arrow_table = arrow_table.set_column(
-                        col_idx, pa.field(col_name, pa.string()), null_array
-                    )
-                else:
-                    # list<null> -> list<string> with empty lists
-                    empty_lists = pa.array(
-                        [[] for _ in range(arrow_table.num_rows)],
-                        type=pa.list_(pa.string()),
-                    )
-                    arrow_table = arrow_table.set_column(
-                        col_idx, pa.field(col_name, pa.list_(pa.string())), empty_lists
-                    )
+        # Coerce Null-typed columns for Delta Lake compatibility
+        arrow_table = coerce_null_types_for_delta(arrow_table)
 
         # Enforce canonical column order (ADR-014, RULES.md §2.4)
         ordered_columns = canonical_column_order(list(arrow_table.column_names))
