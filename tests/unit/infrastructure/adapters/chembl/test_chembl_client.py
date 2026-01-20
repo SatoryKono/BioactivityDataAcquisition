@@ -552,154 +552,203 @@ class TestChemblAdapterRequestCollector:
 
 
 @pytest.mark.unit
-class TestChemblAdapterFallbackMode:
-    """Tests for fallback mode when batch filter fails."""
+class TestChemblAdapterBatchReduction:
+    """Tests for batch size reduction on RetryExhaustedError."""
 
     @pytest.mark.asyncio
-    async def test_fetch_single_record_success(self, mock_http_client, mock_logger):
-        """Test fetching a single record by ID."""
-        mock_response = MagicMock()
-        mock_response.json.return_value = {
-            "document_chembl_id": "CHEMBL1121421",
-            "title": "Test Document",
-        }
-        mock_http_client.get.return_value = mock_response
-
-        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
-        record = await adapter._fetch_single_record("document", "CHEMBL1121421")
-
-        assert record is not None
-        assert record["document_chembl_id"] == "CHEMBL1121421"
-        mock_http_client.get.assert_called_once()
-        # Verify URL includes record ID
-        call_args = mock_http_client.get.call_args
-        assert "CHEMBL1121421" in call_args.args[0]
-
-    @pytest.mark.asyncio
-    async def test_fetch_single_record_failure_returns_none(
+    async def test_batch_splits_on_retry_exhausted_error(
         self, mock_http_client, mock_logger
     ):
-        """Test that fetch_single_record returns None on failure."""
-        mock_http_client.get.side_effect = Exception("API Error")
+        """Test that batch is split in half when RetryExhaustedError occurs."""
+        from bioetl.domain.exceptions import RetryExhaustedError
 
-        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
-        record = await adapter._fetch_single_record("document", "CHEMBL1121421")
-
-        assert record is None
-        mock_logger.warning.assert_called()
-        call_kwargs = mock_logger.warning.call_args.kwargs
-        assert call_kwargs.get("record_id") == "CHEMBL1121421"
-
-    @pytest.mark.asyncio
-    async def test_fetch_with_filter_fallback_yields_records(
-        self, mock_http_client, mock_logger
-    ):
-        """Test that fallback mode yields records one by one."""
-
-        # Setup mock for individual record fetches
-        def mock_get(url, params=None):
-            response = MagicMock()
-            if "CHEMBL1121421" in url:
-                response.json.return_value = {
-                    "document_chembl_id": "CHEMBL1121421",
-                    "title": "Doc 1",
-                }
-            elif "CHEMBL1121493" in url:
-                response.json.return_value = {
-                    "document_chembl_id": "CHEMBL1121493",
-                    "title": "Doc 2",
-                }
-            else:
-                raise Exception("Not found")
-            return response
-
-        mock_http_client.get = AsyncMock(side_effect=mock_get)
-
-        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
-        records = []
-        async for record in adapter._fetch_with_filter_fallback(
-            "document",
-            ["CHEMBL1121421", "CHEMBL1121493"],
-            "document_chembl_id",
-        ):
-            records.append(record)
-
-        assert len(records) == 2
-        assert records[0]["document_chembl_id"] == "CHEMBL1121421"
-        assert records[1]["document_chembl_id"] == "CHEMBL1121493"
-        # Verify fallback mode was logged
-        mock_logger.info.assert_called()
-
-    @pytest.mark.asyncio
-    async def test_fetch_with_filter_falls_back_on_500(
-        self, mock_http_client, mock_logger
-    ):
-        """Test that _fetch_with_filter falls back to individual fetches on 500."""
-        import httpx
-
-        # First call (batch filter) raises 500 error
-        http_error = httpx.HTTPStatusError(
-            "Server Error",
-            request=MagicMock(),
-            response=MagicMock(status_code=500),
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            adapter_config=AdapterConfig(batch_size=4),
         )
 
-        # Track call count to return different results
         call_count = 0
 
         async def mock_get(url, params=None):
             nonlocal call_count
             call_count += 1
+            ids_param = params.get("document_chembl_id__in", "")
+            ids = ids_param.split(",") if ids_param else []
 
-            if call_count == 1:
-                # First call is batch filter - raise 500
-                raise http_error
+            # Fail on 4-ID batch, succeed on smaller batches
+            if len(ids) == 4:
+                raise RetryExhaustedError(
+                    url, attempts=3, last_error=Exception("500 Internal Server Error")
+                )
 
-            # Subsequent calls are individual fetches
-            response = MagicMock()
-            if "CHEMBL1121421" in url:
-                response.json.return_value = {
-                    "document_chembl_id": "CHEMBL1121421",
-                    "title": "Doc 1",
-                }
-            elif "CHEMBL1121493" in url:
-                response.json.return_value = {
-                    "document_chembl_id": "CHEMBL1121493",
-                    "title": "Doc 2",
-                }
-            return response
+            # Return records for smaller batches
+            mock_response = MagicMock()
+            mock_response.json.return_value = {
+                "documents": [{"document_chembl_id": id_} for id_ in ids],
+                "page_meta": {"next": None},
+            }
+            return mock_response
 
         mock_http_client.get = mock_get
 
-        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+        records = []
+        async for record in adapter.fetch_filtered(
+            entity_type="document",
+            filter_ids=["CHEMBL1", "CHEMBL2", "CHEMBL3", "CHEMBL4"],
+            filter_field="document_chembl_id",
+        ):
+            records.append(record)
+
+        # Should get all 4 records despite initial failure
+        assert len(records) == 4
+        chembl_ids = {r["document_chembl_id"] for r in records}
+        assert chembl_ids == {"CHEMBL1", "CHEMBL2", "CHEMBL3", "CHEMBL4"}
+
+        # Verify warning was logged about batch reduction
+        mock_logger.warning.assert_called()
+        warning_calls = [
+            c for c in mock_logger.warning.call_args_list
+            if c.args[0] == "batch_reduction_retry"
+        ]
+        assert len(warning_calls) > 0
+
+    @pytest.mark.asyncio
+    async def test_single_id_failure_logs_error_and_skips(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that single-ID failure is logged and skipped gracefully."""
+        from bioetl.domain.exceptions import RetryExhaustedError
+
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            adapter_config=AdapterConfig(batch_size=2),
+        )
+
+        async def mock_get(url, params=None):
+            ids_param = params.get("document_chembl_id__in", "")
+            ids = ids_param.split(",") if ids_param else []
+
+            # Always fail for CHEMBL_BAD
+            if "CHEMBL_BAD" in ids:
+                raise RetryExhaustedError(
+                    url, attempts=3, last_error=Exception("500 Internal Server Error")
+                )
+
+            # Return records for good IDs
+            mock_response = MagicMock()
+            mock_response.json.return_value = {
+                "documents": [{"document_chembl_id": id_} for id_ in ids],
+                "page_meta": {"next": None},
+            }
+            return mock_response
+
+        mock_http_client.get = mock_get
 
         records = []
-        async for record in adapter._fetch_with_filter(
-            "document",
-            ["CHEMBL1121421", "CHEMBL1121493"],
-            "document_chembl_id",
+        async for record in adapter.fetch_filtered(
+            entity_type="document",
+            filter_ids=["CHEMBL_GOOD", "CHEMBL_BAD"],
+            filter_field="document_chembl_id",
+        ):
+            records.append(record)
+
+        # Should get only the good record
+        assert len(records) == 1
+        assert records[0]["document_chembl_id"] == "CHEMBL_GOOD"
+
+        # Verify error was logged for the failed single ID
+        mock_logger.error.assert_called()
+        error_calls = [
+            c for c in mock_logger.error.call_args_list
+            if c.args[0] == "single_id_fetch_failed"
+        ]
+        assert len(error_calls) == 1
+        assert error_calls[0].kwargs["failed_id"] == "CHEMBL_BAD"
+
+    @pytest.mark.asyncio
+    async def test_successful_batch_no_reduction(self, mock_http_client, mock_logger):
+        """Test that successful batches don't trigger reduction."""
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            adapter_config=AdapterConfig(batch_size=4),
+        )
+
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "documents": [
+                {"document_chembl_id": "CHEMBL1"},
+                {"document_chembl_id": "CHEMBL2"},
+            ],
+            "page_meta": {"next": None},
+        }
+        mock_http_client.get.return_value = mock_response
+
+        records = []
+        async for record in adapter.fetch_filtered(
+            entity_type="document",
+            filter_ids=["CHEMBL1", "CHEMBL2"],
+            filter_field="document_chembl_id",
         ):
             records.append(record)
 
         assert len(records) == 2
-        # Verify fallback warning was logged
-        mock_logger.warning.assert_called()
-        warning_call = mock_logger.warning.call_args
-        assert warning_call.args[0] == "chembl_batch_filter_failed"
+
+        # Verify no batch reduction warning was logged
+        warning_calls = [
+            c for c in mock_logger.warning.call_args_list
+            if c.args and c.args[0] == "batch_reduction_retry"
+        ]
+        assert len(warning_calls) == 0
 
     @pytest.mark.asyncio
-    async def test_fetch_with_filter_reraises_non_500_errors(
-        self, mock_http_client, mock_logger
-    ):
-        """Test that non-500 errors are re-raised, not triggering fallback."""
-        mock_http_client.get.side_effect = Exception("Connection Error")
+    async def test_recursive_batch_reduction(self, mock_http_client, mock_logger):
+        """Test recursive batch reduction when multiple levels fail."""
+        from bioetl.domain.exceptions import RetryExhaustedError
 
-        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            adapter_config=AdapterConfig(batch_size=4),
+        )
 
-        with pytest.raises(ExternalServiceError):
-            async for _ in adapter._fetch_with_filter(
-                "document",
-                ["CHEMBL1121421"],
-                "document_chembl_id",
-            ):
-                pass
+        async def mock_get(url, params=None):
+            ids_param = params.get("document_chembl_id__in", "")
+            ids = ids_param.split(",") if ids_param else []
+
+            # Fail on batches of size 2 or more
+            if len(ids) >= 2:
+                raise RetryExhaustedError(
+                    url, attempts=3, last_error=Exception("500 Internal Server Error")
+                )
+
+            # Succeed only on single-ID requests
+            mock_response = MagicMock()
+            mock_response.json.return_value = {
+                "documents": [{"document_chembl_id": id_} for id_ in ids],
+                "page_meta": {"next": None},
+            }
+            return mock_response
+
+        mock_http_client.get = mock_get
+
+        records = []
+        async for record in adapter.fetch_filtered(
+            entity_type="document",
+            filter_ids=["CHEMBL1", "CHEMBL2", "CHEMBL3", "CHEMBL4"],
+            filter_field="document_chembl_id",
+        ):
+            records.append(record)
+
+        # Should get all 4 records through recursive single-ID fetches
+        assert len(records) == 4
+
+        # Verify multiple batch_reduction_retry warnings were logged
+        warning_calls = [
+            c for c in mock_logger.warning.call_args_list
+            if c.args and c.args[0] == "batch_reduction_retry"
+        ]
+        # Should have warnings for: 4->2+2, then 2->1+1 twice
+        assert len(warning_calls) >= 3
