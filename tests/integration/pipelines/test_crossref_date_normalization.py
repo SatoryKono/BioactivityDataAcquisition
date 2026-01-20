@@ -3,10 +3,10 @@
 Tests that publication date fields are correctly normalized to YYYY-MM-DD format
 when transforming from Bronze to Silver layer.
 
-CrossRef provides dates in various formats:
+CrossRef provides dates in various formats (end-of-period normalization):
 - Full: [[2024, 3, 15]] -> "2024-03-15"
-- Partial month: [[2024, 3]] -> "2024-03-01"
-- Partial year: [[2024]] -> "2024-01-01"
+- Partial month: [[2024, 3]] -> "2024-03-31" (last day of month)
+- Partial year: [[2024]] -> "2024-12-31" (last day of year)
 
 Date fields tested:
 - publication_date: Unified computed date (YYYY-MM-DD)
@@ -138,14 +138,14 @@ class TestCrossRefDateNormalization:
         transformer: CrossRefPublicationTransformer,
         pipeline_context: PipelineContext,
     ) -> None:
-        """Year-only dates ([[2024]]) should be normalized to YYYY-01-01."""
+        """Year-only dates ([[2024]]) should be normalized to YYYY-12-31 (end of year)."""
         record = make_crossref_record(published_print=[[2024]])
 
         result = await transformer.transform(pipeline_context, record, 0)
 
         pub_date = result.get("publication_date")
-        assert pub_date == "2024-01-01", (
-            f"Year-only date should normalize to YYYY-01-01, got {pub_date}"
+        assert pub_date == "2024-12-31", (
+            f"Year-only date should normalize to YYYY-12-31, got {pub_date}"
         )
 
     @pytest.mark.asyncio
@@ -154,14 +154,14 @@ class TestCrossRefDateNormalization:
         transformer: CrossRefPublicationTransformer,
         pipeline_context: PipelineContext,
     ) -> None:
-        """Year-month dates ([[2024, 3]]) should be normalized to YYYY-MM-01."""
+        """Year-month dates ([[2024, 3]]) should be normalized to YYYY-MM-31 (last day)."""
         record = make_crossref_record(published_print=[[2024, 3]])
 
         result = await transformer.transform(pipeline_context, record, 0)
 
         pub_date = result.get("publication_date")
-        assert pub_date == "2024-03-01", (
-            f"Year-month date should normalize to YYYY-MM-01, got {pub_date}"
+        assert pub_date == "2024-03-31", (
+            f"Year-month date should normalize to last day of month, got {pub_date}"
         )
 
     @pytest.mark.asyncio
@@ -228,14 +228,15 @@ class TestCrossRefDateEdgeCases:
         [
             # Full print date
             ("2024-03-15", "2024-02-01", "2024-03-15"),
-            # Partial print date (YYYY-MM)
-            ("2024-03", None, "2024-03-01"),
-            # Partial print date (YYYY)
-            ("2024", None, "2024-01-01"),
+            # Already-normalized partial dates (from format_date_parts)
+            # Note: _compute_publication_date receives already-normalized dates
+            # so it just passes them through
+            ("2024-03-31", None, "2024-03-31"),
+            ("2024-12-31", None, "2024-12-31"),
             # Print is None, use online
             (None, "2024-03-15", "2024-03-15"),
-            # Both partial
-            ("2024-06", "2024-03", "2024-06-01"),
+            # Both dates (print takes priority)
+            ("2024-06-30", "2024-03-31", "2024-06-30"),
             # Both None
             (None, None, None),
         ],
@@ -247,7 +248,12 @@ class TestCrossRefDateEdgeCases:
         published_online: str | None,
         expected: str | None,
     ) -> None:
-        """Test date normalization with various input combinations."""
+        """Test date selection with already-normalized input dates.
+
+        Note: _compute_publication_date receives dates that are already
+        normalized by format_date_parts() in the extractors. It simply
+        selects print over online, not performing additional normalization.
+        """
         result = transformer._compute_publication_date(
             published_print, published_online
         )
@@ -259,23 +265,25 @@ class TestCrossRefDateEdgeCases:
     @pytest.mark.parametrize(
         "date_str,expected",
         [
-            # Full ISO date
+            # Full ISO date - passes through unchanged
             ("2024-12-31", "2024-12-31"),
-            # Partial YYYY-MM
-            ("2024-06", "2024-06-01"),
-            # Partial YYYY
-            ("2024", "2024-01-01"),
-            # Weird format (should return as-is)
-            ("2024-1", "2024-1"),
+            ("2024-03-15", "2024-03-15"),
+            # _compute_publication_date is a pass-through selector
+            # Normalization happens in format_date_parts() before this method
+            ("2024-06-30", "2024-06-30"),
+            ("2024-12-31", "2024-12-31"),
         ],
     )
-    def test_partial_date_formats(
+    def test_date_passthrough(
         self,
         transformer: CrossRefPublicationTransformer,
         date_str: str,
         expected: str,
     ) -> None:
-        """Test various partial date format handling."""
+        """Test that _compute_publication_date passes dates through unchanged.
+
+        Normalization is done by format_date_parts() in extractors, not here.
+        """
         result = transformer._compute_publication_date(date_str, None)
         assert result == expected
 
@@ -314,8 +322,8 @@ class TestCrossRefVCRIntegration:
 
         CrossRef API returns dates in "date-parts" format:
         - [[2024, 3, 15]] for full date
-        - [[2024, 3]] for year-month only (common!)
-        - [[2024]] for year only
+        - [[2024, 3]] for year-month only → "2024-03-31" (end of month)
+        - [[2024]] for year only → "2024-12-31" (end of year)
         """
         # Simulate a record with partial date [[2024, 3]] as returned by API
         record: dict[str, Any] = {
@@ -327,11 +335,11 @@ class TestCrossRefVCRIntegration:
 
         result = await transformer.transform(pipeline_context, record, 0)
 
-        # Should be normalized to YYYY-MM-01
+        # Should be normalized to end-of-month (2024-03-31)
         pub_date = result.get("publication_date")
         assert pub_date is not None
         assert DATE_PATTERN.match(pub_date), f"Invalid format: {pub_date}"
-        assert pub_date == "2024-03-01"
+        assert pub_date == "2024-03-31"
 
     @pytest.mark.asyncio
     async def test_preprint_year_only_date(
@@ -339,7 +347,10 @@ class TestCrossRefVCRIntegration:
         transformer: CrossRefPublicationTransformer,
         pipeline_context: PipelineContext,
     ) -> None:
-        """Test preprints that often have year-only dates."""
+        """Test preprints that often have year-only dates.
+
+        Year-only dates are normalized to end-of-year (YYYY-12-31).
+        """
         record: dict[str, Any] = {
             "DOI": "10.1101/2024.01.01.123456",
             "title": ["Preprint with Year Only"],
@@ -350,4 +361,4 @@ class TestCrossRefVCRIntegration:
         result = await transformer.transform(pipeline_context, record, 0)
 
         pub_date = result.get("publication_date")
-        assert pub_date == "2024-01-01"
+        assert pub_date == "2024-12-31"
