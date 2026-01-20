@@ -28,7 +28,7 @@ from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckProviderMixin
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports.resilience import CircuitBreakerPort
+    from bioetl.domain.ports import CircuitBreakerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
