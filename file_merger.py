@@ -28,6 +28,14 @@ Examples:
 
   # Project code merge mode (creates 5 files by architectural layers)
   python file_merger.py --merge_project_code
+
+  # Documentation merge mode (merges all docs/*.md into one file)
+  python file_merger.py --merge_documentation
+  python file_merger.py --merge_documentation -o my_docs.md
+
+  # Configs merge mode (merges all configs/*.yaml into one file)
+  python file_merger.py --merge_configs
+  python file_merger.py --merge_configs -o my_configs.md
         """,
     )
 
@@ -36,7 +44,7 @@ Examples:
         "--input-dir",
         required=False,
         type=Path,
-        help="Input directory to scan (required unless --merge_project_code is used)",
+        help="Input directory to scan (required unless special mode is used)",
     )
 
     parser.add_argument(
@@ -80,6 +88,18 @@ Examples:
         "--merge_project_code",
         action="store_true",
         help="Special mode: merge code from src/bioetl/ layers into 5 separate files (one per layer)",
+    )
+
+    parser.add_argument(
+        "--merge_documentation",
+        action="store_true",
+        help="Special mode: merge all markdown files from docs/ into one file (default: documentation_merged.md)",
+    )
+
+    parser.add_argument(
+        "--merge_configs",
+        action="store_true",
+        help="Special mode: merge all YAML files from configs/ into one file (default: configs_merged.md)",
     )
 
     return parser.parse_args()
@@ -334,6 +354,146 @@ def merge_project_code_layers(
     return 0
 
 
+def merge_documentation(
+    output_file: Path, encoding: str, exclude_dirs: set[str], sort_method: str
+) -> int:
+    """Merge all documentation markdown files into a single output file.
+
+    Merges all .md files from docs/ directory into one file.
+    Default output: documentation_merged.md
+
+    Args:
+        output_file: Output file path.
+        encoding: File encoding.
+        exclude_dirs: Set of directory names to exclude.
+        sort_method: File sorting method.
+
+    Returns:
+        Exit code (0 for success, 1 for error).
+    """
+    # Documentation directory
+    docs_dir = Path("docs")
+
+    if not docs_dir.exists():
+        print(
+            f"Error: Documentation directory does not exist: {docs_dir}",
+            file=sys.stderr,
+        )
+        return 1
+
+    if not docs_dir.is_dir():
+        print(
+            f"Error: Documentation path is not a directory: {docs_dir}",
+            file=sys.stderr,
+        )
+        return 1
+
+    print("=" * 80)
+    print("DOCUMENTATION MERGE MODE")
+    print("=" * 80)
+    print(f"Source directory: {docs_dir}")
+    print(f"Output file: {output_file}")
+    print("=" * 80)
+
+    # Extensions for documentation
+    extensions = {"md"}
+
+    # Collect files
+    print(f"\nScanning {docs_dir} for markdown files...")
+    files = collect_files(docs_dir, extensions, exclude_dirs)
+
+    if not files:
+        print("Warning: No markdown files found in docs/", file=sys.stderr)
+        return 0
+
+    print(f"Found {len(files)} markdown file(s)")
+
+    # Sort files
+    files = sort_files(files, sort_method)
+
+    # Merge files
+    print(f"Merging files into: {output_file}")
+    files_processed, total_bytes, extension_counts = merge_files(
+        files, output_file, docs_dir, encoding
+    )
+
+    # Print statistics
+    print_statistics(files_processed, total_bytes, extension_counts)
+
+    print(f"\nSuccessfully wrote to: {output_file}")
+    return 0
+
+
+def merge_configs(
+    output_file: Path, encoding: str, exclude_dirs: set[str], sort_method: str
+) -> int:
+    """Merge all configuration YAML files into a single output file.
+
+    Merges all .yaml and .yml files from configs/ directory into one file.
+    Default output: configs_merged.md
+
+    Args:
+        output_file: Output file path.
+        encoding: File encoding.
+        exclude_dirs: Set of directory names to exclude.
+        sort_method: File sorting method.
+
+    Returns:
+        Exit code (0 for success, 1 for error).
+    """
+    # Configuration directory
+    configs_dir = Path("configs")
+
+    if not configs_dir.exists():
+        print(
+            f"Error: Configuration directory does not exist: {configs_dir}",
+            file=sys.stderr,
+        )
+        return 1
+
+    if not configs_dir.is_dir():
+        print(
+            f"Error: Configuration path is not a directory: {configs_dir}",
+            file=sys.stderr,
+        )
+        return 1
+
+    print("=" * 80)
+    print("CONFIGS MERGE MODE")
+    print("=" * 80)
+    print(f"Source directory: {configs_dir}")
+    print(f"Output file: {output_file}")
+    print("=" * 80)
+
+    # Extensions for YAML configuration files
+    extensions = {"yaml", "yml"}
+
+    # Collect files
+    print(f"\nScanning {configs_dir} for YAML files...")
+    files = collect_files(configs_dir, extensions, exclude_dirs)
+
+    if not files:
+        print("Warning: No YAML files found in configs/", file=sys.stderr)
+        return 0
+
+    print(f"Found {len(files)} YAML file(s)")
+
+    # Sort files
+    files = sort_files(files, sort_method)
+
+    # Merge files
+    print(f"Merging files into: {output_file}")
+    files_processed, total_bytes, extension_counts = merge_files(
+        files, output_file, configs_dir, encoding
+    )
+
+    # Print statistics
+    print_statistics(files_processed, total_bytes, extension_counts)
+
+    print(f"\nSuccessfully wrote to: {output_file}")
+    return 0
+
+
 def main() -> int:
     """Main entry point.
 
@@ -342,17 +502,33 @@ def main() -> int:
     """
     args = parse_arguments()
 
-    # Parse exclude dirs (used in both modes)
+    # Parse exclude dirs (used in all modes)
     exclude_dirs = {d.strip() for d in args.exclude_dirs.split(",")}
 
     # Check if project code merge mode is enabled
     if args.merge_project_code:
         return merge_project_code_layers(args.encoding, exclude_dirs, args.sort)
 
+    # Check if documentation merge mode is enabled
+    if args.merge_documentation:
+        # Set default output file if not specified
+        output_file = args.output
+        if output_file == Path("merged_output.txt"):  # User didn't specify output
+            output_file = Path("documentation_merged.md")
+        return merge_documentation(output_file, args.encoding, exclude_dirs, args.sort)
+
+    # Check if configs merge mode is enabled
+    if args.merge_configs:
+        # Set default output file if not specified
+        output_file = args.output
+        if output_file == Path("merged_output.txt"):  # User didn't specify output
+            output_file = Path("configs_merged.md")
+        return merge_configs(output_file, args.encoding, exclude_dirs, args.sort)
+
     # Standard mode - validate input directory is required
     if not args.input_dir:
         print(
-            "Error: --input-dir is required when not using --merge_project_code",
+            "Error: --input-dir is required when not using special mode",
             file=sys.stderr,
         )
         return 1
