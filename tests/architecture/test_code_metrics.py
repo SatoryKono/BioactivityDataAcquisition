@@ -230,6 +230,9 @@ class TestFunctionComplexity:
         "from_dict": 8,  # CC=6 - Dictionary parsing with type conversions
         # BatchExecutor DQ context extraction
         "get_dq_context": 13,  # CC=12 - DQ context gathering with nullable field handling
+        # Storage writer merge operations with Null/List<Null> coercion
+        "write_silver_merged": 17,  # CC=16 - Silver merge with Null type coercion
+        "write_gold_merged": 17,  # CC=16 - Gold merge with Null type coercion
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
