@@ -14,7 +14,7 @@ Documentation audit completed successfully. Key findings:
 2. **Orphaned files consolidated** to `archived/`
 3. **Structure validated** — all expected files present
 4. **No broken links** in navigation files
-5. **All versions synced** with RULES.md v5.10
+5. **All versions synced** with RULES.md v5.11
 
 ---
 
@@ -92,7 +92,7 @@ Added ADR-027 to:
 
 ### Verified ✅
 
-All active documents reference RULES.md v5.10:
+All active documents reference RULES.md v5.11:
 - `00-map.md`
 - `00-overview.md`
 - `quick-reference/rules-summary.md`
@@ -155,7 +155,7 @@ Added to `00-map.md`:
 - [x] 00-overview.md contains ADR-027
 - [x] 34 Mermaid files
 - [x] No deprecated DeltaWriter
-- [x] Parameters match RULES.md v5.10
+- [x] Parameters match RULES.md v5.11
 - [x] No broken links in navigation
 - [x] Document Status table updated
 - [x] Active documents synced with v5.10
