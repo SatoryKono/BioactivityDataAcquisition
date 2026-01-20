@@ -608,7 +608,8 @@ class TestChemblAdapterBatchReduction:
         # Verify warning was logged about batch reduction
         mock_logger.warning.assert_called()
         warning_calls = [
-            c for c in mock_logger.warning.call_args_list
+            c
+            for c in mock_logger.warning.call_args_list
             if c.args[0] == "batch_reduction_retry"
         ]
         assert len(warning_calls) > 0
@@ -661,7 +662,8 @@ class TestChemblAdapterBatchReduction:
         # Verify error was logged for the failed single ID
         mock_logger.error.assert_called()
         error_calls = [
-            c for c in mock_logger.error.call_args_list
+            c
+            for c in mock_logger.error.call_args_list
             if c.args[0] == "single_id_fetch_failed"
         ]
         assert len(error_calls) == 1
@@ -698,7 +700,8 @@ class TestChemblAdapterBatchReduction:
 
         # Verify no batch reduction warning was logged
         warning_calls = [
-            c for c in mock_logger.warning.call_args_list
+            c
+            for c in mock_logger.warning.call_args_list
             if c.args and c.args[0] == "batch_reduction_retry"
         ]
         assert len(warning_calls) == 0
@@ -747,7 +750,8 @@ class TestChemblAdapterBatchReduction:
 
         # Verify multiple batch_reduction_retry warnings were logged
         warning_calls = [
-            c for c in mock_logger.warning.call_args_list
+            c
+            for c in mock_logger.warning.call_args_list
             if c.args and c.args[0] == "batch_reduction_retry"
         ]
         # Should have warnings for: 4->2+2, then 2->1+1 twice

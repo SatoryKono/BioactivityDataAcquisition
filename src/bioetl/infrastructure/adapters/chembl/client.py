@@ -361,7 +361,9 @@ class ChemblAdapter(BaseHttpAdapter):
 
         # 4. Fallback: check error message for '500' pattern
         error_msg = str(e)
-        return "500" in error_msg and ("Server error" in error_msg or "Internal Server Error" in error_msg)
+        return "500" in error_msg and (
+            "Server error" in error_msg or "Internal Server Error" in error_msg
+        )
 
     async def _fetch_with_filter(
         self,
