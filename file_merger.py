@@ -22,17 +22,21 @@ def parse_arguments() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
+  # Standard mode
   python file_merger.py -i ./src -o combined.txt
   python file_merger.py -i ./docs -e md -o docs_combined.md --sort by_extension
+
+  # Project code merge mode (creates 5 files by architectural layers)
+  python file_merger.py --merge_project_code
         """,
     )
 
     parser.add_argument(
         "-i",
         "--input-dir",
-        required=True,
+        required=False,
         type=Path,
-        help="Input directory to scan (required)",
+        help="Input directory to scan (required unless --merge_project_code is used)",
     )
 
     parser.add_argument(
@@ -70,6 +74,12 @@ Examples:
         choices=["alphabetical", "by_extension", "none"],
         default="alphabetical",
         help="File sorting method (default: alphabetical)",
+    )
+
+    parser.add_argument(
+        "--merge_project_code",
+        action="store_true",
+        help="Special mode: merge code from src/bioetl/ layers into 5 separate files (one per layer)",
     )
 
     return parser.parse_args()
@@ -229,6 +239,101 @@ def print_statistics(
     print("=" * 80)
 
 
+def merge_project_code_layers(
+    encoding: str, exclude_dirs: set[str], sort_method: str
+) -> int:
+    """Merge project code by architectural layers.
+
+    Creates 5 output files, one for each layer:
+    - interfaces_merged.md
+    - infrastructure_merged.md
+    - domain_merged.md
+    - composition_merged.md
+    - application_merged.md
+
+    Args:
+        encoding: File encoding.
+        exclude_dirs: Set of directory names to exclude.
+        sort_method: File sorting method.
+
+    Returns:
+        Exit code (0 for success, 1 for error).
+    """
+    # Define project layers
+    layers = ["interfaces", "infrastructure", "domain", "composition", "application"]
+
+    # Base directory for project code
+    base_dir = Path("src/bioetl")
+
+    if not base_dir.exists():
+        print(
+            f"Error: Project directory does not exist: {base_dir}",
+            file=sys.stderr,
+        )
+        return 1
+
+    print("=" * 80)
+    print("PROJECT CODE MERGE MODE")
+    print("=" * 80)
+    print(f"Base directory: {base_dir}")
+    print(f"Layers: {', '.join(layers)}")
+    print(f"Output files: {{layer}}_merged.md")
+    print("=" * 80)
+
+    # Extensions for Python code
+    extensions = {"py"}
+
+    # Process each layer
+    total_files = 0
+    total_size = 0
+
+    for layer in layers:
+        layer_dir = base_dir / layer
+
+        if not layer_dir.exists():
+            print(f"\nWarning: Layer directory not found: {layer_dir}", file=sys.stderr)
+            continue
+
+        print(f"\nProcessing layer: {layer}")
+
+        # Collect files for this layer
+        files = collect_files(layer_dir, extensions, exclude_dirs)
+
+        if not files:
+            print(f"  No Python files found in {layer_dir}")
+            continue
+
+        print(f"  Found {len(files)} file(s)")
+
+        # Sort files
+        files = sort_files(files, sort_method)
+
+        # Create output file for this layer
+        output_file = Path(f"{layer}_merged.md")
+
+        # Merge files
+        files_processed, layer_size, extension_counts = merge_files(
+            files, output_file, layer_dir, encoding
+        )
+
+        total_files += files_processed
+        total_size += layer_size
+
+        print(f"  Wrote {files_processed} file(s) to {output_file}")
+        print(f"  Size: {format_bytes(layer_size)}")
+
+    # Print overall statistics
+    print("\n" + "=" * 80)
+    print("OVERALL STATISTICS")
+    print("=" * 80)
+    print(f"Total files processed: {total_files}")
+    print(f"Total size: {format_bytes(total_size)}")
+    print(f"Output files created: {len(layers)}")
+    print("=" * 80)
+
+    return 0
+
+
 def main() -> int:
     """Main entry point.
 
@@ -237,7 +342,21 @@ def main() -> int:
     """
     args = parse_arguments()
 
-    # Validate input directory
+    # Parse exclude dirs (used in both modes)
+    exclude_dirs = {d.strip() for d in args.exclude_dirs.split(",")}
+
+    # Check if project code merge mode is enabled
+    if args.merge_project_code:
+        return merge_project_code_layers(args.encoding, exclude_dirs, args.sort)
+
+    # Standard mode - validate input directory is required
+    if not args.input_dir:
+        print(
+            "Error: --input-dir is required when not using --merge_project_code",
+            file=sys.stderr,
+        )
+        return 1
+
     if not args.input_dir.exists():
         print(
             f"Error: Input directory does not exist: {args.input_dir}",
@@ -252,9 +371,8 @@ def main() -> int:
         )
         return 1
 
-    # Parse extensions and exclude dirs
+    # Parse extensions
     extensions = {ext.strip().lstrip(".") for ext in args.extensions.split(",")}
-    exclude_dirs = {d.strip() for d in args.exclude_dirs.split(",")}
 
     # Collect files
     print(f"Scanning directory: {args.input_dir}")
