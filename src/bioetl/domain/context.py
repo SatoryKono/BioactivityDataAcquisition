@@ -16,9 +16,6 @@ from typing import Any
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import RunID, RunType
 
-# Backward compatibility alias
-BoundLogger = LoggerPort
-
 
 def _now_utc() -> datetime:
     """Factory function for default started_at timestamp."""
