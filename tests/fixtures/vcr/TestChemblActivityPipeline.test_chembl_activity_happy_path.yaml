@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - BioETL/0.1.0 (contact@example.com)
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/activity.json?limit=1000&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity?limit=1000&offset=0&format=json
   response:
     body:
       string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
@@ -17186,7 +17186,7 @@ interactions:
         "Human alphaherpesvirus 2", "target_pref_name": "Human alphaherpesvirus 2",
         "target_tax_id": "10310", "text_value": null, "toid": null, "type": "Activity",
         "units": null, "uo_units": null, "upper_value": null, "value": null}], "page_meta":
-        {"limit": 1000, "next": "/chembl/api/data/activity.json?limit=1000&offset=1000",
+        {"limit": 1000, "next": "/chembl/api/data/activity?limit=1000&offset=1000",
         "offset": 0, "previous": null, "total_count": 24267312}}'
     headers:
       Cache-Control:
@@ -17228,7 +17228,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/status.json
+    uri: https://www.ebi.ac.uk/chembl/api/data/status
   response:
     body:
       string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
@@ -17268,7 +17268,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/activity.json?limit=10&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity?limit=10&offset=0&format=json
   response:
     body:
       string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
@@ -17447,7 +17447,7 @@ interactions:
         "Peroxisomal acyl-coenzyme A oxidase 1", "target_tax_id": "10116", "text_value":
         null, "toid": null, "type": "IC50", "units": "nM", "uo_units": "UO_0000065",
         "upper_value": null, "value": "180.0"}], "page_meta": {"limit": 10, "next":
-        "/chembl/api/data/activity.json?limit=10&offset=10", "offset": 0, "previous":
+        "/chembl/api/data/activity?limit=10&offset=10", "offset": 0, "previous":
         null, "total_count": 24267312}}'
     headers:
       Cache-Control:

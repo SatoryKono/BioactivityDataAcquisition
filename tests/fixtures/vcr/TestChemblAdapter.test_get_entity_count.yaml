@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - BioETL/0.1.0 (contact@example.com)
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/molecule.json?limit=1&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/molecule?limit=1&format=json
   response:
     body:
       string: '{"molecules": [{"atc_classifications": [], "availability_type": -1,
@@ -51,7 +51,7 @@ interactions:
         -1, "structure_type": "MOL", "therapeutic_flag": false, "topical": false,
         "usan_stem": null, "usan_stem_definition": null, "usan_substem": null, "usan_year":
         null, "veterinary": -1, "withdrawn_flag": false}], "page_meta": {"limit":
-        1, "next": "/chembl/api/data/molecule.json?limit=1&offset=1", "offset": 0,
+        1, "next": "/chembl/api/data/molecule?limit=1&offset=1", "offset": 0,
         "previous": null, "total_count": 2878135}}'
     headers:
       Cache-Control:
