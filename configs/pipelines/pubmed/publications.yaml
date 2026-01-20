@@ -30,6 +30,15 @@ source:
 #   3. configs/dq/entities/pubmed/publication.yaml (entity-specific)
 dq_config_file: ../../dq/entities/pubmed/publication.yaml
 
+# -----------------------------------------------------------------------------
+# Filter Configuration (ADR-028)
+# -----------------------------------------------------------------------------
+# Filter rules are loaded from hierarchical config files:
+#   1. configs/filter/_defaults.yaml (global defaults)
+#   2. configs/filter/providers/pubmed.yaml (provider-specific)
+#   3. configs/filter/entities/pubmed/publications.yaml (entity-specific)
+filter_config_file: ../../filter/entities/pubmed/publications.yaml
+
 # Entity-specific gold filters
 gold_filters:
   required_fields:

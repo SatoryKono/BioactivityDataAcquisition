@@ -1,0 +1,32 @@
+# configs/filter/entities/chembl/compound_record.yaml
+# =============================================================================
+# ChEMBL Compound Record Filter Configuration
+# =============================================================================
+# Entity-specific filter rules for compound records linking molecules to documents.
+# Reference: ADR-028 (Filter Rules Externalization)
+
+version: "1.0.0"
+provider: chembl
+entity: compound_record
+
+# -----------------------------------------------------------------------------
+# Input Filter
+# -----------------------------------------------------------------------------
+# Filter by molecule_chembl_id from molecule CSV
+# NOTE: ChEMBL API doesn't support filtering by record_id directly
+input_filter:
+  enabled: true
+  source_path: "data/input/molecule.csv"
+  column_name: "molecule_chembl_id"
+  filter_field: "molecule_chembl_id"
+  batch_size: 20
+
+# -----------------------------------------------------------------------------
+# Gold Filters
+# -----------------------------------------------------------------------------
+# Criteria for valid compound records
+gold_filters:
+  # Required fields - must have both molecule and document references
+  required_fields:
+    - molecule_chembl_id
+    - document_chembl_id

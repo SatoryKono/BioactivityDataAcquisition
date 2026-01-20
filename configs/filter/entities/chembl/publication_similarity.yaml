@@ -1,0 +1,35 @@
+# configs/filter/entities/chembl/publication_similarity.yaml
+# =============================================================================
+# ChEMBL Publication Similarity Filter Configuration
+# =============================================================================
+# Entity-specific filter rules for document similarity data.
+# Reference: ADR-028 (Filter Rules Externalization)
+
+version: "1.0.0"
+provider: chembl
+entity: publication_similarity
+
+# -----------------------------------------------------------------------------
+# Input Filter
+# -----------------------------------------------------------------------------
+# No input filtering - process all similarity records
+input_filter:
+  enabled: false
+
+# -----------------------------------------------------------------------------
+# Gold Filters
+# -----------------------------------------------------------------------------
+# Criteria for significant similarities
+gold_filters:
+  # Numeric range filters
+  ranges:
+    # Filter to significant similarities only
+    max_tani:
+      min: 0.5
+      include_min: true
+
+  # Required fields
+  required_fields:
+    - sim_id
+    - doc_1
+    - doc_2

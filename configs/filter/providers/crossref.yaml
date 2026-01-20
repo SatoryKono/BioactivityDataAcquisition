@@ -1,0 +1,23 @@
+# configs/filter/providers/crossref.yaml
+# =============================================================================
+# CrossRef Provider Filter Configuration
+# =============================================================================
+# Provider-level defaults for CrossRef entities.
+# Reference: ADR-028 (Filter Rules Externalization)
+
+version: "1.0.0"
+provider: crossref
+
+# -----------------------------------------------------------------------------
+# Input Filter Defaults
+# -----------------------------------------------------------------------------
+# CrossRef Polite pool - conservative batch size
+input_filter:
+  batch_size: 50
+
+# -----------------------------------------------------------------------------
+# Gold Filter Defaults
+# -----------------------------------------------------------------------------
+gold_filters:
+  required_fields: []
+  columns: {}

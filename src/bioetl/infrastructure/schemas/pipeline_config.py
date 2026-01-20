@@ -12,7 +12,7 @@ boundary between infrastructure (YAML parsing) and domain (business logic).
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import (
     AliasChoices,
@@ -705,6 +705,22 @@ class PipelineYamlConfig(BaseModel):
         serialization_alias="dq_rules",
     )
     circuit_breaker: CircuitBreakerConfig = Field(default_factory=CircuitBreakerConfig)
+
+    # Filter Configuration (ADR-028)
+    # - filter_config_file: Reference to external filter config file (hierarchical)
+    # - filter_rules: Inline filter overrides (used as overrides if file present)
+    # - input_filter/gold_filters: Legacy inline fields (backward compatibility)
+    filter_config_file: str | None = Field(
+        default=None,
+        description="Path to filter config file relative to pipeline config. "
+        "When set, filter config is loaded from the hierarchical filter system. "
+        "Example: ../../filter/entities/chembl/activity.yaml",
+    )
+    filter_rules: dict[str, Any] | None = Field(
+        default=None,
+        description="Inline filter overrides. Applied on top of filter_config_file. "
+        "Format: {input_filter: {...}, gold_filters: {...}}",
+    )
 
     primary_keys: list[str] = Field(min_length=1)
     silver_table: str = Field(min_length=1)

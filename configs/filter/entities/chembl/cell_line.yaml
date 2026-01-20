@@ -1,0 +1,30 @@
+# configs/filter/entities/chembl/cell_line.yaml
+# =============================================================================
+# ChEMBL Cell Line Filter Configuration
+# =============================================================================
+# Entity-specific filter rules for cell line data.
+# Reference: ADR-028 (Filter Rules Externalization)
+
+version: "1.0.0"
+provider: chembl
+entity: cell_line
+
+# -----------------------------------------------------------------------------
+# Input Filter
+# -----------------------------------------------------------------------------
+# Filter cell lines by cell_chembl_id from CSV
+input_filter:
+  enabled: true
+  source_path: "data/input/cell.csv"
+  column_name: "cell_chembl_id"
+  filter_field: "cell_chembl_id"
+  batch_size: 20
+
+# -----------------------------------------------------------------------------
+# Gold Filters
+# -----------------------------------------------------------------------------
+# Criteria for valid cell lines
+gold_filters:
+  # Required fields
+  required_fields:
+    - cell_name

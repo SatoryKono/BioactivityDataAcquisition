@@ -30,6 +30,11 @@ from bioetl.infrastructure.schemas.composite_config import (
     SeedSchema,
 )
 from bioetl.infrastructure.schemas.dq_config import DQConfigFile, ThresholdsConfig
+from bioetl.infrastructure.schemas.filter_config import (
+    FilterConfigFile,
+    GoldFiltersFileConfig,
+    InputFilterFileConfig,
+)
 
 __all__ = [
     "CompositeConfigFileSchema",
@@ -39,6 +44,9 @@ __all__ = [
     "DQOverrideSchema",
     "EnricherSchema",
     "ExecutionSchema",
+    "FilterConfigFile",
+    "GoldFiltersFileConfig",
+    "InputFilterFileConfig",
     "LineageSchema",
     "MergeOutputSchema",
     "MergeSchema",

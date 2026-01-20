@@ -1,0 +1,52 @@
+# configs/filter/entities/chembl/activity.yaml
+# =============================================================================
+# ChEMBL Activity Filter Configuration
+# =============================================================================
+# Entity-specific filter rules for biological activity data.
+# Reference: ADR-028 (Filter Rules Externalization)
+
+version: "1.0.0"
+provider: chembl
+entity: activity
+
+# -----------------------------------------------------------------------------
+# Input Filter
+# -----------------------------------------------------------------------------
+# Filter activities by activity_id from CSV
+input_filter:
+  enabled: true
+  source_path: "data/input/activity.csv"
+  column_name: "activity_id"
+  filter_field: "activity_id"
+  batch_size: 20
+
+# -----------------------------------------------------------------------------
+# Gold Filters
+# -----------------------------------------------------------------------------
+# Strict criteria for high-quality activity data
+gold_filters:
+  # Column value filters - inclusion lists
+  columns:
+    # Only IC50 and Ki measurements
+    standard_type: [IC50, Ki]
+    # Only nanoMolar units for consistency
+    standard_units: [nM]
+    # Only exact values (no inequalities)
+    standard_relation: ["="]
+    # Binding (B) and Functional (F) assays only
+    assay_type: [B, F]
+    # Exclude potential duplicates
+    potential_duplicate: ["0"]
+
+  # Numeric range filters
+  ranges:
+    standard_value:
+      min: 0
+      include_min: false  # Exclude exactly 0 (invalid)
+
+  # Required fields - must be non-null
+  required_fields:
+    - standard_type
+    - standard_value
+    - standard_units
+    - target_chembl_id
