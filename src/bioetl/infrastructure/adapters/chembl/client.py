@@ -174,6 +174,51 @@ class ChemblAdapter(BaseHttpAdapter):
             if ids
         }
 
+    def _is_http_500_error(self, e: Exception) -> bool:
+        """Check if exception represents an HTTP 500 error.
+
+        Handles multiple error wrapping scenarios:
+        1. Direct HTTPStatusError with status_code
+        2. Exception with __cause__ being HTTPStatusError
+        3. RetryExhaustedError with last_error containing the original error
+        4. Error message containing "500 Internal Server Error" as fallback
+
+        Args:
+            e: The exception to check
+
+        Returns:
+            True if this represents an HTTP 500 error
+        """
+        import httpx
+
+        def check_http_status_error(err: BaseException | None) -> bool:
+            """Check if error is HTTPStatusError with status 500."""
+            if err is None:
+                return False
+            if isinstance(err, httpx.HTTPStatusError):
+                return err.response.status_code == 500
+            return False
+
+        # Check direct __cause__
+        if check_http_status_error(e.__cause__):
+            return True
+
+        # Check if this is RetryExhaustedError with last_error
+        last_error = getattr(e, "last_error", None)
+        if last_error is not None:
+            if check_http_status_error(last_error):
+                return True
+            # Also check last_error's __cause__ for nested wrapping
+            if check_http_status_error(getattr(last_error, "__cause__", None)):
+                return True
+
+        # Check direct status_code attribute
+        if hasattr(e, "status_code") and getattr(e, "status_code", 0) == 500:
+            return True
+
+        # Fallback: check error message for "500 Internal Server Error"
+        return "500 Internal Server Error" in str(e)
+
     def _is_duplicate_record(
         self,
         record: dict[str, Any],
@@ -328,8 +373,6 @@ class ChemblAdapter(BaseHttpAdapter):
         If batch filter returns 500 (ChEMBL rate limiting disguised as server error),
         falls back to individual record fetching.
         """
-        import httpx
-
         url = self._mapper.get_resource_url(entity_type)
         offset = 0
         seen_ids: set[str] = set()
@@ -343,11 +386,11 @@ class ChemblAdapter(BaseHttpAdapter):
             records, has_next = await self._fetch_page(url, params, entity_type)
         except Exception as e:
             # Check if this is a 500 error (ChEMBL's rate limiting response)
-            is_server_error = False
-            if isinstance(e.__cause__, httpx.HTTPStatusError):
-                is_server_error = e.__cause__.response.status_code == 500
-            elif hasattr(e, "status_code"):
-                is_server_error = getattr(e, "status_code", 0) == 500
+            # Handle multiple error wrapping scenarios:
+            # 1. Direct HTTPStatusError with __cause__
+            # 2. RetryExhaustedError with last_error containing HTTPStatusError
+            # 3. Error message containing "500" as fallback
+            is_server_error = self._is_http_500_error(e)
 
             if is_server_error:
                 # Fallback to individual fetching
