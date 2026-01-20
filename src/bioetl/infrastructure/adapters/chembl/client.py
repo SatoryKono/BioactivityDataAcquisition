@@ -316,105 +316,63 @@ class ChemblAdapter(BaseHttpAdapter):
             # Small delay between requests to be nice to the API
             await asyncio.sleep(0.5)
 
-    def _is_server_500_error(self, e: Exception) -> bool:
-        """Check if exception indicates a 500 server error.
+    def _has_status_500(self, exc: Exception) -> bool:
+        """Check if exception has direct status_code=500 attribute."""
+        return hasattr(exc, "status_code") and exc.status_code == 500
 
-        Checks multiple sources since errors can be wrapped differently:
-        1. Direct status_code attribute (ExternalServiceError)
-        2. RetryExhaustedError.last_error (original httpx error)
-        3. __cause__ chain (exception chaining)
-        4. Error message fallback (contains '500')
-
-        Args:
-            e: The exception to check
-
-        Returns:
-            True if this is a 500 server error
-        """
+    def _check_httpx_500(self, exc: Exception) -> bool:
+        """Check if exception is httpx.HTTPStatusError with status 500."""
         import httpx
 
-        from bioetl.domain.exceptions import RetryExhaustedError
+        return isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code == 500
 
-        # 1. Check direct status_code (ExternalServiceError, ServiceUnavailableError)
-        if hasattr(e, "status_code") and e.status_code == 500:
-            return True
+    def _check_retry_error_500(self, exc: Exception) -> bool:
+        """Check if RetryExhaustedError's last_error indicates 500."""
+        if not isinstance(exc, RetryExhaustedError) or not exc.last_error:
+            return False
+        return self._check_httpx_500(exc.last_error) or self._has_status_500(
+            exc.last_error
+        )
 
-        # 2. Check RetryExhaustedError.last_error
-        if isinstance(e, RetryExhaustedError) and e.last_error:
-            if isinstance(e.last_error, httpx.HTTPStatusError):
-                return e.last_error.response.status_code == 500
-            # Check if last_error has status_code
-            if hasattr(e.last_error, "status_code"):
-                return getattr(e.last_error, "status_code", None) == 500
-
-        # 3. Check __cause__ chain
-        cause = e.__cause__
+    def _check_cause_chain_500(self, exc: Exception) -> bool:
+        """Check __cause__ chain for 500 errors."""
+        cause = exc.__cause__
         while cause:
-            if isinstance(cause, httpx.HTTPStatusError):
-                return cause.response.status_code == 500
-            if hasattr(cause, "status_code") and cause.status_code == 500:
+            if self._check_httpx_500(cause) or self._has_status_500(cause):
                 return True
-            if isinstance(cause, RetryExhaustedError) and cause.last_error:
-                if isinstance(cause.last_error, httpx.HTTPStatusError):
-                    return cause.last_error.response.status_code == 500
+            if self._check_retry_error_500(cause):
+                return True
             cause = getattr(cause, "__cause__", None)
+        return False
 
-        # 4. Fallback: check error message for '500' pattern
-        error_msg = str(e)
+    def _check_error_message_500(self, exc: Exception) -> bool:
+        """Check error message for 500 pattern."""
+        error_msg = str(exc)
         return "500" in error_msg and (
             "Server error" in error_msg or "Internal Server Error" in error_msg
         )
 
-    async def _fetch_with_filter(
-        self,
-        entity_type: str,
-        id_batch: list[str],
-        filter_field: str,
-        limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records filtered by ID batch with client-side deduplication.
+    def _is_server_500_error(self, e: Exception) -> bool:
+        """Check if exception indicates a 500 server error.
 
-        ChEMBL API pagination can return duplicate records across pages
-        when using filter parameters (e.g., assay_chembl_id__in).
-        This method deduplicates records by primary key field.
-
-        If batch filter returns 500 (ChEMBL rate limiting disguised as server error),
-        falls back to individual record fetching.
+        Checks multiple sources since errors can be wrapped differently.
         """
-        url = self._mapper.get_resource_url(entity_type)
-        offset = 0
-        seen_ids: set[str] = set()
-        pk_field = self._mapper.get_primary_key_field(entity_type)
+        return (
+            self._has_status_500(e)
+            or self._check_retry_error_500(e)
+            or self._check_cause_chain_500(e)
+            or self._check_error_message_500(e)
+        )
 
-        # First attempt: try batch filter
-        params = self._build_params(offset)
-        params[f"{filter_field}__in"] = ",".join(id_batch)
-
-        try:
-            records, has_next = await self._fetch_page(url, params, entity_type)
-        except Exception as e:
-            # Check if this is a 500 error (ChEMBL's rate limiting response)
-            # Handle multiple error wrapping scenarios via _is_server_500_error
-            if self._is_server_500_error(e):
-                # Fallback to individual fetching
-                self.logger.warning(
-                    "chembl_batch_filter_failed",
-                    entity_type=entity_type,
-                    batch_size=len(id_batch),
-                    error=str(e),
-                    fallback="individual_fetch",
-                )
-                async for record in self._fetch_with_filter_fallback(
-                    entity_type, id_batch, filter_field
-                ):
-                    yield record
-                return
-            # Re-raise non-500 errors
-            raise
-
-        if not records:
-            return
-
+    def _yield_deduplicated(
+        self,
+        records: list[dict[str, Any]],
+        seen_ids: set[str],
+        pk_field: str,
+        entity_type: str,
+        filter_field: str,
+    ) -> Iterator[dict[str, Any]]:
+        """Yield records while tracking seen IDs for deduplication."""
         for record in records:
             record_id = str(record.get(pk_field, ""))
             if record_id and record_id in seen_ids:
@@ -430,24 +388,49 @@ class ChemblAdapter(BaseHttpAdapter):
                 seen_ids.add(record_id)
             yield record
 
-        if not has_next:
-            return
+    async def _handle_filter_500_fallback(
+        self,
+        e: Exception,
+        entity_type: str,
+        id_batch: list[str],
+        filter_field: str,
+    ) -> AsyncIterator[dict[str, Any]] | None:
+        """Handle 500 error by falling back to individual fetching.
 
-        # Continue with pagination for remaining records
-        offset += len(records)
+        Returns AsyncIterator if fallback should be used, None to re-raise.
+        """
+        if not self._is_server_500_error(e):
+            return None
+        self.logger.warning(
+            "chembl_batch_filter_failed",
+            entity_type=entity_type,
+            batch_size=len(id_batch),
+            error=str(e),
+            fallback="individual_fetch",
+        )
+        return self._fetch_with_filter_fallback(entity_type, id_batch, filter_field)
 
+    async def _paginate_filter_results(
+        self,
+        url: str,
+        id_batch: list[str],
+        filter_field: str,
+        entity_type: str,
+        pk_field: str,
+        seen_ids: set[str],
+        start_offset: int,
+        limit: int | None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Continue pagination after first page."""
+        offset = start_offset
         while True:
             if limit and offset >= limit:
                 break
-
             params = self._build_params(offset)
             params[f"{filter_field}__in"] = ",".join(id_batch)
-
             try:
                 records, has_next = await self._fetch_page(url, params, entity_type)
             except Exception:
-                # If pagination fails, we've already yielded some records
-                # Log warning and return what we have
                 self.logger.warning(
                     "chembl_pagination_interrupted",
                     entity_type=entity_type,
@@ -455,28 +438,56 @@ class ChemblAdapter(BaseHttpAdapter):
                     records_yielded=len(seen_ids),
                 )
                 return
-
             if not records:
                 break
-
-            for record in records:
-                record_id = str(record.get(pk_field, ""))
-                if record_id and record_id in seen_ids:
-                    self.logger.debug(
-                        "skipping_duplicate_record",
-                        entity_type=entity_type,
-                        pk_field=pk_field,
-                        record_id=record_id,
-                        filter_field=filter_field,
-                    )
-                    continue
-                if record_id:
-                    seen_ids.add(record_id)
+            for record in self._yield_deduplicated(
+                records, seen_ids, pk_field, entity_type, filter_field
+            ):
                 yield record
-
             if not has_next:
                 break
             offset += len(records)
+
+    async def _fetch_with_filter(
+        self,
+        entity_type: str,
+        id_batch: list[str],
+        filter_field: str,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records filtered by ID batch with client-side deduplication."""
+        url = self._mapper.get_resource_url(entity_type)
+        seen_ids: set[str] = set()
+        pk_field = self._mapper.get_primary_key_field(entity_type)
+
+        params = self._build_params(0)
+        params[f"{filter_field}__in"] = ",".join(id_batch)
+
+        try:
+            records, has_next = await self._fetch_page(url, params, entity_type)
+        except Exception as e:
+            fallback = await self._handle_filter_500_fallback(
+                e, entity_type, id_batch, filter_field
+            )
+            if fallback is not None:
+                async for record in fallback:
+                    yield record
+                return
+            raise
+
+        if not records:
+            return
+
+        for record in self._yield_deduplicated(
+            records, seen_ids, pk_field, entity_type, filter_field
+        ):
+            yield record
+
+        if has_next:
+            async for record in self._paginate_filter_results(
+                url, id_batch, filter_field, entity_type, pk_field, seen_ids, len(records), limit
+            ):
+                yield record
 
     def _handle_error(self, e: Exception, context: str = "fetch") -> NoReturn:
         """Handle errors with unified classification. Translates to domain exceptions."""
@@ -508,6 +519,55 @@ class ChemblAdapter(BaseHttpAdapter):
             e.__cause__, RetryExhaustedError
         )
 
+    def _log_single_id_failure(
+        self, entity_type: str, filter_field: str, id_batch: list[str], e: Exception
+    ) -> None:
+        """Log single ID fetch failure for graceful degradation."""
+        failed_id = id_batch[0] if id_batch else "unknown"
+        self.logger.error(
+            "single_id_fetch_failed",
+            provider=self.provider_name,
+            entity_type=entity_type,
+            filter_field=filter_field,
+            failed_id=failed_id,
+            error=str(e),
+            error_class=type(e).__name__,
+        )
+
+    async def _retry_with_split_batches(
+        self,
+        entity_type: str,
+        id_batch: list[str],
+        filter_field: str,
+        limit: int | None,
+        seen_ids: set[str],
+        pk_field: str,
+        error: Exception,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Split failed batch in half and retry each part recursively."""
+        mid = len(id_batch) // 2
+        first_half, second_half = id_batch[:mid], id_batch[mid:]
+
+        self.logger.warning(
+            "batch_reduction_retry",
+            provider=self.provider_name,
+            entity_type=entity_type,
+            original_batch_size=len(id_batch),
+            first_half_size=len(first_half),
+            second_half_size=len(second_half),
+            filter_field=filter_field,
+            error=str(error),
+        )
+
+        async for record in self._fetch_batch_with_reduction(
+            entity_type, first_half, filter_field, limit, seen_ids, pk_field
+        ):
+            yield record
+        async for record in self._fetch_batch_with_reduction(
+            entity_type, second_half, filter_field, limit, seen_ids, pk_field
+        ):
+            yield record
+
     async def _fetch_batch_with_reduction(
         self,
         entity_type: str,
@@ -517,15 +577,7 @@ class ChemblAdapter(BaseHttpAdapter):
         seen_ids: set[str],
         pk_field: str,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch a batch of IDs with automatic batch size reduction on failures.
-
-        On RetryExhaustedError (e.g., 500 errors after 3 retries):
-        - If batch size > 1: split in half and retry each half recursively
-        - If batch size == 1: log warning and skip (graceful degradation)
-
-        This allows recovery when a large batch triggers server errors, by
-        narrowing down to problematic IDs and skipping only those.
-        """
+        """Fetch a batch of IDs with automatic batch size reduction on failures."""
         try:
             async for record in self._fetch_with_filter(
                 entity_type, id_batch, filter_field, limit
@@ -536,48 +588,15 @@ class ChemblAdapter(BaseHttpAdapter):
                         seen_ids.add(record_id)
                     yield record
         except (RetryExhaustedError, ExternalServiceError) as e:
-            # Only handle retry exhausted errors (direct or wrapped)
             if not self._is_retry_exhausted_error(e):
                 raise
             if len(id_batch) > 1:
-                # Split batch in half and retry each part
-                mid = len(id_batch) // 2
-                first_half = id_batch[:mid]
-                second_half = id_batch[mid:]
-
-                self.logger.warning(
-                    "batch_reduction_retry",
-                    provider=self.provider_name,
-                    entity_type=entity_type,
-                    original_batch_size=len(id_batch),
-                    first_half_size=len(first_half),
-                    second_half_size=len(second_half),
-                    filter_field=filter_field,
-                    error=str(e),
-                )
-
-                # Recursively fetch each half
-                async for record in self._fetch_batch_with_reduction(
-                    entity_type, first_half, filter_field, limit, seen_ids, pk_field
-                ):
-                    yield record
-                async for record in self._fetch_batch_with_reduction(
-                    entity_type, second_half, filter_field, limit, seen_ids, pk_field
+                async for record in self._retry_with_split_batches(
+                    entity_type, id_batch, filter_field, limit, seen_ids, pk_field, e
                 ):
                     yield record
             else:
-                # Single ID batch still failing - log and skip (graceful degradation)
-                failed_id = id_batch[0] if id_batch else "unknown"
-                self.logger.error(
-                    "single_id_fetch_failed",
-                    provider=self.provider_name,
-                    entity_type=entity_type,
-                    filter_field=filter_field,
-                    failed_id=failed_id,
-                    error=str(e),
-                    error_class=type(e).__name__,
-                )
-                # Skip this ID and continue with the rest
+                self._log_single_id_failure(entity_type, filter_field, id_batch, e)
 
     async def _fetch_filtered(
         self,
