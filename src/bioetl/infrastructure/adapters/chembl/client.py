@@ -178,51 +178,6 @@ class ChemblAdapter(BaseHttpAdapter):
             if ids
         }
 
-    def _is_http_500_error(self, e: Exception) -> bool:
-        """Check if exception represents an HTTP 500 error.
-
-        Handles multiple error wrapping scenarios:
-        1. Direct HTTPStatusError with status_code
-        2. Exception with __cause__ being HTTPStatusError
-        3. RetryExhaustedError with last_error containing the original error
-        4. Error message containing "500 Internal Server Error" as fallback
-
-        Args:
-            e: The exception to check
-
-        Returns:
-            True if this represents an HTTP 500 error
-        """
-        import httpx
-
-        def check_http_status_error(err: BaseException | None) -> bool:
-            """Check if error is HTTPStatusError with status 500."""
-            if err is None:
-                return False
-            if isinstance(err, httpx.HTTPStatusError):
-                return err.response.status_code == 500
-            return False
-
-        # Check direct __cause__
-        if check_http_status_error(e.__cause__):
-            return True
-
-        # Check if this is RetryExhaustedError with last_error
-        last_error = getattr(e, "last_error", None)
-        if last_error is not None:
-            if check_http_status_error(last_error):
-                return True
-            # Also check last_error's __cause__ for nested wrapping
-            if check_http_status_error(getattr(last_error, "__cause__", None)):
-                return True
-
-        # Check direct status_code attribute
-        if hasattr(e, "status_code") and getattr(e, "status_code", 0) == 500:
-            return True
-
-        # Fallback: check error message for "500 Internal Server Error"
-        return "500 Internal Server Error" in str(e)
-
     def _is_duplicate_record(
         self,
         record: dict[str, Any],
