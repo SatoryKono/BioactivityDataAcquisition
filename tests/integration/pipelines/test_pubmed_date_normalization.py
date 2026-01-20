@@ -187,9 +187,7 @@ class TestPubMedDateNormalization:
         pub_date = result.get("publication_date")
         # PubMed normalizes YYYY-MM to YYYY-MM-30 per _normalize_partial_date
         assert pub_date is not None
-        assert DATE_PATTERN.match(pub_date), (
-            f"Invalid date format: {pub_date}"
-        )
+        assert DATE_PATTERN.match(pub_date), f"Invalid date format: {pub_date}"
 
     @pytest.mark.asyncio
     async def test_epub_date_takes_priority(
