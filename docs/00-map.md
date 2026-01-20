@@ -18,7 +18,7 @@
 | Review a pipeline       | [templates/pipeline-review-checklist.md](templates/pipeline-review-checklist.md) |
 | Handle a prod error     | [05-operations/runbooks/index.md](05-operations/runbooks/index.md)                           |
 | Understand architecture | [02-architecture/00-overview.md](02-architecture/00-overview.md)                  |
-| Check data contracts    | [contracts/gold/activity.json](contracts/gold/activity.json)                                  |
+| Check data contracts    | [contracts/gold/activity_v1.0.json](contracts/gold/activity_v1.0.json)                        |
 
 ---
 
