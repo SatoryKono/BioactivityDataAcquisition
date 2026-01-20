@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
-from bioetl.domain.ports.health_check import HealthCheckPort, HealthCheckResult
+from bioetl.domain.ports import HealthCheckPort, HealthCheckResult
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort

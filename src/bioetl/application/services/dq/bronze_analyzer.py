@@ -20,7 +20,7 @@ from typing import Any
 
 import orjson
 
-from bioetl.domain.ports.dq_config import BronzeDQConfigPort
+from bioetl.domain.ports import BronzeDQConfigPort
 from bioetl.domain.value_objects.dq_report import (
     BronzeDQCheckType,
     BronzeDQReport,
