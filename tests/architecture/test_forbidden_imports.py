@@ -108,15 +108,33 @@ class TestPortImportFacade:
         This provides a single entry point and simplifies navigation.
         """
         # Forbidden import patterns (internal port modules)
+        # All port modules should be imported via facade: from bioetl.domain.ports import ...
         internal_port_modules = [
-            "bioetl.domain.ports.storage",
-            "bioetl.domain.ports.locking",
+            "bioetl.domain.ports.audit",
             "bioetl.domain.ports.checkpoint",
-            "bioetl.domain.ports.quarantine",
-            "bioetl.domain.ports.observability",
+            "bioetl.domain.ports.data_normalization",
             "bioetl.domain.ports.data_source",
-            "bioetl.domain.ports.validation",
+            "bioetl.domain.ports.delta_reader",
+            "bioetl.domain.ports.dq_config",
+            "bioetl.domain.ports.dq_report",
             "bioetl.domain.ports.filtering",
+            "bioetl.domain.ports.health_check",
+            "bioetl.domain.ports.idmapping",
+            "bioetl.domain.ports.locking",
+            "bioetl.domain.ports.memory",
+            "bioetl.domain.ports.metadata",
+            "bioetl.domain.ports.metadata_coordinator",
+            "bioetl.domain.ports.noop",
+            "bioetl.domain.ports.normalization",
+            "bioetl.domain.ports.observability",
+            "bioetl.domain.ports.pii",
+            "bioetl.domain.ports.quarantine",
+            "bioetl.domain.ports.resilience",
+            "bioetl.domain.ports.runner",
+            "bioetl.domain.ports.serialization",
+            "bioetl.domain.ports.shutdown",
+            "bioetl.domain.ports.storage",
+            "bioetl.domain.ports.validation",
         ]
 
         violations = []

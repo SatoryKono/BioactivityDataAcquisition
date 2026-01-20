@@ -32,7 +32,7 @@ class AdapterMetrics:
         provider: Provider name for metric labels (e.g., "chembl", "uniprot").
 
     Example:
-        >>> from bioetl.domain.ports.noop import NoOpMetrics
+        >>> from bioetl.domain.ports import NoOpMetrics
         >>> metrics = AdapterMetrics(NoOpMetrics(), "chembl")
         >>> with metrics.measure_request("/activity"):
         ...     # perform HTTP request

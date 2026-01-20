@@ -19,7 +19,7 @@ from pydantic import BaseModel
 
 from bioetl.domain.entities.pubmed import ArticleRecord
 from bioetl.domain.models.metadata import SourceMetadata
-from bioetl.domain.ports.noop import NoOpMetrics
+from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
