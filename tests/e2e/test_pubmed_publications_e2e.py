@@ -48,7 +48,8 @@ def vcr_config() -> dict[str, Any]:
     return {
         "cassette_library_dir": str(CASSETTE_DIR),
         "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
-        "match_on": ["method", "scheme", "host", "port", "path", "query"],
+        # Use query_ignore_email to ignore email parameter variations between test runs
+        "match_on": ["method", "scheme", "host", "port", "path", "query_ignore_email"],
         "decode_compressed_response": True,
     }
 

@@ -84,8 +84,8 @@ class TestFileSizeLimits:
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
         "services_factory.py": 630,  # 623 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
         # Infrastructure layer exemptions
-        "silver_writer.py": 1165,  # 1160 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage + fromisoformat timezone validation
-        "gold_writer.py": 950,  # 944 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage
+        "silver_writer.py": 1190,  # 1180 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage + Null/List<Null> coercion
+        "gold_writer.py": 975,  # 965 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage + Null/List<Null> coercion
         "bronze_writer.py": 760,  # 749 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
         "silver.py": 840,  # 833 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields)
@@ -207,6 +207,9 @@ class TestFunctionComplexity:
         "_coerce_to_int": 10,  # CC=8 - Integer coercion with multiple type checks
         # FilterableDataSourcePort batch filtering
         "fetch_filtered": 20,  # CC=18 - Batch filtering with OR-query and entity type handling
+        # Delta Lake writers with Null/List<Null> coercion
+        "write_silver_merged": 17,  # CC=16 - Silver merge with null coercion logic
+        "write_gold_merged": 17,  # CC=16 - Gold merge with null coercion logic
         "_fetch_with_filter": 25,  # CC=22 - ChEMBL pagination with deduplication and filter building
         "_is_server_500_error": 18,  # CC=16 - Error detection with multiple wrapping scenarios
         # DQ serializer domain functions
@@ -483,8 +486,8 @@ class TestClassSize:
         # Baseline exemptions for existing classes
         "StorageAdapter": 610,  # 603 lines - storage adapter with writers + BronzeWriteResult + SilverWriteResult
         "BaseTransformer": 620,  # 605 lines - Template Method with helpers (tracing + PII hashing + serialize_json_list)
-        "SilverWriter": 1100,  # 1019 lines - schema drift detection + bronze_refs + MetadataCoordinator fallback
-        "GoldWriter": 900,  # 829 lines - SCD Type 2 + metadata sidecar + MetadataCoordinator fallback
+        "SilverWriter": 1190,  # 1180 lines - schema drift detection + bronze_refs + MetadataCoordinator fallback + Null/List<Null> coercion
+        "GoldWriter": 975,  # 965 lines - SCD Type 2 + metadata sidecar + MetadataCoordinator fallback + Null/List<Null> coercion
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
         "UniProtProteinTransformer": 800,  # 772 lines - complex protein data extraction with many fields
