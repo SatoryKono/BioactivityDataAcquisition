@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.filtering.column_filter import GoldColumnFilter
+from bioetl.domain.filtering.column_filter import FilterOperator, GoldColumnFilter
 from bioetl.domain.filtering.gold_config import GoldFilterConfig
 from bioetl.domain.filtering.list_filters import (
     GoldListContainsFilter,
@@ -354,3 +354,238 @@ class TestGoldFilterConfigCombined:
         )
         # Fails range
         assert config.should_include({"name": "test", "score": -1}) is False
+
+
+@pytest.mark.unit
+class TestGoldFilterConfigInOperator:
+    """Tests for IN operator in column filters."""
+
+    @pytest.mark.parametrize(
+        ("val", "expected"),
+        [
+            ("IC50", True),
+            ("Ki", True),
+            ("XYZ", False),
+            (None, False),  # "None" not in values
+        ],
+    )
+    def test_in_operator(self, val: str | None, expected: bool) -> None:
+        """Test IN operator matches values in the allowed set."""
+        cfg = GoldFilterConfig(
+            column_filters=(
+                GoldColumnFilter(
+                    column="type",
+                    operator=FilterOperator.IN,
+                    values=frozenset(["IC50", "Ki"]),
+                ),
+            )
+        )
+        assert cfg.should_include({"type": val}) == expected
+
+
+@pytest.mark.unit
+class TestGoldFilterConfigNotInOperator:
+    """Tests for NOT_IN operator in column filters."""
+
+    @pytest.mark.parametrize(
+        ("val", "expected"),
+        [
+            ("UNKNOWN", False),
+            ("UNCHECKED", False),
+            ("PROTEIN", True),
+            ("SINGLE_PROTEIN", True),
+        ],
+    )
+    def test_not_in_operator(self, val: str, expected: bool) -> None:
+        """Test NOT_IN operator excludes values in the set."""
+        cfg = GoldFilterConfig(
+            column_filters=(
+                GoldColumnFilter(
+                    column="target_type",
+                    operator=FilterOperator.NOT_IN,
+                    values=frozenset(["UNKNOWN", "UNCHECKED"]),
+                ),
+            )
+        )
+        assert cfg.should_include({"target_type": val}) == expected
+
+
+@pytest.mark.unit
+class TestGoldFilterConfigIsNullOperator:
+    """Tests for IS_NULL operator in column filters."""
+
+    @pytest.mark.parametrize(
+        ("val", "expected"),
+        [
+            (None, True),
+            ("", True),
+            ("value", False),
+            (0, False),
+            (0.0, False),
+            (False, False),
+            ([], False),  # Empty list is not null (use IS_EMPTY)
+        ],
+    )
+    def test_is_null_operator(self, val: object, expected: bool) -> None:
+        """Test IS_NULL operator matches None or empty string."""
+        cfg = GoldFilterConfig(
+            column_filters=(
+                GoldColumnFilter(column="field", operator=FilterOperator.IS_NULL),
+            )
+        )
+        assert cfg.should_include({"field": val}) == expected
+
+
+@pytest.mark.unit
+class TestGoldFilterConfigIsNotNullOperator:
+    """Tests for IS_NOT_NULL operator in column filters."""
+
+    @pytest.mark.parametrize(
+        ("val", "expected"),
+        [
+            (None, False),
+            ("", False),
+            ("value", True),
+            (0, True),
+            (0.0, True),
+            (False, True),
+            ([], True),  # Empty list is not null
+        ],
+    )
+    def test_is_not_null_operator(self, val: object, expected: bool) -> None:
+        """Test IS_NOT_NULL operator matches non-None and non-empty-string."""
+        cfg = GoldFilterConfig(
+            column_filters=(
+                GoldColumnFilter(column="field", operator=FilterOperator.IS_NOT_NULL),
+            )
+        )
+        assert cfg.should_include({"field": val}) == expected
+
+
+@pytest.mark.unit
+class TestGoldFilterConfigIsEmptyOperator:
+    """Tests for IS_EMPTY operator in column filters."""
+
+    @pytest.mark.parametrize(
+        ("val", "expected"),
+        [
+            (None, True),
+            ("", True),
+            ("  ", True),  # Whitespace only
+            ("\t\n", True),  # Tabs and newlines
+            ([], True),
+            ({}, True),
+            (set(), True),
+            ([1, 2], False),
+            ({"a": 1}, False),
+            ({1, 2}, False),
+            ("text", False),
+            (0, False),
+            (False, False),
+        ],
+    )
+    def test_is_empty_operator(self, val: object, expected: bool) -> None:
+        """Test IS_EMPTY operator matches empty values."""
+        cfg = GoldFilterConfig(
+            column_filters=(
+                GoldColumnFilter(column="data", operator=FilterOperator.IS_EMPTY),
+            )
+        )
+        assert cfg.should_include({"data": val}) == expected
+
+
+@pytest.mark.unit
+class TestGoldFilterConfigIsNotEmptyOperator:
+    """Tests for IS_NOT_EMPTY operator in column filters."""
+
+    @pytest.mark.parametrize(
+        ("val", "expected"),
+        [
+            (None, False),
+            ("", False),
+            ("  ", False),  # Whitespace only
+            ([], False),
+            ({}, False),
+            ([1, 2], True),
+            ({"a": 1}, True),
+            ("text", True),
+            (0, True),  # 0 is not empty
+            (False, True),  # False is not empty
+        ],
+    )
+    def test_is_not_empty_operator(self, val: object, expected: bool) -> None:
+        """Test IS_NOT_EMPTY operator matches non-empty values."""
+        cfg = GoldFilterConfig(
+            column_filters=(
+                GoldColumnFilter(column="smiles", operator=FilterOperator.IS_NOT_EMPTY),
+            )
+        )
+        assert cfg.should_include({"smiles": val}) == expected
+
+
+@pytest.mark.unit
+class TestGoldFilterConfigMixedOperators:
+    """Tests for combining multiple operators."""
+
+    def test_multiple_column_filters_with_different_operators(self) -> None:
+        """Test combining IN, NOT_IN, and NULL operators."""
+        cfg = GoldFilterConfig(
+            column_filters=(
+                GoldColumnFilter(
+                    column="type",
+                    operator=FilterOperator.IN,
+                    values=frozenset(["IC50", "Ki"]),
+                ),
+                GoldColumnFilter(
+                    column="status",
+                    operator=FilterOperator.NOT_IN,
+                    values=frozenset(["DEPRECATED"]),
+                ),
+                GoldColumnFilter(
+                    column="value",
+                    operator=FilterOperator.IS_NOT_NULL,
+                ),
+            )
+        )
+        # All pass
+        assert (
+            cfg.should_include({"type": "IC50", "status": "ACTIVE", "value": 5.0})
+            is True
+        )
+        # Fails IN
+        assert (
+            cfg.should_include({"type": "EC50", "status": "ACTIVE", "value": 5.0})
+            is False
+        )
+        # Fails NOT_IN
+        assert (
+            cfg.should_include({"type": "IC50", "status": "DEPRECATED", "value": 5.0})
+            is False
+        )
+        # Fails IS_NOT_NULL
+        assert (
+            cfg.should_include({"type": "IC50", "status": "ACTIVE", "value": None})
+            is False
+        )
+
+    def test_operator_with_missing_column(self) -> None:
+        """Test operator behavior when column is missing from record."""
+        cfg = GoldFilterConfig(
+            column_filters=(
+                GoldColumnFilter(column="missing", operator=FilterOperator.IS_NULL),
+            )
+        )
+        # Missing column returns None from dict.get()
+        assert cfg.should_include({}) is True
+
+    def test_is_not_empty_with_missing_column(self) -> None:
+        """Test IS_NOT_EMPTY fails when column is missing."""
+        cfg = GoldFilterConfig(
+            column_filters=(
+                GoldColumnFilter(
+                    column="missing", operator=FilterOperator.IS_NOT_EMPTY
+                ),
+            )
+        )
+        # Missing column returns None, which is empty
+        assert cfg.should_include({}) is False
