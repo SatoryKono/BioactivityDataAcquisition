@@ -413,7 +413,10 @@ class TestDataNormalizationConfig:
 
 
 class TestHashPii:
-    """Tests for _hash_pii helper method."""
+    """Tests for _hash_pii helper method.
+
+    Per RULES.md §5.4: sha256(lowercase(value) + SALT)
+    """
 
     def test_hash_consistency(self) -> None:
         """Test that same input produces same hash."""
@@ -435,3 +438,41 @@ class TestHashPii:
         hash1 = service._hash_pii("John Doe", "salt")
         hash2 = service._hash_pii("Jane Smith", "salt")
         assert hash1 != hash2
+
+    def test_case_normalization(self) -> None:
+        """Test that hashing is case-insensitive per RULES.md §5.4."""
+        service = DefaultDataNormalizationService()
+        hash_lower = service._hash_pii("john doe", "salt")
+        hash_upper = service._hash_pii("JOHN DOE", "salt")
+        hash_mixed = service._hash_pii("John Doe", "salt")
+        assert hash_lower == hash_upper == hash_mixed
+
+    def test_whitespace_normalization(self) -> None:
+        """Test that leading/trailing whitespace is stripped before hashing."""
+        service = DefaultDataNormalizationService()
+        hash_clean = service._hash_pii("john doe", "salt")
+        hash_padded = service._hash_pii("  john doe  ", "salt")
+        hash_tabs = service._hash_pii("\tjohn doe\t", "salt")
+        assert hash_clean == hash_padded == hash_tabs
+
+    def test_hash_formula_matches_rules_md(self) -> None:
+        """Test hash formula matches RULES.md §5.4: sha256(lowercase(value) + SALT)."""
+        import hashlib
+
+        service = DefaultDataNormalizationService()
+        value = "  John Doe  "
+        salt = "test_salt"
+
+        # Expected: sha256(lowercase(stripped(value)) + salt)
+        normalized = value.strip().lower()
+        expected_hash = hashlib.sha256(f"{normalized}{salt}".encode()).hexdigest()
+
+        actual_hash = service._hash_pii(value, salt)
+        assert actual_hash == expected_hash
+
+    def test_empty_salt_allowed(self) -> None:
+        """Test that empty salt works (edge case)."""
+        service = DefaultDataNormalizationService()
+        # Should not raise
+        result = service._hash_pii("test", "")
+        assert len(result) == 64  # SHA-256 hex digest length
