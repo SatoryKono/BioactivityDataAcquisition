@@ -126,6 +126,87 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             )
             raise ValueError(f"XML parse error: {e}") from e
 
+    def _extract_medline_metadata(
+        self,
+        medline: ET.Element | None,
+        pubmed_data: ET.Element | None,
+    ) -> dict[str, Any]:
+        """Extract MEDLINE-specific metadata."""
+        medline_info = medline.find("MedlineJournalInfo") if medline else None
+        citation_subsets = (
+            [get_text(cs) for cs in medline.findall("CitationSubset")]
+            if medline
+            else []
+        )
+
+        pub_status = self._extract_publication_status(pubmed_data)
+
+        return {
+            "nlm_unique_id": (
+                get_text(medline_info.find("NlmUniqueID"))
+                if medline_info is not None
+                else None
+            ),
+            "citation_subset": (
+                ",".join(cs for cs in citation_subsets if cs)
+                if citation_subsets
+                else None
+            ),
+            "publication_status": pub_status,
+            "country": (
+                get_text(medline.find(".//MedlineJournalInfo/Country"))
+                if medline
+                else None
+            ),
+        }
+
+    def _extract_publication_status(self, pubmed_data: ET.Element | None) -> str | None:
+        """Extract publication status from PubmedData."""
+        if pubmed_data is None:
+            return None
+        pub_status_elem = pubmed_data.find("PublicationStatus")
+        return get_text(pub_status_elem) if pub_status_elem is not None else None
+
+    def _extract_counts(
+        self,
+        article: ET.Element,
+        pubmed_data: ET.Element | None,
+    ) -> dict[str, int]:
+        """Extract grant and reference counts."""
+        grant_list = article.find(".//GrantList")
+        grant_count = len(grant_list.findall("Grant")) if grant_list is not None else 0
+
+        ref_list = (
+            pubmed_data.find("ReferenceList") if pubmed_data is not None else None
+        )
+        reference_count = (
+            len(ref_list.findall(".//Reference")) if ref_list is not None else 0
+        )
+
+        return {"grant_count": grant_count, "reference_count": reference_count}
+
+    def _extract_classification_data(
+        self, article: ET.Element, medline: ET.Element | None
+    ) -> dict[str, Any]:
+        """Extract classification-related fields."""
+        publication_types = ClassificationExtractor.parse_publication_types(article)
+        keywords = ClassificationExtractor.parse_keywords(medline)
+        mesh_terms = ClassificationExtractor.parse_mesh_terms(medline)
+        chemicals = ClassificationExtractor.parse_chemicals(medline)
+
+        return {
+            "publication_types": publication_types,
+            "publication_type_list": self.serialize_json_list(publication_types),
+            "keywords": keywords,
+            "keyword_count": len(keywords) if keywords else 0,
+            "mesh_terms": mesh_terms,
+            "mesh_heading_count": len(mesh_terms) if mesh_terms else 0,
+            "chemicals": chemicals,
+            "chemical_count": len(chemicals) if chemicals else 0,
+            "gene_symbols": ClassificationExtractor.parse_gene_symbols(medline),
+            "databanks": ClassificationExtractor.parse_databanks(medline),
+        }
+
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
         """Extract all business fields from PubMed XML.
 
@@ -138,13 +219,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             Dictionary of extracted and normalized fields.
 
         """
-        # Use cached XML root from _pre_extract_validation
         root = self._cached_xml_root
         if root is None:
-            # This should not happen if _pre_extract_validation ran successfully
             return {"pmid": None}
 
-        # Validate PMID using Value Object (returns None for invalid/empty)
         raw_pmid = get_text(root.find(".//PMID"))
         pmid_vo = PubMedId.from_raw(raw_pmid)
         pmid = str(pmid_vo) if pmid_vo else None
@@ -156,51 +234,14 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         if article is None:
             return {"pmid": pmid}
 
-        journal_data = self._extract_journal_data(article)
-        date_data = self._extract_date_data(article, pubmed_data)
-
-        # Extract and hash PII fields (RULES.md §5.4)
-        # Authors stored as JSON-serialized list for unified format across providers
+        # Extract and hash authors
         raw_authors = AuthorExtractor.parse_authors(article)
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
-        # Validate DOI using Value Object (returns None for invalid/empty)
+        # Validate DOI
         raw_doi = IdentifierExtractor.extract_doi(root)
         doi_vo = DOI.from_raw(raw_doi)
         normalized_doi = str(doi_vo) if doi_vo else None
-
-        # Extract classification data
-        publication_types = ClassificationExtractor.parse_publication_types(article)
-        keywords = ClassificationExtractor.parse_keywords(medline)
-        mesh_terms = ClassificationExtractor.parse_mesh_terms(medline)
-        chemicals = ClassificationExtractor.parse_chemicals(medline)
-
-        # Extract MEDLINE metadata
-        medline_info = medline.find("MedlineJournalInfo") if medline else None
-        citation_subsets = (
-            [get_text(cs) for cs in medline.findall("CitationSubset")]
-            if medline
-            else []
-        )
-
-        # Extract publication status from PubmedData
-        pub_status = None
-        if pubmed_data is not None:
-            pub_status_elem = pubmed_data.find("PublicationStatus")
-            if pub_status_elem is not None:
-                pub_status = get_text(pub_status_elem)
-
-        # Extract grant count
-        grant_list = article.find(".//GrantList")
-        grant_count = len(grant_list.findall("Grant")) if grant_list is not None else 0
-
-        # Extract reference count
-        ref_list = (
-            pubmed_data.find("ReferenceList") if pubmed_data is not None else None
-        )
-        reference_count = (
-            len(ref_list.findall(".//Reference")) if ref_list is not None else 0
-        )
 
         return {
             "pmid": pmid,
@@ -213,52 +254,21 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "abstract_structured": AbstractExtractor.is_abstract_structured(article),
             "authors": self.serialize_json_list(hashed_authors),
             "author_count": len(hashed_authors),
-            **journal_data,
-            **date_data,
-            # Classification
-            "publication_types": publication_types,
-            "publication_type_list": self.serialize_json_list(publication_types),
-            "keywords": keywords,
-            "keyword_count": len(keywords) if keywords else 0,
-            "mesh_terms": mesh_terms,
-            "mesh_heading_count": len(mesh_terms) if mesh_terms else 0,
-            "chemicals": chemicals,
-            "chemical_count": len(chemicals) if chemicals else 0,
-            "gene_symbols": ClassificationExtractor.parse_gene_symbols(medline),
-            "databanks": ClassificationExtractor.parse_databanks(medline),
+            **self._extract_journal_data(article),
+            **self._extract_date_data(article, pubmed_data),
+            **self._extract_classification_data(article, medline),
+            **self._extract_medline_metadata(medline, pubmed_data),
+            **self._extract_counts(article, pubmed_data),
             "language": get_text(article.find(".//Language")),
-            "country": (
-                get_text(medline.find(".//MedlineJournalInfo/Country"))
-                if medline
-                else None
-            ),
             "pmc_id": normalize_pmc_id(IdentifierExtractor.extract_pmc_id(root)),
-            # MEDLINE metadata
-            "nlm_unique_id": (
-                get_text(medline_info.find("NlmUniqueID"))
-                if medline_info is not None
-                else None
-            ),
-            "citation_subset": (
-                ",".join(cs for cs in citation_subsets if cs)
-                if citation_subsets
-                else None
-            ),
-            "publication_status": pub_status,
-            # Counts
-            "grant_count": grant_count,
-            "reference_count": reference_count,
-            # === Unified publication fields (cross-provider consistency) ===
             "source": "pubmed",
-            "doc_type": "PUBLICATION",  # PubMed primarily contains publications
-            "citation_count": None,  # Not available from PubMed
-            "is_oa": None,  # Not available from PubMed
-            # Lookup metadata (from adapter fallback handler)
+            "doc_type": "PUBLICATION",
+            "citation_count": None,
+            "is_oa": None,
             "_lookup_method": cast("dict[str, Any]", record).get(
                 "_lookup_method", "pmid"
             ),
             "_original_id": cast("dict[str, Any]", record).get("_original_id"),
-            # DQ flags (default: no warnings or errors)
             "_dq_warn": False,
             "_dq_error": False,
         }
@@ -413,9 +423,18 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         month_lower = month_text.strip().lower()[:3]
         month_map = {
-            "jan": 1, "feb": 2, "mar": 3, "apr": 4,
-            "may": 5, "jun": 6, "jul": 7, "aug": 8,
-            "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+            "jan": 1,
+            "feb": 2,
+            "mar": 3,
+            "apr": 4,
+            "may": 5,
+            "jun": 6,
+            "jul": 7,
+            "aug": 8,
+            "sep": 9,
+            "oct": 10,
+            "nov": 11,
+            "dec": 12,
         }
         result = month_map.get(month_lower)
         if result is None and month_text.isdigit():
@@ -453,6 +472,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "received_date": DateExtractor.extract_history_date(history, "received"),
             "revised_date": DateExtractor.extract_history_date(history, "revised"),
             "epub_date": epub_date,
-            "date_completed": date_completed,
-            "date_revised": date_revised_medline,
+            "date_completed": None,  # Not easily accessible from Article element
+            "date_revised": None,  # Not easily accessible from Article element
         }
