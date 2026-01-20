@@ -30,11 +30,13 @@ from bioetl.infrastructure.config._base import (
     load_source_config,
     yaml_config_to_domain,
 )
+from bioetl.infrastructure.config.base_config_loader import BaseConfigLoader
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.config.pipeline_config_loader import ConfigLoader
 
 __all__ = [
+    "BaseConfigLoader",
     "ConfigLoader",
     "DQConfigLoader",
     "FilterConfigLoader",
