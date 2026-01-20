@@ -226,7 +226,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     pages: Series[str] = pa.Field(nullable=True)  # Legacy: medline_pgn format
     first_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     last_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
-    authors: Series[object] = pa.Field(nullable=True)  # list[str]
+    authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     pub_date: Series[str] = pa.Field(nullable=True)
     publication_date: Series[str] = pa.Field(
         nullable=True, str_matches=DATE_REGEX
@@ -763,7 +763,7 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
-    authors: Series[object] = pa.Field(nullable=True)  # list[str]
+    authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     journal: Series[str] = pa.Field(nullable=True)
     issn: Series[object] = pa.Field(nullable=True)  # list[str]
     publisher: Series[str] = pa.Field(nullable=True)
@@ -832,7 +832,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     pmc_id: Series[str] = pa.Field(nullable=True)
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
-    authors: Series[object] = pa.Field(nullable=True)  # list[str]
+    authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     concepts: Series[object] = pa.Field(nullable=True)  # list[str]
 
     # Journal info
