@@ -37,7 +37,8 @@ jobs:
         run: |
           echo "Checking overall code complexity (max CC = 10, grade B)..."
           # Exempt complex files with justified high complexity:
-          # ChEMBL: _fetch_with_filter with batch filtering logic (CC=11), _fetch_batch_with_reduction (CC=12)
+          # ChEMBL: _fetch_with_filter with entity filtering and pagination (CC=17)
+          # ChEMBL: _fetch_batch_with_reduction with batch processing fallback (CC=11)
           # OpenAlex: fetch_filtered_with_fallback with DOI→title fallback (CC=23)
           # SemanticScholar: fetch_filtered_with_fallback with DOI→ID fallback (CC=22)
           # CrossRef: fetch_batch with batch DOI resolution and fallback to individual (CC=12)
@@ -84,7 +85,7 @@ jobs:
 
           # Exempted paths (adapter files with complex fallback logic, tools scripts)
           EXEMPT_PATHS = {
-              "src/bioetl/infrastructure/adapters/chembl/",  # _fetch_with_filter (CC=11), _fetch_batch_with_reduction (CC=12)
+              "src/bioetl/infrastructure/adapters/chembl/",  # _fetch_with_filter, _fetch_batch_with_reduction (CC=17, CC=11)
               "src/bioetl/infrastructure/adapters/openalex/",
               "src/bioetl/infrastructure/adapters/semanticscholar/",
               "src/bioetl/infrastructure/adapters/crossref/",  # fetch_batch with fallback (CC=12)
