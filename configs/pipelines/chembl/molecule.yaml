@@ -89,14 +89,12 @@ sink:
     partition_by: ["molecule_type"]
     sort_by:
       columns: ["molecule_chembl_id"]
-      ascending: true
     csv_export:
       path: "data/output/silver/chembl/molecule"
   gold:
     path: "data/output/gold/chembl/molecule"
     sort_by:
       columns: ["molecule_chembl_id"]
-      ascending: true
     csv_export:
       path: "data/output/gold/chembl/molecule"
 

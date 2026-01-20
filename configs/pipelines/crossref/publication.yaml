@@ -67,17 +67,14 @@ sink:
   silver:
     path: "data/output/silver/crossref/"
     primary_key: ["doi"]
-    partition_by: []
     sort_by:
       columns: ["doi"]
-      ascending: true
     csv_export:
       path: "data/output/silver/crossref/"
   gold:
     path: "data/output/gold/crossref/"
     sort_by:
       columns: ["doi"]
-      ascending: true
     csv_export:
       path: "data/output/gold/crossref/"
 
@@ -89,4 +86,3 @@ input_filter:
   filter_field: "doi"
   batch_size: 50  # Polite pool API - conservative batch size
   fallback_column: "title"  # Search by title if DOI not found (404)
-
