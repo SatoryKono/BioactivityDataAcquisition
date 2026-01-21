@@ -276,41 +276,113 @@ class TestTemplateMethodPattern:
 
 @pytest.mark.unit
 class TestSerializeJson:
-    """Tests for serialize_json static method."""
+    """Tests for serialize_json static method.
 
-    def test_returns_none_for_none(self) -> None:
+    Tests the refactored serialize_json() that returns native Python types
+    for single-element lists instead of converting to string.
+    """
+
+    # === None и пустые коллекции ===
+
+    def test_none_returns_none(self) -> None:
         """Test returns None for None input."""
-        result = BaseTransformer.serialize_json(None)
-        assert result is None
+        assert BaseTransformer.serialize_json(None) is None
 
-    def test_returns_none_for_empty_list(self) -> None:
+    def test_empty_list_returns_none(self) -> None:
         """Test returns None for empty list (semantic consistency)."""
-        result = BaseTransformer.serialize_json([])
-        assert result is None
+        assert BaseTransformer.serialize_json([]) is None
 
-    def test_returns_none_for_empty_dict(self) -> None:
+    def test_empty_dict_returns_none(self) -> None:
         """Test returns None for empty dict (semantic consistency)."""
-        result = BaseTransformer.serialize_json({})
+        assert BaseTransformer.serialize_json({}) is None
+
+    # === Single-element lists: unwrap to native type ===
+
+    def test_single_string_unwrapped(self) -> None:
+        """Test unwraps single-element list containing string."""
+        result = BaseTransformer.serialize_json(["hello"])
+        assert result == "hello"
+        assert isinstance(result, str)
+
+    def test_single_int_unwrapped(self) -> None:
+        """Test unwraps single-element list containing int."""
+        result = BaseTransformer.serialize_json([42])
+        assert result == 42
+        assert isinstance(result, int)
+
+    def test_single_float_unwrapped(self) -> None:
+        """Test unwraps single-element list containing float."""
+        result = BaseTransformer.serialize_json([3.14])
+        assert result == 3.14
+        assert isinstance(result, float)
+
+    def test_single_bool_true_unwrapped(self) -> None:
+        """Test unwraps single-element list containing True."""
+        result = BaseTransformer.serialize_json([True])
+        assert result is True
+        assert isinstance(result, bool)
+
+    def test_single_bool_false_unwrapped(self) -> None:
+        """Test unwraps single-element list containing False."""
+        result = BaseTransformer.serialize_json([False])
+        assert result is False
+        assert isinstance(result, bool)
+
+    def test_single_none_unwrapped(self) -> None:
+        """Test unwraps single-element list containing None."""
+        result = BaseTransformer.serialize_json([None])
         assert result is None
 
-    def test_unwraps_single_element_list_with_dict(self) -> None:
-        """Test unwraps single-element list containing dict."""
-        data = [{"type": "Ki", "value": 5.0}]
-        result = BaseTransformer.serialize_json(data)
-        # Single dict in list is unwrapped
-        assert result == '{"type":"Ki","value":5.0}'
+    def test_single_dict_serialized_to_json(self) -> None:
+        """Test unwraps single-element list containing dict to JSON string."""
+        result = BaseTransformer.serialize_json([{"a": 1, "b": 2}])
+        assert result == '{"a":1,"b":2}'
+        assert isinstance(result, str)
 
-    def test_unwraps_single_element_list_with_string(self) -> None:
-        """Test unwraps single-element list containing string."""
-        data = ["PROTEIN"]
-        result = BaseTransformer.serialize_json(data)
-        assert result == "PROTEIN"
+    def test_single_empty_dict_returns_none(self) -> None:
+        """Test unwraps single-element list containing empty dict to None."""
+        result = BaseTransformer.serialize_json([{}])
+        assert result is None
 
-    def test_keeps_multi_element_list(self) -> None:
-        """Test keeps multi-element list as array."""
+    # === Multi-element lists: JSON serialize ===
+
+    def test_multi_element_list_ints(self) -> None:
+        """Test multi-element list of ints is JSON serialized."""
+        result = BaseTransformer.serialize_json([1, 2, 3])
+        assert result == "[1,2,3]"
+
+    def test_multi_element_list_strings(self) -> None:
+        """Test multi-element list of strings is JSON serialized."""
+        result = BaseTransformer.serialize_json(["a", "b"])
+        assert result == '["a","b"]'
+
+    def test_multi_element_list_mixed(self) -> None:
+        """Test multi-element list of mixed types is JSON serialized."""
+        result = BaseTransformer.serialize_json([1, "two", True, None])
+        assert result == '[1,"two",true,null]'
+
+    def test_multi_element_list_dicts(self) -> None:
+        """Test multi-element list of dicts is JSON serialized."""
+        result = BaseTransformer.serialize_json([{"a": 1}, {"b": 2}])
+        assert result == '[{"a":1},{"b":2}]'
+
+    def test_keeps_multi_element_list_as_array(self) -> None:
+        """Test keeps multi-element list as JSON array."""
         data = [{"type": "Ki"}, {"type": "IC50"}]
         result = BaseTransformer.serialize_json(data)
         assert result == '[{"type":"Ki"},{"type":"IC50"}]'
+
+    # === Dicts: JSON serialize ===
+
+    def test_dict_serialized_sorted_keys(self) -> None:
+        """Test dict is serialized with sorted keys."""
+        result = BaseTransformer.serialize_json({"z": 1, "a": 2})
+        assert result == '{"a":2,"z":1}'
+
+    def test_nested_dict(self) -> None:
+        """Test nested dict is serialized correctly."""
+        result = BaseTransformer.serialize_json({"outer": {"inner": 1}})
+        assert result == '{"outer":{"inner":1}}'
 
     def test_serializes_non_empty_dict(self) -> None:
         """Test serializes non-empty dict to JSON string."""
@@ -325,16 +397,6 @@ class TestSerializeJson:
         assert "Ацетаминофен" in result
         assert "C₈H₉NO₂" in result
 
-    def test_converts_string_to_string(self) -> None:
-        """Test returns string as-is for string input."""
-        result = BaseTransformer.serialize_json("test string")
-        assert result == "test string"
-
-    def test_converts_number_to_string(self) -> None:
-        """Test converts number to string."""
-        result = BaseTransformer.serialize_json(42)
-        assert result == "42"
-
     def test_serializes_nested_structure(self) -> None:
         """Test serializes nested structures correctly."""
         data = {
@@ -347,6 +409,68 @@ class TestSerializeJson:
         assert '"properties"' in result
         assert '"DOSE"' in result
         assert '"TIME"' in result
+
+    # === Non-collection types: return as-is ===
+
+    def test_string_passthrough(self) -> None:
+        """Test string input is returned as-is."""
+        result = BaseTransformer.serialize_json("hello")
+        assert result == "hello"
+
+    def test_int_passthrough(self) -> None:
+        """Test int input is returned as-is (not converted to string)."""
+        result = BaseTransformer.serialize_json(42)
+        assert result == 42
+        assert isinstance(result, int)
+
+    def test_float_passthrough(self) -> None:
+        """Test float input is returned as-is."""
+        result = BaseTransformer.serialize_json(3.14)
+        assert result == 3.14
+        assert isinstance(result, float)
+
+    def test_bool_passthrough(self) -> None:
+        """Test bool input is returned as-is."""
+        result = BaseTransformer.serialize_json(True)
+        assert result is True
+        assert isinstance(result, bool)
+
+    # === Edge cases ===
+
+    def test_nested_single_element_list(self) -> None:
+        """Test single-element list containing list is JSON-serialized."""
+        result = BaseTransformer.serialize_json([[1, 2, 3]])
+        assert result == "[1,2,3]"
+        assert isinstance(result, str)
+
+    def test_nested_single_element_empty_list_returns_none(self) -> None:
+        """Test single-element list containing empty list returns None."""
+        result = BaseTransformer.serialize_json([[]])
+        assert result is None
+
+    def test_zero_is_valid_int(self) -> None:
+        """Test zero is unwrapped as valid int."""
+        result = BaseTransformer.serialize_json([0])
+        assert result == 0
+        assert isinstance(result, int)
+
+    def test_empty_string_is_valid(self) -> None:
+        """Test empty string is unwrapped as valid string."""
+        result = BaseTransformer.serialize_json([""])
+        assert result == ""
+        assert isinstance(result, str)
+
+    def test_negative_number_unwrapped(self) -> None:
+        """Test negative number is unwrapped correctly."""
+        result = BaseTransformer.serialize_json([-42])
+        assert result == -42
+        assert isinstance(result, int)
+
+    def test_float_zero_unwrapped(self) -> None:
+        """Test float zero is unwrapped correctly."""
+        result = BaseTransformer.serialize_json([0.0])
+        assert result == 0.0
+        assert isinstance(result, float)
 
 
 @pytest.mark.unit
