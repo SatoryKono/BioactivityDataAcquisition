@@ -48,12 +48,14 @@ sink:
     partition_by: ["class_level"]
     sort_by:
       columns: ["protein_class_id"]
+      ascending: true
     csv_export:
       path: "data/output/silver/chembl/protein_class"
   gold:
     path: "data/output/gold/chembl/protein_class"
     sort_by:
       columns: ["class_level", "sort_order", "protein_class_id"]
+      ascending: true
     csv_export:
       path: "data/output/gold/chembl/protein_class"
 

@@ -69,12 +69,14 @@ sink:
     partition_by: []  # No partitioning - small dataset
     sort_by:
       columns: ["target_chembl_id"]
+      ascending: true
     csv_export:
       path: "data/output/silver/uniprot/idmapping"
   gold:
     path: "data/output/gold/uniprot/idmapping"
     sort_by:
       columns: ["target_chembl_id"]
+      ascending: true
     csv_export:
       path: "data/output/gold/uniprot/idmapping"
 
