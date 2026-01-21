@@ -1,10 +1,10 @@
 {
-  "batch_id": "eef810b8-37b2-42b2-8e17-315894dd9b46",
+  "batch_id": "4d5a8f90-3458-41cc-b902-dee9c2e5b07f",
   "checks": {
     "file_integrity": {
-      "checksum_blake2": "d467e67a0ec8b38caa131ce6eb78bdd3e9b44e7edecc2fac24237c3cfe5b4e4a256199495638ff32d3c291b524b1d0a7968cac597eb865506ca5ab8400a84335",
+      "checksum_blake2": "38907d24c425d02458549577a5f41ac01e4fd90fc2c574ec359daab2c7bc925c6118bec849daf6c904d3e0264fdcee0b59d2c9bce217f2a8c0dddae0158cbd05",
       "compression_ratio": null,
-      "size_bytes": 15686,
+      "size_bytes": 691409,
       "status": "pass"
     },
     "record_count": {
@@ -14,7 +14,7 @@
       "quarantine_rate": null,
       "quarantined_records": null,
       "status": "pass",
-      "value": 10
+      "value": 1000
     },
     "schema_snapshot": {
       "fields_detected": 19,
@@ -46,7 +46,7 @@
   },
   "layer": "bronze",
   "pipeline": "chembl_publication",
-  "run_id": "cf1cd60a-d1b1-4025-8f91-c00fa3c12191",
+  "run_id": "1fd8f1b8-6926-44ce-b264-cf543bc56b9a",
   "source_file": "",
   "summary": {
     "failed": 0,
@@ -55,5 +55,5 @@
     "total_checks": 3,
     "warnings": 0
   },
-  "timestamp": "2026-01-21T09:40:17.193172+00:00"
+  "timestamp": "2026-01-21T10:49:09.310061+00:00"
 }
