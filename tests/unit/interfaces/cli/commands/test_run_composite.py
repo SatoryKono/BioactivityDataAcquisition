@@ -409,7 +409,8 @@ class TestRunCompositeCommand:
         """Test --no-health-server option."""
         with patch("asyncio.run", return_value=(True, None)):
             result = cli_runner.invoke(
-                cli, ["run-composite", "--composite", "publication", "--no-health-server"]
+                cli,
+                ["run-composite", "--composite", "publication", "--no-health-server"],
             )
 
         assert result.exit_code == ExitCode.OK.value
@@ -419,7 +420,13 @@ class TestRunCompositeCommand:
         with patch("asyncio.run", return_value=(True, None)):
             result = cli_runner.invoke(
                 cli,
-                ["run-composite", "--composite", "publication", "--health-port", "9090"],
+                [
+                    "run-composite",
+                    "--composite",
+                    "publication",
+                    "--health-port",
+                    "9090",
+                ],
             )
 
         assert result.exit_code == ExitCode.OK.value
@@ -521,9 +528,7 @@ class TestHealthServerInfoOutput:
                 "bioetl.interfaces.cli.commands.run_composite.echo_health_server_info"
             ) as mock_echo,
         ):
-            cli_runner.invoke(
-                cli, ["run-composite", "--composite", "publication"]
-            )
+            cli_runner.invoke(cli, ["run-composite", "--composite", "publication"])
 
         # Verify echo_health_server_info was called
         mock_echo.assert_called_once()
