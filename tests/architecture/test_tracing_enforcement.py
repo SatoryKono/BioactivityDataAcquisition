@@ -329,7 +329,8 @@ class TestTracingConfiguration:
 
     def test_tracing_in_settings(self):
         """Settings should have tracing configuration options."""
-        settings_path = Path("src/bioetl/infrastructure/config.py")
+        # RuntimeConfig is in infrastructure/config/_base.py
+        settings_path = Path("src/bioetl/infrastructure/config/_base.py")
 
         if not settings_path.exists():
             pytest.skip("Settings not found")
@@ -338,7 +339,7 @@ class TestTracingConfiguration:
 
         # Should have tracing-related settings or at least mention it
         # May be optional (via OTEL env vars)
-        any(
+        has_tracing_config = any(
             pattern in source
             for pattern in [
                 "tracing",
@@ -349,9 +350,8 @@ class TestTracingConfiguration:
             ]
         )
 
-        # Tracing config might be via environment variables only
-        # which is valid, so just verify settings exist
-        assert Path(settings_path).exists()
+        # Verify tracing configuration is present
+        assert has_tracing_config, "Settings should contain tracing configuration"
 
 
 class TestMandatorySpans:
