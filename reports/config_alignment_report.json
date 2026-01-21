@@ -1,0 +1,37 @@
+{
+  "date": "2026-01-21T10:12:00.017209",
+  "total_configs": 20,
+  "configs_with_issues": 0,
+  "total_issues": 0,
+  "issues_by_file": {},
+  "intentional_differences": [
+    {
+      "file": "chembl/publication.yaml",
+      "reason": "pipeline_name 'chembl_publication' differs from entity_type 'document' - API endpoint mapping"
+    },
+    {
+      "file": "chembl/publication_similarity.yaml",
+      "reason": "pipeline_name 'chembl_publication_similarity' differs from entity_type 'document_similarity' - API endpoint mapping"
+    },
+    {
+      "file": "chembl/publication_term.yaml",
+      "reason": "pipeline_name 'chembl_publication_term' differs from entity_type 'document_term' - API endpoint mapping"
+    },
+    {
+      "file": "composite/publication.yaml",
+      "reason": "Composite pipeline (ADR-026) uses different schema structure"
+    },
+    {
+      "file": "crossref/publication.yaml",
+      "reason": "pipeline_name 'crossref_publication' differs from entity_type 'work' - API endpoint mapping"
+    },
+    {
+      "file": "pubmed/publications.yaml",
+      "reason": "pipeline_name 'pubmed_publications' differs from entity_type 'publication' - API endpoint mapping"
+    }
+  ],
+  "changes_made": [
+    "Fixed typo in chembl/target.yaml: 'data/output/2gold/chembl/target' -> 'data/output/gold/chembl/target'",
+    "Added 'ascending: true' to sort_by in 30 silver/gold layer configurations across 15 files (ADR-014 compliance)"
+  ]
+}
