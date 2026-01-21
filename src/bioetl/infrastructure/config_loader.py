@@ -1,6 +1,29 @@
 """Configuration loading utilities.
 
 Handles loading and merging of YAML configuration files.
+
+Convention-based path resolution (ADR-029):
+    When a pipeline config does not explicitly specify certain paths/references,
+    they are auto-computed from provider and entity_type:
+
+    File References:
+        - source_file: ../../sources/{provider}.yaml
+        - dq_config_file: ../../dq/entities/{provider}/{entity_type}.yaml
+        - filter_config_file: ../../filter/entities/{provider}/{entity_type}.yaml
+
+    Sink Paths:
+        - sink.bronze.path: data/output/bronze/{provider}/{entity_type}
+        - sink.silver.path: data/output/silver/{provider}/{entity_type}
+        - sink.gold.path: data/output/gold/{provider}/{entity_type}
+        - sink.silver.csv_export.path: {sink.silver.path}
+        - sink.gold.csv_export.path: {sink.gold.path}
+
+    Primary Key Propagation:
+        - sink.silver.primary_key: {primary_keys}
+        - sink.silver.sort_by.columns: {primary_keys}
+        - sink.gold.sort_by.columns: {primary_keys}
+
+    This reduces duplication between pipeline configs and filter/dq entity configs.
 """
 
 from __future__ import annotations
@@ -44,6 +67,82 @@ def _load_base_config(config_path: Path) -> dict[str, Any]:
     return {}
 
 
+def _apply_convention_defaults(config: dict[str, Any]) -> dict[str, Any]:
+    """Apply convention-based defaults for paths and references.
+
+    Auto-computes file references and sink paths from provider/entity_type
+    when not explicitly specified. This reduces config duplication.
+
+    Args:
+        config: Merged configuration dictionary.
+
+    Returns:
+        Configuration with convention-based defaults applied.
+    """
+    provider = config.get("provider")
+    entity_type = config.get("entity_type")
+    primary_keys = config.get("primary_keys", [])
+
+    if not provider or not entity_type:
+        return config
+
+    # Auto-compute file references
+    if "source_file" not in config:
+        config["source_file"] = f"../../sources/{provider}.yaml"
+
+    if "dq_config_file" not in config:
+        config["dq_config_file"] = f"../../dq/entities/{provider}/{entity_type}.yaml"
+
+    if "filter_config_file" not in config:
+        config["filter_config_file"] = (
+            f"../../filter/entities/{provider}/{entity_type}.yaml"
+        )
+
+    # Auto-compute sink paths
+    sink = config.setdefault("sink", {})
+
+    # Bronze layer
+    bronze = sink.setdefault("bronze", {})
+    if "path" not in bronze:
+        bronze["path"] = f"data/output/bronze/{provider}/{entity_type}"
+
+    # Silver layer
+    silver = sink.setdefault("silver", {})
+    if "path" not in silver:
+        silver["path"] = f"data/output/silver/{provider}/{entity_type}"
+
+    # Auto-copy primary_keys to silver.primary_key if not specified
+    if "primary_key" not in silver and primary_keys:
+        silver["primary_key"] = list(primary_keys)
+
+    # Auto-set silver.sort_by.columns from primary_keys if not specified
+    silver_sort_by = silver.setdefault("sort_by", {})
+    if "columns" not in silver_sort_by and primary_keys:
+        silver_sort_by["columns"] = list(primary_keys)
+
+    # Auto-set silver csv_export path
+    silver_csv = silver.setdefault("csv_export", {})
+    if "path" not in silver_csv:
+        silver_csv["path"] = silver["path"]
+
+    # Gold layer
+    gold = sink.setdefault("gold", {})
+    if "path" not in gold:
+        gold["path"] = f"data/output/gold/{provider}/{entity_type}"
+
+    # Auto-set gold.sort_by.columns from primary_keys if not specified
+    gold_sort_by = gold.setdefault("sort_by", {})
+    if "columns" not in gold_sort_by and primary_keys:
+        gold_sort_by["columns"] = list(primary_keys)
+
+    # Auto-set gold csv_export path
+    gold_csv = gold.setdefault("csv_export", {})
+    if "path" not in gold_csv:
+        gold_csv["path"] = gold["path"]
+
+    return config
+
+
 @lru_cache(maxsize=10)
 def load_source_config(provider: str) -> SourceYamlConfig:
     """Load source configuration from YAML file."""
@@ -62,9 +161,105 @@ def load_source_config(provider: str) -> SourceYamlConfig:
     return config
 
 
+def _load_filter_config(
+    config_path: Path, filter_config_file: str
+) -> dict[str, Any] | None:
+    """Load filter configuration from filter_config_file.
+
+    Args:
+        config_path: Path to the pipeline config file (for relative resolution).
+        filter_config_file: Relative path to filter config file.
+
+    Returns:
+        Loaded filter config dict or None if file doesn't exist.
+    """
+    filter_path = config_path.parent / filter_config_file
+    if not filter_path.exists():
+        return None
+
+    with open(filter_path, encoding="utf-8") as f:
+        return yaml.safe_load(f) or {}
+
+
+def _merge_filter_config(
+    config: dict[str, Any],
+    filter_config: dict[str, Any],
+    explicit_entity_config: dict[str, Any],
+) -> None:
+    """Merge filter config (input_filter, gold_filters) into pipeline config.
+
+    Merge priority (highest to lowest):
+    1. Explicit entity config (from pipeline YAML file)
+    2. Filter config (from filter entity file)
+    3. Base defaults (from _base.yaml)
+
+    This allows minimal pipeline configs that inherit from filter configs
+    while still allowing explicit overrides when needed.
+
+    Args:
+        config: Pipeline config dict (modified in place). Contains merged
+            defaults + entity config.
+        filter_config: Filter config dict from filter entity file.
+        explicit_entity_config: Original entity config dict (before merging
+            with defaults). Used to determine what was explicitly set.
+    """
+    # Merge input_filter
+    if "input_filter" in filter_config:
+        # Start with filter config as base
+        merged_input_filter = filter_config["input_filter"].copy()
+
+        # Only override with explicit pipeline values (not defaults from _base.yaml)
+        if "input_filter" in explicit_entity_config:
+            merged_input_filter = _deep_merge(
+                merged_input_filter, explicit_entity_config["input_filter"]
+            )
+
+        config["input_filter"] = merged_input_filter
+
+    # Merge gold_filters
+    if "gold_filters" in filter_config:
+        # Start with filter config as base
+        merged_gold_filters = filter_config["gold_filters"].copy()
+
+        # Only override with explicit pipeline values (not defaults from _base.yaml)
+        if "gold_filters" in explicit_entity_config:
+            merged_gold_filters = _deep_merge(
+                merged_gold_filters, explicit_entity_config["gold_filters"]
+            )
+
+        config["gold_filters"] = merged_gold_filters
+
+
 @lru_cache(maxsize=10)
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
-    """Load pipeline configuration from YAML file and return typed model."""
+    """Load pipeline configuration from YAML file and return typed model.
+
+    The loading process follows this order:
+    1. Load base config from _base.yaml
+    2. Merge with entity-specific config
+    3. Apply convention-based defaults (auto-compute paths/references)
+    4. Load and merge filter config from filter_config_file
+    5. Load source config from source_file
+
+    Convention-based defaults auto-compute:
+    - File references (source_file, dq_config_file, filter_config_file)
+    - Sink paths (bronze/silver/gold paths)
+    - Primary key propagation to sink.silver.primary_key and sort_by
+
+    Filter config merging:
+    - input_filter and gold_filters from filter_config_file are merged
+    - Pipeline inline config acts as overrides on top of filter config
+    - This allows minimal pipeline configs with full filter inheritance
+
+    Args:
+        pipeline_name: Pipeline name (e.g., "chembl_activity").
+
+    Returns:
+        Validated PipelineYamlConfig Pydantic model.
+
+    Raises:
+        ValueError: If pipeline config file doesn't exist.
+    """
     try:
         provider, entity = pipeline_name.split("_", 1)
         config_path = Path(f"configs/pipelines/{provider}/{entity}.yaml")
@@ -80,6 +275,15 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
         entity_config = yaml.safe_load(f) or {}
 
     config = _deep_merge(defaults, entity_config)
+
+    # Apply convention-based defaults (auto-compute paths/references)
+    config = _apply_convention_defaults(config)
+
+    # Load and merge filter config from filter_config_file
+    if filter_config_file := config.get("filter_config_file"):
+        filter_config = _load_filter_config(config_path, filter_config_file)
+        if filter_config:
+            _merge_filter_config(config, filter_config, entity_config)
 
     if source_file := config.get("source_file"):
         source_path = config_path.parent / source_file
