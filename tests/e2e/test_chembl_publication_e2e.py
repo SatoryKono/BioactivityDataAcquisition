@@ -149,11 +149,6 @@ def vcr_config() -> dict[str, Any]:
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.skip(
-    reason="VCR cassette needs re-recording: pipeline now batches 100 IDs into 20-ID chunks, "
-    "but cassette expects all IDs in single request. Re-record with: "
-    "VCR_RECORD_MODE=new_episodes pytest tests/e2e/test_chembl_publication_e2e.py -v"
-)
 async def test_chembl_publication_full_cycle(e2e_data_dir: Path):
     """E2E: ChEMBL Publication pipeline from fetch to Silver.
 
@@ -195,11 +190,6 @@ async def test_chembl_publication_full_cycle(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.skip(
-    reason="VCR cassette needs re-recording: pipeline now batches 100 IDs into 20-ID chunks, "
-    "but cassette expects all IDs in single request. Re-record with: "
-    "VCR_RECORD_MODE=new_episodes pytest tests/e2e/test_chembl_publication_e2e.py -v"
-)
 async def test_chembl_publication_metadata_fields(e2e_data_dir: Path):
     """E2E: Verify publication-related fields are extracted.
 

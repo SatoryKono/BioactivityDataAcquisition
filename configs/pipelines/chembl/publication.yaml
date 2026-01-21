@@ -48,7 +48,7 @@ sink:
       ascending: true
     csv_export:
       path: "data/output/silver/chembl/publication"
-    # flat_structure: true  # Enable for flat path layout (Delta directly in path)
+    flat_structure: true  # Delta directly in path, files named {table}_*.ext
   gold:
     path: "data/output/gold/chembl/publication"
     sort_by:
@@ -56,5 +56,5 @@ sink:
       ascending: true
     csv_export:
       path: "data/output/gold/chembl/publication"
-    # flat_structure: true  # Enable for flat path layout (Delta directly in path)
+    flat_structure: true  # Delta directly in path, files named {table}_*.ext
 
