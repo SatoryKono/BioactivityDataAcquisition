@@ -51,11 +51,11 @@ dq_config_file: ../../dq/entities/uniprot/idmapping.yaml
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Filter rules are loaded from hierarchical config files:
+# Filters loaded from hierarchical config files via convention (ADR-029):
 #   1. configs/filter/_defaults.yaml (global defaults)
 #   2. configs/filter/providers/uniprot.yaml (provider-specific)
 #   3. configs/filter/entities/uniprot/idmapping.yaml (entity-specific)
-filter_config_file: ../../filter/entities/uniprot/idmapping.yaml
+# Add inline overrides below only when extending/differing from entity filter config.
 
 # Sink configuration
 sink:
@@ -78,18 +78,3 @@ sink:
     csv_export:
       path: "data/output/gold/uniprot/idmapping"
 
-# Gold filters - pass all records (including not_found)
-# Users may want to filter in downstream analysis
-gold_filters:
-  required_fields:
-    - target_chembl_id
-    - mapping_status
-
-# Input filter - disabled because ID Mapping reads directly from source.input_path
-# The adapter handles filtering internally via the ID Mapping API
-input_filter:
-  enabled: false
-  source_path: "data/input/target.csv"
-  column_name: "target_chembl_id"
-  filter_field: "target_chembl_id"
-  batch_size: 100

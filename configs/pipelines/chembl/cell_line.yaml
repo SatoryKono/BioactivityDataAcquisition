@@ -27,16 +27,11 @@ dq_config_file: ../../dq/entities/chembl/cell_line.yaml
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Filter rules are loaded from hierarchical config files:
+# Filters loaded from hierarchical config files via convention (ADR-029):
 #   1. configs/filter/_defaults.yaml (global defaults)
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/cell_line.yaml (entity-specific)
-filter_config_file: ../../filter/entities/chembl/cell_line.yaml
-
-# Entity-specific gold filters
-gold_filters:
-  required_fields:
-    - cell_name
+# Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
 sink:
@@ -56,10 +51,3 @@ sink:
     csv_export:
       path: "data/output/gold/chembl/cell_line"
 
-# Entity-specific input filter
-input_filter:
-  enabled: true
-  source_path: "data/input/cell.csv"
-  column_name: "cell_chembl_id"
-  filter_field: "cell_chembl_id"
-  batch_size: 20

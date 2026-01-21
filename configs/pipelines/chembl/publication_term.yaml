@@ -31,20 +31,11 @@ dq_config_file: ../../dq/entities/chembl/publication_term.yaml
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Filter rules are loaded from hierarchical config files:
+# Filters loaded from hierarchical config files via convention (ADR-029):
 #   1. configs/filter/_defaults.yaml (global defaults)
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/publication_term.yaml (entity-specific)
-filter_config_file: ../../filter/entities/chembl/publication_term.yaml
-
-# Entity-specific gold filters
-gold_filters:
-  columns:
-    term_type: [MESH_HEADING, KEYWORD]  # Filter to main term types
-  required_fields:
-    - document_chembl_id
-    - term
-    - term_type
+# Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
 sink:
@@ -65,11 +56,3 @@ sink:
     csv_export:
       path: "data/output/gold/chembl/document_term"
 
-# Entity-specific input filter
-# PublicationTermDataSource delegates FilterableDataSourcePort to wrapped ChEMBL adapter
-input_filter:
-  enabled: true
-  source_path: "data/input/publication.csv"
-  column_name: "document_chembl_id"
-  filter_field: "document_chembl_id"
-  batch_size: 20

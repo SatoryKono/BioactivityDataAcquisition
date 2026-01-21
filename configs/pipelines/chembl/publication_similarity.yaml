@@ -28,23 +28,11 @@ dq_config_file: ../../dq/entities/chembl/publication_similarity.yaml
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Filter rules are loaded from hierarchical config files:
+# Filters loaded from hierarchical config files via convention (ADR-029):
 #   1. configs/filter/_defaults.yaml (global defaults)
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/publication_similarity.yaml (entity-specific)
-filter_config_file: ../../filter/entities/chembl/publication_similarity.yaml
-
-# Entity-specific gold filters
-gold_filters:
-  ranges:
-    # Filter to significant similarities only
-    max_tani:
-      min: 0.5
-      include_min: true
-  required_fields:
-    - sim_id
-    - doc_1
-    - doc_2
+# Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
 sink:
@@ -65,6 +53,3 @@ sink:
     csv_export:
       path: "data/output/gold/chembl/document_similarity"
 
-# No input filter needed - load full dataset
-input_filter:
-  enabled: false

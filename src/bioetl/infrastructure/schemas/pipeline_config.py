@@ -505,6 +505,23 @@ class SortByConfig(BaseModel):
     ascending: bool = True
 
 
+class SinkDQReportConfig(BaseModel):
+    """DQ report configuration for sink layers."""
+
+    enabled: bool = Field(
+        default=False,
+        description="Enable DQ report generation for this layer",
+    )
+    output_path: str | None = Field(
+        default=None,
+        description="Output path for report. None = alongside data files.",
+    )
+    format: Literal["json", "yaml", "html"] = Field(
+        default="json",
+        description="Report output format",
+    )
+
+
 class SinkLayerConfig(BaseModel):
     """Configuration for a specific data layer (Bronze, Silver, Gold)."""
 
@@ -528,6 +545,11 @@ class SinkLayerConfig(BaseModel):
     # Schema drift handling
     on_schema_mismatch: Literal["error", "evolve", "ignore"] = Field(
         default="error", description="How to handle schema drift"
+    )
+    # DQ report generation
+    dq_report: SinkDQReportConfig = Field(
+        default_factory=SinkDQReportConfig,
+        description="DQ report generation settings for this layer",
     )
 
 

@@ -35,21 +35,11 @@ dq_config_file: ../../dq/entities/openalex/publication.yaml
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Filter rules are loaded from hierarchical config files:
+# Filters loaded from hierarchical config files via convention (ADR-029):
 #   1. configs/filter/_defaults.yaml (global defaults)
 #   2. configs/filter/providers/openalex.yaml (provider-specific)
 #   3. configs/filter/entities/openalex/publication.yaml (entity-specific)
-filter_config_file: ../../filter/entities/openalex/publication.yaml
-
-# Entity-specific gold filters
-gold_filters:
-  required_fields:
-    - openalex_id
-    - title
-  ranges:
-    year:
-      min: 1900
-      max: 2100
+# Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
 sink:
@@ -70,11 +60,3 @@ sink:
     csv_export:
       path: "data/output/gold/openalex/publication"
 
-# Input filter for batch DOI resolution with title fallback
-input_filter:
-  enabled: true
-  source_path: "data/input/dois.csv"
-  column_name: "doi"
-  filter_field: "doi"
-  batch_size: 50  # Polite pool API - conservative batch size
-  fallback_column: "title"  # Search by title if DOI not found or empty
