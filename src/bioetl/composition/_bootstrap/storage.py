@@ -7,6 +7,7 @@ and medallion lifecycle service. Used primarily by CLI operations.
 from __future__ import annotations
 
 from collections.abc import Callable
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.composition.factories.storage import StorageAdapter
@@ -58,9 +59,12 @@ def bootstrap_storage() -> StorageAdapter:
     noop_metrics = NoOpMetrics()
     noop_tracing = NoOpTracing()
 
+    # ADR-025: Use data/output/ hierarchy for consistency with pipeline configs
+    output_dir = Path(settings.data_dir) / "output"
+
     return StorageAdapter(
         bronze_writer=BronzeWriter(
-            base_path=settings.bronze_path,
+            base_path=output_dir / "bronze",  # data/output/bronze
             logger=noop_logger,
             metrics=noop_metrics,
             tracing=noop_tracing,
@@ -68,13 +72,13 @@ def bootstrap_storage() -> StorageAdapter:
             json_path=None,
         ),
         silver_writer=SilverWriter(
-            base_path=settings.silver_path,
+            base_path=output_dir / "silver",  # data/output/silver
             logger=noop_logger,
             tracing=noop_tracing,
             csv_exporter=None,
         ),
         gold_writer=GoldWriter(
-            base_path=settings.gold_path,
+            base_path=output_dir / "gold",  # data/output/gold
             logger=noop_logger,
             tracing=noop_tracing,
             csv_exporter=None,
@@ -225,8 +229,6 @@ def bootstrap_export_service() -> ExportService:
     Returns:
         ExportService configured for the current environment.
     """
-    from pathlib import Path
-
     from bioetl.application.services import ExportService
     from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
