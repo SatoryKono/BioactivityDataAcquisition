@@ -72,8 +72,13 @@ main() {
     # 4. Setup pre-commit
     print_step "Setting up pre-commit hooks..."
     if [ -f .pre-commit-config.yaml ]; then
-        uv run pre-commit install
-        print_success "Pre-commit hooks installed."
+        print_step "Installing pre-commit package..."
+        uv pip install pre-commit
+        if uv run pre-commit install; then
+            print_success "Pre-commit hooks installed."
+        else
+            print_warning "Failed to install pre-commit hooks. You may need to run 'pre-commit install' manually."
+        fi
     else
         print_warning "No .pre-commit-config.yaml found."
     fi
