@@ -41,13 +41,19 @@ class MetadataWriterPort(Protocol):
         self,
         base_path: str | Path,
         metadata: BronzeMetadata,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """Write Bronze layer metadata sidecar file.
 
         Args:
             base_path: Base path where Bronze data is stored.
-                      Metadata will be written to {base_path}/_metadata.yaml
+                      Metadata will be written to {base_path}/{provider}_{entity}_metadata.yaml
+                      or {base_path}/_metadata.yaml if provider/entity not provided.
             metadata: Bronze metadata model with lineage and source info.
+            provider: Provider name (e.g., 'chembl') for filename generation.
+            entity: Entity type (e.g., 'activity') for filename generation.
 
         Returns:
             Absolute path to the written metadata file.
@@ -64,16 +70,20 @@ class MetadataWriterPort(Protocol):
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """Write Silver layer metadata sidecar file.
 
         Args:
             base_path: Base path where Silver Delta table is stored.
-                      Metadata will be written to {base_path}/_metadata.yaml
+                      Metadata will be written to {base_path}/{provider}_{entity}_metadata.yaml
+                      or {base_path}/_metadata.yaml if provider/entity not provided.
             metadata: Silver metadata model with lineage, DQ metrics, and Delta info.
-            table_name: Table name for flat_structure naming pattern.
-            flat_structure: If True, write as {table_name}_metadata.yaml instead of
-                          _metadata.yaml in a subdirectory.
+            table_name: Table name for flat_structure naming pattern (deprecated).
+            flat_structure: If True and provider/entity provided, uses new naming.
+            provider: Provider name (e.g., 'chembl') for filename generation.
+            entity: Entity type (e.g., 'activity') for filename generation.
 
         Returns:
             Absolute path to the written metadata file.
@@ -91,16 +101,20 @@ class MetadataWriterPort(Protocol):
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """Write Gold layer metadata sidecar file.
 
         Args:
             base_path: Base path where Gold Delta/Parquet table is stored.
-                      Metadata will be written to {base_path}/_metadata.yaml
+                      Metadata will be written to {base_path}/{provider}_{entity}_metadata.yaml
+                      or {base_path}/_metadata.yaml if provider/entity not provided.
             metadata: Gold metadata model with lineage, schema contract, and SCD info.
-            table_name: Table name for flat_structure naming pattern.
-            flat_structure: If True, write as {table_name}_metadata.yaml instead of
-                          _metadata.yaml in a subdirectory.
+            table_name: Table name for flat_structure naming pattern (deprecated).
+            flat_structure: If True and provider/entity provided, uses new naming.
+            provider: Provider name (e.g., 'chembl') for filename generation.
+            entity: Entity type (e.g., 'activity') for filename generation.
 
         Returns:
             Absolute path to the written metadata file.
