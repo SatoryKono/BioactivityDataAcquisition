@@ -196,7 +196,9 @@ def silver_schema() -> pa.Schema:
 
 
 @pytest.fixture
-def mock_metadata_coordinator(sample_records: list[dict[str, Any]]) -> MagicMock:
+def mock_metadata_coordinator_with_records(
+    sample_records: list[dict[str, Any]],
+) -> MagicMock:
     """Create a mock metadata coordinator that returns mock metadata objects.
 
     Uses MagicMock for the metadata objects to avoid complex Pydantic model setup.
@@ -235,7 +237,7 @@ class TestSilverWriterMetadataIntegration:
         tmp_path: Path,
         mock_logger: MagicMock,
         mock_metadata_writer: MockMetadataWriter,
-        mock_metadata_coordinator: MagicMock,
+        mock_metadata_coordinator_with_records: MagicMock,
         sample_records: list[dict[str, Any]],
         silver_schema: pa.Schema,
     ) -> None:
@@ -244,7 +246,7 @@ class TestSilverWriterMetadataIntegration:
             base_path=tmp_path,
             logger=mock_logger,
             metadata_writer=mock_metadata_writer,
-            metadata_coordinator=mock_metadata_coordinator,
+            metadata_coordinator=mock_metadata_coordinator_with_records,
         )
 
         await writer.write_silver(
