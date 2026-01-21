@@ -282,12 +282,13 @@ class BaseServicesFactory:
         silver_analyzer = DQServicesFactory.create_silver_analyzer()
         gold_analyzer = DQServicesFactory.create_gold_analyzer()
 
-        # DQ reports should be written alongside the data
+        # DQ reports are written to dedicated reports/dq/ directory
         output_root = cls._get_output_root(settings, pipeline_config)
+        dq_reports_path = output_root / "reports" / "dq"
         # Get flat_structure from sink config (use Silver as primary)
         flat_structure = cls._get_flat_structure(pipeline_config)
         report_writer = DQServicesFactory.create_report_writer(
-            base_path=output_root,
+            base_path=dq_reports_path,
             logger=logger,
             flat_structure=flat_structure,
         )

@@ -4,7 +4,7 @@ Implements RULES.md §2.1.1 - Bronze Layer specifications.
 
 Requirements:
 - REQ-DATA-001: JSONL + zstd format
-- REQ-DATA-002: Path format bronze/v1/{provider}/{entity}/{date}/
+- REQ-DATA-002: Path format bronze/{provider}/{entity}/{date}/
 - REQ-DATA-003: Append-only writes
 - REQ-DATA-004: Atomic writes (via temp file + rename)
 
@@ -71,6 +71,7 @@ class BronzeWriter:
         metadata_writer: MetadataWriterPort | None = None,
         save_metadata: bool = False,
         metadata_coordinator: MetadataCoordinatorPort | None = None,
+        flat_structure: bool = False,
     ) -> None:
         """Initialize Bronze writer.
 
@@ -98,6 +99,9 @@ class BronzeWriter:
                                 metadata creation. If provided, uses coordinator
                                 instead of local _build_full_bronze_metadata().
                                 Ensures consistent run_id across layers.
+            flat_structure: If True, write directly to base_path/{date}/ without
+                          adding {provider}/{entity}/ prefix. Use when base_path
+                          already includes provider/entity path segments.
 
         Note:
             Lock validation is now performed at Application layer (BatchWriter)
@@ -129,6 +133,29 @@ class BronzeWriter:
         self._metadata_coordinator: MetadataCoordinatorPort | None = (
             metadata_coordinator
         )
+        self._flat_structure = flat_structure
+
+    def _resolve_bronze_path(
+        self, provider: str, entity: str, date_str: str, filename: str
+    ) -> str:
+        """Resolve Bronze file path based on flat_structure setting.
+
+        Args:
+            provider: Data provider name (e.g., 'chembl').
+            entity: Entity type (e.g., 'document').
+            date_str: Date string in YYYY-MM-DD format.
+            filename: File name (e.g., 'batch_2026-01-21_uuid.jsonl.zst').
+
+        Returns:
+            Relative path from base_path to the file.
+
+        Path formats:
+            flat_structure=False: {provider}/{entity}/{date}/{filename}
+            flat_structure=True:  {date}/{filename}
+        """
+        if self._flat_structure:
+            return f"{date_str}/{filename}"
+        return f"{provider}/{entity}/{date_str}/{filename}"
 
     def _validate_bronze_names(self, provider: str, entity: str) -> None:
         """Validate provider and entity names (alphanumeric + underscores only)."""
@@ -446,10 +473,12 @@ class BronzeWriter:
                 records = self._validate_json_records(records)
 
             date_str = date.strftime("%Y-%m-%d")
-            # Path format: {provider}/{entity}/{date}/batch_{date}_{batch_id}.jsonl.zst
-            # base_path already points to 'data/output/bronze'
-            relative_path = (
-                f"{provider}/{entity}/{date_str}/batch_{date_str}_{batch_id}.jsonl.zst"
+            # Path format depends on flat_structure:
+            #   flat_structure=False: {provider}/{entity}/{date}/batch_...
+            #   flat_structure=True:  {date}/batch_...
+            filename = f"batch_{date_str}_{batch_id}.jsonl.zst"
+            relative_path = self._resolve_bronze_path(
+                provider, entity, date_str, filename
             )
             metadata = self._build_bronze_metadata(
                 run_id, run_type, ingestion_ts, provider, entity, batch_id
@@ -649,8 +678,9 @@ class BronzeWriter:
         for easier access and co-location of data artifacts.
         """
         # JSON copy is now stored alongside the zst file in the same directory
-        json_relative_path = (
-            f"{provider}/{entity}/{date_str}/batch_{date_str}_{batch_id}.jsonl"
+        json_filename = f"batch_{date_str}_{batch_id}.jsonl"
+        json_relative_path = self._resolve_bronze_path(
+            provider, entity, date_str, json_filename
         )
 
         # Combine all records into single JSONL content

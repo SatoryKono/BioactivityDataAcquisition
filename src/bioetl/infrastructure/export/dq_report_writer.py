@@ -29,10 +29,15 @@ class DQReportWriter:
     Implements DQReportWriterPort with atomic writes and
     support for JSON, YAML, and HTML formats.
 
-    Path formats (unified structure):
-    - Bronze: {base_path}/{provider}/{entity}/{date}/batch_{date}_{provider}_{entity}_dq_report{ext}
-    - Silver: {base_path}/{provider}/{entity}/silver_{provider}_{entity}_dq_report{ext}
-    - Gold: {base_path}/{provider}/{entity}/gold_{provider}_{entity}_dq_report{ext}
+    Path formats (unified structure under data/output/reports/dq/):
+    - Bronze: {base_path}/bronze/{provider}/{entity}/{date}/batch_{date}_{provider}_{entity}_dq_report{ext}
+    - Silver: {base_path}/silver/{provider}/{entity}/silver_{provider}_{entity}_dq_report{ext}
+    - Gold: {base_path}/gold/{provider}/{entity}/gold_{provider}_{entity}_dq_report{ext}
+
+    Flat structure (when flat_structure=True):
+    - Bronze: {base_path}/batch_{date}_{provider}_{entity}_dq_report{ext}
+    - Silver: {base_path}/silver_{provider}_{entity}_dq_report{ext}
+    - Gold: {base_path}/gold_{provider}_{entity}_dq_report{ext}
     """
 
     def __init__(
@@ -80,25 +85,25 @@ class DQReportWriter:
         format = format or DQReportFormat.JSON
         extension = self._get_extension(format)
 
+        # Build filename
+        if provider and entity and date_str:
+            filename = f"batch_{date_str}_{provider}_{entity}_dq_report{extension}"
+        else:
+            filename = f"{report.batch_id}_dq_report{extension}"
+
         if output_path is None:
-            # Generate path based on source file location
-            source_dir = Path(report.source_file).parent
-            # Unified naming: batch_{date}_{provider}_{entity}_dq_report{ext}
-            # Falls back to batch_id only if provider/entity not provided
+            # Unified structure: {base_path}/bronze/{provider}/{entity}/{date}/
             if provider and entity and date_str:
-                filename = f"batch_{date_str}_{provider}_{entity}_dq_report{extension}"
+                output_path = (
+                    self._base_path / "bronze" / provider / entity / date_str / filename
+                )
             else:
-                filename = f"{report.batch_id}_dq_report{extension}"
-            output_path = self._base_path / source_dir / filename
+                # Fallback: extract from source file path
+                source_dir = Path(report.source_file).parent
+                output_path = self._base_path / source_dir / filename
         else:
             output_path = Path(output_path)
             if output_path.is_dir():
-                if provider and entity and date_str:
-                    filename = (
-                        f"batch_{date_str}_{provider}_{entity}_dq_report{extension}"
-                    )
-                else:
-                    filename = f"{report.batch_id}_dq_report{extension}"
                 output_path = output_path / filename
 
         return await self._write_report(report, output_path, format)
@@ -144,6 +149,10 @@ class DQReportWriter:
     ) -> Path:
         """Resolve output path for Silver/Gold DQ report.
 
+        Unified path structure:
+        - Normal: {base_path}/{layer}/{provider}/{entity}/{layer}_{provider}_{entity}_dq_report{ext}
+        - Flat: {base_path}/{layer}_{provider}_{entity}_dq_report{ext}
+
         Args:
             layer: Layer name ('silver' or 'gold').
             output_path: Explicit output path or None for auto-generation.
@@ -167,8 +176,17 @@ class DQReportWriter:
         if self._flat_structure:
             return self._base_path / filename
 
-        normalized_table = target_table.replace(".", "/")
-        return self._base_path / normalized_table / filename
+        # Unified structure: {layer}/{provider}/{entity}/
+        if provider and entity:
+            return self._base_path / layer / provider / entity / filename
+
+        # Fallback: extract from table name (e.g., "chembl_activity" -> "chembl/activity")
+        if "_" in target_table:
+            parts = target_table.split("_", 1)
+            return self._base_path / layer / parts[0] / parts[1] / filename
+
+        # Last resort: use table name directly
+        return self._base_path / layer / target_table / filename
 
     async def write_silver_report(
         self,

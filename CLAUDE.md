@@ -336,7 +336,7 @@ cat docs/archived/refactoring-plan.md | head -60
 
 | Уровень | Формат | Хранение | Идемпотентность |
 |---------|--------|----------|-----------------|
-| **Bronze** | JSONL + zstd | 90d → Archive | Append-only. Path: `bronze/v1/{provider}/{entity}/{date}/` |
+| **Bronze** | JSONL + zstd | 90d → Archive | Append-only. Path: `bronze/{provider}/{entity}/{date}/` |
 | **Silver** | Delta Lake | Permanent | Merge/Upsert по `content_hash`. ACID обязателен. |
 | **Gold** | Delta/Parquet | Permanent | SCD Type 2 или партиции по дате |
 
