@@ -34,6 +34,9 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.core.runner import PipelineRunner
+    from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.config import Settings
 
 # Default composite config path
 COMPOSITE_CONFIG_DIR = Path("configs/pipelines/composite")
@@ -220,6 +223,9 @@ def bootstrap_composite_pipeline(
         resume=runtime.resume,
     )
 
+    # Create DQ report service for composite (optional)
+    dq_report_service = _create_dq_report_service(logger, settings)
+
     return CompositePipelineRunner(
         config=config,
         runtime=runtime,
@@ -232,7 +238,45 @@ def bootstrap_composite_pipeline(
         logger=logger,
         lock=lock,
         run_id=effective_run_id,
+        dq_report_service=dq_report_service,
     )
+
+
+def _create_dq_report_service(
+    logger: LoggerPort,
+    settings: Settings,
+) -> DQReportService | None:
+    """Create DQ report service for composite pipelines.
+
+    Returns None if DQ reporting is not configured.
+
+    Args:
+        logger: Structured logger.
+        settings: Application settings.
+
+    Returns:
+        DQReportService instance or None.
+    """
+    try:
+        from bioetl.application.services.dq_report_service import DQReportService
+        from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
+
+        # Create DQ report writer
+        reports_base_path = Path(settings.data_dir) / "output" / "reports" / "dq"
+        report_writer = DQReportWriter(base_path=reports_base_path)
+
+        return DQReportService(
+            logger=logger,
+            report_writer=report_writer,
+            # Analyzers are optional - reports will be generated
+            # for layers where analyzers are available
+        )
+    except Exception as e:
+        logger.debug(
+            "dq_report_service_creation_failed",
+            error=str(e),
+        )
+        return None
 
 
 __all__ = [

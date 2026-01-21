@@ -110,6 +110,7 @@ class CompositePipelineRunner:
         logger: LoggerPort,
         lock: LockPort,
         run_id: str | None = None,
+        dq_report_service: DQReportService | None = None,
     ) -> None:
         """Initialize composite pipeline runner.
 
@@ -126,6 +127,7 @@ class CompositePipelineRunner:
             logger: Structured logger.
             lock: Lock port for distributed locking.
             run_id: Optional run ID (generated if not provided).
+            dq_report_service: Optional DQ report service for generating reports.
         """
         self._config = config
         self._runtime = runtime
@@ -140,6 +142,7 @@ class CompositePipelineRunner:
         self._run_id_str = run_id or str(uuid4())
         self._run_id: RunID = cast(RunID, UUID(self._run_id_str))
         self._started_at: datetime | None = None
+        self._dq_report_service = dq_report_service
 
     @property
     def run_id(self) -> str:
@@ -280,6 +283,9 @@ class CompositePipelineRunner:
                 records_merged=merge_result.records_merged,
             )
 
+            # Step 6b: Generate DQ reports if service is available
+            await self._generate_dq_reports(merge_result)
+
         # Step 7: Cleanup checkpoint on success
         await self._checkpoint_manager.delete()
 
@@ -379,3 +385,54 @@ class CompositePipelineRunner:
                     f"Required enricher '{enricher_name}' failed: "
                     f"{result.error_message or result.status.value}"
                 )
+
+    async def _generate_dq_reports(self, merge_result: MergeResult) -> None:
+        """Generate DQ reports for composite pipeline.
+
+        Args:
+            merge_result: Result of the merge operation.
+        """
+        if self._dq_report_service is None:
+            self._logger.debug(
+                "dq_reports_skipped",
+                reason="DQReportService not configured",
+                composite=self._config.name,
+            )
+            return
+
+        try:
+            from bioetl.application.services.dq_report_service import DQReportContext
+
+            # Create DQ report context for composite
+            context = DQReportContext(
+                run_id=self._run_id_str,
+                pipeline_name=f"composite_{self._config.name}",
+                timestamp=datetime.now(tz=UTC),
+                provider="composite",
+                entity=self._config.name,
+                # Silver context
+                silver_target_table=self._config.merge.output_silver_path,
+                silver_input_count=merge_result.records_from_seed,
+                # Gold context
+                gold_target_table=self._config.merge.output_gold_path,
+                # DQ thresholds from config
+                dq_soft_threshold=self._config.dq.soft_fail_threshold,
+                dq_hard_threshold=self._config.dq.hard_fail_threshold,
+            )
+
+            # Generate reports (if analyzers are configured)
+            await self._dq_report_service.generate_reports(context)
+
+            self._logger.info(
+                "dq_reports_generated",
+                composite=self._config.name,
+                run_id=self._run_id_str,
+            )
+
+        except Exception as e:
+            # DQ report generation failure should not fail the pipeline
+            self._logger.warning(
+                "dq_reports_failed",
+                composite=self._config.name,
+                error=str(e),
+            )
