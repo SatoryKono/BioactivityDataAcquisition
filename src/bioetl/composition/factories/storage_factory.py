@@ -73,8 +73,10 @@ class StorageFactory:
                           Used in test mode to respect test isolation.
         """
         if csv_cfg and csv_cfg.enabled:
+            # Convert to str for CsvExporter (expects str, not Path)
+            path = override_path or csv_cfg.path
             return CsvExporter(
-                base_path=override_path or csv_cfg.path,
+                base_path=str(path),
                 logger=logger,
                 delimiter=csv_cfg.delimiter,
                 header=csv_cfg.header,
