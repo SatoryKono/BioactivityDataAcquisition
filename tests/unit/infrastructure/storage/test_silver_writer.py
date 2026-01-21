@@ -1751,7 +1751,7 @@ class TestSilverWriterLineage:
         write_calls = []
 
         async def capture_write(
-            table_path, metadata, *, table_name=None, flat_structure=False
+            table_path, metadata, *, table_name=None, flat_structure=False, provider=None, entity=None
         ):
             write_calls.append({"table_path": table_path, "metadata": metadata})
 
@@ -1798,7 +1798,7 @@ class TestSilverWriterLineage:
         write_calls = []
 
         async def capture_write(
-            table_path, metadata, *, table_name=None, flat_structure=False
+            table_path, metadata, *, table_name=None, flat_structure=False, provider=None, entity=None
         ):
             write_calls.append({"table_path": table_path, "metadata": metadata})
 
@@ -2047,7 +2047,7 @@ class TestSilverWriterDQMetrics:
         write_calls = []
 
         async def capture_write(
-            table_path, metadata, *, table_name=None, flat_structure=False
+            table_path, metadata, *, table_name=None, flat_structure=False, provider=None, entity=None
         ):
             write_calls.append({"table_path": table_path, "metadata": metadata})
 
@@ -2124,7 +2124,7 @@ class TestSilverWriterDQMetrics:
         write_calls = []
 
         async def capture_write(
-            table_path, metadata, *, table_name=None, flat_structure=False
+            table_path, metadata, *, table_name=None, flat_structure=False, provider=None, entity=None
         ):
             write_calls.append({"table_path": table_path, "metadata": metadata})
 
@@ -2182,7 +2182,7 @@ class TestSilverWriterDQMetrics:
         write_calls = []
 
         async def capture_write(
-            table_path, metadata, *, table_name=None, flat_structure=False
+            table_path, metadata, *, table_name=None, flat_structure=False, provider=None, entity=None
         ):
             write_calls.append({"table_path": table_path, "metadata": metadata})
 

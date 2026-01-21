@@ -396,12 +396,17 @@ class NoOpMetadataWriter:
         self,
         base_path: str | Path,  # noqa: ARG002
         metadata: BronzeMetadata,  # noqa: ARG002
+        *,
+        provider: str | None = None,  # noqa: ARG002
+        entity: str | None = None,  # noqa: ARG002
     ) -> str:
         """Write Bronze metadata (no-op).
 
         Args:
             base_path: Base path (ignored).
             metadata: Metadata (ignored).
+            provider: Provider name (ignored).
+            entity: Entity type (ignored).
 
         Returns:
             Empty string.
@@ -416,6 +421,8 @@ class NoOpMetadataWriter:
         *,
         table_name: str | None = None,  # noqa: ARG002
         flat_structure: bool = False,  # noqa: ARG002
+        provider: str | None = None,  # noqa: ARG002
+        entity: str | None = None,  # noqa: ARG002
     ) -> str:
         """Write Silver metadata (no-op).
 
@@ -424,6 +431,8 @@ class NoOpMetadataWriter:
             metadata: Metadata (ignored).
             table_name: Table name (ignored).
             flat_structure: Flat structure flag (ignored).
+            provider: Provider name (ignored).
+            entity: Entity type (ignored).
 
         Returns:
             Empty string.
@@ -438,6 +447,8 @@ class NoOpMetadataWriter:
         *,
         table_name: str | None = None,  # noqa: ARG002
         flat_structure: bool = False,  # noqa: ARG002
+        provider: str | None = None,  # noqa: ARG002
+        entity: str | None = None,  # noqa: ARG002
     ) -> str:
         """Write Gold metadata (no-op).
 
@@ -446,6 +457,8 @@ class NoOpMetadataWriter:
             metadata: Metadata (ignored).
             table_name: Table name (ignored).
             flat_structure: Flat structure flag (ignored).
+            provider: Provider name (ignored).
+            entity: Entity type (ignored).
 
         Returns:
             Empty string.
