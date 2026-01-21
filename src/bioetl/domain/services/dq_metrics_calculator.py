@@ -113,9 +113,7 @@ class DQMetricsCalculator:
         - info: Minor schema changes
         """
         # Critical: missing required fields (business fields without underscore prefix)
-        has_critical_missing = any(
-            not f.startswith("_") for f in missing_fields
-        )
+        has_critical_missing = any(not f.startswith("_") for f in missing_fields)
         if has_critical_missing:
             return "critical"
         if len(new_fields) > 3:
