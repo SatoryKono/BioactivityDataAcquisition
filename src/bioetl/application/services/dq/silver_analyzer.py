@@ -51,6 +51,167 @@ class SilverDQAnalyzer:
     Implements SilverDQAnalyzerPort.
     """
 
+    def _execute_checks(
+        self,
+        df: pl.DataFrame,
+        enabled_checks: set[SilverDQCheckType],
+        primary_keys: list[str],
+        input_record_count: int | None,
+        quarantined_count: int,
+        previous_schema: dict[str, str] | None,
+    ) -> tuple[dict[str, Any], int, int, int]:
+        """Execute all enabled DQ checks and collect results.
+
+        Args:
+            df: Polars DataFrame with Silver data.
+            enabled_checks: Set of enabled check types.
+            primary_keys: List of primary key columns.
+            input_record_count: Original record count before transforms.
+            quarantined_count: Number of quarantined records.
+            previous_schema: Previous schema for drift detection.
+
+        Returns:
+            Tuple of (checks dict, passed count, failed count, warnings count).
+        """
+        checks: dict[str, Any] = {}
+        passed, failed, warnings = 0, 0, 0
+
+        if SilverDQCheckType.RECORD_COUNT in enabled_checks:
+            record_count_result = self._check_record_count(
+                df, input_record_count, quarantined_count
+            )
+            checks["record_count"] = self._result_to_dict(record_count_result)
+            passed, failed, warnings = self._update_counts(
+                record_count_result.status, passed, failed, warnings
+            )
+
+        if SilverDQCheckType.NULL_RATE in enabled_checks:
+            null_results, overall_rate = self._check_null_rates(df)
+            checks["null_rate"] = {
+                "columns": {
+                    r.column_name: self._result_to_dict(r) for r in null_results
+                },
+                "overall_null_rate": overall_rate,
+                "status": DQCheckStatus.PASS.value,
+            }
+            passed += 1
+
+        if SilverDQCheckType.UNIQUENESS in enabled_checks:
+            uniqueness_result = self._check_uniqueness(df, primary_keys)
+            checks["uniqueness"] = self._result_to_dict(uniqueness_result)
+            passed, failed, warnings = self._update_counts(
+                uniqueness_result.status, passed, failed, warnings
+            )
+
+        if SilverDQCheckType.TYPE_CONFORMANCE in enabled_checks:
+            conformance_result = self._check_type_conformance(df)
+            checks["type_conformance"] = self._result_to_dict(conformance_result)
+            passed, failed, warnings = self._update_counts(
+                conformance_result.status, passed, failed, warnings
+            )
+
+        if SilverDQCheckType.VALUE_DISTRIBUTION in enabled_checks:
+            distribution_result = self._check_value_distribution(df)
+            checks["value_distribution"] = self._distribution_to_dict(
+                distribution_result
+            )
+            passed += 1
+
+        if SilverDQCheckType.SCHEMA_DRIFT in enabled_checks:
+            drift_result = self._check_schema_drift(df, previous_schema)
+            checks["schema_drift"] = self._result_to_dict(drift_result)
+            passed, failed, warnings = self._update_counts(
+                drift_result.status, passed, failed, warnings
+            )
+
+        if SilverDQCheckType.DEDUPLICATION_STATS in enabled_checks:
+            dedup_result = self._check_deduplication(
+                df, primary_keys, input_record_count or len(df)
+            )
+            checks["deduplication_stats"] = self._result_to_dict(dedup_result)
+            passed, failed, warnings = self._update_counts(
+                dedup_result.status, passed, failed, warnings
+            )
+
+        if SilverDQCheckType.CONTENT_HASH_INTEGRITY in enabled_checks:
+            hash_result = self._check_content_hash_integrity(df)
+            checks["content_hash_integrity"] = self._result_to_dict(hash_result)
+            passed, failed, warnings = self._update_counts(
+                hash_result.status, passed, failed, warnings
+            )
+
+        return checks, passed, failed, warnings
+
+    def _calculate_thresholds(
+        self,
+        df_len: int,
+        input_record_count: int | None,
+        quarantined_count: int,
+        soft_fail_threshold: float,
+        hard_fail_threshold: float,
+    ) -> DQThresholds:
+        """Calculate DQ thresholds and error rate status.
+
+        Args:
+            df_len: Length of the DataFrame.
+            input_record_count: Original record count before transforms.
+            quarantined_count: Number of quarantined records.
+            soft_fail_threshold: Warning threshold for error rate.
+            hard_fail_threshold: Failure threshold for error rate.
+
+        Returns:
+            DQThresholds with calculated error rate and status.
+        """
+        total_input = input_record_count or df_len + quarantined_count
+        error_rate = quarantined_count / total_input if total_input > 0 else 0.0
+
+        if error_rate >= hard_fail_threshold:
+            threshold_status = DQCheckStatus.FAIL
+        elif error_rate >= soft_fail_threshold:
+            threshold_status = DQCheckStatus.WARN
+        else:
+            threshold_status = DQCheckStatus.PASS
+
+        return DQThresholds(
+            soft_fail_threshold=soft_fail_threshold,
+            hard_fail_threshold=hard_fail_threshold,
+            current_error_rate=round(error_rate, 4),
+            threshold_status=threshold_status,
+        )
+
+    def _build_summary(
+        self,
+        passed: int,
+        failed: int,
+        warnings: int,
+        threshold_status: DQCheckStatus,
+    ) -> DQReportSummary:
+        """Build DQ report summary with overall status.
+
+        Args:
+            passed: Number of passed checks.
+            failed: Number of failed checks.
+            warnings: Number of warning checks.
+            threshold_status: Status from threshold calculation.
+
+        Returns:
+            DQReportSummary with overall status.
+        """
+        if failed > 0 or threshold_status == DQCheckStatus.FAIL:
+            overall_status = DQReportStatus.FAIL
+        elif warnings > 0 or threshold_status == DQCheckStatus.WARN:
+            overall_status = DQReportStatus.WARNING
+        else:
+            overall_status = DQReportStatus.PASS
+
+        return DQReportSummary(
+            total_checks=passed + failed + warnings,
+            passed=passed,
+            failed=failed,
+            warnings=warnings,
+            overall_status=overall_status,
+        )
+
     def analyze(
         self,
         data: pl.DataFrame | pa.Table,
@@ -96,120 +257,31 @@ class SilverDQAnalyzer:
 
         enabled_checks = set(config.get_checks_enums())
 
-        checks: dict[str, Any] = {}
-        passed = 0
-        failed = 0
-        warnings = 0
-
-        # Record count check
-        if SilverDQCheckType.RECORD_COUNT in enabled_checks:
-            record_count_result = self._check_record_count(
-                df, input_record_count, quarantined_count
-            )
-            checks["record_count"] = self._result_to_dict(record_count_result)
-            passed, failed, warnings = self._update_counts(
-                record_count_result.status, passed, failed, warnings
-            )
-
-        # Null rate check
-        if SilverDQCheckType.NULL_RATE in enabled_checks:
-            null_results, overall_null_rate = self._check_null_rates(df)
-            checks["null_rate"] = {
-                "columns": {
-                    r.column_name: self._result_to_dict(r) for r in null_results
-                },
-                "overall_null_rate": overall_null_rate,
-                "status": DQCheckStatus.PASS.value,
-            }
-            passed += 1
-
-        # Uniqueness check
-        if SilverDQCheckType.UNIQUENESS in enabled_checks:
-            uniqueness_result = self._check_uniqueness(df, primary_keys)
-            checks["uniqueness"] = self._result_to_dict(uniqueness_result)
-            passed, failed, warnings = self._update_counts(
-                uniqueness_result.status, passed, failed, warnings
-            )
-
-        # Type conformance check
-        if SilverDQCheckType.TYPE_CONFORMANCE in enabled_checks:
-            type_conformance_result = self._check_type_conformance(df)
-            checks["type_conformance"] = self._result_to_dict(type_conformance_result)
-            passed, failed, warnings = self._update_counts(
-                type_conformance_result.status, passed, failed, warnings
-            )
-
-        # Value distribution
-        if SilverDQCheckType.VALUE_DISTRIBUTION in enabled_checks:
-            distribution_result = self._check_value_distribution(df)
-            checks["value_distribution"] = self._distribution_to_dict(
-                distribution_result
-            )
-            passed += 1
-
-        # Schema drift
-        if SilverDQCheckType.SCHEMA_DRIFT in enabled_checks:
-            schema_drift_result = self._check_schema_drift(df, previous_schema)
-            checks["schema_drift"] = self._result_to_dict(schema_drift_result)
-            passed, failed, warnings = self._update_counts(
-                schema_drift_result.status, passed, failed, warnings
-            )
-
-        # Deduplication stats
-        if SilverDQCheckType.DEDUPLICATION_STATS in enabled_checks:
-            dedup_result = self._check_deduplication(
-                df, primary_keys, input_record_count or len(df)
-            )
-            checks["deduplication_stats"] = self._result_to_dict(dedup_result)
-            passed, failed, warnings = self._update_counts(
-                dedup_result.status, passed, failed, warnings
-            )
-
-        # Content hash integrity
-        if SilverDQCheckType.CONTENT_HASH_INTEGRITY in enabled_checks:
-            hash_integrity_result = self._check_content_hash_integrity(df)
-            checks["content_hash_integrity"] = self._result_to_dict(
-                hash_integrity_result
-            )
-            passed, failed, warnings = self._update_counts(
-                hash_integrity_result.status, passed, failed, warnings
-            )
-
-        total_checks = passed + failed + warnings
-
-        # Calculate error rate for threshold check
-        total_input = input_record_count or len(df) + quarantined_count
-        error_rate = quarantined_count / total_input if total_input > 0 else 0.0
-
-        # Determine threshold status
-        if error_rate >= hard_fail_threshold:
-            threshold_status = DQCheckStatus.FAIL
-        elif error_rate >= soft_fail_threshold:
-            threshold_status = DQCheckStatus.WARN
-        else:
-            threshold_status = DQCheckStatus.PASS
-
-        thresholds = DQThresholds(
-            soft_fail_threshold=soft_fail_threshold,
-            hard_fail_threshold=hard_fail_threshold,
-            current_error_rate=round(error_rate, 4),
-            threshold_status=threshold_status,
+        # Execute all enabled checks
+        checks, passed, failed, warnings = self._execute_checks(
+            df=df,
+            enabled_checks=enabled_checks,
+            primary_keys=primary_keys,
+            input_record_count=input_record_count,
+            quarantined_count=quarantined_count,
+            previous_schema=previous_schema,
         )
 
-        # Determine overall status
-        if failed > 0 or threshold_status == DQCheckStatus.FAIL:
-            overall_status = DQReportStatus.FAIL
-        elif warnings > 0 or threshold_status == DQCheckStatus.WARN:
-            overall_status = DQReportStatus.WARNING
-        else:
-            overall_status = DQReportStatus.PASS
+        # Calculate thresholds
+        thresholds = self._calculate_thresholds(
+            df_len=len(df),
+            input_record_count=input_record_count,
+            quarantined_count=quarantined_count,
+            soft_fail_threshold=soft_fail_threshold,
+            hard_fail_threshold=hard_fail_threshold,
+        )
 
-        summary = DQReportSummary(
-            total_checks=total_checks,
+        # Build summary
+        summary = self._build_summary(
             passed=passed,
             failed=failed,
             warnings=warnings,
-            overall_status=overall_status,
+            threshold_status=thresholds.threshold_status,
         )
 
         return SilverDQReport(
