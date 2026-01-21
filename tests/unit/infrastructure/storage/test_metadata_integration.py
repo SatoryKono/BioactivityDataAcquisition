@@ -126,6 +126,37 @@ def silver_schema() -> pa.Schema:
     )
 
 
+@pytest.fixture
+def mock_metadata_coordinator(sample_records: list[dict[str, Any]]) -> MagicMock:
+    """Create a mock metadata coordinator that returns mock metadata objects.
+
+    Uses MagicMock for the metadata objects to avoid complex Pydantic model setup.
+    The test verifies that metadata_writer is called, not the exact metadata content.
+    """
+    mock = MagicMock()
+
+    # Create mock SilverMetadata with required attributes for the test assertions
+    mock_silver_metadata = MagicMock(spec=SilverMetadata)
+    mock_silver_metadata.runtime = MagicMock()
+    mock_silver_metadata.runtime.run_id = sample_records[0]["_run_id"]
+    mock_silver_metadata.delta = MagicMock()
+    mock_silver_metadata.delta.rows_inserted = len(sample_records)
+    mock_silver_metadata.delta.operation = "merge"
+    mock_silver_metadata.delta.primary_key = ["id"]
+    mock.create_silver_metadata.return_value = mock_silver_metadata
+
+    # Create mock GoldMetadata
+    mock_gold_metadata = MagicMock(spec=GoldMetadata)
+    mock_gold_metadata.runtime = MagicMock()
+    mock_gold_metadata.runtime.run_id = sample_records[0]["_run_id"]
+    mock_gold_metadata.delta = MagicMock()
+    mock_gold_metadata.delta.rows_inserted = len(sample_records)
+    mock_gold_metadata.delta.operation = "overwrite"
+    mock.create_gold_metadata.return_value = mock_gold_metadata
+
+    return mock
+
+
 class TestSilverWriterMetadataIntegration:
     """Tests for SilverWriter metadata integration."""
 
@@ -135,6 +166,7 @@ class TestSilverWriterMetadataIntegration:
         tmp_path: Path,
         mock_logger: MagicMock,
         mock_metadata_writer: MockMetadataWriter,
+        mock_metadata_coordinator: MagicMock,
         sample_records: list[dict[str, Any]],
         silver_schema: pa.Schema,
     ) -> None:
@@ -143,6 +175,7 @@ class TestSilverWriterMetadataIntegration:
             base_path=tmp_path,
             logger=mock_logger,
             metadata_writer=mock_metadata_writer,
+            metadata_coordinator=mock_metadata_coordinator,
         )
 
         await writer.write_silver(

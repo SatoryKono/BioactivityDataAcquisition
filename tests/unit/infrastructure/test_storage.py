@@ -109,10 +109,10 @@ class TestBronzeWriter:
             ingestion_ts=TEST_INGESTION_TS,
         )
 
-        # Check path contains expected parts (path format: v1/{provider}/{entity}/{date}/batch_{id}.jsonl.zst)
+        # Check path contains expected parts (path format: {provider}/{entity}/{date}/batch_{date}_{id}.jsonl.zst)
         # Note: BronzeWriter returns relative path without 'bronze/' prefix (base_path already contains it)
         # Normalize path separators for cross-platform compatibility
-        expected_path = "v1/test_provider/test_entity/2023-01-01/batch_12345678-1234-5678-1234-567812345678.jsonl.zst"
+        expected_path = "test_provider/test_entity/2023-01-01/batch_2023-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
         assert result.relative_path.replace("\\", "/") == expected_path
 
     async def test_write_bronze_compresses_with_zstd(self, tmp_path, noop_logger):
@@ -202,12 +202,12 @@ class TestBronzeWriter:
             ingestion_ts=TEST_INGESTION_TS,
         )
 
-        # Check JSON file was created
+        # Check JSON file was created (now in same directory as zst files)
         json_path = (
             tmp_path
-            / "json"
             / "test_provider"
             / "test_entity"
+            / "2023-01-01"
             / "batch_2023-01-01_12345678-1234-5678-1234-567812345678.jsonl"
         )
         assert json_path.exists()
@@ -223,9 +223,9 @@ class TestBronzeWriter:
         compressor = zstd.ZstdCompressor(level=3)
         compressed = compressor.compress(jsonl_data.encode("utf-8"))
 
-        # Create directory structure (path format: bronze/v1/{provider}/{entity}/{date}/)
+        # Create directory structure (path format: {provider}/{entity}/{date}/)
         bronze_dir = (
-            tmp_path / "bronze" / "v1" / "test_provider" / "test_entity" / "2023-01-01"
+            tmp_path / "test_provider" / "test_entity" / "2023-01-01"
         )
         bronze_dir.mkdir(parents=True)
         test_file = bronze_dir / "batch_test.jsonl.zst"
@@ -240,7 +240,7 @@ class TestBronzeWriter:
         # Read it back
         read_records = []
         async for record in writer.read_bronze(
-            "bronze/v1/test_provider/test_entity/2023-01-01/batch_test.jsonl.zst"
+            "test_provider/test_entity/2023-01-01/batch_test.jsonl.zst"
         ):
             read_records.append(record)
 
