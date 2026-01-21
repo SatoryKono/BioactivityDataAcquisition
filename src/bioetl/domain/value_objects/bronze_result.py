@@ -37,15 +37,15 @@ class BronzeWriteResult:
     Example:
         >>> result = BronzeWriteResult(
         ...     batch_id=BatchID(uuid4()),
-        ...     relative_path="v1/chembl/activity/2024-01-15/batch_abc.jsonl.zst",
-        ...     absolute_path="/data/bronze/v1/chembl/activity/2024-01-15/batch_abc.jsonl.zst",
+        ...     relative_path="chembl/activity/2024-01-15/batch_abc.jsonl.zst",
+        ...     absolute_path="/data/bronze/chembl/activity/2024-01-15/batch_abc.jsonl.zst",
         ...     record_count=1000,
         ...     compressed_size=50000,
         ...     uncompressed_size=200000,
         ...     checksum_blake2="abc123...",
         ... )
         >>> result.relative_path
-        'v1/chembl/activity/2024-01-15/batch_abc.jsonl.zst'
+        'chembl/activity/2024-01-15/batch_abc.jsonl.zst'
     """
 
     batch_id: BatchID

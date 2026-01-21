@@ -107,10 +107,10 @@ class TestBronzeMetadataInvariants:
     ) -> None:
         """Bronze paths MUST include date partitioning.
 
-        Path format: bronze/v1/{provider}/{entity}/{date}/
+        Path format: bronze/{provider}/{entity}/{date}/
         """
         # Check for date-based path construction pattern
-        assert "bronze/v1/" in bronze_writer_source, (
-            "Bronze path must follow format: bronze/v1/{provider}/{entity}/{date}/\n"
+        assert "{provider}/{entity}/{date" in bronze_writer_source, (
+            "Bronze path must follow format: bronze/{provider}/{entity}/{date}/\n"
             "See RULES.md §2.1.1 - REQ-DATA-002"
         )

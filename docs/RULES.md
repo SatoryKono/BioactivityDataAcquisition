@@ -179,7 +179,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 ### 2.5. Стратегия Партиционирования 
 | Уровень | Стратегия партиционирования | Пример | 
 |---------|----------------------------|--------| 
-| **Bronze** | По `ingestion_date` (YYYY-MM-DD) | `bronze/v1/chembl/activity/2025-05-20/` | 
+| **Bronze** | По `ingestion_date` (YYYY-MM-DD) | `bronze/chembl/activity/2025-05-20/` | 
 | **Silver** | По `source_date` или `entity_type` | `silver/chembl/activity/year=2025/month=05/` | 
 | **Gold** | По use-case (часто по `target_id` или `date`) | `gold/activity_by_target/target_id=CHEMBL123/` | 
  
