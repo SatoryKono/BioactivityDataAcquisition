@@ -41,20 +41,22 @@
 
 ### Backward Compatibility
 
-Deprecated aliases сохранены для обратной совместимости:
+**Update (2026-01-21):** Deprecated aliases were **planned but never implemented**.
+Code analysis confirmed that the codebase was migrated directly to canonical names
+without requiring backward compatibility shims. All consumers were updated atomically.
 
+Original plan (not implemented):
 ```python
-# chembl_structures.py
-Document = ChemblPublication  # Deprecated alias
-
-# pubchem.py
-Compound = PubchemMolecule  # Deprecated alias
-
-# uniprot.py
-Protein = UniprotTarget  # Deprecated alias
+# These aliases were NEVER added - direct migration was cleaner
+# Document = ChemblPublication  # NOT IMPLEMENTED
+# Compound = PubchemMolecule    # NOT IMPLEMENTED
+# Protein = UniprotTarget       # NOT IMPLEMENTED
 ```
 
-Aliases работают идентично оригинальным классам (type aliases).
+**Rationale for skipping aliases:**
+1. All internal consumers were updated in the same migration
+2. No external API stability requirements
+3. Cleaner codebase without deprecated symbols
 
 ### Pandera Schemas
 
@@ -77,7 +79,7 @@ Aliases работают идентично оригинальным класс�
 
 ### Negative
 
-1. **Migration overhead**: Существующий код использует старые имена (митигируется aliases)
+1. **Migration overhead**: Существующий код использовал старые имена (все обновлено атомарно в одном коммите, aliases не потребовались)
 2. **Documentation updates**: Необходимо обновить документацию (выполнено)
 
 ### Neutral
@@ -147,45 +149,41 @@ Aliases работают идентично оригинальным класс�
 
 ### Migration Guide
 
+**Note:** Since aliases were never implemented, old imports will raise `ImportError`.
+All code must use canonical names directly.
+
 **Domain Entities:**
 ```python
-# Before (deprecated)
-from bioetl.domain.entities import Document, Compound, Protein
+# Old names (NOT available - will raise ImportError)
+# from bioetl.domain.entities import Document, Compound, Protein  # ERROR!
 
-# After (canonical)
+# Canonical names (ONLY option)
 from bioetl.domain.entities import ChemblPublication, PubchemMolecule, UniprotTarget
 ```
 
 **Pipelines and Transformers:**
 ```python
-# Before (deprecated)
-from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer
-from bioetl.application.pipelines.chembl.document import ChEMBLDocumentPipeline
+# Old files/classes no longer exist
+# from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer  # ERROR!
 
-# After (canonical)
+# Canonical names (ONLY option)
 from bioetl.application.pipelines.chembl.publication_transformer import PublicationTransformer
 from bioetl.application.pipelines.chembl.publication import ChEMBLPublicationPipeline
-
-# Via package __init__.py (both work, new names preferred)
-from bioetl.application.pipelines.chembl import (
-    PublicationTransformer,    # Canonical
-    DocumentTransformer,       # Deprecated alias
-)
 ```
 
 **Pipeline Names (CLI):**
 ```bash
-# Before (deprecated)
-bioetl run chembl_document
+# Old names no longer work
+# bioetl run chembl_document  # ERROR: Unknown pipeline
 
-# After (canonical)
+# Canonical names (ONLY option)
 bioetl run chembl_publication
 ```
 
 ### Deprecation Timeline
 
-- **v2.0**: Canonical names introduced, deprecated aliases available
-- **v3.0 (planned)**: Deprecated aliases may be removed with deprecation warnings
+- **v2.0**: Canonical names introduced with direct migration (no aliases needed)
+- ~~**v3.0 (planned)**: Deprecated aliases may be removed~~ — Not applicable, aliases were never added
 
 ## References
 
