@@ -498,7 +498,7 @@ class TestClassSize:
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
         "BronzeWriter": 725,  # 720 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata + query_string extraction + async read_bronze
-        "BatchExecutor": 720,  # 718 lines - unified executor for batch processing + DQ context + MetadataCoordinator
+        "BatchExecutor": 725,  # 722 lines - unified executor for batch processing + DQ context + MetadataCoordinator + _extract_dq_entity helper
         "BatchWriter": 380,  # 376 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage + DQ defaults
         # Application core classes
         "FilteredDataSource": 330,  # 320 lines - decorator with fallback mapping support
