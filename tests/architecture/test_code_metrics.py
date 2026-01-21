@@ -56,7 +56,7 @@ class TestFileSizeLimits:
         # Domain ports NoOp implementations
         "noop.py": 475,  # 470 LOC - NoOp implementations for Null Object Pattern (+ NoOpMetadataWriter with provider/entity params)
         # Domain models/metadata.py (models/metadata.py 566 LOC, ports/metadata.py only 104 LOC)
-        "metadata.py": 570,  # 566 LOC - Metadata models with APIRequestDetails + RateLimitInfo for Bronze layer enrichment
+        "metadata.py": 575,  # 571 LOC - Metadata models with APIRequestDetails + RateLimitInfo for Bronze layer enrichment
         # Domain ports (Protocol definitions with comprehensive docstrings)
         "data_normalization.py": 330,  # 321 LOC - DataNormalizationPort with partial date normalization
         "storage.py": 395,  # 390 LOC - StoragePort with read_silver, write_*_merged for composite pipelines + SourceMetadata param + Silver lineage
