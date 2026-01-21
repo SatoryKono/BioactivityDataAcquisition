@@ -39,6 +39,7 @@ dq_config_file: ../../dq/entities/chembl/publication.yaml
 sink:
   bronze:
     path: "data/output/bronze/chembl/publication"
+    flat_structure: true  # Files written directly under path/{date}/, without provider/entity subdirs
   silver:
     path: "data/output/silver/chembl/publication"
     primary_key: ["document_chembl_id"]

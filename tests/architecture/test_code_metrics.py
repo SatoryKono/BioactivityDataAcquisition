@@ -86,7 +86,7 @@ class TestFileSizeLimits:
         # Infrastructure layer exemptions
         "silver_writer.py": 1220,  # 1214 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage + provider/entity params + flat_structure
         "gold_writer.py": 1115,  # 1110 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage + provider/entity params + flat_structure
-        "bronze_writer.py": 770,  # 767 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params
+        "bronze_writer.py": 800,  # 797 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
         "silver.py": 840,  # 833 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields)
         "client.py": 960,  # 941 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback), CrossRefAdapter (DOI→title fallback)
@@ -501,7 +501,7 @@ class TestClassSize:
         "UniProtProteinTransformer": 800,  # 772 lines - complex protein data extraction with many fields
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
-        "BronzeWriter": 725,  # 720 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata + query_string extraction + async read_bronze
+        "BronzeWriter": 760,  # 750 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata + query_string extraction + async read_bronze + flat_structure
         "BatchExecutor": 725,  # 722 lines - unified executor for batch processing + DQ context + MetadataCoordinator + _extract_dq_entity helper
         "BatchWriter": 380,  # 376 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage + DQ defaults
         # Application core classes

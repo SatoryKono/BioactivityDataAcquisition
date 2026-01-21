@@ -39,6 +39,7 @@ filter_config_file: ../../filter/entities/pubmed/publications.yaml
 sink:
   bronze:
     path: "data/output/bronze/pubmed/publication"
+    flat_structure: true  # Path already includes provider/entity
   silver:
     path: "data/output/silver/pubmed/publication"
     partition_by: ["pub_year"]

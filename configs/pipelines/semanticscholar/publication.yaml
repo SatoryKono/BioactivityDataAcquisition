@@ -42,6 +42,7 @@ dq_config_file: ../../dq/entities/semanticscholar/publication.yaml
 sink:
   bronze:
     path: "data/output/bronze/semanticscholar/publication"
+    flat_structure: true  # Path already includes provider/entity
   silver:
     path: "data/output/silver/semanticscholar/publication"
     primary_key: ["paper_id"]

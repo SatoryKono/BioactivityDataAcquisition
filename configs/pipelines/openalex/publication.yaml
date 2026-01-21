@@ -47,6 +47,7 @@ dq_config_file: ../../dq/entities/openalex/publication.yaml
 sink:
   bronze:
     path: "data/output/bronze/openalex/publication"
+    flat_structure: true  # Path already includes provider/entity
   silver:
     path: "data/output/silver/openalex/publication"
     primary_key: ["openalex_id"]

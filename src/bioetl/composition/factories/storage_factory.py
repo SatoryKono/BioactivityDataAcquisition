@@ -74,7 +74,7 @@ class StorageFactory:
         """
         if csv_cfg and csv_cfg.enabled:
             return CsvExporter(
-                base_path=override_path or csv_cfg.path,
+                base_path=str(override_path) if override_path else csv_cfg.path,
                 logger=logger,
                 delimiter=csv_cfg.delimiter,
                 header=csv_cfg.header,
@@ -107,6 +107,7 @@ class StorageFactory:
         metadata_coordinator: MetadataCoordinator | None = None,
         transform_version: str | None = None,
         transform_steps: tuple[str, ...] | None = None,
+        bronze_flat_structure: bool = False,
         silver_flat_structure: bool = False,
         gold_flat_structure: bool = False,
     ) -> StorageAdapter:
@@ -149,6 +150,7 @@ class StorageFactory:
                 metadata_writer=bronze_metadata_writer,
                 save_metadata=bronze_save_metadata,
                 metadata_coordinator=metadata_coordinator,
+                flat_structure=bronze_flat_structure,
             ),
             silver_writer=SilverWriter(
                 base_path=silver_path,
@@ -256,6 +258,7 @@ class StorageFactory:
         transform_steps = tuple(config.transform.steps)
 
         # Extract flat_structure settings
+        bronze_flat_structure = bronze_config.flat_structure if bronze_config else False
         silver_flat_structure = silver_config.flat_structure if silver_config else False
         gold_flat_structure = gold_config.flat_structure if gold_config else False
 
@@ -274,6 +277,7 @@ class StorageFactory:
             metadata_coordinator=metadata_coordinator,
             transform_version=transform_version,
             transform_steps=transform_steps,
+            bronze_flat_structure=bronze_flat_structure,
             silver_flat_structure=silver_flat_structure,
             gold_flat_structure=gold_flat_structure,
         )
