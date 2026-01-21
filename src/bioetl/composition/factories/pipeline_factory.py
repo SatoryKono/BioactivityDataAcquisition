@@ -540,6 +540,11 @@ def assemble_runner(
         tracer=observability.tracer,
     )
 
+    # Extract sink paths for DQ report generation
+    bronze_output_path, silver_output_path, gold_output_path, flat_structure = (
+        _extract_dq_output_paths(yaml_config)
+    )
+
     # Create unified BatchExecutor (replaces PipelineExecutor + RecordProcessor)
     # Safety Guard §4.6: lock validation via lock_validator callback
     batch_executor = ServicesBuilder.create_batch_executor_from_pipeline(
@@ -551,6 +556,11 @@ def assemble_runner(
         strict_gold_validation=strict_gold_validation,
         lock_validator=lock_manager.validate,
         tracer=observability.tracer,
+        # DQ report output paths for flat_structure support
+        bronze_output_path=bronze_output_path,
+        silver_output_path=silver_output_path,
+        gold_output_path=gold_output_path,
+        flat_structure=flat_structure,
     )
 
     # Assemble Runner with directly injected services (explicit DI)
@@ -634,3 +644,49 @@ def _extract_dq_configs(
     gold_config = _extract_single_dq_config(sink, "gold", GoldSinkConfig)
 
     return bronze_config, silver_config, gold_config
+
+
+def _extract_dq_output_paths(
+    yaml_config: PipelineYamlConfig | None,
+) -> tuple[str | None, str | None, str | None, bool]:
+    """Extract DQ report output paths and flat_structure from YAML config.
+
+    Args:
+        yaml_config: Pipeline YAML configuration with sink settings.
+
+    Returns:
+        Tuple of (bronze_path, silver_path, gold_path, flat_structure).
+        Paths may be None if not configured.
+    """
+    if yaml_config is None:
+        return None, None, None, False
+
+    sink = getattr(yaml_config, "sink", None)
+    if sink is None:
+        return None, None, None, False
+
+    # Extract paths from each layer
+    bronze_path: str | None = None
+    silver_path: str | None = None
+    gold_path: str | None = None
+    flat_structure = False
+
+    bronze_config = sink.get("bronze")
+    if bronze_config and hasattr(bronze_config, "path"):
+        bronze_path = bronze_config.path
+
+    silver_config = sink.get("silver")
+    if silver_config:
+        if hasattr(silver_config, "path"):
+            silver_path = silver_config.path
+        if hasattr(silver_config, "flat_structure") and silver_config.flat_structure:
+            flat_structure = True
+
+    gold_config = sink.get("gold")
+    if gold_config:
+        if hasattr(gold_config, "path"):
+            gold_path = gold_config.path
+        if hasattr(gold_config, "flat_structure") and gold_config.flat_structure:
+            flat_structure = True
+
+    return bronze_path, silver_path, gold_path, flat_structure
