@@ -176,6 +176,9 @@ class StoragePort(Protocol):
         table_name: str,
         records: list[dict[str, Any]],
         primary_keys: list[str] | None = None,
+        *,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
     ) -> None:
         """Write merged records to Silver layer without explicit schema.
 
@@ -186,6 +189,8 @@ class StoragePort(Protocol):
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
+            run_id: Optional composite run ID for metadata tracking.
+            sources_used: Optional list of source pipelines used in merge.
 
         Note:
             This method bypasses strict schema validation since merged data
@@ -198,6 +203,9 @@ class StoragePort(Protocol):
         table_name: str,
         records: list[dict[str, Any]],
         primary_keys: list[str] | None = None,
+        *,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
     ) -> None:
         """Write merged records to Gold layer without Pandera schema.
 
@@ -208,6 +216,8 @@ class StoragePort(Protocol):
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
+            run_id: Optional composite run ID for metadata tracking.
+            sources_used: Optional list of source pipelines used in merge.
 
         Note:
             This method bypasses Pandera validation since merged data
