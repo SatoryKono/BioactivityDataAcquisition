@@ -39,7 +39,7 @@ To build a robust, scalable, and maintainable data pipeline for acquiring and pr
 
 ## Current Version
 
-**v5.9.0** (2026-01-06) — See [CHANGELOG](CHANGELOG.md) for details.
+**v5.9.0** (2026-01-06) — See [CHANGELOG](../CHANGELOG.md) for details.
 
 ## Getting Started
 

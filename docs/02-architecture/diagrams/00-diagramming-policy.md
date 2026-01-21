@@ -253,5 +253,5 @@ Worker -> Redis: DEL lock
 
 ## Related Documents
 
-- [00-rules-summary.md](../../00-project_rules/00-rules-summary.md) - Project rules summary
+- [RULES.md](../../RULES.md) - Project rules
 - [00-map.md](../../00-map.md) - Project navigator

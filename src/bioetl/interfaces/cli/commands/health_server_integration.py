@@ -27,7 +27,7 @@ DEFAULT_HEALTH_SERVER_PORT = 8080
 @asynccontextmanager
 async def health_server_context(
     enabled: bool,
-    host: str = "0.0.0.0",
+    host: str = "127.0.0.1",
     port: int = DEFAULT_HEALTH_SERVER_PORT,
 ) -> AsyncIterator[HealthServer | None]:
     """Context manager that optionally runs a health server.
