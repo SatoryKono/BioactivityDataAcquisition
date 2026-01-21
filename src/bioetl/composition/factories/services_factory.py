@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.memory_monitor import MemoryConfig
     from bioetl.application.core.shutdown import ShutdownSignal
+    from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
         CheckpointPort,
@@ -129,6 +130,7 @@ class BaseServicesFactory:
         pipeline_config: PipelineYamlConfig,
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
+        metadata_coordinator: MetadataCoordinator | None = None,
     ) -> PipelineServices:
         """Create services with injected data source.
 
@@ -139,6 +141,8 @@ class BaseServicesFactory:
             pipeline_config: Pipeline YAML configuration
             tracer: Optional tracer (defaults to NoOpTracing if not provided)
             dq_monitor: Optional data quality monitor for anomaly detection
+            metadata_coordinator: Optional MetadataCoordinator for centralized
+                                metadata creation across Bronze, Silver, Gold.
 
         Returns:
             PipelineServices with all dependencies configured
@@ -147,7 +151,11 @@ class BaseServicesFactory:
         metrics = cls._create_metrics(settings)
 
         storage_ctx = StorageFactory.create(
-            settings, pipeline_config, logger, metrics=metrics
+            settings,
+            pipeline_config,
+            logger,
+            metrics=metrics,
+            metadata_coordinator=metadata_coordinator,
         )
 
         lock = cls._create_lock()
@@ -276,9 +284,12 @@ class BaseServicesFactory:
 
         # DQ reports should be written alongside the data
         output_root = cls._get_output_root(settings, pipeline_config)
+        # Get flat_structure from sink config (use Silver as primary)
+        flat_structure = cls._get_flat_structure(pipeline_config)
         report_writer = DQServicesFactory.create_report_writer(
             base_path=output_root,
             logger=logger,
+            flat_structure=flat_structure,
         )
 
         # Create DQ report service
@@ -316,6 +327,29 @@ class BaseServicesFactory:
         for layer_name in ("bronze", "silver", "gold"):
             layer_config = sink.get(layer_name)
             if layer_config and layer_config.dq_report.enabled:
+                return True
+
+        return False
+
+    @staticmethod
+    def _get_flat_structure(config: PipelineYamlConfig) -> bool:
+        """Get flat_structure setting from pipeline config.
+
+        Checks Silver and Gold layers for flat_structure setting.
+        Returns True if either layer has flat_structure enabled.
+
+        Args:
+            config: Pipeline YAML configuration.
+
+        Returns:
+            True if flat_structure is enabled for any layer.
+        """
+        sink = config.sink
+
+        # Check Silver and Gold for flat_structure
+        for layer_name in ("silver", "gold"):
+            layer_config = sink.get(layer_name)
+            if layer_config and getattr(layer_config, "flat_structure", False):
                 return True
 
         return False
@@ -514,6 +548,11 @@ class ServicesBuilder:
         tracer: TracingPort | None = None,
         memory_monitor: MemoryMonitorPort | None = None,
         memory_config: MemoryConfig | None = None,
+        # DQ report output paths (for flat_structure support)
+        bronze_output_path: str | None = None,
+        silver_output_path: str | None = None,
+        gold_output_path: str | None = None,
+        flat_structure: bool = False,
     ) -> BatchExecutor:
         """Create BatchExecutor from pipeline instance.
 
@@ -558,6 +597,11 @@ class ServicesBuilder:
             gold_schema=gold_schema,
             dq_config=pipeline.config.dq,
             table_config=table_config,
+            # DQ report output paths for flat_structure support
+            bronze_output_path=bronze_output_path,
+            silver_output_path=silver_output_path,
+            gold_output_path=gold_output_path,
+            flat_structure=flat_structure,
         )
 
         # Create Gold validator

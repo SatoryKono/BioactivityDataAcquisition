@@ -77,17 +77,24 @@ class DQServicesFactory:
     def create_report_writer(
         base_path: str | Path,
         logger: LoggerPort,
+        flat_structure: bool = False,
     ) -> DQReportWriterPort:
         """Create DQ report writer.
 
         Args:
             base_path: Base path for report storage.
             logger: Structured logger for observability.
+            flat_structure: If True, write reports directly to base_path
+                          with {layer}_{provider}_{entity}_dq_report{ext} naming.
 
         Returns:
             DQReportWriterPort implementation for writing reports to filesystem.
         """
-        return DQReportWriter(base_path=base_path, logger=logger)
+        return DQReportWriter(
+            base_path=base_path,
+            logger=logger,
+            flat_structure=flat_structure,
+        )
 
 
 __all__ = ["DQServicesFactory"]

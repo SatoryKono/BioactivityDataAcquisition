@@ -69,7 +69,7 @@ class TestFileSizeLimits:
         "dq_metrics.py": 420,  # 411 LOC - Batch DQ metrics with helpers for CC reduction + _make_hashable for list/dict values
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
-        "batch_executor.py": 770,  # 764 LOC - unified executor for batch processing + DQ context
+        "batch_executor.py": 785,  # 779 LOC - unified executor for batch processing + DQ context + MetadataCoordinator params
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
         "gold_analyzer.py": 830,  # 827 LOC - Gold layer analysis with DQ rules
         "silver_analyzer.py": 590,  # 570 LOC - Silver layer analysis with validation
@@ -80,9 +80,9 @@ class TestFileSizeLimits:
         "registration.py": 720,  # 705 LOC - provider registration with data source creators (OpenAlex + SemanticScholar + UniProt IDMapping)
         "storage_adapter.py": 640,  # 633 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
         # Consolidated factory files (v5.2)
-        "pipeline_factory.py": 650,  # 643 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory
+        "pipeline_factory.py": 720,  # 716 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths + MetadataCoordinator creation
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
-        "services_factory.py": 630,  # 623 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
+        "services_factory.py": 670,  # 668 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param
         # Infrastructure layer exemptions
         "silver_writer.py": 1175,  # 1168 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage + provider/entity params
         "gold_writer.py": 955,  # 948 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage + provider/entity params
@@ -498,7 +498,7 @@ class TestClassSize:
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
         "BronzeWriter": 725,  # 720 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata + query_string extraction + async read_bronze
-        "BatchExecutor": 710,  # 703 lines - unified executor for batch processing + DQ context
+        "BatchExecutor": 720,  # 718 lines - unified executor for batch processing + DQ context + MetadataCoordinator
         "BatchWriter": 380,  # 376 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage + DQ defaults
         # Application core classes
         "FilteredDataSource": 330,  # 320 lines - decorator with fallback mapping support

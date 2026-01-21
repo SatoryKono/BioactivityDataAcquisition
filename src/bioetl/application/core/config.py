@@ -24,6 +24,11 @@ class RecordProcessorConfig:
     dq_config: DQConfig | None = None
     table_config: TableConfig = field(default_factory=TableConfig)
     memory_config: MemoryConfig = field(default_factory=MemoryConfig)
+    # DQ report output paths (for flat_structure support)
+    bronze_output_path: str | None = None
+    silver_output_path: str | None = None
+    gold_output_path: str | None = None
+    flat_structure: bool = False
 
 
 @dataclass(frozen=True, slots=True)

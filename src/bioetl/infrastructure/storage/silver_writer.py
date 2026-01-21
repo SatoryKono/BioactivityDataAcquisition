@@ -802,11 +802,22 @@ class SilverWriter(BaseDeltaWriter):
         if not records:
             return
 
-        # Extract pipeline info from table path for filename generation
-        # table_path format: {base_path}/{provider}/{entity}
-        path_parts = table_path.rstrip("/").split("/")
-        entity_name = path_parts[-1] if path_parts else "unknown"
-        provider_name = path_parts[-2] if len(path_parts) > 1 else "unknown"
+        # Extract pipeline info from table_name for filename generation
+        # table_name format: {provider}.{entity}, {provider}_{entity}, or just {entity}
+        # Note: We use table_name instead of table_path to be platform-independent
+        # and support flat_structure mode where path doesn't contain entity info.
+        if "." in table_name:
+            parts = table_name.split(".")
+            provider_name = parts[0]
+            entity_name = parts[1] if len(parts) > 1 else parts[0]
+        elif "_" in table_name:
+            # Split on first underscore (e.g., chembl_publication -> chembl, publication)
+            parts = table_name.split("_", 1)
+            provider_name = parts[0]
+            entity_name = parts[1] if len(parts) > 1 else parts[0]
+        else:
+            provider_name = "unknown"
+            entity_name = table_name if table_name else "unknown"
 
         if self._metadata_coordinator is None:
             self.logger.warning(
