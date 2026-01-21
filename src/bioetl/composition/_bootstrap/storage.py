@@ -54,6 +54,14 @@ def bootstrap_storage() -> StorageAdapter:
     Returns:
         StorageAdapter configured for the current environment.
     """
+    from datetime import UTC, datetime
+    from uuid import uuid4
+
+    from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
+    from bioetl.domain.types import RunID, RunType
+    from bioetl.domain.value_objects.run_context import RunContext
+    from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
+
     settings = get_settings()
     noop_logger = NoOpLogger()
     noop_metrics = NoOpMetrics()
@@ -61,6 +69,18 @@ def bootstrap_storage() -> StorageAdapter:
 
     # ADR-025: Use data/output/ hierarchy for consistency with pipeline configs
     output_dir = Path(settings.data_dir) / "output"
+
+    # Create metadata services for composite pipelines
+    metadata_writer = MetadataWriter(logger=noop_logger)
+    run_context = RunContext(
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        started_at=datetime.now(UTC),
+        pipeline_name="composite",
+        provider="composite",
+        entity="merged",
+    )
+    metadata_coordinator = MetadataCoordinator(run_context=run_context)
 
     return StorageAdapter(
         bronze_writer=BronzeWriter(
@@ -76,12 +96,16 @@ def bootstrap_storage() -> StorageAdapter:
             logger=noop_logger,
             tracing=noop_tracing,
             csv_exporter=None,
+            metadata_writer=metadata_writer,
+            metadata_coordinator=metadata_coordinator,
         ),
         gold_writer=GoldWriter(
             base_path=output_dir / "gold",  # data/output/gold
             logger=noop_logger,
             tracing=noop_tracing,
             csv_exporter=None,
+            metadata_writer=metadata_writer,
+            metadata_coordinator=metadata_coordinator,
         ),
     )
 
