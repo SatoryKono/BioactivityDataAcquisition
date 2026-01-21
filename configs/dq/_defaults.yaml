@@ -1,4 +1,4 @@
-# configs/dq/_defaults.yaml
+ # configs/dq/_defaults.yaml
 # Global DQ defaults for all BioETL pipelines
 # RULES.md §3.1.2: DQ Thresholds
 #
