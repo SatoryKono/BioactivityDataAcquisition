@@ -513,7 +513,9 @@ def assemble_runner(
     )
 
     # Extract DQ configs from YAML config for DQ report generation
-    bronze_dq_config, silver_dq_config, gold_dq_config = _extract_dq_configs(yaml_config)
+    bronze_dq_config, silver_dq_config, gold_dq_config = _extract_dq_configs(
+        yaml_config
+    )
 
     postrun_service = PostrunService(
         config=pipeline.config,
