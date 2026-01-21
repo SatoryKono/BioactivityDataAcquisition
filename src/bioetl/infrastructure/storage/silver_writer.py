@@ -796,6 +796,12 @@ class SilverWriter(BaseDeltaWriter):
         if not records:
             return
 
+        # Extract pipeline info from table path for filename generation
+        # table_path format: {base_path}/{provider}/{entity}
+        path_parts = table_path.rstrip("/").split("/")
+        entity_name = path_parts[-1] if path_parts else "unknown"
+        provider_name = path_parts[-2] if len(path_parts) > 1 else "unknown"
+
         # Use MetadataCoordinator if available (centralized metadata)
         if self._metadata_coordinator is not None:
             from bioetl.domain.ports import SilverMetadataInput
@@ -820,6 +826,8 @@ class SilverWriter(BaseDeltaWriter):
                 metadata,
                 table_name=table_name,
                 flat_structure=self._flat_structure,
+                provider=provider_name,
+                entity=entity_name,
             )
             return
 
@@ -864,16 +872,11 @@ class SilverWriter(BaseDeltaWriter):
             completed_at_utc=now,
         )
 
-        # Extract pipeline info from table path
-        # table_path format: {base_path}/{provider}/{entity}
-        path_parts = table_path.rstrip("/").split("/")
-        entity = path_parts[-1] if path_parts else "unknown"
-        provider = path_parts[-2] if len(path_parts) > 1 else "unknown"
-
+        # Use already extracted provider/entity from top of method
         pipeline = PipelineMetadata(
-            name=f"{provider}_{entity}",
-            provider=provider,
-            entity=entity,
+            name=f"{provider_name}_{entity_name}",
+            provider=provider_name,
+            entity=entity_name,
         )
 
         # Build lineage from records and bronze_refs
@@ -959,6 +962,8 @@ class SilverWriter(BaseDeltaWriter):
             metadata,
             table_name=table_name,
             flat_structure=self._flat_structure,
+            provider=provider_name,
+            entity=entity_name,
         )
 
     async def _merge_records(

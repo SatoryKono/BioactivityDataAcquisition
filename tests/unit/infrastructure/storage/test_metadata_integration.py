@@ -30,7 +30,14 @@ class MockMetadataWriter:
         self.silver_calls: list[tuple[str | Path, SilverMetadata]] = []
         self.gold_calls: list[tuple[str | Path, GoldMetadata]] = []
 
-    async def write_bronze_metadata(self, base_path: str | Path, metadata: Any) -> str:
+    async def write_bronze_metadata(
+        self,
+        base_path: str | Path,
+        metadata: Any,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
+    ) -> str:
         """Mock Bronze metadata write."""
         return ""
 
@@ -41,6 +48,8 @@ class MockMetadataWriter:
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """Record Silver metadata write."""
         self.silver_calls.append((base_path, metadata))
@@ -53,6 +62,8 @@ class MockMetadataWriter:
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """Record Gold metadata write."""
         self.gold_calls.append((base_path, metadata))
