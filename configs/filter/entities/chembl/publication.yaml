@@ -37,10 +37,8 @@ gold_filters:
       min: 1950
       include_min: false
 
-  # Required fields
+  # Required fields (pubmed_id and doi are optional - not all publications have them)
   required_fields:
     - document_chembl_id
     - doc_type
     - title
-    - pubmed_id
-    - doi

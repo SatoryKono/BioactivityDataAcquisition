@@ -187,6 +187,8 @@ def create_test_context(
     run_type: RunType = RunType.INCREMENTAL,
     resume: bool = False,
     query: str | None = None,
+    filter_ids: tuple[str, ...] | None = None,
+    filter_field: str | None = None,
 ) -> PipelineRunContext:
     """Создание контекста для E2E теста.
 
@@ -196,10 +198,19 @@ def create_test_context(
         run_type: Тип запуска (INCREMENTAL, BACKFILL, REBUILD)
         resume: Возобновление с чекпоинта
         query: Поисковый запрос (для PubChem)
+        filter_ids: IDs для фильтрации (если указаны, используется вместо YAML filter)
+        filter_field: Поле для фильтрации (обязательно если указаны filter_ids)
 
     Returns:
         PipelineRunContext для передачи в bootstrap_pipeline
     """
+    from bioetl.domain.context import InputFilterContext
+
+    if filter_ids is not None and filter_field is not None:
+        input_filter = InputFilterContext.from_ids(filter_ids, filter_field)
+    else:
+        input_filter = InputFilterContext.disabled()
+
     return PipelineRunContext(
         pipeline_name=pipeline_name,
         run_id=uuid4(),
@@ -207,6 +218,7 @@ def create_test_context(
         resume=resume,
         limit=limit,
         query=query,
+        input_filter=input_filter,
     )
 
 
