@@ -13663,7 +13663,7 @@ Requirements:
 
 Architecture:
 - Stores checkpoints as JSON on local filesystem
-- Path: {base_path}/checkpoints/{pipeline}/latest.json
+- Path: {base_path}/{provider}_{entity}.json (flat structure)
 - Atomic writes via temp file + os.replace
 - Metadata includes run_id and custom metadata
 """
@@ -13803,15 +13803,18 @@ class LocalCheckpoint:
         return await loop.run_in_executor(None, self._list_all_sync)
 
     def _list_all_sync(self) -> list[str]:
-        """Synchronous list_all implementation."""
-        prefix = "checkpoints"
-        root = self.base_path / prefix
+        """Synchronous list_all implementation.
+
+        Lists all pipelines with checkpoints by scanning for .json files
+        directly in the base path (flat structure).
+        """
         pipelines: set[str] = set()
 
-        if root.exists():
-            for path in root.iterdir():
-                if path.is_dir():
-                    pipelines.add(path.name)
+        if self.base_path.exists():
+            for path in self.base_path.iterdir():
+                if path.is_file() and path.suffix == ".json":
+                    # Remove .json suffix to get pipeline name
+                    pipelines.add(path.stem)
 
         return sorted(pipelines)
 
@@ -13829,7 +13832,12 @@ class LocalCheckpoint:
         return (self.base_path / key).exists()
 
     def _get_key(self, pipeline: str) -> str:
-        return f"checkpoints/{pipeline}/latest.json"
+        """Get checkpoint file path for a pipeline.
+
+        Returns flat path: {pipeline}.json (e.g., chembl_activity.json)
+        The base_path already points to data/output/checkpoints/.
+        """
+        return f"{pipeline}.json"
 
     async def aclose(self) -> None:
         """Close checkpoint storage (no-op for local filesystem)."""
@@ -14236,27 +14244,27 @@ class Settings(BaseSettings):
     @property
     def bronze_path(self) -> Path:
         """Path for Bronze layer storage."""
-        return self.data_dir / "bronze"
+        return self.data_dir / "output" / "bronze"
 
     @property
     def silver_path(self) -> Path:
         """Path for Silver layer storage."""
-        return self.data_dir / "silver"
+        return self.data_dir / "output" / "silver"
 
     @property
     def gold_path(self) -> Path:
         """Path for Gold layer storage."""
-        return self.data_dir / "gold"
+        return self.data_dir / "output" / "gold"
 
     @property
     def checkpoint_path(self) -> Path:
         """Path for checkpoint storage."""
-        return self.data_dir / "checkpoints"
+        return self.data_dir / "output" / "checkpoints"
 
     @property
     def quarantine_path(self) -> Path:
         """Path for quarantine storage."""
-        return self.data_dir / "quarantine"
+        return self.data_dir / "output" / "quarantine"
 
     @classmethod
     def settings_customise_sources(
@@ -15888,10 +15896,12 @@ class DQReportWriter:
 
     Implements DQReportWriterPort with atomic writes and
     support for JSON, YAML, and HTML formats.
-    """
 
-    # Default subdirectory for DQ reports
-    DQ_REPORTS_DIR = "_dq_reports"
+    Path formats (unified structure):
+    - Bronze: {base_path}/{provider}/{entity}/{date}/batch_{date}_{provider}_{entity}_dq_report{ext}
+    - Silver: {base_path}/{provider}/{entity}/silver_{provider}_{entity}_dq_report{ext}
+    - Gold: {base_path}/{provider}/{entity}/gold_{provider}_{entity}_dq_report{ext}
+    """
 
     def __init__(
         self,
@@ -15905,8 +15915,7 @@ class DQReportWriter:
             base_path: Base path for report storage.
             logger: Structured logger for observability.
             flat_structure: If True, write reports directly to base_path
-                          with {table_name}_dq_report{ext} naming pattern
-                          instead of {table_name}/_dq_reports/{run_id}_dq_report{ext}.
+                          with {layer}_{provider}_{entity}_dq_report{ext} naming pattern.
         """
         self._base_path = Path(base_path)
         self._logger = logger
@@ -15918,6 +15927,10 @@ class DQReportWriter:
         report: BronzeDQReport,
         output_path: Path | None = None,
         format: DQReportFormat | None = None,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
+        date_str: str | None = None,
     ) -> Path:
         """Write Bronze DQ report to file.
 
@@ -15925,6 +15938,9 @@ class DQReportWriter:
             report: Bronze DQ report to write.
             output_path: Output path (None = alongside data).
             format: Output format (None = JSON).
+            provider: Provider name for filename generation.
+            entity: Entity name for filename generation.
+            date_str: Date string (YYYY-MM-DD) for filename generation.
 
         Returns:
             Path to the written report file.
@@ -15935,24 +15951,101 @@ class DQReportWriter:
         if output_path is None:
             # Generate path based on source file location
             source_dir = Path(report.source_file).parent
-            output_path = (
-                self._base_path
-                / source_dir
-                / self.DQ_REPORTS_DIR
-                / f"{report.batch_id}_dq_report{extension}"
-            )
+            # Unified naming: batch_{date}_{provider}_{entity}_dq_report{ext}
+            # Falls back to batch_id only if provider/entity not provided
+            if provider and entity and date_str:
+                filename = f"batch_{date_str}_{provider}_{entity}_dq_report{extension}"
+            else:
+                filename = f"{report.batch_id}_dq_report{extension}"
+            output_path = self._base_path / source_dir / filename
         else:
             output_path = Path(output_path)
             if output_path.is_dir():
-                output_path = output_path / f"{report.batch_id}_dq_report{extension}"
+                if provider and entity and date_str:
+                    filename = (
+                        f"batch_{date_str}_{provider}_{entity}_dq_report{extension}"
+                    )
+                else:
+                    filename = f"{report.batch_id}_dq_report{extension}"
+                output_path = output_path / filename
 
         return await self._write_report(report, output_path, format)
+
+    def _build_layer_filename(
+        self,
+        layer: str,
+        extension: str,
+        provider: str | None,
+        entity: str | None,
+        target_table: str,
+        run_id: str,
+    ) -> str:
+        """Build filename for Silver/Gold DQ report.
+
+        Args:
+            layer: Layer name ('silver' or 'gold').
+            extension: File extension including dot.
+            provider: Provider name for filename.
+            entity: Entity name for filename.
+            target_table: Target table name (fallback for naming).
+            run_id: Run ID (fallback for naming).
+
+        Returns:
+            Generated filename.
+        """
+        if provider and entity:
+            return f"{layer}_{provider}_{entity}_dq_report{extension}"
+        if self._flat_structure:
+            flat_table_name = target_table.replace(".", "_")
+            return f"{layer}_{flat_table_name}_dq_report{extension}"
+        return f"{layer}_{run_id}_dq_report{extension}"
+
+    def _resolve_layer_output_path(
+        self,
+        layer: str,
+        output_path: Path | None,
+        extension: str,
+        provider: str | None,
+        entity: str | None,
+        target_table: str,
+        run_id: str,
+    ) -> Path:
+        """Resolve output path for Silver/Gold DQ report.
+
+        Args:
+            layer: Layer name ('silver' or 'gold').
+            output_path: Explicit output path or None for auto-generation.
+            extension: File extension including dot.
+            provider: Provider name for filename.
+            entity: Entity name for filename.
+            target_table: Target table name.
+            run_id: Run ID.
+
+        Returns:
+            Resolved output path.
+        """
+        filename = self._build_layer_filename(
+            layer, extension, provider, entity, target_table, run_id
+        )
+
+        if output_path is not None:
+            output_path = Path(output_path)
+            return output_path / filename if output_path.is_dir() else output_path
+
+        if self._flat_structure:
+            return self._base_path / filename
+
+        normalized_table = target_table.replace(".", "/")
+        return self._base_path / normalized_table / filename
 
     async def write_silver_report(
         self,
         report: SilverDQReport,
         output_path: Path | None = None,
         format: DQReportFormat | None = None,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> Path:
         """Write Silver DQ report to file.
 
@@ -15960,39 +16053,33 @@ class DQReportWriter:
             report: Silver DQ report to write.
             output_path: Output path (None = alongside data).
             format: Output format (None = JSON).
+            provider: Provider name for filename generation.
+            entity: Entity name for filename generation.
 
         Returns:
             Path to the written report file.
         """
         format = format or DQReportFormat.JSON
         extension = self._get_extension(format)
-
-        if output_path is None:
-            if self._flat_structure:
-                # Flat: {base_path}/{table_name}_dq_report{ext}
-                output_path = (
-                    self._base_path / f"{report.target_table}_dq_report{extension}"
-                )
-            else:
-                # Nested: {base_path}/{table_name}/_dq_reports/{run_id}_dq_report{ext}
-                output_path = (
-                    self._base_path
-                    / report.target_table
-                    / self.DQ_REPORTS_DIR
-                    / f"{report.run_id}_dq_report{extension}"
-                )
-        else:
-            output_path = Path(output_path)
-            if output_path.is_dir():
-                output_path = output_path / f"{report.run_id}_dq_report{extension}"
-
-        return await self._write_report(report, output_path, format)
+        resolved_path = self._resolve_layer_output_path(
+            "silver",
+            output_path,
+            extension,
+            provider,
+            entity,
+            report.target_table,
+            report.run_id,
+        )
+        return await self._write_report(report, resolved_path, format)
 
     async def write_gold_report(
         self,
         report: GoldDQReport,
         output_path: Path | None = None,
         format: DQReportFormat | None = None,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> Path:
         """Write Gold DQ report to file.
 
@@ -16000,33 +16087,24 @@ class DQReportWriter:
             report: Gold DQ report to write.
             output_path: Output path (None = alongside data).
             format: Output format (None = JSON).
+            provider: Provider name for filename generation.
+            entity: Entity name for filename generation.
 
         Returns:
             Path to the written report file.
         """
         format = format or DQReportFormat.JSON
         extension = self._get_extension(format)
-
-        if output_path is None:
-            if self._flat_structure:
-                # Flat: {base_path}/{table_name}_dq_report{ext}
-                output_path = (
-                    self._base_path / f"{report.target_table}_dq_report{extension}"
-                )
-            else:
-                # Nested: {base_path}/{table_name}/_dq_reports/{run_id}_dq_report{ext}
-                output_path = (
-                    self._base_path
-                    / report.target_table
-                    / self.DQ_REPORTS_DIR
-                    / f"{report.run_id}_dq_report{extension}"
-                )
-        else:
-            output_path = Path(output_path)
-            if output_path.is_dir():
-                output_path = output_path / f"{report.run_id}_dq_report{extension}"
-
-        return await self._write_report(report, output_path, format)
+        resolved_path = self._resolve_layer_output_path(
+            "gold",
+            output_path,
+            extension,
+            provider,
+            entity,
+            report.target_table,
+            report.run_id,
+        )
+        return await self._write_report(report, resolved_path, format)
 
     async def _write_report(
         self,
@@ -20255,7 +20333,8 @@ class BronzeSinkConfig(BaseModel):
 class SilverSinkConfig(BaseModel):
     """Silver sink configuration with optional DQ report.
 
-    Extends base silver sink config with DQ report generation.
+    Unified schema for Silver layer sink configuration.
+    Includes both metadata and DQ report settings.
     """
 
     path: str = Field(description="Base path for Silver data")
@@ -20263,7 +20342,18 @@ class SilverSinkConfig(BaseModel):
     mode: Literal["merge", "append", "overwrite"] = Field(default="merge")
     primary_key: list[str] = Field(default_factory=list)
     partition_by: list[str] = Field(default_factory=list)
+    # Metadata sidecar support
+    save_metadata: bool = Field(
+        default=False,
+        description="Save _metadata.yaml sidecar file with lineage and QC info",
+    )
+    # DQ report config
     dq_report: SilverDQReportConfig = Field(default_factory=SilverDQReportConfig)
+    # Schema drift handling
+    on_schema_mismatch: Literal["error", "evolve", "ignore"] = Field(
+        default="error",
+        description="How to handle schema drift",
+    )
 
 
 class GoldSinkConfig(BaseModel):
@@ -24871,9 +24961,6 @@ class BronzeWriter:
     COMPRESSION_LEVEL = 3
     COMPRESSION_THREADS = -1
 
-    # Bronze format version for path partitioning (REQ-DATA-002)
-    BRONZE_FORMAT_VERSION = "v1"
-
     def __init__(
         self,
         base_path: str | Path,
@@ -25262,11 +25349,10 @@ class BronzeWriter:
                 records = self._validate_json_records(records)
 
             date_str = date.strftime("%Y-%m-%d")
-            # FIX: Removed redundant 'bronze/' prefix.
+            # Path format: {provider}/{entity}/{date}/batch_{date}_{batch_id}.jsonl.zst
             # base_path already points to 'data/output/bronze'
             relative_path = (
-                f"{self.BRONZE_FORMAT_VERSION}/{provider}/{entity}/"
-                f"{date_str}/batch_{batch_id}.jsonl.zst"
+                f"{provider}/{entity}/{date_str}/batch_{date_str}_{batch_id}.jsonl.zst"
             )
             metadata = self._build_bronze_metadata(
                 run_id, run_type, ingestion_ts, provider, entity, batch_id
@@ -25412,10 +25498,14 @@ class BronzeWriter:
                 await self._metadata_writer.write_bronze_metadata(
                     base_path=metadata_base_path,
                     metadata=bronze_metadata,
+                    provider=provider,
+                    entity=entity,
                 )
                 self.logger.debug(
                     "bronze_metadata_written",
-                    metadata_path=str(metadata_base_path / "_metadata.yaml"),
+                    metadata_path=str(
+                        metadata_base_path / f"{provider}_{entity}_metadata.yaml"
+                    ),
                     run_id=str(run_id),
                 )
 
@@ -25456,13 +25546,21 @@ class BronzeWriter:
         date_str: str,
         batch_id: BatchID,
     ) -> None:
-        """Write uncompressed JSONL copy of records atomically."""
-        json_relative_path = f"{provider}/{entity}/batch_{date_str}_{batch_id}.jsonl"
+        """Write uncompressed JSONL copy of records atomically.
+
+        JSON copy is written in the same directory as the compressed zst file
+        for easier access and co-location of data artifacts.
+        """
+        # JSON copy is now stored alongside the zst file in the same directory
+        json_relative_path = (
+            f"{provider}/{entity}/{date_str}/batch_{date_str}_{batch_id}.jsonl"
+        )
 
         # Combine all records into single JSONL content
         jsonl_content = b"".join(records)
 
-        json_full_path = Path(self.json_path) / json_relative_path
+        # Use base_path (same location as zst files) instead of separate json_path
+        json_full_path = self.base_path / json_relative_path
         json_full_path.parent.mkdir(parents=True, exist_ok=True)
 
         loop = asyncio.get_running_loop()
@@ -25507,20 +25605,22 @@ class BronzeWriter:
         date: datetime | None = None,
     ) -> list[str]:
         """List all batch files for a given provider/entity."""
-        # FIX: Removed redundant 'bronze/' prefix here too
-        prefix = f"{self.BRONZE_FORMAT_VERSION}/{provider}/{entity}/"
+        # Path format: {provider}/{entity}/{date}/
+        prefix = f"{provider}/{entity}/"
         if date:
             prefix = f"{prefix}{date.strftime('%Y-%m-%d')}/"
 
         return self._list_batches_local(prefix, date)
 
     def _find_old_date_dirs(self, cutoff_str: str) -> list[Path]:
-        """Find date directories older than cutoff."""
-        version_path = self.base_path / self.BRONZE_FORMAT_VERSION
-        if not version_path.exists():
+        """Find date directories older than cutoff.
+
+        Iterates over {base_path}/{provider}/{entity}/{date}/ structure.
+        """
+        if not self.base_path.exists():
             return []
         old_dirs: list[Path] = []
-        for prov in version_path.iterdir():
+        for prov in self.base_path.iterdir():
             if not prov.is_dir():
                 continue
             for ent in prov.iterdir():
@@ -26043,6 +26143,9 @@ class GoldWriter(BaseDeltaWriter):
         table_name: str,
         records: list[dict[str, Any]],
         primary_keys: list[str] | None = None,
+        *,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
     ) -> None:
         """Write merged records to Gold layer without Pandera schema.
 
@@ -26053,6 +26156,8 @@ class GoldWriter(BaseDeltaWriter):
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
+            run_id: Optional composite run ID for metadata tracking.
+            sources_used: Optional list of source pipelines used in merge.
         """
         from bioetl.domain.schemas.column_order import canonical_column_order
 
@@ -26096,6 +26201,145 @@ class GoldWriter(BaseDeltaWriter):
                 mode="overwrite",
                 schema_mode="overwrite",
             ),
+        )
+
+        # Write metadata sidecar for composite merged data
+        await self._write_gold_merged_metadata(
+            table_path=table_path,
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys or [],
+            run_id=run_id,
+            sources_used=sources_used,
+        )
+
+    async def _write_gold_merged_metadata(
+        self,
+        table_path: str,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str],
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+    ) -> None:
+        """Write Gold layer metadata sidecar for merged composite data.
+
+        Args:
+            table_path: Full path to the Delta table.
+            table_name: Table name (used for filename generation).
+            records: List of records written.
+            primary_keys: Primary key columns used.
+            run_id: Composite run ID for tracking.
+            sources_used: List of source pipelines (e.g., ['seed', 'crossref', 'openalex']).
+        """
+        if not records:
+            return
+
+        # Extract provider/entity from table_name for filename generation
+        if "/" in table_name:
+            # Handle path-like table names (e.g., 'composite/publication')
+            parts = table_name.split("/")
+            provider_name = parts[0] if len(parts) > 1 else "composite"
+            entity_name = parts[-1]
+        elif "_" in table_name:
+            parts = table_name.split("_", 1)
+            provider_name = parts[0]
+            entity_name = parts[1] if len(parts) > 1 else parts[0]
+        else:
+            provider_name = "composite"
+            entity_name = table_name if table_name else "unknown"
+
+        if self._metadata_coordinator is None:
+            self.logger.debug(
+                "gold_merged_metadata_skipped",
+                reason="MetadataCoordinator not configured",
+                table_path=table_path,
+            )
+            return
+
+        from datetime import UTC, datetime
+        from importlib.metadata import version as pkg_version
+        from platform import node as hostname
+        from platform import python_version
+
+        from bioetl.domain.models.metadata import (
+            DQSummary,
+            EnvironmentMetadata,
+            GoldMetadata,
+            GoldOutputMetadata,
+            LineageMetadata,
+            PipelineMetadata,
+            RuntimeMetadata,
+            RunTypeEnum,
+        )
+
+        # Build metadata
+        now = datetime.now(UTC)
+        runtime = RuntimeMetadata(
+            run_id=run_id or "",
+            run_type=RunTypeEnum.INCREMENTAL,
+            started_at_utc=now,
+            completed_at_utc=now,
+        )
+
+        pipeline = PipelineMetadata(
+            name=f"composite_{entity_name}",
+            provider=provider_name,
+            entity=entity_name,
+        )
+
+        # Build lineage with sources_used via source_tables
+        lineage = LineageMetadata(
+            bronze_paths=[],
+            transform_version=self._transform_version or "1.0.0",
+            transform_steps=list(self._transform_steps)
+            if self._transform_steps
+            else ["merge"],
+            source_tables=dict.fromkeys(sources_used or [], 0),
+        )
+
+        # Build DQ summary
+        dq_summary = DQSummary(
+            total_records=len(records),
+            valid_records=len(records),
+            error_records=0,
+            error_rate=0.0,
+        )
+
+        # Build output metadata
+        output = GoldOutputMetadata(
+            record_count=len(records),
+        )
+
+        # Build environment metadata
+        try:
+            bioetl_version = pkg_version("bioetl")
+        except Exception:
+            bioetl_version = "unknown"
+
+        environment = EnvironmentMetadata(
+            hostname=hostname(),
+            python_version=python_version(),
+            bioetl_version=bioetl_version,
+        )
+
+        # Build complete metadata
+        metadata = GoldMetadata(
+            runtime=runtime,
+            pipeline=pipeline,
+            lineage=lineage,
+            dq_summary=dq_summary,
+            output=output,
+            environment=environment,
+        )
+
+        await self._metadata_writer.write_gold_metadata(
+            table_path,
+            metadata,
+            table_name=table_name,
+            flat_structure=self._flat_structure,
+            provider=provider_name,
+            entity=entity_name,
         )
 
     async def _validate_records_against_schema(
@@ -26255,6 +26499,21 @@ class GoldWriter(BaseDeltaWriter):
         if not records:
             return
 
+        # Extract pipeline info from table name for filename generation
+        # table_name format: {provider}.{entity}, {provider}_{entity}, or just {entity}
+        if "." in table_name:
+            parts = table_name.split(".")
+            provider_name = parts[0]
+            entity_name = parts[1] if len(parts) > 1 else parts[0]
+        elif "_" in table_name:
+            # Try underscore format (e.g., chembl_publication)
+            parts = table_name.split("_", 1)  # Split only on first underscore
+            provider_name = parts[0]
+            entity_name = parts[1] if len(parts) > 1 else parts[0]
+        else:
+            provider_name = "unknown"
+            entity_name = table_name if table_name else "unknown"
+
         # Use MetadataCoordinator if available (centralized metadata)
         if self._metadata_coordinator is not None:
             from bioetl.domain.ports import GoldMetadataInput, SilverRef
@@ -26288,6 +26547,8 @@ class GoldWriter(BaseDeltaWriter):
                 metadata,
                 table_name=table_name,
                 flat_structure=self._flat_structure,
+                provider=provider_name,
+                entity=entity_name,
             )
             return
 
@@ -26318,20 +26579,11 @@ class GoldWriter(BaseDeltaWriter):
             completed_at_utc=now,
         )
 
-        # Extract pipeline info from table name
-        # table_name format: {provider}.{entity} or just {entity}
-        parts = table_name.split(".")
-        if len(parts) >= 2:
-            provider = parts[0]
-            entity = parts[1]
-        else:
-            provider = "unknown"
-            entity = parts[0] if parts else "unknown"
-
+        # Use already extracted provider/entity from top of method
         pipeline = PipelineMetadata(
-            name=f"{provider}_{entity}",
-            provider=provider,
-            entity=entity,
+            name=f"{provider_name}_{entity_name}",
+            provider=provider_name,
+            entity=entity_name,
         )
 
         # Build lineage (Gold layer sources from Silver)
@@ -26387,6 +26639,8 @@ class GoldWriter(BaseDeltaWriter):
             metadata,
             table_name=table_name,
             flat_structure=self._flat_structure,
+            provider=provider_name,
+            entity=entity_name,
         )
 
     async def _run_in_executor(self, func: Callable[..., T], *args: Any) -> T:
@@ -26749,8 +27003,24 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LoggerPort
 
-# Metadata sidecar filename
+# Default metadata sidecar filename (fallback)
 METADATA_FILENAME = "_metadata.yaml"
+
+
+def _get_metadata_filename(provider: str | None, entity: str | None) -> str:
+    """Generate metadata filename based on provider and entity.
+
+    Args:
+        provider: Provider name (e.g., 'chembl').
+        entity: Entity type (e.g., 'activity').
+
+    Returns:
+        Filename in format {provider}_{entity}_metadata.yaml if both provided,
+        otherwise falls back to _metadata.yaml.
+    """
+    if provider and entity:
+        return f"{provider}_{entity}_metadata.yaml"
+    return METADATA_FILENAME
 
 
 class MetadataWriter:
@@ -26781,18 +27051,26 @@ class MetadataWriter:
         self,
         base_path: str | Path,
         metadata: BronzeMetadata,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """Write Bronze layer metadata sidecar file.
 
         Args:
             base_path: Base path where Bronze data is stored.
-                      Metadata will be written to {base_path}/_metadata.yaml
+                      Metadata will be written to {base_path}/{provider}_{entity}_metadata.yaml
+                      or {base_path}/_metadata.yaml if provider/entity not provided.
             metadata: Bronze metadata model with lineage and source info.
+            provider: Provider name (e.g., 'chembl') for filename generation.
+            entity: Entity type (e.g., 'activity') for filename generation.
 
         Returns:
             Absolute path to the written metadata file.
         """
-        return await self._write_metadata(base_path, metadata, "bronze")
+        return await self._write_metadata(
+            base_path, metadata, "bronze", provider=provider, entity=entity
+        )
 
     async def write_silver_metadata(
         self,
@@ -26801,16 +27079,20 @@ class MetadataWriter:
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """Write Silver layer metadata sidecar file.
 
         Args:
             base_path: Base path where Silver Delta table is stored.
-                      Metadata will be written to {base_path}/_metadata.yaml
+                      Metadata will be written to {base_path}/{provider}_{entity}_metadata.yaml
+                      or {base_path}/_metadata.yaml if provider/entity not provided.
             metadata: Silver metadata model with lineage, DQ metrics, and Delta info.
-            table_name: Table name for flat_structure naming pattern.
-            flat_structure: If True, write as {table_name}_metadata.yaml instead of
-                          _metadata.yaml in a subdirectory.
+            table_name: Table name for flat_structure naming pattern (deprecated).
+            flat_structure: If True and provider/entity provided, uses new naming.
+            provider: Provider name (e.g., 'chembl') for filename generation.
+            entity: Entity type (e.g., 'activity') for filename generation.
 
         Returns:
             Absolute path to the written metadata file.
@@ -26821,6 +27103,8 @@ class MetadataWriter:
             "silver",
             table_name=table_name,
             flat_structure=flat_structure,
+            provider=provider,
+            entity=entity,
         )
 
     async def write_gold_metadata(
@@ -26830,16 +27114,20 @@ class MetadataWriter:
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """Write Gold layer metadata sidecar file.
 
         Args:
             base_path: Base path where Gold Delta/Parquet table is stored.
-                      Metadata will be written to {base_path}/_metadata.yaml
+                      Metadata will be written to {base_path}/{provider}_{entity}_metadata.yaml
+                      or {base_path}/_metadata.yaml if provider/entity not provided.
             metadata: Gold metadata model with lineage, schema contract, and SCD info.
-            table_name: Table name for flat_structure naming pattern.
-            flat_structure: If True, write as {table_name}_metadata.yaml instead of
-                          _metadata.yaml in a subdirectory.
+            table_name: Table name for flat_structure naming pattern (deprecated).
+            flat_structure: If True and provider/entity provided, uses new naming.
+            provider: Provider name (e.g., 'chembl') for filename generation.
+            entity: Entity type (e.g., 'activity') for filename generation.
 
         Returns:
             Absolute path to the written metadata file.
@@ -26850,6 +27138,8 @@ class MetadataWriter:
             "gold",
             table_name=table_name,
             flat_structure=flat_structure,
+            provider=provider,
+            entity=entity,
         )
 
     async def _write_metadata(
@@ -26860,6 +27150,8 @@ class MetadataWriter:
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """Write metadata to sidecar file.
 
@@ -26867,14 +27159,22 @@ class MetadataWriter:
             base_path: Base path for metadata file.
             metadata: Pydantic metadata model.
             layer: Layer name for logging.
-            table_name: Table name for flat_structure naming pattern.
-            flat_structure: If True, write as {table_name}_metadata.yaml.
+            table_name: Table name for flat_structure naming pattern (deprecated).
+            flat_structure: If True and provider/entity provided, uses new naming.
+            provider: Provider name (e.g., 'chembl') for filename generation.
+            entity: Entity type (e.g., 'activity') for filename generation.
 
         Returns:
             Absolute path to written metadata file.
         """
         path = Path(base_path)
-        if flat_structure and table_name:
+
+        # Use provider/entity naming if both are provided
+        if provider and entity:
+            filename = _get_metadata_filename(provider, entity)
+            metadata_path = path / filename
+        elif flat_structure and table_name:
+            # Backward compatibility: use table_name if flat_structure is True
             metadata_path = path / f"{table_name}_metadata.yaml"
         else:
             metadata_path = path / METADATA_FILENAME
@@ -26924,6 +27224,9 @@ class NoOpMetadataWriter:
         self,
         base_path: str | Path,
         metadata: BronzeMetadata,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """No-op Bronze metadata write."""
         return ""
@@ -26935,6 +27238,8 @@ class NoOpMetadataWriter:
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """No-op Silver metadata write."""
         return ""
@@ -26946,6 +27251,8 @@ class NoOpMetadataWriter:
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """No-op Gold metadata write."""
         return ""
@@ -27827,33 +28134,37 @@ class SilverWriter(BaseDeltaWriter):
         self,
         table_name: str,
         records: list[dict[str, Any]],
+        quarantined_count: int = 0,
     ) -> BatchDQMetrics:
-        """Compute DQ metrics for the batch of records.
-
-        Calculates column statistics, detects schema drift, and creates
-        a BatchDQMetrics value object for metadata persistence.
+        """Compute DQ metrics using centralized calculator.
 
         Args:
             table_name: Target table name for schema drift detection.
             records: List of records to analyze.
+            quarantined_count: Number of quarantined records.
 
         Returns:
             BatchDQMetrics with computed column stats and schema drift info.
         """
-        from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
-
-        # Detect schema drift (non-raising, for metrics only)
-        schema_drift = await self._detect_schema_drift(table_name, records)
-
-        # Create BatchDQMetrics with column statistics
-        # Currently all records passed validation (errors were quarantined earlier)
-        return BatchDQMetrics.from_records(
-            records=records,
-            error_count=0,  # Records here passed validation
-            warning_count=0,
-            validation_errors=None,
-            schema_drift=schema_drift,
+        from bioetl.domain.services.dq_metrics_calculator import (
+            DQMetricsCalculator,
+            DQMetricsInput,
         )
+
+        # Get existing schema for drift detection
+        existing_schema = await self._get_table_schema(table_name)
+        existing_fields: set[str] | None = None
+        if existing_schema is not None:
+            existing_fields = set(existing_schema.names)
+
+        calculator = DQMetricsCalculator()
+        input_data = DQMetricsInput(
+            records=records,
+            existing_schema_fields=existing_fields,
+            quarantined_count=quarantined_count,
+        )
+
+        return calculator.calculate(input_data)
 
     async def _log_silver_audit(
         self,
@@ -27957,6 +28268,7 @@ class SilverWriter(BaseDeltaWriter):
         mode: SilverWriteMode,
         bronze_refs: list[BronzeWriteResult] | None = None,
         dq_metrics: BatchDQMetrics | None = None,
+        dq_report_path: str | None = None,
     ) -> None:
         """Write Silver layer metadata sidecar file.
 
@@ -27972,173 +28284,61 @@ class SilverWriter(BaseDeltaWriter):
             dq_metrics: Optional BatchDQMetrics with computed DQ metrics.
                 If provided, dq_summary will contain real column metrics,
                 schema drift info, and error rates (REQ-DQ-001).
+            dq_report_path: Optional path to generated DQ report for cross-reference.
         """
         if not records:
             return
 
-        # Use MetadataCoordinator if available (centralized metadata)
-        if self._metadata_coordinator is not None:
-            from bioetl.domain.ports import SilverMetadataInput
+        # Extract pipeline info from table_name for filename generation
+        # table_name format: {provider}.{entity}, {provider}_{entity}, or just {entity}
+        # Note: We use table_name instead of table_path to be platform-independent
+        # and support flat_structure mode where path doesn't contain entity info.
+        if "." in table_name:
+            parts = table_name.split(".")
+            provider_name = parts[0]
+            entity_name = parts[1] if len(parts) > 1 else parts[0]
+        elif "_" in table_name:
+            # Split on first underscore (e.g., chembl_publication -> chembl, publication)
+            parts = table_name.split("_", 1)
+            provider_name = parts[0]
+            entity_name = parts[1] if len(parts) > 1 else parts[0]
+        else:
+            provider_name = "unknown"
+            entity_name = table_name if table_name else "unknown"
 
-            # Get Delta version after write
-            version_after = await self._get_delta_version(table_path)
-
-            silver_input = SilverMetadataInput(
+        if self._metadata_coordinator is None:
+            self.logger.warning(
+                "silver_metadata_skipped",
+                reason="MetadataCoordinator not configured",
                 table_path=table_path,
-                records=records,
-                primary_keys=primary_keys,
-                mode=mode,
-                bronze_refs=bronze_refs,
-                dq_metrics=dq_metrics,
-                version_after=version_after,
-                transform_version=self._transform_version,
-                transform_steps=self._transform_steps,
-            )
-            metadata = self._metadata_coordinator.create_silver_metadata(silver_input)
-            await self._metadata_writer.write_silver_metadata(
-                table_path,
-                metadata,
-                table_name=table_name,
-                flat_structure=self._flat_structure,
             )
             return
 
-        # Fallback to local metadata building (backward compatibility)
-        from datetime import UTC, datetime
-        from importlib.metadata import version as pkg_version
-        from platform import node as hostname
-        from platform import python_version
-
-        from bioetl.domain.models.metadata import (
-            DeltaMetrics,
-            DQSummary,
-            EnvironmentMetadata,
-            LineageMetadata,
-            PipelineMetadata,
-            RuntimeMetadata,
-            RunTypeEnum,
-            SilverMetadata,
-            SilverOutputMetadata,
-        )
-
-        # Extract run context from first record
-        first_record = records[0]
-        run_id = first_record.get("_run_id", "")
-        run_type_str = first_record.get("_run_type", "incremental")
-
-        # Map run_type string to enum
-        try:
-            run_type = RunTypeEnum(run_type_str)
-        except ValueError:
-            run_type = RunTypeEnum.INCREMENTAL
+        from bioetl.domain.ports import SilverMetadataInput
 
         # Get Delta version after write
         version_after = await self._get_delta_version(table_path)
 
-        # Build runtime metadata
-        now = datetime.now(UTC)
-        runtime = RuntimeMetadata(
-            run_id=run_id,
-            run_type=run_type,
-            started_at_utc=now,
-            completed_at_utc=now,
-        )
-
-        # Extract pipeline info from table path
-        # table_path format: {base_path}/{provider}/{entity}
-        path_parts = table_path.rstrip("/").split("/")
-        entity = path_parts[-1] if path_parts else "unknown"
-        provider = path_parts[-2] if len(path_parts) > 1 else "unknown"
-
-        pipeline = PipelineMetadata(
-            name=f"{provider}_{entity}",
-            provider=provider,
-            entity=entity,
-        )
-
-        # Build lineage from records and bronze_refs
-        source_batch_ids = list(
-            {
-                r.get("_source_batch_id", "")
-                for r in records
-                if r.get("_source_batch_id")
-            }
-        )
-
-        # Extract bronze paths from bronze_refs for complete lineage (REQ-LINEAGE-001)
-        bronze_paths: list[str] = []
-        if bronze_refs:
-            bronze_paths = [ref.relative_path for ref in bronze_refs]
-
-        lineage = LineageMetadata(
-            source_batch_ids=source_batch_ids,
-            bronze_paths=bronze_paths,
-        )
-
-        # Build Delta metrics
-        # Map SilverWriteMode to DeltaMetrics operation (Literal type)
-        operation_map: dict[
-            SilverWriteMode, Literal["merge", "overwrite", "append"]
-        ] = {
-            SilverWriteMode.MERGE: "merge",
-            SilverWriteMode.APPEND: "append",
-            SilverWriteMode.DELETE: "overwrite",  # DELETE mode uses overwrite
-        }
-        delta = DeltaMetrics(
+        silver_input = SilverMetadataInput(
             table_path=table_path,
-            operation=operation_map[mode],
-            primary_key=primary_keys,
+            records=records,
+            primary_keys=primary_keys,
+            mode=mode,
+            bronze_refs=bronze_refs,
+            dq_metrics=dq_metrics,
             version_after=version_after,
-            rows_inserted=len(records),
+            transform_version=self._transform_version,
+            transform_steps=self._transform_steps,
+            dq_report_path=dq_report_path,
         )
-
-        # Build DQ summary from computed metrics or use basic fallback
-        if dq_metrics is not None:
-            # Use real DQ metrics with column stats, schema drift, error rates
-            dq_summary = dq_metrics.to_dq_summary()
-        else:
-            # Fallback to basic metrics (backward compatibility)
-            dq_summary = DQSummary(
-                total_records=len(records),
-                valid_records=len(records),
-            )
-
-        # Build output metrics
-        output = SilverOutputMetadata(
-            record_count=len(records),
-        )
-
-        # Build environment info
-        try:
-            bioetl_version = pkg_version("bioetl")
-        except Exception:
-            bioetl_version = "unknown"
-
-        environment = EnvironmentMetadata(
-            hostname=hostname(),
-            python_version=python_version(),
-            bioetl_version=bioetl_version,
-        )
-
-        # Build complete metadata
-        metadata = SilverMetadata(
-            runtime=runtime,
-            pipeline=pipeline,
-            lineage=lineage,
-            delta=delta,
-            dq_summary=dq_summary,
-            output=output,
-            environment=environment,
-        )
-
-        # Write metadata sidecar file
-        # Note: In fallback path, table_name is derived from table_path
-        # For flat_structure, use pipeline name as table_name
+        metadata = self._metadata_coordinator.create_silver_metadata(silver_input)
         await self._metadata_writer.write_silver_metadata(
             table_path,
             metadata,
             table_name=table_name,
             flat_structure=self._flat_structure,
+            provider=provider_name,
+            entity=entity_name,
         )
 
     async def _merge_records(
@@ -28283,6 +28483,9 @@ class SilverWriter(BaseDeltaWriter):
         table_name: str,
         records: list[dict[str, Any]],
         primary_keys: list[str] | None = None,
+        *,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
     ) -> None:
         """Write merged records to Silver layer without explicit schema.
 
@@ -28293,6 +28496,8 @@ class SilverWriter(BaseDeltaWriter):
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
+            run_id: Optional composite run ID for metadata tracking.
+            sources_used: Optional list of source pipelines used in merge.
         """
         from bioetl.domain.schemas.column_order import canonical_column_order
 
@@ -28340,6 +28545,159 @@ class SilverWriter(BaseDeltaWriter):
                 mode="overwrite",
                 schema_mode="overwrite",
             ),
+        )
+
+        # Write metadata sidecar for composite merged data
+        await self._write_silver_merged_metadata(
+            table_path=table_path,
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys or [],
+            run_id=run_id,
+            sources_used=sources_used,
+        )
+
+    async def _write_silver_merged_metadata(
+        self,
+        table_path: str,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str],
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+    ) -> None:
+        """Write Silver layer metadata sidecar for merged composite data.
+
+        Args:
+            table_path: Full path to the Delta table.
+            table_name: Table name (used for filename generation).
+            records: List of records written.
+            primary_keys: Primary key columns used.
+            run_id: Composite run ID for tracking.
+            sources_used: List of source pipelines (e.g., ['seed', 'crossref', 'openalex']).
+        """
+        if not records:
+            return
+
+        # Extract provider/entity from table_name for filename generation
+        if "/" in table_name:
+            # Handle path-like table names (e.g., 'composite/publication')
+            parts = table_name.split("/")
+            provider_name = parts[0] if len(parts) > 1 else "composite"
+            entity_name = parts[-1]
+        elif "_" in table_name:
+            parts = table_name.split("_", 1)
+            provider_name = parts[0]
+            entity_name = parts[1] if len(parts) > 1 else parts[0]
+        else:
+            provider_name = "composite"
+            entity_name = table_name if table_name else "unknown"
+
+        if self._metadata_coordinator is None:
+            self.logger.debug(
+                "silver_merged_metadata_skipped",
+                reason="MetadataCoordinator not configured",
+                table_path=table_path,
+            )
+            return
+
+        from datetime import UTC, datetime
+        from importlib.metadata import version as pkg_version
+        from platform import node as hostname
+        from platform import python_version
+
+        from bioetl.domain.models.metadata import (
+            DeltaMetrics,
+            DQSummary,
+            EnvironmentMetadata,
+            LineageMetadata,
+            PipelineMetadata,
+            RuntimeMetadata,
+            RunTypeEnum,
+            SilverMetadata,
+            SilverOutputMetadata,
+        )
+
+        # Get Delta version after write
+        version_after = await self._get_delta_version(table_path)
+
+        # Build metadata
+        now = datetime.now(UTC)
+        runtime = RuntimeMetadata(
+            run_id=run_id or "",
+            run_type=RunTypeEnum.INCREMENTAL,
+            started_at_utc=now,
+            completed_at_utc=now,
+        )
+
+        pipeline = PipelineMetadata(
+            name=f"composite_{entity_name}",
+            provider=provider_name,
+            entity=entity_name,
+        )
+
+        # Build lineage with sources_used via source_tables
+        lineage = LineageMetadata(
+            bronze_paths=[],
+            transform_version=self._transform_version or "1.0.0",
+            transform_steps=list(self._transform_steps)
+            if self._transform_steps
+            else ["merge"],
+            source_tables=dict.fromkeys(sources_used or [], 0),
+        )
+
+        # Build Delta metrics
+        delta = DeltaMetrics(
+            table_path=table_path,
+            operation="overwrite",
+            primary_key=primary_keys,
+            version_after=version_after,
+            rows_inserted=len(records),
+        )
+
+        # Build DQ summary
+        dq_summary = DQSummary(
+            total_records=len(records),
+            valid_records=len(records),
+            error_records=0,
+            error_rate=0.0,
+        )
+
+        # Build output metadata
+        output = SilverOutputMetadata(
+            record_count=len(records),
+        )
+
+        # Build environment metadata
+        try:
+            bioetl_version = pkg_version("bioetl")
+        except Exception:
+            bioetl_version = "unknown"
+
+        environment = EnvironmentMetadata(
+            hostname=hostname(),
+            python_version=python_version(),
+            bioetl_version=bioetl_version,
+        )
+
+        # Build complete metadata
+        metadata = SilverMetadata(
+            runtime=runtime,
+            pipeline=pipeline,
+            lineage=lineage,
+            delta=delta,
+            dq_summary=dq_summary,
+            output=output,
+            environment=environment,
+        )
+
+        await self._metadata_writer.write_silver_metadata(
+            table_path,
+            metadata,
+            table_name=table_name,
+            flat_structure=self._flat_structure,
+            provider=provider_name,
+            entity=entity_name,
         )
 
 ================================================================================
