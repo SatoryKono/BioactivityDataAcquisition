@@ -272,11 +272,25 @@ def assert_silver_table_has_records(
 
     Raises:
         AssertionError: Если таблица пуста или записей меньше expected_min
-    """
 
+    Note:
+        Handles both standard layout (data_dir/output/silver/{table_name}/)
+        and flat_structure layout (data_dir/output/silver/) for pipelines
+        with flat_structure: true in their config.
+    """
+    # Standard path: data_dir/output/silver/{table_name}/
     table_path = data_dir / "output" / "silver" / table_name
+
+    # Flat structure path: data_dir/output/silver/ (Delta table at root)
+    flat_path = data_dir / "output" / "silver"
+
+    # Check both locations - standard path first, then flat structure
     if not table_path.exists():
-        raise AssertionError(f"Silver table does not exist: {table_path}")
+        # Try flat_structure path (check for _delta_log at root)
+        if flat_path.exists() and (flat_path / "_delta_log").exists():
+            table_path = flat_path
+        else:
+            raise AssertionError(f"Silver table does not exist: {table_path}")
 
     dt = DeltaTable(str(table_path))
     df = dt.to_pyarrow_table()
@@ -310,11 +324,23 @@ def assert_gold_table_has_records(
 
     Raises:
         AssertionError: Если таблица пуста или записей меньше expected_min
-    """
 
+    Note:
+        Handles both standard and flat_structure layouts.
+    """
+    # Standard path: data_dir/output/gold/{table_name}/
     table_path = data_dir / "output" / "gold" / table_name
+
+    # Flat structure path: data_dir/output/gold/ (Delta table at root)
+    flat_path = data_dir / "output" / "gold"
+
+    # Check both locations - standard path first, then flat structure
     if not table_path.exists():
-        raise AssertionError(f"Gold table does not exist: {table_path}")
+        # Try flat_structure path (check for _delta_log at root)
+        if flat_path.exists() and (flat_path / "_delta_log").exists():
+            table_path = flat_path
+        else:
+            raise AssertionError(f"Gold table does not exist: {table_path}")
 
     dt = DeltaTable(str(table_path))
     count = len(dt.to_pyarrow_table())
@@ -336,9 +362,19 @@ def get_silver_records(data_dir: Path, table_name: str) -> list[dict]:
 
     Returns:
         Список словарей с записями
-    """
 
+    Note:
+        Handles both standard and flat_structure layouts.
+    """
+    # Standard path: data_dir/output/silver/{table_name}/
     table_path = data_dir / "output" / "silver" / table_name
+
+    # Try flat_structure path if standard doesn't exist
+    if not table_path.exists():
+        flat_path = data_dir / "output" / "silver"
+        if flat_path.exists() and (flat_path / "_delta_log").exists():
+            table_path = flat_path
+
     dt = DeltaTable(str(table_path))
     return dt.to_pyarrow_table().to_pylist()
 
@@ -352,8 +388,18 @@ def get_gold_records(data_dir: Path, table_name: str) -> list[dict]:
 
     Returns:
         Список словарей с записями
-    """
 
+    Note:
+        Handles both standard and flat_structure layouts.
+    """
+    # Standard path: data_dir/output/gold/{table_name}/
     table_path = data_dir / "output" / "gold" / table_name
+
+    # Try flat_structure path if standard doesn't exist
+    if not table_path.exists():
+        flat_path = data_dir / "output" / "gold"
+        if flat_path.exists() and (flat_path / "_delta_log").exists():
+            table_path = flat_path
+
     dt = DeltaTable(str(table_path))
     return dt.to_pyarrow_table().to_pylist()

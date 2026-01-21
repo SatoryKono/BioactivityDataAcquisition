@@ -33,7 +33,8 @@ composite:
       - doi                 # Digital Object Identifier
       - pmid                # PubMed ID
       - title               # Publication title (for fallback joins)
-    silver_table: silver/chembl/publication/chembl_publication
+    # Note: chembl_publication uses flat_structure, so table is in path directly
+    silver_table: silver/chembl/publication
 
   # ---------------------------------------------------------------------------
   # Enricher Pipelines
