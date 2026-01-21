@@ -8,7 +8,6 @@ and combines their contents into a single output file with metadata headers.
 import argparse
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 
 def get_project_root() -> Path:
@@ -146,7 +145,7 @@ def should_exclude_dir(dir_path: Path, exclude_dirs: set[str]) -> bool:
 
 def collect_files(
     input_dir: Path, extensions: set[str], exclude_dirs: set[str]
-) -> List[Path]:
+) -> list[Path]:
     """Recursively collect files matching specified extensions.
 
     Args:
@@ -157,7 +156,7 @@ def collect_files(
     Returns:
         List of Path objects for matching files.
     """
-    files: List[Path] = []
+    files: list[Path] = []
 
     for item in input_dir.rglob("*"):
         # Skip excluded directories
@@ -171,7 +170,7 @@ def collect_files(
     return files
 
 
-def sort_files(files: List[Path], sort_method: str) -> List[Path]:
+def sort_files(files: list[Path], sort_method: str) -> list[Path]:
     """Sort files according to specified method.
 
     Args:
@@ -190,8 +189,8 @@ def sort_files(files: List[Path], sort_method: str) -> List[Path]:
 
 
 def merge_files(
-    files: List[Path], output_file: Path, input_dir: Path, encoding: str
-) -> Tuple[int, int, Dict[str, int]]:
+    files: list[Path], output_file: Path, input_dir: Path, encoding: str
+) -> tuple[int, int, dict[str, int]]:
     """Merge files into a single output file.
 
     Args:
@@ -205,7 +204,7 @@ def merge_files(
     """
     files_processed = 0
     total_bytes = 0
-    extension_counts: Dict[str, int] = {}
+    extension_counts: dict[str, int] = {}
 
     with output_file.open("w", encoding=encoding) as outf:
         for file_path in files:
@@ -265,7 +264,7 @@ def format_bytes(num_bytes: int) -> str:
 
 
 def print_statistics(
-    files_processed: int, total_bytes: int, extension_counts: Dict[str, int]
+    files_processed: int, total_bytes: int, extension_counts: dict[str, int]
 ) -> None:
     """Print processing statistics.
 
@@ -359,7 +358,7 @@ def merge_project_code_layers(
         output_file = Path(f"{layer}_merged.md")
 
         # Merge files
-        files_processed, layer_size, extension_counts = merge_files(
+        files_processed, layer_size, _extension_counts = merge_files(
             files, output_file, layer_dir, encoding
         )
 
@@ -457,7 +456,7 @@ def generate_tree_structure(
     exclude_dirs: set[str],
     prefix: str = "",
     is_last: bool = True,
-) -> List[str]:
+) -> list[str]:
     """Generate tree structure lines for a directory.
 
     Args:
@@ -469,7 +468,7 @@ def generate_tree_structure(
     Returns:
         List of formatted tree lines.
     """
-    lines: List[str] = []
+    lines: list[str] = []
 
     # Get directory name
     dir_name = directory.name if directory.name else str(directory)
@@ -489,9 +488,7 @@ def generate_tree_structure(
 
     # Filter out excluded directories
     items = [
-        item
-        for item in items
-        if not (item.is_dir() and item.name in exclude_dirs)
+        item for item in items if not (item.is_dir() and item.name in exclude_dirs)
     ]
 
     # Process items
