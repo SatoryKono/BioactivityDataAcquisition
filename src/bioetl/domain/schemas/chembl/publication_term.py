@@ -1,10 +1,11 @@
-"""Pandera schema for ChEMBL Document Term entity.
+"""Pandera schema for ChEMBL Publication Term entity.
 
-Aligned with RULES.md v5.0 and ChEMBL 34 schema.
+Aligned with RULES.md v5.12 and ChEMBL 34 schema.
+Renamed from DocumentTermSchema per ADR-024 (Entity Naming Unification).
 
-DocumentTerms are derived entities extracted from Document records by
-flattening the 1:M relationship between documents and their associated
-terms (MeSH headings, keywords, concepts).
+PublicationTerms are derived entities extracted from Publication (ChEMBL Document)
+records by flattening the 1:M relationship between publications and their
+associated terms (MeSH headings, keywords, concepts).
 """
 
 from __future__ import annotations
@@ -15,8 +16,8 @@ from pandera.typing import Series
 from bioetl.domain.schemas.base import ETLRecordSchema
 
 
-class DocumentTermSchema(ETLRecordSchema):
-    """Document Term validation schema for Silver layer.
+class PublicationTermSchema(ETLRecordSchema):
+    """Publication Term validation schema for Silver layer.
 
     Composite Key: (document_chembl_id, term_type, term)
     Entity ID is generated as SHA256 hash of the composite key.
