@@ -388,8 +388,18 @@ def get_gold_records(data_dir: Path, table_name: str) -> list[dict]:
 
     Returns:
         Список словарей с записями
-    """
 
+    Note:
+        Handles both standard and flat_structure layouts.
+    """
+    # Standard path: data_dir/output/gold/{table_name}/
     table_path = data_dir / "output" / "gold" / table_name
+
+    # Try flat_structure path if standard doesn't exist
+    if not table_path.exists():
+        flat_path = data_dir / "output" / "gold"
+        if flat_path.exists() and (flat_path / "_delta_log").exists():
+            table_path = flat_path
+
     dt = DeltaTable(str(table_path))
     return dt.to_pyarrow_table().to_pylist()
