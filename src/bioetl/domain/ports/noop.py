@@ -413,34 +413,22 @@ class NoOpMetadataWriter:
         self,
         base_path: str | Path,  # noqa: ARG002
         metadata: SilverMetadata,  # noqa: ARG002
+        *,
+        table_name: str | None = None,  # noqa: ARG002
+        flat_structure: bool = False,  # noqa: ARG002
     ) -> str:
-        """Write Silver metadata (no-op).
-
-        Args:
-            base_path: Base path (ignored).
-            metadata: Metadata (ignored).
-
-        Returns:
-            Empty string.
-
-        """
+        """No-op Silver metadata write. Returns empty string."""
         return ""
 
     async def write_gold_metadata(
         self,
         base_path: str | Path,  # noqa: ARG002
         metadata: GoldMetadata,  # noqa: ARG002
+        *,
+        table_name: str | None = None,  # noqa: ARG002
+        flat_structure: bool = False,  # noqa: ARG002
     ) -> str:
-        """Write Gold metadata (no-op).
-
-        Args:
-            base_path: Base path (ignored).
-            metadata: Metadata (ignored).
-
-        Returns:
-            Empty string.
-
-        """
+        """No-op Gold metadata write. Returns empty string."""
         return ""
 
     async def aclose(self) -> None:
