@@ -32,8 +32,21 @@ source:
 filter_config_file: ../../filter/entities/pubmed/publications.yaml
 
 # -----------------------------------------------------------------------------
-# Sink Overrides (only non-convention values)
+# Sink Overrides
 # -----------------------------------------------------------------------------
+# Note: flat_structure=true means Delta data is written directly to path
+# without table_name subdirectory, matching chembl_publication pattern
 sink:
+  bronze:
+    path: "data/output/bronze/pubmed/publication"
   silver:
+    path: "data/output/silver/pubmed/publication"
     partition_by: ["pub_year"]
+    csv_export:
+      path: "data/output/silver/pubmed/publication"
+    flat_structure: true
+  gold:
+    path: "data/output/gold/pubmed/publication"
+    csv_export:
+      path: "data/output/gold/pubmed/publication"
+    flat_structure: true

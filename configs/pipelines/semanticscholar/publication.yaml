@@ -37,6 +37,8 @@ dq_config_file: ../../dq/entities/semanticscholar/publication.yaml
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink configuration
+# Note: flat_structure=true means Delta data is written directly to path
+# without table_name subdirectory, matching chembl_publication pattern
 sink:
   bronze:
     path: "data/output/bronze/semanticscholar/publication"
@@ -49,6 +51,7 @@ sink:
       ascending: true
     csv_export:
       path: "data/output/silver/semanticscholar/publication"
+    flat_structure: true
   gold:
     path: "data/output/gold/semanticscholar/publication"
     sort_by:
@@ -56,4 +59,5 @@ sink:
       ascending: true
     csv_export:
       path: "data/output/gold/semanticscholar/publication"
+    flat_structure: true
 

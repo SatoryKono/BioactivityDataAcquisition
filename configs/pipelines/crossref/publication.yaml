@@ -35,22 +35,26 @@ dq_config_file: ../../dq/entities/crossref/publication.yaml
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
+# Note: flat_structure=true means Delta data is written directly to path
+# without table_name subdirectory, matching chembl_publication pattern
 sink:
   bronze:
-    path: "data/output/bronze/crossref/"
+    path: "data/output/bronze/crossref/publication"
   silver:
-    path: "data/output/silver/crossref/"
+    path: "data/output/silver/crossref/publication"
     primary_key: ["doi"]
     sort_by:
       columns: ["doi"]
       ascending: true
     csv_export:
-      path: "data/output/silver/crossref/"
+      path: "data/output/silver/crossref/publication"
+    flat_structure: true
   gold:
-    path: "data/output/gold/crossref/"
+    path: "data/output/gold/crossref/publication"
     sort_by:
       columns: ["doi"]
       ascending: true
     csv_export:
-      path: "data/output/gold/crossref/"
+      path: "data/output/gold/crossref/publication"
+    flat_structure: true
 
