@@ -7,20 +7,60 @@
 # All entity-specific configs MUST inherit these defaults unless explicitly
 # overriding with documented justification.
 #
-# Version: 2.0.0
-# Reference: RULES.md v5.10, Appendix D
-# Last Updated: 2026-01-14
+# Version: 2.1.0
+# Reference: RULES.md v5.10, Appendix D; ADR-029 (Convention-based Paths)
+# Last Updated: 2026-01-21
 #
 # Usage:
 #   Entity configs specify only entity-specific fields:
 #   - pipeline_name, provider, entity_type
 #   - primary_keys, silver_table, gold_table
-#   - gold_filters
-#   - sink path overrides
-#   - input_filter configuration
+#   - DQ overrides (only fields that DIFFER from entity DQ config)
+#   - Explicit overrides for paths/configs that differ from convention
 #
 # Inheritance Chain:
 #   _base.yaml (this file) -> <provider>/<entity>.yaml
+#
+# =============================================================================
+#
+# Convention-Based Path Resolution (ADR-029)
+# =============================================================================
+#
+# The config loader auto-computes paths/references from provider and entity_type
+# when not explicitly specified. This reduces duplication across configs.
+#
+# Auto-computed File References:
+#   source_file       -> ../../sources/{provider}.yaml
+#   dq_config_file    -> ../../dq/entities/{provider}/{entity_type}.yaml
+#   filter_config_file -> ../../filter/entities/{provider}/{entity_type}.yaml
+#
+# Auto-computed Sink Paths:
+#   sink.bronze.path           -> data/output/bronze/{provider}/{entity_type}
+#   sink.silver.path           -> data/output/silver/{provider}/{entity_type}
+#   sink.gold.path             -> data/output/gold/{provider}/{entity_type}
+#   sink.silver.csv_export.path -> {sink.silver.path}
+#   sink.gold.csv_export.path   -> {sink.gold.path}
+#
+# Auto-propagated Primary Keys:
+#   sink.silver.primary_key    -> {primary_keys}
+#   sink.silver.sort_by.columns -> {primary_keys}
+#   sink.gold.sort_by.columns   -> {primary_keys}
+#
+# Filter/DQ Rules:
+#   - input_filter and gold_filters are loaded from filter_config_file
+#   - dq_rules are loaded from dq_config_file
+#   - Inline overrides in pipeline config are merged on top
+#
+# Minimal Pipeline Config Example:
+#   pipeline_name: chembl_activity
+#   provider: chembl
+#   entity_type: activity
+#   version: "1.2.0"
+#   description: "Extract biological activity records from ChEMBL API"
+#   primary_keys: ["activity_id"]
+#   silver_table: "chembl_activity"
+#   gold_table: "chembl_activity"
+#   # All paths, filters, DQ rules inherited by convention
 #
 # =============================================================================
 
