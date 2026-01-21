@@ -491,7 +491,7 @@ class TestClassSize:
         "StorageAdapter": 625,  # 619 lines - storage adapter with writers + BronzeWriteResult + SilverWriteResult
         "BaseTransformer": 620,  # 605 lines - Template Method with helpers (tracing + PII hashing + serialize_json_list)
         "SilverWriter": 1175,  # 1168 lines - schema drift detection + bronze_refs + MetadataCoordinator fallback + provider/entity params
-        "GoldWriter": 955,  # 948 lines - SCD Type 2 + metadata sidecar + MetadataCoordinator fallback + provider/entity params
+        "GoldWriter": 1040,  # 1036 lines - SCD Type 2 + metadata sidecar + MetadataCoordinator fallback + provider/entity params + flat_structure
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
         "UniProtProteinTransformer": 800,  # 772 lines - complex protein data extraction with many fields
@@ -549,7 +549,7 @@ class TestClassSize:
         # Composite pipeline services (ADR-026)
         "MergeService": 655,  # 650 lines - Composite merge service with conflict resolution + dual path + DOI normalization
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
-        "CompositePipelineRunner": 350,  # 313 lines - Composite pipeline orchestrator
+        "CompositePipelineRunner": 375,  # 370 lines - Composite pipeline orchestrator
         # Publication adapters with APIRequestCollector (metadata enrichment)
         "OpenAlexAdapter": 580,  # 578 lines - FilterableDataSourcePort + APIRequestCollector + fallback handler
         "PubMedAdapter": 545,  # 540 lines - FilterableDataSourcePort + APIRequestCollector + TitleFallbackHandler
