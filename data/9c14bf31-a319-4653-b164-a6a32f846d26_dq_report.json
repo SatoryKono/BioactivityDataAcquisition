@@ -1,0 +1,51 @@
+{
+  "batch_id": "9c14bf31-a319-4653-b164-a6a32f846d26",
+  "checks": {
+    "file_integrity": {
+      "checksum_blake2": "e7a49f95e75b0ac290f0ee8e1ef633790bd8e972ae959fa9c835a9e0df35bde7b164f702b7ec0c84db2ccfb9d48f415ced4aa0dcf2f76ef4331f271ba2b4bf79",
+      "compression_ratio": null,
+      "size_bytes": 3013,
+      "status": "pass"
+    },
+    "record_count": {
+      "delta_from_last_run": null,
+      "input_records": null,
+      "output_records": null,
+      "quarantine_rate": null,
+      "quarantined_records": null,
+      "status": "pass",
+      "value": 10
+    },
+    "schema_snapshot": {
+      "fields_detected": 11,
+      "missing_fields_since_last_run": [],
+      "new_fields_since_last_run": [],
+      "schema": {
+        "cell_chembl_id": "string",
+        "cell_description": "string",
+        "cell_id": "integer",
+        "cell_name": "string",
+        "cell_source_organism": "string",
+        "cell_source_tax_id": "integer",
+        "cell_source_tissue": "string",
+        "cellosaurus_id": "null|string",
+        "cl_lincs_id": "null|string",
+        "clo_id": "null|string",
+        "efo_id": "null|string"
+      },
+      "status": "pass"
+    }
+  },
+  "layer": "bronze",
+  "pipeline": "chembl_cell_line",
+  "run_id": "ba290ee9-0e3e-44bc-8791-7778de7c2888",
+  "source_file": "",
+  "summary": {
+    "failed": 0,
+    "overall_status": "pass",
+    "passed": 3,
+    "total_checks": 3,
+    "warnings": 0
+  },
+  "timestamp": "2026-01-21T14:49:51.406180+00:00"
+}

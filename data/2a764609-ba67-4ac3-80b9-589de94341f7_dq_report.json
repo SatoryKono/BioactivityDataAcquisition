@@ -1,0 +1,46 @@
+{
+  "batch_id": "2a764609-ba67-4ac3-80b9-589de94341f7",
+  "checks": {
+    "file_integrity": {
+      "checksum_blake2": "1e8841740a4dff591a50f2fc48da8ca7c9f663a872de7a06a8ce5c9c34804795deedc5451028211bd91dff11eecc84298911dbb709fabe1adcee9d0be7662ff0",
+      "compression_ratio": null,
+      "size_bytes": 3117,
+      "status": "pass"
+    },
+    "record_count": {
+      "delta_from_last_run": null,
+      "input_records": null,
+      "output_records": null,
+      "quarantine_rate": null,
+      "quarantined_records": null,
+      "status": "pass",
+      "value": 10
+    },
+    "schema_snapshot": {
+      "fields_detected": 6,
+      "missing_fields_since_last_run": [],
+      "new_fields_since_last_run": [],
+      "schema": {
+        "compound_key": "string",
+        "compound_name": "string",
+        "document_chembl_id": "string",
+        "molecule_chembl_id": "string",
+        "record_id": "integer",
+        "src_id": "integer"
+      },
+      "status": "pass"
+    }
+  },
+  "layer": "bronze",
+  "pipeline": "chembl_compound_record",
+  "run_id": "6a15b846-2be4-4bfe-9806-49a00f43fd20",
+  "source_file": "",
+  "summary": {
+    "failed": 0,
+    "overall_status": "pass",
+    "passed": 3,
+    "total_checks": 3,
+    "warnings": 0
+  },
+  "timestamp": "2026-01-21T14:49:52.547059+00:00"
+}

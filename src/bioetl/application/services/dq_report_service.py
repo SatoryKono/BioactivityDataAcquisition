@@ -80,30 +80,43 @@ class DQReportContext:
         run_id: Pipeline run identifier.
         pipeline_name: Name of the pipeline.
         timestamp: Report generation timestamp (UTC).
+        provider: Data provider name (e.g., 'chembl').
+        entity: Entity type name (e.g., 'activity').
         bronze_source_file: Path to Bronze source file (for Bronze report).
         bronze_batch_id: Bronze batch identifier.
         bronze_records: Raw Bronze records (bytes iterator, consumed only once).
+        bronze_output_path: Base path for Bronze DQ reports (optional).
         silver_data: Silver layer DataFrame (Polars).
         silver_target_table: Silver target table path.
         silver_source_batch_ids: List of Bronze batch IDs processed.
         silver_primary_keys: Primary key columns.
         silver_input_count: Total records before transformation.
         silver_quarantined_count: Quarantined records count.
+        silver_output_path: Base path for Silver DQ reports (optional).
         gold_data: Gold layer DataFrame (Polars).
         gold_target_table: Gold target table path.
         gold_required_fields: Required fields for completeness check.
+        gold_business_rules: Business rules for Gold validation.
+        gold_baseline_stats: Baseline statistics for drift detection.
+        gold_output_path: Base path for Gold DQ reports (optional).
         dq_soft_threshold: Soft fail threshold for DQ checks.
         dq_hard_threshold: Hard fail threshold for DQ checks.
+        flat_structure: Whether to use flat file structure for DQ reports.
     """
 
     run_id: str
     pipeline_name: str
     timestamp: datetime
 
+    # Provider and entity for filename generation
+    provider: str | None = None
+    entity: str | None = None
+
     # Bronze context
     bronze_source_file: str | None = None
     bronze_batch_id: str | None = None
     bronze_records: list[bytes] | None = None
+    bronze_output_path: str | None = None
 
     # Silver context
     silver_data: Any | None = None  # pl.DataFrame
@@ -113,6 +126,7 @@ class DQReportContext:
     silver_input_count: int | None = None
     silver_quarantined_count: int = 0
     silver_previous_schema: dict[str, str] | None = None
+    silver_output_path: str | None = None
 
     # Gold context
     gold_data: Any | None = None  # pl.DataFrame
@@ -120,10 +134,14 @@ class DQReportContext:
     gold_required_fields: list[str] | None = None
     gold_business_rules: list[dict[str, Any]] | None = None
     gold_baseline_stats: dict[str, Any] | None = None
+    gold_output_path: str | None = None
 
     # DQ thresholds
     dq_soft_threshold: float = 0.05
     dq_hard_threshold: float = 0.20
+
+    # Flat structure flag for DQ reports
+    flat_structure: bool = False
 
 
 class DQReportService:
@@ -396,12 +414,19 @@ class DQReportService:
                 previous_schema=context.silver_previous_schema,
             )
 
-            # Write report
-            output_path = Path(config.output_path) if config.output_path else None
+            # Write report - use context output_path if provided, else config
+            output_path: Path | None = None
+            if context.silver_output_path:
+                output_path = Path(context.silver_output_path)
+            elif config.output_path:
+                output_path = Path(config.output_path)
+
             path = await self._report_writer.write_silver_report(
                 report=report,
                 output_path=output_path,
                 format=config.get_format_enum(),
+                provider=context.provider,
+                entity=context.entity,
             )
 
             self._logger.debug(
@@ -465,12 +490,19 @@ class DQReportService:
                 baseline_stats=context.gold_baseline_stats,
             )
 
-            # Write report
-            output_path = Path(config.output_path) if config.output_path else None
+            # Write report - use context output_path if provided, else config
+            output_path: Path | None = None
+            if context.gold_output_path:
+                output_path = Path(context.gold_output_path)
+            elif config.output_path:
+                output_path = Path(config.output_path)
+
             path = await self._report_writer.write_gold_report(
                 report=report,
                 output_path=output_path,
                 format=config.get_format_enum(),
+                provider=context.provider,
+                entity=context.entity,
             )
 
             self._logger.debug(
