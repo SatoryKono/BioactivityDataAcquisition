@@ -106,6 +106,6 @@
 
 ## ADR References
 
-- [ADR-014](docs/02-architecture/decisions/ADR-014-deterministic-writes.md): Deterministic Writes
-- [ADR-025](docs/02-architecture/decisions/ADR-025-pipeline-config-unification.md): Pipeline Config Unification
-- [ADR-027](docs/02-architecture/decisions/ADR-027-dq-rules-externalization.md): DQ Rules Externalization
+- [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md): Deterministic Writes
+- [ADR-025](../02-architecture/decisions/ADR-025-pipeline-config-unification.md): Pipeline Config Unification
+- [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md): DQ Rules Externalization

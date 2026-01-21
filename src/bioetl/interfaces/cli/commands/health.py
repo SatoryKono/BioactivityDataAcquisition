@@ -26,8 +26,8 @@ def health() -> None:
 @health.command("server")
 @click.option(
     "--host",
-    default="0.0.0.0",
-    help="Host to bind to.",
+    default="127.0.0.1",
+    help="Host to bind to. Use 0.0.0.0 to expose externally.",
     show_default=True,
 )
 @click.option(
