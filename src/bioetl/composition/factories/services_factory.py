@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.memory_monitor import MemoryConfig
     from bioetl.application.core.shutdown import ShutdownSignal
+    from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
         CheckpointPort,
@@ -129,6 +130,7 @@ class BaseServicesFactory:
         pipeline_config: PipelineYamlConfig,
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
+        metadata_coordinator: MetadataCoordinator | None = None,
     ) -> PipelineServices:
         """Create services with injected data source.
 
@@ -139,6 +141,8 @@ class BaseServicesFactory:
             pipeline_config: Pipeline YAML configuration
             tracer: Optional tracer (defaults to NoOpTracing if not provided)
             dq_monitor: Optional data quality monitor for anomaly detection
+            metadata_coordinator: Optional MetadataCoordinator for centralized
+                                metadata creation across Bronze, Silver, Gold.
 
         Returns:
             PipelineServices with all dependencies configured
@@ -147,7 +151,11 @@ class BaseServicesFactory:
         metrics = cls._create_metrics(settings)
 
         storage_ctx = StorageFactory.create(
-            settings, pipeline_config, logger, metrics=metrics
+            settings,
+            pipeline_config,
+            logger,
+            metrics=metrics,
+            metadata_coordinator=metadata_coordinator,
         )
 
         lock = cls._create_lock()
