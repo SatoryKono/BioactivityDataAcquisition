@@ -270,6 +270,13 @@ sink:
        retention_days: 90
        sla_freshness_hours: 24
 
+    # Flat structure mode (default: false)
+    # When enabled, data is written directly to {path}/{date}/ without {provider}/{entity}/ prefix:
+    # - Normal (false): {path}/{provider}/{entity}/{date}/batch_...
+    # - Flat (true):    {path}/{date}/batch_...
+    # Use flat_structure=true when path already includes provider/entity segments.
+    flat_structure: false
+
     # Path template (overridden per entity)
     # path: data/output/bronze
 
