@@ -15897,10 +15897,15 @@ class DQReportWriter:
     Implements DQReportWriterPort with atomic writes and
     support for JSON, YAML, and HTML formats.
 
-    Path formats (unified structure):
-    - Bronze: {base_path}/{provider}/{entity}/{date}/batch_{date}_{provider}_{entity}_dq_report{ext}
-    - Silver: {base_path}/{provider}/{entity}/silver_{provider}_{entity}_dq_report{ext}
-    - Gold: {base_path}/{provider}/{entity}/gold_{provider}_{entity}_dq_report{ext}
+    Path formats (unified structure under data/output/reports/dq/):
+    - Bronze: {base_path}/bronze/{provider}/{entity}/{date}/batch_{date}_{provider}_{entity}_dq_report{ext}
+    - Silver: {base_path}/silver/{provider}/{entity}/silver_{provider}_{entity}_dq_report{ext}
+    - Gold: {base_path}/gold/{provider}/{entity}/gold_{provider}_{entity}_dq_report{ext}
+
+    Flat structure (when flat_structure=True):
+    - Bronze: {base_path}/batch_{date}_{provider}_{entity}_dq_report{ext}
+    - Silver: {base_path}/silver_{provider}_{entity}_dq_report{ext}
+    - Gold: {base_path}/gold_{provider}_{entity}_dq_report{ext}
     """
 
     def __init__(
@@ -15948,25 +15953,25 @@ class DQReportWriter:
         format = format or DQReportFormat.JSON
         extension = self._get_extension(format)
 
+        # Build filename
+        if provider and entity and date_str:
+            filename = f"batch_{date_str}_{provider}_{entity}_dq_report{extension}"
+        else:
+            filename = f"{report.batch_id}_dq_report{extension}"
+
         if output_path is None:
-            # Generate path based on source file location
-            source_dir = Path(report.source_file).parent
-            # Unified naming: batch_{date}_{provider}_{entity}_dq_report{ext}
-            # Falls back to batch_id only if provider/entity not provided
+            # Unified structure: {base_path}/bronze/{provider}/{entity}/{date}/
             if provider and entity and date_str:
-                filename = f"batch_{date_str}_{provider}_{entity}_dq_report{extension}"
+                output_path = (
+                    self._base_path / "bronze" / provider / entity / date_str / filename
+                )
             else:
-                filename = f"{report.batch_id}_dq_report{extension}"
-            output_path = self._base_path / source_dir / filename
+                # Fallback: extract from source file path
+                source_dir = Path(report.source_file).parent
+                output_path = self._base_path / source_dir / filename
         else:
             output_path = Path(output_path)
             if output_path.is_dir():
-                if provider and entity and date_str:
-                    filename = (
-                        f"batch_{date_str}_{provider}_{entity}_dq_report{extension}"
-                    )
-                else:
-                    filename = f"{report.batch_id}_dq_report{extension}"
                 output_path = output_path / filename
 
         return await self._write_report(report, output_path, format)
@@ -16012,6 +16017,10 @@ class DQReportWriter:
     ) -> Path:
         """Resolve output path for Silver/Gold DQ report.
 
+        Unified path structure:
+        - Normal: {base_path}/{layer}/{provider}/{entity}/{layer}_{provider}_{entity}_dq_report{ext}
+        - Flat: {base_path}/{layer}_{provider}_{entity}_dq_report{ext}
+
         Args:
             layer: Layer name ('silver' or 'gold').
             output_path: Explicit output path or None for auto-generation.
@@ -16035,8 +16044,17 @@ class DQReportWriter:
         if self._flat_structure:
             return self._base_path / filename
 
-        normalized_table = target_table.replace(".", "/")
-        return self._base_path / normalized_table / filename
+        # Unified structure: {layer}/{provider}/{entity}/
+        if provider and entity:
+            return self._base_path / layer / provider / entity / filename
+
+        # Fallback: extract from table name (e.g., "chembl_activity" -> "chembl/activity")
+        if "_" in target_table:
+            parts = target_table.split("_", 1)
+            return self._base_path / layer / parts[0] / parts[1] / filename
+
+        # Last resort: use table name directly
+        return self._base_path / layer / target_table / filename
 
     async def write_silver_report(
         self,
@@ -24907,7 +24925,7 @@ Implements RULES.md §2.1.1 - Bronze Layer specifications.
 
 Requirements:
 - REQ-DATA-001: JSONL + zstd format
-- REQ-DATA-002: Path format bronze/v1/{provider}/{entity}/{date}/
+- REQ-DATA-002: Path format bronze/{provider}/{entity}/{date}/
 - REQ-DATA-003: Append-only writes
 - REQ-DATA-004: Atomic writes (via temp file + rename)
 
@@ -24974,6 +24992,7 @@ class BronzeWriter:
         metadata_writer: MetadataWriterPort | None = None,
         save_metadata: bool = False,
         metadata_coordinator: MetadataCoordinatorPort | None = None,
+        flat_structure: bool = False,
     ) -> None:
         """Initialize Bronze writer.
 
@@ -25001,6 +25020,9 @@ class BronzeWriter:
                                 metadata creation. If provided, uses coordinator
                                 instead of local _build_full_bronze_metadata().
                                 Ensures consistent run_id across layers.
+            flat_structure: If True, write directly to base_path/{date}/ without
+                          adding {provider}/{entity}/ prefix. Use when base_path
+                          already includes provider/entity path segments.
 
         Note:
             Lock validation is now performed at Application layer (BatchWriter)
@@ -25032,6 +25054,29 @@ class BronzeWriter:
         self._metadata_coordinator: MetadataCoordinatorPort | None = (
             metadata_coordinator
         )
+        self._flat_structure = flat_structure
+
+    def _resolve_bronze_path(
+        self, provider: str, entity: str, date_str: str, filename: str
+    ) -> str:
+        """Resolve Bronze file path based on flat_structure setting.
+
+        Args:
+            provider: Data provider name (e.g., 'chembl').
+            entity: Entity type (e.g., 'document').
+            date_str: Date string in YYYY-MM-DD format.
+            filename: File name (e.g., 'batch_2026-01-21_uuid.jsonl.zst').
+
+        Returns:
+            Relative path from base_path to the file.
+
+        Path formats:
+            flat_structure=False: {provider}/{entity}/{date}/{filename}
+            flat_structure=True:  {date}/{filename}
+        """
+        if self._flat_structure:
+            return f"{date_str}/{filename}"
+        return f"{provider}/{entity}/{date_str}/{filename}"
 
     def _validate_bronze_names(self, provider: str, entity: str) -> None:
         """Validate provider and entity names (alphanumeric + underscores only)."""
@@ -25349,10 +25394,12 @@ class BronzeWriter:
                 records = self._validate_json_records(records)
 
             date_str = date.strftime("%Y-%m-%d")
-            # Path format: {provider}/{entity}/{date}/batch_{date}_{batch_id}.jsonl.zst
-            # base_path already points to 'data/output/bronze'
-            relative_path = (
-                f"{provider}/{entity}/{date_str}/batch_{date_str}_{batch_id}.jsonl.zst"
+            # Path format depends on flat_structure:
+            #   flat_structure=False: {provider}/{entity}/{date}/batch_...
+            #   flat_structure=True:  {date}/batch_...
+            filename = f"batch_{date_str}_{batch_id}.jsonl.zst"
+            relative_path = self._resolve_bronze_path(
+                provider, entity, date_str, filename
             )
             metadata = self._build_bronze_metadata(
                 run_id, run_type, ingestion_ts, provider, entity, batch_id
@@ -25552,8 +25599,9 @@ class BronzeWriter:
         for easier access and co-location of data artifacts.
         """
         # JSON copy is now stored alongside the zst file in the same directory
-        json_relative_path = (
-            f"{provider}/{entity}/{date_str}/batch_{date_str}_{batch_id}.jsonl"
+        json_filename = f"batch_{date_str}_{batch_id}.jsonl"
+        json_relative_path = self._resolve_bronze_path(
+            provider, entity, date_str, json_filename
         )
 
         # Combine all records into single JSONL content

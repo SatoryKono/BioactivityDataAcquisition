@@ -61,6 +61,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 01ab5ef962c81d45
     │   │   ├── 01c8b61a9c915ffe
     │   │   ├── 01d4be06baa4e4e0
+    │   │   ├── 0210e7565854609f
     │   │   ├── 021cb63c6c32c43b
     │   │   ├── 023b265e2d2507d8
     │   │   ├── 024363c8b1efb2be
@@ -156,6 +157,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 096e802ead190427
     │   │   ├── 099c91df382b705c
     │   │   ├── 09c7e1e081060dd6
+    │   │   ├── 09cc611cc9e3abfc
     │   │   ├── 09ce9d6fd47586d5
     │   │   ├── 09e08f88bd71fe4d
     │   │   ├── 09ef53d4c74d7bee
@@ -346,6 +348,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 1a0ca0b00972463e
     │   │   ├── 1a90bc4cd5baab59
     │   │   ├── 1a9f1455b0d232a0
+    │   │   ├── 1aac2bfaf360e0a2
     │   │   ├── 1ae41b35b5f7d81c
     │   │   ├── 1ae715d6aafd024b
     │   │   ├── 1af4ccae64384676
@@ -512,6 +515,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 289b80106a8f62fa
     │   │   ├── 28a97c2eebec5880
     │   │   ├── 28b9fb74573446e6
+    │   │   ├── 28eb107116556413
     │   │   ├── 294e13965437b784
     │   │   ├── 296337b3729d9893
     │   │   ├── 29984846eeab0082
@@ -1280,6 +1284,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 6718f26dc20e008d
     │   │   ├── 6730e3105dd56543
     │   │   ├── 67552ca89ed0b3ee
+    │   │   ├── 67612e92d73eced6
     │   │   ├── 6779217778206ceb
     │   │   ├── 67888cc0d1d55d76
     │   │   ├── 678c157ad3de9d77
@@ -1343,6 +1348,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 6bd77032071d7c14
     │   │   ├── 6c173e58fb704bec
     │   │   ├── 6c4a4f5efaa68d30
+    │   │   ├── 6c56c8241852633a
     │   │   ├── 6c75809445665042
     │   │   ├── 6cb71a517efcd81f
     │   │   ├── 6cd1bea458f90754
@@ -2786,6 +2792,7 @@ BioactivityDataAcquisition2/
     │   │   ├── e1937848b01ff16a
     │   │   ├── e1a581363a7405c0
     │   │   ├── e1af2b5eccd01633
+    │   │   ├── e1d718e96ca45363
     │   │   ├── e1d975b7c382a31f
     │   │   ├── e1da525415c69ba9
     │   │   ├── e1dd2569bd635681
@@ -3304,6 +3311,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp4jl5m9oh
     │   │   ├── tmp4l29qbq_
     │   │   ├── tmp4lcs8x_x
+    │   │   ├── tmp4lgxn2x2
     │   │   ├── tmp4lur45c8
     │   │   ├── tmp4px_lm5f
     │   │   ├── tmp4q5pt478
@@ -3837,6 +3845,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpj9dbgi3w
     │   │   ├── tmpj9lzovgm
     │   │   ├── tmpja28xagy
+    │   │   ├── tmpja_q9v_9
     │   │   ├── tmpjbj_peqj
     │   │   ├── tmpjdaplq94
     │   │   ├── tmpjf5pdaol
@@ -3847,6 +3856,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpjhuc24o4
     │   │   ├── tmpjih018q6
     │   │   ├── tmpjjclsnct
+    │   │   ├── tmpjjzjc_ie
     │   │   ├── tmpjk2pylnp
     │   │   ├── tmpjm6cm23k
     │   │   ├── tmpjnyk1w0d
@@ -3983,6 +3993,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpnqndi0yy
     │   │   ├── tmpnqzawvyf
     │   │   ├── tmpnrs7_8kc
+    │   │   ├── tmpnru_loou
     │   │   ├── tmpnt932k4t
     │   │   ├── tmpntf5w0_z
     │   │   ├── tmpntz8jtbs
@@ -4097,6 +4108,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmprqnv64pv
     │   │   ├── tmprsemugf9
     │   │   ├── tmprskb48a1
+    │   │   ├── tmprslvp2nc
     │   │   ├── tmprsp7rgj8
     │   │   ├── tmprtaoxuh1
     │   │   ├── tmpruwztiev
@@ -9213,7 +9225,8 @@ BioactivityDataAcquisition2/
     │   ├── checkpoints/
     │   │   └── composite/
     │   │       ├── composite_composite_publication_4bca1010-3a0a-4e31-a932-27dc40fe5611.json
-    │   │       └── composite_composite_publication_51a36405-57e2-40c6-80c2-6bd831af2c12.json
+    │   │       ├── composite_composite_publication_51a36405-57e2-40c6-80c2-6bd831af2c12.json
+    │   │       └── composite_composite_publication_96197c6f-0c5c-46ea-9c5e-c69fd84ff7dc.json
     │   ├── input/
     │   │   ├── activity.csv
     │   │   ├── assay.csv
@@ -9233,13 +9246,11 @@ BioactivityDataAcquisition2/
     │       ├── bronze/
     │       │   ├── chembl/
     │       │   │   ├── publication/
-    │       │   │   │   ├── chembl/
-    │       │   │   │   │   └── document/
-    │       │   │   │   │       └── 2026-01-21/
-    │       │   │   │   │           ├── batch_2026-01-21_32f754c8-1f60-4b47-80d7-f1164926d721.jsonl
-    │       │   │   │   │           ├── batch_2026-01-21_32f754c8-1f60-4b47-80d7-f1164926d721.jsonl.zst
-    │       │   │   │   │           ├── batch_2026-01-21_32f754c8-1f60-4b47-80d7-f1164926d721.jsonl.zst.meta.json
-    │       │   │   │   │           └── chembl_document_metadata.yaml
+    │       │   │   │   ├── 2026-01-21/
+    │       │   │   │   │   ├── batch_2026-01-21_026207ad-d479-4ed0-9364-49ce908f7279.jsonl
+    │       │   │   │   │   ├── batch_2026-01-21_026207ad-d479-4ed0-9364-49ce908f7279.jsonl.zst
+    │       │   │   │   │   ├── batch_2026-01-21_026207ad-d479-4ed0-9364-49ce908f7279.jsonl.zst.meta.json
+    │       │   │   │   │   └── chembl_document_metadata.yaml
     │       │   │   │   └── batch_2026-01-21_chembl_publication_dq_report.json
     │       │   │   ├── activity
     │       │   │   ├── assay
@@ -9251,69 +9262,61 @@ BioactivityDataAcquisition2/
     │       │   │   └── target_component
     │       │   ├── crossref/
     │       │   │   └── publication/
-    │       │   │       ├── crossref/
-    │       │   │       │   └── work/
-    │       │   │       │       └── 2026-01-21/
-    │       │   │       │           ├── batch_2026-01-21_ef308368-21e0-47ab-8a3f-3d912fba8a8b.jsonl
-    │       │   │       │           ├── batch_2026-01-21_ef308368-21e0-47ab-8a3f-3d912fba8a8b.jsonl.zst
-    │       │   │       │           ├── batch_2026-01-21_ef308368-21e0-47ab-8a3f-3d912fba8a8b.jsonl.zst.meta.json
-    │       │   │       │           └── crossref_work_metadata.yaml
+    │       │   │       ├── 2026-01-21/
+    │       │   │       │   ├── batch_2026-01-21_74d8ec55-daee-4909-a303-abcae2e476d4.jsonl
+    │       │   │       │   ├── batch_2026-01-21_74d8ec55-daee-4909-a303-abcae2e476d4.jsonl.zst
+    │       │   │       │   ├── batch_2026-01-21_74d8ec55-daee-4909-a303-abcae2e476d4.jsonl.zst.meta.json
+    │       │   │       │   └── crossref_work_metadata.yaml
     │       │   │       └── batch_2026-01-21_crossref_publication_dq_report.json
     │       │   ├── openalex/
     │       │   │   └── publication/
-    │       │   │       ├── openalex/
-    │       │   │       │   └── publication/
-    │       │   │       │       └── 2026-01-21/
-    │       │   │       │           ├── batch_2026-01-21_8b24b55c-fdb6-432c-a251-544fd2e860e4.jsonl
-    │       │   │       │           ├── batch_2026-01-21_8b24b55c-fdb6-432c-a251-544fd2e860e4.jsonl.zst
-    │       │   │       │           ├── batch_2026-01-21_8b24b55c-fdb6-432c-a251-544fd2e860e4.jsonl.zst.meta.json
-    │       │   │       │           └── openalex_publication_metadata.yaml
+    │       │   │       ├── 2026-01-21/
+    │       │   │       │   ├── batch_2026-01-21_b3d59d26-0354-4340-b2a9-f732828e4f53.jsonl
+    │       │   │       │   ├── batch_2026-01-21_b3d59d26-0354-4340-b2a9-f732828e4f53.jsonl.zst
+    │       │   │       │   ├── batch_2026-01-21_b3d59d26-0354-4340-b2a9-f732828e4f53.jsonl.zst.meta.json
+    │       │   │       │   └── openalex_publication_metadata.yaml
     │       │   │       └── batch_2026-01-21_openalex_publication_dq_report.json
     │       │   ├── pubchem/
     │       │   │   └── compound
     │       │   ├── pubmed/
     │       │   │   └── publication/
-    │       │   │       ├── pubmed/
-    │       │   │       │   └── publication/
-    │       │   │       │       └── 2026-01-21/
-    │       │   │       │           ├── batch_2026-01-21_17a01fd3-5c31-4762-a548-95e3b50d2ebd.jsonl
-    │       │   │       │           ├── batch_2026-01-21_17a01fd3-5c31-4762-a548-95e3b50d2ebd.jsonl.zst
-    │       │   │       │           ├── batch_2026-01-21_17a01fd3-5c31-4762-a548-95e3b50d2ebd.jsonl.zst.meta.json
-    │       │   │       │           └── pubmed_publication_metadata.yaml
+    │       │   │       ├── 2026-01-21/
+    │       │   │       │   ├── batch_2026-01-21_c3c7f715-2b70-45b9-b661-ebcc5bbdfada.jsonl
+    │       │   │       │   ├── batch_2026-01-21_c3c7f715-2b70-45b9-b661-ebcc5bbdfada.jsonl.zst
+    │       │   │       │   ├── batch_2026-01-21_c3c7f715-2b70-45b9-b661-ebcc5bbdfada.jsonl.zst.meta.json
+    │       │   │       │   └── pubmed_publication_metadata.yaml
     │       │   │       └── batch_2026-01-21_pubmed_publication_dq_report.json
     │       │   ├── semanticscholar/
     │       │   │   └── publication/
-    │       │   │       ├── semanticscholar/
-    │       │   │       │   └── publication/
-    │       │   │       │       └── 2026-01-21/
-    │       │   │       │           ├── batch_2026-01-21_371fed40-656e-4650-9672-e619d9d4edc0.jsonl
-    │       │   │       │           ├── batch_2026-01-21_371fed40-656e-4650-9672-e619d9d4edc0.jsonl.zst
-    │       │   │       │           ├── batch_2026-01-21_371fed40-656e-4650-9672-e619d9d4edc0.jsonl.zst.meta.json
-    │       │   │       │           └── semanticscholar_publication_metadata.yaml
+    │       │   │       ├── 2026-01-21/
+    │       │   │       │   ├── batch_2026-01-21_c37ab13b-c8ff-4eb1-9ad1-682f4c6d5273.jsonl
+    │       │   │       │   ├── batch_2026-01-21_c37ab13b-c8ff-4eb1-9ad1-682f4c6d5273.jsonl.zst
+    │       │   │       │   ├── batch_2026-01-21_c37ab13b-c8ff-4eb1-9ad1-682f4c6d5273.jsonl.zst.meta.json
+    │       │   │       │   └── semanticscholar_publication_metadata.yaml
     │       │   │       └── batch_2026-01-21_semanticscholar_publication_dq_report.json
     │       │   └── uniprot/
     │       │       └── protein
     │       ├── gold/
     │       │   ├── chembl/
-    │       │   │   ├── activity/
-    │       │   │   │   ├── chembl_activity.csv
-    │       │   │   │   └── gold_chembl_activity_dq_report.json
-    │       │   │   ├── document_term/
-    │       │   │   │   ├── chembl_publication_term.csv
-    │       │   │   │   └── gold_chembl_publication_term_dq_report.json
     │       │   │   ├── publication/
     │       │   │   │   ├── _delta_log/
     │       │   │   │   │   └── 00000000000000000000.json
     │       │   │   │   ├── chembl_publication.csv
     │       │   │   │   ├── chembl_publication_metadata.yaml
     │       │   │   │   ├── gold_chembl_publication_dq_report.json
-    │       │   │   │   └── part-00000-43dacbab-4130-4683-a0de-b6032dd8601f-c000.snappy.parquet
-    │       │   │   ├── target/
-    │       │   │   │   ├── chembl_target.csv
-    │       │   │   │   └── gold_chembl_target_dq_report.json
+    │       │   │   │   └── part-00000-79e61912-3240-4c6f-81ac-adb3f0624106-c000.snappy.parquet
+    │       │   │   ├── activity
     │       │   │   ├── cell_line
     │       │   │   ├── compound_record
+    │       │   │   ├── document_term
+    │       │   │   ├── target
     │       │   │   └── target_component
+    │       │   ├── composite/
+    │       │   │   └── publication/
+    │       │   │       ├── _delta_log/
+    │       │   │       │   └── 00000000000000000000.json
+    │       │   │       ├── composite_publication_metadata.yaml
+    │       │   │       └── part-00000-21211ff4-0dc4-4c46-b34d-4ada859ffc78-c000.snappy.parquet
     │       │   ├── crossref/
     │       │   │   └── publication/
     │       │   │       ├── _delta_log/
@@ -9321,7 +9324,7 @@ BioactivityDataAcquisition2/
     │       │   │       ├── crossref_publication.csv
     │       │   │       ├── crossref_publication_metadata.yaml
     │       │   │       ├── gold_crossref_publication_dq_report.json
-    │       │   │       └── part-00000-50487a32-1665-4625-a441-466cf513d8c6-c000.snappy.parquet
+    │       │   │       └── part-00000-6713880f-bd23-4c42-ae27-30bcc9aaa994-c000.snappy.parquet
     │       │   ├── openalex/
     │       │   │   └── publication/
     │       │   │       ├── _delta_log/
@@ -9329,20 +9332,15 @@ BioactivityDataAcquisition2/
     │       │   │       ├── gold_openalex_publication_dq_report.json
     │       │   │       ├── openalex_publication.csv
     │       │   │       ├── openalex_publication_metadata.yaml
-    │       │   │       └── part-00000-5c244e9b-08ac-4966-ac1e-1db17d0b0fff-c000.snappy.parquet
+    │       │   │       └── part-00000-23282a29-8db2-4b00-89ce-84b667734e7d-c000.snappy.parquet
     │       │   ├── pubchem/
     │       │   │   └── compound
-    │       │   ├── publication_enriched/
-    │       │   │   ├── _delta_log/
-    │       │   │   │   └── 00000000000000000000.json
-    │       │   │   ├── part-00000-f58efa2e-2811-46ed-9067-997b371dd873-c000.snappy.parquet
-    │       │   │   └── publication_enriched_metadata.yaml
     │       │   ├── pubmed/
     │       │   │   └── publication/
     │       │   │       ├── _delta_log/
     │       │   │       │   └── 00000000000000000000.json
     │       │   │       ├── gold_pubmed_publication_dq_report.json
-    │       │   │       ├── part-00000-a7198b83-620c-4464-9256-fc207a417bca-c000.snappy.parquet
+    │       │   │       ├── part-00000-fb458113-7d2c-42bc-a29b-c7b2a6177442-c000.snappy.parquet
     │       │   │       ├── pubmed_publication.csv
     │       │   │       └── pubmed_publication_metadata.yaml
     │       │   └── semanticscholar/
@@ -9350,49 +9348,39 @@ BioactivityDataAcquisition2/
     │       │           ├── _delta_log/
     │       │           │   └── 00000000000000000000.json
     │       │           ├── gold_semanticscholar_publication_dq_report.json
-    │       │           ├── part-00000-5a217f0a-53c0-42c2-bf2f-79423c575752-c000.snappy.parquet
+    │       │           ├── part-00000-e1a29979-853a-4f4a-9fbc-a9992161c400-c000.snappy.parquet
     │       │           ├── semanticscholar_publication.csv
     │       │           └── semanticscholar_publication_metadata.yaml
     │       └── silver/
     │           ├── chembl/
-    │           │   ├── activity/
-    │           │   │   ├── chembl_activity.csv
-    │           │   │   └── silver_chembl_activity_dq_report.json
-    │           │   ├── assay/
-    │           │   │   ├── chembl_assay.csv
-    │           │   │   └── silver_chembl_assay_dq_report.json
-    │           │   ├── document_term/
-    │           │   │   ├── chembl_publication_term.csv
-    │           │   │   └── silver_chembl_publication_term_dq_report.json
-    │           │   ├── molecule/
-    │           │   │   ├── chembl_molecule.csv
-    │           │   │   └── silver_chembl_molecule_dq_report.json
     │           │   ├── publication/
     │           │   │   ├── _delta_log/
     │           │   │   │   └── 00000000000000000000.json
     │           │   │   ├── chembl_publication.csv
     │           │   │   ├── chembl_publication_metadata.yaml
-    │           │   │   ├── part-00000-cc88ea50-bef7-4934-b797-d16eb662ed8d-c000.snappy.parquet
+    │           │   │   ├── part-00000-0046e976-fef8-414d-bff0-e590f6815c7a-c000.snappy.parquet
     │           │   │   └── silver_chembl_publication_dq_report.json
-    │           │   ├── target/
-    │           │   │   ├── chembl_target.csv
-    │           │   │   └── silver_chembl_target_dq_report.json
+    │           │   ├── activity
+    │           │   ├── assay
     │           │   ├── cell_line
     │           │   ├── compound_record
+    │           │   ├── document_term
+    │           │   ├── molecule
+    │           │   ├── target
     │           │   └── target_component
     │           ├── composite/
     │           │   └── publication/
     │           │       ├── _delta_log/
     │           │       │   └── 00000000000000000000.json
     │           │       ├── composite_publication_metadata.yaml
-    │           │       └── part-00000-8924cdb1-35fa-40e4-8012-9d39a1ea11c2-c000.snappy.parquet
+    │           │       └── part-00000-b00477e6-7c25-4cd0-af92-45452c6dfaa4-c000.snappy.parquet
     │           ├── crossref/
     │           │   └── publication/
     │           │       ├── _delta_log/
     │           │       │   └── 00000000000000000000.json
     │           │       ├── crossref_publication.csv
     │           │       ├── crossref_publication_metadata.yaml
-    │           │       ├── part-00000-2aacff1e-be15-4a5a-a219-2618d5a3520c-c000.snappy.parquet
+    │           │       ├── part-00000-7d2437c0-a4ba-4922-8175-3b82ff8b0906-c000.snappy.parquet
     │           │       └── silver_crossref_publication_dq_report.json
     │           ├── openalex/
     │           │   └── publication/
@@ -9400,7 +9388,7 @@ BioactivityDataAcquisition2/
     │           │       │   └── 00000000000000000000.json
     │           │       ├── openalex_publication.csv
     │           │       ├── openalex_publication_metadata.yaml
-    │           │       ├── part-00000-cdd6f22a-198b-4967-b355-ed87db14fed6-c000.snappy.parquet
+    │           │       ├── part-00000-ee125750-4c42-4eda-ba62-26b708ae8c22-c000.snappy.parquet
     │           │       └── silver_openalex_publication_dq_report.json
     │           ├── pubchem/
     │           │   └── compound
@@ -9408,7 +9396,7 @@ BioactivityDataAcquisition2/
     │           │   └── publication/
     │           │       ├── _delta_log/
     │           │       │   └── 00000000000000000000.json
-    │           │       ├── part-00000-b922693c-0ad7-4368-ae49-cf74e34c82a1-c000.snappy.parquet
+    │           │       ├── part-00000-726eebce-0388-4505-bb52-c8961a352c63-c000.snappy.parquet
     │           │       ├── pubmed_publication.csv
     │           │       ├── pubmed_publication_metadata.yaml
     │           │       └── silver_pubmed_publication_dq_report.json
@@ -9416,14 +9404,12 @@ BioactivityDataAcquisition2/
     │           │   └── publication/
     │           │       ├── _delta_log/
     │           │       │   └── 00000000000000000000.json
-    │           │       ├── part-00000-93dba4df-603e-4877-9c8d-4b2739b3c8e9-c000.snappy.parquet
+    │           │       ├── part-00000-048d8c41-2dab-423d-95c0-71207f2beb7a-c000.snappy.parquet
     │           │       ├── semanticscholar_publication.csv
     │           │       ├── semanticscholar_publication_metadata.yaml
     │           │       └── silver_semanticscholar_publication_dq_report.json
     │           └── uniprot/
-    │               └── protein/
-    │                   ├── silver_uniprot_protein_dq_report.json
-    │                   └── uniprot_protein.csv
+    │               └── protein
     ├── docs/
     │   ├── 00-project_rules/
     │   │   ├── 03-file-policy.md
@@ -9518,6 +9504,7 @@ BioactivityDataAcquisition2/
     │   │   ├── cleanup-policy.md
     │   │   ├── date-handling.md
     │   │   ├── dq-configuration.md
+    │   │   ├── file-path-audit-report.md
     │   │   ├── getting-started.md
     │   │   ├── local-storage-layout.md
     │   │   ├── pipeline-lifecycle.md
@@ -9673,6 +9660,7 @@ BioactivityDataAcquisition2/
     │   │   ├── config_unification_report_2026-01-19.md
     │   │   ├── date-handling-audit-2026-01-19.md
     │   │   ├── dq_redundancy_audit_2026-01-20.md
+    │   │   ├── file-path-audit-2026-01-21.md
     │   │   ├── metadata-audit-report-2026-01-19.md
     │   │   └── metadata_inventory.csv
     │   ├── contracts/
@@ -11129,6 +11117,7 @@ BioactivityDataAcquisition2/
     │   ├── strategies.py
     │   ├── test_architecture.py
     │   └── test_data_storage.py
+    ├── .coverage
     ├── .editorconfig
     ├── .env
     ├── .env.example
@@ -11158,6 +11147,6 @@ BioactivityDataAcquisition2/
 ```
 
 **Statistics:**
-- Directories: 753
-- Files: 10399
-- Total items: 11152
+- Directories: 735
+- Files: 10406
+- Total items: 11141

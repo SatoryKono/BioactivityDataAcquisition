@@ -5024,12 +5024,13 @@ class BaseServicesFactory:
         silver_analyzer = DQServicesFactory.create_silver_analyzer()
         gold_analyzer = DQServicesFactory.create_gold_analyzer()
 
-        # DQ reports should be written alongside the data
+        # DQ reports are written to dedicated reports/dq/ directory
         output_root = cls._get_output_root(settings, pipeline_config)
+        dq_reports_path = output_root / "reports" / "dq"
         # Get flat_structure from sink config (use Silver as primary)
         flat_structure = cls._get_flat_structure(pipeline_config)
         report_writer = DQServicesFactory.create_report_writer(
-            base_path=output_root,
+            base_path=dq_reports_path,
             logger=logger,
             flat_structure=flat_structure,
         )
@@ -6188,8 +6189,10 @@ class StorageFactory:
                           Used in test mode to respect test isolation.
         """
         if csv_cfg and csv_cfg.enabled:
+            # Convert to str for CsvExporter (expects str, not Path)
+            path = override_path or csv_cfg.path
             return CsvExporter(
-                base_path=override_path or csv_cfg.path,
+                base_path=str(path),
                 logger=logger,
                 delimiter=csv_cfg.delimiter,
                 header=csv_cfg.header,
@@ -6222,6 +6225,7 @@ class StorageFactory:
         metadata_coordinator: MetadataCoordinator | None = None,
         transform_version: str | None = None,
         transform_steps: tuple[str, ...] | None = None,
+        bronze_flat_structure: bool = False,
         silver_flat_structure: bool = False,
         gold_flat_structure: bool = False,
     ) -> StorageAdapter:
@@ -6264,6 +6268,7 @@ class StorageFactory:
                 metadata_writer=bronze_metadata_writer,
                 save_metadata=bronze_save_metadata,
                 metadata_coordinator=metadata_coordinator,
+                flat_structure=bronze_flat_structure,
             ),
             silver_writer=SilverWriter(
                 base_path=silver_path,
@@ -6371,6 +6376,7 @@ class StorageFactory:
         transform_steps = tuple(config.transform.steps)
 
         # Extract flat_structure settings
+        bronze_flat_structure = bronze_config.flat_structure if bronze_config else False
         silver_flat_structure = silver_config.flat_structure if silver_config else False
         gold_flat_structure = gold_config.flat_structure if gold_config else False
 
@@ -6389,6 +6395,7 @@ class StorageFactory:
             metadata_coordinator=metadata_coordinator,
             transform_version=transform_version,
             transform_steps=transform_steps,
+            bronze_flat_structure=bronze_flat_structure,
             silver_flat_structure=silver_flat_structure,
             gold_flat_structure=gold_flat_structure,
         )
