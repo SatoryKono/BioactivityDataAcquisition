@@ -82,11 +82,6 @@ class DQMetricsCalculator:
 
         Returns:
             SchemaDriftInfo if drift detected, None otherwise.
-
-        Drift severity levels:
-        - critical: Missing required fields (non-underscore prefix)
-        - warn: More than 3 new fields
-        - info: Minor schema changes
         """
         if not existing_fields or not records:
             return None
@@ -98,21 +93,34 @@ class DQMetricsCalculator:
         if not new_fields and not missing_fields:
             return None
 
-        # Critical: missing required fields (business fields without underscore prefix)
-        critical_missing = [f for f in missing_fields if not f.startswith("_")]
-
-        if critical_missing:
-            status = "critical"
-        elif len(new_fields) > 3:
-            status = "warn"
-        else:
-            status = "info"
-
+        status = self._determine_drift_status(new_fields, missing_fields)
         return SchemaDriftInfo(
             status=status,
             new_fields=tuple(sorted(new_fields)),
             missing_fields=tuple(sorted(missing_fields)),
         )
+
+    def _determine_drift_status(
+        self,
+        new_fields: set[str],
+        missing_fields: set[str],
+    ) -> str:
+        """Determine drift severity status.
+
+        Drift severity levels:
+        - critical: Missing required fields (non-underscore prefix)
+        - warn: More than 3 new fields
+        - info: Minor schema changes
+        """
+        # Critical: missing required fields (business fields without underscore prefix)
+        has_critical_missing = any(
+            not f.startswith("_") for f in missing_fields
+        )
+        if has_critical_missing:
+            return "critical"
+        if len(new_fields) > 3:
+            return "warn"
+        return "info"
 
 
 __all__ = ["DQMetricsCalculator", "DQMetricsInput"]
