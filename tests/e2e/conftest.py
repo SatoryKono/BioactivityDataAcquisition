@@ -242,19 +242,33 @@ def assert_bronze_files_exist(data_dir: Path, provider: str, entity: str) -> lis
         AssertionError: Если файлы не найдены
 
     Note:
-        Path structure is: data_dir/output/bronze/{provider}/{entity}/
-        (based on settings.bronze_path which includes 'output/bronze')
+        Handles both standard and flat_structure layouts:
+        - Standard: data_dir/output/bronze/{provider}/{entity}/{date}/
+        - Flat: data_dir/output/bronze/{date}/ (when flat_structure: true)
     """
-    # BronzeWriter writes to settings.bronze_path/{provider}/{entity}/{date}/
+    # Standard path: data_dir/output/bronze/{provider}/{entity}/
     bronze_path = data_dir / "output" / "bronze" / provider / entity
-    if not bronze_path.exists():
-        raise AssertionError(f"Bronze path does not exist: {bronze_path}")
 
-    files = list(bronze_path.rglob("*.jsonl.zst"))
-    if not files:
-        raise AssertionError(f"No Bronze files found in {bronze_path}")
+    # Flat structure path: data_dir/output/bronze/ (files directly under base)
+    flat_path = data_dir / "output" / "bronze"
 
-    return files
+    # Check both locations - standard path first, then flat structure
+    if bronze_path.exists():
+        files = list(bronze_path.rglob("*.jsonl.zst"))
+        if files:
+            return files
+
+    # Try flat_structure path
+    if flat_path.exists():
+        files = list(flat_path.rglob("*.jsonl.zst"))
+        if files:
+            return files
+
+    raise AssertionError(
+        f"No Bronze files found. Checked paths:\n"
+        f"  - Standard: {bronze_path}\n"
+        f"  - Flat: {flat_path}"
+    )
 
 
 def assert_silver_table_has_records(
