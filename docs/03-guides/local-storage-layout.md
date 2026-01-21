@@ -8,39 +8,39 @@ This guide describes the local filesystem layout used by BioETL in Local-Only mo
 
 ```
 data/
-├── output/                              # Data output directory (ADR-025)
-│   ├── bronze/
-│   │   └── {provider}/
-│   │       └── {entity}/
-│   │           └── {date}/              # YYYY-MM-DD
-│   │               ├── batch_{date}_{batch_id}.jsonl.zst
-│   │               ├── batch_{date}_{batch_id}.jsonl     # Optional JSON copy
-│   │               ├── {provider}_{entity}_metadata.yaml # Optional metadata
-│   │               └── batch_{date}_{provider}_{entity}_dq_report.json
-│   ├── silver/
-│   │   └── {provider}/
-│   │       └── {entity}/                # Delta Lake table
-│   │           ├── _delta_log/
-│   │           ├── part-00000-*.parquet
-│   │           ├── {provider}_{entity}_metadata.yaml
-│   │           └── silver_{provider}_{entity}_dq_report.json
-│   ├── gold/
-│   │   └── {provider}/
-│   │       └── {entity}/                # Delta Lake table (flattened)
-│   │           ├── _delta_log/
-│   │           ├── part-00000-*.parquet
-│   │           ├── {provider}_{entity}_metadata.yaml
-│   │           └── gold_{provider}_{entity}_dq_report.json
-│   └── reports/
-│       └── dq/                          # Composite DQ reports
-├── checkpoints/
-│   ├── {pipeline_name}.json             # Flat structure (e.g., chembl_activity.json)
-│   └── composite/
-│       └── composite_{name}_{run_id}.json
-└── quarantine/
-    └── common.quarantine/               # Unified quarantine table
-        ├── _delta_log/
-        └── part-00000-*.parquet
+└── output/                              # Data output directory (ADR-025)
+    ├── bronze/
+    │   └── {provider}/
+    │       └── {entity}/
+    │           └── {date}/              # YYYY-MM-DD
+    │               ├── batch_{date}_{batch_id}.jsonl.zst
+    │               ├── batch_{date}_{batch_id}.jsonl     # Optional JSON copy
+    │               ├── {provider}_{entity}_metadata.yaml # Optional metadata
+    │               └── batch_{date}_{provider}_{entity}_dq_report.json
+    ├── silver/
+    │   └── {provider}/
+    │       └── {entity}/                # Delta Lake table
+    │           ├── _delta_log/
+    │           ├── part-00000-*.parquet
+    │           ├── {provider}_{entity}_metadata.yaml
+    │           └── silver_{provider}_{entity}_dq_report.json
+    ├── gold/
+    │   └── {provider}/
+    │       └── {entity}/                # Delta Lake table (flattened)
+    │           ├── _delta_log/
+    │           ├── part-00000-*.parquet
+    │           ├── {provider}_{entity}_metadata.yaml
+    │           └── gold_{provider}_{entity}_dq_report.json
+    ├── checkpoints/
+    │   ├── {pipeline_name}.json         # Flat structure (e.g., chembl_activity.json)
+    │   └── composite/
+    │       └── composite_{name}_{run_id}.json
+    ├── quarantine/
+    │   └── common.quarantine/           # Unified quarantine table
+    │       ├── _delta_log/
+    │       └── part-00000-*.parquet
+    └── reports/
+        └── dq/                          # Composite DQ reports
 ```
 
 > **Note**: The `output/` subdirectory separates generated data from configuration
@@ -121,13 +121,13 @@ df = pl.read_delta("data/output/silver/chembl/activity", version=5)
 | Aspect | Value |
 |--------|-------|
 | Format | JSON |
-| Path Pattern | `data/checkpoints/{pipeline_name}.json` |
-| Composite Pattern | `data/checkpoints/composite/composite_{name}_{run_id}.json` |
+| Path Pattern | `data/output/checkpoints/{pipeline_name}.json` |
+| Composite Pattern | `data/output/checkpoints/composite/composite_{name}_{run_id}.json` |
 | Purpose | Resume interrupted pipelines |
 
 **Flat structure** (not nested):
 ```
-data/checkpoints/
+data/output/checkpoints/
 ├── chembl_activity.json
 ├── chembl_molecule.json
 ├── pubchem_compound.json
@@ -169,7 +169,7 @@ Remove old Delta Lake files:
 # Via Python
 python -c "
 from deltalake import DeltaTable
-dt = DeltaTable('data/silver/chembl/activity')
+dt = DeltaTable('data/output/silver/chembl/activity')
 dt.vacuum(retention_hours=168)  # 7 days
 "
 ```
@@ -180,7 +180,7 @@ After successful pipeline completion, checkpoints are automatically deleted.
 For manual cleanup:
 
 ```bash
-rm data/checkpoints/{pipeline_name}.json
+rm data/output/checkpoints/{pipeline_name}.json
 ```
 
 ### Quarantine Purge
