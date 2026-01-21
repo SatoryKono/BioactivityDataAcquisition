@@ -29,7 +29,8 @@ jobs:
             # /run-tests command
             -   name: Run Tests (Coverage)
                 run: |
-                    pytest tests -m "not e2e" --ignore=tests/e2e --ignore=tests/contract \
+                    # Exclude e2e and benchmark tests (benchmark tests require manual run)
+                    pytest tests -m "not e2e and not benchmark" --ignore=tests/e2e --ignore=tests/contract \
                       --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
 
             # /render-diagrams command
