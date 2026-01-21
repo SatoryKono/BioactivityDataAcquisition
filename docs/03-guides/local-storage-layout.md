@@ -8,32 +8,44 @@ This guide describes the local filesystem layout used by BioETL in Local-Only mo
 
 ```
 data/
-├── bronze/
-│   └── v1/                          # Format version (JSONL + zstd)
-│       └── {provider}/
-│           └── {entity}/
-│               └── {date}/          # YYYY-MM-DD
-│                   ├── batch_001.jsonl.zst
-│                   └── batch_002.jsonl.zst
-├── silver/
-│   └── {provider}/
-│       └── {entity}/                # Delta Lake table
-│           ├── _delta_log/
-│           ├── part-00000-*.parquet
-│           └── ...
-├── gold/
-│   └── {provider}/
-│       └── {entity}/                # Delta Lake table (flattened)
-│           ├── _delta_log/
-│           └── ...
-├── checkpoints/
-│   └── {pipeline_name}/
-│       └── checkpoint.json          # Last processed state
-└── quarantine/
-    └── common.quarantine/           # Unified quarantine table
-        ├── _delta_log/
-        └── ...
+└── output/                              # Data output directory (ADR-025)
+    ├── bronze/
+    │   └── {provider}/
+    │       └── {entity}/
+    │           └── {date}/              # YYYY-MM-DD
+    │               ├── batch_{date}_{batch_id}.jsonl.zst
+    │               ├── batch_{date}_{batch_id}.jsonl     # Optional JSON copy
+    │               ├── {provider}_{entity}_metadata.yaml # Optional metadata
+    │               └── batch_{date}_{provider}_{entity}_dq_report.json
+    ├── silver/
+    │   └── {provider}/
+    │       └── {entity}/                # Delta Lake table
+    │           ├── _delta_log/
+    │           ├── part-00000-*.parquet
+    │           ├── {provider}_{entity}_metadata.yaml
+    │           └── silver_{provider}_{entity}_dq_report.json
+    ├── gold/
+    │   └── {provider}/
+    │       └── {entity}/                # Delta Lake table (flattened)
+    │           ├── _delta_log/
+    │           ├── part-00000-*.parquet
+    │           ├── {provider}_{entity}_metadata.yaml
+    │           └── gold_{provider}_{entity}_dq_report.json
+    ├── checkpoints/
+    │   ├── {pipeline_name}.json         # Flat structure (e.g., chembl_activity.json)
+    │   └── composite/
+    │       └── composite_{name}_{run_id}.json
+    ├── quarantine/
+    │   └── common.quarantine/           # Unified quarantine table
+    │       ├── _delta_log/
+    │       └── part-00000-*.parquet
+    └── reports/
+        └── dq/                          # Composite DQ reports
 ```
+
+> **Note**: The `output/` subdirectory separates generated data from configuration
+> and input files. This structure is established by ADR-025 and used by all
+> pipeline configurations.
 
 ## Layer Details
 
@@ -42,22 +54,27 @@ data/
 | Aspect | Value |
 |--------|-------|
 | Format | JSONL + zstd compression |
-| Path Pattern | `data/bronze/v1/{provider}/{entity}/{date}/` |
+| Path Pattern | `data/output/bronze/{provider}/{entity}/{date}/` |
+| File Pattern | `batch_{YYYY-MM-DD}_{batch_id}.jsonl.zst` |
 | Retention | 90 days (manual cleanup) |
 | Idempotency | Append-only |
 
 **Example paths:**
 ```
-data/bronze/v1/chembl/activity/2025-01-15/batch_001.jsonl.zst
-data/bronze/v1/pubchem/compound/2025-01-15/batch_001.jsonl.zst
+data/output/bronze/chembl/activity/2025-01-15/batch_2025-01-15_a1b2c3d4.jsonl.zst
+data/output/bronze/pubchem/compound/2025-01-15/batch_2025-01-15_e5f6g7h8.jsonl.zst
 ```
+
+**Sidecar files (optional):**
+- `{provider}_{entity}_metadata.yaml` - Batch metadata (record counts, timestamps)
+- `batch_{date}_{provider}_{entity}_dq_report.json` - Data quality report
 
 ### Silver Layer
 
 | Aspect | Value |
 |--------|-------|
 | Format | Delta Lake (delta-rs) |
-| Path Pattern | `data/silver/{provider}/{entity}/` |
+| Path Pattern | `data/output/silver/{provider}/{entity}/` |
 | Retention | Permanent |
 | Idempotency | Merge/Upsert by `content_hash` |
 
@@ -66,15 +83,19 @@ data/bronze/v1/pubchem/compound/2025-01-15/batch_001.jsonl.zst
 - Contains full JSON fields for forensic analysis
 - Time travel available via `version` parameter
 
+**Sidecar files:**
+- `{provider}_{entity}_metadata.yaml` - Table metadata with lineage
+- `silver_{provider}_{entity}_dq_report.json` - Data quality report
+
 **Reading Silver data:**
 ```python
 import polars as pl
 
 # Current version
-df = pl.read_delta("data/silver/chembl/activity")
+df = pl.read_delta("data/output/silver/chembl/activity")
 
 # Historical version (time travel)
-df = pl.read_delta("data/silver/chembl/activity", version=5)
+df = pl.read_delta("data/output/silver/chembl/activity", version=5)
 ```
 
 ### Gold Layer
@@ -82,7 +103,7 @@ df = pl.read_delta("data/silver/chembl/activity", version=5)
 | Aspect | Value |
 |--------|-------|
 | Format | Delta Lake (flattened schema) |
-| Path Pattern | `data/gold/{provider}/{entity}/` |
+| Path Pattern | `data/output/gold/{provider}/{entity}/` |
 | Retention | Permanent |
 | Idempotency | SCD Type 2 or partition overwrite |
 
@@ -91,21 +112,40 @@ df = pl.read_delta("data/silver/chembl/activity", version=5)
 - Excludes fields from `GOLD_EXCLUDE_FIELDS`
 - Optimized for analytics queries
 
+**Sidecar files:**
+- `{provider}_{entity}_metadata.yaml` - Table metadata with SCD info
+- `gold_{provider}_{entity}_dq_report.json` - Data quality report
+
 ### Checkpoints
 
 | Aspect | Value |
 |--------|-------|
 | Format | JSON |
-| Path Pattern | `data/checkpoints/{pipeline}/checkpoint.json` |
+| Path Pattern | `data/output/checkpoints/{pipeline_name}.json` |
+| Composite Pattern | `data/output/checkpoints/composite/composite_{name}_{run_id}.json` |
 | Purpose | Resume interrupted pipelines |
+
+**Flat structure** (not nested):
+```
+data/output/checkpoints/
+├── chembl_activity.json
+├── chembl_molecule.json
+├── pubchem_compound.json
+└── composite/
+    └── composite_publication_enrichment_abc123.json
+```
 
 **Checkpoint structure:**
 ```json
 {
-  "last_processed_id": "CHEMBL12345",
-  "last_processed_ts": "2025-01-15T10:30:00Z",
+  "pipeline": "chembl_activity",
   "run_id": "550e8400-e29b-41d4-a716-446655440000",
-  "batch_count": 42
+  "metadata": {
+    "last_processed_id": "CHEMBL12345",
+    "last_processed_ts": "2025-01-15T10:30:00Z",
+    "batch_count": 42
+  },
+  "version": "2.0"
 }
 ```
 
@@ -129,7 +169,7 @@ Remove old Delta Lake files:
 # Via Python
 python -c "
 from deltalake import DeltaTable
-dt = DeltaTable('data/silver/chembl/activity')
+dt = DeltaTable('data/output/silver/chembl/activity')
 dt.vacuum(retention_hours=168)  # 7 days
 "
 ```
@@ -140,7 +180,7 @@ After successful pipeline completion, checkpoints are automatically deleted.
 For manual cleanup:
 
 ```bash
-rm -rf data/checkpoints/{pipeline}/
+rm data/output/checkpoints/{pipeline_name}.json
 ```
 
 ### Quarantine Purge
@@ -158,9 +198,35 @@ from bioetl.infrastructure.config import Settings
 
 settings = Settings()
 print(settings.data_dir)  # Path("data")
-print(settings.bronze_path)  # Path("data/bronze")
-print(settings.silver_path)  # Path("data/silver")
+# Actual paths use data/output/ hierarchy:
+# - Bronze: data/output/bronze/
+# - Silver: data/output/silver/
+# - Gold: data/output/gold/
 ```
+
+### Convention-Based Path Resolution
+
+Pipeline configurations can omit explicit paths. The config loader automatically
+resolves paths using conventions:
+
+```yaml
+# configs/pipelines/chembl/activity.yaml
+sink:
+  bronze:
+    # path defaults to: data/output/bronze/chembl/activity
+  silver:
+    # path defaults to: data/output/silver/chembl/activity
+  gold:
+    # path defaults to: data/output/gold/chembl/activity
+```
+
+**Resolution logic** (`src/bioetl/infrastructure/config_loader.py`):
+```python
+layer.setdefault("path", f"data/output/{layer_name}/{provider}/{entity_type}")
+```
+
+This convention ensures consistent paths across all pipelines without repetitive
+configuration. Explicit paths can still be specified to override the defaults.
 
 ## Configs Structure
 
