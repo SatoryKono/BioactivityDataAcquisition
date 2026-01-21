@@ -123,7 +123,7 @@ class TestEchoHealthServerInfo:
 
         runner = CliRunner()
         result = runner.invoke(test_cmd)
-        assert "Health server: http://0.0.0.0:8080/health" in result.output
+        assert "Health server: http://127.0.0.1:8080/health" in result.output
 
     def test_no_echo_when_disabled(self) -> None:
         """Test that nothing is echoed when health server is disabled."""
@@ -145,7 +145,7 @@ class TestEchoHealthServerInfo:
 
         runner = CliRunner()
         result = runner.invoke(test_cmd)
-        assert "Health server: http://0.0.0.0:9090/health" in result.output
+        assert "Health server: http://127.0.0.1:9090/health" in result.output
 
 
 class TestRunCommandHealthServerOptions:
