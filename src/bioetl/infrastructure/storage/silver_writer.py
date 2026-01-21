@@ -647,33 +647,37 @@ class SilverWriter(BaseDeltaWriter):
         self,
         table_name: str,
         records: list[dict[str, Any]],
+        quarantined_count: int = 0,
     ) -> BatchDQMetrics:
-        """Compute DQ metrics for the batch of records.
-
-        Calculates column statistics, detects schema drift, and creates
-        a BatchDQMetrics value object for metadata persistence.
+        """Compute DQ metrics using centralized calculator.
 
         Args:
             table_name: Target table name for schema drift detection.
             records: List of records to analyze.
+            quarantined_count: Number of quarantined records.
 
         Returns:
             BatchDQMetrics with computed column stats and schema drift info.
         """
-        from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
-
-        # Detect schema drift (non-raising, for metrics only)
-        schema_drift = await self._detect_schema_drift(table_name, records)
-
-        # Create BatchDQMetrics with column statistics
-        # Currently all records passed validation (errors were quarantined earlier)
-        return BatchDQMetrics.from_records(
-            records=records,
-            error_count=0,  # Records here passed validation
-            warning_count=0,
-            validation_errors=None,
-            schema_drift=schema_drift,
+        from bioetl.application.services.dq_metrics_calculator import (
+            DQMetricsCalculator,
+            DQMetricsInput,
         )
+
+        # Get existing schema for drift detection
+        existing_schema = await self._get_table_schema(table_name)
+        existing_fields: set[str] | None = None
+        if existing_schema is not None:
+            existing_fields = set(existing_schema.names)
+
+        calculator = DQMetricsCalculator()
+        input_data = DQMetricsInput(
+            records=records,
+            existing_schema_fields=existing_fields,
+            quarantined_count=quarantined_count,
+        )
+
+        return calculator.calculate(input_data)
 
     async def _log_silver_audit(
         self,
@@ -777,6 +781,7 @@ class SilverWriter(BaseDeltaWriter):
         mode: SilverWriteMode,
         bronze_refs: list[BronzeWriteResult] | None = None,
         dq_metrics: BatchDQMetrics | None = None,
+        dq_report_path: str | None = None,
     ) -> None:
         """Write Silver layer metadata sidecar file.
 
@@ -792,6 +797,7 @@ class SilverWriter(BaseDeltaWriter):
             dq_metrics: Optional BatchDQMetrics with computed DQ metrics.
                 If provided, dq_summary will contain real column metrics,
                 schema drift info, and error rates (REQ-DQ-001).
+            dq_report_path: Optional path to generated DQ report for cross-reference.
         """
         if not records:
             return
@@ -802,161 +808,32 @@ class SilverWriter(BaseDeltaWriter):
         entity_name = path_parts[-1] if path_parts else "unknown"
         provider_name = path_parts[-2] if len(path_parts) > 1 else "unknown"
 
-        # Use MetadataCoordinator if available (centralized metadata)
-        if self._metadata_coordinator is not None:
-            from bioetl.domain.ports import SilverMetadataInput
-
-            # Get Delta version after write
-            version_after = await self._get_delta_version(table_path)
-
-            silver_input = SilverMetadataInput(
+        if self._metadata_coordinator is None:
+            self.logger.warning(
+                "silver_metadata_skipped",
+                reason="MetadataCoordinator not configured",
                 table_path=table_path,
-                records=records,
-                primary_keys=primary_keys,
-                mode=mode,
-                bronze_refs=bronze_refs,
-                dq_metrics=dq_metrics,
-                version_after=version_after,
-                transform_version=self._transform_version,
-                transform_steps=self._transform_steps,
-            )
-            metadata = self._metadata_coordinator.create_silver_metadata(silver_input)
-            await self._metadata_writer.write_silver_metadata(
-                table_path,
-                metadata,
-                table_name=table_name,
-                flat_structure=self._flat_structure,
-                provider=provider_name,
-                entity=entity_name,
             )
             return
 
-        # Fallback to local metadata building (backward compatibility)
-        from datetime import UTC, datetime
-        from importlib.metadata import version as pkg_version
-        from platform import node as hostname
-        from platform import python_version
-
-        from bioetl.domain.models.metadata import (
-            DeltaMetrics,
-            DQSummary,
-            EnvironmentMetadata,
-            LineageMetadata,
-            PipelineMetadata,
-            RuntimeMetadata,
-            RunTypeEnum,
-            SilverMetadata,
-            SilverOutputMetadata,
-        )
-
-        # Extract run context from first record
-        first_record = records[0]
-        run_id = first_record.get("_run_id", "")
-        run_type_str = first_record.get("_run_type", "incremental")
-
-        # Map run_type string to enum
-        try:
-            run_type = RunTypeEnum(run_type_str)
-        except ValueError:
-            run_type = RunTypeEnum.INCREMENTAL
+        from bioetl.domain.ports import SilverMetadataInput
 
         # Get Delta version after write
         version_after = await self._get_delta_version(table_path)
 
-        # Build runtime metadata
-        now = datetime.now(UTC)
-        runtime = RuntimeMetadata(
-            run_id=run_id,
-            run_type=run_type,
-            started_at_utc=now,
-            completed_at_utc=now,
-        )
-
-        # Use already extracted provider/entity from top of method
-        pipeline = PipelineMetadata(
-            name=f"{provider_name}_{entity_name}",
-            provider=provider_name,
-            entity=entity_name,
-        )
-
-        # Build lineage from records and bronze_refs
-        source_batch_ids = list(
-            {
-                r.get("_source_batch_id", "")
-                for r in records
-                if r.get("_source_batch_id")
-            }
-        )
-
-        # Extract bronze paths from bronze_refs for complete lineage (REQ-LINEAGE-001)
-        bronze_paths: list[str] = []
-        if bronze_refs:
-            bronze_paths = [ref.relative_path for ref in bronze_refs]
-
-        lineage = LineageMetadata(
-            source_batch_ids=source_batch_ids,
-            bronze_paths=bronze_paths,
-        )
-
-        # Build Delta metrics
-        # Map SilverWriteMode to DeltaMetrics operation (Literal type)
-        operation_map: dict[
-            SilverWriteMode, Literal["merge", "overwrite", "append"]
-        ] = {
-            SilverWriteMode.MERGE: "merge",
-            SilverWriteMode.APPEND: "append",
-            SilverWriteMode.DELETE: "overwrite",  # DELETE mode uses overwrite
-        }
-        delta = DeltaMetrics(
+        silver_input = SilverMetadataInput(
             table_path=table_path,
-            operation=operation_map[mode],
-            primary_key=primary_keys,
+            records=records,
+            primary_keys=primary_keys,
+            mode=mode,
+            bronze_refs=bronze_refs,
+            dq_metrics=dq_metrics,
             version_after=version_after,
-            rows_inserted=len(records),
+            transform_version=self._transform_version,
+            transform_steps=self._transform_steps,
+            dq_report_path=dq_report_path,
         )
-
-        # Build DQ summary from computed metrics or use basic fallback
-        if dq_metrics is not None:
-            # Use real DQ metrics with column stats, schema drift, error rates
-            dq_summary = dq_metrics.to_dq_summary()
-        else:
-            # Fallback to basic metrics (backward compatibility)
-            dq_summary = DQSummary(
-                total_records=len(records),
-                valid_records=len(records),
-            )
-
-        # Build output metrics
-        output = SilverOutputMetadata(
-            record_count=len(records),
-        )
-
-        # Build environment info
-        try:
-            bioetl_version = pkg_version("bioetl")
-        except Exception:
-            bioetl_version = "unknown"
-
-        environment = EnvironmentMetadata(
-            hostname=hostname(),
-            python_version=python_version(),
-            bioetl_version=bioetl_version,
-        )
-
-        # Build complete metadata
-        metadata = SilverMetadata(
-            runtime=runtime,
-            pipeline=pipeline,
-            lineage=lineage,
-            delta=delta,
-            dq_summary=dq_summary,
-            output=output,
-            environment=environment,
-        )
-
-        # Write metadata sidecar file
-        # Note: In fallback path, table_name is derived from table_path
-        # For flat_structure, use pipeline name as table_name
+        metadata = self._metadata_coordinator.create_silver_metadata(silver_input)
         await self._metadata_writer.write_silver_metadata(
             table_path,
             metadata,

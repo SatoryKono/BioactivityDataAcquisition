@@ -184,7 +184,8 @@ class BronzeSinkConfig(BaseModel):
 class SilverSinkConfig(BaseModel):
     """Silver sink configuration with optional DQ report.
 
-    Extends base silver sink config with DQ report generation.
+    Unified schema for Silver layer sink configuration.
+    Includes both metadata and DQ report settings.
     """
 
     path: str = Field(description="Base path for Silver data")
@@ -192,7 +193,18 @@ class SilverSinkConfig(BaseModel):
     mode: Literal["merge", "append", "overwrite"] = Field(default="merge")
     primary_key: list[str] = Field(default_factory=list)
     partition_by: list[str] = Field(default_factory=list)
+    # Metadata sidecar support
+    save_metadata: bool = Field(
+        default=False,
+        description="Save _metadata.yaml sidecar file with lineage and QC info",
+    )
+    # DQ report config
     dq_report: SilverDQReportConfig = Field(default_factory=SilverDQReportConfig)
+    # Schema drift handling
+    on_schema_mismatch: Literal["error", "evolve", "ignore"] = Field(
+        default="error",
+        description="How to handle schema drift",
+    )
 
 
 class GoldSinkConfig(BaseModel):
