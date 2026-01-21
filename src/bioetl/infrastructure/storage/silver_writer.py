@@ -1115,6 +1115,9 @@ class SilverWriter(BaseDeltaWriter):
             return
 
         from datetime import UTC, datetime
+        from importlib.metadata import version as pkg_version
+        from platform import node as hostname
+        from platform import python_version
 
         from bioetl.domain.models.metadata import (
             DQSummary,
@@ -1127,9 +1130,6 @@ class SilverWriter(BaseDeltaWriter):
             SilverOutputMetadata,
             TransformMetadata,
         )
-        from importlib.metadata import version as pkg_version
-        from platform import node as hostname
-        from platform import python_version
 
         # Get Delta version after write
         version_after = await self._get_delta_version(table_path)
