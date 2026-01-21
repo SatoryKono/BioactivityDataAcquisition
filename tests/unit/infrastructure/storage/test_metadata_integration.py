@@ -150,12 +150,6 @@ def mock_metadata_writer() -> MockMetadataWriter:
 
 
 @pytest.fixture
-def mock_metadata_coordinator() -> MockMetadataCoordinator:
-    """Create a mock metadata coordinator."""
-    return MockMetadataCoordinator()
-
-
-@pytest.fixture
 def sample_records() -> list[dict[str, Any]]:
     """Create sample records for testing."""
     run_id = str(uuid4())

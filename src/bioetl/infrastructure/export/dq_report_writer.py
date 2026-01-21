@@ -94,7 +94,9 @@ class DQReportWriter:
             output_path = Path(output_path)
             if output_path.is_dir():
                 if provider and entity and date_str:
-                    filename = f"batch_{date_str}_{provider}_{entity}_dq_report{extension}"
+                    filename = (
+                        f"batch_{date_str}_{provider}_{entity}_dq_report{extension}"
+                    )
                 else:
                     filename = f"{report.batch_id}_dq_report{extension}"
                 output_path = output_path / filename
