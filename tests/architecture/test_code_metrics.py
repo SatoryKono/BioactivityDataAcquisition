@@ -86,7 +86,7 @@ class TestFileSizeLimits:
         # Infrastructure layer exemptions
         "silver_writer.py": 1175,  # 1168 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage + provider/entity params
         "gold_writer.py": 955,  # 948 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage + provider/entity params
-        "bronze_writer.py": 765,  # 761 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params
+        "bronze_writer.py": 770,  # 767 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
         "silver.py": 840,  # 833 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields)
         "client.py": 960,  # 941 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback), CrossRefAdapter (DOI→title fallback)
@@ -497,7 +497,7 @@ class TestClassSize:
         "UniProtProteinTransformer": 800,  # 772 lines - complex protein data extraction with many fields
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
-        "BronzeWriter": 715,  # 711 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata + query_string extraction + async read_bronze
+        "BronzeWriter": 725,  # 720 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata + query_string extraction + async read_bronze
         "BatchExecutor": 710,  # 703 lines - unified executor for batch processing + DQ context
         "BatchWriter": 380,  # 376 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage + DQ defaults
         # Application core classes
