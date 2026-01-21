@@ -1,0 +1,653 @@
+{
+  "checks": {
+    "deduplication_stats": {
+      "duplicates_by_business_key": 0,
+      "duplicates_by_content_hash": 0,
+      "input_before_dedupe": 99,
+      "output_after_dedupe": 99,
+      "status": "pass"
+    },
+    "null_rate": {
+      "columns": {
+        "_dq_error": {
+          "column_name": "_dq_error",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "_dq_warn": {
+          "column_name": "_dq_warn",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "_index": {
+          "column_name": "_index",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "_ingestion_ts": {
+          "column_name": "_ingestion_ts",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "_lookup_method": {
+          "column_name": "_lookup_method",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "_original_id": {
+          "column_name": "_original_id",
+          "note": null,
+          "null_rate": 1.0,
+          "status": "warn"
+        },
+        "_run_id": {
+          "column_name": "_run_id",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "_run_type": {
+          "column_name": "_run_type",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "_source_batch_id": {
+          "column_name": "_source_batch_id",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "abstract": {
+          "column_name": "abstract",
+          "note": null,
+          "null_rate": 1.0,
+          "status": "warn"
+        },
+        "authors": {
+          "column_name": "authors",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "citation_count": {
+          "column_name": "citation_count",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "content_hash": {
+          "column_name": "content_hash",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "doc_type": {
+          "column_name": "doc_type",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "doi": {
+          "column_name": "doi",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "entity_id": {
+          "column_name": "entity_id",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "first_page": {
+          "column_name": "first_page",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "is_oa": {
+          "column_name": "is_oa",
+          "note": null,
+          "null_rate": 1.0,
+          "status": "warn"
+        },
+        "issn": {
+          "column_name": "issn",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "issue": {
+          "column_name": "issue",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "journal": {
+          "column_name": "journal",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "language": {
+          "column_name": "language",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "last_page": {
+          "column_name": "last_page",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "license_url": {
+          "column_name": "license_url",
+          "note": null,
+          "null_rate": 0.1717,
+          "status": "pass"
+        },
+        "oa_status": {
+          "column_name": "oa_status",
+          "note": null,
+          "null_rate": 1.0,
+          "status": "warn"
+        },
+        "pmc_id": {
+          "column_name": "pmc_id",
+          "note": null,
+          "null_rate": 1.0,
+          "status": "warn"
+        },
+        "pmid": {
+          "column_name": "pmid",
+          "note": null,
+          "null_rate": 1.0,
+          "status": "warn"
+        },
+        "publication_date": {
+          "column_name": "publication_date",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "published_online": {
+          "column_name": "published_online",
+          "note": null,
+          "null_rate": 0.8283,
+          "status": "warn"
+        },
+        "published_print": {
+          "column_name": "published_print",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "publisher": {
+          "column_name": "publisher",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "reference_count": {
+          "column_name": "reference_count",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "source": {
+          "column_name": "source",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "subjects": {
+          "column_name": "subjects",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "title": {
+          "column_name": "title",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "volume": {
+          "column_name": "volume",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        },
+        "year": {
+          "column_name": "year",
+          "note": null,
+          "null_rate": 0.0,
+          "status": "pass"
+        }
+      },
+      "overall_null_rate": 0.1892,
+      "status": "pass"
+    },
+    "record_count": {
+      "delta_from_last_run": null,
+      "input_records": 99,
+      "output_records": 99,
+      "quarantine_rate": 0.0,
+      "quarantined_records": 0,
+      "status": "pass",
+      "value": 99
+    },
+    "schema_drift": {
+      "drift_level": "info",
+      "missing_fields": [],
+      "new_fields": [],
+      "status": "pass",
+      "type_changes": []
+    },
+    "type_conformance": {
+      "errors": [],
+      "pandera_passed": true,
+      "schema_version": null,
+      "status": "pass",
+      "type_coercions": {}
+    },
+    "uniqueness": {
+      "column_stats": {
+        "_dq_error": {
+          "cardinality": 1,
+          "uniqueness_ratio": 0.0101
+        },
+        "_dq_warn": {
+          "cardinality": 1,
+          "uniqueness_ratio": 0.0101
+        },
+        "_index": {
+          "cardinality": 99,
+          "uniqueness_ratio": 1.0
+        },
+        "abstract": {
+          "cardinality": 1,
+          "uniqueness_ratio": 0.0101
+        },
+        "content_hash": {
+          "cardinality": 99,
+          "uniqueness_ratio": 1.0
+        },
+        "doi": {
+          "cardinality": 99,
+          "uniqueness_ratio": 1.0
+        },
+        "entity_id": {
+          "cardinality": 99,
+          "uniqueness_ratio": 1.0
+        },
+        "pmc_id": {
+          "cardinality": 1,
+          "uniqueness_ratio": 0.0101
+        },
+        "pmid": {
+          "cardinality": 1,
+          "uniqueness_ratio": 0.0101
+        },
+        "title": {
+          "cardinality": 99,
+          "uniqueness_ratio": 1.0
+        }
+      },
+      "duplicate_rate": 0.0,
+      "primary_key": "doi",
+      "status": "pass",
+      "total_count": 99,
+      "unique_count": 99
+    },
+    "value_distribution": {
+      "categorical_columns": {
+        "authors": {
+          "cardinality": 96,
+          "top_values": [
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "[\"Marina Della Greca\",\"Rosa Lanzetta\",\"Lorenzo Mangoni\",\"Pietro Monaco\",\"Lucio Previtera\"]"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "[\"Philip J. Rybczynski\",\"Roxanne E. Zeck\",\"Joseph Dudash\",\"Donald W. Combs\",\"Thomas P. Burris\",\"Maria Yang\",\"Melville C. Osborne\",\"Xiaoli Chen\",\"Keith T. Demarest\"]"
+            },
+            {
+              "count": 2,
+              "pct": 0.0202,
+              "value": "[\"S.A. Hardinger\",\"J.A. Jakubowski\",\"P.L. Fuchs\"]"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "[\"Ji-Wang Chern\",\"Chia-Yang Shiau\",\"Guan-Yu Lu\"]"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "[\"William Howson\",\"Judy M. Hills\",\"G. Michael Blackburn\",\"Marianne Broekman\"]"
+            }
+          ]
+        },
+        "content_hash": {
+          "cardinality": 99,
+          "top_values": [
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "0595f802321d5c8bfd281146e86ac6557b3d243d071a718b9334452ef9c01088"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "7741873d8ed6440080b0aaf08465a72cb9cf9dd9800cc2ae5b70dd7b2e81d9be"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "7fb08f15b68f51d430e4c2ce09352b8b087af9805d1b635b546100f805faf1f0"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "3eceb1e6b42ad4d41e61e1de90a93477ac9fba0d900dbdb32499e2c973e28f25"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "f7f742c359bd0dd064e1f0760e264ef34ac51556a173fd09c03f35f0924d5636"
+            }
+          ]
+        },
+        "doc_type": {
+          "cardinality": 1,
+          "top_values": [
+            {
+              "count": 99,
+              "pct": 1.0,
+              "value": "PUBLICATION"
+            }
+          ]
+        },
+        "doi": {
+          "cardinality": 99,
+          "top_values": [
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "10.1016/s0960-894x(01)81098-2"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "10.1016/s0960-894x(01)81087-8"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "10.1016/s0960-894x(01)81092-1"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "10.1016/s0960-894x(01)81034-9"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "10.1016/s0960-894x(01)81165-3"
+            }
+          ]
+        },
+        "entity_id": {
+          "cardinality": 99,
+          "top_values": [
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "crossref:10.1016/s0960-894x(01)81166-5"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "crossref:10.1016/s0960-894x(01)81161-6"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "crossref:10.1016/s0960-894x(01)81080-5"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "crossref:10.1016/s0960-894x(01)81037-4"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "crossref:10.1016/j.bmcl.2003.11.016"
+            }
+          ]
+        },
+        "first_page": {
+          "cardinality": 98,
+          "top_values": [
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "595"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "211"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "2750"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "705"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "210"
+            }
+          ]
+        },
+        "journal": {
+          "cardinality": 2,
+          "top_values": [
+            {
+              "count": 82,
+              "pct": 0.8283,
+              "value": "Bioorganic &amp; Medicinal Chemistry Letters"
+            },
+            {
+              "count": 17,
+              "pct": 0.1717,
+              "value": "Journal of Medicinal Chemistry"
+            }
+          ]
+        },
+        "last_page": {
+          "cardinality": 97,
+          "top_values": [
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "672"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "512"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "544"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "120"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "110"
+            }
+          ]
+        },
+        "publication_date": {
+          "cardinality": 7,
+          "top_values": [
+            {
+              "count": 5,
+              "pct": 0.0505,
+              "value": "2004-01-31"
+            },
+            {
+              "count": 68,
+              "pct": 0.6869,
+              "value": "1991-01-31"
+            },
+            {
+              "count": 16,
+              "pct": 0.1616,
+              "value": "2004-01-01"
+            },
+            {
+              "count": 2,
+              "pct": 0.0202,
+              "value": "2004-06-30"
+            },
+            {
+              "count": 5,
+              "pct": 0.0505,
+              "value": "1991-12-31"
+            }
+          ]
+        },
+        "publisher": {
+          "cardinality": 2,
+          "top_values": [
+            {
+              "count": 17,
+              "pct": 0.1717,
+              "value": "American Chemical Society (ACS)"
+            },
+            {
+              "count": 82,
+              "pct": 0.8283,
+              "value": "Elsevier BV"
+            }
+          ]
+        },
+        "title": {
+          "cardinality": 99,
+          "top_values": [
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "Synthesis and biological activity of fluorinated intermediates of the methionine salvage pathway"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "The Interaction of Anhydroalditols with Sweet-Almond β-glucosidase and Escherichia coli β-galactosidase: implications for the design of potent glycosidase inhibitors"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "A potent, simple derivative of an analog of the CC-1065 alkylation subunit"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "Antihypertensive benzopyran-related potassium channel activators: a role for lipophilicity"
+            },
+            {
+              "count": 1,
+              "pct": 0.0101,
+              "value": "Discovery of α,γ-Diketo Acids as Potent Selective and Reversible Inhibitors of Hepatitis C Virus NS5b RNA-Dependent RNA Polymerase"
+            }
+          ]
+        }
+      },
+      "numeric_columns": {
+        "_index": {
+          "max": 98.0,
+          "mean": 49.0,
+          "median": 49.0,
+          "min": 0.0,
+          "outliers_zscore_3": 0,
+          "p25": null,
+          "p75": null,
+          "p95": null,
+          "std": 28.722813232690143
+        },
+        "citation_count": {
+          "max": 305.0,
+          "mean": 24.454545454545453,
+          "median": 11.0,
+          "min": 0.0,
+          "outliers_zscore_3": 0,
+          "p25": null,
+          "p75": null,
+          "p95": null,
+          "std": 38.266592433543835
+        },
+        "year": {
+          "max": 2004.0,
+          "mean": 1994.4141414141413,
+          "median": 1991.0,
+          "min": 1991.0,
+          "outliers_zscore_3": 0,
+          "p25": null,
+          "p75": null,
+          "p95": null,
+          "std": 5.749907010801063
+        }
+      },
+      "status": "pass"
+    }
+  },
+  "layer": "silver",
+  "metadata_path": null,
+  "pipeline": "crossref_publication",
+  "run_id": "22f9ff41-52b9-495a-b392-c2be19f6adce",
+  "source_batch_ids": [
+    "f68c6273-58b5-40e3-887a-25a3bf77a009"
+  ],
+  "summary": {
+    "failed": 0,
+    "overall_status": "pass",
+    "passed": 7,
+    "total_checks": 7,
+    "warnings": 0
+  },
+  "target_table": "crossref_publication",
+  "thresholds": {
+    "current_error_rate": 0.0,
+    "hard_fail_threshold": 0.2,
+    "soft_fail_threshold": 0.05,
+    "threshold_status": "pass"
+  },
+  "timestamp": "2026-01-21T14:36:37.780179+00:00"
+}

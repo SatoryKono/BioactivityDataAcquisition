@@ -1,0 +1,79 @@
+{
+  "batch_id": "f68c6273-58b5-40e3-887a-25a3bf77a009",
+  "checks": {
+    "file_integrity": {
+      "checksum_blake2": "77a54124a5a45e48638a2b9a15269eb94ae4a47f2b03b7df131181a74cf38c4c477eb4906a278b4c3f60d06a1cfd8635a6f100c5077283a2f1dd78c4af01ee26",
+      "compression_ratio": null,
+      "size_bytes": 702820,
+      "status": "pass"
+    },
+    "record_count": {
+      "delta_from_last_run": null,
+      "input_records": null,
+      "output_records": null,
+      "quarantine_rate": null,
+      "quarantined_records": null,
+      "status": "pass",
+      "value": 99
+    },
+    "schema_snapshot": {
+      "fields_detected": 39,
+      "missing_fields_since_last_run": [],
+      "new_fields_since_last_run": [],
+      "schema": {
+        "DOI": "string",
+        "ISSN": "array",
+        "URL": "string",
+        "_lookup_method": "string",
+        "alternative-id": "array",
+        "assertion": "array",
+        "author": "array",
+        "container-title": "array",
+        "content-domain": "object",
+        "created": "object",
+        "deposited": "object",
+        "indexed": "object",
+        "is-referenced-by-count": "integer",
+        "issn-type": "array",
+        "issue": "string",
+        "issued": "object",
+        "journal-issue": "object",
+        "language": "string",
+        "license": "array",
+        "link": "array",
+        "member": "string",
+        "page": "string",
+        "prefix": "string",
+        "published": "object",
+        "published-online": "object",
+        "published-print": "object",
+        "publisher": "string",
+        "reference": "array",
+        "reference-count": "integer",
+        "references-count": "integer",
+        "resource": "object",
+        "score": "float",
+        "short-container-title": "array",
+        "source": "string",
+        "title": "array",
+        "type": "string",
+        "update-policy": "string",
+        "updated-by": "array",
+        "volume": "string"
+      },
+      "status": "pass"
+    }
+  },
+  "layer": "bronze",
+  "pipeline": "crossref_publication",
+  "run_id": "22f9ff41-52b9-495a-b392-c2be19f6adce",
+  "source_file": "",
+  "summary": {
+    "failed": 0,
+    "overall_status": "pass",
+    "passed": 3,
+    "total_checks": 3,
+    "warnings": 0
+  },
+  "timestamp": "2026-01-21T14:36:37.780179+00:00"
+}
