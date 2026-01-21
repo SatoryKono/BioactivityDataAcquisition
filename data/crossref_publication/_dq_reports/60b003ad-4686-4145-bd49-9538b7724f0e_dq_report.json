@@ -28,7 +28,7 @@
       "quarantine_rate": null,
       "quarantined_records": null,
       "status": "pass",
-      "value": 2
+      "value": 99
     },
     "referential_integrity": {
       "foreign_keys": {},
@@ -47,8 +47,8 @@
     "status": "pass"
   },
   "layer": "gold",
-  "pipeline": "chembl_activity",
-  "run_id": "c00bc3ed-e0a7-4439-b1d8-d14d908bfd59",
+  "pipeline": "crossref_publication",
+  "run_id": "60b003ad-4686-4145-bd49-9538b7724f0e",
   "summary": {
     "failed": 0,
     "overall_status": "pass",
@@ -56,6 +56,6 @@
     "total_checks": 6,
     "warnings": 0
   },
-  "target_table": "chembl_activity",
-  "timestamp": "2026-01-21T13:36:35.559532+00:00"
+  "target_table": "crossref_publication",
+  "timestamp": "2026-01-21T13:38:54.629640+00:00"
 }
