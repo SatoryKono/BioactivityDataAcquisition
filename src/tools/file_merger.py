@@ -707,7 +707,9 @@ def main() -> int:
         if output_file == default_output:  # User didn't specify output
             output_file = Path("reports/documentation_merged.md")
         output_file.parent.mkdir(parents=True, exist_ok=True)
-        result = merge_documentation(output_file, args.encoding, exclude_dirs, args.sort)
+        result = merge_documentation(
+            output_file, args.encoding, exclude_dirs, args.sort
+        )
         if result != 0:
             exit_code = result
 
