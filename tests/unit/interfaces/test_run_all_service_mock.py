@@ -110,7 +110,9 @@ class TestRunAllWithMockedService:
             _create_run_result("chembl_assay"),
         ]
 
-        result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
+        result = cli_runner.invoke(
+            cli, ["run-all", "--source", "chembl", "--no-health-server"]
+        )
 
         assert result.exit_code == 0
         assert mock_pipeline_runner_service.run.call_count == 2
@@ -178,7 +180,9 @@ class TestRunAllWithMockedService:
 
         mock_pipeline_runner_service.run.side_effect = RuntimeError("Service failure")
 
-        result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
+        result = cli_runner.invoke(
+            cli, ["run-all", "--source", "chembl", "--no-health-server"]
+        )
 
         assert result.exit_code == ExitCode.PIPELINE_ERROR
         assert "unexpected error" in result.output.lower()
@@ -204,7 +208,9 @@ class TestRunAllWithMockedService:
             "chembl_activity", ["other_pipeline"]
         )
 
-        result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
+        result = cli_runner.invoke(
+            cli, ["run-all", "--source", "chembl", "--no-health-server"]
+        )
 
         assert result.exit_code == ExitCode.PIPELINE_ERROR
         assert "not found" in result.output.lower()
@@ -240,7 +246,9 @@ class TestRunAllDryRunMode:
             "chembl_activity", status=RunStatus.DRY_RUN
         )
 
-        result = cli_runner.invoke(cli, ["run-all", "--source", "chembl", "--dry-run"])
+        result = cli_runner.invoke(
+            cli, ["run-all", "--source", "chembl", "--dry-run", "--no-health-server"]
+        )
 
         assert result.exit_code == 0
         call_args = mock_pipeline_runner_service.run.call_args
@@ -268,7 +276,9 @@ class TestRunAllDryRunMode:
             "chembl_activity", status=RunStatus.DRY_RUN
         )
 
-        result = cli_runner.invoke(cli, ["run-all", "--source", "chembl", "--dry-run"])
+        result = cli_runner.invoke(
+            cli, ["run-all", "--source", "chembl", "--dry-run", "--no-health-server"]
+        )
 
         assert result.exit_code == 0
         assert "[DRY-RUN]" in result.output
@@ -298,7 +308,9 @@ class TestRunAllDryRunMode:
             _create_run_result("chembl_assay", status=RunStatus.DRY_RUN),
         ]
 
-        result = cli_runner.invoke(cli, ["run-all", "--source", "chembl", "--dry-run"])
+        result = cli_runner.invoke(
+            cli, ["run-all", "--source", "chembl", "--dry-run", "--no-health-server"]
+        )
 
         assert result.exit_code == 0
         assert "2 pipelines previewed" in result.output
@@ -334,7 +346,9 @@ class TestRunAllFormatterOutput:
             "chembl_activity"
         )
 
-        result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
+        result = cli_runner.invoke(
+            cli, ["run-all", "--source", "chembl", "--no-health-server"]
+        )
 
         assert "[OK]" in result.output
         assert "completed successfully" in result.output
@@ -362,7 +376,9 @@ class TestRunAllFormatterOutput:
             error_message="Connection timeout",
         )
 
-        result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
+        result = cli_runner.invoke(
+            cli, ["run-all", "--source", "chembl", "--no-health-server"]
+        )
 
         assert "[FAIL]" in result.output
         assert "failed" in result.output.lower()
@@ -392,7 +408,9 @@ class TestRunAllFormatterOutput:
             _create_run_result("chembl_assay"),
         ]
 
-        result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
+        result = cli_runner.invoke(
+            cli, ["run-all", "--source", "chembl", "--no-health-server"]
+        )
 
         assert "Succeeded: 2" in result.output
 
@@ -421,7 +439,9 @@ class TestRunAllFormatterOutput:
             _create_run_result("chembl_assay", status=RunStatus.FAILED),
         ]
 
-        result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
+        result = cli_runner.invoke(
+            cli, ["run-all", "--source", "chembl", "--no-health-server"]
+        )
 
         assert "Failed: 1" in result.output
 
@@ -450,7 +470,9 @@ class TestRunAllFormatterOutput:
             _create_run_result("chembl_assay", status=RunStatus.FAILED),
         ]
 
-        result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
+        result = cli_runner.invoke(
+            cli, ["run-all", "--source", "chembl", "--no-health-server"]
+        )
 
         assert "chembl_assay" in result.output
 
@@ -492,7 +514,9 @@ class TestRunAllShutdownScenarios:
             _create_run_result("chembl_molecule"),  # Should not be called
         ]
 
-        result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
+        result = cli_runner.invoke(
+            cli, ["run-all", "--source", "chembl", "--no-health-server"]
+        )
 
         # Only 2 calls should have been made (third pipeline skipped)
         assert mock_pipeline_runner_service.run.call_count == 2
@@ -519,7 +543,9 @@ class TestRunAllShutdownScenarios:
             "chembl_activity", status=RunStatus.SHUTDOWN
         )
 
-        result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
+        result = cli_runner.invoke(
+            cli, ["run-all", "--source", "chembl", "--no-health-server"]
+        )
 
         assert "[STOP]" in result.output
         assert "WARNING:" in result.output
@@ -550,7 +576,9 @@ class TestRunAllShutdownScenarios:
             "chembl_activity", status=RunStatus.SHUTDOWN
         )
 
-        result = cli_runner.invoke(cli, ["run-all", "--source", "chembl"])
+        result = cli_runner.invoke(
+            cli, ["run-all", "--source", "chembl", "--no-health-server"]
+        )
 
         # No failures means OK (all_succeeded returns True when failed=0)
         assert result.exit_code == ExitCode.OK
@@ -583,6 +611,7 @@ class TestRunAllAsyncFunction:
             result = await _run_all_pipelines_async(
                 pipelines=["pipeline1", "pipeline2"],
                 options=RunOptions(),
+                health_server_enabled=False,  # Disable to avoid port conflicts in parallel tests
             )
 
         assert result.total == 2
@@ -607,6 +636,7 @@ class TestRunAllAsyncFunction:
             result = await _run_all_pipelines_async(
                 pipelines=["pipeline1", "pipeline2"],
                 options=RunOptions(),
+                health_server_enabled=False,  # Disable to avoid port conflicts in parallel tests
             )
 
         assert result.succeeded == 1
@@ -626,6 +656,7 @@ class TestRunAllAsyncFunction:
             result = await _run_all_pipelines_async(
                 pipelines=["pipeline1"],
                 options=RunOptions(),
+                health_server_enabled=False,  # Disable to avoid port conflicts in parallel tests
             )
 
         assert result.failed == 1
