@@ -79,6 +79,7 @@ class GoldWriter(BaseDeltaWriter):
         metadata_coordinator: MetadataCoordinatorPort | None = None,
         transform_version: str | None = None,
         transform_steps: tuple[str, ...] | None = None,
+        flat_structure: bool = False,
     ) -> None:
         """Initialize Gold writer.
 
@@ -100,14 +101,16 @@ class GoldWriter(BaseDeltaWriter):
             transform_version: Optional semver version of transform (e.g., '1.0.0')
                              for lineage tracking in metadata.
             transform_steps: Optional tuple of transform step names for lineage.
+            flat_structure: If True, Delta data written directly to base_path
+                          without table_name subdirectory.
 
         Note:
             LoggerPort is required per RULES.md DI requirements.
             Lock validation is now performed at Application layer (BatchWriter)
             per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
         """
-        # Initialize base class (sets base_path, logger, _retention_manager)
-        super().__init__(base_path, logger)
+        # Initialize base class (sets base_path, logger, _retention_manager, _flat_structure)
+        super().__init__(base_path, logger, flat_structure=flat_structure)
 
         # Use NoOpTracing if not provided (test convenience, production uses composition)
         # Import from domain.ports.noop to maintain proper layer separation
@@ -185,7 +188,7 @@ class GoldWriter(BaseDeltaWriter):
             self._validate_schema_strict(schema)
             await self._validate_records_against_schema(records, schema)
 
-            table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+            table_path = self._resolve_table_path(table_name)
 
             await self._dispatch_write(
                 validated_mode,
@@ -303,7 +306,7 @@ class GoldWriter(BaseDeltaWriter):
                     [(pk, "ascending") for pk in valid_keys]
                 )
 
-        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+        table_path = self._resolve_table_path(table_name)
 
         self.logger.info(
             "Writing merged Gold records",
@@ -882,7 +885,7 @@ class GoldWriter(BaseDeltaWriter):
             List of records as dictionaries.
 
         """
-        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+        table_path = self._resolve_table_path(table_name)
         # Delta Lake (Gold) -> Arrow -> Pydict
         dt = await self._run_in_executor(lambda: DeltaTable(table_path))
         arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
@@ -910,7 +913,7 @@ class GoldWriter(BaseDeltaWriter):
             List of historical records.
 
         """
-        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+        table_path = self._resolve_table_path(table_name)
         dt = await self._run_in_executor(lambda: DeltaTable(table_path))
         arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
 

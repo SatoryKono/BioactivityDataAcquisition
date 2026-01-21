@@ -50,6 +50,7 @@ sink:
       path: "data/output/silver/chembl/publication"
     dq_report:
       enabled: true
+    flat_structure: true  # Delta data directly in path
   gold:
     path: "data/output/gold/chembl/publication"
     sort_by:
@@ -58,4 +59,5 @@ sink:
       path: "data/output/gold/chembl/publication"
     dq_report:
       enabled: true
+    flat_structure: true  # Delta data directly in path
 

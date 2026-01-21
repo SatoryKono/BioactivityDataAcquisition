@@ -98,6 +98,8 @@ class StorageFactory:
         metadata_coordinator: MetadataCoordinator | None = None,
         transform_version: str | None = None,
         transform_steps: tuple[str, ...] | None = None,
+        silver_flat_structure: bool = False,
+        gold_flat_structure: bool = False,
     ) -> StorageAdapter:
         """Create StorageAdapter with all writers configured.
 
@@ -147,6 +149,7 @@ class StorageFactory:
                 metadata_coordinator=metadata_coordinator,
                 transform_version=transform_version,
                 transform_steps=transform_steps,
+                flat_structure=silver_flat_structure,
             ),
             gold_writer=GoldWriter(
                 base_path=gold_path,
@@ -157,6 +160,7 @@ class StorageFactory:
                 metadata_coordinator=metadata_coordinator,
                 transform_version=transform_version,
                 transform_steps=transform_steps,
+                flat_structure=gold_flat_structure,
             ),
         )
 
@@ -236,6 +240,10 @@ class StorageFactory:
         transform_version = config.transform.version
         transform_steps = tuple(config.transform.steps)
 
+        # Extract flat_structure settings
+        silver_flat_structure = silver_config.flat_structure if silver_config else False
+        gold_flat_structure = gold_config.flat_structure if gold_config else False
+
         adapter = StorageFactory._create_storage_adapter(
             bronze_path=bronze_path,
             silver_path=silver_path,
@@ -251,6 +259,8 @@ class StorageFactory:
             metadata_coordinator=metadata_coordinator,
             transform_version=transform_version,
             transform_steps=transform_steps,
+            silver_flat_structure=silver_flat_structure,
+            gold_flat_structure=gold_flat_structure,
         )
 
         return StorageContext(

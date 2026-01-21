@@ -551,6 +551,12 @@ class SinkLayerConfig(BaseModel):
         default_factory=SinkDQReportConfig,
         description="DQ report generation settings for this layer",
     )
+    # Flat structure mode
+    flat_structure: bool = Field(
+        default=False,
+        description="If True, Delta data written directly to path without table_name subdirectory. "
+        "CSV, metadata, and DQ reports use {table_name}_* naming pattern.",
+    )
 
 
 class GoldRangeFilterConfig(BaseModel):

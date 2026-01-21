@@ -61,6 +61,9 @@ class MetadataWriterPort(Protocol):
         self,
         base_path: str | Path,
         metadata: SilverMetadata,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
     ) -> str:
         """Write Silver layer metadata sidecar file.
 
@@ -68,6 +71,9 @@ class MetadataWriterPort(Protocol):
             base_path: Base path where Silver Delta table is stored.
                       Metadata will be written to {base_path}/_metadata.yaml
             metadata: Silver metadata model with lineage, DQ metrics, and Delta info.
+            table_name: Table name for flat_structure naming pattern.
+            flat_structure: If True, write as {table_name}_metadata.yaml instead of
+                          _metadata.yaml in a subdirectory.
 
         Returns:
             Absolute path to the written metadata file.
@@ -82,6 +88,9 @@ class MetadataWriterPort(Protocol):
         self,
         base_path: str | Path,
         metadata: GoldMetadata,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
     ) -> str:
         """Write Gold layer metadata sidecar file.
 
@@ -89,6 +98,9 @@ class MetadataWriterPort(Protocol):
             base_path: Base path where Gold Delta/Parquet table is stored.
                       Metadata will be written to {base_path}/_metadata.yaml
             metadata: Gold metadata model with lineage, schema contract, and SCD info.
+            table_name: Table name for flat_structure naming pattern.
+            flat_structure: If True, write as {table_name}_metadata.yaml instead of
+                          _metadata.yaml in a subdirectory.
 
         Returns:
             Absolute path to the written metadata file.
