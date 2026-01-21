@@ -1153,7 +1153,9 @@ class SilverWriter(BaseDeltaWriter):
         lineage = LineageMetadata(
             bronze_paths=[],
             transform_version=self._transform_version or "1.0.0",
-            transform_steps=list(self._transform_steps) if self._transform_steps else ["merge"],
+            transform_steps=list(self._transform_steps)
+            if self._transform_steps
+            else ["merge"],
             source_tables=dict.fromkeys(sources_used or [], 0),
         )
 
