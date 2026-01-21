@@ -482,14 +482,19 @@ class GoldWriter(BaseDeltaWriter):
             return
 
         # Extract pipeline info from table name for filename generation
-        # table_name format: {provider}.{entity} or just {entity}
-        parts = table_name.split(".")
-        if len(parts) >= 2:
+        # table_name format: {provider}.{entity}, {provider}_{entity}, or just {entity}
+        if "." in table_name:
+            parts = table_name.split(".")
             provider_name = parts[0]
-            entity_name = parts[1]
+            entity_name = parts[1] if len(parts) > 1 else parts[0]
+        elif "_" in table_name:
+            # Try underscore format (e.g., chembl_publication)
+            parts = table_name.split("_", 1)  # Split only on first underscore
+            provider_name = parts[0]
+            entity_name = parts[1] if len(parts) > 1 else parts[0]
         else:
             provider_name = "unknown"
-            entity_name = parts[0] if parts else "unknown"
+            entity_name = table_name if table_name else "unknown"
 
         # Use MetadataCoordinator if available (centralized metadata)
         if self._metadata_coordinator is not None:
