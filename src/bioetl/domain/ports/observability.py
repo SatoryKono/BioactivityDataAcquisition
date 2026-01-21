@@ -147,7 +147,7 @@ class DQMonitorPort(Protocol):
     drops, and threshold breaches in pipeline metrics.
 
     Example:
-        Basic monitoring workflow in a pipeline::
+        Basic monitoring in a pipeline::
 
             # DataQualityMonitor is injected via composition layer
             # (see: infrastructure.observability.anomaly.DataQualityMonitor)

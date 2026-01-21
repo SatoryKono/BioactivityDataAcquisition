@@ -324,9 +324,9 @@ class StreamingBatchProcessor:
 
     Usage:
         >>> processor = StreamingBatchProcessor(transformer, memory_monitor)
-        >>> async for chunk in processor.process_in_chunks(records, batch_id, chunk_size=100):
-        ...     await writer.write_silver(chunk.silver_records, batch_id, ts)
-        ...     await writer.write_gold(chunk.gold_records)
+        >>> async for sub_batch in processor.process_in_chunks(records, batch_id, chunk_size=100):
+        ...     await writer.write_silver(sub_batch.silver_records, batch_id, ts)
+        ...     await writer.write_gold(sub_batch.gold_records)
 
     """
 
@@ -352,19 +352,19 @@ class StreamingBatchProcessor:
         chunk_size: int = 100,
         start_index: int = 0,
     ) -> AsyncIterator[TransformResult]:
-        """Process records in memory-efficient chunks.
+        """Process records in memory-efficient sub-batches.
 
-        Yields TransformResult for each chunk, allowing incremental
-        writes and garbage collection between chunks.
+        Yields TransformResult for each sub-batch, allowing incremental
+        writes and garbage collection between sub-batches.
 
         Args:
             records: All records to process.
             batch_id: Batch identifier.
-            chunk_size: Initial chunk size (may be reduced under memory pressure).
+            chunk_size: Initial sub-batch size (may be reduced under memory pressure).
             start_index: Starting index for the entire batch.
 
         Yields:
-            TransformResult for each processed chunk.
+            TransformResult for each processed sub-batch.
 
         """
         current_chunk_size = chunk_size
@@ -372,7 +372,7 @@ class StreamingBatchProcessor:
         total_records = len(records)
 
         while i < total_records:
-            # Adjust chunk size based on memory pressure
+            # Adjust sub-batch size based on memory pressure
             if self._memory_monitor:
                 current_chunk_size = self._memory_monitor.get_recommended_batch_size(
                     current_chunk_size
@@ -385,7 +385,7 @@ class StreamingBatchProcessor:
 
             yield result
 
-            # Advance by actual chunk size processed
+            # Advance by actual sub-batch size processed
             i += len(chunk)
 
     def iter_records(self, records: list[dict[str, Any]]) -> Iterator[dict[str, Any]]:
