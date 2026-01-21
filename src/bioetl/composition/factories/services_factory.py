@@ -152,7 +152,7 @@ class BaseServicesFactory:
 
         lock = cls._create_lock()
         checkpoint = cls._create_checkpoint(storage_ctx)
-        quarantine = cls._create_quarantine(storage_ctx)
+        quarantine = cls._create_quarantine(settings)
 
         # Use provided tracer or fallback to NoOpTracing
         # Tracer should be created via bootstrap_tracer() for consistent configuration
@@ -196,13 +196,14 @@ class BaseServicesFactory:
         return LocalCheckpoint(base_path=storage_ctx.checkpoints_path)
 
     @staticmethod
-    def _create_quarantine(storage_ctx: StorageContext) -> QuarantinePort:
-        """Create local quarantine storage."""
-        silver_path = storage_ctx.silver_path
-        if isinstance(silver_path, str):
-            silver_path = Path(silver_path)
+    def _create_quarantine(settings: Settings) -> QuarantinePort:
+        """Create unified quarantine storage independent of entity paths.
+
+        Quarantine storage is centralized at data_dir/quarantine to avoid
+        coupling with Silver path structure and simplify management.
+        """
         return UnifiedQuarantine(
-            base_path=str(silver_path / "common" / "quarantine"),
+            base_path=str(settings.quarantine_path),
         )
 
     @staticmethod
@@ -210,6 +211,40 @@ class BaseServicesFactory:
         if settings.metrics_enabled:
             return PrometheusMetrics()
         return NoOpMetrics()
+
+    @staticmethod
+    def _get_output_root(
+        settings: Settings,
+        pipeline_config: PipelineYamlConfig,
+    ) -> Path:
+        """Derive output root from pipeline config or fall back to settings.
+
+        DQ reports should be written alongside the data. This method extracts
+        the output root from the bronze sink path configuration when available.
+
+        For paths like 'data/output/bronze/chembl/activity':
+        - parent = 'data/output/bronze/chembl'
+        - parent.parent = 'data/output/bronze'
+        - parent.parent.parent = 'data/output' (output root)
+
+        Args:
+            settings: Application settings.
+            pipeline_config: Pipeline YAML configuration.
+
+        Returns:
+            Path to the output root directory.
+        """
+        bronze_config = pipeline_config.sink.get("bronze")
+
+        # Use bronze path from config if available and not in test mode
+        if not settings.test_mode and bronze_config and bronze_config.path:
+            bronze_path = Path(bronze_config.path)
+            # Go up 3 levels: bronze/provider/entity -> output root
+            # e.g., data/output/bronze/chembl/activity -> data/output
+            return bronze_path.parent.parent.parent
+
+        # Fall back to settings data_dir
+        return settings.data_dir
 
     @classmethod
     def _create_dq_services(
@@ -239,9 +274,10 @@ class BaseServicesFactory:
         silver_analyzer = DQServicesFactory.create_silver_analyzer()
         gold_analyzer = DQServicesFactory.create_gold_analyzer()
 
-        # Create report writer with data directory from settings
+        # DQ reports should be written alongside the data
+        output_root = cls._get_output_root(settings, pipeline_config)
         report_writer = DQServicesFactory.create_report_writer(
-            base_path=settings.data_dir,
+            base_path=output_root,
             logger=logger,
         )
 
