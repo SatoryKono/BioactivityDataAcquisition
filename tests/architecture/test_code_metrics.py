@@ -54,7 +54,7 @@ class TestFileSizeLimits:
         "chemical.py": 600,  # 575 LOC - Chemical structure Value Objects (InChIKey, SMILES, PublicationYear)
         "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
         # Domain ports NoOp implementations
-        "noop.py": 460,  # 457 LOC - NoOp implementations for Null Object Pattern (+ NoOpMetadataWriter)
+        "noop.py": 475,  # 470 LOC - NoOp implementations for Null Object Pattern (+ NoOpMetadataWriter with provider/entity params)
         # Domain models/metadata.py (models/metadata.py 566 LOC, ports/metadata.py only 104 LOC)
         "metadata.py": 570,  # 566 LOC - Metadata models with APIRequestDetails + RateLimitInfo for Bronze layer enrichment
         # Domain ports (Protocol definitions with comprehensive docstrings)
@@ -84,9 +84,9 @@ class TestFileSizeLimits:
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
         "services_factory.py": 630,  # 623 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
         # Infrastructure layer exemptions
-        "silver_writer.py": 1165,  # 1163 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage
-        "gold_writer.py": 945,  # 943 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage
-        "bronze_writer.py": 760,  # 749 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param
+        "silver_writer.py": 1175,  # 1168 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage + provider/entity params
+        "gold_writer.py": 955,  # 948 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage + provider/entity params
+        "bronze_writer.py": 765,  # 761 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
         "silver.py": 840,  # 833 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields)
         "client.py": 960,  # 941 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback), CrossRefAdapter (DOI→title fallback)
@@ -487,8 +487,8 @@ class TestClassSize:
         # Baseline exemptions for existing classes
         "StorageAdapter": 610,  # 603 lines - storage adapter with writers + BronzeWriteResult + SilverWriteResult
         "BaseTransformer": 620,  # 605 lines - Template Method with helpers (tracing + PII hashing + serialize_json_list)
-        "SilverWriter": 1165,  # 1163 lines - schema drift detection + bronze_refs + MetadataCoordinator fallback
-        "GoldWriter": 945,  # 943 lines - SCD Type 2 + metadata sidecar + MetadataCoordinator fallback
+        "SilverWriter": 1175,  # 1168 lines - schema drift detection + bronze_refs + MetadataCoordinator fallback + provider/entity params
+        "GoldWriter": 955,  # 948 lines - SCD Type 2 + metadata sidecar + MetadataCoordinator fallback + provider/entity params
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
         "UniProtProteinTransformer": 800,  # 772 lines - complex protein data extraction with many fields
