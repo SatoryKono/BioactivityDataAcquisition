@@ -659,7 +659,7 @@ class SilverWriter(BaseDeltaWriter):
         Returns:
             BatchDQMetrics with computed column stats and schema drift info.
         """
-        from bioetl.application.services.dq_metrics_calculator import (
+        from bioetl.domain.services.dq_metrics_calculator import (
             DQMetricsCalculator,
             DQMetricsInput,
         )

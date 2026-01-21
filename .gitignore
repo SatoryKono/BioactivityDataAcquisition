@@ -89,7 +89,9 @@ data/silver/
 data/gold/
 data/quarantine/
 data/checkpoints/
-
+data/_dq_reports
+data/chembl_*
+data/pubchem_*
 # Temporary pipeline artifacts
 tmp/
 *.tmp
@@ -123,3 +125,4 @@ coverage-*.xml
 configs/pipelines.zip
 silver/composite/test/part-00000-948efb73-0e52-4037-9cf8-9615203fda36-c000.snappy.parquet
 gold/test_merged/part-00000-b6b05ee6-01a5-4345-976d-4cd349289aa1-c000.snappy.parquet
+/data/_dq_reports/21d59cae-1fcf-4e0c-b3fc-29f40921ceb6_dq_report.json

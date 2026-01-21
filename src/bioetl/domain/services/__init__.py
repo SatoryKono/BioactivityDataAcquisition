@@ -33,6 +33,10 @@ from bioetl.domain.services.data_normalization_config import DataNormalizationCo
 from bioetl.domain.services.data_normalization_service import (
     DefaultDataNormalizationService,
 )
+from bioetl.domain.services.dq_metrics_calculator import (
+    DQMetricsCalculator,
+    DQMetricsInput,
+)
 from bioetl.domain.services.dq_serializer import DQReportSerializer
 from bioetl.domain.services.identity_service import IdentityService
 from bioetl.domain.services.normalization_config import NormalizationConfig
@@ -45,6 +49,8 @@ DataNormalizationService = DefaultDataNormalizationService
 
 __all__ = [
     "ActivityAggregator",
+    "DQMetricsCalculator",
+    "DQMetricsInput",
     "DQReportSerializer",
     "DataNormalizationConfig",
     "DataNormalizationService",

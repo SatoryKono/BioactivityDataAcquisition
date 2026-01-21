@@ -29,10 +29,6 @@ from bioetl.application.services.config_service import (
     SettingsInfo,
 )
 from bioetl.application.services.data_quality_service import DataQualityService
-from bioetl.application.services.dq_metrics_calculator import (
-    DQMetricsCalculator,
-    DQMetricsInput,
-)
 from bioetl.application.services.dq_report_service import (
     DQReportContext,
     DQReportResult,
@@ -87,6 +83,12 @@ from bioetl.application.services.vacuum_service import (
     TableVacuumResult,
     VacuumAllResult,
     VacuumService,
+)
+
+# Re-export from domain for backward compatibility
+from bioetl.domain.services.dq_metrics_calculator import (
+    DQMetricsCalculator,
+    DQMetricsInput,
 )
 
 __all__ = [
