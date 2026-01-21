@@ -96,7 +96,8 @@ main() {
     uv run python -c "import sys; print(sys.prefix)"
 
     echo -e "\n${BLUE}Installed Packages (Summary):${NC}"
-    uv run pip list | head -n 10
+    # Ignore BrokenPipeError if head closes early
+    uv run pip list 2>/dev/null | head -n 10
     echo -e "... (use 'uv pip list' to see all)"
 
     print_header "Setup Complete!"
