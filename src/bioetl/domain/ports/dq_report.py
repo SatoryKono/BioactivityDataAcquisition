@@ -199,7 +199,7 @@ class DQReportWriterPort(Protocol):
             format: Output format (None = JSON).
             provider: Provider name for filename generation.
             entity: Entity name for filename generation.
-            date_str: Date string (YYYY-MM-DD) for filename generation.
+            date_str: Date string for path generation (YYYY-MM-DD).
 
         Returns:
             Path to the written report file.
@@ -221,8 +221,8 @@ class DQReportWriterPort(Protocol):
             report: Silver DQ report to write.
             output_path: Output path (None = alongside data).
             format: Output format (None = JSON).
-            provider: Provider name for filename generation.
-            entity: Entity name for filename generation.
+            provider: Provider name for path generation.
+            entity: Entity name for path generation.
 
         Returns:
             Path to the written report file.
@@ -244,8 +244,8 @@ class DQReportWriterPort(Protocol):
             report: Gold DQ report to write.
             output_path: Output path (None = alongside data).
             format: Output format (None = JSON).
-            provider: Provider name for filename generation.
-            entity: Entity name for filename generation.
+            provider: Provider name for path generation.
+            entity: Entity name for path generation.
 
         Returns:
             Path to the written report file.

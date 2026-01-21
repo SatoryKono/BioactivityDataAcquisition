@@ -702,6 +702,21 @@ class BatchExecutor:
             )
         return (0.05, 0.20)
 
+    def _extract_dq_entity(self) -> str:
+        """Extract entity name from silver_table for DQ report naming.
+
+        Ensures consistency with actual table names (e.g., "publication" not "document").
+
+        Returns:
+            Entity name extracted from silver_table or fallback to entity_type.
+        """
+        silver_table = self._config.table_config.silver_table
+        if silver_table and "_" in silver_table:
+            return silver_table.split("_", 1)[1]
+        if silver_table and "." in silver_table:
+            return silver_table.split(".")[-1]
+        return silver_table or self._config.entity_type
+
     def get_dq_context(self) -> DQReportContext | None:
         """Build DQ report context from accumulated data.
 
@@ -730,19 +745,7 @@ class BatchExecutor:
 
         # Get current date for Bronze DQ report filename
         current_date_str = datetime.now(UTC).strftime("%Y-%m-%d")
-
-        # Extract entity name from silver_table for DQ report naming
-        # This ensures consistency with actual table names (e.g., "publication" not "document")
-        silver_table = self._config.table_config.silver_table
-        if silver_table and "_" in silver_table:
-            # Split on first underscore (e.g., chembl_publication -> publication)
-            dq_entity = silver_table.split("_", 1)[1]
-        elif silver_table and "." in silver_table:
-            # Split on dot (e.g., chembl.publication -> publication)
-            dq_entity = silver_table.split(".")[-1]
-        else:
-            # Fallback to entity_type if silver_table is not set
-            dq_entity = silver_table or self._config.entity_type
+        dq_entity = self._extract_dq_entity()
 
         return DQReportContext(
             run_id=str(self._context.run_id),

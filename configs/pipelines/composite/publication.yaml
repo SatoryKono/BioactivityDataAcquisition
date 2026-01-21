@@ -120,8 +120,8 @@ composite:
 
     # Output paths
     output:
-      silver: silver/composite/publication
-      gold: gold/publication_enriched
+      silver: data/output/silver/composite/publication
+      gold: data/output/gold/composite/publication
 
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
