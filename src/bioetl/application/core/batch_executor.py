@@ -731,13 +731,26 @@ class BatchExecutor:
         # Get current date for Bronze DQ report filename
         current_date_str = datetime.now(UTC).strftime("%Y-%m-%d")
 
+        # Extract entity name from silver_table for DQ report naming
+        # This ensures consistency with actual table names (e.g., "publication" not "document")
+        silver_table = self._config.table_config.silver_table
+        if "_" in silver_table:
+            # Split on first underscore (e.g., chembl_publication -> publication)
+            dq_entity = silver_table.split("_", 1)[1]
+        elif "." in silver_table:
+            # Split on dot (e.g., chembl.publication -> publication)
+            dq_entity = silver_table.split(".")[-1]
+        else:
+            dq_entity = silver_table
+
         return DQReportContext(
             run_id=str(self._context.run_id),
             pipeline_name=self._config.pipeline_name,
             timestamp=datetime.now(UTC),
             # Provider and entity for DQ report naming
+            # Use extracted entity from silver_table for consistency
             provider=self._config.provider,
-            entity=self._config.entity_type,
+            entity=dq_entity,
             # Bronze context
             bronze_records=self._bronze_records_for_dq or None,
             bronze_batch_id=self._source_batch_ids[-1]
