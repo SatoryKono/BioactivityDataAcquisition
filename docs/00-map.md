@@ -1,11 +1,11 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.11 | Last updated: 2026-01-21*
+*Synced with RULES.md v5.12 | Last updated: 2026-01-21*
 
 > **Documentation Audit Completed:** 2026-01-21
-> - Added ADR-028-filter-rules-externalization to ADR list
-> - Updated rules-summary.md version to v5.11
-> - Fixed guide count (13 guides)
+> - RULES.md updated to v5.12: ADR-021..028 added to registry with inline references
+> - REQUIREMENTS.md updated to v1.4: correct count 156 (was 139)
+> - Added ADR-028-filter-rules-externalization to 00-map.md
 > - See: [archived/audits/sync-audit-2026-01-21.md](archived/audits/sync-audit-2026-01-21.md) for details
 
 ## Quick Links
@@ -354,10 +354,10 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2026-01-20   | v5.11 (Int→Float Coercion)   |
-| REQUIREMENTS.md          | 2025-12-27   | v1.2 (127 requirements)      |
+| RULES.md                 | 2026-01-21   | v5.12 (ADR Registry Update)  |
+| REQUIREMENTS.md          | 2026-01-21   | v1.4 (156 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
-| 00-map.md                | 2026-01-21   | v6.7 Added ADR-028, fixes    |
+| 00-map.md                | 2026-01-21   | v6.8 RULES v5.12, REQ v1.4   |
 | rules-summary.md         | 2026-01-20   | v5.11 Synced                 |
 | 03-guides/               | 2026-01-20   | Consolidated (13 guides)     |
 | ADR-001..028             | 2026-01-21   | All 28 ADRs documented       |
