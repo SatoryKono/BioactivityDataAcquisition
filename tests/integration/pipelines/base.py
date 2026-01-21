@@ -74,6 +74,8 @@ class IntegrationPipelineTestCase:
         config: PipelineYamlConfig,
         logger: structlog.BoundLogger,
         metrics: MetricsPort,
+        tracing: Any = None,
+        metadata_coordinator: Any = None,
     ) -> StorageContext:
         """Create a StorageContext pointing to local temp paths."""
         # Create real writers pointing to local paths
