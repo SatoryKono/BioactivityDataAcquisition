@@ -728,16 +728,24 @@ class BatchExecutor:
         primary_keys = list(self._config.table_config.primary_keys)
         soft_threshold, hard_threshold = self._get_dq_thresholds()
 
+        # Get current date for Bronze DQ report filename
+        current_date_str = datetime.now(UTC).strftime("%Y-%m-%d")
+
         return DQReportContext(
             run_id=str(self._context.run_id),
             pipeline_name=self._config.pipeline_name,
             timestamp=datetime.now(UTC),
+            # Provider and entity for DQ report naming
+            provider=self._config.provider,
+            entity=self._config.entity_type,
             # Bronze context
             bronze_records=self._bronze_records_for_dq or None,
             bronze_batch_id=self._source_batch_ids[-1]
             if self._source_batch_ids
             else None,
             bronze_source_file=self._last_bronze_path,
+            bronze_output_path=self._config.bronze_output_path,
+            bronze_date_str=current_date_str,
             # Silver context
             silver_data=silver_data,
             silver_target_table=self._config.table_config.silver_table,
@@ -745,10 +753,14 @@ class BatchExecutor:
             silver_primary_keys=primary_keys or None,
             silver_input_count=self.records_fetched,
             silver_quarantined_count=self.records_quarantined,
+            silver_output_path=self._config.silver_output_path,
             # Gold context
             gold_data=gold_data,
             gold_target_table=self._config.table_config.gold_table,
+            gold_output_path=self._config.gold_output_path,
             # DQ thresholds from config (use defaults if not configured)
             dq_soft_threshold=soft_threshold,
             dq_hard_threshold=hard_threshold,
+            # Flat structure flag for DQ reports
+            flat_structure=self._config.flat_structure,
         )
