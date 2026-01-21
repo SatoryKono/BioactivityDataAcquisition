@@ -159,6 +159,7 @@ class BaseDeltaWriter:
         self,
         base_path: str | Path,
         logger: LoggerPort,
+        flat_structure: bool = False,
     ) -> None:
         """Initialize base Delta writer.
 
@@ -166,10 +167,29 @@ class BaseDeltaWriter:
             base_path: Base path for Delta table storage.
                       Tables are stored as subdirectories (e.g., base_path/chembl/activity/).
             logger: Structured logger for observability (MUST be injected per RULES.md).
+            flat_structure: If True, Delta data is written directly to base_path
+                          without creating table_name subdirectory.
         """
         self.base_path = str(base_path).rstrip("/")
         self.logger = logger
+        self._flat_structure = flat_structure
         self._retention_manager = RetentionManager(base_path)
+
+    def _resolve_table_path(self, table_name: str) -> str:
+        """Resolve the filesystem path for a Delta table.
+
+        In flat_structure mode, returns base_path directly.
+        Otherwise, appends table_name as subdirectory.
+
+        Args:
+            table_name: Table name in dot notation (e.g., 'chembl.activity').
+
+        Returns:
+            String path to the table directory.
+        """
+        if self._flat_structure:
+            return self.base_path
+        return f"{self.base_path}/{table_name.replace('.', '/')}"
 
     def _prepare_arrow_data(
         self,
@@ -254,7 +274,7 @@ class BaseDeltaWriter:
         Returns:
             PyArrow Schema if table exists, None otherwise.
         """
-        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+        table_path = self._resolve_table_path(table_name)
         loop = asyncio.get_running_loop()
         try:
             dt = await loop.run_in_executor(
@@ -269,6 +289,7 @@ class BaseDeltaWriter:
         """Get the filesystem path for a Delta table.
 
         Converts dot-notation table names to filesystem paths.
+        In flat_structure mode, returns base_path directly.
 
         Args:
             table_name: Table name in dot notation (e.g., 'chembl.activity').
@@ -283,7 +304,7 @@ class BaseDeltaWriter:
         """
         from pathlib import Path
 
-        return Path(self.base_path) / table_name.replace(".", "/")
+        return Path(self._resolve_table_path(table_name))
 
     async def read_table(
         self,
@@ -302,7 +323,7 @@ class BaseDeltaWriter:
         Raises:
             FileNotFoundError: If the table does not exist.
         """
-        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+        table_path = self._resolve_table_path(table_name)
         loop = asyncio.get_running_loop()
 
         try:

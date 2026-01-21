@@ -76,6 +76,9 @@ class MetadataWriter:
         self,
         base_path: str | Path,
         metadata: SilverMetadata,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
     ) -> str:
         """Write Silver layer metadata sidecar file.
 
@@ -83,16 +86,24 @@ class MetadataWriter:
             base_path: Base path where Silver Delta table is stored.
                       Metadata will be written to {base_path}/_metadata.yaml
             metadata: Silver metadata model with lineage, DQ metrics, and Delta info.
+            table_name: Table name for flat_structure naming pattern.
+            flat_structure: If True, write as {table_name}_metadata.yaml instead of
+                          _metadata.yaml in a subdirectory.
 
         Returns:
             Absolute path to the written metadata file.
         """
-        return await self._write_metadata(base_path, metadata, "silver")
+        return await self._write_metadata(
+            base_path, metadata, "silver", table_name=table_name, flat_structure=flat_structure
+        )
 
     async def write_gold_metadata(
         self,
         base_path: str | Path,
         metadata: GoldMetadata,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
     ) -> str:
         """Write Gold layer metadata sidecar file.
 
@@ -100,17 +111,25 @@ class MetadataWriter:
             base_path: Base path where Gold Delta/Parquet table is stored.
                       Metadata will be written to {base_path}/_metadata.yaml
             metadata: Gold metadata model with lineage, schema contract, and SCD info.
+            table_name: Table name for flat_structure naming pattern.
+            flat_structure: If True, write as {table_name}_metadata.yaml instead of
+                          _metadata.yaml in a subdirectory.
 
         Returns:
             Absolute path to the written metadata file.
         """
-        return await self._write_metadata(base_path, metadata, "gold")
+        return await self._write_metadata(
+            base_path, metadata, "gold", table_name=table_name, flat_structure=flat_structure
+        )
 
     async def _write_metadata(
         self,
         base_path: str | Path,
         metadata: BronzeMetadata | SilverMetadata | GoldMetadata,
         layer: str,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
     ) -> str:
         """Write metadata to sidecar file.
 
@@ -118,12 +137,17 @@ class MetadataWriter:
             base_path: Base path for metadata file.
             metadata: Pydantic metadata model.
             layer: Layer name for logging.
+            table_name: Table name for flat_structure naming pattern.
+            flat_structure: If True, write as {table_name}_metadata.yaml.
 
         Returns:
             Absolute path to written metadata file.
         """
         path = Path(base_path)
-        metadata_path = path / METADATA_FILENAME
+        if flat_structure and table_name:
+            metadata_path = path / f"{table_name}_metadata.yaml"
+        else:
+            metadata_path = path / METADATA_FILENAME
 
         # Serialize to dict with JSON mode for datetime handling
         metadata_dict = metadata.model_dump(mode="json", by_alias=True)
@@ -178,6 +202,9 @@ class NoOpMetadataWriter:
         self,
         base_path: str | Path,
         metadata: SilverMetadata,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
     ) -> str:
         """No-op Silver metadata write."""
         return ""
@@ -186,6 +213,9 @@ class NoOpMetadataWriter:
         self,
         base_path: str | Path,
         metadata: GoldMetadata,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
     ) -> str:
         """No-op Gold metadata write."""
         return ""

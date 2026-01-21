@@ -37,16 +37,21 @@ class DQReportWriter:
         self,
         base_path: str | Path,
         logger: LoggerPort,
+        flat_structure: bool = False,
     ) -> None:
         """Initialize DQ report writer.
 
         Args:
             base_path: Base path for report storage.
             logger: Structured logger for observability.
+            flat_structure: If True, write reports directly to base_path
+                          with {table_name}_dq_report{ext} naming pattern
+                          instead of {table_name}/_dq_reports/{run_id}_dq_report{ext}.
         """
         self._base_path = Path(base_path)
         self._logger = logger
         self._serializer = DQReportSerializer()
+        self._flat_structure = flat_structure
 
     async def write_bronze_report(
         self,
@@ -103,13 +108,17 @@ class DQReportWriter:
         extension = self._get_extension(format)
 
         if output_path is None:
-            # Generate path based on target table
-            output_path = (
-                self._base_path
-                / report.target_table
-                / self.DQ_REPORTS_DIR
-                / f"{report.run_id}_dq_report{extension}"
-            )
+            if self._flat_structure:
+                # Flat: {base_path}/{table_name}_dq_report{ext}
+                output_path = self._base_path / f"{report.target_table}_dq_report{extension}"
+            else:
+                # Nested: {base_path}/{table_name}/_dq_reports/{run_id}_dq_report{ext}
+                output_path = (
+                    self._base_path
+                    / report.target_table
+                    / self.DQ_REPORTS_DIR
+                    / f"{report.run_id}_dq_report{extension}"
+                )
         else:
             output_path = Path(output_path)
             if output_path.is_dir():
@@ -137,13 +146,17 @@ class DQReportWriter:
         extension = self._get_extension(format)
 
         if output_path is None:
-            # Generate path based on target table
-            output_path = (
-                self._base_path
-                / report.target_table
-                / self.DQ_REPORTS_DIR
-                / f"{report.run_id}_dq_report{extension}"
-            )
+            if self._flat_structure:
+                # Flat: {base_path}/{table_name}_dq_report{ext}
+                output_path = self._base_path / f"{report.target_table}_dq_report{extension}"
+            else:
+                # Nested: {base_path}/{table_name}/_dq_reports/{run_id}_dq_report{ext}
+                output_path = (
+                    self._base_path
+                    / report.target_table
+                    / self.DQ_REPORTS_DIR
+                    / f"{report.run_id}_dq_report{extension}"
+                )
         else:
             output_path = Path(output_path)
             if output_path.is_dir():

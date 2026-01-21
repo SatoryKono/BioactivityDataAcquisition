@@ -100,6 +100,7 @@ class SilverWriter(BaseDeltaWriter):
         metadata_coordinator: MetadataCoordinatorPort | None = None,
         transform_version: str | None = None,
         transform_steps: tuple[str, ...] | None = None,
+        flat_structure: bool = False,
     ) -> None:
         """Initialize Silver writer.
 
@@ -126,14 +127,16 @@ class SilverWriter(BaseDeltaWriter):
             transform_version: Optional semver version of transform (e.g., '1.0.0')
                              for lineage tracking in metadata.
             transform_steps: Optional tuple of transform step names for lineage.
+            flat_structure: If True, Delta data written directly to base_path
+                          without table_name subdirectory.
 
         Note:
             LoggerPort is required per RULES.md DI requirements.
             Lock validation is now performed at Application layer (BatchWriter)
             per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
         """
-        # Initialize base class (sets base_path, logger, _retention_manager)
-        super().__init__(base_path, logger)
+        # Initialize base class (sets base_path, logger, _retention_manager, _flat_structure)
+        super().__init__(base_path, logger, flat_structure=flat_structure)
 
         # Use NoOpTracing if not provided (test convenience, production uses composition)
         if tracing is None:
@@ -576,7 +579,7 @@ class SilverWriter(BaseDeltaWriter):
             # Check for schema drift before writing
             await self._check_schema_drift(table_name, records, on_schema_mismatch)
 
-            table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+            table_path = self._resolve_table_path(table_name)
             arrow_data = self._prepare_arrow_data(records, schema, primary_keys)
 
             try:
@@ -1124,7 +1127,7 @@ class SilverWriter(BaseDeltaWriter):
                     [(pk, "ascending") for pk in valid_keys]
                 )
 
-        table_path = f"{self.base_path}/{table_name.replace('.', '/')}"
+        table_path = self._resolve_table_path(table_name)
 
         self.logger.info(
             "Writing merged Silver records",

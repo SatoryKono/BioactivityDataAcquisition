@@ -329,6 +329,14 @@ sink:
       ascending: true
       # columns: [<entity_id>]  # MUST be overridden in entity config
 
+    # Flat structure mode (default: false)
+    # When enabled, data is written directly to the path without table_name subdirectory:
+    # - Delta: data written directly to {path}/ (instead of {path}/{table_name}/)
+    # - CSV: {table_name}.csv at {path} (unchanged)
+    # - Metadata: {table_name}_metadata.yaml (instead of {path}/{table_name}/_metadata.yaml)
+    # - DQ Report: {table_name}_dq_report.json (instead of {path}/{table_name}/_dq_reports/...)
+    flat_structure: false
+
     # Entity-specific (MUST be overridden):
     # path: data/output/silver
     # primary_key: [<entity_id>]
@@ -378,6 +386,14 @@ sink:
     sort_by:
       ascending: true
       # columns: [<entity_id>]  # MUST be overridden in entity config
+
+    # Flat structure mode (default: false)
+    # When enabled, data is written directly to the path without table_name subdirectory:
+    # - Delta: data written directly to {path}/ (instead of {path}/{table_name}/)
+    # - CSV: {table_name}.csv at {path} (unchanged)
+    # - Metadata: {table_name}_metadata.yaml (instead of {path}/{table_name}/_metadata.yaml)
+    # - DQ Report: {table_name}_dq_report.json (instead of {path}/{table_name}/_dq_reports/...)
+    flat_structure: false
 
     # Entity-specific (MUST be overridden):
     # path: data/output/gold
