@@ -109,7 +109,8 @@ class StorageFactory:
         """
         save_json = bronze_config.save_json if bronze_config else False
         bronze_save_metadata = bronze_config.save_metadata if bronze_config else False
-        json_path = str(bronze_path.parent / "json") if save_json else None
+        # JSON files are now written alongside zst files (same directory)
+        # No separate json_path needed
 
         # Ensure tracing is always explicitly provided (DI pattern)
         effective_tracing: TracingPort = tracing or NoOpTracing()
@@ -135,7 +136,7 @@ class StorageFactory:
                 metrics=metrics,
                 tracing=effective_tracing,
                 save_json=save_json,
-                json_path=json_path,
+                json_path=None,  # JSON is now written alongside zst files
                 metadata_writer=bronze_metadata_writer,
                 save_metadata=bronze_save_metadata,
                 metadata_coordinator=metadata_coordinator,
@@ -219,16 +220,15 @@ class StorageFactory:
             gold_config.csv_export if gold_config else None, logger
         )
 
-        json_path = None
-        if bronze_config and bronze_config.save_json:
-            json_path = str(bronze_path.parent / "json")
+        # JSON files are now written alongside zst files (same directory)
+        save_json = bronze_config.save_json if bronze_config else False
 
         bronze_save_metadata = bronze_config.save_metadata if bronze_config else False
         silver_save_metadata = silver_config.save_metadata if silver_config else False
         gold_save_metadata = gold_config.save_metadata if gold_config else False
         StorageFactory._log_export_status(
             logger,
-            json_path,
+            save_json,
             silver_csv_exporter,
             gold_csv_exporter,
             bronze_save_metadata,
@@ -274,7 +274,7 @@ class StorageFactory:
     @staticmethod
     def _log_export_status(
         logger: LoggerPort,
-        json_path: str | None,
+        save_json: bool,
         silver_csv_exporter: CsvExporter | None,
         gold_csv_exporter: CsvExporter | None,
         bronze_save_metadata: bool = False,
@@ -282,8 +282,8 @@ class StorageFactory:
         gold_save_metadata: bool = False,
     ) -> None:
         """Log export configuration status."""
-        if json_path:
-            logger.info("JSON export enabled for Bronze layer")
+        if save_json:
+            logger.info("JSON export enabled for Bronze layer (alongside zst files)")
         if bronze_save_metadata:
             logger.info("metadata_export_enabled", layer="bronze")
         if silver_save_metadata:
