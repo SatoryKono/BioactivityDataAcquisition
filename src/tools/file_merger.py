@@ -11,6 +11,22 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 
+def get_project_root() -> Path:
+    """Get the project root directory.
+
+    Returns the project root directory by going up from the script location.
+    Script is located in src/tools/, so project root is 2 levels up.
+
+    Returns:
+        Path to project root directory.
+    """
+    # Get the directory where this script is located
+    script_dir = Path(__file__).resolve().parent
+    # Go up 2 levels: src/tools/ -> src/ -> project_root/
+    project_root = script_dir.parent.parent
+    return project_root
+
+
 def parse_arguments() -> argparse.Namespace:
     """Parse command-line arguments.
 
@@ -23,23 +39,23 @@ def parse_arguments() -> argparse.Namespace:
         epilog="""
 Examples:
   # Standard mode
-  python file_merger.py -i ./src -o combined.txt
-  python file_merger.py -i ./docs -e md -o docs_combined.md --sort by_extension
+  python src/tools/file_merger.py -i ./src -o combined.txt
+  python src/tools/file_merger.py -i ./docs -e md -o docs_combined.md --sort by_extension
 
   # Project code merge mode (creates 5 files by architectural layers)
-  python file_merger.py --merge_project_code
+  python src/tools/file_merger.py --merge_project_code
 
   # Documentation merge mode (merges all docs/*.md into one file)
-  python file_merger.py --merge_documentation
-  python file_merger.py --merge_documentation -o my_docs.md
+  python src/tools/file_merger.py --merge_documentation
+  python src/tools/file_merger.py --merge_documentation -o my_docs.md
 
   # Configs merge mode (merges all configs/*.yaml into one file)
-  python file_merger.py --merge_configs
-  python file_merger.py --merge_configs -o my_configs.md
+  python src/tools/file_merger.py --merge_configs
+  python src/tools/file_merger.py --merge_configs -o my_configs.md
 
   # Project structure mode (creates tree structure of all project files)
-  python file_merger.py --project_structure
-  python file_merger.py --project_structure -o structure.md
+  python src/tools/file_merger.py --project_structure
+  python src/tools/file_merger.py --project_structure -o structure.md
         """,
     )
 
@@ -293,7 +309,8 @@ def merge_project_code_layers(
     layers = ["interfaces", "infrastructure", "domain", "composition", "application"]
 
     # Base directory for project code
-    base_dir = Path("src/bioetl")
+    project_root = get_project_root()
+    base_dir = project_root / "src" / "bioetl"
 
     if not base_dir.exists():
         print(
@@ -382,7 +399,8 @@ def merge_documentation(
         Exit code (0 for success, 1 for error).
     """
     # Documentation directory
-    docs_dir = Path("docs")
+    project_root = get_project_root()
+    docs_dir = project_root / "docs"
 
     if not docs_dir.exists():
         print(
@@ -513,7 +531,7 @@ def create_project_structure(
         Exit code (0 for success, 1 for error).
     """
     # Project root directory
-    root_dir = Path(".")
+    root_dir = get_project_root()
 
     print("=" * 80)
     print("PROJECT STRUCTURE MODE")
@@ -537,7 +555,7 @@ def create_project_structure(
     try:
         with output_file.open("w", encoding=encoding) as f:
             f.write("# Project Structure\n\n")
-            f.write(f"Generated: {Path('.').resolve()}\n\n")
+            f.write(f"Generated: {root_dir.resolve()}\n\n")
             f.write("```\n")
             for line in tree_lines:
                 f.write(line + "\n")
@@ -578,7 +596,8 @@ def merge_configs(
         Exit code (0 for success, 1 for error).
     """
     # Configuration directory
-    configs_dir = Path("configs")
+    project_root = get_project_root()
+    configs_dir = project_root / "configs"
 
     if not configs_dir.exists():
         print(
