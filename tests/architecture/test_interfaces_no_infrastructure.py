@@ -106,22 +106,11 @@ class TestInterfacesNoDIrectInfrastructure:
         if not commands_dir.exists():
             pytest.skip("CLI commands directory not found")
 
-        # Known legacy violations - these should be addressed in future refactoring
-        # but are allowed for now to prevent regression in new code
-        # Note: All CLI commands are now properly routed through composition entrypoints:
-        #   - quarantine.py uses QuarantineService via get_quarantine_service()
-        #   - health.py was refactored to use composition entrypoints
-        allowed_legacy_files: set[str] = set()
-
         violations = []
 
         for py_file in commands_dir.glob("*.py"):
             # Skip __init__.py as it typically just re-exports
             if py_file.name == "__init__.py":
-                continue
-
-            # Skip known legacy files (documented above)
-            if py_file.name in allowed_legacy_files:
                 continue
 
             imports = get_imports_from_file(py_file)
