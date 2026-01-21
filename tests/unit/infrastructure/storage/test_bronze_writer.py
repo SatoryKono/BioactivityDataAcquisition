@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 import json
 from datetime import UTC, datetime
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -506,8 +505,9 @@ class TestBronzeWriterWriteLocal:
         assert result.checksum_blake2  # Non-empty checksum
 
         # Verify path format (normalize for cross-platform)
+        # Path format: {provider}/{entity}/{date}/batch_{date}_{batch_id}.jsonl.zst
         path_str = result.relative_path.replace("\\", "/")
-        assert "v1/chembl/activity/2024-01-15" in path_str
+        assert "chembl/activity/2024-01-15" in path_str
         assert str(batch_id) in result.relative_path
         assert result.relative_path.endswith(".jsonl.zst")
 
@@ -621,8 +621,9 @@ class TestBronzeWriterWriteLocal:
             ingestion_ts=ingestion_ts,
         )
 
-        # Verify JSON copy exists
-        json_path = Path(writer.json_path) / "pubchem" / "compound"
+        # JSON copy is now in the same directory as zst files
+        # Path format: {provider}/{entity}/{date}/batch_{date}_{batch_id}.jsonl
+        json_path = tmp_path / "pubchem" / "compound" / "2024-01-15"
         json_files = list(json_path.glob("*.jsonl"))
         assert len(json_files) == 1
 
@@ -1022,13 +1023,13 @@ class TestBronzeWriterAtomicWrite:
             ingestion_ts=ingestion_ts,
         )
 
-        # Verify JSON file exists
-        json_path = Path(writer.json_path) / "chembl" / "activity"
+        # JSON file is now in the same directory as zst files
+        json_path = tmp_path / "chembl" / "activity" / "2024-01-15"
         json_files = list(json_path.glob("*.jsonl"))
         assert len(json_files) == 1
 
         # No temp files should remain
-        tmp_files = list(Path(writer.json_path).rglob("*.tmp"))
+        tmp_files = list(tmp_path.rglob("*.tmp"))
         assert len(tmp_files) == 0, f"Found orphan temp files: {tmp_files}"
 
 
@@ -1888,9 +1889,8 @@ class TestBronzeWriterCleanup:
             metrics=NoOpMetrics(),
         )
 
-        # Create directory structure
-        version_path = tmp_path / "v1"
-        provider_path = version_path / "chembl"
+        # Create directory structure (without v1/ prefix)
+        provider_path = tmp_path / "chembl"
         entity_path = provider_path / "activity"
 
         # Create date directories
@@ -1918,9 +1918,8 @@ class TestBronzeWriterCleanup:
             metrics=NoOpMetrics(),
         )
 
-        # Create directory structure
-        version_path = tmp_path / "v1"
-        provider_path = version_path / "chembl"
+        # Create directory structure (without v1/ prefix)
+        provider_path = tmp_path / "chembl"
         entity_path = provider_path / "activity"
 
         # Create non-date directory
@@ -1948,9 +1947,8 @@ class TestBronzeWriterCleanup:
             metrics=NoOpMetrics(),
         )
 
-        # Create directory structure with old data
-        version_path = tmp_path / "v1"
-        provider_path = version_path / "chembl"
+        # Create directory structure with old data (without v1/ prefix)
+        provider_path = tmp_path / "chembl"
         entity_path = provider_path / "activity"
 
         old_date = entity_path / "2024-01-01"
@@ -1975,9 +1973,8 @@ class TestBronzeWriterCleanup:
             metrics=NoOpMetrics(),
         )
 
-        # Create directory structure with old data
-        version_path = tmp_path / "v1"
-        provider_path = version_path / "chembl"
+        # Create directory structure with old data (without v1/ prefix)
+        provider_path = tmp_path / "chembl"
         entity_path = provider_path / "activity"
 
         old_date = entity_path / "2024-01-01"
@@ -2005,9 +2002,8 @@ class TestBronzeWriterCleanup:
             metrics=NoOpMetrics(),
         )
 
-        # Create directory structure with recent data
-        version_path = tmp_path / "v1"
-        provider_path = version_path / "chembl"
+        # Create directory structure with recent data (without v1/ prefix)
+        provider_path = tmp_path / "chembl"
         entity_path = provider_path / "activity"
 
         recent_date = entity_path / "2024-12-01"
@@ -2034,12 +2030,10 @@ class TestBronzeWriterCleanup:
             metrics=NoOpMetrics(),
         )
 
-        version_path = tmp_path / "v1"
-
-        # Create multiple provider/entity combinations
+        # Create multiple provider/entity combinations (without v1/ prefix)
         for provider in ["chembl", "pubchem"]:
             for entity in ["activity", "compound"]:
-                entity_path = version_path / provider / entity
+                entity_path = tmp_path / provider / entity
                 old_date = entity_path / "2024-01-01"
                 old_date.mkdir(parents=True)
                 (old_date / "batch.jsonl.zst").write_bytes(b"data")
