@@ -204,6 +204,9 @@ class DQReportWriterPort(Protocol):
         report: SilverDQReport,
         output_path: Path | None = None,
         format: DQReportFormat | None = None,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> Path:
         """Write Silver DQ report to file.
 
@@ -211,6 +214,8 @@ class DQReportWriterPort(Protocol):
             report: Silver DQ report to write.
             output_path: Output path (None = alongside data).
             format: Output format (None = JSON).
+            provider: Provider name for filename generation.
+            entity: Entity name for filename generation.
 
         Returns:
             Path to the written report file.
@@ -222,6 +227,9 @@ class DQReportWriterPort(Protocol):
         report: GoldDQReport,
         output_path: Path | None = None,
         format: DQReportFormat | None = None,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> Path:
         """Write Gold DQ report to file.
 
@@ -229,6 +237,8 @@ class DQReportWriterPort(Protocol):
             report: Gold DQ report to write.
             output_path: Output path (None = alongside data).
             format: Output format (None = JSON).
+            provider: Provider name for filename generation.
+            entity: Entity name for filename generation.
 
         Returns:
             Path to the written report file.
