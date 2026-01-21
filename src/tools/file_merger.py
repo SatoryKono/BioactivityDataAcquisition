@@ -55,6 +55,9 @@ Examples:
   # Project structure mode (creates tree structure of all project files)
   python src/tools/file_merger.py --project_structure
   python src/tools/file_merger.py --project_structure -o structure.md
+
+  # All merge modes at once (creates all output files in reports/)
+  python src/tools/file_merger.py --merge_all
         """,
     )
 
@@ -70,8 +73,8 @@ Examples:
         "-o",
         "--output",
         type=Path,
-        default=Path("merged_output.txt"),
-        help="Output file path (default: merged_output.txt)",
+        default=Path("reports/merged_output.txt"),
+        help="Output file path (default: reports/merged_output.txt)",
     )
 
     parser.add_argument(
@@ -125,6 +128,12 @@ Examples:
         "--project_structure",
         action="store_true",
         help="Special mode: create tree structure of all project files (default: project_structure.md)",
+    )
+
+    parser.add_argument(
+        "--merge_all",
+        action="store_true",
+        help="Execute all merge modes: --merge_project_code --merge_documentation --merge_configs --project_structure",
     )
 
     return parser.parse_args()
@@ -311,6 +320,10 @@ def merge_project_code_layers(
     project_root = get_project_root()
     base_dir = project_root / "src" / "bioetl"
 
+    # Reports output directory
+    reports_dir = Path("reports")
+    reports_dir.mkdir(exist_ok=True)
+
     if not base_dir.exists():
         print(
             f"Error: Project directory does not exist: {base_dir}",
@@ -355,7 +368,7 @@ def merge_project_code_layers(
         files = sort_files(files, sort_method)
 
         # Create output file for this layer
-        output_file = Path(f"{layer}_merged.md")
+        output_file = reports_dir / f"{layer}_merged.md"
 
         # Merge files
         files_processed, layer_size, _extension_counts = merge_files(
@@ -437,6 +450,9 @@ def merge_documentation(
 
     # Sort files
     files = sort_files(files, sort_method)
+
+    # Create output directory if needed
+    output_file.parent.mkdir(parents=True, exist_ok=True)
 
     # Merge files
     print(f"Merging files into: {output_file}")
@@ -548,6 +564,9 @@ def create_project_structure(
     file_count = sum(1 for line in tree_lines if not line.rstrip().endswith("/"))
     dir_count = total_lines - file_count
 
+    # Create output directory if needed
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+
     # Write to output file
     try:
         with output_file.open("w", encoding=encoding) as f:
@@ -633,6 +652,9 @@ def merge_configs(
     # Sort files
     files = sort_files(files, sort_method)
 
+    # Create output directory if needed
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+
     # Merge files
     print(f"Merging files into: {output_file}")
     files_processed, total_bytes, extension_counts = merge_files(
@@ -657,33 +679,66 @@ def main() -> int:
     # Parse exclude dirs (used in all modes)
     exclude_dirs = {d.strip() for d in args.exclude_dirs.split(",")}
 
+    # Expand --merge_all into individual flags
+    if args.merge_all:
+        args.merge_project_code = True
+        args.merge_documentation = True
+        args.merge_configs = True
+        args.project_structure = True
+
+    # Default output path for checking if user specified custom output
+    default_output = Path("reports/merged_output.txt")
+
+    exit_code = 0
+    executed_any = False
+
     # Check if project code merge mode is enabled
     if args.merge_project_code:
-        return merge_project_code_layers(args.encoding, exclude_dirs, args.sort)
+        executed_any = True
+        result = merge_project_code_layers(args.encoding, exclude_dirs, args.sort)
+        if result != 0:
+            exit_code = result
 
     # Check if documentation merge mode is enabled
     if args.merge_documentation:
+        executed_any = True
         # Set default output file if not specified
         output_file = args.output
-        if output_file == Path("merged_output.txt"):  # User didn't specify output
-            output_file = Path("documentation_merged.md")
-        return merge_documentation(output_file, args.encoding, exclude_dirs, args.sort)
+        if output_file == default_output:  # User didn't specify output
+            output_file = Path("reports/documentation_merged.md")
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        result = merge_documentation(
+            output_file, args.encoding, exclude_dirs, args.sort
+        )
+        if result != 0:
+            exit_code = result
 
     # Check if configs merge mode is enabled
     if args.merge_configs:
+        executed_any = True
         # Set default output file if not specified
         output_file = args.output
-        if output_file == Path("merged_output.txt"):  # User didn't specify output
-            output_file = Path("configs_merged.md")
-        return merge_configs(output_file, args.encoding, exclude_dirs, args.sort)
+        if output_file == default_output:  # User didn't specify output
+            output_file = Path("reports/configs_merged.md")
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        result = merge_configs(output_file, args.encoding, exclude_dirs, args.sort)
+        if result != 0:
+            exit_code = result
 
     # Check if project structure mode is enabled
     if args.project_structure:
+        executed_any = True
         # Set default output file if not specified
         output_file = args.output
-        if output_file == Path("merged_output.txt"):  # User didn't specify output
-            output_file = Path("project_structure.md")
-        return create_project_structure(output_file, args.encoding, exclude_dirs)
+        if output_file == default_output:  # User didn't specify output
+            output_file = Path("reports/project_structure.md")
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        result = create_project_structure(output_file, args.encoding, exclude_dirs)
+        if result != 0:
+            exit_code = result
+
+    if executed_any:
+        return exit_code
 
     # Standard mode - validate input directory is required
     if not args.input_dir:
@@ -725,6 +780,9 @@ def main() -> int:
 
     # Sort files
     files = sort_files(files, args.sort)
+
+    # Create output directory if needed
+    args.output.parent.mkdir(parents=True, exist_ok=True)
 
     # Merge files
     print(f"Merging files into: {args.output}")
