@@ -30,10 +30,13 @@ __all__ = [
 
 
 def bootstrap_quarantine() -> QuarantinePort:
-    """Bootstrap the quarantine service for CLI inspection."""
+    """Bootstrap the quarantine service for CLI inspection.
+
+    Uses centralized quarantine_path from settings (data_dir/quarantine)
+    for unified quarantine storage independent of entity paths.
+    """
     settings = get_settings()
-    base_path = str(settings.silver_path / "common" / "quarantine")
-    return UnifiedQuarantine(base_path=base_path)
+    return UnifiedQuarantine(base_path=str(settings.quarantine_path))
 
 
 def bootstrap_checkpoint(pipeline_name: str) -> CheckpointPort:
