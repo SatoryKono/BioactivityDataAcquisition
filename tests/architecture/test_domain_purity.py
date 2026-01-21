@@ -257,6 +257,9 @@ class TestDomainComplexity:
             "validate_concentration": 7,  # Concentration validation with unit checks
             "validate_pchembl": 7,  # pChEMBL validation with range checks
             "validate_activity_value": 10,  # Activity value validation
+            # DQ metrics calculator (moved from application to domain)
+            "DQMetricsCalculator": 7,  # CC=6 - DQ metrics calculator with drift detection
+            "_detect_schema_drift": 10,  # CC=9 - Schema drift detection with severity levels
             # Value coercion with type handling
             "_coerce_to_int": 10,  # CC=8 - Integer coercion with multiple type checks
             # DQ serializer domain functions
