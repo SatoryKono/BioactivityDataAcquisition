@@ -202,19 +202,23 @@ class TestStorageWriterContracts:
         """Verify that storage writers use atomic write patterns.
 
         REQ-DATA-004: All file writes should be atomic to prevent data corruption.
+
+        Note: Delta Lake writers (silver_writer.py, gold_writer.py) get atomicity
+        from Delta Lake's transaction log, not temp file + rename. Only bronze_writer
+        needs explicit atomic patterns since it writes JSONL files directly.
         """
         storage_path = src_dir / "bioetl" / "infrastructure" / "storage"
         if not storage_path.exists():
             pytest.skip("Storage layer not found")
 
-        # Writers that should use atomic patterns
-        writer_files = ["bronze_writer.py", "gold_writer.py"]
+        # Writers that should use explicit atomic patterns (non-Delta file writers)
+        # Delta writers (silver, gold) get atomicity from Delta Lake's transaction log
+        writer_files = ["bronze_writer.py"]
 
         # Patterns indicating atomic writes (should be present)
         atomic_indicators = [
             r"atomic_write",
             r"AtomicWriteGroup",
-            r"\.replace\s*\(",
             r"tempfile\.mkstemp",
         ]
 
