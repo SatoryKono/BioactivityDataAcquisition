@@ -110,7 +110,9 @@ class DQReportWriter:
         if output_path is None:
             if self._flat_structure:
                 # Flat: {base_path}/{table_name}_dq_report{ext}
-                output_path = self._base_path / f"{report.target_table}_dq_report{extension}"
+                output_path = (
+                    self._base_path / f"{report.target_table}_dq_report{extension}"
+                )
             else:
                 # Nested: {base_path}/{table_name}/_dq_reports/{run_id}_dq_report{ext}
                 output_path = (
@@ -148,7 +150,9 @@ class DQReportWriter:
         if output_path is None:
             if self._flat_structure:
                 # Flat: {base_path}/{table_name}_dq_report{ext}
-                output_path = self._base_path / f"{report.target_table}_dq_report{extension}"
+                output_path = (
+                    self._base_path / f"{report.target_table}_dq_report{extension}"
+                )
             else:
                 # Nested: {base_path}/{table_name}/_dq_reports/{run_id}_dq_report{ext}
                 output_path = (

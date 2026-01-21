@@ -94,7 +94,11 @@ class MetadataWriter:
             Absolute path to the written metadata file.
         """
         return await self._write_metadata(
-            base_path, metadata, "silver", table_name=table_name, flat_structure=flat_structure
+            base_path,
+            metadata,
+            "silver",
+            table_name=table_name,
+            flat_structure=flat_structure,
         )
 
     async def write_gold_metadata(
@@ -119,7 +123,11 @@ class MetadataWriter:
             Absolute path to the written metadata file.
         """
         return await self._write_metadata(
-            base_path, metadata, "gold", table_name=table_name, flat_structure=flat_structure
+            base_path,
+            metadata,
+            "gold",
+            table_name=table_name,
+            flat_structure=flat_structure,
         )
 
     async def _write_metadata(
