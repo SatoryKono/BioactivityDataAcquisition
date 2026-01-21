@@ -30,21 +30,11 @@ dq_config_file: ../../dq/entities/semanticscholar/publication.yaml
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Filter rules are loaded from hierarchical config files:
+# Filters loaded from hierarchical config files via convention (ADR-029):
 #   1. configs/filter/_defaults.yaml (global defaults)
 #   2. configs/filter/providers/semanticscholar.yaml (provider-specific)
 #   3. configs/filter/entities/semanticscholar/publication.yaml (entity-specific)
-filter_config_file: ../../filter/entities/semanticscholar/publication.yaml
-
-# Entity-specific gold filters
-gold_filters:
-  required_fields:
-    - paper_id
-    - title
-  ranges:
-    year:
-      min: 1900
-      max: 2100
+# Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink configuration
 sink:
@@ -65,11 +55,3 @@ sink:
     csv_export:
       path: "data/output/gold/semanticscholar/publication"
 
-# Input filter for batch DOI resolution with title fallback
-input_filter:
-  enabled: true
-  source_path: "data/input/dois.csv"
-  column_name: "doi"
-  filter_field: "doi"
-  batch_size: 100
-  fallback_column: "title"  # Search by title if DOI not found or empty

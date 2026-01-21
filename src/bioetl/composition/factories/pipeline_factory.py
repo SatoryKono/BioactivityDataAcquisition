@@ -266,6 +266,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             silver_schema=self.silver_schema,
             gold_schema=self.gold_schema,
             strict_gold_validation=runtime.strict_gold_validation,
+            yaml_config=yaml_config,
         )
 
 
@@ -437,6 +438,7 @@ def assemble_runner(
     silver_schema: pa.Schema | None,
     gold_schema: Any,
     strict_gold_validation: bool,
+    yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
     """Assemble a PipelineRunner from a pipeline instance.
 
@@ -452,6 +454,7 @@ def assemble_runner(
         silver_schema: PyArrow schema for Silver layer
         gold_schema: Schema for Gold layer validation
         strict_gold_validation: Whether to enforce strict Gold validation
+        yaml_config: Original YAML config for DQ report extraction
 
     Returns:
         Fully initialized PipelineRunner
@@ -509,8 +512,8 @@ def assemble_runner(
         pipeline_name=pipeline.config.pipeline_name,
     )
 
-    # Extract DQ configs from pipeline for DQ report generation
-    bronze_dq_config, silver_dq_config, gold_dq_config = _extract_dq_configs(pipeline)
+    # Extract DQ configs from YAML config for DQ report generation
+    bronze_dq_config, silver_dq_config, gold_dq_config = _extract_dq_configs(yaml_config)
 
     postrun_service = PostrunService(
         config=pipeline.config,
@@ -596,19 +599,16 @@ def _extract_single_dq_config(
 
 
 def _extract_dq_configs(
-    pipeline: BasePipeline,
+    yaml_config: PipelineYamlConfig | None,
 ) -> tuple[
     BronzeDQConfigPort | None,
     SilverDQConfigPort | None,
     GoldDQConfigPort | None,
 ]:
-    """Extract DQ report configs for each layer from pipeline.
-
-    DQ configs are stored in the pipeline's original YAML config reference
-    if available. This function retrieves them for use in PostrunService.
+    """Extract DQ report configs for each layer from YAML config.
 
     Args:
-        pipeline: Pipeline instance with potential DQ config reference.
+        yaml_config: Pipeline YAML configuration with sink settings.
 
     Returns:
         Tuple of (bronze_config, silver_config, gold_config).
@@ -620,7 +620,6 @@ def _extract_dq_configs(
         SilverSinkConfig,
     )
 
-    yaml_config = getattr(pipeline, "_yaml_config", None)
     if yaml_config is None:
         return None, None, None
 

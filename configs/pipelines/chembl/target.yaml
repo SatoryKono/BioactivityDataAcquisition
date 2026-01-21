@@ -27,11 +27,11 @@ dq_config_file: ../../dq/entities/chembl/target.yaml
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Filter rules are loaded from hierarchical config files:
+# Filters loaded from hierarchical config files via convention (ADR-029):
 #   1. configs/filter/_defaults.yaml (global defaults)
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/target.yaml (entity-specific)
-filter_config_file: ../../filter/entities/chembl/target.yaml
+# Add inline overrides below only when extending/differing from entity filter config.
 
 # -----------------------------------------------------------------------------
 # Inline DQ Overrides (applied on top of dq_config_file)
@@ -64,24 +64,6 @@ dq_rules:
       condition: "all_present"
       error_message: "Target must have ID and preferred name"
 
-# Entity-specific gold filters
-gold_filters:
-  columns:
-    target_type: [SINGLE PROTEIN]
-  list_lengths:
-    component_accessions:
-      min: 1
-      max: 1
-    component_ids:
-      min: 1
-  list_contains:
-    component_types:
-      values: [PROTEIN]
-      mode: all
-  required_fields:
-    - pref_name
-    - organism
-
 # Entity-specific sink overrides
 sink:
   bronze:
@@ -101,10 +83,3 @@ sink:
     csv_export:
       path: "data/output/gold/chembl/target"
 
-# Entity-specific input filter
-input_filter:
-  enabled: true
-  source_path: "data/input/target.csv"
-  column_name: "target_chembl_id"
-  filter_field: "target_chembl_id"
-  batch_size: 20

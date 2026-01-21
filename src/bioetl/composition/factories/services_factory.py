@@ -274,48 +274,13 @@ class BaseServicesFactory:
         Returns:
             True if any layer has dq_report.enabled = true.
         """
-        from bioetl.infrastructure.schemas.dq_report_config import (
-            BronzeSinkConfig,
-            GoldSinkConfig,
-            SilverSinkConfig,
-        )
-
         sink = config.sink
 
-        # Check Bronze
-        bronze_config = sink.get("bronze")
-        if bronze_config:
-            # Try to parse as BronzeSinkConfig to check dq_report
-            try:
-                bronze_sink = BronzeSinkConfig.model_validate(
-                    bronze_config.model_dump()
-                )
-                if bronze_sink.dq_report.enabled:
-                    return True
-            except Exception:
-                pass
-
-        # Check Silver
-        silver_config = sink.get("silver")
-        if silver_config:
-            try:
-                silver_sink = SilverSinkConfig.model_validate(
-                    silver_config.model_dump()
-                )
-                if silver_sink.dq_report.enabled:
-                    return True
-            except Exception:
-                pass
-
-        # Check Gold
-        gold_config = sink.get("gold")
-        if gold_config:
-            try:
-                gold_sink = GoldSinkConfig.model_validate(gold_config.model_dump())
-                if gold_sink.dq_report.enabled:
-                    return True
-            except Exception:
-                pass
+        # Check each layer for dq_report.enabled
+        for layer_name in ("bronze", "silver", "gold"):
+            layer_config = sink.get(layer_name)
+            if layer_config and layer_config.dq_report.enabled:
+                return True
 
         return False
 

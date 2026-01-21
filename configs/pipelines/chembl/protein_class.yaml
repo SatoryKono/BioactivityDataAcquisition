@@ -32,18 +32,11 @@ dq_config_file: ../../dq/entities/chembl/protein_class.yaml
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Filter rules are loaded from hierarchical config files:
+# Filters loaded from hierarchical config files via convention (ADR-029):
 #   1. configs/filter/_defaults.yaml (global defaults)
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/protein_class.yaml (entity-specific)
-filter_config_file: ../../filter/entities/chembl/protein_class.yaml
-
-# Entity-specific gold filters - exclude deprecated records
-gold_filters:
-  required_fields:
-    - pref_name
-  columns:
-    downgraded: ["0"]
+# Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
 sink:
@@ -64,6 +57,3 @@ sink:
     csv_export:
       path: "data/output/gold/chembl/protein_class"
 
-# No input filter for reference table (full load)
-input_filter:
-  enabled: false

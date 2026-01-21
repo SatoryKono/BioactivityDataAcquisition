@@ -184,6 +184,7 @@ class TestFunctionComplexity:
         "_validate_config": 8,  # PipelineConfig validation logic
         "PipelineConfig": 8,  # PipelineConfig post-init logic
         "_request_with_retry": 18,  # HTTP client retry logic with circuit breaker
+        "_apply_convention_defaults": 17,  # Config loader with many conditional defaults
         # Domain value object validation
         "complete": 7,  # PipelineRun state transition with validation
         "_validate": 8,  # Value object validation with multiple checks
