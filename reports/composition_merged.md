@@ -144,10 +144,13 @@ __all__ = [
 
 
 def bootstrap_quarantine() -> QuarantinePort:
-    """Bootstrap the quarantine service for CLI inspection."""
+    """Bootstrap the quarantine service for CLI inspection.
+
+    Uses centralized quarantine_path from settings (data_dir/quarantine)
+    for unified quarantine storage independent of entity paths.
+    """
     settings = get_settings()
-    base_path = str(settings.silver_path / "common" / "quarantine")
-    return UnifiedQuarantine(base_path=base_path)
+    return UnifiedQuarantine(base_path=str(settings.quarantine_path))
 
 
 def bootstrap_checkpoint(pipeline_name: str) -> CheckpointPort:
@@ -882,6 +885,7 @@ and medallion lifecycle service. Used primarily by CLI operations.
 from __future__ import annotations
 
 from collections.abc import Callable
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.composition.factories.storage import StorageAdapter
@@ -928,14 +932,37 @@ def bootstrap_storage() -> StorageAdapter:
     Returns:
         StorageAdapter configured for the current environment.
     """
+    from datetime import UTC, datetime
+    from uuid import uuid4
+
+    from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
+    from bioetl.domain.types import RunID, RunType
+    from bioetl.domain.value_objects.run_context import RunContext
+    from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
+
     settings = get_settings()
     noop_logger = NoOpLogger()
     noop_metrics = NoOpMetrics()
     noop_tracing = NoOpTracing()
 
+    # ADR-025: Use data/output/ hierarchy for consistency with pipeline configs
+    output_dir = Path(settings.data_dir) / "output"
+
+    # Create metadata services for composite pipelines
+    metadata_writer = MetadataWriter(logger=noop_logger)
+    run_context = RunContext(
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        started_at=datetime.now(UTC),
+        pipeline_name="composite",
+        provider="composite",
+        entity="merged",
+    )
+    metadata_coordinator = MetadataCoordinator(run_context=run_context)
+
     return StorageAdapter(
         bronze_writer=BronzeWriter(
-            base_path=settings.bronze_path,
+            base_path=output_dir / "bronze",  # data/output/bronze
             logger=noop_logger,
             metrics=noop_metrics,
             tracing=noop_tracing,
@@ -943,16 +970,20 @@ def bootstrap_storage() -> StorageAdapter:
             json_path=None,
         ),
         silver_writer=SilverWriter(
-            base_path=settings.silver_path,
+            base_path=output_dir / "silver",  # data/output/silver
             logger=noop_logger,
             tracing=noop_tracing,
             csv_exporter=None,
+            metadata_writer=metadata_writer,
+            metadata_coordinator=metadata_coordinator,
         ),
         gold_writer=GoldWriter(
-            base_path=settings.gold_path,
+            base_path=output_dir / "gold",  # data/output/gold
             logger=noop_logger,
             tracing=noop_tracing,
             csv_exporter=None,
+            metadata_writer=metadata_writer,
+            metadata_coordinator=metadata_coordinator,
         ),
     )
 
@@ -1100,8 +1131,6 @@ def bootstrap_export_service() -> ExportService:
     Returns:
         ExportService configured for the current environment.
     """
-    from pathlib import Path
-
     from bioetl.application.services import ExportService
     from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
@@ -1362,6 +1391,9 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.core.runner import PipelineRunner
+    from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.config import Settings
 
 # Default composite config path
 COMPOSITE_CONFIG_DIR = Path("configs/pipelines/composite")
@@ -1548,6 +1580,9 @@ def bootstrap_composite_pipeline(
         resume=runtime.resume,
     )
 
+    # Create DQ report service for composite (optional)
+    dq_report_service = _create_dq_report_service(logger, settings)
+
     return CompositePipelineRunner(
         config=config,
         runtime=runtime,
@@ -1560,7 +1595,48 @@ def bootstrap_composite_pipeline(
         logger=logger,
         lock=lock,
         run_id=effective_run_id,
+        dq_report_service=dq_report_service,
     )
+
+
+def _create_dq_report_service(
+    logger: LoggerPort,
+    settings: Settings,
+) -> DQReportService | None:
+    """Create DQ report service for composite pipelines.
+
+    Returns None if DQ reporting is not configured.
+
+    Args:
+        logger: Structured logger.
+        settings: Application settings.
+
+    Returns:
+        DQReportService instance or None.
+    """
+    try:
+        from bioetl.application.services.dq_report_service import DQReportService
+        from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
+
+        # Create DQ report writer
+        reports_base_path = Path(settings.data_dir) / "output" / "reports" / "dq"
+        report_writer = DQReportWriter(
+            base_path=reports_base_path,
+            logger=logger,
+        )
+
+        return DQReportService(
+            logger=logger,
+            report_writer=report_writer,
+            # Analyzers are optional - reports will be generated
+            # for layers where analyzers are available
+        )
+    except Exception as e:
+        logger.debug(
+            "dq_report_service_creation_failed",
+            error=str(e),
+        )
+        return None
 
 
 __all__ = [
@@ -3039,17 +3115,24 @@ class DQServicesFactory:
     def create_report_writer(
         base_path: str | Path,
         logger: LoggerPort,
+        flat_structure: bool = False,
     ) -> DQReportWriterPort:
         """Create DQ report writer.
 
         Args:
             base_path: Base path for report storage.
             logger: Structured logger for observability.
+            flat_structure: If True, write reports directly to base_path
+                          with {layer}_{provider}_{entity}_dq_report{ext} naming.
 
         Returns:
             DQReportWriterPort implementation for writing reports to filesystem.
         """
-        return DQReportWriter(base_path=base_path, logger=logger)
+        return DQReportWriter(
+            base_path=base_path,
+            logger=logger,
+            flat_structure=flat_structure,
+        )
 
 
 __all__ = ["DQServicesFactory"]
@@ -3789,6 +3872,7 @@ and assembled with all dependencies in the composition layer.
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 from bioetl.application.core.lock_manager import LockManager
@@ -3806,7 +3890,9 @@ from bioetl.composition.factories.services_factory import (
     BaseServicesFactory,
     ServicesBuilder,
 )
+from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
 from bioetl.domain.locking import LockContextHolder
+from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
 
 if TYPE_CHECKING:
@@ -3816,6 +3902,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.composition.observability import ObservabilityBundle
+    from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig
     from bioetl.domain.ports import (
@@ -4099,6 +4186,7 @@ def build_pipeline_services(
     filter_config: InputFilterConfig | None = None,
     tracer: TracingPort | None = None,
     dq_monitor: DQMonitorPort | None = None,
+    metadata_coordinator: MetadataCoordinator | None = None,
 ) -> PipelineServices:
     """Build PipelineServices from settings.
 
@@ -4111,6 +4199,8 @@ def build_pipeline_services(
         filter_config: Optional input filter configuration
         tracer: Optional tracer (created via bootstrap_tracer())
         dq_monitor: Optional data quality monitor for anomaly detection
+        metadata_coordinator: Optional MetadataCoordinator for centralized
+                            metadata creation across Bronze, Silver, Gold.
 
     Returns:
         Configured PipelineServices instance
@@ -4127,6 +4217,7 @@ def build_pipeline_services(
         pipeline_config=pipeline_config,
         tracer=tracer,
         dq_monitor=dq_monitor,
+        metadata_coordinator=metadata_coordinator,
     )
 
 
@@ -4172,6 +4263,21 @@ def create_pipeline_with_services(
     """
     yaml_config = config or load_pipeline_config(pipeline_name)
 
+    # Extract entity from pipeline_name (e.g., "chembl_publication" → "publication")
+    entity = _extract_entity_type(pipeline_name) or pipeline_name
+
+    # Create RunContext for MetadataCoordinator
+    run_context = RunContext.create(
+        run_id=run_id,
+        run_type=runtime.run_type,
+        started_at=datetime.now(UTC),
+        provider=provider,
+        entity=entity,
+    )
+
+    # Create MetadataCoordinator with run context for centralized metadata
+    metadata_coordinator = MetadataCoordinator(run_context)
+
     services = build_pipeline_services(
         pipeline_name=pipeline_name,
         create_data_source_fn=create_data_source_fn,
@@ -4181,6 +4287,7 @@ def create_pipeline_with_services(
         filter_config=filter_config,
         tracer=tracer,
         dq_monitor=dq_monitor,
+        metadata_coordinator=metadata_coordinator,
     )
 
     domain_config = yaml_config_to_domain(yaml_config)
@@ -4314,6 +4421,11 @@ def assemble_runner(
         tracer=observability.tracer,
     )
 
+    # Extract sink paths for DQ report generation
+    bronze_output_path, silver_output_path, gold_output_path, flat_structure = (
+        _extract_dq_output_paths(yaml_config)
+    )
+
     # Create unified BatchExecutor (replaces PipelineExecutor + RecordProcessor)
     # Safety Guard §4.6: lock validation via lock_validator callback
     batch_executor = ServicesBuilder.create_batch_executor_from_pipeline(
@@ -4325,6 +4437,11 @@ def assemble_runner(
         strict_gold_validation=strict_gold_validation,
         lock_validator=lock_manager.validate,
         tracer=observability.tracer,
+        # DQ report output paths for flat_structure support
+        bronze_output_path=bronze_output_path,
+        silver_output_path=silver_output_path,
+        gold_output_path=gold_output_path,
+        flat_structure=flat_structure,
     )
 
     # Assemble Runner with directly injected services (explicit DI)
@@ -4408,6 +4525,51 @@ def _extract_dq_configs(
     gold_config = _extract_single_dq_config(sink, "gold", GoldSinkConfig)
 
     return bronze_config, silver_config, gold_config
+
+
+def _get_layer_path(config: Any) -> str | None:
+    """Extract path from layer config if available."""
+    return getattr(config, "path", None) if config else None
+
+
+def _has_flat_structure(config: Any) -> bool:
+    """Check if layer config has flat_structure enabled."""
+    return bool(config and getattr(config, "flat_structure", False))
+
+
+def _extract_dq_output_paths(
+    yaml_config: PipelineYamlConfig | None,
+) -> tuple[str | None, str | None, str | None, bool]:
+    """Extract DQ report output paths and flat_structure from YAML config.
+
+    Args:
+        yaml_config: Pipeline YAML configuration with sink settings.
+
+    Returns:
+        Tuple of (bronze_path, silver_path, gold_path, flat_structure).
+        Paths may be None if not configured.
+    """
+    if yaml_config is None:
+        return None, None, None, False
+
+    sink = getattr(yaml_config, "sink", None)
+    if sink is None:
+        return None, None, None, False
+
+    bronze_config = sink.get("bronze")
+    silver_config = sink.get("silver")
+    gold_config = sink.get("gold")
+
+    flat_structure = _has_flat_structure(silver_config) or _has_flat_structure(
+        gold_config
+    )
+
+    return (
+        _get_layer_path(bronze_config),
+        _get_layer_path(silver_config),
+        _get_layer_path(gold_config),
+        flat_structure,
+    )
 
 ================================================================================
 File: runner_factory.py
@@ -4618,6 +4780,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.memory_monitor import MemoryConfig
     from bioetl.application.core.shutdown import ShutdownSignal
+    from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
         CheckpointPort,
@@ -4709,6 +4872,7 @@ class BaseServicesFactory:
         pipeline_config: PipelineYamlConfig,
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
+        metadata_coordinator: MetadataCoordinator | None = None,
     ) -> PipelineServices:
         """Create services with injected data source.
 
@@ -4719,6 +4883,8 @@ class BaseServicesFactory:
             pipeline_config: Pipeline YAML configuration
             tracer: Optional tracer (defaults to NoOpTracing if not provided)
             dq_monitor: Optional data quality monitor for anomaly detection
+            metadata_coordinator: Optional MetadataCoordinator for centralized
+                                metadata creation across Bronze, Silver, Gold.
 
         Returns:
             PipelineServices with all dependencies configured
@@ -4727,12 +4893,16 @@ class BaseServicesFactory:
         metrics = cls._create_metrics(settings)
 
         storage_ctx = StorageFactory.create(
-            settings, pipeline_config, logger, metrics=metrics
+            settings,
+            pipeline_config,
+            logger,
+            metrics=metrics,
+            metadata_coordinator=metadata_coordinator,
         )
 
         lock = cls._create_lock()
         checkpoint = cls._create_checkpoint(storage_ctx)
-        quarantine = cls._create_quarantine(storage_ctx)
+        quarantine = cls._create_quarantine(settings)
 
         # Use provided tracer or fallback to NoOpTracing
         # Tracer should be created via bootstrap_tracer() for consistent configuration
@@ -4776,13 +4946,14 @@ class BaseServicesFactory:
         return LocalCheckpoint(base_path=storage_ctx.checkpoints_path)
 
     @staticmethod
-    def _create_quarantine(storage_ctx: StorageContext) -> QuarantinePort:
-        """Create local quarantine storage."""
-        silver_path = storage_ctx.silver_path
-        if isinstance(silver_path, str):
-            silver_path = Path(silver_path)
+    def _create_quarantine(settings: Settings) -> QuarantinePort:
+        """Create unified quarantine storage independent of entity paths.
+
+        Quarantine storage is centralized at data_dir/quarantine to avoid
+        coupling with Silver path structure and simplify management.
+        """
         return UnifiedQuarantine(
-            base_path=str(silver_path / "common" / "quarantine"),
+            base_path=str(settings.quarantine_path),
         )
 
     @staticmethod
@@ -4790,6 +4961,40 @@ class BaseServicesFactory:
         if settings.metrics_enabled:
             return PrometheusMetrics()
         return NoOpMetrics()
+
+    @staticmethod
+    def _get_output_root(
+        settings: Settings,
+        pipeline_config: PipelineYamlConfig,
+    ) -> Path:
+        """Derive output root from pipeline config or fall back to settings.
+
+        DQ reports should be written alongside the data. This method extracts
+        the output root from the bronze sink path configuration when available.
+
+        For paths like 'data/output/bronze/chembl/activity':
+        - parent = 'data/output/bronze/chembl'
+        - parent.parent = 'data/output/bronze'
+        - parent.parent.parent = 'data/output' (output root)
+
+        Args:
+            settings: Application settings.
+            pipeline_config: Pipeline YAML configuration.
+
+        Returns:
+            Path to the output root directory.
+        """
+        bronze_config = pipeline_config.sink.get("bronze")
+
+        # Use bronze path from config if available and not in test mode
+        if not settings.test_mode and bronze_config and bronze_config.path:
+            bronze_path = Path(bronze_config.path)
+            # Go up 3 levels: bronze/provider/entity -> output root
+            # e.g., data/output/bronze/chembl/activity -> data/output
+            return bronze_path.parent.parent.parent
+
+        # Fall back to settings data_dir
+        return settings.data_dir
 
     @classmethod
     def _create_dq_services(
@@ -4819,10 +5024,14 @@ class BaseServicesFactory:
         silver_analyzer = DQServicesFactory.create_silver_analyzer()
         gold_analyzer = DQServicesFactory.create_gold_analyzer()
 
-        # Create report writer with data directory from settings
+        # DQ reports should be written alongside the data
+        output_root = cls._get_output_root(settings, pipeline_config)
+        # Get flat_structure from sink config (use Silver as primary)
+        flat_structure = cls._get_flat_structure(pipeline_config)
         report_writer = DQServicesFactory.create_report_writer(
-            base_path=settings.data_dir,
+            base_path=output_root,
             logger=logger,
+            flat_structure=flat_structure,
         )
 
         # Create DQ report service
@@ -4860,6 +5069,29 @@ class BaseServicesFactory:
         for layer_name in ("bronze", "silver", "gold"):
             layer_config = sink.get(layer_name)
             if layer_config and layer_config.dq_report.enabled:
+                return True
+
+        return False
+
+    @staticmethod
+    def _get_flat_structure(config: PipelineYamlConfig) -> bool:
+        """Get flat_structure setting from pipeline config.
+
+        Checks Silver and Gold layers for flat_structure setting.
+        Returns True if either layer has flat_structure enabled.
+
+        Args:
+            config: Pipeline YAML configuration.
+
+        Returns:
+            True if flat_structure is enabled for any layer.
+        """
+        sink = config.sink
+
+        # Check Silver and Gold for flat_structure
+        for layer_name in ("silver", "gold"):
+            layer_config = sink.get(layer_name)
+            if layer_config and getattr(layer_config, "flat_structure", False):
                 return True
 
         return False
@@ -5058,6 +5290,11 @@ class ServicesBuilder:
         tracer: TracingPort | None = None,
         memory_monitor: MemoryMonitorPort | None = None,
         memory_config: MemoryConfig | None = None,
+        # DQ report output paths (for flat_structure support)
+        bronze_output_path: str | None = None,
+        silver_output_path: str | None = None,
+        gold_output_path: str | None = None,
+        flat_structure: bool = False,
     ) -> BatchExecutor:
         """Create BatchExecutor from pipeline instance.
 
@@ -5102,6 +5339,11 @@ class ServicesBuilder:
             gold_schema=gold_schema,
             dq_config=pipeline.config.dq,
             table_config=table_config,
+            # DQ report output paths for flat_structure support
+            bronze_output_path=bronze_output_path,
+            silver_output_path=silver_output_path,
+            gold_output_path=gold_output_path,
+            flat_structure=flat_structure,
         )
 
         # Create Gold validator
@@ -5424,6 +5666,9 @@ class StorageAdapter:
         table_name: str,
         records: list[dict[str, Any]],
         primary_keys: list[str] | None = None,
+        *,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
     ) -> None:
         """Write merged records to Silver layer without explicit schema.
 
@@ -5433,14 +5678,25 @@ class StorageAdapter:
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
+            run_id: Optional composite run ID for metadata tracking.
+            sources_used: Optional list of source pipelines used in merge.
         """
-        await self.silver.write_silver_merged(table_name, records, primary_keys)
+        await self.silver.write_silver_merged(
+            table_name,
+            records,
+            primary_keys,
+            run_id=run_id,
+            sources_used=sources_used,
+        )
 
     async def write_gold_merged(
         self,
         table_name: str,
         records: list[dict[str, Any]],
         primary_keys: list[str] | None = None,
+        *,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
     ) -> None:
         """Write merged records to Gold layer without Pandera schema.
 
@@ -5450,8 +5706,16 @@ class StorageAdapter:
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
+            run_id: Optional composite run ID for metadata tracking.
+            sources_used: Optional list of source pipelines used in merge.
         """
-        await self.gold.write_gold_merged(table_name, records, primary_keys)
+        await self.gold.write_gold_merged(
+            table_name,
+            records,
+            primary_keys,
+            run_id=run_id,
+            sources_used=sources_used,
+        )
 
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Silver layer data for a specific table.
@@ -5911,12 +6175,21 @@ class StorageFactory:
 
     @staticmethod
     def _create_csv_exporter_from_config(
-        csv_cfg: Any, logger: LoggerPort
+        csv_cfg: Any,
+        logger: LoggerPort,
+        override_path: Path | None = None,
     ) -> CsvExporter | None:
-        """Create a CsvExporter from configuration if enabled."""
+        """Create a CsvExporter from configuration if enabled.
+
+        Args:
+            csv_cfg: CSV export configuration from YAML.
+            logger: Logger for observability.
+            override_path: If provided, use this path instead of csv_cfg.path.
+                          Used in test mode to respect test isolation.
+        """
         if csv_cfg and csv_cfg.enabled:
             return CsvExporter(
-                base_path=csv_cfg.path,
+                base_path=override_path or csv_cfg.path,
                 logger=logger,
                 delimiter=csv_cfg.delimiter,
                 header=csv_cfg.header,
@@ -5960,7 +6233,8 @@ class StorageFactory:
         """
         save_json = bronze_config.save_json if bronze_config else False
         bronze_save_metadata = bronze_config.save_metadata if bronze_config else False
-        json_path = str(bronze_path.parent / "json") if save_json else None
+        # JSON files are now written alongside zst files (same directory)
+        # No separate json_path needed
 
         # Ensure tracing is always explicitly provided (DI pattern)
         effective_tracing: TracingPort = tracing or NoOpTracing()
@@ -5986,7 +6260,7 @@ class StorageFactory:
                 metrics=metrics,
                 tracing=effective_tracing,
                 save_json=save_json,
-                json_path=json_path,
+                json_path=None,  # JSON is now written alongside zst files
                 metadata_writer=bronze_metadata_writer,
                 save_metadata=bronze_save_metadata,
                 metadata_coordinator=metadata_coordinator,
@@ -6063,23 +6337,28 @@ class StorageFactory:
             gold_path=str(gold_path),
         )
 
+        # In test mode, override CSV export paths to use resolved layer paths
+        # This ensures test isolation by writing to temp directories
         silver_csv_exporter = StorageFactory._create_csv_exporter_from_config(
-            silver_config.csv_export if silver_config else None, logger
+            silver_config.csv_export if silver_config else None,
+            logger,
+            override_path=silver_path if settings.test_mode else None,
         )
         gold_csv_exporter = StorageFactory._create_csv_exporter_from_config(
-            gold_config.csv_export if gold_config else None, logger
+            gold_config.csv_export if gold_config else None,
+            logger,
+            override_path=gold_path if settings.test_mode else None,
         )
 
-        json_path = None
-        if bronze_config and bronze_config.save_json:
-            json_path = str(bronze_path.parent / "json")
+        # JSON files are now written alongside zst files (same directory)
+        save_json = bronze_config.save_json if bronze_config else False
 
         bronze_save_metadata = bronze_config.save_metadata if bronze_config else False
         silver_save_metadata = silver_config.save_metadata if silver_config else False
         gold_save_metadata = gold_config.save_metadata if gold_config else False
         StorageFactory._log_export_status(
             logger,
-            json_path,
+            save_json,
             silver_csv_exporter,
             gold_csv_exporter,
             bronze_save_metadata,
@@ -6125,7 +6404,7 @@ class StorageFactory:
     @staticmethod
     def _log_export_status(
         logger: LoggerPort,
-        json_path: str | None,
+        save_json: bool,
         silver_csv_exporter: CsvExporter | None,
         gold_csv_exporter: CsvExporter | None,
         bronze_save_metadata: bool = False,
@@ -6133,8 +6412,8 @@ class StorageFactory:
         gold_save_metadata: bool = False,
     ) -> None:
         """Log export configuration status."""
-        if json_path:
-            logger.info("JSON export enabled for Bronze layer")
+        if save_json:
+            logger.info("JSON export enabled for Bronze layer (alongside zst files)")
         if bronze_save_metadata:
             logger.info("metadata_export_enabled", layer="bronze")
         if silver_save_metadata:
@@ -8393,6 +8672,7 @@ class MetadataCoordinator:
             dq_summary=dq_summary,
             output=output,
             environment=self._get_environment_metadata(),
+            dq_report_path=input_data.dq_report_path,
         )
 
     def create_gold_metadata(self, input_data: GoldMetadataInput) -> GoldMetadata:

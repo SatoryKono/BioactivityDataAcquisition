@@ -1100,7 +1100,9 @@ class MergeService:
             path=self._config.output_silver_path,
             records=records_merged,
         )
-        await self._write_merged_silver(merged_df)
+        await self._write_merged_silver(
+            merged_df, run_id=run_id, sources_used=sources_used
+        )
 
         # Step 7: Write to Gold via StoragePort
         self._logger.info(
@@ -1108,7 +1110,9 @@ class MergeService:
             path=self._config.output_gold_path,
             records=records_merged,
         )
-        await self._write_merged_gold(merged_df)
+        await self._write_merged_gold(
+            merged_df, run_id=run_id, sources_used=sources_used
+        )
 
         completed_at = datetime.now(tz=UTC)
         duration = (completed_at - started_at).total_seconds()
@@ -1185,31 +1189,55 @@ class MergeService:
             df = df.with_columns([pl.col(col).cast(pl.String) for col in null_cols])
         return df
 
-    async def _write_merged_silver(self, df: pl.DataFrame) -> None:
+    async def _write_merged_silver(
+        self,
+        df: pl.DataFrame,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+    ) -> None:
         """Write merged data to Silver layer via StoragePort.
 
         Args:
             df: Polars DataFrame to write.
+            run_id: Composite run ID for metadata tracking.
+            sources_used: List of source pipelines used in merge.
         """
         # Coerce null columns for Delta Lake compatibility
         df = self._coerce_null_columns(df)
 
         table_name = _path_to_table_name(self._config.output_silver_path)
         records = df.to_dicts()
-        await self._storage.write_silver_merged(table_name, records)
+        await self._storage.write_silver_merged(
+            table_name,
+            records,
+            run_id=run_id,
+            sources_used=sources_used,
+        )
 
-    async def _write_merged_gold(self, df: pl.DataFrame) -> None:
+    async def _write_merged_gold(
+        self,
+        df: pl.DataFrame,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+    ) -> None:
         """Write merged data to Gold layer via StoragePort.
 
         Args:
             df: Polars DataFrame to write.
+            run_id: Composite run ID for metadata tracking.
+            sources_used: List of source pipelines used in merge.
         """
         # Coerce null columns for Delta Lake compatibility
         df = self._coerce_null_columns(df)
 
         table_name = _path_to_table_name(self._config.output_gold_path)
         records = df.to_dicts()
-        await self._storage.write_gold_merged(table_name, records)
+        await self._storage.write_gold_merged(
+            table_name,
+            records,
+            run_id=run_id,
+            sources_used=sources_used,
+        )
 
     def _infer_silver_table(self, pipeline_name: str) -> str:
         """Infer Silver table path from pipeline name."""
@@ -1635,6 +1663,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.composite.merger import MergeService
     from bioetl.application.core.runner import PipelineRunner
+    from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
     from bioetl.domain.composite.result import EnrichmentResult
     from bioetl.domain.ports import LockPort, LoggerPort
@@ -1710,6 +1739,7 @@ class CompositePipelineRunner:
         logger: LoggerPort,
         lock: LockPort,
         run_id: str | None = None,
+        dq_report_service: DQReportService | None = None,
     ) -> None:
         """Initialize composite pipeline runner.
 
@@ -1726,6 +1756,7 @@ class CompositePipelineRunner:
             logger: Structured logger.
             lock: Lock port for distributed locking.
             run_id: Optional run ID (generated if not provided).
+            dq_report_service: Optional DQ report service for generating reports.
         """
         self._config = config
         self._runtime = runtime
@@ -1740,6 +1771,7 @@ class CompositePipelineRunner:
         self._run_id_str = run_id or str(uuid4())
         self._run_id: RunID = cast(RunID, UUID(self._run_id_str))
         self._started_at: datetime | None = None
+        self._dq_report_service = dq_report_service
 
     @property
     def run_id(self) -> str:
@@ -1880,6 +1912,9 @@ class CompositePipelineRunner:
                 records_merged=merge_result.records_merged,
             )
 
+            # Step 6b: Generate DQ reports if service is available
+            await self._generate_dq_reports(merge_result)
+
         # Step 7: Cleanup checkpoint on success
         await self._checkpoint_manager.delete()
 
@@ -1979,6 +2014,57 @@ class CompositePipelineRunner:
                     f"Required enricher '{enricher_name}' failed: "
                     f"{result.error_message or result.status.value}"
                 )
+
+    async def _generate_dq_reports(self, merge_result: MergeResult) -> None:
+        """Generate DQ reports for composite pipeline.
+
+        Args:
+            merge_result: Result of the merge operation.
+        """
+        if self._dq_report_service is None:
+            self._logger.debug(
+                "dq_reports_skipped",
+                reason="DQReportService not configured",
+                composite=self._config.name,
+            )
+            return
+
+        try:
+            from bioetl.application.services.dq_report_service import DQReportContext
+
+            # Create DQ report context for composite
+            context = DQReportContext(
+                run_id=self._run_id_str,
+                pipeline_name=f"composite_{self._config.name}",
+                timestamp=datetime.now(tz=UTC),
+                provider="composite",
+                entity=self._config.name,
+                # Silver context
+                silver_target_table=self._config.merge.output_silver_path,
+                silver_input_count=merge_result.records_from_seed,
+                # Gold context
+                gold_target_table=self._config.merge.output_gold_path,
+                # DQ thresholds from config
+                dq_soft_threshold=self._config.dq.soft_fail_threshold,
+                dq_hard_threshold=self._config.dq.hard_fail_threshold,
+            )
+
+            # Generate reports (if analyzers are configured)
+            await self._dq_report_service.generate_reports(context)
+
+            self._logger.info(
+                "dq_reports_generated",
+                composite=self._config.name,
+                run_id=self._run_id_str,
+            )
+
+        except Exception as e:
+            # DQ report generation failure should not fail the pipeline
+            self._logger.warning(
+                "dq_reports_failed",
+                composite=self._config.name,
+                error=str(e),
+            )
 
 ================================================================================
 File: __init__.py
@@ -3706,6 +3792,21 @@ class BatchExecutor:
             )
         return (0.05, 0.20)
 
+    def _extract_dq_entity(self) -> str:
+        """Extract entity name from silver_table for DQ report naming.
+
+        Ensures consistency with actual table names (e.g., "publication" not "document").
+
+        Returns:
+            Entity name extracted from silver_table or fallback to entity_type.
+        """
+        silver_table = self._config.table_config.silver_table
+        if silver_table and "_" in silver_table:
+            return silver_table.split("_", 1)[1]
+        if silver_table and "." in silver_table:
+            return silver_table.split(".")[-1]
+        return silver_table or self._config.entity_type
+
     def get_dq_context(self) -> DQReportContext | None:
         """Build DQ report context from accumulated data.
 
@@ -3732,16 +3833,26 @@ class BatchExecutor:
         primary_keys = list(self._config.table_config.primary_keys)
         soft_threshold, hard_threshold = self._get_dq_thresholds()
 
+        # Get current date for Bronze DQ report filename
+        current_date_str = datetime.now(UTC).strftime("%Y-%m-%d")
+        dq_entity = self._extract_dq_entity()
+
         return DQReportContext(
             run_id=str(self._context.run_id),
             pipeline_name=self._config.pipeline_name,
             timestamp=datetime.now(UTC),
+            # Provider and entity for DQ report naming
+            # Use extracted entity from silver_table for consistency
+            provider=self._config.provider,
+            entity=dq_entity,
             # Bronze context
             bronze_records=self._bronze_records_for_dq or None,
             bronze_batch_id=self._source_batch_ids[-1]
             if self._source_batch_ids
             else None,
             bronze_source_file=self._last_bronze_path,
+            bronze_output_path=self._config.bronze_output_path,
+            bronze_date_str=current_date_str,
             # Silver context
             silver_data=silver_data,
             silver_target_table=self._config.table_config.silver_table,
@@ -3749,12 +3860,16 @@ class BatchExecutor:
             silver_primary_keys=primary_keys or None,
             silver_input_count=self.records_fetched,
             silver_quarantined_count=self.records_quarantined,
+            silver_output_path=self._config.silver_output_path,
             # Gold context
             gold_data=gold_data,
             gold_target_table=self._config.table_config.gold_table,
+            gold_output_path=self._config.gold_output_path,
             # DQ thresholds from config (use defaults if not configured)
             dq_soft_threshold=soft_threshold,
             dq_hard_threshold=hard_threshold,
+            # Flat structure flag for DQ reports
+            flat_structure=self._config.flat_structure,
         )
 
 ================================================================================
@@ -5326,6 +5441,11 @@ class RecordProcessorConfig:
     dq_config: DQConfig | None = None
     table_config: TableConfig = field(default_factory=TableConfig)
     memory_config: MemoryConfig = field(default_factory=MemoryConfig)
+    # DQ report output paths (for flat_structure support)
+    bronze_output_path: str | None = None
+    silver_output_path: str | None = None
+    gold_output_path: str | None = None
+    flat_structure: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -18381,6 +18501,12 @@ from bioetl.application.services.vacuum_service import (
     VacuumService,
 )
 
+# Re-export from domain for backward compatibility
+from bioetl.domain.services.dq_metrics_calculator import (
+    DQMetricsCalculator,
+    DQMetricsInput,
+)
+
 __all__ = [
     "BronzeCleanupService",
     "CheckpointInfo",
@@ -18389,6 +18515,8 @@ __all__ = [
     "ClearResult",
     "ColumnInfo",
     "ConfigService",
+    "DQMetricsCalculator",
+    "DQMetricsInput",
     "DQReportContext",
     "DQReportResult",
     "DQReportService",
@@ -20963,6 +21091,27 @@ class SilverDQAnalyzer:
 __all__ = ["SilverDQAnalyzer"]
 
 ================================================================================
+File: dq_metrics_calculator.py
+Path: services\dq_metrics_calculator.py
+================================================================================
+"""Re-export DQMetricsCalculator from domain layer.
+
+This module re-exports DQMetricsCalculator and DQMetricsInput from the domain
+layer for backward compatibility. The actual implementation has been moved to
+bioetl.domain.services.dq_metrics_calculator to fix architecture violations
+(infrastructure layer cannot import from application layer).
+
+New code should import directly from bioetl.domain.services.
+"""
+
+from bioetl.domain.services.dq_metrics_calculator import (
+    DQMetricsCalculator,
+    DQMetricsInput,
+)
+
+__all__ = ["DQMetricsCalculator", "DQMetricsInput"]
+
+================================================================================
 File: dq_report_service.py
 Path: services\dq_report_service.py
 ================================================================================
@@ -21048,30 +21197,44 @@ class DQReportContext:
         run_id: Pipeline run identifier.
         pipeline_name: Name of the pipeline.
         timestamp: Report generation timestamp (UTC).
+        provider: Data provider name (e.g., 'chembl').
+        entity: Entity type name (e.g., 'activity').
         bronze_source_file: Path to Bronze source file (for Bronze report).
         bronze_batch_id: Bronze batch identifier.
         bronze_records: Raw Bronze records (bytes iterator, consumed only once).
+        bronze_output_path: Base path for Bronze DQ reports (optional).
         silver_data: Silver layer DataFrame (Polars).
         silver_target_table: Silver target table path.
         silver_source_batch_ids: List of Bronze batch IDs processed.
         silver_primary_keys: Primary key columns.
         silver_input_count: Total records before transformation.
         silver_quarantined_count: Quarantined records count.
+        silver_output_path: Base path for Silver DQ reports (optional).
         gold_data: Gold layer DataFrame (Polars).
         gold_target_table: Gold target table path.
         gold_required_fields: Required fields for completeness check.
+        gold_business_rules: Business rules for Gold validation.
+        gold_baseline_stats: Baseline statistics for drift detection.
+        gold_output_path: Base path for Gold DQ reports (optional).
         dq_soft_threshold: Soft fail threshold for DQ checks.
         dq_hard_threshold: Hard fail threshold for DQ checks.
+        flat_structure: Whether to use flat file structure for DQ reports.
     """
 
     run_id: str
     pipeline_name: str
     timestamp: datetime
 
+    # Provider and entity for filename generation
+    provider: str | None = None
+    entity: str | None = None
+
     # Bronze context
     bronze_source_file: str | None = None
     bronze_batch_id: str | None = None
     bronze_records: list[bytes] | None = None
+    bronze_output_path: str | None = None
+    bronze_date_str: str | None = None  # Date string (YYYY-MM-DD) for filename
 
     # Silver context
     silver_data: Any | None = None  # pl.DataFrame
@@ -21081,6 +21244,7 @@ class DQReportContext:
     silver_input_count: int | None = None
     silver_quarantined_count: int = 0
     silver_previous_schema: dict[str, str] | None = None
+    silver_output_path: str | None = None
 
     # Gold context
     gold_data: Any | None = None  # pl.DataFrame
@@ -21088,10 +21252,14 @@ class DQReportContext:
     gold_required_fields: list[str] | None = None
     gold_business_rules: list[dict[str, Any]] | None = None
     gold_baseline_stats: dict[str, Any] | None = None
+    gold_output_path: str | None = None
 
     # DQ thresholds
     dq_soft_threshold: float = 0.05
     dq_hard_threshold: float = 0.20
+
+    # Flat structure flag for DQ reports
+    flat_structure: bool = False
 
 
 class DQReportService:
@@ -21291,12 +21459,20 @@ class DQReportService:
                 timestamp=context.timestamp,
             )
 
-            # Write report
-            output_path = Path(config.output_path) if config.output_path else None
+            # Write report - use context output_path if provided, else config
+            output_path: Path | None = None
+            if context.bronze_output_path:
+                output_path = Path(context.bronze_output_path)
+            elif config.output_path:
+                output_path = Path(config.output_path)
+
             path = await self._report_writer.write_bronze_report(
                 report=report,
                 output_path=output_path,
                 format=config.get_format_enum(),
+                provider=context.provider,
+                entity=context.entity,
+                date_str=context.bronze_date_str,
             )
 
             self._logger.debug(
@@ -21364,12 +21540,19 @@ class DQReportService:
                 previous_schema=context.silver_previous_schema,
             )
 
-            # Write report
-            output_path = Path(config.output_path) if config.output_path else None
+            # Write report - use context output_path if provided, else config
+            output_path: Path | None = None
+            if context.silver_output_path:
+                output_path = Path(context.silver_output_path)
+            elif config.output_path:
+                output_path = Path(config.output_path)
+
             path = await self._report_writer.write_silver_report(
                 report=report,
                 output_path=output_path,
                 format=config.get_format_enum(),
+                provider=context.provider,
+                entity=context.entity,
             )
 
             self._logger.debug(
@@ -21433,12 +21616,19 @@ class DQReportService:
                 baseline_stats=context.gold_baseline_stats,
             )
 
-            # Write report
-            output_path = Path(config.output_path) if config.output_path else None
+            # Write report - use context output_path if provided, else config
+            output_path: Path | None = None
+            if context.gold_output_path:
+                output_path = Path(context.gold_output_path)
+            elif config.output_path:
+                output_path = Path(config.output_path)
+
             path = await self._report_writer.write_gold_report(
                 report=report,
                 output_path=output_path,
                 format=config.get_format_enum(),
+                provider=context.provider,
+                entity=context.entity,
             )
 
             self._logger.debug(

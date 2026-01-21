@@ -11465,6 +11465,11 @@ class SilverMetadata(BaseModel):
         default_factory=SilverOutputMetadata, description="Output metrics"
     )
     environment: EnvironmentMetadata = Field(description="Environment information")
+    # Cross-reference to DQ report
+    dq_report_path: str | None = Field(
+        default=None,
+        description="Path to corresponding DQ report file (if generated)",
+    )
 
 
 class GoldMetadata(BaseModel):
@@ -12881,6 +12886,10 @@ class DQReportWriterPort(Protocol):
         report: BronzeDQReport,
         output_path: Path | None = None,
         format: DQReportFormat | None = None,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
+        date_str: str | None = None,
     ) -> Path:
         """Write Bronze DQ report to file.
 
@@ -12888,6 +12897,9 @@ class DQReportWriterPort(Protocol):
             report: Bronze DQ report to write.
             output_path: Output path (None = alongside data).
             format: Output format (None = JSON).
+            provider: Provider name for filename generation.
+            entity: Entity name for filename generation.
+            date_str: Date string for path generation (YYYY-MM-DD).
 
         Returns:
             Path to the written report file.
@@ -12899,6 +12911,9 @@ class DQReportWriterPort(Protocol):
         report: SilverDQReport,
         output_path: Path | None = None,
         format: DQReportFormat | None = None,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> Path:
         """Write Silver DQ report to file.
 
@@ -12906,6 +12921,8 @@ class DQReportWriterPort(Protocol):
             report: Silver DQ report to write.
             output_path: Output path (None = alongside data).
             format: Output format (None = JSON).
+            provider: Provider name for path generation.
+            entity: Entity name for path generation.
 
         Returns:
             Path to the written report file.
@@ -12917,6 +12934,9 @@ class DQReportWriterPort(Protocol):
         report: GoldDQReport,
         output_path: Path | None = None,
         format: DQReportFormat | None = None,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> Path:
         """Write Gold DQ report to file.
 
@@ -12924,6 +12944,8 @@ class DQReportWriterPort(Protocol):
             report: Gold DQ report to write.
             output_path: Output path (None = alongside data).
             format: Output format (None = JSON).
+            provider: Provider name for path generation.
+            entity: Entity name for path generation.
 
         Returns:
             Path to the written report file.
@@ -13717,13 +13739,19 @@ class MetadataWriterPort(Protocol):
         self,
         base_path: str | Path,
         metadata: BronzeMetadata,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """Write Bronze layer metadata sidecar file.
 
         Args:
             base_path: Base path where Bronze data is stored.
-                      Metadata will be written to {base_path}/_metadata.yaml
+                      Metadata will be written to {base_path}/{provider}_{entity}_metadata.yaml
+                      or {base_path}/_metadata.yaml if provider/entity not provided.
             metadata: Bronze metadata model with lineage and source info.
+            provider: Provider name (e.g., 'chembl') for filename generation.
+            entity: Entity type (e.g., 'activity') for filename generation.
 
         Returns:
             Absolute path to the written metadata file.
@@ -13740,16 +13768,20 @@ class MetadataWriterPort(Protocol):
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """Write Silver layer metadata sidecar file.
 
         Args:
             base_path: Base path where Silver Delta table is stored.
-                      Metadata will be written to {base_path}/_metadata.yaml
+                      Metadata will be written to {base_path}/{provider}_{entity}_metadata.yaml
+                      or {base_path}/_metadata.yaml if provider/entity not provided.
             metadata: Silver metadata model with lineage, DQ metrics, and Delta info.
-            table_name: Table name for flat_structure naming pattern.
-            flat_structure: If True, write as {table_name}_metadata.yaml instead of
-                          _metadata.yaml in a subdirectory.
+            table_name: Table name for flat_structure naming pattern (deprecated).
+            flat_structure: If True and provider/entity provided, uses new naming.
+            provider: Provider name (e.g., 'chembl') for filename generation.
+            entity: Entity type (e.g., 'activity') for filename generation.
 
         Returns:
             Absolute path to the written metadata file.
@@ -13767,16 +13799,20 @@ class MetadataWriterPort(Protocol):
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """Write Gold layer metadata sidecar file.
 
         Args:
             base_path: Base path where Gold Delta/Parquet table is stored.
-                      Metadata will be written to {base_path}/_metadata.yaml
+                      Metadata will be written to {base_path}/{provider}_{entity}_metadata.yaml
+                      or {base_path}/_metadata.yaml if provider/entity not provided.
             metadata: Gold metadata model with lineage, schema contract, and SCD info.
-            table_name: Table name for flat_structure naming pattern.
-            flat_structure: If True, write as {table_name}_metadata.yaml instead of
-                          _metadata.yaml in a subdirectory.
+            table_name: Table name for flat_structure naming pattern (deprecated).
+            flat_structure: If True and provider/entity provided, uses new naming.
+            provider: Provider name (e.g., 'chembl') for filename generation.
+            entity: Entity type (e.g., 'activity') for filename generation.
 
         Returns:
             Absolute path to the written metadata file.
@@ -13860,6 +13896,7 @@ class SilverMetadataInput:
         version_after: Delta table version after write.
         transform_version: Optional semver version of transform applied.
         transform_steps: Optional list of transform step names applied.
+        dq_report_path: Optional path to generated DQ report for cross-reference.
     """
 
     table_path: str
@@ -13871,6 +13908,7 @@ class SilverMetadataInput:
     version_after: int | None = None
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
+    dq_report_path: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -14361,12 +14399,17 @@ class NoOpMetadataWriter:
         self,
         base_path: str | Path,  # noqa: ARG002
         metadata: BronzeMetadata,  # noqa: ARG002
+        *,
+        provider: str | None = None,  # noqa: ARG002
+        entity: str | None = None,  # noqa: ARG002
     ) -> str:
         """Write Bronze metadata (no-op).
 
         Args:
             base_path: Base path (ignored).
             metadata: Metadata (ignored).
+            provider: Provider name (ignored).
+            entity: Entity type (ignored).
 
         Returns:
             Empty string.
@@ -14381,6 +14424,8 @@ class NoOpMetadataWriter:
         *,
         table_name: str | None = None,  # noqa: ARG002
         flat_structure: bool = False,  # noqa: ARG002
+        provider: str | None = None,  # noqa: ARG002
+        entity: str | None = None,  # noqa: ARG002
     ) -> str:
         """Write Silver metadata (no-op).
 
@@ -14389,6 +14434,8 @@ class NoOpMetadataWriter:
             metadata: Metadata (ignored).
             table_name: Table name (ignored).
             flat_structure: Flat structure flag (ignored).
+            provider: Provider name (ignored).
+            entity: Entity type (ignored).
 
         Returns:
             Empty string.
@@ -14403,6 +14450,8 @@ class NoOpMetadataWriter:
         *,
         table_name: str | None = None,  # noqa: ARG002
         flat_structure: bool = False,  # noqa: ARG002
+        provider: str | None = None,  # noqa: ARG002
+        entity: str | None = None,  # noqa: ARG002
     ) -> str:
         """Write Gold metadata (no-op).
 
@@ -14411,6 +14460,8 @@ class NoOpMetadataWriter:
             metadata: Metadata (ignored).
             table_name: Table name (ignored).
             flat_structure: Flat structure flag (ignored).
+            provider: Provider name (ignored).
+            entity: Entity type (ignored).
 
         Returns:
             Empty string.
@@ -15920,6 +15971,9 @@ class StoragePort(Protocol):
         table_name: str,
         records: list[dict[str, Any]],
         primary_keys: list[str] | None = None,
+        *,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
     ) -> None:
         """Write merged records to Silver layer without explicit schema.
 
@@ -15930,6 +15984,8 @@ class StoragePort(Protocol):
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
+            run_id: Optional composite run ID for metadata tracking.
+            sources_used: Optional list of source pipelines used in merge.
 
         Note:
             This method bypasses strict schema validation since merged data
@@ -15942,6 +15998,9 @@ class StoragePort(Protocol):
         table_name: str,
         records: list[dict[str, Any]],
         primary_keys: list[str] | None = None,
+        *,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
     ) -> None:
         """Write merged records to Gold layer without Pandera schema.
 
@@ -15952,6 +16011,8 @@ class StoragePort(Protocol):
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
+            run_id: Optional composite run ID for metadata tracking.
+            sources_used: Optional list of source pipelines used in merge.
 
         Note:
             This method bypasses Pandera validation since merged data
@@ -17645,9 +17706,10 @@ class ChemblPublicationSchema(PublicationBaseSchema):
 File: publication_similarity.py
 Path: schemas\chembl\publication_similarity.py
 ================================================================================
-"""Pandera schema for ChEMBL Document Similarity entity.
+"""Pandera schema for ChEMBL Publication Similarity entity.
 
-Aligned with RULES.md v5.0 and ChEMBL 34 schema.
+Aligned with RULES.md v5.12 and ChEMBL 34 schema.
+Renamed from DocumentSimilaritySchema per ADR-024 (Entity Naming Unification).
 """
 
 from __future__ import annotations
@@ -17658,8 +17720,8 @@ from pandera.typing import Series
 from bioetl.domain.schemas.base import ETLRecordSchema
 
 
-class DocumentSimilaritySchema(ETLRecordSchema):
-    """Document Similarity validation schema for Silver layer."""
+class PublicationSimilaritySchema(ETLRecordSchema):
+    """Publication Similarity validation schema for Silver layer."""
 
     # === Primary Key ===
     sim_id: Series[int] = pa.Field(nullable=False, description="Primary key.")
@@ -17717,13 +17779,14 @@ class DocumentSimilaritySchema(ETLRecordSchema):
 File: publication_term.py
 Path: schemas\chembl\publication_term.py
 ================================================================================
-"""Pandera schema for ChEMBL Document Term entity.
+"""Pandera schema for ChEMBL Publication Term entity.
 
-Aligned with RULES.md v5.0 and ChEMBL 34 schema.
+Aligned with RULES.md v5.12 and ChEMBL 34 schema.
+Renamed from DocumentTermSchema per ADR-024 (Entity Naming Unification).
 
-DocumentTerms are derived entities extracted from Document records by
-flattening the 1:M relationship between documents and their associated
-terms (MeSH headings, keywords, concepts).
+PublicationTerms are derived entities extracted from Publication (ChEMBL Document)
+records by flattening the 1:M relationship between publications and their
+associated terms (MeSH headings, keywords, concepts).
 """
 
 from __future__ import annotations
@@ -17734,8 +17797,8 @@ from pandera.typing import Series
 from bioetl.domain.schemas.base import ETLRecordSchema
 
 
-class DocumentTermSchema(ETLRecordSchema):
-    """Document Term validation schema for Silver layer.
+class PublicationTermSchema(ETLRecordSchema):
+    """Publication Term validation schema for Silver layer.
 
     Composite Key: (document_chembl_id, term_type, term)
     Entity ID is generated as SHA256 hash of the composite key.
@@ -20435,6 +20498,10 @@ from bioetl.domain.services.data_normalization_config import DataNormalizationCo
 from bioetl.domain.services.data_normalization_service import (
     DefaultDataNormalizationService,
 )
+from bioetl.domain.services.dq_metrics_calculator import (
+    DQMetricsCalculator,
+    DQMetricsInput,
+)
 from bioetl.domain.services.dq_serializer import DQReportSerializer
 from bioetl.domain.services.identity_service import IdentityService
 from bioetl.domain.services.normalization_config import NormalizationConfig
@@ -20447,6 +20514,8 @@ DataNormalizationService = DefaultDataNormalizationService
 
 __all__ = [
     "ActivityAggregator",
+    "DQMetricsCalculator",
+    "DQMetricsInput",
     "DQReportSerializer",
     "DataNormalizationConfig",
     "DataNormalizationService",
@@ -21208,6 +21277,135 @@ class DefaultDataNormalizationService:
         if len(parts) == 2:
             return _DATE_FULL_FMT.format(year, parts[1], monthrange(year, parts[1])[1])
         return _DATE_FULL_FMT.format(year, 12, 31)
+
+================================================================================
+File: dq_metrics_calculator.py
+Path: services\dq_metrics_calculator.py
+================================================================================
+"""Centralized DQ metrics calculation for Silver layer.
+
+Single Source of Truth for DQ metrics used by both:
+- SilverWriter (for _metadata.yaml)
+- SilverDQAnalyzer (for DQ Report)
+
+Implements REQ-DQ-001.
+
+This is pure domain logic (no I/O) per RULES.md §1.1.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any
+
+from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics, SchemaDriftInfo
+
+
+@dataclass(frozen=True, slots=True)
+class DQMetricsInput:
+    """Input for DQ metrics calculation.
+
+    Attributes:
+        records: List of record dictionaries to analyze.
+        existing_schema_fields: Set of field names from existing table schema.
+            Used for schema drift detection. None if table doesn't exist.
+        quarantined_count: Number of records that failed validation.
+        validation_errors: List of validation error messages.
+    """
+
+    records: list[dict[str, Any]]
+    existing_schema_fields: set[str] | None = None
+    quarantined_count: int = 0
+    validation_errors: list[str] | None = None
+
+
+class DQMetricsCalculator:
+    """Calculator for Silver DQ metrics.
+
+    Provides unified calculation logic used by both
+    metadata writer and DQ report generator.
+
+    This class is stateless and thread-safe.
+    """
+
+    def calculate(self, input_data: DQMetricsInput) -> BatchDQMetrics:
+        """Calculate DQ metrics from records.
+
+        Args:
+            input_data: Records and context for calculation.
+
+        Returns:
+            BatchDQMetrics with computed statistics including:
+            - Column statistics (null rate, unique count, min/max/mean)
+            - Schema drift info
+            - Error/warning counts
+        """
+        schema_drift = self._detect_schema_drift(
+            input_data.records,
+            input_data.existing_schema_fields,
+        )
+
+        return BatchDQMetrics.from_records(
+            records=input_data.records,
+            error_count=input_data.quarantined_count,
+            warning_count=0,
+            validation_errors=input_data.validation_errors,
+            schema_drift=schema_drift,
+        )
+
+    def _detect_schema_drift(
+        self,
+        records: list[dict[str, Any]],
+        existing_fields: set[str] | None,
+    ) -> SchemaDriftInfo | None:
+        """Detect schema drift between existing and incoming schema.
+
+        Args:
+            records: Incoming records to check.
+            existing_fields: Field names from existing table schema.
+
+        Returns:
+            SchemaDriftInfo if drift detected, None otherwise.
+        """
+        if not existing_fields or not records:
+            return None
+
+        incoming_fields = set(records[0].keys())
+        new_fields = incoming_fields - existing_fields
+        missing_fields = existing_fields - incoming_fields
+
+        if not new_fields and not missing_fields:
+            return None
+
+        status = self._determine_drift_status(new_fields, missing_fields)
+        return SchemaDriftInfo(
+            status=status,
+            new_fields=tuple(sorted(new_fields)),
+            missing_fields=tuple(sorted(missing_fields)),
+        )
+
+    def _determine_drift_status(
+        self,
+        new_fields: set[str],
+        missing_fields: set[str],
+    ) -> str:
+        """Determine drift severity status.
+
+        Drift severity levels:
+        - critical: Missing required fields (non-underscore prefix)
+        - warn: More than 3 new fields
+        - info: Minor schema changes
+        """
+        # Critical: missing required fields (business fields without underscore prefix)
+        has_critical_missing = any(not f.startswith("_") for f in missing_fields)
+        if has_critical_missing:
+            return "critical"
+        if len(new_fields) > 3:
+            return "warn"
+        return "info"
+
+
+__all__ = ["DQMetricsCalculator", "DQMetricsInput"]
 
 ================================================================================
 File: dq_serializer.py
@@ -27412,6 +27610,7 @@ class SilverDQReport:
         checks: Dictionary of check type to result.
         thresholds: DQ threshold configuration.
         summary: Report summary.
+        metadata_path: Path to corresponding _metadata.yaml file (if generated).
     """
 
     layer: MedallionLayer
@@ -27423,6 +27622,8 @@ class SilverDQReport:
     checks: dict[str, Any]
     thresholds: DQThresholds
     summary: DQReportSummary
+    # Cross-reference to metadata
+    metadata_path: str | None = None
 
     def __post_init__(self) -> None:
         """Validate layer and convert lists."""

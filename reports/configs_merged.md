@@ -2,7 +2,7 @@
 File: _defaults.yaml
 Path: dq\_defaults.yaml
 ================================================================================
-# configs/dq/_defaults.yaml
+ # configs/dq/_defaults.yaml
 # Global DQ defaults for all BioETL pipelines
 # RULES.md §3.1.2: DQ Thresholds
 #
@@ -1988,7 +1988,7 @@ input_filter:
   source_path: "data/input/publication.csv"
   column_name: "document_chembl_id"
   filter_field: "document_chembl_id"
-  batch_size: 20
+  batch_size: 100
 
 # -----------------------------------------------------------------------------
 # Gold Filters
@@ -2730,8 +2730,8 @@ Path: naming_exceptions.yaml
 ================================================================================
 # Naming Convention Exceptions
 # This file documents allowed exceptions to the naming conventions in RULES.md §2.
-# Version: 2.0
-# Last Updated: 2026-01-06
+# Version: 2.1
+# Last Updated: 2026-01-21
 
 # Documentation files that are allowed to use UPPER_CASE names.
 # These are conventional files recognized by GitHub and standard tooling.
@@ -2762,14 +2762,13 @@ class_suffix_exceptions:
     - Target
     - TargetComponent
     - Molecule
-    # Canonical names (v2.0)
-    - ChemblPublication  # Replaces Document
-    - PubchemMolecule    # Replaces Compound
-    - UniprotTarget      # Replaces Protein
-    # Deprecated aliases (backward compatibility, v2.0)
-    - Document           # → ChemblPublication (deprecated)
-    - Compound           # → PubchemMolecule (deprecated)
-    - Protein            # → UniprotTarget (deprecated)
+    # Canonical names (v2.0 - ADR-024)
+    - ChemblPublication  # Replaces Document (no alias - direct migration)
+    - PubchemMolecule    # Replaces Compound (no alias - direct migration)
+    - UniprotTarget      # Replaces Protein (no alias - direct migration)
+    # NOTE: Deprecated aliases (Document, Compound, Protein) were NEVER implemented.
+    # Per ADR-024 update (2026-01-21), the codebase was migrated directly to
+    # canonical names without backward compatibility shims.
     # Other publication entities
     - Publication
 
@@ -3180,6 +3179,10 @@ sink:
     # Save _metadata.yaml sidecar file (disabled by default)
     save_metadata: true
 
+    # DQ report configuration for Bronze layer
+    dq_report:
+      enabled: true
+
     # Metadata configuration (when save_metadata: true)
     metadata:
        lineage:
@@ -3227,6 +3230,10 @@ sink:
 
     # Save _metadata.yaml sidecar file (disabled by default)
     save_metadata: true
+
+    # DQ report configuration for Silver layer
+    dq_report:
+      enabled: true
 
     # Metadata configuration (when save_metadata: true)
     metadata:
@@ -3290,6 +3297,10 @@ sink:
 
     # Save _metadata.yaml sidecar file (disabled by default)
     save_metadata: true
+
+    # DQ report configuration for Gold layer
+    dq_report:
+      enabled: true
 
     # Metadata configuration (when save_metadata: true)
     metadata:
@@ -3564,12 +3575,14 @@ sink:
     partition_by: ["type"]
     sort_by:
       columns: ["assay_param_id"]
+      ascending: true
     csv_export:
       path: "data/output/silver/chembl/assay_parameters"
   gold:
     path: "data/output/gold/chembl/assay_parameters"
     sort_by:
       columns: ["assay_param_id"]
+      ascending: true
     csv_export:
       path: "data/output/gold/chembl/assay_parameters"
 
@@ -3622,12 +3635,14 @@ sink:
     primary_key: ["cell_chembl_id"]
     sort_by:
       columns: ["cell_chembl_id"]
+      ascending: true
     csv_export:
       path: "data/output/silver/chembl/cell_line"
   gold:
     path: "data/output/gold/chembl/cell_line"
     sort_by:
       columns: ["cell_chembl_id", "cell_name"]
+      ascending: true
     csv_export:
       path: "data/output/gold/chembl/cell_line"
 
@@ -3683,12 +3698,14 @@ sink:
     primary_key: ["record_id"]
     sort_by:
       columns: ["record_id"]
+      ascending: true
     csv_export:
       path: "data/output/silver/chembl/compound_record"
   gold:
     path: "data/output/gold/chembl/compound_record"
     sort_by:
       columns: ["molecule_chembl_id", "document_chembl_id", "record_id"]
+      ascending: true
     csv_export:
       path: "data/output/gold/chembl/compound_record"
 
@@ -3802,12 +3819,14 @@ sink:
     partition_by: ["molecule_type"]
     sort_by:
       columns: ["molecule_chembl_id"]
+      ascending: true
     csv_export:
       path: "data/output/silver/chembl/molecule"
   gold:
     path: "data/output/gold/chembl/molecule"
     sort_by:
       columns: ["molecule_chembl_id"]
+      ascending: true
     csv_export:
       path: "data/output/gold/chembl/molecule"
 
@@ -3866,12 +3885,14 @@ sink:
     partition_by: ["class_level"]
     sort_by:
       columns: ["protein_class_id"]
+      ascending: true
     csv_export:
       path: "data/output/silver/chembl/protein_class"
   gold:
     path: "data/output/gold/chembl/protein_class"
     sort_by:
       columns: ["class_level", "sort_order", "protein_class_id"]
+      ascending: true
     csv_export:
       path: "data/output/gold/chembl/protein_class"
 
@@ -3917,31 +3938,28 @@ dq_config_file: ../../dq/entities/chembl/publication.yaml
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
+# Note: dq_report.enabled inherited from _base.yaml for all layers
 sink:
   bronze:
     path: "data/output/bronze/chembl/publication"
-    dq_report:
-      enabled: true
   silver:
     path: "data/output/silver/chembl/publication"
     primary_key: ["document_chembl_id"]
     partition_by: ["doc_type"]
     sort_by:
       columns: ["document_chembl_id"]
+      ascending: true
     csv_export:
       path: "data/output/silver/chembl/publication"
-    dq_report:
-      enabled: true
-    # flat_structure: true  # Enable for flat path layout (Delta directly in path)
+    flat_structure: true  # Delta directly in path, files named {table}_*.ext
   gold:
     path: "data/output/gold/chembl/publication"
     sort_by:
       columns: ["document_chembl_id"]
+      ascending: true
     csv_export:
       path: "data/output/gold/chembl/publication"
-    dq_report:
-      enabled: true
-    # flat_structure: true  # Enable for flat path layout (Delta directly in path)
+    flat_structure: true  # Delta directly in path, files named {table}_*.ext
 
 
 ================================================================================
@@ -3994,12 +4012,14 @@ sink:
     partition_by: []  # No good partition key
     sort_by:
       columns: ["sim_id"]
+      ascending: true
     csv_export:
       path: "data/output/silver/chembl/document_similarity"
   gold:
     path: "data/output/gold/chembl/document_similarity"
     sort_by:
       columns: ["sim_id"]
+      ascending: true
     csv_export:
       path: "data/output/gold/chembl/document_similarity"
 
@@ -4057,12 +4077,14 @@ sink:
     partition_by: ["term_type"]
     sort_by:
       columns: ["entity_id"]
+      ascending: true
     csv_export:
       path: "data/output/silver/chembl/document_term"
   gold:
     path: "data/output/gold/chembl/document_term"
     sort_by:
       columns: ["entity_id"]
+      ascending: true
     csv_export:
       path: "data/output/gold/chembl/document_term"
 
@@ -4147,14 +4169,16 @@ sink:
     partition_by: ["target_type"]
     sort_by:
       columns: ["target_chembl_id"]
+      ascending: true
     csv_export:
       path: "data/output/silver/chembl/target"
   gold:
     path: "data/output/gold/chembl/target"
     sort_by:
       columns: ["target_chembl_id", "pref_name"]
+      ascending: true
     csv_export:
-      path: "data/output/2gold/chembl/target"
+      path: "data/output/gold/chembl/target"
 
 
 ================================================================================
@@ -4206,12 +4230,14 @@ sink:
     partition_by: ["organism"]
     sort_by:
       columns: ["component_id"]
+      ascending: true
     csv_export:
       path: "data/output/silver/chembl/target_component"
   gold:
     path: "data/output/gold/chembl/target_component"
     sort_by:
       columns: ["component_id"]
+      ascending: true
     csv_export:
       path: "data/output/gold/chembl/target_component"
 
@@ -4255,7 +4281,8 @@ composite:
       - doi                 # Digital Object Identifier
       - pmid                # PubMed ID
       - title               # Publication title (for fallback joins)
-    silver_table: silver/chembl/publication/chembl_publication
+    # Note: chembl_publication uses flat_structure, so table is in path directly
+    silver_table: silver/chembl/publication
 
   # ---------------------------------------------------------------------------
   # Enricher Pipelines
@@ -4271,7 +4298,7 @@ composite:
         - title
       required: true     # Composite fails if this enricher fails
       timeout_seconds: 900
-      silver_table: silver/crossref/crossref_publication
+      silver_table: silver/crossref/publication
 
     # OpenAlex: Academic concepts and institutions
     # OPTIONAL: Failure logged, composite continues
@@ -4282,7 +4309,7 @@ composite:
       required: true
       filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
       timeout_seconds: 600
-      silver_table: silver/openalex/publication/openalex_publication
+      silver_table: silver/openalex/publication
 
     # PubMed: MeSH terms and medical metadata
     # OPTIONAL: Only processes records with pmid
@@ -4293,7 +4320,7 @@ composite:
       required: true
       filter_condition: "pmid IS NOT NULL"
       timeout_seconds: 600
-      silver_table: silver/pubmed/publication/pubmed_publication
+      silver_table: silver/pubmed/publication
 
     # Semantic Scholar: AI/ML embeddings and TLDR
     # OPTIONAL: Higher rate limits, ok to skip
@@ -4305,7 +4332,7 @@ composite:
       filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
       timeout_seconds: 1200
       fallback_strategy: skip  # Skip on failure (high rate limits)
-      silver_table: silver/semanticscholar/publication/semanticscholar_publication
+      silver_table: silver/semanticscholar/publication
 
   # ---------------------------------------------------------------------------
   # Merge Configuration
@@ -4341,8 +4368,8 @@ composite:
 
     # Output paths
     output:
-      silver: silver/composite/publication
-      gold: gold/publication_enriched
+      silver: data/output/silver/composite/publication
+      gold: data/output/gold/composite/publication
 
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
@@ -4460,20 +4487,22 @@ dq_config_file: ../../dq/entities/crossref/publication.yaml
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze/crossref/"
+    path: "data/output/bronze/crossref/publication"
   silver:
-    path: "data/output/silver/crossref/"
+    path: "data/output/silver/crossref/publication"
     primary_key: ["doi"]
     sort_by:
       columns: ["doi"]
+      ascending: true
     csv_export:
-      path: "data/output/silver/crossref/"
+      path: "data/output/silver/crossref/publication"
   gold:
-    path: "data/output/gold/crossref/"
+    path: "data/output/gold/crossref/publication"
     sort_by:
       columns: ["doi"]
+      ascending: true
     csv_export:
-      path: "data/output/gold/crossref/"
+      path: "data/output/gold/crossref/publication"
 
 
 ================================================================================
@@ -4524,6 +4553,8 @@ dq_config_file: ../../dq/entities/openalex/publication.yaml
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
+# Note: flat_structure=true means Delta data is written directly to path
+# without table_name subdirectory, matching chembl_publication pattern
 sink:
   bronze:
     path: "data/output/bronze/openalex/publication"
@@ -4533,14 +4564,18 @@ sink:
     partition_by: ["year"]
     sort_by:
       columns: ["openalex_id"]
+      ascending: true
     csv_export:
       path: "data/output/silver/openalex/publication"
+    flat_structure: true
   gold:
     path: "data/output/gold/openalex/publication"
     sort_by:
       columns: ["openalex_id"]
+      ascending: true
     csv_export:
       path: "data/output/gold/openalex/publication"
+    flat_structure: true
 
 
 ================================================================================
@@ -4652,12 +4687,14 @@ sink:
     partition_by: ["batch_date"]
     sort_by:
       columns: ["cid"]
+      ascending: true
     csv_export:
       path: "data/output/silver/pubchem/compound"
   gold:
     path: "data/output/gold/pubchem/compound"
     sort_by:
       columns: ["cid"]
+      ascending: true
     csv_export:
       path: "data/output/gold/pubchem/compound"
 
@@ -4700,11 +4737,24 @@ source:
 filter_config_file: ../../filter/entities/pubmed/publications.yaml
 
 # -----------------------------------------------------------------------------
-# Sink Overrides (only non-convention values)
+# Sink Overrides
 # -----------------------------------------------------------------------------
+# Note: flat_structure=true means Delta data is written directly to path
+# without table_name subdirectory, matching chembl_publication pattern
 sink:
+  bronze:
+    path: "data/output/bronze/pubmed/publication"
   silver:
+    path: "data/output/silver/pubmed/publication"
     partition_by: ["pub_year"]
+    csv_export:
+      path: "data/output/silver/pubmed/publication"
+    flat_structure: true
+  gold:
+    path: "data/output/gold/pubmed/publication"
+    csv_export:
+      path: "data/output/gold/pubmed/publication"
+    flat_structure: true
 
 ================================================================================
 File: publication.yaml
@@ -4749,6 +4799,8 @@ dq_config_file: ../../dq/entities/semanticscholar/publication.yaml
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink configuration
+# Note: flat_structure=true means Delta data is written directly to path
+# without table_name subdirectory, matching chembl_publication pattern
 sink:
   bronze:
     path: "data/output/bronze/semanticscholar/publication"
@@ -4758,14 +4810,18 @@ sink:
     partition_by: ["year"]
     sort_by:
       columns: ["paper_id"]
+      ascending: true
     csv_export:
       path: "data/output/silver/semanticscholar/publication"
+    flat_structure: true
   gold:
     path: "data/output/gold/semanticscholar/publication"
     sort_by:
       columns: ["paper_id"]
+      ascending: true
     csv_export:
       path: "data/output/gold/semanticscholar/publication"
+    flat_structure: true
 
 
 ================================================================================
@@ -4843,12 +4899,14 @@ sink:
     partition_by: []  # No partitioning - small dataset
     sort_by:
       columns: ["target_chembl_id"]
+      ascending: true
     csv_export:
       path: "data/output/silver/uniprot/idmapping"
   gold:
     path: "data/output/gold/uniprot/idmapping"
     sort_by:
       columns: ["target_chembl_id"]
+      ascending: true
     csv_export:
       path: "data/output/gold/uniprot/idmapping"
 
