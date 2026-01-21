@@ -20,7 +20,10 @@ class TestLocalCheckpoint:
         assert cp.base_path == tmp_path
 
     async def test_save_creates_file(self, tmp_path):
-        """Test save creates checkpoint file."""
+        """Test save creates checkpoint file.
+
+        Flat structure: {base_path}/{pipeline}.json
+        """
         cp = LocalCheckpoint(base_path=tmp_path)
 
         pipeline = "test_pipeline"
@@ -28,15 +31,17 @@ class TestLocalCheckpoint:
 
         await cp.save(pipeline, run_id, {"key": "value"})
 
-        checkpoint_file = tmp_path / "checkpoints" / "test_pipeline" / "latest.json"
+        # Flat structure: checkpoint file directly in base_path
+        checkpoint_file = tmp_path / "test_pipeline.json"
         assert checkpoint_file.exists()
 
     async def test_load_returns_correct_data(self, tmp_path):
-        """Test that load returns the correct data."""
-        # Create checkpoint file
-        checkpoint_dir = tmp_path / "checkpoints" / "test_pipeline"
-        checkpoint_dir.mkdir(parents=True)
-        checkpoint_file = checkpoint_dir / "latest.json"
+        """Test that load returns the correct data.
+
+        Flat structure: {base_path}/{pipeline}.json
+        """
+        # Create checkpoint file (flat structure)
+        checkpoint_file = tmp_path / "test_pipeline.json"
         checkpoint_file.write_text(
             json.dumps(
                 {
@@ -82,11 +87,12 @@ class TestLocalCheckpoint:
         assert loaded_metadata == metadata
 
     async def test_delete_removes_file(self, tmp_path):
-        """Test delete removes checkpoint file."""
-        # Create checkpoint file
-        checkpoint_dir = tmp_path / "checkpoints" / "test_pipeline"
-        checkpoint_dir.mkdir(parents=True)
-        checkpoint_file = checkpoint_dir / "latest.json"
+        """Test delete removes checkpoint file.
+
+        Flat structure: {base_path}/{pipeline}.json
+        """
+        # Create checkpoint file (flat structure)
+        checkpoint_file = tmp_path / "test_pipeline.json"
         checkpoint_file.write_text(json.dumps({"pipeline": "test"}))
 
         cp = LocalCheckpoint(base_path=tmp_path)
@@ -103,11 +109,12 @@ class TestLocalCheckpoint:
         await cp.delete("nonexistent_pipeline")
 
     async def test_exists_returns_true(self, tmp_path):
-        """Test exists returns True for existing checkpoint."""
-        # Create checkpoint file
-        checkpoint_dir = tmp_path / "checkpoints" / "test_pipeline"
-        checkpoint_dir.mkdir(parents=True)
-        checkpoint_file = checkpoint_dir / "latest.json"
+        """Test exists returns True for existing checkpoint.
+
+        Flat structure: {base_path}/{pipeline}.json
+        """
+        # Create checkpoint file (flat structure)
+        checkpoint_file = tmp_path / "test_pipeline.json"
         checkpoint_file.write_text("{}")
 
         cp = LocalCheckpoint(base_path=tmp_path)
@@ -125,12 +132,14 @@ class TestLocalCheckpoint:
         assert result is False
 
     async def test_list_all_pipelines(self, tmp_path):
-        """Test list_all returns all pipelines with checkpoints."""
-        # Create checkpoint directories
+        """Test list_all returns all pipelines with checkpoints.
+
+        Flat structure: {base_path}/{pipeline}.json
+        """
+        # Create checkpoint files (flat structure)
         for name in ["pipeline_a", "pipeline_b", "pipeline_c"]:
-            checkpoint_dir = tmp_path / "checkpoints" / name
-            checkpoint_dir.mkdir(parents=True)
-            (checkpoint_dir / "latest.json").write_text("{}")
+            checkpoint_file = tmp_path / f"{name}.json"
+            checkpoint_file.write_text("{}")
 
         cp = LocalCheckpoint(base_path=tmp_path)
 
@@ -153,7 +162,10 @@ class TestLocalCheckpoint:
         # Should complete without error
 
     async def test_atomic_write(self, tmp_path):
-        """Test that writes are atomic (temp file + rename)."""
+        """Test that writes are atomic (temp file + rename).
+
+        Flat structure: {base_path}/{pipeline}.json
+        """
         cp = LocalCheckpoint(base_path=tmp_path)
 
         pipeline = "test_pipeline"
@@ -170,7 +182,6 @@ class TestLocalCheckpoint:
         _, metadata = result
         assert metadata == {"version": 2}
 
-        # No temp files should remain
-        checkpoint_dir = tmp_path / "checkpoints" / "test_pipeline"
-        temp_files = list(checkpoint_dir.glob(".checkpoint_*.tmp"))
+        # No temp files should remain (in base_path since it's flat structure)
+        temp_files = list(tmp_path.glob(".checkpoint_*.tmp"))
         assert len(temp_files) == 0
