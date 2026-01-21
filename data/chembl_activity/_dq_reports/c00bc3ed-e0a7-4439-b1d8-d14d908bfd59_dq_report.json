@@ -1,0 +1,61 @@
+{
+  "checks": {
+    "anomaly_detection": {
+      "anomalies_detected": [],
+      "cold_start_days": 30,
+      "cold_start_mode": true,
+      "current_day": 0,
+      "metrics_monitored": [],
+      "status": "pass"
+    },
+    "business_rules": {
+      "rules": [],
+      "rules_evaluated": 0,
+      "rules_failed": 0,
+      "rules_passed": 0,
+      "status": "pass"
+    },
+    "completeness": {
+      "minimum_threshold": 0.9,
+      "overall_completeness_score": 1.0,
+      "required_fields": {},
+      "status": "pass"
+    },
+    "record_count": {
+      "delta_from_last_run": 0,
+      "input_records": null,
+      "output_records": null,
+      "quarantine_rate": null,
+      "quarantined_records": null,
+      "status": "pass",
+      "value": 2
+    },
+    "referential_integrity": {
+      "foreign_keys": {},
+      "status": "pass"
+    },
+    "statistical_profile": {
+      "baseline_period_days": 30,
+      "metrics": {},
+      "status": "pass"
+    }
+  },
+  "data_freshness": {
+    "freshness_lag_hours": 0.0,
+    "freshness_lag_seconds": 0.0,
+    "max_updated_at": null,
+    "status": "pass"
+  },
+  "layer": "gold",
+  "pipeline": "chembl_activity",
+  "run_id": "c00bc3ed-e0a7-4439-b1d8-d14d908bfd59",
+  "summary": {
+    "failed": 0,
+    "overall_status": "pass",
+    "passed": 6,
+    "total_checks": 6,
+    "warnings": 0
+  },
+  "target_table": "chembl_activity",
+  "timestamp": "2026-01-21T13:36:35.559532+00:00"
+}
