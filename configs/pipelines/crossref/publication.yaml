@@ -43,12 +43,14 @@ sink:
     primary_key: ["doi"]
     sort_by:
       columns: ["doi"]
+      ascending: true
     csv_export:
       path: "data/output/silver/crossref/"
   gold:
     path: "data/output/gold/crossref/"
     sort_by:
       columns: ["doi"]
+      ascending: true
     csv_export:
       path: "data/output/gold/crossref/"
 
