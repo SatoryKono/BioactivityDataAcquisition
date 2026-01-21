@@ -35,11 +35,10 @@ dq_config_file: ../../dq/entities/chembl/publication.yaml
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
+# Note: dq_report.enabled inherited from _base.yaml for all layers
 sink:
   bronze:
     path: "data/output/bronze/chembl/publication"
-    dq_report:
-      enabled: true
   silver:
     path: "data/output/silver/chembl/publication"
     primary_key: ["document_chembl_id"]
@@ -49,8 +48,6 @@ sink:
       ascending: true
     csv_export:
       path: "data/output/silver/chembl/publication"
-    dq_report:
-      enabled: true
     # flat_structure: true  # Enable for flat path layout (Delta directly in path)
   gold:
     path: "data/output/gold/chembl/publication"
@@ -59,7 +56,5 @@ sink:
       ascending: true
     csv_export:
       path: "data/output/gold/chembl/publication"
-    dq_report:
-      enabled: true
     # flat_structure: true  # Enable for flat path layout (Delta directly in path)
 

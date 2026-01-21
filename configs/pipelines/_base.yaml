@@ -253,6 +253,10 @@ sink:
     # Save _metadata.yaml sidecar file (disabled by default)
     save_metadata: true
 
+    # DQ report configuration for Bronze layer
+    dq_report:
+      enabled: true
+
     # Metadata configuration (when save_metadata: true)
     metadata:
        lineage:
@@ -300,6 +304,10 @@ sink:
 
     # Save _metadata.yaml sidecar file (disabled by default)
     save_metadata: true
+
+    # DQ report configuration for Silver layer
+    dq_report:
+      enabled: true
 
     # Metadata configuration (when save_metadata: true)
     metadata:
@@ -363,6 +371,10 @@ sink:
 
     # Save _metadata.yaml sidecar file (disabled by default)
     save_metadata: true
+
+    # DQ report configuration for Gold layer
+    dq_report:
+      enabled: true
 
     # Metadata configuration (when save_metadata: true)
     metadata:
