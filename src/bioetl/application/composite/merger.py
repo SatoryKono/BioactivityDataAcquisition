@@ -135,7 +135,9 @@ class MergeService:
             path=self._config.output_silver_path,
             records=records_merged,
         )
-        await self._write_merged_silver(merged_df, run_id=run_id, sources_used=sources_used)
+        await self._write_merged_silver(
+            merged_df, run_id=run_id, sources_used=sources_used
+        )
 
         # Step 7: Write to Gold via StoragePort
         self._logger.info(
@@ -143,7 +145,9 @@ class MergeService:
             path=self._config.output_gold_path,
             records=records_merged,
         )
-        await self._write_merged_gold(merged_df, run_id=run_id, sources_used=sources_used)
+        await self._write_merged_gold(
+            merged_df, run_id=run_id, sources_used=sources_used
+        )
 
         completed_at = datetime.now(tz=UTC)
         duration = (completed_at - started_at).total_seconds()
