@@ -534,6 +534,11 @@ class SilverMetadata(BaseModel):
         default_factory=SilverOutputMetadata, description="Output metrics"
     )
     environment: EnvironmentMetadata = Field(description="Environment information")
+    # Cross-reference to DQ report
+    dq_report_path: str | None = Field(
+        default=None,
+        description="Path to corresponding DQ report file (if generated)",
+    )
 
 
 class GoldMetadata(BaseModel):

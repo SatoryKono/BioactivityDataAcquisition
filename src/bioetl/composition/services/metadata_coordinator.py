@@ -295,6 +295,7 @@ class MetadataCoordinator:
             dq_summary=dq_summary,
             output=output,
             environment=self._get_environment_metadata(),
+            dq_report_path=input_data.dq_report_path,
         )
 
     def create_gold_metadata(self, input_data: GoldMetadataInput) -> GoldMetadata:

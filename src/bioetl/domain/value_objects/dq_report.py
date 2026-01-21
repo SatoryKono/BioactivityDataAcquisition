@@ -549,6 +549,7 @@ class SilverDQReport:
         checks: Dictionary of check type to result.
         thresholds: DQ threshold configuration.
         summary: Report summary.
+        metadata_path: Path to corresponding _metadata.yaml file (if generated).
     """
 
     layer: MedallionLayer
@@ -560,6 +561,8 @@ class SilverDQReport:
     checks: dict[str, Any]
     thresholds: DQThresholds
     summary: DQReportSummary
+    # Cross-reference to metadata
+    metadata_path: str | None = None
 
     def __post_init__(self) -> None:
         """Validate layer and convert lists."""

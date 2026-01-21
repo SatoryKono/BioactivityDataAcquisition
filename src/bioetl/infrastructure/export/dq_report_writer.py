@@ -108,16 +108,22 @@ class DQReportWriter:
         extension = self._get_extension(format)
 
         if output_path is None:
+            # Normalize target_table: replace '.' with '/' for directory structure
+            # This ensures 'chembl.activity' becomes 'chembl/activity'
+            normalized_table = report.target_table.replace(".", "/")
+
             if self._flat_structure:
                 # Flat: {base_path}/{table_name}_dq_report{ext}
+                # For flat structure, use underscore instead of slash
+                flat_table_name = report.target_table.replace(".", "_")
                 output_path = (
-                    self._base_path / f"{report.target_table}_dq_report{extension}"
+                    self._base_path / f"{flat_table_name}_dq_report{extension}"
                 )
             else:
                 # Nested: {base_path}/{table_name}/_dq_reports/{run_id}_dq_report{ext}
                 output_path = (
                     self._base_path
-                    / report.target_table
+                    / normalized_table
                     / self.DQ_REPORTS_DIR
                     / f"{report.run_id}_dq_report{extension}"
                 )
@@ -148,16 +154,22 @@ class DQReportWriter:
         extension = self._get_extension(format)
 
         if output_path is None:
+            # Normalize target_table: replace '.' with '/' for directory structure
+            # This ensures 'chembl.activity' becomes 'chembl/activity'
+            normalized_table = report.target_table.replace(".", "/")
+
             if self._flat_structure:
                 # Flat: {base_path}/{table_name}_dq_report{ext}
+                # For flat structure, use underscore instead of slash
+                flat_table_name = report.target_table.replace(".", "_")
                 output_path = (
-                    self._base_path / f"{report.target_table}_dq_report{extension}"
+                    self._base_path / f"{flat_table_name}_dq_report{extension}"
                 )
             else:
                 # Nested: {base_path}/{table_name}/_dq_reports/{run_id}_dq_report{ext}
                 output_path = (
                     self._base_path
-                    / report.target_table
+                    / normalized_table
                     / self.DQ_REPORTS_DIR
                     / f"{report.run_id}_dq_report{extension}"
                 )
