@@ -105,15 +105,16 @@ def add_health_server_options(cmd: click.Command) -> click.Command:
     return cmd
 
 
-def echo_health_server_info(enabled: bool, port: int) -> None:
+def echo_health_server_info(enabled: bool, port: int, host: str = "127.0.0.1") -> None:
     """Output health server status information.
 
     Args:
         enabled: Whether health server is enabled.
         port: Port the server is listening on.
+        host: Host the server is bound to (default: 127.0.0.1 for security).
     """
     if enabled:
-        click.echo(f"Health server: http://0.0.0.0:{port}/health")
+        click.echo(f"Health server: http://{host}:{port}/health")
 
 
 __all__ = [
