@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.11 (Int→Float Coercion Documentation), 2026-01-20* 
+*Версия: 5.12 (ADR Registry Update), 2026-01-21* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -44,7 +44,7 @@
 **Паттерн**: Слоистая архитектура с инверсией зависимостей (Ports & Adapters). 
  
 ### 1.1. Слои и Контракты
-См. также [ADR-005](02-architecture/decisions/ADR-005-composition-layer-separation.md) для Composition Layer и [ADR-020](02-architecture/decisions/ADR-020-basepipeline-decomposition.md) для BasePipeline архитектуры.
+См. также [ADR-005](02-architecture/decisions/ADR-005-composition-layer-separation.md) для Composition Layer, [ADR-020](02-architecture/decisions/ADR-020-basepipeline-decomposition.md) для BasePipeline, [ADR-021](02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md) для DDD Aggregates и [ADR-026](02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) для Composite Pipeline.
 
 - **Infrastructure (Инфраструктура/Адаптеры)**: Реализация взаимодействия с внешним миром (HTTP, БД, файловая система).
 - **Application (Приложение/Пайплайны)**: Оркестрация потоков данных. Определяет *когда* и *в каком порядке* вызываются порты.
@@ -263,10 +263,12 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 - **Конфигурация**: `load_strategy: incremental | full` в YAML пайплайна. 
 - **Hybrid**: Incremental ежедневно + Full еженедельно для обеспечения консистентности. 
  
-### 2.8. Генерация ID Сущности (Entity ID) 
-| Сценарий | Стратегия ID | 
-|----------|--------------| 
-| Источник предоставляет стабильный ID | Использовать как есть (`chembl_id`, `pubchem_cid`) | 
+### 2.8. Генерация ID Сущности (Entity ID)
+См. [ADR-023](02-architecture/decisions/ADR-023-entity-type-patterns.md) и [ADR-024](02-architecture/decisions/ADR-024-entity-naming-unification.md) для паттернов типов и именования сущностей.
+
+| Сценарий | Стратегия ID |
+|----------|--------------|
+| Источник предоставляет стабильный ID | Использовать как есть (`chembl_id`, `pubchem_cid`) |
 | ID отсутствует | **Content Hash**: `sha256(provider + canonical_json_dumps(record))` | 
  
 - **Алгоритм**: `sha256(provider + canonical_json_dumps(record))` 
@@ -318,7 +320,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 - **Observability**: Метрики `circuit_breaker_state` (0=Closed, 1=Half-Open, 2=Open), `trips_total`. Алерт при зависании в Open > 10 мин. 
  
 ### 3.2. Наблюдаемость (Observability)
-См. [ADR-017](02-architecture/decisions/ADR-017-observability-architecture.md).
+См. [ADR-017](02-architecture/decisions/ADR-017-observability-architecture.md) и [ADR-022](02-architecture/decisions/ADR-022-tracing-noop.md) для NoOp Tracing.
 
 - **Correlation ID**: `run_id` обязателен во всех логах, метриках и блокировках. 
 - **Retention**: Логи хранятся 30 дней, метрики — 90 дней. 
@@ -1005,8 +1007,10 @@ make run-local    # запуск сэмплового пайплайна на ф
 | >20% DQ errors | Batch fail | Проверить источник; возможно API вернул ошибку в теле ответа | 
 | Lock timeout | Alert "Lock expired" | Проверить зомби-процессы; `make release-lock PIPELINE=...` | 
  
-## Приложение D: Схема Конфигурации Пайплайна 
-```yaml 
+## Приложение D: Схема Конфигурации Пайплайна
+См. [ADR-025](02-architecture/decisions/ADR-025-pipeline-config-unification.md) для унификации конфигурации, [ADR-027](02-architecture/decisions/ADR-027-dq-rules-externalization.md) для DQ rules и [ADR-028](02-architecture/decisions/ADR-028-filter-rules-externalization.md) для filter rules.
+
+```yaml
 # configs/pipelines/chembl_activity.yaml 
 pipeline: 
   name: chembl_activity 
@@ -1118,8 +1122,17 @@ fields:
 | [ADR-018](02-architecture/decisions/ADR-018-gold-strict-validation.md) | Gold Strict Validation | Accepted | 2025-12-28 |
 | [ADR-019](02-architecture/decisions/ADR-019-observability-port-enforcement.md) | Observability Port Enforcement | Accepted | 2025-12-26 |
 | [ADR-020](02-architecture/decisions/ADR-020-basepipeline-decomposition.md) | BasePipeline Decomposition | Accepted | 2025-12-16 |
+| [ADR-021](02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md) | DDD Aggregates Adoption | Accepted | 2025-12-29 |
+| [ADR-022](02-architecture/decisions/ADR-022-tracing-noop.md) | NoOp Tracing for Local-Only | Accepted | 2025-12-30 |
+| [ADR-023](02-architecture/decisions/ADR-023-entity-type-patterns.md) | Entity Type Patterns | Accepted | 2026-01-06 |
+| [ADR-024](02-architecture/decisions/ADR-024-entity-naming-unification.md) | Entity Naming Unification | Accepted | 2026-01-06 |
+| [ADR-025](02-architecture/decisions/ADR-025-pipeline-config-unification.md) | Pipeline Config Unification | Accepted | 2026-01-19 |
+| [ADR-026](02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) | Composite Pipeline Pattern | Accepted | 2026-01-15 |
+| [ADR-027](02-architecture/decisions/ADR-027-dq-rules-externalization.md) | DQ Rules Externalization | Accepted | 2026-01-19 |
+| [ADR-028](02-architecture/decisions/ADR-028-filter-rules-externalization.md) | Filter Rules Externalization | Accepted | 2026-01-20 |
 
 ## История Изменений (Changelog)
+- **5.12** (2026-01-21): ADR Registry Update. Добавлены ADR-021..028 в реестр (Приложение F). Добавлены inline ссылки на новые ADR в соответствующие секции (§1.1, §2.8, §3.2, App D).
 - **5.11** (2026-01-20): Int→Float Coercion Documentation. Добавлена §2.6 "Int→Float Coercion для Nullable Integers" — документация паттерна Gold-схем с `Series[float]` + `coerce=True` для nullable integer полей (34 occurrences). Это осознанное архитектурное решение для обработки nullable integers в Pandas/Polars.
 - **5.10** (2026-01-06): TTL/Heartbeat Values Correction. Исправлены значения Lock TTL (90s) и Heartbeat (30s) в §3.3 для соответствия реализации в `domain/config.py:238,241`. Синхронизация всех документов.
 - **5.9** (2026-01-01): TTL/Heartbeat Sync Fix. Добавлены явные значения Lock TTL и Heartbeat в §3.3.
