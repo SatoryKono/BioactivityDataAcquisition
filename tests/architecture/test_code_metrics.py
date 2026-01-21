@@ -73,16 +73,16 @@ class TestFileSizeLimits:
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
         "gold_analyzer.py": 830,  # 827 LOC - Gold layer analysis with DQ rules
         "silver_analyzer.py": 590,  # 570 LOC - Silver layer analysis with validation
-        "dq_report_service.py": 520,  # 514 LOC - DQ report service with extracted helpers for CC reduction
+        "dq_report_service.py": 565,  # 561 LOC - DQ report service with provider/entity path support for flat_structure
         # Composition layer exemptions
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "entrypoints.py": 750,  # 736 LOC - pipeline entrypoints (run_pipeline expanded + services + export)
         "registration.py": 720,  # 705 LOC - provider registration with data source creators (OpenAlex + SemanticScholar + UniProt IDMapping)
         "storage_adapter.py": 640,  # 633 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
         # Consolidated factory files (v5.2)
-        "pipeline_factory.py": 650,  # 643 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory
+        "pipeline_factory.py": 695,  # 692 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
-        "services_factory.py": 630,  # 623 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory
+        "services_factory.py": 665,  # 660 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure support
         # Infrastructure layer exemptions
         "silver_writer.py": 1175,  # 1168 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage + provider/entity params
         "gold_writer.py": 955,  # 948 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage + provider/entity params
@@ -519,7 +519,7 @@ class TestClassSize:
         "FileAuditAdapter": 330,  # 324 lines - File-based AuditPort implementation with async I/O
         # DQ analyzers (comprehensive data quality analysis)
         "DQReportSerializer": 410,  # 403 lines - DQ report serialization with multiple formats (increased for CC reduction)
-        "DQReportService": 385,  # 379 lines - DQ report orchestration with extracted helpers for CC reduction
+        "DQReportService": 410,  # 407 lines - DQ report orchestration with provider/entity path support for flat_structure
         "GoldDQAnalyzer": 780,  # 779 lines - Gold layer DQ analysis with business rules
         "SilverDQAnalyzer": 540,  # 521 lines - Silver layer DQ analysis with schema drift
         # Domain services
