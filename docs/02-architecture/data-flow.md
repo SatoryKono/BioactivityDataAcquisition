@@ -71,7 +71,7 @@ flowchart LR
 ```
 data/                              # Local-Only (current)
 ├── bronze/
-│   └── v1/{provider}/{entity}/{date}/
+│   └── {provider}/{entity}/{date}/
 │       ├── batch_001.jsonl.zst
 │       └── _manifest.json
 │
