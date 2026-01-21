@@ -80,9 +80,9 @@ class TestFileSizeLimits:
         "registration.py": 720,  # 705 LOC - provider registration with data source creators (OpenAlex + SemanticScholar + UniProt IDMapping)
         "storage_adapter.py": 640,  # 633 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
         # Consolidated factory files (v5.2)
-        "pipeline_factory.py": 695,  # 692 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths
+        "pipeline_factory.py": 720,  # 716 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths + MetadataCoordinator creation
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
-        "services_factory.py": 665,  # 660 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure support
+        "services_factory.py": 670,  # 668 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param
         # Infrastructure layer exemptions
         "silver_writer.py": 1175,  # 1168 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage + provider/entity params
         "gold_writer.py": 955,  # 948 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage + provider/entity params
