@@ -1,6 +1,6 @@
 # Pipeline Review Checklist
 
-*Synced with RULES.md v5.11 (2026-01-05)*
+*Synced with RULES.md v5.12 (2026-01-05)*
 
 Use this checklist when reviewing new or modified pipelines.
 

@@ -1,6 +1,6 @@
 # ChEMBL Assay Pipeline Specification
 
-*Version 1.1.0 | Aligned with RULES.md v5.11*
+*Version 1.1.0 | Aligned with RULES.md v5.12*
 
 ---
 

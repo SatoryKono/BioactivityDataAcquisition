@@ -1,12 +1,12 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.11 | Last updated: 2026-01-19*
+*Synced with RULES.md v5.12 | Last updated: 2026-01-21*
 
-> **Documentation Audit Completed:** 2026-01-14
-> - All audit files consolidated in `archived/audits/`
-> - Removed duplicate CHANGELOG.md from docs/
-> - Quick reference moved to `quick-reference/`
-> - See: [archived/audits/](archived/audits/) for historical audits
+> **Documentation Audit Completed:** 2026-01-21
+> - RULES.md updated to v5.12: ADR-021..028 added to registry with inline references
+> - REQUIREMENTS.md updated to v1.4: correct count 156 (was 139)
+> - Added ADR-028-filter-rules-externalization to 00-map.md
+> - See: [archived/audits/sync-audit-2026-01-21.md](archived/audits/sync-audit-2026-01-21.md) for details
 
 ## Quick Links
 
@@ -68,10 +68,10 @@ docs/
 │   ├── data-layers.md           # Bronze/Silver/Gold layer details
 │   ├── observability-layers.md  # Observability architecture
 │   ├── diagrams.md              # Mermaid diagrams collection
-│   ├── decisions/               # ADR-001..027 (27 records)
+│   ├── decisions/               # ADR-001..028 (28 records)
 │   └── diagrams/                # 34 Mermaid diagram files + render_diagrams.py
 │
-├── 03-guides/                   # How-to guides (12 guides)
+├── 03-guides/                   # How-to guides (13 guides)
 │   ├── quick-start.md           # Quick start guide
 │   ├── getting-started.md       # Getting started
 │   ├── running-pipelines.md     # Running pipelines
@@ -178,6 +178,7 @@ docs/
 | [ADR-025: Pipeline Config Unification](02-architecture/decisions/ADR-025-pipeline-config-unification.md) | Pipeline config unification   | -        |
 | [ADR-026: Composite Pipeline Pattern](02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) | Composite pipeline pattern    | -        |
 | [ADR-027: DQ Rules Externalization](02-architecture/decisions/ADR-027-dq-rules-externalization.md) | Hierarchical DQ configuration | §3.1.2   |
+| [ADR-028: Filter Rules Externalization](02-architecture/decisions/ADR-028-filter-rules-externalization.md) | Hierarchical filter configuration | App D   |
 
 ### Data Management
 
@@ -353,18 +354,18 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2026-01-20   | v5.11 (Int→Float Coercion)   |
-| REQUIREMENTS.md          | 2025-12-27   | v1.2 (127 requirements)      |
+| RULES.md                 | 2026-01-21   | v5.12 (ADR Registry Update)  |
+| REQUIREMENTS.md          | 2026-01-21   | v1.4 (156 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
-| 00-map.md                | 2026-01-14   | v6.6 Fixed broken links      |
-| rules-summary.md         | 2026-01-06   | v5.10 Synced                 |
-| 03-guides/               | 2026-01-20   | Consolidated (12 guides)     |
-| ADR-001..027             | 2026-01-19   | All 27 ADRs documented       |
+| 00-map.md                | 2026-01-21   | v6.8 RULES v5.12, REQ v1.4   |
+| rules-summary.md         | 2026-01-20   | v5.11 Synced                 |
+| 03-guides/               | 2026-01-20   | Consolidated (13 guides)     |
+| ADR-001..028             | 2026-01-21   | All 28 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
-| archived/audits/         | 2026-01-14   | Historical audit files       |
+| archived/audits/         | 2026-01-21   | Historical audit files       |
 | 02-architecture/diagrams/| 2025-12-31   | 34 Mermaid diagrams          |
 
 ---
 
-*Last updated: 2026-01-19. Documentation audit completed.*
+*Last updated: 2026-01-21. Documentation sync audit completed.*
