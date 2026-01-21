@@ -263,7 +263,10 @@ def _create_dq_report_service(
 
         # Create DQ report writer
         reports_base_path = Path(settings.data_dir) / "output" / "reports" / "dq"
-        report_writer = DQReportWriter(base_path=reports_base_path)
+        report_writer = DQReportWriter(
+            base_path=reports_base_path,
+            logger=logger,
+        )
 
         return DQReportService(
             logger=logger,

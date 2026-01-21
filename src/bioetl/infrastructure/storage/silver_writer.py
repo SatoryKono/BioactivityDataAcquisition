@@ -1120,6 +1120,7 @@ class SilverWriter(BaseDeltaWriter):
         from platform import python_version
 
         from bioetl.domain.models.metadata import (
+            DeltaMetrics,
             DQSummary,
             EnvironmentMetadata,
             LineageMetadata,
@@ -1128,7 +1129,6 @@ class SilverWriter(BaseDeltaWriter):
             RunTypeEnum,
             SilverMetadata,
             SilverOutputMetadata,
-            TransformMetadata,
         )
 
         # Get Delta version after write
@@ -1149,34 +1149,34 @@ class SilverWriter(BaseDeltaWriter):
             entity=entity_name,
         )
 
-        # Build lineage with sources_used
+        # Build lineage with sources_used via source_tables
         lineage = LineageMetadata(
             bronze_paths=[],
-            sources=sources_used or [],
+            transform_version=self._transform_version or "1.0.0",
+            transform_steps=list(self._transform_steps) if self._transform_steps else ["merge"],
+            source_tables={src: 0 for src in (sources_used or [])},
+        )
+
+        # Build Delta metrics
+        delta = DeltaMetrics(
+            table_path=table_path,
+            operation="overwrite",
+            primary_key=primary_keys,
+            version_after=version_after,
+            rows_inserted=len(records),
         )
 
         # Build DQ summary
         dq_summary = DQSummary(
             total_records=len(records),
             valid_records=len(records),
-            invalid_records=0,
+            error_records=0,
             error_rate=0.0,
         )
 
         # Build output metadata
         output = SilverOutputMetadata(
-            table_path=table_path,
-            delta_version=version_after,
             record_count=len(records),
-            primary_keys=primary_keys,
-            partition_columns=[],
-            write_mode="overwrite",
-        )
-
-        # Build transform metadata
-        transform = TransformMetadata(
-            version=self._transform_version or "1.0.0",
-            steps=list(self._transform_steps) if self._transform_steps else ["merge"],
         )
 
         # Build environment metadata
@@ -1193,14 +1193,12 @@ class SilverWriter(BaseDeltaWriter):
 
         # Build complete metadata
         metadata = SilverMetadata(
-            schema_version="1.0.0",
-            created_at_utc=now,
             runtime=runtime,
             pipeline=pipeline,
             lineage=lineage,
+            delta=delta,
             dq_summary=dq_summary,
             output=output,
-            transform=transform,
             environment=environment,
         )
 
