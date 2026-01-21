@@ -1750,7 +1750,9 @@ class TestSilverWriterLineage:
         mock_metadata_writer = MagicMock()
         write_calls = []
 
-        async def capture_write(table_path, metadata, *, table_name=None, flat_structure=False):
+        async def capture_write(
+            table_path, metadata, *, table_name=None, flat_structure=False
+        ):
             write_calls.append({"table_path": table_path, "metadata": metadata})
 
         mock_metadata_writer.write_silver_metadata = capture_write
@@ -1795,7 +1797,9 @@ class TestSilverWriterLineage:
         mock_metadata_writer = MagicMock()
         write_calls = []
 
-        async def capture_write(table_path, metadata, *, table_name=None, flat_structure=False):
+        async def capture_write(
+            table_path, metadata, *, table_name=None, flat_structure=False
+        ):
             write_calls.append({"table_path": table_path, "metadata": metadata})
 
         mock_metadata_writer.write_silver_metadata = capture_write
@@ -2042,7 +2046,9 @@ class TestSilverWriterDQMetrics:
         mock_metadata_writer = MagicMock()
         write_calls = []
 
-        async def capture_write(table_path, metadata, *, table_name=None, flat_structure=False):
+        async def capture_write(
+            table_path, metadata, *, table_name=None, flat_structure=False
+        ):
             write_calls.append({"table_path": table_path, "metadata": metadata})
 
         mock_metadata_writer.write_silver_metadata = capture_write
@@ -2117,7 +2123,9 @@ class TestSilverWriterDQMetrics:
         mock_metadata_writer = MagicMock()
         write_calls = []
 
-        async def capture_write(table_path, metadata, *, table_name=None, flat_structure=False):
+        async def capture_write(
+            table_path, metadata, *, table_name=None, flat_structure=False
+        ):
             write_calls.append({"table_path": table_path, "metadata": metadata})
 
         mock_metadata_writer.write_silver_metadata = capture_write
@@ -2173,7 +2181,9 @@ class TestSilverWriterDQMetrics:
         mock_metadata_writer = MagicMock()
         write_calls = []
 
-        async def capture_write(table_path, metadata, *, table_name=None, flat_structure=False):
+        async def capture_write(
+            table_path, metadata, *, table_name=None, flat_structure=False
+        ):
             write_calls.append({"table_path": table_path, "metadata": metadata})
 
         mock_metadata_writer.write_silver_metadata = capture_write
