@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.composite.merger import MergeService
     from bioetl.application.core.runner import PipelineRunner
+    from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
     from bioetl.domain.composite.result import EnrichmentResult
     from bioetl.domain.ports import LockPort, LoggerPort
