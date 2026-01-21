@@ -35,14 +35,24 @@ class MockMetadataWriter:
         return ""
 
     async def write_silver_metadata(
-        self, base_path: str | Path, metadata: SilverMetadata
+        self,
+        base_path: str | Path,
+        metadata: SilverMetadata,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
     ) -> str:
         """Record Silver metadata write."""
         self.silver_calls.append((base_path, metadata))
         return str(Path(base_path) / "_metadata.yaml")
 
     async def write_gold_metadata(
-        self, base_path: str | Path, metadata: GoldMetadata
+        self,
+        base_path: str | Path,
+        metadata: GoldMetadata,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
     ) -> str:
         """Record Gold metadata write."""
         self.gold_calls.append((base_path, metadata))

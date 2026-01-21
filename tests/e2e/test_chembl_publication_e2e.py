@@ -29,6 +29,16 @@ from .conftest import (
 # VCR cassette directory for ChEMBL E2E tests
 CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "chembl"
 
+# Document IDs from VCR cassette for input_filter
+# These IDs have pubmed_id and doi fields required by gold_filters
+PUBLICATION_TEST_IDS = (
+    "CHEMBL1121421",
+    "CHEMBL1121493",
+    "CHEMBL1121680",
+    "CHEMBL1121695",
+    "CHEMBL1121721",
+)
+
 
 @pytest.fixture(scope="module")
 def vcr_config() -> dict[str, Any]:
@@ -51,8 +61,13 @@ async def test_chembl_publication_full_cycle(e2e_data_dir: Path):
     1. Publication data is fetched and transformed
     2. Silver table contains expected records
     """
-    # Arrange
-    ctx = create_test_context("chembl_publication", limit=5)
+    # Arrange - use specific IDs from VCR cassette to match recorded responses
+    ctx = create_test_context(
+        "chembl_publication",
+        limit=5,
+        filter_ids=PUBLICATION_TEST_IDS,
+        filter_field="document_chembl_id",
+    )
 
     # Act
     runner = bootstrap_pipeline(ctx)
@@ -84,8 +99,13 @@ async def test_chembl_publication_metadata_fields(e2e_data_dir: Path):
 
     Publications may contain journal, year, DOI and other metadata.
     """
-    # Arrange
-    ctx = create_test_context("chembl_publication", limit=5)
+    # Arrange - use specific IDs from VCR cassette to match recorded responses
+    ctx = create_test_context(
+        "chembl_publication",
+        limit=5,
+        filter_ids=PUBLICATION_TEST_IDS,
+        filter_field="document_chembl_id",
+    )
 
     # Act
     runner = bootstrap_pipeline(ctx)
