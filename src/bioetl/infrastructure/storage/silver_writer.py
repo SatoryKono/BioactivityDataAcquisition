@@ -623,6 +623,7 @@ class SilverWriter(BaseDeltaWriter):
             # Write metadata sidecar file if configured
             await self._write_silver_metadata(
                 table_path=table_path,
+                table_name=table_name,
                 records=records,
                 primary_keys=primary_keys,
                 mode=validated_mode,
@@ -770,6 +771,7 @@ class SilverWriter(BaseDeltaWriter):
     async def _write_silver_metadata(
         self,
         table_path: str,
+        table_name: str,
         records: list[dict[str, Any]],
         primary_keys: list[str],
         mode: SilverWriteMode,
@@ -780,6 +782,7 @@ class SilverWriter(BaseDeltaWriter):
 
         Args:
             table_path: Full path to the Delta table.
+            table_name: Table name (used for flat_structure file naming).
             records: List of records written.
             primary_keys: Primary key columns used.
             mode: Write mode used (merge, append, delete).
@@ -812,7 +815,12 @@ class SilverWriter(BaseDeltaWriter):
                 transform_steps=self._transform_steps,
             )
             metadata = self._metadata_coordinator.create_silver_metadata(silver_input)
-            await self._metadata_writer.write_silver_metadata(table_path, metadata)
+            await self._metadata_writer.write_silver_metadata(
+                table_path,
+                metadata,
+                table_name=table_name,
+                flat_structure=self._flat_structure,
+            )
             return
 
         # Fallback to local metadata building (backward compatibility)
@@ -944,7 +952,14 @@ class SilverWriter(BaseDeltaWriter):
         )
 
         # Write metadata sidecar file
-        await self._metadata_writer.write_silver_metadata(table_path, metadata)
+        # Note: In fallback path, table_name is derived from table_path
+        # For flat_structure, use pipeline name as table_name
+        await self._metadata_writer.write_silver_metadata(
+            table_path,
+            metadata,
+            table_name=table_name,
+            flat_structure=self._flat_structure,
+        )
 
     async def _merge_records(
         self,

@@ -509,7 +509,12 @@ class GoldWriter(BaseDeltaWriter):
                 transform_steps=self._transform_steps,
             )
             metadata = self._metadata_coordinator.create_gold_metadata(gold_input)
-            await self._metadata_writer.write_gold_metadata(table_path, metadata)
+            await self._metadata_writer.write_gold_metadata(
+                table_path,
+                metadata,
+                table_name=table_name,
+                flat_structure=self._flat_structure,
+            )
             return
 
         # Fallback to local metadata building (backward compatibility)
@@ -603,7 +608,12 @@ class GoldWriter(BaseDeltaWriter):
         )
 
         # Write metadata sidecar file
-        await self._metadata_writer.write_gold_metadata(table_path, metadata)
+        await self._metadata_writer.write_gold_metadata(
+            table_path,
+            metadata,
+            table_name=table_name,
+            flat_structure=self._flat_structure,
+        )
 
     async def _run_in_executor(self, func: Callable[..., T], *args: Any) -> T:
         """Run a function in the executor."""
