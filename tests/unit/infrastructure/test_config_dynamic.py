@@ -19,8 +19,12 @@ def setup_configs(tmp_path, monkeypatch):
     Sets up a temporary configs directory structure and changes the current working directory
     to tmp_path so the relative paths in load_pipeline_config work correctly.
 
-    IMPORTANT: Clears the LRU cache on teardown to prevent cross-test contamination.
+    IMPORTANT: Clears the LRU cache on setup AND teardown to prevent cross-test contamination.
     """
+    # Clear cache at START of each test to ensure clean state
+    load_pipeline_config_cached.cache_clear()
+    load_source_config.cache_clear()
+
     # Create the configs/pipelines directory structure in the temp dir
     pipelines_dir = tmp_path / "configs" / "pipelines"
     pipelines_dir.mkdir(parents=True)
@@ -163,3 +167,220 @@ def test_gold_filters_loading(setup_configs):
     assert config.gold_filters.columns == {"standard_type": ["IC50", "Ki"]}
     assert config.gold_filters.required_fields == ["value"]
     assert config.gold_filters.exclude_if_present == ["invalid"]
+
+
+# =============================================================================
+# Convention-based Path Resolution Tests (ADR-029)
+# =============================================================================
+
+
+def test_convention_based_source_file(setup_configs, tmp_path):
+    """Verify source_file is auto-computed from provider when not specified."""
+    pipelines_dir = setup_configs
+
+    # Create a config without source_file
+    config_data = {
+        "pipeline_name": "test_provider_entity",
+        "provider": "testprovider",
+        "entity_type": "entity",
+        "primary_keys": ["id"],
+        "silver_table": "test.entity",
+    }
+
+    test_dir = pipelines_dir / "testprovider"
+    test_dir.mkdir()
+    (test_dir / "entity.yaml").write_text(yaml.dump(config_data))
+
+    config = load_pipeline_config("testprovider_entity")
+
+    # source_file should be auto-computed
+    assert config.dq_config_file == "../../dq/entities/testprovider/entity.yaml"
+    assert config.filter_config_file == "../../filter/entities/testprovider/entity.yaml"
+
+
+def test_convention_based_sink_paths(setup_configs, tmp_path):
+    """Verify sink paths are auto-computed from provider/entity when not specified."""
+    pipelines_dir = setup_configs
+
+    # Create a config without sink paths
+    config_data = {
+        "pipeline_name": "auto_paths",
+        "provider": "autoprov",
+        "entity_type": "autoent",
+        "primary_keys": ["id"],
+        "silver_table": "auto.entity",
+    }
+
+    auto_dir = pipelines_dir / "autoprov"
+    auto_dir.mkdir()
+    (auto_dir / "autoent.yaml").write_text(yaml.dump(config_data))
+
+    config = load_pipeline_config("autoprov_autoent")
+
+    # Sink paths should be auto-computed
+    assert config.sink["bronze"].path == "data/output/bronze/autoprov/autoent"
+    assert config.sink["silver"].path == "data/output/silver/autoprov/autoent"
+    assert config.sink["gold"].path == "data/output/gold/autoprov/autoent"
+
+
+def test_convention_based_primary_key_propagation(setup_configs, tmp_path):
+    """Verify primary_keys are propagated to sink.silver.primary_key."""
+    pipelines_dir = setup_configs
+
+    config_data = {
+        "pipeline_name": "pk_test_entity",
+        "provider": "pktest",
+        "entity_type": "entity",
+        "primary_keys": ["pk_field1", "pk_field2"],
+        "silver_table": "pk.entity",
+    }
+
+    pk_dir = pipelines_dir / "pktest"
+    pk_dir.mkdir()
+    (pk_dir / "entity.yaml").write_text(yaml.dump(config_data))
+
+    config = load_pipeline_config("pktest_entity")
+
+    # primary_keys should be propagated to sink.silver.primary_key
+    assert config.sink["silver"].primary_key == ["pk_field1", "pk_field2"]
+    # And to sort_by.columns
+    assert config.sink["silver"].sort_by.columns == ["pk_field1", "pk_field2"]
+    assert config.sink["gold"].sort_by.columns == ["pk_field1", "pk_field2"]
+
+
+def test_explicit_paths_override_convention(setup_configs, tmp_path):
+    """Verify explicitly specified paths override convention defaults."""
+    pipelines_dir = setup_configs
+
+    config_data = {
+        "pipeline_name": "explicit_paths",
+        "provider": "explicit",
+        "entity_type": "entity",
+        "primary_keys": ["id"],
+        "silver_table": "explicit.entity",
+        "sink": {
+            "bronze": {"path": "custom/bronze/path"},
+            "silver": {"path": "custom/silver/path", "primary_key": ["custom_pk"]},
+            "gold": {"path": "custom/gold/path"},
+        },
+    }
+
+    explicit_dir = pipelines_dir / "explicit"
+    explicit_dir.mkdir()
+    (explicit_dir / "entity.yaml").write_text(yaml.dump(config_data))
+
+    config = load_pipeline_config("explicit_entity")
+
+    # Explicit paths should be used
+    assert config.sink["bronze"].path == "custom/bronze/path"
+    assert config.sink["silver"].path == "custom/silver/path"
+    assert config.sink["silver"].primary_key == ["custom_pk"]
+    assert config.sink["gold"].path == "custom/gold/path"
+
+
+def test_filter_config_merging(setup_configs, tmp_path):
+    """Verify filter config is loaded and merged from filter_config_file."""
+    pipelines_dir = setup_configs
+
+    # Create filter config directory structure
+    filter_dir = tmp_path / "configs" / "filter" / "entities" / "filtertest"
+    filter_dir.mkdir(parents=True)
+
+    # Create filter entity config with complete input_filter
+    filter_config = {
+        "input_filter": {
+            "enabled": True,
+            "source_path": "data/input/filter.csv",
+            "column_name": "filter_col",
+            "filter_field": "filter_field",
+            "batch_size": 50,
+        },
+        "gold_filters": {
+            "columns": {"status": ["active"]},
+            "required_fields": ["id", "name"],
+        },
+    }
+    (filter_dir / "entity.yaml").write_text(yaml.dump(filter_config))
+
+    # Create pipeline config that references the filter config
+    config_data = {
+        "pipeline_name": "filtertest_entity",
+        "provider": "filtertest",
+        "entity_type": "entity",
+        "primary_keys": ["id"],
+        "silver_table": "filter.entity",
+        # filter_config_file will be auto-computed to ../../filter/entities/filtertest/entity.yaml
+    }
+
+    filter_pipeline_dir = pipelines_dir / "filtertest"
+    filter_pipeline_dir.mkdir()
+    (filter_pipeline_dir / "entity.yaml").write_text(yaml.dump(config_data))
+
+    config = load_pipeline_config("filtertest_entity")
+
+    # Filter config should be merged
+    assert config.input_filter.enabled is True
+    assert config.input_filter.source_path == "data/input/filter.csv"
+    assert config.input_filter.batch_size == 50
+    assert config.gold_filters.columns == {"status": ["active"]}
+    assert config.gold_filters.required_fields == ["id", "name"]
+
+
+def test_filter_config_explicit_override(setup_configs, tmp_path):
+    """Verify explicit pipeline config overrides filter config."""
+    pipelines_dir = setup_configs
+
+    # Create filter config directory structure
+    filter_dir = tmp_path / "configs" / "filter" / "entities" / "override"
+    filter_dir.mkdir(parents=True)
+
+    # Create filter entity config
+    filter_config = {
+        "input_filter": {
+            "enabled": True,
+            "source_path": "data/input/base.csv",
+            "column_name": "id_col",
+            "filter_field": "id",
+            "batch_size": 50,
+        },
+        "gold_filters": {
+            "columns": {"status": ["active"]},
+            "required_fields": ["id"],
+        },
+    }
+    (filter_dir / "entity.yaml").write_text(yaml.dump(filter_config))
+
+    # Create pipeline config with explicit overrides
+    config_data = {
+        "pipeline_name": "override_entity",
+        "provider": "override",
+        "entity_type": "entity",
+        "primary_keys": ["id"],
+        "silver_table": "override.entity",
+        # Explicit overrides
+        "input_filter": {
+            "batch_size": 100,  # Override batch_size
+        },
+        "gold_filters": {
+            "required_fields": ["id", "name", "extra"],  # Override required_fields
+        },
+    }
+
+    override_dir = pipelines_dir / "override"
+    override_dir.mkdir()
+    (override_dir / "entity.yaml").write_text(yaml.dump(config_data))
+
+    config = load_pipeline_config("override_entity")
+
+    # Explicit overrides should take precedence
+    assert config.input_filter.enabled is True  # From filter config
+    assert (
+        config.input_filter.source_path == "data/input/base.csv"
+    )  # From filter config
+    assert config.input_filter.batch_size == 100  # Explicit override
+    assert config.gold_filters.columns == {"status": ["active"]}  # From filter config
+    assert config.gold_filters.required_fields == [
+        "id",
+        "name",
+        "extra",
+    ]  # Explicit override

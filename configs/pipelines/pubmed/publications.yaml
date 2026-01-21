@@ -1,7 +1,12 @@
 # configs/pipelines/pubmed/publications.yaml
-# Pipeline configuration for PubMed Publication entity.
+# =============================================================================
+# PubMed Publications Pipeline Configuration
+# =============================================================================
+# Minimal config using convention-based path resolution (ADR-029).
+# Inherits from _base.yaml with most paths/filters auto-computed.
 #
-# Inherits defaults from ../_base.yaml
+# Note: filter_config_file is explicit because entity file uses plural name
+#       (publications.yaml) which differs from entity_type (publication).
 
 pipeline_name: pubmed_publications
 provider: pubmed
@@ -13,64 +18,22 @@ primary_keys: ["pmid"]
 silver_table: "pubmed_publication"
 gold_table: "pubmed_publication"
 
-source_file: ../../sources/pubmed.yaml
-
-# Pipeline-specific source configuration
+# -----------------------------------------------------------------------------
+# Source Configuration (provider-specific API settings)
+# -----------------------------------------------------------------------------
 source:
   search_term: "bioinformatics[Title/Abstract] AND drug discovery[Title/Abstract]"
   email: "${BIOETL_NCBI_EMAIL}"
   api_key: "${BIOETL_NCBI_API_KEY}"
 
 # -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
+# Override: Filter config uses plural "publications.yaml" not "publication.yaml"
 # -----------------------------------------------------------------------------
-# DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/pubmed.yaml (provider-specific)
-#   3. configs/dq/entities/pubmed/publication.yaml (entity-specific)
-dq_config_file: ../../dq/entities/pubmed/publication.yaml
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filter rules are loaded from hierarchical config files:
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/pubmed.yaml (provider-specific)
-#   3. configs/filter/entities/pubmed/publications.yaml (entity-specific)
 filter_config_file: ../../filter/entities/pubmed/publications.yaml
 
-# Entity-specific gold filters
-gold_filters:
-  required_fields:
-    - pmid
-    - title
-  columns: {}
-
-# Entity-specific sink overrides
+# -----------------------------------------------------------------------------
+# Sink Overrides (only non-convention values)
+# -----------------------------------------------------------------------------
 sink:
-  bronze:
-    path: "data/output/bronze/pubmed/publication"
   silver:
-    path: "data/output/silver/pubmed/publication"
-    primary_key: ["pmid"]
     partition_by: ["pub_year"]
-    sort_by:
-      columns: ["pmid"]
-    csv_export:
-      path: "data/output/silver/pubmed/publication"
-  gold:
-    path: "data/output/gold/pubmed/publication"
-    sort_by:
-      columns: ["pmid"]
-    csv_export:
-      path: "data/output/gold/pubmed/publication"
-
-# Entity-specific input filter
-# PubMed adapter implements FilterableDataSourcePort with PMID batch fetching
-input_filter:
-  enabled: true
-  source_path: "data/input/pubmed.csv"
-  column_name: "pubmed_id"
-  filter_field: "pmid"
-  batch_size: 100
-  fallback_column: "title"  # Search by title if PMID not found or empty

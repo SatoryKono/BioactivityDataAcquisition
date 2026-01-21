@@ -1,8 +1,19 @@
 # configs/pipelines/chembl/activity.yaml
-# Pipeline configuration for ChEMBL Activity entity.
+# =============================================================================
+# ChEMBL Activity Pipeline Configuration
+# =============================================================================
+# Minimal config using convention-based path resolution (ADR-029).
+# Inherits from _base.yaml with paths/filters auto-computed from provider/entity.
 #
-# Inherits defaults from ../_base.yaml:
-# - dq_rules, circuit_breaker, sink structure, maintenance, input_filter
+# Auto-computed by convention:
+#   - source_file: ../../sources/chembl.yaml
+#   - dq_config_file: ../../dq/entities/chembl/activity.yaml
+#   - filter_config_file: ../../filter/entities/chembl/activity.yaml
+#   - input_filter: loaded from filter_config_file
+#   - gold_filters: loaded from filter_config_file
+#   - sink paths: data/output/{layer}/chembl/activity
+#   - sink.silver.primary_key: ["activity_id"]
+#   - sink.*.sort_by.columns: ["activity_id"]
 
 pipeline_name: chembl_activity
 provider: chembl
@@ -14,36 +25,12 @@ primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 
-# Reference to source configuration file
-source_file: ../../sources/chembl.yaml
-
 # -----------------------------------------------------------------------------
-# Data Quality Configuration
+# DQ Overrides (applied on top of entity DQ config)
 # -----------------------------------------------------------------------------
-# DQ config is loaded from hierarchical files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/chembl.yaml (provider-specific)
-#   3. configs/dq/entities/chembl/activity.yaml (entity-specific)
-#
-# Reference to DQ config file (enables hierarchical loading)
-dq_config_file: ../../dq/entities/chembl/activity.yaml
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filter rules are loaded from hierarchical config files:
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/chembl.yaml (provider-specific)
-#   3. configs/filter/entities/chembl/activity.yaml (entity-specific)
-filter_config_file: ../../filter/entities/chembl/activity.yaml
-
-# -----------------------------------------------------------------------------
-# Inline DQ Overrides (applied on top of dq_config_file)
-# -----------------------------------------------------------------------------
-# Only overrides that EXTEND or DIFFER from entity DQ config are kept here.
+# Only rules that EXTEND or DIFFER from configs/dq/entities/chembl/activity.yaml
 # Redundant rules (same as entity config) have been removed per ADR-027.
 dq_rules:
-  # Field-level overrides
   field_validations:
     # Override: Entity has min:0 only, pipeline adds max for extreme outliers
     - field: "standard_value"
@@ -82,47 +69,3 @@ dq_rules:
           min: 0.001
           max: 100000
           nullable: false
-
-# Entity-specific gold filters
-gold_filters:
-  columns:
-    standard_type: [IC50, Ki]
-    standard_units: [nM]
-    standard_relation: ["="]
-    assay_type: [B, F]
-    potential_duplicate: ["0"]
-  ranges:
-    standard_value:
-      min: 0
-      include_min: false
-  required_fields:
-    - standard_type
-    - standard_value
-    - standard_units
-    - target_chembl_id
-
-# Entity-specific sink overrides (paths and primary_key)
-sink:
-  bronze:
-    path: "data/output/bronze/chembl/activity"
-  silver:
-    path: "data/output/silver/chembl/activity"
-    primary_key: ["activity_id"]
-    sort_by:
-      columns: ["activity_id"]
-    csv_export:
-      path: "data/output/silver/chembl/activity"
-  gold:
-    path: "data/output/gold/chembl/activity"
-    sort_by:
-      columns: ["activity_id"]
-    csv_export:
-      path: "data/output/gold/chembl/activity"
-
-# Entity-specific input filter
-input_filter:
-  enabled: true
-  source_path: "data/input/activity.csv"
-  column_name: "activity_id"
-  filter_field: "activity_id"
-  batch_size: 20
