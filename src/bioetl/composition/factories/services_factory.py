@@ -540,6 +540,11 @@ class ServicesBuilder:
         tracer: TracingPort | None = None,
         memory_monitor: MemoryMonitorPort | None = None,
         memory_config: MemoryConfig | None = None,
+        # DQ report output paths (for flat_structure support)
+        bronze_output_path: str | None = None,
+        silver_output_path: str | None = None,
+        gold_output_path: str | None = None,
+        flat_structure: bool = False,
     ) -> BatchExecutor:
         """Create BatchExecutor from pipeline instance.
 
@@ -584,6 +589,11 @@ class ServicesBuilder:
             gold_schema=gold_schema,
             dq_config=pipeline.config.dq,
             table_config=table_config,
+            # DQ report output paths for flat_structure support
+            bronze_output_path=bronze_output_path,
+            silver_output_path=silver_output_path,
+            gold_output_path=gold_output_path,
+            flat_structure=flat_structure,
         )
 
         # Create Gold validator
