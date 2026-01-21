@@ -986,16 +986,28 @@ if TYPE_CHECKING:
 def _path_to_table_name(path: str) -> str:
     """Convert a full path to a table name by stripping layer prefix.
 
+    Handles both relative and absolute paths:
+    - "silver/chembl/activity" → "chembl/activity"
+    - "data/output/silver/chembl/activity" → "chembl/activity"
+    - "gold/composite/publication" → "composite/publication"
+    - "data/output/gold/composite/publication" → "composite/publication"
+
     Args:
-        path: Path like "silver/chembl/activity" or "gold/publication_enriched"
+        path: Path containing a layer segment (silver/, gold/, bronze/).
 
     Returns:
-        Table name like "chembl/activity" or "publication_enriched"
+        Table name with layer prefix stripped.
     """
-    # Strip common layer prefixes
-    for prefix in ("silver/", "gold/", "bronze/"):
-        if path.startswith(prefix):
-            return path[len(prefix) :]
+    # Normalize path separators
+    normalized = path.replace("\\", "/")
+
+    # Find and strip layer prefix (handles both relative and absolute paths)
+    for layer in ("silver/", "gold/", "bronze/"):
+        if layer in normalized:
+            # Take everything after the layer prefix
+            idx = normalized.find(layer)
+            return normalized[idx + len(layer) :]
+
     return path
 
 

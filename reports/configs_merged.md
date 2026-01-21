@@ -3196,6 +3196,13 @@ sink:
        retention_days: 90
        sla_freshness_hours: 24
 
+    # Flat structure mode (default: false)
+    # When enabled, data is written directly to {path}/{date}/ without {provider}/{entity}/ prefix:
+    # - Normal (false): {path}/{provider}/{entity}/{date}/batch_...
+    # - Flat (true):    {path}/{date}/batch_...
+    # Use flat_structure=true when path already includes provider/entity segments.
+    flat_structure: false
+
     # Path template (overridden per entity)
     # path: data/output/bronze
 
@@ -3942,6 +3949,7 @@ dq_config_file: ../../dq/entities/chembl/publication.yaml
 sink:
   bronze:
     path: "data/output/bronze/chembl/publication"
+    flat_structure: true  # Files written directly under path/{date}/, without provider/entity subdirs
   silver:
     path: "data/output/silver/chembl/publication"
     primary_key: ["document_chembl_id"]
@@ -4485,9 +4493,11 @@ dq_config_file: ../../dq/entities/crossref/publication.yaml
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
+# Note: flat_structure=true because paths already include provider/entity
 sink:
   bronze:
     path: "data/output/bronze/crossref/publication"
+    flat_structure: true  # Path already includes provider/entity
   silver:
     path: "data/output/silver/crossref/publication"
     primary_key: ["doi"]
@@ -4496,6 +4506,7 @@ sink:
       ascending: true
     csv_export:
       path: "data/output/silver/crossref/publication"
+    flat_structure: true
   gold:
     path: "data/output/gold/crossref/publication"
     sort_by:
@@ -4503,6 +4514,7 @@ sink:
       ascending: true
     csv_export:
       path: "data/output/gold/crossref/publication"
+    flat_structure: true
 
 
 ================================================================================
@@ -4558,6 +4570,7 @@ dq_config_file: ../../dq/entities/openalex/publication.yaml
 sink:
   bronze:
     path: "data/output/bronze/openalex/publication"
+    flat_structure: true  # Path already includes provider/entity
   silver:
     path: "data/output/silver/openalex/publication"
     primary_key: ["openalex_id"]
@@ -4744,6 +4757,7 @@ filter_config_file: ../../filter/entities/pubmed/publications.yaml
 sink:
   bronze:
     path: "data/output/bronze/pubmed/publication"
+    flat_structure: true  # Path already includes provider/entity
   silver:
     path: "data/output/silver/pubmed/publication"
     partition_by: ["pub_year"]
@@ -4804,6 +4818,7 @@ dq_config_file: ../../dq/entities/semanticscholar/publication.yaml
 sink:
   bronze:
     path: "data/output/bronze/semanticscholar/publication"
+    flat_structure: true  # Path already includes provider/entity
   silver:
     path: "data/output/silver/semanticscholar/publication"
     primary_key: ["paper_id"]
