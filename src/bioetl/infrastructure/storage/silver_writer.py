@@ -996,6 +996,9 @@ class SilverWriter(BaseDeltaWriter):
         table_name: str,
         records: list[dict[str, Any]],
         primary_keys: list[str] | None = None,
+        *,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
     ) -> None:
         """Write merged records to Silver layer without explicit schema.
 
@@ -1006,6 +1009,8 @@ class SilverWriter(BaseDeltaWriter):
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
+            run_id: Optional composite run ID for metadata tracking.
+            sources_used: Optional list of source pipelines used in merge.
         """
         from bioetl.domain.schemas.column_order import canonical_column_order
 
@@ -1053,4 +1058,157 @@ class SilverWriter(BaseDeltaWriter):
                 mode="overwrite",
                 schema_mode="overwrite",
             ),
+        )
+
+        # Write metadata sidecar for composite merged data
+        await self._write_silver_merged_metadata(
+            table_path=table_path,
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys or [],
+            run_id=run_id,
+            sources_used=sources_used,
+        )
+
+    async def _write_silver_merged_metadata(
+        self,
+        table_path: str,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str],
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+    ) -> None:
+        """Write Silver layer metadata sidecar for merged composite data.
+
+        Args:
+            table_path: Full path to the Delta table.
+            table_name: Table name (used for filename generation).
+            records: List of records written.
+            primary_keys: Primary key columns used.
+            run_id: Composite run ID for tracking.
+            sources_used: List of source pipelines (e.g., ['seed', 'crossref', 'openalex']).
+        """
+        if not records:
+            return
+
+        # Extract provider/entity from table_name for filename generation
+        if "/" in table_name:
+            # Handle path-like table names (e.g., 'composite/publication')
+            parts = table_name.split("/")
+            provider_name = parts[0] if len(parts) > 1 else "composite"
+            entity_name = parts[-1]
+        elif "_" in table_name:
+            parts = table_name.split("_", 1)
+            provider_name = parts[0]
+            entity_name = parts[1] if len(parts) > 1 else parts[0]
+        else:
+            provider_name = "composite"
+            entity_name = table_name if table_name else "unknown"
+
+        if self._metadata_coordinator is None:
+            self.logger.debug(
+                "silver_merged_metadata_skipped",
+                reason="MetadataCoordinator not configured",
+                table_path=table_path,
+            )
+            return
+
+        from datetime import UTC, datetime
+
+        from bioetl.domain.models.metadata import (
+            DQSummary,
+            EnvironmentMetadata,
+            LineageMetadata,
+            PipelineMetadata,
+            RuntimeMetadata,
+            RunTypeEnum,
+            SilverMetadata,
+            SilverOutputMetadata,
+            TransformMetadata,
+        )
+        from importlib.metadata import version as pkg_version
+        from platform import node as hostname
+        from platform import python_version
+
+        # Get Delta version after write
+        version_after = await self._get_delta_version(table_path)
+
+        # Build metadata
+        now = datetime.now(UTC)
+        runtime = RuntimeMetadata(
+            run_id=run_id or "",
+            run_type=RunTypeEnum.INCREMENTAL,
+            started_at_utc=now,
+            completed_at_utc=now,
+        )
+
+        pipeline = PipelineMetadata(
+            name=f"composite_{entity_name}",
+            provider=provider_name,
+            entity=entity_name,
+        )
+
+        # Build lineage with sources_used
+        lineage = LineageMetadata(
+            bronze_paths=[],
+            sources=sources_used or [],
+        )
+
+        # Build DQ summary
+        dq_summary = DQSummary(
+            total_records=len(records),
+            valid_records=len(records),
+            invalid_records=0,
+            error_rate=0.0,
+        )
+
+        # Build output metadata
+        output = SilverOutputMetadata(
+            table_path=table_path,
+            delta_version=version_after,
+            record_count=len(records),
+            primary_keys=primary_keys,
+            partition_columns=[],
+            write_mode="overwrite",
+        )
+
+        # Build transform metadata
+        transform = TransformMetadata(
+            version=self._transform_version or "1.0.0",
+            steps=list(self._transform_steps) if self._transform_steps else ["merge"],
+        )
+
+        # Build environment metadata
+        try:
+            bioetl_version = pkg_version("bioetl")
+        except Exception:
+            bioetl_version = "unknown"
+
+        environment = EnvironmentMetadata(
+            hostname=hostname(),
+            python_version=python_version(),
+            bioetl_version=bioetl_version,
+        )
+
+        # Build complete metadata
+        metadata = SilverMetadata(
+            schema_version="1.0.0",
+            created_at_utc=now,
+            runtime=runtime,
+            pipeline=pipeline,
+            lineage=lineage,
+            dq_summary=dq_summary,
+            output=output,
+            transform=transform,
+            environment=environment,
+        )
+
+        await self._metadata_writer.write_silver_metadata(
+            table_path,
+            metadata,
+            table_name=table_name,
+            flat_structure=self._flat_structure,
+            provider=provider_name,
+            entity=entity_name,
         )
