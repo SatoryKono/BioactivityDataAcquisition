@@ -27,8 +27,24 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LoggerPort
 
-# Metadata sidecar filename
+# Default metadata sidecar filename (fallback)
 METADATA_FILENAME = "_metadata.yaml"
+
+
+def _get_metadata_filename(provider: str | None, entity: str | None) -> str:
+    """Generate metadata filename based on provider and entity.
+
+    Args:
+        provider: Provider name (e.g., 'chembl').
+        entity: Entity type (e.g., 'activity').
+
+    Returns:
+        Filename in format {provider}_{entity}_metadata.yaml if both provided,
+        otherwise falls back to _metadata.yaml.
+    """
+    if provider and entity:
+        return f"{provider}_{entity}_metadata.yaml"
+    return METADATA_FILENAME
 
 
 class MetadataWriter:
@@ -59,18 +75,26 @@ class MetadataWriter:
         self,
         base_path: str | Path,
         metadata: BronzeMetadata,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """Write Bronze layer metadata sidecar file.
 
         Args:
             base_path: Base path where Bronze data is stored.
-                      Metadata will be written to {base_path}/_metadata.yaml
+                      Metadata will be written to {base_path}/{provider}_{entity}_metadata.yaml
+                      or {base_path}/_metadata.yaml if provider/entity not provided.
             metadata: Bronze metadata model with lineage and source info.
+            provider: Provider name (e.g., 'chembl') for filename generation.
+            entity: Entity type (e.g., 'activity') for filename generation.
 
         Returns:
             Absolute path to the written metadata file.
         """
-        return await self._write_metadata(base_path, metadata, "bronze")
+        return await self._write_metadata(
+            base_path, metadata, "bronze", provider=provider, entity=entity
+        )
 
     async def write_silver_metadata(
         self,
@@ -79,16 +103,20 @@ class MetadataWriter:
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """Write Silver layer metadata sidecar file.
 
         Args:
             base_path: Base path where Silver Delta table is stored.
-                      Metadata will be written to {base_path}/_metadata.yaml
+                      Metadata will be written to {base_path}/{provider}_{entity}_metadata.yaml
+                      or {base_path}/_metadata.yaml if provider/entity not provided.
             metadata: Silver metadata model with lineage, DQ metrics, and Delta info.
-            table_name: Table name for flat_structure naming pattern.
-            flat_structure: If True, write as {table_name}_metadata.yaml instead of
-                          _metadata.yaml in a subdirectory.
+            table_name: Table name for flat_structure naming pattern (deprecated).
+            flat_structure: If True and provider/entity provided, uses new naming.
+            provider: Provider name (e.g., 'chembl') for filename generation.
+            entity: Entity type (e.g., 'activity') for filename generation.
 
         Returns:
             Absolute path to the written metadata file.
@@ -99,6 +127,8 @@ class MetadataWriter:
             "silver",
             table_name=table_name,
             flat_structure=flat_structure,
+            provider=provider,
+            entity=entity,
         )
 
     async def write_gold_metadata(
@@ -108,16 +138,20 @@ class MetadataWriter:
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """Write Gold layer metadata sidecar file.
 
         Args:
             base_path: Base path where Gold Delta/Parquet table is stored.
-                      Metadata will be written to {base_path}/_metadata.yaml
+                      Metadata will be written to {base_path}/{provider}_{entity}_metadata.yaml
+                      or {base_path}/_metadata.yaml if provider/entity not provided.
             metadata: Gold metadata model with lineage, schema contract, and SCD info.
-            table_name: Table name for flat_structure naming pattern.
-            flat_structure: If True, write as {table_name}_metadata.yaml instead of
-                          _metadata.yaml in a subdirectory.
+            table_name: Table name for flat_structure naming pattern (deprecated).
+            flat_structure: If True and provider/entity provided, uses new naming.
+            provider: Provider name (e.g., 'chembl') for filename generation.
+            entity: Entity type (e.g., 'activity') for filename generation.
 
         Returns:
             Absolute path to the written metadata file.
@@ -128,6 +162,8 @@ class MetadataWriter:
             "gold",
             table_name=table_name,
             flat_structure=flat_structure,
+            provider=provider,
+            entity=entity,
         )
 
     async def _write_metadata(
@@ -138,6 +174,8 @@ class MetadataWriter:
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """Write metadata to sidecar file.
 
@@ -145,14 +183,22 @@ class MetadataWriter:
             base_path: Base path for metadata file.
             metadata: Pydantic metadata model.
             layer: Layer name for logging.
-            table_name: Table name for flat_structure naming pattern.
-            flat_structure: If True, write as {table_name}_metadata.yaml.
+            table_name: Table name for flat_structure naming pattern (deprecated).
+            flat_structure: If True and provider/entity provided, uses new naming.
+            provider: Provider name (e.g., 'chembl') for filename generation.
+            entity: Entity type (e.g., 'activity') for filename generation.
 
         Returns:
             Absolute path to written metadata file.
         """
         path = Path(base_path)
-        if flat_structure and table_name:
+
+        # Use provider/entity naming if both are provided
+        if provider and entity:
+            filename = _get_metadata_filename(provider, entity)
+            metadata_path = path / filename
+        elif flat_structure and table_name:
+            # Backward compatibility: use table_name if flat_structure is True
             metadata_path = path / f"{table_name}_metadata.yaml"
         else:
             metadata_path = path / METADATA_FILENAME
@@ -202,6 +248,9 @@ class NoOpMetadataWriter:
         self,
         base_path: str | Path,
         metadata: BronzeMetadata,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """No-op Bronze metadata write."""
         return ""
@@ -213,6 +262,8 @@ class NoOpMetadataWriter:
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """No-op Silver metadata write."""
         return ""
@@ -224,6 +275,8 @@ class NoOpMetadataWriter:
         *,
         table_name: str | None = None,
         flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """No-op Gold metadata write."""
         return ""

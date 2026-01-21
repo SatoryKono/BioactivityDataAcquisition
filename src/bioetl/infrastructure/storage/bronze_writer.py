@@ -599,10 +599,14 @@ class BronzeWriter:
                 await self._metadata_writer.write_bronze_metadata(
                     base_path=metadata_base_path,
                     metadata=bronze_metadata,
+                    provider=provider,
+                    entity=entity,
                 )
                 self.logger.debug(
                     "bronze_metadata_written",
-                    metadata_path=str(metadata_base_path / "_metadata.yaml"),
+                    metadata_path=str(
+                        metadata_base_path / f"{provider}_{entity}_metadata.yaml"
+                    ),
                     run_id=str(run_id),
                 )
 

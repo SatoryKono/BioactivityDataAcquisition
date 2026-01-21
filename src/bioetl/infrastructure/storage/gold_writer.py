@@ -481,6 +481,16 @@ class GoldWriter(BaseDeltaWriter):
         if not records:
             return
 
+        # Extract pipeline info from table name for filename generation
+        # table_name format: {provider}.{entity} or just {entity}
+        parts = table_name.split(".")
+        if len(parts) >= 2:
+            provider_name = parts[0]
+            entity_name = parts[1]
+        else:
+            provider_name = "unknown"
+            entity_name = parts[0] if parts else "unknown"
+
         # Use MetadataCoordinator if available (centralized metadata)
         if self._metadata_coordinator is not None:
             from bioetl.domain.ports import GoldMetadataInput, SilverRef
@@ -514,6 +524,8 @@ class GoldWriter(BaseDeltaWriter):
                 metadata,
                 table_name=table_name,
                 flat_structure=self._flat_structure,
+                provider=provider_name,
+                entity=entity_name,
             )
             return
 
@@ -544,20 +556,11 @@ class GoldWriter(BaseDeltaWriter):
             completed_at_utc=now,
         )
 
-        # Extract pipeline info from table name
-        # table_name format: {provider}.{entity} or just {entity}
-        parts = table_name.split(".")
-        if len(parts) >= 2:
-            provider = parts[0]
-            entity = parts[1]
-        else:
-            provider = "unknown"
-            entity = parts[0] if parts else "unknown"
-
+        # Use already extracted provider/entity from top of method
         pipeline = PipelineMetadata(
-            name=f"{provider}_{entity}",
-            provider=provider,
-            entity=entity,
+            name=f"{provider_name}_{entity_name}",
+            provider=provider_name,
+            entity=entity_name,
         )
 
         # Build lineage (Gold layer sources from Silver)
@@ -613,6 +616,8 @@ class GoldWriter(BaseDeltaWriter):
             metadata,
             table_name=table_name,
             flat_structure=self._flat_structure,
+            provider=provider_name,
+            entity=entity_name,
         )
 
     async def _run_in_executor(self, func: Callable[..., T], *args: Any) -> T:
