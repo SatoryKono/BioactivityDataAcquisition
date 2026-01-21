@@ -41,8 +41,8 @@ docs/
 ├── 00-map.md                    # This file (Project Navigator)
 ├── index.md                     # Welcome page
 ├── glossary.md                  # Ubiquitous Language terminology
-├── RULES.md                     # Canonical rules document (v5.11)
-├── REQUIREMENTS.md              # 127 testable requirements
+├── RULES.md                     # Canonical rules document (v5.12)
+├── REQUIREMENTS.md              # 156 testable requirements
 │
 ├── archived/                    # Historical documents
 │   ├── audits/                  # Audit reports
@@ -358,7 +358,7 @@ graph TD
 | REQUIREMENTS.md          | 2026-01-21   | v1.4 (156 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
 | 00-map.md                | 2026-01-21   | v6.8 RULES v5.12, REQ v1.4   |
-| rules-summary.md         | 2026-01-20   | v5.11 Synced                 |
+| rules-summary.md         | 2026-01-21   | v5.12 Synced                 |
 | 03-guides/               | 2026-01-20   | Consolidated (13 guides)     |
 | ADR-001..028             | 2026-01-21   | All 28 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
