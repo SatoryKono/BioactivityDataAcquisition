@@ -670,6 +670,16 @@ def _extract_dq_configs(
     return bronze_config, silver_config, gold_config
 
 
+def _get_layer_path(config: Any) -> str | None:
+    """Extract path from layer config if available."""
+    return getattr(config, "path", None) if config else None
+
+
+def _has_flat_structure(config: Any) -> bool:
+    """Check if layer config has flat_structure enabled."""
+    return bool(config and getattr(config, "flat_structure", False))
+
+
 def _extract_dq_output_paths(
     yaml_config: PipelineYamlConfig | None,
 ) -> tuple[str | None, str | None, str | None, bool]:
@@ -689,28 +699,17 @@ def _extract_dq_output_paths(
     if sink is None:
         return None, None, None, False
 
-    # Extract paths from each layer
-    bronze_path: str | None = None
-    silver_path: str | None = None
-    gold_path: str | None = None
-    flat_structure = False
-
     bronze_config = sink.get("bronze")
-    if bronze_config and hasattr(bronze_config, "path"):
-        bronze_path = bronze_config.path
-
     silver_config = sink.get("silver")
-    if silver_config:
-        if hasattr(silver_config, "path"):
-            silver_path = silver_config.path
-        if hasattr(silver_config, "flat_structure") and silver_config.flat_structure:
-            flat_structure = True
-
     gold_config = sink.get("gold")
-    if gold_config:
-        if hasattr(gold_config, "path"):
-            gold_path = gold_config.path
-        if hasattr(gold_config, "flat_structure") and gold_config.flat_structure:
-            flat_structure = True
 
-    return bronze_path, silver_path, gold_path, flat_structure
+    flat_structure = _has_flat_structure(silver_config) or _has_flat_structure(
+        gold_config
+    )
+
+    return (
+        _get_layer_path(bronze_config),
+        _get_layer_path(silver_config),
+        _get_layer_path(gold_config),
+        flat_structure,
+    )

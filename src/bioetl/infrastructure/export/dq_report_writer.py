@@ -103,6 +103,73 @@ class DQReportWriter:
 
         return await self._write_report(report, output_path, format)
 
+    def _build_layer_filename(
+        self,
+        layer: str,
+        extension: str,
+        provider: str | None,
+        entity: str | None,
+        target_table: str,
+        run_id: str,
+    ) -> str:
+        """Build filename for Silver/Gold DQ report.
+
+        Args:
+            layer: Layer name ('silver' or 'gold').
+            extension: File extension including dot.
+            provider: Provider name for filename.
+            entity: Entity name for filename.
+            target_table: Target table name (fallback for naming).
+            run_id: Run ID (fallback for naming).
+
+        Returns:
+            Generated filename.
+        """
+        if provider and entity:
+            return f"{layer}_{provider}_{entity}_dq_report{extension}"
+        if self._flat_structure:
+            flat_table_name = target_table.replace(".", "_")
+            return f"{layer}_{flat_table_name}_dq_report{extension}"
+        return f"{layer}_{run_id}_dq_report{extension}"
+
+    def _resolve_layer_output_path(
+        self,
+        layer: str,
+        output_path: Path | None,
+        extension: str,
+        provider: str | None,
+        entity: str | None,
+        target_table: str,
+        run_id: str,
+    ) -> Path:
+        """Resolve output path for Silver/Gold DQ report.
+
+        Args:
+            layer: Layer name ('silver' or 'gold').
+            output_path: Explicit output path or None for auto-generation.
+            extension: File extension including dot.
+            provider: Provider name for filename.
+            entity: Entity name for filename.
+            target_table: Target table name.
+            run_id: Run ID.
+
+        Returns:
+            Resolved output path.
+        """
+        filename = self._build_layer_filename(
+            layer, extension, provider, entity, target_table, run_id
+        )
+
+        if output_path is not None:
+            output_path = Path(output_path)
+            return output_path / filename if output_path.is_dir() else output_path
+
+        if self._flat_structure:
+            return self._base_path / filename
+
+        normalized_table = target_table.replace(".", "/")
+        return self._base_path / normalized_table / filename
+
     async def write_silver_report(
         self,
         report: SilverDQReport,
@@ -126,37 +193,16 @@ class DQReportWriter:
         """
         format = format or DQReportFormat.JSON
         extension = self._get_extension(format)
-
-        if output_path is None:
-            # Normalize target_table: replace '.' with '/' for directory structure
-            # This ensures 'chembl.activity' becomes 'chembl/activity'
-            normalized_table = report.target_table.replace(".", "/")
-
-            if self._flat_structure:
-                # Flat: {base_path}/silver_{provider}_{entity}_dq_report{ext}
-                if provider and entity:
-                    filename = f"silver_{provider}_{entity}_dq_report{extension}"
-                else:
-                    flat_table_name = report.target_table.replace(".", "_")
-                    filename = f"silver_{flat_table_name}_dq_report{extension}"
-                output_path = self._base_path / filename
-            else:
-                # Unified: {base_path}/{provider}/{entity}/silver_{provider}_{entity}_dq_report{ext}
-                if provider and entity:
-                    filename = f"silver_{provider}_{entity}_dq_report{extension}"
-                else:
-                    filename = f"silver_{report.run_id}_dq_report{extension}"
-                output_path = self._base_path / normalized_table / filename
-        else:
-            output_path = Path(output_path)
-            if output_path.is_dir():
-                if provider and entity:
-                    filename = f"silver_{provider}_{entity}_dq_report{extension}"
-                else:
-                    filename = f"silver_{report.run_id}_dq_report{extension}"
-                output_path = output_path / filename
-
-        return await self._write_report(report, output_path, format)
+        resolved_path = self._resolve_layer_output_path(
+            "silver",
+            output_path,
+            extension,
+            provider,
+            entity,
+            report.target_table,
+            report.run_id,
+        )
+        return await self._write_report(report, resolved_path, format)
 
     async def write_gold_report(
         self,
@@ -181,37 +227,16 @@ class DQReportWriter:
         """
         format = format or DQReportFormat.JSON
         extension = self._get_extension(format)
-
-        if output_path is None:
-            # Normalize target_table: replace '.' with '/' for directory structure
-            # This ensures 'chembl.activity' becomes 'chembl/activity'
-            normalized_table = report.target_table.replace(".", "/")
-
-            if self._flat_structure:
-                # Flat: {base_path}/gold_{provider}_{entity}_dq_report{ext}
-                if provider and entity:
-                    filename = f"gold_{provider}_{entity}_dq_report{extension}"
-                else:
-                    flat_table_name = report.target_table.replace(".", "_")
-                    filename = f"gold_{flat_table_name}_dq_report{extension}"
-                output_path = self._base_path / filename
-            else:
-                # Unified: {base_path}/{provider}/{entity}/gold_{provider}_{entity}_dq_report{ext}
-                if provider and entity:
-                    filename = f"gold_{provider}_{entity}_dq_report{extension}"
-                else:
-                    filename = f"gold_{report.run_id}_dq_report{extension}"
-                output_path = self._base_path / normalized_table / filename
-        else:
-            output_path = Path(output_path)
-            if output_path.is_dir():
-                if provider and entity:
-                    filename = f"gold_{provider}_{entity}_dq_report{extension}"
-                else:
-                    filename = f"gold_{report.run_id}_dq_report{extension}"
-                output_path = output_path / filename
-
-        return await self._write_report(report, output_path, format)
+        resolved_path = self._resolve_layer_output_path(
+            "gold",
+            output_path,
+            extension,
+            provider,
+            entity,
+            report.target_table,
+            report.run_id,
+        )
+        return await self._write_report(report, resolved_path, format)
 
     async def _write_report(
         self,
