@@ -1,6 +1,7 @@
-"""Pandera schema for ChEMBL Document Similarity entity.
+"""Pandera schema for ChEMBL Publication Similarity entity.
 
-Aligned with RULES.md v5.0 and ChEMBL 34 schema.
+Aligned with RULES.md v5.12 and ChEMBL 34 schema.
+Renamed from DocumentSimilaritySchema per ADR-024 (Entity Naming Unification).
 """
 
 from __future__ import annotations
@@ -11,8 +12,8 @@ from pandera.typing import Series
 from bioetl.domain.schemas.base import ETLRecordSchema
 
 
-class DocumentSimilaritySchema(ETLRecordSchema):
-    """Document Similarity validation schema for Silver layer."""
+class PublicationSimilaritySchema(ETLRecordSchema):
+    """Publication Similarity validation schema for Silver layer."""
 
     # === Primary Key ===
     sim_id: Series[int] = pa.Field(nullable=False, description="Primary key.")
