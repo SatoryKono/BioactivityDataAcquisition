@@ -29,6 +29,10 @@ from bioetl.application.services.config_service import (
     SettingsInfo,
 )
 from bioetl.application.services.data_quality_service import DataQualityService
+from bioetl.application.services.dq_metrics_calculator import (
+    DQMetricsCalculator,
+    DQMetricsInput,
+)
 from bioetl.application.services.dq_report_service import (
     DQReportContext,
     DQReportResult,
@@ -93,6 +97,8 @@ __all__ = [
     "ClearResult",
     "ColumnInfo",
     "ConfigService",
+    "DQMetricsCalculator",
+    "DQMetricsInput",
     "DQReportContext",
     "DQReportResult",
     "DQReportService",

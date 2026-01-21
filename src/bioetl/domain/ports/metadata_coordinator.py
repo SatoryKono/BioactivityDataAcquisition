@@ -63,6 +63,7 @@ class SilverMetadataInput:
         version_after: Delta table version after write.
         transform_version: Optional semver version of transform applied.
         transform_steps: Optional list of transform step names applied.
+        dq_report_path: Optional path to generated DQ report for cross-reference.
     """
 
     table_path: str
@@ -74,6 +75,7 @@ class SilverMetadataInput:
     version_after: int | None = None
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
+    dq_report_path: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
