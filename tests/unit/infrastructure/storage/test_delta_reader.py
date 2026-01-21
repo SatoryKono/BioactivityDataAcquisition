@@ -38,11 +38,13 @@ def sample_delta_table(tmp_path: Path) -> Path:
     table_path = tmp_path / "test_provider" / "test_entity"
     table_path.mkdir(parents=True)
 
-    table = pa.table({
-        "id": ["1", "2", "3"],
-        "name": ["Alice", "Bob", "Charlie"],
-        "value": [10, 20, 30],
-    })
+    table = pa.table(
+        {
+            "id": ["1", "2", "3"],
+            "name": ["Alice", "Bob", "Charlie"],
+            "value": [10, 20, 30],
+        }
+    )
 
     write_deltalake(str(table_path), table)
     return table_path
@@ -56,7 +58,9 @@ class TestDeltaReaderInit:
         """Test reader initializes with correct base path."""
         assert reader._base_path == tmp_path
 
-    def test_base_path_accepts_string(self, tmp_path: Path, mock_logger: MagicMock) -> None:
+    def test_base_path_accepts_string(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
         """Test reader accepts string path."""
         reader = DeltaReader(base_path=str(tmp_path), logger=mock_logger)
         assert reader._base_path == tmp_path
@@ -79,9 +83,7 @@ class TestResolvePath:
         result = reader._resolve_path(absolute_path)
         assert result == Path(absolute_path)
 
-    def test_nested_relative_path(
-        self, reader: DeltaReader, tmp_path: Path
-    ) -> None:
+    def test_nested_relative_path(self, reader: DeltaReader, tmp_path: Path) -> None:
         """Test nested relative path is resolved correctly."""
         result = reader._resolve_path("provider/entity/table")
         assert result == tmp_path / "provider" / "entity" / "table"
@@ -364,10 +366,12 @@ class TestEmptyTable:
         table_path.mkdir(parents=True)
 
         # Create empty table with schema
-        schema = pa.schema([
-            pa.field("id", pa.string()),
-            pa.field("value", pa.int64()),
-        ])
+        schema = pa.schema(
+            [
+                pa.field("id", pa.string()),
+                pa.field("value", pa.int64()),
+            ]
+        )
         empty_table = pa.table({"id": [], "value": []}, schema=schema)
         write_deltalake(str(table_path), empty_table)
 

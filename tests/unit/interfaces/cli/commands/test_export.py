@@ -95,9 +95,21 @@ class TestExportListTables:
     ) -> None:
         """Test --list with tables found."""
         mock_export_service.list_tables.return_value = [
-            TableInfo(name="chembl_activity", layer="silver", path=Path("/data/silver/chembl/activity")),
-            TableInfo(name="pubchem_compound", layer="silver", path=Path("/data/silver/pubchem/compound")),
-            TableInfo(name="chembl_activity", layer="gold", path=Path("/data/gold/chembl/activity")),
+            TableInfo(
+                name="chembl_activity",
+                layer="silver",
+                path=Path("/data/silver/chembl/activity"),
+            ),
+            TableInfo(
+                name="pubchem_compound",
+                layer="silver",
+                path=Path("/data/silver/pubchem/compound"),
+            ),
+            TableInfo(
+                name="chembl_activity",
+                layer="gold",
+                path=Path("/data/gold/chembl/activity"),
+            ),
         ]
 
         with patch(
@@ -118,7 +130,11 @@ class TestExportListTables:
     ) -> None:
         """Test --list with --layer filter."""
         mock_export_service.list_tables.return_value = [
-            TableInfo(name="chembl_activity", layer="gold", path=Path("/data/gold/chembl/activity")),
+            TableInfo(
+                name="chembl_activity",
+                layer="gold",
+                path=Path("/data/gold/chembl/activity"),
+            ),
         ]
 
         with patch(
@@ -211,7 +227,9 @@ class TestExportPreview:
             )
 
         assert result.exit_code == 0
-        mock_export_service.preview.assert_called_once_with("chembl.activity", layer="gold")
+        mock_export_service.preview.assert_called_once_with(
+            "chembl.activity", layer="gold"
+        )
 
 
 class TestExportMissingTable:
@@ -282,7 +300,9 @@ class TestExportToFile:
             "bioetl.interfaces.cli.commands.export.get_export_service",
             return_value=mock_export_service,
         ):
-            result = cli_runner.invoke(cli, ["export", "chembl.activity", "--format", "xlsx"])
+            result = cli_runner.invoke(
+                cli, ["export", "chembl.activity", "--format", "xlsx"]
+            )
 
         assert result.exit_code == 0
         assert "50" in result.output
@@ -308,7 +328,9 @@ class TestExportToFile:
             "bioetl.interfaces.cli.commands.export.get_export_service",
             return_value=mock_export_service,
         ):
-            result = cli_runner.invoke(cli, ["export", "chembl.activity", "--format", "tsv"])
+            result = cli_runner.invoke(
+                cli, ["export", "chembl.activity", "--format", "tsv"]
+            )
 
         assert result.exit_code == 0
         assert "75" in result.output
@@ -334,7 +356,9 @@ class TestExportToFile:
             "bioetl.interfaces.cli.commands.export.get_export_service",
             return_value=mock_export_service,
         ):
-            result = cli_runner.invoke(cli, ["export", "chembl.activity", "--limit", "100"])
+            result = cli_runner.invoke(
+                cli, ["export", "chembl.activity", "--limit", "100"]
+            )
 
         assert result.exit_code == 0
         # Verify export was called with correct options
@@ -662,11 +686,16 @@ class TestExportCombinedOptions:
                 [
                     "export",
                     "chembl.activity",
-                    "--format", "xlsx",
-                    "--layer", "gold",
-                    "--output", str(output_dir),
-                    "--limit", "1000",
-                    "--columns", "id,name,value",
+                    "--format",
+                    "xlsx",
+                    "--layer",
+                    "gold",
+                    "--output",
+                    str(output_dir),
+                    "--limit",
+                    "1000",
+                    "--columns",
+                    "id,name,value",
                 ],
             )
 
