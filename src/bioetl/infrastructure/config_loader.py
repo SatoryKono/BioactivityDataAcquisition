@@ -67,6 +67,50 @@ def _load_base_config(config_path: Path) -> dict[str, Any]:
     return {}
 
 
+def _apply_file_reference_defaults(
+    config: dict[str, Any], provider: str, entity_type: str
+) -> None:
+    """Apply convention-based defaults for file references.
+
+    Sets source_file, dq_config_file, and filter_config_file if not specified.
+    """
+    config.setdefault("source_file", f"../../sources/{provider}.yaml")
+    config.setdefault(
+        "dq_config_file", f"../../dq/entities/{provider}/{entity_type}.yaml"
+    )
+    config.setdefault(
+        "filter_config_file", f"../../filter/entities/{provider}/{entity_type}.yaml"
+    )
+
+
+def _apply_layer_defaults(
+    layer: dict[str, Any],
+    provider: str,
+    entity_type: str,
+    layer_name: str,
+    primary_keys: list[str],
+) -> None:
+    """Apply convention-based defaults for a single medallion layer.
+
+    Sets path, sort_by.columns, csv_export.path if not specified.
+    For silver layer, also sets primary_key.
+    """
+    layer.setdefault("path", f"data/output/{layer_name}/{provider}/{entity_type}")
+
+    if primary_keys:
+        # Silver layer gets primary_key propagation
+        if layer_name == "silver":
+            layer.setdefault("primary_key", list(primary_keys))
+
+        # Both silver and gold get sort_by.columns propagation
+        sort_by = layer.setdefault("sort_by", {})
+        sort_by.setdefault("columns", list(primary_keys))
+
+    # Auto-set csv_export path to match layer path
+    csv_export = layer.setdefault("csv_export", {})
+    csv_export.setdefault("path", layer["path"])
+
+
 def _apply_convention_defaults(config: dict[str, Any]) -> dict[str, Any]:
     """Apply convention-based defaults for paths and references.
 
@@ -81,64 +125,21 @@ def _apply_convention_defaults(config: dict[str, Any]) -> dict[str, Any]:
     """
     provider = config.get("provider")
     entity_type = config.get("entity_type")
-    primary_keys = config.get("primary_keys", [])
 
     if not provider or not entity_type:
         return config
 
+    primary_keys = config.get("primary_keys", [])
+
     # Auto-compute file references
-    if "source_file" not in config:
-        config["source_file"] = f"../../sources/{provider}.yaml"
+    _apply_file_reference_defaults(config, provider, entity_type)
 
-    if "dq_config_file" not in config:
-        config["dq_config_file"] = f"../../dq/entities/{provider}/{entity_type}.yaml"
-
-    if "filter_config_file" not in config:
-        config["filter_config_file"] = (
-            f"../../filter/entities/{provider}/{entity_type}.yaml"
-        )
-
-    # Auto-compute sink paths
+    # Auto-compute sink paths for each medallion layer
     sink = config.setdefault("sink", {})
 
-    # Bronze layer
-    bronze = sink.setdefault("bronze", {})
-    if "path" not in bronze:
-        bronze["path"] = f"data/output/bronze/{provider}/{entity_type}"
-
-    # Silver layer
-    silver = sink.setdefault("silver", {})
-    if "path" not in silver:
-        silver["path"] = f"data/output/silver/{provider}/{entity_type}"
-
-    # Auto-copy primary_keys to silver.primary_key if not specified
-    if "primary_key" not in silver and primary_keys:
-        silver["primary_key"] = list(primary_keys)
-
-    # Auto-set silver.sort_by.columns from primary_keys if not specified
-    silver_sort_by = silver.setdefault("sort_by", {})
-    if "columns" not in silver_sort_by and primary_keys:
-        silver_sort_by["columns"] = list(primary_keys)
-
-    # Auto-set silver csv_export path
-    silver_csv = silver.setdefault("csv_export", {})
-    if "path" not in silver_csv:
-        silver_csv["path"] = silver["path"]
-
-    # Gold layer
-    gold = sink.setdefault("gold", {})
-    if "path" not in gold:
-        gold["path"] = f"data/output/gold/{provider}/{entity_type}"
-
-    # Auto-set gold.sort_by.columns from primary_keys if not specified
-    gold_sort_by = gold.setdefault("sort_by", {})
-    if "columns" not in gold_sort_by and primary_keys:
-        gold_sort_by["columns"] = list(primary_keys)
-
-    # Auto-set gold csv_export path
-    gold_csv = gold.setdefault("csv_export", {})
-    if "path" not in gold_csv:
-        gold_csv["path"] = gold["path"]
+    for layer_name in ("bronze", "silver", "gold"):
+        layer = sink.setdefault(layer_name, {})
+        _apply_layer_defaults(layer, provider, entity_type, layer_name, primary_keys)
 
     return config
 
