@@ -117,6 +117,7 @@ class DQReportContext:
     bronze_batch_id: str | None = None
     bronze_records: list[bytes] | None = None
     bronze_output_path: str | None = None
+    bronze_date_str: str | None = None  # Date string (YYYY-MM-DD) for filename
 
     # Silver context
     silver_data: Any | None = None  # pl.DataFrame
@@ -341,12 +342,19 @@ class DQReportService:
                 timestamp=context.timestamp,
             )
 
-            # Write report
-            output_path = Path(config.output_path) if config.output_path else None
+            # Write report - use context output_path if provided, else config
+            output_path: Path | None = None
+            if context.bronze_output_path:
+                output_path = Path(context.bronze_output_path)
+            elif config.output_path:
+                output_path = Path(config.output_path)
+
             path = await self._report_writer.write_bronze_report(
                 report=report,
                 output_path=output_path,
                 format=config.get_format_enum(),
+                provider=context.provider,
+                entity=context.entity,
             )
 
             self._logger.debug(
