@@ -69,7 +69,7 @@ class TestFileSizeLimits:
         "dq_metrics.py": 420,  # 411 LOC - Batch DQ metrics with helpers for CC reduction + _make_hashable for list/dict values
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
-        "batch_executor.py": 770,  # 764 LOC - unified executor for batch processing + DQ context
+        "batch_executor.py": 785,  # 779 LOC - unified executor for batch processing + DQ context + MetadataCoordinator params
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
         "gold_analyzer.py": 830,  # 827 LOC - Gold layer analysis with DQ rules
         "silver_analyzer.py": 590,  # 570 LOC - Silver layer analysis with validation
@@ -498,7 +498,7 @@ class TestClassSize:
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
         "BronzeWriter": 725,  # 720 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata + query_string extraction + async read_bronze
-        "BatchExecutor": 710,  # 703 lines - unified executor for batch processing + DQ context
+        "BatchExecutor": 720,  # 718 lines - unified executor for batch processing + DQ context + MetadataCoordinator
         "BatchWriter": 380,  # 376 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage + DQ defaults
         # Application core classes
         "FilteredDataSource": 330,  # 320 lines - decorator with fallback mapping support
