@@ -79,7 +79,7 @@ class MemoryMonitor:
     Example:
         >>> monitor = MemoryMonitor(config=MemoryConfig(), logger=logger)
         >>> batch_size = 1000
-        >>> for chunk in data_source:
+        >>> for batch in data_source:
         ...     batch_size = monitor.get_recommended_batch_size(batch_size)
         ...     # Process with adjusted batch size
 

@@ -21,7 +21,7 @@ class Layer(str, Enum):
 
     Attributes:
         BRONZE: Raw data layer (immutable, append-only).
-        SILVER: Cleansed/normalized data layer.
+        SILVER: Normalized and validated data layer.
         GOLD: Business-ready aggregated data layer.
     """
 
