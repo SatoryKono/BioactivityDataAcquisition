@@ -355,6 +355,7 @@ class DQReportService:
                 format=config.get_format_enum(),
                 provider=context.provider,
                 entity=context.entity,
+                date_str=context.bronze_date_str,
             )
 
             self._logger.debug(

@@ -276,9 +276,12 @@ class BaseServicesFactory:
 
         # DQ reports should be written alongside the data
         output_root = cls._get_output_root(settings, pipeline_config)
+        # Get flat_structure from sink config (use Silver as primary)
+        flat_structure = cls._get_flat_structure(pipeline_config)
         report_writer = DQServicesFactory.create_report_writer(
             base_path=output_root,
             logger=logger,
+            flat_structure=flat_structure,
         )
 
         # Create DQ report service
@@ -316,6 +319,29 @@ class BaseServicesFactory:
         for layer_name in ("bronze", "silver", "gold"):
             layer_config = sink.get(layer_name)
             if layer_config and layer_config.dq_report.enabled:
+                return True
+
+        return False
+
+    @staticmethod
+    def _get_flat_structure(config: PipelineYamlConfig) -> bool:
+        """Get flat_structure setting from pipeline config.
+
+        Checks Silver and Gold layers for flat_structure setting.
+        Returns True if either layer has flat_structure enabled.
+
+        Args:
+            config: Pipeline YAML configuration.
+
+        Returns:
+            True if flat_structure is enabled for any layer.
+        """
+        sink = config.sink
+
+        # Check Silver and Gold for flat_structure
+        for layer_name in ("silver", "gold"):
+            layer_config = sink.get(layer_name)
+            if layer_config and getattr(layer_config, "flat_structure", False):
                 return True
 
         return False
