@@ -28,10 +28,12 @@ class DQReportWriter:
 
     Implements DQReportWriterPort with atomic writes and
     support for JSON, YAML, and HTML formats.
-    """
 
-    # Default subdirectory for DQ reports
-    DQ_REPORTS_DIR = "_dq_reports"
+    Path formats (unified structure):
+    - Bronze: {base_path}/{provider}/{entity}/{date}/batch_{date}_{provider}_{entity}_dq_report{ext}
+    - Silver: {base_path}/{provider}/{entity}/silver_{provider}_{entity}_dq_report{ext}
+    - Gold: {base_path}/{provider}/{entity}/gold_{provider}_{entity}_dq_report{ext}
+    """
 
     def __init__(
         self,
@@ -45,8 +47,7 @@ class DQReportWriter:
             base_path: Base path for report storage.
             logger: Structured logger for observability.
             flat_structure: If True, write reports directly to base_path
-                          with {table_name}_dq_report{ext} naming pattern
-                          instead of {table_name}/_dq_reports/{run_id}_dq_report{ext}.
+                          with {layer}_{provider}_{entity}_dq_report{ext} naming pattern.
         """
         self._base_path = Path(base_path)
         self._logger = logger
@@ -58,6 +59,10 @@ class DQReportWriter:
         report: BronzeDQReport,
         output_path: Path | None = None,
         format: DQReportFormat | None = None,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
+        date_str: str | None = None,
     ) -> Path:
         """Write Bronze DQ report to file.
 
@@ -65,6 +70,9 @@ class DQReportWriter:
             report: Bronze DQ report to write.
             output_path: Output path (None = alongside data).
             format: Output format (None = JSON).
+            provider: Provider name for filename generation.
+            entity: Entity name for filename generation.
+            date_str: Date string (YYYY-MM-DD) for filename generation.
 
         Returns:
             Path to the written report file.
@@ -75,16 +83,21 @@ class DQReportWriter:
         if output_path is None:
             # Generate path based on source file location
             source_dir = Path(report.source_file).parent
-            output_path = (
-                self._base_path
-                / source_dir
-                / self.DQ_REPORTS_DIR
-                / f"{report.batch_id}_dq_report{extension}"
-            )
+            # Unified naming: batch_{date}_{provider}_{entity}_dq_report{ext}
+            # Falls back to batch_id only if provider/entity not provided
+            if provider and entity and date_str:
+                filename = f"batch_{date_str}_{provider}_{entity}_dq_report{extension}"
+            else:
+                filename = f"{report.batch_id}_dq_report{extension}"
+            output_path = self._base_path / source_dir / filename
         else:
             output_path = Path(output_path)
             if output_path.is_dir():
-                output_path = output_path / f"{report.batch_id}_dq_report{extension}"
+                if provider and entity and date_str:
+                    filename = f"batch_{date_str}_{provider}_{entity}_dq_report{extension}"
+                else:
+                    filename = f"{report.batch_id}_dq_report{extension}"
+                output_path = output_path / filename
 
         return await self._write_report(report, output_path, format)
 
@@ -93,6 +106,9 @@ class DQReportWriter:
         report: SilverDQReport,
         output_path: Path | None = None,
         format: DQReportFormat | None = None,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> Path:
         """Write Silver DQ report to file.
 
@@ -100,6 +116,8 @@ class DQReportWriter:
             report: Silver DQ report to write.
             output_path: Output path (None = alongside data).
             format: Output format (None = JSON).
+            provider: Provider name for filename generation.
+            entity: Entity name for filename generation.
 
         Returns:
             Path to the written report file.
@@ -113,24 +131,28 @@ class DQReportWriter:
             normalized_table = report.target_table.replace(".", "/")
 
             if self._flat_structure:
-                # Flat: {base_path}/{table_name}_dq_report{ext}
-                # For flat structure, use underscore instead of slash
-                flat_table_name = report.target_table.replace(".", "_")
-                output_path = (
-                    self._base_path / f"{flat_table_name}_dq_report{extension}"
-                )
+                # Flat: {base_path}/silver_{provider}_{entity}_dq_report{ext}
+                if provider and entity:
+                    filename = f"silver_{provider}_{entity}_dq_report{extension}"
+                else:
+                    flat_table_name = report.target_table.replace(".", "_")
+                    filename = f"silver_{flat_table_name}_dq_report{extension}"
+                output_path = self._base_path / filename
             else:
-                # Nested: {base_path}/{table_name}/_dq_reports/{run_id}_dq_report{ext}
-                output_path = (
-                    self._base_path
-                    / normalized_table
-                    / self.DQ_REPORTS_DIR
-                    / f"{report.run_id}_dq_report{extension}"
-                )
+                # Unified: {base_path}/{provider}/{entity}/silver_{provider}_{entity}_dq_report{ext}
+                if provider and entity:
+                    filename = f"silver_{provider}_{entity}_dq_report{extension}"
+                else:
+                    filename = f"silver_{report.run_id}_dq_report{extension}"
+                output_path = self._base_path / normalized_table / filename
         else:
             output_path = Path(output_path)
             if output_path.is_dir():
-                output_path = output_path / f"{report.run_id}_dq_report{extension}"
+                if provider and entity:
+                    filename = f"silver_{provider}_{entity}_dq_report{extension}"
+                else:
+                    filename = f"silver_{report.run_id}_dq_report{extension}"
+                output_path = output_path / filename
 
         return await self._write_report(report, output_path, format)
 
@@ -139,6 +161,9 @@ class DQReportWriter:
         report: GoldDQReport,
         output_path: Path | None = None,
         format: DQReportFormat | None = None,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> Path:
         """Write Gold DQ report to file.
 
@@ -146,6 +171,8 @@ class DQReportWriter:
             report: Gold DQ report to write.
             output_path: Output path (None = alongside data).
             format: Output format (None = JSON).
+            provider: Provider name for filename generation.
+            entity: Entity name for filename generation.
 
         Returns:
             Path to the written report file.
@@ -159,24 +186,28 @@ class DQReportWriter:
             normalized_table = report.target_table.replace(".", "/")
 
             if self._flat_structure:
-                # Flat: {base_path}/{table_name}_dq_report{ext}
-                # For flat structure, use underscore instead of slash
-                flat_table_name = report.target_table.replace(".", "_")
-                output_path = (
-                    self._base_path / f"{flat_table_name}_dq_report{extension}"
-                )
+                # Flat: {base_path}/gold_{provider}_{entity}_dq_report{ext}
+                if provider and entity:
+                    filename = f"gold_{provider}_{entity}_dq_report{extension}"
+                else:
+                    flat_table_name = report.target_table.replace(".", "_")
+                    filename = f"gold_{flat_table_name}_dq_report{extension}"
+                output_path = self._base_path / filename
             else:
-                # Nested: {base_path}/{table_name}/_dq_reports/{run_id}_dq_report{ext}
-                output_path = (
-                    self._base_path
-                    / normalized_table
-                    / self.DQ_REPORTS_DIR
-                    / f"{report.run_id}_dq_report{extension}"
-                )
+                # Unified: {base_path}/{provider}/{entity}/gold_{provider}_{entity}_dq_report{ext}
+                if provider and entity:
+                    filename = f"gold_{provider}_{entity}_dq_report{extension}"
+                else:
+                    filename = f"gold_{report.run_id}_dq_report{extension}"
+                output_path = self._base_path / normalized_table / filename
         else:
             output_path = Path(output_path)
             if output_path.is_dir():
-                output_path = output_path / f"{report.run_id}_dq_report{extension}"
+                if provider and entity:
+                    filename = f"gold_{provider}_{entity}_dq_report{extension}"
+                else:
+                    filename = f"gold_{report.run_id}_dq_report{extension}"
+                output_path = output_path / filename
 
         return await self._write_report(report, output_path, format)
 

@@ -293,8 +293,9 @@ class TestDQReportIntegration:
 
         # Assert
         assert result.bronze_report_path is not None
-        # Path should contain _dq_reports directory
-        assert "_dq_reports" in str(result.bronze_report_path)
+        # DQ reports are now in the same directory as data (no _dq_reports subdir)
+        # Path should contain dq_report in filename
+        assert "_dq_report" in str(result.bronze_report_path)
         # Path should contain batch_id in filename
         assert "batch-001" in result.bronze_report_path.name
 
