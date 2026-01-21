@@ -202,6 +202,9 @@ class TestFunctionComplexity:
         "validate_concentration": 7,  # Concentration validation with unit checks
         "validate_pchembl": 7,  # pChEMBL validation with range checks
         "validate_activity_value": 10,  # Activity value validation
+        # DQ metrics calculator (moved from application to domain)
+        "DQMetricsCalculator": 7,  # CC=6 - DQ metrics calculator with drift detection
+        "_detect_schema_drift": 10,  # CC=9 - Schema drift detection with severity levels
         # CrossRef/OpenAlex/SemanticScholar adapter fallback logic
         "fetch_filtered_with_fallback": 25,  # DOI→title fallback with batch processing + multi-identifier resolution
         # Domain value coercion with type handling

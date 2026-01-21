@@ -15,11 +15,74 @@ from uuid import uuid4
 import pyarrow as pa
 import pytest
 
-from bioetl.domain.models.metadata import GoldMetadata, SilverMetadata
+from bioetl.domain.models.metadata import (
+    DeltaMetrics,
+    EnvironmentMetadata,
+    GoldMetadata,
+    PipelineMetadata,
+    RuntimeMetadata,
+    RunTypeEnum,
+    SilverMetadata,
+)
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+
+class MockMetadataCoordinator:
+    """Mock MetadataCoordinator that creates minimal metadata objects."""
+
+    def create_silver_metadata(self, input_data: Any) -> SilverMetadata:
+        """Create minimal SilverMetadata for testing."""
+        runtime = RuntimeMetadata(
+            run_id=input_data.records[0].get("_run_id", "test-run-id"),
+            run_type=RunTypeEnum.INCREMENTAL,
+            started_at_utc=datetime.now(UTC),
+        )
+        pipeline = PipelineMetadata(name="test", provider="test", entity="test")
+        environment = EnvironmentMetadata(
+            hostname="test", python_version="3.11", bioetl_version="1.0"
+        )
+        delta = DeltaMetrics(
+            table_path=str(input_data.table_path),
+            operation=str(input_data.mode.value)
+            if hasattr(input_data.mode, "value")
+            else str(input_data.mode),
+            rows_inserted=len(input_data.records),
+            primary_key=input_data.primary_keys,
+        )
+        return SilverMetadata(
+            runtime=runtime,
+            pipeline=pipeline,
+            delta=delta,
+            environment=environment,
+        )
+
+    def create_gold_metadata(self, input_data: Any) -> GoldMetadata:
+        """Create minimal GoldMetadata for testing."""
+        from bioetl.domain.models.metadata import GoldOutputMetadata
+
+        runtime = RuntimeMetadata(
+            run_id="test-run-id",
+            run_type=RunTypeEnum.INCREMENTAL,
+            started_at_utc=datetime.now(UTC),
+        )
+        pipeline = PipelineMetadata(name="test", provider="test", entity="test")
+        environment = EnvironmentMetadata(
+            hostname="test", python_version="3.11", bioetl_version="1.0"
+        )
+        output = GoldOutputMetadata(
+            table_path=str(input_data.table_path),
+            record_count=len(input_data.records),
+            operation="overwrite",
+        )
+        return GoldMetadata(
+            runtime=runtime,
+            pipeline=pipeline,
+            output=output,
+            environment=environment,
+        )
 
 
 class MockMetadataWriter:
@@ -87,6 +150,12 @@ def mock_metadata_writer() -> MockMetadataWriter:
 
 
 @pytest.fixture
+def mock_metadata_coordinator() -> MockMetadataCoordinator:
+    """Create a mock metadata coordinator."""
+    return MockMetadataCoordinator()
+
+
+@pytest.fixture
 def sample_records() -> list[dict[str, Any]]:
     """Create sample records for testing."""
     run_id = str(uuid4())
@@ -135,6 +204,7 @@ class TestSilverWriterMetadataIntegration:
         tmp_path: Path,
         mock_logger: MagicMock,
         mock_metadata_writer: MockMetadataWriter,
+        mock_metadata_coordinator: MockMetadataCoordinator,
         sample_records: list[dict[str, Any]],
         silver_schema: pa.Schema,
     ) -> None:
@@ -143,6 +213,7 @@ class TestSilverWriterMetadataIntegration:
             base_path=tmp_path,
             logger=mock_logger,
             metadata_writer=mock_metadata_writer,
+            metadata_coordinator=mock_metadata_coordinator,
         )
 
         await writer.write_silver(
