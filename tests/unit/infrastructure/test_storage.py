@@ -224,9 +224,7 @@ class TestBronzeWriter:
         compressed = compressor.compress(jsonl_data.encode("utf-8"))
 
         # Create directory structure (path format: {provider}/{entity}/{date}/)
-        bronze_dir = (
-            tmp_path / "test_provider" / "test_entity" / "2023-01-01"
-        )
+        bronze_dir = tmp_path / "test_provider" / "test_entity" / "2023-01-01"
         bronze_dir.mkdir(parents=True)
         test_file = bronze_dir / "batch_test.jsonl.zst"
         test_file.write_bytes(compressed)

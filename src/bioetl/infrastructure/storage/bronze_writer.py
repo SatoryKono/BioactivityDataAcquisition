@@ -449,8 +449,7 @@ class BronzeWriter:
             # Path format: {provider}/{entity}/{date}/batch_{date}_{batch_id}.jsonl.zst
             # base_path already points to 'data/output/bronze'
             relative_path = (
-                f"{provider}/{entity}/"
-                f"{date_str}/batch_{date_str}_{batch_id}.jsonl.zst"
+                f"{provider}/{entity}/{date_str}/batch_{date_str}_{batch_id}.jsonl.zst"
             )
             metadata = self._build_bronze_metadata(
                 run_id, run_type, ingestion_ts, provider, entity, batch_id
