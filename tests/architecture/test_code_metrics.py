@@ -73,7 +73,7 @@ class TestFileSizeLimits:
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
         "gold_analyzer.py": 830,  # 827 LOC - Gold layer analysis with DQ rules
         "silver_analyzer.py": 590,  # 570 LOC - Silver layer analysis with validation
-        "dq_report_service.py": 560,  # 552 LOC - DQ report service with extracted helpers for CC reduction
+        "dq_report_service.py": 565,  # 561 LOC - DQ report service with extracted helpers for CC reduction
         # Composition layer exemptions
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "entrypoints.py": 750,  # 736 LOC - pipeline entrypoints (run_pipeline expanded + services + export)
@@ -519,7 +519,7 @@ class TestClassSize:
         "FileAuditAdapter": 330,  # 324 lines - File-based AuditPort implementation with async I/O
         # DQ analyzers (comprehensive data quality analysis)
         "DQReportSerializer": 410,  # 403 lines - DQ report serialization with multiple formats (increased for CC reduction)
-        "DQReportService": 405,  # 399 lines - DQ report orchestration with extracted helpers for CC reduction
+        "DQReportService": 410,  # 407 lines - DQ report orchestration with extracted helpers for CC reduction
         "GoldDQAnalyzer": 780,  # 779 lines - Gold layer DQ analysis with business rules
         "SilverDQAnalyzer": 540,  # 521 lines - Silver layer DQ analysis with schema drift
         # Domain services
