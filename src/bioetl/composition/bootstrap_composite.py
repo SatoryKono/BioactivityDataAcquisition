@@ -105,6 +105,15 @@ def bootstrap_composite_pipeline(
 
     # Create seed runner factory
     def seed_runner_factory() -> PipelineRunner:
+        """Create PipelineRunner for the seed phase.
+
+        The seed pipeline runs first to fetch primary entities (e.g., publications)
+        which provide join keys (DOI, PMID) for subsequent enricher pipelines.
+
+        Returns:
+            PipelineRunner configured for seed pipeline execution with
+            optional limit from runtime config.
+        """
         options = RunOptions(
             run_type="incremental",
             limit=runtime.seed_limit,
@@ -119,6 +128,26 @@ def bootstrap_composite_pipeline(
     def enricher_runner_factory(
         pipeline_name: str, keys: pl.DataFrame
     ) -> PipelineRunner:
+        """Create PipelineRunner for an enricher phase.
+
+        Enricher pipelines fetch supplementary data (citations, metadata) using
+        join keys extracted from seed results. This factory applies composite-specific
+        configuration per ADR-026.
+
+        Configuration adjustments:
+        - Disables YAML input_filter to prevent enrichers from using their own
+          filter files (e.g., data/input/dois.csv)
+        - Extracts join key values (DOI, PMID) from seed results DataFrame
+        - Passes extracted IDs as filter_ids to limit API calls to relevant records
+
+        Args:
+            pipeline_name: Name of the enricher pipeline to instantiate.
+            keys: DataFrame containing seed results with join key columns.
+
+        Returns:
+            PipelineRunner configured for enricher pipeline execution with
+            programmatic filtering based on seed results.
+        """
         # For enrichers in composite mode:
         # 1. Disable YAML input_filter - we don't want enrichers to use their
         #    own filter files (e.g., data/input/dois.csv).
