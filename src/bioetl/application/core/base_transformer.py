@@ -388,43 +388,44 @@ class BaseTransformer(ABC):
         )
 
     @staticmethod
-    def serialize_json(value: Any) -> str | None:
-        """Serialize complex values (dict/list) to JSON string.
+    def serialize_json(value: Any) -> str | int | float | bool | None:
+        """Serialize dict/list to JSON string or native type for Silver layer.
 
-        Used for storing nested structures in Silver layer as JSON strings.
-        - Empty collections ([], {}) are treated as None for semantic consistency
-        - Single-element lists are unwrapped: [x] → x
-        - Uses orjson with OPT_SORT_KEYS for deterministic output (RULES.md §2.8.1)
-        - Output is compact (no spaces) for efficiency and consistency with Bronze/Hashing.
-
-        Args:
-            value: Value to serialize.
-
-        Returns:
-            JSON string for non-empty dict/list, str(value) for other types,
-            None for None or empty collections.
-
+        Empty collections → None; single-element lists → unwrapped native type;
+        multi-element lists/dicts → JSON string (orjson with OPT_SORT_KEYS).
         """
         if value is None:
             return None
+
         if isinstance(value, dict):
-            if len(value) == 0:
-                return None
-            json_bytes: bytes = orjson.dumps(value, option=orjson.OPT_SORT_KEYS)
-            return json_bytes.decode("utf-8")
+            return BaseTransformer._serialize_dict(value)
+
         if isinstance(value, list):
-            if len(value) == 0:
-                return None
-            # Unwrap single-element lists
-            if len(value) == 1:
-                item = value[0]
-                if isinstance(item, dict):
-                    item_bytes: bytes = orjson.dumps(item, option=orjson.OPT_SORT_KEYS)
-                    return item_bytes.decode("utf-8")
-                return str(item)
-            list_bytes: bytes = orjson.dumps(value, option=orjson.OPT_SORT_KEYS)
-            return list_bytes.decode("utf-8")
-        return str(value)
+            return BaseTransformer._serialize_list(value)
+
+        # Non-collection types (str, int, float, bool): return as-is
+        return value
+
+    @staticmethod
+    def _serialize_dict(d: dict[str, Any]) -> str | None:
+        if not d:
+            return None
+        return orjson.dumps(d, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+
+    @staticmethod
+    def _serialize_list(lst: list[Any]) -> str | int | float | bool | None:
+        if not lst:
+            return None
+        if len(lst) == 1:
+            item = lst[0]
+            if isinstance(item, (dict, list)):
+                return (
+                    None
+                    if not item
+                    else orjson.dumps(item, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+                )
+            return item
+        return orjson.dumps(lst, option=orjson.OPT_SORT_KEYS).decode("utf-8")
 
     @staticmethod
     def serialize_json_list(value: list[Any] | None) -> str | None:
@@ -459,7 +460,7 @@ class BaseTransformer(ABC):
         cls,
         record: dict[str, Any],
         field_names: Sequence[str],
-    ) -> dict[str, str | None]:
+    ) -> dict[str, str | int | float | bool | None]:
         """Serialize multiple JSON fields at once.
 
         Convenience method to reduce repetitive serialize_json() calls
@@ -470,7 +471,7 @@ class BaseTransformer(ABC):
             field_names: Names of fields to serialize.
 
         Returns:
-            Dictionary with serialized JSON strings (or None for empty/missing).
+            Dictionary with serialized values (JSON strings, native types, or None).
 
         Example:
             >>> result = self.serialize_json_fields(record, [

@@ -93,7 +93,7 @@ class TargetTransformer(BaseChemblTransformer):
 
     def _aggregate_synonyms(
         self, components: list[dict[str, Any]] | None
-    ) -> str | None:
+    ) -> str | int | float | bool | None:
         """Aggregate synonyms from all components into a single JSON list.
 
         Uses aggregate_nested_lists from transform_utils.
@@ -110,7 +110,7 @@ class TargetTransformer(BaseChemblTransformer):
 
     def _aggregate_component_xrefs(
         self, components: list[dict[str, Any]] | None
-    ) -> str | None:
+    ) -> str | int | float | bool | None:
         """Aggregate cross-references from all target components.
 
         Uses aggregate_nested_lists from transform_utils.
