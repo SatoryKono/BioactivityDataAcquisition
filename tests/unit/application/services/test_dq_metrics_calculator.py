@@ -8,7 +8,7 @@ from bioetl.application.services.dq_metrics_calculator import (
     DQMetricsCalculator,
     DQMetricsInput,
 )
-from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics, SchemaDriftInfo
+from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 
 
 @pytest.fixture

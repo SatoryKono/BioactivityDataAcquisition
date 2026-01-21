@@ -10,7 +10,7 @@ Requirements:
 
 Architecture:
 - Stores checkpoints as JSON on local filesystem
-- Path: {base_path}/checkpoints/{pipeline}/latest.json
+- Path: {base_path}/{provider}_{entity}.json (flat structure)
 - Atomic writes via temp file + os.replace
 - Metadata includes run_id and custom metadata
 """
@@ -150,15 +150,18 @@ class LocalCheckpoint:
         return await loop.run_in_executor(None, self._list_all_sync)
 
     def _list_all_sync(self) -> list[str]:
-        """Synchronous list_all implementation."""
-        prefix = "checkpoints"
-        root = self.base_path / prefix
+        """Synchronous list_all implementation.
+
+        Lists all pipelines with checkpoints by scanning for .json files
+        directly in the base path (flat structure).
+        """
         pipelines: set[str] = set()
 
-        if root.exists():
-            for path in root.iterdir():
-                if path.is_dir():
-                    pipelines.add(path.name)
+        if self.base_path.exists():
+            for path in self.base_path.iterdir():
+                if path.is_file() and path.suffix == ".json":
+                    # Remove .json suffix to get pipeline name
+                    pipelines.add(path.stem)
 
         return sorted(pipelines)
 
@@ -176,7 +179,12 @@ class LocalCheckpoint:
         return (self.base_path / key).exists()
 
     def _get_key(self, pipeline: str) -> str:
-        return f"checkpoints/{pipeline}/latest.json"
+        """Get checkpoint file path for a pipeline.
+
+        Returns flat path: {pipeline}.json (e.g., chembl_activity.json)
+        The base_path already points to data/output/checkpoints/.
+        """
+        return f"{pipeline}.json"
 
     async def aclose(self) -> None:
         """Close checkpoint storage (no-op for local filesystem)."""

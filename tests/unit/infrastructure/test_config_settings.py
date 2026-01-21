@@ -116,14 +116,17 @@ class TestSettings:
         assert settings.data_dir == Path("/custom/data")
 
     def test_path_properties(self, monkeypatch) -> None:
-        """Test bronze_path, silver_path, gold_path, checkpoint_path properties."""
+        """Test bronze_path, silver_path, gold_path, checkpoint_path properties.
+
+        Unified path structure: {data_dir}/output/{layer}/
+        """
         monkeypatch.delenv("BIOETL_ENV", raising=False)
         settings = Settings(test_mode=True, data_dir=Path("/data"), _env_file=None)
 
-        assert settings.bronze_path == Path("/data/bronze")
-        assert settings.silver_path == Path("/data/silver")
-        assert settings.gold_path == Path("/data/gold")
-        assert settings.checkpoint_path == Path("/data/checkpoints")
+        assert settings.bronze_path == Path("/data/output/bronze")
+        assert settings.silver_path == Path("/data/output/silver")
+        assert settings.gold_path == Path("/data/output/gold")
+        assert settings.checkpoint_path == Path("/data/output/checkpoints")
 
     def test_staging_env(self, monkeypatch) -> None:
         """Test that staging env works."""

@@ -339,27 +339,27 @@ class Settings(BaseSettings):
     @property
     def bronze_path(self) -> Path:
         """Path for Bronze layer storage."""
-        return self.data_dir / "bronze"
+        return self.data_dir / "output" / "bronze"
 
     @property
     def silver_path(self) -> Path:
         """Path for Silver layer storage."""
-        return self.data_dir / "silver"
+        return self.data_dir / "output" / "silver"
 
     @property
     def gold_path(self) -> Path:
         """Path for Gold layer storage."""
-        return self.data_dir / "gold"
+        return self.data_dir / "output" / "gold"
 
     @property
     def checkpoint_path(self) -> Path:
         """Path for checkpoint storage."""
-        return self.data_dir / "checkpoints"
+        return self.data_dir / "output" / "checkpoints"
 
     @property
     def quarantine_path(self) -> Path:
         """Path for quarantine storage."""
-        return self.data_dir / "quarantine"
+        return self.data_dir / "output" / "quarantine"
 
     @classmethod
     def settings_customise_sources(

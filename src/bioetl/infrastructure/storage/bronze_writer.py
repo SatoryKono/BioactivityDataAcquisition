@@ -58,9 +58,6 @@ class BronzeWriter:
     COMPRESSION_LEVEL = 3
     COMPRESSION_THREADS = -1
 
-    # Bronze format version for path partitioning (REQ-DATA-002)
-    BRONZE_FORMAT_VERSION = "v1"
-
     def __init__(
         self,
         base_path: str | Path,
@@ -449,11 +446,11 @@ class BronzeWriter:
                 records = self._validate_json_records(records)
 
             date_str = date.strftime("%Y-%m-%d")
-            # FIX: Removed redundant 'bronze/' prefix.
+            # Path format: {provider}/{entity}/{date}/batch_{date}_{batch_id}.jsonl.zst
             # base_path already points to 'data/output/bronze'
             relative_path = (
-                f"{self.BRONZE_FORMAT_VERSION}/{provider}/{entity}/"
-                f"{date_str}/batch_{batch_id}.jsonl.zst"
+                f"{provider}/{entity}/"
+                f"{date_str}/batch_{date_str}_{batch_id}.jsonl.zst"
             )
             metadata = self._build_bronze_metadata(
                 run_id, run_type, ingestion_ts, provider, entity, batch_id
@@ -647,13 +644,21 @@ class BronzeWriter:
         date_str: str,
         batch_id: BatchID,
     ) -> None:
-        """Write uncompressed JSONL copy of records atomically."""
-        json_relative_path = f"{provider}/{entity}/batch_{date_str}_{batch_id}.jsonl"
+        """Write uncompressed JSONL copy of records atomically.
+
+        JSON copy is written in the same directory as the compressed zst file
+        for easier access and co-location of data artifacts.
+        """
+        # JSON copy is now stored alongside the zst file in the same directory
+        json_relative_path = (
+            f"{provider}/{entity}/{date_str}/batch_{date_str}_{batch_id}.jsonl"
+        )
 
         # Combine all records into single JSONL content
         jsonl_content = b"".join(records)
 
-        json_full_path = Path(self.json_path) / json_relative_path
+        # Use base_path (same location as zst files) instead of separate json_path
+        json_full_path = self.base_path / json_relative_path
         json_full_path.parent.mkdir(parents=True, exist_ok=True)
 
         loop = asyncio.get_running_loop()
@@ -698,20 +703,22 @@ class BronzeWriter:
         date: datetime | None = None,
     ) -> list[str]:
         """List all batch files for a given provider/entity."""
-        # FIX: Removed redundant 'bronze/' prefix here too
-        prefix = f"{self.BRONZE_FORMAT_VERSION}/{provider}/{entity}/"
+        # Path format: {provider}/{entity}/{date}/
+        prefix = f"{provider}/{entity}/"
         if date:
             prefix = f"{prefix}{date.strftime('%Y-%m-%d')}/"
 
         return self._list_batches_local(prefix, date)
 
     def _find_old_date_dirs(self, cutoff_str: str) -> list[Path]:
-        """Find date directories older than cutoff."""
-        version_path = self.base_path / self.BRONZE_FORMAT_VERSION
-        if not version_path.exists():
+        """Find date directories older than cutoff.
+
+        Iterates over {base_path}/{provider}/{entity}/{date}/ structure.
+        """
+        if not self.base_path.exists():
             return []
         old_dirs: list[Path] = []
-        for prov in version_path.iterdir():
+        for prov in self.base_path.iterdir():
             if not prov.is_dir():
                 continue
             for ent in prov.iterdir():
