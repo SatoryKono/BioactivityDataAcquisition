@@ -23,7 +23,6 @@ from bioetl.infrastructure.schemas.composite_config import (
     LineageSchema,
     MergeOutputSchema,
     MergeSchema,
-    RetrySchema,
     SeedSchema,
 )
 
@@ -55,7 +54,9 @@ class TestSeedSchema:
             )
 
         # Empty string in list - caught by custom validator
-        with pytest.raises(ValidationError, match="output_keys cannot contain empty strings"):
+        with pytest.raises(
+            ValidationError, match="output_keys cannot contain empty strings"
+        ):
             SeedSchema(
                 pipeline="test",
                 output_keys=["id", ""],
@@ -109,7 +110,9 @@ class TestEnricherSchema:
             )
 
         # Empty string in list - caught by custom validator
-        with pytest.raises(ValidationError, match="join_keys cannot contain empty strings"):
+        with pytest.raises(
+            ValidationError, match="join_keys cannot contain empty strings"
+        ):
             EnricherSchema(
                 pipeline="test",
                 join_keys=[""],
@@ -181,7 +184,9 @@ class TestDQSchemas:
         DQOverrideSchema(soft_fail_threshold=0.1, hard_fail_threshold=0.2)
 
         # Invalid: soft >= hard
-        with pytest.raises(ValidationError, match="soft_fail_threshold must be less than"):
+        with pytest.raises(
+            ValidationError, match="soft_fail_threshold must be less than"
+        ):
             DQOverrideSchema(soft_fail_threshold=0.5, hard_fail_threshold=0.5)
 
     def test_dq_override_to_domain(self) -> None:
@@ -232,9 +237,7 @@ class TestCompositeConfigSchema:
                     "silver_table": "s3://e1",
                 }
             ],
-            "merge": {
-                "output": {"silver": "s3://merged/s", "gold": "s3://merged/g"}
-            },
+            "merge": {"output": {"silver": "s3://merged/s", "gold": "s3://merged/g"}},
         }
 
     def test_valid_config(self, valid_config_data: dict) -> None:
@@ -254,7 +257,9 @@ class TestCompositeConfigSchema:
             }
         ]
 
-        with pytest.raises(ValidationError, match="join_key 'missing_key' not found in seed"):
+        with pytest.raises(
+            ValidationError, match="join_key 'missing_key' not found in seed"
+        ):
             CompositeConfigSchema(**data)
 
     def test_validate_unique_enricher_names(self, valid_config_data: dict) -> None:
@@ -299,14 +304,18 @@ class TestCompositeConfigFileSchema:
                         "join_keys": ["id"],
                     }
                 ],
-                "merge": {
-                    "output": {"silver": "s", "gold": "g"}
-                }
+                "merge": {"output": {"silver": "s", "gold": "g"}},
             },
             "gold_filters": {"key": "val"},
             "maintenance": {"enabled": True},
         }
-        schema = CompositeConfigFileSchema(**data)
+        # Use explicit instantiation to satisfy mypy
+        schema = CompositeConfigFileSchema(
+            schema_version=str(data["schema_version"]),
+            composite=CompositeConfigSchema(**data["composite"]),  # type: ignore[arg-type]
+            gold_filters=data["gold_filters"],  # type: ignore[arg-type]
+            maintenance=data["maintenance"],  # type: ignore[arg-type]
+        )
         assert schema.schema_version == "2.0.0"
         assert schema.gold_filters == {"key": "val"}
         assert schema.maintenance == {"enabled": True}
@@ -314,10 +323,11 @@ class TestCompositeConfigFileSchema:
         domain = schema.to_domain()
         assert domain.name == "test"
 
+
 class TestExecutionLineageSchemas:
     """Tests for Execution and Lineage schemas."""
 
-    def test_execution_schema_defaults(self):
+    def test_execution_schema_defaults(self) -> None:
         schema = ExecutionSchema()
         assert schema.max_concurrency == 4
         assert schema.retry.max_attempts == 3
@@ -325,7 +335,7 @@ class TestExecutionLineageSchemas:
         domain = schema.to_domain()
         assert domain.max_concurrency == 4
 
-    def test_lineage_schema_defaults(self):
+    def test_lineage_schema_defaults(self) -> None:
         schema = LineageSchema()
         assert schema.track_field_sources is True
 

@@ -6,6 +6,7 @@ Tests CLI output formatters.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import pytest
 from bioetl.application.core.cleanup_service import CleanupPreview, LayerInfo
@@ -49,7 +50,7 @@ class TestFormatBytes:
     def test_mb(self) -> None:
         """Test formatting MB."""
         assert format_bytes(1024**2) == "1.00 MB"
-        assert format_bytes(1.5 * 1024**2) == "1.50 MB"
+        assert format_bytes(int(1.5 * 1024**2)) == "1.50 MB"
 
     def test_gb(self) -> None:
         """Test formatting GB."""
@@ -185,7 +186,7 @@ class TestEchoQuarantineRecord:
 
     def test_record_output(self, capsys: pytest.CaptureFixture) -> None:
         """Test record output."""
-        record = {"error_code": "ERR01", "payload": "data"}
+        record: dict[str, Any] = {"error_code": "ERR01", "payload": "data"}
         echo_quarantine_record(record)
         captured = capsys.readouterr()
 
@@ -194,7 +195,7 @@ class TestEchoQuarantineRecord:
 
     def test_record_missing_fields(self, capsys: pytest.CaptureFixture) -> None:
         """Test record with missing fields."""
-        record = {}
+        record: dict[str, Any] = {}
         echo_quarantine_record(record)
         captured = capsys.readouterr()
 

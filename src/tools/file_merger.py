@@ -489,9 +489,7 @@ def generate_tree_structure(
 
     # Filter out excluded directories
     items = [
-        item
-        for item in items
-        if not (item.is_dir() and item.name in exclude_dirs)
+        item for item in items if not (item.is_dir() and item.name in exclude_dirs)
     ]
 
     # Process items

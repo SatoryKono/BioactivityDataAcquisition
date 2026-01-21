@@ -22,7 +22,7 @@ def cli_runner() -> CliRunner:
 
 
 @pytest.fixture
-def mock_export_service():
+def mock_export_service() -> MagicMock:
     """Create a mock export service."""
     service = MagicMock()
     service.list_tables = MagicMock()
@@ -118,12 +118,18 @@ class TestExportCommand:
         col_mock.type = "string"
         col_mock.nullable = False
 
+        # Properly type columns as tuple of ColumnInfo-like objects
+        # We can use the actual ColumnInfo for testing to be cleaner
+        from bioetl.application.services.export_service import ColumnInfo
+
+        cols = (ColumnInfo(name="id", type="string", nullable=False),)
+
         preview_data = TablePreview(
             table_name="chembl.activity",
             layer="silver",
             row_count=100,
-            columns=[col_mock],
-            sample_rows=[{"id": "123"}],
+            columns=cols,
+            sample_rows=({"id": "123"},),
         )
         mock_export_service.preview.return_value = preview_data
 
@@ -133,7 +139,9 @@ class TestExportCommand:
         assert "Table: chembl.activity" in result.output
         assert "Rows: 100" in result.output
         assert "id: string" in result.output
-        mock_export_service.preview.assert_called_once_with("chembl.activity", layer="silver")
+        mock_export_service.preview.assert_called_once_with(
+            "chembl.activity", layer="silver"
+        )
 
     @patch("bioetl.interfaces.cli.commands.export.get_export_service")
     def test_preview_table_not_found(
@@ -205,11 +213,16 @@ class TestExportCommand:
             export_command,
             [
                 "chembl.activity",
-                "--format", "xlsx",
-                "--layer", "gold",
-                "--limit", "10",
-                "--columns", "id,smiles",
-                "--output", "/tmp/custom",
+                "--format",
+                "xlsx",
+                "--layer",
+                "gold",
+                "--limit",
+                "10",
+                "--columns",
+                "id,smiles",
+                "--output",
+                "/tmp/custom",
             ],
         )
 
