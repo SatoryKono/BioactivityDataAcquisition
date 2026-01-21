@@ -734,14 +734,15 @@ class BatchExecutor:
         # Extract entity name from silver_table for DQ report naming
         # This ensures consistency with actual table names (e.g., "publication" not "document")
         silver_table = self._config.table_config.silver_table
-        if "_" in silver_table:
+        if silver_table and "_" in silver_table:
             # Split on first underscore (e.g., chembl_publication -> publication)
             dq_entity = silver_table.split("_", 1)[1]
-        elif "." in silver_table:
+        elif silver_table and "." in silver_table:
             # Split on dot (e.g., chembl.publication -> publication)
             dq_entity = silver_table.split(".")[-1]
         else:
-            dq_entity = silver_table
+            # Fallback to entity_type if silver_table is not set
+            dq_entity = silver_table or self._config.entity_type
 
         return DQReportContext(
             run_id=str(self._context.run_id),
