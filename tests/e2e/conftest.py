@@ -242,11 +242,11 @@ def assert_bronze_files_exist(data_dir: Path, provider: str, entity: str) -> lis
         AssertionError: Если файлы не найдены
 
     Note:
-        Path structure is: data_dir/bronze/v1/{provider}/{entity}/
-        (base_path is data_dir/bronze, BronzeWriter appends 'v1/...')
+        Path structure is: data_dir/output/bronze/{provider}/{entity}/
+        (based on settings.bronze_path which includes 'output/bronze')
     """
-    # BronzeWriter uses base_path + "v1/{provider}/..." path format
-    bronze_path = data_dir / "bronze" / "v1" / provider / entity
+    # BronzeWriter writes to settings.bronze_path/{provider}/{entity}/{date}/
+    bronze_path = data_dir / "output" / "bronze" / provider / entity
     if not bronze_path.exists():
         raise AssertionError(f"Bronze path does not exist: {bronze_path}")
 
@@ -274,7 +274,7 @@ def assert_silver_table_has_records(
         AssertionError: Если таблица пуста или записей меньше expected_min
     """
 
-    table_path = data_dir / "silver" / table_name
+    table_path = data_dir / "output" / "silver" / table_name
     if not table_path.exists():
         raise AssertionError(f"Silver table does not exist: {table_path}")
 
@@ -312,7 +312,7 @@ def assert_gold_table_has_records(
         AssertionError: Если таблица пуста или записей меньше expected_min
     """
 
-    table_path = data_dir / "gold" / table_name
+    table_path = data_dir / "output" / "gold" / table_name
     if not table_path.exists():
         raise AssertionError(f"Gold table does not exist: {table_path}")
 
@@ -338,7 +338,7 @@ def get_silver_records(data_dir: Path, table_name: str) -> list[dict]:
         Список словарей с записями
     """
 
-    table_path = data_dir / "silver" / table_name
+    table_path = data_dir / "output" / "silver" / table_name
     dt = DeltaTable(str(table_path))
     return dt.to_pyarrow_table().to_pylist()
 
@@ -354,6 +354,6 @@ def get_gold_records(data_dir: Path, table_name: str) -> list[dict]:
         Список словарей с записями
     """
 
-    table_path = data_dir / "gold" / table_name
+    table_path = data_dir / "output" / "gold" / table_name
     dt = DeltaTable(str(table_path))
     return dt.to_pyarrow_table().to_pylist()
