@@ -37,7 +37,9 @@ class TestBootstrapQuarantine:
         with patch(
             "bioetl.composition._bootstrap.checkpoint.get_settings"
         ) as mock_settings:
-            mock_settings.return_value = MagicMock(silver_path=Path("/tmp/silver"))
+            mock_settings.return_value = MagicMock(
+                quarantine_path=Path("/tmp/quarantine")
+            )
             result = bootstrap_quarantine()
 
         assert isinstance(result, QuarantinePort)
@@ -48,13 +50,15 @@ class TestBootstrapQuarantine:
         with patch(
             "bioetl.composition._bootstrap.checkpoint.get_settings"
         ) as mock_settings:
-            mock_settings.return_value = MagicMock(silver_path=Path("/custom/silver"))
+            mock_settings.return_value = MagicMock(
+                quarantine_path=Path("/custom/quarantine")
+            )
             result = bootstrap_quarantine()
 
         # Verify it's a valid UnifiedQuarantine instance with correct path
         assert isinstance(result, UnifiedQuarantine)
-        # Use Path for cross-platform comparison (Windows uses backslashes)
-        assert Path(result.base_path).match("*/common/quarantine")
+        # Now uses centralized quarantine_path from settings
+        assert result.base_path == "/custom/quarantine"
 
 
 @pytest.mark.unit
@@ -108,7 +112,9 @@ class TestBootstrapQuarantineManager:
         with patch(
             "bioetl.composition._bootstrap.checkpoint.get_settings"
         ) as mock_settings:
-            mock_settings.return_value = MagicMock(silver_path=Path("/tmp/silver"))
+            mock_settings.return_value = MagicMock(
+                quarantine_path=Path("/tmp/quarantine")
+            )
             result = bootstrap_quarantine_manager("test_pipeline")
 
         assert isinstance(result, QuarantineManager)
@@ -118,7 +124,9 @@ class TestBootstrapQuarantineManager:
         with patch(
             "bioetl.composition._bootstrap.checkpoint.get_settings"
         ) as mock_settings:
-            mock_settings.return_value = MagicMock(silver_path=Path("/tmp/silver"))
+            mock_settings.return_value = MagicMock(
+                quarantine_path=Path("/tmp/quarantine")
+            )
             result = bootstrap_quarantine_manager("chembl_activity")
 
         assert result._pipeline_name == "chembl_activity"
@@ -128,7 +136,9 @@ class TestBootstrapQuarantineManager:
         with patch(
             "bioetl.composition._bootstrap.checkpoint.get_settings"
         ) as mock_settings:
-            mock_settings.return_value = MagicMock(silver_path=Path("/tmp/silver"))
+            mock_settings.return_value = MagicMock(
+                quarantine_path=Path("/tmp/quarantine")
+            )
             result = bootstrap_quarantine_manager("test_pipeline")
 
         # QuarantineManager uses _quarantine attribute
@@ -254,7 +264,9 @@ class TestBootstrapQuarantineService:
         with patch(
             "bioetl.composition._bootstrap.checkpoint.get_settings"
         ) as mock_settings:
-            mock_settings.return_value = MagicMock(silver_path=Path("/tmp/silver"))
+            mock_settings.return_value = MagicMock(
+                quarantine_path=Path("/tmp/quarantine")
+            )
             result = bootstrap_quarantine_service()
 
         assert isinstance(result, QuarantineService)
@@ -264,7 +276,9 @@ class TestBootstrapQuarantineService:
         with patch(
             "bioetl.composition._bootstrap.checkpoint.get_settings"
         ) as mock_settings:
-            mock_settings.return_value = MagicMock(silver_path=Path("/tmp/silver"))
+            mock_settings.return_value = MagicMock(
+                quarantine_path=Path("/tmp/quarantine")
+            )
             result = bootstrap_quarantine_service()
 
         # QuarantineService uses quarantine_port attribute (dataclass)
