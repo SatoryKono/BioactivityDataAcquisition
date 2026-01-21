@@ -143,7 +143,7 @@ class MergeService:
             path=self._config.output_gold_path,
             records=records_merged,
         )
-        await self._write_merged_gold(merged_df)
+        await self._write_merged_gold(merged_df, run_id=run_id, sources_used=sources_used)
 
         completed_at = datetime.now(tz=UTC)
         duration = (completed_at - started_at).total_seconds()
@@ -220,31 +220,55 @@ class MergeService:
             df = df.with_columns([pl.col(col).cast(pl.String) for col in null_cols])
         return df
 
-    async def _write_merged_silver(self, df: pl.DataFrame) -> None:
+    async def _write_merged_silver(
+        self,
+        df: pl.DataFrame,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+    ) -> None:
         """Write merged data to Silver layer via StoragePort.
 
         Args:
             df: Polars DataFrame to write.
+            run_id: Composite run ID for metadata tracking.
+            sources_used: List of source pipelines used in merge.
         """
         # Coerce null columns for Delta Lake compatibility
         df = self._coerce_null_columns(df)
 
         table_name = _path_to_table_name(self._config.output_silver_path)
         records = df.to_dicts()
-        await self._storage.write_silver_merged(table_name, records)
+        await self._storage.write_silver_merged(
+            table_name,
+            records,
+            run_id=run_id,
+            sources_used=sources_used,
+        )
 
-    async def _write_merged_gold(self, df: pl.DataFrame) -> None:
+    async def _write_merged_gold(
+        self,
+        df: pl.DataFrame,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+    ) -> None:
         """Write merged data to Gold layer via StoragePort.
 
         Args:
             df: Polars DataFrame to write.
+            run_id: Composite run ID for metadata tracking.
+            sources_used: List of source pipelines used in merge.
         """
         # Coerce null columns for Delta Lake compatibility
         df = self._coerce_null_columns(df)
 
         table_name = _path_to_table_name(self._config.output_gold_path)
         records = df.to_dicts()
-        await self._storage.write_gold_merged(table_name, records)
+        await self._storage.write_gold_merged(
+            table_name,
+            records,
+            run_id=run_id,
+            sources_used=sources_used,
+        )
 
     def _infer_silver_table(self, pipeline_name: str) -> str:
         """Infer Silver table path from pipeline name."""
