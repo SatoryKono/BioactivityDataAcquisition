@@ -60,12 +60,21 @@ class StorageFactory:
 
     @staticmethod
     def _create_csv_exporter_from_config(
-        csv_cfg: Any, logger: LoggerPort
+        csv_cfg: Any,
+        logger: LoggerPort,
+        override_path: Path | None = None,
     ) -> CsvExporter | None:
-        """Create a CsvExporter from configuration if enabled."""
+        """Create a CsvExporter from configuration if enabled.
+
+        Args:
+            csv_cfg: CSV export configuration from YAML.
+            logger: Logger for observability.
+            override_path: If provided, use this path instead of csv_cfg.path.
+                          Used in test mode to respect test isolation.
+        """
         if csv_cfg and csv_cfg.enabled:
             return CsvExporter(
-                base_path=csv_cfg.path,
+                base_path=override_path or csv_cfg.path,
                 logger=logger,
                 delimiter=csv_cfg.delimiter,
                 header=csv_cfg.header,
@@ -213,11 +222,17 @@ class StorageFactory:
             gold_path=str(gold_path),
         )
 
+        # In test mode, override CSV export paths to use resolved layer paths
+        # This ensures test isolation by writing to temp directories
         silver_csv_exporter = StorageFactory._create_csv_exporter_from_config(
-            silver_config.csv_export if silver_config else None, logger
+            silver_config.csv_export if silver_config else None,
+            logger,
+            override_path=silver_path if settings.test_mode else None,
         )
         gold_csv_exporter = StorageFactory._create_csv_exporter_from_config(
-            gold_config.csv_export if gold_config else None, logger
+            gold_config.csv_export if gold_config else None,
+            logger,
+            override_path=gold_path if settings.test_mode else None,
         )
 
         # JSON files are now written alongside zst files (same directory)

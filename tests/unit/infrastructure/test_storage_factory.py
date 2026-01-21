@@ -254,6 +254,9 @@ class TestStorageFactoryLocal:
         """Test local run with CSV export enabled for Silver and Gold."""
         from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
+        # Test production behavior: CSV paths from YAML config
+        mock_settings.test_mode = False
+
         with (
             patch("bioetl.composition.factories.storage_factory.BronzeWriter"),
             patch(
