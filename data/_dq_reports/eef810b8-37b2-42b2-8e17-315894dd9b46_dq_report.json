@@ -1,0 +1,59 @@
+{
+  "batch_id": "eef810b8-37b2-42b2-8e17-315894dd9b46",
+  "checks": {
+    "file_integrity": {
+      "checksum_blake2": "d467e67a0ec8b38caa131ce6eb78bdd3e9b44e7edecc2fac24237c3cfe5b4e4a256199495638ff32d3c291b524b1d0a7968cac597eb865506ca5ab8400a84335",
+      "compression_ratio": null,
+      "size_bytes": 15686,
+      "status": "pass"
+    },
+    "record_count": {
+      "delta_from_last_run": null,
+      "input_records": null,
+      "output_records": null,
+      "quarantine_rate": null,
+      "quarantined_records": null,
+      "status": "pass",
+      "value": 10
+    },
+    "schema_snapshot": {
+      "fields_detected": 19,
+      "missing_fields_since_last_run": [],
+      "new_fields_since_last_run": [],
+      "schema": {
+        "abstract": "string",
+        "authors": "null|string",
+        "chembl_release": "object",
+        "contact": "null",
+        "doc_type": "string",
+        "document_chembl_id": "string",
+        "doi": "null|string",
+        "doi_chembl": "null",
+        "first_page": "null|string",
+        "issue": "null|string",
+        "journal": "null|string",
+        "journal_full_title": "null|string",
+        "last_page": "null|string",
+        "patent_id": "null",
+        "pubmed_id": "integer|null",
+        "src_id": "integer",
+        "title": "string",
+        "volume": "null|string",
+        "year": "integer|null"
+      },
+      "status": "pass"
+    }
+  },
+  "layer": "bronze",
+  "pipeline": "chembl_publication",
+  "run_id": "cf1cd60a-d1b1-4025-8f91-c00fa3c12191",
+  "source_file": "",
+  "summary": {
+    "failed": 0,
+    "overall_status": "pass",
+    "passed": 3,
+    "total_checks": 3,
+    "warnings": 0
+  },
+  "timestamp": "2026-01-21T09:40:17.193172+00:00"
+}
