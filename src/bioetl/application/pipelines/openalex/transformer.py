@@ -184,7 +184,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "issn": journal_info.get("issn"),
             "publisher": journal_info.get("publisher"),
             "year": year,
-            "publication_date": self._normalize_partial_date(
+            "publication_date": self._data_normalizer.normalize_partial_date(
                 rec.get("publication_date")
             ),
             "doc_type": doc_type,
@@ -225,42 +225,3 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
         """
         return OpenAlexPublicationEntity
-
-    def _normalize_partial_date(self, date_str: str | None) -> str | None:
-        """Normalize partial date to YYYY-MM-DD format (end of period).
-
-        OpenAlex API may return partial dates in various formats:
-        - Full date: "2024-05-15" (YYYY-MM-DD)
-        - Month precision: "2024-05" (YYYY-MM)
-        - Year precision: "2024" (YYYY)
-
-        Partial dates are normalized to end of period for consistency:
-        - YYYY-MM → YYYY-MM-30 (approximate month end)
-        - YYYY → YYYY-12-31 (year end)
-
-        Args:
-            date_str: Raw date string from OpenAlex API.
-
-        Returns:
-            Normalized ISO date string (YYYY-MM-DD) or None.
-
-        """
-        if not date_str:
-            return None
-
-        date_str = str(date_str).strip()
-
-        # Full ISO format (YYYY-MM-DD) - return as-is
-        if len(date_str) == 10 and date_str[4] == "-" and date_str[7] == "-":
-            return date_str
-
-        # Partial date: YYYY-MM → YYYY-MM-30 (end of month approximation)
-        if len(date_str) == 7 and date_str[4] == "-":
-            return f"{date_str}-30"
-
-        # Partial date: YYYY → YYYY-12-31 (end of year)
-        if len(date_str) == 4 and date_str.isdigit():
-            return f"{date_str}-12-31"
-
-        # Unknown format - return None for invalid dates
-        return None
