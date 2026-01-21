@@ -39,6 +39,80 @@ def valid_records():
     ]
 
 
+@pytest.fixture
+def mock_metadata_coordinator():
+    """Create a mock MetadataCoordinator that returns proper SilverMetadata."""
+    from datetime import UTC, datetime
+
+    from bioetl.domain.models.metadata import (
+        DeltaMetrics,
+        DQSummary,
+        EnvironmentMetadata,
+        LineageMetadata,
+        PipelineMetadata,
+        RuntimeMetadata,
+        RunTypeEnum,
+        SilverMetadata,
+        SilverOutputMetadata,
+    )
+    from bioetl.domain.ports import SilverMetadataInput
+
+    coordinator = MagicMock()
+
+    def create_silver_metadata(input_data: SilverMetadataInput) -> SilverMetadata:
+        """Create a proper SilverMetadata object from input."""
+        # Extract bronze_paths from bronze_refs
+        bronze_paths = []
+        if input_data.bronze_refs:
+            bronze_paths = [ref.relative_path for ref in input_data.bronze_refs]
+
+        # Extract source_batch_ids from records
+        source_batch_ids = list(
+            {
+                r.get("_source_batch_id", "")
+                for r in input_data.records
+                if r.get("_source_batch_id")
+            }
+        )
+
+        return SilverMetadata(
+            runtime=RuntimeMetadata(
+                run_id="test-run-id",
+                run_type=RunTypeEnum.INCREMENTAL,
+                started_at_utc=datetime.now(UTC),
+            ),
+            pipeline=PipelineMetadata(
+                name="test_pipeline",
+                provider="test",
+                entity="table",
+            ),
+            lineage=LineageMetadata(
+                source_batch_ids=source_batch_ids,
+                bronze_paths=bronze_paths,
+            ),
+            delta=DeltaMetrics(
+                table_path=input_data.table_path,
+                operation="merge",
+                primary_key=input_data.primary_keys,
+            ),
+            dq_summary=input_data.dq_metrics.to_dq_summary()
+            if input_data.dq_metrics
+            else DQSummary(
+                total_records=len(input_data.records),
+                valid_records=len(input_data.records),
+            ),
+            output=SilverOutputMetadata(record_count=len(input_data.records)),
+            environment=EnvironmentMetadata(
+                hostname="test-host",
+                python_version="3.11.0",
+                bioetl_version="1.0.0",
+            ),
+        )
+
+    coordinator.create_silver_metadata = create_silver_metadata
+    return coordinator
+
+
 @pytest.mark.unit
 class TestSilverWriterInit:
     """Tests for SilverWriter initialization."""
@@ -1715,7 +1789,7 @@ class TestSilverWriterLineage:
 
     @pytest.mark.asyncio
     async def test_write_silver_metadata_includes_bronze_paths(
-        self, noop_logger, valid_records
+        self, noop_logger, valid_records, mock_metadata_coordinator
     ):
         """Test _write_silver_metadata populates bronze_paths from bronze_refs."""
         from uuid import uuid4
@@ -1767,6 +1841,7 @@ class TestSilverWriterLineage:
             base_path="/tmp/silver",
             logger=noop_logger,
             metadata_writer=mock_metadata_writer,
+            metadata_coordinator=mock_metadata_coordinator,
         )
 
         await writer._write_silver_metadata(
@@ -1792,7 +1867,7 @@ class TestSilverWriterLineage:
 
     @pytest.mark.asyncio
     async def test_write_silver_metadata_empty_bronze_paths_when_no_refs(
-        self, noop_logger, valid_records
+        self, noop_logger, valid_records, mock_metadata_coordinator
     ):
         """Test _write_silver_metadata has empty bronze_paths when bronze_refs=None."""
         from bioetl.infrastructure.storage.silver_writer import (
@@ -1820,6 +1895,7 @@ class TestSilverWriterLineage:
             base_path="/tmp/silver",
             logger=noop_logger,
             metadata_writer=mock_metadata_writer,
+            metadata_coordinator=mock_metadata_coordinator,
         )
 
         await writer._write_silver_metadata(
@@ -2042,7 +2118,7 @@ class TestSilverWriterDQMetrics:
 
     @pytest.mark.asyncio
     async def test_write_silver_metadata_with_dq_metrics(
-        self, noop_logger, valid_records
+        self, noop_logger, valid_records, mock_metadata_coordinator
     ):
         """Test _write_silver_metadata uses DQ metrics when provided."""
         from bioetl.domain.value_objects.dq_metrics import (
@@ -2092,6 +2168,7 @@ class TestSilverWriterDQMetrics:
             base_path="/tmp/silver",
             logger=noop_logger,
             metadata_writer=mock_metadata_writer,
+            metadata_coordinator=mock_metadata_coordinator,
         )
 
         await writer._write_silver_metadata(
@@ -2130,7 +2207,7 @@ class TestSilverWriterDQMetrics:
 
     @pytest.mark.asyncio
     async def test_write_silver_metadata_fallback_without_dq_metrics(
-        self, noop_logger, valid_records
+        self, noop_logger, valid_records, mock_metadata_coordinator
     ):
         """Test _write_silver_metadata uses fallback when dq_metrics is None."""
         from bioetl.infrastructure.storage.silver_writer import (
@@ -2158,6 +2235,7 @@ class TestSilverWriterDQMetrics:
             base_path="/tmp/silver",
             logger=noop_logger,
             metadata_writer=mock_metadata_writer,
+            metadata_coordinator=mock_metadata_coordinator,
         )
 
         await writer._write_silver_metadata(
@@ -2183,7 +2261,7 @@ class TestSilverWriterDQMetrics:
 
     @pytest.mark.asyncio
     async def test_write_silver_computes_and_passes_dq_metrics(
-        self, noop_logger, valid_records
+        self, noop_logger, valid_records, mock_metadata_coordinator
     ):
         """Test write_silver computes DQ metrics and passes to metadata."""
         import pyarrow as pa
@@ -2229,6 +2307,7 @@ class TestSilverWriterDQMetrics:
                 base_path="/tmp/silver",
                 logger=noop_logger,
                 metadata_writer=mock_metadata_writer,
+                metadata_coordinator=mock_metadata_coordinator,
             )
 
             await writer.write_silver(
