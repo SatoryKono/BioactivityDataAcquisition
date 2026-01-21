@@ -1,7 +1,11 @@
 # configs/pipelines/uniprot/protein.yaml
-# Pipeline configuration for UniProt Protein entity.
+# =============================================================================
+# UniProt Protein Pipeline Configuration
+# =============================================================================
+# Minimal config using convention-based path resolution (ADR-029).
+# Inherits from _base.yaml with paths/filters auto-computed from provider/entity.
 #
-# Inherits defaults from ../_base.yaml
+# Auto-computed by convention (see _base.yaml for full list)
 
 pipeline_name: uniprot_protein
 provider: uniprot
@@ -13,59 +17,10 @@ primary_keys: ["accession"]
 silver_table: "uniprot_protein"
 gold_table: "uniprot_protein"
 
-source_file: ../../sources/uniprot.yaml
-
 # -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
+# Sink Overrides (only non-convention values)
 # -----------------------------------------------------------------------------
-# DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/uniprot.yaml (provider-specific)
-#   3. configs/dq/entities/uniprot/protein.yaml (entity-specific)
-dq_config_file: ../../dq/entities/uniprot/protein.yaml
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filter rules are loaded from hierarchical config files:
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/uniprot.yaml (provider-specific)
-#   3. configs/filter/entities/uniprot/protein.yaml (entity-specific)
-filter_config_file: ../../filter/entities/uniprot/protein.yaml
-
-# Entity-specific gold filters
-gold_filters:
-  required_fields:
-    - accession
-    - entry_name
-    - organism
-  columns:
-    reviewed: ["true"]  # Swiss-Prot (reviewed) only
-
-# Entity-specific sink overrides
+# Note: partition_by is entity-specific and differs from convention
 sink:
-  bronze:
-    path: "data/output/bronze/uniprot/protein"
   silver:
-    path: "data/output/silver/uniprot/protein"
-    primary_key: ["accession"]
     partition_by: ["organism"]
-    sort_by:
-      columns: ["accession"]
-    csv_export:
-      path: "data/output/silver/uniprot/protein"
-  gold:
-    path: "data/output/gold/uniprot/protein"
-    sort_by:
-      columns: ["accession"]
-    csv_export:
-      path: "data/output/gold/uniprot/protein"
-
-# Entity-specific input filter
-# UniProt adapter implements FilterableDataSourcePort with OR-query batching
-input_filter:
-  enabled: true
-  source_path: "data/input/protein.csv"
-  column_name: "uniprot_id"
-  filter_field: "accession"
-  batch_size: 100
