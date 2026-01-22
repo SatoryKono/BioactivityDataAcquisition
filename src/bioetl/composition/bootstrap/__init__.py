@@ -63,6 +63,7 @@ from bioetl.composition.bootstrap.runtime import (
     bootstrap_pipeline_runner_service,
     bootstrap_tracer,
     load_composite_config,
+    maybe_start_metrics_server,
     start_metrics_server,
     validate_observability_preflight,
 )
@@ -106,6 +107,7 @@ __all__ = [
     "load_composite_config",
     # Config loader
     "load_pipeline_config",
+    "maybe_start_metrics_server",
     "start_metrics_server",
     "validate_observability_preflight",
 ]
