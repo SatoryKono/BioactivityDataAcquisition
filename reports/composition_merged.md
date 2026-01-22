@@ -492,16 +492,16 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 from bioetl.composition.observability import ObservabilityBundle
+from bioetl.domain.exceptions import MetricsServerError
 from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
-from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
-from bioetl.infrastructure.observability.server import (
-    MetricsServerError,
+from bioetl.infrastructure.observability import (
+    NoOpMetrics,
+    NoOpTracing,
+    OpenTelemetryTracer,
+    PrometheusMetrics,
+    UnifiedLogger,
     start_metrics_server,
 )
-from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
-from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
 if TYPE_CHECKING:
     from bioetl.application.services.metrics_service import MetricsService
@@ -918,16 +918,22 @@ __all__ = [
 ]
 
 
-def bootstrap_storage() -> StorageAdapter:
-    """Bootstrap a read-only storage adapter for CLI operations.
+def bootstrap_storage(*, enable_csv_export: bool = False) -> StorageAdapter:
+    """Bootstrap a storage adapter for CLI and composite pipeline operations.
 
-    Creates a minimal StorageAdapter suitable for preview operations.
-    No CSV export is configured since this is for read-only inspection.
+    Creates a StorageAdapter suitable for preview operations and composite
+    pipelines. CSV export is disabled by default for read-only inspection
+    but can be enabled for composite pipelines that need CSV output.
+
     Uses NoOpLogger since this is for CLI preview operations without observability.
 
     Note:
         Lock validation is performed at Application layer (BatchWriter)
         per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
+
+    Args:
+        enable_csv_export: If True, creates CsvExporters for Silver and Gold
+            layers. Used by composite pipelines that need CSV output.
 
     Returns:
         StorageAdapter configured for the current environment.
@@ -938,6 +944,7 @@ def bootstrap_storage() -> StorageAdapter:
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.types import RunID, RunType
     from bioetl.domain.value_objects.run_context import RunContext
+    from bioetl.infrastructure.export.csv_exporter import CsvExporter
     from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
     settings = get_settings()
@@ -960,6 +967,19 @@ def bootstrap_storage() -> StorageAdapter:
     )
     metadata_coordinator = MetadataCoordinator(run_context=run_context)
 
+    # Create CSV exporters if enabled (for composite pipelines)
+    silver_csv_exporter = None
+    gold_csv_exporter = None
+    if enable_csv_export:
+        silver_csv_exporter = CsvExporter(
+            base_path=str(output_dir / "silver"),
+            logger=noop_logger,
+        )
+        gold_csv_exporter = CsvExporter(
+            base_path=str(output_dir / "gold"),
+            logger=noop_logger,
+        )
+
     return StorageAdapter(
         bronze_writer=BronzeWriter(
             base_path=output_dir / "bronze",  # data/output/bronze
@@ -973,7 +993,7 @@ def bootstrap_storage() -> StorageAdapter:
             base_path=output_dir / "silver",  # data/output/silver
             logger=noop_logger,
             tracing=noop_tracing,
-            csv_exporter=None,
+            csv_exporter=silver_csv_exporter,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
         ),
@@ -981,7 +1001,7 @@ def bootstrap_storage() -> StorageAdapter:
             base_path=output_dir / "gold",  # data/output/gold
             logger=noop_logger,
             tracing=noop_tracing,
-            csv_exporter=None,
+            csv_exporter=gold_csv_exporter,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
         ),
@@ -1457,8 +1477,9 @@ def bootstrap_composite_pipeline(
         log_level="INFO",
     )
 
-    # Bootstrap storage for reading Silver tables
-    storage = bootstrap_storage()
+    # Bootstrap storage for reading Silver tables and writing merged data
+    # Enable CSV export for composite pipelines (merged Silver/Gold data)
+    storage = bootstrap_storage(enable_csv_export=True)
 
     # Bootstrap lock (using in-memory lock for local execution)
     lock = MemoryLock()
@@ -3428,7 +3449,8 @@ from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
 
 # Gold schemas (required for all pipelines)
-from bioetl.infrastructure.schemas.gold import (
+# Imported from domain.contracts package for clean separation of data contracts
+from bioetl.domain.contracts import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
     ChEMBLAssayParametersGoldSchema,
@@ -5469,6 +5491,7 @@ Note:
 from __future__ import annotations
 
 import asyncio
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -5723,95 +5746,59 @@ class StorageAdapter:
 
         Implements StoragePort.clear_silver().
         Clears both Delta tables and CSV exports (if configured).
-        Should only be called for rebuild/backfill runs, NOT for incremental.
-
-        Args:
-            table_name: The name of the table to clear.
-            dry_run: If True, only count what would be deleted.
-
-        Returns:
-            Count of cleared items (tables + files).
         """
-        loop = asyncio.get_running_loop()
-        cleared_count = 0
-
-        # Clear Silver Delta table (sync operation wrapped in executor)
-        cleared_count += await loop.run_in_executor(
-            None, lambda: self.silver.clear(table_name, dry_run=dry_run)
-        )
-
-        # Clear Silver CSV if exporter is configured
-        if self.silver.csv_exporter and not dry_run:
-            exporter = self.silver.csv_exporter
-            deleted = await loop.run_in_executor(
-                None, lambda: exporter.clear(table_name)
-            )
-            cleared_count += len(deleted)
-
-        return cleared_count
+        return await self._run_clear(self.silver, table_name, dry_run)
 
     async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Gold layer data for a specific table.
 
         Implements StoragePort.clear_gold().
         Clears both Delta tables and CSV exports (if configured).
-        Should only be called for rebuild/backfill runs, NOT for incremental.
-
-        Args:
-            table_name: The name of the table to clear.
-            dry_run: If True, only count what would be deleted.
-
-        Returns:
-            Count of cleared items (tables + files).
         """
+        return await self._run_clear(self.gold, table_name, dry_run)
+
+    async def _run_clear(
+        self,
+        writer: SilverWriter | GoldWriter,
+        table_name: str,
+        dry_run: bool,
+    ) -> int:
+        """Execute clear operation for a writer."""
         loop = asyncio.get_running_loop()
-        cleared_count = 0
-
-        # Clear Gold Delta table (sync operation wrapped in executor)
-        cleared_count += await loop.run_in_executor(
-            None, lambda: self.gold.clear(table_name, dry_run=dry_run)
+        cleared = await loop.run_in_executor(
+            None, lambda: writer.clear(table_name, dry_run=dry_run)
         )
-
-        # Clear Gold CSV if exporter is configured
-        if self.gold.csv_exporter and not dry_run:
-            exporter = self.gold.csv_exporter
+        if writer.csv_exporter and not dry_run:
+            exporter = writer.csv_exporter
             deleted = await loop.run_in_executor(
                 None, lambda: exporter.clear(table_name)
             )
-            cleared_count += len(deleted)
-
-        return cleared_count
+            cleared += len(deleted)
+        return cleared
 
     async def clear_csv(self, table_name: str | None = None) -> int:
         """Clear CSV export files for Silver and Gold layers.
 
         Implements StoragePort.clear_csv().
-
-        Args:
-            table_name: If provided, only clear CSV for this table.
-                       If None, clear all CSV files.
-
-        Returns:
-            Number of files cleared.
         """
+        count = 0
         loop = asyncio.get_running_loop()
-        cleared_count = 0
 
         if self.silver.csv_exporter:
             exporter = self.silver.csv_exporter
             deleted = await loop.run_in_executor(
                 None, lambda: exporter.clear(table_name)
             )
-            cleared_count += len(deleted) if isinstance(deleted, list) else deleted
+            count += len(deleted) if isinstance(deleted, list) else deleted
 
         if self.gold.csv_exporter:
             exporter = self.gold.csv_exporter
             deleted = await loop.run_in_executor(
                 None, lambda: exporter.clear(table_name)
             )
-            cleared_count += len(deleted) if isinstance(deleted, list) else deleted
+            count += len(deleted) if isinstance(deleted, list) else deleted
 
-        return cleared_count
+        return count
 
     async def clear_delta(self, table_name: str | None = None) -> int:
         """Clear Delta tables for Silver and Gold layers.
@@ -5941,6 +5928,38 @@ class StorageAdapter:
             return HealthStatus.DEGRADED
         else:
             return HealthStatus.UNHEALTHY
+
+    async def optimize(
+        self,
+        table_name: str,
+        retention_hours: int = 168,
+        dry_run: bool = False,
+    ) -> None:
+        """Optimize storage for a specific table/entity.
+
+        Performs maintenance operations appropriate for the storage layer:
+        - Delta Lake: Runs VACUUM to remove old files
+        - JSONL/File: Removes files older than retention period
+
+        Args:
+            table_name: Target identifier (e.g., 'provider.entity' for Delta/Bronze)
+            retention_hours: Retention period in hours (default 168h = 7 days)
+            dry_run: If True, only log what would be done without action
+        """
+        # 1. Optimize Silver/Gold Delta Tables
+        await self.vacuum(table_name, retention_hours, dry_run)
+
+        # 2. Optimize Bronze (File cleanup)
+        # Parse table_name to get provider/entity for targeted cleanup
+        if "." in table_name:
+            provider, entity = table_name.split(".", 1)
+            cutoff_date = datetime.now(UTC) - timedelta(hours=retention_hours)
+            await self.bronze.cleanup_old_files(
+                cutoff_date=cutoff_date,
+                dry_run=dry_run,
+                provider=provider,
+                entity=entity,
+            )
 
     async def vacuum(
         self,
