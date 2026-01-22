@@ -369,19 +369,12 @@ class GoldWriter(BaseDeltaWriter):
         if not records:
             return
 
-        # Extract provider/entity from table_name for filename generation
-        if "/" in table_name:
-            # Handle path-like table names (e.g., 'composite/publication')
-            parts = table_name.split("/")
-            provider_name = parts[0] if len(parts) > 1 else "composite"
-            entity_name = parts[-1]
-        elif "_" in table_name:
-            parts = table_name.split("_", 1)
-            provider_name = parts[0]
-            entity_name = parts[1] if len(parts) > 1 else parts[0]
-        else:
-            provider_name = "composite"
-            entity_name = table_name if table_name else "unknown"
+        from bioetl.infrastructure.storage.metadata_builder import (
+            GoldMetadataBuilder,
+            _parse_table_name,
+        )
+
+        provider_name, entity_name = _parse_table_name(table_name)
 
         if self._metadata_coordinator is None:
             self.logger.debug(
@@ -391,80 +384,18 @@ class GoldWriter(BaseDeltaWriter):
             )
             return
 
-        from datetime import UTC, datetime
-        from importlib.metadata import version as pkg_version
-        from platform import node as hostname
-        from platform import python_version
-
-        from bioetl.domain.models.metadata import (
-            DQSummary,
-            EnvironmentMetadata,
-            GoldMetadata,
-            GoldOutputMetadata,
-            LineageMetadata,
-            PipelineMetadata,
-            RuntimeMetadata,
-            RunTypeEnum,
+        # Build metadata using the extracted builder
+        builder = GoldMetadataBuilder(
+            transform_version=self._transform_version,
+            transform_steps=self._transform_steps,
         )
-
-        # Build metadata
-        now = datetime.now(UTC)
-        runtime = RuntimeMetadata(
-            run_id=run_id or "",
-            run_type=RunTypeEnum.INCREMENTAL,
-            started_at_utc=now,
-            completed_at_utc=now,
-        )
-
-        pipeline = PipelineMetadata(
-            name=f"composite_{entity_name}",
-            provider=provider_name,
-            entity=entity_name,
-        )
-
-        # Build lineage with sources_used via source_tables
-        lineage = LineageMetadata(
-            bronze_paths=[],
-            transform_version=self._transform_version or "1.0.0",
-            transform_steps=list(self._transform_steps)
-            if self._transform_steps
-            else ["merge"],
-            source_tables=dict.fromkeys(sources_used or [], 0),
-        )
-
-        # Build DQ summary
-        dq_summary = DQSummary(
-            total_records=len(records),
-            valid_records=len(records),
-            error_records=0,
-            error_rate=0.0,
-        )
-
-        # Build output metadata
-        output = GoldOutputMetadata(
-            record_count=len(records),
-        )
-
-        # Build environment metadata
-        try:
-            bioetl_version = pkg_version("bioetl")
-        except Exception:
-            bioetl_version = "unknown"
-
-        environment = EnvironmentMetadata(
-            hostname=hostname(),
-            python_version=python_version(),
-            bioetl_version=bioetl_version,
-        )
-
-        # Build complete metadata
-        metadata = GoldMetadata(
-            runtime=runtime,
-            pipeline=pipeline,
-            lineage=lineage,
-            dq_summary=dq_summary,
-            output=output,
-            environment=environment,
+        metadata = builder.build_merged_metadata(
+            table_path=table_path,
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+            run_id=run_id,
+            sources_used=sources_used,
         )
 
         await self._metadata_writer.write_gold_metadata(
@@ -633,20 +564,9 @@ class GoldWriter(BaseDeltaWriter):
         if not records:
             return
 
-        # Extract pipeline info from table name for filename generation
-        # table_name format: {provider}.{entity}, {provider}_{entity}, or just {entity}
-        if "." in table_name:
-            parts = table_name.split(".")
-            provider_name = parts[0]
-            entity_name = parts[1] if len(parts) > 1 else parts[0]
-        elif "_" in table_name:
-            # Try underscore format (e.g., chembl_publication)
-            parts = table_name.split("_", 1)  # Split only on first underscore
-            provider_name = parts[0]
-            entity_name = parts[1] if len(parts) > 1 else parts[0]
-        else:
-            provider_name = "unknown"
-            entity_name = table_name if table_name else "unknown"
+        from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
+
+        provider_name, entity_name = _parse_table_name(table_name)
 
         # Use MetadataCoordinator if available (centralized metadata)
         if self._metadata_coordinator is not None:
@@ -687,84 +607,19 @@ class GoldWriter(BaseDeltaWriter):
             return
 
         # Fallback to local metadata building (backward compatibility)
-        from datetime import UTC
-        from importlib.metadata import version as pkg_version
-        from platform import node as hostname
-        from platform import python_version
+        from bioetl.infrastructure.storage.metadata_builder import GoldMetadataBuilder
 
-        from bioetl.domain.models.metadata import (
-            DQSummary,
-            EnvironmentMetadata,
-            GoldMetadata,
-            GoldOutputMetadata,
-            LineageMetadata,
-            PipelineMetadata,
-            RuntimeMetadata,
-            RunTypeEnum,
-            SCDMetadata,
+        builder = GoldMetadataBuilder(
+            transform_version=self._transform_version,
+            transform_steps=self._transform_steps,
         )
-
-        # Build runtime metadata
-        now = ingestion_ts or datetime.now(UTC)
-        runtime = RuntimeMetadata(
-            run_id=str(run_id) if run_id else "",
-            run_type=RunTypeEnum.INCREMENTAL,  # Gold is always incremental
-            started_at_utc=now,
-            completed_at_utc=now,
-        )
-
-        # Use already extracted provider/entity from top of method
-        pipeline = PipelineMetadata(
-            name=f"{provider_name}_{entity_name}",
-            provider=provider_name,
-            entity=entity_name,
-        )
-
-        # Build lineage (Gold layer sources from Silver)
-        lineage = LineageMetadata()
-
-        # Build DQ summary (basic metrics)
-        dq_summary = DQSummary(
-            total_records=len(records),
-            valid_records=len(records),
-        )
-
-        # Build output metrics
-        output = GoldOutputMetadata(
-            record_count=len(records),
-        )
-
-        # Build SCD metadata if applicable
-        scd = None
-        if mode == GoldWriteMode.SCD2 and scd_config:
-            scd = SCDMetadata(
-                enabled=True,
-                effective_date_column=scd_config.get("valid_from_col", "_valid_from"),
-                end_date_column=scd_config.get("valid_to_col", "_valid_to"),
-                current_flag_column=scd_config.get("current_flag_col", "_is_current"),
-            )
-
-        # Build environment info
-        try:
-            bioetl_version = pkg_version("bioetl")
-        except Exception:
-            bioetl_version = "unknown"
-
-        environment = EnvironmentMetadata(
-            hostname=hostname(),
-            python_version=python_version(),
-            bioetl_version=bioetl_version,
-        )
-
-        # Build complete metadata
-        metadata = GoldMetadata(
-            runtime=runtime,
-            pipeline=pipeline,
-            lineage=lineage,
-            dq_summary=dq_summary,
-            output=output,
-            scd=scd,
-            environment=environment,
+        metadata = builder.build_fallback_metadata(
+            table_name=table_name,
+            records=records,
+            mode=mode,
+            scd_config=scd_config,
+            ingestion_ts=ingestion_ts,
+            run_id=run_id,
         )
 
         # Write metadata sidecar file
@@ -782,80 +637,18 @@ class GoldWriter(BaseDeltaWriter):
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, func, *args)
 
-    def _sanitize_type_for_delta(self, dtype: pa.DataType) -> pa.DataType:
-        """Recursively replace null types with string (Delta Lake doesn't support null)."""
-        if pa.types.is_null(dtype):
-            return pa.string()
-        elif pa.types.is_list(dtype):
-            inner = self._sanitize_type_for_delta(dtype.value_type)
-            return pa.list_(inner)
-        elif pa.types.is_large_list(dtype):
-            inner = self._sanitize_type_for_delta(dtype.value_type)
-            return pa.large_list(inner)
-        elif pa.types.is_struct(dtype):
-            new_fields = [
-                pa.field(f.name, self._sanitize_type_for_delta(f.type), f.nullable)
-                for f in dtype
-            ]
-            return pa.struct(new_fields)
-        elif pa.types.is_map(dtype):
-            key_type = self._sanitize_type_for_delta(dtype.key_type)
-            item_type = self._sanitize_type_for_delta(dtype.item_type)
-            return pa.map_(key_type, item_type)
-        return dtype
-
     def _to_arrow_table(self, records: list[dict[str, Any]]) -> pa.Table:
         """Convert records to PyArrow table, handling null types.
 
         Delta Lake doesn't support null type, so we convert null columns to string.
         This includes nested null types (e.g., list<null>).
+
+        Delegates to ArrowDataConverter for the actual conversion.
         """
-        from bioetl.domain.schemas.column_order import canonical_column_order
+        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
 
-        arrow_data = pa.Table.from_pylist(records)
-
-        # Enforce canonical column order (not alphabetical!)
-        # Per ADR-014 Deterministic Writes and RULES.md §2.4
-        ordered_columns = canonical_column_order(list(arrow_data.column_names))
-        arrow_data = arrow_data.select(ordered_columns)
-
-        # Check if schema needs sanitization (contains null types anywhere)
-        # Use lowercase check since PyArrow may print "null" or "Null"
-        schema_str = str(arrow_data.schema).lower()
-        if "null" in schema_str:
-            # Can't cast null to string directly, need to rebuild columns
-            new_columns = []
-            new_fields = []
-            for i, field in enumerate(arrow_data.schema):
-                col = arrow_data.column(i)
-                new_type = self._sanitize_type_for_delta(field.type)
-                if pa.types.is_null(field.type):
-                    # Create string array with all nulls
-                    new_col = pa.array([None] * len(col), type=pa.string())
-                    new_columns.append(new_col)
-                elif new_type != field.type:
-                    # Try to cast for nested types
-                    try:
-                        new_columns.append(col.cast(new_type))
-                    except pa.ArrowInvalid:
-                        # If cast fails, convert to string via Python
-                        new_columns.append(
-                            pa.array(
-                                [
-                                    str(v) if v is not None else None
-                                    for v in col.to_pylist()
-                                ],
-                                type=pa.string(),
-                            )
-                        )
-                else:
-                    new_columns.append(col)
-                new_fields.append(pa.field(field.name, new_type, field.nullable))
-
-            new_schema = pa.schema(new_fields)
-            arrow_data = pa.Table.from_arrays(new_columns, schema=new_schema)
-
-        return arrow_data
+        converter = ArrowDataConverter(logger=self.logger)
+        return converter.convert_records_to_arrow(records)
 
     async def _write_simple(
         self,
