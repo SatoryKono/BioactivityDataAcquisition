@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
-from unittest.mock import AsyncMock, MagicMock, call
+from unittest.mock import AsyncMock, MagicMock
 
 import polars as pl
 import pytest
@@ -24,7 +24,6 @@ from bioetl.domain.composite.result import (
     EnrichmentResult,
     EnrichmentStatus,
     MergeResult,
-    SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
 
@@ -690,11 +689,11 @@ class TestEnrichmentLogging:
         """Test logging when enrichment stage starts."""
         await runner.run()
 
-        # Find log call with ENRICHING state
+        # Find log call with enriching state (lowercase) or phase event
         enriching_calls = [
             c
             for c in mock_logger.info.call_args_list
-            if "ENRICHING" in str(c) or "Enrichment stage started" in str(c)
+            if "enriching" in str(c).lower() or "enrichment_started" in str(c)
         ]
         assert len(enriching_calls) >= 1
 
@@ -703,12 +702,11 @@ class TestEnrichmentLogging:
         """Test logging when enrichment stage completes."""
         await runner.run()
 
-        # Find log call with ENRICHMENT_COMPLETED
+        # Find log call with enrichment_completed (lowercase) or phase event
         completed_calls = [
             c
             for c in mock_logger.info.call_args_list
-            if "ENRICHMENT_COMPLETED" in str(c)
-            or "Enrichment stage completed" in str(c)
+            if "enrichment_completed" in str(c).lower()
         ]
         assert len(completed_calls) >= 1
 

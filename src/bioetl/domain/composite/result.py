@@ -136,6 +136,30 @@ class EnrichmentResult:
             duration_seconds=timeout_seconds,
         )
 
+    @classmethod
+    def not_run(
+        cls,
+        enricher_name: str,
+        reason: str = "Pipeline not executed (required_only mode)",
+    ) -> EnrichmentResult:
+        """Factory for not-run enrichment result.
+
+        Used when an enricher is intentionally not executed,
+        for example due to required_only mode or explicit exclusion.
+
+        Args:
+            enricher_name: Name of the enricher pipeline.
+            reason: Human-readable reason why pipeline was not run.
+
+        Returns:
+            EnrichmentResult with NOT_RUN status.
+        """
+        return cls(
+            enricher_name=enricher_name,
+            status=EnrichmentStatus.NOT_RUN,
+            error_message=reason,
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class SeedResult:
@@ -186,7 +210,23 @@ class MergeResult:
 
 @dataclass(frozen=True, slots=True)
 class CompositeResult:
-    """Complete result of composite pipeline execution."""
+    """Complete result of composite pipeline execution.
+
+    Attributes:
+        composite_name: Name of the composite pipeline.
+        composite_run_id: Unique run identifier.
+        seed_result: Result of seed pipeline execution.
+        enrichment_results: Results per enricher (keyed by pipeline name).
+        merge_result: Result of merge operation (None if not completed).
+        total_duration_seconds: Total execution time.
+        started_at: Execution start timestamp.
+        completed_at: Execution end timestamp.
+        lineage: Optional lineage metadata.
+        had_warnings: True if any optional enrichers failed but pipeline completed.
+            This indicates "completed with warnings" status - the pipeline succeeded
+            but some non-required enrichments did not complete successfully.
+        _required_enrichers: Internal set of required enricher names.
+    """
 
     composite_name: str
     composite_run_id: str
@@ -197,6 +237,7 @@ class CompositeResult:
     started_at: datetime | None = None
     completed_at: datetime | None = None
     lineage: LineageMetadata | None = None
+    had_warnings: bool = False
     _required_enrichers: frozenset[str] = field(default_factory=frozenset)
 
     @property
@@ -234,6 +275,37 @@ class CompositeResult:
         ]
 
     @property
+    def skipped_enrichers(self) -> list[str]:
+        """List of enrichers that were skipped (filter excluded all records)."""
+        return [
+            n
+            for n, r in self.enrichment_results.items()
+            if r.status == EnrichmentStatus.SKIPPED
+        ]
+
+    @property
+    def not_run_enrichers(self) -> list[str]:
+        """List of enrichers that were not run (e.g., required_only mode)."""
+        return [
+            n
+            for n, r in self.enrichment_results.items()
+            if r.status == EnrichmentStatus.NOT_RUN
+        ]
+
+    @property
+    def optional_failed_enrichers(self) -> list[str]:
+        """List of optional enrichers that failed.
+
+        These are enrichers that failed but are not required,
+        so the pipeline can still complete successfully.
+        """
+        return [
+            n
+            for n, r in self.enrichment_results.items()
+            if r.status == EnrichmentStatus.FAILED and n not in self._required_enrichers
+        ]
+
+    @property
     def total_records_enriched(self) -> int:
         """Total records enriched across all enrichers."""
         return sum(r.records_enriched for r in self.enrichment_results.values())
@@ -244,10 +316,14 @@ class CompositeResult:
             "composite_name": self.composite_name,
             "composite_run_id": self.composite_run_id,
             "is_success": self.is_success,
+            "had_warnings": self.had_warnings,
             "seed_records": self.seed_result.records_silver,
             "enrichers_run": len(self.enrichment_results),
             "enrichers_succeeded": len(self.successful_enrichers),
             "enrichers_failed": len(self.failed_enrichers),
+            "enrichers_skipped": len(self.skipped_enrichers),
+            "enrichers_not_run": len(self.not_run_enrichers),
+            "optional_failures": self.optional_failed_enrichers or None,
             "records_merged": self.merge_result.records_merged
             if self.merge_result
             else 0,
