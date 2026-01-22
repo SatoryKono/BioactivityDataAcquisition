@@ -21,6 +21,7 @@ from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.record_processor import RecordProcessor
+from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.dq_factory import DQServicesFactory
 from bioetl.composition.factories.storage import StorageContext, StorageFactory
 from bioetl.domain.config import TableConfig
@@ -60,6 +61,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "BaseServicesFactory",
+    "PipelineCallbacksContext",
     "ServicesBuilder",
     "create_data_normalization_service",
     "extract_pipeline_callbacks",
@@ -73,7 +75,7 @@ __all__ = [
 
 def extract_pipeline_callbacks(
     pipeline: BasePipeline,
-) -> tuple[Any, Any, Any]:
+) -> PipelineCallbacksContext:
     """Extract transformation callbacks from pipeline.
 
     Extracts callbacks from the pipeline's transformer if available,
@@ -83,7 +85,7 @@ def extract_pipeline_callbacks(
         pipeline: Pipeline instance with transformer or legacy methods.
 
     Returns:
-        Tuple of (transform_callback, gold_filter_callback, gold_transform_callback).
+        PipelineCallbacksContext with transform, gold_filter, and gold_transform callbacks.
 
     Raises:
         AttributeError: If pipeline has no transformer and doesn't implement
@@ -91,10 +93,10 @@ def extract_pipeline_callbacks(
     """
     transformer = pipeline.transformer
     if transformer is not None:
-        return (
-            transformer.transform,
-            transformer.should_write_gold,
-            transformer.transform_for_gold,
+        return PipelineCallbacksContext(
+            transform=transformer.transform,
+            gold_filter=transformer.should_write_gold,
+            gold_transform=transformer.transform_for_gold,
         )
 
     # Fallback for pipelines without explicit transformer (legacy)
@@ -110,7 +112,11 @@ def extract_pipeline_callbacks(
         "transform_for_gold",
         lambda _context, silver_record: silver_record,
     )
-    return (transform_cb, gold_filter_cb, gold_transform_cb)
+    return PipelineCallbacksContext(
+        transform=transform_cb,
+        gold_filter=gold_filter_cb,
+        gold_transform=gold_transform_cb,
+    )
 
 
 # =============================================================================
@@ -510,9 +516,7 @@ class ServicesBuilder:
         Returns:
             Configured RecordProcessor instance
         """
-        transform_cb, gold_filter_cb, gold_transform_cb = extract_pipeline_callbacks(
-            pipeline
-        )
+        callbacks = extract_pipeline_callbacks(pipeline)
 
         return ServicesBuilder.create_record_processor(
             services=pipeline.services,
@@ -529,9 +533,9 @@ class ServicesBuilder:
             silver_write_mode=pipeline.config.write_mode,
             gold_write_mode=pipeline.config.gold_write_mode,
             on_schema_mismatch=pipeline.config.on_schema_mismatch,
-            transform_callback=transform_cb,
-            gold_filter_callback=gold_filter_cb,
-            gold_transform_callback=gold_transform_cb,
+            transform_callback=callbacks.transform,
+            gold_filter_callback=callbacks.gold_filter,
+            gold_transform_callback=callbacks.gold_transform,
             strict_gold_validation=strict_gold_validation,
             lock_validator=lock_validator,
         )
@@ -575,9 +579,7 @@ class ServicesBuilder:
         Returns:
             Configured BatchExecutor instance.
         """
-        transform_cb, gold_filter_cb, gold_transform_cb = extract_pipeline_callbacks(
-            pipeline
-        )
+        callbacks = extract_pipeline_callbacks(pipeline)
 
         # Build configuration
         error_classifier = ErrorClassifier()
@@ -615,9 +617,9 @@ class ServicesBuilder:
             context=pipeline.context,
             config=processor_config,
             error_classifier=error_classifier,
-            transform_callback=transform_cb,
-            gold_filter_callback=gold_filter_cb,
-            gold_transform_callback=gold_transform_cb,
+            transform_callback=callbacks.transform,
+            gold_filter_callback=callbacks.gold_filter,
+            gold_transform_callback=callbacks.gold_transform,
             gold_validator=gold_validator,
             checkpoint_manager=checkpoint_manager,
             shutdown_signal=shutdown_signal,

@@ -31,6 +31,33 @@ def _get_bioetl_version() -> str:
         return "unknown"
 
 
+def _get_git_commit_cached() -> str | None:
+    """Get git commit hash directly via subprocess.
+
+    This is a fallback for metadata builders when MetadataCoordinator
+    is not available. Uses subprocess directly to avoid layer violations
+    (infrastructure cannot import composition).
+
+    Returns:
+        Short git commit hash or None.
+    """
+    import subprocess
+
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+        return None
+    except (subprocess.SubprocessError, FileNotFoundError, OSError):
+        return None
+
+
 def _parse_table_name(table_name: str) -> tuple[str, str]:
     """Parse table name into provider and entity components.
 
@@ -92,6 +119,7 @@ class SilverMetadataBuilder:
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         version_after: int | None = None,
+        partition_by: list[str] | None = None,
     ) -> SilverMetadata:
         """Build Silver metadata for merged composite data.
 
@@ -103,6 +131,7 @@ class SilverMetadataBuilder:
             run_id: Composite run ID.
             sources_used: List of source pipelines (e.g., ['seed', 'crossref']).
             version_after: Delta table version after write.
+            partition_by: Partition columns used for the Delta table.
 
         Returns:
             SilverMetadata object ready for serialization.
@@ -133,6 +162,8 @@ class SilverMetadataBuilder:
             name=f"composite_{entity_name}",
             provider=provider_name,
             entity=entity_name,
+            version=_get_bioetl_version(),
+            git_commit=_get_git_commit_cached(),
         )
 
         lineage = LineageMetadata(
@@ -148,6 +179,7 @@ class SilverMetadataBuilder:
             table_path=table_path,
             operation="overwrite",
             primary_key=primary_keys,
+            partition_by=partition_by or [],
             version_after=version_after,
             rows_inserted=len(records),
         )
@@ -254,6 +286,8 @@ class GoldMetadataBuilder:
             name=f"{provider_name}_{entity_name}",
             provider=provider_name,
             entity=entity_name,
+            version=_get_bioetl_version(),
+            git_commit=_get_git_commit_cached(),
         )
 
         lineage = LineageMetadata()
@@ -339,6 +373,8 @@ class GoldMetadataBuilder:
             name=f"composite_{entity_name}",
             provider=provider_name,
             entity=entity_name,
+            version=_get_bioetl_version(),
+            git_commit=_get_git_commit_cached(),
         )
 
         lineage = LineageMetadata(

@@ -216,7 +216,7 @@ class TestConfigValuesNotHardcoded:
             _get_rate_limit_from_config,
         )
 
-        rate, capacity = _get_rate_limit_from_config("chembl")
+        rate_limit = _get_rate_limit_from_config("chembl")
 
         # Load expected values from YAML
         with open("configs/sources/chembl.yaml", encoding="utf-8") as f:
@@ -225,11 +225,11 @@ class TestConfigValuesNotHardcoded:
         expected_rate = raw["source"]["rate_limit"]["requests_per_second"]
         expected_capacity = raw["source"]["rate_limit"]["burst"]
 
-        assert rate == expected_rate, (
-            f"ChEMBL rate mismatch: got {rate}, expected {expected_rate}"
+        assert rate_limit.rate == expected_rate, (
+            f"ChEMBL rate mismatch: got {rate_limit.rate}, expected {expected_rate}"
         )
-        assert capacity == expected_capacity, (
-            f"ChEMBL capacity mismatch: got {capacity}, expected {expected_capacity}"
+        assert rate_limit.capacity == expected_capacity, (
+            f"ChEMBL capacity mismatch: got {rate_limit.capacity}, expected {expected_capacity}"
         )
 
     def test_chembl_circuit_breaker_from_config(self) -> None:
@@ -238,7 +238,7 @@ class TestConfigValuesNotHardcoded:
             _get_circuit_breaker_from_config,
         )
 
-        threshold, timeout = _get_circuit_breaker_from_config("chembl")
+        cb_config = _get_circuit_breaker_from_config("chembl")
 
         # Load expected values from YAML
         with open("configs/sources/chembl.yaml", encoding="utf-8") as f:
@@ -247,5 +247,5 @@ class TestConfigValuesNotHardcoded:
         expected_threshold = raw["source"]["circuit_breaker"]["failure_threshold"]
         expected_timeout = raw["source"]["circuit_breaker"]["recovery_timeout"]
 
-        assert threshold == expected_threshold
-        assert timeout == expected_timeout
+        assert cb_config.failure_threshold == expected_threshold
+        assert cb_config.recovery_timeout == expected_timeout
