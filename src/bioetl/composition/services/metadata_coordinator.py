@@ -153,16 +153,7 @@ class MetadataCoordinator:
         )
 
     def _build_pipeline_metadata(self) -> PipelineMetadata:
-        """Build PipelineMetadata from run context.
-
-        Includes versioning and reproducibility metadata:
-        - version: Pipeline version from config or package
-        - git_commit: Git commit hash for reproducibility
-        - config_hash: SHA256 hash of pipeline configuration
-
-        Returns:
-            PipelineMetadata with pipeline identification and versioning.
-        """
+        """Build PipelineMetadata with versioning from run context."""
         return PipelineMetadata(
             name=self._context.pipeline_name,
             provider=self._context.provider,
