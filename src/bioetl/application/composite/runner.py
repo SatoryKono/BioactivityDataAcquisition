@@ -303,7 +303,7 @@ class CompositePipelineRunner:
             # Transition to ENRICHING state before starting enrichments
             enricher_names = [e.pipeline for e in enrichers_to_run]
             state = state.with_state(CompositePipelineState.ENRICHING)
-            await self._checkpoint_manager.save(state)
+            await self._save_checkpoint_safe(state, "enriching_start")
 
             self._logger.info(
                 "Enrichment stage started",
@@ -324,7 +324,7 @@ class CompositePipelineRunner:
             for name, result in enrichment_results.items():
                 if result.is_success or result.status == EnrichmentStatus.SKIPPED:
                     state = state.with_enricher_completed(name, result)
-            await self._checkpoint_manager.save(state)
+            await self._save_checkpoint_safe(state, "enriching_progress")
 
             # Log aggregated enrichment results
             self._log_enrichment_summary(enrichment_results)
@@ -345,14 +345,7 @@ class CompositePipelineRunner:
         except RuntimeError as e:
             # Required enricher failed - transition to FAILED state
             state = state.with_state(CompositePipelineState.FAILED)
-            try:
-                await self._checkpoint_manager.save(state)
-            except Exception as save_error:
-                self._logger.warning(
-                    "Failed to save FAILED state to checkpoint",
-                    composite=self._config.name,
-                    error=str(save_error),
-                )
+            await self._save_checkpoint_safe(state, "enriching_failed")
 
             self._logger.error(
                 "Required enricher failed, pipeline transitioning to FAILED",
@@ -365,7 +358,7 @@ class CompositePipelineRunner:
 
         # Step 5b: Transition to ENRICHMENT_COMPLETED
         state = state.with_state(CompositePipelineState.ENRICHMENT_COMPLETED)
-        await self._checkpoint_manager.save(state)
+        await self._save_checkpoint_safe(state, "enriching_completed")
 
         self._logger.info(
             "Enrichment stage completed",
@@ -377,7 +370,7 @@ class CompositePipelineRunner:
         # Step 6: Transition to MERGING and merge results
         if not self._runtime.dry_run:
             state = state.with_state(CompositePipelineState.MERGING)
-            await self._checkpoint_manager.save(state)
+            await self._save_checkpoint_safe(state, "merging_start")
 
             self._logger.info(
                 "Merge stage started",
