@@ -90,12 +90,14 @@ class TestCoordinatorOptionalEnricherLogging:
             for c in mock_logger.warning.call_args_list
             if c.args and "Optional enricher failed" in str(c.args[0])
         ]
-        assert len(warning_calls) >= 1, "Should log warning for optional enricher failure"
+        assert len(warning_calls) >= 1, (
+            "Should log warning for optional enricher failure"
+        )
 
         # Verify warning includes required=False
-        assert any(
-            c.kwargs.get("required") is False for c in warning_calls
-        ), "Warning should indicate required=False"
+        assert any(c.kwargs.get("required") is False for c in warning_calls), (
+            "Warning should indicate required=False"
+        )
 
     @pytest.mark.asyncio
     async def test_does_not_log_error_for_optional_enricher_failure(
@@ -122,11 +124,11 @@ class TestCoordinatorOptionalEnricherLogging:
 
         # Verify no error was logged for optional enricher
         error_calls = [
-            c
-            for c in mock_logger.error.call_args_list
-            if "pubmed" in str(c)
+            c for c in mock_logger.error.call_args_list if "pubmed" in str(c)
         ]
-        assert len(error_calls) == 0, "Should not log error for optional enricher failure"
+        assert len(error_calls) == 0, (
+            "Should not log error for optional enricher failure"
+        )
 
 
 @pytest.mark.unit
@@ -172,9 +174,9 @@ class TestCoordinatorRequiredEnricherLogging:
         assert len(error_calls) >= 1, "Should log error for required enricher failure"
 
         # Verify error includes required=True
-        assert any(
-            c.kwargs.get("required") is True for c in error_calls
-        ), "Error should indicate required=True"
+        assert any(c.kwargs.get("required") is True for c in error_calls), (
+            "Error should indicate required=True"
+        )
 
         # Verify result is failed
         assert "crossref" in results
