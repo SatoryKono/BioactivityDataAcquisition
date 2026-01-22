@@ -344,7 +344,7 @@ class TestSerialization:
         )
         data = state.to_dict()
         assert "state" in data
-        assert data["state"] == "ENRICHING"
+        assert data["state"] == "enriching"
 
     def test_full_roundtrip(self):
         """Full roundtrip should preserve all fields."""

@@ -7,6 +7,7 @@ This package contains domain models for composite pipeline orchestration:
 - MergeStrategy: Strategy for merging enriched data
 - ConflictResolution: Strategy for field conflict resolution
 - LineageMetadata: Provenance tracking for merged records
+- CompositePipelineState: FSM states for pipeline execution lifecycle
 
 See ADR-026 for architectural decisions.
 """
@@ -29,7 +30,13 @@ from bioetl.domain.composite.result import (
     MergeResult,
     SeedResult,
 )
-from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.composite.state import (
+    CompositePipelineState,
+    TransitionRules,
+    can_transition,
+    get_transition_rules,
+    validate_transition,
+)
 from bioetl.domain.composite.strategy import (
     ConflictResolution,
     FallbackStrategy,
@@ -53,4 +60,8 @@ __all__ = [
     "MergeStrategy",
     "SeedConfig",
     "SeedResult",
+    "TransitionRules",
+    "can_transition",
+    "get_transition_rules",
+    "validate_transition",
 ]
