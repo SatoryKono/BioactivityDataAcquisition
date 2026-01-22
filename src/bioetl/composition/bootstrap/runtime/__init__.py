@@ -9,6 +9,7 @@ IMPORTANT: This module MUST NOT import from bootstrap/cli/.
 CLI modules may import from runtime for runner access, but not vice versa.
 
 Components:
+- assembly: Pure configuration assembly functions (no I/O)
 - observability: Full observability stack bootstrap
 - pipeline: Main pipeline bootstrap entry point
 - composite: Composite pipeline bootstrap
@@ -17,6 +18,12 @@ Components:
 
 from __future__ import annotations
 
+from bioetl.composition.bootstrap.runtime.assembly import (
+    VacuumSettings,
+    assemble_filter_config,
+    assemble_runtime_config,
+    assemble_vacuum_settings,
+)
 from bioetl.composition.bootstrap.runtime.composite import (
     # Deprecated alias
     bootstrap_composite_pipeline,
@@ -55,6 +62,11 @@ from bioetl.composition.bootstrap.runtime.runner import (
 __all__ = [
     # Observability (canonical)
     "MetricsServerError",
+    # Assembly (pure functions)
+    "VacuumSettings",
+    "assemble_filter_config",
+    "assemble_runtime_config",
+    "assemble_vacuum_settings",
     # Composite (deprecated alias)
     "bootstrap_composite_pipeline",
     # Composite (canonical)
