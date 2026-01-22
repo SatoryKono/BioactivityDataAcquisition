@@ -20,6 +20,7 @@ from bioetl.application.composite.runner import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
 )
+from bioetl.application.composite.runner_helpers import log_enrichment_summary
 from bioetl.domain.composite.result import (
     EnrichmentResult,
     EnrichmentStatus,
@@ -726,10 +727,10 @@ class TestEnrichmentLogging:
 
 @pytest.mark.unit
 class TestEnrichmentSummaryAggregation:
-    """Tests for _log_enrichment_summary method."""
+    """Tests for log_enrichment_summary helper function."""
 
     def test_log_enrichment_summary_counts_statuses(self, runner, mock_logger):
-        """Test _log_enrichment_summary correctly counts statuses."""
+        """Test log_enrichment_summary correctly counts statuses."""
         results = {
             "enricher1": EnrichmentResult.success(
                 enricher_name="enricher1",
@@ -757,7 +758,7 @@ class TestEnrichmentSummaryAggregation:
             ),
         }
 
-        runner._log_enrichment_summary(results)
+        log_enrichment_summary(results, runner._config.name, mock_logger)
 
         # Verify logger.info was called with summary
         mock_logger.info.assert_called()
@@ -772,8 +773,8 @@ class TestEnrichmentSummaryAggregation:
         assert summary_call is not None
 
     def test_log_enrichment_summary_empty_results(self, runner, mock_logger):
-        """Test _log_enrichment_summary handles empty results."""
-        runner._log_enrichment_summary({})
+        """Test log_enrichment_summary handles empty results."""
+        log_enrichment_summary({}, runner._config.name, mock_logger)
 
         # Should not log anything for empty results
         summary_calls = [
