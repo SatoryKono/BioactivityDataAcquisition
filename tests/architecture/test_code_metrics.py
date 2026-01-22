@@ -64,7 +64,9 @@ class TestFileSizeLimits:
         # Domain Pandera schemas (declarative field definitions)
         "compound.py": 390,  # 387 LOC - PubChem molecule schema + deprecated alias __getattr__ (v2.0)
         "protein.py": 370,  # 365 LOC - UniProt target schema + deprecated alias __getattr__ (v2.0)
+        # Domain contracts/gold (Gold layer Pandera schemas)
         "publications.py": 400,  # 374 LOC - Gold layer publication schemas (PubMed, CrossRef, OpenAlex, SemanticScholar)
+        # Note: chembl.py exemption at line 39 covers both domain/entities/chembl.py and domain/contracts/gold/chembl.py
         # Domain DQ models (data quality reports and serialization)
         "dq_serializer.py": 435,  # 429 LOC - DQ report serialization logic (increased for CC reduction)
         "dq_report.py": 660,  # 646 LOC - DQ report models with validation rules
@@ -494,6 +496,7 @@ class TestClassSize:
         # Large classes that are acceptable due to their nature
         "BasePipeline": 400,
         "PipelineRunner": 450,  # 441 lines - includes vacuum + health check methods
+        # Note: CompositePipelineRunner exemption is in Composite pipeline services section (680 lines)
         "UnifiedHTTPClient": 450,  # 427 lines - HTTP client with retry/circuit breaker
         "PipelineObserver": 350,  # 319 lines - unified observability with lifecycle events
         # Baseline exemptions for existing classes
