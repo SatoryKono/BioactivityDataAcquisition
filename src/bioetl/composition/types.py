@@ -10,10 +10,24 @@ For actual runtime imports, use the specific modules:
 - PipelineRegistry: from bioetl.composition.registry
 - get_default_registry: from bioetl.composition.registry (default instance)
 - create_registry: from bioetl.composition.registry (isolated instance for tests)
+
+Typed contexts for bootstrap functions (replacing untyped tuples):
+- PipelineCallbacksContext: transform, gold_filter, gold_transform callbacks
+- DQConfigsContext: Bronze/Silver/Gold DQ report configurations
+- DQOutputPathsContext: DQ report output paths and flat_structure flag
+- RateLimitConfig: rate and capacity for token bucket
+- CircuitBreakerConfig: failure_threshold and recovery_timeout
 """
 
 from __future__ import annotations
 
+from bioetl.composition.bootstrap_contexts import (
+    CircuitBreakerConfig,
+    DQConfigsContext,
+    DQOutputPathsContext,
+    PipelineCallbacksContext,
+    RateLimitConfig,
+)
 from bioetl.composition.factories.storage import StorageAdapter
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.registry import (
@@ -24,9 +38,14 @@ from bioetl.composition.registry import (
 )
 
 __all__ = [
+    "CircuitBreakerConfig",
+    "DQConfigsContext",
+    "DQOutputPathsContext",
     "ObservabilityBundle",
+    "PipelineCallbacksContext",
     "PipelineDefinition",
     "PipelineRegistry",
+    "RateLimitConfig",
     "StorageAdapter",
     "create_registry",
     "get_default_registry",

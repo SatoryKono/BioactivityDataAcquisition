@@ -345,9 +345,7 @@ class TestAssembleFilterConfig:
 
         assert result is None
 
-    def test_cli_filter_overrides_yaml(
-        self, yaml_filter_enabled: YamlInputFilter
-    ):
+    def test_cli_filter_overrides_yaml(self, yaml_filter_enabled: YamlInputFilter):
         """Test that CLI input_filter overrides YAML config."""
         ctx = PipelineRunContext(
             pipeline_name="test_pipeline",
@@ -371,9 +369,7 @@ class TestAssembleFilterConfig:
         assert result.column_name == "cli_column"
         assert result.filter_field == "cli_field"
 
-    def test_ignore_yaml_filter_flag(
-        self, yaml_filter_enabled: YamlInputFilter
-    ):
+    def test_ignore_yaml_filter_flag(self, yaml_filter_enabled: YamlInputFilter):
         """Test that ignore_yaml_filter flag disables YAML filter."""
         ctx = PipelineRunContext(
             pipeline_name="test_pipeline",

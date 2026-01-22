@@ -13,6 +13,11 @@ from bioetl.application.core.idmapping_data_source import IDMappingDataSource
 from bioetl.application.core.publication_term_data_source import (
     PublicationTermDataSource,
 )
+from bioetl.composition.bootstrap_contexts import (
+    CircuitBreakerConfig,
+    RateLimitConfig,
+)
+from bioetl.composition.bootstrap_logger import BootstrapLogger
 from bioetl.composition.providers.provider_registry import (
     HttpConfig,
     ProviderConfig,
@@ -87,26 +92,40 @@ def _get_batch_size_from_config(provider: str, default: int = 100) -> int:
     return source_config.batch_size if source_config else default
 
 
-def _get_rate_limit_from_config(provider: str) -> tuple[float, int]:
-    """Get (rate, capacity) from source config or defaults (5.0, 10)."""
+def _get_rate_limit_from_config(provider: str) -> RateLimitConfig:
+    """Get rate limit configuration from source config or defaults.
+
+    Args:
+        provider: Provider name (e.g., 'chembl', 'pubchem').
+
+    Returns:
+        RateLimitConfig with rate and capacity values.
+    """
     source_config = _get_source_config(provider)
     if source_config:
-        return (
-            source_config.rate_limit.requests_per_second,
-            source_config.rate_limit.burst,
+        return RateLimitConfig(
+            rate=source_config.rate_limit.requests_per_second,
+            capacity=source_config.rate_limit.burst,
         )
-    return 5.0, 10
+    return RateLimitConfig(rate=5.0, capacity=10)
 
 
-def _get_circuit_breaker_from_config(provider: str) -> tuple[int, int]:
-    """Get (failure_threshold, recovery_timeout) from config or defaults (5, 300)."""
+def _get_circuit_breaker_from_config(provider: str) -> CircuitBreakerConfig:
+    """Get circuit breaker configuration from source config or defaults.
+
+    Args:
+        provider: Provider name (e.g., 'chembl', 'pubchem').
+
+    Returns:
+        CircuitBreakerConfig with failure_threshold and recovery_timeout.
+    """
     source_config = _get_source_config(provider)
     if source_config:
-        return (
-            source_config.circuit_breaker.failure_threshold,
-            source_config.circuit_breaker.recovery_timeout,
+        return CircuitBreakerConfig(
+            failure_threshold=source_config.circuit_breaker.failure_threshold,
+            recovery_timeout=source_config.circuit_breaker.recovery_timeout,
         )
-    return 5, 300
+    return CircuitBreakerConfig(failure_threshold=5, recovery_timeout=300)
 
 
 def _get_adapter_config(provider: str, default_page_size: int = 1000) -> AdapterConfig:
@@ -203,13 +222,13 @@ def _create_pubchem_adapter(
     if logger is None:
         raise ValueError("PubChem adapter requires logger")
 
-    rate, capacity = _get_rate_limit_from_config("pubchem")
-    cb_threshold, cb_timeout = _get_circuit_breaker_from_config("pubchem")
+    rate_limit = _get_rate_limit_from_config("pubchem")
+    cb_config = _get_circuit_breaker_from_config("pubchem")
 
-    rate = kwargs.pop("rate", rate)
-    capacity = kwargs.pop("capacity", capacity)
-    cb_threshold = kwargs.pop("circuit_breaker_threshold", cb_threshold)
-    cb_timeout = kwargs.pop("circuit_breaker_timeout", cb_timeout)
+    rate = kwargs.pop("rate", rate_limit.rate)
+    capacity = kwargs.pop("capacity", rate_limit.capacity)
+    cb_threshold = kwargs.pop("circuit_breaker_threshold", cb_config.failure_threshold)
+    cb_timeout = kwargs.pop("circuit_breaker_timeout", cb_config.recovery_timeout)
     max_workers = kwargs.pop("max_workers", 4)
     strict_error_handling = kwargs.pop("strict_error_handling", False)
     metrics = kwargs.pop("metrics", None)
@@ -540,11 +559,11 @@ def register_all_providers() -> None:
     Each provider includes a data_source_creator for unified registry access.
     """
     # Load rate limits from source configs (with fallback defaults)
-    chembl_rate, chembl_capacity = _get_rate_limit_from_config("chembl")
-    pubchem_rate, pubchem_capacity = _get_rate_limit_from_config("pubchem")
-    uniprot_rate, uniprot_capacity = _get_rate_limit_from_config("uniprot")
-    pubmed_rate, pubmed_capacity = _get_rate_limit_from_config("pubmed")
-    crossref_rate, crossref_capacity = _get_rate_limit_from_config("crossref")
+    chembl_rate_limit = _get_rate_limit_from_config("chembl")
+    pubchem_rate_limit = _get_rate_limit_from_config("pubchem")
+    uniprot_rate_limit = _get_rate_limit_from_config("uniprot")
+    pubmed_rate_limit = _get_rate_limit_from_config("pubmed")
+    crossref_rate_limit = _get_rate_limit_from_config("crossref")
 
     # ChEMBL - async HTTP adapter
     if not ProviderRegistry.is_registered("chembl"):
@@ -553,8 +572,8 @@ def register_all_providers() -> None:
             ProviderConfig(
                 adapter_class=ChemblAdapter,
                 http_config=HttpConfig(
-                    rate=chembl_rate,
-                    capacity=chembl_capacity,
+                    rate=chembl_rate_limit.rate,
+                    capacity=chembl_rate_limit.capacity,
                 ),
                 requires_http_client=True,
                 requires_logger=True,
@@ -571,8 +590,8 @@ def register_all_providers() -> None:
             ProviderConfig(
                 adapter_class=PubChemAdapter,
                 http_config=HttpConfig(
-                    rate=pubchem_rate,
-                    capacity=pubchem_capacity,
+                    rate=pubchem_rate_limit.rate,
+                    capacity=pubchem_rate_limit.capacity,
                 ),
                 requires_http_client=False,
                 requires_logger=True,
@@ -588,8 +607,8 @@ def register_all_providers() -> None:
             ProviderConfig(
                 adapter_class=UniProtAdapter,
                 http_config=HttpConfig(
-                    rate=uniprot_rate,
-                    capacity=uniprot_capacity,
+                    rate=uniprot_rate_limit.rate,
+                    capacity=uniprot_rate_limit.capacity,
                     rate_overrides={"uniprot_api_key": 100.0},
                 ),
                 requires_http_client=True,
@@ -605,8 +624,8 @@ def register_all_providers() -> None:
             ProviderConfig(
                 adapter_class=PubMedAdapter,
                 http_config=HttpConfig(
-                    rate=pubmed_rate,
-                    capacity=pubmed_capacity,
+                    rate=pubmed_rate_limit.rate,
+                    capacity=pubmed_rate_limit.capacity,
                     rate_overrides={"pubmed_api_key": 10.0},
                 ),
                 requires_http_client=True,
@@ -624,8 +643,8 @@ def register_all_providers() -> None:
             ProviderConfig(
                 adapter_class=CrossRefAdapter,
                 http_config=HttpConfig(
-                    rate=crossref_rate,
-                    capacity=crossref_capacity,
+                    rate=crossref_rate_limit.rate,
+                    capacity=crossref_rate_limit.capacity,
                 ),
                 requires_http_client=True,
                 requires_logger=True,
@@ -637,15 +656,15 @@ def register_all_providers() -> None:
     # OpenAlex - async HTTP adapter for open scholarly metadata
     # Requires mailto for polite pool access (10 req/sec)
     # Supports batch DOI resolution with title fallback
-    openalex_rate, openalex_capacity = _get_rate_limit_from_config("openalex")
+    openalex_rate_limit = _get_rate_limit_from_config("openalex")
     if not ProviderRegistry.is_registered("openalex"):
         ProviderRegistry.register(
             "openalex",
             ProviderConfig(
                 adapter_class=OpenAlexAdapter,
                 http_config=HttpConfig(
-                    rate=openalex_rate,
-                    capacity=openalex_capacity,
+                    rate=openalex_rate_limit.rate,
+                    capacity=openalex_rate_limit.capacity,
                 ),
                 requires_http_client=True,
                 requires_logger=True,
@@ -656,15 +675,15 @@ def register_all_providers() -> None:
 
     # Semantic Scholar - async HTTP adapter for DOI resolution with title fallback
     # API key recommended for stable rate limits (1 req/sec guaranteed)
-    s2_rate, s2_capacity = _get_rate_limit_from_config("semanticscholar")
+    s2_rate_limit = _get_rate_limit_from_config("semanticscholar")
     if not ProviderRegistry.is_registered("semanticscholar"):
         ProviderRegistry.register(
             "semanticscholar",
             ProviderConfig(
                 adapter_class=SemanticScholarAdapter,
                 http_config=HttpConfig(
-                    rate=s2_rate,
-                    capacity=s2_capacity,
+                    rate=s2_rate_limit.rate,
+                    capacity=s2_rate_limit.capacity,
                 ),
                 requires_http_client=True,
                 requires_logger=True,
@@ -677,17 +696,15 @@ def register_all_providers() -> None:
     # Input comes from CSV file, not external API filtering
     # Note: IDMappingDataSource is a lightweight wrapper, actual API client is
     # UniProtIDMappingClient created in the data_source_creator
-    uniprot_idmapping_rate, uniprot_idmapping_capacity = _get_rate_limit_from_config(
-        "uniprot"
-    )
+    uniprot_idmapping_rate_limit = _get_rate_limit_from_config("uniprot")
     if not ProviderRegistry.is_registered("uniprot_idmapping"):
         ProviderRegistry.register(
             "uniprot_idmapping",
             ProviderConfig(
                 adapter_class=IDMappingDataSource,
                 http_config=HttpConfig(
-                    rate=uniprot_idmapping_rate,
-                    capacity=uniprot_idmapping_capacity,
+                    rate=uniprot_idmapping_rate_limit.rate,
+                    capacity=uniprot_idmapping_rate_limit.capacity,
                 ),
                 requires_http_client=True,
                 requires_logger=True,

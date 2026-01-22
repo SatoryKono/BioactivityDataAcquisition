@@ -25,6 +25,7 @@ from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
+from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
 from bioetl.composition.factories.data_source_factory import (
     DataSourceCreator,
     DataSourceRegistry,
@@ -49,14 +50,11 @@ if TYPE_CHECKING:
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig
     from bioetl.domain.ports import (
-        BronzeDQConfigPort,
         DataSourcePort,
         DQMonitorPort,
-        GoldDQConfigPort,
         LoggerPort,
         MetricsPort,
         PiiHasherPort,
-        SilverDQConfigPort,
         TracingPort,
     )
     from bioetl.domain.services import IdentityService
@@ -537,9 +535,7 @@ def assemble_runner(
     )
 
     # Extract DQ configs from YAML config for DQ report generation
-    bronze_dq_config, silver_dq_config, gold_dq_config = _extract_dq_configs(
-        yaml_config
-    )
+    dq_configs = _extract_dq_configs(yaml_config)
 
     postrun_service = PostrunService(
         config=pipeline.config,
@@ -550,9 +546,9 @@ def assemble_runner(
         logger=logger_port,
         # DQ Report parameters
         dq_report_service=pipeline.services.dq_report_service,
-        bronze_dq_config=bronze_dq_config,
-        silver_dq_config=silver_dq_config,
-        gold_dq_config=gold_dq_config,
+        bronze_dq_config=dq_configs.bronze,
+        silver_dq_config=dq_configs.silver,
+        gold_dq_config=dq_configs.gold,
     )
 
     observer = PipelineObserver(
@@ -565,9 +561,7 @@ def assemble_runner(
     )
 
     # Extract sink paths for DQ report generation
-    bronze_output_path, silver_output_path, gold_output_path, flat_structure = (
-        _extract_dq_output_paths(yaml_config)
-    )
+    dq_output_paths = _extract_dq_output_paths(yaml_config)
 
     # Create unified BatchExecutor (replaces PipelineExecutor + RecordProcessor)
     # Safety Guard §4.6: lock validation via lock_validator callback
@@ -581,10 +575,10 @@ def assemble_runner(
         lock_validator=lock_manager.validate,
         tracer=observability.tracer,
         # DQ report output paths for flat_structure support
-        bronze_output_path=bronze_output_path,
-        silver_output_path=silver_output_path,
-        gold_output_path=gold_output_path,
-        flat_structure=flat_structure,
+        bronze_output_path=dq_output_paths.bronze_path,
+        silver_output_path=dq_output_paths.silver_path,
+        gold_output_path=dq_output_paths.gold_path,
+        flat_structure=dq_output_paths.flat_structure,
     )
 
     # Assemble Runner with directly injected services (explicit DI)
@@ -641,18 +635,14 @@ def _extract_single_dq_config(
 
 def _extract_dq_configs(
     yaml_config: PipelineYamlConfig | None,
-) -> tuple[
-    BronzeDQConfigPort | None,
-    SilverDQConfigPort | None,
-    GoldDQConfigPort | None,
-]:
+) -> DQConfigsContext:
     """Extract DQ report configs for each layer from YAML config.
 
     Args:
         yaml_config: Pipeline YAML configuration with sink settings.
 
     Returns:
-        Tuple of (bronze_config, silver_config, gold_config).
+        DQConfigsContext with bronze, silver, and gold DQ configurations.
         All values may be None if DQ reports are not configured.
     """
     from bioetl.infrastructure.schemas.dq_report_config import (
@@ -662,17 +652,21 @@ def _extract_dq_configs(
     )
 
     if yaml_config is None:
-        return None, None, None
+        return DQConfigsContext(bronze=None, silver=None, gold=None)
 
     sink = getattr(yaml_config, "sink", None)
     if sink is None:
-        return None, None, None
+        return DQConfigsContext(bronze=None, silver=None, gold=None)
 
     bronze_config = _extract_single_dq_config(sink, "bronze", BronzeSinkConfig)
     silver_config = _extract_single_dq_config(sink, "silver", SilverSinkConfig)
     gold_config = _extract_single_dq_config(sink, "gold", GoldSinkConfig)
 
-    return bronze_config, silver_config, gold_config
+    return DQConfigsContext(
+        bronze=bronze_config,
+        silver=silver_config,
+        gold=gold_config,
+    )
 
 
 def _get_layer_path(config: Any) -> str | None:
@@ -687,22 +681,26 @@ def _has_flat_structure(config: Any) -> bool:
 
 def _extract_dq_output_paths(
     yaml_config: PipelineYamlConfig | None,
-) -> tuple[str | None, str | None, str | None, bool]:
+) -> DQOutputPathsContext:
     """Extract DQ report output paths and flat_structure from YAML config.
 
     Args:
         yaml_config: Pipeline YAML configuration with sink settings.
 
     Returns:
-        Tuple of (bronze_path, silver_path, gold_path, flat_structure).
+        DQOutputPathsContext with bronze_path, silver_path, gold_path, and flat_structure.
         Paths may be None if not configured.
     """
     if yaml_config is None:
-        return None, None, None, False
+        return DQOutputPathsContext(
+            bronze_path=None, silver_path=None, gold_path=None, flat_structure=False
+        )
 
     sink = getattr(yaml_config, "sink", None)
     if sink is None:
-        return None, None, None, False
+        return DQOutputPathsContext(
+            bronze_path=None, silver_path=None, gold_path=None, flat_structure=False
+        )
 
     bronze_config = sink.get("bronze")
     silver_config = sink.get("silver")
@@ -712,9 +710,9 @@ def _extract_dq_output_paths(
         gold_config
     )
 
-    return (
-        _get_layer_path(bronze_config),
-        _get_layer_path(silver_config),
-        _get_layer_path(gold_config),
-        flat_structure,
+    return DQOutputPathsContext(
+        bronze_path=_get_layer_path(bronze_config),
+        silver_path=_get_layer_path(silver_config),
+        gold_path=_get_layer_path(gold_config),
+        flat_structure=flat_structure,
     )
