@@ -18,8 +18,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
+from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.infrastructure.config import get_settings
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
     from bioetl.application.core.cleanup_service import CleanupService
@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
+    from bioetl.domain.ports import LoggerPort
 
 __all__ = [
     "bootstrap_bronze_cleanup_service",
@@ -58,7 +59,7 @@ def bootstrap_cleanup_service() -> CleanupService:
     from bioetl.application.core.cleanup_service import CleanupService
 
     storage = bootstrap_storage_adapter()
-    noop_logger = NoOpLogger()
+    noop_logger = create_noop_logger()
 
     return CleanupService(storage=storage, logger=noop_logger)
 
@@ -90,7 +91,7 @@ def bootstrap_lifecycle_service() -> MedallionLifecycleService:
     )
 
     storage = bootstrap_storage_adapter()
-    noop_logger = NoOpLogger()
+    noop_logger = create_noop_logger()
 
     return MedallionLifecycleService(storage=storage, logger=noop_logger)
 
@@ -107,7 +108,7 @@ def bootstrap_bronze_cleanup_service() -> BronzeCleanupService:
     from bioetl.application.services import BronzeCleanupService
 
     storage = bootstrap_storage_adapter()
-    noop_logger = NoOpLogger()
+    noop_logger = create_noop_logger()
 
     return BronzeCleanupService(storage=storage, logger=noop_logger)
 
@@ -124,7 +125,7 @@ def bootstrap_vacuum_service() -> VacuumService:
     from bioetl.application.services import VacuumService
 
     lifecycle = bootstrap_lifecycle_service()
-    noop_logger = NoOpLogger()
+    noop_logger = create_noop_logger()
 
     # Create table collector that queries the registry (DI pattern)
     table_collector = _create_table_collector(noop_logger)
@@ -137,7 +138,7 @@ def bootstrap_vacuum_service() -> VacuumService:
 
 
 def _create_table_collector(
-    logger: NoOpLogger,
+    logger: LoggerPort,
 ) -> Callable[[str], list[tuple[str, str]]]:
     """Create a table collector function for VacuumService.
 
@@ -206,7 +207,7 @@ def bootstrap_export_service() -> ExportService:
     from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
     settings = get_settings()
-    noop_logger = NoOpLogger()
+    noop_logger = create_noop_logger()
 
     # Use data/output/ subdirectory for actual data paths (matches pipeline configs)
     # The pipeline configs use data/output/silver, data/output/gold
