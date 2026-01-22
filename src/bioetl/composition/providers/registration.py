@@ -154,6 +154,63 @@ def _wrap_with_filter(
     return data_source
 
 
+def _wrap_with_resilience(
+    data_source: DataSourcePort,
+    provider: str,
+    logger: LoggerPort | None = None,
+    metrics: MetricsPort | None = None,
+) -> DataSourcePort:
+    """Wrap data source with retry and circuit breaker decorators.
+
+    Applies the Decorator Pattern to add resilience at the DataSourcePort level.
+    Configuration is loaded from configs/sources/{provider}.yaml.
+
+    Decorator order (innermost to outermost):
+    1. Base data source
+    2. RetryingDataSourceDecorator
+    3. CircuitBreakerDataSourceDecorator
+
+    This ensures:
+    - Circuit breaker fails fast before retry attempts
+    - Retries happen within circuit breaker protection
+
+    Args:
+        data_source: The base DataSourcePort to wrap.
+        provider: Provider name for configuration lookup.
+        logger: Optional logger for decorator events.
+        metrics: Optional metrics for decorator tracking.
+
+    Returns:
+        Wrapped DataSourcePort with resilience decorators.
+    """
+    from bioetl.domain.resilience import RetryConfig
+    from bioetl.infrastructure.adapters.decorators import wrap_with_resilience
+
+    # Load retry config from source configuration
+    source_config = _get_source_config(provider)
+    if source_config is not None:
+        retry_config = RetryConfig(max_attempts=source_config.max_retries)
+    else:
+        retry_config = RetryConfig()
+
+    # Load circuit breaker config
+    failure_threshold, recovery_timeout = _get_circuit_breaker_from_config(provider)
+    circuit_breaker = CircuitBreaker(
+        provider=provider,
+        failure_threshold=failure_threshold,
+        recovery_timeout=recovery_timeout,
+        metrics=metrics,
+    )
+
+    return wrap_with_resilience(
+        data_source=data_source,
+        retry_config=retry_config,
+        circuit_breaker=circuit_breaker,
+        logger=logger,
+        metrics=metrics,
+    )
+
+
 def _create_chembl_data_source(
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
