@@ -8,11 +8,7 @@ Schemas are independent of pipeline implementations and can be imported by
 data consumers (analysts, downstream applications) for validation and documentation.
 
 Usage for analysts:
-    # Preferred (new code):
     >>> from bioetl.domain.contracts import ChEMBLActivityGoldSchema
-
-    # Deprecated (still works for backward compatibility):
-    >>> from bioetl.interfaces.contracts import ChEMBLActivityGoldSchema
     >>> import pandas as pd
     >>> df = pd.read_parquet("data/gold/chembl_activity/")
     >>> ChEMBLActivityGoldSchema.validate(df)
@@ -38,8 +34,7 @@ See also:
 from __future__ import annotations
 
 # Re-export all Gold schemas from domain.contracts for backward compatibility
-from bioetl.domain.contracts import (
-    DATE_REGEX,
+from bioetl.domain.contracts.gold import (
     # ChEMBL schemas
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
@@ -67,6 +62,9 @@ from bioetl.domain.contracts import (
     UniProtIDMappingGoldSchema,
     UniProtProteinGoldSchema,
 )
+
+# Utilities
+from bioetl.domain.contracts.gold._base import DATE_REGEX
 
 __all__ = [
     # Utilities

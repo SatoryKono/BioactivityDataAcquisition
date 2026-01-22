@@ -13,9 +13,8 @@ Example:
 
 from __future__ import annotations
 
-# Re-export all schemas from domain.contracts for backward compatibility
-from bioetl.domain.contracts import (
-    DATE_REGEX,
+# Re-export all schemas from contracts for backward compatibility
+from bioetl.domain.contracts.gold import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
     ChEMBLAssayParametersGoldSchema,
@@ -36,6 +35,7 @@ from bioetl.domain.contracts import (
     UniProtIDMappingGoldSchema,
     UniProtProteinGoldSchema,
 )
+from bioetl.domain.contracts.gold._base import DATE_REGEX
 
 __all__ = [
     "DATE_REGEX",

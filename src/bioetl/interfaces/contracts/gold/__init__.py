@@ -6,27 +6,25 @@ backward compatibility. New code should import from bioetl.domain.contracts.gold
 This package contains Pandera DataFrameModel schemas for Gold layer validation,
 organized by data provider for easy navigation.
 
-Submodules (deprecated paths, use bioetl.domain.contracts.gold instead):
+Submodules:
     chembl: ChEMBL bioactivity database schemas
     pubchem: PubChem compound schemas
     uniprot: UniProt protein database schemas
     publications: Cross-provider publication schemas (PubMed, CrossRef, OpenAlex, SemanticScholar)
 
 Example usage:
-    # Preferred (new code):
     >>> from bioetl.domain.contracts.gold import chembl
-    >>> chembl.ChEMBLActivityGoldSchema.validate(df)
-
-    # Deprecated (still works):
-    >>> from bioetl.interfaces.contracts.gold import chembl
     >>> df = pd.read_parquet("data/gold/chembl_activity/")
     >>> chembl.ChEMBLActivityGoldSchema.validate(df)
+
+    >>> from bioetl.domain.contracts.gold.publications import PubMedPublicationGoldSchema
+    >>> PubMedPublicationGoldSchema.validate(pubmed_df)
 """
 
 from __future__ import annotations
 
 # Re-export all schemas from domain.contracts.gold for backward compatibility
-from bioetl.domain.contracts.gold import (
+from bioetl.domain.contracts.gold.chembl import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
     ChEMBLAssayParametersGoldSchema,
@@ -39,11 +37,15 @@ from bioetl.domain.contracts.gold import (
     ChEMBLProteinClassGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
+)
+from bioetl.domain.contracts.gold.pubchem import PubChemCompoundGoldSchema
+from bioetl.domain.contracts.gold.publications import (
     CrossRefPublicationGoldSchema,
     OpenAlexPublicationGoldSchema,
-    PubChemCompoundGoldSchema,
     PubMedPublicationGoldSchema,
     SemanticScholarPublicationGoldSchema,
+)
+from bioetl.domain.contracts.gold.uniprot import (
     UniProtIDMappingGoldSchema,
     UniProtProteinGoldSchema,
 )
