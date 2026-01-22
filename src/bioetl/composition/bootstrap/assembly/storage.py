@@ -29,17 +29,25 @@ from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-__all__ = ["bootstrap_storage"]
+__all__ = [
+    # Deprecated alias (backward compatibility)
+    "bootstrap_storage",
+    # Canonical name (use this)
+    "bootstrap_storage_adapter",
+]
 
 
-def bootstrap_storage(*, enable_csv_export: bool = False) -> StorageAdapter:
-    """Bootstrap a storage adapter for CLI and composite pipeline operations.
+def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdapter:
+    """Create a storage adapter for CLI and composite pipeline operations.
 
     Creates a StorageAdapter suitable for preview operations and composite
     pipelines. CSV export is disabled by default for read-only inspection
     but can be enabled for composite pipelines that need CSV output.
 
     Uses NoOpLogger since this is for CLI preview operations without observability.
+
+    Layer: Returns infrastructure adapter (StorageAdapter) containing
+    Bronze, Silver, and Gold writers.
 
     Note:
         Lock validation is performed at Application layer (BatchWriter)
@@ -111,3 +119,20 @@ def bootstrap_storage(*, enable_csv_export: bool = False) -> StorageAdapter:
             metadata_coordinator=metadata_coordinator,
         ),
     )
+
+
+def bootstrap_storage(*, enable_csv_export: bool = False) -> StorageAdapter:
+    """Bootstrap a storage adapter for CLI and composite pipeline operations.
+
+    .. deprecated::
+        Use :func:`bootstrap_storage_adapter` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        enable_csv_export: If True, creates CsvExporters for Silver and Gold
+            layers. Used by composite pipelines that need CSV output.
+
+    Returns:
+        StorageAdapter configured for the current environment.
+    """
+    return bootstrap_storage_adapter(enable_csv_export=enable_csv_export)

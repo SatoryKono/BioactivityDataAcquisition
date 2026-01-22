@@ -10,7 +10,7 @@ from __future__ import annotations
 from uuid import uuid4
 
 from bioetl.application.services import PipelineRunnerService
-from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
+from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
 from bioetl.composition.factories.runner_factory import (
     create_metrics_extractor,
     create_runner_factory,
@@ -41,7 +41,7 @@ def bootstrap_pipeline_runner_service(
         >>> result = await service.run("chembl_activity", options=options)
     """
     # Bootstrap logger for the service (using a unique ID for service-level logging)
-    logger = bootstrap_logger(
+    logger = bootstrap_logger_port(
         pipeline="pipeline_runner_service",
         run_id=uuid4(),
         log_level="INFO",

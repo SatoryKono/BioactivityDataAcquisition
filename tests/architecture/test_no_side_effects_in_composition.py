@@ -50,26 +50,30 @@ def test_no_side_effect_imports():
 
 
 def test_bootstrap_uses_explicit_registration():
-    """bootstrap_pipeline() MUST call register_all_pipelines() explicitly.
+    """bootstrap_pipeline_runner() MUST call register_all_pipelines() explicitly.
 
     This ensures deterministic initialization without hidden side effects.
 
-    Note: bootstrap_pipeline() is now defined in composition/bootstrap/runtime/pipeline.py
+    Note: bootstrap_pipeline_runner() is the canonical name (bootstrap_pipeline() is
+    a deprecated alias) defined in composition/bootstrap/runtime/pipeline.py
     as part of the CLI/runtime split (see CLAUDE.md §2.1).
     """
-    # bootstrap_pipeline is now in composition/bootstrap/runtime/pipeline.py
+    # bootstrap_pipeline_runner is in composition/bootstrap/runtime/pipeline.py
     bootstrap_file = COMPOSITION_DIR / "bootstrap" / "runtime" / "pipeline.py"
     source = bootstrap_file.read_text(encoding="utf-8")
     tree = ast.parse(source)
 
-    # Find bootstrap_pipeline function
+    # Find bootstrap_pipeline_runner function (canonical name)
     bootstrap_func = None
     for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef) and node.name == "bootstrap_pipeline":
+        if (
+            isinstance(node, ast.FunctionDef)
+            and node.name == "bootstrap_pipeline_runner"
+        ):
             bootstrap_func = node
             break
 
-    assert bootstrap_func is not None, "bootstrap_pipeline function not found"
+    assert bootstrap_func is not None, "bootstrap_pipeline_runner function not found"
 
     # Check that register_all_pipelines() is called in the function body
     calls_register = False
@@ -83,33 +87,37 @@ def test_bootstrap_uses_explicit_registration():
                 break
 
     assert calls_register, (
-        "bootstrap_pipeline() must explicitly call register_all_pipelines() "
+        "bootstrap_pipeline_runner() must explicitly call register_all_pipelines() "
         "for deterministic initialization"
     )
 
 
 def test_no_metrics_server_direct_call_in_bootstrap_pipeline():
-    """bootstrap_pipeline() MUST NOT call start_metrics_server() directly.
+    """bootstrap_pipeline_runner() MUST NOT call start_metrics_server() directly.
 
-    Metrics server startup should be handled by bootstrap_metrics() or
-    bootstrap_observability() for proper opt-in control.
+    Metrics server startup should be handled by bootstrap_metrics_port() or
+    bootstrap_observability_bundle() for proper opt-in control.
 
-    Note: bootstrap_pipeline() is now defined in composition/bootstrap/runtime/pipeline.py
+    Note: bootstrap_pipeline_runner() is the canonical name (bootstrap_pipeline() is
+    a deprecated alias) defined in composition/bootstrap/runtime/pipeline.py
     as part of the CLI/runtime split (see CLAUDE.md §2.1).
     """
-    # bootstrap_pipeline is now in composition/bootstrap/runtime/pipeline.py
+    # bootstrap_pipeline_runner is in composition/bootstrap/runtime/pipeline.py
     bootstrap_file = COMPOSITION_DIR / "bootstrap" / "runtime" / "pipeline.py"
     source = bootstrap_file.read_text(encoding="utf-8")
     tree = ast.parse(source)
 
-    # Find bootstrap_pipeline function
+    # Find bootstrap_pipeline_runner function (canonical name)
     bootstrap_func = None
     for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef) and node.name == "bootstrap_pipeline":
+        if (
+            isinstance(node, ast.FunctionDef)
+            and node.name == "bootstrap_pipeline_runner"
+        ):
             bootstrap_func = node
             break
 
-    assert bootstrap_func is not None, "bootstrap_pipeline function not found"
+    assert bootstrap_func is not None, "bootstrap_pipeline_runner function not found"
 
     # Check that start_metrics_server() is NOT called directly
     for node in ast.walk(bootstrap_func):
@@ -119,6 +127,6 @@ def test_no_metrics_server_direct_call_in_bootstrap_pipeline():
                 and node.func.id == "start_metrics_server"
             ):
                 raise AssertionError(
-                    "bootstrap_pipeline() must not call start_metrics_server() directly. "
-                    "Use bootstrap_metrics() or bootstrap_observability() instead."
+                    "bootstrap_pipeline_runner() must not call start_metrics_server() directly. "
+                    "Use bootstrap_metrics_port() or bootstrap_observability_bundle() instead."
                 )
