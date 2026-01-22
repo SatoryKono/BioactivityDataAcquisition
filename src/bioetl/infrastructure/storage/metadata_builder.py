@@ -31,6 +31,20 @@ def _get_bioetl_version() -> str:
         return "unknown"
 
 
+def _get_git_commit_cached() -> str | None:
+    """Get git commit hash (lazy import to avoid circular deps).
+
+    Returns:
+        Short git commit hash or None.
+    """
+    try:
+        from bioetl.composition.services.versioning import get_git_commit
+
+        return get_git_commit()
+    except ImportError:
+        return None
+
+
 def _parse_table_name(table_name: str) -> tuple[str, str]:
     """Parse table name into provider and entity components.
 
@@ -133,6 +147,8 @@ class SilverMetadataBuilder:
             name=f"composite_{entity_name}",
             provider=provider_name,
             entity=entity_name,
+            version=_get_bioetl_version(),
+            git_commit=_get_git_commit_cached(),
         )
 
         lineage = LineageMetadata(
@@ -254,6 +270,8 @@ class GoldMetadataBuilder:
             name=f"{provider_name}_{entity_name}",
             provider=provider_name,
             entity=entity_name,
+            version=_get_bioetl_version(),
+            git_commit=_get_git_commit_cached(),
         )
 
         lineage = LineageMetadata()
@@ -339,6 +357,8 @@ class GoldMetadataBuilder:
             name=f"composite_{entity_name}",
             provider=provider_name,
             entity=entity_name,
+            version=_get_bioetl_version(),
+            git_commit=_get_git_commit_cached(),
         )
 
         lineage = LineageMetadata(
