@@ -16,64 +16,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.medallion_types import (
+    ClearResult,
+    PrepareResult,
+    VacuumResult,
+)
+
 if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.medallion import MedallionPolicy
     from bioetl.domain.ports import LoggerPort, MetricsPort, StoragePort
-
-
-@dataclass(frozen=True, slots=True)
-class ClearResult:
-    """Result of clear operation.
-
-    Attributes:
-        silver_cleared: Number of Silver records cleared.
-        gold_cleared: Number of Gold records cleared.
-        dry_run: Whether this was a dry run (no actual deletion).
-    """
-
-    silver_cleared: int
-    gold_cleared: int
-    dry_run: bool
-
-    @property
-    def total_cleared(self) -> int:
-        """Get total records cleared.
-
-        Returns:
-            Sum of silver and gold cleared records.
-        """
-        return self.silver_cleared + self.gold_cleared
-
-
-@dataclass(frozen=True, slots=True)
-class VacuumResult:
-    """Result of VACUUM operation.
-
-    Attributes:
-        silver_files_removed: Number of files removed from Silver table.
-        gold_files_removed: Number of files removed from Gold table.
-        skipped: Whether VACUUM was skipped.
-    """
-
-    silver_files_removed: int
-    gold_files_removed: int
-    skipped: bool
-
-
-@dataclass(frozen=True, slots=True)
-class PrepareResult:
-    """Result of prepare_for_run operation.
-
-    Combines clear result with policy used for transparency.
-
-    Attributes:
-        clear_result: Result of clear operation.
-        policy: MedallionPolicy used for the operation.
-    """
-
-    clear_result: ClearResult
-    policy: MedallionPolicy
 
 
 @dataclass
@@ -347,11 +299,9 @@ class MedallionLifecycleService:
     ) -> VacuumResult:
         """Finalize medallion layers after pipeline run.
 
-        Vacuums Silver and Gold tables if enabled:
-        - Skipped if runtime.vacuum_after_run is False
-        - Skipped in dry-run mode
-
-        This method consolidates vacuum logic previously scattered in PostrunService.
+        Optimizes storage (Vacuum/Cleanup) if enabled:
+        - Skipped if neither optimize_storage nor vacuum_after_run is True
+        - Uses StoragePort.optimize() for unified maintenance
 
         Args:
             config: Pipeline configuration with table names.
@@ -359,104 +309,82 @@ class MedallionLifecycleService:
             metrics: Optional metrics port for observability.
 
         Returns:
-            VacuumResult with files removed counts.
+            VacuumResult (counts are 0 as implementation details are hidden).
         """
-        if not runtime.vacuum_after_run:
-            return VacuumResult(
-                silver_files_removed=0, gold_files_removed=0, skipped=True
-            )
+        # Support both new flag and legacy flag
+        enabled = runtime.optimize_storage or runtime.vacuum_after_run
 
-        if runtime.dry_run:
-            self.logger.info(
-                "VACUUM skipped in dry-run mode",
-                extra={"stage": "vacuum"},
-            )
+        if not enabled:
             return VacuumResult(
                 silver_files_removed=0, gold_files_removed=0, skipped=True
             )
 
         self.logger.info(
-            "Starting VACUUM operation",
+            "Starting storage optimization",
             extra={
-                "stage": "vacuum",
+                "stage": "optimize",
                 "retention_days": runtime.vacuum_retention_days,
+                "dry_run": runtime.dry_run,
+                "target": config.silver_table,
             },
         )
 
-        gold_table = config.gold_table or f"{config.provider}.{config.entity_type}"
-
-        silver_files = await self._vacuum_table_safe(
-            table=config.silver_table,
-            layer="silver",
-            retention_days=runtime.vacuum_retention_days,
-            metrics=metrics,
-            pipeline_name=config.pipeline_name,
-        )
-        gold_files = await self._vacuum_table_safe(
-            table=gold_table,
-            layer="gold",
-            retention_days=runtime.vacuum_retention_days,
-            metrics=metrics,
-            pipeline_name=config.pipeline_name,
-        )
-
-        return VacuumResult(
-            silver_files_removed=silver_files,
-            gold_files_removed=gold_files,
-            skipped=False,
-        )
-
-    async def _vacuum_table_safe(
-        self,
-        table: str,
-        layer: str,
-        retention_days: int,
-        metrics: MetricsPort | None,
-        pipeline_name: str,
-    ) -> int:
-        """Vacuum a single table with error handling.
-
-        Gracefully handles errors to avoid failing the entire pipeline
-        due to vacuum issues.
-
-        Args:
-            table: Table name to vacuum.
-            layer: Layer name for metrics (silver/gold).
-            retention_days: Retention period in days.
-            metrics: Optional metrics port.
-            pipeline_name: Pipeline name for metrics tags.
-
-        Returns:
-            Number of files removed (0 on error).
-        """
         try:
-            files_removed = await self.vacuum(
-                table=table,
-                retention_days=retention_days,
-                dry_run=False,
-            )
-            self.logger.info(
-                "vacuum_completed",
-                layer=layer,
-                table=table,
-                files_removed=files_removed,
+            # StoragePort.optimize unifies vacuum and file cleanup
+            # We call it for both Silver and Gold tables to ensure all layers are covered
+            # even if table names differ (custom Gold table).
+
+            # Optimize based on Silver table name (covers Silver layer + Bronze)
+            await self.storage.optimize(
+                table_name=config.silver_table,
+                retention_hours=runtime.vacuum_retention_days * 24,
+                dry_run=runtime.dry_run,
             )
 
+            gold_table = config.gold_table or f"{config.provider}.{config.entity_type}"
+
+            # Optimize based on Gold table name if different (covers Gold layer)
+            if gold_table != config.silver_table:
+                await self.storage.optimize(
+                    table_name=gold_table,
+                    retention_hours=runtime.vacuum_retention_days * 24,
+                    dry_run=runtime.dry_run,
+                )
+
+            # Metrics for success
             if metrics:
                 metrics.increment_counter(
-                    "vacuum_files_removed",
-                    files_removed,
-                    {"pipeline": pipeline_name, "layer": layer},
+                    "storage_optimization_total",
+                    1,
+                    {"pipeline": config.pipeline_name, "status": "success"},
                 )
-            return files_removed
+
+            # Implementation details are hidden, so we return 0 counts
+            # This is acceptable as the unification hides explicit layer operations
+            return VacuumResult(
+                silver_files_removed=0,
+                gold_files_removed=0,
+                skipped=False,
+            )
+
         except Exception as e:
-            self.logger.warning(
-                "vacuum_failed",
-                layer=layer,
-                table=table,
+            self.logger.error(
+                "storage_optimization_failed",
+                pipeline=config.pipeline_name,
                 error=str(e),
             )
-            return 0
+            if metrics:
+                metrics.increment_counter(
+                    "storage_optimization_total",
+                    1,
+                    {"pipeline": config.pipeline_name, "status": "failed"},
+                )
+            # Don't fail the pipeline for maintenance tasks
+            return VacuumResult(
+                silver_files_removed=0,
+                gold_files_removed=0,
+                skipped=False,
+            )
 
 
 __all__ = [

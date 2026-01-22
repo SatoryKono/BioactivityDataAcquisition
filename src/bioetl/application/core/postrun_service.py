@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.application.services.data_quality_service import DataQualityService
-from bioetl.application.services.medallion_lifecycle import VacuumResult
+from bioetl.application.services.medallion_types import VacuumResult
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
 if TYPE_CHECKING:
