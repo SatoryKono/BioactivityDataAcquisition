@@ -89,7 +89,9 @@ class TestBootstrapLogger:
 class TestBootstrapPipeline:
     """Tests for bootstrap_pipeline function."""
 
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
+    )
     @patch("bioetl.infrastructure.config.get_settings")
     def test_bootstrap_pipeline_unknown_pipeline_raises(
         self,
@@ -133,7 +135,9 @@ class TestBootstrapPipeline:
     @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
+    )
     @patch("bioetl.infrastructure.config.get_settings")
     def test_bootstrap_pipeline_creates_runner_without_starting_server(
         self,
@@ -209,7 +213,9 @@ class TestBootstrapPipeline:
 
     @patch("bioetl.infrastructure.config.get_settings")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
+    )
     @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_providers")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
@@ -612,7 +618,9 @@ class TestBootstrapVacuumConfig:
     @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
+    )
     @patch("bioetl.infrastructure.config.get_settings")
     def test_bootstrap_uses_yaml_vacuum_config_when_cli_not_set(
         self,
@@ -677,7 +685,9 @@ class TestBootstrapVacuumConfig:
     @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
+    )
     @patch("bioetl.infrastructure.config.get_settings")
     def test_bootstrap_cli_vacuum_overrides_yaml_config(
         self,

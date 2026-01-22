@@ -87,9 +87,7 @@ def create_noop_tracing() -> TracingPort:
     return NoOpTracing()
 
 
-def create_noop_observability_bundle() -> (
-    tuple[NoOpLogger, MetricsPort, TracingPort]
-):
+def create_noop_observability_bundle() -> tuple[NoOpLogger, MetricsPort, TracingPort]:
     """Create a complete NoOp observability bundle for CLI operations.
 
     Convenience function that creates all three NoOp implementations
