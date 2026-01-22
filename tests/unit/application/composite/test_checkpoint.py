@@ -319,6 +319,26 @@ class TestIsResumable:
         )
         assert state.is_resumable is False
 
+    def test_resumable_when_failed_with_progress(self):
+        """Checkpoint in FAILED state should be resumable if progress was made."""
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id="run-123",
+            state=CompositePipelineState.FAILED,
+            seed_completed=True,
+        )
+        assert state.is_resumable is True
+
+    def test_resumable_based_on_failed_fsm_state(self):
+        """FAILED state should be resumable via FSM state check."""
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id="run-123",
+            state=CompositePipelineState.FAILED,
+        )
+        # FAILED is now resumable to allow merge retry
+        assert state.is_resumable is True
+
 
 class TestSerialization:
     """Tests for to_dict and from_dict methods."""
