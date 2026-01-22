@@ -51,12 +51,19 @@ class TestTypesModuleExports:
         from bioetl.composition import types
 
         expected_exports = [
+            # Core composition types
             "ObservabilityBundle",
             "PipelineDefinition",
             "PipelineRegistry",
             "StorageAdapter",
             "create_registry",
             "get_default_registry",
+            # Typed bootstrap contexts
+            "CircuitBreakerConfig",
+            "DQConfigsContext",
+            "DQOutputPathsContext",
+            "PipelineCallbacksContext",
+            "RateLimitConfig",
         ]
         for name in expected_exports:
             assert name in types.__all__, f"{name} not in __all__"
@@ -67,12 +74,19 @@ class TestTypesModuleExports:
         from bioetl.composition import types
 
         expected = {
+            # Core composition types
             "ObservabilityBundle",
             "PipelineDefinition",
             "PipelineRegistry",
             "StorageAdapter",
             "create_registry",
             "get_default_registry",
+            # Typed bootstrap contexts
+            "CircuitBreakerConfig",
+            "DQConfigsContext",
+            "DQOutputPathsContext",
+            "PipelineCallbacksContext",
+            "RateLimitConfig",
         }
         assert set(types.__all__) == expected
 

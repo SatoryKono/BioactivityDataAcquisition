@@ -91,7 +91,7 @@ class TestFileSizeLimits:
         # Consolidated factory files (v5.2)
         "pipeline_factory.py": 720,  # 716 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths + MetadataCoordinator creation
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
-        "services_factory.py": 670,  # 668 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param
+        "services_factory.py": 672,  # 671 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext
         # Infrastructure layer exemptions
         "silver_writer.py": 1130,  # 1111 LOC - schema drift + merge logic (metadata builder extracted to metadata_builder.py)
         "gold_writer.py": 910,  # 890 LOC - SCD Type 2 (metadata/arrow logic extracted to metadata_builder.py, arrow_converter.py)
