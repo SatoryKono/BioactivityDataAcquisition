@@ -7,8 +7,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
     from bioetl.application.services.lock_service import LockService
@@ -32,6 +32,6 @@ def bootstrap_lock_service() -> LockService:
     from bioetl.application.services.lock_service import LockService
 
     lock_port = MemoryLock()
-    noop_logger = NoOpLogger()
+    noop_logger = create_noop_logger()
 
     return LockService(lock_port=lock_port, logger=noop_logger)
