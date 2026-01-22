@@ -120,6 +120,9 @@ class TestStoragePortProtocol:
         from collections.abc import Iterator
         from typing import Literal
 
+        from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+        from bioetl.domain.value_objects.silver_result import SilverWriteResult
+
         class ValidStorage:
             async def write_bronze(
                 self,
@@ -131,16 +134,14 @@ class TestStoragePortProtocol:
                 run_id: Any,
                 run_type: Any,
                 ingestion_ts: Any,  # Required per ADR-014
-                source_metadata: Any = None,  # Optional SourceMetadata
-            ) -> Any:  # Returns BronzeWriteResult
-                from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
-
+                source_metadata: Any = None,
+            ) -> BronzeWriteResult:
                 return BronzeWriteResult(
-                    path="/test/bronze",
+                    path="bronze/test",
                     record_count=0,
-                    compressed_size_bytes=0,
-                    raw_size_bytes=0,
-                    checksum="test",
+                    compressed_size=0,
+                    raw_size=0,
+                    checksum="sha256:test",
                 )
 
             async def write_silver(
@@ -152,8 +153,8 @@ class TestStoragePortProtocol:
                 mode: Literal["merge", "append", "delete"] = "merge",
                 partition_cols: list[str] | None = None,
                 on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
-                bronze_refs: list[Any] | None = None,  # For lineage tracking
-            ) -> Any:  # Returns SilverWriteResult | None
+                bronze_refs: list[BronzeWriteResult] | None = None,
+            ) -> SilverWriteResult | None:
                 return None
 
             async def write_gold(
@@ -166,7 +167,7 @@ class TestStoragePortProtocol:
                 *,
                 ingestion_ts: Any = None,
                 run_id: Any = None,
-                silver_refs: list[Any] | None = None,  # For lineage tracking
+                silver_refs: list[Any] | None = None,
             ) -> None:
                 pass
 
@@ -242,13 +243,6 @@ class TestStoragePortProtocol:
             ) -> dict[str, Any]:
                 return {}
 
-            async def cleanup_bronze(
-                self,
-                cutoff_date: Any,
-                dry_run: bool = False,
-            ) -> dict[str, int]:
-                return {"files_removed": 0, "bytes_freed": 0, "directories_removed": 0}
-
             async def optimize(
                 self,
                 table_name: str,
@@ -256,6 +250,13 @@ class TestStoragePortProtocol:
                 dry_run: bool = False,
             ) -> None:
                 pass
+
+            async def cleanup_bronze(
+                self,
+                cutoff_date: Any,
+                dry_run: bool = False,
+            ) -> dict[str, int]:
+                return {"files_removed": 0, "bytes_freed": 0, "directories_removed": 0}
 
         assert isinstance(ValidStorage(), StoragePort)
 
