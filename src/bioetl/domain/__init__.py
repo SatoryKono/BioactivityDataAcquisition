@@ -83,6 +83,11 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     TargetComponentRecord,
     TargetRecord,
     UniprotTarget,
+    # Deprecated aliases (ADR-024, glossary v2.0)
+    Compound,
+    Document,
+    Protein,
+    PubChemCompoundRecord,
 )
 
 # Error classifier
@@ -367,6 +372,11 @@ __all__ = [
     "Target",
     "TargetComponent",
     "UniprotTarget",
+    # Deprecated entity aliases (ADR-024, glossary v2.0)
+    "Compound",  # → PubchemMolecule
+    "Document",  # → ChemblPublication
+    "Protein",  # → UniprotTarget
+    "PubChemCompoundRecord",  # → PubchemMoleculeRecord
     # Error classifier
     "ErrorClassifier",
     # Events

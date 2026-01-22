@@ -136,7 +136,7 @@ class PubchemMoleculeDetailRecord(BaseModel):
     # Primary Key
     cid: int = Field(description="PubChem Compound ID")
 
-    # Basic Properties (from PubChemCompoundRecord)
+    # Basic Properties (from PubchemMoleculeRecord)
     molecular_formula: str | None = Field(default=None)
     molecular_weight: float | None = Field(default=None)
     canonical_smiles: str | None = Field(default=None)
