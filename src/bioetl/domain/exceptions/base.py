@@ -148,28 +148,3 @@ class RecoverableError(BioETLError):
         from bioetl.domain.types import ErrorType
 
         return getattr(cls, "error_type", ErrorType.NETWORK_ERROR)
-
-
-class DataQualityError(BioETLError):
-    """Errors in data quality (skip record).
-
-    These errors indicate problems with individual data records that should
-    be logged and skipped, but should not stop the pipeline.
-    Examples: schema violations, missing required fields, invalid data formats.
-    """
-
-    @classmethod
-    def get_error_type(cls) -> ErrorType:
-        """Get the default error type for data quality errors.
-
-        Returns:
-            ErrorType.INVALID_DATA as the default for DataQualityError subclasses
-            that don't define their own error_type. This signals that the record
-            should be quarantined (§2.6) and processing should continue.
-
-        Note:
-            Subclasses may override by defining a class-level error_type attribute.
-        """
-        from bioetl.domain.types import ErrorType
-
-        return getattr(cls, "error_type", ErrorType.INVALID_DATA)

@@ -1,4 +1,4 @@
-"""Tests for storage-related exceptions.
+"""Tests for infrastructure-related exceptions.
 
 Coverage target: >90%
 """
@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.exceptions.storage import (
+from bioetl.domain.exceptions.infrastructure import (
     BronzeValidationError,
     BucketNotFoundError,
     DeltaOptimizeError,
@@ -19,22 +19,21 @@ from bioetl.domain.exceptions.storage import (
     StorageQuotaExceededError,
     TableNotFoundError,
     UploadError,
-    _build_schema_error_message,
-    _build_schema_validation_message,
-    _format_column_diff,
-    _format_type_mismatches,
+    InfrastructureError,
 )
-from bioetl.domain.exceptions.base import CriticalError, RecoverableError
+from bioetl.domain.exceptions.base import CriticalError
 from bioetl.domain.types import ErrorType
 
 
 class TestStorageError:
     """Tests for base StorageError."""
 
-    def test_storage_error_inherits_from_recoverable_error(self) -> None:
+    def test_storage_error_inherits_from_infrastructure_error(self) -> None:
         """Test StorageError inheritance."""
         error = StorageError("Test storage error")
-        assert isinstance(error, RecoverableError)
+        assert isinstance(error, InfrastructureError)
+        # It inherits InfrastructureError -> CriticalError, but overrides error_type to NETWORK_ERROR (Recoverable)
+        assert isinstance(error, CriticalError)
         assert error.error_type == ErrorType.NETWORK_ERROR
 
     def test_storage_error_message(self) -> None:
@@ -137,38 +136,6 @@ class TestSchemaEvolutionError:
         assert error.error_type == ErrorType.SCHEMA_EVOLUTION
 
 
-class TestBuildSchemaErrorMessage:
-    """Tests for _build_schema_error_message helper."""
-
-    def test_build_schema_error_message_with_new_fields(self) -> None:
-        """Test message with only new fields."""
-        msg = _build_schema_error_message(
-            table="test",
-            new_fields={"col_a", "col_b"},
-            removed_fields=set(),
-        )
-        assert "Schema drift detected for 'test'" in msg
-        assert "new fields" in msg
-
-    def test_build_schema_error_message_with_removed_fields(self) -> None:
-        """Test message with only removed fields."""
-        msg = _build_schema_error_message(
-            table="test",
-            new_fields=set(),
-            removed_fields={"old_col"},
-        )
-        assert "removed fields" in msg
-
-    def test_build_schema_error_message_with_empty_sets(self) -> None:
-        """Test message with empty field sets."""
-        msg = _build_schema_error_message(
-            table="test",
-            new_fields=set(),
-            removed_fields=set(),
-        )
-        assert msg == "Schema drift detected for 'test'"
-
-
 class TestBronzeValidationError:
     """Tests for BronzeValidationError."""
 
@@ -249,7 +216,9 @@ class TestDeltaWriteConflictError:
         """Test DeltaWriteConflictError inherits from StorageError."""
         error = DeltaWriteConflictError(table_path="/path")
         assert isinstance(error, StorageError)
-        assert isinstance(error, RecoverableError)
+        # Note: In new hierarchy, StorageError inherits InfrastructureError (Critical),
+        # but DeltaWriteConflictError overrides error_type to be Recoverable (NETWORK_ERROR).
+        assert error.error_type == ErrorType.NETWORK_ERROR
 
 
 class TestDeltaTransactionError:
@@ -281,99 +250,6 @@ class TestDeltaTransactionError:
         error = DeltaTransactionError(table_path="/path", reason="test")
         assert isinstance(error, CriticalError)
         assert error.error_type == ErrorType.DB_UNAVAILABLE
-
-
-class TestFormatColumnDiff:
-    """Tests for _format_column_diff helper."""
-
-    def test_format_column_diff_with_missing(self) -> None:
-        """Test formatting missing columns."""
-        parts = _format_column_diff(
-            expected_columns=["a", "b", "c"],
-            actual_columns=["a"],
-        )
-        assert len(parts) == 1
-        assert "missing columns" in parts[0]
-
-    def test_format_column_diff_with_extra(self) -> None:
-        """Test formatting extra columns."""
-        parts = _format_column_diff(
-            expected_columns=["a"],
-            actual_columns=["a", "b", "c"],
-        )
-        assert len(parts) == 1
-        assert "unexpected columns" in parts[0]
-
-    def test_format_column_diff_with_both(self) -> None:
-        """Test formatting both missing and extra columns."""
-        parts = _format_column_diff(
-            expected_columns=["a", "b"],
-            actual_columns=["a", "c"],
-        )
-        assert len(parts) == 2
-
-    def test_format_column_diff_no_diff(self) -> None:
-        """Test formatting when no differences."""
-        parts = _format_column_diff(
-            expected_columns=["a", "b"],
-            actual_columns=["a", "b"],
-        )
-        assert len(parts) == 0
-
-
-class TestFormatTypeMismatches:
-    """Tests for _format_type_mismatches helper."""
-
-    def test_format_type_mismatches(self) -> None:
-        """Test formatting type mismatches."""
-        msg = _format_type_mismatches(
-            {
-                "col_a": ("int64", "string"),
-                "col_b": ("float64", "int32"),
-            }
-        )
-        assert "type mismatches" in msg
-        assert "col_a: expected int64, got string" in msg
-        assert "col_b: expected float64, got int32" in msg
-
-    def test_format_type_mismatches_single(self) -> None:
-        """Test formatting single type mismatch."""
-        msg = _format_type_mismatches({"col": ("expected", "actual")})
-        assert "col: expected expected, got actual" in msg
-
-
-class TestBuildSchemaValidationMessage:
-    """Tests for _build_schema_validation_message helper."""
-
-    def test_build_schema_validation_message_with_columns(self) -> None:
-        """Test message with column diff."""
-        msg = _build_schema_validation_message(
-            table_path="/path/table",
-            expected_columns=["a", "b"],
-            actual_columns=["a", "c"],
-            type_mismatches={},
-        )
-        assert "Schema validation failed for '/path/table'" in msg
-
-    def test_build_schema_validation_message_with_types(self) -> None:
-        """Test message with type mismatches."""
-        msg = _build_schema_validation_message(
-            table_path="/path/table",
-            expected_columns=[],
-            actual_columns=[],
-            type_mismatches={"col": ("int", "str")},
-        )
-        assert "type mismatches" in msg
-
-    def test_build_schema_validation_message_empty(self) -> None:
-        """Test message with empty params."""
-        msg = _build_schema_validation_message(
-            table_path="/path/table",
-            expected_columns=[],
-            actual_columns=[],
-            type_mismatches={},
-        )
-        assert "Schema validation failed for '/path/table'" in msg
 
 
 class TestDeltaSchemaValidationError:
@@ -445,7 +321,7 @@ class TestDeltaOptimizeError:
             table_path="/path", operation="vacuum", reason="test"
         )
         assert isinstance(error, StorageError)
-        assert isinstance(error, RecoverableError)
+        assert error.error_type == ErrorType.NETWORK_ERROR
 
 
 class TestStorageQuotaExceededError:

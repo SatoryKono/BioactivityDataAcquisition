@@ -32,6 +32,8 @@ from bioetl.domain.exceptions import (
     StorageError,
     TableNotFoundError,
     UploadError,
+    InfrastructureError,
+    ValidationError,
 )
 from bioetl.domain.types import ErrorType
 
@@ -85,7 +87,7 @@ class TestExceptions:
     def test_storage_error_inheritance(self) -> None:
         """Test StorageError inheritance."""
         e = StorageError("Storage operation failed")
-        assert isinstance(e, RecoverableError)
+        assert isinstance(e, InfrastructureError)
         assert isinstance(e, BioETLError)
 
     def test_external_service_error(self) -> None:
@@ -144,7 +146,7 @@ class TestExceptions:
             field="smiles",
             value="invalid_data",
         )
-        assert isinstance(e, ExternalServiceError)
+        assert isinstance(e, ValidationError)
         assert e.service_name == "pubchem"
         assert e.field == "smiles"
         assert e.value == "invalid_data"
@@ -278,7 +280,7 @@ class TestErrorClassifier:
 
         assert classifier.classify(CustomCritical("msg")) == ErrorType.DB_UNAVAILABLE
         assert classifier.classify(CustomRecoverable("msg")) == ErrorType.NETWORK_ERROR
-        assert classifier.classify(CustomDQ("msg")) == ErrorType.INVALID_DATA
+        assert classifier.classify(CustomDQ("msg")) == ErrorType.DATA_QUALITY
 
     @pytest.mark.slow
     @pytest.mark.hypothesis
@@ -307,7 +309,8 @@ class TestErrorContext:
 
         assert ctx["provider"] == "chembl"
         assert ctx["retry_after"] == 60.0
-        assert len(ctx) == 2
+        assert ctx["cause"] is None
+        assert len(ctx) == 3
 
     def test_context_excludes_private_attributes(self) -> None:
         """The context property should exclude private attributes."""
@@ -384,11 +387,15 @@ class TestErrorContext:
     @pytest.mark.parametrize(
         "error_cls,args,expected_keys",
         [
-            (LockLostError, ("key1", "run1"), {"key", "run_id"}),
-            (RateLimitError, ("provider1", 30.0), {"provider", "retry_after"}),
+            (LockLostError, ("key1", "run1"), {"key", "run_id", "failed_components"}),
+            (RateLimitError, ("provider1", 30.0), {"provider", "retry_after", "cause"}),
             (SchemaViolationError, ("table1", ["e1"]), {"table", "errors"}),
-            (BucketNotFoundError, ("bucket1",), {"bucket"}),
-            (RetryExhaustedError, ("url1", 3, None), {"url", "attempts", "last_error"}),
+            (BucketNotFoundError, ("bucket1",), {"bucket", "failed_components"}),
+            (
+                RetryExhaustedError,
+                ("url1", 3, None),
+                {"url", "attempts", "last_error", "cause"},
+            ),
         ],
     )
     def test_context_for_various_errors(

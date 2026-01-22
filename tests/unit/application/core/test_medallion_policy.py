@@ -224,8 +224,8 @@ class TestPolicyViolationErrorMessage:
         # Bronze only allows append
         assert "append" in str(exc_info.value)
 
-    def test_error_is_critical_error(self):
-        """Test that PolicyViolationError is a CriticalError."""
-        from bioetl.domain.exceptions.base import CriticalError
+    def test_error_inheritance(self):
+        """Test PolicyViolationError inheritance."""
+        from bioetl.domain.exceptions import InternalError
 
-        assert issubclass(PolicyViolationError, CriticalError)
+        assert issubclass(PolicyViolationError, InternalError)

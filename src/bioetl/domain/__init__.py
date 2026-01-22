@@ -105,6 +105,7 @@ from bioetl.domain.exceptions import (
     BucketNotFoundError,
     CheckpointConflictError,
     CircuitBreakerOpenError,
+    ConnectionError,
     CriticalError,
     DataQualityError,
     DataQualityThresholdError,
@@ -113,8 +114,10 @@ from bioetl.domain.exceptions import (
     DeltaSchemaValidationError,
     DeltaTransactionError,
     DeltaWriteConflictError,
+    ExternalDataValidationError,
     ExternalServiceError,
     InfrastructureError,
+    InternalError,
     InvalidDataFormatError,
     InvalidStateError,
     LockAcquisitionError,
@@ -128,6 +131,7 @@ from bioetl.domain.exceptions import (
     RecoverableError,
     RetryExhaustedError,
     SchemaEvolutionError,
+    SchemaValidationError,
     SchemaViolationError,
     ServiceAuthenticationError,
     ServiceUnavailableError,
@@ -136,6 +140,7 @@ from bioetl.domain.exceptions import (
     TableNotFoundError,
     TimeoutError,
     UploadError,
+    ValidationError,
 )
 
 # Filter configuration
@@ -395,12 +400,14 @@ __all__ = [
     "RateLimitExceededError",
     "ServiceAuthenticationError",
     "DataValidationError",
+    "ExternalDataValidationError",
     # Exceptions - Critical
     "BucketNotFoundError",
     "CheckpointConflictError",
     "DeltaSchemaValidationError",
     "DeltaTransactionError",
     "InfrastructureError",
+    "InternalError",
     "InvalidStateError",
     "LockAcquisitionError",
     "LockLostError",
@@ -409,6 +416,7 @@ __all__ = [
     "StorageQuotaExceededError",
     # Exceptions - Recoverable
     "CircuitBreakerOpenError",
+    "ConnectionError",
     "DeltaOptimizeError",
     "DeltaWriteConflictError",
     "NetworkError",
@@ -423,7 +431,9 @@ __all__ = [
     "DataQualityThresholdError",
     "InvalidDataFormatError",
     "MissingRequiredFieldError",
+    "SchemaValidationError",
     "SchemaViolationError",
+    "ValidationError",
     # Filters
     "FilterLoadResult",
     "GoldColumnFilter",

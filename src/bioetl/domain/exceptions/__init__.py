@@ -1,118 +1,115 @@
-"""Domain layer exceptions.
+"""bioetl.domain.exceptions - centralized exception package.
 
-Implements centralized exception hierarchy for all BioETL errors.
-All exceptions should inherit from BioETLError to enable consistent error handling.
-
-Each exception class defines an explicit `error_type` attribute for deterministic
-error classification (see ErrorClassifier).
-
-This module re-exports all exceptions for backward compatibility with:
-    from bioetl.domain.exceptions import SomeError
-
-External Service Exceptions (RULES.md §7.2):
-    Domain layer provides abstract exceptions for external service errors.
-    Application layer should catch these abstract exceptions, not provider-specific ones.
-
-    - ExternalServiceError: Base for all external service errors
-    - ServiceUnavailableError: Service is down (5xx, timeout)
-    - RateLimitExceededError: Rate limit exceeded (429)
-    - ServiceAuthenticationError: Auth failed (401/403)
-    - DataValidationError: Invalid data from external source
-
-Provider-Specific Exceptions:
-    Provider-specific API errors (ChemblApiError, CrossRefApiError, etc.) are
-    defined in infrastructure.adapters.{provider}.exceptions. Application layer
-    should catch ExternalServiceError instead.
+This package re-exports exception classes from submodules for backward compatibility.
 """
 
+# Re-export exceptions from submodules for compatibility
 from bioetl.domain.exceptions.base import (
     BioETLError,
     CriticalError,
-    DataQualityError,
     RecoverableError,
 )
-from bioetl.domain.exceptions.critical import (
-    AuthFailureError,
-    CheckpointConflictError,
-    InfrastructureError,
-    InvalidStateError,
-    LockAcquisitionError,
-    LockLostError,
-    MergeConflictError,
-    PolicyViolationError,
-)
 from bioetl.domain.exceptions.data_quality import (
+    DataQualityError,
     DataQualityThresholdError,
-    InvalidDataFormatError,
-    MissingRequiredFieldError,
-    SchemaViolationError,
 )
-from bioetl.domain.exceptions.external_service import (
-    DataValidationError,
-    ExternalServiceError,
-    RateLimitExceededError,
-    ServiceAuthenticationError,
-    ServiceUnavailableError,
-)
-from bioetl.domain.exceptions.recoverable import (
-    ApiError,
-    CircuitBreakerOpenError,
-    NetworkError,
-    RateLimitError,
-    RetryExhaustedError,
-    TimeoutError,
-)
-from bioetl.domain.exceptions.storage import (
+from bioetl.domain.exceptions.infrastructure import (
     BronzeValidationError,
     BucketNotFoundError,
+    CheckpointConflictError,
     DeltaOptimizeError,
     DeltaSchemaValidationError,
     DeltaTransactionError,
     DeltaWriteConflictError,
+    InfrastructureError,
+    LockAcquisitionError,
+    LockLostError,
+    MergeConflictError,
     SchemaEvolutionError,
     StorageError,
     StorageQuotaExceededError,
     TableNotFoundError,
     UploadError,
 )
+from bioetl.domain.exceptions.internal import (
+    AuthFailureError,
+    InternalError,
+    InvalidStateError,
+    PolicyViolationError,
+)
+from bioetl.domain.exceptions.network import (
+    ApiError,
+    CircuitBreakerOpenError,
+    ConnectionError,
+    ExternalServiceError,
+    NetworkError,
+    RateLimitError,
+    RateLimitExceededError,
+    RetryExhaustedError,
+    ServiceAuthenticationError,
+    ServiceUnavailableError,
+    TimeoutError,
+)
+from bioetl.domain.exceptions.validation import (
+    ExternalDataValidationError,
+    InvalidDataFormatError,
+    MissingRequiredFieldError,
+    SchemaValidationError,
+    ValidationError,
+)
 
-__all__ = [
-    "ApiError",
-    "AuthFailureError",
+# Aliases for backward compatibility
+DataValidationError = ExternalDataValidationError
+SchemaViolationError = SchemaValidationError
+
+__all__ = [  # noqa: RUF022
+    # Base
     "BioETLError",
-    "BronzeValidationError",
-    "BucketNotFoundError",
-    "CheckpointConflictError",
-    "CircuitBreakerOpenError",
     "CriticalError",
+    "RecoverableError",
+    # Validation
+    "ValidationError",
+    "SchemaValidationError",
+    "MissingRequiredFieldError",
+    "InvalidDataFormatError",
+    "ExternalDataValidationError",
+    "DataValidationError",  # Alias
+    # Data Quality
     "DataQualityError",
     "DataQualityThresholdError",
-    "DataValidationError",
-    "DeltaOptimizeError",
-    "DeltaSchemaValidationError",
-    "DeltaTransactionError",
-    "DeltaWriteConflictError",
+    "SchemaViolationError",  # Alias
+    # Network
+    "NetworkError",
+    "TimeoutError",
+    "ConnectionError",
+    "RateLimitError",
+    "RetryExhaustedError",
+    "CircuitBreakerOpenError",
     "ExternalServiceError",
+    "ServiceUnavailableError",
+    "RateLimitExceededError",
+    "ServiceAuthenticationError",
+    "ApiError",
+    # Infrastructure
     "InfrastructureError",
-    "InvalidDataFormatError",
-    "InvalidStateError",
+    "StorageError",
+    "BucketNotFoundError",
+    "TableNotFoundError",
+    "UploadError",
+    "SchemaEvolutionError",
+    "DeltaOptimizeError",
     "LockAcquisitionError",
     "LockLostError",
+    "CheckpointConflictError",
     "MergeConflictError",
-    "MissingRequiredFieldError",
-    "NetworkError",
-    "PolicyViolationError",
-    "RateLimitError",
-    "RateLimitExceededError",
-    "RecoverableError",
-    "RetryExhaustedError",
-    "SchemaEvolutionError",
-    "SchemaViolationError",
-    "ServiceAuthenticationError",
-    "ServiceUnavailableError",
-    "StorageError",
+    "DeltaTransactionError",
     "StorageQuotaExceededError",
-    "TableNotFoundError",
-    "TimeoutError",
-    "UploadError",
+    "DeltaWriteConflictError",
+    "BronzeValidationError",
+    "DeltaSchemaValidationError",
+    # Internal
+    "InternalError",
+    "PolicyViolationError",
+    "InvalidStateError",
+    "AuthFailureError",
 ]
