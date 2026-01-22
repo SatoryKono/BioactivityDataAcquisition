@@ -25,9 +25,7 @@ from bioetl.domain.composite.result import (
     EnrichmentResult,
     EnrichmentStatus,
     MergeResult,
-    SeedResult,
 )
-from bioetl.domain.composite.state import CompositePipelineState
 
 
 @dataclass
@@ -638,9 +636,6 @@ class TestEnrichmentSummary:
         await runner.run()
 
         # Check enrichment summary includes not_run count
-        summary_calls = [
-            c for c in logger.info.call_args_list if "Enrichment summary" in str(c)
-        ]
         # Summary may be called, check if not_run is logged somewhere
         all_info_str = str(logger.info.call_args_list)
         # NOT_RUN enrichers should be mentioned
