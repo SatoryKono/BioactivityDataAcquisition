@@ -148,12 +148,21 @@ class TestValidTransitions:
         "current,target",
         [
             (CompositePipelineState.NOT_STARTED, CompositePipelineState.SEED_RUNNING),
-            (CompositePipelineState.SEED_RUNNING, CompositePipelineState.SEED_COMPLETED),
+            (
+                CompositePipelineState.SEED_RUNNING,
+                CompositePipelineState.SEED_COMPLETED,
+            ),
             (CompositePipelineState.SEED_RUNNING, CompositePipelineState.FAILED),
             (CompositePipelineState.SEED_COMPLETED, CompositePipelineState.ENRICHING),
-            (CompositePipelineState.ENRICHING, CompositePipelineState.ENRICHMENT_COMPLETED),
+            (
+                CompositePipelineState.ENRICHING,
+                CompositePipelineState.ENRICHMENT_COMPLETED,
+            ),
             (CompositePipelineState.ENRICHING, CompositePipelineState.FAILED),
-            (CompositePipelineState.ENRICHMENT_COMPLETED, CompositePipelineState.MERGING),
+            (
+                CompositePipelineState.ENRICHMENT_COMPLETED,
+                CompositePipelineState.MERGING,
+            ),
             (CompositePipelineState.MERGING, CompositePipelineState.COMPLETED),
             (CompositePipelineState.MERGING, CompositePipelineState.FAILED),
         ],
@@ -170,10 +179,19 @@ class TestValidTransitions:
         "current,target",
         [
             (CompositePipelineState.NOT_STARTED, CompositePipelineState.SEED_RUNNING),
-            (CompositePipelineState.SEED_RUNNING, CompositePipelineState.SEED_COMPLETED),
+            (
+                CompositePipelineState.SEED_RUNNING,
+                CompositePipelineState.SEED_COMPLETED,
+            ),
             (CompositePipelineState.SEED_COMPLETED, CompositePipelineState.ENRICHING),
-            (CompositePipelineState.ENRICHING, CompositePipelineState.ENRICHMENT_COMPLETED),
-            (CompositePipelineState.ENRICHMENT_COMPLETED, CompositePipelineState.MERGING),
+            (
+                CompositePipelineState.ENRICHING,
+                CompositePipelineState.ENRICHMENT_COMPLETED,
+            ),
+            (
+                CompositePipelineState.ENRICHMENT_COMPLETED,
+                CompositePipelineState.MERGING,
+            ),
             (CompositePipelineState.MERGING, CompositePipelineState.COMPLETED),
         ],
     )
