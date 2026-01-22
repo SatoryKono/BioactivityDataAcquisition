@@ -1,20 +1,27 @@
-"""Gold layer Pandera schemas for data validation.
+"""Gold layer data contracts organized by provider.
 
-DEPRECATED: This module re-exports schemas from bioetl.interfaces.contracts for
-backward compatibility. New code should import from bioetl.interfaces.contracts.
+This package contains Pandera DataFrameModel schemas for Gold layer validation,
+organized by data provider for easy navigation.
 
-Example:
-    # Preferred (new code):
-    from bioetl.interfaces.contracts import ChEMBLActivityGoldSchema
+Submodules:
+    chembl: ChEMBL bioactivity database schemas
+    pubchem: PubChem compound schemas
+    uniprot: UniProt protein database schemas
+    publications: Cross-provider publication schemas (PubMed, CrossRef, OpenAlex, SemanticScholar)
 
-    # Deprecated (legacy code, still works):
-    from bioetl.infrastructure.schemas.gold import ChEMBLActivityGoldSchema
+Example usage:
+    >>> from bioetl.interfaces.contracts.gold import chembl
+    >>> df = pd.read_parquet("data/gold/chembl_activity/")
+    >>> chembl.ChEMBLActivityGoldSchema.validate(df)
+
+    >>> from bioetl.interfaces.contracts.gold.publications import PubMedPublicationGoldSchema
+    >>> PubMedPublicationGoldSchema.validate(pubmed_df)
 """
 
 from __future__ import annotations
 
-# Re-export all schemas from contracts for backward compatibility
-from bioetl.interfaces.contracts.gold import (
+# Import all schemas for flat namespace access
+from bioetl.interfaces.contracts.gold.chembl import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
     ChEMBLAssayParametersGoldSchema,
@@ -27,18 +34,20 @@ from bioetl.interfaces.contracts.gold import (
     ChEMBLProteinClassGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
+)
+from bioetl.interfaces.contracts.gold.pubchem import PubChemCompoundGoldSchema
+from bioetl.interfaces.contracts.gold.publications import (
     CrossRefPublicationGoldSchema,
     OpenAlexPublicationGoldSchema,
-    PubChemCompoundGoldSchema,
     PubMedPublicationGoldSchema,
     SemanticScholarPublicationGoldSchema,
+)
+from bioetl.interfaces.contracts.gold.uniprot import (
     UniProtIDMappingGoldSchema,
     UniProtProteinGoldSchema,
 )
-from bioetl.interfaces.contracts.gold._base import DATE_REGEX
 
 __all__ = [
-    "DATE_REGEX",
     "ChEMBLActivityGoldSchema",
     "ChEMBLAssayGoldSchema",
     "ChEMBLAssayParametersGoldSchema",
