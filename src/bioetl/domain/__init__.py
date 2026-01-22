@@ -131,6 +131,7 @@ from bioetl.domain.exceptions import (
     RateLimitExceededError,
     RecoverableError,
     RetryExhaustedError,
+    RunnerAlreadyExecutedError,
     SchemaEvolutionError,
     SchemaViolationError,
     ServiceAuthenticationError,
@@ -415,6 +416,7 @@ __all__ = [
     "MergeConflictError",
     "MetricsServerError",
     "PolicyViolationError",
+    "RunnerAlreadyExecutedError",
     "StorageQuotaExceededError",
     # Exceptions - Recoverable
     "CircuitBreakerOpenError",

@@ -108,11 +108,13 @@ class FakeLockPort:
         wait_timeout: float = 10.0,
         exclusive: bool = True,
     ) -> bool:
-        self.acquire_calls.append({
-            "key": key,
-            "owner_id": owner_id,
-            "ttl": ttl,
-        })
+        self.acquire_calls.append(
+            {
+                "key": key,
+                "owner_id": owner_id,
+                "ttl": ttl,
+            }
+        )
         return self._should_acquire
 
     async def release(
@@ -121,10 +123,12 @@ class FakeLockPort:
         owner_id: Any,
         exclusive: bool = True,
     ) -> bool:
-        self.release_calls.append({
-            "key": key,
-            "owner_id": owner_id,
-        })
+        self.release_calls.append(
+            {
+                "key": key,
+                "owner_id": owner_id,
+            }
+        )
         return True
 
 
@@ -278,10 +282,12 @@ class FakeKeyExtractorService:
     """Fake key extractor that returns configurable data."""
 
     keys_df: pl.DataFrame = field(
-        default_factory=lambda: pl.DataFrame({
-            "chembl_id": ["CHEMBL1", "CHEMBL2", "CHEMBL3"],
-            "doi": ["10.1000/a", "10.1000/b", "10.1000/c"],
-        })
+        default_factory=lambda: pl.DataFrame(
+            {
+                "chembl_id": ["CHEMBL1", "CHEMBL2", "CHEMBL3"],
+                "doi": ["10.1000/a", "10.1000/b", "10.1000/c"],
+            }
+        )
     )
 
     async def extract(
@@ -488,7 +494,9 @@ class TestSeedFailure:
     async def test_seed_failure_transitions_to_failed_state(self):
         """Seed failure should transition FSM to FAILED state."""
         seed_factory = FakePipelineRunnerFactory()
-        seed_factory.configure("seed", should_fail=True, error_message="Seed database connection failed")
+        seed_factory.configure(
+            "seed", should_fail=True, error_message="Seed database connection failed"
+        )
 
         runner, components = create_test_runner(seed_factory=seed_factory)
 
@@ -589,18 +597,18 @@ class TestMergeFailure:
     async def test_merge_failure_preserves_enrichment_results(self):
         """Merge failure should preserve enrichment results in checkpoint."""
         config = FakeCompositeConfig(
-            enrichers=(
-                FakeEnricherConfig(pipeline="crossref", required=False),
-            )
+            enrichers=(FakeEnricherConfig(pipeline="crossref", required=False),)
         )
 
-        coordinator = FakeEnrichmentCoordinator(results={
-            "crossref": EnrichmentResult.success(
-                enricher_name="crossref",
-                records_input=100,
-                records_enriched=90,
-            ),
-        })
+        coordinator = FakeEnrichmentCoordinator(
+            results={
+                "crossref": EnrichmentResult.success(
+                    enricher_name="crossref",
+                    records_input=100,
+                    records_enriched=90,
+                ),
+            }
+        )
         merger = FakeMergeService(should_fail=True)
 
         runner, components = create_test_runner(
@@ -650,23 +658,25 @@ class TestFullSuccessFlow:
             )
         )
 
-        coordinator = FakeEnrichmentCoordinator(results={
-            "crossref": EnrichmentResult.success(
-                enricher_name="crossref",
-                records_input=100,
-                records_enriched=95,
-            ),
-            "pubmed": EnrichmentResult.success(
-                enricher_name="pubmed",
-                records_input=100,
-                records_enriched=80,
-            ),
-            "openalex": EnrichmentResult.success(
-                enricher_name="openalex",
-                records_input=100,
-                records_enriched=70,
-            ),
-        })
+        coordinator = FakeEnrichmentCoordinator(
+            results={
+                "crossref": EnrichmentResult.success(
+                    enricher_name="crossref",
+                    records_input=100,
+                    records_enriched=95,
+                ),
+                "pubmed": EnrichmentResult.success(
+                    enricher_name="pubmed",
+                    records_input=100,
+                    records_enriched=80,
+                ),
+                "openalex": EnrichmentResult.success(
+                    enricher_name="openalex",
+                    records_input=100,
+                    records_enriched=70,
+                ),
+            }
+        )
 
         runner, components = create_test_runner(config=config, coordinator=coordinator)
 
@@ -688,13 +698,15 @@ class TestFullSuccessFlow:
         config = FakeCompositeConfig(
             enrichers=(FakeEnricherConfig(pipeline="crossref"),)
         )
-        coordinator = FakeEnrichmentCoordinator(results={
-            "crossref": EnrichmentResult.success(
-                enricher_name="crossref",
-                records_input=100,
-                records_enriched=90,
-            ),
-        })
+        coordinator = FakeEnrichmentCoordinator(
+            results={
+                "crossref": EnrichmentResult.success(
+                    enricher_name="crossref",
+                    records_input=100,
+                    records_enriched=90,
+                ),
+            }
+        )
 
         runner, components = create_test_runner(config=config, coordinator=coordinator)
 
@@ -719,26 +731,28 @@ class TestFullSuccessFlow:
     async def test_full_success_returns_complete_result(self):
         """Full success should return CompositeResult with all data."""
         config = FakeCompositeConfig(
-            enrichers=(
-                FakeEnricherConfig(pipeline="crossref", required=True),
-            )
+            enrichers=(FakeEnricherConfig(pipeline="crossref", required=True),)
         )
 
-        coordinator = FakeEnrichmentCoordinator(results={
-            "crossref": EnrichmentResult.success(
-                enricher_name="crossref",
-                records_input=100,
-                records_enriched=90,
-            ),
-        })
+        coordinator = FakeEnrichmentCoordinator(
+            results={
+                "crossref": EnrichmentResult.success(
+                    enricher_name="crossref",
+                    records_input=100,
+                    records_enriched=90,
+                ),
+            }
+        )
 
-        merger = FakeMergeService(result=MergeResult(
-            records_merged=100,
-            records_from_seed=100,
-            records_enriched=90,
-            records_fully_enriched=85,
-            sources_used=("seed", "crossref"),
-        ))
+        merger = FakeMergeService(
+            result=MergeResult(
+                records_merged=100,
+                records_from_seed=100,
+                records_enriched=90,
+                records_fully_enriched=85,
+                sources_used=("seed", "crossref"),
+            )
+        )
 
         runner, _ = create_test_runner(
             config=config,
@@ -796,18 +810,20 @@ class TestResumePartialEnrichment:
         checkpoint = FakeCheckpointManager(initial_state=initial_state)
 
         # Coordinator should only receive results for remaining enrichers
-        coordinator = FakeEnrichmentCoordinator(results={
-            "pubmed": EnrichmentResult.success(
-                enricher_name="pubmed",
-                records_input=100,
-                records_enriched=80,
-            ),
-            "openalex": EnrichmentResult.success(
-                enricher_name="openalex",
-                records_input=100,
-                records_enriched=70,
-            ),
-        })
+        coordinator = FakeEnrichmentCoordinator(
+            results={
+                "pubmed": EnrichmentResult.success(
+                    enricher_name="pubmed",
+                    records_input=100,
+                    records_enriched=80,
+                ),
+                "openalex": EnrichmentResult.success(
+                    enricher_name="openalex",
+                    records_input=100,
+                    records_enriched=70,
+                ),
+            }
+        )
 
         seed_factory = FakePipelineRunnerFactory()
 
@@ -833,9 +849,7 @@ class TestResumePartialEnrichment:
     async def test_resume_after_merge_failure_reruns_merge(self):
         """Resume after merge failure should re-run merge only."""
         config = FakeCompositeConfig(
-            enrichers=(
-                FakeEnricherConfig(pipeline="crossref"),
-            )
+            enrichers=(FakeEnricherConfig(pipeline="crossref"),)
         )
 
         # Create checkpoint with all enrichers completed but merge failed
@@ -985,13 +999,15 @@ class TestRequiredOnlyMode:
             )
         )
 
-        coordinator = FakeEnrichmentCoordinator(results={
-            "crossref": EnrichmentResult.success(
-                enricher_name="crossref",
-                records_input=100,
-                records_enriched=90,
-            ),
-        })
+        coordinator = FakeEnrichmentCoordinator(
+            results={
+                "crossref": EnrichmentResult.success(
+                    enricher_name="crossref",
+                    records_input=100,
+                    records_enriched=90,
+                ),
+            }
+        )
 
         runner, _ = create_test_runner(
             config=config,
@@ -1022,13 +1038,15 @@ class TestRequiredOnlyMode:
             )
         )
 
-        coordinator = FakeEnrichmentCoordinator(results={
-            "crossref": EnrichmentResult.success(
-                enricher_name="crossref",
-                records_input=100,
-                records_enriched=90,
-            ),
-        })
+        coordinator = FakeEnrichmentCoordinator(
+            results={
+                "crossref": EnrichmentResult.success(
+                    enricher_name="crossref",
+                    records_input=100,
+                    records_enriched=90,
+                ),
+            }
+        )
 
         runner, _ = create_test_runner(
             config=config,
@@ -1056,17 +1074,19 @@ class TestOptionalEnricherFailure:
             )
         )
 
-        coordinator = FakeEnrichmentCoordinator(results={
-            "crossref": EnrichmentResult.success(
-                enricher_name="crossref",
-                records_input=100,
-                records_enriched=90,
-            ),
-            "pubmed": EnrichmentResult.failed(
-                enricher_name="pubmed",
-                error_message="Connection timeout",
-            ),
-        })
+        coordinator = FakeEnrichmentCoordinator(
+            results={
+                "crossref": EnrichmentResult.success(
+                    enricher_name="crossref",
+                    records_input=100,
+                    records_enriched=90,
+                ),
+                "pubmed": EnrichmentResult.failed(
+                    enricher_name="pubmed",
+                    error_message="Connection timeout",
+                ),
+            }
+        )
 
         runner, _ = create_test_runner(config=config, coordinator=coordinator)
 
@@ -1085,18 +1105,20 @@ class TestOptionalEnricherFailure:
             )
         )
 
-        coordinator = FakeEnrichmentCoordinator(results={
-            "crossref": EnrichmentResult.success(
-                enricher_name="crossref",
-                records_input=100,
-                records_enriched=90,
-            ),
-            "pubmed": EnrichmentResult.timeout(
-                enricher_name="pubmed",
-                timeout_seconds=600,
-                records_input=100,
-            ),
-        })
+        coordinator = FakeEnrichmentCoordinator(
+            results={
+                "crossref": EnrichmentResult.success(
+                    enricher_name="crossref",
+                    records_input=100,
+                    records_enriched=90,
+                ),
+                "pubmed": EnrichmentResult.timeout(
+                    enricher_name="pubmed",
+                    timeout_seconds=600,
+                    records_input=100,
+                ),
+            }
+        )
 
         runner, _ = create_test_runner(config=config, coordinator=coordinator)
 
@@ -1153,13 +1175,15 @@ class TestFSMTransitionLogging:
             enrichers=(FakeEnricherConfig(pipeline="crossref"),)
         )
 
-        coordinator = FakeEnrichmentCoordinator(results={
-            "crossref": EnrichmentResult.success(
-                enricher_name="crossref",
-                records_input=100,
-                records_enriched=90,
-            ),
-        })
+        coordinator = FakeEnrichmentCoordinator(
+            results={
+                "crossref": EnrichmentResult.success(
+                    enricher_name="crossref",
+                    records_input=100,
+                    records_enriched=90,
+                ),
+            }
+        )
 
         runner, components = create_test_runner(config=config, coordinator=coordinator)
 
@@ -1169,7 +1193,9 @@ class TestFSMTransitionLogging:
         transitions = logger.get_fsm_transitions()
 
         # Should have multiple transitions logged
-        assert len(transitions) >= 4  # At least: seed_start, seed_complete, enrichment, merge, complete
+        assert (
+            len(transitions) >= 4
+        )  # At least: seed_start, seed_complete, enrichment, merge, complete
 
         # Verify key transitions
         transition_pairs = transitions
