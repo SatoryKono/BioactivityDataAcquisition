@@ -143,7 +143,8 @@ class TestStoragePortProtocol:
                 mode: Literal["merge", "append", "delete"] = "merge",
                 partition_cols: list[str] | None = None,
                 on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
-            ) -> None:
+                bronze_refs: list[Any] | None = None,
+            ) -> Any:
                 pass
 
             async def write_gold(
@@ -171,6 +172,9 @@ class TestStoragePortProtocol:
                 table_name: str,
                 records: list[dict[str, Any]],
                 primary_keys: list[str] | None = None,
+                *,
+                run_id: str | None = None,
+                sources_used: list[str] | None = None,
             ) -> None:
                 pass
 
@@ -179,6 +183,9 @@ class TestStoragePortProtocol:
                 table_name: str,
                 records: list[dict[str, Any]],
                 primary_keys: list[str] | None = None,
+                *,
+                run_id: str | None = None,
+                sources_used: list[str] | None = None,
             ) -> None:
                 pass
 
