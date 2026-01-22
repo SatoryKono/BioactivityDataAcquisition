@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
-from unittest.mock import AsyncMock, MagicMock, call
+from unittest.mock import AsyncMock, MagicMock
 
 import polars as pl
 import pytest
@@ -24,7 +24,6 @@ from bioetl.domain.composite.result import (
     EnrichmentResult,
     EnrichmentStatus,
     MergeResult,
-    SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
 
