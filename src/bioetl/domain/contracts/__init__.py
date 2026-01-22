@@ -1,13 +1,10 @@
 """Data contracts for BioETL Gold layer.
 
-DEPRECATED: This module re-exports schemas from bioetl.domain.contracts for
-backward compatibility. New code should import from bioetl.domain.contracts.
-
 This package provides Pandera DataFrameModel schemas for Gold layer validation.
-Schemas are independent of pipeline implementations and can be imported by
-data consumers (analysts, downstream applications) for validation and documentation.
+Schemas are part of the domain layer and can be imported by any layer for
+validation and documentation.
 
-Usage for analysts:
+Usage:
     >>> from bioetl.domain.contracts import ChEMBLActivityGoldSchema
     >>> import pandas as pd
     >>> df = pd.read_parquet("data/gold/chembl_activity/")
@@ -33,7 +30,7 @@ See also:
 
 from __future__ import annotations
 
-# Re-export all Gold schemas from domain.contracts for backward compatibility
+# Re-export all Gold schemas for convenient access
 from bioetl.domain.contracts.gold import (
     # ChEMBL schemas
     ChEMBLActivityGoldSchema,
