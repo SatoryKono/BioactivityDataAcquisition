@@ -17,6 +17,7 @@ from uuid import UUID, uuid4
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.domain.composite.result import (
     CompositeResult,
+    EnrichmentResult,
     EnrichmentStatus,
     MergeResult,
     SeedResult,
@@ -35,7 +36,6 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
-    from bioetl.domain.composite.result import EnrichmentResult
     from bioetl.domain.ports import LockPort, LoggerPort
 
 
@@ -298,8 +298,21 @@ class CompositePipelineRunner:
         # Step 3: Determine which enrichers to run
         enrichers_to_run = self._get_enrichers_to_run(state)
 
-        # Step 4: Run enrichers (fan-out)
+        # Step 4: Run enrichers (fan-out) with FSM state management
         if enrichers_to_run:
+            # Transition to ENRICHING state before starting enrichments
+            enricher_names = [e.pipeline for e in enrichers_to_run]
+            state = state.with_state(CompositePipelineState.ENRICHING)
+            await self._checkpoint_manager.save(state)
+
+            self._logger.info(
+                "Enrichment stage started",
+                composite=self._config.name,
+                enrichers=enricher_names,
+                count=len(enrichers_to_run),
+                state="ENRICHING",
+            )
+
             enrichment_results = await self._coordinator.run_enrichers(
                 keys=keys_df,
                 enrichers=enrichers_to_run,
@@ -313,14 +326,65 @@ class CompositePipelineRunner:
                     state = state.with_enricher_completed(name, result)
             await self._checkpoint_manager.save(state)
 
+            # Log aggregated enrichment results
+            self._log_enrichment_summary(enrichment_results)
+        else:
+            # No enrichers to run - skip enrichment stage
+            self._logger.info(
+                "No enrichers to run, skipping enrichment stage",
+                composite=self._config.name,
+                reason="all_completed_or_filtered",
+            )
+
         # Merge with previously completed enrichers
         enrichment_results.update(state.enrichment_results)
 
-        # Step 5: Check required enrichers
-        self._check_required_enrichers(enrichment_results)
+        # Step 5: Check required enrichers with FSM FAILED transition on error
+        try:
+            self._check_required_enrichers(enrichment_results)
+        except RuntimeError as e:
+            # Required enricher failed - transition to FAILED state
+            state = state.with_state(CompositePipelineState.FAILED)
+            try:
+                await self._checkpoint_manager.save(state)
+            except Exception as save_error:
+                self._logger.warning(
+                    "Failed to save FAILED state to checkpoint",
+                    composite=self._config.name,
+                    error=str(save_error),
+                )
 
-        # Step 6: Merge results
+            self._logger.error(
+                "Required enricher failed, pipeline transitioning to FAILED",
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                error=str(e),
+                state="FAILED",
+            )
+            raise
+
+        # Step 5b: Transition to ENRICHMENT_COMPLETED
+        state = state.with_state(CompositePipelineState.ENRICHMENT_COMPLETED)
+        await self._checkpoint_manager.save(state)
+
+        self._logger.info(
+            "Enrichment stage completed",
+            composite=self._config.name,
+            state="ENRICHMENT_COMPLETED",
+            total_enrichers=len(enrichment_results),
+        )
+
+        # Step 6: Transition to MERGING and merge results
         if not self._runtime.dry_run:
+            state = state.with_state(CompositePipelineState.MERGING)
+            await self._checkpoint_manager.save(state)
+
+            self._logger.info(
+                "Merge stage started",
+                composite=self._config.name,
+                state="MERGING",
+            )
+
             merge_result = await self._merger.merge(
                 seed_table=self._config.seed.silver_table,
                 enrichers=self._config.enrichers,
@@ -492,6 +556,67 @@ class CompositePipelineRunner:
                     f"Required enricher '{enricher_name}' failed: "
                     f"{result.error_message or result.status.value}"
                 )
+
+    def _log_enrichment_summary(
+        self, enrichment_results: dict[str, EnrichmentResult]
+    ) -> None:
+        """Log aggregated summary of enrichment results.
+
+        Args:
+            enrichment_results: Results from enrichers.
+        """
+        if not enrichment_results:
+            return
+
+        # Aggregate by status
+        success_count = 0
+        partial_count = 0
+        failed_count = 0
+        skipped_count = 0
+        timeout_count = 0
+
+        total_records_input = 0
+        total_records_enriched = 0
+        total_records_errored = 0
+
+        failed_enrichers: list[str] = []
+        successful_enrichers: list[str] = []
+
+        for name, result in enrichment_results.items():
+            total_records_input += result.records_input
+            total_records_enriched += result.records_enriched
+            total_records_errored += result.records_errored
+
+            if result.status == EnrichmentStatus.SUCCESS:
+                success_count += 1
+                successful_enrichers.append(name)
+            elif result.status == EnrichmentStatus.PARTIAL:
+                partial_count += 1
+                successful_enrichers.append(name)
+            elif result.status == EnrichmentStatus.FAILED:
+                failed_count += 1
+                failed_enrichers.append(name)
+            elif result.status == EnrichmentStatus.SKIPPED:
+                skipped_count += 1
+            elif result.status == EnrichmentStatus.TIMEOUT:
+                timeout_count += 1
+                failed_enrichers.append(name)
+
+        self._logger.info(
+            "Enrichment summary",
+            composite=self._config.name,
+            total_enrichers=len(enrichment_results),
+            success=success_count,
+            partial=partial_count,
+            failed=failed_count,
+            skipped=skipped_count,
+            timeout=timeout_count,
+            successful_enrichers=successful_enrichers,
+            failed_enrichers=failed_enrichers if failed_enrichers else None,
+            total_records_input=total_records_input,
+            total_records_enriched=total_records_enriched,
+            total_records_errored=total_records_errored,
+        )
 
     async def _generate_dq_reports(self, merge_result: MergeResult) -> None:
         """Generate DQ reports for composite pipeline.
