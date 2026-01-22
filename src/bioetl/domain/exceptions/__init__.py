@@ -41,6 +41,7 @@ from bioetl.domain.exceptions.critical import (
     MergeConflictError,
     MetricsServerError,
     PolicyViolationError,
+    RunnerAlreadyExecutedError,
 )
 from bioetl.domain.exceptions.data_quality import (
     DataQualityThresholdError,
@@ -108,6 +109,7 @@ __all__ = [
     "RateLimitExceededError",
     "RecoverableError",
     "RetryExhaustedError",
+    "RunnerAlreadyExecutedError",
     "SchemaEvolutionError",
     "SchemaViolationError",
     "ServiceAuthenticationError",

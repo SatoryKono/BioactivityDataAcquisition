@@ -180,3 +180,43 @@ class MetricsServerError(CriticalError):
         self.reason = reason
         self.original_error = original_error
         super().__init__(f"Failed to start metrics server on port {port}: {reason}")
+
+
+class RunnerAlreadyExecutedError(CriticalError):
+    """Raised when attempting to run a pipeline runner that has already executed.
+
+    This is a CRITICAL error - each Runner instance should only be executed once.
+    Create a new Runner instance for another run.
+
+    This prevents undefined behavior from reusing Runner instances that have
+    internal state from previous executions (checkpoints, metrics, timestamps).
+
+    Attributes:
+        runner_type: Type of runner (e.g., "CompositePipelineRunner").
+        run_id: The run ID of the already-executed run.
+        final_state: The final state of the previous execution (if available).
+    """
+
+    error_type = ErrorType.INVALID_DATA
+
+    def __init__(
+        self,
+        runner_type: str,
+        run_id: str,
+        final_state: str | None = None,
+    ) -> None:
+        """Initialize RunnerAlreadyExecutedError.
+
+        Args:
+            runner_type: Type of runner.
+            run_id: Run ID of the executed run.
+            final_state: Final state of the previous execution.
+        """
+        self.runner_type = runner_type
+        self.run_id = run_id
+        self.final_state = final_state
+        msg = f"{runner_type} already executed (run_id={run_id})"
+        if final_state:
+            msg += f", final_state={final_state}"
+        msg += ". Create a new Runner instance for another run."
+        super().__init__(msg)
