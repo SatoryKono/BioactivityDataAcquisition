@@ -44,7 +44,7 @@ class TestHealthServerCommand:
         assert result.exit_code == 0
         assert "--host" in result.output
         assert "--port" in result.output
-        assert "0.0.0.0" in result.output  # default host
+        assert "127.0.0.1" in result.output  # default host (localhost for security)
         assert "8080" in result.output  # default port
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
@@ -69,7 +69,7 @@ class TestHealthServerCommand:
             result = cli_runner.invoke(cli, ["health", "server"])
 
         # Verify output
-        assert "Starting health server on http://0.0.0.0:8080" in result.output
+        assert "Starting health server on http://127.0.0.1:8080" in result.output
         assert "/health" in result.output
         assert "/health/live" in result.output
         assert "/health/ready" in result.output
@@ -671,7 +671,7 @@ class TestHealthServerAsyncExecution:
         mock_get_deps.assert_called_once()
         # Verify HealthServer was called with default options
         mock_server_cls.assert_called_once_with(
-            host="0.0.0.0",
+            host="127.0.0.1",
             port=8080,
             health_monitor=mock_deps.health_monitor,
         )

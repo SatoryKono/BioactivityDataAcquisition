@@ -96,14 +96,10 @@ class MyAdapter:
 ### 2.1. Архитектура Medallion 
 | Уровень | Формат | Валидация | Хранение (Retention) | Идемпотентность | 
 |---------|--------|-----------|----------------------|-----------------| 
-| **Bronze** (Сырые) | **JSONL + zstd** | Мин./Нет | 90 дней hot -> Archive (S3 Lifecycle) | Path: `bronze/{format_version}/{provider}/{entity}/{date}/`. Append-only. | 
+| **Bronze** (Сырые) | **JSONL + zstd** | Мин./Нет | 90 дней hot -> Archive (S3 Lifecycle) | Path: `bronze/{provider}/{entity}/{date}/`. Append-only. | 
 | **Silver** (Норм.) | **Delta Lake / Iceberg** | Мягкая (учет дрейфа схемы) | Постоянно | **Merge/Upsert**. Raw Parquet в Silver **MUST NOT** использоваться. Обязателен ACID. Time Travel — для Ops, не для DR. | 
-| **Gold** (Витрины) | Delta/Iceberg/Parquet | Строгая (`strict=True`) | Постоянно | Версионированные снимки (SCD Type 2) или партиционирование по дате. | 
+| **Gold** (Витрины) | Delta/Iceberg/Parquet | Строгая (`strict=True`) | Постоянно | Версионированные снимки (SCD Type 2) или партиционирование по дате. |
 
-**Bronze Lifecycle:**
-- Формат файлов (JSONL) зафиксирован в версии пути (`/v1/`).
-- Изменение формата требует новой ветки (`/v2/`). Миграция "in-place" запрещена.
- 
 #### 2.1.1. Silver Write Modes (Режимы Записи)
 Режимы записи для Silver слоя строго типизированы (`SilverWriteMode` enum):
 - **MERGE**: Upsert по первичным ключам. Стратегия по умолчанию для incremental updates.

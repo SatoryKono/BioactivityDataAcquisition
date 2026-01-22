@@ -173,3 +173,34 @@ class UniprotTarget(BaseEntity):
             raise ValueError(
                 f"Annotation score must be 1-5, got {self.annotation_score}"
             )
+
+
+__all__ = [
+    "IDMappingResult",
+    "UniprotTarget",
+]
+# Note: Deprecated alias (Protein) is provided via __getattr__
+# but not listed in __all__ since it is deprecated (ADR-024, glossary v2.0)
+
+
+# === Deprecated Alias (ADR-024, glossary v2.0) ===
+# This alias is retained for backward compatibility.
+# Use UniprotTarget in new code.
+
+
+def __getattr__(name: str) -> type:
+    """Provide deprecated alias with warning.
+
+    Deprecated:
+        Protein: Use UniprotTarget instead.
+    """
+    import warnings
+
+    if name == "Protein":
+        warnings.warn(
+            "Protein is deprecated, use UniprotTarget instead (ADR-024, glossary v2.0)",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return UniprotTarget
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

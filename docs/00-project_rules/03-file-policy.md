@@ -178,7 +178,7 @@ source_file: ../../sources/chembl.yaml
 | Silver | Постоянно | Delta Lake VACUUM (7 дней) |
 | Gold | Постоянно | Delta Lake VACUUM (7 дней) |
 
-См. [05-cleanup-policy.md](05-cleanup-policy.md) для деталей.
+См. [RULES.md §2.1.1](../RULES.md) для деталей политики retention.
 
 ---
 

@@ -175,7 +175,7 @@ pipelines/
 
 ## Related Documentation
 
-- [RULES.md](../../RULES.md) — Project constitution
+- [RULES.md](../RULES.md) — Project constitution
 - [CLAUDE.md](../../CLAUDE.md) — Agent instructions
 - [ADR Directory](../02-architecture/decisions/) — Architecture Decision Records
 - [API Reference](../04-reference/api/) — API documentation
