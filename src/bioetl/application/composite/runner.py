@@ -714,7 +714,9 @@ class CompositePipelineRunner:
             completed_enrichers_count=completed_count,
             total_enrichers_count=total_enrichers,
             remaining_enrichers_count=remaining_count,
-            completed_enrichers=list(state.completed_enrichers) if completed_count > 0 else None,
+            completed_enrichers=list(state.completed_enrichers)
+            if completed_count > 0
+            else None,
         )
 
     async def _save_checkpoint_safe(
