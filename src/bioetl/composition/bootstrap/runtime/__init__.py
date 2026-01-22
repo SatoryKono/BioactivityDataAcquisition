@@ -28,6 +28,7 @@ from bioetl.composition.bootstrap.runtime.observability import (
     bootstrap_metrics,
     bootstrap_observability,
     bootstrap_tracer,
+    maybe_start_metrics_server,
     start_metrics_server,
     validate_observability_preflight,
 )
@@ -51,6 +52,7 @@ __all__ = [
     "bootstrap_pipeline_runner_service",
     "bootstrap_tracer",
     "load_composite_config",
+    "maybe_start_metrics_server",
     "start_metrics_server",
     "validate_observability_preflight",
 ]
