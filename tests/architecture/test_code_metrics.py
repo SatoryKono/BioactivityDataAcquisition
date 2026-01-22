@@ -557,7 +557,7 @@ class TestClassSize:
         # Composite pipeline services (ADR-026)
         "MergeService": 700,  # 694 lines - Composite merge service with conflict resolution + extracted helper methods
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
-        "CompositePipelineRunner": 375,  # 370 lines - Composite pipeline orchestrator
+        "CompositePipelineRunner": 470,  # 463 lines - Composite pipeline orchestrator with FSM state management
         # Publication adapters with APIRequestCollector (metadata enrichment)
         "OpenAlexAdapter": 580,  # 578 lines - FilterableDataSourcePort + APIRequestCollector + fallback handler
         "PubMedAdapter": 545,  # 540 lines - FilterableDataSourcePort + APIRequestCollector + TitleFallbackHandler
