@@ -13,7 +13,7 @@ Note:
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -511,7 +511,7 @@ class StorageAdapter:
         # Parse table_name to get provider/entity for targeted cleanup
         if "." in table_name:
             provider, entity = table_name.split(".", 1)
-            cutoff_date = datetime.now(timezone.utc) - timedelta(hours=retention_hours)
+            cutoff_date = datetime.now(UTC) - timedelta(hours=retention_hours)
             await self.bronze.cleanup_old_files(
                 cutoff_date=cutoff_date,
                 dry_run=dry_run,
