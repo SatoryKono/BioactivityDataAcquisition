@@ -358,20 +358,8 @@ class StoragePort(Protocol):
     ) -> dict[str, Any]:
         """Preview what would be cleared without actual deletion.
 
-        Used by CLI dry-run mode to show users what data would be affected
-        before performing a rebuild or backfill operation.
-
-        Args:
-            silver_table: Silver table name (e.g., 'chembl.activity')
-            gold_table: Optional Gold table name
-
         Returns:
-            Dict with structure:
-            {
-                "silver": {"path": str, "file_count": int, "exists": bool},
-                "gold": {"path": str, "file_count": int, "exists": bool} | None,
-                "total_files": int
-            }
+            Dict with layer info (path, file_count, exists) and total_files.
         """
         ...
 
@@ -383,17 +371,12 @@ class StoragePort(Protocol):
     ) -> None:
         """Optimize storage for a specific table/entity.
 
-        Performs maintenance operations appropriate for the storage layer:
-        - Delta Lake: Runs VACUUM to remove old files
-        - JSONL/File: Removes files older than retention period
+        Unifies Vacuum (Delta) and file cleanup (Bronze).
 
         Args:
-            table_name: Target identifier (e.g., 'provider.entity' for Delta/Bronze)
-            retention_hours: Retention period in hours (default 168h = 7 days)
-            dry_run: If True, only log what would be done without action
-
-        Raises:
-            StorageError: If optimization fails
+            table_name: Target identifier (e.g., 'provider.entity').
+            retention_hours: Retention period in hours.
+            dry_run: If True, only log what would be done.
         """
         ...
 
@@ -404,19 +387,11 @@ class StoragePort(Protocol):
     ) -> dict[str, int]:
         """Remove Bronze files older than cutoff date (RULES.md §2.1 retention).
 
-        Implements Bronze layer retention policy by removing files
-        older than the specified cutoff date.
-
         Args:
             cutoff_date: Files older than this date will be removed.
             dry_run: If True, only count what would be removed.
 
         Returns:
-            Dictionary with cleanup statistics:
-            {
-                "files_removed": int,
-                "bytes_freed": int,
-                "directories_removed": int
-            }
+            Dict with cleanup stats (files_removed, bytes_freed, directories_removed).
         """
         ...

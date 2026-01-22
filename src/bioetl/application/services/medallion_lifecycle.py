@@ -16,64 +16,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.medallion_types import (
+    ClearResult,
+    PrepareResult,
+    VacuumResult,
+)
+
 if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.medallion import MedallionPolicy
     from bioetl.domain.ports import LoggerPort, MetricsPort, StoragePort
-
-
-@dataclass(frozen=True, slots=True)
-class ClearResult:
-    """Result of clear operation.
-
-    Attributes:
-        silver_cleared: Number of Silver records cleared.
-        gold_cleared: Number of Gold records cleared.
-        dry_run: Whether this was a dry run (no actual deletion).
-    """
-
-    silver_cleared: int
-    gold_cleared: int
-    dry_run: bool
-
-    @property
-    def total_cleared(self) -> int:
-        """Get total records cleared.
-
-        Returns:
-            Sum of silver and gold cleared records.
-        """
-        return self.silver_cleared + self.gold_cleared
-
-
-@dataclass(frozen=True, slots=True)
-class VacuumResult:
-    """Result of VACUUM operation.
-
-    Attributes:
-        silver_files_removed: Number of files removed from Silver table.
-        gold_files_removed: Number of files removed from Gold table.
-        skipped: Whether VACUUM was skipped.
-    """
-
-    silver_files_removed: int
-    gold_files_removed: int
-    skipped: bool
-
-
-@dataclass(frozen=True, slots=True)
-class PrepareResult:
-    """Result of prepare_for_run operation.
-
-    Combines clear result with policy used for transparency.
-
-    Attributes:
-        clear_result: Result of clear operation.
-        policy: MedallionPolicy used for the operation.
-    """
-
-    clear_result: ClearResult
-    policy: MedallionPolicy
 
 
 @dataclass
@@ -434,57 +386,6 @@ class MedallionLifecycleService:
                 skipped=False,
             )
 
-    async def _vacuum_table_safe(
-        self,
-        table: str,
-        layer: str,
-        retention_days: int,
-        metrics: MetricsPort | None,
-        pipeline_name: str,
-    ) -> int:
-        """Vacuum a single table with error handling.
-
-        Gracefully handles errors to avoid failing the entire pipeline
-        due to vacuum issues.
-
-        Args:
-            table: Table name to vacuum.
-            layer: Layer name for metrics (silver/gold).
-            retention_days: Retention period in days.
-            metrics: Optional metrics port.
-            pipeline_name: Pipeline name for metrics tags.
-
-        Returns:
-            Number of files removed (0 on error).
-        """
-        try:
-            files_removed = await self.vacuum(
-                table=table,
-                retention_days=retention_days,
-                dry_run=False,
-            )
-            self.logger.info(
-                "vacuum_completed",
-                layer=layer,
-                table=table,
-                files_removed=files_removed,
-            )
-
-            if metrics:
-                metrics.increment_counter(
-                    "vacuum_files_removed",
-                    files_removed,
-                    {"pipeline": pipeline_name, "layer": layer},
-                )
-            return files_removed
-        except Exception as e:
-            self.logger.warning(
-                "vacuum_failed",
-                layer=layer,
-                table=table,
-                error=str(e),
-            )
-            return 0
 
 
 __all__ = [
