@@ -1,39 +1,17 @@
-"""Composition Root for BioETL.
+"""Bootstrap function for main pipeline execution.
 
-Handles the initialization and wiring of infrastructure components (adapters)
-to provide a ready-to-use PipelineRunner for execution.
+Contains the primary Composition Root entry point for creating
+a fully configured PipelineRunner ready for execution.
 
-Bootstrap functions are organized into submodules:
-- bootstrap.observability: logging, tracing, metrics, DQ monitor
-- bootstrap.storage: storage adapters, cleanup, lifecycle services
-- bootstrap.checkpoint: checkpoint and quarantine management
-
-All bootstrap functions are re-exported here for convenience.
-
-Note:
-    Infrastructure types (BronzeWriter, SilverWriter, etc.) are NOT exported
-    from this module. Import them directly from infrastructure modules or
-    use composition/types.py for type annotations.
+This is the main entry point for runtime pipeline execution.
+CLI commands should use this via composition/entrypoints.py.
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition._bootstrap import (
-    bootstrap_checkpoint,
-    bootstrap_checkpoint_manager,
-    bootstrap_cleanup,
-    bootstrap_dq_monitor,
-    bootstrap_lifecycle_service,
-    bootstrap_logger,
-    bootstrap_metrics,
-    bootstrap_observability,
-    bootstrap_quarantine,
-    bootstrap_quarantine_manager,
-    bootstrap_storage,
-    bootstrap_tracer,
-)
+from bioetl.composition.bootstrap.runtime.observability import bootstrap_observability
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
@@ -41,28 +19,11 @@ from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.domain.config import RuntimeConfig
 from bioetl.infrastructure.config import get_settings, load_pipeline_config
 
-__all__ = [
-    # Bootstrap functions (from submodules)
-    "bootstrap_checkpoint",
-    "bootstrap_checkpoint_manager",
-    "bootstrap_cleanup",
-    "bootstrap_dq_monitor",
-    "bootstrap_lifecycle_service",
-    "bootstrap_logger",
-    "bootstrap_metrics",
-    "bootstrap_observability",
-    "bootstrap_pipeline",
-    "bootstrap_quarantine",
-    "bootstrap_quarantine_manager",
-    "bootstrap_storage",
-    "bootstrap_tracer",
-    # Config loader
-    "load_pipeline_config",
-]
-
 if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.context import PipelineRunContext
+
+__all__ = ["bootstrap_pipeline"]
 
 
 def bootstrap_pipeline(
