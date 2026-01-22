@@ -136,6 +136,7 @@ def _create_table_collector() -> Callable[[str], list[tuple[str, str]]]:
     Raises:
         ValueError: If config file for a registered pipeline is not found.
     """
+
     def collect_tables(layer: str) -> list[tuple[str, str]]:
         """Collect tables from all registered pipelines.
 
