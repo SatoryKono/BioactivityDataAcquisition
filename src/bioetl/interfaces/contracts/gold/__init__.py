@@ -1,5 +1,8 @@
 """Gold layer data contracts organized by provider.
 
+DEPRECATED: This module re-exports schemas from bioetl.domain.contracts.gold for
+backward compatibility. New code should import from bioetl.domain.contracts.gold.
+
 This package contains Pandera DataFrameModel schemas for Gold layer validation,
 organized by data provider for easy navigation.
 
@@ -10,18 +13,18 @@ Submodules:
     publications: Cross-provider publication schemas (PubMed, CrossRef, OpenAlex, SemanticScholar)
 
 Example usage:
-    >>> from bioetl.interfaces.contracts.gold import chembl
+    >>> from bioetl.domain.contracts.gold import chembl
     >>> df = pd.read_parquet("data/gold/chembl_activity/")
     >>> chembl.ChEMBLActivityGoldSchema.validate(df)
 
-    >>> from bioetl.interfaces.contracts.gold.publications import PubMedPublicationGoldSchema
+    >>> from bioetl.domain.contracts.gold.publications import PubMedPublicationGoldSchema
     >>> PubMedPublicationGoldSchema.validate(pubmed_df)
 """
 
 from __future__ import annotations
 
-# Import all schemas for flat namespace access
-from bioetl.interfaces.contracts.gold.chembl import (
+# Re-export all schemas from domain.contracts.gold for backward compatibility
+from bioetl.domain.contracts.gold.chembl import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
     ChEMBLAssayParametersGoldSchema,
@@ -35,14 +38,14 @@ from bioetl.interfaces.contracts.gold.chembl import (
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
 )
-from bioetl.interfaces.contracts.gold.pubchem import PubChemCompoundGoldSchema
-from bioetl.interfaces.contracts.gold.publications import (
+from bioetl.domain.contracts.gold.pubchem import PubChemCompoundGoldSchema
+from bioetl.domain.contracts.gold.publications import (
     CrossRefPublicationGoldSchema,
     OpenAlexPublicationGoldSchema,
     PubMedPublicationGoldSchema,
     SemanticScholarPublicationGoldSchema,
 )
-from bioetl.interfaces.contracts.gold.uniprot import (
+from bioetl.domain.contracts.gold.uniprot import (
     UniProtIDMappingGoldSchema,
     UniProtProteinGoldSchema,
 )

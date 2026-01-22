@@ -18,6 +18,9 @@ from __future__ import annotations
 # Composite pipeline subpackage (ADR-026)
 from bioetl.domain import composite
 
+# Data contracts (Gold layer Pandera schemas)
+from bioetl.domain import contracts
+
 # Domain constants module
 from bioetl.domain import constants
 
@@ -320,6 +323,8 @@ __all__ = [
     "composite",
     # Constants
     "constants",
+    # Contracts (Gold layer Pandera schemas)
+    "contracts",
     # Configuration
     "DEFAULT_VALIDATION_CONFIG",
     "DQConfig",

@@ -1,12 +1,14 @@
 """Base utilities for Gold layer data contracts.
 
+DEPRECATED: This module re-exports from bioetl.domain.contracts.gold._base for
+backward compatibility. New code should import from bioetl.domain.contracts.gold._base.
+
 Contains shared constants and utilities used across all Gold schemas.
 """
 
 from __future__ import annotations
 
-# Regex pattern for date validation (YYYY-MM-DD format)
-# Used for fields like publication_date, accepted_date, etc.
-DATE_REGEX = r"^\d{4}-\d{2}-\d{2}$"
+# Re-export from domain.contracts for backward compatibility
+from bioetl.domain.contracts.gold._base import DATE_REGEX
 
 __all__ = ["DATE_REGEX"]
