@@ -53,8 +53,12 @@ def test_bootstrap_uses_explicit_registration():
     """bootstrap_pipeline() MUST call register_all_pipelines() explicitly.
 
     This ensures deterministic initialization without hidden side effects.
+
+    Note: bootstrap_pipeline() is now defined in composition/bootstrap/runtime/pipeline.py
+    as part of the CLI/runtime split (see CLAUDE.md §2.1).
     """
-    bootstrap_file = COMPOSITION_DIR / "bootstrap.py"
+    # bootstrap_pipeline is now in composition/bootstrap/runtime/pipeline.py
+    bootstrap_file = COMPOSITION_DIR / "bootstrap" / "runtime" / "pipeline.py"
     source = bootstrap_file.read_text(encoding="utf-8")
     tree = ast.parse(source)
 
@@ -89,8 +93,12 @@ def test_no_metrics_server_direct_call_in_bootstrap_pipeline():
 
     Metrics server startup should be handled by bootstrap_metrics() or
     bootstrap_observability() for proper opt-in control.
+
+    Note: bootstrap_pipeline() is now defined in composition/bootstrap/runtime/pipeline.py
+    as part of the CLI/runtime split (see CLAUDE.md §2.1).
     """
-    bootstrap_file = COMPOSITION_DIR / "bootstrap.py"
+    # bootstrap_pipeline is now in composition/bootstrap/runtime/pipeline.py
+    bootstrap_file = COMPOSITION_DIR / "bootstrap" / "runtime" / "pipeline.py"
     source = bootstrap_file.read_text(encoding="utf-8")
     tree = ast.parse(source)
 
