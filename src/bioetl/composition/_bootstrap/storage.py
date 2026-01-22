@@ -40,16 +40,22 @@ __all__ = [
 ]
 
 
-def bootstrap_storage() -> StorageAdapter:
-    """Bootstrap a read-only storage adapter for CLI operations.
+def bootstrap_storage(*, enable_csv_export: bool = False) -> StorageAdapter:
+    """Bootstrap a storage adapter for CLI and composite pipeline operations.
 
-    Creates a minimal StorageAdapter suitable for preview operations.
-    No CSV export is configured since this is for read-only inspection.
+    Creates a StorageAdapter suitable for preview operations and composite
+    pipelines. CSV export is disabled by default for read-only inspection
+    but can be enabled for composite pipelines that need CSV output.
+
     Uses NoOpLogger since this is for CLI preview operations without observability.
 
     Note:
         Lock validation is performed at Application layer (BatchWriter)
         per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
+
+    Args:
+        enable_csv_export: If True, creates CsvExporters for Silver and Gold
+            layers. Used by composite pipelines that need CSV output.
 
     Returns:
         StorageAdapter configured for the current environment.
@@ -60,6 +66,7 @@ def bootstrap_storage() -> StorageAdapter:
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.types import RunID, RunType
     from bioetl.domain.value_objects.run_context import RunContext
+    from bioetl.infrastructure.export.csv_exporter import CsvExporter
     from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
     settings = get_settings()
@@ -82,6 +89,19 @@ def bootstrap_storage() -> StorageAdapter:
     )
     metadata_coordinator = MetadataCoordinator(run_context=run_context)
 
+    # Create CSV exporters if enabled (for composite pipelines)
+    silver_csv_exporter = None
+    gold_csv_exporter = None
+    if enable_csv_export:
+        silver_csv_exporter = CsvExporter(
+            base_path=str(output_dir / "silver"),
+            logger=noop_logger,
+        )
+        gold_csv_exporter = CsvExporter(
+            base_path=str(output_dir / "gold"),
+            logger=noop_logger,
+        )
+
     return StorageAdapter(
         bronze_writer=BronzeWriter(
             base_path=output_dir / "bronze",  # data/output/bronze
@@ -95,7 +115,7 @@ def bootstrap_storage() -> StorageAdapter:
             base_path=output_dir / "silver",  # data/output/silver
             logger=noop_logger,
             tracing=noop_tracing,
-            csv_exporter=None,
+            csv_exporter=silver_csv_exporter,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
         ),
@@ -103,7 +123,7 @@ def bootstrap_storage() -> StorageAdapter:
             base_path=output_dir / "gold",  # data/output/gold
             logger=noop_logger,
             tracing=noop_tracing,
-            csv_exporter=None,
+            csv_exporter=gold_csv_exporter,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
         ),

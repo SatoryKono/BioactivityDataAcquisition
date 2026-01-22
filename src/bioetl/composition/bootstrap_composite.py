@@ -100,8 +100,9 @@ def bootstrap_composite_pipeline(
         log_level="INFO",
     )
 
-    # Bootstrap storage for reading Silver tables
-    storage = bootstrap_storage()
+    # Bootstrap storage for reading Silver tables and writing merged data
+    # Enable CSV export for composite pipelines (merged Silver/Gold data)
+    storage = bootstrap_storage(enable_csv_export=True)
 
     # Bootstrap lock (using in-memory lock for local execution)
     lock = MemoryLock()

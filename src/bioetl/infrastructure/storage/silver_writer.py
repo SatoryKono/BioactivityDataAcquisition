@@ -1050,6 +1050,14 @@ class SilverWriter(BaseDeltaWriter):
             ),
         )
 
+        # Export to CSV if configured (composite pipelines use overwrite mode)
+        if self.csv_exporter:
+            await self.csv_exporter.export(
+                table_name,
+                arrow_table,
+                append=False,  # Merged data replaces existing CSV
+            )
+
         # Write metadata sidecar for composite merged data
         await self._write_silver_merged_metadata(
             table_path=table_path,
