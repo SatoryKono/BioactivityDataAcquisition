@@ -376,7 +376,9 @@ class GoldMetadataBuilder:
         # Extract schema metadata from Gold schema
         schema_info = _extract_schema_metadata(gold_schema)
 
-        return GoldMetadata(
+        # Note: schema_info uses Field(alias="schema") with populate_by_name=True
+        # mypy doesn't understand this Pydantic feature, but it works at runtime
+        return GoldMetadata(  # type: ignore[call-arg]
             runtime=runtime,
             pipeline=pipeline,
             lineage=lineage,
@@ -467,7 +469,8 @@ class GoldMetadataBuilder:
         # Extract schema metadata from Gold schema
         schema_info = _extract_schema_metadata(gold_schema)
 
-        return GoldMetadata(
+        # Note: schema_info uses Field(alias="schema") with populate_by_name=True
+        return GoldMetadata(  # type: ignore[call-arg]
             runtime=runtime,
             pipeline=pipeline,
             lineage=lineage,
