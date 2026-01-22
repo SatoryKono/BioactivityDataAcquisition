@@ -610,8 +610,8 @@ def health() -> None:
 @health.command("server")
 @click.option(
     "--host",
-    default="0.0.0.0",
-    help="Host to bind to.",
+    default="127.0.0.1",
+    help="Host to bind to. Use 0.0.0.0 to expose externally.",
     show_default=True,
 )
 @click.option(
@@ -792,7 +792,7 @@ DEFAULT_HEALTH_SERVER_PORT = 8080
 @asynccontextmanager
 async def health_server_context(
     enabled: bool,
-    host: str = "0.0.0.0",
+    host: str = "127.0.0.1",
     port: int = DEFAULT_HEALTH_SERVER_PORT,
 ) -> AsyncIterator[HealthServer | None]:
     """Context manager that optionally runs a health server.
@@ -870,15 +870,16 @@ def add_health_server_options(cmd: click.Command) -> click.Command:
     return cmd
 
 
-def echo_health_server_info(enabled: bool, port: int) -> None:
+def echo_health_server_info(enabled: bool, port: int, host: str = "127.0.0.1") -> None:
     """Output health server status information.
 
     Args:
         enabled: Whether health server is enabled.
         port: Port the server is listening on.
+        host: Host the server is bound to (default: 127.0.0.1 for security).
     """
     if enabled:
-        click.echo(f"Health server: http://0.0.0.0:{port}/health")
+        click.echo(f"Health server: http://{host}:{port}/health")
 
 
 __all__ = [
@@ -2846,7 +2847,7 @@ class HealthServer:
 
     def __init__(
         self,
-        host: str = "0.0.0.0",
+        host: str = "127.0.0.1",
         port: int = 8080,
         health_monitor: HealthMonitorPort | None = None,
         logger: LoggerPort | None = None,
@@ -3176,21 +3177,18 @@ Path: observability.py
 ================================================================================
 """Observability interface for BioETL.
 
-Re-exports observability components from the composition layer.
-This module exists for backward compatibility and provides a clean
-interface for external consumers.
+Re-exports observability components for external consumers.
 
 Note:
-    For architectural purity, these components are managed by the
-    composition layer and re-exported here for the interfaces layer.
+    MetricsServerError is defined in domain.exceptions (value object,
+    can be imported by all layers). start_metrics_server is re-exported
+    from infrastructure.observability.
 """
 
 from __future__ import annotations
 
-from bioetl.composition._bootstrap import (
-    MetricsServerError,
-    start_metrics_server,
-)
+from bioetl.domain.exceptions import MetricsServerError
+from bioetl.infrastructure.observability import start_metrics_server
 
 __all__ = [
     "MetricsServerError",
