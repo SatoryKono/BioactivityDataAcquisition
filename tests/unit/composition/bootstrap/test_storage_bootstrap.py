@@ -18,7 +18,6 @@ from bioetl.composition._bootstrap.storage import (
     bootstrap_vacuum_service,
 )
 from bioetl.composition.factories.storage import StorageAdapter
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 
 @pytest.mark.unit
@@ -123,8 +122,7 @@ class TestCreateTableCollector:
 
     def test_returns_callable(self) -> None:
         """Test that _create_table_collector returns a callable."""
-        logger = NoOpLogger()
-        collector = _create_table_collector(logger)
+        collector = _create_table_collector()
 
         assert callable(collector)
 
@@ -143,8 +141,7 @@ class TestCreateTableCollector:
         mock_config.gold_table = "gold.table1"
         mock_load_config.return_value = mock_config
 
-        logger = NoOpLogger()
-        collector = _create_table_collector(logger)
+        collector = _create_table_collector()
 
         tables = collector("silver")
 
@@ -165,8 +162,7 @@ class TestCreateTableCollector:
         mock_config.gold_table = "gold.table1"
         mock_load_config.return_value = mock_config
 
-        logger = NoOpLogger()
-        collector = _create_table_collector(logger)
+        collector = _create_table_collector()
 
         tables = collector("gold")
 
@@ -187,8 +183,7 @@ class TestCreateTableCollector:
         mock_config.gold_table = "gold.table1"
         mock_load_config.return_value = mock_config
 
-        logger = NoOpLogger()
-        collector = _create_table_collector(logger)
+        collector = _create_table_collector()
 
         tables = collector("all")
 
@@ -199,23 +194,20 @@ class TestCreateTableCollector:
 
     @patch("bioetl.composition.entrypoints.load_pipeline_config")
     @patch("bioetl.composition.registry.get_default_registry")
-    def test_handles_missing_config(
+    def test_raises_on_missing_config(
         self,
         mock_registry: MagicMock,
         mock_load_config: MagicMock,
     ) -> None:
-        """Test handling of missing pipeline config."""
+        """Test that missing pipeline config raises ValueError."""
         mock_registry.return_value.list_pipelines.return_value = ["pipeline1"]
-        mock_load_config.side_effect = FileNotFoundError("Config not found")
+        mock_load_config.side_effect = ValueError("Config not found")
 
-        logger = MagicMock()
-        collector = _create_table_collector(logger)
+        collector = _create_table_collector()
 
-        tables = collector("all")
-
-        # Should return empty list and log warning
-        assert tables == []
-        logger.warning.assert_called_once()
+        # Should raise ValueError instead of silently failing
+        with pytest.raises(ValueError, match="Config not found"):
+            collector("all")
 
     @patch("bioetl.composition.entrypoints.load_pipeline_config")
     @patch("bioetl.composition.registry.get_default_registry")
@@ -235,8 +227,7 @@ class TestCreateTableCollector:
         mock_config.gold_table = "shared.gold"
         mock_load_config.return_value = mock_config
 
-        logger = NoOpLogger()
-        collector = _create_table_collector(logger)
+        collector = _create_table_collector()
 
         tables = collector("all")
 
@@ -257,8 +248,7 @@ class TestCreateTableCollector:
         mock_config.gold_table = None
         mock_load_config.return_value = mock_config
 
-        logger = NoOpLogger()
-        collector = _create_table_collector(logger)
+        collector = _create_table_collector()
 
         tables = collector("all")
 
@@ -290,8 +280,7 @@ class TestCreateTableCollector:
 
         mock_load_config.side_effect = config_for_pipeline
 
-        logger = NoOpLogger()
-        collector = _create_table_collector(logger)
+        collector = _create_table_collector()
 
         tables = collector("silver")
 

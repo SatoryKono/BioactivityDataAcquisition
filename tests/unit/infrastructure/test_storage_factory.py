@@ -613,9 +613,18 @@ class TestStorageAdapterVacuum:
         return bronze, silver, gold
 
     @pytest.mark.asyncio
-    async def test_vacuum_calls_silver_vacuum(self, mock_writers):
+    async def test_vacuum_calls_silver_vacuum(self, mock_writers, tmp_path):
         """Test vacuum delegates to silver writer."""
         bronze, silver, gold = mock_writers
+
+        # Create mock path that exists for silver but not gold
+        silver_path = tmp_path / "silver" / "chembl_activity"
+        silver_path.mkdir(parents=True)
+        gold_path = tmp_path / "gold" / "chembl_activity"
+        # Don't create gold_path so it doesn't exist
+
+        silver.get_table_path = MagicMock(return_value=silver_path)
+        gold.get_table_path = MagicMock(return_value=gold_path)
 
         adapter = StorageAdapter(
             bronze_writer=bronze,
@@ -631,8 +640,8 @@ class TestStorageAdapterVacuum:
 
         result = await adapter.vacuum("chembl_activity", retention_hours=168)
 
-        # Should have vacuumed at least silver (2 files)
-        assert result >= 2
+        # Should have vacuumed silver (2 files), gold skipped (doesn't exist)
+        assert result == 2
 
 
 @pytest.mark.unit

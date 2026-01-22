@@ -60,8 +60,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
     from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
-_logger = BootstrapLogger()
-
 
 def _get_factories() -> tuple[Any, Any]:
     """Lazy import factories to avoid circular imports."""
@@ -72,12 +70,20 @@ def _get_factories() -> tuple[Any, Any]:
 
 
 def _get_source_config(provider: str) -> SourceYamlConfig | None:
-    """Load config from configs/sources/{provider}.yaml or return None."""
-    try:
-        return load_source_config(provider)
-    except ValueError:
-        _logger.debug("source_config_not_found", provider=provider, fallback="defaults")
+    """Load config from configs/sources/{provider}.yaml or return None.
+
+    Returns:
+        SourceYamlConfig if found, None if config file does not exist.
+
+    Raises:
+        ValueError: If config file exists but is invalid.
+    """
+    from pathlib import Path
+
+    config_path = Path(f"configs/sources/{provider}.yaml")
+    if not config_path.exists():
         return None
+    return load_source_config(provider)
 
 
 def _get_batch_size_from_config(provider: str, default: int = 100) -> int:
@@ -136,19 +142,13 @@ def _get_adapter_config(provider: str, default_page_size: int = 1000) -> Adapter
         AdapterConfig: Immutable adapter configuration
 
     Raises:
-        ValueError: If source config is missing and fail_fast is True
+        ValueError: If source config file exists but is invalid.
     """
     source_config = _get_source_config(provider)
     if source_config is not None:
         return source_config.to_adapter_config(default_page_size=default_page_size)
 
-    # Fallback to domain defaults
-    _logger.warning(
-        "source_config_missing",
-        provider=provider,
-        fallback="AdapterConfig defaults",
-        recommendation=f"Create configs/sources/{provider}.yaml to configure adapter parameters",
-    )
+    # Fallback to domain defaults when config file does not exist
     return AdapterConfig(page_size=default_page_size)
 
 
