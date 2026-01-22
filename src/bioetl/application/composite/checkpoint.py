@@ -19,6 +19,7 @@ from bioetl.domain.composite.result import (
     EnrichmentStatus,
     SeedResult,
 )
+from bioetl.domain.composite.state import CompositePipelineState
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -29,6 +30,7 @@ class CompositeCheckpointState:
     """Immutable checkpoint state for composite pipeline.
 
     Tracks progress through composite execution phases:
+    - FSM state (current phase of execution)
     - Seed completion
     - Individual enricher completions
     - Any intermediate state needed for resume
@@ -36,6 +38,7 @@ class CompositeCheckpointState:
     Attributes:
         composite_name: Name of the composite pipeline.
         run_id: Composite run ID.
+        state: Current FSM state of the pipeline.
         seed_completed: Whether seed pipeline completed.
         seed_result: Result from seed if completed.
         completed_enrichers: Set of completed enricher names.
@@ -48,15 +51,20 @@ class CompositeCheckpointState:
         ...     composite_name="composite_publication",
         ...     run_id="abc-123",
         ... )
+        >>> state.state
+        <CompositePipelineState.NOT_STARTED: 'NOT_STARTED'>
         >>> state.seed_completed
         False
         >>> new_state = state.with_seed_completed(seed_result)
         >>> new_state.seed_completed
         True
+        >>> new_state.state
+        <CompositePipelineState.SEED_COMPLETED: 'SEED_COMPLETED'>
     """
 
     composite_name: str
     run_id: str
+    state: CompositePipelineState = CompositePipelineState.NOT_STARTED
     seed_completed: bool = False
     seed_result: SeedResult | None = None
     completed_enrichers: frozenset[str] = field(default_factory=frozenset)
@@ -65,10 +73,14 @@ class CompositeCheckpointState:
     updated_at: datetime | None = None
 
     def with_seed_completed(self, result: SeedResult) -> CompositeCheckpointState:
-        """Create new state with seed marked as completed."""
+        """Create new state with seed marked as completed.
+
+        Sets state to SEED_COMPLETED to indicate seed phase is done.
+        """
         return CompositeCheckpointState(
             composite_name=self.composite_name,
             run_id=self.run_id,
+            state=CompositePipelineState.SEED_COMPLETED,
             seed_completed=True,
             seed_result=result,
             completed_enrichers=self.completed_enrichers,
@@ -80,12 +92,18 @@ class CompositeCheckpointState:
     def with_enricher_completed(
         self, enricher_name: str, result: EnrichmentResult
     ) -> CompositeCheckpointState:
-        """Create new state with enricher marked as completed."""
+        """Create new state with enricher marked as completed.
+
+        Sets state to ENRICHING to indicate enrichment phase is in progress.
+        The transition to ENRICHMENT_COMPLETED should be done explicitly
+        via with_state() when all enrichers are done.
+        """
         new_completed = self.completed_enrichers | {enricher_name}
         new_results = {**self.enrichment_results, enricher_name: result}
         return CompositeCheckpointState(
             composite_name=self.composite_name,
             run_id=self.run_id,
+            state=CompositePipelineState.ENRICHING,
             seed_completed=self.seed_completed,
             seed_result=self.seed_result,
             completed_enrichers=frozenset(new_completed),
@@ -94,9 +112,41 @@ class CompositeCheckpointState:
             updated_at=datetime.now(tz=UTC),
         )
 
+    def with_state(self, new_state: CompositePipelineState) -> CompositeCheckpointState:
+        """Create new state with updated FSM state.
+
+        Allows Runner to explicitly set state transitions (e.g., to MERGING,
+        ENRICHMENT_COMPLETED, FAILED, or COMPLETED) without modifying other fields.
+
+        Args:
+            new_state: New FSM state to set.
+
+        Returns:
+            New checkpoint state with updated FSM state.
+        """
+        return CompositeCheckpointState(
+            composite_name=self.composite_name,
+            run_id=self.run_id,
+            state=new_state,
+            seed_completed=self.seed_completed,
+            seed_result=self.seed_result,
+            completed_enrichers=self.completed_enrichers,
+            enrichment_results=self.enrichment_results,
+            created_at=self.created_at,
+            updated_at=datetime.now(tz=UTC),
+        )
+
     @property
     def is_resumable(self) -> bool:
-        """Check if this checkpoint can be resumed."""
+        """Check if this checkpoint can be resumed.
+
+        Uses FSM state for more precise resume capability check.
+        Falls back to flags for backward compatibility.
+        """
+        # Use FSM state if available and meaningful
+        if self.state.is_resumable:
+            return True
+        # Fallback to flags for backward compatibility
         return self.seed_completed or bool(self.completed_enrichers)
 
     def to_dict(self) -> dict[str, object]:
@@ -104,6 +154,7 @@ class CompositeCheckpointState:
         return {
             "composite_name": self.composite_name,
             "run_id": self.run_id,
+            "state": self.state.value,
             "seed_completed": self.seed_completed,
             "seed_result": self._serialize_seed_result(),
             "completed_enrichers": list(self.completed_enrichers),
@@ -144,7 +195,11 @@ class CompositeCheckpointState:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> CompositeCheckpointState:
-        """Create state from dictionary."""
+        """Create state from dictionary.
+
+        Handles backward compatibility for checkpoints without state field.
+        Gracefully handles corrupted state values by defaulting to NOT_STARTED.
+        """
         seed_result = None
         if data.get("seed_result"):
             sr = data["seed_result"]
@@ -183,9 +238,21 @@ class CompositeCheckpointState:
             if updated_at.tzinfo is None:
                 updated_at = updated_at.replace(tzinfo=UTC)
 
+        # Parse state with backward compatibility and error handling
+        state = CompositePipelineState.NOT_STARTED
+        state_value = data.get("state")
+        if state_value is not None:
+            try:
+                state = CompositePipelineState(state_value)
+            except ValueError:
+                # Corrupted state value - use conservative default
+                # Logging will be handled by CompositeCheckpointManager
+                state = CompositePipelineState.NOT_STARTED
+
         return cls(
             composite_name=data["composite_name"],
             run_id=data["run_id"],
+            state=state,
             seed_completed=data.get("seed_completed", False),
             seed_result=seed_result,
             completed_enrichers=frozenset(data.get("completed_enrichers", [])),
@@ -279,10 +346,20 @@ class CompositeCheckpointManager:
                 try:
                     data = json.loads(checkpoint_path.read_text())
                     state = CompositeCheckpointState.from_dict(data)
+                    # Check for state mismatch (corrupted file)
+                    raw_state = data.get("state")
+                    if raw_state is not None and state.state.value != raw_state:
+                        self._logger.warning(
+                            "Checkpoint state value corrupted, using default",
+                            composite=self._composite_name,
+                            raw_state=raw_state,
+                            parsed_state=state.state.value,
+                        )
                     self._logger.info(
                         "Loaded checkpoint",
                         composite=self._composite_name,
                         checkpoint_path=str(checkpoint_path),
+                        state=state.state.value,
                         seed_completed=state.seed_completed,
                         completed_enrichers=list(state.completed_enrichers),
                     )
@@ -322,6 +399,8 @@ class CompositeCheckpointManager:
                 "Saved checkpoint",
                 composite=self._composite_name,
                 checkpoint_path=str(self._checkpoint_path),
+                state=state.state.value,
+                completed_enrichers=len(state.completed_enrichers),
             )
         except Exception as e:
             self._logger.error(

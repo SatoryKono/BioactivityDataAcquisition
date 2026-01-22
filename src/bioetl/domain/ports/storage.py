@@ -358,20 +358,25 @@ class StoragePort(Protocol):
     ) -> dict[str, Any]:
         """Preview what would be cleared without actual deletion.
 
-        Used by CLI dry-run mode to show users what data would be affected
-        before performing a rebuild or backfill operation.
+        Returns:
+            Dict with layer info (path, file_count, exists) and total_files.
+        """
+        ...
+
+    async def optimize(
+        self,
+        table_name: str,
+        retention_hours: int = 168,
+        dry_run: bool = False,
+    ) -> None:
+        """Optimize storage for a specific table/entity.
+
+        Unifies Vacuum (Delta) and file cleanup (Bronze).
 
         Args:
-            silver_table: Silver table name (e.g., 'chembl.activity')
-            gold_table: Optional Gold table name
-
-        Returns:
-            Dict with structure:
-            {
-                "silver": {"path": str, "file_count": int, "exists": bool},
-                "gold": {"path": str, "file_count": int, "exists": bool} | None,
-                "total_files": int
-            }
+            table_name: Target identifier (e.g., 'provider.entity').
+            retention_hours: Retention period in hours.
+            dry_run: If True, only log what would be done.
         """
         ...
 
@@ -382,19 +387,11 @@ class StoragePort(Protocol):
     ) -> dict[str, int]:
         """Remove Bronze files older than cutoff date (RULES.md §2.1 retention).
 
-        Implements Bronze layer retention policy by removing files
-        older than the specified cutoff date.
-
         Args:
             cutoff_date: Files older than this date will be removed.
             dry_run: If True, only count what would be removed.
 
         Returns:
-            Dictionary with cleanup statistics:
-            {
-                "files_removed": int,
-                "bytes_freed": int,
-                "directories_removed": int
-            }
+            Dict with cleanup stats (files_removed, bytes_freed, directories_removed).
         """
         ...
