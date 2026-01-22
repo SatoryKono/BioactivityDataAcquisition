@@ -2,8 +2,6 @@
 
 These tests verify that source configurations from configs/sources/*.yaml
 are used instead of hardcoded values.
-
-Related to: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/XXX
 """
 
 from __future__ import annotations

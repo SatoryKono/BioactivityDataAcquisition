@@ -67,17 +67,21 @@ class DQReportWriter:
         *,
         provider: str | None = None,
         entity: str | None = None,
-        date_str: str | None = None,
+        date_str: str | None = None,  # Deprecated: no longer used in path/filename
     ) -> Path:
         """Write Bronze DQ report to file.
 
+        Output path structure (unified with Silver/Gold):
+        - Normal: {base_path}/bronze/{provider}/{entity}/bronze_{provider}_{entity}_dq_report.json
+        - Flat: {base_path}/bronze_{provider}_{entity}_dq_report.json
+
         Args:
             report: Bronze DQ report to write.
-            output_path: Output path (None = alongside data).
+            output_path: Output path (None = auto-generated at entity level).
             format: Output format (None = JSON).
             provider: Provider name for filename generation.
             entity: Entity name for filename generation.
-            date_str: Date string (YYYY-MM-DD) for filename generation.
+            date_str: Deprecated, kept for backward compatibility (ignored).
 
         Returns:
             Path to the written report file.
@@ -85,21 +89,24 @@ class DQReportWriter:
         format = format or DQReportFormat.JSON
         extension = self._get_extension(format)
 
-        # Build filename
-        if provider and entity and date_str:
-            filename = f"batch_{date_str}_{provider}_{entity}_dq_report{extension}"
+        # Build filename - unified with Silver pattern: {layer}_{provider}_{entity}_dq_report
+        if provider and entity:
+            filename = f"bronze_{provider}_{entity}_dq_report{extension}"
         else:
-            filename = f"{report.batch_id}_dq_report{extension}"
+            filename = f"bronze_{report.batch_id}_dq_report{extension}"
 
         if output_path is None:
-            # Unified structure: {base_path}/bronze/{provider}/{entity}/{date}/
-            if provider and entity and date_str:
-                output_path = (
-                    self._base_path / "bronze" / provider / entity / date_str / filename
-                )
+            # Unified structure: {base_path}/bronze/{provider}/{entity}/ (no date subdirectory)
+            # Matches Silver/Gold pattern for consistency
+            if self._flat_structure:
+                output_path = self._base_path / filename
+            elif provider and entity:
+                output_path = self._base_path / "bronze" / provider / entity / filename
             else:
-                # Fallback: extract from source file path
-                source_dir = Path(report.source_file).parent
+                # Fallback: extract from source file path (parent without date)
+                source_dir = Path(
+                    report.source_file
+                ).parent.parent  # Go up from date dir
                 output_path = self._base_path / source_dir / filename
         else:
             output_path = Path(output_path)

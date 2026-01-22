@@ -597,8 +597,13 @@ class BronzeWriter:
                         source_metadata=source_metadata,
                     )
 
-                # Write to batch directory (same level as data file)
-                metadata_base_path = full_path.parent
+                # Write to entity directory (not date subdirectory) - unified with Silver
+                # flat_structure=True: base_path already includes provider/entity
+                # flat_structure=False: base_path/{provider}/{entity}/
+                if self._flat_structure:
+                    metadata_base_path = self.base_path
+                else:
+                    metadata_base_path = self.base_path / provider / entity
                 await self._metadata_writer.write_bronze_metadata(
                     base_path=metadata_base_path,
                     metadata=bronze_metadata,
