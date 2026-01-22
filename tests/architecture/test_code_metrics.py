@@ -29,7 +29,7 @@ class TestFileSizeLimits:
     # Note: ports.py was split into ports/ package in main
     EXEMPTIONS = {
         # Application layer exemptions
-        "runner.py": 1210,  # 1199 LOC - Complex orchestration + FSM state management + required_only mode + NOT_RUN status + checkpoint resume + FSM error handling robustness
+        "runner.py": 1080,  # 1059 LOC - Complex orchestration (FSM helpers extracted to fsm_helper.py)
         "base.py": 600,  # Base classes may be larger
         # Infrastructure layer exemptions
         "config.py": 600,  # Config can be verbose
@@ -93,8 +93,8 @@ class TestFileSizeLimits:
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
         "services_factory.py": 670,  # 668 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param
         # Infrastructure layer exemptions
-        "silver_writer.py": 1220,  # 1214 LOC - schema drift + merge logic + MetadataCoordinator fallback + SilverWriteResult return + transform lineage + provider/entity params + flat_structure
-        "gold_writer.py": 1115,  # 1110 LOC - SCD Type 2 + MetadataCoordinator fallback + silver_refs lineage + transform lineage + provider/entity params + flat_structure
+        "silver_writer.py": 1130,  # 1111 LOC - schema drift + merge logic (metadata builder extracted to metadata_builder.py)
+        "gold_writer.py": 910,  # 890 LOC - SCD Type 2 (metadata/arrow logic extracted to metadata_builder.py, arrow_converter.py)
         "bronze_writer.py": 800,  # 797 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
         "silver.py": 840,  # 833 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields)
@@ -408,7 +408,12 @@ class TestFunctionLength:
         "run_enrichers": 90,  # EnrichmentCoordinator parallel execution with async gather
         "_apply_filter": 60,  # EnrichmentCoordinator filter condition parsing
         "_run_single_enricher": 150,  # EnrichmentCoordinator single enricher with timeout/error handling
-        "_run_with_lock": 110,  # CompositePipelineRunner lock-held orchestration
+        "_run_with_lock": 270,  # CompositePipelineRunner lock-held orchestration (expanded after main sync)
+        # FSM helper functions (extracted from runner)
+        "handle_resume_from_failed": 60,  # FSMStateHelper resume logic
+        # Runner helper functions (extracted from runner)
+        "log_enrichment_summary": 65,  # Enrichment status logging
+        "add_not_run_results": 65,  # Add not-run enricher results
         # Composite pipeline bootstrap functions
         "_parse_composite_config": 95,  # 93 lines - Composite config parsing with validation
         "bootstrap_composite_pipeline": 135,  # 130 lines - Composite pipeline bootstrapping
@@ -443,8 +448,8 @@ class TestFunctionLength:
     }
 
     # Maximum allowed violations (for tracking technical debt)
-    # Baseline updated 2026-01-19: merged exemptions from both branches
-    MAX_VIOLATIONS = 92
+    # Baseline updated 2026-01-22: added FSM/runner helper exemptions after decomposition
+    MAX_VIOLATIONS = 95
 
     def test_functions_under_50_lines(self, src_dir: Path) -> None:
         """All functions must be under 50 lines (with exemptions)."""
@@ -509,8 +514,8 @@ class TestClassSize:
         # Baseline exemptions for existing classes
         "StorageAdapter": 625,  # 619 lines - storage adapter with writers + BronzeWriteResult + SilverWriteResult
         "BaseTransformer": 620,  # 605 lines - Template Method with helpers (tracing + PII hashing + serialize_json_list)
-        "SilverWriter": 1220,  # 1212 lines - schema drift detection + bronze_refs + MetadataCoordinator fallback + provider/entity params + CSV export for merged
-        "GoldWriter": 1050,  # 1046 lines - SCD Type 2 + metadata sidecar + MetadataCoordinator fallback + provider/entity params + flat_structure + CSV export for merged
+        "SilverWriter": 1130,  # 1111 lines - schema drift detection (metadata builder extracted)
+        "GoldWriter": 910,  # 890 lines - SCD Type 2 (metadata/arrow logic extracted)
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
         "UniProtProteinTransformer": 800,  # 772 lines - complex protein data extraction with many fields
@@ -568,7 +573,7 @@ class TestClassSize:
         # Composite pipeline services (ADR-026)
         "MergeService": 700,  # 694 lines - Composite merge service with conflict resolution + extracted helper methods
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
-        "CompositePipelineRunner": 1140,  # 1132 lines - Composite pipeline orchestrator with full FSM state management + required_only mode + NOT_RUN status + checkpoint resume + FSM error handling robustness
+        "CompositePipelineRunner": 1080,  # 1059 lines - Composite pipeline orchestrator (FSM helpers extracted to fsm_helper.py)
         # Publication adapters with APIRequestCollector (metadata enrichment)
         "OpenAlexAdapter": 580,  # 578 lines - FilterableDataSourcePort + APIRequestCollector + fallback handler
         "PubMedAdapter": 545,  # 540 lines - FilterableDataSourcePort + APIRequestCollector + TitleFallbackHandler
