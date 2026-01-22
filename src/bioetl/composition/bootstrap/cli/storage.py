@@ -17,20 +17,20 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.cleanup_service import CleanupService
+from bioetl.application.services import (
+    BronzeCleanupService,
+    ExportService,
+    VacuumService,
+)
+from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
-from bioetl.infrastructure.config import get_settings
+from bioetl.composition.registry import get_default_registry
+from bioetl.infrastructure.config import get_settings, load_pipeline_config
+from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
 if TYPE_CHECKING:
-    from bioetl.application.core.cleanup_service import CleanupService
-    from bioetl.application.services import (
-        BronzeCleanupService,
-        ExportService,
-        VacuumService,
-    )
-    from bioetl.application.services.medallion_lifecycle import (
-        MedallionLifecycleService,
-    )
     from bioetl.domain.ports import LoggerPort
 
 __all__ = [
@@ -56,8 +56,6 @@ def bootstrap_cleanup_service() -> CleanupService:
     Returns:
         CleanupService configured for the current environment.
     """
-    from bioetl.application.core.cleanup_service import CleanupService
-
     storage = bootstrap_storage_adapter()
     noop_logger = create_noop_logger()
 
@@ -86,10 +84,6 @@ def bootstrap_lifecycle_service() -> MedallionLifecycleService:
     Returns:
         MedallionLifecycleService configured for the current environment.
     """
-    from bioetl.application.services.medallion_lifecycle import (
-        MedallionLifecycleService,
-    )
-
     storage = bootstrap_storage_adapter()
     noop_logger = create_noop_logger()
 
@@ -105,8 +99,6 @@ def bootstrap_bronze_cleanup_service() -> BronzeCleanupService:
     Returns:
         BronzeCleanupService configured for the current environment.
     """
-    from bioetl.application.services import BronzeCleanupService
-
     storage = bootstrap_storage_adapter()
     noop_logger = create_noop_logger()
 
@@ -122,8 +114,6 @@ def bootstrap_vacuum_service() -> VacuumService:
     Returns:
         VacuumService configured for the current environment.
     """
-    from bioetl.application.services import VacuumService
-
     lifecycle = bootstrap_lifecycle_service()
     noop_logger = create_noop_logger()
 
@@ -152,9 +142,6 @@ def _create_table_collector(
     Returns:
         Callable that collects tables for a given layer.
     """
-    from bioetl.composition.registry import get_default_registry
-    from bioetl.infrastructure.config import load_pipeline_config
-
     def collect_tables(layer: str) -> list[tuple[str, str]]:
         """Collect tables from all registered pipelines.
 
@@ -203,9 +190,6 @@ def bootstrap_export_service() -> ExportService:
     Returns:
         ExportService configured for the current environment.
     """
-    from bioetl.application.services import ExportService
-    from bioetl.infrastructure.storage.delta_reader import DeltaReader
-
     settings = get_settings()
     noop_logger = create_noop_logger()
 
