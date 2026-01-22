@@ -7,17 +7,17 @@ import sys
 from bioetl.domain.entities.bioactivity import Bioactivity
 from bioetl.domain.entities.chembl_activity import Assay
 from bioetl.domain.entities.chembl_structures import Molecule, Target
-from bioetl.infrastructure.schemas.gold import (
-    ChEMBLActivityGoldSchema,
-    ChEMBLAssayGoldSchema,
-    ChEMBLMoleculeGoldSchema,
-    ChEMBLTargetGoldSchema,
-)
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
     CHEMBL_ASSAY_SCHEMA,
     CHEMBL_MOLECULE_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
+)
+from bioetl.interfaces.contracts import (
+    ChEMBLActivityGoldSchema,
+    ChEMBLAssayGoldSchema,
+    ChEMBLMoleculeGoldSchema,
+    ChEMBLTargetGoldSchema,
 )
 
 # Configure logging for CLI output

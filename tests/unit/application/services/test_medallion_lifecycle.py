@@ -9,10 +9,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.services.medallion_lifecycle import (
-    ClearResult,
-    MedallionLifecycleService,
-)
+from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
+from bioetl.application.services.medallion_types import ClearResult
 from bioetl.domain.medallion import ClearPolicy, MedallionPolicy
 
 
@@ -530,6 +528,7 @@ class TestMedallionLifecycleServiceFinalizeRun:
         storage.clear_silver = AsyncMock(return_value=0)
         storage.clear_gold = AsyncMock(return_value=0)
         storage.vacuum = AsyncMock(return_value=42)
+        storage.optimize = AsyncMock()  # Add optimize mock
         return storage
 
     @pytest.fixture
@@ -591,12 +590,13 @@ class TestMedallionLifecycleServiceFinalizeRun:
         assert result.silver_files_removed == 0
         assert result.gold_files_removed == 0
         mock_storage_with_vacuum.vacuum.assert_not_called()
+        mock_storage_with_vacuum.optimize.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_finalize_skipped_in_dry_run(
+    async def test_finalize_executes_in_dry_run(
         self, mock_storage_with_vacuum, mock_logger, pipeline_config
     ):
-        """finalize_run skips vacuum in dry-run mode."""
+        """finalize_run executes optimize with dry_run=True."""
         from bioetl.domain.config import RuntimeConfig
         from bioetl.domain.types import RunType
 
@@ -612,18 +612,30 @@ class TestMedallionLifecycleServiceFinalizeRun:
 
         result = await service.finalize_run(config=pipeline_config, runtime=runtime)
 
-        assert result.skipped is True
-        mock_storage_with_vacuum.vacuum.assert_not_called()
+        assert result.skipped is False
+        # Should call optimize with dry_run=True
+        # Called twice: once for Silver ("test_silver"), once for Gold (default "chembl.activity")
+        mock_storage_with_vacuum.optimize.assert_any_call(
+            table_name="test_silver",
+            retention_hours=168,
+            dry_run=True,
+        )
+        mock_storage_with_vacuum.optimize.assert_any_call(
+            table_name="chembl.activity",
+            retention_hours=168,
+            dry_run=True,
+        )
+        assert mock_storage_with_vacuum.optimize.call_count == 2
 
     @pytest.mark.asyncio
-    async def test_finalize_vacuums_both_tables(
+    async def test_finalize_calls_optimize(
         self,
         mock_storage_with_vacuum,
         mock_logger,
         pipeline_config,
         runtime_config_vacuum_enabled,
     ):
-        """finalize_run vacuums both Silver and Gold tables."""
+        """finalize_run calls optimize correctly."""
         service = MedallionLifecycleService(
             storage=mock_storage_with_vacuum, logger=mock_logger
         )
@@ -633,20 +645,34 @@ class TestMedallionLifecycleServiceFinalizeRun:
         )
 
         assert result.skipped is False
-        assert result.silver_files_removed == 42
-        assert result.gold_files_removed == 42
-        assert mock_storage_with_vacuum.vacuum.call_count == 2
+        # Implementation details hidden, counts are 0
+        assert result.silver_files_removed == 0
+        assert result.gold_files_removed == 0
+
+        # Verify optimize call
+        # Called twice: once for Silver ("test_silver"), once for Gold (default "chembl.activity")
+        mock_storage_with_vacuum.optimize.assert_any_call(
+            table_name="test_silver",
+            retention_hours=168,
+            dry_run=False,
+        )
+        mock_storage_with_vacuum.optimize.assert_any_call(
+            table_name="chembl.activity",
+            retention_hours=168,
+            dry_run=False,
+        )
+        assert mock_storage_with_vacuum.optimize.call_count == 2
 
     @pytest.mark.asyncio
-    async def test_finalize_handles_vacuum_error_gracefully(
+    async def test_finalize_handles_optimize_error_gracefully(
         self,
         mock_storage_with_vacuum,
         mock_logger,
         pipeline_config,
         runtime_config_vacuum_enabled,
     ):
-        """finalize_run handles vacuum errors gracefully."""
-        mock_storage_with_vacuum.vacuum.side_effect = RuntimeError("Vacuum failed")
+        """finalize_run handles optimize errors gracefully."""
+        mock_storage_with_vacuum.optimize.side_effect = RuntimeError("Optimize failed")
         service = MedallionLifecycleService(
             storage=mock_storage_with_vacuum, logger=mock_logger
         )
@@ -655,10 +681,12 @@ class TestMedallionLifecycleServiceFinalizeRun:
             config=pipeline_config, runtime=runtime_config_vacuum_enabled
         )
 
-        # Should return 0 files removed on error, not raise
+        # Should return skipped=False (attempted) and 0 files removed
         assert result.skipped is False
         assert result.silver_files_removed == 0
         assert result.gold_files_removed == 0
+        # Should log error
+        mock_logger.error.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_finalize_emits_metrics(
@@ -680,8 +708,8 @@ class TestMedallionLifecycleServiceFinalizeRun:
             metrics=mock_metrics,
         )
 
-        assert mock_metrics.increment_counter.call_count == 2
-        # Verify metric calls
-        calls = mock_metrics.increment_counter.call_args_list
-        assert calls[0][0][0] == "vacuum_files_removed"
-        assert calls[1][0][0] == "vacuum_files_removed"
+        # Should emit 1 metric for optimization
+        assert mock_metrics.increment_counter.call_count == 1
+        call_args = mock_metrics.increment_counter.call_args
+        assert call_args[0][0] == "storage_optimization_total"
+        assert call_args[0][2]["status"] == "success"
