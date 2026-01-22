@@ -78,7 +78,9 @@ class MockCompositeConfig:
 class MockPipelineRunner:
     """Mock PipelineRunner for testing."""
 
-    def __init__(self, should_fail: bool = False, error_message: str = "Pipeline failed"):
+    def __init__(
+        self, should_fail: bool = False, error_message: str = "Pipeline failed"
+    ):
         self._should_fail = should_fail
         self._error_message = error_message
         self.run_called = False
@@ -495,7 +497,10 @@ class TestCheckpointExistsWarning:
 
         # Verify warning was logged
         warning_calls = [str(c) for c in logger.warning.call_args_list]
-        assert any("Existing checkpoint with progress will be overwritten" in c for c in warning_calls)
+        assert any(
+            "Existing checkpoint with progress will be overwritten" in c
+            for c in warning_calls
+        )
         assert any("--resume flag" in c for c in warning_calls)
 
     @pytest.mark.asyncio
@@ -515,7 +520,10 @@ class TestCheckpointExistsWarning:
 
         # No warning should be logged
         warning_calls = [str(c) for c in logger.warning.call_args_list]
-        assert not any("Existing checkpoint with progress will be overwritten" in c for c in warning_calls)
+        assert not any(
+            "Existing checkpoint with progress will be overwritten" in c
+            for c in warning_calls
+        )
 
     @pytest.mark.asyncio
     async def test_no_warning_when_checkpoint_has_no_progress(self, tmp_path):
@@ -554,7 +562,10 @@ class TestCheckpointExistsWarning:
 
         # No warning should be logged (checkpoint has no progress)
         warning_calls = [str(c) for c in logger.warning.call_args_list]
-        assert not any("Existing checkpoint with progress will be overwritten" in c for c in warning_calls)
+        assert not any(
+            "Existing checkpoint with progress will be overwritten" in c
+            for c in warning_calls
+        )
 
 
 class TestFSMStateTransitionOnResume:
