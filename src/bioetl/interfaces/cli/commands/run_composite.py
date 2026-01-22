@@ -23,6 +23,9 @@ from bioetl.interfaces.cli.commands.health_server_integration import (
     echo_health_server_info,
     health_server_context,
 )
+from bioetl.interfaces.cli.commands.metrics_server_integration import (
+    ensure_metrics_server_started,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
@@ -88,6 +91,9 @@ async def _run_composite_async(
     Returns:
         Tuple of (success, error_message).
     """
+    # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
+    ensure_metrics_server_started()
+
     async with health_server_context(
         enabled=health_server_enabled,
         port=health_port,

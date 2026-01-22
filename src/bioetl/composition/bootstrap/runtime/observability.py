@@ -52,6 +52,7 @@ __all__ = [
     "bootstrap_observability_bundle",
     "bootstrap_tracer",
     "bootstrap_tracer_port",
+    "maybe_start_metrics_server",
     "start_metrics_server",
     "validate_observability_preflight",
 ]
@@ -206,13 +207,15 @@ def bootstrap_tracer(
 
 
 def bootstrap_metrics_port(settings: Settings) -> MetricsPort:
-    """Create a metrics port implementation with optional server start.
+    """Create a metrics port implementation.
 
     Unified Observability Contract: Always returns a valid MetricsPort.
     When metrics are disabled, returns NoOpMetrics (silent fallback).
 
-    Server is started only if explicitly enabled in settings.
-    Supports fail_fast mode for strict startup validation.
+    Note:
+        This function only creates the metrics collector.
+        Server startup is handled separately by entrypoints via
+        maybe_start_metrics_server() to keep bootstrap side-effect free.
 
     Layer: Returns domain port implementation (MetricsPort).
 
@@ -222,38 +225,58 @@ def bootstrap_metrics_port(settings: Settings) -> MetricsPort:
     Returns:
         MetricsPort instance (PrometheusMetrics or NoOpMetrics).
         Never returns None - uses NoOpMetrics as fallback.
-
-    Raises:
-        MetricsServerError: If fail_fast=True and server fails to start.
     """
     if not settings.observability.metrics_enabled:
         # Silent fallback - no warning since explicitly disabled
         return NoOpMetrics(warn_on_use=False)
 
-    metrics = PrometheusMetrics()
+    return PrometheusMetrics()
 
-    if settings.observability.metrics_server_enabled:
-        obs = settings.observability
 
-        if obs.metrics_fail_fast:
-            # In fail_fast mode, let MetricsServerError propagate
-            start_metrics_server(
-                port=settings.metrics_port,
-                fail_fast=True,
-                retry_count=obs.metrics_retry_count,
-                retry_delay=obs.metrics_retry_delay,
-            )
-        else:
-            # Lenient mode: log but don't fail - metrics collection still works
-            with contextlib.suppress(Exception):
-                start_metrics_server(
-                    port=settings.metrics_port,
-                    fail_fast=False,
-                    retry_count=obs.metrics_retry_count,
-                    retry_delay=obs.metrics_retry_delay,
-                )
+def maybe_start_metrics_server(settings: Settings) -> bool:
+    """Start metrics server if enabled in settings.
 
-    return metrics
+    This function should be called by entrypoints (CLI, REST API) after
+    bootstrap to start the Prometheus HTTP server. Separating server
+    startup from bootstrap keeps the composition layer side-effect free.
+
+    Args:
+        settings: Application settings.
+
+    Returns:
+        True if server was started or already running, False if disabled
+        or failed to start.
+
+    Raises:
+        MetricsServerError: If fail_fast=True and server fails to start.
+    """
+    if not settings.observability.metrics_enabled:
+        return False
+
+    if not settings.observability.metrics_server_enabled:
+        return False
+
+    obs = settings.observability
+
+    if obs.metrics_fail_fast:
+        # In fail_fast mode, let MetricsServerError propagate
+        return start_metrics_server(
+            port=settings.metrics_port,
+            fail_fast=True,
+            retry_count=obs.metrics_retry_count,
+            retry_delay=obs.metrics_retry_delay,
+        )
+
+    # Lenient mode: log but don't fail - metrics collection still works
+    with contextlib.suppress(Exception):
+        return start_metrics_server(
+            port=settings.metrics_port,
+            fail_fast=False,
+            retry_count=obs.metrics_retry_count,
+            retry_delay=obs.metrics_retry_delay,
+        )
+
+    return False
 
 
 def bootstrap_metrics(settings: Settings) -> MetricsPort:
