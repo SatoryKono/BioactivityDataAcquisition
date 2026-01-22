@@ -211,6 +211,14 @@ class CompositePipelineRunner:
         # Load checkpoint (for resume)
         state = await self._checkpoint_manager.load()
 
+        # Handle resume from FAILED state - determine correct phase to continue from
+        if self._runtime.resume and state.state == CompositePipelineState.FAILED:
+            state = self._handle_resume_from_failed(state)
+
+        # Log resume context if resuming with progress
+        if self._runtime.resume and state.is_resumable:
+            self._log_resume_context(state)
+
         # Track results
         seed_result: SeedResult | None = None
         enrichment_results: dict[str, EnrichmentResult] = {}
@@ -628,6 +636,87 @@ class CompositePipelineRunner:
             run_id=self._run_id_str,
             stage=stage,
             **extra,
+        )
+
+    def _handle_resume_from_failed(
+        self, state: CompositeCheckpointState
+    ) -> CompositeCheckpointState:
+        """Handle resuming from FAILED state by determining correct phase.
+
+        When checkpoint has state=FAILED, we need to determine the actual phase
+        to resume from based on seed_completed and completed_enrichers flags.
+
+        Args:
+            state: Checkpoint state with FAILED status.
+
+        Returns:
+            Updated state with corrected FSM state for resumption.
+        """
+        total_enrichers = len(self._config.enrichers)
+        completed_count = len(state.completed_enrichers)
+
+        if not state.seed_completed:
+            # Seed failed - resume from NOT_STARTED (will re-run seed)
+            resume_phase = CompositePipelineState.NOT_STARTED
+            phase_description = "seed (seed not completed)"
+        elif completed_count < total_enrichers:
+            # Enrichment failed - resume from ENRICHING (will run remaining enrichers)
+            resume_phase = CompositePipelineState.ENRICHING
+            phase_description = (
+                f"enrichment ({completed_count}/{total_enrichers} enrichers completed)"
+            )
+        else:
+            # Merge failed - resume from ENRICHMENT_COMPLETED (will re-run merge)
+            resume_phase = CompositePipelineState.ENRICHMENT_COMPLETED
+            phase_description = "merge (all enrichers completed)"
+
+        self._logger.info(
+            "Checkpoint indicates previous failure, resuming from phase",
+            composite=self._config.name,
+            run_id=self._run_id_str,
+            previous_state=state.state.value,
+            resume_phase=resume_phase.value,
+            phase_description=phase_description,
+            seed_completed=state.seed_completed,
+            completed_enrichers=completed_count,
+            total_enrichers=total_enrichers,
+        )
+
+        # Log FSM transition from FAILED to resume phase
+        self._log_fsm_transition(
+            from_state=state.state,
+            to_state=resume_phase,
+            stage="resume_from_failed",
+            phase_description=phase_description,
+        )
+
+        return state.with_state(resume_phase)
+
+    def _log_resume_context(self, state: CompositeCheckpointState) -> None:
+        """Log detailed resume context when resuming from checkpoint.
+
+        Provides visibility into what was completed previously and what
+        will be executed in this run.
+
+        Args:
+            state: Current checkpoint state being resumed from.
+        """
+        total_enrichers = len(self._config.enrichers)
+        completed_count = len(state.completed_enrichers)
+        remaining_count = total_enrichers - completed_count
+
+        self._logger.info(
+            "Resuming from checkpoint",
+            composite=self._config.name,
+            run_id=self._run_id_str,
+            last_state=state.state.value,
+            seed_completed=state.seed_completed,
+            completed_enrichers_count=completed_count,
+            total_enrichers_count=total_enrichers,
+            remaining_enrichers_count=remaining_count,
+            completed_enrichers=list(state.completed_enrichers)
+            if completed_count > 0
+            else None,
         )
 
     async def _save_checkpoint_safe(

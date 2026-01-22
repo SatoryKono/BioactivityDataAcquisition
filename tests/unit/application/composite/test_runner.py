@@ -544,7 +544,10 @@ class TestCheckpointSaveErrorHandling:
     async def test_warning_logged_on_checkpoint_save_failure(self):
         """Warning should be logged when checkpoint save fails."""
         checkpoint_manager = create_mock_checkpoint_manager()
-        checkpoint_manager.save = AsyncMock(side_effect=OSError("Permission denied"))
+        # First save fails (SEED_RUNNING), rest succeed for pipeline to complete
+        checkpoint_manager.save = AsyncMock(
+            side_effect=[OSError("Permission denied"), None, None, None, None, None]
+        )
         logger = create_mock_logger()
 
         runner = CompositePipelineRunner(
