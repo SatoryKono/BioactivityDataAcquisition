@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from bioetl.domain.models.metadata import (
         BronzeMetadata,
         GoldMetadata,
+        GovernanceMetadata,
         SilverMetadata,
         SourceMetadata,
     )
@@ -37,6 +38,7 @@ class BronzeMetadataInput:
                         details for rich lineage tracking.
         query_string: Query string from PipelineRunContext used for data
                      source filtering (e.g., 'assay_type=B').
+        governance: Optional governance metadata from pipeline config.
     """
 
     batch_id: BatchID
@@ -47,6 +49,7 @@ class BronzeMetadataInput:
     completed_at: datetime
     source_metadata: SourceMetadata | None = None
     query_string: str | None = None
+    governance: GovernanceMetadata | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -65,6 +68,9 @@ class SilverMetadataInput:
         transform_steps: Optional list of transform step names applied.
         dq_report_path: Optional path to generated DQ report for cross-reference.
         partition_by: Partition columns used for the Delta table.
+        governance: Optional governance metadata from pipeline config.
+        started_at: UTC timestamp when Silver write started.
+        completed_at: UTC timestamp when Silver write completed.
     """
 
     table_path: str
@@ -78,6 +84,9 @@ class SilverMetadataInput:
     transform_steps: tuple[str, ...] | None = None
     dq_report_path: str | None = None
     partition_by: list[str] | None = None
+    governance: GovernanceMetadata | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -114,6 +123,7 @@ class GoldMetadataInput:
         transform_steps: Optional list of transform step names applied.
         gold_schema: Optional Pandera schema class for extracting schema metadata
                     (contract_path, version, columns).
+        governance: Optional governance metadata from pipeline config.
     """
 
     table_path: str
@@ -126,6 +136,7 @@ class GoldMetadataInput:
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
     gold_schema: Any | None = None  # Pandera DataFrameModel class
+    governance: GovernanceMetadata | None = None
 
 
 @runtime_checkable

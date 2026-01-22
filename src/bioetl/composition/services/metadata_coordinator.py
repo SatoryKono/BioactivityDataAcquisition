@@ -156,15 +156,14 @@ class MetadataCoordinator:
         )
 
     def _build_pipeline_metadata(self) -> PipelineMetadata:
-        """Build PipelineMetadata from run context.
-
-        Returns:
-            PipelineMetadata with pipeline identification.
-        """
+        """Build PipelineMetadata with versioning from run context."""
         return PipelineMetadata(
             name=self._context.pipeline_name,
             provider=self._context.provider,
             entity=self._context.entity,
+            version=self._context.pipeline_version or "1.0.0",
+            git_commit=self._context.git_commit,
+            config_hash=self._context.config_hash,
         )
 
     def create_bronze_metadata(self, input_data: BronzeMetadataInput) -> BronzeMetadata:
@@ -213,6 +212,7 @@ class MetadataCoordinator:
                 total_bytes=input_data.compressed_size,
             ),
             environment=self._get_environment_metadata(),
+            governance=input_data.governance,
         )
 
     def create_silver_metadata(self, input_data: SilverMetadataInput) -> SilverMetadata:
@@ -278,20 +278,21 @@ class MetadataCoordinator:
         )
 
         # Build DQ summary from computed metrics or use basic fallback
-        if input_data.dq_metrics is not None:
-            dq_summary = input_data.dq_metrics.to_dq_summary()
-        else:
-            dq_summary = DQSummary(
-                total_records=len(input_data.records),
-                valid_records=len(input_data.records),
-            )
-
-        output = SilverOutputMetadata(
-            record_count=len(input_data.records),
+        rec_count = len(input_data.records)
+        dq_summary = (input_data.dq_metrics.to_dq_summary() if input_data.dq_metrics
+                      else DQSummary(total_records=rec_count, valid_records=rec_count))
+        output = SilverOutputMetadata(record_count=rec_count)
+        # Calculate duration if both timestamps provided
+        duration_seconds = (
+            (input_data.completed_at - input_data.started_at).total_seconds()
+            if input_data.started_at and input_data.completed_at else None
         )
-
         return SilverMetadata(
-            runtime=self._build_runtime_metadata(),
+            runtime=self._build_runtime_metadata(
+                started_at=input_data.started_at,
+                completed_at=input_data.completed_at,
+                duration_seconds=duration_seconds,
+            ),
             pipeline=self._build_pipeline_metadata(),
             lineage=lineage,
             delta=delta,
@@ -299,6 +300,7 @@ class MetadataCoordinator:
             output=output,
             environment=self._get_environment_metadata(),
             dq_report_path=input_data.dq_report_path,
+            governance=input_data.governance,
         )
 
     def _extract_schema_metadata(self, gold_schema: Any | None) -> SchemaMetadata:
@@ -457,6 +459,7 @@ class MetadataCoordinator:
             output=output,
             scd=scd,
             environment=self._get_environment_metadata(),
+            governance=input_data.governance,
         )
 
     @classmethod
