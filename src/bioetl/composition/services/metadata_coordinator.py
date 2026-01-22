@@ -18,11 +18,12 @@ Architecture:
 
 from __future__ import annotations
 
+import inspect
 import platform
 import socket
 from datetime import datetime
 from functools import cached_property
-from typing import Literal
+from typing import Any, Literal
 
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.models.metadata import (
@@ -39,6 +40,8 @@ from bioetl.domain.models.metadata import (
     RuntimeMetadata,
     RunTypeEnum,
     SCDMetadata,
+    SchemaColumnMetadata,
+    SchemaMetadata,
     SilverMetadata,
     SilverOutputMetadata,
     SourceMetadata,
@@ -297,6 +300,84 @@ class MetadataCoordinator:
             dq_report_path=input_data.dq_report_path,
         )
 
+    def _extract_schema_metadata(self, gold_schema: Any | None) -> SchemaMetadata:
+        """Extract schema metadata from a Pandera DataFrameModel.
+
+        Extracts contract_path, version, columns, and validation mode from
+        the Pandera schema class for Gold layer metadata tracking.
+
+        Args:
+            gold_schema: Pandera DataFrameModel class (not instance).
+
+        Returns:
+            SchemaMetadata with populated fields, or default if schema is None.
+        """
+        if gold_schema is None:
+            return SchemaMetadata()
+
+        # Extract contract_path from module path
+        contract_path: str | None = None
+        try:
+            module = inspect.getmodule(gold_schema)
+            if module and module.__file__:
+                # Convert absolute path to relative path from project root
+                # e.g., .../src/bioetl/domain/contracts/gold/chembl.py
+                # -> src/bioetl/domain/contracts/gold/chembl.py
+                file_path = module.__file__
+                if "src/bioetl" in file_path:
+                    idx = file_path.find("src/bioetl")
+                    contract_path = file_path[idx:]
+        except Exception:
+            pass
+
+        # Extract schema version from Config if defined
+        version = "1.0"
+        if hasattr(gold_schema, "Config"):
+            config = gold_schema.Config
+            version = getattr(config, "version", "1.0")
+            if not isinstance(version, str):
+                version = str(version)
+
+        # Determine validation mode
+        validation: Literal["strict", "lenient"] = "strict"
+        if hasattr(gold_schema, "Config"):
+            config = gold_schema.Config
+            is_strict = getattr(config, "strict", True)
+            validation = "strict" if is_strict else "lenient"
+
+        # Extract column definitions
+        columns: list[SchemaColumnMetadata] = []
+        try:
+            # Try to get schema columns using Pandera's to_schema() method
+            if hasattr(gold_schema, "to_schema"):
+                schema_instance = gold_schema.to_schema()
+                if hasattr(schema_instance, "columns"):
+                    for col_name, col_schema in schema_instance.columns.items():
+                        # Get the dtype as string
+                        dtype_str = str(col_schema.dtype) if col_schema.dtype else "object"
+                        # Simplify dtype string (remove pandera.dtypes. prefix)
+                        if "." in dtype_str:
+                            dtype_str = dtype_str.split(".")[-1]
+
+                        nullable = getattr(col_schema, "nullable", True)
+                        columns.append(
+                            SchemaColumnMetadata(
+                                name=col_name,
+                                type=dtype_str,
+                                nullable=nullable,
+                            )
+                        )
+        except Exception:
+            # If schema extraction fails, leave columns empty
+            pass
+
+        return SchemaMetadata(
+            contract_path=contract_path,
+            version=version,
+            validation=validation,
+            columns=columns,
+        )
+
     def create_gold_metadata(self, input_data: GoldMetadataInput) -> GoldMetadata:
         """Create Gold layer metadata.
 
@@ -359,12 +440,16 @@ class MetadataCoordinator:
                 ),
             )
 
+        # Extract schema metadata from Gold schema (contract_path, version, columns)
+        schema_info = self._extract_schema_metadata(input_data.gold_schema)
+
         return GoldMetadata(
             runtime=self._build_runtime_metadata(
                 completed_at=input_data.completed_at,
             ),
             pipeline=self._build_pipeline_metadata(),
             lineage=lineage,
+            schema_info=schema_info,
             dq_summary=dq_summary,
             output=output,
             scd=scd,
