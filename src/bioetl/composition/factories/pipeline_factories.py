@@ -85,7 +85,7 @@ from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
 
 # Gold schemas (required for all pipelines)
-from bioetl.infrastructure.schemas.gold import (
+from bioetl.contracts.schemas.gold import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
     ChEMBLAssayParametersGoldSchema,
@@ -108,7 +108,7 @@ from bioetl.infrastructure.schemas.gold import (
 )
 
 # Silver schemas (optional PyArrow schemas)
-from bioetl.infrastructure.schemas.silver import (
+from bioetl.contracts.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
     CHEMBL_ASSAY_PARAMETERS_SCHEMA,
     CHEMBL_ASSAY_SCHEMA,

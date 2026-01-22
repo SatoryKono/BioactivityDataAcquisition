@@ -8,7 +8,7 @@ from __future__ import annotations
 import pyarrow as pa
 import pytest
 
-from bioetl.infrastructure.schemas.silver import (
+from bioetl.contracts.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
     CHEMBL_ASSAY_SCHEMA,
     CHEMBL_MOLECULE_SCHEMA,

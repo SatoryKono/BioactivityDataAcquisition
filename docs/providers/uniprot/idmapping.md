@@ -213,8 +213,8 @@ CHEMBL9999999
 | **Config** | `configs/pipelines/uniprot/idmapping.yaml` |
 | **Transformer** | `src/bioetl/application/pipelines/uniprot/idmapping_transformer.py` |
 | **Client** | `src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py` |
-| **Silver Schema** | `src/bioetl/infrastructure/schemas/silver.py:134-154` |
-| **Gold Schema** | `src/bioetl/infrastructure/schemas/gold.py:166-198` |
+| **Silver Schema** | `src/bioetl.contracts.schemas.silver.py:134-154` |
+| **Gold Schema** | `src/bioetl.contracts.schemas.gold.py:166-198` |
 | **Unit Tests** | `tests/unit/application/pipelines/test_idmapping_transformer.py` |
 | **Integration Tests** | `tests/integration/adapters/test_uniprot_idmapping.py` |
 

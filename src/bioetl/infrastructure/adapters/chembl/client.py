@@ -31,7 +31,7 @@ from bioetl.domain.exceptions import (
 )
 from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.resilience import AdapterConfig
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import HealthStatus, CircuitBreakerState
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.chembl.entity_mapper import (
@@ -54,7 +54,7 @@ if TYPE_CHECKING:
     from httpx import Response
 
     from bioetl.domain.models.metadata import SourceMetadata
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, CircuitBreakerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
@@ -85,6 +85,7 @@ class ChemblAdapter(BaseHttpAdapter):
     adapter_config: AdapterConfig | None = None
     thread_pool: ThreadPoolExecutor | None = None
     metrics: MetricsPort | None = None
+    circuit_breaker: CircuitBreakerPort | None = None
 
     provider_name: str = field(init=False, default="chembl")
     """Provider identifier (required by DataSourcePort)."""
@@ -122,12 +123,14 @@ class ChemblAdapter(BaseHttpAdapter):
 
     def _get_health_status(self) -> HealthStatus:
         """Get health status from circuit breaker state."""
-        return assess_health_from_circuit_breaker(self.http_client.circuit_breaker)
+        if self.circuit_breaker:
+            return assess_health_from_circuit_breaker(self.circuit_breaker)
+        return HealthStatus.HEALTHY
 
     def _get_effective_batch_size(self) -> int:
         """Get batch size adjusted for health: full if HEALTHY, half if DEGRADED."""
         health_status = self._get_health_status()
-        failure_count = self.http_client.circuit_breaker.get_failure_count()
+        failure_count = self.circuit_breaker.get_failure_count() if self.circuit_breaker else 0
 
         if health_status == HealthStatus.UNHEALTHY:
             raise CriticalError(
@@ -355,11 +358,12 @@ class ChemblAdapter(BaseHttpAdapter):
     def _handle_error(self, e: Exception, context: str = "fetch") -> NoReturn:
         """Handle errors with unified classification. Translates to domain exceptions."""
         # Build context with circuit breaker info
-        failure_count = self.http_client.circuit_breaker.get_failure_count()
+        failure_count = self.circuit_breaker.get_failure_count() if self.circuit_breaker else 0
         health_status = self._get_health_status()
+        cb_state = self.circuit_breaker.get_state().value if self.circuit_breaker else CircuitBreakerState.CLOSED.value
 
         error_context = {
-            "circuit_breaker_state": self.http_client.circuit_breaker.get_state().value,
+            "circuit_breaker_state": cb_state,
             "circuit_breaker_failures": failure_count,
             "health_status": health_status.value,
         }
@@ -785,16 +789,19 @@ class ChemblAdapter(BaseHttpAdapter):
             Dictionary with circuit breaker stats and health status.
 
         """
+        cb_failures = self.circuit_breaker.get_failure_count() if self.circuit_breaker else 0
+        cb_state = self.circuit_breaker.get_state().value if self.circuit_breaker else "UNKNOWN"
         return {
-            "circuit_breaker_failures": self.http_client.circuit_breaker.get_failure_count(),
-            "circuit_breaker_state": self.http_client.circuit_breaker.get_state().value,
+            "circuit_breaker_failures": cb_failures,
+            "circuit_breaker_state": cb_state,
             "health_status": self._get_health_status().value,
         }
 
     def reset_circuit_breaker(self) -> None:
         """Reset circuit breaker (e.g., after successful recovery)."""
-        self.http_client.circuit_breaker.reset()
-        self.logger.info("chembl_circuit_breaker_reset", provider="chembl")
+        if self.circuit_breaker:
+            self.circuit_breaker.reset()
+            self.logger.info("chembl_circuit_breaker_reset", provider="chembl")
 
     async def get_entity_count(self, entity_type: str) -> int:
         """Get total count of entities."""

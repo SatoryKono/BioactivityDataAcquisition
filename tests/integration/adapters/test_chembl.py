@@ -50,7 +50,6 @@ class TestChemblAdapter:
 
         return UnifiedHTTPClient(
             rate_limiter=token_bucket,
-            circuit_breaker=circuit_breaker,
             timeout=30.0,
         )
 

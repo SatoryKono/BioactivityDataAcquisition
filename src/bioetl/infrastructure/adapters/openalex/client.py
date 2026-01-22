@@ -35,7 +35,7 @@ from bioetl.infrastructure.adapters.openalex.fallback import TitleFallbackHandle
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, CircuitBreakerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
 
@@ -68,6 +68,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
     mailto: str
     batch_size: int = 50
     metrics: MetricsPort | None = None
+    circuit_breaker: CircuitBreakerPort | None = None
 
     provider_name: str = field(init=False, default="openalex")
     """Provider identifier (required by DataSourcePort)."""
@@ -667,4 +668,5 @@ def _create_openalex_adapter(
         mailto=mailto,
         batch_size=kwargs.get("batch_size", 50),
         metrics=kwargs.get("metrics"),
+        circuit_breaker=kwargs.get("circuit_breaker"),
     )

@@ -34,7 +34,7 @@ from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcess
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, CircuitBreakerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
 
@@ -81,6 +81,7 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
     api_key: str | None = None
     batch_size: int = 200
     metrics: MetricsPort | None = None
+    circuit_breaker: CircuitBreakerPort | None = None
 
     provider_name: str = field(init=False, default="pubmed")
     """Provider identifier (required by DataSourcePort)."""
@@ -626,4 +627,5 @@ def _create_pubmed_adapter(
         api_key=api_key,
         batch_size=kwargs.get("batch_size", 200),
         metrics=kwargs.get("metrics"),
+        circuit_breaker=kwargs.get("circuit_breaker"),
     )

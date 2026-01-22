@@ -60,7 +60,6 @@ def http_client() -> UnifiedHTTPClient:
     """Create HTTP client for testing."""
     return UnifiedHTTPClient(
         rate_limiter=TokenBucket(rate=10.0, capacity=100.0),
-        circuit_breaker=CircuitBreaker(provider="semanticscholar_test"),
         timeout=30.0,
     )
 
@@ -406,7 +405,6 @@ class TestSemanticScholarAdapterRateLimiting:
 
         http_client = UnifiedHTTPClient(
             rate_limiter=slow_rate_limiter,
-            circuit_breaker=circuit_breaker,
         )
 
         adapter = SemanticScholarAdapter(

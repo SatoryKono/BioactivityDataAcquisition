@@ -116,7 +116,7 @@ class ChEMBLTargetPipeline(BasePipeline):
 
 ```python
 from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
-from bioetl.infrastructure.schemas.silver import CHEMBL_TARGET_SCHEMA
+from bioetl.contracts.schemas.silver import CHEMBL_TARGET_SCHEMA
 
 # Определение фабрики
 chembl_target_factory = GenericPipelineFactory(

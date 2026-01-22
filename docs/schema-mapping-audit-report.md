@@ -110,7 +110,7 @@ Silver schema defines `pmid` as `Series[int]`, but Gold schema expects `Series[s
 # Silver: src/bioetl/domain/schemas/pubmed/article.py:34
 pmid: Series[int] = pa.Field(nullable=False, description="PubMed ID (PK)")
 
-# Gold: src/bioetl/infrastructure/schemas/gold.py:216
+# Gold: src/bioetl.contracts.schemas.gold.py:216
 pmid: Series[str] = pa.Field(nullable=False)
 ```
 
@@ -185,7 +185,7 @@ Silver schema has 18 PubMed-specific fields not present in Gold schema, causing 
 
 ### Evidence
 
-**Missing in Gold Schema** (`src/bioetl/infrastructure/schemas/gold.py:211-272`):
+**Missing in Gold Schema** (`src/bioetl.contracts.schemas.gold.py:211-272`):
 - `journal_title`, `journal_iso_abbrev` (replaced by `journal`, `journal_abbrev`)
 - `journal_issn_type`
 - `pub_month`, `pub_day`
@@ -225,7 +225,7 @@ Base Silver schema uses `Series[datetime]` for `_ingestion_ts`, but Gold schemas
 # Silver: src/bioetl/domain/schemas/base.py:45
 ingestion_ts: Series[datetime] = pa.Field(alias="_ingestion_ts", nullable=False)
 
-# Gold: src/bioetl/infrastructure/schemas/gold.py:108
+# Gold: src/bioetl.contracts.schemas.gold.py:108
 ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 ```
 
@@ -257,7 +257,7 @@ Base Silver schema defines `_dq_warn` and `_dq_error` as `nullable=False` with `
 dq_warn: Series[bool] = pa.Field(alias="_dq_warn", nullable=False, default=False)
 dq_error: Series[bool] = pa.Field(alias="_dq_error", nullable=False, default=False)
 
-# Gold: src/bioetl/infrastructure/schemas/gold.py:258-259
+# Gold: src/bioetl.contracts.schemas.gold.py:258-259
 dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
 dq_error: Series[bool] = pa.Field(nullable=True, alias="_dq_error")
 ```
@@ -369,7 +369,7 @@ Publication schemas across providers have inconsistent field sets, making cross-
 
 | Component | Path |
 |-----------|------|
-| Gold Schemas | `src/bioetl/infrastructure/schemas/gold.py` |
+| Gold Schemas | `src/bioetl.contracts.schemas.gold.py` |
 | Silver Schemas - Base | `src/bioetl/domain/schemas/base.py` |
 | Silver Schemas - ChEMBL | `src/bioetl/domain/schemas/chembl/*.py` |
 | Silver Schemas - Publications | `src/bioetl/domain/schemas/{pubmed,crossref,openalex,semanticscholar}/*.py` |
@@ -381,7 +381,7 @@ Publication schemas across providers have inconsistent field sets, making cross-
 
 ```bash
 # Validate all schemas parse correctly
-python -c "from bioetl.domain.schemas import *; from bioetl.infrastructure.schemas.gold import *; print('All schemas valid')"
+python -c "from bioetl.domain.schemas import *; from bioetl.contracts.schemas.gold import *; print('All schemas valid')"
 
 # Run mypy strict on schemas
 mypy src/bioetl/domain/schemas/ --strict
@@ -389,7 +389,7 @@ mypy src/bioetl/infrastructure/schemas/ --strict
 
 # Compare Silver vs Gold field counts
 grep -c "Series\[" src/bioetl/domain/schemas/chembl/activity.py
-grep -c "Series\[" src/bioetl/infrastructure/schemas/gold.py | head -1
+grep -c "Series\[" src/bioetl.contracts.schemas.gold.py | head -1
 ```
 
 ---

@@ -587,7 +587,7 @@ print(f"Added {current_count - previous_count} records")
 
 ### Pandera Schema
 
-Все Gold-схемы определены в `src/bioetl/infrastructure/schemas/gold.py`.
+Все Gold-схемы определены в `src/bioetl.contracts.schemas.gold.py`.
 
 ```python
 class ChEMBLActivityGoldSchema(pa.DataFrameModel):
@@ -603,7 +603,7 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
 ### Проверка контракта
 
 ```python
-from bioetl.infrastructure.schemas.gold import ChEMBLActivityGoldSchema
+from bioetl.contracts.schemas.gold import ChEMBLActivityGoldSchema
 import polars as pl
 
 # Загрузка и валидация

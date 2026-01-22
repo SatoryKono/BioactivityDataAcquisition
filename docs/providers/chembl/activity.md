@@ -327,7 +327,7 @@ META_FIELDS = {
 
 **Файл:** `src/bioetl/infrastructure/storage/delta_writer.py`
 
-**PyArrow Schema** (`src/bioetl/infrastructure/schemas/silver.py`):
+**PyArrow Schema** (`src/bioetl.contracts.schemas.silver.py`):
 
 ```python
 CHEMBL_ACTIVITY_SCHEMA = pa.schema([
@@ -486,7 +486,7 @@ def extract(self, context, record) -> Watermark:
 | Трансформер | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
 | Gold-фильтр | `src/bioetl/application/pipelines/chembl/activity_gold_filter.py` |
 | Watermark | `src/bioetl/application/pipelines/chembl/activity_watermark.py` |
-| Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` |
+| Silver Schema | `src/bioetl.contracts.schemas.silver.py` |
 | Bronze Writer | `src/bioetl/infrastructure/storage/bronze_writer.py` |
 | Delta Writer | `src/bioetl/infrastructure/storage/delta_writer.py` |
 | Gold Writer | `src/bioetl/infrastructure/storage/gold_writer.py` |

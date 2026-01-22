@@ -38,7 +38,6 @@ def pubmed_adapter(monkeypatch, mock_logger) -> PubMedAdapter:
 
     http_client = UnifiedHTTPClient(
         TokenBucket(rate=3.0, capacity=6.0),
-        CircuitBreaker(provider="pubmed_test"),
     )
     return PubMedAdapter(
         http_client=http_client,

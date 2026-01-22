@@ -47,7 +47,7 @@ The `authors` field has inconsistent types between Silver (JSON string) and Gold
 
 ### File Locations
 
-**Gold Schema (`src/bioetl/infrastructure/schemas/gold.py`)**:
+**Gold Schema (`src/bioetl.contracts.schemas.gold.py`)**:
 - Line 229: PubMed `authors: Series[object] = pa.Field(nullable=True)  # list[str]`
 - Line 766: CrossRef `authors: Series[object] = pa.Field(nullable=True)  # list[str]`
 - Line 835: OpenAlex `authors: Series[object] = pa.Field(nullable=True)  # list[str]`

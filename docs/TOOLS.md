@@ -80,8 +80,8 @@ python src/tools/create_pipeline.py --provider pubchem --entity compound --dry-r
 - `bioetl.domain.entities.bioactivity.Bioactivity`
 - `bioetl.domain.entities.chembl_activity.Assay`
 - `bioetl.domain.entities.chembl_structures.Molecule, Target`
-- `bioetl.infrastructure.schemas.gold`
-- `bioetl.infrastructure.schemas.silver`
+- `bioetl.contracts.schemas.gold`
+- `bioetl.contracts.schemas.silver`
 
 **Использование:**
 ```bash

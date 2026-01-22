@@ -9,7 +9,7 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from bioetl.infrastructure.schemas.gold import (
+from bioetl.contracts.schemas.gold import (
     ChEMBLDocumentGoldSchema,
     CrossRefPublicationGoldSchema,
     OpenAlexPublicationGoldSchema,

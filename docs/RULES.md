@@ -233,7 +233,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 - **MAY** конвертировать `float → int` после проверки на `NaN` (если бизнес-логика требует)
 - **MUST NOT** предполагать, что все значения — целые числа
 
-**Реализация**: `src/bioetl/infrastructure/schemas/gold.py`
+**Реализация**: `src/bioetl.contracts.schemas.gold.py`
 
 #### Жизненный цикл Карантина 
 - **Retention**: 30 дней. Старые записи удаляются автоматически (S3 Lifecycle). 

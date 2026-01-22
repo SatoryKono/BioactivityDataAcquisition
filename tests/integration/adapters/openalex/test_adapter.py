@@ -50,7 +50,6 @@ async def http_client():
 
     client = UnifiedHTTPClient(
         rate_limiter=rate_limiter,
-        circuit_breaker=circuit_breaker,
         timeout=30.0,
         provider="openalex",
     )

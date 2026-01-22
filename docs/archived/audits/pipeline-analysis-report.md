@@ -316,8 +316,8 @@
 - `src/bioetl/composition/factories/pipeline_factories.py:162-303`
 
 ### Schemas
-- Silver: `src/bioetl/infrastructure/schemas/silver.py`
-- Gold: `src/bioetl/infrastructure/schemas/gold.py`
+- Silver: `src/bioetl.contracts.schemas.silver.py`
+- Gold: `src/bioetl.contracts.schemas.gold.py`
 
 ### Transformers
 - ChEMBL: `src/bioetl/application/pipelines/chembl/*_transformer.py`

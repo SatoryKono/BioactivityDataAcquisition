@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     import httpx
 
     from bioetl.domain.models.metadata import SourceMetadata
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, CircuitBreakerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
@@ -60,6 +60,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         base_url: str = "https://rest.uniprot.org",
         strict_error_handling: bool = False,
         metrics: MetricsPort | None = None,
+        circuit_breaker: CircuitBreakerPort | None = None,
     ) -> None:
         """Initialize UniProt client.
 
@@ -70,9 +71,10 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             base_url: UniProt REST API base URL
             strict_error_handling: Whether to raise exceptions (True) or log warnings (False)
             metrics: MetricsPort instance for recording SLA metrics
+            circuit_breaker: CircuitBreakerPort instance (optional)
 
         """
-        super().__init__(http_client, logger)
+        super().__init__(http_client, logger, metrics=metrics, circuit_breaker=circuit_breaker)
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.strict_error_handling = strict_error_handling

@@ -93,7 +93,7 @@ bioetl run chembl_activity --run-type rebuild
 | Entity Definition | `src/bioetl/domain/entities.py` |
 | Transformer | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
 | Gold Filter | `src/bioetl/application/pipelines/chembl/activity_gold_filter.py` |
-| Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` |
+| Silver Schema | `src/bioetl.contracts.schemas.silver.py` |
 
 ---
 

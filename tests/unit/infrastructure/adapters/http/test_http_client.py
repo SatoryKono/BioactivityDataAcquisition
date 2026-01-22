@@ -8,164 +8,7 @@ from uuid import uuid4
 import httpx
 import pytest
 
-from bioetl.domain.exceptions import CircuitBreakerOpenError, RetryExhaustedError
-from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-
-
-@pytest.mark.unit
-class TestRetryConfig:
-    """Tests for RetryConfig."""
-
-    def test_default_values(self):
-        """Test default configuration values."""
-        config = RetryConfig()
-        assert config.max_attempts == 3
-        assert config.base_delay == 1.0
-        assert config.max_delay == 60.0
-        assert config.multiplier == 2.0
-        assert config.jitter_range == (0.1, 0.5)
-        assert config.retryable_statuses == frozenset({429, 500, 502, 503, 504})
-        assert ConnectionError in config.retryable_exceptions
-        assert TimeoutError in config.retryable_exceptions
-
-    def test_calculate_delay_first_attempt(self):
-        """Test delay calculation for first attempt (no jitter)."""
-        config = RetryConfig(base_delay=1.0, multiplier=2.0, jitter_range=(0.0, 0.0))
-        delay = config.calculate_delay(0)
-        assert delay == 1.0
-
-    def test_calculate_delay_second_attempt(self):
-        """Test delay calculation for second attempt (no jitter)."""
-        config = RetryConfig(base_delay=1.0, multiplier=2.0, jitter_range=(0.0, 0.0))
-        delay = config.calculate_delay(1)
-        assert delay == 2.0
-
-    def test_calculate_delay_third_attempt(self):
-        """Test delay calculation for third attempt (no jitter)."""
-        config = RetryConfig(base_delay=1.0, multiplier=2.0, jitter_range=(0.0, 0.0))
-        delay = config.calculate_delay(2)
-        assert delay == 4.0
-
-    def test_calculate_delay_respects_max_delay(self):
-        """Test that delay is capped at max_delay."""
-        config = RetryConfig(
-            base_delay=10.0, multiplier=2.0, max_delay=15.0, jitter_range=(0.0, 0.0)
-        )
-        delay = config.calculate_delay(5)  # Would be 320 without cap
-        assert delay == 15.0
-
-    def test_is_retryable_status(self):
-        """Test is_retryable_status method."""
-        config = RetryConfig()
-        assert config.is_retryable_status(429)
-        assert config.is_retryable_status(500)  # Internal Server Error is retryable
-        assert config.is_retryable_status(502)
-        assert config.is_retryable_status(503)
-        assert config.is_retryable_status(504)
-        assert not config.is_retryable_status(200)
-        assert not config.is_retryable_status(400)
-        assert not config.is_retryable_status(401)
-
-    def test_is_retryable_exception(self):
-        """Test is_retryable_exception method."""
-        config = RetryConfig()
-        assert config.is_retryable_exception(ConnectionError("test"))
-        assert config.is_retryable_exception(TimeoutError("test"))
-        assert not config.is_retryable_exception(ValueError("test"))
-
-    def test_custom_retryable_statuses(self):
-        """Test custom retryable status codes."""
-        config = RetryConfig(retryable_statuses=frozenset({500, 502}))
-        assert config.is_retryable_status(500)
-        assert config.is_retryable_status(502)
-        assert not config.is_retryable_status(429)  # No longer in list
-
-    def test_jitter_same_input_same_output(self):
-        """Test jitter produces same delay for same inputs (deterministic)."""
-        config = RetryConfig(
-            base_delay=10.0,
-            jitter_range=(0.1, 0.3),
-            jitter_seed=42,
-        )
-        url = "https://api.example.com/data"
-
-        # Same inputs should produce identical delays
-        delay1 = config.calculate_delay(attempt=0, url=url)
-        delay2 = config.calculate_delay(attempt=0, url=url)
-        delay3 = config.calculate_delay(attempt=0, url=url)
-
-        assert delay1 == delay2 == delay3
-
-        # Different attempt numbers should also be deterministic
-        delay_a1 = config.calculate_delay(attempt=1, url=url)
-        delay_a1_again = config.calculate_delay(attempt=1, url=url)
-        assert delay_a1 == delay_a1_again
-
-    def test_jitter_different_urls_different_output(self):
-        """Test jitter produces different delays for different URLs."""
-        config = RetryConfig(
-            base_delay=10.0,
-            jitter_range=(0.1, 0.2),
-            jitter_seed=42,
-        )
-
-        delay1 = config.calculate_delay(attempt=0, url="https://api.example.com/data1")
-        delay2 = config.calculate_delay(attempt=0, url="https://api.example.com/data2")
-
-        # Different URLs should produce different jitter values
-        assert delay1 != delay2
-
-        # Both should still be within jitter range: base * (1 + jitter)
-        # With jitter_range=(0.1, 0.2), delay should be between 11.0 and 12.0
-        assert 11.0 <= delay1 <= 12.0
-        assert 11.0 <= delay2 <= 12.0
-
-    def test_jitter_cross_process_stability(self):
-        """Test deterministic jitter produces stable values across processes.
-
-        This test verifies that the jitter calculation uses MD5 (not Python's
-        hash()) which is stable across different Python processes.
-        """
-        import hashlib
-
-        config = RetryConfig(
-            base_delay=10.0,
-            jitter_range=(0.1, 0.2),
-            jitter_seed=42,
-        )
-        url = "https://api.example.com/test"
-
-        # Compute expected delay using MD5 directly (cross-process stable)
-        hash_input = f"0:{url}:42"
-        digest = hashlib.md5(hash_input.encode(), usedforsecurity=False).hexdigest()
-        jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
-
-        base_delay = 10.0
-        jitter_min, jitter_max = 0.1, 0.2
-        jitter_span = jitter_max - jitter_min
-        jitter_amount = jitter_min + (jitter_span * jitter_factor)
-        expected_delay = min(base_delay * (1 + jitter_amount), config.max_delay)
-
-        # Verify implementation matches our expectation
-        actual_delay = config.calculate_delay(attempt=0, url=url)
-
-        assert actual_delay == expected_delay, (
-            f"Jitter calculation mismatch. Expected {expected_delay}, got {actual_delay}. "
-            "This may indicate the implementation uses Python's hash() instead of MD5."
-        )
-
-        # Also verify the value is deterministic (same value on repeated calls)
-        assert config.calculate_delay(attempt=0, url=url) == expected_delay
-        assert config.calculate_delay(attempt=0, url=url) == expected_delay
-
-    def test_is_last_attempt(self):
-        """Test is_last_attempt method."""
-        config = RetryConfig(max_attempts=3)
-        assert not config.is_last_attempt(0)
-        assert not config.is_last_attempt(1)
-        assert config.is_last_attempt(2)
-        assert config.is_last_attempt(3)  # Beyond last
 
 
 @pytest.fixture
@@ -177,20 +20,10 @@ def mock_rate_limiter():
 
 
 @pytest.fixture
-def mock_circuit_breaker():
-    """Create mock circuit breaker."""
-    cb = MagicMock()
-    cb.call = AsyncMock()
-    return cb
-
-
-@pytest.fixture
-def http_client(mock_rate_limiter, mock_circuit_breaker):
+def http_client(mock_rate_limiter):
     """Create UnifiedHTTPClient instance."""
     return UnifiedHTTPClient(
         rate_limiter=mock_rate_limiter,
-        circuit_breaker=mock_circuit_breaker,
-        retry_config=RetryConfig(max_attempts=2, jitter_range=(0.0, 0.0)),
         timeout=10.0,
     )
 
@@ -199,11 +32,10 @@ def http_client(mock_rate_limiter, mock_circuit_breaker):
 class TestUnifiedHTTPClientInit:
     """Tests for UnifiedHTTPClient initialization."""
 
-    def test_init_with_defaults(self, mock_rate_limiter, mock_circuit_breaker):
+    def test_init_with_defaults(self, mock_rate_limiter):
         """Test initialization with default values."""
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
-            circuit_breaker=mock_circuit_breaker,
         )
         assert client.timeout == 30.0
         assert client.run_id is None
@@ -211,30 +43,27 @@ class TestUnifiedHTTPClientInit:
         assert client.contact_email is None
         assert client._client is None
 
-    def test_init_with_run_id(self, mock_rate_limiter, mock_circuit_breaker):
+    def test_init_with_run_id(self, mock_rate_limiter):
         """Test initialization with run_id."""
         run_id = uuid4()
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
-            circuit_breaker=mock_circuit_breaker,
             run_id=run_id,
         )
         assert client.run_id == run_id
 
-    def test_init_with_custom_user_agent(self, mock_rate_limiter, mock_circuit_breaker):
+    def test_init_with_custom_user_agent(self, mock_rate_limiter):
         """Test initialization with custom user_agent."""
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
-            circuit_breaker=mock_circuit_breaker,
             user_agent="CustomApp/1.0.0",
         )
         assert client.user_agent == "CustomApp/1.0.0"
 
-    def test_init_with_contact_email(self, mock_rate_limiter, mock_circuit_breaker):
+    def test_init_with_contact_email(self, mock_rate_limiter):
         """Test initialization with contact_email."""
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
-            circuit_breaker=mock_circuit_breaker,
             contact_email="admin@example.com",
         )
         assert client.contact_email == "admin@example.com"
@@ -260,13 +89,12 @@ class TestUnifiedHTTPClientContextManager:
 
     @pytest.mark.asyncio
     async def test_aenter_with_run_id_sets_header(
-        self, mock_rate_limiter, mock_circuit_breaker
+        self, mock_rate_limiter
     ):
         """Test __aenter__ sets correlation ID header when run_id provided."""
         run_id = uuid4()
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
-            circuit_breaker=mock_circuit_breaker,
             run_id=run_id,
         )
 
@@ -277,12 +105,11 @@ class TestUnifiedHTTPClientContextManager:
 
     @pytest.mark.asyncio
     async def test_aenter_sets_default_user_agent(
-        self, mock_rate_limiter, mock_circuit_breaker
+        self, mock_rate_limiter
     ):
         """Test __aenter__ sets default User-Agent header."""
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
-            circuit_breaker=mock_circuit_breaker,
         )
 
         async with client:
@@ -291,12 +118,11 @@ class TestUnifiedHTTPClientContextManager:
 
     @pytest.mark.asyncio
     async def test_aenter_sets_custom_user_agent(
-        self, mock_rate_limiter, mock_circuit_breaker
+        self, mock_rate_limiter
     ):
         """Test __aenter__ sets custom User-Agent header."""
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
-            circuit_breaker=mock_circuit_breaker,
             user_agent="CustomApp/2.0.0",
         )
 
@@ -306,12 +132,11 @@ class TestUnifiedHTTPClientContextManager:
 
     @pytest.mark.asyncio
     async def test_aenter_appends_contact_email_to_user_agent(
-        self, mock_rate_limiter, mock_circuit_breaker
+        self, mock_rate_limiter
     ):
         """Test __aenter__ appends contact_email to User-Agent when provided."""
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
-            circuit_breaker=mock_circuit_breaker,
             contact_email="support@example.com",
         )
 
@@ -321,12 +146,11 @@ class TestUnifiedHTTPClientContextManager:
 
     @pytest.mark.asyncio
     async def test_aenter_with_custom_user_agent_and_email(
-        self, mock_rate_limiter, mock_circuit_breaker
+        self, mock_rate_limiter
     ):
         """Test __aenter__ with both custom user_agent and contact_email."""
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
-            circuit_breaker=mock_circuit_breaker,
             user_agent="MyApp/3.0.0",
             contact_email="admin@myapp.com",
         )
@@ -355,140 +179,82 @@ class TestUnifiedHTTPClientGetClient:
 
 
 @pytest.mark.unit
-class TestUnifiedHTTPClientHandleRetryDelay:
-    """Tests for _handle_retry_delay method."""
-
-    @pytest.mark.asyncio
-    async def test_handle_retry_delay_uses_calculated_delay(self, http_client):
-        """Test _handle_retry_delay uses calculated delay."""
-        with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
-            await http_client._handle_retry_delay(attempt=0)
-            mock_sleep.assert_called_once()
-            # First attempt with base_delay=1.0
-            assert mock_sleep.call_args[0][0] == 1.0
-
-    @pytest.mark.asyncio
-    async def test_handle_retry_delay_respects_retry_after_header(self, http_client):
-        """Test _handle_retry_delay uses Retry-After header if present."""
-        response = MagicMock()
-        response.headers = {"Retry-After": "5"}
-
-        with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
-            await http_client._handle_retry_delay(attempt=0, response=response)
-            mock_sleep.assert_called_once_with(5.0)
-
-
-@pytest.mark.unit
 class TestUnifiedHTTPClientRequestMethods:
     """Tests for GET, POST, HEAD request methods."""
 
     @pytest.mark.asyncio
-    async def test_get_success(self, http_client, mock_circuit_breaker):
+    async def test_get_success(self, http_client):
         """Test successful GET request."""
         mock_response = MagicMock(spec=httpx.Response)
         mock_response.status_code = 200
         mock_response.raise_for_status = MagicMock()
-        mock_circuit_breaker.call.return_value = mock_response
 
         async with http_client:
+            # Mock the internal client's request method
+            http_client._client.request = AsyncMock(return_value=mock_response)
             response = await http_client.get("https://api.example.com/data")
 
         assert response == mock_response
+        http_client.rate_limiter.acquire.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_get_with_params_and_headers(self, http_client, mock_circuit_breaker):
+    async def test_get_with_params_and_headers(self, http_client):
         """Test GET request with params and headers."""
         mock_response = MagicMock(spec=httpx.Response)
         mock_response.status_code = 200
         mock_response.raise_for_status = MagicMock()
-        mock_circuit_breaker.call.return_value = mock_response
 
         async with http_client:
+            request_mock = AsyncMock(return_value=mock_response)
+            http_client._client.request = request_mock
             await http_client.get(
                 "https://api.example.com/data",
                 params={"page": 1},
                 headers={"Accept": "application/json"},
             )
 
-        mock_circuit_breaker.call.assert_called_once()
+        request_mock.assert_called_once()
+        call_args = request_mock.call_args
+        assert call_args[0] == ("GET", "https://api.example.com/data")
+        assert call_args[1]["params"] == {"page": 1}
+        assert call_args[1]["headers"] == {"Accept": "application/json"}
 
     @pytest.mark.asyncio
-    async def test_post_with_json(self, http_client, mock_circuit_breaker):
+    async def test_post_with_json(self, http_client):
         """Test POST request with JSON body."""
         mock_response = MagicMock(spec=httpx.Response)
         mock_response.status_code = 201
         mock_response.raise_for_status = MagicMock()
-        mock_circuit_breaker.call.return_value = mock_response
 
         async with http_client:
+            request_mock = AsyncMock(return_value=mock_response)
+            http_client._client.request = request_mock
             response = await http_client.post(
                 "https://api.example.com/data",
                 json={"name": "test"},
             )
 
         assert response == mock_response
+        request_mock.assert_called_with(
+            "POST", "https://api.example.com/data", json={"name": "test"}, data=None, headers=None
+        )
 
     @pytest.mark.asyncio
-    async def test_head_request(self, http_client, mock_circuit_breaker):
+    async def test_head_request(self, http_client):
         """Test HEAD request."""
         mock_response = MagicMock(spec=httpx.Response)
         mock_response.status_code = 200
         mock_response.raise_for_status = MagicMock()
-        mock_circuit_breaker.call.return_value = mock_response
 
         async with http_client:
+            request_mock = AsyncMock(return_value=mock_response)
+            http_client._client.request = request_mock
             response = await http_client.head("https://api.example.com/health")
 
         assert response == mock_response
-
-    @pytest.mark.asyncio
-    async def test_circuit_breaker_open_error_propagates(
-        self, http_client, mock_circuit_breaker
-    ):
-        """Test CircuitBreakerOpenError is not retried."""
-        mock_circuit_breaker.call.side_effect = CircuitBreakerOpenError(
-            "chembl", "Circuit is open"
+        request_mock.assert_called_with(
+            "HEAD", "https://api.example.com/health", headers=None
         )
-
-        async with http_client:
-            with pytest.raises(CircuitBreakerOpenError):
-                await http_client.get("https://api.example.com/data")
-
-    @pytest.mark.asyncio
-    async def test_retry_exhausted_raises_error(
-        self, http_client, mock_circuit_breaker
-    ):
-        """Test RetryExhaustedError after all retries."""
-        mock_circuit_breaker.call.side_effect = httpx.ConnectError("Connection failed")
-
-        async with http_client:
-            with pytest.raises(RetryExhaustedError):
-                await http_client.get("https://api.example.com/data")
-
-        # Should have tried max_attempts times
-        assert mock_circuit_breaker.call.call_count == 2
-
-    @pytest.mark.asyncio
-    async def test_retryable_status_triggers_retry(
-        self, http_client, mock_circuit_breaker
-    ):
-        """Test retryable status code triggers retry."""
-        mock_response_503 = MagicMock(spec=httpx.Response)
-        mock_response_503.status_code = 503
-        mock_response_503.headers = {}
-
-        mock_response_200 = MagicMock(spec=httpx.Response)
-        mock_response_200.status_code = 200
-        mock_response_200.raise_for_status = MagicMock()
-
-        mock_circuit_breaker.call.side_effect = [mock_response_503, mock_response_200]
-
-        with patch("asyncio.sleep", new_callable=AsyncMock):
-            async with http_client:
-                response = await http_client.get("https://api.example.com/data")
-
-        assert response == mock_response_200
-        assert mock_circuit_breaker.call.call_count == 2
 
 
 @pytest.mark.unit
@@ -530,7 +296,6 @@ class TestUnifiedHTTPClientObservability:
     def http_client_with_observability(
         self,
         mock_rate_limiter,
-        mock_circuit_breaker,
         mock_tracer,
         mock_metrics,
         mock_logger,
@@ -539,8 +304,6 @@ class TestUnifiedHTTPClientObservability:
         tracer, _ = mock_tracer
         return UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
-            circuit_breaker=mock_circuit_breaker,
-            retry_config=RetryConfig(max_attempts=2, jitter_range=(0.0, 0.0)),
             timeout=10.0,
             provider="test_provider",
             tracer=tracer,
@@ -550,7 +313,7 @@ class TestUnifiedHTTPClientObservability:
 
     @pytest.mark.asyncio
     async def test_successful_request_creates_span(
-        self, http_client_with_observability, mock_circuit_breaker, mock_tracer
+        self, http_client_with_observability, mock_tracer
     ):
         """Test successful request creates tracing span with correct attributes."""
         tracer, span = mock_tracer
@@ -558,9 +321,9 @@ class TestUnifiedHTTPClientObservability:
         mock_response = MagicMock(spec=httpx.Response)
         mock_response.status_code = 200
         mock_response.raise_for_status = MagicMock()
-        mock_circuit_breaker.call.return_value = mock_response
 
         async with http_client_with_observability:
+            http_client_with_observability._client.request = AsyncMock(return_value=mock_response)
             await http_client_with_observability.get("https://api.example.com/data")
 
         # Verify span was created
@@ -582,15 +345,15 @@ class TestUnifiedHTTPClientObservability:
 
     @pytest.mark.asyncio
     async def test_successful_request_records_metrics(
-        self, http_client_with_observability, mock_circuit_breaker, mock_metrics
+        self, http_client_with_observability, mock_metrics
     ):
         """Test successful request records duration histogram."""
         mock_response = MagicMock(spec=httpx.Response)
         mock_response.status_code = 200
         mock_response.raise_for_status = MagicMock()
-        mock_circuit_breaker.call.return_value = mock_response
 
         async with http_client_with_observability:
+            http_client_with_observability._client.request = AsyncMock(return_value=mock_response)
             await http_client_with_observability.get("https://api.example.com/data")
 
         # Verify histogram was observed
@@ -604,46 +367,16 @@ class TestUnifiedHTTPClientObservability:
         assert labels["status"] == "200"
 
     @pytest.mark.asyncio
-    async def test_retry_records_retry_counter(
-        self, http_client_with_observability, mock_circuit_breaker, mock_metrics
-    ):
-        """Test retry increments retry counter."""
-        mock_response_503 = MagicMock(spec=httpx.Response)
-        mock_response_503.status_code = 503
-        mock_response_503.headers = {}
-
-        mock_response_200 = MagicMock(spec=httpx.Response)
-        mock_response_200.status_code = 200
-        mock_response_200.raise_for_status = MagicMock()
-
-        mock_circuit_breaker.call.side_effect = [mock_response_503, mock_response_200]
-
-        with patch("asyncio.sleep", new_callable=AsyncMock):
-            async with http_client_with_observability:
-                await http_client_with_observability.get("https://api.example.com/data")
-
-        # Verify retry counter was incremented
-        counter_calls = [
-            c
-            for c in mock_metrics.increment_counter.call_args_list
-            if c[0][0] == "http_retries_total"
-        ]
-        assert len(counter_calls) == 1
-        assert counter_calls[0][0][1] == 1  # 1 retry
-
-    @pytest.mark.asyncio
     async def test_error_records_error_counter(
-        self, http_client_with_observability, mock_circuit_breaker, mock_metrics
+        self, http_client_with_observability, mock_metrics
     ):
         """Test error increments error counter."""
-        mock_circuit_breaker.call.side_effect = httpx.ConnectError("Connection failed")
-
-        with patch("asyncio.sleep", new_callable=AsyncMock):
-            async with http_client_with_observability:
-                with pytest.raises(RetryExhaustedError):
-                    await http_client_with_observability.get(
-                        "https://api.example.com/data"
-                    )
+        async with http_client_with_observability:
+            http_client_with_observability._client.request = AsyncMock(side_effect=httpx.ConnectError("Connection failed"))
+            with pytest.raises(httpx.ConnectError):
+                await http_client_with_observability.get(
+                    "https://api.example.com/data"
+                )
 
         # Verify error counter was incremented
         error_calls = [
@@ -656,77 +389,23 @@ class TestUnifiedHTTPClientObservability:
         assert labels["provider"] == "test_provider"
         assert labels["error_type"] == "ConnectError"
 
-    @pytest.mark.asyncio
-    async def test_circuit_breaker_open_logs_warning(
-        self, http_client_with_observability, mock_circuit_breaker, mock_logger
-    ):
-        """Test circuit breaker open logs warning."""
-        mock_circuit_breaker.call.side_effect = CircuitBreakerOpenError(
-            "test_provider", "Circuit is open"
-        )
-
-        async with http_client_with_observability:
-            with pytest.raises(CircuitBreakerOpenError):
-                await http_client_with_observability.get("https://api.example.com/data")
-
-        # Verify warning was logged
-        mock_logger.warning.assert_called_once()
-        call_args = mock_logger.warning.call_args
-        assert call_args[0][0] == "http_circuit_breaker_open"
-        assert call_args[1]["provider"] == "test_provider"
-
-    @pytest.mark.asyncio
-    async def test_retry_logs_warning(
-        self, http_client_with_observability, mock_circuit_breaker, mock_logger
-    ):
-        """Test retry logs warning message."""
-        mock_response_503 = MagicMock(spec=httpx.Response)
-        mock_response_503.status_code = 503
-        mock_response_503.headers = {}
-
-        mock_response_200 = MagicMock(spec=httpx.Response)
-        mock_response_200.status_code = 200
-        mock_response_200.raise_for_status = MagicMock()
-
-        mock_circuit_breaker.call.side_effect = [mock_response_503, mock_response_200]
-
-        with patch("asyncio.sleep", new_callable=AsyncMock):
-            async with http_client_with_observability:
-                await http_client_with_observability.get("https://api.example.com/data")
-
-        # Verify warning was logged for retry (not debug - retries are notable events)
-        # Check that logger.warning was called at least once for retry
-        mock_logger.warning.assert_called()
-        call_args_list = mock_logger.warning.call_args_list
-        retry_calls = [c for c in call_args_list if c.args and "Retry" in c.args[0]]
-        assert len(retry_calls) >= 1, (
-            f"Expected at least 1 retry warning call, got {len(retry_calls)}. "
-            f"All warning calls: {call_args_list}"
-        )
-        # Verify retry call contains expected fields
-        retry_call = retry_calls[0]
-        assert "attempt" in retry_call.kwargs
-        assert retry_call.kwargs["attempt"] == 1
-
     def test_default_observability_uses_noop(
-        self, mock_rate_limiter, mock_circuit_breaker
+        self, mock_rate_limiter
     ):
         """Test client uses NoOp implementations when observability not provided."""
         from bioetl.domain.ports import NoOpMetrics, NoOpTracing
 
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
-            circuit_breaker=mock_circuit_breaker,
         )
 
         assert isinstance(client._tracer, NoOpTracing)
         assert isinstance(client._metrics, NoOpMetrics)
 
-    def test_provider_attribute_set(self, mock_rate_limiter, mock_circuit_breaker):
+    def test_provider_attribute_set(self, mock_rate_limiter):
         """Test provider attribute is set correctly."""
         client = UnifiedHTTPClient(
             rate_limiter=mock_rate_limiter,
-            circuit_breaker=mock_circuit_breaker,
             provider="chembl",
         )
         assert client.provider == "chembl"

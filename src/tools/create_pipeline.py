@@ -302,7 +302,7 @@ def main() -> int:
     logger.info("Done! Don't forget to:")
     logger.info("1. Implement transformation logic in transformer.py")
     logger.info(
-        "2. Define validation schema in src/bioetl/infrastructure/schemas/gold.py"
+        "2. Define validation schema in src/bioetl.contracts.schemas.gold.py"
     )
     logger.info(
         "3. Register any new factories if needed (though GenericPipelineFactory should handle it)"

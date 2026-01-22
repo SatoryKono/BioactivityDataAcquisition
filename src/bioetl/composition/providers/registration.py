@@ -19,13 +19,17 @@ from bioetl.composition.providers.provider_registry import (
     ProviderConfig,
     ProviderRegistry,
 )
-from bioetl.domain.resilience import AdapterConfig
+from bioetl.domain.resilience import AdapterConfig, RetryConfig
 
 # Import adapter classes from Infrastructure (allowed direction)
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.crossref.client import (
     CrossRefAdapter,
     _create_crossref_adapter,
+)
+from bioetl.infrastructure.adapters.decorators import (
+    CircuitBreakerDataSourceDecorator,
+    RetryDataSourceDecorator,
 )
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
@@ -50,7 +54,7 @@ from bioetl.infrastructure.config import load_source_config
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
-    from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+    from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort, CircuitBreakerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -134,6 +138,40 @@ def _get_adapter_config(provider: str, default_page_size: int = 1000) -> Adapter
     return AdapterConfig(page_size=default_page_size)
 
 
+def _wrap_with_resilience(
+    data_source: DataSourcePort,
+    provider: str,
+    logger: LoggerPort | None = None,
+    metrics: MetricsPort | None = None,
+    circuit_breaker: CircuitBreakerPort | None = None,
+) -> DataSourcePort:
+    """Wrap data source with Retry and CircuitBreaker decorators.
+
+    This replaces the internal resilience logic previously found in UnifiedHTTPClient.
+    """
+    # Get configs
+    source_config = _get_source_config(provider)
+    max_retries = source_config.max_retries if source_config else 3
+
+    if circuit_breaker is None:
+        cb_threshold, cb_timeout = _get_circuit_breaker_from_config(provider)
+        circuit_breaker = CircuitBreaker(
+            provider=provider,
+            failure_threshold=cb_threshold,
+            recovery_timeout=cb_timeout,
+            metrics=metrics,
+        )
+
+    # Circuit Breaker (Inner)
+    wrapped = CircuitBreakerDataSourceDecorator(data_source, circuit_breaker)
+
+    # Retry (Outer)
+    retry_config = RetryConfig(max_attempts=max_retries)
+    wrapped = RetryDataSourceDecorator(wrapped, retry_config, logger)
+
+    return wrapped
+
+
 def _wrap_with_filter(
     data_source: DataSourcePort,
     filter_config: InputFilterConfig | None,
@@ -176,18 +214,37 @@ def _create_chembl_data_source(
     # Load adapter configuration from YAML (single source of truth)
     adapter_config = _get_adapter_config("chembl", default_page_size=1000)
 
+    # Create shared Circuit Breaker for Adapter logic AND Decorator
+    cb_threshold, cb_timeout = _get_circuit_breaker_from_config("chembl")
+    circuit_breaker = CircuitBreaker(
+        provider="chembl",
+        failure_threshold=cb_threshold,
+        recovery_timeout=cb_timeout,
+        metrics=metrics,
+    )
+
     base_adapter = DataSourceFactory.create(
         "chembl",
         http_client=http_client,
         logger=logger,
         adapter_config=adapter_config,
         metrics=metrics,
+        circuit_breaker=circuit_breaker,
     )
 
     # Wrap with PublicationTermDataSource for derived entity extraction
     # document_term is extracted from publication records (1:M relationship)
     if pipeline_config.entity_type == "document_term":
         base_adapter = PublicationTermDataSource(base_adapter)
+
+    # Wrap with resilience (using same CB)
+    base_adapter = _wrap_with_resilience(
+        base_adapter,
+        "chembl",
+        logger,
+        metrics,
+        circuit_breaker=circuit_breaker
+    )
 
     return _wrap_with_filter(
         base_adapter, filter_config, logger, metrics, pipeline_name
@@ -244,6 +301,10 @@ def _create_pubchem_data_source(
         strict_error_handling=settings.strict_error_handling,
         metrics=metrics,
     )
+    # PubChemAdapter has internal resilience, but we wrap it for consistency at port level
+    # (Optional: double wrapping doesn't hurt much, provides standard metrics)
+    data_source = _wrap_with_resilience(data_source, "pubchem", logger, metrics)
+
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
@@ -265,6 +326,7 @@ def _create_uniprot_data_source(
         base_url=pipeline_config.source.api.base_url or "https://rest.uniprot.org",
         strict_error_handling=settings.strict_error_handling,
     )
+    data_source = _wrap_with_resilience(data_source, "uniprot", logger, metrics)
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
@@ -295,6 +357,7 @@ def _create_pubmed_data_source(
         email=email,
         api_key=api_key,
     )
+    data_source = _wrap_with_resilience(data_source, "pubmed", logger, metrics)
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
@@ -341,6 +404,7 @@ def _create_crossref_data_source(
         batch_size=batch_size,
         metrics=metrics,
     )
+    data_source = _wrap_with_resilience(data_source, "crossref", logger, metrics)
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
@@ -387,6 +451,7 @@ def _create_openalex_data_source(
         batch_size=batch_size,
         metrics=metrics,
     )
+    data_source = _wrap_with_resilience(data_source, "openalex", logger, metrics)
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
@@ -439,6 +504,7 @@ def _create_semanticscholar_data_source(
         batch_size=batch_size,
         metrics=metrics,
     )
+    data_source = _wrap_with_resilience(data_source, "semanticscholar", logger, metrics)
 
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
@@ -505,193 +571,12 @@ def _create_uniprot_idmapping_data_source(
         from_db = getattr(pipeline_config.source.api, "from_db", from_db)
         to_db = getattr(pipeline_config.source.api, "to_db", to_db)
 
-    return IDMappingDataSource(
+    data_source = IDMappingDataSource(
         idmapping_client=idmapping_client,
         input_path=input_path,
         logger=logger,
         from_db=from_db,
         to_db=to_db,
     )
-
-
-# =============================================================================
-# Provider registration
-# =============================================================================
-
-
-def register_all_providers() -> None:
-    """Explicitly register all data source providers.
-
-    This function MUST be called from bootstrap before using ProviderRegistry.
-    Idempotent - safe to call multiple times.
-
-    Configuration Priority:
-    1. configs/sources/{provider}.yaml - PRIMARY (rate limits, circuit breaker, batch_size)
-    2. HttpConfig in ProviderConfig - FALLBACK only
-
-    Provider configurations are now loaded from YAML files:
-    - ChEMBL: configs/sources/chembl.yaml
-    - PubChem: configs/sources/pubchem.yaml
-    - UniProt: configs/sources/uniprot.yaml
-    - PubMed: configs/sources/pubmed.yaml
-    - CrossRef: configs/sources/crossref.yaml
-    - OpenAlex: configs/sources/openalex.yaml
-    - Semantic Scholar: configs/sources/semanticscholar.yaml
-
-    Each provider includes a data_source_creator for unified registry access.
-    """
-    # Load rate limits from source configs (with fallback defaults)
-    chembl_rate, chembl_capacity = _get_rate_limit_from_config("chembl")
-    pubchem_rate, pubchem_capacity = _get_rate_limit_from_config("pubchem")
-    uniprot_rate, uniprot_capacity = _get_rate_limit_from_config("uniprot")
-    pubmed_rate, pubmed_capacity = _get_rate_limit_from_config("pubmed")
-    crossref_rate, crossref_capacity = _get_rate_limit_from_config("crossref")
-
-    # ChEMBL - async HTTP adapter
-    if not ProviderRegistry.is_registered("chembl"):
-        ProviderRegistry.register(
-            "chembl",
-            ProviderConfig(
-                adapter_class=ChemblAdapter,
-                http_config=HttpConfig(
-                    rate=chembl_rate,
-                    capacity=chembl_capacity,
-                ),
-                requires_http_client=True,
-                requires_logger=True,
-                data_source_creator=_create_chembl_data_source,
-            ),
-        )
-
-    # PubChem - sync adapter with DI-compliant custom creator
-    # Dependencies (TokenBucket, CircuitBreaker, ThreadPoolExecutor) are created
-    # in _create_pubchem_adapter following Composition Root pattern
-    if not ProviderRegistry.is_registered("pubchem"):
-        ProviderRegistry.register(
-            "pubchem",
-            ProviderConfig(
-                adapter_class=PubChemAdapter,
-                http_config=HttpConfig(
-                    rate=pubchem_rate,
-                    capacity=pubchem_capacity,
-                ),
-                requires_http_client=False,
-                requires_logger=True,
-                custom_creator=_create_pubchem_adapter,
-                data_source_creator=_create_pubchem_data_source,
-            ),
-        )
-
-    # UniProt - async HTTP adapter with conditional rate override
-    if not ProviderRegistry.is_registered("uniprot"):
-        ProviderRegistry.register(
-            "uniprot",
-            ProviderConfig(
-                adapter_class=UniProtAdapter,
-                http_config=HttpConfig(
-                    rate=uniprot_rate,
-                    capacity=uniprot_capacity,
-                    rate_overrides={"uniprot_api_key": 100.0},
-                ),
-                requires_http_client=True,
-                requires_logger=True,
-                data_source_creator=_create_uniprot_data_source,
-            ),
-        )
-
-    # PubMed - async HTTP adapter with custom creator for email/API key handling
-    if not ProviderRegistry.is_registered("pubmed"):
-        ProviderRegistry.register(
-            "pubmed",
-            ProviderConfig(
-                adapter_class=PubMedAdapter,
-                http_config=HttpConfig(
-                    rate=pubmed_rate,
-                    capacity=pubmed_capacity,
-                    rate_overrides={"pubmed_api_key": 10.0},
-                ),
-                requires_http_client=True,
-                requires_logger=True,
-                custom_creator=_create_pubmed_adapter,
-                data_source_creator=_create_pubmed_data_source,
-            ),
-        )
-
-    # CrossRef - async HTTP adapter for DOI resolution and publication metadata
-    # Requires mailto for polite pool access (50 req/sec vs 1 req/sec without)
-    if not ProviderRegistry.is_registered("crossref"):
-        ProviderRegistry.register(
-            "crossref",
-            ProviderConfig(
-                adapter_class=CrossRefAdapter,
-                http_config=HttpConfig(
-                    rate=crossref_rate,
-                    capacity=crossref_capacity,
-                ),
-                requires_http_client=True,
-                requires_logger=True,
-                custom_creator=_create_crossref_adapter,
-                data_source_creator=_create_crossref_data_source,
-            ),
-        )
-
-    # OpenAlex - async HTTP adapter for open scholarly metadata
-    # Requires mailto for polite pool access (10 req/sec)
-    # Supports batch DOI resolution with title fallback
-    openalex_rate, openalex_capacity = _get_rate_limit_from_config("openalex")
-    if not ProviderRegistry.is_registered("openalex"):
-        ProviderRegistry.register(
-            "openalex",
-            ProviderConfig(
-                adapter_class=OpenAlexAdapter,
-                http_config=HttpConfig(
-                    rate=openalex_rate,
-                    capacity=openalex_capacity,
-                ),
-                requires_http_client=True,
-                requires_logger=True,
-                custom_creator=_create_openalex_adapter,
-                data_source_creator=_create_openalex_data_source,
-            ),
-        )
-
-    # Semantic Scholar - async HTTP adapter for DOI resolution with title fallback
-    # API key recommended for stable rate limits (1 req/sec guaranteed)
-    s2_rate, s2_capacity = _get_rate_limit_from_config("semanticscholar")
-    if not ProviderRegistry.is_registered("semanticscholar"):
-        ProviderRegistry.register(
-            "semanticscholar",
-            ProviderConfig(
-                adapter_class=SemanticScholarAdapter,
-                http_config=HttpConfig(
-                    rate=s2_rate,
-                    capacity=s2_capacity,
-                ),
-                requires_http_client=True,
-                requires_logger=True,
-                data_source_creator=_create_semanticscholar_data_source,
-            ),
-        )
-
-    # UniProt ID Mapping - maps ChEMBL target IDs to UniProt accessions
-    # Uses UniProt ID Mapping REST API (job-based async)
-    # Input comes from CSV file, not external API filtering
-    # Note: IDMappingDataSource is a lightweight wrapper, actual API client is
-    # UniProtIDMappingClient created in the data_source_creator
-    uniprot_idmapping_rate, uniprot_idmapping_capacity = _get_rate_limit_from_config(
-        "uniprot"
-    )
-    if not ProviderRegistry.is_registered("uniprot_idmapping"):
-        ProviderRegistry.register(
-            "uniprot_idmapping",
-            ProviderConfig(
-                adapter_class=IDMappingDataSource,
-                http_config=HttpConfig(
-                    rate=uniprot_idmapping_rate,
-                    capacity=uniprot_idmapping_capacity,
-                ),
-                requires_http_client=True,
-                requires_logger=True,
-                data_source_creator=_create_uniprot_idmapping_data_source,
-            ),
-        )
+    # Wrap with resilience
+    return _wrap_with_resilience(data_source, "uniprot", logger, metrics)

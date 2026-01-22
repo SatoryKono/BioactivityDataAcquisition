@@ -31,8 +31,7 @@ class TestChemblAdapter:
     def test_adapter_creation(self, mock_logger):
         """Test ChEMBL adapter can be created."""
         bucket = TokenBucket(rate=10.0, capacity=10)
-        cb = CircuitBreaker(provider="chembl")
-        http_client = UnifiedHTTPClient(bucket, cb)
+        http_client = UnifiedHTTPClient(bucket)
         adapter = ChemblAdapter(http_client=http_client, logger=mock_logger)
 
         assert adapter.provider_name == "chembl"
@@ -41,8 +40,7 @@ class TestChemblAdapter:
     def test_adapter_with_custom_batch_size(self, mock_logger):
         """Test ChEMBL adapter with custom page size via adapter_config."""
         bucket = TokenBucket(rate=10.0, capacity=10)
-        cb = CircuitBreaker(provider="chembl")
-        http_client = UnifiedHTTPClient(bucket, cb)
+        http_client = UnifiedHTTPClient(bucket)
         adapter = ChemblAdapter(
             http_client=http_client,
             logger=mock_logger,
@@ -192,8 +190,7 @@ class TestUniProtAdapter:
     def http_client(self):
         """Create a UnifiedHTTPClient for testing."""
         bucket = TokenBucket(rate=10.0, capacity=10)
-        cb = CircuitBreaker(provider="uniprot")
-        return UnifiedHTTPClient(bucket, cb)
+        return UnifiedHTTPClient(bucket)
 
     @pytest.fixture
     def mock_logger(self):

@@ -95,5 +95,5 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 | Pipeline Logic | `src/bioetl/application/pipelines/chembl/assay.py` |
 | Transformer | `src/bioetl/application/pipelines/chembl/assay_transformer.py` |
 | Gold Filter | `src/bioetl/application/pipelines/chembl/assay_filter.py` |
-| Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` |
-| Gold Schema | `src/bioetl/infrastructure/schemas/gold.py` |
+| Silver Schema | `src/bioetl.contracts.schemas.silver.py` |
+| Gold Schema | `src/bioetl.contracts.schemas.gold.py` |

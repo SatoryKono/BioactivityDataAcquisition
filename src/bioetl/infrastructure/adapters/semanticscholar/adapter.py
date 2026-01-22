@@ -41,7 +41,7 @@ from bioetl.infrastructure.adapters.semanticscholar.fallback import (
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, CircuitBreakerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 SEMANTICSCHOLAR_BASE_URL = "https://api.semanticscholar.org/graph/v1"
@@ -84,6 +84,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
     batch_size: int = 100
     fields: str = DEFAULT_FIELDS
     metrics: MetricsPort | None = None
+    circuit_breaker: CircuitBreakerPort | None = None
 
     provider_name: str = field(init=False, default="semanticscholar")
     """Provider identifier (required by DataSourcePort)."""

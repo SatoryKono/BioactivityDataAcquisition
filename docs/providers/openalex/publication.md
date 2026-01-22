@@ -290,7 +290,7 @@ gold_filters:
 | Адаптер | `src/bioetl/infrastructure/adapters/openalex/client.py` |
 | Fallback Handler | `src/bioetl/infrastructure/adapters/openalex/fallback.py` |
 | Domain Entity | `src/bioetl/domain/entities/openalex.py` |
-| Gold Schema | `src/bioetl/infrastructure/schemas/gold.py` |
+| Gold Schema | `src/bioetl.contracts.schemas.gold.py` |
 
 ---
 

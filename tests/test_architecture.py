@@ -266,7 +266,7 @@ def test_silver_schemas_match_domain_entities(src_dir: Path):
     # Import schemas and entities
     try:
         from bioetl.domain.entities import Bioactivity, PubchemMolecule, UniprotTarget
-        from bioetl.infrastructure.schemas.silver import (
+        from bioetl.contracts.schemas.silver import (
             CHEMBL_ACTIVITY_SCHEMA,
             PUBCHEM_COMPOUND_SCHEMA,
             UNIPROT_PROTEIN_SCHEMA,

@@ -55,7 +55,6 @@ class TestUniProtIDMappingIntegration:
 
         return UnifiedHTTPClient(
             rate_limiter=token_bucket,
-            circuit_breaker=circuit_breaker,
             timeout=60.0,  # Longer timeout for ID mapping jobs
         )
 

@@ -106,7 +106,7 @@ The following Gold layer schema classes in `infrastructure/schemas/gold.py` stil
 
 **Verification:**
 ```bash
-grep -n "class ChEMBLDocument.*GoldSchema" src/bioetl/infrastructure/schemas/gold.py
+grep -n "class ChEMBLDocument.*GoldSchema" src/bioetl.contracts.schemas.gold.py
 # Output:
 # 395:class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
 # 440:class ChEMBLDocumentTermGoldSchema(pa.DataFrameModel):

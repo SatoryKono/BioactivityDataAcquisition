@@ -32,7 +32,6 @@ def crossref_adapter(mock_logger: MagicMock) -> CrossRefAdapter:
     """Fixture to provide a CrossRefAdapter instance for testing."""
     http_client = UnifiedHTTPClient(
         TokenBucket(rate=50.0, capacity=100.0),
-        CircuitBreaker(provider="crossref_test"),
     )
     return CrossRefAdapter(
         http_client=http_client,

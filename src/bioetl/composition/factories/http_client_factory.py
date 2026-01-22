@@ -1,6 +1,6 @@
 """Factory for creating HTTP clients with standard configurations.
 
-Ensures consistent rate limiting and circuit breaker settings across providers.
+Ensures consistent rate limiting across providers.
 Uses source configuration from YAML files (configs/sources/*.yaml) for settings.
 
 Configuration Priority:
@@ -9,9 +9,9 @@ Configuration Priority:
 3. ProviderRegistry defaults (fallback only)
 
 SRP Compliance:
-- Creates UnifiedHTTPClient with injected RateLimiterPort and CircuitBreakerPort
-- RetryConfig is configured via domain value object
+- Creates UnifiedHTTPClient with injected RateLimiterPort
 - Observability components (tracer, metrics, logger) are injected for correlation
+- Resilience (Retry, Circuit Breaker) is now handled by DataSourcePort decorators
 """
 
 from __future__ import annotations
@@ -20,8 +20,6 @@ from typing import TYPE_CHECKING
 
 from bioetl.composition.bootstrap_logger import BootstrapLogger
 from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded
-from bioetl.domain.resilience import RetryConfig
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.config import load_source_config
@@ -125,16 +123,12 @@ class HttpClientFactory:
                 fallback="ProviderRegistry defaults",
             )
 
-        # Get rate limit, circuit breaker, and client settings
+        # Get rate limit and client settings
         if source_config is not None:
             # Use source YAML config (primary)
             rate = source_config.rate_limit.requests_per_second
             capacity = source_config.rate_limit.burst
-            failure_threshold = source_config.circuit_breaker.failure_threshold
-            recovery_timeout = source_config.circuit_breaker.recovery_timeout
-            # Client settings (timeout and retries)
             timeout = source_config.timeout_sec
-            max_retries = source_config.max_retries
         else:
             # Fallback to ProviderRegistry
             http_config = ProviderRegistry.get_http_config(provider)
@@ -142,17 +136,11 @@ class HttpClientFactory:
                 # Provider doesn't use shared HTTP client - use safe defaults
                 rate = 5.0
                 capacity = 10
-                failure_threshold = 5
-                recovery_timeout = 300
                 timeout = 30.0
-                max_retries = 3
             else:
                 rate = http_config.rate
                 capacity = http_config.capacity
-                failure_threshold = 5  # Default
-                recovery_timeout = 300  # Default
                 timeout = 30.0  # Default
-                max_retries = 3  # Default
 
         # Apply rate overrides based on settings (API key boosts)
         http_config = ProviderRegistry.get_http_config(provider)
@@ -165,13 +153,6 @@ class HttpClientFactory:
 
         return UnifiedHTTPClient(
             rate_limiter=TokenBucket(rate=rate, capacity=capacity, provider=provider),
-            circuit_breaker=CircuitBreaker(
-                provider=provider,
-                failure_threshold=failure_threshold,
-                recovery_timeout=recovery_timeout,
-                metrics=metrics,
-            ),
-            retry_config=RetryConfig(max_attempts=max_retries),
             timeout=timeout,
             provider=provider,
             run_id=run_id,

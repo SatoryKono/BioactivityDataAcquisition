@@ -263,7 +263,7 @@ content_hash = sha256(
 
 ### 6.2. Silver Layer
 
-**PyArrow Schema** (`src/bioetl/infrastructure/schemas/silver.py`):
+**PyArrow Schema** (`src/bioetl.contracts.schemas.silver.py`):
 
 ```python
 CHEMBL_ASSAY_SCHEMA = pa.schema([
@@ -414,8 +414,8 @@ def extract(self, _context, record) -> Watermark:
 | Трансформер | `src/bioetl/application/pipelines/chembl/assay_transformer.py` |
 | Gold-фильтр | `src/bioetl/application/pipelines/chembl/assay_filter.py` |
 | Watermark | `src/bioetl/application/pipelines/chembl/assay_watermark.py` |
-| Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` |
-| Gold Schema | `src/bioetl/infrastructure/schemas/gold.py` |
+| Silver Schema | `src/bioetl.contracts.schemas.silver.py` |
+| Gold Schema | `src/bioetl.contracts.schemas.gold.py` |
 | Data Contract | `docs/contracts/chembl_assay_gold.json` |
 
 ---

@@ -39,7 +39,7 @@ from bioetl.infrastructure.adapters.crossref.fallback import TitleFallbackHandle
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, CircuitBreakerPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
 
@@ -72,6 +72,7 @@ class CrossRefAdapter(BaseHttpAdapter):
     mailto: str
     batch_size: int = 50
     metrics: MetricsPort | None = None
+    circuit_breaker: CircuitBreakerPort | None = None
 
     provider_name: str = field(init=False, default="crossref")
     """Provider identifier (required by DataSourcePort)."""
@@ -454,4 +455,5 @@ def _create_crossref_adapter(
         mailto=mailto,
         batch_size=kwargs.get("batch_size", 50),
         metrics=kwargs.get("metrics"),
+        circuit_breaker=kwargs.get("circuit_breaker"),
     )

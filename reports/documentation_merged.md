@@ -10578,7 +10578,7 @@ print(f"Added {current_count - previous_count} records")
 
 ### Pandera Schema
 
-Все Gold-схемы определены в `src/bioetl/infrastructure/schemas/gold.py`.
+Все Gold-схемы определены в `src/bioetl.contracts.schemas.gold.py`.
 
 ```python
 class ChEMBLActivityGoldSchema(pa.DataFrameModel):
@@ -10594,7 +10594,7 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
 ### Проверка контракта
 
 ```python
-from bioetl.infrastructure.schemas.gold import ChEMBLActivityGoldSchema
+from bioetl.contracts.schemas.gold import ChEMBLActivityGoldSchema
 import polars as pl
 
 # Загрузка и валидация
@@ -10789,7 +10789,7 @@ class PubMedPublicationTransformer(BaseTransformer):
 ```python
 from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
-from bioetl.infrastructure.schemas.gold import PubMedPublicationGoldSchema
+from bioetl.contracts.schemas.gold import PubMedPublicationGoldSchema
 
 pubmed_publications_factory = GenericPipelineFactory(
     pipeline_name="pubmed_publications",
@@ -10939,7 +10939,7 @@ class ChEMBLTargetPipeline(BasePipeline):
 
 ```python
 from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
-from bioetl.infrastructure.schemas.silver import CHEMBL_TARGET_SCHEMA
+from bioetl.contracts.schemas.silver import CHEMBL_TARGET_SCHEMA
 
 # Определение фабрики
 chembl_target_factory = GenericPipelineFactory(
@@ -17309,7 +17309,7 @@ bioetl run chembl_activity --run-type rebuild
 | Entity Definition | `src/bioetl/domain/entities.py` |
 | Transformer | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
 | Gold Filter | `src/bioetl/application/pipelines/chembl/activity_gold_filter.py` |
-| Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` |
+| Silver Schema | `src/bioetl.contracts.schemas.silver.py` |
 
 ---
 
@@ -17416,8 +17416,8 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 | Pipeline Logic | `src/bioetl/application/pipelines/chembl/assay.py` |
 | Transformer | `src/bioetl/application/pipelines/chembl/assay_transformer.py` |
 | Gold Filter | `src/bioetl/application/pipelines/chembl/assay_filter.py` |
-| Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` |
-| Gold Schema | `src/bioetl/infrastructure/schemas/gold.py` |
+| Silver Schema | `src/bioetl.contracts.schemas.silver.py` |
+| Gold Schema | `src/bioetl.contracts.schemas.gold.py` |
 
 ================================================================================
 File: README.md
@@ -20704,7 +20704,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 - **MAY** конвертировать `float → int` после проверки на `NaN` (если бизнес-логика требует)
 - **MUST NOT** предполагать, что все значения — целые числа
 
-**Реализация**: `src/bioetl/infrastructure/schemas/gold.py`
+**Реализация**: `src/bioetl.contracts.schemas.gold.py`
 
 #### Жизненный цикл Карантина 
 - **Retention**: 30 дней. Старые записи удаляются автоматически (S3 Lifecycle). 
@@ -21709,8 +21709,8 @@ python src/tools/create_pipeline.py --provider pubchem --entity compound --dry-r
 - `bioetl.domain.entities.bioactivity.Bioactivity`
 - `bioetl.domain.entities.chembl_activity.Assay`
 - `bioetl.domain.entities.chembl_structures.Molecule, Target`
-- `bioetl.infrastructure.schemas.gold`
-- `bioetl.infrastructure.schemas.silver`
+- `bioetl.contracts.schemas.gold`
+- `bioetl.contracts.schemas.silver`
 
 **Использование:**
 ```bash
@@ -36720,7 +36720,7 @@ The following Gold layer schema classes in `infrastructure/schemas/gold.py` stil
 
 **Verification:**
 ```bash
-grep -n "class ChEMBLDocument.*GoldSchema" src/bioetl/infrastructure/schemas/gold.py
+grep -n "class ChEMBLDocument.*GoldSchema" src/bioetl.contracts.schemas.gold.py
 # Output:
 # 395:class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
 # 440:class ChEMBLDocumentTermGoldSchema(pa.DataFrameModel):
@@ -37263,8 +37263,8 @@ Path: archived\audits\pipeline-analysis-report.md
 - `src/bioetl/composition/factories/pipeline_factories.py:162-303`
 
 ### Schemas
-- Silver: `src/bioetl/infrastructure/schemas/silver.py`
-- Gold: `src/bioetl/infrastructure/schemas/gold.py`
+- Silver: `src/bioetl.contracts.schemas.silver.py`
+- Gold: `src/bioetl.contracts.schemas.gold.py`
 
 ### Transformers
 - ChEMBL: `src/bioetl/application/pipelines/chembl/*_transformer.py`
@@ -56634,7 +56634,7 @@ META_FIELDS = {
 
 **Файл:** `src/bioetl/infrastructure/storage/delta_writer.py`
 
-**PyArrow Schema** (`src/bioetl/infrastructure/schemas/silver.py`):
+**PyArrow Schema** (`src/bioetl.contracts.schemas.silver.py`):
 
 ```python
 CHEMBL_ACTIVITY_SCHEMA = pa.schema([
@@ -56793,7 +56793,7 @@ def extract(self, context, record) -> Watermark:
 | Трансформер | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
 | Gold-фильтр | `src/bioetl/application/pipelines/chembl/activity_gold_filter.py` |
 | Watermark | `src/bioetl/application/pipelines/chembl/activity_watermark.py` |
-| Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` |
+| Silver Schema | `src/bioetl.contracts.schemas.silver.py` |
 | Bronze Writer | `src/bioetl/infrastructure/storage/bronze_writer.py` |
 | Delta Writer | `src/bioetl/infrastructure/storage/delta_writer.py` |
 | Gold Writer | `src/bioetl/infrastructure/storage/gold_writer.py` |
@@ -57228,7 +57228,7 @@ content_hash = sha256(
 
 ### 6.2. Silver Layer
 
-**PyArrow Schema** (`src/bioetl/infrastructure/schemas/silver.py`):
+**PyArrow Schema** (`src/bioetl.contracts.schemas.silver.py`):
 
 ```python
 CHEMBL_ASSAY_SCHEMA = pa.schema([
@@ -57379,8 +57379,8 @@ def extract(self, _context, record) -> Watermark:
 | Трансформер | `src/bioetl/application/pipelines/chembl/assay_transformer.py` |
 | Gold-фильтр | `src/bioetl/application/pipelines/chembl/assay_filter.py` |
 | Watermark | `src/bioetl/application/pipelines/chembl/assay_watermark.py` |
-| Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` |
-| Gold Schema | `src/bioetl/infrastructure/schemas/gold.py` |
+| Silver Schema | `src/bioetl.contracts.schemas.silver.py` |
+| Gold Schema | `src/bioetl.contracts.schemas.gold.py` |
 | Data Contract | `docs/contracts/chembl_assay_gold.json` |
 
 ---
@@ -59136,7 +59136,7 @@ gold_filters:
 | Адаптер | `src/bioetl/infrastructure/adapters/openalex/client.py` |
 | Fallback Handler | `src/bioetl/infrastructure/adapters/openalex/fallback.py` |
 | Domain Entity | `src/bioetl/domain/entities/openalex.py` |
-| Gold Schema | `src/bioetl/infrastructure/schemas/gold.py` |
+| Gold Schema | `src/bioetl.contracts.schemas.gold.py` |
 
 ---
 
@@ -60090,8 +60090,8 @@ CHEMBL9999999
 | **Config** | `configs/pipelines/uniprot/idmapping.yaml` |
 | **Transformer** | `src/bioetl/application/pipelines/uniprot/idmapping_transformer.py` |
 | **Client** | `src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py` |
-| **Silver Schema** | `src/bioetl/infrastructure/schemas/silver.py:134-154` |
-| **Gold Schema** | `src/bioetl/infrastructure/schemas/gold.py:166-198` |
+| **Silver Schema** | `src/bioetl.contracts.schemas.silver.py:134-154` |
+| **Gold Schema** | `src/bioetl.contracts.schemas.gold.py:166-198` |
 | **Unit Tests** | `tests/unit/application/pipelines/test_idmapping_transformer.py` |
 | **Integration Tests** | `tests/integration/adapters/test_uniprot_idmapping.py` |
 
@@ -62014,7 +62014,7 @@ Silver schema defines `pmid` as `Series[int]`, but Gold schema expects `Series[s
 # Silver: src/bioetl/domain/schemas/pubmed/article.py:34
 pmid: Series[int] = pa.Field(nullable=False, description="PubMed ID (PK)")
 
-# Gold: src/bioetl/infrastructure/schemas/gold.py:216
+# Gold: src/bioetl.contracts.schemas.gold.py:216
 pmid: Series[str] = pa.Field(nullable=False)
 ```
 
@@ -62089,7 +62089,7 @@ Silver schema has 18 PubMed-specific fields not present in Gold schema, causing 
 
 ### Evidence
 
-**Missing in Gold Schema** (`src/bioetl/infrastructure/schemas/gold.py:211-272`):
+**Missing in Gold Schema** (`src/bioetl.contracts.schemas.gold.py:211-272`):
 - `journal_title`, `journal_iso_abbrev` (replaced by `journal`, `journal_abbrev`)
 - `journal_issn_type`
 - `pub_month`, `pub_day`
@@ -62129,7 +62129,7 @@ Base Silver schema uses `Series[datetime]` for `_ingestion_ts`, but Gold schemas
 # Silver: src/bioetl/domain/schemas/base.py:45
 ingestion_ts: Series[datetime] = pa.Field(alias="_ingestion_ts", nullable=False)
 
-# Gold: src/bioetl/infrastructure/schemas/gold.py:108
+# Gold: src/bioetl.contracts.schemas.gold.py:108
 ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
 ```
 
@@ -62161,7 +62161,7 @@ Base Silver schema defines `_dq_warn` and `_dq_error` as `nullable=False` with `
 dq_warn: Series[bool] = pa.Field(alias="_dq_warn", nullable=False, default=False)
 dq_error: Series[bool] = pa.Field(alias="_dq_error", nullable=False, default=False)
 
-# Gold: src/bioetl/infrastructure/schemas/gold.py:258-259
+# Gold: src/bioetl.contracts.schemas.gold.py:258-259
 dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
 dq_error: Series[bool] = pa.Field(nullable=True, alias="_dq_error")
 ```
@@ -62273,7 +62273,7 @@ Publication schemas across providers have inconsistent field sets, making cross-
 
 | Component | Path |
 |-----------|------|
-| Gold Schemas | `src/bioetl/infrastructure/schemas/gold.py` |
+| Gold Schemas | `src/bioetl.contracts.schemas.gold.py` |
 | Silver Schemas - Base | `src/bioetl/domain/schemas/base.py` |
 | Silver Schemas - ChEMBL | `src/bioetl/domain/schemas/chembl/*.py` |
 | Silver Schemas - Publications | `src/bioetl/domain/schemas/{pubmed,crossref,openalex,semanticscholar}/*.py` |
@@ -62285,7 +62285,7 @@ Publication schemas across providers have inconsistent field sets, making cross-
 
 ```bash
 # Validate all schemas parse correctly
-python -c "from bioetl.domain.schemas import *; from bioetl.infrastructure.schemas.gold import *; print('All schemas valid')"
+python -c "from bioetl.domain.schemas import *; from bioetl.contracts.schemas.gold import *; print('All schemas valid')"
 
 # Run mypy strict on schemas
 mypy src/bioetl/domain/schemas/ --strict
@@ -62293,7 +62293,7 @@ mypy src/bioetl/infrastructure/schemas/ --strict
 
 # Compare Silver vs Gold field counts
 grep -c "Series\[" src/bioetl/domain/schemas/chembl/activity.py
-grep -c "Series\[" src/bioetl/infrastructure/schemas/gold.py | head -1
+grep -c "Series\[" src/bioetl.contracts.schemas.gold.py | head -1
 ```
 
 ---
@@ -62541,7 +62541,7 @@ The `authors` field has inconsistent types between Silver (JSON string) and Gold
 
 ### File Locations
 
-**Gold Schema (`src/bioetl/infrastructure/schemas/gold.py`)**:
+**Gold Schema (`src/bioetl.contracts.schemas.gold.py`)**:
 - Line 229: PubMed `authors: Series[object] = pa.Field(nullable=True)  # list[str]`
 - Line 766: CrossRef `authors: Series[object] = pa.Field(nullable=True)  # list[str]`
 - Line 835: OpenAlex `authors: Series[object] = pa.Field(nullable=True)  # list[str]`

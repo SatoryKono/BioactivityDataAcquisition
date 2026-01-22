@@ -54,6 +54,7 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
         provider_name: Unique identifier for the data provider.
         logger: LoggerPort instance for structured logging.
         metrics: MetricsPort instance for metrics collection (defaults to NoOpMetrics).
+        circuit_breaker: CircuitBreakerPort instance (optional, for health checks).
 
     """
 
@@ -61,6 +62,7 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
     provider_name: str
     logger: LoggerPort
     metrics: MetricsPort | None  # Runtime-resolved to NoOpMetrics if None
+    circuit_breaker: CircuitBreakerPort | None
     _error_handler: ErrorService
 
     def __init__(
@@ -68,6 +70,7 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
         http_client: UnifiedHTTPClient,
         logger: LoggerPort,
         metrics: MetricsPort | None = None,
+        circuit_breaker: CircuitBreakerPort | None = None,
     ) -> None:
         """Initialize BaseAdapter.
 
@@ -76,24 +79,30 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
             logger: LoggerPort instance for structured logging (required).
             metrics: MetricsPort instance for metrics collection (optional).
                     Defaults to NoOpMetrics if not provided.
+            circuit_breaker: CircuitBreakerPort for health status assessment.
 
         """
         self.http_client = http_client
         self.logger = logger
         self.metrics = metrics if metrics is not None else NoOpMetrics()
+        self.circuit_breaker = circuit_breaker
         self._error_handler = ErrorService(logger)
 
     @property
     def _circuit_breaker(self) -> CircuitBreakerPort:
-        """Return circuit breaker from HTTP client.
+        """Return circuit breaker.
 
         Implements abstract property from HealthCheckProviderMixin.
 
         Returns:
             CircuitBreakerPort instance for health status assessment.
 
+        Raises:
+            RuntimeError: If circuit breaker is not configured.
         """
-        return self.http_client.circuit_breaker
+        if self.circuit_breaker:
+            return self.circuit_breaker
+        raise RuntimeError(f"Circuit Breaker not configured for adapter {self.provider_name}")
 
     async def __aenter__(self) -> Self:
         """Enter async context manager.

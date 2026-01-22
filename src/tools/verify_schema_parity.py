@@ -7,13 +7,13 @@ import sys
 from bioetl.domain.entities.bioactivity import Bioactivity
 from bioetl.domain.entities.chembl_activity import Assay
 from bioetl.domain.entities.chembl_structures import Molecule, Target
-from bioetl.infrastructure.schemas.gold import (
+from bioetl.contracts.schemas.gold import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
     ChEMBLMoleculeGoldSchema,
     ChEMBLTargetGoldSchema,
 )
-from bioetl.infrastructure.schemas.silver import (
+from bioetl.contracts.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
     CHEMBL_ASSAY_SCHEMA,
     CHEMBL_MOLECULE_SCHEMA,

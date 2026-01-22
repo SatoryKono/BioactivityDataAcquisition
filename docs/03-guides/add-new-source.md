@@ -146,7 +146,7 @@ class PubMedPublicationTransformer(BaseTransformer):
 ```python
 from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
-from bioetl.infrastructure.schemas.gold import PubMedPublicationGoldSchema
+from bioetl.contracts.schemas.gold import PubMedPublicationGoldSchema
 
 pubmed_publications_factory = GenericPipelineFactory(
     pipeline_name="pubmed_publications",

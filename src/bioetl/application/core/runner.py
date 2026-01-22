@@ -3,18 +3,25 @@
 Application Service that orchestrates pipeline execution lifecycle.
 Coordinates locking, checkpointing, and execution.
 
-Delegates to specialized services (injected directly via DI):
-- LockManager: Distributed locking
-- PreflightService: Infrastructure health validation
-- PostrunService: DQ checks, VACUUM, cleanup
-- MedallionLifecycleService: Medallion layer clearing and vacuum
-- PipelineObserver: Observability wrapper for tracing, metrics, logging
+Delegates to specialized handlers (Phase Handlers) for execution phases:
+- PreflightHandler: Infrastructure validation
+- InitializationHandler: Medallion preparation
+- ExecutionHandler: Batch execution
+- PostrunHandler: DQ, cleanup
+- CleanupHandler: Final resource cleanup
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.handlers import (
+    CleanupHandler,
+    ExecutionHandler,
+    InitializationHandler,
+    PostrunHandler,
+    PreflightHandler,
+)
 from bioetl.domain.events import PipelineEvent
 
 if TYPE_CHECKING:
@@ -41,10 +48,7 @@ class PipelineRunner:
     It coordinates application services like locking and checkpointing,
     but remains decoupled from the core business logic of the pipeline itself.
 
-    Delegates specialized operations to:
-    - PreflightService: Pre-flight infrastructure validation
-    - PostrunService: Post-run DQ checks, cleanup
-    - MedallionLifecycleService: Pre-run clearing and post-run VACUUM
+    Delegates execution phases to dedicated handlers (Command pattern).
     """
 
     def __init__(
@@ -97,10 +101,19 @@ class PipelineRunner:
 
         # Services injected directly via DI (created in composition layer)
         self._lock_manager = lock_manager
+        self._observer = observer
+
+        # Initialize Phase Handlers
+        self._preflight_handler = PreflightHandler(preflight, services)
+        self._initialization_handler = InitializationHandler(lifecycle_service, config, runtime)
+        self._execution_handler = ExecutionHandler(executor, checkpoint_manager, runtime)
+        self._postrun_handler = PostrunHandler(postrun, executor, checkpoint_manager)
+        self._cleanup_handler = CleanupHandler(postrun, tracer)
+
+        # Keep references for backward compatibility accessors (if any)
         self._preflight_service = preflight
         self._postrun_service = postrun
         self._lifecycle_service = lifecycle_service
-        self._observer = observer
 
     @property
     def logger(self) -> LoggerPort:
@@ -130,51 +143,33 @@ class PipelineRunner:
         try:
             with self._observer:
                 async with self._services, self._lock_manager:
-                    # Pre-flight: validate infrastructure
-                    await self._preflight_service.validate_infrastructure(
-                        self._services
-                    )
+                    # Pre-flight
+                    await self._preflight_handler.handle()
 
-                    # Lifecycle: prepare (clear based on run type policy)
-                    await self._lifecycle_service.prepare_for_run(
-                        config=self._config,
-                        runtime=self._runtime,
-                    )
+                    # Lifecycle preparation
+                    await self._initialization_handler.handle()
 
                     # Execute pipeline
-                    await self._checkpoint_manager.load_checkpoint()
-                    await self._executor.execute(
-                        limit=self._runtime.limit,
-                        query=self._runtime.query,
-                    )
+                    await self._execution_handler.handle()
 
-                    # Post-run: DQ checks, DQ reports, and VACUUM
-                    dq_context = self._executor.get_dq_context()
-                    await self._postrun_service.run(
-                        executor=self._executor,
-                        dq_context=dq_context,
-                    )
-
-                    await self._checkpoint_manager.delete_checkpoint()
+                    # Post-run
+                    await self._postrun_handler.handle()
 
                 self._logger.debug(
                     PipelineEvent.COMPLETE,
                     records_fetched=self._executor.records_fetched,
                 )
         finally:
-            await self._postrun_service.cleanup(self._tracer)
+            await self._cleanup_handler.handle()
 
-    # Backward-compatible private methods (delegate to services)
+    # Backward-compatible private methods (delegate to handlers/services)
     async def _validate_infrastructure(self) -> None:
         """Validate infrastructure health before pipeline execution."""
-        await self._preflight_service.validate_infrastructure(self._services)
+        await self._preflight_handler.handle()
 
     async def _prepare_medallion_layers(self) -> None:
         """Prepare medallion layers (clear based on run type policy)."""
-        await self._lifecycle_service.prepare_for_run(
-            config=self._config,
-            runtime=self._runtime,
-        )
+        await self._initialization_handler.handle()
 
     async def _check_data_quality(self) -> None:
         """Check data quality metrics and report anomalies."""
@@ -186,4 +181,4 @@ class PipelineRunner:
 
     async def _cleanup(self) -> None:
         """Cleanup all resources including observability."""
-        await self._postrun_service.cleanup(self._tracer)
+        await self._cleanup_handler.handle()
