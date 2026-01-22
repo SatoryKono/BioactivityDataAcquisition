@@ -53,6 +53,28 @@ class CompositePipelineState(str, Enum):
         return self == CompositePipelineState.COMPLETED
 
     @property
+    def is_resumable(self) -> bool:
+        """Check if execution can be resumed from this state.
+
+        Resumable states have completed work that can be skipped on resume:
+        SEED_COMPLETED, ENRICHING, ENRICHMENT_COMPLETED.
+
+        Returns:
+            True if this state allows resume with partial progress preserved.
+
+        Example:
+            >>> CompositePipelineState.SEED_COMPLETED.is_resumable
+            True
+            >>> CompositePipelineState.NOT_STARTED.is_resumable
+            False
+        """
+        return self in {
+            CompositePipelineState.SEED_COMPLETED,
+            CompositePipelineState.ENRICHING,
+            CompositePipelineState.ENRICHMENT_COMPLETED,
+        }
+
+    @property
     def allowed_transitions(self) -> frozenset[CompositePipelineState]:
         """Get the set of states that can be transitioned to from this state."""
         allowed_values = _STATE_TRANSITIONS.get(self.value, frozenset())
@@ -136,5 +158,17 @@ TransitionRules = Mapping[CompositePipelineState, frozenset[CompositePipelineSta
 
 
 def get_transition_rules() -> TransitionRules:
-    """Get the complete state transition rules as a mapping."""
+    """Get the complete state transition rules as a mapping.
+
+    Returns a dictionary mapping each state to its allowed target states.
+    Useful for visualization or external validation.
+
+    Returns:
+        Mapping of state -> allowed target states.
+
+    Example:
+        >>> rules = get_transition_rules()
+        >>> CompositePipelineState.MERGING in rules[CompositePipelineState.ENRICHMENT_COMPLETED]
+        True
+    """
     return {state: state.allowed_transitions for state in CompositePipelineState}
