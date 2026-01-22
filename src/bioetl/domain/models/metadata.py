@@ -37,6 +37,114 @@ class RunTypeEnum(str, Enum):
 
 
 # =============================================================================
+# Governance Metadata Components
+# =============================================================================
+
+
+class GovernanceLineageConfig(BaseModel):
+    """Governance-level lineage configuration from pipeline config.
+
+    Captures static lineage information defined in pipeline YAML,
+    separate from runtime lineage tracked in LineageMetadata.
+
+    Attributes:
+        source_system: Source system identifier (e.g., "chembl", "pubchem").
+        source_version: Version of source system/API.
+        extraction_method: How data was extracted (api, csv, parquet).
+        source_layer: Source Medallion layer (for Silver/Gold).
+        transformations: List of transformation steps applied.
+        filters_applied: Whether Gold filters were applied.
+        business_domain: Business domain classification.
+        use_cases: Intended use cases for the data.
+    """
+
+    source_system: str | None = Field(
+        default=None, description="Source system identifier"
+    )
+    source_version: str | None = Field(
+        default=None, description="Version of source system"
+    )
+    extraction_method: str | None = Field(
+        default=None, description="Extraction method (api, csv, parquet)"
+    )
+    source_layer: str | None = Field(
+        default=None, description="Source Medallion layer"
+    )
+    transformations: list[str] = Field(
+        default_factory=list, description="Transformation steps applied"
+    )
+    filters_applied: bool | None = Field(
+        default=None, description="Whether filters were applied"
+    )
+    business_domain: str | None = Field(
+        default=None, description="Business domain classification"
+    )
+    use_cases: list[str] = Field(
+        default_factory=list, description="Intended use cases"
+    )
+
+
+class QualityExpectations(BaseModel):
+    """Quality expectations for data governance.
+
+    Defines target quality metrics for the data layer.
+
+    Attributes:
+        completeness: Expected completeness rate (0.0-1.0).
+        accuracy: Expected accuracy rate (0.0-1.0).
+    """
+
+    completeness: float | None = Field(
+        default=None, ge=0.0, le=1.0, description="Expected completeness (0-1)"
+    )
+    accuracy: float | None = Field(
+        default=None, ge=0.0, le=1.0, description="Expected accuracy (0-1)"
+    )
+
+
+class GovernanceMetadata(BaseModel):
+    """Governance metadata for data stewardship and compliance.
+
+    Captures static governance information from pipeline configuration
+    that describes data ownership, retention, and SLA requirements.
+    This is separate from execution metadata (runtime, DQ metrics, etc.).
+
+    Attributes:
+        owner: Data owner team or individual.
+        steward: Data steward responsible for quality.
+        description: Human-readable description of the data.
+        tags: Classification tags for discovery.
+        retention_days: Data retention period in days.
+        sla_freshness_hours: SLA for data freshness in hours.
+        lineage: Static lineage configuration from pipeline config.
+        quality_expectations: Target quality metrics.
+        classification: Data classification level (public, internal, restricted).
+    """
+
+    owner: str | None = Field(default=None, description="Data owner")
+    steward: str | None = Field(default=None, description="Data steward")
+    description: str | None = Field(default=None, description="Data description")
+    tags: list[str] = Field(default_factory=list, description="Classification tags")
+    retention_days: int | None = Field(
+        default=None, ge=1, description="Retention period in days"
+    )
+    sla_freshness_hours: int | None = Field(
+        default=None, ge=1, description="SLA freshness in hours"
+    )
+    lineage: GovernanceLineageConfig = Field(
+        default_factory=GovernanceLineageConfig,
+        description="Static lineage configuration",
+    )
+    quality_expectations: QualityExpectations = Field(
+        default_factory=QualityExpectations,
+        description="Target quality metrics",
+    )
+    classification: str | None = Field(
+        default=None, description="Data classification (public, internal, restricted)"
+    )
+
+
+# =============================================================================
 # Common Components
 # =============================================================================
 
@@ -498,6 +606,7 @@ class BronzeMetadata(BaseModel):
     """Complete metadata for Bronze layer sidecar file.
 
     Structure follows RULES.md 2.4 lineage requirements.
+    Includes governance metadata block for data stewardship.
     """
 
     version: str = Field(default="1.0", description="Metadata schema version")
@@ -511,12 +620,15 @@ class BronzeMetadata(BaseModel):
         default_factory=OutputMetadata, description="Output information"
     )
     environment: EnvironmentMetadata = Field(description="Environment information")
+    governance: GovernanceMetadata | None = Field(
+        default=None, description="Governance metadata for data stewardship"
+    )
 
 
 class SilverMetadata(BaseModel):
     """Complete metadata for Silver layer sidecar file.
 
-    Includes lineage tracking from Bronze and DQ metrics.
+    Includes lineage tracking from Bronze, DQ metrics, and governance metadata.
     """
 
     version: str = Field(default="1.0", description="Metadata schema version")
@@ -539,12 +651,15 @@ class SilverMetadata(BaseModel):
         default=None,
         description="Path to corresponding DQ report file (if generated)",
     )
+    governance: GovernanceMetadata | None = Field(
+        default=None, description="Governance metadata for data stewardship"
+    )
 
 
 class GoldMetadata(BaseModel):
     """Complete metadata for Gold layer sidecar file.
 
-    Includes schema contract and SCD tracking.
+    Includes schema contract, SCD tracking, and governance metadata.
     """
 
     model_config = ConfigDict(populate_by_name=True)
@@ -569,3 +684,6 @@ class GoldMetadata(BaseModel):
     )
     scd: SCDMetadata | None = Field(default=None, description="SCD Type 2 metadata")
     environment: EnvironmentMetadata = Field(description="Environment information")
+    governance: GovernanceMetadata | None = Field(
+        default=None, description="Governance metadata for data stewardship"
+    )

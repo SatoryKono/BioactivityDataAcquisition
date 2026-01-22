@@ -619,6 +619,7 @@ class SilverWriter(BaseDeltaWriter):
                 mode=validated_mode,
                 bronze_refs=bronze_refs,
                 dq_metrics=dq_metrics,
+                partition_by=partition_cols,
             )
 
             # Return SilverWriteResult for Gold lineage tracking (REQ-LINEAGE-002)
@@ -772,6 +773,7 @@ class SilverWriter(BaseDeltaWriter):
         bronze_refs: list[BronzeWriteResult] | None = None,
         dq_metrics: BatchDQMetrics | None = None,
         dq_report_path: str | None = None,
+        partition_by: list[str] | None = None,
     ) -> None:
         """Write Silver layer metadata sidecar file.
 
@@ -788,6 +790,7 @@ class SilverWriter(BaseDeltaWriter):
                 If provided, dq_summary will contain real column metrics,
                 schema drift info, and error rates (REQ-DQ-001).
             dq_report_path: Optional path to generated DQ report for cross-reference.
+            partition_by: Partition columns used for the Delta table.
         """
         if not records:
             return
@@ -819,6 +822,7 @@ class SilverWriter(BaseDeltaWriter):
             transform_version=self._transform_version,
             transform_steps=self._transform_steps,
             dq_report_path=dq_report_path,
+            partition_by=partition_by,
         )
         metadata = self._metadata_coordinator.create_silver_metadata(silver_input)
         await self._metadata_writer.write_silver_metadata(

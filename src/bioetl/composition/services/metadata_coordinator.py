@@ -53,18 +53,17 @@ from bioetl.domain.value_objects.run_context import RunContext
 
 
 def _get_bioetl_version() -> str:
-    """Get BioETL package version safely."""
-    try:
-        from bioetl import __version__
+    """Get BioETL package version.
 
-        return __version__
-    except ImportError:
-        try:
-            from importlib.metadata import version as pkg_version
+    Returns:
+        Package version string.
 
-            return pkg_version("bioetl")
-        except Exception:
-            return "unknown"
+    Raises:
+        PackageNotFoundError: If bioetl package is not installed.
+    """
+    from importlib.metadata import version as pkg_version
+
+    return pkg_version("bioetl")
 
 
 class MetadataCoordinator:
@@ -154,15 +153,14 @@ class MetadataCoordinator:
         )
 
     def _build_pipeline_metadata(self) -> PipelineMetadata:
-        """Build PipelineMetadata from run context.
-
-        Returns:
-            PipelineMetadata with pipeline identification.
-        """
+        """Build PipelineMetadata with versioning from run context."""
         return PipelineMetadata(
             name=self._context.pipeline_name,
             provider=self._context.provider,
             entity=self._context.entity,
+            version=self._context.pipeline_version or "1.0.0",
+            git_commit=self._context.git_commit,
+            config_hash=self._context.config_hash,
         )
 
     def create_bronze_metadata(self, input_data: BronzeMetadataInput) -> BronzeMetadata:
@@ -211,6 +209,7 @@ class MetadataCoordinator:
                 total_bytes=input_data.compressed_size,
             ),
             environment=self._get_environment_metadata(),
+            governance=input_data.governance,
         )
 
     def create_silver_metadata(self, input_data: SilverMetadataInput) -> SilverMetadata:
@@ -270,6 +269,7 @@ class MetadataCoordinator:
             table_path=input_data.table_path,
             operation=operation_map[input_data.mode],
             primary_key=input_data.primary_keys,
+            partition_by=input_data.partition_by or [],
             version_after=input_data.version_after,
             rows_inserted=len(input_data.records),
         )
@@ -296,6 +296,7 @@ class MetadataCoordinator:
             output=output,
             environment=self._get_environment_metadata(),
             dq_report_path=input_data.dq_report_path,
+            governance=input_data.governance,
         )
 
     def create_gold_metadata(self, input_data: GoldMetadataInput) -> GoldMetadata:
@@ -370,6 +371,7 @@ class MetadataCoordinator:
             output=output,
             scd=scd,
             environment=self._get_environment_metadata(),
+            governance=input_data.governance,
         )
 
     @classmethod
