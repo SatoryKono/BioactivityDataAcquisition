@@ -4,6 +4,10 @@ Provides high-level operations for managing the Prometheus metrics server.
 Abstracts infrastructure concerns from CLI and other interfaces.
 
 Implements RULES.md §1.1 - Application layer depends only on Domain.
+
+Note:
+    MetricsServerError is defined in infrastructure.observability.exceptions
+    and re-exported here for backward compatibility.
 """
 
 from __future__ import annotations
@@ -12,26 +16,19 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
+from bioetl.infrastructure.observability.exceptions import MetricsServerError
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
-
-class MetricsServerError(Exception):
-    """Raised when metrics server fails to start."""
-
-    def __init__(self, port: int, reason: str, original_error: Exception | None = None):
-        """Initialize MetricsServerError.
-
-        Args:
-            port: Port that failed.
-            reason: Reason for failure.
-            original_error: Underlying exception.
-
-        """
-        super().__init__(f"Failed to start metrics server on port {port}: {reason}")
-        self.port = port
-        self.reason = reason
-        self.original_error = original_error
+# Re-export for backward compatibility
+__all__ = [
+    "MetricsServerError",
+    "MetricsServerPort",
+    "MetricsServerStatus",
+    "MetricsService",
+    "StartResult",
+]
 
 
 @runtime_checkable
