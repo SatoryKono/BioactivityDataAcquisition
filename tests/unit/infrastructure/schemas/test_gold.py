@@ -9,8 +9,8 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-# Import from contracts package (canonical location in interfaces layer)
-from bioetl.interfaces.contracts import (
+# Import from contracts package (canonical location in domain layer)
+from bioetl.domain.contracts import (
     ChEMBLDocumentGoldSchema,
     CrossRefPublicationGoldSchema,
     OpenAlexPublicationGoldSchema,
