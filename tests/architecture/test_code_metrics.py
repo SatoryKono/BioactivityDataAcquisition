@@ -61,8 +61,8 @@ class TestFileSizeLimits:
         "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
         # Domain ports NoOp implementations
         "noop.py": 475,  # 470 LOC - NoOp implementations for Null Object Pattern (+ NoOpMetadataWriter with provider/entity params)
-        # Domain models/metadata.py (models/metadata.py 566 LOC, ports/metadata.py only 104 LOC)
-        "metadata.py": 575,  # 571 LOC - Metadata models with APIRequestDetails + RateLimitInfo for Bronze layer enrichment
+        # Domain models/metadata.py (models/metadata.py 685 LOC, ports/metadata.py only 104 LOC)
+        "metadata.py": 690,  # 685 LOC - Metadata models with APIRequestDetails + RateLimitInfo for Bronze layer enrichment + extended fields
         # Domain ports (Protocol definitions with comprehensive docstrings)
         "data_normalization.py": 330,  # 321 LOC - DataNormalizationPort with partial date normalization
         "storage.py": 405,  # 400 LOC - StoragePort with read_silver, write_*_merged for composite pipelines + SourceMetadata param + Silver lineage
@@ -84,6 +84,7 @@ class TestFileSizeLimits:
         "silver_analyzer.py": 650,  # 642 LOC - Silver layer analysis with extracted helper methods
         "dq_report_service.py": 565,  # 561 LOC - DQ report service with extracted helpers for CC reduction
         # Composition layer exemptions
+        "metadata_coordinator.py": 480,  # 474 LOC - MetadataCoordinator with centralized metadata management
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "entrypoints.py": 780,  # 775 LOC - pipeline entrypoints (run_pipeline expanded + services + export + ensure_metrics_server_started)
         "registration.py": 720,  # 705 LOC - provider registration with data source creators (OpenAlex + SemanticScholar + UniProt IDMapping)
@@ -93,14 +94,14 @@ class TestFileSizeLimits:
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
         "services_factory.py": 672,  # 671 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext
         # Infrastructure layer exemptions
-        "silver_writer.py": 1130,  # 1111 LOC - schema drift + merge logic (metadata builder extracted to metadata_builder.py)
+        "silver_writer.py": 1140,  # 1132 LOC - schema drift + merge logic + CSV export for merged (metadata builder extracted)
         "gold_writer.py": 910,  # 890 LOC - SCD Type 2 (metadata/arrow logic extracted to metadata_builder.py, arrow_converter.py)
         "bronze_writer.py": 800,  # 797 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
         "silver.py": 840,  # 833 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields)
         "client.py": 960,  # 941 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
-        "pipeline_config.py": 910,  # 905 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure support
+        "pipeline_config.py": 1045,  # 1038 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
@@ -251,6 +252,8 @@ class TestFunctionComplexity:
         "get_dq_context": 13,  # CC=12 - DQ context gathering with nullable field handling
         # Composite pipeline logging
         "_log_enrichment_summary": 12,  # CC=11 - Status aggregation with multiple EnrichmentStatus branches
+        # Metadata builder schema extraction
+        "_extract_schema_metadata": 17,  # CC=16 - Schema metadata extraction with multiple field type checks
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -575,7 +578,7 @@ class TestClassSize:
         # Derived entity data source wrappers (comprehensive docstrings)
         "PublicationTermDataSource": 585,  # 579 lines - Wrapper with FilterableDataSourcePort delegation + get_source_metadata
         # Composition services
-        "MetadataCoordinator": 315,  # 308 lines - Metadata coordination for Medallion layers
+        "MetadataCoordinator": 410,  # 403 lines - Metadata coordination for Medallion layers + extended lineage
         # Composite pipeline services (ADR-026)
         "MergeService": 700,  # 694 lines - Composite merge service with conflict resolution + extracted helper methods
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service

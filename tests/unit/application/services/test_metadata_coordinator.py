@@ -1151,4 +1151,6 @@ class TestGovernanceMetadata:
         assert governance.sla_freshness_hours is None
         assert governance.classification is None
         assert governance.lineage is not None  # Default GovernanceLineageConfig
-        assert governance.quality_expectations is not None  # Default QualityExpectations
+        assert (
+            governance.quality_expectations is not None
+        )  # Default QualityExpectations

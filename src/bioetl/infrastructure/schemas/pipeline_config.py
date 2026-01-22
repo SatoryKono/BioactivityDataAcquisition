@@ -550,9 +550,7 @@ class SinkLineageConfig(BaseModel):
     business_domain: str | None = Field(
         default=None, description="Business domain classification"
     )
-    use_cases: list[str] = Field(
-        default_factory=list, description="Intended use cases"
-    )
+    use_cases: list[str] = Field(default_factory=list, description="Intended use cases")
 
 
 class SinkQualityExpectationsConfig(BaseModel):
