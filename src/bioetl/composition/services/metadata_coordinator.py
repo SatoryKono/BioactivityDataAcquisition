@@ -153,15 +153,14 @@ class MetadataCoordinator:
         )
 
     def _build_pipeline_metadata(self) -> PipelineMetadata:
-        """Build PipelineMetadata from run context.
-
-        Returns:
-            PipelineMetadata with pipeline identification.
-        """
+        """Build PipelineMetadata with versioning from run context."""
         return PipelineMetadata(
             name=self._context.pipeline_name,
             provider=self._context.provider,
             entity=self._context.entity,
+            version=self._context.pipeline_version or "1.0.0",
+            git_commit=self._context.git_commit,
+            config_hash=self._context.config_hash,
         )
 
     def create_bronze_metadata(self, input_data: BronzeMetadataInput) -> BronzeMetadata:
