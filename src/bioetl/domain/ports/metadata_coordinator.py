@@ -121,6 +121,8 @@ class GoldMetadataInput:
         silver_refs: List of Silver source references for lineage tracking.
         transform_version: Optional semver version of transform applied.
         transform_steps: Optional list of transform step names applied.
+        gold_schema: Optional Pandera schema class for extracting schema metadata
+                    (contract_path, version, columns).
         governance: Optional governance metadata from pipeline config.
     """
 
@@ -133,6 +135,7 @@ class GoldMetadataInput:
     silver_refs: list[SilverRef] | None = None
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
+    gold_schema: Any | None = None  # Pandera DataFrameModel class
     governance: GovernanceMetadata | None = None
 
 
