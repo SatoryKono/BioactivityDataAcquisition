@@ -66,7 +66,7 @@ class TestFileSizeLimits:
         "protein.py": 370,  # 365 LOC - UniProt target schema + deprecated alias __getattr__ (v2.0)
         # Domain contracts/gold (Gold layer Pandera schemas)
         "publications.py": 400,  # 374 LOC - Gold layer publication schemas (PubMed, CrossRef, OpenAlex, SemanticScholar)
-        "chembl.py": 710,  # 705 LOC - ChEMBL Gold schemas (Activity, Assay, Molecule, Target, etc.)
+        # Note: chembl.py exemption at line 39 covers both domain/entities/chembl.py and domain/contracts/gold/chembl.py
         # Domain DQ models (data quality reports and serialization)
         "dq_serializer.py": 435,  # 429 LOC - DQ report serialization logic (increased for CC reduction)
         "dq_report.py": 660,  # 646 LOC - DQ report models with validation rules
@@ -561,7 +561,7 @@ class TestClassSize:
         # Composite pipeline services (ADR-026)
         "MergeService": 700,  # 694 lines - Composite merge service with conflict resolution + extracted helper methods
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
-        "CompositePipelineRunner": 610,  # 603 lines - Composite pipeline orchestrator with FSM enrichment transitions
+        # Note: CompositePipelineRunner exemption at line 499 (610 lines for FSM transitions)
         # Publication adapters with APIRequestCollector (metadata enrichment)
         "OpenAlexAdapter": 580,  # 578 lines - FilterableDataSourcePort + APIRequestCollector + fallback handler
         "PubMedAdapter": 545,  # 540 lines - FilterableDataSourcePort + APIRequestCollector + TitleFallbackHandler
