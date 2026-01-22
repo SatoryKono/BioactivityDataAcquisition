@@ -15,8 +15,8 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 from bioetl.composition.bootstrap.assembly.checkpoint import (
-    bootstrap_checkpoint,
-    bootstrap_quarantine,
+    bootstrap_checkpoint_port,
+    bootstrap_quarantine_port,
 )
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.config import get_settings
@@ -49,7 +49,7 @@ def bootstrap_quarantine_manager(pipeline_name: str) -> QuarantineManager:
     """
     from bioetl.application.core.quarantine_manager import QuarantineManager
 
-    quarantine_port = bootstrap_quarantine()
+    quarantine_port = bootstrap_quarantine_port()
     return QuarantineManager(
         quarantine_port=quarantine_port,
         pipeline_name=pipeline_name,
@@ -73,7 +73,7 @@ def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointManager:
     from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.domain.types import RunID
 
-    checkpoint_port = bootstrap_checkpoint(pipeline_name)
+    checkpoint_port = bootstrap_checkpoint_port(pipeline_name)
     noop_logger = NoOpLogger()
 
     return CheckpointManager(
@@ -120,7 +120,7 @@ def bootstrap_quarantine_service() -> QuarantineService:
     """
     from bioetl.application.services import QuarantineService
 
-    quarantine_port = bootstrap_quarantine()
+    quarantine_port = bootstrap_quarantine_port()
     noop_logger = NoOpLogger()
 
     return QuarantineService(

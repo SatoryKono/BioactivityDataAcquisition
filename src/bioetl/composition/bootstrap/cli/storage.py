@@ -17,7 +17,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage
+from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
@@ -34,28 +34,46 @@ if TYPE_CHECKING:
 
 __all__ = [
     "bootstrap_bronze_cleanup_service",
+    # Deprecated alias (backward compatibility)
     "bootstrap_cleanup",
+    # Canonical name (use this)
+    "bootstrap_cleanup_service",
     "bootstrap_export_service",
     "bootstrap_lifecycle_service",
     "bootstrap_vacuum_service",
 ]
 
 
-def bootstrap_cleanup() -> CleanupService:
-    """Bootstrap the cleanup service for CLI operations.
+def bootstrap_cleanup_service() -> CleanupService:
+    """Create a cleanup service for CLI operations.
 
     Creates a CleanupService with storage and logger for cleanup operations.
     Used by CLI for --dry-run preview and actual cleanup.
+
+    Layer: Returns application service (CleanupService).
 
     Returns:
         CleanupService configured for the current environment.
     """
     from bioetl.application.core.cleanup_service import CleanupService
 
-    storage = bootstrap_storage()
+    storage = bootstrap_storage_adapter()
     noop_logger = NoOpLogger()
 
     return CleanupService(storage=storage, logger=noop_logger)
+
+
+def bootstrap_cleanup() -> CleanupService:
+    """Bootstrap the cleanup service for CLI operations.
+
+    .. deprecated::
+        Use :func:`bootstrap_cleanup_service` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Returns:
+        CleanupService configured for the current environment.
+    """
+    return bootstrap_cleanup_service()
 
 
 def bootstrap_lifecycle_service() -> MedallionLifecycleService:
@@ -71,7 +89,7 @@ def bootstrap_lifecycle_service() -> MedallionLifecycleService:
         MedallionLifecycleService,
     )
 
-    storage = bootstrap_storage()
+    storage = bootstrap_storage_adapter()
     noop_logger = NoOpLogger()
 
     return MedallionLifecycleService(storage=storage, logger=noop_logger)
@@ -88,7 +106,7 @@ def bootstrap_bronze_cleanup_service() -> BronzeCleanupService:
     """
     from bioetl.application.services import BronzeCleanupService
 
-    storage = bootstrap_storage()
+    storage = bootstrap_storage_adapter()
     noop_logger = NoOpLogger()
 
     return BronzeCleanupService(storage=storage, logger=noop_logger)
