@@ -19,15 +19,15 @@ from uuid import UUID
 
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
-from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
-from bioetl.infrastructure.observability.server import (
+from bioetl.infrastructure.observability import (
     MetricsServerError,
+    NoOpMetrics,
+    NoOpTracing,
+    OpenTelemetryTracer,
+    PrometheusMetrics,
+    UnifiedLogger,
     start_metrics_server,
 )
-from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
-from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
 if TYPE_CHECKING:
     from bioetl.application.services.metrics_service import MetricsService

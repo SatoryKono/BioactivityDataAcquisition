@@ -5,12 +5,13 @@ from unittest import mock
 import pytest
 
 from bioetl.composition._bootstrap import observability as composition_observability
+from bioetl.infrastructure import observability as infra_observability
 from bioetl.infrastructure.observability import server as obs_server
 from bioetl.interfaces import observability
 
 # This module tests the observability interface.
-# The observability module re-exports metrics server components from composition layer,
-# which in turn imports from infrastructure.
+# The observability module re-exports metrics server components from infrastructure layer
+# (not from composition._bootstrap) to respect layer boundaries.
 
 
 # Mock `_SERVER_STARTED` to isolate state among test cases.
@@ -46,13 +47,15 @@ def test_start_metrics_server_failure():
         assert result is False
 
 
-def test_interface_re_exports_from_composition():
-    """Verify interface re-exports start_metrics_server from composition layer.
+def test_interface_re_exports_from_infrastructure():
+    """Verify interface re-exports start_metrics_server from infrastructure layer.
 
-    After architectural refactoring, interfaces/observability.py re-exports
-    from composition/_bootstrap for architectural purity.
+    interfaces/observability.py imports from infrastructure.observability
+    (not composition._bootstrap) to respect layer boundaries.
     """
     # The function should be the same object since it's a re-export
+    assert observability.start_metrics_server is infra_observability.start_metrics_server
+    # Composition layer also imports from infrastructure, so all should be the same
     assert (
         observability.start_metrics_server
         is composition_observability.start_metrics_server
@@ -60,8 +63,10 @@ def test_interface_re_exports_from_composition():
 
 
 def test_interface_exposes_metrics_server_error():
-    """Verify MetricsServerError is exported from interface via composition."""
-    # Interface re-exports from composition, which imports from infrastructure
+    """Verify MetricsServerError is exported from interface via infrastructure."""
+    # Interface imports directly from infrastructure
+    assert observability.MetricsServerError is infra_observability.MetricsServerError
+    # All layers should reference the same exception class from infrastructure
     assert observability.MetricsServerError is obs_server.MetricsServerError
     assert (
         observability.MetricsServerError is composition_observability.MetricsServerError

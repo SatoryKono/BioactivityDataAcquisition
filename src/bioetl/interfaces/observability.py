@@ -1,17 +1,18 @@
 """Observability interface for BioETL.
 
-Re-exports observability components from the composition layer.
-This module exists for backward compatibility and provides a clean
-interface for external consumers.
+Re-exports observability components from the infrastructure layer.
+This module provides a clean interface for external consumers.
 
 Note:
-    For architectural purity, these components are managed by the
-    composition layer and re-exported here for the interfaces layer.
+    MetricsServerError and start_metrics_server are now imported from
+    infrastructure.observability (not composition._bootstrap) to respect
+    layer boundaries. Interfaces may import from infrastructure since
+    exceptions are value objects.
 """
 
 from __future__ import annotations
 
-from bioetl.composition._bootstrap import (
+from bioetl.infrastructure.observability import (
     MetricsServerError,
     start_metrics_server,
 )
