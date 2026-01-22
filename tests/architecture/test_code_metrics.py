@@ -29,7 +29,7 @@ class TestFileSizeLimits:
     # Note: ports.py was split into ports/ package in main
     EXEMPTIONS = {
         # Application layer exemptions
-        "runner.py": 1085,  # Complex orchestration + FSM state management + required_only mode + NOT_RUN status + checkpoint resume
+        "runner.py": 1210,  # 1199 LOC - Complex orchestration + FSM state management + required_only mode + NOT_RUN status + checkpoint resume + FSM error handling robustness
         "base.py": 600,  # Base classes may be larger
         # Infrastructure layer exemptions
         "config.py": 600,  # Config can be verbose
@@ -564,7 +564,7 @@ class TestClassSize:
         # Composite pipeline services (ADR-026)
         "MergeService": 700,  # 694 lines - Composite merge service with conflict resolution + extracted helper methods
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
-        "CompositePipelineRunner": 1020,  # 1012 lines - Composite pipeline orchestrator with full FSM state management + required_only mode + NOT_RUN status + checkpoint resume
+        "CompositePipelineRunner": 1140,  # 1132 lines - Composite pipeline orchestrator with full FSM state management + required_only mode + NOT_RUN status + checkpoint resume + FSM error handling robustness
         # Publication adapters with APIRequestCollector (metadata enrichment)
         "OpenAlexAdapter": 580,  # 578 lines - FilterableDataSourcePort + APIRequestCollector + fallback handler
         "PubMedAdapter": 545,  # 540 lines - FilterableDataSourcePort + APIRequestCollector + TitleFallbackHandler
