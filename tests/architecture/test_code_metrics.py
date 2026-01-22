@@ -105,7 +105,7 @@ class TestFileSizeLimits:
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
         "storage_factory.py": 400,  # Extracted from storage.py
-        "observability.py": 450,  # Bootstrap observability
+        "observability.py": 475,  # Bootstrap observability + deprecated aliases
         # Application layer exemptions
         "base_transformer.py": 680,  # 667 LOC - BaseTransformer with serialization helpers
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
