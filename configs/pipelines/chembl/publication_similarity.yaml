@@ -33,6 +33,8 @@ dq_config_file: ../../dq/entities/chembl/publication_similarity.yaml
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/publication_similarity.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
+# Note: explicit filter_config_file because entity_type=document_similarity differs from file name
+filter_config_file: ../../filter/entities/chembl/publication_similarity.yaml
 
 # Entity-specific sink overrides
 sink:
