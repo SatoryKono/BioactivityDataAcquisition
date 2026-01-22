@@ -84,6 +84,30 @@ from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTrans
 from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
 
+# Gold schemas (required for all pipelines)
+# Imported from domain.contracts package for clean separation of data contracts
+from bioetl.domain.contracts import (
+    ChEMBLActivityGoldSchema,
+    ChEMBLAssayGoldSchema,
+    ChEMBLAssayParametersGoldSchema,
+    ChEMBLCellLineGoldSchema,
+    ChEMBLCompoundRecordGoldSchema,
+    ChEMBLDocumentGoldSchema,
+    ChEMBLDocumentSimilarityGoldSchema,
+    ChEMBLDocumentTermGoldSchema,
+    ChEMBLMoleculeGoldSchema,
+    ChEMBLProteinClassGoldSchema,
+    ChEMBLTargetComponentGoldSchema,
+    ChEMBLTargetGoldSchema,
+    CrossRefPublicationGoldSchema,
+    OpenAlexPublicationGoldSchema,
+    PubChemCompoundGoldSchema,
+    PubMedPublicationGoldSchema,
+    SemanticScholarPublicationGoldSchema,
+    UniProtIDMappingGoldSchema,
+    UniProtProteinGoldSchema,
+)
+
 # Silver schemas (optional PyArrow schemas)
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
@@ -105,30 +129,6 @@ from bioetl.infrastructure.schemas.silver import (
     SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
     UNIPROT_ID_MAPPING_SCHEMA,
     UNIPROT_PROTEIN_SCHEMA,
-)
-
-# Gold schemas (required for all pipelines)
-# Imported from interfaces.contracts package for clean separation of data contracts
-from bioetl.interfaces.contracts import (
-    ChEMBLActivityGoldSchema,
-    ChEMBLAssayGoldSchema,
-    ChEMBLAssayParametersGoldSchema,
-    ChEMBLCellLineGoldSchema,
-    ChEMBLCompoundRecordGoldSchema,
-    ChEMBLDocumentGoldSchema,
-    ChEMBLDocumentSimilarityGoldSchema,
-    ChEMBLDocumentTermGoldSchema,
-    ChEMBLMoleculeGoldSchema,
-    ChEMBLProteinClassGoldSchema,
-    ChEMBLTargetComponentGoldSchema,
-    ChEMBLTargetGoldSchema,
-    CrossRefPublicationGoldSchema,
-    OpenAlexPublicationGoldSchema,
-    PubChemCompoundGoldSchema,
-    PubMedPublicationGoldSchema,
-    SemanticScholarPublicationGoldSchema,
-    UniProtIDMappingGoldSchema,
-    UniProtProteinGoldSchema,
 )
 
 if TYPE_CHECKING:
