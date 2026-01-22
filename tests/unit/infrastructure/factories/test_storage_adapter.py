@@ -269,14 +269,10 @@ class TestStorageAdapterOptimize:
         storage_adapter.vacuum = AsyncMock()  # type: ignore
 
         await storage_adapter.optimize(
-            table_name="chembl.activity",
-            retention_hours=168,
-            dry_run=True
+            table_name="chembl.activity", retention_hours=168, dry_run=True
         )
 
-        storage_adapter.vacuum.assert_called_once_with(
-            "chembl.activity", 168, True
-        )
+        storage_adapter.vacuum.assert_called_once_with("chembl.activity", 168, True)
 
     @pytest.mark.asyncio
     async def test_optimize_calls_bronze_cleanup(
@@ -288,9 +284,7 @@ class TestStorageAdapterOptimize:
         storage_adapter.vacuum = AsyncMock()  # type: ignore
 
         await storage_adapter.optimize(
-            table_name="chembl.activity",
-            retention_hours=168,
-            dry_run=False
+            table_name="chembl.activity", retention_hours=168, dry_run=False
         )
 
         mock_bronze_writer.cleanup_old_files.assert_called_once()

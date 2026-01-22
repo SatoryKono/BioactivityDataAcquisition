@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 from datetime import UTC, datetime
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -40,7 +41,7 @@ def batch_id() -> BatchID:
 @pytest.fixture
 def run_id() -> RunID:
     """Generate a unique run ID."""
-    return uuid4()
+    return RunID(uuid4())
 
 
 @pytest.fixture
@@ -70,7 +71,9 @@ def sample_records() -> list[bytes]:
 class TestBronzeWriterNameValidation:
     """Tests for BronzeWriter provider/entity name validation."""
 
-    def test_validate_bronze_names_valid(self, tmp_path, noop_logger) -> None:
+    def test_validate_bronze_names_valid(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test valid provider and entity names pass validation."""
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -85,7 +88,7 @@ class TestBronzeWriterNameValidation:
         writer._validate_bronze_names("Test123", "Entity456")
 
     def test_validate_bronze_names_invalid_provider(
-        self, tmp_path, noop_logger
+        self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
         """Test invalid provider names raise ValueError."""
         writer = BronzeWriter(
@@ -110,7 +113,9 @@ class TestBronzeWriterNameValidation:
         with pytest.raises(ValueError, match="Invalid provider name"):
             writer._validate_bronze_names("provider-name", "activity")
 
-    def test_validate_bronze_names_invalid_entity(self, tmp_path, noop_logger) -> None:
+    def test_validate_bronze_names_invalid_entity(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test invalid entity names raise ValueError."""
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -137,8 +142,8 @@ class TestBronzeWriterNameValidation:
     @pytest.mark.asyncio
     async def test_write_bronze_invalid_provider_raises(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -168,8 +173,8 @@ class TestBronzeWriterNameValidation:
     @pytest.mark.asyncio
     async def test_write_bronze_invalid_entity_raises(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -196,7 +201,9 @@ class TestBronzeWriterNameValidation:
                 ingestion_ts=ingestion_ts,
             )
 
-    def test_validate_records_iterator_valid(self, tmp_path, noop_logger) -> None:
+    def test_validate_records_iterator_valid(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test valid iterator passes validation."""
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -209,7 +216,9 @@ class TestBronzeWriterNameValidation:
         writer._validate_records_iterator(iter([]))
         writer._validate_records_iterator(x for x in [b"a", b"b"])
 
-    def test_validate_records_iterator_none_raises(self, tmp_path, noop_logger) -> None:
+    def test_validate_records_iterator_none_raises(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test None records raises TypeError."""
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -221,7 +230,7 @@ class TestBronzeWriterNameValidation:
             writer._validate_records_iterator(None)  # type: ignore[arg-type]
 
     def test_validate_records_iterator_not_iterator_raises(
-        self, tmp_path, noop_logger
+        self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
         """Test non-iterator types raise TypeError."""
         writer = BronzeWriter(
@@ -245,8 +254,8 @@ class TestBronzeWriterNameValidation:
     @pytest.mark.asyncio
     async def test_write_bronze_invalid_records_type_raises(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
@@ -278,7 +287,9 @@ class TestBronzeWriterNameValidation:
 class TestBronzeWriterUTCValidation:
     """Tests for BronzeWriter UTC datetime validation (ADR-014 determinism)."""
 
-    def test_validate_utc_datetime_valid(self, tmp_path, noop_logger) -> None:
+    def test_validate_utc_datetime_valid(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test valid UTC datetime passes validation."""
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -290,7 +301,9 @@ class TestBronzeWriterUTCValidation:
         utc_dt = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
         writer._validate_utc_datetime(utc_dt, "test_param")
 
-    def test_validate_utc_datetime_naive_raises(self, tmp_path, noop_logger) -> None:
+    def test_validate_utc_datetime_naive_raises(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test naive datetime raises ValueError."""
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -302,7 +315,9 @@ class TestBronzeWriterUTCValidation:
         with pytest.raises(ValueError, match="must be timezone-aware"):
             writer._validate_utc_datetime(naive_dt, "date")
 
-    def test_validate_utc_datetime_non_utc_raises(self, tmp_path, noop_logger) -> None:
+    def test_validate_utc_datetime_non_utc_raises(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test non-UTC timezone raises ValueError."""
         from datetime import timedelta, timezone
 
@@ -322,8 +337,8 @@ class TestBronzeWriterUTCValidation:
     @pytest.mark.asyncio
     async def test_write_bronze_naive_date_raises(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -353,8 +368,8 @@ class TestBronzeWriterUTCValidation:
     @pytest.mark.asyncio
     async def test_write_bronze_naive_ingestion_ts_raises(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -384,8 +399,8 @@ class TestBronzeWriterUTCValidation:
     @pytest.mark.asyncio
     async def test_write_bronze_non_utc_date_raises(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -420,7 +435,7 @@ class TestBronzeWriterUTCValidation:
 class TestBronzeWriterInit:
     """Tests for BronzeWriter initialization."""
 
-    def test_init_local_storage(self, tmp_path, noop_logger) -> None:
+    def test_init_local_storage(self, tmp_path: Path, noop_logger: NoOpLogger) -> None:
         """Test initialization for local storage."""
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -432,7 +447,7 @@ class TestBronzeWriterInit:
         assert writer.save_json is False
         assert writer.logger is noop_logger
 
-    def test_init_with_save_json(self, tmp_path, noop_logger) -> None:
+    def test_init_with_save_json(self, tmp_path: Path, noop_logger: NoOpLogger) -> None:
         """Test initialization with JSON saving enabled."""
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -444,7 +459,9 @@ class TestBronzeWriterInit:
         assert writer.save_json is True
         assert writer.json_path is not None
 
-    def test_init_with_custom_json_path(self, tmp_path, noop_logger) -> None:
+    def test_init_with_custom_json_path(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test initialization with custom JSON path."""
         custom_path = str(tmp_path / "custom_json")
         writer = BronzeWriter(
@@ -457,7 +474,7 @@ class TestBronzeWriterInit:
 
         assert writer.json_path == custom_path
 
-    def test_init_requires_logger(self, tmp_path) -> None:
+    def test_init_requires_logger(self, tmp_path: Path) -> None:
         """Test that logger is required (no fallback)."""
         with pytest.raises(TypeError, match="logger"):
             BronzeWriter(base_path=tmp_path)  # type: ignore[call-arg]
@@ -470,8 +487,8 @@ class TestBronzeWriterWriteLocal:
     @pytest.mark.asyncio
     async def test_write_bronze_local(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -549,8 +566,8 @@ class TestBronzeWriterWriteLocal:
     @pytest.mark.asyncio
     async def test_write_bronze_local_async(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -593,8 +610,8 @@ class TestBronzeWriterWriteLocal:
     @pytest.mark.asyncio
     async def test_write_bronze_with_json_copy(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -636,8 +653,8 @@ class TestBronzeWriterWriteLocal:
     @pytest.mark.asyncio
     async def test_write_bronze_empty_records_raises(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
@@ -671,8 +688,8 @@ class TestBronzeWriterReadLocal:
     @pytest.mark.asyncio
     async def test_read_bronze_local(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -717,8 +734,8 @@ class TestBronzeWriterListBatches:
     @pytest.mark.asyncio
     async def test_list_batches_local(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         run_id: RunID,
         run_type: RunType,
@@ -763,8 +780,8 @@ class TestBronzeWriterListBatches:
     @pytest.mark.asyncio
     async def test_list_batches_with_date_filter(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         run_id: RunID,
         run_type: RunType,
@@ -807,7 +824,9 @@ class TestBronzeWriterListBatches:
         assert "2024-01-15" in batches[0]
 
     @pytest.mark.asyncio
-    async def test_list_batches_empty(self, tmp_path, noop_logger) -> None:
+    async def test_list_batches_empty(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test listing batches when none exist."""
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -826,8 +845,8 @@ class TestBronzeWriterAtomicWrite:
     @pytest.mark.asyncio
     async def test_no_partial_files_on_write_failure(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -878,8 +897,8 @@ class TestBronzeWriterAtomicWrite:
     @pytest.mark.asyncio
     async def test_no_orphan_metadata_without_data(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -919,8 +938,8 @@ class TestBronzeWriterAtomicWrite:
     @pytest.mark.asyncio
     async def test_no_temp_files_after_successful_write(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -953,8 +972,8 @@ class TestBronzeWriterAtomicWrite:
     @pytest.mark.asyncio
     async def test_failure_during_stream_write_cleans_up(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -995,8 +1014,8 @@ class TestBronzeWriterAtomicWrite:
     @pytest.mark.asyncio
     async def test_json_copy_uses_atomic_write(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -1040,7 +1059,7 @@ class TestBronzeWriterLoggerInjection:
     @pytest.mark.asyncio
     async def test_logger_called_on_write(
         self,
-        tmp_path,
+        tmp_path: Path,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -1076,7 +1095,7 @@ class TestBronzeWriterLoggerInjection:
         assert call_args[1]["batch_id"] == str(batch_id)
         assert call_args[1]["run_id"] == str(run_id)
 
-    def test_logger_is_stored_as_attribute(self, tmp_path) -> None:
+    def test_logger_is_stored_as_attribute(self, tmp_path: Path) -> None:
         """Test that injected logger is stored and accessible."""
         mock_logger = MagicMock()
         writer = BronzeWriter(
@@ -1095,8 +1114,8 @@ class TestBronzeWriterMetadataDeterminism:
     @pytest.mark.asyncio
     async def test_metadata_bitwise_identical_on_repeated_calls(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         run_id: RunID,
         run_type: RunType,
@@ -1167,8 +1186,8 @@ class TestBronzeWriterMetadataDeterminism:
 
     def test_metadata_json_format_is_deterministic(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
@@ -1206,8 +1225,8 @@ class TestBronzeWriterMetadataDeterminism:
 
     def test_metadata_has_no_whitespace_variations(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
@@ -1246,7 +1265,7 @@ class TestBronzeWriterMetadataDeterminism:
 class TestBronzeWriterMetrics:
     """Tests for BronzeWriter metrics collection (O1 observability)."""
 
-    def test_init_with_metrics(self, tmp_path, noop_logger) -> None:
+    def test_init_with_metrics(self, tmp_path: Path, noop_logger: NoOpLogger) -> None:
         """Test initialization with custom metrics port."""
         mock_metrics = MagicMock()
         writer = BronzeWriter(
@@ -1257,7 +1276,9 @@ class TestBronzeWriterMetrics:
 
         assert writer._metrics is mock_metrics
 
-    def test_init_without_metrics_uses_noop(self, tmp_path, noop_logger) -> None:
+    def test_init_without_metrics_uses_noop(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test initialization without metrics uses NoOpMetrics."""
         from bioetl.domain.ports.noop import NoOpMetrics
 
@@ -1272,8 +1293,8 @@ class TestBronzeWriterMetrics:
     @pytest.mark.asyncio
     async def test_write_bronze_records_duration_metric(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -1317,8 +1338,8 @@ class TestBronzeWriterMetrics:
     @pytest.mark.asyncio
     async def test_write_bronze_records_count_metric(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -1361,8 +1382,8 @@ class TestBronzeWriterMetrics:
     @pytest.mark.asyncio
     async def test_write_bronze_records_bytes_metric(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -1405,8 +1426,8 @@ class TestBronzeWriterMetrics:
     @pytest.mark.asyncio
     async def test_write_bronze_all_metrics_recorded(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -1454,7 +1475,7 @@ class TestBronzeWriterMetrics:
     @pytest.mark.asyncio
     async def test_logger_includes_metrics_info(
         self,
-        tmp_path,
+        tmp_path: Path,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -1497,7 +1518,9 @@ class TestBronzeWriterMetrics:
 class TestBronzeWriterJsonValidation:
     """Tests for BronzeWriter JSON input validation."""
 
-    def test_init_with_validate_json_default(self, tmp_path, noop_logger) -> None:
+    def test_init_with_validate_json_default(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test that validate_json defaults to True."""
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -1506,7 +1529,9 @@ class TestBronzeWriterJsonValidation:
         )
         assert writer.validate_json is True
 
-    def test_init_with_validate_json_disabled(self, tmp_path, noop_logger) -> None:
+    def test_init_with_validate_json_disabled(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test initialization with JSON validation disabled."""
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -1516,7 +1541,9 @@ class TestBronzeWriterJsonValidation:
         )
         assert writer.validate_json is False
 
-    def test_validate_json_records_valid(self, tmp_path, noop_logger) -> None:
+    def test_validate_json_records_valid(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test _validate_json_records passes valid JSON through."""
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -1536,7 +1563,9 @@ class TestBronzeWriterJsonValidation:
         validated = list(writer._validate_json_records(iter(valid_records)))
         assert validated == valid_records
 
-    def test_validate_json_records_invalid_raises(self, tmp_path, noop_logger) -> None:
+    def test_validate_json_records_invalid_raises(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test _validate_json_records raises BronzeValidationError on invalid JSON."""
         from bioetl.domain.exceptions import BronzeValidationError
 
@@ -1559,7 +1588,9 @@ class TestBronzeWriterJsonValidation:
         assert exc_info.value.original_error is not None
         assert "Invalid JSON" in str(exc_info.value)
 
-    def test_validate_json_records_empty_string(self, tmp_path, noop_logger) -> None:
+    def test_validate_json_records_empty_string(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test _validate_json_records raises on empty string."""
         from bioetl.domain.exceptions import BronzeValidationError
 
@@ -1574,7 +1605,9 @@ class TestBronzeWriterJsonValidation:
 
         assert exc_info.value.record_index == 0
 
-    def test_validate_json_records_truncated_json(self, tmp_path, noop_logger) -> None:
+    def test_validate_json_records_truncated_json(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test _validate_json_records raises on truncated JSON."""
         from bioetl.domain.exceptions import BronzeValidationError
 
@@ -1593,7 +1626,9 @@ class TestBronzeWriterJsonValidation:
 
         assert exc_info.value.record_index == 0
 
-    def test_validate_json_records_is_lazy(self, tmp_path, noop_logger) -> None:
+    def test_validate_json_records_is_lazy(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test _validate_json_records is a lazy generator."""
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -1617,8 +1652,8 @@ class TestBronzeWriterJsonValidation:
     @pytest.mark.asyncio
     async def test_write_bronze_validates_json_by_default(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
@@ -1657,8 +1692,8 @@ class TestBronzeWriterJsonValidation:
     @pytest.mark.asyncio
     async def test_write_bronze_skips_validation_when_disabled(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         batch_id: BatchID,
         run_id: RunID,
         run_type: RunType,
@@ -1699,8 +1734,8 @@ class TestBronzeWriterJsonValidation:
     @pytest.mark.asyncio
     async def test_write_bronze_valid_json_succeeds(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -1786,8 +1821,8 @@ class TestBronzeWriterAudit:
     @pytest.mark.asyncio
     async def test_write_bronze_with_audit(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -1831,8 +1866,8 @@ class TestBronzeWriterAudit:
     @pytest.mark.asyncio
     async def test_write_bronze_without_audit(
         self,
-        tmp_path,
-        noop_logger,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -1867,7 +1902,9 @@ class TestBronzeWriterAudit:
 class TestBronzeWriterCleanup:
     """Tests for BronzeWriter cleanup operations."""
 
-    def test_find_old_date_dirs_empty_base(self, tmp_path, noop_logger) -> None:
+    def test_find_old_date_dirs_empty_base(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test _find_old_date_dirs returns empty list for nonexistent base."""
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -1880,7 +1917,7 @@ class TestBronzeWriterCleanup:
         assert result == []
 
     def test_find_old_date_dirs_finds_old_directories(
-        self, tmp_path, noop_logger
+        self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
         """Test _find_old_date_dirs correctly identifies old date directories."""
         writer = BronzeWriter(
@@ -1909,7 +1946,7 @@ class TestBronzeWriterCleanup:
         assert result[0] == old_date
 
     def test_find_old_date_dirs_ignores_non_date_directories(
-        self, tmp_path, noop_logger
+        self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
         """Test _find_old_date_dirs ignores directories without date format."""
         writer = BronzeWriter(
@@ -1938,7 +1975,7 @@ class TestBronzeWriterCleanup:
 
     @pytest.mark.asyncio
     async def test_cleanup_old_files_removes_old_data(
-        self, tmp_path, noop_logger
+        self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
         """Test cleanup_old_files removes files older than cutoff."""
         writer = BronzeWriter(
@@ -1965,7 +2002,9 @@ class TestBronzeWriterCleanup:
         assert not old_date.exists()
 
     @pytest.mark.asyncio
-    async def test_cleanup_old_files_dry_run(self, tmp_path, noop_logger) -> None:
+    async def test_cleanup_old_files_dry_run(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
         """Test cleanup_old_files dry_run counts but doesn't delete."""
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -1993,7 +2032,7 @@ class TestBronzeWriterCleanup:
 
     @pytest.mark.asyncio
     async def test_cleanup_old_files_preserves_recent_data(
-        self, tmp_path, noop_logger
+        self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
         """Test cleanup_old_files preserves data newer than cutoff."""
         writer = BronzeWriter(
@@ -2021,7 +2060,7 @@ class TestBronzeWriterCleanup:
 
     @pytest.mark.asyncio
     async def test_cleanup_old_files_multiple_providers(
-        self, tmp_path, noop_logger
+        self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
         """Test cleanup_old_files handles multiple providers/entities."""
         writer = BronzeWriter(
@@ -2053,9 +2092,9 @@ class TestBronzeWriterMetadataSidecar:
     @pytest.mark.asyncio
     async def test_metadata_writer_called_when_save_metadata_enabled(
         self,
-        tmp_path,
-        noop_logger,
-        noop_metrics,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
+        noop_metrics: MetricsPort,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -2107,9 +2146,9 @@ class TestBronzeWriterMetadataSidecar:
     @pytest.mark.asyncio
     async def test_metadata_writer_not_called_when_save_metadata_disabled(
         self,
-        tmp_path,
-        noop_logger,
-        noop_metrics,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
+        noop_metrics: MetricsPort,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -2147,9 +2186,9 @@ class TestBronzeWriterMetadataSidecar:
     @pytest.mark.asyncio
     async def test_noop_metadata_writer_used_by_default(
         self,
-        tmp_path,
-        noop_logger,
-        noop_metrics,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
+        noop_metrics: MetricsPort,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -2184,9 +2223,9 @@ class TestBronzeWriterMetadataSidecar:
     @pytest.mark.asyncio
     async def test_build_full_bronze_metadata_structure(
         self,
-        tmp_path,
-        noop_logger,
-        noop_metrics,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
+        noop_metrics: MetricsPort,
         batch_id: BatchID,
         run_id: RunID,
         ingestion_ts: datetime,
@@ -2238,9 +2277,9 @@ class TestBronzeWriterMetadataSidecar:
     @pytest.mark.asyncio
     async def test_metadata_run_type_mapping(
         self,
-        tmp_path,
-        noop_logger,
-        noop_metrics,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
+        noop_metrics: MetricsPort,
         batch_id: BatchID,
         run_id: RunID,
         ingestion_ts: datetime,
@@ -2282,9 +2321,9 @@ class TestBronzeWriterQueryString:
     @pytest.mark.asyncio
     async def test_query_string_extracted_from_source_metadata(
         self,
-        tmp_path,
-        noop_logger,
-        noop_metrics,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
+        noop_metrics: MetricsPort,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -2352,9 +2391,9 @@ class TestBronzeWriterQueryString:
     @pytest.mark.asyncio
     async def test_query_string_none_when_source_metadata_has_no_query(
         self,
-        tmp_path,
-        noop_logger,
-        noop_metrics,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
+        noop_metrics: MetricsPort,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -2411,9 +2450,9 @@ class TestBronzeWriterQueryString:
     @pytest.mark.asyncio
     async def test_query_string_none_when_no_source_metadata(
         self,
-        tmp_path,
-        noop_logger,
-        noop_metrics,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
+        noop_metrics: MetricsPort,
         sample_records: list[bytes],
         batch_id: BatchID,
         run_id: RunID,
@@ -2590,7 +2629,7 @@ class TestBronzeWriterCleanupFiltered:
     """Tests for BronzeWriter filtered cleanup operations."""
 
     def test_find_old_date_dirs_filtered_by_provider(
-        self, tmp_path, noop_logger
+        self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
         """Test _find_old_date_dirs filters by provider."""
         writer = BronzeWriter(
@@ -2604,13 +2643,13 @@ class TestBronzeWriterCleanupFiltered:
         (tmp_path / "p2" / "e1" / "2024-01-01").mkdir(parents=True)
 
         cutoff = "2024-06-01"
-        result = writer._find_old_date_dirs("2024-06-01", provider="p1")
+        result = writer._find_old_date_dirs(cutoff, provider="p1")
 
         assert len(result) == 1
         assert "p1" in str(result[0])
 
     def test_find_old_date_dirs_filtered_by_entity(
-        self, tmp_path, noop_logger
+        self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
         """Test _find_old_date_dirs filters by entity (requires provider)."""
         writer = BronzeWriter(
@@ -2631,7 +2670,7 @@ class TestBronzeWriterCleanupFiltered:
 
     @pytest.mark.asyncio
     async def test_cleanup_old_files_filtered(
-        self, tmp_path, noop_logger
+        self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
         """Test cleanup_old_files respects provider/entity filters."""
         writer = BronzeWriter(
