@@ -131,8 +131,17 @@ class TestStoragePortProtocol:
                 run_id: Any,
                 run_type: Any,
                 ingestion_ts: Any,  # Required per ADR-014
-            ) -> None:
-                pass
+                source_metadata: Any = None,  # Optional SourceMetadata
+            ) -> Any:  # Returns BronzeWriteResult
+                from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+
+                return BronzeWriteResult(
+                    path="/test/bronze",
+                    record_count=0,
+                    compressed_size_bytes=0,
+                    raw_size_bytes=0,
+                    checksum="test",
+                )
 
             async def write_silver(
                 self,
@@ -143,8 +152,9 @@ class TestStoragePortProtocol:
                 mode: Literal["merge", "append", "delete"] = "merge",
                 partition_cols: list[str] | None = None,
                 on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
-            ) -> None:
-                pass
+                bronze_refs: list[Any] | None = None,  # For lineage tracking
+            ) -> Any:  # Returns SilverWriteResult | None
+                return None
 
             async def write_gold(
                 self,
@@ -156,6 +166,7 @@ class TestStoragePortProtocol:
                 *,
                 ingestion_ts: Any = None,
                 run_id: Any = None,
+                silver_refs: list[Any] | None = None,  # For lineage tracking
             ) -> None:
                 pass
 
@@ -171,6 +182,9 @@ class TestStoragePortProtocol:
                 table_name: str,
                 records: list[dict[str, Any]],
                 primary_keys: list[str] | None = None,
+                *,
+                run_id: str | None = None,
+                sources_used: list[str] | None = None,
             ) -> None:
                 pass
 
@@ -179,6 +193,9 @@ class TestStoragePortProtocol:
                 table_name: str,
                 records: list[dict[str, Any]],
                 primary_keys: list[str] | None = None,
+                *,
+                run_id: str | None = None,
+                sources_used: list[str] | None = None,
             ) -> None:
                 pass
 
@@ -231,6 +248,14 @@ class TestStoragePortProtocol:
                 dry_run: bool = False,
             ) -> dict[str, int]:
                 return {"files_removed": 0, "bytes_freed": 0, "directories_removed": 0}
+
+            async def optimize(
+                self,
+                table_name: str,
+                retention_hours: int = 168,
+                dry_run: bool = False,
+            ) -> None:
+                pass
 
         assert isinstance(ValidStorage(), StoragePort)
 
