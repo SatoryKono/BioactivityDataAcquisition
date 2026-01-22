@@ -36,7 +36,7 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 
 See [decisions/README.md](decisions/README.md) for full index with categories.
 
-27 ADRs documenting key architectural decisions:
+28 ADRs documenting key architectural decisions:
 
 | ADR | Topic | RULES.md Reference |
 |-----|-------|-------------------|
@@ -67,6 +67,7 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-025](decisions/ADR-025-pipeline-config-unification.md) | Pipeline Config Unification | - |
 | [ADR-026](decisions/ADR-026-composite-pipeline-pattern.md) | Composite Pipeline Pattern | - |
 | [ADR-027](decisions/ADR-027-dq-rules-externalization.md) | DQ Rules Externalization | §3.1.2 |
+| [ADR-028](decisions/ADR-028-filter-rules-externalization.md) | Filter Rules Externalization | App D |
 
 ---
 
