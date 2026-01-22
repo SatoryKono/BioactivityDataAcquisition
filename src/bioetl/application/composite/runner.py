@@ -410,11 +410,11 @@ class CompositePipelineRunner:
             state = state.with_state(CompositePipelineState.ENRICHING)
         if state.state == CompositePipelineState.ENRICHING:
             state = state.with_state(CompositePipelineState.ENRICHMENT_COMPLETED)
-            await self._checkpoint_manager.save(state)
-            self._logger.debug(
-                "Enrichment phase completed",
+            await self._save_checkpoint_safe(state, "enrichment_completed")
+            self._logger.info(
+                "Enrichment stage completed",
                 composite=self._config.name,
-                state=state.state.value,
+                state="ENRICHMENT_COMPLETED",
             )
         return state
 
@@ -434,7 +434,7 @@ class CompositePipelineRunner:
         if not self._runtime.dry_run:
             # Transition to MERGING state
             state = state.with_state(CompositePipelineState.MERGING)
-            await self._checkpoint_manager.save(state)
+            await self._save_checkpoint_safe(state, "merging")
             self._logger.info(
                 "Starting merge stage",
                 composite=self._config.name,
@@ -467,7 +467,7 @@ class CompositePipelineRunner:
                     state="FAILED",
                 )
                 state = state.with_state(CompositePipelineState.FAILED)
-                await self._checkpoint_manager.save(state)
+                await self._save_checkpoint_safe(state, "merge_failed")
                 raise
         else:
             # Dry run mode - skip merge, log completion
@@ -485,7 +485,7 @@ class CompositePipelineRunner:
 
         # Transition to COMPLETED state
         state = state.with_state(CompositePipelineState.COMPLETED)
-        await self._checkpoint_manager.save(state)
+        await self._save_checkpoint_safe(state, "completed")
 
         # Cleanup checkpoint on success
         try:

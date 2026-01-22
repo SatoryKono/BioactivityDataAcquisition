@@ -296,15 +296,15 @@ class TestEnrichmentFSMTransitions:
         assert enrichment_completed_idx >= 0, "ENRICHMENT_COMPLETED should be saved"
         assert merging_idx >= 0, "MERGING should be saved"
 
-        assert (
-            seed_completed_idx < enriching_idx
-        ), "SEED_COMPLETED should come before ENRICHING"
-        assert (
-            enriching_idx < enrichment_completed_idx
-        ), "ENRICHING should come before ENRICHMENT_COMPLETED"
-        assert (
-            enrichment_completed_idx < merging_idx
-        ), "ENRICHMENT_COMPLETED should come before MERGING"
+        assert seed_completed_idx < enriching_idx, (
+            "SEED_COMPLETED should come before ENRICHING"
+        )
+        assert enriching_idx < enrichment_completed_idx, (
+            "ENRICHING should come before ENRICHMENT_COMPLETED"
+        )
+        assert enrichment_completed_idx < merging_idx, (
+            "ENRICHMENT_COMPLETED should come before MERGING"
+        )
 
 
 @pytest.mark.unit
@@ -403,9 +403,9 @@ class TestEnrichmentFSMFailure:
 
         # Verify checkpoint.save was called with FAILED state
         saved_states = mock_checkpoint_manager._saved_states
-        assert any(
-            s.state == CompositePipelineState.FAILED for s in saved_states
-        ), "FAILED state must be saved"
+        assert any(s.state == CompositePipelineState.FAILED for s in saved_states), (
+            "FAILED state must be saved"
+        )
 
     @pytest.mark.asyncio
     async def test_logs_error_when_required_enricher_fails(
@@ -707,7 +707,8 @@ class TestEnrichmentLogging:
         completed_calls = [
             c
             for c in mock_logger.info.call_args_list
-            if "ENRICHMENT_COMPLETED" in str(c) or "Enrichment stage completed" in str(c)
+            if "ENRICHMENT_COMPLETED" in str(c)
+            or "Enrichment stage completed" in str(c)
         ]
         assert len(completed_calls) >= 1
 
@@ -729,9 +730,7 @@ class TestEnrichmentLogging:
 class TestEnrichmentSummaryAggregation:
     """Tests for _log_enrichment_summary method."""
 
-    def test_log_enrichment_summary_counts_statuses(
-        self, runner, mock_logger
-    ):
+    def test_log_enrichment_summary_counts_statuses(self, runner, mock_logger):
         """Test _log_enrichment_summary correctly counts statuses."""
         results = {
             "enricher1": EnrichmentResult.success(
@@ -780,8 +779,6 @@ class TestEnrichmentSummaryAggregation:
 
         # Should not log anything for empty results
         summary_calls = [
-            c
-            for c in mock_logger.info.call_args_list
-            if "Enrichment summary" in str(c)
+            c for c in mock_logger.info.call_args_list if "Enrichment summary" in str(c)
         ]
         assert len(summary_calls) == 0
