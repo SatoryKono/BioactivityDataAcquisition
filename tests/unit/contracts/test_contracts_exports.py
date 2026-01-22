@@ -1,7 +1,7 @@
 """Tests for contracts package exports.
 
 Verifies that the contracts package correctly exports all Gold schemas
-and provides backward-compatible imports.
+from the canonical location (bioetl.domain.contracts).
 """
 
 from __future__ import annotations
@@ -14,8 +14,8 @@ class TestContractsPackageExports:
     """Test that contracts package exports all required schemas."""
 
     def test_all_chembl_schemas_exported(self):
-        """All ChEMBL Gold schemas should be importable from contracts."""
-        from bioetl.interfaces.contracts import (
+        """All ChEMBL Gold schemas should be importable from domain.contracts."""
+        from bioetl.domain.contracts import (
             ChEMBLActivityGoldSchema,
             ChEMBLAssayGoldSchema,
             ChEMBLAssayParametersGoldSchema,
@@ -45,8 +45,8 @@ class TestContractsPackageExports:
         assert hasattr(ChEMBLTargetGoldSchema, "validate")
 
     def test_all_publication_schemas_exported(self):
-        """All publication Gold schemas should be importable from contracts."""
-        from bioetl.interfaces.contracts import (
+        """All publication Gold schemas should be importable from domain.contracts."""
+        from bioetl.domain.contracts import (
             CrossRefPublicationGoldSchema,
             OpenAlexPublicationGoldSchema,
             PubMedPublicationGoldSchema,
@@ -59,14 +59,14 @@ class TestContractsPackageExports:
         assert hasattr(SemanticScholarPublicationGoldSchema, "validate")
 
     def test_pubchem_schema_exported(self):
-        """PubChem Gold schema should be importable from contracts."""
-        from bioetl.interfaces.contracts import PubChemCompoundGoldSchema
+        """PubChem Gold schema should be importable from domain.contracts."""
+        from bioetl.domain.contracts import PubChemCompoundGoldSchema
 
         assert hasattr(PubChemCompoundGoldSchema, "validate")
 
     def test_uniprot_schemas_exported(self):
-        """UniProt Gold schemas should be importable from contracts."""
-        from bioetl.interfaces.contracts import (
+        """UniProt Gold schemas should be importable from domain.contracts."""
+        from bioetl.domain.contracts import (
             UniProtIDMappingGoldSchema,
             UniProtProteinGoldSchema,
         )
@@ -75,8 +75,8 @@ class TestContractsPackageExports:
         assert hasattr(UniProtProteinGoldSchema, "validate")
 
     def test_date_regex_exported(self):
-        """DATE_REGEX utility should be importable from contracts."""
-        from bioetl.interfaces.contracts import DATE_REGEX
+        """DATE_REGEX utility should be importable from domain.contracts."""
+        from bioetl.domain.contracts import DATE_REGEX
 
         assert DATE_REGEX == r"^\d{4}-\d{2}-\d{2}$"
 
@@ -86,8 +86,8 @@ class TestContractsSubmoduleImports:
     """Test that contracts submodules work correctly."""
 
     def test_import_from_gold_submodule(self):
-        """Should be able to import from bioetl.interfaces.contracts.gold."""
-        from bioetl.interfaces.contracts.gold import (
+        """Should be able to import from bioetl.domain.contracts.gold."""
+        from bioetl.domain.contracts.gold import (
             ChEMBLActivityGoldSchema,
             PubChemCompoundGoldSchema,
         )
@@ -97,12 +97,12 @@ class TestContractsSubmoduleImports:
 
     def test_import_from_provider_modules(self):
         """Should be able to import from provider-specific modules."""
-        from bioetl.interfaces.contracts.gold.chembl import ChEMBLActivityGoldSchema
-        from bioetl.interfaces.contracts.gold.pubchem import PubChemCompoundGoldSchema
-        from bioetl.interfaces.contracts.gold.publications import (
+        from bioetl.domain.contracts.gold.chembl import ChEMBLActivityGoldSchema
+        from bioetl.domain.contracts.gold.pubchem import PubChemCompoundGoldSchema
+        from bioetl.domain.contracts.gold.publications import (
             PubMedPublicationGoldSchema,
         )
-        from bioetl.interfaces.contracts.gold.uniprot import UniProtProteinGoldSchema
+        from bioetl.domain.contracts.gold.uniprot import UniProtProteinGoldSchema
 
         assert hasattr(ChEMBLActivityGoldSchema, "validate")
         assert hasattr(PubChemCompoundGoldSchema, "validate")
@@ -111,44 +111,12 @@ class TestContractsSubmoduleImports:
 
 
 @pytest.mark.unit
-class TestBackwardCompatibility:
-    """Test backward compatibility with old import paths."""
-
-    def test_old_import_path_still_works(self):
-        """Old import path should still work for backward compatibility."""
-        # This should work because infrastructure.schemas.gold re-exports
-        # from contracts
-        from bioetl.infrastructure.schemas.gold import (
-            ChEMBLActivityGoldSchema,
-            PubChemCompoundGoldSchema,
-        )
-
-        assert hasattr(ChEMBLActivityGoldSchema, "validate")
-        assert hasattr(PubChemCompoundGoldSchema, "validate")
-
-    def test_date_regex_backward_compatible(self):
-        """DATE_REGEX should be accessible from old path."""
-        from bioetl.infrastructure.schemas.gold import DATE_REGEX
-
-        assert DATE_REGEX == r"^\d{4}-\d{2}-\d{2}$"
-
-    def test_schemas_are_identical(self):
-        """Schemas from both paths should be the same object."""
-        from bioetl.infrastructure.schemas.gold import (
-            ChEMBLActivityGoldSchema as OldSchema,
-        )
-        from bioetl.interfaces.contracts import ChEMBLActivityGoldSchema as NewSchema
-
-        assert NewSchema is OldSchema
-
-
-@pytest.mark.unit
 class TestSchemaAttributes:
     """Test that schemas have expected Pandera attributes."""
 
     def test_schema_has_strict_config(self):
         """All Gold schemas should have strict=True config."""
-        from bioetl.interfaces.contracts import ChEMBLActivityGoldSchema
+        from bioetl.domain.contracts import ChEMBLActivityGoldSchema
 
         # Pandera models have a Config class with strict attribute
         assert hasattr(ChEMBLActivityGoldSchema, "Config")
@@ -156,7 +124,7 @@ class TestSchemaAttributes:
 
     def test_schema_can_generate_json_schema(self):
         """Schemas should be able to generate JSON Schema."""
-        from bioetl.interfaces.contracts import ChEMBLActivityGoldSchema
+        from bioetl.domain.contracts import ChEMBLActivityGoldSchema
 
         # This method is used by generate_contracts.py
         assert hasattr(ChEMBLActivityGoldSchema, "to_json_schema")

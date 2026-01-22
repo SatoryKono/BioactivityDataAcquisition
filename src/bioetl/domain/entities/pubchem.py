@@ -8,10 +8,6 @@ DTO Design:
 - Uses extra='forbid' to detect API changes early
 - frozen=True ensures immutability
 - Adapters return DTOs, transformers convert to Domain Entities
-
-Deprecated aliases (ADR-024, glossary v2.0):
-- Compound → PubchemMolecule
-- CompoundRecord → PubchemMoleculeRecord
 """
 
 from __future__ import annotations
@@ -31,9 +27,6 @@ class PubchemMoleculeRecord(BaseModel):
     Represents a molecule (compound) from PubChem API via pubchempy.
     Required field: cid.
     At least one structural identifier (SMILES/InChI) should be present.
-
-    Note: Renamed from PubChemCompoundRecord to align with Ubiquitous Language
-    (ADR-024). 'Molecule' is the canonical term for chemical compounds.
 
     Example:
         >>> record = PubchemMoleculeRecord(
@@ -127,41 +120,3 @@ __all__ = [
     "PubchemMolecule",
     "PubchemMoleculeRecord",
 ]
-# Note: Deprecated aliases (Compound, PubChemCompoundRecord) are provided via __getattr__
-# but not listed in __all__ since they are deprecated (ADR-024, glossary v2.0)
-
-
-# === Deprecated Aliases (ADR-024, glossary v2.0) ===
-# These aliases are retained for backward compatibility.
-# Use PubchemMolecule and PubchemMoleculeRecord in new code.
-#
-# Note: `CompoundRecord` is NOT a deprecated PubChem alias because it's
-# a valid ChEMBL entity (molecule-document link from /compound_record).
-# The original PubChem DTO name was `PubChemCompoundRecord`.
-
-
-def __getattr__(name: str) -> type:
-    """Provide deprecated aliases with warnings.
-
-    Deprecated:
-        Compound: Use PubchemMolecule instead.
-        PubChemCompoundRecord: Use PubchemMoleculeRecord instead.
-    """
-    import warnings
-
-    if name == "Compound":
-        warnings.warn(
-            "Compound is deprecated, use PubchemMolecule instead (ADR-024, glossary v2.0)",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return PubchemMolecule
-    if name == "PubChemCompoundRecord":
-        warnings.warn(
-            "PubChemCompoundRecord is deprecated, use PubchemMoleculeRecord instead "
-            "(ADR-024, glossary v2.0)",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return PubchemMoleculeRecord
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
