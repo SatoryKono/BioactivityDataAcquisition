@@ -18,7 +18,7 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
-from bioetl.contracts.gold._base import DATE_REGEX
+from bioetl.interfaces.contracts.gold._base import DATE_REGEX
 
 
 class PubMedPublicationGoldSchema(pa.DataFrameModel):
