@@ -11,7 +11,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition.bootstrap.runtime.observability import bootstrap_observability
+from bioetl.composition.bootstrap.runtime.observability import (
+    bootstrap_observability_bundle,
+)
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
@@ -23,10 +25,15 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.context import PipelineRunContext
 
-__all__ = ["bootstrap_pipeline"]
+__all__ = [
+    # Deprecated alias (backward compatibility)
+    "bootstrap_pipeline",
+    # Canonical name (use this)
+    "bootstrap_pipeline_runner",
+]
 
 
-def bootstrap_pipeline(
+def bootstrap_pipeline_runner(
     ctx: PipelineRunContext,
     registry: PipelineRegistry | None = None,
 ) -> PipelineRunner:
@@ -38,6 +45,8 @@ def bootstrap_pipeline(
     3. Bootstraps observability (logging, tracing, metrics)
     4. Builds filter configuration from CLI/YAML
     5. Delegates to the appropriate factory to create the runner
+
+    Layer: Returns application-level runner (PipelineRunner) ready for execution.
 
     Args:
         ctx: Pipeline run context containing launch parameters including
@@ -58,14 +67,14 @@ def bootstrap_pipeline(
         ...     run_id=uuid4(),
         ...     run_type=RunType.INCREMENTAL,
         ... )
-        >>> runner = bootstrap_pipeline(ctx)
+        >>> runner = bootstrap_pipeline_runner(ctx)
         >>> await runner.run()
 
         # For test isolation:
         >>> from bioetl.composition.registry import create_registry
         >>> registry = create_registry()
         >>> register_all_pipelines(registry=registry)
-        >>> runner = bootstrap_pipeline(ctx, registry=registry)
+        >>> runner = bootstrap_pipeline_runner(ctx, registry=registry)
     """
     # Use provided registry or default
     effective_registry = registry if registry is not None else get_default_registry()
@@ -80,7 +89,7 @@ def bootstrap_pipeline(
     yaml_config = load_pipeline_config(ctx.pipeline_name)
 
     # Bootstrap unified observability (includes metrics server start if enabled)
-    observability = bootstrap_observability(
+    observability = bootstrap_observability_bundle(
         pipeline=ctx.pipeline_name,
         run_id=ctx.run_id,
         settings=settings,
@@ -148,3 +157,23 @@ def bootstrap_pipeline(
         filter_config=filter_config,
         config=yaml_config,
     )
+
+
+def bootstrap_pipeline(
+    ctx: PipelineRunContext,
+    registry: PipelineRegistry | None = None,
+) -> PipelineRunner:
+    """Composition Root: Assembles and returns a fully configured PipelineRunner.
+
+    .. deprecated::
+        Use :func:`bootstrap_pipeline_runner` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        ctx: Pipeline run context containing launch parameters.
+        registry: Optional PipelineRegistry instance.
+
+    Returns:
+        PipelineRunner: Fully configured runner ready for execution.
+    """
+    return bootstrap_pipeline_runner(ctx=ctx, registry=registry)
