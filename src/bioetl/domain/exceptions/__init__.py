@@ -39,6 +39,7 @@ from bioetl.domain.exceptions.critical import (
     LockAcquisitionError,
     LockLostError,
     MergeConflictError,
+    MetricsServerError,
     PolicyViolationError,
 )
 from bioetl.domain.exceptions.data_quality import (
@@ -99,6 +100,7 @@ __all__ = [
     "LockAcquisitionError",
     "LockLostError",
     "MergeConflictError",
+    "MetricsServerError",
     "MissingRequiredFieldError",
     "NetworkError",
     "PolicyViolationError",
