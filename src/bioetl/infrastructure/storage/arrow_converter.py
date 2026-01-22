@@ -78,12 +78,6 @@ class ArrowDataConverter:
     ) -> pa.Table:
         """Convert records to PyArrow table with null type handling.
 
-        Performs:
-        1. Convert records to Arrow table
-        2. Apply canonical column order (ADR-014)
-        3. Coerce null types to string (Delta Lake compatibility)
-        4. Sort by primary keys for deterministic writes
-
         Args:
             records: List of record dictionaries.
             primary_keys: Optional list of columns for sorting.
@@ -91,9 +85,29 @@ class ArrowDataConverter:
         Returns:
             PyArrow Table ready for Delta Lake write.
         """
-        from bioetl.domain.schemas.column_order import canonical_column_order
-
         arrow_data = pa.Table.from_pylist(records)
+        return self.prepare_for_delta(arrow_data, primary_keys)
+
+    def prepare_for_delta(
+        self,
+        arrow_data: pa.Table,
+        primary_keys: list[str] | None = None,
+    ) -> pa.Table:
+        """Prepare existing Arrow table for Delta Lake write.
+
+        Performs:
+        1. Apply canonical column order (ADR-014)
+        2. Coerce null types to string (Delta Lake compatibility)
+        3. Sort by primary keys for deterministic writes
+
+        Args:
+            arrow_data: Input Arrow table.
+            primary_keys: Optional list of columns for sorting.
+
+        Returns:
+            Prepared Arrow table.
+        """
+        from bioetl.domain.schemas.column_order import canonical_column_order
 
         # Enforce canonical column order (ADR-014, RULES.md §2.4)
         ordered_columns = canonical_column_order(list(arrow_data.column_names))

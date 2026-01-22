@@ -186,7 +186,17 @@ class GoldWriter(BaseDeltaWriter):
             self._validate_records(records)
             self._validate_scd2_requirements(validated_mode, scd_config, ingestion_ts)
             self._validate_schema_strict(schema)
-            await self._validate_records_against_schema(records, schema)
+
+            arrow_data: pa.Table | None = None
+
+            if validated_mode == GoldWriteMode.SCD2:
+                await self._validate_records_against_schema(records, schema)
+            else:
+                # Optimized path: Validate and convert in one go (executor)
+                # This uses pd.DataFrame.from_records (faster) and avoids double parsing
+                arrow_data = await self._validate_and_convert(
+                    records, schema, primary_keys
+                )
 
             table_path = self._resolve_table_path(table_name)
 
@@ -200,6 +210,7 @@ class GoldWriter(BaseDeltaWriter):
                 schema,
                 scd_config,
                 ingestion_ts,
+                arrow_data=arrow_data,
             )
 
             if self._audit:
@@ -414,9 +425,44 @@ class GoldWriter(BaseDeltaWriter):
         """Validate records against Pandera schema."""
         import pandas as pd
 
-        df = pd.DataFrame(records)
+        # Run DataFrame creation and validation in executor to avoid blocking event loop
+        # Use from_records which is faster for list of dicts
+        def _validate() -> None:
+            df = pd.DataFrame.from_records(records)
+            schema.validate(df, lazy=False)
+
         try:
-            await self._run_in_executor(lambda: schema.validate(df, lazy=False))
+            await self._run_in_executor(_validate)
+        except pandera_pa.errors.SchemaError as e:
+            raise ValueError(f"Schema validation failed: {e}") from e
+
+    async def _validate_and_convert(
+        self,
+        records: list[dict[str, Any]],
+        schema: DataFrameSchema,
+        primary_keys: list[str] | None,
+    ) -> pa.Table:
+        """Validate and convert records to Arrow table (optimized path).
+
+        Combines validation and conversion in a single executor task to minimize
+        blocking and leverage faster DataFrame creation.
+        """
+        import pandas as pd
+        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+
+        def _process() -> pa.Table:
+            # 1. Faster DataFrame creation
+            df = pd.DataFrame.from_records(records)
+            # 2. Validation
+            schema.validate(df, lazy=False)
+            # 3. Fast conversion to Arrow
+            arrow_data = pa.Table.from_pandas(df, preserve_index=False)
+            # 4. Final preparation (null sanitization, sorting)
+            converter = ArrowDataConverter(logger=self.logger)
+            return converter.prepare_for_delta(arrow_data, primary_keys)
+
+        try:
+            return await self._run_in_executor(_process)
         except pandera_pa.errors.SchemaError as e:
             raise ValueError(f"Schema validation failed: {e}") from e
 
@@ -431,6 +477,7 @@ class GoldWriter(BaseDeltaWriter):
         schema: DataFrameSchema,
         scd_config: dict[str, Any] | None,
         ingestion_ts: datetime | None,
+        arrow_data: pa.Table | None = None,
     ) -> None:
         """Dispatch to appropriate write method based on mode."""
         if mode == GoldWriteMode.SCD2:
@@ -448,6 +495,7 @@ class GoldWriter(BaseDeltaWriter):
                 partition_cols,
                 primary_keys,
                 schema,
+                arrow_data=arrow_data,
             )
 
     async def _log_gold_audit(
@@ -664,13 +712,17 @@ class GoldWriter(BaseDeltaWriter):
         partition_cols: list[str] | None,
         primary_keys: list[str] | None = None,
         _schema: DataFrameSchema | None = None,
+        arrow_data: pa.Table | None = None,
     ) -> None:
         """Write records using simple overwrite or append mode."""
-        arrow_data = self._to_arrow_table(records)
+        if arrow_data is None:
+            # Fallback (e.g. from SCD2 if we ever used simple write, or test calls)
+            # Run in executor to minimize blocking
+            arrow_data = await self._run_in_executor(self._to_arrow_table, records)
 
-        # Sort by primary keys for deterministic writing
-        if primary_keys:
-            arrow_data = arrow_data.sort_by([(pk, "ascending") for pk in primary_keys])
+            # Sort by primary keys for deterministic writing
+            if primary_keys:
+                arrow_data = arrow_data.sort_by([(pk, "ascending") for pk in primary_keys])
 
         # UPDATED: Use schema_mode="overwrite" if mode is "overwrite" to allow schema evolution
         schema_mode = "overwrite" if mode == "overwrite" else None
