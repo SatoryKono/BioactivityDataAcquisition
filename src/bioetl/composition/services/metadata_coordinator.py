@@ -275,25 +275,15 @@ class MetadataCoordinator:
         )
 
         # Build DQ summary from computed metrics or use basic fallback
-        if input_data.dq_metrics is not None:
-            dq_summary = input_data.dq_metrics.to_dq_summary()
-        else:
-            dq_summary = DQSummary(
-                total_records=len(input_data.records),
-                valid_records=len(input_data.records),
-            )
-
-        output = SilverOutputMetadata(
-            record_count=len(input_data.records),
-        )
-
+        rec_count = len(input_data.records)
+        dq_summary = (input_data.dq_metrics.to_dq_summary() if input_data.dq_metrics
+                      else DQSummary(total_records=rec_count, valid_records=rec_count))
+        output = SilverOutputMetadata(record_count=rec_count)
         # Calculate duration if both timestamps provided
-        duration_seconds: float | None = None
-        if input_data.started_at is not None and input_data.completed_at is not None:
-            duration_seconds = (
-                input_data.completed_at - input_data.started_at
-            ).total_seconds()
-
+        duration_seconds = (
+            (input_data.completed_at - input_data.started_at).total_seconds()
+            if input_data.started_at and input_data.completed_at else None
+        )
         return SilverMetadata(
             runtime=self._build_runtime_metadata(
                 started_at=input_data.started_at,

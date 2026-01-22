@@ -27,6 +27,8 @@ Note:
 from __future__ import annotations
 
 import asyncio
+import time
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any, Literal
 
 import orjson
@@ -49,7 +51,6 @@ from bioetl.infrastructure.storage.base_delta_writer import (
 )
 
 if TYPE_CHECKING:
-    from datetime import datetime
     from pathlib import Path
 
     from bioetl.domain.ports import (
@@ -547,13 +548,7 @@ class SilverWriter(BaseDeltaWriter):
             Lock validation is performed at Application layer (BatchWriter)
             per RULES.md §4.6 Safety Guard.
         """
-        import time
-        from datetime import UTC, datetime, timedelta
-
-        # Capture start time for runtime metadata (REQ-LINEAGE-001)
-        started_at = datetime.now(UTC)
-        start_perf = time.perf_counter()
-
+        started_at, start_perf = datetime.now(UTC), time.perf_counter()
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_silver") as span:
             span.set_attribute("table_name", table_name)
@@ -616,11 +611,8 @@ class SilverWriter(BaseDeltaWriter):
 
             # Get Delta version after write for lineage tracking (REQ-LINEAGE-002)
             version_after = await self._get_delta_version(table_path)
-
-            # Calculate completed_at using deterministic approach (ADR-014)
-            duration = time.perf_counter() - start_perf
-            completed_at = started_at + timedelta(seconds=duration)
-
+            # Calculate completed_at (ADR-014: deterministic from start + duration)
+            completed_at = started_at + timedelta(seconds=time.perf_counter() - start_perf)
             # Write metadata sidecar file if configured
             await self._write_silver_metadata(
                 table_path=table_path,
@@ -798,13 +790,9 @@ class SilverWriter(BaseDeltaWriter):
             records: List of records written.
             primary_keys: Primary key columns used.
             mode: Write mode used (merge, append, delete).
-            bronze_refs: Optional list of BronzeWriteResult for lineage tracking.
-                If provided, bronze_paths will be populated from relative_path
-                of each BronzeWriteResult (REQ-LINEAGE-001).
-            dq_metrics: Optional BatchDQMetrics with computed DQ metrics.
-                If provided, dq_summary will contain real column metrics,
-                schema drift info, and error rates (REQ-DQ-001).
-            dq_report_path: Optional path to generated DQ report for cross-reference.
+            bronze_refs: Optional BronzeWriteResult list for lineage (REQ-LINEAGE-001).
+            dq_metrics: Optional BatchDQMetrics for DQ summary (REQ-DQ-001).
+            dq_report_path: Optional path to generated DQ report.
             partition_by: Partition columns used for the Delta table.
             started_at: UTC timestamp when Silver write started.
             completed_at: UTC timestamp when Silver write completed.
