@@ -131,7 +131,8 @@ class TestStoragePortProtocol:
                 run_id: Any,
                 run_type: Any,
                 ingestion_ts: Any,  # Required per ADR-014
-            ) -> None:
+                source_metadata: Any = None,
+            ) -> Any:
                 pass
 
             async def write_silver(
@@ -157,6 +158,7 @@ class TestStoragePortProtocol:
                 *,
                 ingestion_ts: Any = None,
                 run_id: Any = None,
+                silver_refs: list[Any] | None = None,
             ) -> None:
                 pass
 
@@ -238,6 +240,14 @@ class TestStoragePortProtocol:
                 dry_run: bool = False,
             ) -> dict[str, int]:
                 return {"files_removed": 0, "bytes_freed": 0, "directories_removed": 0}
+
+            async def optimize(
+                self,
+                table_name: str,
+                retention_hours: int = 168,
+                dry_run: bool = False,
+            ) -> None:
+                pass
 
         assert isinstance(ValidStorage(), StoragePort)
 
