@@ -268,26 +268,14 @@ class CompositePipelineRunner:
         # Step 5: Check required enrichers
         self._check_required_enrichers(enrichment_results)
 
-        # Step 6: Merge results
-        if not self._runtime.dry_run:
-            merge_result = await self._merger.merge(
-                seed_table=self._config.seed.silver_table,
-                enrichers=self._config.enrichers,
-                enrichment_results=enrichment_results,
-                run_id=self._run_id_str,
-            )
+        # Step 5b: Transition to ENRICHMENT_COMPLETED
+        state = await self._transition_to_enrichment_completed(state)
 
-            self._logger.info(
-                "Merge completed",
-                composite=self._config.name,
-                records_merged=merge_result.records_merged,
-            )
+        # Step 6: Execute merge or skip in dry run mode
+        state, merge_result = await self._execute_merge_stage(state, enrichment_results)
 
-            # Step 6b: Generate DQ reports if service is available
-            await self._generate_dq_reports(merge_result)
-
-        # Step 7: Cleanup checkpoint on success
-        await self._checkpoint_manager.delete()
+        # Step 7: Finalize - set COMPLETED and cleanup checkpoint
+        await self._finalize_pipeline(state)
 
         completed_at = datetime.now(tz=UTC)
         started = self._started_at or completed_at  # Fallback if not set
@@ -311,6 +299,109 @@ class CompositePipelineRunner:
             completed_at=completed_at,
             _required_enrichers=frozenset(self._config.required_enrichers),
         )
+
+    async def _transition_to_enrichment_completed(
+        self, state: CompositeCheckpointState
+    ) -> CompositeCheckpointState:
+        """Transition FSM state to ENRICHMENT_COMPLETED.
+
+        Handles the case where no enrichers were run (state is still SEED_COMPLETED).
+        Must go through ENRICHING first per FSM rules.
+        """
+        from bioetl.domain.composite.state import CompositePipelineState
+
+        if state.state == CompositePipelineState.SEED_COMPLETED:
+            # Must go through ENRICHING first per FSM rules
+            state = state.with_state(CompositePipelineState.ENRICHING)
+        if state.state == CompositePipelineState.ENRICHING:
+            state = state.with_state(CompositePipelineState.ENRICHMENT_COMPLETED)
+            await self._checkpoint_manager.save(state)
+            self._logger.debug(
+                "Enrichment phase completed",
+                composite=self._config.name,
+                state=state.state.value,
+            )
+        return state
+
+    async def _execute_merge_stage(
+        self,
+        state: CompositeCheckpointState,
+        enrichment_results: dict[str, EnrichmentResult],
+    ) -> tuple[CompositeCheckpointState, MergeResult | None]:
+        """Execute merge stage or skip in dry run mode.
+
+        Returns updated state and merge result (None for dry run).
+        """
+        from bioetl.domain.composite.state import CompositePipelineState
+
+        merge_result: MergeResult | None = None
+
+        if not self._runtime.dry_run:
+            # Transition to MERGING state
+            state = state.with_state(CompositePipelineState.MERGING)
+            await self._checkpoint_manager.save(state)
+            self._logger.info(
+                "Starting merge stage",
+                composite=self._config.name,
+                state=state.state.value,
+            )
+
+            try:
+                merge_result = await self._merger.merge(
+                    seed_table=self._config.seed.silver_table,
+                    enrichers=self._config.enrichers,
+                    enrichment_results=enrichment_results,
+                    run_id=self._run_id_str,
+                )
+
+                self._logger.info(
+                    "Merge completed",
+                    composite=self._config.name,
+                    records_merged=merge_result.records_merged,
+                )
+
+                # Generate DQ reports if service is available
+                await self._generate_dq_reports(merge_result)
+
+            except Exception as merge_error:
+                # Merge failed - save FAILED state for potential resume
+                self._logger.error(
+                    "Merge failed",
+                    composite=self._config.name,
+                    error=str(merge_error),
+                    state="FAILED",
+                )
+                state = state.with_state(CompositePipelineState.FAILED)
+                await self._checkpoint_manager.save(state)
+                raise
+        else:
+            # Dry run mode - skip merge, log completion
+            self._logger.info(
+                "Dry run: merge skipped",
+                composite=self._config.name,
+                state="COMPLETED",
+            )
+
+        return state, merge_result
+
+    async def _finalize_pipeline(self, state: CompositeCheckpointState) -> None:
+        """Finalize pipeline - set COMPLETED state and cleanup checkpoint."""
+        from bioetl.domain.composite.state import CompositePipelineState
+
+        # Transition to COMPLETED state
+        state = state.with_state(CompositePipelineState.COMPLETED)
+        await self._checkpoint_manager.save(state)
+
+        # Cleanup checkpoint on success
+        try:
+            await self._checkpoint_manager.delete()
+        except Exception as delete_error:
+            # Checkpoint deletion failure is non-critical
+            self._logger.warning(
+                "Failed to delete checkpoint",
+                composite=self._config.name,
+                error=str(delete_error),
+            )
 
     async def _run_seed(self) -> SeedResult:
         """Run the seed pipeline."""
