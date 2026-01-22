@@ -74,7 +74,7 @@ class CircuitBreakerDataSourceDecorator:
         ... )
         >>> async with decorated:
         ...     async for record in decorated.fetch("activity", limit=100):
-        ...         print(record)
+        ...         process(record)  # Handle each record
     """
 
     data_source: DataSourcePort
@@ -235,9 +235,7 @@ class CircuitBreakerDataSourceDecorator:
             return HealthStatus.UNHEALTHY
 
         try:
-            result = await self.circuit_breaker.call(
-                self.data_source.health_check
-            )
+            result = await self.circuit_breaker.call(self.data_source.health_check)
             return result
         except CircuitBreakerOpenError:
             return HealthStatus.UNHEALTHY

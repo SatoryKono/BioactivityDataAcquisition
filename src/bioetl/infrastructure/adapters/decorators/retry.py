@@ -74,7 +74,7 @@ class RetryingDataSourceDecorator:
         ... )
         >>> async with decorated:
         ...     async for record in decorated.fetch("activity", limit=100):
-        ...         print(record)
+        ...         process(record)  # Handle each record
     """
 
     data_source: DataSourcePort

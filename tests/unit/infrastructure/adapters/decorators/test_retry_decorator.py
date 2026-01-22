@@ -97,7 +97,9 @@ class MockDataSource:
         self._fetch_error = error
         self._fail_on_calls = fail_on_calls
 
-    def set_health_check_error(self, error: Exception, fail_on_calls: list[int]) -> None:
+    def set_health_check_error(
+        self, error: Exception, fail_on_calls: list[int]
+    ) -> None:
         """Configure health_check to fail on specific calls (0-indexed)."""
         self._health_check_error = error
         self._fail_on_calls = fail_on_calls
