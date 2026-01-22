@@ -11,21 +11,19 @@ Note:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 from uuid import uuid4
 
+from bioetl.application.core.checkpoint_manager import CheckpointManager
+from bioetl.application.core.quarantine_manager import QuarantineManager
+from bioetl.application.services import CheckpointService, QuarantineService
 from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_checkpoint_port,
     bootstrap_quarantine_port,
 )
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
+from bioetl.domain.types import RunID
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.config import get_settings
-
-if TYPE_CHECKING:
-    from bioetl.application.core.checkpoint_manager import CheckpointManager
-    from bioetl.application.core.quarantine_manager import QuarantineManager
-    from bioetl.application.services import CheckpointService, QuarantineService
 
 __all__ = [
     "bootstrap_checkpoint_manager",
@@ -47,8 +45,6 @@ def bootstrap_quarantine_manager(pipeline_name: str) -> QuarantineManager:
     Returns:
         QuarantineManager configured for the specified pipeline.
     """
-    from bioetl.application.core.quarantine_manager import QuarantineManager
-
     quarantine_port = bootstrap_quarantine_port()
     return QuarantineManager(
         quarantine_port=quarantine_port,
@@ -70,9 +66,6 @@ def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointManager:
     Returns:
         CheckpointManager configured for CLI inspection.
     """
-    from bioetl.application.core.checkpoint_manager import CheckpointManager
-    from bioetl.domain.types import RunID
-
     checkpoint_port = bootstrap_checkpoint_port(pipeline_name)
     noop_logger = create_noop_logger()
 
@@ -94,8 +87,6 @@ def bootstrap_checkpoint_service() -> CheckpointService:
     Returns:
         CheckpointService configured for CLI operations.
     """
-    from bioetl.application.services import CheckpointService
-
     settings = get_settings()
     # Use empty pipeline name for global operations
     checkpoint_port = LocalCheckpoint(
@@ -118,8 +109,6 @@ def bootstrap_quarantine_service() -> QuarantineService:
     Returns:
         QuarantineService configured for CLI operations.
     """
-    from bioetl.application.services import QuarantineService
-
     quarantine_port = bootstrap_quarantine_port()
     noop_logger = create_noop_logger()
 

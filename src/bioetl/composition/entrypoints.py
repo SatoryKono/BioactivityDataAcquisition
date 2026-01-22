@@ -17,7 +17,9 @@ from uuid import uuid4
 
 # Re-export canonical DTO classes from application.services (H1 refactoring)
 # These are the single source of truth for pipeline execution interfaces.
+from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.application.services import RunOptions, RunResult, RunStatus
+from bioetl.infrastructure.config import get_settings
 
 __all__ = [
     # Configuration
@@ -130,8 +132,6 @@ def ensure_metrics_server_started() -> bool:
         >>> ensure_metrics_server_started()
         True  # Server started on configured port
     """
-    from bioetl.infrastructure.config import get_settings
-
     settings = get_settings()
     return maybe_start_metrics_server(settings)
 
@@ -289,9 +289,6 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
         >>> else:
         ...     logger.error("pipeline_failed", error_message=result.error_message)
     """
-    from bioetl.application.core.shutdown import PipelineShutdownError
-    from bioetl.infrastructure.config import get_settings
-
     # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
     settings = get_settings()
     maybe_start_metrics_server(settings)

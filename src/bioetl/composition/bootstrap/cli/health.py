@@ -7,17 +7,13 @@ Used primarily by CLI health operations.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
+from bioetl.application.services import HealthService
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.factories.data_source_factory import DataSourceFactory
-
-if TYPE_CHECKING:
-    from bioetl.application.services import HealthService
-    from bioetl.domain.ports import MetricsPort
-    from bioetl.infrastructure.adapters.http.health_monitor import (
-        ProviderHealthMonitor,
-    )
+from bioetl.domain.ports import MetricsPort
+from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
+from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 
 __all__ = [
     "HealthServerDependencies",
@@ -57,8 +53,6 @@ def bootstrap_health_service() -> HealthService:
         >>> if summary.all_healthy:
         ...     logger.info("All providers healthy")
     """
-    from bioetl.application.services import HealthService
-
     noop_logger = create_noop_logger()
 
     return HealthService(
@@ -85,13 +79,6 @@ def bootstrap_health_server_dependencies() -> HealthServerDependencies:
         >>> server = HealthServer(host="127.0.0.1", port=9090,
         ...                       health_monitor=deps.health_monitor)
     """
-    from bioetl.infrastructure.adapters.http.health_monitor import (
-        ProviderHealthMonitor,
-    )
-    from bioetl.infrastructure.observability.prometheus_metrics import (
-        PrometheusMetrics,
-    )
-
     # Create metrics port for health monitor
     metrics = PrometheusMetrics()
 
