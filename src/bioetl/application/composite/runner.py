@@ -14,22 +14,21 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
+from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.domain.composite.result import (
     CompositeResult,
     EnrichmentStatus,
     MergeResult,
     SeedResult,
 )
+from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.composite.checkpoint import (
-        CompositeCheckpointManager,
-        CompositeCheckpointState,
-    )
+    from bioetl.application.composite.checkpoint import CompositeCheckpointManager
     from bioetl.application.composite.coordinator import EnrichmentCoordinator
     from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.composite.merger import MergeService
@@ -219,14 +218,66 @@ class CompositePipelineRunner:
 
         # Step 1: Run seed (if not completed)
         if not state.seed_completed:
-            seed_result = await self._run_seed()
+            # Transition to SEED_RUNNING before starting seed
+            previous_state = state.state
+            state = state.with_state(CompositePipelineState.SEED_RUNNING)
+            self._log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.SEED_RUNNING,
+                stage="seed_start",
+            )
+            await self._save_checkpoint_safe(state, "seed_running")
+
+            # Execute seed with error handling
+            try:
+                seed_result = await self._run_seed()
+            except Exception as e:
+                # Seed failed - transition to FAILED state
+                self._logger.error(
+                    "Seed pipeline failed",
+                    composite=self._config.name,
+                    run_id=self._run_id_str,
+                    seed_pipeline=self._config.seed.pipeline,
+                    error=str(e),
+                )
+                self._log_fsm_transition(
+                    from_state=CompositePipelineState.SEED_RUNNING,
+                    to_state=CompositePipelineState.FAILED,
+                    stage="seed_failed",
+                    error=str(e),
+                )
+                # Save FAILED state to checkpoint for resume awareness
+                failed_state = state.with_state(CompositePipelineState.FAILED)
+                await self._save_checkpoint_safe(failed_state, "seed_failed")
+                # Re-raise to trigger outer error handling and lock release
+                raise
+
+            # Seed succeeded - transition to SEED_COMPLETED
             state = state.with_seed_completed(seed_result)
-            await self._checkpoint_manager.save(state)
+            self._log_fsm_transition(
+                from_state=CompositePipelineState.SEED_RUNNING,
+                to_state=CompositePipelineState.SEED_COMPLETED,
+                stage="seed_complete",
+                records_extracted=seed_result.records_extracted,
+                records_silver=seed_result.records_silver,
+            )
+            await self._save_checkpoint_safe(state, "seed_completed")
         else:
+            # Resume: seed already completed
             self._logger.info(
                 "Seed already completed, resuming from checkpoint",
                 composite=self._config.name,
+                run_id=self._run_id_str,
             )
+            # Ensure FSM state reflects SEED_COMPLETED when resuming
+            if state.state != CompositePipelineState.SEED_COMPLETED:
+                previous_state = state.state
+                state = state.with_state(CompositePipelineState.SEED_COMPLETED)
+                self._log_fsm_transition(
+                    from_state=previous_state,
+                    to_state=CompositePipelineState.SEED_COMPLETED,
+                    stage="seed_resume",
+                )
             seed_result = SeedResult(
                 pipeline_name=self._config.seed.pipeline,
                 resumed=True,
@@ -311,6 +362,62 @@ class CompositePipelineRunner:
             completed_at=completed_at,
             _required_enrichers=frozenset(self._config.required_enrichers),
         )
+
+    def _log_fsm_transition(
+        self,
+        from_state: CompositePipelineState,
+        to_state: CompositePipelineState,
+        stage: str,
+        **extra: object,
+    ) -> None:
+        """Log FSM state transition.
+
+        Args:
+            from_state: Previous FSM state.
+            to_state: New FSM state.
+            stage: Pipeline stage identifier (e.g., 'seed_start', 'seed_complete').
+            **extra: Additional context for logging.
+        """
+        self._logger.info(
+            "FSM state transition",
+            from_state=from_state.value,
+            to_state=to_state.value,
+            composite=self._config.name,
+            run_id=self._run_id_str,
+            stage=stage,
+            **extra,
+        )
+
+    async def _save_checkpoint_safe(
+        self,
+        state: CompositeCheckpointState,
+        operation: str,
+    ) -> bool:
+        """Save checkpoint with graceful error handling.
+
+        Checkpoint save failures should not stop pipeline execution, but
+        resume capability will be affected.
+
+        Args:
+            state: Checkpoint state to save.
+            operation: Description of the operation for logging.
+
+        Returns:
+            True if save succeeded, False otherwise.
+        """
+        try:
+            await self._checkpoint_manager.save(state)
+            return True
+        except Exception as e:
+            self._logger.warning(
+                "checkpoint_save_failed",
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                operation=operation,
+                error=str(e),
+                note="Resume capability may be affected",
+            )
+            return False
 
     async def _run_seed(self) -> SeedResult:
         """Run the seed pipeline."""
