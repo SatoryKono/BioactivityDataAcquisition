@@ -24,11 +24,10 @@ Note:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import MetricsPort, TracingPort
-    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.domain.ports import MetricsPort, TracingPort
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 
 __all__ = [
     "create_noop_logger",
@@ -51,8 +50,6 @@ def create_noop_logger() -> NoOpLogger:
         >>> logger = create_noop_logger()
         >>> logger.info("This will be silently ignored")
     """
-    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-
     return NoOpLogger()
 
 
@@ -69,8 +66,6 @@ def create_noop_metrics() -> MetricsPort:
         >>> metrics = create_noop_metrics()
         >>> metrics.increment_counter("test", 1, {"label": "value"})
     """
-    from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
-
     return NoOpMetrics(warn_on_use=False)
 
 
@@ -89,8 +84,6 @@ def create_noop_tracing() -> TracingPort:
         >>> with tracer.start_as_current_span("operation"):
         ...     pass  # Span is silently ignored
     """
-    from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
-
     return NoOpTracing()
 
 

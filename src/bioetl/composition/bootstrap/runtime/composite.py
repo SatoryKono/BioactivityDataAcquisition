@@ -107,8 +107,9 @@ def bootstrap_composite_runner(
     Returns:
         CompositePipelineRunner ready for execution.
     """
-    # Lazy import to avoid circular dependency with entrypoints
-    # (entrypoints -> _bootstrap -> bootstrap -> runtime -> composite -> entrypoints)
+    # CIRCULAR-DEPENDENCY: Local import required to break circular dependency.
+    # Import chain: entrypoints -> _bootstrap -> bootstrap -> runtime -> composite -> entrypoints
+    # Moving this import to module level would cause ImportError at startup.
     from bioetl.composition.entrypoints import RunOptions, build_pipeline_context
 
     effective_run_id = run_id or str(uuid4())
