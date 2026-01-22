@@ -159,16 +159,12 @@ class BronzeWriter:
 
     def _validate_bronze_names(self, provider: str, entity: str) -> None:
         """Validate provider and entity names (alphanumeric + underscores only)."""
-        if not provider or not provider.replace("_", "").isalnum():
-            raise ValueError(
-                f"Invalid provider name: '{provider}'. "
-                "Use alphanumeric characters and underscores only."
-            )
-        if not entity or not entity.replace("_", "").isalnum():
-            raise ValueError(
-                f"Invalid entity name: '{entity}'. "
-                "Use alphanumeric characters and underscores only."
-            )
+        for name, label in [(provider, "provider"), (entity, "entity")]:
+            if not name or not name.replace("_", "").isalnum():
+                raise ValueError(
+                    f"Invalid {label} name: '{name}'. "
+                    "Use alphanumeric characters and underscores only."
+                )
 
     def _validate_records_iterator(self, records: Iterator[bytes]) -> None:
         """Validate that records is an Iterator[bytes].
@@ -189,29 +185,11 @@ class BronzeWriter:
             )
 
     def _validate_utc_datetime(self, dt: datetime, param_name: str) -> None:
-        """Validate that datetime is timezone-aware and in UTC.
-
-        Bronze layer requires UTC timestamps for lineage consistency
-        and deterministic behavior (see ADR-014).
-
-        Args:
-            dt: Datetime to validate.
-            param_name: Parameter name for error messages.
-
-        Raises:
-            ValueError: If datetime is naive or not in UTC.
-        """
+        """Validate that datetime is timezone-aware and in UTC."""
         if dt.tzinfo is None:
-            raise ValueError(
-                f"{param_name} must be timezone-aware, got naive datetime. "
-                "Use datetime.now(UTC) or datetime(..., tzinfo=timezone.utc)."
-            )
-        offset = dt.tzinfo.utcoffset(dt)
-        if offset is None or offset != timedelta(0):
-            raise ValueError(
-                f"{param_name} must be UTC, got timezone with offset {offset}. "
-                "Convert to UTC before passing to BronzeWriter."
-            )
+            raise ValueError(f"{param_name} must be timezone-aware (UTC).")
+        if dt.tzinfo.utcoffset(dt) != timedelta(0):
+            raise ValueError(f"{param_name} must be UTC (offset 0).")
 
     def _validate_json_records(self, records: Iterator[bytes]) -> Iterator[bytes]:
         """Validate that each record is valid JSON bytes (lazy generator).
@@ -715,16 +693,6 @@ class BronzeWriter:
             if line.strip():
                 yield orjson.loads(line)
 
-    def _list_batches_local(self, prefix: str, date: datetime | None) -> list[str]:
-        """List batch files from local filesystem."""
-        search_path = self.base_path / prefix
-        if not search_path.exists():
-            return []
-
-        pattern = "batch_*.jsonl.zst" if date else "**/*.jsonl.zst"
-        files = list(search_path.glob(pattern))
-        return [str(p.relative_to(self.base_path)) for p in files]
-
     async def list_batches(
         self,
         provider: str,
@@ -737,7 +705,13 @@ class BronzeWriter:
         if date:
             prefix = f"{prefix}{date.strftime('%Y-%m-%d')}/"
 
-        return self._list_batches_local(prefix, date)
+        search_path = self.base_path / prefix
+        if not search_path.exists():
+            return []
+
+        pattern = "batch_*.jsonl.zst" if date else "**/*.jsonl.zst"
+        files = list(search_path.glob(pattern))
+        return [str(p.relative_to(self.base_path)) for p in files]
 
     def _find_old_date_dirs(
         self,
@@ -752,37 +726,24 @@ class BronzeWriter:
         """
         if not self.base_path.exists():
             return []
+
+        pattern = f"{provider or '*'}/{entity or '*'}"
         old_dirs: list[Path] = []
 
-        # Filter providers
-        if provider:
-            providers = [self.base_path / provider]
-        else:
-            providers = [p for p in self.base_path.iterdir() if p.is_dir()]
-
-        for prov in providers:
-            if not prov.exists():
+        # Use glob to filter provider/entity structure efficiently
+        for entity_dir in self.base_path.glob(pattern):
+            if not entity_dir.is_dir():
                 continue
 
-            # Filter entities
-            if entity:
-                entities = [prov / entity]
-            else:
-                entities = [e for e in prov.iterdir() if e.is_dir()]
+            for date_dir in entity_dir.iterdir():
+                if self._is_old_date_dir(date_dir, cutoff_str):
+                    old_dirs.append(date_dir)
 
-            for ent in entities:
-                if not ent.exists():
-                    continue
-
-                for date_dir in ent.iterdir():
-                    is_old = (
-                        date_dir.is_dir()
-                        and len(date_dir.name) == 10
-                        and date_dir.name < cutoff_str
-                    )
-                    if is_old:
-                        old_dirs.append(date_dir)
         return old_dirs
+
+    def _is_old_date_dir(self, path: Path, cutoff_str: str) -> bool:
+        """Check if path is a date directory older than cutoff."""
+        return path.is_dir() and len(path.name) == 10 and path.name < cutoff_str
 
     async def cleanup_old_files(
         self,
