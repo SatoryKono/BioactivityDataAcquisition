@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.registry import get_default_registry
 from bioetl.infrastructure.config import (
@@ -15,7 +16,6 @@ from bioetl.infrastructure.config import (
     load_pipeline_config,
     yaml_config_to_domain,
 )
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
     from bioetl.application.services import ConfigService
@@ -39,7 +39,7 @@ def bootstrap_config_service() -> ConfigService:
     """
     from bioetl.application.services import ConfigService
 
-    noop_logger = NoOpLogger()
+    noop_logger = create_noop_logger()
 
     # Ensure pipelines are registered for list_pipelines()
     register_all_pipelines()

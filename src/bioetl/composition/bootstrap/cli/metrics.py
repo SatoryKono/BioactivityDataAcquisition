@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 
 if TYPE_CHECKING:
     from bioetl.application.services.metrics_service import MetricsService
@@ -39,7 +39,7 @@ def bootstrap_metrics_service() -> MetricsService:
         MetricsServerAdapter,
     )
 
-    logger = NoOpLogger()
+    logger = create_noop_logger()
     server = MetricsServerAdapter(logger=logger)
 
     return MetricsService(
