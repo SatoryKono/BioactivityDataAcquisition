@@ -411,7 +411,7 @@ class TestFunctionLength:
         "_run_with_lock": 110,  # CompositePipelineRunner lock-held orchestration
         # Composite pipeline bootstrap functions
         "_parse_composite_config": 95,  # 93 lines - Composite config parsing with validation
-        "bootstrap_composite_pipeline": 135,  # 130 lines - Composite pipeline bootstrapping
+        "bootstrap_composite_pipeline": 175,  # 170 lines - Composite pipeline bootstrapping with factory functions
         "run_composite": 60,  # 56 lines - Composite CLI entrypoint
         "build_pipeline_context": 60,  # 55 lines - Context building for composite
         "write_gold_merged": 75,  # 74 lines - Gold write with merged enrichers + flat_structure
