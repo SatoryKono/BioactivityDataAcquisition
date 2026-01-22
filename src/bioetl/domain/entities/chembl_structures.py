@@ -478,29 +478,3 @@ __all__ = [
     "Target",
     "TargetComponent",
 ]
-# Note: Deprecated alias (Document) is provided via __getattr__
-# but not listed in __all__ since it is deprecated (ADR-024, glossary v2.0)
-
-
-# === Deprecated Alias (ADR-024, glossary v2.0) ===
-# This alias is retained for backward compatibility.
-# Use ChemblPublication in new code.
-
-
-def __getattr__(name: str) -> type:
-    """Provide deprecated alias with warning.
-
-    Deprecated:
-        Document: Use ChemblPublication instead.
-    """
-    import warnings
-
-    if name == "Document":
-        warnings.warn(
-            "Document is deprecated, use ChemblPublication instead "
-            "(ADR-024, glossary v2.0)",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return ChemblPublication
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

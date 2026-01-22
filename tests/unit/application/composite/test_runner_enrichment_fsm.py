@@ -727,7 +727,7 @@ class TestEnrichmentLogging:
 
 @pytest.mark.unit
 class TestEnrichmentSummaryAggregation:
-    """Tests for log_enrichment_summary standalone function."""
+    """Tests for log_enrichment_summary helper function."""
 
     def test_log_enrichment_summary_counts_statuses(self, runner, mock_logger):
         """Test log_enrichment_summary correctly counts statuses."""
@@ -758,7 +758,6 @@ class TestEnrichmentSummaryAggregation:
             ),
         }
 
-        # Call standalone function with logger and composite name
         log_enrichment_summary(results, runner._config.name, mock_logger)
 
         # Verify logger.info was called with summary
