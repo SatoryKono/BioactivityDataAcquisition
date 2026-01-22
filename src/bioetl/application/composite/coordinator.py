@@ -348,15 +348,24 @@ class EnrichmentCoordinator:
 
             except Exception as e:
                 duration = (datetime.now(tz=UTC) - started_at).total_seconds()
-                self._logger.error(
-                    "Enricher failed",
+
+                # Re-raise for required enrichers (logged as error)
+                if enricher.required:
+                    self._logger.error(
+                        "Required enricher failed",
+                        enricher=enricher.pipeline,
+                        error=str(e),
+                        required=True,
+                    )
+                    raise
+
+                # Optional enricher failures are warnings (pipeline continues)
+                self._logger.warning(
+                    "Optional enricher failed",
                     enricher=enricher.pipeline,
                     error=str(e),
+                    required=False,
                 )
-
-                # Re-raise for required enrichers
-                if enricher.required:
-                    raise
 
                 return EnrichmentResult.failed(
                     enricher_name=enricher.pipeline,

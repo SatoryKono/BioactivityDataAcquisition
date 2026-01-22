@@ -1,6 +1,6 @@
 # ADR-026: Composite Pipeline Pattern
 
-- **Status**: Proposed
+- **Status**: Accepted
 - **Date**: 2026-01-15
 - **Author**: Claude Agent
 - **Reviewers**: TBD
@@ -167,6 +167,7 @@ src/bioetl/
 │   │   ├── __init__.py
 │   │   ├── config.py           # CompositeConfig, EnricherConfig
 │   │   ├── result.py           # EnrichmentResult, MergeResult
+│   │   ├── state.py            # CompositePipelineState FSM enum
 │   │   ├── strategy.py         # MergeStrategy enum
 │   │   └── lineage.py          # LineageMetadata value object
 │   └── ports/
@@ -206,6 +207,106 @@ src/bioetl/
 | application/composite | domain/*, application/core | ✅ |
 | composition/composite | all layers | ✅ |
 | application/composite | infrastructure | ❌ (via ports only) |
+
+### Finite State Machine (FSM) Pattern
+
+The composite pipeline uses a Finite State Machine to manage execution lifecycle.
+This ensures predictable execution flow and prevents invalid operations.
+
+#### State Diagram
+
+```
+┌─────────────────┐
+│   NOT_STARTED   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  SEED_RUNNING   │──────────┐
+└────────┬────────┘          │
+         │                   │
+         ▼                   │
+┌─────────────────┐          │
+│ SEED_COMPLETED  │          │
+└────────┬────────┘          │
+         │                   │
+         ▼                   │
+┌─────────────────┐          │
+│   ENRICHING     │──────────┤
+└────────┬────────┘          │
+         │                   │
+         ▼                   │
+┌─────────────────┐          │
+│ENRICHMENT_COMPL.│          │
+└────────┬────────┘          │
+         │                   │
+         ▼                   │
+┌─────────────────┐          │
+│    MERGING      │──────────┤
+└────────┬────────┘          │
+         │                   ▼
+         ▼            ┌─────────────┐
+┌─────────────────┐   │   FAILED    │
+│   COMPLETED     │   │ (terminal)  │
+│   (terminal)    │   └─────────────┘
+└─────────────────┘
+```
+
+#### Layer Separation for FSM
+
+| Component | Layer | Responsibility |
+|-----------|-------|----------------|
+| `CompositePipelineState` (Enum) | **domain** | Defines states, transition rules, validation |
+| `can_transition()`, `validate_transition()` | **domain** | Pure functions for transition logic |
+| `CompositeCheckpointState.state` field | **application** | Persists FSM state for resume |
+| `CompositePipelineRunner` | **application** | Executes transitions, manages lifecycle |
+| `EnrichmentCoordinator` | **application** | No FSM knowledge (delegated service) |
+| `MergeService` | **application** | No FSM knowledge (delegated service) |
+
+**Key Principle:** Domain layer defines *what transitions are valid*, Application layer
+executes *when transitions happen*. This separation allows:
+
+1. **Testability**: FSM rules can be unit-tested in isolation
+2. **Predictability**: Invalid transitions raise `InvalidStateError` immediately
+3. **Observability**: Every transition is logged with from/to states
+4. **Resumability**: `is_resumable` property enables checkpoint-based recovery
+
+#### FSM in Domain Layer (`domain/composite/state.py`)
+
+```python
+class CompositePipelineState(str, Enum):
+    NOT_STARTED = "not_started"
+    SEED_RUNNING = "seed_running"
+    SEED_COMPLETED = "seed_completed"
+    ENRICHING = "enriching"
+    ENRICHMENT_COMPLETED = "enrichment_completed"
+    MERGING = "merging"
+    COMPLETED = "completed"  # Terminal
+    FAILED = "failed"        # Terminal
+
+    def can_transition_to(self, target: CompositePipelineState) -> bool:
+        """Domain logic: check if transition is valid."""
+        return target in self.allowed_transitions
+
+    def validate_transition(self, target: CompositePipelineState) -> None:
+        """Raises InvalidStateError if transition is invalid."""
+        ...
+```
+
+#### FSM in Application Layer (`application/composite/runner.py`)
+
+```python
+class CompositePipelineRunner:
+    async def run(self) -> CompositeResult:
+        # Application decides WHEN to transition
+        state = state.with_state(CompositePipelineState.SEED_RUNNING)
+        self._log_fsm_transition(from_state, to_state, stage="seed_start")
+
+        # ... execute seed ...
+
+        state = state.with_state(CompositePipelineState.SEED_COMPLETED)
+        # ... etc.
+```
 
 ## Domain Models
 
