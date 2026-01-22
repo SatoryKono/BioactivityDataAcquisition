@@ -69,6 +69,8 @@ class SilverMetadataInput:
         dq_report_path: Optional path to generated DQ report for cross-reference.
         partition_by: Partition columns used for the Delta table.
         governance: Optional governance metadata from pipeline config.
+        started_at: UTC timestamp when Silver write started.
+        completed_at: UTC timestamp when Silver write completed.
     """
 
     table_path: str
@@ -83,6 +85,8 @@ class SilverMetadataInput:
     dq_report_path: str | None = None
     partition_by: list[str] | None = None
     governance: GovernanceMetadata | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
 
 
 @dataclass(frozen=True, slots=True)
