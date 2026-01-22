@@ -210,6 +210,7 @@ class MetadataCoordinator:
                 total_bytes=input_data.compressed_size,
             ),
             environment=self._get_environment_metadata(),
+            governance=input_data.governance,
         )
 
     def create_silver_metadata(self, input_data: SilverMetadataInput) -> SilverMetadata:
@@ -296,6 +297,7 @@ class MetadataCoordinator:
             output=output,
             environment=self._get_environment_metadata(),
             dq_report_path=input_data.dq_report_path,
+            governance=input_data.governance,
         )
 
     def create_gold_metadata(self, input_data: GoldMetadataInput) -> GoldMetadata:
@@ -370,6 +372,7 @@ class MetadataCoordinator:
             output=output,
             scd=scd,
             environment=self._get_environment_metadata(),
+            governance=input_data.governance,
         )
 
     @classmethod
