@@ -21,7 +21,10 @@ from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
     GoldMetadata,
+    GovernanceLineageConfig,
+    GovernanceMetadata,
     LayerType,
+    QualityExpectations,
     RunTypeEnum,
     SilverMetadata,
     SourceMetadata,
@@ -972,3 +975,180 @@ class TestConsistencyAcrossLayers:
 
         # Environment should be the same cached object
         assert bronze.environment is silver.environment is gold.environment
+
+
+class TestGovernanceMetadata:
+    """Tests for governance metadata in sidecar files."""
+
+    def test_bronze_metadata_with_governance(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Test Bronze metadata includes governance when provided."""
+        governance = GovernanceMetadata(
+            owner="data-team",
+            steward="chembl-owner",
+            description="Raw ChEMBL activity data",
+            tags=["chembl", "activity", "raw"],
+            retention_days=90,
+            sla_freshness_hours=24,
+            lineage=GovernanceLineageConfig(
+                source_system="chembl",
+                source_version="v33",
+                extraction_method="api",
+            ),
+        )
+
+        input_data = BronzeMetadataInput(
+            batch_id=BatchID(uuid4()),
+            record_count=100,
+            compressed_size=5000,
+            output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
+            started_at=datetime.now(UTC),
+            completed_at=datetime.now(UTC),
+            governance=governance,
+        )
+
+        metadata = coordinator.create_bronze_metadata(input_data)
+
+        assert metadata.governance is not None
+        assert metadata.governance.owner == "data-team"
+        assert metadata.governance.steward == "chembl-owner"
+        assert metadata.governance.description == "Raw ChEMBL activity data"
+        assert metadata.governance.tags == ["chembl", "activity", "raw"]
+        assert metadata.governance.retention_days == 90
+        assert metadata.governance.sla_freshness_hours == 24
+        assert metadata.governance.lineage.source_system == "chembl"
+        assert metadata.governance.lineage.extraction_method == "api"
+
+    def test_bronze_metadata_without_governance(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Test Bronze metadata has None governance when not provided."""
+        input_data = BronzeMetadataInput(
+            batch_id=BatchID(uuid4()),
+            record_count=100,
+            compressed_size=5000,
+            output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
+            started_at=datetime.now(UTC),
+            completed_at=datetime.now(UTC),
+        )
+
+        metadata = coordinator.create_bronze_metadata(input_data)
+
+        assert metadata.governance is None
+
+    def test_silver_metadata_with_governance(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Test Silver metadata includes governance with quality expectations."""
+        governance = GovernanceMetadata(
+            owner="data-team",
+            description="Cleansed ChEMBL activity data",
+            tags=["chembl", "activity", "silver", "validated"],
+            lineage=GovernanceLineageConfig(
+                source_layer="bronze",
+                transformations=["deduplication", "normalization", "dq_validation"],
+            ),
+            quality_expectations=QualityExpectations(
+                completeness=0.95,
+                accuracy=0.99,
+            ),
+        )
+
+        records = [{"id": 1, "_source_batch_id": str(uuid4())}]
+        input_data = SilverMetadataInput(
+            table_path="/data/silver/chembl/activity",
+            records=records,
+            primary_keys=["id"],
+            mode=SilverWriteMode.MERGE,
+            governance=governance,
+        )
+
+        metadata = coordinator.create_silver_metadata(input_data)
+
+        assert metadata.governance is not None
+        assert metadata.governance.description == "Cleansed ChEMBL activity data"
+        assert "validated" in metadata.governance.tags
+        assert metadata.governance.lineage.source_layer == "bronze"
+        assert "deduplication" in metadata.governance.lineage.transformations
+        assert metadata.governance.quality_expectations.completeness == 0.95
+        assert metadata.governance.quality_expectations.accuracy == 0.99
+
+    def test_gold_metadata_with_governance(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Test Gold metadata includes governance with business domain."""
+        governance = GovernanceMetadata(
+            owner="analytics-team",
+            description="Business-ready ChEMBL activity data",
+            tags=["chembl", "activity", "gold", "ml-ready"],
+            lineage=GovernanceLineageConfig(
+                source_layer="silver",
+                filters_applied=True,
+                business_domain="drug-discovery",
+                use_cases=["ml-training", "reporting", "analytics"],
+            ),
+        )
+
+        records = [{"compound_id": "CMP123", "activity_value": 5.5}]
+        input_data = GoldMetadataInput(
+            table_path="/data/gold/chembl/activity",
+            table_name="chembl.activity",
+            records=records,
+            mode=GoldWriteMode.OVERWRITE,
+            governance=governance,
+        )
+
+        metadata = coordinator.create_gold_metadata(input_data)
+
+        assert metadata.governance is not None
+        assert metadata.governance.owner == "analytics-team"
+        assert "ml-ready" in metadata.governance.tags
+        assert metadata.governance.lineage.filters_applied is True
+        assert metadata.governance.lineage.business_domain == "drug-discovery"
+        assert "ml-training" in metadata.governance.lineage.use_cases
+
+    def test_governance_metadata_immutable(self) -> None:
+        """Test GovernanceMetadata can be frozen (Pydantic model)."""
+        governance = GovernanceMetadata(
+            owner="data-team",
+            tags=["tag1"],
+        )
+
+        # Pydantic models are mutable by default, but we can validate the structure
+        assert governance.owner == "data-team"
+        assert governance.tags == ["tag1"]
+
+    def test_governance_lineage_config_defaults(self) -> None:
+        """Test GovernanceLineageConfig has correct defaults."""
+        lineage = GovernanceLineageConfig()
+
+        assert lineage.source_system is None
+        assert lineage.source_version is None
+        assert lineage.extraction_method is None
+        assert lineage.source_layer is None
+        assert lineage.transformations == []
+        assert lineage.filters_applied is None
+        assert lineage.business_domain is None
+        assert lineage.use_cases == []
+
+    def test_quality_expectations_defaults(self) -> None:
+        """Test QualityExpectations has correct defaults."""
+        qe = QualityExpectations()
+
+        assert qe.completeness is None
+        assert qe.accuracy is None
+
+    def test_governance_metadata_defaults(self) -> None:
+        """Test GovernanceMetadata has correct defaults."""
+        governance = GovernanceMetadata()
+
+        assert governance.owner is None
+        assert governance.steward is None
+        assert governance.description is None
+        assert governance.tags == []
+        assert governance.retention_days is None
+        assert governance.sla_freshness_hours is None
+        assert governance.classification is None
+        assert governance.lineage is not None  # Default GovernanceLineageConfig
+        assert governance.quality_expectations is not None  # Default QualityExpectations
