@@ -221,6 +221,7 @@ class GoldWriter(BaseDeltaWriter):
                 ingestion_ts=ingestion_ts,
                 run_id=run_id,
                 silver_refs=silver_refs,
+                gold_schema=schema,
             )
 
     def _validate_write_mode(self, mode: str) -> GoldWriteMode:
@@ -548,6 +549,7 @@ class GoldWriter(BaseDeltaWriter):
         ingestion_ts: datetime | None,
         run_id: RunID | None,
         silver_refs: list[Any] | None = None,
+        gold_schema: Any | None = None,
     ) -> None:
         """Write Gold layer metadata sidecar file.
 
@@ -560,6 +562,7 @@ class GoldWriter(BaseDeltaWriter):
             ingestion_ts: Ingestion timestamp.
             run_id: Run identifier.
             silver_refs: List of SilverRef for Gold lineage tracking.
+            gold_schema: Optional Pandera schema class for extracting schema metadata.
         """
         if not records:
             return
@@ -594,6 +597,7 @@ class GoldWriter(BaseDeltaWriter):
                 silver_refs=converted_refs,
                 transform_version=self._transform_version,
                 transform_steps=self._transform_steps,
+                gold_schema=gold_schema,
             )
             metadata = self._metadata_coordinator.create_gold_metadata(gold_input)
             await self._metadata_writer.write_gold_metadata(
@@ -620,6 +624,7 @@ class GoldWriter(BaseDeltaWriter):
             scd_config=scd_config,
             ingestion_ts=ingestion_ts,
             run_id=run_id,
+            gold_schema=gold_schema,
         )
 
         # Write metadata sidecar file
