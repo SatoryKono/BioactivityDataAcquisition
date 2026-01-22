@@ -35,6 +35,11 @@ from bioetl.composition.factories.services_factory import (
     ServicesBuilder,
 )
 from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
+from bioetl.composition.services.versioning import (
+    compute_config_hash,
+    get_git_commit,
+    get_pipeline_version,
+)
 from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
@@ -407,13 +412,21 @@ def create_pipeline_with_services(
     # Extract entity from pipeline_name (e.g., "chembl_publication" → "publication")
     entity = _extract_entity_type(pipeline_name) or pipeline_name
 
-    # Create RunContext for MetadataCoordinator
+    # Compute versioning and reproducibility metadata
+    pipeline_version = get_pipeline_version(yaml_config)
+    git_commit = get_git_commit()
+    config_hash = compute_config_hash(yaml_config)
+
+    # Create RunContext for MetadataCoordinator with full metadata
     run_context = RunContext.create(
         run_id=run_id,
         run_type=runtime.run_type,
         started_at=datetime.now(UTC),
         provider=provider,
         entity=entity,
+        pipeline_version=pipeline_version,
+        git_commit=git_commit,
+        config_hash=config_hash,
     )
 
     # Create MetadataCoordinator with run context for centralized metadata

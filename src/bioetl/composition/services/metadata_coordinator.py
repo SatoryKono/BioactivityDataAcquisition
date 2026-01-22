@@ -155,13 +155,21 @@ class MetadataCoordinator:
     def _build_pipeline_metadata(self) -> PipelineMetadata:
         """Build PipelineMetadata from run context.
 
+        Includes versioning and reproducibility metadata:
+        - version: Pipeline version from config or package
+        - git_commit: Git commit hash for reproducibility
+        - config_hash: SHA256 hash of pipeline configuration
+
         Returns:
-            PipelineMetadata with pipeline identification.
+            PipelineMetadata with pipeline identification and versioning.
         """
         return PipelineMetadata(
             name=self._context.pipeline_name,
             provider=self._context.provider,
             entity=self._context.entity,
+            version=self._context.pipeline_version or "1.0.0",
+            git_commit=self._context.git_commit,
+            config_hash=self._context.config_hash,
         )
 
     def create_bronze_metadata(self, input_data: BronzeMetadataInput) -> BronzeMetadata:
