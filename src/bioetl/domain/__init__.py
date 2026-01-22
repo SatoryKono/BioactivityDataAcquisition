@@ -86,11 +86,6 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     TargetComponentRecord,
     TargetRecord,
     UniprotTarget,
-    # Deprecated aliases (ADR-024, glossary v2.0)
-    Compound,
-    Document,
-    Protein,
-    PubChemCompoundRecord,
 )
 
 # Error classifier
@@ -108,6 +103,7 @@ from bioetl.domain.exceptions import (
     BucketNotFoundError,
     CheckpointConflictError,
     CircuitBreakerOpenError,
+    ConfigurationError,
     CriticalError,
     DataQualityError,
     DataQualityThresholdError,
@@ -117,7 +113,9 @@ from bioetl.domain.exceptions import (
     DeltaTransactionError,
     DeltaWriteConflictError,
     ExternalServiceError,
+    FileSystemError,
     InfrastructureError,
+    InternalError,
     InvalidDataFormatError,
     InvalidStateError,
     LockAcquisitionError,
@@ -141,6 +139,7 @@ from bioetl.domain.exceptions import (
     TableNotFoundError,
     TimeoutError,
     UploadError,
+    ValidationError,
 )
 
 # Filter configuration
@@ -381,11 +380,6 @@ __all__ = [
     "Target",
     "TargetComponent",
     "UniprotTarget",
-    # Deprecated entity aliases (ADR-024, glossary v2.0)
-    "Compound",  # → PubchemMolecule
-    "Document",  # → ChemblPublication
-    "Protein",  # → UniprotTarget
-    "PubChemCompoundRecord",  # → PubchemMoleculeRecord
     # Error classifier
     "ErrorClassifier",
     # Events
@@ -404,11 +398,14 @@ __all__ = [
     "RateLimitExceededError",
     "ServiceAuthenticationError",
     "DataValidationError",
-    # Exceptions - Critical
+    # Exceptions - Internal/Critical
+    "InternalError",
     "BucketNotFoundError",
     "CheckpointConflictError",
+    "ConfigurationError",
     "DeltaSchemaValidationError",
     "DeltaTransactionError",
+    "FileSystemError",
     "InfrastructureError",
     "InvalidStateError",
     "LockAcquisitionError",
@@ -418,7 +415,7 @@ __all__ = [
     "PolicyViolationError",
     "RunnerAlreadyExecutedError",
     "StorageQuotaExceededError",
-    # Exceptions - Recoverable
+    # Exceptions - Recoverable/Network
     "CircuitBreakerOpenError",
     "DeltaOptimizeError",
     "DeltaWriteConflictError",
@@ -430,6 +427,8 @@ __all__ = [
     "TableNotFoundError",
     "TimeoutError",
     "UploadError",
+    # Exceptions - Validation
+    "ValidationError",
     # Exceptions - Data Quality
     "DataQualityThresholdError",
     "InvalidDataFormatError",

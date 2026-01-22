@@ -49,6 +49,10 @@ class TestFileSizeLimits:
         "chembl_structures.py": 510,  # 506 LOC - ChEMBL structural entities + deprecated alias __getattr__ (v2.0)
         "config_types.py": 430,  # 425 LOC - TypedDict definitions for YAML config parsing (DQ config extended)
         "exceptions.py": 550,  # 513 LOC
+        # Domain exceptions module reorganization (refactoring into logical categories)
+        "infrastructure.py": 590,  # 579 LOC - InfrastructureErrors (storage, filesystem, environment)
+        "internal.py": 380,  # 369 LOC - InternalErrors (critical application errors)
+        "network.py": 450,  # 434 LOC - NetworkErrors (connectivity, external services)
         # Domain value objects (rich domain models with validation)
         "batch.py": 550,  # 531 LOC - Batch aggregate with lifecycle methods
         "pipeline_run.py": 600,  # 581 LOC - PipelineRun aggregate with state machine

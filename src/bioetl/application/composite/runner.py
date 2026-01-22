@@ -15,6 +15,12 @@ from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from bioetl.application.composite.runner_helpers import (
+    add_not_run_results,
+    calculate_had_warnings,
+    get_mergeable_enrichers,
+    log_enrichment_summary,
+)
 from bioetl.domain.composite.result import (
     CompositeResult,
     EnrichmentResult,
@@ -397,7 +403,7 @@ class CompositePipelineRunner:
             await self._checkpoint_manager.save(state)
 
             # Log aggregated enrichment results
-            self._log_enrichment_summary(enrichment_results)
+            log_enrichment_summary(enrichment_results, self._config.name, self._logger)
         else:
             # No enrichers to run - skip enrichment stage
             self._logger.info(
@@ -410,8 +416,14 @@ class CompositePipelineRunner:
         enrichment_results.update(state.enrichment_results)
 
         # Step 4b: Add NOT_RUN results for optional enrichers skipped due to required_only
-        enrichment_results = self._add_not_run_results(
-            enrichment_results, enrichers_to_run, state
+        enrichment_results = add_not_run_results(
+            enrichment_results,
+            enrichers_to_run,
+            self._config.enrichers,
+            state.completed_enrichers,
+            self._runtime.required_only,
+            self._config.name,
+            self._logger,
         )
 
         # Step 5: Check required enrichers with FSM FAILED transition on error
@@ -462,7 +474,12 @@ class CompositePipelineRunner:
         total_duration = (completed_at - started).total_seconds()
 
         # Calculate if we had warnings from optional enricher failures
-        had_warnings = self._calculate_had_warnings(enrichment_results)
+        had_warnings = calculate_had_warnings(
+            enrichment_results,
+            frozenset(self._config.required_enrichers),
+            self._config.name,
+            self._logger,
+        )
 
         # Log completion with appropriate status
         if had_warnings:
@@ -578,7 +595,9 @@ class CompositePipelineRunner:
 
             try:
                 # Get only enrichers with data to merge (exclude SKIPPED/NOT_RUN)
-                mergeable_enrichers = self._get_mergeable_enrichers(enrichment_results)
+                mergeable_enrichers = get_mergeable_enrichers(
+                    enrichment_results, self._config.enrichers, self._logger
+                )
 
                 merge_result = await self._merger.merge(
                     seed_table=self._config.seed.silver_table,
@@ -801,211 +820,6 @@ class CompositePipelineRunner:
                     f"Required enricher '{enricher_name}' failed: "
                     f"{result.error_message or result.status.value}"
                 )
-
-    def _add_not_run_results(
-        self,
-        enrichment_results: dict[str, EnrichmentResult],
-        enrichers_to_run: list[EnricherConfig],
-        state: CompositeCheckpointState,
-    ) -> dict[str, EnrichmentResult]:
-        """Add NOT_RUN results for optional enrichers skipped due to required_only mode.
-
-        When required_only is True, optional enrichers are not executed. This method
-        adds explicit NOT_RUN results for these enrichers so they appear in the
-        final enrichment_results for complete lineage tracking.
-
-        Args:
-            enrichment_results: Current enrichment results from executed enrichers.
-            enrichers_to_run: List of enrichers that were actually run.
-            state: Current checkpoint state.
-
-        Returns:
-            Updated enrichment_results with NOT_RUN entries for skipped optional enrichers.
-        """
-        if not self._runtime.required_only:
-            return enrichment_results
-
-        # Get set of enrichers that were actually run or previously completed
-        run_names = {e.pipeline for e in enrichers_to_run}
-        completed_names = state.completed_enrichers
-
-        # Find optional enrichers that were skipped due to required_only
-        for enricher in self._config.enrichers:
-            # Only process optional enrichers
-            if enricher.required:
-                continue
-
-            # Skip if this enricher was run or previously completed
-            if enricher.pipeline in run_names:
-                continue
-            if enricher.pipeline in completed_names:
-                continue
-
-            # Skip if already in results (shouldn't happen, but defensive)
-            if enricher.pipeline in enrichment_results:
-                continue
-
-            # Add NOT_RUN result for this skipped optional enricher
-            enrichment_results[enricher.pipeline] = EnrichmentResult.not_run(
-                enricher_name=enricher.pipeline,
-                reason="Skipped due to required_only mode",
-            )
-
-            self._logger.info(
-                "Optional enricher not run",
-                composite=self._config.name,
-                enricher=enricher.pipeline,
-                reason="required_only_mode",
-            )
-
-        return enrichment_results
-
-    def _calculate_had_warnings(
-        self, enrichment_results: dict[str, EnrichmentResult]
-    ) -> bool:
-        """Calculate if the pipeline had warnings from optional enricher failures.
-
-        A warning occurs when an optional (non-required) enricher fails but the
-        pipeline can still complete successfully. This allows users to distinguish
-        between clean completions and completions with issues.
-
-        Args:
-            enrichment_results: All enrichment results.
-
-        Returns:
-            True if any optional enricher failed (status FAILED or TIMEOUT).
-        """
-        required_enrichers = frozenset(self._config.required_enrichers)
-
-        for name, result in enrichment_results.items():
-            # Skip required enrichers - their failures would already have raised
-            if name in required_enrichers:
-                continue
-
-            # Check for failure statuses (FAILED, TIMEOUT)
-            if result.status in (EnrichmentStatus.FAILED, EnrichmentStatus.TIMEOUT):
-                self._logger.warning(
-                    "Optional enricher failed",
-                    composite=self._config.name,
-                    enricher=name,
-                    status=result.status.value,
-                    error_message=result.error_message,
-                )
-                return True
-
-        return False
-
-    def _get_mergeable_enrichers(
-        self,
-        enrichment_results: dict[str, EnrichmentResult],
-    ) -> list[EnricherConfig]:
-        """Get list of enrichers that should be included in merge.
-
-        Excludes enrichers with NOT_RUN or SKIPPED status since they have no
-        data to merge. This prevents file I/O errors when trying to read
-        non-existent or empty Silver tables.
-
-        Args:
-            enrichment_results: All enrichment results.
-
-        Returns:
-            List of EnricherConfig for enrichers that have data to merge.
-        """
-        # Statuses that indicate no data to merge
-        non_mergeable_statuses = (
-            EnrichmentStatus.SKIPPED,
-            EnrichmentStatus.NOT_RUN,
-        )
-
-        mergeable: list[EnricherConfig] = []
-        for enricher_cfg in self._config.enrichers:
-            result = enrichment_results.get(enricher_cfg.pipeline)
-
-            # If no result, don't include in merge
-            if result is None:
-                continue
-
-            # If status indicates no data, don't include in merge
-            if result.status in non_mergeable_statuses:
-                self._logger.debug(
-                    "Excluding enricher from merge",
-                    enricher=enricher_cfg.pipeline,
-                    status=result.status.value,
-                    reason="no_data_to_merge",
-                )
-                continue
-
-            mergeable.append(enricher_cfg)
-
-        return mergeable
-
-    def _log_enrichment_summary(
-        self, enrichment_results: dict[str, EnrichmentResult]
-    ) -> None:
-        """Log aggregated summary of enrichment results.
-
-        Args:
-            enrichment_results: Results from enrichers.
-        """
-        if not enrichment_results:
-            return
-
-        # Aggregate by status
-        success_count = 0
-        partial_count = 0
-        failed_count = 0
-        skipped_count = 0
-        timeout_count = 0
-        not_run_count = 0
-
-        total_records_input = 0
-        total_records_enriched = 0
-        total_records_errored = 0
-
-        failed_enrichers: list[str] = []
-        successful_enrichers: list[str] = []
-        not_run_enrichers: list[str] = []
-
-        for name, result in enrichment_results.items():
-            total_records_input += result.records_input
-            total_records_enriched += result.records_enriched
-            total_records_errored += result.records_errored
-
-            if result.status == EnrichmentStatus.SUCCESS:
-                success_count += 1
-                successful_enrichers.append(name)
-            elif result.status == EnrichmentStatus.PARTIAL:
-                partial_count += 1
-                successful_enrichers.append(name)
-            elif result.status == EnrichmentStatus.FAILED:
-                failed_count += 1
-                failed_enrichers.append(name)
-            elif result.status == EnrichmentStatus.SKIPPED:
-                skipped_count += 1
-            elif result.status == EnrichmentStatus.TIMEOUT:
-                timeout_count += 1
-                failed_enrichers.append(name)
-            elif result.status == EnrichmentStatus.NOT_RUN:
-                not_run_count += 1
-                not_run_enrichers.append(name)
-
-        self._logger.info(
-            "Enrichment summary",
-            composite=self._config.name,
-            total_enrichers=len(enrichment_results),
-            success=success_count,
-            partial=partial_count,
-            failed=failed_count,
-            skipped=skipped_count,
-            timeout=timeout_count,
-            not_run=not_run_count,
-            successful_enrichers=successful_enrichers,
-            failed_enrichers=failed_enrichers if failed_enrichers else None,
-            not_run_enrichers=not_run_enrichers if not_run_enrichers else None,
-            total_records_input=total_records_input,
-            total_records_enriched=total_records_enriched,
-            total_records_errored=total_records_errored,
-        )
 
     async def _generate_dq_reports(self, merge_result: MergeResult) -> None:
         """Generate DQ reports for composite pipeline.
