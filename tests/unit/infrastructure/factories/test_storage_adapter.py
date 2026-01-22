@@ -8,7 +8,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.composition.factories.storage import StorageAdapter
+from bioetl.composition.factories.storage_adapter import StorageAdapter
 from bioetl.domain.ports import StoragePort
 from bioetl.domain.types import RunType
 
@@ -18,6 +18,7 @@ def mock_bronze_writer() -> MagicMock:
     """Create mock bronze writer."""
     writer = MagicMock()
     writer.write_bronze = AsyncMock()
+    writer.cleanup_old_files = AsyncMock()
     return writer
 
 
@@ -26,6 +27,7 @@ def mock_silver_writer() -> MagicMock:
     """Create mock silver writer."""
     writer = MagicMock()
     writer.write_silver = AsyncMock()
+    writer.vacuum = AsyncMock()
     return writer
 
 
@@ -250,3 +252,66 @@ class TestStorageAdapterClose:
         # Can be called multiple times
         await storage_adapter.aclose()
         await storage_adapter.aclose()
+
+
+@pytest.mark.unit
+class TestStorageAdapterOptimize:
+    """Tests for optimize method."""
+
+    @pytest.mark.asyncio
+    async def test_optimize_delegates_to_vacuum(
+        self,
+        storage_adapter: StorageAdapter,
+        mock_silver_writer: MagicMock,
+    ) -> None:
+        """Test that optimize calls vacuum."""
+        # Mock vacuum method on adapter since it calls self.vacuum
+        storage_adapter.vacuum = AsyncMock()  # type: ignore
+
+        await storage_adapter.optimize(
+            table_name="chembl.activity",
+            retention_hours=168,
+            dry_run=True
+        )
+
+        storage_adapter.vacuum.assert_called_once_with(
+            "chembl.activity", 168, True
+        )
+
+    @pytest.mark.asyncio
+    async def test_optimize_calls_bronze_cleanup(
+        self,
+        storage_adapter: StorageAdapter,
+        mock_bronze_writer: MagicMock,
+    ) -> None:
+        """Test that optimize calls bronze cleanup for valid table names."""
+        storage_adapter.vacuum = AsyncMock()  # type: ignore
+
+        await storage_adapter.optimize(
+            table_name="chembl.activity",
+            retention_hours=168,
+            dry_run=False
+        )
+
+        mock_bronze_writer.cleanup_old_files.assert_called_once()
+        call_kwargs = mock_bronze_writer.cleanup_old_files.call_args[1]
+        assert call_kwargs["provider"] == "chembl"
+        assert call_kwargs["entity"] == "activity"
+        assert "cutoff_date" in call_kwargs
+        assert call_kwargs["dry_run"] is False
+
+    @pytest.mark.asyncio
+    async def test_optimize_skips_bronze_cleanup_for_no_dot(
+        self,
+        storage_adapter: StorageAdapter,
+        mock_bronze_writer: MagicMock,
+    ) -> None:
+        """Test that optimize skips bronze cleanup if table name has no dot."""
+        storage_adapter.vacuum = AsyncMock()  # type: ignore
+
+        await storage_adapter.optimize(
+            table_name="invalid_table_name",
+            retention_hours=168,
+        )
+
+        mock_bronze_writer.cleanup_old_files.assert_not_called()
