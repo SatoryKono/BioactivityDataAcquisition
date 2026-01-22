@@ -1,16 +1,8 @@
-"""Pipeline Factory.
+"""Pipeline Factory - consolidated module for pipeline and runner creation.
 
-Consolidated module for pipeline and runner creation.
-
-Contains:
-- GenericPipelineFactory: Configurable factory for creating pipelines
-- create_pipeline_factory: Convenience function for creating factories
-- assemble_runner: Assembles PipelineRunner from pipeline instance
-- build_pipeline_services: Builds PipelineServices from settings
-- create_pipeline_with_services: Creates pipeline with injected services
-
-This module follows the DI pattern: pipelines are configured declaratively
-and assembled with all dependencies in the composition layer.
+Contains GenericPipelineFactory, assemble_runner, build_pipeline_services,
+and create_pipeline_with_services. Follows DI pattern with declarative
+configuration and assembly in the composition layer.
 """
 
 from __future__ import annotations
@@ -408,28 +400,19 @@ def create_pipeline_with_services(
         Configured pipeline instance
     """
     yaml_config = config or load_pipeline_config(pipeline_name)
-
-    # Extract entity from pipeline_name (e.g., "chembl_publication" → "publication")
     entity = _extract_entity_type(pipeline_name) or pipeline_name
 
-    # Compute versioning and reproducibility metadata
-    pipeline_version = get_pipeline_version(yaml_config)
-    git_commit = get_git_commit()
-    config_hash = compute_config_hash(yaml_config)
-
-    # Create RunContext for MetadataCoordinator with full metadata
+    # Create RunContext with versioning metadata for MetadataCoordinator
     run_context = RunContext.create(
         run_id=run_id,
         run_type=runtime.run_type,
         started_at=datetime.now(UTC),
         provider=provider,
         entity=entity,
-        pipeline_version=pipeline_version,
-        git_commit=git_commit,
-        config_hash=config_hash,
+        pipeline_version=get_pipeline_version(yaml_config),
+        git_commit=get_git_commit(),
+        config_hash=compute_config_hash(yaml_config),
     )
-
-    # Create MetadataCoordinator with run context for centralized metadata
     metadata_coordinator = MetadataCoordinator(run_context)
 
     services = build_pipeline_services(

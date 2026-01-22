@@ -32,16 +32,29 @@ def _get_bioetl_version() -> str:
 
 
 def _get_git_commit_cached() -> str | None:
-    """Get git commit hash (lazy import to avoid circular deps).
+    """Get git commit hash directly via subprocess.
+
+    This is a fallback for metadata builders when MetadataCoordinator
+    is not available. Uses subprocess directly to avoid layer violations
+    (infrastructure cannot import composition).
 
     Returns:
         Short git commit hash or None.
     """
-    try:
-        from bioetl.composition.services.versioning import get_git_commit
+    import subprocess
 
-        return get_git_commit()
-    except ImportError:
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+        return None
+    except (subprocess.SubprocessError, FileNotFoundError, OSError):
         return None
 
 

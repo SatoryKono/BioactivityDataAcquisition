@@ -45,7 +45,7 @@ def get_git_commit() -> str | None:
 
     Example:
         >>> commit = get_git_commit()
-        >>> print(commit)  # 'abc1234' or None
+        >>> commit  # 'abc1234' or None
     """
     try:
         result = subprocess.run(
@@ -104,7 +104,7 @@ def compute_config_hash(config: PipelineYamlConfig | dict[str, Any]) -> str:
     Example:
         >>> config = load_pipeline_config("chembl_activity")
         >>> hash_value = compute_config_hash(config)
-        >>> print(hash_value)  # '3a7bd3e2...'
+        >>> hash_value  # '3a7bd3e2...'
     """
     # Convert Pydantic model to dict if needed
     if hasattr(config, "model_dump"):
@@ -143,16 +143,16 @@ def get_pipeline_version(
 
     Example:
         >>> version = get_pipeline_version(config)
-        >>> print(version)  # '1.0.0'
+        >>> version  # '1.0.0'
     """
     # Try to get version from config
     if config is not None:
         # Handle Pydantic model
         if hasattr(config, "version") and config.version:
-            return config.version
+            return str(config.version)
         # Handle dict
         if isinstance(config, dict) and config.get("version"):
-            return config["version"]
+            return str(config["version"])
 
     # Fallback to bioetl package version
     try:
