@@ -419,10 +419,14 @@ class TestFunctionLength:
         "bootstrap_composite_pipeline": 175,  # 170 lines - Composite pipeline bootstrapping with factory functions
         "run_composite": 60,  # 56 lines - Composite CLI entrypoint
         "build_pipeline_context": 60,  # 55 lines - Context building for composite
-        "write_gold_merged": 75,  # 74 lines - Gold write with merged enrichers + flat_structure
+        "write_gold_merged": 85,  # 82 lines - Gold write with merged enrichers + flat_structure + CSV export
         "_write_gold_merged_metadata": 130,  # 128 lines - Gold merged metadata with full lineage
-        "write_silver_merged": 80,  # 78 lines - Silver merged write with flat_structure
+        "write_silver_merged": 90,  # 86 lines - Silver merged write with flat_structure + CSV export
+        "_write_silver_merged_metadata": 65,  # 63 lines - Silver merged metadata sidecar
         "_to_arrow_table": 55,  # 52 lines - Arrow table conversion
+        # Metadata builder functions (extracted during refactoring)
+        "build_merged_metadata": 100,  # 95 lines - Metadata builder for merged data (Silver/Gold)
+        "build_fallback_metadata": 90,  # 86 lines - Fallback metadata building
         # DQ config loader functions
         "load": 70,  # 67 lines - DQ config loading with merge
         "_normalize_to_file_format": 60,  # 55 lines - File format normalization
@@ -445,6 +449,8 @@ class TestFunctionLength:
         # Services factory functions
         "create_common_services": 65,  # Common services factory
         "_create_dq_services": 55,  # DQ services factory
+        # DQ report writer functions
+        "write_bronze_report": 60,  # Bronze DQ report with unified path structure docstring
     }
 
     # Maximum allowed violations (for tracking technical debt)

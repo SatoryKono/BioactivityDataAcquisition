@@ -142,6 +142,7 @@ def _create_table_collector(
     Returns:
         Callable that collects tables for a given layer.
     """
+
     def collect_tables(layer: str) -> list[tuple[str, str]]:
         """Collect tables from all registered pipelines.
 
