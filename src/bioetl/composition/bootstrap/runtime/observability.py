@@ -18,7 +18,6 @@ Note:
 
 from __future__ import annotations
 
-import contextlib
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
@@ -162,9 +161,8 @@ def bootstrap_tracer_port(
 ) -> TracingPort:
     """Create a tracing port implementation for distributed tracing.
 
-    Unified Observability Contract: Always returns a valid TracingPort.
-    When tracing is disabled or OpenTelemetry is not installed,
-    returns NoOpTracing (silent fallback).
+    When tracing is disabled, returns NoOpTracing.
+    When tracing is enabled, returns OpenTelemetryTracer.
 
     Layer: Returns domain port implementation (TracingPort).
 
@@ -174,14 +172,12 @@ def bootstrap_tracer_port(
 
     Returns:
         TracingPort instance (OpenTelemetryTracer or NoOpTracing).
-        Never returns None - uses NoOpTracing as fallback.
+
+    Raises:
+        ImportError: If tracing is enabled but OpenTelemetry is not installed.
     """
     if settings.observability.tracing_enabled:
-        try:
-            return OpenTelemetryTracer(service_name=service_name)
-        except ImportError:
-            # OpenTelemetry not installed, fall back to no-op
-            pass
+        return OpenTelemetryTracer(service_name=service_name)
     return NoOpTracing()
 
 
@@ -257,25 +253,13 @@ def maybe_start_metrics_server(settings: Settings) -> bool:
 
     obs = settings.observability
 
-    if obs.metrics_fail_fast:
-        # In fail_fast mode, let MetricsServerError propagate
-        return start_metrics_server(
-            port=settings.metrics_port,
-            fail_fast=True,
-            retry_count=obs.metrics_retry_count,
-            retry_delay=obs.metrics_retry_delay,
-        )
-
-    # Lenient mode: log but don't fail - metrics collection still works
-    with contextlib.suppress(Exception):
-        return start_metrics_server(
-            port=settings.metrics_port,
-            fail_fast=False,
-            retry_count=obs.metrics_retry_count,
-            retry_delay=obs.metrics_retry_delay,
-        )
-
-    return False
+    # Start metrics server - let exceptions propagate to entrypoints
+    return start_metrics_server(
+        port=settings.metrics_port,
+        fail_fast=obs.metrics_fail_fast,
+        retry_count=obs.metrics_retry_count,
+        retry_delay=obs.metrics_retry_delay,
+    )
 
 
 def bootstrap_metrics(settings: Settings) -> MetricsPort:

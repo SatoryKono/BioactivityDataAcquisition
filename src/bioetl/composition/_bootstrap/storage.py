@@ -198,7 +198,7 @@ def bootstrap_vacuum_service() -> VacuumService:
     noop_logger = NoOpLogger()
 
     # Create table collector that queries the registry (DI pattern)
-    table_collector = _create_table_collector(noop_logger)
+    table_collector = _create_table_collector()
 
     return VacuumService(
         lifecycle=lifecycle,
@@ -207,20 +207,18 @@ def bootstrap_vacuum_service() -> VacuumService:
     )
 
 
-def _create_table_collector(
-    logger: NoOpLogger,
-) -> Callable[[str], list[tuple[str, str]]]:
+def _create_table_collector() -> Callable[[str], list[tuple[str, str]]]:
     """Create a table collector function for VacuumService.
 
     This function queries the pipeline registry and config loader
     to collect silver/gold tables. It lives in composition layer
     to maintain proper dependency direction (application -> domain <- composition).
 
-    Args:
-        logger: Logger for warnings when configs are not found.
-
     Returns:
         Callable that collects tables for a given layer.
+
+    Raises:
+        ValueError: If config file for a registered pipeline is not found.
     """
     from bioetl.composition.entrypoints import load_pipeline_config
     from bioetl.composition.registry import get_default_registry
@@ -233,6 +231,9 @@ def _create_table_collector(
 
         Returns:
             List of (table_name, layer) tuples sorted alphabetically.
+
+        Raises:
+            ValueError: If config file for a registered pipeline is not found.
         """
         registry = get_default_registry()
         pipelines = registry.list_pipelines()
@@ -241,17 +242,11 @@ def _create_table_collector(
         gold_tables: set[str] = set()
 
         for pipeline_name in pipelines:
-            try:
-                config = load_pipeline_config(pipeline_name)
-                if config.silver_table:
-                    silver_tables.add(config.silver_table)
-                if config.gold_table:
-                    gold_tables.add(config.gold_table)
-            except FileNotFoundError:
-                logger.warning(
-                    "Config not found for pipeline",
-                    pipeline_name=pipeline_name,
-                )
+            config = load_pipeline_config(pipeline_name)
+            if config.silver_table:
+                silver_tables.add(config.silver_table)
+            if config.gold_table:
+                gold_tables.add(config.gold_table)
 
         tables: list[tuple[str, str]] = []
         if layer in ("all", "silver"):

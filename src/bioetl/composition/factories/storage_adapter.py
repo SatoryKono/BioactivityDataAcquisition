@@ -504,42 +504,31 @@ class StorageAdapter:
         """
         total_removed = 0
 
-        # Vacuum Silver
-        try:
+        # Vacuum Silver (only if table exists)
+        silver_table_path = self.silver.get_table_path(table_name)
+        if silver_table_path.exists():
             removed = await self.silver.vacuum(
                 table_name=table_name,
                 retention_hours=retention_hours,
                 dry_run=dry_run,
             )
             total_removed += len(removed)
-        except Exception:
-            # Log but continue to Gold (table may not exist)
-            pass
 
-        # Vacuum Gold (GoldWriter uses SilverWriter internally, need to add vacuum)
-        # Gold layer uses same Delta format, so we can vacuum via path
-        try:
-            gold_table_path = f"{self.gold.base_path}/{table_name.replace('.', '/')}"
-            loop = asyncio.get_running_loop()
+        # Vacuum Gold (only if table exists)
+        gold_table_path = self.gold.get_table_path(table_name)
+        if gold_table_path.exists():
             from deltalake import DeltaTable
-            from deltalake.exceptions import (
-                TableNotFoundError as DeltaTableNotFoundError,
-            )
 
-            try:
-                dt = await loop.run_in_executor(
-                    None,
-                    lambda: DeltaTable(gold_table_path),
-                )
-                removed = await loop.run_in_executor(
-                    None,
-                    lambda: dt.vacuum(retention_hours=retention_hours, dry_run=dry_run),
-                )
-                total_removed += len(removed)
-            except DeltaTableNotFoundError:
-                pass
-        except Exception:
-            pass
+            loop = asyncio.get_running_loop()
+            dt = await loop.run_in_executor(
+                None,
+                lambda: DeltaTable(str(gold_table_path)),
+            )
+            removed = await loop.run_in_executor(
+                None,
+                lambda: dt.vacuum(retention_hours=retention_hours, dry_run=dry_run),
+            )
+            total_removed += len(removed)
 
         return total_removed
 

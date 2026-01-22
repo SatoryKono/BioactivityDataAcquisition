@@ -246,7 +246,7 @@ def bootstrap_composite_runner(
         resume=runtime.resume,
     )
 
-    # Create DQ report service for composite (optional)
+    # Create DQ report service for composite
     dq_report_service = _create_dq_report_service(logger, settings)
 
     return CompositePipelineRunner(
@@ -290,38 +290,30 @@ def bootstrap_composite_pipeline(
 def _create_dq_report_service(
     logger: LoggerPort,
     settings: Settings,
-) -> DQReportService | None:
+) -> DQReportService:
     """Create DQ report service for composite pipelines.
-
-    Returns None if DQ reporting is not configured.
 
     Args:
         logger: Structured logger.
         settings: Application settings.
 
     Returns:
-        DQReportService instance or None.
+        DQReportService instance.
+
+    Raises:
+        ImportError: If required modules are not available.
     """
-    try:
-        from bioetl.application.services.dq_report_service import DQReportService
-        from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
+    from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
 
-        # Create DQ report writer
-        reports_base_path = Path(settings.data_dir) / "output" / "reports" / "dq"
-        report_writer = DQReportWriter(
-            base_path=reports_base_path,
-            logger=logger,
-        )
+    # Create DQ report writer
+    reports_base_path = Path(settings.data_dir) / "output" / "reports" / "dq"
+    report_writer = DQReportWriter(
+        base_path=reports_base_path,
+        logger=logger,
+    )
 
-        return DQReportService(
-            logger=logger,
-            report_writer=report_writer,
-            # Analyzers are optional - reports will be generated
-            # for layers where analyzers are available
-        )
-    except Exception as e:
-        logger.debug(
-            "dq_report_service_creation_failed",
-            error=str(e),
-        )
-        return None
+    return DQReportService(
+        logger=logger,
+        report_writer=report_writer,
+    )
