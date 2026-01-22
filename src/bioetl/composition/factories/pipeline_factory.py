@@ -621,16 +621,21 @@ def _extract_single_dq_config(
 
     Returns:
         DQ report config if enabled, None otherwise.
+
+    Raises:
+        ValidationError: If sink config exists but is invalid.
     """
     sink_config = sink.get(layer_name)
     if not sink_config:
         return None
-    try:
-        validated = config_class.model_validate(sink_config.model_dump())
-        if validated.dq_report.enabled:
-            return validated.dq_report
-    except Exception:
-        pass
+
+    # Check if sink_config has model_dump (is a Pydantic model)
+    if not hasattr(sink_config, "model_dump"):
+        return None
+
+    validated = config_class.model_validate(sink_config.model_dump())
+    if hasattr(validated, "dq_report") and validated.dq_report.enabled:
+        return validated.dq_report
     return None
 
 

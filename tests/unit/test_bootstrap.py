@@ -558,11 +558,11 @@ class TestMaybeStartMetricsServer:
         assert exc_info.value.reason == "port_in_use"
 
     @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
-    def test_maybe_start_metrics_server_fail_fast_false_suppresses_error(
+    def test_maybe_start_metrics_server_fail_fast_false_propagates_error(
         self,
         mock_start_server: MagicMock,
     ) -> None:
-        """Test that fail_fast=False suppresses exceptions."""
+        """Test that fail_fast=False still propagates exceptions to entrypoints."""
         from bioetl.composition.bootstrap import maybe_start_metrics_server
 
         settings = MagicMock()
@@ -573,13 +573,12 @@ class TestMaybeStartMetricsServer:
         settings.observability.metrics_retry_count = 3
         settings.observability.metrics_retry_delay = 1.0
 
-        # Simulate exception in lenient mode
+        # Simulate exception - should propagate to entrypoints for handling
         mock_start_server.side_effect = Exception("Random failure")
 
-        # Should not raise, should return False
-        result = maybe_start_metrics_server(settings)
-
-        assert result is False
+        # Exceptions now propagate instead of being suppressed
+        with pytest.raises(Exception, match="Random failure"):
+            maybe_start_metrics_server(settings)
 
     def test_maybe_start_metrics_server_disabled_returns_false(self) -> None:
         """Test that disabled metrics returns False without calling server."""
