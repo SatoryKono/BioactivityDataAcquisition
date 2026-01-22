@@ -42,13 +42,9 @@ class TestDomainCompositeLayerBoundaries:
             content = py_file.read_text(encoding="utf-8")
 
             # Check for direct imports
-            if re.search(
-                r"^\s*from\s+bioetl\.application\b", content, re.MULTILINE
-            ):
+            if re.search(r"^\s*from\s+bioetl\.application\b", content, re.MULTILINE):
                 violations.append(f"{py_file.name}: imports from bioetl.application")
-            if re.search(
-                r"^\s*import\s+bioetl\.application\b", content, re.MULTILINE
-            ):
+            if re.search(r"^\s*import\s+bioetl\.application\b", content, re.MULTILINE):
                 violations.append(f"{py_file.name}: imports bioetl.application")
 
         assert not violations, (
@@ -71,9 +67,7 @@ class TestDomainCompositeLayerBoundaries:
         for py_file in domain_composite_path.rglob("*.py"):
             content = py_file.read_text(encoding="utf-8")
 
-            if re.search(
-                r"^\s*from\s+bioetl\.infrastructure\b", content, re.MULTILINE
-            ):
+            if re.search(r"^\s*from\s+bioetl\.infrastructure\b", content, re.MULTILINE):
                 violations.append(f"{py_file.name}: imports from bioetl.infrastructure")
             if re.search(
                 r"^\s*import\s+bioetl\.infrastructure\b", content, re.MULTILINE
@@ -184,10 +178,7 @@ class TestCoordinatorIsolation:
         for node in ast.walk(tree):
             if isinstance(node, ast.If):
                 # Check if this is TYPE_CHECKING block
-                if (
-                    isinstance(node.test, ast.Name)
-                    and node.test.id == "TYPE_CHECKING"
-                ):
+                if isinstance(node.test, ast.Name) and node.test.id == "TYPE_CHECKING":
                     in_type_checking = True
 
             if isinstance(node, ast.ImportFrom) and not in_type_checking:
@@ -239,10 +230,7 @@ class TestMergerIsolation:
 
         for node in ast.walk(tree):
             if isinstance(node, ast.If):
-                if (
-                    isinstance(node.test, ast.Name)
-                    and node.test.id == "TYPE_CHECKING"
-                ):
+                if isinstance(node.test, ast.Name) and node.test.id == "TYPE_CHECKING":
                     in_type_checking = True
 
             if isinstance(node, ast.ImportFrom) and not in_type_checking:
@@ -295,8 +283,11 @@ class TestRunnerFSMOwnership:
         content = runner_file.read_text(encoding="utf-8")
 
         # Must import from domain layer
-        assert "from bioetl.domain.composite.state import CompositePipelineState" in content or \
-               "from bioetl.domain.composite import CompositePipelineState" in content, (
+        assert (
+            "from bioetl.domain.composite.state import CompositePipelineState"
+            in content
+            or "from bioetl.domain.composite import CompositePipelineState" in content
+        ), (
             "CompositePipelineRunner must import CompositePipelineState "
             "from domain layer for FSM management."
         )
@@ -342,14 +333,12 @@ class TestCheckpointFSMIntegration:
 
         # Must import FSM state from domain
         has_fsm_import = (
-            "CompositePipelineState" in content
-            and "bioetl.domain.composite" in content
+            "CompositePipelineState" in content and "bioetl.domain.composite" in content
         )
 
         # Must have state field in CheckpointState
         has_state_field = (
-            "state: CompositePipelineState" in content
-            or "state:" in content
+            "state: CompositePipelineState" in content or "state:" in content
         )
 
         assert has_fsm_import and has_state_field, (
@@ -424,7 +413,7 @@ class TestFSMDomainExports:
         tree = ast.parse(content)
 
         # Find __all__ assignment
-        all_list = None
+        all_list: list[str] | None = None
         for node in ast.walk(tree):
             if isinstance(node, ast.Assign):
                 for target in node.targets:
@@ -434,6 +423,7 @@ class TestFSMDomainExports:
                                 elt.value
                                 for elt in node.value.elts
                                 if isinstance(elt, ast.Constant)
+                                and isinstance(elt.value, str)
                             ]
 
         assert all_list is not None, "__all__ not found in domain/composite/__init__.py"
