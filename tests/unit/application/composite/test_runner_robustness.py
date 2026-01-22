@@ -351,7 +351,8 @@ class TestFSMTransitionValidation:
 
         # Check that no warning about "Invalid FSM transition" was logged
         warning_calls = [
-            c for c in mock_logger.warning.call_args_list
+            c
+            for c in mock_logger.warning.call_args_list
             if c.args and "Invalid FSM transition" in str(c.args[0])
         ]
         assert len(warning_calls) == 0, "No invalid FSM transition warnings expected"
@@ -414,7 +415,8 @@ class TestFSMTransitionValidation:
 
         # Should NOT have warnings about invalid transitions from FAILED
         warning_calls = [
-            c for c in mock_logger.warning.call_args_list
+            c
+            for c in mock_logger.warning.call_args_list
             if c.args and "Invalid FSM transition" in str(c.args[0])
         ]
         assert len(warning_calls) == 0, "Resume from FAILED should not warn"
@@ -473,7 +475,8 @@ class TestConfigurationConsistency:
 
         # Check that info message about all optional enrichers was logged
         info_calls = [
-            c for c in mock_logger.info.call_args_list
+            c
+            for c in mock_logger.info.call_args_list
             if c.args and "All enrichers are optional" in str(c.args[0])
         ]
         assert len(info_calls) == 1, "Should log info about all optional enrichers"
@@ -523,10 +526,13 @@ class TestConfigurationConsistency:
 
         # Check that warning about inconsistency was logged
         warning_calls = [
-            c for c in mock_logger.warning.call_args_list
+            c
+            for c in mock_logger.warning.call_args_list
             if c.args and "required_enrichers mismatch" in str(c.args[0])
         ]
-        assert len(warning_calls) == 1, "Should log warning about required_enrichers mismatch"
+        assert len(warning_calls) == 1, (
+            "Should log warning about required_enrichers mismatch"
+        )
 
 
 # ============================================================================
