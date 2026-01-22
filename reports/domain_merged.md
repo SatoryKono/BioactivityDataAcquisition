@@ -22,6 +22,9 @@ from __future__ import annotations
 # Composite pipeline subpackage (ADR-026)
 from bioetl.domain import composite
 
+# Data contracts (Gold layer Pandera schemas)
+from bioetl.domain import contracts
+
 # Domain constants module
 from bioetl.domain import constants
 
@@ -104,6 +107,7 @@ from bioetl.domain.exceptions import (
     BucketNotFoundError,
     CheckpointConflictError,
     CircuitBreakerOpenError,
+    ConfigurationError,
     CriticalError,
     DataQualityError,
     DataQualityThresholdError,
@@ -113,12 +117,15 @@ from bioetl.domain.exceptions import (
     DeltaTransactionError,
     DeltaWriteConflictError,
     ExternalServiceError,
+    FileSystemError,
     InfrastructureError,
+    InternalError,
     InvalidDataFormatError,
     InvalidStateError,
     LockAcquisitionError,
     LockLostError,
     MergeConflictError,
+    MetricsServerError,
     MissingRequiredFieldError,
     NetworkError,
     PolicyViolationError,
@@ -126,6 +133,7 @@ from bioetl.domain.exceptions import (
     RateLimitExceededError,
     RecoverableError,
     RetryExhaustedError,
+    RunnerAlreadyExecutedError,
     SchemaEvolutionError,
     SchemaViolationError,
     ServiceAuthenticationError,
@@ -135,6 +143,7 @@ from bioetl.domain.exceptions import (
     TableNotFoundError,
     TimeoutError,
     UploadError,
+    ValidationError,
 )
 
 # Filter configuration
@@ -316,8 +325,12 @@ from bioetl.domain.value_objects import (
 __all__ = [
     # Composite pipeline (subpackage)
     "composite",
+    # Data contracts (subpackage)
+    "contracts",
     # Constants
     "constants",
+    # Contracts (Gold layer Pandera schemas)
+    "contracts",
     # Configuration
     "DEFAULT_VALIDATION_CONFIG",
     "DQConfig",
@@ -389,19 +402,24 @@ __all__ = [
     "RateLimitExceededError",
     "ServiceAuthenticationError",
     "DataValidationError",
-    # Exceptions - Critical
+    # Exceptions - Internal/Critical
+    "InternalError",
     "BucketNotFoundError",
     "CheckpointConflictError",
+    "ConfigurationError",
     "DeltaSchemaValidationError",
     "DeltaTransactionError",
+    "FileSystemError",
     "InfrastructureError",
     "InvalidStateError",
     "LockAcquisitionError",
     "LockLostError",
     "MergeConflictError",
+    "MetricsServerError",
     "PolicyViolationError",
+    "RunnerAlreadyExecutedError",
     "StorageQuotaExceededError",
-    # Exceptions - Recoverable
+    # Exceptions - Recoverable/Network
     "CircuitBreakerOpenError",
     "DeltaOptimizeError",
     "DeltaWriteConflictError",
@@ -413,6 +431,8 @@ __all__ = [
     "TableNotFoundError",
     "TimeoutError",
     "UploadError",
+    # Exceptions - Validation
+    "ValidationError",
     # Exceptions - Data Quality
     "DataQualityThresholdError",
     "InvalidDataFormatError",
@@ -2529,6 +2549,7 @@ This package contains domain models for composite pipeline orchestration:
 - MergeStrategy: Strategy for merging enriched data
 - ConflictResolution: Strategy for field conflict resolution
 - LineageMetadata: Provenance tracking for merged records
+- CompositePipelineState: FSM states for pipeline execution lifecycle
 
 See ADR-026 for architectural decisions.
 """
@@ -2551,6 +2572,13 @@ from bioetl.domain.composite.result import (
     MergeResult,
     SeedResult,
 )
+from bioetl.domain.composite.state import (
+    CompositePipelineState,
+    TransitionRules,
+    can_transition,
+    get_transition_rules,
+    validate_transition,
+)
 from bioetl.domain.composite.strategy import (
     ConflictResolution,
     FallbackStrategy,
@@ -2559,6 +2587,7 @@ from bioetl.domain.composite.strategy import (
 
 __all__ = [
     "CompositeConfig",
+    "CompositePipelineState",
     "CompositeResult",
     "ConflictResolution",
     "EnricherConfig",
@@ -2573,6 +2602,10 @@ __all__ = [
     "MergeStrategy",
     "SeedConfig",
     "SeedResult",
+    "TransitionRules",
+    "can_transition",
+    "get_transition_rules",
+    "validate_transition",
 ]
 
 ================================================================================
@@ -3400,6 +3433,30 @@ class EnrichmentResult:
             duration_seconds=timeout_seconds,
         )
 
+    @classmethod
+    def not_run(
+        cls,
+        enricher_name: str,
+        reason: str = "Pipeline not executed (required_only mode)",
+    ) -> EnrichmentResult:
+        """Factory for not-run enrichment result.
+
+        Used when an enricher is intentionally not executed,
+        for example due to required_only mode or explicit exclusion.
+
+        Args:
+            enricher_name: Name of the enricher pipeline.
+            reason: Human-readable reason why pipeline was not run.
+
+        Returns:
+            EnrichmentResult with NOT_RUN status.
+        """
+        return cls(
+            enricher_name=enricher_name,
+            status=EnrichmentStatus.NOT_RUN,
+            error_message=reason,
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class SeedResult:
@@ -3450,7 +3507,23 @@ class MergeResult:
 
 @dataclass(frozen=True, slots=True)
 class CompositeResult:
-    """Complete result of composite pipeline execution."""
+    """Complete result of composite pipeline execution.
+
+    Attributes:
+        composite_name: Name of the composite pipeline.
+        composite_run_id: Unique run identifier.
+        seed_result: Result of seed pipeline execution.
+        enrichment_results: Results per enricher (keyed by pipeline name).
+        merge_result: Result of merge operation (None if not completed).
+        total_duration_seconds: Total execution time.
+        started_at: Execution start timestamp.
+        completed_at: Execution end timestamp.
+        lineage: Optional lineage metadata.
+        had_warnings: True if any optional enrichers failed but pipeline completed.
+            This indicates "completed with warnings" status - the pipeline succeeded
+            but some non-required enrichments did not complete successfully.
+        _required_enrichers: Internal set of required enricher names.
+    """
 
     composite_name: str
     composite_run_id: str
@@ -3461,6 +3534,7 @@ class CompositeResult:
     started_at: datetime | None = None
     completed_at: datetime | None = None
     lineage: LineageMetadata | None = None
+    had_warnings: bool = False
     _required_enrichers: frozenset[str] = field(default_factory=frozenset)
 
     @property
@@ -3498,6 +3572,37 @@ class CompositeResult:
         ]
 
     @property
+    def skipped_enrichers(self) -> list[str]:
+        """List of enrichers that were skipped (filter excluded all records)."""
+        return [
+            n
+            for n, r in self.enrichment_results.items()
+            if r.status == EnrichmentStatus.SKIPPED
+        ]
+
+    @property
+    def not_run_enrichers(self) -> list[str]:
+        """List of enrichers that were not run (e.g., required_only mode)."""
+        return [
+            n
+            for n, r in self.enrichment_results.items()
+            if r.status == EnrichmentStatus.NOT_RUN
+        ]
+
+    @property
+    def optional_failed_enrichers(self) -> list[str]:
+        """List of optional enrichers that failed.
+
+        These are enrichers that failed but are not required,
+        so the pipeline can still complete successfully.
+        """
+        return [
+            n
+            for n, r in self.enrichment_results.items()
+            if r.status == EnrichmentStatus.FAILED and n not in self._required_enrichers
+        ]
+
+    @property
     def total_records_enriched(self) -> int:
         """Total records enriched across all enrichers."""
         return sum(r.records_enriched for r in self.enrichment_results.values())
@@ -3508,15 +3613,204 @@ class CompositeResult:
             "composite_name": self.composite_name,
             "composite_run_id": self.composite_run_id,
             "is_success": self.is_success,
+            "had_warnings": self.had_warnings,
             "seed_records": self.seed_result.records_silver,
             "enrichers_run": len(self.enrichment_results),
             "enrichers_succeeded": len(self.successful_enrichers),
             "enrichers_failed": len(self.failed_enrichers),
+            "enrichers_skipped": len(self.skipped_enrichers),
+            "enrichers_not_run": len(self.not_run_enrichers),
+            "optional_failures": self.optional_failed_enrichers or None,
             "records_merged": self.merge_result.records_merged
             if self.merge_result
             else 0,
             "total_duration_seconds": self.total_duration_seconds,
         }
+
+================================================================================
+File: state.py
+Path: composite\state.py
+================================================================================
+"""Composite pipeline finite state machine.
+
+Defines states and transition rules for composite pipeline execution lifecycle.
+The FSM ensures predictable execution flow and prevents invalid operations.
+See ADR-026 for architectural decisions.
+
+Transition flow: NOT_STARTED -> SEED_RUNNING -> SEED_COMPLETED -> ENRICHING
+-> ENRICHMENT_COMPLETED -> MERGING -> COMPLETED. Any active state can -> FAILED.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from enum import Enum
+
+
+class CompositePipelineState(str, Enum):
+    """State of composite pipeline execution.
+
+    States: NOT_STARTED, SEED_RUNNING, SEED_COMPLETED, ENRICHING,
+    ENRICHMENT_COMPLETED, MERGING, COMPLETED, FAILED.
+
+    Terminal states: COMPLETED, FAILED (no transitions allowed).
+    Active states: SEED_RUNNING, ENRICHING, MERGING (work in progress).
+    """
+
+    NOT_STARTED = "not_started"
+    SEED_RUNNING = "seed_running"
+    SEED_COMPLETED = "seed_completed"
+    ENRICHING = "enriching"
+    ENRICHMENT_COMPLETED = "enrichment_completed"
+    MERGING = "merging"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+    @property
+    def is_terminal(self) -> bool:
+        """Check if this is a terminal state (COMPLETED or FAILED)."""
+        return self in {CompositePipelineState.COMPLETED, CompositePipelineState.FAILED}
+
+    @property
+    def is_active(self) -> bool:
+        """Check if this is an active state (SEED_RUNNING, ENRICHING, MERGING)."""
+        return self in {
+            CompositePipelineState.SEED_RUNNING,
+            CompositePipelineState.ENRICHING,
+            CompositePipelineState.MERGING,
+        }
+
+    @property
+    def is_success(self) -> bool:
+        """Check if this state represents successful completion (COMPLETED only)."""
+        return self == CompositePipelineState.COMPLETED
+
+    @property
+    def is_resumable(self) -> bool:
+        """Check if execution can be resumed from this state.
+
+        Resumable states have completed work that can be skipped on resume:
+        SEED_COMPLETED, ENRICHING, ENRICHMENT_COMPLETED, FAILED.
+
+        FAILED is resumable to allow retry after merge failure - the seed
+        and enrichment results are preserved in the checkpoint.
+
+        Returns:
+            True if this state allows resume with partial progress preserved.
+
+        Example:
+            >>> CompositePipelineState.SEED_COMPLETED.is_resumable
+            True
+            >>> CompositePipelineState.NOT_STARTED.is_resumable
+            False
+            >>> CompositePipelineState.FAILED.is_resumable
+            True
+        """
+        return self in {
+            CompositePipelineState.SEED_COMPLETED,
+            CompositePipelineState.ENRICHING,
+            CompositePipelineState.ENRICHMENT_COMPLETED,
+            CompositePipelineState.FAILED,
+        }
+
+    @property
+    def allowed_transitions(self) -> frozenset[CompositePipelineState]:
+        """Get the set of states that can be transitioned to from this state."""
+        allowed_values = _STATE_TRANSITIONS.get(self.value, frozenset())
+        return frozenset(CompositePipelineState(v) for v in allowed_values)
+
+    def can_transition_to(self, target: CompositePipelineState) -> bool:
+        """Check if transition to target state is valid."""
+        return target in self.allowed_transitions
+
+    def validate_transition(self, target: CompositePipelineState) -> None:
+        """Validate transition to target state, raising InvalidStateError if invalid."""
+        if not self.can_transition_to(target):
+            from bioetl.domain.exceptions import InvalidStateError
+
+            raise InvalidStateError(
+                f"Invalid state transition: {self.value} -> {target.value}",
+                current_state=self.value,
+                attempted_operation=f"transition_to_{target.value}",
+            )
+
+    @classmethod
+    def from_string(cls, value: str) -> CompositePipelineState:
+        """Create CompositePipelineState from string value (case-insensitive)."""
+        try:
+            return cls(value.lower())
+        except ValueError:
+            valid = ", ".join(s.value for s in cls)
+            raise ValueError(
+                f"Invalid composite pipeline state: {value}. Valid: {valid}"
+            ) from None
+
+    def to_metric_value(self) -> int:
+        """Convert state to numeric value (0-7) for Prometheus metrics."""
+        return _STATE_METRIC_VALUES[self]
+
+
+# Valid transitions for each state
+# Maps current state value -> set of allowed next state values
+_STATE_TRANSITIONS: Mapping[str, frozenset[str]] = {
+    "not_started": frozenset({"seed_running"}),
+    "seed_running": frozenset({"seed_completed", "failed"}),
+    "seed_completed": frozenset({"enriching"}),
+    "enriching": frozenset({"enrichment_completed", "failed"}),
+    "enrichment_completed": frozenset({"merging"}),
+    "merging": frozenset({"completed", "failed"}),
+    "completed": frozenset(),  # Terminal state
+    "failed": frozenset(),  # Terminal state
+}
+
+# Metric values for each state (for Prometheus gauge)
+_STATE_METRIC_VALUES: Mapping[CompositePipelineState, int] = {
+    CompositePipelineState.NOT_STARTED: 0,
+    CompositePipelineState.SEED_RUNNING: 1,
+    CompositePipelineState.SEED_COMPLETED: 2,
+    CompositePipelineState.ENRICHING: 3,
+    CompositePipelineState.ENRICHMENT_COMPLETED: 4,
+    CompositePipelineState.MERGING: 5,
+    CompositePipelineState.COMPLETED: 6,
+    CompositePipelineState.FAILED: 7,
+}
+
+
+def can_transition(
+    current: CompositePipelineState,
+    target: CompositePipelineState,
+) -> bool:
+    """Check if a state transition is valid (module-level function)."""
+    return current.can_transition_to(target)
+
+
+def validate_transition(
+    current: CompositePipelineState,
+    target: CompositePipelineState,
+) -> None:
+    """Validate a state transition, raising InvalidStateError if invalid."""
+    current.validate_transition(target)
+
+
+# Type alias for state transition rules
+TransitionRules = Mapping[CompositePipelineState, frozenset[CompositePipelineState]]
+
+
+def get_transition_rules() -> TransitionRules:
+    """Get the complete state transition rules as a mapping.
+
+    Returns a dictionary mapping each state to its allowed target states.
+    Useful for visualization or external validation.
+
+    Returns:
+        Mapping of state -> allowed target states.
+
+    Example:
+        >>> rules = get_transition_rules()
+        >>> CompositePipelineState.MERGING in rules[CompositePipelineState.ENRICHMENT_COMPLETED]
+        True
+    """
+    return {state: state.allowed_transitions for state in CompositePipelineState}
 
 ================================================================================
 File: strategy.py
@@ -4180,6 +4474,10 @@ class RuntimeConfig:
     # When enabled, VACUUM is executed after successful pipeline run
     vacuum_after_run: bool = False
     vacuum_retention_days: int = 7
+
+    # Storage optimization (Unifies cleanup policies)
+    # Controls explicit storage maintenance (vacuum, old file removal)
+    optimize_storage: bool = False
 
     # Medallion invariants validation (REQ-CONF-001)
     # When True, Medallion config violations fail the pipeline
@@ -5090,6 +5388,1373 @@ class PipelineRunContext:
 
 ================================================================================
 File: __init__.py
+Path: contracts\__init__.py
+================================================================================
+"""Data contracts for BioETL Gold layer.
+
+This package provides Pandera DataFrameModel schemas for Gold layer validation.
+Schemas are part of the domain layer and can be imported by any layer for
+validation and documentation.
+
+Usage:
+    >>> from bioetl.domain.contracts import ChEMBLActivityGoldSchema
+    >>> import pandas as pd
+    >>> df = pd.read_parquet("data/gold/chembl_activity/")
+    >>> ChEMBLActivityGoldSchema.validate(df)
+
+    # Or import by provider:
+    >>> from bioetl.domain.contracts.gold import chembl
+    >>> chembl.ChEMBLActivityGoldSchema.validate(df)
+
+Available schemas by provider:
+    - ChEMBL: Activity, Assay, Target, Molecule, etc.
+    - PubChem: Compound
+    - UniProt: Protein, IDMapping
+    - PubMed: Publication
+    - CrossRef: Publication
+    - OpenAlex: Publication
+    - SemanticScholar: Publication
+
+See also:
+    - docs/03-data-contracts/ for detailed schema documentation
+    - ADR-018 for Gold strict validation rationale
+"""
+
+from __future__ import annotations
+
+# Re-export all Gold schemas for convenient access
+from bioetl.domain.contracts.gold import (
+    # ChEMBL schemas
+    ChEMBLActivityGoldSchema,
+    ChEMBLAssayGoldSchema,
+    ChEMBLAssayParametersGoldSchema,
+    ChEMBLCellLineGoldSchema,
+    ChEMBLCompoundRecordGoldSchema,
+    ChEMBLDocumentGoldSchema,
+    ChEMBLDocumentSimilarityGoldSchema,
+    ChEMBLDocumentTermGoldSchema,
+    ChEMBLMoleculeGoldSchema,
+    ChEMBLProteinClassGoldSchema,
+    ChEMBLTargetComponentGoldSchema,
+    ChEMBLTargetGoldSchema,
+    # CrossRef schemas
+    CrossRefPublicationGoldSchema,
+    # OpenAlex schemas
+    OpenAlexPublicationGoldSchema,
+    # PubChem schemas
+    PubChemCompoundGoldSchema,
+    # PubMed schemas
+    PubMedPublicationGoldSchema,
+    # SemanticScholar schemas
+    SemanticScholarPublicationGoldSchema,
+    # UniProt schemas
+    UniProtIDMappingGoldSchema,
+    UniProtProteinGoldSchema,
+)
+
+# Utilities
+from bioetl.domain.contracts.gold._base import DATE_REGEX
+
+__all__ = [
+    # Utilities
+    "DATE_REGEX",
+    # ChEMBL
+    "ChEMBLActivityGoldSchema",
+    "ChEMBLAssayGoldSchema",
+    "ChEMBLAssayParametersGoldSchema",
+    "ChEMBLCellLineGoldSchema",
+    "ChEMBLCompoundRecordGoldSchema",
+    "ChEMBLDocumentGoldSchema",
+    "ChEMBLDocumentSimilarityGoldSchema",
+    "ChEMBLDocumentTermGoldSchema",
+    "ChEMBLMoleculeGoldSchema",
+    "ChEMBLProteinClassGoldSchema",
+    "ChEMBLTargetComponentGoldSchema",
+    "ChEMBLTargetGoldSchema",
+    # CrossRef
+    "CrossRefPublicationGoldSchema",
+    # OpenAlex
+    "OpenAlexPublicationGoldSchema",
+    # PubChem
+    "PubChemCompoundGoldSchema",
+    # PubMed
+    "PubMedPublicationGoldSchema",
+    # SemanticScholar
+    "SemanticScholarPublicationGoldSchema",
+    # UniProt
+    "UniProtIDMappingGoldSchema",
+    "UniProtProteinGoldSchema",
+]
+
+================================================================================
+File: __init__.py
+Path: contracts\gold\__init__.py
+================================================================================
+"""Gold layer data contracts organized by provider.
+
+This package contains Pandera DataFrameModel schemas for Gold layer validation,
+organized by data provider for easy navigation.
+
+Submodules:
+    chembl: ChEMBL bioactivity database schemas
+    pubchem: PubChem compound schemas
+    uniprot: UniProt protein database schemas
+    publications: Cross-provider publication schemas (PubMed, CrossRef, OpenAlex, SemanticScholar)
+
+Example usage:
+    >>> from bioetl.domain.contracts.gold import chembl
+    >>> df = pd.read_parquet("data/gold/chembl_activity/")
+    >>> chembl.ChEMBLActivityGoldSchema.validate(df)
+
+    >>> from bioetl.domain.contracts.gold.publications import PubMedPublicationGoldSchema
+    >>> PubMedPublicationGoldSchema.validate(pubmed_df)
+"""
+
+from __future__ import annotations
+
+# Import all schemas for flat namespace access
+from bioetl.domain.contracts.gold.chembl import (
+    ChEMBLActivityGoldSchema,
+    ChEMBLAssayGoldSchema,
+    ChEMBLAssayParametersGoldSchema,
+    ChEMBLCellLineGoldSchema,
+    ChEMBLCompoundRecordGoldSchema,
+    ChEMBLDocumentGoldSchema,
+    ChEMBLDocumentSimilarityGoldSchema,
+    ChEMBLDocumentTermGoldSchema,
+    ChEMBLMoleculeGoldSchema,
+    ChEMBLProteinClassGoldSchema,
+    ChEMBLTargetComponentGoldSchema,
+    ChEMBLTargetGoldSchema,
+)
+from bioetl.domain.contracts.gold.pubchem import PubChemCompoundGoldSchema
+from bioetl.domain.contracts.gold.publications import (
+    CrossRefPublicationGoldSchema,
+    OpenAlexPublicationGoldSchema,
+    PubMedPublicationGoldSchema,
+    SemanticScholarPublicationGoldSchema,
+)
+from bioetl.domain.contracts.gold.uniprot import (
+    UniProtIDMappingGoldSchema,
+    UniProtProteinGoldSchema,
+)
+
+__all__ = [
+    "ChEMBLActivityGoldSchema",
+    "ChEMBLAssayGoldSchema",
+    "ChEMBLAssayParametersGoldSchema",
+    "ChEMBLCellLineGoldSchema",
+    "ChEMBLCompoundRecordGoldSchema",
+    "ChEMBLDocumentGoldSchema",
+    "ChEMBLDocumentSimilarityGoldSchema",
+    "ChEMBLDocumentTermGoldSchema",
+    "ChEMBLMoleculeGoldSchema",
+    "ChEMBLProteinClassGoldSchema",
+    "ChEMBLTargetComponentGoldSchema",
+    "ChEMBLTargetGoldSchema",
+    "CrossRefPublicationGoldSchema",
+    "OpenAlexPublicationGoldSchema",
+    "PubChemCompoundGoldSchema",
+    "PubMedPublicationGoldSchema",
+    "SemanticScholarPublicationGoldSchema",
+    "UniProtIDMappingGoldSchema",
+    "UniProtProteinGoldSchema",
+]
+
+================================================================================
+File: _base.py
+Path: contracts\gold\_base.py
+================================================================================
+"""Base utilities for Gold layer data contracts.
+
+Contains shared constants and utilities used across all Gold schemas.
+"""
+
+from __future__ import annotations
+
+# Regex pattern for date validation (YYYY-MM-DD format)
+# Used for fields like publication_date, accepted_date, etc.
+DATE_REGEX = r"^\d{4}-\d{2}-\d{2}$"
+
+__all__ = ["DATE_REGEX"]
+
+================================================================================
+File: chembl.py
+Path: contracts\gold\chembl.py
+================================================================================
+"""ChEMBL Gold layer data contracts.
+
+Contains Pandera DataFrameModel schemas for ChEMBL entities in the Gold layer:
+- Activity: Bioassay activity records with molecule-target-assay relationships
+- Assay: Bioassay protocols and parameters
+- AssayParameters: Experimental assay parameters (concentrations, pH, temperature)
+- CellLine: Cell line metadata
+- CompoundRecord: Document-molecule linkages
+- Document (Publication): Publication records
+- DocumentSimilarity: Document similarity (Tanimoto coefficients)
+- DocumentTerm: Document-term associations (flattened 1:M relationship)
+- Molecule: Chemical structures with properties
+- ProteinClass: Hierarchical protein classifications
+- Target: Protein targets with taxonomic info
+- TargetComponent: Target protein components
+
+Int→Float coercion note:
+    Fields marked with `coerce=True` and `Series[float]` that are `int64` in Silver
+    use float to handle nullable integers. This is a deliberate design decision
+    documented in RULES.md §2.6.
+"""
+
+from __future__ import annotations
+
+import pandera.pandas as pa
+from pandera.typing import Series
+
+from bioetl.domain.contracts.gold._base import DATE_REGEX
+
+
+class ChEMBLActivityGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Activity in Gold layer."""
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary identifier
+    activity_id: Series[str] = pa.Field(nullable=False)
+
+    # Core identifiers
+    molecule_chembl_id: Series[str] = pa.Field(nullable=False)
+    target_chembl_id: Series[str] = pa.Field(nullable=True)
+    assay_chembl_id: Series[str] = pa.Field(nullable=True)
+    document_chembl_id: Series[str] = pa.Field(nullable=True)
+    record_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 in Silver
+    src_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 in Silver
+
+    # Molecule data
+    canonical_smiles: Series[str] = pa.Field(nullable=True)
+    molecule_pref_name: Series[str] = pa.Field(nullable=True)
+    parent_molecule_chembl_id: Series[str] = pa.Field(nullable=True)
+
+    # Target data
+    target_pref_name: Series[str] = pa.Field(nullable=True)
+    target_organism: Series[str] = pa.Field(nullable=True)
+    target_taxonomy_id: Series[str] = pa.Field(nullable=True)  # Standardized name
+
+    # Assay data
+    assay_type: Series[str] = pa.Field(nullable=True)
+    assay_description: Series[str] = pa.Field(nullable=True)
+    assay_variant_accession: Series[str] = pa.Field(nullable=True)
+    assay_variant_mutation: Series[str] = pa.Field(nullable=True)
+
+    # BAO annotations
+    bao_endpoint: Series[str] = pa.Field(nullable=True)
+    bao_format: Series[str] = pa.Field(nullable=True)
+    bao_label: Series[str] = pa.Field(nullable=True)
+
+    # Raw activity values
+    type: Series[str] = pa.Field(nullable=True)
+    value: Series[float] = pa.Field(nullable=True, coerce=True)
+    units: Series[str] = pa.Field(nullable=True)
+    relation: Series[str] = pa.Field(nullable=True)
+    upper_value: Series[float] = pa.Field(nullable=True, coerce=True)
+    text_value: Series[str] = pa.Field(nullable=True)
+
+    # Standardized activity values
+    standard_type: Series[str] = pa.Field(nullable=True)
+    standard_value: Series[float] = pa.Field(nullable=True, coerce=True)
+    standard_units: Series[str] = pa.Field(nullable=True)
+    standard_relation: Series[str] = pa.Field(nullable=True)
+    standard_upper_value: Series[float] = pa.Field(nullable=True, coerce=True)
+    standard_text_value: Series[str] = pa.Field(nullable=True)
+    standard_flag: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+
+    # Derived metrics
+    pchembl_value: Series[float] = pa.Field(nullable=True, coerce=True)
+
+    # Ligand efficiency metrics
+    ligand_efficiency_bei: Series[float] = pa.Field(nullable=True, coerce=True)
+    ligand_efficiency_le: Series[float] = pa.Field(nullable=True, coerce=True)
+    ligand_efficiency_lle: Series[float] = pa.Field(nullable=True, coerce=True)
+    ligand_efficiency_sei: Series[float] = pa.Field(nullable=True, coerce=True)
+
+    # Units ontology
+    qudt_units: Series[str] = pa.Field(nullable=True)
+    uo_units: Series[str] = pa.Field(nullable=True)
+
+    # Document/Publication data
+    document_journal: Series[str] = pa.Field(nullable=True)
+    document_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+
+    # Quality annotations
+    activity_comment: Series[str] = pa.Field(nullable=True)
+    data_validity_comment: Series[str] = pa.Field(nullable=True)
+    data_validity_description: Series[str] = pa.Field(nullable=True)
+    potential_duplicate: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+
+    # Action type
+    action_type_action_type: Series[str] = pa.Field(nullable=True)
+    action_type_description: Series[str] = pa.Field(nullable=True)
+    action_type_parent_type: Series[str] = pa.Field(nullable=True)
+
+    # Activity properties
+    activity_properties: Series[str] = pa.Field(nullable=True)
+    toid: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 in Silver
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class ChEMBLAssayGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Assay in Gold layer."""
+
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+    assay_chembl_id: Series[str] = pa.Field(nullable=False)
+    target_chembl_id: Series[str] = pa.Field(nullable=True)
+    document_chembl_id: Series[str] = pa.Field(nullable=True)
+    cell_chembl_id: Series[str] = pa.Field(nullable=True)
+    tissue_chembl_id: Series[str] = pa.Field(nullable=True)
+    src_id: Series[float] = pa.Field(nullable=True, coerce=True)
+    src_assay_id: Series[str] = pa.Field(nullable=True)
+    aidx: Series[str] = pa.Field(nullable=True)
+    assay_type: Series[str] = pa.Field(nullable=True)
+    assay_type_description: Series[str] = pa.Field(nullable=True)
+    assay_category: Series[str] = pa.Field(nullable=True)
+    assay_test_type: Series[str] = pa.Field(nullable=True)
+    assay_group: Series[str] = pa.Field(nullable=True)
+    assay_organism: Series[str] = pa.Field(nullable=True)
+    assay_taxonomy_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # Standardized name
+    assay_cell_type: Series[str] = pa.Field(nullable=True)
+    assay_tissue: Series[str] = pa.Field(nullable=True)
+    assay_strain: Series[str] = pa.Field(nullable=True)
+    assay_subcellular_fraction: Series[str] = pa.Field(nullable=True)
+    bao_format: Series[str] = pa.Field(nullable=True)
+    bao_label: Series[str] = pa.Field(nullable=True)
+    description: Series[str] = pa.Field(nullable=True)
+    confidence_score: Series[float] = pa.Field(nullable=True, coerce=True)
+    confidence_description: Series[str] = pa.Field(nullable=True)
+    relationship_type: Series[str] = pa.Field(nullable=True)
+    relationship_description: Series[str] = pa.Field(nullable=True)
+    assay_pref_name: Series[str] = pa.Field(nullable=True)
+    score: Series[float] = pa.Field(nullable=True, coerce=True)
+    variant_accession: Series[str] = pa.Field(nullable=True)
+    variant_isoform: Series[str] = pa.Field(nullable=True)
+    variant_mutation: Series[str] = pa.Field(nullable=True)
+    variant_organism: Series[str] = pa.Field(nullable=True)
+    variant_sequence: Series[str] = pa.Field(nullable=True)
+    variant_taxonomy_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # Standardized name
+    variant_sequence_json: Series[str] = pa.Field(nullable=True)
+    assay_classifications: Series[str] = pa.Field(nullable=True)
+    assay_parameters: Series[str] = pa.Field(nullable=True)
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class ChEMBLAssayParametersGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL AssayParameters in Gold layer.
+
+    Experimental parameters for bioassays: concentrations, pH, temperature, etc.
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary identifier (surrogate)
+    assay_param_id: Series[float] = pa.Field(
+        nullable=False, coerce=True
+    )  # int64 in Silver
+
+    # Foreign key
+    assay_chembl_id: Series[str] = pa.Field(nullable=False)
+
+    # Parameter type
+    type: Series[str] = pa.Field(nullable=False)
+
+    # Raw values
+    relation: Series[str] = pa.Field(nullable=True)
+    value: Series[float] = pa.Field(nullable=True, coerce=True)
+    units: Series[str] = pa.Field(nullable=True)
+    text_value: Series[str] = pa.Field(nullable=True)
+    comments: Series[str] = pa.Field(nullable=True)
+
+    # Standardized values
+    standard_type: Series[str] = pa.Field(nullable=True)
+    standard_relation: Series[str] = pa.Field(nullable=True)
+    standard_value: Series[float] = pa.Field(nullable=True, coerce=True)
+    standard_units: Series[str] = pa.Field(nullable=True)
+    standard_text_value: Series[str] = pa.Field(nullable=True)
+
+    # Lineage metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class ChEMBLCellLineGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Cell Line in Gold layer."""
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary identifier
+    cell_chembl_id: Series[str] = pa.Field(nullable=False)
+
+    # Core metadata
+    cell_name: Series[str] = pa.Field(nullable=False)
+    cell_description: Series[str] = pa.Field(nullable=True)
+
+    # Source information
+    cell_source_tissue: Series[str] = pa.Field(nullable=True)
+    cell_source_organism: Series[str] = pa.Field(nullable=True)
+    cell_source_taxonomy_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # Standardized name
+
+    # External identifiers
+    cellosaurus_id: Series[str] = pa.Field(nullable=True)
+    cl_lincs_id: Series[str] = pa.Field(nullable=True)
+    efo_id: Series[str] = pa.Field(nullable=True)
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class ChEMBLCompoundRecordGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Compound Record in Gold layer."""
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary identifier
+    record_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
+
+    # Foreign keys
+    molecule_chembl_id: Series[str] = pa.Field(nullable=False)
+    document_chembl_id: Series[str] = pa.Field(nullable=False)
+
+    # Original compound names from document
+    compound_key: Series[str] = pa.Field(nullable=True)
+    compound_name: Series[str] = pa.Field(nullable=True)
+
+    # Source information
+    src_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
+    src_compound_id: Series[str] = pa.Field(nullable=True)
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Document in Gold layer."""
+
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+    document_chembl_id: Series[str] = pa.Field(nullable=False)
+    # Cross-reference IDs for linking publications across providers
+    # pmid: PubMed ID (numeric string: "12345678")
+    pmid: Series[str] = pa.Field(nullable=True)
+    # pmc_id: PubMed Central ID (format: "PMC1234567")
+    pmc_id: Series[str] = pa.Field(nullable=True)
+    # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
+    doi: Series[str] = pa.Field(nullable=True)
+    patent_id: Series[str] = pa.Field(nullable=True)
+    title: Series[str] = pa.Field(nullable=True)
+    authors: Series[str] = pa.Field(nullable=True)
+    abstract: Series[str] = pa.Field(nullable=True)
+    doc_type: Series[str] = pa.Field(nullable=True)
+    journal: Series[str] = pa.Field(nullable=True)
+    journal_full_title: Series[str] = pa.Field(nullable=True)
+    year: Series[float] = pa.Field(nullable=True, coerce=True)
+    publication_date: Series[str] = pa.Field(
+        nullable=True, str_matches=DATE_REGEX
+    )  # Unified: YYYY-MM-DD
+    volume: Series[str] = pa.Field(nullable=True)
+    issue: Series[str] = pa.Field(nullable=True)
+    first_page: Series[str] = pa.Field(nullable=True)
+    last_page: Series[str] = pa.Field(nullable=True)
+    src_id: Series[float] = pa.Field(nullable=True, coerce=True)
+
+    # Lookup metadata
+    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+    # _original_id: Original identifier used for lookup (document_chembl_id for direct)
+    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class ChEMBLDocumentSimilarityGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Document Similarity in Gold layer.
+
+    Represents similarity between two ChEMBL documents based on Tanimoto coefficients.
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary key
+    sim_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
+
+    # Foreign keys
+    doc_1: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
+    doc_2: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
+
+    # PubMed identifiers (numeric strings - matches Silver)
+    pubmed_id1: Series[str] = pa.Field(nullable=True)
+    pubmed_id2: Series[str] = pa.Field(nullable=True)
+
+    # Tanimoto coefficients
+    tid_tani: Series[float] = pa.Field(nullable=True, ge=0, le=1, coerce=True)
+    mol_tani: Series[float] = pa.Field(nullable=True, ge=0, le=1, coerce=True)
+
+    # Derived metrics
+    avg_tani: Series[float] = pa.Field(nullable=True, ge=0, le=1, coerce=True)
+    max_tani: Series[float] = pa.Field(nullable=True, ge=0, le=1, coerce=True)
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class ChEMBLDocumentTermGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Document Term in Gold layer.
+
+    Derived entity extracted from Document records by flattening
+    the 1:M relationship between documents and their terms.
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Composite key fields
+    document_chembl_id: Series[str] = pa.Field(nullable=False)
+    term: Series[str] = pa.Field(nullable=False)
+    term_type: Series[str] = pa.Field(nullable=False)
+
+    # MeSH-specific fields
+    mesh_id: Series[str] = pa.Field(nullable=True)
+    qualifier: Series[str] = pa.Field(nullable=True)
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Molecule in Gold layer."""
+
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+    molecule_chembl_id: Series[str] = pa.Field(nullable=False)
+    pref_name: Series[str] = pa.Field(nullable=True)
+    molecule_type: Series[str] = pa.Field(nullable=True)
+    structure_type: Series[str] = pa.Field(nullable=True)
+    max_phase: Series[float] = pa.Field(nullable=True, coerce=True)
+    first_approval: Series[float] = pa.Field(nullable=True, coerce=True)
+    chirality: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    dosed_ingredient: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    availability_type: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    usan_stem: Series[str] = pa.Field(nullable=True)
+    usan_stem_definition: Series[str] = pa.Field(nullable=True)
+    usan_substem: Series[str] = pa.Field(nullable=True)
+    usan_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    helm_notation: Series[str] = pa.Field(nullable=True)
+    molecule_species: Series[str] = pa.Field(nullable=True)
+    oral: Series[bool] = pa.Field(nullable=True)
+    parenteral: Series[bool] = pa.Field(nullable=True)
+    topical: Series[bool] = pa.Field(nullable=True)
+    black_box_warning: Series[float] = pa.Field(nullable=True, coerce=True)
+    natural_product: Series[float] = pa.Field(nullable=True, coerce=True)
+    first_in_class: Series[float] = pa.Field(nullable=True, coerce=True)
+    prodrug: Series[float] = pa.Field(nullable=True, coerce=True)
+    therapeutic_flag: Series[bool] = pa.Field(nullable=True)
+    withdrawn_flag: Series[bool] = pa.Field(nullable=True)
+    inorganic_flag: Series[float] = pa.Field(nullable=True, coerce=True)
+    polymer_flag: Series[float] = pa.Field(nullable=True, coerce=True)
+    molecule_hierarchy: Series[str] = pa.Field(nullable=True)
+    molecule_properties: Series[str] = pa.Field(nullable=True)
+    molecule_structures: Series[str] = pa.Field(nullable=True)
+    molecule_synonyms: Series[str] = pa.Field(nullable=True)
+    cross_references: Series[str] = pa.Field(nullable=True)
+    atc_classifications: Series[str] = pa.Field(nullable=True)
+    hierarchy_parent_chembl_id: Series[str] = pa.Field(nullable=True)
+    hierarchy_active_chembl_id: Series[str] = pa.Field(nullable=True)
+    hierarchy_child_chembl_id: Series[str] = pa.Field(nullable=True)
+    property_alogp: Series[float] = pa.Field(nullable=True, coerce=True)
+    property_mw_freebase: Series[float] = pa.Field(nullable=True, coerce=True)
+    property_full_mwt: Series[float] = pa.Field(nullable=True, coerce=True)
+    property_hba: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    property_hbd: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    property_psa: Series[float] = pa.Field(nullable=True, coerce=True)
+    property_rtb: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    property_ro5_violations: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int64
+    property_heavy_atoms: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    property_aromatic_rings: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int64
+    property_qed_weighted: Series[float] = pa.Field(nullable=True, coerce=True)
+    property_full_molformula: Series[str] = pa.Field(nullable=True)
+    property_ro3_pass: Series[str] = pa.Field(nullable=True)
+    # Flattened Structures (unified naming without structure_ prefix)
+    canonical_smiles: Series[str] = pa.Field(nullable=True)
+    standard_inchi: Series[str] = pa.Field(nullable=True)
+    inchikey: Series[str] = pa.Field(nullable=True)
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class ChEMBLProteinClassGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Protein Classification in Gold layer.
+
+    Hierarchical classification of protein targets (enzyme classes, receptor types, etc.).
+    Self-referencing structure with up to 8 levels of depth.
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary identifier
+    protein_class_id: Series[float] = pa.Field(nullable=False, ge=1, coerce=True)
+
+    # Hierarchy
+    parent_id: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
+    class_level: Series[float] = pa.Field(nullable=True, ge=1, le=8, coerce=True)
+
+    # Classification data
+    pref_name: Series[str] = pa.Field(nullable=True)
+    short_name: Series[str] = pa.Field(nullable=True)
+    protein_class_desc: Series[str] = pa.Field(nullable=True)
+    definition: Series[str] = pa.Field(nullable=True)
+
+    # Additional metadata
+    sort_order: Series[float] = pa.Field(nullable=True, coerce=True)
+    replaced_by: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
+    downgraded: Series[float] = pa.Field(nullable=True, isin=[0, 1], coerce=True)
+
+    # Lineage metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class ChEMBLTargetGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Target in Gold layer."""
+
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+    target_chembl_id: Series[str] = pa.Field(nullable=False)
+    pref_name: Series[str] = pa.Field(nullable=True)
+    target_type: Series[str] = pa.Field(nullable=True)
+    organism: Series[str] = pa.Field(nullable=True)
+    taxonomy_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # Standardized name
+    species_group_flag: Series[bool] = pa.Field(nullable=True)
+    description: Series[str] = pa.Field(nullable=True)
+    downgraded: Series[bool] = pa.Field(nullable=True, coerce=True)
+    dap_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    pipeline_stages: Series[str] = pa.Field(nullable=True)
+    target_constraints: Series[str] = pa.Field(nullable=True)
+    target_components: Series[str] = pa.Field(nullable=True)
+    cross_references: Series[str] = pa.Field(nullable=True)
+    target_component_synonyms: Series[str] = pa.Field(nullable=True)
+    component_accessions: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_ids: Series[object] = pa.Field(nullable=True)  # list[int]
+    component_types: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_relationships: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_descriptions: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_organisms: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_taxonomy_ids: Series[object] = pa.Field(
+        nullable=True
+    )  # Standardized name, list[int]
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
+    """Schema for ChEMBL Target Component in Gold layer."""
+
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+    component_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64
+    accession: Series[str] = pa.Field(nullable=True)
+    component_type: Series[str] = pa.Field(nullable=True)
+    description: Series[str] = pa.Field(nullable=True)
+    organism: Series[str] = pa.Field(nullable=True)
+    taxonomy_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # Standardized name
+    target_component_synonyms: Series[str] = pa.Field(nullable=True)
+    target_component_xrefs: Series[str] = pa.Field(nullable=True)
+    protein_classifications: Series[str] = pa.Field(nullable=True)
+    protein_classification_ids: Series[object] = pa.Field(nullable=True)  # list[int]
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+__all__ = [
+    "ChEMBLActivityGoldSchema",
+    "ChEMBLAssayGoldSchema",
+    "ChEMBLAssayParametersGoldSchema",
+    "ChEMBLCellLineGoldSchema",
+    "ChEMBLCompoundRecordGoldSchema",
+    "ChEMBLDocumentGoldSchema",
+    "ChEMBLDocumentSimilarityGoldSchema",
+    "ChEMBLDocumentTermGoldSchema",
+    "ChEMBLMoleculeGoldSchema",
+    "ChEMBLProteinClassGoldSchema",
+    "ChEMBLTargetComponentGoldSchema",
+    "ChEMBLTargetGoldSchema",
+]
+
+================================================================================
+File: pubchem.py
+Path: contracts\gold\pubchem.py
+================================================================================
+"""PubChem Gold layer data contracts.
+
+Contains Pandera DataFrameModel schemas for PubChem entities in the Gold layer:
+- Compound: Chemical structures and identifiers from PubChem
+
+Int→Float coercion note:
+    Fields marked with `coerce=True` and `Series[float]` that are `int64` in Silver
+    use float to handle nullable integers. This is a deliberate design decision
+    documented in RULES.md §2.6.
+"""
+
+from __future__ import annotations
+
+import pandera.pandas as pa
+from pandera.typing import Series
+
+
+class PubChemCompoundGoldSchema(pa.DataFrameModel):
+    """Schema for PubChem Compound in Gold layer.
+
+    Aligned with domain/entities/pubchem.py (PubchemMolecule domain entity)
+    and application/pipelines/pubchem/transformer.py (PubChemCompoundTransformer).
+    """
+
+    entity_id: Series[str] = pa.Field(nullable=False)
+    cid: Series[str] = pa.Field(nullable=False)  # Domain entity uses str for cid
+    molecular_formula: Series[str] = pa.Field(nullable=True)
+    molecular_weight: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # Transformed to float by transformer
+    canonical_smiles: Series[str] = pa.Field(nullable=True)
+    isomeric_smiles: Series[str] = pa.Field(nullable=True)
+    inchi: Series[str] = pa.Field(nullable=True)
+    inchikey: Series[str] = pa.Field(nullable=True)
+    iupac_name: Series[str] = pa.Field(nullable=True)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+__all__ = ["PubChemCompoundGoldSchema"]
+
+================================================================================
+File: publications.py
+Path: contracts\gold\publications.py
+================================================================================
+"""Publication Gold layer data contracts.
+
+Contains Pandera DataFrameModel schemas for cross-provider publication entities
+in the Gold layer:
+- PubMed: Publication metadata with MEDLINE-specific fields
+- CrossRef: Publication metadata via DOI resolution
+- OpenAlex: Publication metadata from OpenAlex Works API
+- SemanticScholar: Publication metadata with citation metrics
+
+Int→Float coercion note:
+    Fields marked with `coerce=True` and `Series[float]` that are `int64` in Silver
+    use float to handle nullable integers. This is a deliberate design decision
+    documented in RULES.md §2.6.
+"""
+
+from __future__ import annotations
+
+import pandera.pandas as pa
+from pandera.typing import Series
+
+from bioetl.domain.contracts.gold._base import DATE_REGEX
+
+
+class PubMedPublicationGoldSchema(pa.DataFrameModel):
+    """Schema for PubMed Publication in Gold layer.
+
+    Includes PubMed-specific fields for forensic retention and detailed analysis.
+    See: https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_230101.dtd
+    """
+
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+    pmid: Series[str] = pa.Field(nullable=False)
+    doi: Series[str] = pa.Field(nullable=True)
+    pmc_id: Series[str] = pa.Field(nullable=True)
+    title: Series[str] = pa.Field(nullable=True)
+    abstract: Series[str] = pa.Field(nullable=True)
+    abstract_structured: Series[bool] = pa.Field(
+        nullable=True
+    )  # Whether abstract has NLM sections
+    vernacular_title: Series[str] = pa.Field(
+        nullable=True
+    )  # Original non-English title
+
+    # Journal information
+    journal: Series[str] = pa.Field(nullable=True)
+    journal_abbrev: Series[str] = pa.Field(nullable=True)
+    # PubMed-specific journal fields (forensic retention)
+    journal_title: Series[str] = pa.Field(nullable=True)  # Full journal name (PubMed)
+    journal_iso_abbrev: Series[str] = pa.Field(nullable=True)  # ISO abbreviation
+    journal_issn_type: Series[str] = pa.Field(
+        nullable=True
+    )  # ISSN type: Print/Electronic/Linking
+    issn: Series[str] = pa.Field(nullable=True)
+    nlm_unique_id: Series[str] = pa.Field(nullable=True)  # NLM catalog ID
+    volume: Series[str] = pa.Field(nullable=True)
+    issue: Series[str] = pa.Field(nullable=True)
+
+    # Page information
+    pages: Series[str] = pa.Field(nullable=True)  # Legacy: medline_pgn format
+    medline_pgn: Series[str] = pa.Field(nullable=True)  # Original PubMed pagination
+    first_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
+    last_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
+
+    # Authors
+    authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
+
+    # Date fields
+    pub_date: Series[str] = pa.Field(nullable=True)
+    pub_month: Series[float] = pa.Field(nullable=True, coerce=True)  # Month (1-12)
+    pub_day: Series[float] = pa.Field(nullable=True, coerce=True)  # Day (1-31)
+    publication_date: Series[str] = pa.Field(
+        nullable=True, str_matches=DATE_REGEX
+    )  # Unified: YYYY-MM-DD
+    year: Series[float] = pa.Field(nullable=True, coerce=True)
+    publication_year: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # Legacy alias
+    accepted_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
+    received_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
+    revised_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
+    epub_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
+    # MEDLINE-specific dates
+    date_completed: Series[str] = pa.Field(
+        nullable=True, str_matches=DATE_REGEX
+    )  # MEDLINE processing completion
+    date_revised: Series[str] = pa.Field(
+        nullable=True, str_matches=DATE_REGEX
+    )  # Record revision date (MEDLINE)
+
+    # Publication status and types
+    publication_status: Series[str] = pa.Field(
+        nullable=True
+    )  # ppublish/epublish/aheadofprint
+    publication_type_list: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array of pub types
+    publication_types: Series[object] = pa.Field(nullable=True)  # list[str]
+
+    # Classification
+    keywords: Series[object] = pa.Field(nullable=True)  # list[str]
+    mesh_terms: Series[object] = pa.Field(nullable=True)  # list[str]
+    citation_subset: Series[str] = pa.Field(
+        nullable=True
+    )  # Citation subset codes (e.g., 'AIM')
+    language: Series[str] = pa.Field(nullable=True)
+    country: Series[str] = pa.Field(nullable=True)
+
+    # Counts (denormalized for query efficiency)
+    author_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    mesh_heading_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    keyword_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    grant_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    reference_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    chemical_count: Series[float] = pa.Field(nullable=True, coerce=True)
+
+    # Source tracking
+    source: Series[str] = pa.Field(nullable=True)
+
+    # Lookup metadata
+    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+    # _original_id: Original identifier used for lookup
+    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class CrossRefPublicationGoldSchema(pa.DataFrameModel):
+    """Schema for CrossRef Publication in Gold layer.
+
+    Used for enriching publication records with CrossRef metadata via DOI resolution.
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary identifier
+    # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
+    # Note: CrossRef uses DOI as primary key; pmid/pmc_id come from PubMed, not CrossRef
+    doi: Series[str] = pa.Field(nullable=False)
+
+    # Cross-reference IDs for linking publications across providers
+    # pmid: PubMed ID (numeric string: "12345678") - null for CrossRef native records
+    pmid: Series[str] = pa.Field(nullable=True)
+    # pmc_id: PubMed Central ID (format: "PMC1234567") - null for CrossRef native records
+    pmc_id: Series[str] = pa.Field(nullable=True)
+
+    # Core fields
+    title: Series[str] = pa.Field(nullable=True)
+    abstract: Series[str] = pa.Field(nullable=True)
+    authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
+    journal: Series[str] = pa.Field(nullable=True)
+    issn: Series[object] = pa.Field(nullable=True)  # list[str]
+    publisher: Series[str] = pa.Field(nullable=True)
+    volume: Series[str] = pa.Field(nullable=True)
+    issue: Series[str] = pa.Field(nullable=True)
+    first_page: Series[str] = pa.Field(nullable=True)
+    last_page: Series[str] = pa.Field(nullable=True)
+
+    # Date fields
+    year: Series[float] = pa.Field(nullable=True, ge=1900, le=2100, coerce=True)
+    publication_date: Series[str] = pa.Field(
+        nullable=True, str_matches=DATE_REGEX
+    )  # Unified: YYYY-MM-DD
+    published_print: Series[str] = pa.Field(
+        nullable=True, str_matches=DATE_REGEX
+    )  # Legacy: provider-specific
+    published_online: Series[str] = pa.Field(
+        nullable=True, str_matches=DATE_REGEX
+    )  # Legacy: provider-specific
+
+    # Metadata
+    doc_type: Series[str] = pa.Field(nullable=True)
+    citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    reference_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    language: Series[str] = pa.Field(nullable=True)
+    license_url: Series[str] = pa.Field(nullable=True)
+    subjects: Series[object] = pa.Field(nullable=True)  # list[str]
+    source: Series[str] = pa.Field(nullable=True)
+
+    # Lookup metadata
+    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+    # _original_id: Original identifier used for lookup
+    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
+    # Lineage metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
+    """Schema for OpenAlex Publication in Gold layer.
+
+    Used for batch DOI resolution with title fallback via OpenAlex Works API.
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary key
+    openalex_id: Series[str] = pa.Field(nullable=False)
+
+    # Cross-reference IDs for linking publications across providers
+    # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
+    doi: Series[str] = pa.Field(nullable=True)
+    # pmid: PubMed ID (numeric string: "12345678")
+    pmid: Series[str] = pa.Field(nullable=True)
+    # pmc_id: PubMed Central ID (format: "PMC1234567")
+    pmc_id: Series[str] = pa.Field(nullable=True)
+    title: Series[str] = pa.Field(nullable=True)
+    abstract: Series[str] = pa.Field(nullable=True)
+    authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
+    concepts: Series[object] = pa.Field(nullable=True)  # list[str]
+
+    # Journal info
+    journal: Series[str] = pa.Field(nullable=True)
+    issn: Series[str] = pa.Field(nullable=True)
+    publisher: Series[str] = pa.Field(nullable=True)
+
+    # Page fields (nullable - OpenAlex API doesn't typically provide page information)
+    # Added for schema consistency across all publication providers
+    first_page: Series[str] = pa.Field(nullable=True)
+    last_page: Series[str] = pa.Field(nullable=True)
+
+    # Date fields
+    year: Series[float] = pa.Field(nullable=True, ge=1500, le=2100, coerce=True)
+    publication_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
+
+    # Metadata
+    doc_type: Series[str] = pa.Field(nullable=False)
+    is_oa: Series[bool] = pa.Field(nullable=True)
+    oa_status: Series[str] = pa.Field(nullable=True)
+    # OpenAlex source field: cited_by_count
+    # Unified BioETL field: citation_count (standardized across all providers)
+    citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    language: Series[str] = pa.Field(nullable=True)
+    source: Series[str] = pa.Field(nullable=False)
+
+    # Lookup metadata
+    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+    # _original_id: Original identifier used for lookup
+    lookup_method: Series[str] = pa.Field(nullable=False, alias="_lookup_method")
+    original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
+    # Lineage metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
+    """Schema for Semantic Scholar Publication in Gold layer.
+
+    Used for enriching publication records with Semantic Scholar metadata.
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary key
+    paper_id: Series[str] = pa.Field(nullable=False)
+
+    # External IDs
+    doi: Series[str] = pa.Field(nullable=True)
+    pmid: Series[str] = pa.Field(nullable=True)
+    # Cross-reference IDs for linking publications across providers
+    # pmc_id: PubMed Central ID (format: "PMC1234567")
+    pmc_id: Series[str] = pa.Field(nullable=True)
+    arxiv_id: Series[str] = pa.Field(nullable=True)
+    corpus_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+
+    # Core fields
+    title: Series[str] = pa.Field(nullable=True)
+    abstract: Series[str] = pa.Field(nullable=True)
+    tldr: Series[str] = pa.Field(nullable=True)
+    year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    publication_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
+
+    # Journal/Venue
+    journal: Series[str] = pa.Field(nullable=True)
+    volume: Series[str] = pa.Field(nullable=True)
+    pages: Series[str] = pa.Field(nullable=True)  # Legacy: "first-last" format
+    first_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
+    last_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
+    venue: Series[str] = pa.Field(nullable=True)
+
+    # Metrics
+    citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)  # int64
+    reference_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)  # int64
+
+    # Open Access
+    is_oa: Series[bool] = pa.Field(nullable=True)
+    open_access_url: Series[str] = pa.Field(nullable=True)
+    oa_status: Series[str] = pa.Field(nullable=True)
+
+    # Classification (JSON strings)
+    fields_of_study: Series[str] = pa.Field(nullable=True)
+    publication_types: Series[str] = pa.Field(nullable=True)
+    authors: Series[str] = pa.Field(nullable=True)
+
+    # Source tracking
+    source: Series[str] = pa.Field(nullable=True)
+
+    # Lookup metadata
+    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+    # _original_id: Original identifier used for lookup
+    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
+    # Lineage metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+__all__ = [
+    "CrossRefPublicationGoldSchema",
+    "OpenAlexPublicationGoldSchema",
+    "PubMedPublicationGoldSchema",
+    "SemanticScholarPublicationGoldSchema",
+]
+
+================================================================================
+File: uniprot.py
+Path: contracts\gold\uniprot.py
+================================================================================
+"""UniProt Gold layer data contracts.
+
+Contains Pandera DataFrameModel schemas for UniProt entities in the Gold layer:
+- Protein: UniProt protein sequences and metadata
+- IDMapping: ChEMBL→UniProt target ID mappings with status tracking
+
+Int→Float coercion note:
+    Fields marked with `coerce=True` and `Series[float]` that are `int64` in Silver
+    use float to handle nullable integers. This is a deliberate design decision
+    documented in RULES.md §2.6.
+"""
+
+from __future__ import annotations
+
+import pandera.pandas as pa
+from pandera.typing import Series
+
+
+class UniProtProteinGoldSchema(pa.DataFrameModel):
+    """Schema for UniProt Protein in Gold layer."""
+
+    entity_id: Series[str] = pa.Field(nullable=False)
+    accession: Series[str] = pa.Field(nullable=False)
+    entry_name: Series[str] = pa.Field(nullable=True)
+    protein_name: Series[str] = pa.Field(nullable=True)
+    gene_names: Series[object] = pa.Field(nullable=True)  # list[str]
+    organism_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    sequence_length: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class UniProtIDMappingGoldSchema(pa.DataFrameModel):
+    """Schema for UniProt ID Mapping in Gold layer.
+
+    Maps ChEMBL target IDs to UniProt accessions.
+    Records with mapping_status='not_found' have null uniprot_accession.
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary key (source identifier)
+    target_chembl_id: Series[str] = pa.Field(nullable=False)
+
+    # Mapped identifier (nullable - None if not found)
+    uniprot_accession: Series[str] = pa.Field(nullable=True)
+
+    # Mapping status: 'found', 'not_found', 'error'
+    mapping_status: Series[str] = pa.Field(nullable=False)
+
+    # DQ warning flag (True for not_found)
+    dq_warn: Series[bool] = pa.Field(nullable=False, alias="_dq_warn")
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+__all__ = [
+    "UniProtIDMappingGoldSchema",
+    "UniProtProteinGoldSchema",
+]
+
+================================================================================
+File: __init__.py
 Path: entities\__init__.py
 ================================================================================
 """Domain entities for BioETL.
@@ -5187,7 +6852,7 @@ __all__ = [
     "ChemblPublication",
     "ChemblPublicationRecord",
     "ChemblPublicationTermRecord",
-    "CompoundRecord",
+    "CompoundRecord",  # ChEMBL compound_record (molecule-document link)
     "CrossRefPublicationEntity",
     "DocumentSimilarity",
     "DocumentTerm",
@@ -7055,6 +8720,18 @@ class ProteinClassification(BaseEntity):
         """Check if this classification is deprecated."""
         return self.replaced_by is not None or self.downgraded == 1
 
+
+__all__ = [
+    "CellLine",
+    "ChemblPublication",
+    "DocumentSimilarity",
+    "DocumentTerm",
+    "Molecule",
+    "ProteinClassification",
+    "Target",
+    "TargetComponent",
+]
+
 ================================================================================
 File: crossref.py
 Path: entities\crossref.py
@@ -7518,7 +9195,7 @@ Path: entities\pubchem.py
 
 Contains:
 - PubchemMolecule: Domain entity (dataclass) with lineage fields
-- PubChemCompoundRecord: DTO (Pydantic) for type-safe data transfer at boundaries
+- PubchemMoleculeRecord: DTO (Pydantic) for type-safe data transfer at boundaries
 
 DTO Design:
 - Uses extra='forbid' to detect API changes early
@@ -7543,9 +9220,6 @@ class PubchemMoleculeRecord(BaseModel):
     Represents a molecule (compound) from PubChem API via pubchempy.
     Required field: cid.
     At least one structural identifier (SMILES/InChI) should be present.
-
-    Note: Renamed from PubChemCompoundRecord to align with Ubiquitous Language
-    (ADR-024). 'Molecule' is the canonical term for chemical compounds.
 
     Example:
         >>> record = PubchemMoleculeRecord(
@@ -7605,10 +9279,10 @@ class PubchemMoleculeRecord(BaseModel):
 
 @dataclass(frozen=True, kw_only=True)
 class PubchemMolecule(BaseEntity):
-    """Represents a chemical compound/molecule (PubChem Compound).
+    """Represents a chemical compound/molecule (PubChem Molecule).
 
     Domain entity with lineage fields (run_id, content_hash, etc.).
-    For DTO without lineage, use PubChemCompoundRecord.
+    For DTO without lineage, use PubchemMoleculeRecord.
     """
 
     cid: str
@@ -8305,6 +9979,12 @@ class UniprotTarget(BaseEntity):
                 f"Annotation score must be 1-5, got {self.annotation_score}"
             )
 
+
+__all__ = [
+    "IDMappingResult",
+    "UniprotTarget",
+]
+
 ================================================================================
 File: error_classifier.py
 Path: error_classifier.py
@@ -8577,6 +10257,13 @@ All exceptions should inherit from BioETLError to enable consistent error handli
 Each exception class defines an explicit `error_type` attribute for deterministic
 error classification (see ErrorClassifier).
 
+Exception Categories (§7 RULES.md):
+    - ValidationErrors: Schema and data format validation errors
+    - DataQualityErrors: Batch-level data quality issues
+    - NetworkErrors: Network connectivity and external service errors
+    - InfrastructureErrors: Storage, filesystem, and environment errors
+    - InternalErrors: Critical application errors requiring immediate attention
+
 This module re-exports all exceptions for backward compatibility with:
     from bioetl.domain.exceptions import SomeError
 
@@ -8596,50 +10283,36 @@ Provider-Specific Exceptions:
     should catch ExternalServiceError instead.
 """
 
+# =============================================================================
+# Base Classes
+# =============================================================================
 from bioetl.domain.exceptions.base import (
     BioETLError,
     CriticalError,
     DataQualityError,
     RecoverableError,
 )
-from bioetl.domain.exceptions.critical import (
-    AuthFailureError,
-    CheckpointConflictError,
-    InfrastructureError,
-    InvalidStateError,
-    LockAcquisitionError,
-    LockLostError,
-    MergeConflictError,
-    PolicyViolationError,
-)
+
+# =============================================================================
+# DataQualityErrors - Batch-level data quality issues
+# =============================================================================
 from bioetl.domain.exceptions.data_quality import (
     DataQualityThresholdError,
-    InvalidDataFormatError,
-    MissingRequiredFieldError,
-    SchemaViolationError,
 )
-from bioetl.domain.exceptions.external_service import (
-    DataValidationError,
-    ExternalServiceError,
-    RateLimitExceededError,
-    ServiceAuthenticationError,
-    ServiceUnavailableError,
-)
-from bioetl.domain.exceptions.recoverable import (
-    ApiError,
-    CircuitBreakerOpenError,
-    NetworkError,
-    RateLimitError,
-    RetryExhaustedError,
-    TimeoutError,
-)
-from bioetl.domain.exceptions.storage import (
+
+# =============================================================================
+# InfrastructureErrors - Storage, filesystem, and environment errors
+# =============================================================================
+from bioetl.domain.exceptions.infrastructure import (
     BronzeValidationError,
     BucketNotFoundError,
+    ConfigurationError,
     DeltaOptimizeError,
     DeltaSchemaValidationError,
     DeltaTransactionError,
     DeltaWriteConflictError,
+    FileSystemError,
+    InfrastructureError,
     SchemaEvolutionError,
     StorageError,
     StorageQuotaExceededError,
@@ -8647,36 +10320,90 @@ from bioetl.domain.exceptions.storage import (
     UploadError,
 )
 
+# =============================================================================
+# InternalErrors - Critical application errors
+# =============================================================================
+from bioetl.domain.exceptions.internal import (
+    AuthFailureError,
+    CheckpointConflictError,
+    InternalError,
+    InvalidStateError,
+    LockAcquisitionError,
+    LockLostError,
+    MergeConflictError,
+    MetricsServerError,
+    PolicyViolationError,
+    RunnerAlreadyExecutedError,
+)
+
+# =============================================================================
+# NetworkErrors - Network connectivity and external service errors
+# =============================================================================
+from bioetl.domain.exceptions.network import (
+    ApiError,
+    CircuitBreakerOpenError,
+    DataValidationError,
+    ExternalServiceError,
+    NetworkError,
+    RateLimitError,
+    RateLimitExceededError,
+    RetryExhaustedError,
+    ServiceAuthenticationError,
+    ServiceUnavailableError,
+    TimeoutError,
+)
+
+# =============================================================================
+# ValidationErrors - Schema and data format validation
+# =============================================================================
+from bioetl.domain.exceptions.validation import (
+    InvalidDataFormatError,
+    MissingRequiredFieldError,
+    SchemaViolationError,
+    ValidationError,
+)
+
 __all__ = [
     "ApiError",
     "AuthFailureError",
+    # Base classes
     "BioETLError",
     "BronzeValidationError",
     "BucketNotFoundError",
     "CheckpointConflictError",
     "CircuitBreakerOpenError",
+    "ConfigurationError",
     "CriticalError",
     "DataQualityError",
+    # DataQualityErrors
     "DataQualityThresholdError",
     "DataValidationError",
     "DeltaOptimizeError",
     "DeltaSchemaValidationError",
     "DeltaTransactionError",
     "DeltaWriteConflictError",
+    # External service errors (NetworkErrors subcategory)
     "ExternalServiceError",
+    "FileSystemError",
+    # InfrastructureErrors
     "InfrastructureError",
+    # InternalErrors
+    "InternalError",
     "InvalidDataFormatError",
     "InvalidStateError",
     "LockAcquisitionError",
     "LockLostError",
     "MergeConflictError",
+    "MetricsServerError",
     "MissingRequiredFieldError",
+    # NetworkErrors
     "NetworkError",
     "PolicyViolationError",
     "RateLimitError",
     "RateLimitExceededError",
     "RecoverableError",
     "RetryExhaustedError",
+    "RunnerAlreadyExecutedError",
     "SchemaEvolutionError",
     "SchemaViolationError",
     "ServiceAuthenticationError",
@@ -8686,6 +10413,8 @@ __all__ = [
     "TableNotFoundError",
     "TimeoutError",
     "UploadError",
+    # ValidationErrors
+    "ValidationError",
 ]
 
 ================================================================================
@@ -8869,227 +10598,57 @@ class DataQualityError(BioETLError):
         return getattr(cls, "error_type", ErrorType.INVALID_DATA)
 
 ================================================================================
-File: critical.py
-Path: exceptions\critical.py
-================================================================================
-"""Critical exceptions that stop pipeline execution.
-
-These errors indicate serious problems that cannot be recovered from
-and require immediate attention.
-"""
-
-from __future__ import annotations
-
-from bioetl.domain.exceptions.base import CriticalError
-from bioetl.domain.types import ErrorType
-
-
-class LockLostError(CriticalError):
-    """Raised when distributed lock is lost during execution.
-
-    This is a CRITICAL error - worker MUST terminate before any commit.
-    Losing the lock means another worker may have acquired it.
-    """
-
-    error_type = ErrorType.LOCK_LOST
-
-    def __init__(self, key: str, run_id: str | None = None) -> None:
-        self.key = key
-        self.run_id = run_id
-        msg = f"Lock lost: {key}"
-        if run_id:
-            msg += f" (run_id={run_id})"
-        super().__init__(msg)
-
-
-class LockAcquisitionError(CriticalError):
-    """Raised when lock cannot be acquired.
-
-    This prevents the pipeline from starting if the lock is held by another worker.
-    """
-
-    error_type = ErrorType.LOCK_LOST
-
-    def __init__(self, key: str, current_owner: str | None = None) -> None:
-        self.key = key
-        self.current_owner = current_owner
-        msg = f"Failed to acquire lock: {key}"
-        if current_owner:
-            msg += f" (owned by {current_owner})"
-        super().__init__(msg)
-
-
-class CheckpointConflictError(CriticalError):
-    """Raised when checkpoint write fails due to concurrent modification.
-
-    This indicates that another worker has modified the checkpoint,
-    which could lead to data inconsistency.
-    """
-
-    error_type = ErrorType.DB_UNAVAILABLE
-
-    def __init__(self, pipeline: str, message: str) -> None:
-        self.pipeline = pipeline
-        super().__init__(f"Checkpoint conflict in '{pipeline}': {message}")
-
-
-class MergeConflictError(CriticalError):
-    """Raised when Delta merge has conflicts.
-
-    This indicates that the data merge operation has unresolved conflicts
-    that require manual intervention.
-    """
-
-    error_type = ErrorType.DB_UNAVAILABLE
-
-    def __init__(self, table: str, conflicts: int) -> None:
-        self.table = table
-        self.conflicts = conflicts
-        super().__init__(f"Merge conflict in '{table}': {conflicts} conflicts")
-
-
-class AuthFailureError(CriticalError):
-    """Raised when API authentication fails (401, 403).
-
-    This is a CRITICAL error - pipeline should not continue without valid auth.
-    """
-
-    error_type = ErrorType.AUTH_FAILURE
-
-    def __init__(self, provider: str, status_code: int | None = None) -> None:
-        self.provider = provider
-        self.status_code = status_code
-        msg = f"Authentication failed for {provider}"
-        if status_code:
-            msg += f" (HTTP {status_code})"
-        super().__init__(msg)
-
-
-class InfrastructureError(CriticalError):
-    """Raised when infrastructure health check fails.
-
-    This is a CRITICAL error - pipeline should not start if infrastructure
-    is unavailable (storage or data source unreachable).
-    """
-
-    error_type = ErrorType.DB_UNAVAILABLE
-
-    def __init__(
-        self, message: str, failed_components: list[str] | None = None
-    ) -> None:
-        self.failed_components = failed_components or []
-        super().__init__(message)
-
-
-class PolicyViolationError(CriticalError):
-    """Raised when medallion layer policy is violated.
-
-    This is a CRITICAL error - pipeline must not proceed with invalid
-    write mode for a given medallion layer.
-
-    Example:
-        - Bronze layer only allows APPEND mode
-        - Attempting OVERWRITE on Bronze raises PolicyViolationError
-    """
-
-    error_type = ErrorType.INVALID_DATA
-
-    def __init__(self, message: str) -> None:
-        super().__init__(message)
-
-
-class InvalidStateError(CriticalError):
-    """Raised when an aggregate operation is attempted in an invalid state.
-
-    This is a CRITICAL error indicating an invariant violation attempt.
-    Aggregates use this to enforce state machine transitions and business rules.
-
-    Example:
-        - Attempting to complete a PipelineRun that has failed stages
-        - Attempting to record stages on an already completed run
-        - Mutating a Batch after it has been sealed
-    """
-
-    error_type = ErrorType.INVALID_DATA
-
-    def __init__(
-        self,
-        message: str,
-        current_state: str | None = None,
-        attempted_operation: str | None = None,
-    ) -> None:
-        self.current_state = current_state
-        self.attempted_operation = attempted_operation
-        super().__init__(message)
-
-================================================================================
 File: data_quality.py
 Path: exceptions\data_quality.py
 ================================================================================
-"""Data quality exceptions for invalid or malformed data.
+"""Data quality exceptions for batch-level quality issues.
 
-These errors indicate problems with individual data records that should
-be logged and skipped, but should not stop the pipeline.
+These errors indicate problems with data quality at the batch or pipeline level,
+as opposed to individual record validation errors. DataQualityErrors typically
+affect processing decisions for entire batches or trigger quarantine mechanisms.
+
+Категория: DataQualityErrors - ошибки качества данных на уровне содержательной
+целостности (нарушение инвариантов, аномалии в данных, превышение порогов,
+случаи помещения данных в карантин).
+
+Note:
+    Individual record validation errors (SchemaViolationError, MissingRequiredFieldError,
+    InvalidDataFormatError) are in the `validation` module.
 """
 
 from __future__ import annotations
 
-from bioetl.domain.exceptions.base import BioETLError, DataQualityError
+from bioetl.domain.exceptions.base import BioETLError
 from bioetl.domain.types import ErrorType
-
-
-class SchemaViolationError(DataQualityError):
-    """Raised when data does not match expected schema.
-
-    This indicates that a data record has schema validation errors and should be skipped.
-    """
-
-    error_type = ErrorType.SCHEMA_VIOLATION
-
-    def __init__(self, table: str, errors: list[str]) -> None:
-        self.table = table
-        self.errors = errors
-        super().__init__(f"Schema validation failed for '{table}': {errors}")
-
-
-class MissingRequiredFieldError(DataQualityError):
-    """Raised when required field is missing from data record."""
-
-    error_type = ErrorType.MISSING_REQUIRED_FIELD
-
-    def __init__(self, field: str, record_id: str | None = None) -> None:
-        self.field = field
-        self.record_id = record_id
-        msg = f"Missing required field: {field}"
-        if record_id:
-            msg += f" (record_id={record_id})"
-        super().__init__(msg)
-
-
-class InvalidDataFormatError(DataQualityError):
-    """Raised when data format is invalid."""
-
-    error_type = ErrorType.INVALID_DATA
-
-    def __init__(self, field: str, value: str, expected_format: str) -> None:
-        self.field = field
-        self.value = value
-        self.expected_format = expected_format
-        super().__init__(
-            f"Invalid format for '{field}': got '{value}', expected {expected_format}"
-        )
 
 
 class DataQualityThresholdError(BioETLError):
     """Raised when Data Quality error rate exceeds the hard threshold.
 
     This error indicates that the quality of the batch is too low to proceed,
-    requiring the pipeline or batch to stop.
+    requiring the pipeline or batch to stop. Per RULES.md §4.1:
+    - Soft threshold (>5%): Warning, continue processing
+    - Hard threshold (>20%): Fail batch with this error
+
+    Attributes:
+        error_rate: Actual error rate observed (0.0-1.0).
+        threshold: Configured threshold that was exceeded (0.0-1.0).
+
+    Example:
+        >>> # 25% of records failed validation
+        >>> raise DataQualityThresholdError(error_rate=0.25, threshold=0.20)
+        # Raises: DQ Hard Threshold exceeded: 25.00% errors (limit: 20.00%)
     """
 
     error_type = ErrorType.DATA_QUALITY
 
     def __init__(self, error_rate: float, threshold: float) -> None:
+        """Initialize DataQualityThresholdError.
+
+        Args:
+            error_rate: Actual error rate observed (0.0-1.0).
+            threshold: Configured threshold that was exceeded (0.0-1.0).
+        """
         self.error_rate = error_rate
         self.threshold = threshold
         super().__init__(
@@ -9097,332 +10656,17 @@ class DataQualityThresholdError(BioETLError):
         )
 
 ================================================================================
-File: external_service.py
-Path: exceptions\external_service.py
+File: infrastructure.py
+Path: exceptions\infrastructure.py
 ================================================================================
-"""External service exceptions for BioETL.
+"""Infrastructure exceptions for storage, filesystem, and environment errors.
 
-Provides abstract exception hierarchy for errors from external data sources.
-Domain layer uses these abstract exceptions without knowing specific providers.
+These errors involve I/O operations with storage systems (Delta Lake, local filesystem),
+configuration issues, and resource exhaustion. Infrastructure errors are typically
+critical and require immediate attention.
 
-This module follows RULES.md §7.2 - Domain should be independent from implementations.
-"""
-
-from __future__ import annotations
-
-from bioetl.domain.exceptions.base import RecoverableError
-from bioetl.domain.types import ErrorType
-
-
-class ExternalServiceError(RecoverableError):
-    """Base exception for all external service errors.
-
-    This is the abstract exception that domain/application layers should catch
-    when handling errors from external data sources.
-
-    Infrastructure adapters MUST translate provider-specific errors into this
-    hierarchy on the adapter boundary.
-
-    Attributes:
-        service_name: Optional name of the service that failed.
-        status_code: Optional HTTP status code if applicable.
-        retry_after: Optional seconds to wait before retry.
-
-    Example:
-        >>> try:
-        ...     await adapter.fetch("entity")
-        ... except ExternalServiceError as e:
-        ...     logger.error("External service failed", service=e.service_name)
-    """
-
-    error_type = ErrorType.NETWORK_ERROR
-
-    def __init__(
-        self,
-        message: str,
-        service_name: str | None = None,
-        status_code: int | None = None,
-        retry_after: float | None = None,
-    ) -> None:
-        """Initialize ExternalServiceError.
-
-        Args:
-            message: Error description.
-            service_name: Name of the external service (e.g., "chembl", "crossref").
-            status_code: HTTP status code if applicable.
-            retry_after: Seconds to wait before retry if applicable.
-        """
-        self.service_name = service_name
-        self.status_code = status_code
-        self.retry_after = retry_after
-        super().__init__(message)
-
-
-class ServiceUnavailableError(ExternalServiceError):
-    """Raised when external service is unavailable.
-
-    Typically caused by:
-    - HTTP 5xx errors (500, 502, 503, 504)
-    - Connection timeouts
-    - DNS resolution failures
-
-    The request may be retried after exponential backoff.
-    """
-
-    error_type = ErrorType.TIMEOUT
-
-    def __init__(
-        self,
-        message: str,
-        service_name: str | None = None,
-        status_code: int | None = None,
-        retry_after: float | None = None,
-    ) -> None:
-        """Initialize ServiceUnavailableError.
-
-        Args:
-            message: Error description.
-            service_name: Name of the unavailable service.
-            status_code: HTTP status code (typically 5xx).
-            retry_after: Seconds to wait before retry.
-        """
-        super().__init__(
-            message,
-            service_name=service_name,
-            status_code=status_code,
-            retry_after=retry_after,
-        )
-
-
-class RateLimitExceededError(ExternalServiceError):
-    """Raised when external service rate limit is exceeded.
-
-    Caused by HTTP 429 Too Many Requests.
-    The request MUST be retried after the specified delay.
-
-    Note:
-        This is distinct from domain.exceptions.RateLimitError which is
-        for internal rate limiting. This exception is for rate limits
-        imposed by external services.
-    """
-
-    error_type = ErrorType.RATE_LIMIT
-
-    def __init__(
-        self,
-        message: str,
-        service_name: str | None = None,
-        retry_after: float = 60.0,
-    ) -> None:
-        """Initialize RateLimitExceededError.
-
-        Args:
-            message: Error description.
-            service_name: Name of the service imposing rate limit.
-            retry_after: Seconds to wait before retry (from Retry-After header).
-        """
-        super().__init__(
-            message,
-            service_name=service_name,
-            status_code=429,
-            retry_after=retry_after,
-        )
-
-
-class ServiceAuthenticationError(ExternalServiceError):
-    """Raised when external service authentication fails.
-
-    Caused by HTTP 401 Unauthorized or 403 Forbidden.
-
-    Note:
-        This is a RECOVERABLE error in the external service hierarchy
-        because it may be caused by expired tokens that can be refreshed.
-        For truly critical auth failures, see domain.exceptions.AuthFailureError.
-    """
-
-    error_type = ErrorType.AUTH_FAILURE
-
-    def __init__(
-        self,
-        message: str,
-        service_name: str | None = None,
-        status_code: int | None = None,
-    ) -> None:
-        """Initialize ServiceAuthenticationError.
-
-        Args:
-            message: Error description.
-            service_name: Name of the service that rejected auth.
-            status_code: HTTP status code (401 or 403).
-        """
-        super().__init__(
-            message,
-            service_name=service_name,
-            status_code=status_code,
-        )
-
-
-class DataValidationError(ExternalServiceError):
-    """Raised when external service returns invalid data.
-
-    Used when data from an external source fails validation but the
-    service itself is healthy. This is distinct from DataQualityError
-    which is for internal data quality issues.
-
-    Examples:
-        - Invalid JSON response
-        - Missing required fields in response
-        - Unexpected data format
-    """
-
-    error_type = ErrorType.INVALID_DATA
-
-    def __init__(
-        self,
-        message: str,
-        service_name: str | None = None,
-        field: str | None = None,
-        value: str | None = None,
-    ) -> None:
-        """Initialize DataValidationError.
-
-        Args:
-            message: Error description.
-            service_name: Name of the service that returned invalid data.
-            field: Name of the invalid field if applicable.
-            value: The invalid value if safe to log.
-        """
-        self.field = field
-        self.value = value
-        super().__init__(message, service_name=service_name)
-
-================================================================================
-File: recoverable.py
-Path: exceptions\recoverable.py
-================================================================================
-"""Recoverable exceptions that can be retried.
-
-These errors are typically transient and may succeed on retry.
-Examples: network timeouts, rate limits, temporary service unavailability.
-"""
-
-from __future__ import annotations
-
-from bioetl.domain.exceptions.base import RecoverableError
-from bioetl.domain.types import ErrorType
-
-
-class RateLimitError(RecoverableError):
-    """Raised when API rate limit is exceeded.
-
-    The request should be retried after the specified delay.
-    """
-
-    error_type = ErrorType.RATE_LIMIT
-
-    def __init__(self, provider: str, retry_after: float) -> None:
-        self.provider = provider
-        self.retry_after = retry_after
-        super().__init__(
-            f"Rate limit exceeded for {provider}. Retry after {retry_after}s"
-        )
-
-
-class RetryExhaustedError(RecoverableError):
-    """Raised when all retry attempts are exhausted.
-
-    This indicates that a transient error persisted across all retry attempts.
-    """
-
-    error_type = ErrorType.NETWORK_ERROR
-
-    def __init__(
-        self, url: str, attempts: int, last_error: Exception | None = None
-    ) -> None:
-        self.url = url
-        self.attempts = attempts
-        self.last_error = last_error
-        msg = f"Exhausted {attempts} retry attempts for {url}"
-        if last_error:
-            msg += f": {last_error}"
-        super().__init__(msg)
-
-
-class CircuitBreakerOpenError(RecoverableError):
-    """Raised when circuit breaker is open and blocking requests.
-
-    This indicates that the service has failed repeatedly and the circuit breaker
-    has opened to prevent further requests.
-    """
-
-    error_type = ErrorType.TIMEOUT
-
-    def __init__(self, provider: str, retry_after: float) -> None:
-        self.provider = provider
-        self.retry_after = retry_after
-        super().__init__(
-            f"Circuit breaker open for {provider}. Retry after {retry_after}s"
-        )
-
-
-class ApiError(RecoverableError):
-    """Raised when external API returns an error.
-
-    This is a generic API error that may be retryable depending on the status code.
-    """
-
-    error_type = ErrorType.NETWORK_ERROR
-
-    def __init__(self, message: str, status_code: int | None = None) -> None:
-        self.message = message
-        self.status_code = status_code
-        msg = message
-        if status_code:
-            msg = f"[{status_code}] {message}"
-        super().__init__(msg)
-
-
-class TimeoutError(RecoverableError):
-    """Raised when request times out (502, 504, gateway errors).
-
-    The request may be retried after a delay.
-    """
-
-    error_type = ErrorType.TIMEOUT
-
-    def __init__(self, message: str, timeout_seconds: float | None = None) -> None:
-        self.timeout_seconds = timeout_seconds
-        msg = message
-        if timeout_seconds:
-            msg += f" (timeout: {timeout_seconds}s)"
-        super().__init__(msg)
-
-
-class NetworkError(RecoverableError):
-    """Raised when network connectivity issues occur.
-
-    This is a generic network error that may be retried.
-    """
-
-    error_type = ErrorType.NETWORK_ERROR
-
-    def __init__(self, message: str, cause: Exception | None = None) -> None:
-        self.cause = cause
-        super().__init__(message)
-
-================================================================================
-File: storage.py
-Path: exceptions\storage.py
-================================================================================
-"""Storage-related exceptions.
-
-These errors involve I/O operations with storage systems
-(S3, Delta Lake, local filesystem).
-
-Implements granular error classification for:
-- Delta Lake operations (write conflicts, transactions, schema)
-- Storage quota and capacity issues
-- General I/O errors
+Категория: InfrastructureErrors - ошибки инфраструктуры и окружения (сбой файловой
+системы, недоступность хранилища или БД, проблемы конфигурации и др.).
 
 See ADR-016 for error handling strategy.
 """
@@ -9432,45 +10676,239 @@ from __future__ import annotations
 from bioetl.domain.exceptions.base import CriticalError, RecoverableError
 from bioetl.domain.types import ErrorType
 
+# =============================================================================
+# Base Infrastructure Exception
+# =============================================================================
+
+
+class InfrastructureError(CriticalError):
+    """Base class for infrastructure-related errors.
+
+    These errors indicate problems with the execution environment that typically
+    cannot be recovered from without external intervention. Examples:
+    - Health check failures
+    - Resource unavailability
+    - Configuration issues
+
+    Attributes:
+        failed_components: Optional list of components that failed.
+
+    Example:
+        >>> raise InfrastructureError(
+        ...     "Infrastructure health check failed",
+        ...     failed_components=["storage", "chembl_api"]
+        ... )
+    """
+
+    error_type = ErrorType.DB_UNAVAILABLE
+
+    def __init__(
+        self, message: str, failed_components: list[str] | None = None
+    ) -> None:
+        """Initialize InfrastructureError.
+
+        Args:
+            message: Description of the infrastructure failure.
+            failed_components: Optional list of components that failed.
+        """
+        self.failed_components = failed_components or []
+        super().__init__(message)
+
+
+class ConfigurationError(InfrastructureError):
+    """Raised when system configuration is invalid or missing.
+
+    This error indicates that the pipeline cannot start due to
+    configuration problems that must be resolved first.
+
+    Attributes:
+        config_key: Name of the problematic configuration key.
+
+    Example:
+        >>> raise ConfigurationError("BIOETL_CHEMBL_API_KEY")
+    """
+
+    error_type = ErrorType.DB_UNAVAILABLE
+
+    def __init__(self, config_key: str) -> None:
+        """Initialize ConfigurationError.
+
+        Args:
+            config_key: Name of the problematic configuration key.
+        """
+        self.config_key = config_key
+        super().__init__(f"Missing or invalid configuration: {config_key}")
+
+
+class FileSystemError(InfrastructureError):
+    """Raised when filesystem operations fail.
+
+    This error indicates problems with local file I/O operations
+    such as reading, writing, or directory operations.
+
+    Attributes:
+        path: Path that caused the error.
+        operation: Type of operation that failed (read, write, delete).
+        reason: Description of why the operation failed.
+
+    Example:
+        >>> raise FileSystemError(
+        ...     "/data/bronze",
+        ...     operation="write",
+        ...     reason="Permission denied"
+        ... )
+    """
+
+    error_type = ErrorType.DB_UNAVAILABLE
+
+    def __init__(self, path: str, operation: str, reason: str) -> None:
+        """Initialize FileSystemError.
+
+        Args:
+            path: Path that caused the error.
+            operation: Type of operation that failed.
+            reason: Description of why the operation failed.
+        """
+        self.path = path
+        self.operation = operation
+        self.reason = reason
+        super().__init__(f"Filesystem {operation} failed for '{path}': {reason}")
+
+
+# =============================================================================
+# Storage Exceptions
+# =============================================================================
+
 
 class StorageError(RecoverableError):
     """Base exception for storage-related errors.
 
-    These errors typically involve I/O operations and may be transient.
+    These errors typically involve I/O operations with Delta Lake or
+    object storage and may be transient (recoverable via retry).
+
+    For critical storage failures that cannot be retried, see
+    StorageQuotaExceededError and DeltaTransactionError.
     """
 
     error_type = ErrorType.NETWORK_ERROR
 
 
 class BucketNotFoundError(StorageError):
-    """Raised when S3 bucket does not exist."""
+    """Raised when S3 bucket does not exist.
+
+    Attributes:
+        bucket: Name of the missing bucket.
+
+    Example:
+        >>> raise BucketNotFoundError("bioetl-bronze-data")
+    """
 
     error_type = ErrorType.DB_UNAVAILABLE
 
     def __init__(self, bucket: str) -> None:
+        """Initialize BucketNotFoundError.
+
+        Args:
+            bucket: Name of the missing bucket.
+        """
         self.bucket = bucket
         super().__init__(f"Bucket '{bucket}' not found")
 
 
+class TableNotFoundError(StorageError):
+    """Raised when Delta table does not exist.
+
+    Attributes:
+        table_path: Path to the missing table.
+
+    Example:
+        >>> raise TableNotFoundError("/data/silver/chembl_activity")
+    """
+
+    error_type = ErrorType.DB_UNAVAILABLE
+
+    def __init__(self, table_path: str) -> None:
+        """Initialize TableNotFoundError.
+
+        Args:
+            table_path: Path to the missing table.
+        """
+        self.table_path = table_path
+        super().__init__(f"Table not found: '{table_path}'")
+
+
 class UploadError(StorageError):
-    """Raised when upload to S3 fails."""
+    """Raised when upload to storage fails.
+
+    Attributes:
+        key: Storage key/path for the failed upload.
+        reason: Description of why the upload failed.
+
+    Example:
+        >>> raise UploadError("bronze/chembl/activity/2024-01-01/data.jsonl", "Connection reset")
+    """
 
     error_type = ErrorType.NETWORK_ERROR
 
     def __init__(self, key: str, reason: str) -> None:
+        """Initialize UploadError.
+
+        Args:
+            key: Storage key/path for the failed upload.
+            reason: Description of why the upload failed.
+        """
         self.key = key
         self.reason = reason
         super().__init__(f"Failed to upload '{key}': {reason}")
 
 
-class TableNotFoundError(StorageError):
-    """Raised when Delta table does not exist."""
+class StorageQuotaExceededError(CriticalError):
+    """Raised when storage quota or disk space is exhausted.
+
+    This is a critical error requiring immediate operator attention.
+    Pipeline cannot continue without freeing storage.
+
+    Attributes:
+        path: Storage path that exceeded quota.
+        quota_bytes: Optional quota limit in bytes.
+        used_bytes: Optional current usage in bytes.
+
+    Example:
+        >>> raise StorageQuotaExceededError(
+        ...     "/data/silver",
+        ...     quota_bytes=100_000_000_000,
+        ...     used_bytes=100_500_000_000
+        ... )
+    """
 
     error_type = ErrorType.DB_UNAVAILABLE
 
-    def __init__(self, table_path: str) -> None:
-        self.table_path = table_path
-        super().__init__(f"Table not found: '{table_path}'")
+    def __init__(
+        self,
+        path: str,
+        quota_bytes: int | None = None,
+        used_bytes: int | None = None,
+    ) -> None:
+        """Initialize StorageQuotaExceededError.
+
+        Args:
+            path: Storage path that exceeded quota.
+            quota_bytes: Optional quota limit in bytes.
+            used_bytes: Optional current usage in bytes.
+        """
+        self.path = path
+        self.quota_bytes = quota_bytes
+        self.used_bytes = used_bytes
+
+        msg = f"Storage quota exceeded for '{path}'"
+        if quota_bytes is not None and used_bytes is not None:
+            msg += f" (used: {used_bytes:,} bytes, quota: {quota_bytes:,} bytes)"
+        super().__init__(msg)
+
+
+# =============================================================================
+# Schema Evolution Exceptions
+# =============================================================================
 
 
 def _build_schema_error_message(
@@ -9490,6 +10928,18 @@ class SchemaEvolutionError(StorageError):
 
     This error indicates that the incoming records have different fields
     compared to the existing table schema.
+
+    Attributes:
+        table: Name of the table with schema drift.
+        new_fields: Set of fields in new data but not in existing schema.
+        removed_fields: Set of fields in existing schema but not in new data.
+
+    Example:
+        >>> raise SchemaEvolutionError(
+        ...     "chembl_activity",
+        ...     new_fields={"new_column"},
+        ...     removed_fields={"old_column"}
+        ... )
     """
 
     error_type = ErrorType.SCHEMA_EVOLUTION
@@ -9500,6 +10950,13 @@ class SchemaEvolutionError(StorageError):
         new_fields: set[str] | None = None,
         removed_fields: set[str] | None = None,
     ) -> None:
+        """Initialize SchemaEvolutionError.
+
+        Args:
+            table: Name of the table with schema drift.
+            new_fields: Set of fields in new data but not in existing schema.
+            removed_fields: Set of fields in existing schema but not in new data.
+        """
         self.table = table
         self.new_fields = new_fields or set()
         self.removed_fields = removed_fields or set()
@@ -9514,6 +10971,17 @@ class BronzeValidationError(StorageError):
     This error indicates that records passed to BronzeWriter
     are not valid JSON bytes. Critical error that should stop
     the pipeline to prevent invalid data in Bronze layer.
+
+    Attributes:
+        record_index: Optional 0-based index of the invalid record.
+        original_error: Optional original error message from JSON parser.
+
+    Example:
+        >>> raise BronzeValidationError(
+        ...     "Invalid JSON in batch",
+        ...     record_index=42,
+        ...     original_error="Unexpected character at position 156"
+        ... )
     """
 
     error_type = ErrorType.INVALID_DATA
@@ -9553,6 +11021,18 @@ class DeltaWriteConflictError(StorageError):
     the same data partition. Typically recoverable via retry.
 
     See delta-rs documentation for conflict resolution strategies.
+
+    Attributes:
+        table_path: Path to the Delta table.
+        operation: Type of operation that failed (write, merge, delete).
+        conflicting_version: Optional Delta version that caused conflict.
+
+    Example:
+        >>> raise DeltaWriteConflictError(
+        ...     "/data/silver/chembl_activity",
+        ...     operation="merge",
+        ...     conflicting_version=42
+        ... )
     """
 
     error_type = ErrorType.NETWORK_ERROR  # Recoverable
@@ -9584,6 +11064,18 @@ class DeltaTransactionError(CriticalError):
 
     This is a critical error indicating transaction log corruption
     or unrecoverable state. Pipeline should fail to prevent data loss.
+
+    Attributes:
+        table_path: Path to the Delta table.
+        reason: Description of why transaction failed.
+        version: Optional Delta version where failure occurred.
+
+    Example:
+        >>> raise DeltaTransactionError(
+        ...     "/data/silver/chembl_activity",
+        ...     reason="Transaction log corrupted",
+        ...     version=42
+        ... )
     """
 
     error_type = ErrorType.DB_UNAVAILABLE
@@ -9660,6 +11152,20 @@ class DeltaSchemaValidationError(CriticalError):
     the expected Delta table schema in strict mode.
 
     See ADR-018 for Gold strict validation policy.
+
+    Attributes:
+        table_path: Path to the Delta table.
+        expected_columns: Expected column names.
+        actual_columns: Actual column names in data.
+        type_mismatches: Dict of column -> (expected_type, actual_type).
+
+    Example:
+        >>> raise DeltaSchemaValidationError(
+        ...     "/data/gold/chembl_activity",
+        ...     expected_columns=["id", "name", "value"],
+        ...     actual_columns=["id", "name"],
+        ...     type_mismatches={"id": ("int64", "string")}
+        ... )
     """
 
     error_type = ErrorType.SCHEMA_MISMATCH_GOLD
@@ -9699,6 +11205,18 @@ class DeltaOptimizeError(StorageError):
 
     These maintenance operations are recoverable and can be retried.
     Failed optimization doesn't affect data integrity.
+
+    Attributes:
+        table_path: Path to the Delta table.
+        operation: Type of maintenance operation ("vacuum" or "optimize").
+        reason: Description of failure.
+
+    Example:
+        >>> raise DeltaOptimizeError(
+        ...     "/data/silver/chembl_activity",
+        ...     operation="vacuum",
+        ...     reason="Concurrent operation in progress"
+        ... )
     """
 
     error_type = ErrorType.NETWORK_ERROR  # Recoverable
@@ -9721,37 +11239,942 @@ class DeltaOptimizeError(StorageError):
         self.reason = reason
         super().__init__(f"Delta {operation} failed on '{table_path}': {reason}")
 
+================================================================================
+File: internal.py
+Path: exceptions\internal.py
+================================================================================
+"""Internal exceptions for critical application errors.
 
-class StorageQuotaExceededError(CriticalError):
-    """Raised when storage quota or disk space is exhausted.
+These errors indicate serious problems that cannot be recovered from and require
+immediate attention. They typically result in pipeline termination.
 
-    This is a critical error requiring immediate operator attention.
-    Pipeline cannot continue without freeing storage.
+Категория: InternalErrors - внутренние ошибки приложения (непредвиденные сбои,
+некорректное состояние, нарушение внутренних инвариантов, сбои fallback-логики),
+как правило критические и требующие немедленной остановки процесса ETL.
+
+All exceptions in this module inherit from CriticalError, indicating that
+the pipeline should stop immediately.
+"""
+
+from __future__ import annotations
+
+from bioetl.domain.exceptions.base import CriticalError
+from bioetl.domain.types import ErrorType
+
+# =============================================================================
+# Base Internal Exception
+# =============================================================================
+
+
+class InternalError(CriticalError):
+    """Base class for internal application errors.
+
+    InternalErrors indicate unexpected conditions that should not occur
+    during normal operation. They typically represent programming errors,
+    invariant violations, or system state corruption.
+
+    These errors are always critical and result in immediate pipeline termination.
+    """
+
+    error_type = ErrorType.INVALID_DATA
+
+
+# =============================================================================
+# State and Invariant Violations
+# =============================================================================
+
+
+class InvalidStateError(CriticalError):
+    """Raised when an aggregate operation is attempted in an invalid state.
+
+    This is a CRITICAL error indicating an invariant violation attempt.
+    Aggregates use this to enforce state machine transitions and business rules.
+
+    Examples:
+        - Attempting to complete a PipelineRun that has failed stages
+        - Attempting to record stages on an already completed run
+        - Mutating a Batch after it has been sealed
+
+    Attributes:
+        current_state: Optional current state of the object.
+        attempted_operation: Optional description of the attempted operation.
+
+    Example:
+        >>> raise InvalidStateError(
+        ...     "Cannot complete run with failed stages",
+        ...     current_state="FAILED",
+        ...     attempted_operation="complete"
+        ... )
+    """
+
+    error_type = ErrorType.INVALID_DATA
+
+    def __init__(
+        self,
+        message: str,
+        current_state: str | None = None,
+        attempted_operation: str | None = None,
+    ) -> None:
+        """Initialize InvalidStateError.
+
+        Args:
+            message: Description of the state violation.
+            current_state: Optional current state of the object.
+            attempted_operation: Optional description of the attempted operation.
+        """
+        self.current_state = current_state
+        self.attempted_operation = attempted_operation
+        super().__init__(message)
+
+
+class PolicyViolationError(CriticalError):
+    """Raised when medallion layer policy is violated.
+
+    This is a CRITICAL error - pipeline must not proceed with invalid
+    write mode for a given medallion layer.
+
+    Examples:
+        - Bronze layer only allows APPEND mode
+        - Attempting OVERWRITE on Bronze raises PolicyViolationError
+
+    Example:
+        >>> raise PolicyViolationError(
+        ...     "Bronze layer does not support OVERWRITE mode"
+        ... )
+    """
+
+    error_type = ErrorType.INVALID_DATA
+
+    def __init__(self, message: str) -> None:
+        """Initialize PolicyViolationError.
+
+        Args:
+            message: Description of the policy violation.
+        """
+        super().__init__(message)
+
+
+# =============================================================================
+# Lock Errors
+# =============================================================================
+
+
+class LockLostError(CriticalError):
+    """Raised when distributed lock is lost during execution.
+
+    This is a CRITICAL error - worker MUST terminate before any commit.
+    Losing the lock means another worker may have acquired it.
+
+    Attributes:
+        key: Lock key that was lost.
+        run_id: Optional run ID of the affected pipeline run.
+
+    Example:
+        >>> raise LockLostError("lock:chembl_activity", run_id="run-123")
+    """
+
+    error_type = ErrorType.LOCK_LOST
+
+    def __init__(self, key: str, run_id: str | None = None) -> None:
+        """Initialize LockLostError.
+
+        Args:
+            key: Lock key that was lost.
+            run_id: Optional run ID of the affected pipeline run.
+        """
+        self.key = key
+        self.run_id = run_id
+        msg = f"Lock lost: {key}"
+        if run_id:
+            msg += f" (run_id={run_id})"
+        super().__init__(msg)
+
+
+class LockAcquisitionError(CriticalError):
+    """Raised when lock cannot be acquired.
+
+    This prevents the pipeline from starting if the lock is held by another worker.
+
+    Attributes:
+        key: Lock key that could not be acquired.
+        current_owner: Optional identifier of the current lock owner.
+
+    Example:
+        >>> raise LockAcquisitionError("lock:chembl_activity", current_owner="worker-456")
+    """
+
+    error_type = ErrorType.LOCK_LOST
+
+    def __init__(self, key: str, current_owner: str | None = None) -> None:
+        """Initialize LockAcquisitionError.
+
+        Args:
+            key: Lock key that could not be acquired.
+            current_owner: Optional identifier of the current lock owner.
+        """
+        self.key = key
+        self.current_owner = current_owner
+        msg = f"Failed to acquire lock: {key}"
+        if current_owner:
+            msg += f" (owned by {current_owner})"
+        super().__init__(msg)
+
+
+# =============================================================================
+# Data Integrity Errors
+# =============================================================================
+
+
+class CheckpointConflictError(CriticalError):
+    """Raised when checkpoint write fails due to concurrent modification.
+
+    This indicates that another worker has modified the checkpoint,
+    which could lead to data inconsistency.
+
+    Attributes:
+        pipeline: Name of the pipeline with checkpoint conflict.
+
+    Example:
+        >>> raise CheckpointConflictError(
+        ...     "chembl_activity",
+        ...     "Version mismatch: expected 5, found 6"
+        ... )
+    """
+
+    error_type = ErrorType.DB_UNAVAILABLE
+
+    def __init__(self, pipeline: str, message: str) -> None:
+        """Initialize CheckpointConflictError.
+
+        Args:
+            pipeline: Name of the pipeline with checkpoint conflict.
+            message: Description of the conflict.
+        """
+        self.pipeline = pipeline
+        super().__init__(f"Checkpoint conflict in '{pipeline}': {message}")
+
+
+class MergeConflictError(CriticalError):
+    """Raised when Delta merge has conflicts.
+
+    This indicates that the data merge operation has unresolved conflicts
+    that require manual intervention.
+
+    Attributes:
+        table: Name of the table with merge conflicts.
+        conflicts: Number of conflicting records.
+
+    Example:
+        >>> raise MergeConflictError("chembl_activity", conflicts=42)
+    """
+
+    error_type = ErrorType.DB_UNAVAILABLE
+
+    def __init__(self, table: str, conflicts: int) -> None:
+        """Initialize MergeConflictError.
+
+        Args:
+            table: Name of the table with merge conflicts.
+            conflicts: Number of conflicting records.
+        """
+        self.table = table
+        self.conflicts = conflicts
+        super().__init__(f"Merge conflict in '{table}': {conflicts} conflicts")
+
+
+# =============================================================================
+# Authentication Errors
+# =============================================================================
+
+
+class AuthFailureError(CriticalError):
+    """Raised when API authentication fails (401, 403).
+
+    This is a CRITICAL error - pipeline should not continue without valid auth.
+
+    Note:
+        This differs from ServiceAuthenticationError (in network module) which
+        is recoverable. AuthFailureError is for critical authentication failures
+        where the pipeline cannot proceed at all.
+
+    Attributes:
+        provider: Name of the provider where authentication failed.
+        status_code: Optional HTTP status code.
+
+    Example:
+        >>> raise AuthFailureError("uniprot", status_code=401)
+    """
+
+    error_type = ErrorType.AUTH_FAILURE
+
+    def __init__(self, provider: str, status_code: int | None = None) -> None:
+        """Initialize AuthFailureError.
+
+        Args:
+            provider: Name of the provider where authentication failed.
+            status_code: Optional HTTP status code.
+        """
+        self.provider = provider
+        self.status_code = status_code
+        msg = f"Authentication failed for {provider}"
+        if status_code:
+            msg += f" (HTTP {status_code})"
+        super().__init__(msg)
+
+
+# =============================================================================
+# System Errors
+# =============================================================================
+
+
+class MetricsServerError(CriticalError):
+    """Raised when metrics server fails to start with fail_fast=True.
+
+    This is a CRITICAL error - if fail_fast is enabled, the pipeline
+    should not start without operational metrics collection.
+
+    This exception is raised by the Prometheus metrics server when it cannot
+    bind to the specified port and fail_fast mode is enabled.
+
+    Attributes:
+        port: Port that failed to bind.
+        reason: Reason for failure (e.g., "port_in_use", "os_error", "unexpected").
+        original_error: Underlying exception that caused the failure.
+
+    Example:
+        >>> raise MetricsServerError(
+        ...     port=8000,
+        ...     reason="port_in_use",
+        ...     original_error=OSError("Address already in use")
+        ... )
     """
 
     error_type = ErrorType.DB_UNAVAILABLE
 
     def __init__(
-        self,
-        path: str,
-        quota_bytes: int | None = None,
-        used_bytes: int | None = None,
+        self, port: int, reason: str, original_error: Exception | None = None
     ) -> None:
-        """Initialize StorageQuotaExceededError.
+        """Initialize MetricsServerError.
 
         Args:
-            path: Storage path that exceeded quota.
-            quota_bytes: Optional quota limit in bytes.
-            used_bytes: Optional current usage in bytes.
+            port: Port that failed.
+            reason: Reason for failure.
+            original_error: Underlying exception.
         """
-        self.path = path
-        self.quota_bytes = quota_bytes
-        self.used_bytes = used_bytes
+        self.port = port
+        self.reason = reason
+        self.original_error = original_error
+        super().__init__(f"Failed to start metrics server on port {port}: {reason}")
 
-        msg = f"Storage quota exceeded for '{path}'"
-        if quota_bytes is not None and used_bytes is not None:
-            msg += f" (used: {used_bytes:,} bytes, quota: {quota_bytes:,} bytes)"
+
+class RunnerAlreadyExecutedError(CriticalError):
+    """Raised when attempting to run a pipeline runner that has already executed.
+
+    This is a CRITICAL error - each Runner instance should only be executed once.
+    Create a new Runner instance for another run.
+
+    This prevents undefined behavior from reusing Runner instances that have
+    internal state from previous executions (checkpoints, metrics, timestamps).
+
+    Attributes:
+        runner_type: Type of runner (e.g., "CompositePipelineRunner").
+        run_id: The run ID of the already-executed run.
+        final_state: The final state of the previous execution (if available).
+
+    Example:
+        >>> raise RunnerAlreadyExecutedError(
+        ...     runner_type="CompositePipelineRunner",
+        ...     run_id="run-123",
+        ...     final_state="COMPLETED"
+        ... )
+    """
+
+    error_type = ErrorType.INVALID_DATA
+
+    def __init__(
+        self,
+        runner_type: str,
+        run_id: str,
+        final_state: str | None = None,
+    ) -> None:
+        """Initialize RunnerAlreadyExecutedError.
+
+        Args:
+            runner_type: Type of runner.
+            run_id: Run ID of the executed run.
+            final_state: Final state of the previous execution.
+        """
+        self.runner_type = runner_type
+        self.run_id = run_id
+        self.final_state = final_state
+        msg = f"{runner_type} already executed (run_id={run_id})"
+        if final_state:
+            msg += f", final_state={final_state}"
+        msg += ". Create a new Runner instance for another run."
         super().__init__(msg)
+
+================================================================================
+File: network.py
+Path: exceptions\network.py
+================================================================================
+"""Network exceptions for connectivity and external service errors.
+
+These errors are typically transient and may succeed on retry. They cover:
+- Network connectivity issues (timeouts, connection errors)
+- Rate limiting from external services
+- Circuit breaker protection
+- External API errors
+
+Категория: NetworkErrors - ошибки сетевого взаимодействия и внешних сервисов
+(проблемы соединения, таймауты, превышение лимитов, открытие circuit breaker
+и истощение ретраев).
+
+All exceptions in this module inherit from RecoverableError, indicating that
+retry with exponential backoff is appropriate (per RULES.md §3.1.3).
+"""
+
+from __future__ import annotations
+
+from bioetl.domain.exceptions.base import RecoverableError
+from bioetl.domain.types import ErrorType
+
+# =============================================================================
+# Base Network Exceptions
+# =============================================================================
+
+
+class NetworkError(RecoverableError):
+    """Base class for network connectivity errors.
+
+    This is a generic network error that may be retried.
+    Covers connection failures, DNS issues, and general connectivity problems.
+
+    Attributes:
+        cause: Optional underlying exception that caused the network error.
+
+    Example:
+        >>> raise NetworkError("Connection refused", cause=original_exception)
+    """
+
+    error_type = ErrorType.NETWORK_ERROR
+
+    def __init__(self, message: str, cause: Exception | None = None) -> None:
+        """Initialize NetworkError.
+
+        Args:
+            message: Description of the network error.
+            cause: Optional underlying exception.
+        """
+        self.cause = cause
+        super().__init__(message)
+
+
+class TimeoutError(RecoverableError):
+    """Raised when request times out (502, 504, gateway errors).
+
+    The request may be retried after a delay with exponential backoff.
+
+    Attributes:
+        timeout_seconds: Optional timeout duration that was exceeded.
+
+    Example:
+        >>> raise TimeoutError("Request to ChEMBL API timed out", timeout_seconds=30.0)
+    """
+
+    error_type = ErrorType.TIMEOUT
+
+    def __init__(self, message: str, timeout_seconds: float | None = None) -> None:
+        """Initialize TimeoutError.
+
+        Args:
+            message: Description of the timeout.
+            timeout_seconds: Optional timeout duration that was exceeded.
+        """
+        self.timeout_seconds = timeout_seconds
+        msg = message
+        if timeout_seconds:
+            msg += f" (timeout: {timeout_seconds}s)"
+        super().__init__(msg)
+
+
+class RateLimitError(RecoverableError):
+    """Raised when API rate limit is exceeded.
+
+    The request should be retried after the specified delay.
+
+    Attributes:
+        provider: Name of the provider that imposed the rate limit.
+        retry_after: Seconds to wait before retrying.
+
+    Example:
+        >>> raise RateLimitError("chembl", retry_after=60.0)
+    """
+
+    error_type = ErrorType.RATE_LIMIT
+
+    def __init__(self, provider: str, retry_after: float) -> None:
+        """Initialize RateLimitError.
+
+        Args:
+            provider: Name of the provider that imposed the rate limit.
+            retry_after: Seconds to wait before retrying.
+        """
+        self.provider = provider
+        self.retry_after = retry_after
+        super().__init__(
+            f"Rate limit exceeded for {provider}. Retry after {retry_after}s"
+        )
+
+
+class CircuitBreakerOpenError(RecoverableError):
+    """Raised when circuit breaker is open and blocking requests.
+
+    This indicates that the service has failed repeatedly and the circuit breaker
+    has opened to prevent further requests. See ADR-007 for circuit breaker details.
+
+    Attributes:
+        provider: Name of the provider whose circuit breaker is open.
+        retry_after: Seconds to wait before circuit breaker may close.
+
+    Example:
+        >>> raise CircuitBreakerOpenError("pubchem", retry_after=300.0)
+    """
+
+    error_type = ErrorType.TIMEOUT
+
+    def __init__(self, provider: str, retry_after: float) -> None:
+        """Initialize CircuitBreakerOpenError.
+
+        Args:
+            provider: Name of the provider whose circuit breaker is open.
+            retry_after: Seconds to wait before circuit breaker may close.
+        """
+        self.provider = provider
+        self.retry_after = retry_after
+        super().__init__(
+            f"Circuit breaker open for {provider}. Retry after {retry_after}s"
+        )
+
+
+class RetryExhaustedError(RecoverableError):
+    """Raised when all retry attempts are exhausted.
+
+    This indicates that a transient error persisted across all retry attempts.
+    Further retries at the same operation are unlikely to succeed without
+    external intervention.
+
+    Attributes:
+        url: URL or operation identifier that failed.
+        attempts: Number of retry attempts made.
+        last_error: Optional last exception from the final attempt.
+
+    Example:
+        >>> raise RetryExhaustedError(
+        ...     "https://api.chembl.org/data",
+        ...     attempts=3,
+        ...     last_error=TimeoutError("Connection timed out")
+        ... )
+    """
+
+    error_type = ErrorType.NETWORK_ERROR
+
+    def __init__(
+        self, url: str, attempts: int, last_error: Exception | None = None
+    ) -> None:
+        """Initialize RetryExhaustedError.
+
+        Args:
+            url: URL or operation identifier that failed.
+            attempts: Number of retry attempts made.
+            last_error: Optional last exception from the final attempt.
+        """
+        self.url = url
+        self.attempts = attempts
+        self.last_error = last_error
+        msg = f"Exhausted {attempts} retry attempts for {url}"
+        if last_error:
+            msg += f": {last_error}"
+        super().__init__(msg)
+
+
+class ApiError(RecoverableError):
+    """Raised when external API returns an error.
+
+    This is a generic API error that may be retryable depending on the status code.
+    For more specific external service errors, see ExternalServiceError hierarchy.
+
+    Attributes:
+        message: Error message from the API.
+        status_code: Optional HTTP status code.
+
+    Example:
+        >>> raise ApiError("Invalid request parameters", status_code=400)
+    """
+
+    error_type = ErrorType.NETWORK_ERROR
+
+    def __init__(self, message: str, status_code: int | None = None) -> None:
+        """Initialize ApiError.
+
+        Args:
+            message: Error message from the API.
+            status_code: Optional HTTP status code.
+        """
+        self.message = message
+        self.status_code = status_code
+        msg = message
+        if status_code:
+            msg = f"[{status_code}] {message}"
+        super().__init__(msg)
+
+
+# =============================================================================
+# External Service Exceptions (RULES.md §7.2)
+# =============================================================================
+#
+# These exceptions provide abstract error types for external data sources.
+# Domain/application layers should catch these abstract exceptions, not
+# provider-specific ones. Infrastructure adapters MUST translate provider-specific
+# errors into this hierarchy at the adapter boundary.
+
+
+class ExternalServiceError(RecoverableError):
+    """Base exception for all external service errors.
+
+    This is the abstract exception that domain/application layers should catch
+    when handling errors from external data sources.
+
+    Infrastructure adapters MUST translate provider-specific errors into this
+    hierarchy on the adapter boundary.
+
+    Attributes:
+        service_name: Optional name of the service that failed.
+        status_code: Optional HTTP status code if applicable.
+        retry_after: Optional seconds to wait before retry.
+
+    Example:
+        >>> try:
+        ...     await adapter.fetch("entity")
+        ... except ExternalServiceError as e:
+        ...     logger.error("External service failed", service=e.service_name)
+    """
+
+    error_type = ErrorType.NETWORK_ERROR
+
+    def __init__(
+        self,
+        message: str,
+        service_name: str | None = None,
+        status_code: int | None = None,
+        retry_after: float | None = None,
+    ) -> None:
+        """Initialize ExternalServiceError.
+
+        Args:
+            message: Error description.
+            service_name: Name of the external service (e.g., "chembl", "crossref").
+            status_code: HTTP status code if applicable.
+            retry_after: Seconds to wait before retry if applicable.
+        """
+        self.service_name = service_name
+        self.status_code = status_code
+        self.retry_after = retry_after
+        super().__init__(message)
+
+
+class ServiceUnavailableError(ExternalServiceError):
+    """Raised when external service is unavailable.
+
+    Typically caused by:
+    - HTTP 5xx errors (500, 502, 503, 504)
+    - Connection timeouts
+    - DNS resolution failures
+
+    The request may be retried after exponential backoff.
+
+    Example:
+        >>> raise ServiceUnavailableError(
+        ...     "ChEMBL API returned 503",
+        ...     service_name="chembl",
+        ...     status_code=503,
+        ...     retry_after=60.0
+        ... )
+    """
+
+    error_type = ErrorType.TIMEOUT
+
+    def __init__(
+        self,
+        message: str,
+        service_name: str | None = None,
+        status_code: int | None = None,
+        retry_after: float | None = None,
+    ) -> None:
+        """Initialize ServiceUnavailableError.
+
+        Args:
+            message: Error description.
+            service_name: Name of the unavailable service.
+            status_code: HTTP status code (typically 5xx).
+            retry_after: Seconds to wait before retry.
+        """
+        super().__init__(
+            message,
+            service_name=service_name,
+            status_code=status_code,
+            retry_after=retry_after,
+        )
+
+
+class RateLimitExceededError(ExternalServiceError):
+    """Raised when external service rate limit is exceeded.
+
+    Caused by HTTP 429 Too Many Requests.
+    The request MUST be retried after the specified delay.
+
+    Note:
+        This is distinct from RateLimitError which is for internal rate limiting.
+        This exception is for rate limits imposed by external services.
+
+    Example:
+        >>> raise RateLimitExceededError(
+        ...     "PubChem rate limit exceeded",
+        ...     service_name="pubchem",
+        ...     retry_after=30.0
+        ... )
+    """
+
+    error_type = ErrorType.RATE_LIMIT
+
+    def __init__(
+        self,
+        message: str,
+        service_name: str | None = None,
+        retry_after: float = 60.0,
+    ) -> None:
+        """Initialize RateLimitExceededError.
+
+        Args:
+            message: Error description.
+            service_name: Name of the service imposing rate limit.
+            retry_after: Seconds to wait before retry (from Retry-After header).
+        """
+        super().__init__(
+            message,
+            service_name=service_name,
+            status_code=429,
+            retry_after=retry_after,
+        )
+
+
+class ServiceAuthenticationError(ExternalServiceError):
+    """Raised when external service authentication fails.
+
+    Caused by HTTP 401 Unauthorized or 403 Forbidden.
+
+    Note:
+        This is a RECOVERABLE error in the external service hierarchy
+        because it may be caused by expired tokens that can be refreshed.
+        For truly critical auth failures, see AuthFailureError in internal module.
+
+    Example:
+        >>> raise ServiceAuthenticationError(
+        ...     "UniProt API key expired",
+        ...     service_name="uniprot",
+        ...     status_code=401
+        ... )
+    """
+
+    error_type = ErrorType.AUTH_FAILURE
+
+    def __init__(
+        self,
+        message: str,
+        service_name: str | None = None,
+        status_code: int | None = None,
+    ) -> None:
+        """Initialize ServiceAuthenticationError.
+
+        Args:
+            message: Error description.
+            service_name: Name of the service that rejected auth.
+            status_code: HTTP status code (401 or 403).
+        """
+        super().__init__(
+            message,
+            service_name=service_name,
+            status_code=status_code,
+        )
+
+
+class DataValidationError(ExternalServiceError):
+    """Raised when external service returns invalid data.
+
+    Used when data from an external source fails validation but the
+    service itself is healthy. This is distinct from DataQualityError
+    which is for internal data quality issues.
+
+    Examples:
+        - Invalid JSON response
+        - Missing required fields in response
+        - Unexpected data format
+
+    Attributes:
+        field: Optional name of the invalid field.
+        value: Optional invalid value (if safe to log).
+
+    Example:
+        >>> raise DataValidationError(
+        ...     "Missing 'molecule_chembl_id' in response",
+        ...     service_name="chembl",
+        ...     field="molecule_chembl_id"
+        ... )
+    """
+
+    error_type = ErrorType.INVALID_DATA
+
+    def __init__(
+        self,
+        message: str,
+        service_name: str | None = None,
+        field: str | None = None,
+        value: str | None = None,
+    ) -> None:
+        """Initialize DataValidationError.
+
+        Args:
+            message: Error description.
+            service_name: Name of the service that returned invalid data.
+            field: Name of the invalid field if applicable.
+            value: The invalid value if safe to log.
+        """
+        self.field = field
+        self.value = value
+        super().__init__(message, service_name=service_name)
+
+================================================================================
+File: validation.py
+Path: exceptions\validation.py
+================================================================================
+"""Validation exceptions for schema and data format errors.
+
+These errors indicate that data does not conform to expected schemas or formats.
+ValidationErrors are typically recoverable at the record level - individual invalid
+records can be logged and skipped while processing continues for other records.
+
+Категория: ValidationErrors - ошибки валидации данных и схем (нарушение формата,
+отсутствующие поля и т.п.).
+"""
+
+from __future__ import annotations
+
+from bioetl.domain.exceptions.base import DataQualityError
+from bioetl.domain.types import ErrorType
+
+
+class ValidationError(DataQualityError):
+    """Base class for all validation errors.
+
+    ValidationErrors indicate structural problems with data records:
+    - Schema violations (wrong structure)
+    - Missing required fields
+    - Invalid data formats
+
+    These errors are handled by logging and skipping the affected record,
+    allowing the pipeline to continue processing other records.
+
+    Inherits from DataQualityError to maintain the error classification hierarchy.
+    """
+
+    error_type = ErrorType.INVALID_DATA
+
+
+class SchemaViolationError(ValidationError):
+    """Raised when data does not match expected schema.
+
+    This indicates that a data record has schema validation errors and should be skipped.
+
+    Attributes:
+        table: Name of the table/entity with schema violation.
+        errors: List of specific validation error messages.
+
+    Example:
+        >>> raise SchemaViolationError("compounds", ["missing 'smiles'", "invalid 'mass'"])
+    """
+
+    error_type = ErrorType.SCHEMA_VIOLATION
+
+    def __init__(self, table: str, errors: list[str]) -> None:
+        """Initialize SchemaViolationError.
+
+        Args:
+            table: Name of the table or entity with schema violation.
+            errors: List of specific validation error messages.
+        """
+        self.table = table
+        self.errors = errors
+        super().__init__(f"Schema validation failed for '{table}': {errors}")
+
+
+class MissingRequiredFieldError(ValidationError):
+    """Raised when a required field is missing from a data record.
+
+    Attributes:
+        field: Name of the missing required field.
+        record_id: Optional identifier of the affected record.
+
+    Example:
+        >>> raise MissingRequiredFieldError("molecule_chembl_id", record_id="CHEMBL25")
+    """
+
+    error_type = ErrorType.MISSING_REQUIRED_FIELD
+
+    def __init__(self, field: str, record_id: str | None = None) -> None:
+        """Initialize MissingRequiredFieldError.
+
+        Args:
+            field: Name of the missing required field.
+            record_id: Optional identifier of the affected record.
+        """
+        self.field = field
+        self.record_id = record_id
+        msg = f"Missing required field: {field}"
+        if record_id:
+            msg += f" (record_id={record_id})"
+        super().__init__(msg)
+
+
+class InvalidDataFormatError(ValidationError):
+    """Raised when data format is invalid.
+
+    Indicates that a field value does not match its expected format,
+    such as an invalid date string or malformed identifier.
+
+    Attributes:
+        field: Name of the field with invalid format.
+        value: The actual invalid value.
+        expected_format: Description of the expected format.
+
+    Example:
+        >>> raise InvalidDataFormatError("date", "2024/01/01", "ISO 8601 (YYYY-MM-DD)")
+    """
+
+    error_type = ErrorType.INVALID_DATA
+
+    def __init__(self, field: str, value: str, expected_format: str) -> None:
+        """Initialize InvalidDataFormatError.
+
+        Args:
+            field: Name of the field with invalid format.
+            value: The actual invalid value.
+            expected_format: Description of the expected format.
+        """
+        self.field = field
+        self.value = value
+        self.expected_format = expected_format
+        super().__init__(
+            f"Invalid format for '{field}': got '{value}', expected {expected_format}"
+        )
 
 ================================================================================
 File: __init__.py
@@ -16153,20 +18576,25 @@ class StoragePort(Protocol):
     ) -> dict[str, Any]:
         """Preview what would be cleared without actual deletion.
 
-        Used by CLI dry-run mode to show users what data would be affected
-        before performing a rebuild or backfill operation.
+        Returns:
+            Dict with layer info (path, file_count, exists) and total_files.
+        """
+        ...
+
+    async def optimize(
+        self,
+        table_name: str,
+        retention_hours: int = 168,
+        dry_run: bool = False,
+    ) -> None:
+        """Optimize storage for a specific table/entity.
+
+        Unifies Vacuum (Delta) and file cleanup (Bronze).
 
         Args:
-            silver_table: Silver table name (e.g., 'chembl.activity')
-            gold_table: Optional Gold table name
-
-        Returns:
-            Dict with structure:
-            {
-                "silver": {"path": str, "file_count": int, "exists": bool},
-                "gold": {"path": str, "file_count": int, "exists": bool} | None,
-                "total_files": int
-            }
+            table_name: Target identifier (e.g., 'provider.entity').
+            retention_hours: Retention period in hours.
+            dry_run: If True, only log what would be done.
         """
         ...
 
@@ -16177,20 +18605,12 @@ class StoragePort(Protocol):
     ) -> dict[str, int]:
         """Remove Bronze files older than cutoff date (RULES.md §2.1 retention).
 
-        Implements Bronze layer retention policy by removing files
-        older than the specified cutoff date.
-
         Args:
             cutoff_date: Files older than this date will be removed.
             dry_run: If True, only count what would be removed.
 
         Returns:
-            Dictionary with cleanup statistics:
-            {
-                "files_removed": int,
-                "bytes_freed": int,
-                "directories_removed": int
-            }
+            Dict with cleanup stats (files_removed, bytes_freed, directories_removed).
         """
         ...
 
@@ -18867,6 +21287,11 @@ class PublicationSchema(ETLRecordSchema):
         name = "PublicationSchema"
         description = "CrossRef Publication Silver layer validation"
 
+
+__all__ = [
+    "PublicationSchema",
+]
+
 ================================================================================
 File: __init__.py
 Path: schemas\openalex\__init__.py
@@ -19350,6 +21775,11 @@ class PubchemMoleculeSchema(ETLRecordSchema):
         coerce = True
         name = "PubchemMoleculeSchema"
         description = "PubChem Molecule Silver layer validation"
+
+
+__all__ = [
+    "PubchemMoleculeSchema",
+]
 
 ================================================================================
 File: article.py
@@ -20176,6 +22606,11 @@ class UniprotTargetSchema(ETLRecordSchema):
         coerce = True
         name = "UniprotTargetSchema"
         description = "UniProt Target Silver layer validation"
+
+
+__all__ = [
+    "UniprotTargetSchema",
+]
 
 ================================================================================
 File: serialization.py

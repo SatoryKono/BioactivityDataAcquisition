@@ -1988,7 +1988,7 @@ input_filter:
   source_path: "data/input/publication.csv"
   column_name: "document_chembl_id"
   filter_field: "document_chembl_id"
-  batch_size: 100
+  batch_size: 20
 
 # -----------------------------------------------------------------------------
 # Gold Filters
@@ -3943,6 +3943,8 @@ dq_config_file: ../../dq/entities/chembl/publication.yaml
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/publication.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
+# Note: explicit filter_config_file because entity_type=document differs from file name
+filter_config_file: ../../filter/entities/chembl/publication.yaml
 
 # Entity-specific sink overrides
 # Note: dq_report.enabled inherited from _base.yaml for all layers
@@ -4009,6 +4011,8 @@ dq_config_file: ../../dq/entities/chembl/publication_similarity.yaml
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/publication_similarity.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
+# Note: explicit filter_config_file because entity_type=document_similarity differs from file name
+filter_config_file: ../../filter/entities/chembl/publication_similarity.yaml
 
 # Entity-specific sink overrides
 sink:
@@ -4074,6 +4078,8 @@ dq_config_file: ../../dq/entities/chembl/publication_term.yaml
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/publication_term.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
+# Note: explicit filter_config_file because entity_type=document_term differs from file name
+filter_config_file: ../../filter/entities/chembl/publication_term.yaml
 
 # Entity-specific sink overrides
 sink:
@@ -4299,12 +4305,13 @@ composite:
   # Enrichers can run in parallel up to max_concurrency limit.
   enrichers:
     # CrossRef: Citation and reference data
-    # REQUIRED: Failure causes composite to fail
+    # REQUIRED: Primary source for citation data (needs doi)
     - pipeline: crossref_publication
       join_keys:
         - doi            # Primary join key
         - title
-      required: true     # Composite fails if this enricher fails
+      required: false    # Optional - seed may not have DOIs
+      filter_condition: "doi IS NOT NULL"
       timeout_seconds: 900
       silver_table: silver/crossref/publication
 
@@ -4314,7 +4321,7 @@ composite:
       join_keys:
         - doi            # Primary key
         - title          # Fallback key if doi not found
-      required: true
+      required: false    # Optional - needs doi or pmid
       filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
       timeout_seconds: 600
       silver_table: silver/openalex/publication
@@ -4325,7 +4332,7 @@ composite:
       join_keys:
         - pmid           # PubMed-specific identifier
         - doi
-      required: true
+      required: false    # Optional - only for records with pmid
       filter_condition: "pmid IS NOT NULL"
       timeout_seconds: 600
       silver_table: silver/pubmed/publication
@@ -4336,7 +4343,7 @@ composite:
       join_keys:
         - doi
         - title
-      required: true
+      required: false    # Optional - high rate limits, ok to skip
       filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
       timeout_seconds: 1200
       fallback_strategy: skip  # Skip on failure (high rate limits)
