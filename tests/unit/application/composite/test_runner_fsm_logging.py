@@ -269,14 +269,12 @@ class TestFSMTransitionLogging:
             for c in fsm_calls
             if "seed_completed" in str(c.kwargs.get("to_state", ""))
         ]
-        assert (
-            len(seed_completed_calls) >= 1
-        ), "Should log FSM transition to SEED_COMPLETED"
+        assert len(seed_completed_calls) >= 1, (
+            "Should log FSM transition to SEED_COMPLETED"
+        )
 
     @pytest.mark.asyncio
-    async def test_logs_fsm_transition_to_enriching(
-        self, runner, mock_logger
-    ) -> None:
+    async def test_logs_fsm_transition_to_enriching(self, runner, mock_logger) -> None:
         """Test FSM transition to ENRICHING is logged."""
         await runner.run()
 
@@ -307,14 +305,12 @@ class TestFSMTransitionLogging:
             for c in fsm_calls
             if "enrichment_completed" in str(c.kwargs.get("to_state", ""))
         ]
-        assert (
-            len(completed_calls) >= 1
-        ), "Should log FSM transition to ENRICHMENT_COMPLETED"
+        assert len(completed_calls) >= 1, (
+            "Should log FSM transition to ENRICHMENT_COMPLETED"
+        )
 
     @pytest.mark.asyncio
-    async def test_logs_fsm_transition_to_merging(
-        self, runner, mock_logger
-    ) -> None:
+    async def test_logs_fsm_transition_to_merging(self, runner, mock_logger) -> None:
         """Test FSM transition to MERGING is logged."""
         await runner.run()
 
@@ -329,9 +325,7 @@ class TestFSMTransitionLogging:
         assert len(merging_calls) >= 1, "Should log FSM transition to MERGING"
 
     @pytest.mark.asyncio
-    async def test_logs_fsm_transition_to_completed(
-        self, runner, mock_logger
-    ) -> None:
+    async def test_logs_fsm_transition_to_completed(self, runner, mock_logger) -> None:
         """Test FSM transition to COMPLETED is logged."""
         await runner.run()
 
@@ -341,9 +335,7 @@ class TestFSMTransitionLogging:
             if c.args and "FSM state transition" in str(c.args[0])
         ]
         completed_calls = [
-            c
-            for c in fsm_calls
-            if c.kwargs.get("to_state") == "completed"
+            c for c in fsm_calls if c.kwargs.get("to_state") == "completed"
         ]
         assert len(completed_calls) >= 1, "Should log FSM transition to COMPLETED"
 
@@ -377,9 +369,7 @@ class TestPhaseEventLogging:
     """Tests for PipelineEvent.phase_started/phase_completed logging."""
 
     @pytest.mark.asyncio
-    async def test_logs_seed_started_phase_event(
-        self, runner, mock_logger
-    ) -> None:
+    async def test_logs_seed_started_phase_event(self, runner, mock_logger) -> None:
         """Test seed_started phase event is logged."""
         await runner.run()
 
@@ -391,9 +381,7 @@ class TestPhaseEventLogging:
         assert len(seed_started_calls) >= 1, "Should log seed_started phase event"
 
     @pytest.mark.asyncio
-    async def test_logs_seed_completed_phase_event(
-        self, runner, mock_logger
-    ) -> None:
+    async def test_logs_seed_completed_phase_event(self, runner, mock_logger) -> None:
         """Test seed_completed phase event is logged."""
         await runner.run()
 
@@ -416,9 +404,9 @@ class TestPhaseEventLogging:
             for c in mock_logger.info.call_args_list
             if c.args and "enrichment_started" in str(c.args[0])
         ]
-        assert (
-            len(enrichment_started_calls) >= 1
-        ), "Should log enrichment_started phase event"
+        assert len(enrichment_started_calls) >= 1, (
+            "Should log enrichment_started phase event"
+        )
 
     @pytest.mark.asyncio
     async def test_logs_enrichment_completed_phase_event(
@@ -432,14 +420,12 @@ class TestPhaseEventLogging:
             for c in mock_logger.info.call_args_list
             if c.args and "enrichment_completed" in str(c.args[0])
         ]
-        assert (
-            len(enrichment_completed_calls) >= 1
-        ), "Should log enrichment_completed phase event"
+        assert len(enrichment_completed_calls) >= 1, (
+            "Should log enrichment_completed phase event"
+        )
 
     @pytest.mark.asyncio
-    async def test_logs_merge_started_phase_event(
-        self, runner, mock_logger
-    ) -> None:
+    async def test_logs_merge_started_phase_event(self, runner, mock_logger) -> None:
         """Test merge_started phase event is logged."""
         await runner.run()
 
@@ -451,9 +437,7 @@ class TestPhaseEventLogging:
         assert len(merge_started_calls) >= 1, "Should log merge_started phase event"
 
     @pytest.mark.asyncio
-    async def test_logs_merge_completed_phase_event(
-        self, runner, mock_logger
-    ) -> None:
+    async def test_logs_merge_completed_phase_event(self, runner, mock_logger) -> None:
         """Test merge_completed phase event is logged."""
         await runner.run()
 
@@ -508,9 +492,7 @@ class TestFSMFailureLogging:
             for c in mock_logger.info.call_args_list
             if c.args and "FSM state transition" in str(c.args[0])
         ]
-        failed_calls = [
-            c for c in fsm_calls if c.kwargs.get("to_state") == "failed"
-        ]
+        failed_calls = [c for c in fsm_calls if c.kwargs.get("to_state") == "failed"]
         assert len(failed_calls) >= 1, "Should log FSM transition to FAILED"
 
     @pytest.mark.asyncio
@@ -560,9 +542,7 @@ class TestFSMFailureLogging:
             for c in mock_logger.info.call_args_list
             if c.args and "FSM state transition" in str(c.args[0])
         ]
-        failed_calls = [
-            c for c in fsm_calls if c.kwargs.get("to_state") == "failed"
-        ]
+        failed_calls = [c for c in fsm_calls if c.kwargs.get("to_state") == "failed"]
         assert len(failed_calls) >= 1, "Should log FSM transition to FAILED"
 
         # Check that stage indicates required enricher failure
@@ -612,15 +592,13 @@ class TestFSMFailureLogging:
             for c in mock_logger.info.call_args_list
             if c.args and "FSM state transition" in str(c.args[0])
         ]
-        failed_calls = [
-            c for c in fsm_calls if c.kwargs.get("to_state") == "failed"
-        ]
+        failed_calls = [c for c in fsm_calls if c.kwargs.get("to_state") == "failed"]
         assert len(failed_calls) >= 1, "Should log FSM transition to FAILED"
 
         # Check that stage indicates seed failure
-        assert any(
-            c.kwargs.get("stage") == "seed_failed" for c in failed_calls
-        ), "Stage should indicate seed_failed"
+        assert any(c.kwargs.get("stage") == "seed_failed" for c in failed_calls), (
+            "Stage should indicate seed_failed"
+        )
 
 
 @pytest.mark.unit
@@ -718,9 +696,9 @@ class TestNoEnrichersLogging:
         empty_enrichment_calls = [
             c for c in fsm_calls if c.kwargs.get("stage") == "enrichment_start_empty"
         ]
-        assert (
-            len(empty_enrichment_calls) >= 1
-        ), "Should log FSM transition for empty enrichment"
+        assert len(empty_enrichment_calls) >= 1, (
+            "Should log FSM transition for empty enrichment"
+        )
 
         # Verify reason is included
         assert any(
