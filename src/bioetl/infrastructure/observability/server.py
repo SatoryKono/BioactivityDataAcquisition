@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 from prometheus_client import start_http_server
 
-from bioetl.infrastructure.observability.exceptions import MetricsServerError
+from bioetl.domain.exceptions import MetricsServerError
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:

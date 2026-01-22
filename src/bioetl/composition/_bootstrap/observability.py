@@ -18,9 +18,9 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 from bioetl.composition.observability import ObservabilityBundle
+from bioetl.domain.exceptions import MetricsServerError
 from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 from bioetl.infrastructure.observability import (
-    MetricsServerError,
     NoOpMetrics,
     NoOpTracing,
     OpenTelemetryTracer,

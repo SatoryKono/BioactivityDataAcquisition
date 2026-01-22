@@ -115,6 +115,7 @@ from bioetl.domain.exceptions import (
     LockAcquisitionError,
     LockLostError,
     MergeConflictError,
+    MetricsServerError,
     MissingRequiredFieldError,
     NetworkError,
     PolicyViolationError,
@@ -395,6 +396,7 @@ __all__ = [
     "LockAcquisitionError",
     "LockLostError",
     "MergeConflictError",
+    "MetricsServerError",
     "PolicyViolationError",
     "StorageQuotaExceededError",
     # Exceptions - Recoverable
