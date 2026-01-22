@@ -20,11 +20,11 @@ from __future__ import annotations
 
 import contextlib
 from typing import TYPE_CHECKING
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.exceptions import MetricsServerError
-from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
+from bioetl.domain.ports import DQMonitorPort, LoggerPort, MetricsPort, TracingPort
 from bioetl.infrastructure.observability import (
     NoOpMetrics,
     NoOpTracing,
@@ -33,9 +33,10 @@ from bioetl.infrastructure.observability import (
     UnifiedLogger,
     start_metrics_server,
 )
+from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import DQMonitorPort
     from bioetl.infrastructure.config import Settings
 
 __all__ = [
@@ -124,8 +125,6 @@ def bootstrap_logger_port(
     Returns:
         UnifiedLogger implementing LoggerPort with Log Schema enforcement.
     """
-    from uuid import uuid4
-
     effective_run_id = run_id if run_id is not None else uuid4()
     return UnifiedLogger(
         pipeline=pipeline,
@@ -319,9 +318,6 @@ def bootstrap_dq_monitor_port(
 
     if not obs_settings.dq_monitor_enabled:
         return None
-
-    from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
-    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
     effective_logger = logger if logger is not None else NoOpLogger()
 
