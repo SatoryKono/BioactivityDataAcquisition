@@ -6,7 +6,7 @@ Abstracts infrastructure concerns from CLI and other interfaces.
 Implements RULES.md §1.1 - Application layer depends only on Domain.
 
 Note:
-    MetricsServerError is defined in infrastructure.observability.exceptions
+    MetricsServerError is defined in domain.exceptions.critical
     and re-exported here for backward compatibility.
 """
 
@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-from bioetl.infrastructure.observability.exceptions import MetricsServerError
+from bioetl.domain.exceptions import MetricsServerError
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
