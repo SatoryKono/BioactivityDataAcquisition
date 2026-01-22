@@ -13,6 +13,7 @@ Note:
 from __future__ import annotations
 
 import asyncio
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -267,95 +268,59 @@ class StorageAdapter:
 
         Implements StoragePort.clear_silver().
         Clears both Delta tables and CSV exports (if configured).
-        Should only be called for rebuild/backfill runs, NOT for incremental.
-
-        Args:
-            table_name: The name of the table to clear.
-            dry_run: If True, only count what would be deleted.
-
-        Returns:
-            Count of cleared items (tables + files).
         """
-        loop = asyncio.get_running_loop()
-        cleared_count = 0
-
-        # Clear Silver Delta table (sync operation wrapped in executor)
-        cleared_count += await loop.run_in_executor(
-            None, lambda: self.silver.clear(table_name, dry_run=dry_run)
-        )
-
-        # Clear Silver CSV if exporter is configured
-        if self.silver.csv_exporter and not dry_run:
-            exporter = self.silver.csv_exporter
-            deleted = await loop.run_in_executor(
-                None, lambda: exporter.clear(table_name)
-            )
-            cleared_count += len(deleted)
-
-        return cleared_count
+        return await self._run_clear(self.silver, table_name, dry_run)
 
     async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Gold layer data for a specific table.
 
         Implements StoragePort.clear_gold().
         Clears both Delta tables and CSV exports (if configured).
-        Should only be called for rebuild/backfill runs, NOT for incremental.
-
-        Args:
-            table_name: The name of the table to clear.
-            dry_run: If True, only count what would be deleted.
-
-        Returns:
-            Count of cleared items (tables + files).
         """
+        return await self._run_clear(self.gold, table_name, dry_run)
+
+    async def _run_clear(
+        self,
+        writer: SilverWriter | GoldWriter,
+        table_name: str,
+        dry_run: bool,
+    ) -> int:
+        """Execute clear operation for a writer."""
         loop = asyncio.get_running_loop()
-        cleared_count = 0
-
-        # Clear Gold Delta table (sync operation wrapped in executor)
-        cleared_count += await loop.run_in_executor(
-            None, lambda: self.gold.clear(table_name, dry_run=dry_run)
+        cleared = await loop.run_in_executor(
+            None, lambda: writer.clear(table_name, dry_run=dry_run)
         )
-
-        # Clear Gold CSV if exporter is configured
-        if self.gold.csv_exporter and not dry_run:
-            exporter = self.gold.csv_exporter
+        if writer.csv_exporter and not dry_run:
+            exporter = writer.csv_exporter
             deleted = await loop.run_in_executor(
                 None, lambda: exporter.clear(table_name)
             )
-            cleared_count += len(deleted)
-
-        return cleared_count
+            cleared += len(deleted)
+        return cleared
 
     async def clear_csv(self, table_name: str | None = None) -> int:
         """Clear CSV export files for Silver and Gold layers.
 
         Implements StoragePort.clear_csv().
-
-        Args:
-            table_name: If provided, only clear CSV for this table.
-                       If None, clear all CSV files.
-
-        Returns:
-            Number of files cleared.
         """
+        count = 0
         loop = asyncio.get_running_loop()
-        cleared_count = 0
 
         if self.silver.csv_exporter:
             exporter = self.silver.csv_exporter
             deleted = await loop.run_in_executor(
                 None, lambda: exporter.clear(table_name)
             )
-            cleared_count += len(deleted) if isinstance(deleted, list) else deleted
+            count += len(deleted) if isinstance(deleted, list) else deleted
 
         if self.gold.csv_exporter:
             exporter = self.gold.csv_exporter
             deleted = await loop.run_in_executor(
                 None, lambda: exporter.clear(table_name)
             )
-            cleared_count += len(deleted) if isinstance(deleted, list) else deleted
+            count += len(deleted) if isinstance(deleted, list) else deleted
 
-        return cleared_count
+        return count
 
     async def clear_delta(self, table_name: str | None = None) -> int:
         """Clear Delta tables for Silver and Gold layers.
@@ -485,6 +450,38 @@ class StorageAdapter:
             return HealthStatus.DEGRADED
         else:
             return HealthStatus.UNHEALTHY
+
+    async def optimize(
+        self,
+        table_name: str,
+        retention_hours: int = 168,
+        dry_run: bool = False,
+    ) -> None:
+        """Optimize storage for a specific table/entity.
+
+        Performs maintenance operations appropriate for the storage layer:
+        - Delta Lake: Runs VACUUM to remove old files
+        - JSONL/File: Removes files older than retention period
+
+        Args:
+            table_name: Target identifier (e.g., 'provider.entity' for Delta/Bronze)
+            retention_hours: Retention period in hours (default 168h = 7 days)
+            dry_run: If True, only log what would be done without action
+        """
+        # 1. Optimize Silver/Gold Delta Tables
+        await self.vacuum(table_name, retention_hours, dry_run)
+
+        # 2. Optimize Bronze (File cleanup)
+        # Parse table_name to get provider/entity for targeted cleanup
+        if "." in table_name:
+            provider, entity = table_name.split(".", 1)
+            cutoff_date = datetime.now(UTC) - timedelta(hours=retention_hours)
+            await self.bronze.cleanup_old_files(
+                cutoff_date=cutoff_date,
+                dry_run=dry_run,
+                provider=provider,
+                entity=entity,
+            )
 
     async def vacuum(
         self,

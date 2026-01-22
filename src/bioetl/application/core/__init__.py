@@ -61,9 +61,9 @@ from bioetl.application.core.transform_utils import (
     safe_extract,
     validate_smiles,
 )
-from bioetl.application.services.medallion_lifecycle import (
+from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
+from bioetl.application.services.medallion_types import (
     ClearResult,
-    MedallionLifecycleService,
     PrepareResult,
 )
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
