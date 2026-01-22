@@ -137,7 +137,6 @@ from bioetl.domain.exceptions import (
     ServiceAuthenticationError,
     ServiceUnavailableError,
     StorageError,
-    RunnerAlreadyExecutedError,
     StorageQuotaExceededError,
     TableNotFoundError,
     TimeoutError,
