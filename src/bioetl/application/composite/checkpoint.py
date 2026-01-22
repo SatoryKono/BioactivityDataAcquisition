@@ -324,11 +324,45 @@ class CompositeCheckpointManager:
         # Sort by modification time, return newest
         return max(checkpoints, key=lambda p: p.stat().st_mtime)
 
+    def _warn_if_checkpoint_exists_with_progress(self) -> None:
+        """Warn if an existing checkpoint with progress will be overwritten.
+
+        Called when resume=False to notify user that previous progress exists
+        and will be lost. This helps prevent accidental data loss when user
+        forgets to pass --resume flag.
+        """
+        checkpoint_path = self._get_latest_checkpoint_path()
+        if checkpoint_path is None or not checkpoint_path.exists():
+            return
+
+        try:
+            data = json.loads(checkpoint_path.read_text())
+            state = CompositeCheckpointState.from_dict(data)
+
+            # Only warn if checkpoint has actual progress
+            if state.is_resumable:
+                self._logger.warning(
+                    "Existing checkpoint with progress will be overwritten",
+                    composite=self._composite_name,
+                    checkpoint_path=str(checkpoint_path),
+                    checkpoint_state=state.state.value,
+                    seed_completed=state.seed_completed,
+                    completed_enrichers=len(state.completed_enrichers),
+                    hint="Use --resume flag to continue from previous progress",
+                )
+        except Exception:
+            # Silently ignore if we can't read the checkpoint
+            # (corrupted file will be overwritten anyway)
+            pass
+
     async def load(self) -> CompositeCheckpointState:
         """Load checkpoint state.
 
         If resume=True and checkpoint exists, load it.
         Otherwise, create fresh state.
+
+        When resume=False but a checkpoint with progress exists, logs a warning
+        that the checkpoint will be overwritten.
 
         Returns:
             Checkpoint state (loaded or fresh).
@@ -370,6 +404,9 @@ class CompositeCheckpointManager:
                         composite=self._composite_name,
                         error=str(e),
                     )
+        else:
+            # resume=False: check if existing checkpoint with progress will be overwritten
+            self._warn_if_checkpoint_exists_with_progress()
 
         # Create fresh state
         return CompositeCheckpointState(
