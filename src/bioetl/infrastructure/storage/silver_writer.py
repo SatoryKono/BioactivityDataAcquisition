@@ -547,6 +547,13 @@ class SilverWriter(BaseDeltaWriter):
             Lock validation is performed at Application layer (BatchWriter)
             per RULES.md §4.6 Safety Guard.
         """
+        import time
+        from datetime import UTC, datetime, timedelta
+
+        # Capture start time for runtime metadata (REQ-LINEAGE-001)
+        started_at = datetime.now(UTC)
+        start_perf = time.perf_counter()
+
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_silver") as span:
             span.set_attribute("table_name", table_name)
@@ -610,6 +617,10 @@ class SilverWriter(BaseDeltaWriter):
             # Get Delta version after write for lineage tracking (REQ-LINEAGE-002)
             version_after = await self._get_delta_version(table_path)
 
+            # Calculate completed_at using deterministic approach (ADR-014)
+            duration = time.perf_counter() - start_perf
+            completed_at = started_at + timedelta(seconds=duration)
+
             # Write metadata sidecar file if configured
             await self._write_silver_metadata(
                 table_path=table_path,
@@ -620,6 +631,8 @@ class SilverWriter(BaseDeltaWriter):
                 bronze_refs=bronze_refs,
                 dq_metrics=dq_metrics,
                 partition_by=partition_cols,
+                started_at=started_at,
+                completed_at=completed_at,
             )
 
             # Return SilverWriteResult for Gold lineage tracking (REQ-LINEAGE-002)
@@ -774,6 +787,8 @@ class SilverWriter(BaseDeltaWriter):
         dq_metrics: BatchDQMetrics | None = None,
         dq_report_path: str | None = None,
         partition_by: list[str] | None = None,
+        started_at: datetime | None = None,
+        completed_at: datetime | None = None,
     ) -> None:
         """Write Silver layer metadata sidecar file.
 
@@ -791,6 +806,8 @@ class SilverWriter(BaseDeltaWriter):
                 schema drift info, and error rates (REQ-DQ-001).
             dq_report_path: Optional path to generated DQ report for cross-reference.
             partition_by: Partition columns used for the Delta table.
+            started_at: UTC timestamp when Silver write started.
+            completed_at: UTC timestamp when Silver write completed.
         """
         if not records:
             return
@@ -823,6 +840,8 @@ class SilverWriter(BaseDeltaWriter):
             transform_steps=self._transform_steps,
             dq_report_path=dq_report_path,
             partition_by=partition_by,
+            started_at=started_at,
+            completed_at=completed_at,
         )
         metadata = self._metadata_coordinator.create_silver_metadata(silver_input)
         await self._metadata_writer.write_silver_metadata(
