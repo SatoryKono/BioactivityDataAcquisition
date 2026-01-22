@@ -321,6 +321,8 @@ from bioetl.domain.value_objects import (
 __all__ = [
     # Composite pipeline (subpackage)
     "composite",
+    # Data contracts (subpackage)
+    "contracts",
     # Constants
     "constants",
     # Contracts (Gold layer Pandera schemas)
