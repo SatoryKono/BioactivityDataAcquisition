@@ -64,6 +64,7 @@ class TestFileSizeLimits:
         # Domain Pandera schemas (declarative field definitions)
         "compound.py": 390,  # 387 LOC - PubChem molecule schema + deprecated alias __getattr__ (v2.0)
         "protein.py": 370,  # 365 LOC - UniProt target schema + deprecated alias __getattr__ (v2.0)
+        "publications.py": 400,  # 374 LOC - Gold layer publication schemas (PubMed, CrossRef, OpenAlex, SemanticScholar)
         # Domain DQ models (data quality reports and serialization)
         "dq_serializer.py": 435,  # 429 LOC - DQ report serialization logic (increased for CC reduction)
         "dq_report.py": 660,  # 646 LOC - DQ report models with validation rules
