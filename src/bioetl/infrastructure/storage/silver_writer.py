@@ -612,7 +612,9 @@ class SilverWriter(BaseDeltaWriter):
             # Get Delta version after write for lineage tracking (REQ-LINEAGE-002)
             version_after = await self._get_delta_version(table_path)
             # Calculate completed_at (ADR-014: deterministic from start + duration)
-            completed_at = started_at + timedelta(seconds=time.perf_counter() - start_perf)
+            completed_at = started_at + timedelta(
+                seconds=time.perf_counter() - start_perf
+            )
             # Write metadata sidecar file if configured
             await self._write_silver_metadata(
                 table_path=table_path,

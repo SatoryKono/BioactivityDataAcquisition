@@ -279,13 +279,17 @@ class MetadataCoordinator:
 
         # Build DQ summary from computed metrics or use basic fallback
         rec_count = len(input_data.records)
-        dq_summary = (input_data.dq_metrics.to_dq_summary() if input_data.dq_metrics
-                      else DQSummary(total_records=rec_count, valid_records=rec_count))
+        dq_summary = (
+            input_data.dq_metrics.to_dq_summary()
+            if input_data.dq_metrics
+            else DQSummary(total_records=rec_count, valid_records=rec_count)
+        )
         output = SilverOutputMetadata(record_count=rec_count)
         # Calculate duration if both timestamps provided
         duration_seconds = (
             (input_data.completed_at - input_data.started_at).total_seconds()
-            if input_data.started_at and input_data.completed_at else None
+            if input_data.started_at and input_data.completed_at
+            else None
         )
         return SilverMetadata(
             runtime=self._build_runtime_metadata(
@@ -357,7 +361,9 @@ class MetadataCoordinator:
                 if hasattr(schema_instance, "columns"):
                     for col_name, col_schema in schema_instance.columns.items():
                         # Get the dtype as string
-                        dtype_str = str(col_schema.dtype) if col_schema.dtype else "object"
+                        dtype_str = (
+                            str(col_schema.dtype) if col_schema.dtype else "object"
+                        )
                         # Simplify dtype string (remove pandera.dtypes. prefix)
                         if "." in dtype_str:
                             dtype_str = dtype_str.split(".")[-1]

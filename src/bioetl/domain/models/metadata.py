@@ -67,9 +67,7 @@ class GovernanceLineageConfig(BaseModel):
     extraction_method: str | None = Field(
         default=None, description="Extraction method (api, csv, parquet)"
     )
-    source_layer: str | None = Field(
-        default=None, description="Source Medallion layer"
-    )
+    source_layer: str | None = Field(default=None, description="Source Medallion layer")
     transformations: list[str] = Field(
         default_factory=list, description="Transformation steps applied"
     )
@@ -79,9 +77,7 @@ class GovernanceLineageConfig(BaseModel):
     business_domain: str | None = Field(
         default=None, description="Business domain classification"
     )
-    use_cases: list[str] = Field(
-        default_factory=list, description="Intended use cases"
-    )
+    use_cases: list[str] = Field(default_factory=list, description="Intended use cases")
 
 
 class QualityExpectations(BaseModel):
