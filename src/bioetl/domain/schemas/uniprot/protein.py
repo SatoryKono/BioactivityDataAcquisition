@@ -337,29 +337,3 @@ class UniprotTargetSchema(ETLRecordSchema):
 __all__ = [
     "UniprotTargetSchema",
 ]
-# Note: Deprecated alias (ProteinSchema) is provided via __getattr__
-# but not listed in __all__ since it is deprecated (ADR-024, glossary v2.0)
-
-
-# === Deprecated Alias (ADR-024, glossary v2.0) ===
-# This alias is retained for backward compatibility.
-# Use UniprotTargetSchema in new code.
-
-
-def __getattr__(name: str) -> type:
-    """Provide deprecated alias with warning.
-
-    Deprecated:
-        ProteinSchema: Use UniprotTargetSchema instead.
-    """
-    import warnings
-
-    if name == "ProteinSchema":
-        warnings.warn(
-            "ProteinSchema is deprecated, use UniprotTargetSchema instead "
-            "(ADR-024, glossary v2.0)",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return UniprotTargetSchema
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
