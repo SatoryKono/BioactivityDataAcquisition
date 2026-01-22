@@ -792,22 +792,9 @@ class SilverWriter(BaseDeltaWriter):
         if not records:
             return
 
-        # Extract pipeline info from table_name for filename generation
-        # table_name format: {provider}.{entity}, {provider}_{entity}, or just {entity}
-        # Note: We use table_name instead of table_path to be platform-independent
-        # and support flat_structure mode where path doesn't contain entity info.
-        if "." in table_name:
-            parts = table_name.split(".")
-            provider_name = parts[0]
-            entity_name = parts[1] if len(parts) > 1 else parts[0]
-        elif "_" in table_name:
-            # Split on first underscore (e.g., chembl_publication -> chembl, publication)
-            parts = table_name.split("_", 1)
-            provider_name = parts[0]
-            entity_name = parts[1] if len(parts) > 1 else parts[0]
-        else:
-            provider_name = "unknown"
-            entity_name = table_name if table_name else "unknown"
+        from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
+
+        provider_name, entity_name = _parse_table_name(table_name)
 
         if self._metadata_coordinator is None:
             self.logger.warning(
@@ -819,7 +806,6 @@ class SilverWriter(BaseDeltaWriter):
 
         from bioetl.domain.ports import SilverMetadataInput
 
-        # Get Delta version after write
         version_after = await self._get_delta_version(table_path)
 
         silver_input = SilverMetadataInput(
@@ -1082,19 +1068,12 @@ class SilverWriter(BaseDeltaWriter):
         if not records:
             return
 
-        # Extract provider/entity from table_name for filename generation
-        if "/" in table_name:
-            # Handle path-like table names (e.g., 'composite/publication')
-            parts = table_name.split("/")
-            provider_name = parts[0] if len(parts) > 1 else "composite"
-            entity_name = parts[-1]
-        elif "_" in table_name:
-            parts = table_name.split("_", 1)
-            provider_name = parts[0]
-            entity_name = parts[1] if len(parts) > 1 else parts[0]
-        else:
-            provider_name = "composite"
-            entity_name = table_name if table_name else "unknown"
+        from bioetl.infrastructure.storage.metadata_builder import (
+            SilverMetadataBuilder,
+            _parse_table_name,
+        )
+
+        provider_name, entity_name = _parse_table_name(table_name)
 
         if self._metadata_coordinator is None:
             self.logger.debug(
@@ -1104,94 +1083,22 @@ class SilverWriter(BaseDeltaWriter):
             )
             return
 
-        from datetime import UTC, datetime
-        from importlib.metadata import version as pkg_version
-        from platform import node as hostname
-        from platform import python_version
-
-        from bioetl.domain.models.metadata import (
-            DeltaMetrics,
-            DQSummary,
-            EnvironmentMetadata,
-            LineageMetadata,
-            PipelineMetadata,
-            RuntimeMetadata,
-            RunTypeEnum,
-            SilverMetadata,
-            SilverOutputMetadata,
-        )
-
         # Get Delta version after write
         version_after = await self._get_delta_version(table_path)
 
-        # Build metadata
-        now = datetime.now(UTC)
-        runtime = RuntimeMetadata(
-            run_id=run_id or "",
-            run_type=RunTypeEnum.INCREMENTAL,
-            started_at_utc=now,
-            completed_at_utc=now,
+        # Build metadata using the extracted builder
+        builder = SilverMetadataBuilder(
+            transform_version=self._transform_version,
+            transform_steps=self._transform_steps,
         )
-
-        pipeline = PipelineMetadata(
-            name=f"composite_{entity_name}",
-            provider=provider_name,
-            entity=entity_name,
-        )
-
-        # Build lineage with sources_used via source_tables
-        lineage = LineageMetadata(
-            bronze_paths=[],
-            transform_version=self._transform_version or "1.0.0",
-            transform_steps=list(self._transform_steps)
-            if self._transform_steps
-            else ["merge"],
-            source_tables=dict.fromkeys(sources_used or [], 0),
-        )
-
-        # Build Delta metrics
-        delta = DeltaMetrics(
+        metadata = builder.build_merged_metadata(
             table_path=table_path,
-            operation="overwrite",
-            primary_key=primary_keys,
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+            run_id=run_id,
+            sources_used=sources_used,
             version_after=version_after,
-            rows_inserted=len(records),
-        )
-
-        # Build DQ summary
-        dq_summary = DQSummary(
-            total_records=len(records),
-            valid_records=len(records),
-            error_records=0,
-            error_rate=0.0,
-        )
-
-        # Build output metadata
-        output = SilverOutputMetadata(
-            record_count=len(records),
-        )
-
-        # Build environment metadata
-        try:
-            bioetl_version = pkg_version("bioetl")
-        except Exception:
-            bioetl_version = "unknown"
-
-        environment = EnvironmentMetadata(
-            hostname=hostname(),
-            python_version=python_version(),
-            bioetl_version=bioetl_version,
-        )
-
-        # Build complete metadata
-        metadata = SilverMetadata(
-            runtime=runtime,
-            pipeline=pipeline,
-            lineage=lineage,
-            delta=delta,
-            dq_summary=dq_summary,
-            output=output,
-            environment=environment,
         )
 
         await self._metadata_writer.write_silver_metadata(
