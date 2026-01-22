@@ -387,7 +387,6 @@ class MedallionLifecycleService:
             )
 
 
-
 __all__ = [
     "ClearResult",
     "MedallionLifecycleService",
