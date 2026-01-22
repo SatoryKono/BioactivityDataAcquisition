@@ -35,15 +35,19 @@ class TestArrowDataConverterSanitizeType:
     def test_sanitize_struct_with_null_field(self) -> None:
         """Struct with null field should have field converted to string."""
         converter = ArrowDataConverter()
-        struct_type = pa.struct([
-            pa.field("name", pa.string()),
-            pa.field("value", pa.null()),
-        ])
+        struct_type = pa.struct(
+            [
+                pa.field("name", pa.string()),
+                pa.field("value", pa.null()),
+            ]
+        )
         result = converter.sanitize_type_for_delta(struct_type)
-        expected = pa.struct([
-            pa.field("name", pa.string()),
-            pa.field("value", pa.string()),
-        ])
+        expected = pa.struct(
+            [
+                pa.field("name", pa.string()),
+                pa.field("value", pa.string()),
+            ]
+        )
         assert result == expected
 
     def test_sanitize_map_with_null_value(self) -> None:

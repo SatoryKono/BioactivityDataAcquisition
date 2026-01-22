@@ -168,16 +168,16 @@ class TestFSMStateHelperHandleResumeFromFailed:
         result = fsm_helper.handle_resume_from_failed(state)
         assert result.state == CompositePipelineState.ENRICHING
 
-    def test_resume_from_failed_merge_failed(
-        self, fsm_helper: FSMStateHelper
-    ) -> None:
+    def test_resume_from_failed_merge_failed(self, fsm_helper: FSMStateHelper) -> None:
         """Should resume to ENRICHMENT_COMPLETED if all enrichers done but merge failed."""
         state = CompositeCheckpointState(
             composite_name="test_composite",
             run_id="test-run-123",
             state=CompositePipelineState.FAILED,
             seed_completed=True,
-            completed_enrichers=frozenset(["provider1.entity1", "provider2.entity2"]),  # All completed
+            completed_enrichers=frozenset(
+                ["provider1.entity1", "provider2.entity2"]
+            ),  # All completed
         )
 
         result = fsm_helper.handle_resume_from_failed(state)
