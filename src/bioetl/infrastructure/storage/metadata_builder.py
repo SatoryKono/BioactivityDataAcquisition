@@ -8,15 +8,20 @@ Implements RULES.md §2.3 and ADR-026 for metadata creation.
 
 from __future__ import annotations
 
+import inspect
 from datetime import UTC, datetime
 from importlib.metadata import version as pkg_version
 from platform import node as hostname
 from platform import python_version
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
     from bioetl.domain.medallion import GoldWriteMode
-    from bioetl.domain.models.metadata import GoldMetadata, SilverMetadata
+    from bioetl.domain.models.metadata import (
+        GoldMetadata,
+        SchemaMetadata,
+        SilverMetadata,
+    )
 
 
 def _get_bioetl_version() -> str:
@@ -83,6 +88,87 @@ def _parse_table_name(table_name: str) -> tuple[str, str]:
         parts = table_name.split("_", 1)
         return parts[0], parts[1] if len(parts) > 1 else parts[0]
     return "unknown", table_name if table_name else "unknown"
+
+
+def _extract_schema_metadata(gold_schema: Any | None) -> SchemaMetadata:
+    """Extract schema metadata from a Pandera DataFrameModel.
+
+    Extracts contract_path, version, columns, and validation mode from
+    the Pandera schema class for Gold layer metadata tracking.
+
+    Args:
+        gold_schema: Pandera DataFrameModel class (not instance).
+
+    Returns:
+        SchemaMetadata with populated fields, or default if schema is None.
+    """
+    from bioetl.domain.models.metadata import SchemaColumnMetadata, SchemaMetadata
+
+    if gold_schema is None:
+        return SchemaMetadata()
+
+    # Extract contract_path from module path
+    contract_path: str | None = None
+    try:
+        module = inspect.getmodule(gold_schema)
+        if module and module.__file__:
+            # Convert absolute path to relative path from project root
+            # e.g., .../src/bioetl/domain/contracts/gold/chembl.py
+            # -> src/bioetl/domain/contracts/gold/chembl.py
+            file_path = module.__file__
+            if "src/bioetl" in file_path:
+                idx = file_path.find("src/bioetl")
+                contract_path = file_path[idx:]
+    except Exception:
+        pass
+
+    # Extract schema version from Config if defined
+    version = "1.0"
+    if hasattr(gold_schema, "Config"):
+        config = gold_schema.Config
+        version = getattr(config, "version", "1.0")
+        if not isinstance(version, str):
+            version = str(version)
+
+    # Determine validation mode
+    validation: Literal["strict", "lenient"] = "strict"
+    if hasattr(gold_schema, "Config"):
+        config = gold_schema.Config
+        is_strict = getattr(config, "strict", True)
+        validation = "strict" if is_strict else "lenient"
+
+    # Extract column definitions
+    columns: list[SchemaColumnMetadata] = []
+    try:
+        # Try to get schema columns using Pandera's to_schema() method
+        if hasattr(gold_schema, "to_schema"):
+            schema_instance = gold_schema.to_schema()
+            if hasattr(schema_instance, "columns"):
+                for col_name, col_schema in schema_instance.columns.items():
+                    # Get the dtype as string
+                    dtype_str = str(col_schema.dtype) if col_schema.dtype else "object"
+                    # Simplify dtype string (remove pandera.dtypes. prefix)
+                    if "." in dtype_str:
+                        dtype_str = dtype_str.split(".")[-1]
+
+                    nullable = getattr(col_schema, "nullable", True)
+                    columns.append(
+                        SchemaColumnMetadata(
+                            name=col_name,
+                            type=dtype_str,
+                            nullable=nullable,
+                        )
+                    )
+    except Exception:
+        # If schema extraction fails, leave columns empty
+        pass
+
+    return SchemaMetadata(
+        contract_path=contract_path,
+        version=version,
+        validation=validation,
+        columns=columns,
+    )
 
 
 class SilverMetadataBuilder:
@@ -245,6 +331,7 @@ class GoldMetadataBuilder:
         scd_config: dict[str, Any] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: Any | None = None,
+        gold_schema: Any | None = None,
     ) -> GoldMetadata:
         """Build Gold metadata using fallback logic (no coordinator).
 
@@ -255,6 +342,7 @@ class GoldMetadataBuilder:
             scd_config: SCD2 configuration if applicable.
             ingestion_ts: Ingestion timestamp.
             run_id: Run identifier.
+            gold_schema: Optional Pandera schema class for extracting schema metadata.
 
         Returns:
             GoldMetadata object ready for serialization.
@@ -316,10 +404,16 @@ class GoldMetadataBuilder:
             bioetl_version=_get_bioetl_version(),
         )
 
-        return GoldMetadata(
+        # Extract schema metadata from Gold schema
+        schema_info = _extract_schema_metadata(gold_schema)
+
+        # Note: schema_info uses Field(alias="schema") with populate_by_name=True
+        # mypy doesn't understand this Pydantic feature, but it works at runtime
+        return GoldMetadata(  # type: ignore[call-arg]
             runtime=runtime,
             pipeline=pipeline,
             lineage=lineage,
+            schema_info=schema_info,
             dq_summary=dq_summary,
             output=output,
             scd=scd,
@@ -334,6 +428,7 @@ class GoldMetadataBuilder:
         primary_keys: list[str],
         run_id: str | None = None,
         sources_used: list[str] | None = None,
+        gold_schema: Any | None = None,
     ) -> GoldMetadata:
         """Build Gold metadata for merged composite data.
 
@@ -344,6 +439,7 @@ class GoldMetadataBuilder:
             primary_keys: Primary key columns (unused but kept for symmetry).
             run_id: Composite run ID.
             sources_used: List of source pipelines.
+            gold_schema: Optional Pandera schema class for extracting schema metadata.
 
         Returns:
             GoldMetadata object ready for serialization.
@@ -403,10 +499,15 @@ class GoldMetadataBuilder:
             bioetl_version=_get_bioetl_version(),
         )
 
-        return GoldMetadata(
+        # Extract schema metadata from Gold schema
+        schema_info = _extract_schema_metadata(gold_schema)
+
+        # Note: schema_info uses Field(alias="schema") with populate_by_name=True
+        return GoldMetadata(  # type: ignore[call-arg]
             runtime=runtime,
             pipeline=pipeline,
             lineage=lineage,
+            schema_info=schema_info,
             dq_summary=dq_summary,
             output=output,
             environment=environment,
