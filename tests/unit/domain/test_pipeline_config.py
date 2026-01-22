@@ -345,6 +345,40 @@ class TestPipelineConfig:
         with pytest.raises(TypeError):
             config.fields[0] = "field3"  # type: ignore[index]
 
+    def test_immutable_transform_steps(self) -> None:
+        """Test that transform_steps tuple cannot be mutated."""
+        config = PipelineConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            primary_keys=["id"],
+            silver_table="silver",
+            transform_steps=["step1", "step2"],
+        )
+
+        with pytest.raises(TypeError):
+            config.transform_steps[0] = "new_step"  # type: ignore[index]
+
+    def test_immutable_dq_config(self) -> None:
+        """Test that dq config cannot be replaced or mutated."""
+        dq = DQConfig()
+        config = PipelineConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            primary_keys=["id"],
+            silver_table="silver",
+            dq=dq,
+        )
+
+        # Cannot replace dq attribute
+        with pytest.raises(AttributeError):
+            config.dq = DQConfig()  # type: ignore[misc]
+
+        # Cannot mutate dq object (it is frozen)
+        with pytest.raises(AttributeError):
+            config.dq.soft_fail_threshold = 0.5  # type: ignore[misc]
+
     def test_list_to_tuple_conversion(self) -> None:
         """Test that incoming lists are converted to tuples."""
         config = PipelineConfig(
