@@ -43,12 +43,13 @@ composite:
   # Enrichers can run in parallel up to max_concurrency limit.
   enrichers:
     # CrossRef: Citation and reference data
-    # REQUIRED: Failure causes composite to fail
+    # REQUIRED: Primary source for citation data (needs doi)
     - pipeline: crossref_publication
       join_keys:
         - doi            # Primary join key
         - title
-      required: true     # Composite fails if this enricher fails
+      required: false    # Optional - seed may not have DOIs
+      filter_condition: "doi IS NOT NULL"
       timeout_seconds: 900
       silver_table: silver/crossref/publication
 
@@ -58,7 +59,7 @@ composite:
       join_keys:
         - doi            # Primary key
         - title          # Fallback key if doi not found
-      required: true
+      required: false    # Optional - needs doi or pmid
       filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
       timeout_seconds: 600
       silver_table: silver/openalex/publication
@@ -69,7 +70,7 @@ composite:
       join_keys:
         - pmid           # PubMed-specific identifier
         - doi
-      required: true
+      required: false    # Optional - only for records with pmid
       filter_condition: "pmid IS NOT NULL"
       timeout_seconds: 600
       silver_table: silver/pubmed/publication
@@ -80,7 +81,7 @@ composite:
       join_keys:
         - doi
         - title
-      required: true
+      required: false    # Optional - high rate limits, ok to skip
       filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
       timeout_seconds: 1200
       fallback_strategy: skip  # Skip on failure (high rate limits)
