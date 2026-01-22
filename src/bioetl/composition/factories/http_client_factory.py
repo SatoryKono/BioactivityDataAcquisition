@@ -18,7 +18,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition.bootstrap_logger import BootstrapLogger
 from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded
 from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
@@ -30,8 +29,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
-
-_logger = BootstrapLogger()
 
 
 class HttpClientFactory:
@@ -114,16 +111,11 @@ class HttpClientFactory:
         Returns:
             Configured UnifiedHTTPClient with observability
         """
-        # Try to load source config from YAML (primary source)
-        source_config = None
-        try:
-            source_config = load_source_config(provider)
-        except ValueError:
-            _logger.debug(
-                "source_config_not_found",
-                provider=provider,
-                fallback="ProviderRegistry defaults",
-            )
+        # Load source config from YAML (primary source) if exists
+        from pathlib import Path
+
+        config_path = Path(f"configs/sources/{provider}.yaml")
+        source_config = load_source_config(provider) if config_path.exists() else None
 
         # Get rate limit, circuit breaker, and client settings
         if source_config is not None:
