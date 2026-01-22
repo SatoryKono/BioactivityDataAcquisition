@@ -67,6 +67,7 @@ class SilverMetadataInput:
         transform_version: Optional semver version of transform applied.
         transform_steps: Optional list of transform step names applied.
         dq_report_path: Optional path to generated DQ report for cross-reference.
+        partition_by: Partition columns used for the Delta table.
         governance: Optional governance metadata from pipeline config.
     """
 
@@ -80,6 +81,7 @@ class SilverMetadataInput:
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
     dq_report_path: str | None = None
+    partition_by: list[str] | None = None
     governance: GovernanceMetadata | None = None
 
 

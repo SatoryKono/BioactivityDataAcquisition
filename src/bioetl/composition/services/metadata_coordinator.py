@@ -270,6 +270,7 @@ class MetadataCoordinator:
             table_path=input_data.table_path,
             operation=operation_map[input_data.mode],
             primary_key=input_data.primary_keys,
+            partition_by=input_data.partition_by or [],
             version_after=input_data.version_after,
             rows_inserted=len(input_data.records),
         )

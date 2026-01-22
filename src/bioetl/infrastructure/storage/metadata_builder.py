@@ -92,6 +92,7 @@ class SilverMetadataBuilder:
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         version_after: int | None = None,
+        partition_by: list[str] | None = None,
     ) -> SilverMetadata:
         """Build Silver metadata for merged composite data.
 
@@ -103,6 +104,7 @@ class SilverMetadataBuilder:
             run_id: Composite run ID.
             sources_used: List of source pipelines (e.g., ['seed', 'crossref']).
             version_after: Delta table version after write.
+            partition_by: Partition columns used for the Delta table.
 
         Returns:
             SilverMetadata object ready for serialization.
@@ -148,6 +150,7 @@ class SilverMetadataBuilder:
             table_path=table_path,
             operation="overwrite",
             primary_key=primary_keys,
+            partition_by=partition_by or [],
             version_after=version_after,
             rows_inserted=len(records),
         )
