@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 from prometheus_client import start_http_server
 
+from bioetl.domain.exceptions import MetricsServerError
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
@@ -17,23 +18,8 @@ if TYPE_CHECKING:
 _SERVER_STARTED = False
 _SERVER_LOCK = Lock()
 
-
-class MetricsServerError(Exception):
-    """Raised when metrics server fails to start with fail_fast=True."""
-
-    def __init__(self, port: int, reason: str, original_error: Exception | None = None):
-        """Initialize MetricsServerError.
-
-        Args:
-            port: Port that failed.
-            reason: Reason for failure.
-            original_error: Underlying exception.
-
-        """
-        super().__init__(f"Failed to start metrics server on port {port}: {reason}")
-        self.port = port
-        self.reason = reason
-        self.original_error = original_error
+# Re-export for backward compatibility
+__all__ = ["MetricsServerError", "reset_server_state", "start_metrics_server"]
 
 
 def _handle_port_in_use(
