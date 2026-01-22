@@ -27,6 +27,8 @@ Note:
 from __future__ import annotations
 
 import asyncio
+import time
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any, Literal
 
 import orjson
@@ -49,7 +51,6 @@ from bioetl.infrastructure.storage.base_delta_writer import (
 )
 
 if TYPE_CHECKING:
-    from datetime import datetime
     from pathlib import Path
 
     from bioetl.domain.ports import (
@@ -547,6 +548,7 @@ class SilverWriter(BaseDeltaWriter):
             Lock validation is performed at Application layer (BatchWriter)
             per RULES.md §4.6 Safety Guard.
         """
+        started_at, start_perf = datetime.now(UTC), time.perf_counter()
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_silver") as span:
             span.set_attribute("table_name", table_name)
@@ -609,7 +611,8 @@ class SilverWriter(BaseDeltaWriter):
 
             # Get Delta version after write for lineage tracking (REQ-LINEAGE-002)
             version_after = await self._get_delta_version(table_path)
-
+            # Calculate completed_at (ADR-014: deterministic from start + duration)
+            completed_at = started_at + timedelta(seconds=time.perf_counter() - start_perf)
             # Write metadata sidecar file if configured
             await self._write_silver_metadata(
                 table_path=table_path,
@@ -620,6 +623,8 @@ class SilverWriter(BaseDeltaWriter):
                 bronze_refs=bronze_refs,
                 dq_metrics=dq_metrics,
                 partition_by=partition_cols,
+                started_at=started_at,
+                completed_at=completed_at,
             )
 
             # Return SilverWriteResult for Gold lineage tracking (REQ-LINEAGE-002)
@@ -774,6 +779,8 @@ class SilverWriter(BaseDeltaWriter):
         dq_metrics: BatchDQMetrics | None = None,
         dq_report_path: str | None = None,
         partition_by: list[str] | None = None,
+        started_at: datetime | None = None,
+        completed_at: datetime | None = None,
     ) -> None:
         """Write Silver layer metadata sidecar file.
 
@@ -783,14 +790,12 @@ class SilverWriter(BaseDeltaWriter):
             records: List of records written.
             primary_keys: Primary key columns used.
             mode: Write mode used (merge, append, delete).
-            bronze_refs: Optional list of BronzeWriteResult for lineage tracking.
-                If provided, bronze_paths will be populated from relative_path
-                of each BronzeWriteResult (REQ-LINEAGE-001).
-            dq_metrics: Optional BatchDQMetrics with computed DQ metrics.
-                If provided, dq_summary will contain real column metrics,
-                schema drift info, and error rates (REQ-DQ-001).
-            dq_report_path: Optional path to generated DQ report for cross-reference.
+            bronze_refs: Optional BronzeWriteResult list for lineage (REQ-LINEAGE-001).
+            dq_metrics: Optional BatchDQMetrics for DQ summary (REQ-DQ-001).
+            dq_report_path: Optional path to generated DQ report.
             partition_by: Partition columns used for the Delta table.
+            started_at: UTC timestamp when Silver write started.
+            completed_at: UTC timestamp when Silver write completed.
         """
         if not records:
             return
@@ -823,6 +828,8 @@ class SilverWriter(BaseDeltaWriter):
             transform_steps=self._transform_steps,
             dq_report_path=dq_report_path,
             partition_by=partition_by,
+            started_at=started_at,
+            completed_at=completed_at,
         )
         metadata = self._metadata_coordinator.create_silver_metadata(silver_input)
         await self._metadata_writer.write_silver_metadata(
