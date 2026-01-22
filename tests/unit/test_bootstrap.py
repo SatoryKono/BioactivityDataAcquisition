@@ -89,12 +89,12 @@ class TestBootstrapLogger:
 class TestBootstrapPipeline:
     """Tests for bootstrap_pipeline function."""
 
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle")
     @patch("bioetl.infrastructure.config.get_settings")
     def test_bootstrap_pipeline_unknown_pipeline_raises(
         self,
         mock_get_settings: MagicMock,
-        mock_bootstrap_observability: MagicMock,
+        mock_bootstrap_observability_bundle: MagicMock,
         mock_settings: MagicMock,
         mock_logger: MagicMock,
     ):
@@ -131,16 +131,16 @@ class TestBootstrapPipeline:
             bootstrap_pipeline(ctx)
 
     @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.FilterConfigBuilder")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle")
     @patch("bioetl.infrastructure.config.get_settings")
     def test_bootstrap_pipeline_creates_runner_without_starting_server(
         self,
         mock_get_settings: MagicMock,
-        mock_bootstrap_observability: MagicMock,
+        mock_bootstrap_observability_bundle: MagicMock,
         mock_load_config: MagicMock,
-        mock_filter_builder: MagicMock,
+        mock_assemble_filter: MagicMock,
         mock_get_registry: MagicMock,
         mock_logger: MagicMock,
     ) -> None:
@@ -175,9 +175,9 @@ class TestBootstrapPipeline:
         # Mock observability bundle
         mock_obs = MagicMock()
         mock_obs.logger = mock_logger
-        mock_bootstrap_observability.return_value = mock_obs
+        mock_bootstrap_observability_bundle.return_value = mock_obs
 
-        mock_filter_builder.build.return_value = None
+        mock_assemble_filter.return_value = None
 
         # Setup pipeline registry mock
         mock_config = MagicMock()
@@ -205,11 +205,11 @@ class TestBootstrapPipeline:
 
         assert result is mock_runner
         # Verify observability was bootstrapped (creates MetricsPort, but doesn't start server)
-        mock_bootstrap_observability.assert_called_once()
+        mock_bootstrap_observability_bundle.assert_called_once()
 
     @patch("bioetl.infrastructure.config.get_settings")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_providers")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
@@ -218,7 +218,7 @@ class TestBootstrapPipeline:
         mock_load_config,
         mock_register_pipelines,
         mock_register_providers,
-        mock_observability,
+        mock_observability_bundle,
         mock_get_registry,
         mock_get_settings,
         mock_settings,
@@ -244,7 +244,7 @@ class TestBootstrapPipeline:
         # Mock observability with logger
         mock_obs = MagicMock()
         mock_obs.logger = mock_logger
-        mock_observability.return_value = mock_obs
+        mock_observability_bundle.return_value = mock_obs
 
         # Mock factory and runner
         mock_runner = MagicMock(spec=PipelineRunner)
@@ -610,16 +610,16 @@ class TestBootstrapVacuumConfig:
     """Tests for bootstrap_pipeline vacuum configuration merging."""
 
     @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.FilterConfigBuilder")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle")
     @patch("bioetl.infrastructure.config.get_settings")
     def test_bootstrap_uses_yaml_vacuum_config_when_cli_not_set(
         self,
         mock_get_settings: MagicMock,
-        mock_bootstrap_observability: MagicMock,
+        mock_bootstrap_observability_bundle: MagicMock,
         mock_load_config: MagicMock,
-        mock_filter_builder: MagicMock,
+        mock_assemble_filter: MagicMock,
         mock_get_registry: MagicMock,
     ) -> None:
         """Test that YAML auto_vacuum config is used when CLI doesn't override."""
@@ -640,8 +640,8 @@ class TestBootstrapVacuumConfig:
         logger.bind.return_value = logger
         mock_obs = MagicMock()
         mock_obs.logger = logger
-        mock_bootstrap_observability.return_value = mock_obs
-        mock_filter_builder.build.return_value = None
+        mock_bootstrap_observability_bundle.return_value = mock_obs
+        mock_assemble_filter.return_value = None
 
         # Setup YAML config with auto_vacuum enabled
         yaml_config = MagicMock()
@@ -675,16 +675,16 @@ class TestBootstrapVacuumConfig:
         assert runtime.vacuum_retention_days == 14
 
     @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.FilterConfigBuilder")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
-    @patch("bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle")
     @patch("bioetl.infrastructure.config.get_settings")
     def test_bootstrap_cli_vacuum_overrides_yaml_config(
         self,
         mock_get_settings: MagicMock,
-        mock_bootstrap_observability: MagicMock,
+        mock_bootstrap_observability_bundle: MagicMock,
         mock_load_config: MagicMock,
-        mock_filter_builder: MagicMock,
+        mock_assemble_filter: MagicMock,
         mock_get_registry: MagicMock,
     ) -> None:
         """Test that CLI vacuum options override YAML config."""
@@ -705,8 +705,8 @@ class TestBootstrapVacuumConfig:
         logger.bind.return_value = logger
         mock_obs = MagicMock()
         mock_obs.logger = logger
-        mock_bootstrap_observability.return_value = mock_obs
-        mock_filter_builder.build.return_value = None
+        mock_bootstrap_observability_bundle.return_value = mock_obs
+        mock_assemble_filter.return_value = None
 
         # Setup YAML config with auto_vacuum enabled
         yaml_config = MagicMock()
