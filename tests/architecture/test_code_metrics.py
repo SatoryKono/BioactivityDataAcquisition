@@ -244,8 +244,6 @@ class TestFunctionComplexity:
         "from_dict": 9,  # CC=9 - Dictionary parsing with type conversions + FSM state parsing
         # BatchExecutor DQ context extraction
         "get_dq_context": 13,  # CC=12 - DQ context gathering with nullable field handling
-        # PipelineRunner lock-held orchestration
-        "_run_with_lock": 14,  # CC=13 - Pipeline execution with lock, error handling, and cleanup
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:

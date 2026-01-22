@@ -258,14 +258,6 @@ class TestStoragePortProtocol:
             ) -> dict[str, int]:
                 return {"files_removed": 0, "bytes_freed": 0, "directories_removed": 0}
 
-            async def optimize(
-                self,
-                table_name: str,
-                retention_hours: int = 168,
-                dry_run: bool = False,
-            ) -> None:
-                pass
-
         assert isinstance(ValidStorage(), StoragePort)
 
         # Note: @runtime_checkable protocols only check for method presence,
