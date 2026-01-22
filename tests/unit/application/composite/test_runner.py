@@ -116,7 +116,9 @@ def create_mock_key_extractor() -> AsyncMock:
     import polars as pl
 
     extractor = AsyncMock()
-    extractor.extract = AsyncMock(return_value=pl.DataFrame({"chembl_id": ["CHEMBL123"]}))
+    extractor.extract = AsyncMock(
+        return_value=pl.DataFrame({"chembl_id": ["CHEMBL123"]})
+    )
     return extractor
 
 
@@ -188,7 +190,9 @@ class TestFSMSeedStateTransitions:
 
         # Verify checkpoint was saved with SEED_RUNNING state
         save_calls = checkpoint_manager.save.call_args_list
-        assert len(save_calls) >= 2, "Should save checkpoint at least twice (SEED_RUNNING and SEED_COMPLETED)"
+        assert len(save_calls) >= 2, (
+            "Should save checkpoint at least twice (SEED_RUNNING and SEED_COMPLETED)"
+        )
 
         # First save should be SEED_RUNNING
         first_save_state = save_calls[0][0][0]
@@ -239,7 +243,9 @@ class TestFSMSeedFailure:
     @pytest.mark.asyncio
     async def test_failed_state_set_on_seed_error(self):
         """FAILED state should be set when seed pipeline fails."""
-        seed_runner = MockPipelineRunner(should_fail=True, error_message="Connection timeout")
+        seed_runner = MockPipelineRunner(
+            should_fail=True, error_message="Connection timeout"
+        )
         checkpoint_manager = create_mock_checkpoint_manager()
         runner = create_runner(
             seed_runner=seed_runner,
@@ -298,7 +304,9 @@ class TestFSMSeedFailure:
             await runner.run()
 
         # Verify error was logged
-        error_calls = [c for c in logger.error.call_args_list if "Seed pipeline failed" in str(c)]
+        error_calls = [
+            c for c in logger.error.call_args_list if "Seed pipeline failed" in str(c)
+        ]
         assert len(error_calls) >= 1, "Should log seed failure error"
 
 
@@ -408,7 +416,9 @@ class TestFSMSeedResume:
             c for c in logger.info.call_args_list if "FSM state transition" in str(c)
         ]
         # Should log transition to SEED_COMPLETED
-        assert any("seed_resume" in str(c) for c in transition_calls), "Should log seed_resume transition"
+        assert any("seed_resume" in str(c) for c in transition_calls), (
+            "Should log seed_resume transition"
+        )
 
 
 class TestFSMTransitionLogging:
@@ -524,7 +534,9 @@ class TestCheckpointSaveErrorHandling:
 
         # Warning should be logged
         warning_calls = [
-            c for c in logger.warning.call_args_list if "checkpoint_save_failed" in str(c)
+            c
+            for c in logger.warning.call_args_list
+            if "checkpoint_save_failed" in str(c)
         ]
         assert len(warning_calls) >= 1
 
