@@ -45,6 +45,7 @@ class TestFileSizeLimits:
         "activity.py": 330,  # 327 LOC - Activity domain types with rich validation
         "types.py": 400,  # 396 LOC
         "state.py": 380,  # 371 LOC - CompositePipelineState FSM with transition rules
+        "result.py": 340,  # 331 LOC - Result monad with map/flatMap operations
         "chembl_structures.py": 510,  # 506 LOC - ChEMBL structural entities + deprecated alias __getattr__ (v2.0)
         "config_types.py": 430,  # 425 LOC - TypedDict definitions for YAML config parsing (DQ config extended)
         "exceptions.py": 550,  # 513 LOC

@@ -351,7 +351,9 @@ class TestOptionalEnricherFailure:
 
         # Check that warning was logged for optional failure
         warning_calls = [
-            c for c in logger.warning.call_args_list if "Optional enricher failed" in str(c)
+            c
+            for c in logger.warning.call_args_list
+            if "Optional enricher failed" in str(c)
         ]
         assert len(warning_calls) >= 1
 
@@ -381,7 +383,9 @@ class TestRequiredOnlyMode:
         # pubmed should have NOT_RUN status
         assert "pubmed" in result.enrichment_results
         assert result.enrichment_results["pubmed"].status == EnrichmentStatus.NOT_RUN
-        assert "required_only" in result.enrichment_results["pubmed"].error_message.lower()
+        assert (
+            "required_only" in result.enrichment_results["pubmed"].error_message.lower()
+        )
 
     @pytest.mark.asyncio
     async def test_not_run_enrichers_in_result(self):
@@ -446,7 +450,9 @@ class TestRequiredOnlyMode:
 
         # Check that info was logged for skipped enricher
         info_calls = [
-            c for c in logger.info.call_args_list if "Optional enricher not run" in str(c)
+            c
+            for c in logger.info.call_args_list
+            if "Optional enricher not run" in str(c)
         ]
         assert len(info_calls) >= 1
 
@@ -576,7 +582,8 @@ class TestCompletionLogging:
 
         # Check that completion was logged with warnings status
         complete_calls = [
-            c for c in logger.info.call_args_list
+            c
+            for c in logger.info.call_args_list
             if "completed_with_warnings" in str(c) or "had_warnings" in str(c)
         ]
         assert len(complete_calls) >= 1
