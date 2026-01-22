@@ -9,8 +9,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.factories.data_source_factory import DataSourceFactory
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
     from bioetl.application.services import HealthService
@@ -59,7 +59,7 @@ def bootstrap_health_service() -> HealthService:
     """
     from bioetl.application.services import HealthService
 
-    noop_logger = NoOpLogger()
+    noop_logger = create_noop_logger()
 
     return HealthService(
         logger=noop_logger,

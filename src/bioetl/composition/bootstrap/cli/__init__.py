@@ -37,6 +37,12 @@ from bioetl.composition.bootstrap.cli.health import (
 )
 from bioetl.composition.bootstrap.cli.lock import bootstrap_lock_service
 from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
+from bioetl.composition.bootstrap.cli.noop import (
+    create_noop_logger,
+    create_noop_metrics,
+    create_noop_observability_bundle,
+    create_noop_tracing,
+)
 from bioetl.composition.bootstrap.cli.storage import (
     bootstrap_bronze_cleanup_service,
     # Deprecated alias
@@ -72,4 +78,9 @@ __all__ = [
     "bootstrap_quarantine_manager",
     "bootstrap_quarantine_service",
     "bootstrap_vacuum_service",
+    # NoOp factories (centralized)
+    "create_noop_logger",
+    "create_noop_metrics",
+    "create_noop_observability_bundle",
+    "create_noop_tracing",
 ]

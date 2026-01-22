@@ -18,9 +18,9 @@ from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_checkpoint_port,
     bootstrap_quarantine_port,
 )
+from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.config import get_settings
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
     from bioetl.application.core.checkpoint_manager import CheckpointManager
@@ -74,7 +74,7 @@ def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointManager:
     from bioetl.domain.types import RunID
 
     checkpoint_port = bootstrap_checkpoint_port(pipeline_name)
-    noop_logger = NoOpLogger()
+    noop_logger = create_noop_logger()
 
     return CheckpointManager(
         checkpoint_port=checkpoint_port,
@@ -102,7 +102,7 @@ def bootstrap_checkpoint_service() -> CheckpointService:
         base_path=settings.checkpoint_path,
         pipeline_name="",
     )
-    noop_logger = NoOpLogger()
+    noop_logger = create_noop_logger()
 
     return CheckpointService(
         checkpoint_port=checkpoint_port,
@@ -121,7 +121,7 @@ def bootstrap_quarantine_service() -> QuarantineService:
     from bioetl.application.services import QuarantineService
 
     quarantine_port = bootstrap_quarantine_port()
-    noop_logger = NoOpLogger()
+    noop_logger = create_noop_logger()
 
     return QuarantineService(
         quarantine_port=quarantine_port,
