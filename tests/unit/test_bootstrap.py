@@ -386,6 +386,7 @@ class TestChemblActivityFactory:
         # Should NOT call load_pipeline_config when config is provided
         mock_load_config.assert_not_called()
 
+    @patch("bioetl.composition.factories.pipeline_factory.compute_config_hash")
     @patch("bioetl.composition.factories.pipeline_factory.yaml_config_to_domain")
     @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
     @patch("bioetl.composition.factories.pipeline_factory.BaseServicesFactory")
@@ -394,6 +395,7 @@ class TestChemblActivityFactory:
         mock_base_services,
         mock_load_config,
         mock_yaml_to_domain,
+        mock_compute_hash,
         mock_settings,
         mock_logger,
         mock_services,
@@ -409,6 +411,7 @@ class TestChemblActivityFactory:
         mock_base_services.create_common_services.return_value = mock_services
         mock_domain_config = MagicMock()
         mock_yaml_to_domain.return_value = mock_domain_config
+        mock_compute_hash.return_value = "mock_config_hash_12345"
 
         # Mock the data source creator
         mock_data_source = MagicMock()
