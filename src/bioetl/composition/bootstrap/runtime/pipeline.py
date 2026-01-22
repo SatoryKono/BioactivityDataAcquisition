@@ -11,14 +11,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.composition.bootstrap.runtime.assembly import (
+    assemble_filter_config,
+    assemble_runtime_config,
+    assemble_vacuum_settings,
+)
 from bioetl.composition.bootstrap.runtime.observability import (
     bootstrap_observability_bundle,
 )
-from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
-from bioetl.domain.config import RuntimeConfig
 from bioetl.infrastructure.config import get_settings, load_pipeline_config
 
 if TYPE_CHECKING:
@@ -96,44 +99,28 @@ def bootstrap_pipeline_runner(
         log_level=ctx.log_level,
     )
 
-    # Merge YAML maintenance config with CLI overrides
-    # CLI flags take precedence over YAML config (tri-state: None/True/False)
-    # None means no CLI override -> use YAML
-    # True/False means explicit CLI override
-    vacuum_after_run = (
-        ctx.vacuum.enabled
-        if ctx.vacuum.enabled is not None
-        else yaml_config.maintenance.auto_vacuum
-    )
-    vacuum_retention_days = (
-        ctx.vacuum.retention_days
-        if ctx.vacuum.enabled is not None
-        else yaml_config.maintenance.vacuum_retention_days
+    # Assemble vacuum settings (CLI overrides YAML)
+    vacuum = assemble_vacuum_settings(
+        cli_vacuum=ctx.vacuum,
+        yaml_maintenance=yaml_config.maintenance,
     )
 
-    runtime_config = RuntimeConfig(
+    # Assemble runtime config from resolved parameters
+    runtime_config = assemble_runtime_config(
         run_type=ctx.run_type,
         resume=ctx.resume,
         limit=ctx.limit,
-        heartbeat_interval=settings.pipeline.heartbeat_interval,
         query=ctx.query,
         dry_run=ctx.dry_run,
-        vacuum_after_run=vacuum_after_run,
-        vacuum_retention_days=vacuum_retention_days,
+        heartbeat_interval=settings.pipeline.heartbeat_interval,
+        vacuum=vacuum,
     )
 
-    # Build filter config using the dedicated builder or CLI input_filter
-    # In test mode or composite mode, YAML-based filters are disabled
-    # - test_mode: E2E tests run without requiring filter CSV files
-    # - ignore_yaml_filter: composite enrichers use seed keys, not YAML filter
-    # - direct_filter_ids: composite enrichers pass DOIs directly (no CSV)
-    filter_config = FilterConfigBuilder.build(
+    # Assemble filter config (CLI/direct IDs override YAML)
+    filter_config = assemble_filter_config(
         yaml_filter=yaml_config.input_filter,
-        cli_csv=ctx.input_filter.source_path if ctx.input_filter.enabled else None,
-        cli_column=ctx.input_filter.column_name if ctx.input_filter.enabled else None,
-        cli_field=ctx.input_filter.filter_field if ctx.input_filter.enabled else None,
-        test_mode=settings.test_mode or ctx.ignore_yaml_filter,
-        direct_filter_ids=ctx.input_filter.filter_ids,
+        ctx=ctx,
+        test_mode=settings.test_mode,
     )
 
     if filter_config:

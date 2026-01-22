@@ -62,6 +62,11 @@ from bioetl.composition.bootstrap.cli import (
 # =============================================================================
 from bioetl.composition.bootstrap.runtime import (
     MetricsServerError,
+    # Assembly (pure functions)
+    VacuumSettings,
+    assemble_filter_config,
+    assemble_runtime_config,
+    assemble_vacuum_settings,
     # Deprecated aliases
     bootstrap_composite_pipeline,
     # Canonical names
@@ -95,6 +100,11 @@ __all__ = [
     "HealthServerDependencies",
     # Runtime services
     "MetricsServerError",
+    # Runtime assembly (pure functions)
+    "VacuumSettings",
+    "assemble_filter_config",
+    "assemble_runtime_config",
+    "assemble_vacuum_settings",
     "bootstrap_bronze_cleanup_service",
     # Assembly (deprecated aliases)
     "bootstrap_checkpoint",
