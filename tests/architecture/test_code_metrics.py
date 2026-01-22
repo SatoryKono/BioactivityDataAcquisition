@@ -44,7 +44,7 @@ class TestFileSizeLimits:
         "value_validator.py": 360,  # 351 LOC - Value objects validation
         "activity.py": 330,  # 327 LOC - Activity domain types with rich validation
         "types.py": 400,  # 396 LOC
-        "chembl_structures.py": 470,  # ~469 LOC - ChEMBL structural entities + deprecated aliases (v2.0)
+        "chembl_structures.py": 510,  # 506 LOC - ChEMBL structural entities + deprecated alias __getattr__ (v2.0)
         "config_types.py": 430,  # 425 LOC - TypedDict definitions for YAML config parsing (DQ config extended)
         "exceptions.py": 550,  # 513 LOC
         # Domain value objects (rich domain models with validation)
@@ -61,8 +61,8 @@ class TestFileSizeLimits:
         "data_normalization.py": 330,  # 321 LOC - DataNormalizationPort with partial date normalization
         "storage.py": 405,  # 400 LOC - StoragePort with read_silver, write_*_merged for composite pipelines + SourceMetadata param + Silver lineage
         # Domain Pandera schemas (declarative field definitions)
-        "compound.py": 380,  # 377 LOC - PubChem molecule schema + deprecated alias (v2.0)
-        "protein.py": 360,  # 354 LOC - UniProt target schema + deprecated alias (v2.0)
+        "compound.py": 390,  # 387 LOC - PubChem molecule schema + deprecated alias __getattr__ (v2.0)
+        "protein.py": 370,  # 365 LOC - UniProt target schema + deprecated alias __getattr__ (v2.0)
         # Domain DQ models (data quality reports and serialization)
         "dq_serializer.py": 435,  # 429 LOC - DQ report serialization logic (increased for CC reduction)
         "dq_report.py": 660,  # 646 LOC - DQ report models with validation rules
