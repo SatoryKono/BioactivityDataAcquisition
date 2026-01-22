@@ -66,6 +66,7 @@ class TestObservabilityInitialization:
             r"from.*import.*start_metrics_server",  # Import is allowed
             r"#.*start_metrics_server",  # Comments are allowed
             r"\"\"\".*start_metrics_server",  # Docstrings are allowed
+            r"maybe_start_metrics_server",  # Entrypoint wrapper is allowed
         ]
 
         violations = []
