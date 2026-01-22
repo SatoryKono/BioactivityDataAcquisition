@@ -375,6 +375,28 @@ class StoragePort(Protocol):
         """
         ...
 
+    async def optimize(
+        self,
+        table_name: str,
+        retention_hours: int = 168,
+        dry_run: bool = False,
+    ) -> None:
+        """Optimize storage for a specific table/entity.
+
+        Performs maintenance operations appropriate for the storage layer:
+        - Delta Lake: Runs VACUUM to remove old files
+        - JSONL/File: Removes files older than retention period
+
+        Args:
+            table_name: Target identifier (e.g., 'provider.entity' for Delta/Bronze)
+            retention_hours: Retention period in hours (default 168h = 7 days)
+            dry_run: If True, only log what would be done without action
+
+        Raises:
+            StorageError: If optimization fails
+        """
+        ...
+
     async def cleanup_bronze(
         self,
         cutoff_date: datetime,

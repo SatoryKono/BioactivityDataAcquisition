@@ -739,20 +739,41 @@ class BronzeWriter:
 
         return self._list_batches_local(prefix, date)
 
-    def _find_old_date_dirs(self, cutoff_str: str) -> list[Path]:
+    def _find_old_date_dirs(
+        self,
+        cutoff_str: str,
+        provider: str | None = None,
+        entity: str | None = None,
+    ) -> list[Path]:
         """Find date directories older than cutoff.
 
         Iterates over {base_path}/{provider}/{entity}/{date}/ structure.
+        Optionally filters by provider and entity.
         """
         if not self.base_path.exists():
             return []
         old_dirs: list[Path] = []
-        for prov in self.base_path.iterdir():
-            if not prov.is_dir():
+
+        # Filter providers
+        if provider:
+            providers = [self.base_path / provider]
+        else:
+            providers = [p for p in self.base_path.iterdir() if p.is_dir()]
+
+        for prov in providers:
+            if not prov.exists():
                 continue
-            for ent in prov.iterdir():
-                if not ent.is_dir():
+
+            # Filter entities
+            if entity:
+                entities = [prov / entity]
+            else:
+                entities = [e for e in prov.iterdir() if e.is_dir()]
+
+            for ent in entities:
+                if not ent.exists():
                     continue
+
                 for date_dir in ent.iterdir():
                     is_old = (
                         date_dir.is_dir()
@@ -764,13 +785,17 @@ class BronzeWriter:
         return old_dirs
 
     async def cleanup_old_files(
-        self, cutoff_date: datetime, dry_run: bool = False
+        self,
+        cutoff_date: datetime,
+        dry_run: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> dict[str, int]:
         """Remove Bronze files older than cutoff date (RULES.md §2.1 retention)."""
         cutoff_str = cutoff_date.strftime("%Y-%m-%d")
         files, bytes_total, dirs = 0, 0, 0
 
-        for date_dir in self._find_old_date_dirs(cutoff_str):
+        for date_dir in self._find_old_date_dirs(cutoff_str, provider, entity):
             for fp in date_dir.glob("*"):
                 if fp.is_file():
                     bytes_total += fp.stat().st_size

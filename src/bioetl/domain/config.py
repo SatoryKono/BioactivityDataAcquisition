@@ -495,6 +495,10 @@ class RuntimeConfig:
     vacuum_after_run: bool = False
     vacuum_retention_days: int = 7
 
+    # Storage optimization (Unifies cleanup policies)
+    # Controls explicit storage maintenance (vacuum, old file removal)
+    optimize_storage: bool = False
+
     # Medallion invariants validation (REQ-CONF-001)
     # When True, Medallion config violations fail the pipeline
     # When False, violations are logged as warnings

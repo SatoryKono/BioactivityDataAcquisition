@@ -13,6 +13,7 @@ Note:
 from __future__ import annotations
 
 import asyncio
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -485,6 +486,38 @@ class StorageAdapter:
             return HealthStatus.DEGRADED
         else:
             return HealthStatus.UNHEALTHY
+
+    async def optimize(
+        self,
+        table_name: str,
+        retention_hours: int = 168,
+        dry_run: bool = False,
+    ) -> None:
+        """Optimize storage for a specific table/entity.
+
+        Performs maintenance operations appropriate for the storage layer:
+        - Delta Lake: Runs VACUUM to remove old files
+        - JSONL/File: Removes files older than retention period
+
+        Args:
+            table_name: Target identifier (e.g., 'provider.entity' for Delta/Bronze)
+            retention_hours: Retention period in hours (default 168h = 7 days)
+            dry_run: If True, only log what would be done without action
+        """
+        # 1. Optimize Silver/Gold Delta Tables
+        await self.vacuum(table_name, retention_hours, dry_run)
+
+        # 2. Optimize Bronze (File cleanup)
+        # Parse table_name to get provider/entity for targeted cleanup
+        if "." in table_name:
+            provider, entity = table_name.split(".", 1)
+            cutoff_date = datetime.now(timezone.utc) - timedelta(hours=retention_hours)
+            await self.bronze.cleanup_old_files(
+                cutoff_date=cutoff_date,
+                dry_run=dry_run,
+                provider=provider,
+                entity=entity,
+            )
 
     async def vacuum(
         self,

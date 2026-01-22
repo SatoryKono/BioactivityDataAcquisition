@@ -2583,3 +2583,77 @@ class TestBronzeWriteResult:
                 uncompressed_size=500,
                 checksum_blake2="",
             )
+
+
+@pytest.mark.unit
+class TestBronzeWriterCleanupFiltered:
+    """Tests for BronzeWriter filtered cleanup operations."""
+
+    def test_find_old_date_dirs_filtered_by_provider(
+        self, tmp_path, noop_logger
+    ) -> None:
+        """Test _find_old_date_dirs filters by provider."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+        )
+
+        # Setup
+        (tmp_path / "p1" / "e1" / "2024-01-01").mkdir(parents=True)
+        (tmp_path / "p2" / "e1" / "2024-01-01").mkdir(parents=True)
+
+        cutoff = "2024-06-01"
+        result = writer._find_old_date_dirs("2024-06-01", provider="p1")
+
+        assert len(result) == 1
+        assert "p1" in str(result[0])
+
+    def test_find_old_date_dirs_filtered_by_entity(
+        self, tmp_path, noop_logger
+    ) -> None:
+        """Test _find_old_date_dirs filters by entity (requires provider)."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+        )
+
+        # Setup
+        (tmp_path / "p1" / "e1" / "2024-01-01").mkdir(parents=True)
+        (tmp_path / "p1" / "e2" / "2024-01-01").mkdir(parents=True)
+
+        cutoff = "2024-06-01"
+        result = writer._find_old_date_dirs(cutoff, provider="p1", entity="e1")
+
+        assert len(result) == 1
+        assert "e1" in str(result[0])
+
+    @pytest.mark.asyncio
+    async def test_cleanup_old_files_filtered(
+        self, tmp_path, noop_logger
+    ) -> None:
+        """Test cleanup_old_files respects provider/entity filters."""
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+        )
+
+        # Setup
+        p1_e1 = tmp_path / "p1" / "e1" / "2024-01-01"
+        p1_e1.mkdir(parents=True)
+        (p1_e1 / "file").touch()
+
+        p2_e1 = tmp_path / "p2" / "e1" / "2024-01-01"
+        p2_e1.mkdir(parents=True)
+        (p2_e1 / "file").touch()
+
+        cutoff = datetime(2024, 6, 1, tzinfo=UTC)
+
+        # Cleanup only p1
+        result = await writer.cleanup_old_files(cutoff, provider="p1")
+
+        assert result["files_removed"] == 1
+        assert not p1_e1.exists()
+        assert p2_e1.exists()
