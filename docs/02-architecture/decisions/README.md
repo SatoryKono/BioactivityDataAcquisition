@@ -33,6 +33,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-025](ADR-025-pipeline-config-unification.md) | Pipeline Config Unification | Accepted | Configuration | 2026-01-14 |
 | [ADR-026](ADR-026-composite-pipeline-pattern.md) | Composite Pipeline Pattern | Accepted | Architecture | 2026-01-15 |
 | [ADR-027](ADR-027-dq-rules-externalization.md) | DQ Rules Externalization | Accepted | Data Quality | 2026-01-19 |
+| [ADR-028](ADR-028-filter-rules-externalization.md) | Filter Rules Externalization | Accepted | Configuration | 2026-01-20 |
 
 ## ADRs by Category
 
@@ -86,6 +87,7 @@ This directory contains Architecture Decision Records documenting significant ar
 
 ### Configuration
 - [ADR-025](ADR-025-pipeline-config-unification.md): Pipeline Config Unification
+- [ADR-028](ADR-028-filter-rules-externalization.md): Filter Rules Externalization — Hierarchical filter config
 
 ## ADR Relationships Graph
 
