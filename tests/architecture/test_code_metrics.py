@@ -71,8 +71,8 @@ class TestFileSizeLimits:
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
         "batch_executor.py": 785,  # 779 LOC - unified executor for batch processing + DQ context + MetadataCoordinator params
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
-        "gold_analyzer.py": 830,  # 827 LOC - Gold layer analysis with DQ rules
-        "silver_analyzer.py": 590,  # 570 LOC - Silver layer analysis with validation
+        "gold_analyzer.py": 835,  # 829 LOC - Gold layer analysis with extracted helper methods
+        "silver_analyzer.py": 650,  # 642 LOC - Silver layer analysis with extracted helper methods
         "dq_report_service.py": 565,  # 561 LOC - DQ report service with extracted helpers for CC reduction
         # Composition layer exemptions
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
@@ -100,7 +100,7 @@ class TestFileSizeLimits:
         # Application layer exemptions
         "base_transformer.py": 680,  # 667 LOC - BaseTransformer with serialization helpers
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
-        "merger.py": 690,  # 686 LOC - MergeService with type-safe coalesce  # 602 LOC - Composite merge service with join logic and conflict resolution + dual path + DOI normalization
+        "merger.py": 750,  # 742 LOC - MergeService with type-safe coalesce + extracted helper methods for explicit rules
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
@@ -231,7 +231,9 @@ class TestFunctionComplexity:
         "_check_value_distribution": 18,  # CC=17 - Value distribution analysis
         "_check_schema_drift": 14,  # CC=13 - Schema drift detection
         # Composite pipeline merge service
-        "_apply_explicit_rules": 20,  # CC=20 - Explicit field priority rules with column reordering
+        "_apply_explicit_rules": 11,  # CC=10 - Explicit field priority rules (refactored with helper methods)
+        # DQ analyzer extracted helper methods
+        "_execute_checks": 12,  # CC=11 - Execute all enabled DQ checks (inherent complexity from multiple check types)
         # Composite pipeline domain models (ADR-026)
         "DQOverrideConfig": 10,  # CC=9 - DQ override validation with threshold checks
         "from_dict": 8,  # CC=6 - Dictionary parsing with type conversions
@@ -525,7 +527,7 @@ class TestClassSize:
         "DQReportSerializer": 410,  # 403 lines - DQ report serialization with multiple formats (increased for CC reduction)
         "DQReportService": 410,  # 407 lines - DQ report orchestration with extracted helpers for CC reduction
         "GoldDQAnalyzer": 780,  # 779 lines - Gold layer DQ analysis with business rules
-        "SilverDQAnalyzer": 540,  # 521 lines - Silver layer DQ analysis with schema drift
+        "SilverDQAnalyzer": 600,  # 593 lines - Silver layer DQ analysis with extracted helper methods
         # Domain services
         "NormalizationService": 370,  # 364 lines - Normalization service with validation
         "ActivityAggregator": 320,  # 311 lines - Activity aggregation with multiple strategies
@@ -551,7 +553,7 @@ class TestClassSize:
         # Composition services
         "MetadataCoordinator": 315,  # 308 lines - Metadata coordination for Medallion layers
         # Composite pipeline services (ADR-026)
-        "MergeService": 655,  # 650 lines - Composite merge service with conflict resolution + dual path + DOI normalization
+        "MergeService": 700,  # 694 lines - Composite merge service with conflict resolution + extracted helper methods
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
         "CompositePipelineRunner": 375,  # 370 lines - Composite pipeline orchestrator
         # Publication adapters with APIRequestCollector (metadata enrichment)
