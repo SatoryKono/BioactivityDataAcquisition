@@ -29,6 +29,7 @@ from bioetl.domain.composite.result import (
     MergeResult,
     SeedResult,
 )
+from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.composite.strategy import (
     ConflictResolution,
     FallbackStrategy,
@@ -37,6 +38,7 @@ from bioetl.domain.composite.strategy import (
 
 __all__ = [
     "CompositeConfig",
+    "CompositePipelineState",
     "CompositeResult",
     "ConflictResolution",
     "EnricherConfig",
