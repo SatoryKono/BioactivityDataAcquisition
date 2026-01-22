@@ -40,11 +40,18 @@ if TYPE_CHECKING:
 
 __all__ = [
     "MetricsServerError",
+    # Deprecated aliases (backward compatibility)
     "bootstrap_dq_monitor",
+    # Canonical names (use these)
+    "bootstrap_dq_monitor_port",
     "bootstrap_logger",
+    "bootstrap_logger_port",
     "bootstrap_metrics",
+    "bootstrap_metrics_port",
     "bootstrap_observability",
+    "bootstrap_observability_bundle",
     "bootstrap_tracer",
+    "bootstrap_tracer_port",
     "start_metrics_server",
     "validate_observability_preflight",
 ]
@@ -95,16 +102,18 @@ def validate_observability_preflight(
         )
 
 
-def bootstrap_logger(
+def bootstrap_logger_port(
     pipeline: str,
     run_id: UUID | None = None,
     log_level: str = "INFO",
 ) -> LoggerPort:
-    """Create a logger for pipeline execution.
+    """Create a logger port implementation for pipeline execution.
 
     Uses UnifiedLogger which enforces the Log Schema from RULES.md §3.2.1:
     - Mandatory fields: run_id, pipeline (bound at initialization)
     - Stage field: defaults to "init" for LoggerPort compatibility
+
+    Layer: Returns domain port implementation (LoggerPort).
 
     Args:
         pipeline: Pipeline name for logger context.
@@ -125,15 +134,39 @@ def bootstrap_logger(
     )
 
 
-def bootstrap_tracer(
+def bootstrap_logger(
+    pipeline: str,
+    run_id: UUID | None = None,
+    log_level: str = "INFO",
+) -> LoggerPort:
+    """Create a logger for pipeline execution.
+
+    .. deprecated::
+        Use :func:`bootstrap_logger_port` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        pipeline: Pipeline name for logger context.
+        run_id: Unique run identifier. If None, generates a new UUID.
+        log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
+
+    Returns:
+        UnifiedLogger implementing LoggerPort with Log Schema enforcement.
+    """
+    return bootstrap_logger_port(pipeline=pipeline, run_id=run_id, log_level=log_level)
+
+
+def bootstrap_tracer_port(
     settings: Settings,
     service_name: str = "bioetl",
 ) -> TracingPort:
-    """Bootstrap distributed tracing for runtime execution.
+    """Create a tracing port implementation for distributed tracing.
 
     Unified Observability Contract: Always returns a valid TracingPort.
     When tracing is disabled or OpenTelemetry is not installed,
     returns NoOpTracing (silent fallback).
+
+    Layer: Returns domain port implementation (TracingPort).
 
     Args:
         settings: Application settings (MUST be injected, not loaded globally).
@@ -152,14 +185,36 @@ def bootstrap_tracer(
     return NoOpTracing()
 
 
-def bootstrap_metrics(settings: Settings) -> MetricsPort:
-    """Bootstrap metrics with optional server start for runtime execution.
+def bootstrap_tracer(
+    settings: Settings,
+    service_name: str = "bioetl",
+) -> TracingPort:
+    """Bootstrap distributed tracing for runtime execution.
+
+    .. deprecated::
+        Use :func:`bootstrap_tracer_port` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        settings: Application settings (MUST be injected, not loaded globally).
+        service_name: Name of the service for tracing context.
+
+    Returns:
+        TracingPort instance (OpenTelemetryTracer or NoOpTracing).
+    """
+    return bootstrap_tracer_port(settings=settings, service_name=service_name)
+
+
+def bootstrap_metrics_port(settings: Settings) -> MetricsPort:
+    """Create a metrics port implementation with optional server start.
 
     Unified Observability Contract: Always returns a valid MetricsPort.
     When metrics are disabled, returns NoOpMetrics (silent fallback).
 
     Server is started only if explicitly enabled in settings.
     Supports fail_fast mode for strict startup validation.
+
+    Layer: Returns domain port implementation (MetricsPort).
 
     Args:
         settings: Application settings.
@@ -201,13 +256,34 @@ def bootstrap_metrics(settings: Settings) -> MetricsPort:
     return metrics
 
 
-def bootstrap_dq_monitor(
+def bootstrap_metrics(settings: Settings) -> MetricsPort:
+    """Bootstrap metrics with optional server start for runtime execution.
+
+    .. deprecated::
+        Use :func:`bootstrap_metrics_port` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        settings: Application settings.
+
+    Returns:
+        MetricsPort instance (PrometheusMetrics or NoOpMetrics).
+
+    Raises:
+        MetricsServerError: If fail_fast=True and server fails to start.
+    """
+    return bootstrap_metrics_port(settings=settings)
+
+
+def bootstrap_dq_monitor_port(
     settings: Settings, logger: LoggerPort | None = None
 ) -> DQMonitorPort | None:
-    """Bootstrap data quality monitor for anomaly detection.
+    """Create a data quality monitor port implementation.
 
     Creates a DataQualityMonitor configured with settings from ObservabilitySettings.
     Returns None if dq_monitor_enabled=False.
+
+    Layer: Returns domain port implementation (DQMonitorPort) or None.
 
     Args:
         settings: Application settings.
@@ -250,13 +326,32 @@ def bootstrap_dq_monitor(
     return monitor
 
 
-def bootstrap_observability(
+def bootstrap_dq_monitor(
+    settings: Settings, logger: LoggerPort | None = None
+) -> DQMonitorPort | None:
+    """Bootstrap data quality monitor for anomaly detection.
+
+    .. deprecated::
+        Use :func:`bootstrap_dq_monitor_port` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        settings: Application settings.
+        logger: Optional logger for DQ monitor. If None, uses NoOpLogger.
+
+    Returns:
+        Configured DQMonitorPort or None if disabled.
+    """
+    return bootstrap_dq_monitor_port(settings=settings, logger=logger)
+
+
+def bootstrap_observability_bundle(
     pipeline: str,
     run_id: UUID,
     settings: Settings,
     log_level: str = "INFO",
 ) -> ObservabilityBundle:
-    """Bootstrap all observability components for pipeline execution.
+    """Create a complete observability bundle for pipeline execution.
 
     Unified Observability Contract:
     - Always returns a valid ObservabilityBundle with non-None logger and metrics
@@ -266,6 +361,9 @@ def bootstrap_observability(
 
     Creates a unified observability bundle containing logger, tracer, metrics,
     and data quality monitor.
+
+    Layer: Returns application-level bundle (ObservabilityBundle) containing
+    port implementations.
 
     Args:
         pipeline: Pipeline name for logger context.
@@ -280,10 +378,12 @@ def bootstrap_observability(
     Raises:
         ObservabilityContractError: If bundle creation fails validation.
     """
-    logger = bootstrap_logger(pipeline=pipeline, run_id=run_id, log_level=log_level)
-    tracer = bootstrap_tracer(settings)
-    metrics = bootstrap_metrics(settings)
-    dq_monitor = bootstrap_dq_monitor(settings, logger)
+    logger = bootstrap_logger_port(
+        pipeline=pipeline, run_id=run_id, log_level=log_level
+    )
+    tracer = bootstrap_tracer_port(settings)
+    metrics = bootstrap_metrics_port(settings)
+    dq_monitor = bootstrap_dq_monitor_port(settings, logger)
 
     bundle = ObservabilityBundle(
         logger=logger,
@@ -312,3 +412,32 @@ def bootstrap_observability(
     )
 
     return bundle
+
+
+def bootstrap_observability(
+    pipeline: str,
+    run_id: UUID,
+    settings: Settings,
+    log_level: str = "INFO",
+) -> ObservabilityBundle:
+    """Bootstrap all observability components for pipeline execution.
+
+    .. deprecated::
+        Use :func:`bootstrap_observability_bundle` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        pipeline: Pipeline name for logger context.
+        run_id: Unique run identifier.
+        settings: Application settings.
+        log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
+
+    Returns:
+        Configured ObservabilityBundle instance with valid implementations.
+
+    Raises:
+        ObservabilityContractError: If bundle creation fails validation.
+    """
+    return bootstrap_observability_bundle(
+        pipeline=pipeline, run_id=run_id, settings=settings, log_level=log_level
+    )

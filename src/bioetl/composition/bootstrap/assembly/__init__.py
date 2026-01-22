@@ -16,13 +16,27 @@ Note:
 from __future__ import annotations
 
 from bioetl.composition.bootstrap.assembly.checkpoint import (
+    # Deprecated aliases
     bootstrap_checkpoint,
+    # Canonical names
+    bootstrap_checkpoint_port,
     bootstrap_quarantine,
+    bootstrap_quarantine_port,
 )
-from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage
+from bioetl.composition.bootstrap.assembly.storage import (
+    # Deprecated alias
+    bootstrap_storage,
+    # Canonical name
+    bootstrap_storage_adapter,
+)
 
 __all__ = [
+    # Deprecated aliases (backward compatibility)
     "bootstrap_checkpoint",
+    # Canonical names (use these)
+    "bootstrap_checkpoint_port",
     "bootstrap_quarantine",
+    "bootstrap_quarantine_port",
     "bootstrap_storage",
+    "bootstrap_storage_adapter",
 ]

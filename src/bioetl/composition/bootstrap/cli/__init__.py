@@ -39,7 +39,10 @@ from bioetl.composition.bootstrap.cli.lock import bootstrap_lock_service
 from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
 from bioetl.composition.bootstrap.cli.storage import (
     bootstrap_bronze_cleanup_service,
+    # Deprecated alias
     bootstrap_cleanup,
+    # Canonical name
+    bootstrap_cleanup_service,
     bootstrap_export_service,
     bootstrap_lifecycle_service,
     bootstrap_vacuum_service,
@@ -48,12 +51,14 @@ from bioetl.composition.bootstrap.cli.storage import (
 __all__ = [
     # Health
     "HealthServerDependencies",
-    # Storage & Maintenance
+    # Storage & Maintenance (canonical)
     "bootstrap_bronze_cleanup_service",
     # Checkpoint & Quarantine
     "bootstrap_checkpoint_manager",
     "bootstrap_checkpoint_service",
+    # Storage & Maintenance (deprecated alias)
     "bootstrap_cleanup",
+    "bootstrap_cleanup_service",
     # Config
     "bootstrap_config_service",
     "bootstrap_export_service",

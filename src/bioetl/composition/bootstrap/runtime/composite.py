@@ -26,9 +26,9 @@ from bioetl.application.composite.runner import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
 )
-from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage
-from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
-from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline
+from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
+from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
+from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
@@ -45,7 +45,10 @@ if TYPE_CHECKING:
 
 __all__ = [
     "CompositeRuntimeConfig",
+    # Deprecated alias (backward compatibility)
     "bootstrap_composite_pipeline",
+    # Canonical name (use this)
+    "bootstrap_composite_runner",
     "load_composite_config",
 ]
 
@@ -86,12 +89,15 @@ def load_composite_config(name: str) -> CompositeConfig:
         raise ValueError(f"Invalid composite config '{name}': {e}") from e
 
 
-def bootstrap_composite_pipeline(
+def bootstrap_composite_runner(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     run_id: str | None = None,
 ) -> CompositePipelineRunner:
-    """Bootstrap a CompositePipelineRunner with all dependencies.
+    """Create a CompositePipelineRunner with all dependencies.
+
+    Layer: Returns application-level runner (CompositePipelineRunner) ready
+    for execution.
 
     Args:
         config: Composite pipeline configuration.
@@ -109,7 +115,7 @@ def bootstrap_composite_pipeline(
     settings = get_settings()
 
     # Bootstrap logger (without settings - uses log_level parameter)
-    logger = bootstrap_logger(
+    logger = bootstrap_logger_port(
         pipeline=config.name,
         run_id=UUID(effective_run_id),
         log_level="INFO",
@@ -117,7 +123,7 @@ def bootstrap_composite_pipeline(
 
     # Bootstrap storage for reading Silver tables and writing merged data
     # Enable CSV export for composite pipelines (merged Silver/Gold data)
-    storage = bootstrap_storage(enable_csv_export=True)
+    storage = bootstrap_storage_adapter(enable_csv_export=True)
 
     # Bootstrap lock (using in-memory lock for local execution)
     lock = MemoryLock()
@@ -138,7 +144,7 @@ def bootstrap_composite_pipeline(
             limit=runtime.seed_limit,
         )
         ctx = build_pipeline_context(config.seed.pipeline, options)
-        return bootstrap_pipeline(ctx)
+        return bootstrap_pipeline_runner(ctx)
 
     # Build enricher config lookup for fast access
     enricher_configs = {e.pipeline: e for e in config.enrichers}
@@ -200,7 +206,7 @@ def bootstrap_composite_pipeline(
             filter_field=filter_field,
         )
         ctx = build_pipeline_context(pipeline_name, options)
-        return bootstrap_pipeline(ctx)
+        return bootstrap_pipeline_runner(ctx)
 
     # Create services
     # Base path for resolving Silver table locations
@@ -256,6 +262,28 @@ def bootstrap_composite_pipeline(
         run_id=effective_run_id,
         dq_report_service=dq_report_service,
     )
+
+
+def bootstrap_composite_pipeline(
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    run_id: str | None = None,
+) -> CompositePipelineRunner:
+    """Bootstrap a CompositePipelineRunner with all dependencies.
+
+    .. deprecated::
+        Use :func:`bootstrap_composite_runner` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        config: Composite pipeline configuration.
+        runtime: Runtime options (resume, dry_run, etc.).
+        run_id: Optional run ID (generated if not provided).
+
+    Returns:
+        CompositePipelineRunner ready for execution.
+    """
+    return bootstrap_composite_runner(config=config, runtime=runtime, run_id=run_id)
 
 
 def _create_dq_report_service(
