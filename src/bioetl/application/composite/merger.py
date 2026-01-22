@@ -539,71 +539,142 @@ class MergeService:
         # Same as seed priority for now
         return self._coalesce_prefer_seed(df, enrichers)
 
+    def _collect_field_columns(
+        self,
+        field: str,
+        enrichers: Sequence[EnricherConfig],
+        available_columns: set[str],
+    ) -> list[str]:
+        """Collect all columns for a field including enricher prefixed versions.
+
+        Args:
+            field: Base field name.
+            enrichers: Sequence of enricher configurations.
+            available_columns: Set of available column names in DataFrame.
+
+        Returns:
+            List of column names including seed and enricher versions.
+        """
+        columns = [field] if field in available_columns else []
+        for enricher in enrichers:
+            prefixed = f"{enricher.pipeline}_{field}"
+            if prefixed in available_columns:
+                columns.append(prefixed)
+        return columns
+
+    def _order_columns_by_priority(
+        self,
+        field: str,
+        columns: list[str],
+        priorities: Sequence[str],
+    ) -> list[str]:
+        """Order columns by priority list, appending any remaining columns.
+
+        Args:
+            field: Base field name.
+            columns: List of available columns for this field.
+            priorities: Ordered list of source priorities.
+
+        Returns:
+            Ordered list of columns by priority.
+        """
+        ordered_cols: list[str] = []
+
+        for source in priorities:
+            if source in ("seed", "chembl"):  # Seed convention
+                if field in columns and field not in ordered_cols:
+                    ordered_cols.append(field)
+            else:
+                prefixed = f"{source}_{field}"
+                if prefixed in columns and prefixed not in ordered_cols:
+                    ordered_cols.append(prefixed)
+
+        # Add remaining columns not in priority list
+        for col in columns:
+            if col not in ordered_cols:
+                ordered_cols.append(col)
+
+        return ordered_cols
+
+    def _filter_compatible_columns(
+        self,
+        df: pl.DataFrame,
+        field: str,
+        ordered_cols: list[str],
+    ) -> tuple[list[str], list[str]]:
+        """Filter columns to only those compatible for coalescing.
+
+        Args:
+            df: DataFrame containing the columns.
+            field: Base field name for logging.
+            ordered_cols: Ordered list of column names.
+
+        Returns:
+            Tuple of (compatible_columns, incompatible_columns).
+        """
+        if not ordered_cols:
+            return [], []
+
+        base_col = ordered_cols[0]
+        compatible_cols = [base_col]
+        incompatible_cols: list[str] = []
+
+        for col in ordered_cols[1:]:
+            if self._can_coalesce(df, base_col, col):
+                compatible_cols.append(col)
+            else:
+                self._logger.debug(
+                    "Skipping column with incompatible type in explicit rules",
+                    field=field,
+                    incompatible_col=col,
+                    base_type=str(df[base_col].dtype),
+                    col_type=str(df[col].dtype),
+                )
+                incompatible_cols.append(col)
+
+        return compatible_cols, incompatible_cols
+
     def _apply_explicit_rules(
         self, df: pl.DataFrame, enrichers: Sequence[EnricherConfig]
     ) -> pl.DataFrame:
-        """Apply explicit field priority rules."""
+        """Apply explicit field priority rules.
+
+        Coalesces columns by priority, handling type compatibility.
+        """
         import polars as pl
 
         result = df
+        available_columns = set(df.columns)
 
         for field, priorities in self._config.field_priorities.items():
-            # Find all columns for this field
-            columns = [field]  # Seed column
-            for enricher in enrichers:
-                prefixed = f"{enricher.pipeline}_{field}"
-                if prefixed in df.columns:
-                    columns.append(prefixed)
+            columns = self._collect_field_columns(field, enrichers, available_columns)
 
             if len(columns) <= 1:
                 continue
 
-            # Reorder columns by priority
-            ordered_cols = []
-            for source in priorities:
-                if source == "seed" or source == "chembl":  # Seed convention
-                    if field in columns:
-                        ordered_cols.append(field)
-                else:
-                    prefixed = f"{source}_{field}"
-                    if prefixed in columns:
-                        ordered_cols.append(prefixed)
+            ordered_cols = self._order_columns_by_priority(field, columns, priorities)
 
-            # Add any remaining columns not in priority list
-            for col in columns:
-                if col not in ordered_cols:
-                    ordered_cols.append(col)
+            if not ordered_cols:
+                continue
 
-            if ordered_cols:
-                # Filter to only compatible types for coalescing
-                base_col = ordered_cols[0]
-                compatible_cols = [base_col]
-                cols_to_drop = []
+            compatible_cols, _ = self._filter_compatible_columns(
+                result, field, ordered_cols
+            )
 
-                for col in ordered_cols[1:]:
-                    if self._can_coalesce(result, base_col, col):
-                        compatible_cols.append(col)
-                    else:
-                        # Incompatible type - mark for dropping
-                        self._logger.debug(
-                            "Skipping column with incompatible type in explicit rules",
-                            field=field,
-                            incompatible_col=col,
-                            base_type=str(result[base_col].dtype),
-                            col_type=str(result[col].dtype),
-                        )
-                        cols_to_drop.append(col)
+            # Coalesce compatible columns
+            if len(compatible_cols) > 1:
+                result = result.with_columns(
+                    pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(field)
+                )
 
-                # Coalesce only compatible columns
-                if len(compatible_cols) > 1:
-                    result = result.with_columns(
-                        pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(field)
-                    )
-
-                # Drop all non-base columns (both coalesced and incompatible)
-                for col in ordered_cols[1:]:
-                    if col != field and col in result.columns:
-                        result = result.drop(col)
+            # Drop all non-base columns
+            cols_to_drop = [
+                col
+                for col in ordered_cols[1:]
+                if col != field and col in result.columns
+            ]
+            if cols_to_drop:
+                result = result.drop(cols_to_drop)
 
         return result
 

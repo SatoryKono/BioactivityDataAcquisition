@@ -14,7 +14,7 @@ Fetch modes:
 - Query search: Legacy - search by compound name
 
 DTO Support:
-- fetch_as_models(): Returns typed DTO models (PubChemCompoundRecord)
+- fetch_as_models(): Returns typed DTO models (PubchemMoleculeRecord)
 - fetch(): Returns raw dicts (backward compatible)
 
 Documentation: https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest
@@ -217,7 +217,7 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
                      If False, use model_construct (skip validation, faster).
 
         Yields:
-            Typed DTO models (PubChemCompoundRecord for compound)
+            Typed DTO models (PubchemMoleculeRecord for compound)
 
         Raises:
             ValueError: If entity_type is not supported for DTO conversion

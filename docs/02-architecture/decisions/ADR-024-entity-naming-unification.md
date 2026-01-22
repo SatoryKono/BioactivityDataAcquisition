@@ -187,6 +187,6 @@ bioetl run chembl_publication
 
 ## References
 
-- [glossary.md](../../../glossary.md) — Ubiquitous Language definitions
-- [RULES.md §8.2](../../../RULES.md) — Domain Layer guidelines
+- [glossary.md](../../glossary.md) — Ubiquitous Language definitions
+- [RULES.md §8.2](../../RULES.md) — Domain Layer guidelines
 - [ADR-021](ADR-021-ddd-aggregates-adoption.md) — DDD Aggregates

@@ -354,3 +354,34 @@ class PubchemMoleculeSchema(ETLRecordSchema):
         coerce = True
         name = "PubchemMoleculeSchema"
         description = "PubChem Molecule Silver layer validation"
+
+
+__all__ = [
+    "PubchemMoleculeSchema",
+]
+# Note: Deprecated alias (CompoundSchema) is provided via __getattr__
+# but not listed in __all__ since it is deprecated (ADR-024, glossary v2.0)
+
+
+# === Deprecated Alias (ADR-024, glossary v2.0) ===
+# This alias is retained for backward compatibility.
+# Use PubchemMoleculeSchema in new code.
+
+
+def __getattr__(name: str) -> type:
+    """Provide deprecated alias with warning.
+
+    Deprecated:
+        CompoundSchema: Use PubchemMoleculeSchema instead.
+    """
+    import warnings
+
+    if name == "CompoundSchema":
+        warnings.warn(
+            "CompoundSchema is deprecated, use PubchemMoleculeSchema instead "
+            "(ADR-024, glossary v2.0)",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return PubchemMoleculeSchema
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
