@@ -53,18 +53,17 @@ from bioetl.domain.value_objects.run_context import RunContext
 
 
 def _get_bioetl_version() -> str:
-    """Get BioETL package version safely."""
-    try:
-        from bioetl import __version__
+    """Get BioETL package version.
 
-        return __version__
-    except ImportError:
-        try:
-            from importlib.metadata import version as pkg_version
+    Returns:
+        Package version string.
 
-            return pkg_version("bioetl")
-        except Exception:
-            return "unknown"
+    Raises:
+        PackageNotFoundError: If bioetl package is not installed.
+    """
+    from importlib.metadata import version as pkg_version
+
+    return pkg_version("bioetl")
 
 
 class MetadataCoordinator:
