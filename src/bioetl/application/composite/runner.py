@@ -251,7 +251,9 @@ class CompositePipelineRunner:
         if not state.seed_completed:
             # Validate and transition to SEED_RUNNING before starting seed
             previous_state = state.state
-            self._validate_fsm_transition(previous_state, CompositePipelineState.SEED_RUNNING)
+            self._validate_fsm_transition(
+                previous_state, CompositePipelineState.SEED_RUNNING
+            )
             state = state.with_state(CompositePipelineState.SEED_RUNNING)
             self._log_fsm_transition(
                 from_state=previous_state,
@@ -349,7 +351,9 @@ class CompositePipelineRunner:
             # Validate and transition to ENRICHING state before starting enrichments
             enricher_names = [e.pipeline for e in enrichers_to_run]
             previous_state = state.state
-            self._validate_fsm_transition(previous_state, CompositePipelineState.ENRICHING)
+            self._validate_fsm_transition(
+                previous_state, CompositePipelineState.ENRICHING
+            )
             state = state.with_state(CompositePipelineState.ENRICHING)
             await self._checkpoint_manager.save(state)
 
@@ -495,7 +499,9 @@ class CompositePipelineRunner:
         if state.state == CompositePipelineState.SEED_COMPLETED:
             # Must go through ENRICHING first per FSM rules (no enrichers case)
             previous_state = state.state
-            self._validate_fsm_transition(previous_state, CompositePipelineState.ENRICHING)
+            self._validate_fsm_transition(
+                previous_state, CompositePipelineState.ENRICHING
+            )
             state = state.with_state(CompositePipelineState.ENRICHING)
             self._log_fsm_transition(
                 from_state=previous_state,
@@ -542,7 +548,9 @@ class CompositePipelineRunner:
         if not self._runtime.dry_run:
             # Validate and transition to MERGING state
             previous_state = state.state
-            self._validate_fsm_transition(previous_state, CompositePipelineState.MERGING)
+            self._validate_fsm_transition(
+                previous_state, CompositePipelineState.MERGING
+            )
             state = state.with_state(CompositePipelineState.MERGING)
             await self._save_checkpoint_safe(state, "merging")
 
@@ -621,7 +629,9 @@ class CompositePipelineRunner:
         # Validate and transition to COMPLETED state (only if not already COMPLETED from dry run)
         if state.state != CompositePipelineState.COMPLETED:
             previous_state = state.state
-            self._validate_fsm_transition(previous_state, CompositePipelineState.COMPLETED)
+            self._validate_fsm_transition(
+                previous_state, CompositePipelineState.COMPLETED
+            )
             state = state.with_state(CompositePipelineState.COMPLETED)
 
             # Log FSM transition to COMPLETED
@@ -798,9 +808,7 @@ class CompositePipelineRunner:
 
         # Validate and log FSM transition from FAILED to resume phase
         # allow_resume=True permits transitions from terminal FAILED state
-        self._validate_fsm_transition(
-            state.state, resume_phase, allow_resume=True
-        )
+        self._validate_fsm_transition(state.state, resume_phase, allow_resume=True)
         self._log_fsm_transition(
             from_state=state.state,
             to_state=resume_phase,
