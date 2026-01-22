@@ -6,6 +6,13 @@ All exceptions should inherit from BioETLError to enable consistent error handli
 Each exception class defines an explicit `error_type` attribute for deterministic
 error classification (see ErrorClassifier).
 
+Exception Categories (§7 RULES.md):
+    - ValidationErrors: Schema and data format validation errors
+    - DataQualityErrors: Batch-level data quality issues
+    - NetworkErrors: Network connectivity and external service errors
+    - InfrastructureErrors: Storage, filesystem, and environment errors
+    - InternalErrors: Critical application errors requiring immediate attention
+
 This module re-exports all exceptions for backward compatibility with:
     from bioetl.domain.exceptions import SomeError
 
@@ -25,16 +32,50 @@ Provider-Specific Exceptions:
     should catch ExternalServiceError instead.
 """
 
+# =============================================================================
+# Base Classes
+# =============================================================================
 from bioetl.domain.exceptions.base import (
     BioETLError,
     CriticalError,
     DataQualityError,
     RecoverableError,
 )
-from bioetl.domain.exceptions.critical import (
+
+# =============================================================================
+# DataQualityErrors - Batch-level data quality issues
+# =============================================================================
+from bioetl.domain.exceptions.data_quality import (
+    DataQualityThresholdError,
+)
+
+# =============================================================================
+# InfrastructureErrors - Storage, filesystem, and environment errors
+# =============================================================================
+from bioetl.domain.exceptions.infrastructure import (
+    BronzeValidationError,
+    BucketNotFoundError,
+    ConfigurationError,
+    DeltaOptimizeError,
+    DeltaSchemaValidationError,
+    DeltaTransactionError,
+    DeltaWriteConflictError,
+    FileSystemError,
+    InfrastructureError,
+    SchemaEvolutionError,
+    StorageError,
+    StorageQuotaExceededError,
+    TableNotFoundError,
+    UploadError,
+)
+
+# =============================================================================
+# InternalErrors - Critical application errors
+# =============================================================================
+from bioetl.domain.exceptions.internal import (
     AuthFailureError,
     CheckpointConflictError,
-    InfrastructureError,
+    InternalError,
     InvalidStateError,
     LockAcquisitionError,
     LockLostError,
@@ -43,59 +84,60 @@ from bioetl.domain.exceptions.critical import (
     PolicyViolationError,
     RunnerAlreadyExecutedError,
 )
-from bioetl.domain.exceptions.data_quality import (
-    DataQualityThresholdError,
+
+# =============================================================================
+# NetworkErrors - Network connectivity and external service errors
+# =============================================================================
+from bioetl.domain.exceptions.network import (
+    ApiError,
+    CircuitBreakerOpenError,
+    DataValidationError,
+    ExternalServiceError,
+    NetworkError,
+    RateLimitError,
+    RateLimitExceededError,
+    RetryExhaustedError,
+    ServiceAuthenticationError,
+    ServiceUnavailableError,
+    TimeoutError,
+)
+
+# =============================================================================
+# ValidationErrors - Schema and data format validation
+# =============================================================================
+from bioetl.domain.exceptions.validation import (
     InvalidDataFormatError,
     MissingRequiredFieldError,
     SchemaViolationError,
-)
-from bioetl.domain.exceptions.external_service import (
-    DataValidationError,
-    ExternalServiceError,
-    RateLimitExceededError,
-    ServiceAuthenticationError,
-    ServiceUnavailableError,
-)
-from bioetl.domain.exceptions.recoverable import (
-    ApiError,
-    CircuitBreakerOpenError,
-    NetworkError,
-    RateLimitError,
-    RetryExhaustedError,
-    TimeoutError,
-)
-from bioetl.domain.exceptions.storage import (
-    BronzeValidationError,
-    BucketNotFoundError,
-    DeltaOptimizeError,
-    DeltaSchemaValidationError,
-    DeltaTransactionError,
-    DeltaWriteConflictError,
-    SchemaEvolutionError,
-    StorageError,
-    StorageQuotaExceededError,
-    TableNotFoundError,
-    UploadError,
+    ValidationError,
 )
 
 __all__ = [
     "ApiError",
     "AuthFailureError",
+    # Base classes
     "BioETLError",
     "BronzeValidationError",
     "BucketNotFoundError",
     "CheckpointConflictError",
     "CircuitBreakerOpenError",
+    "ConfigurationError",
     "CriticalError",
     "DataQualityError",
+    # DataQualityErrors
     "DataQualityThresholdError",
     "DataValidationError",
     "DeltaOptimizeError",
     "DeltaSchemaValidationError",
     "DeltaTransactionError",
     "DeltaWriteConflictError",
+    # External service errors (NetworkErrors subcategory)
     "ExternalServiceError",
+    "FileSystemError",
+    # InfrastructureErrors
     "InfrastructureError",
+    # InternalErrors
+    "InternalError",
     "InvalidDataFormatError",
     "InvalidStateError",
     "LockAcquisitionError",
@@ -103,6 +145,7 @@ __all__ = [
     "MergeConflictError",
     "MetricsServerError",
     "MissingRequiredFieldError",
+    # NetworkErrors
     "NetworkError",
     "PolicyViolationError",
     "RateLimitError",
@@ -119,4 +162,6 @@ __all__ = [
     "TableNotFoundError",
     "TimeoutError",
     "UploadError",
+    # ValidationErrors
+    "ValidationError",
 ]
