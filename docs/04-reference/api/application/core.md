@@ -18,17 +18,18 @@ Orchestrates pipeline execution lifecycle. Coordinates locking, checkpointing, a
             - logger
             - services
 
-### PipelineExecutor
+### BatchExecutor
 
-Orchestrates data flow: extraction → transformation → writing.
+Orchestrates data flow: extraction → transformation → writing with adaptive batch sizing.
 
-::: bioetl.application.core.executor.PipelineExecutor
+::: bioetl.application.core.batch_executor.BatchExecutor
     options:
         show_root_heading: true
         show_source: false
         members:
             - __init__
             - execute
+            - process
             - batch_size
             - checkpoint_interval
 
