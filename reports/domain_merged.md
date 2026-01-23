@@ -5908,7 +5908,7 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     pmc_id: Series[str] = pa.Field(nullable=True)
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
     doi: Series[str] = pa.Field(nullable=True)
-    patent_id: Series[str] = pa.Field(nullable=True)
+    # patent_id excluded from unified publication schema
     title: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
@@ -5924,6 +5924,14 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     first_page: Series[str] = pa.Field(nullable=True)
     last_page: Series[str] = pa.Field(nullable=True)
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)
+
+    # Unified publication fields
+    citation_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    is_oa: Series[bool] = pa.Field(nullable=True)
+    language: Series[str] = pa.Field(nullable=True)
+
+    # System field (per SYSTEM_FIELDS_PREFIX)
+    source: Series[str] = pa.Field(nullable=True, alias="_source")
 
     # Lookup metadata
     # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
@@ -8282,13 +8290,12 @@ class ChemblPublication(BaseEntity):
     # Standardized to 'pmid' for cross-provider JOIN consistency (was 'pubmed_id')
     pmid: str | None = None  # Numeric string for cross-provider consistency
     doi: str | None = None
-    patent_id: str | None = None
 
     # Core metadata
     title: str | None = None
-    authors: str | None = None  # Combined authors string
+    authors: str | None = None  # JSON array of hashed author names
     abstract: str | None = None
-    doc_type: str | None = None  # PUBLICATION, PATENT, etc.
+    doc_type: str | None = None  # PUBLICATION, PATENT, DATASET, BOOK
 
     # Journal information
     journal: str | None = None
@@ -8303,8 +8310,16 @@ class ChemblPublication(BaseEntity):
     # Cross-reference IDs (ChEMBL doesn't provide PMC ID)
     pmc_id: str | None = None
 
+    # Unified publication fields (not available from ChEMBL API)
+    citation_count: int | None = None
+    is_oa: bool | None = None
+    language: str | None = None
+
     # Source information
     src_id: int | None = None
+
+    # System fields
+    _source: str = "chembl"  # Data source identifier
 
     # Lookup metadata (tracks resolution strategy)
     _lookup_method: str = "direct"  # ChEMBL uses direct extraction
@@ -13391,6 +13406,110 @@ class RunTypeEnum(str, Enum):
 
 
 # =============================================================================
+# Governance Metadata Components
+# =============================================================================
+
+
+class GovernanceLineageConfig(BaseModel):
+    """Governance-level lineage configuration from pipeline config.
+
+    Captures static lineage information defined in pipeline YAML,
+    separate from runtime lineage tracked in LineageMetadata.
+
+    Attributes:
+        source_system: Source system identifier (e.g., "chembl", "pubchem").
+        source_version: Version of source system/API.
+        extraction_method: How data was extracted (api, csv, parquet).
+        source_layer: Source Medallion layer (for Silver/Gold).
+        transformations: List of transformation steps applied.
+        filters_applied: Whether Gold filters were applied.
+        business_domain: Business domain classification.
+        use_cases: Intended use cases for the data.
+    """
+
+    source_system: str | None = Field(
+        default=None, description="Source system identifier"
+    )
+    source_version: str | None = Field(
+        default=None, description="Version of source system"
+    )
+    extraction_method: str | None = Field(
+        default=None, description="Extraction method (api, csv, parquet)"
+    )
+    source_layer: str | None = Field(default=None, description="Source Medallion layer")
+    transformations: list[str] = Field(
+        default_factory=list, description="Transformation steps applied"
+    )
+    filters_applied: bool | None = Field(
+        default=None, description="Whether filters were applied"
+    )
+    business_domain: str | None = Field(
+        default=None, description="Business domain classification"
+    )
+    use_cases: list[str] = Field(default_factory=list, description="Intended use cases")
+
+
+class QualityExpectations(BaseModel):
+    """Quality expectations for data governance.
+
+    Defines target quality metrics for the data layer.
+
+    Attributes:
+        completeness: Expected completeness rate (0.0-1.0).
+        accuracy: Expected accuracy rate (0.0-1.0).
+    """
+
+    completeness: float | None = Field(
+        default=None, ge=0.0, le=1.0, description="Expected completeness (0-1)"
+    )
+    accuracy: float | None = Field(
+        default=None, ge=0.0, le=1.0, description="Expected accuracy (0-1)"
+    )
+
+
+class GovernanceMetadata(BaseModel):
+    """Governance metadata for data stewardship and compliance.
+
+    Captures static governance information from pipeline configuration
+    that describes data ownership, retention, and SLA requirements.
+    This is separate from execution metadata (runtime, DQ metrics, etc.).
+
+    Attributes:
+        owner: Data owner team or individual.
+        steward: Data steward responsible for quality.
+        description: Human-readable description of the data.
+        tags: Classification tags for discovery.
+        retention_days: Data retention period in days.
+        sla_freshness_hours: SLA for data freshness in hours.
+        lineage: Static lineage configuration from pipeline config.
+        quality_expectations: Target quality metrics.
+        classification: Data classification level (public, internal, restricted).
+    """
+
+    owner: str | None = Field(default=None, description="Data owner")
+    steward: str | None = Field(default=None, description="Data steward")
+    description: str | None = Field(default=None, description="Data description")
+    tags: list[str] = Field(default_factory=list, description="Classification tags")
+    retention_days: int | None = Field(
+        default=None, ge=1, description="Retention period in days"
+    )
+    sla_freshness_hours: int | None = Field(
+        default=None, ge=1, description="SLA freshness in hours"
+    )
+    lineage: GovernanceLineageConfig = Field(
+        default_factory=GovernanceLineageConfig,
+        description="Static lineage configuration",
+    )
+    quality_expectations: QualityExpectations = Field(
+        default_factory=QualityExpectations,
+        description="Target quality metrics",
+    )
+    classification: str | None = Field(
+        default=None, description="Data classification (public, internal, restricted)"
+    )
+
+
+# =============================================================================
 # Common Components
 # =============================================================================
 
@@ -13852,6 +13971,7 @@ class BronzeMetadata(BaseModel):
     """Complete metadata for Bronze layer sidecar file.
 
     Structure follows RULES.md 2.4 lineage requirements.
+    Includes governance metadata block for data stewardship.
     """
 
     version: str = Field(default="1.0", description="Metadata schema version")
@@ -13865,12 +13985,15 @@ class BronzeMetadata(BaseModel):
         default_factory=OutputMetadata, description="Output information"
     )
     environment: EnvironmentMetadata = Field(description="Environment information")
+    governance: GovernanceMetadata | None = Field(
+        default=None, description="Governance metadata for data stewardship"
+    )
 
 
 class SilverMetadata(BaseModel):
     """Complete metadata for Silver layer sidecar file.
 
-    Includes lineage tracking from Bronze and DQ metrics.
+    Includes lineage tracking from Bronze, DQ metrics, and governance metadata.
     """
 
     version: str = Field(default="1.0", description="Metadata schema version")
@@ -13893,12 +14016,15 @@ class SilverMetadata(BaseModel):
         default=None,
         description="Path to corresponding DQ report file (if generated)",
     )
+    governance: GovernanceMetadata | None = Field(
+        default=None, description="Governance metadata for data stewardship"
+    )
 
 
 class GoldMetadata(BaseModel):
     """Complete metadata for Gold layer sidecar file.
 
-    Includes schema contract and SCD tracking.
+    Includes schema contract, SCD tracking, and governance metadata.
     """
 
     model_config = ConfigDict(populate_by_name=True)
@@ -13923,6 +14049,9 @@ class GoldMetadata(BaseModel):
     )
     scd: SCDMetadata | None = Field(default=None, description="SCD Type 2 metadata")
     environment: EnvironmentMetadata = Field(description="Environment information")
+    governance: GovernanceMetadata | None = Field(
+        default=None, description="Governance metadata for data stewardship"
+    )
 
 ================================================================================
 File: normalization.py
@@ -16272,6 +16401,7 @@ if TYPE_CHECKING:
     from bioetl.domain.models.metadata import (
         BronzeMetadata,
         GoldMetadata,
+        GovernanceMetadata,
         SilverMetadata,
         SourceMetadata,
     )
@@ -16293,6 +16423,7 @@ class BronzeMetadataInput:
                         details for rich lineage tracking.
         query_string: Query string from PipelineRunContext used for data
                      source filtering (e.g., 'assay_type=B').
+        governance: Optional governance metadata from pipeline config.
     """
 
     batch_id: BatchID
@@ -16303,6 +16434,7 @@ class BronzeMetadataInput:
     completed_at: datetime
     source_metadata: SourceMetadata | None = None
     query_string: str | None = None
+    governance: GovernanceMetadata | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -16320,6 +16452,10 @@ class SilverMetadataInput:
         transform_version: Optional semver version of transform applied.
         transform_steps: Optional list of transform step names applied.
         dq_report_path: Optional path to generated DQ report for cross-reference.
+        partition_by: Partition columns used for the Delta table.
+        governance: Optional governance metadata from pipeline config.
+        started_at: UTC timestamp when Silver write started.
+        completed_at: UTC timestamp when Silver write completed.
     """
 
     table_path: str
@@ -16332,6 +16468,10 @@ class SilverMetadataInput:
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
     dq_report_path: str | None = None
+    partition_by: list[str] | None = None
+    governance: GovernanceMetadata | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -16366,6 +16506,9 @@ class GoldMetadataInput:
         silver_refs: List of Silver source references for lineage tracking.
         transform_version: Optional semver version of transform applied.
         transform_steps: Optional list of transform step names applied.
+        gold_schema: Optional Pandera schema class for extracting schema metadata
+                    (contract_path, version, columns).
+        governance: Optional governance metadata from pipeline config.
     """
 
     table_path: str
@@ -16377,6 +16520,8 @@ class GoldMetadataInput:
     silver_refs: list[SilverRef] | None = None
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
+    gold_schema: Any | None = None  # Pandera DataFrameModel class
+    governance: GovernanceMetadata | None = None
 
 
 @runtime_checkable
@@ -18896,6 +19041,7 @@ from __future__ import annotations
 from bioetl.domain.schemas.column_order import (
     ALL_SYSTEM_FIELDS,
     DQ_FIELDS_SUFFIX,
+    LOOKUP_FIELDS_PREFIX,
     SYSTEM_FIELDS_PREFIX,
     canonical_column_order,
 )
@@ -18903,6 +19049,7 @@ from bioetl.domain.schemas.column_order import (
 __all__ = [
     "ALL_SYSTEM_FIELDS",
     "DQ_FIELDS_SUFFIX",
+    "LOOKUP_FIELDS_PREFIX",
     "SYSTEM_FIELDS_PREFIX",
     "canonical_column_order",
 ]
@@ -20094,8 +20241,14 @@ class ChemblPublicationSchema(PublicationBaseSchema):
         description="Document type.",
     )
 
+    # === System Fields ===
+    _source: Series[str] = pa.Field(
+        nullable=False,
+        default="chembl",
+        description="Data source identifier.",
+    )
+
     # === Provider-specific Identifiers ===
-    patent_id: Series[str] = pa.Field(nullable=True, description="Patent ID.")
     src_id: Series[int] = pa.Field(nullable=True, description="Source ID.")
 
     # === Provider-specific Journal Fields ===
@@ -20528,8 +20681,42 @@ SYSTEM_FIELDS_PREFIX: Final[tuple[str, ...]] = (
     "_run_id",
     "_run_type",
     "_source_batch_id",
+    "_source",
     "_ingestion_ts",
     "_index",
+)
+
+LOOKUP_FIELDS_PREFIX: Final[tuple[str, ...]] = (
+    "_lookup_method",
+    "_original_id",
+)
+
+PUBLICATION_METADATA_FIELDS: Final[tuple[str, ...]] = (
+    "authors",
+    "title",
+    "journal",
+    "year",
+    "volume",
+    "issue",
+    "first_page",
+    "last_page",
+    "language",
+)
+
+PUBLICATION_CROSSREF_FIELDS: Final[tuple[str, ...]] = (
+    "document_chembl_id",
+    "doi",
+    "pmid",
+    "pmc_id",
+)
+
+
+PUBLICATION_UNIFIED_FIELDS: Final[tuple[str, ...]] = (
+    "doc_type",
+    "is_oa",
+    "abstract",
+    "citation_count",
+    "publication_date",
 )
 
 # DQ flags that MUST appear last (in order), if present
@@ -20539,9 +20726,16 @@ DQ_FIELDS_SUFFIX: Final[tuple[str, ...]] = (
     "_dq_error",
 )
 
+
 # All system fields (prefix + suffix) for quick membership check
 ALL_SYSTEM_FIELDS: Final[frozenset[str]] = frozenset(
-    SYSTEM_FIELDS_PREFIX + DQ_FIELDS_SUFFIX
+    SYSTEM_FIELDS_PREFIX + LOOKUP_FIELDS_PREFIX + DQ_FIELDS_SUFFIX
+)
+
+ALL_PUBLICATION_FIELDS: Final[frozenset[str]] = frozenset(
+    PUBLICATION_METADATA_FIELDS
+    + PUBLICATION_CROSSREF_FIELDS
+    + PUBLICATION_UNIFIED_FIELDS
 )
 
 
@@ -20581,13 +20775,16 @@ def canonical_column_order(columns: list[str] | tuple[str, ...]) -> list[str]:
     # 1. System prefix fields (preserve defined order, skip missing)
     prefix = _filter_present(SYSTEM_FIELDS_PREFIX, columns_set)
 
+    # 2. Lookup fields (preserve defined order)
+    lookup = _filter_present(LOOKUP_FIELDS_PREFIX, columns_set)
+
     # 2. DQ suffix fields (preserve defined order, skip missing)
     suffix = _filter_present(DQ_FIELDS_SUFFIX, columns_set)
 
     # 3. Business fields (sorted alphabetically)
     business = sorted(columns_set - ALL_SYSTEM_FIELDS)
 
-    return prefix + business + suffix
+    return prefix + lookup + business + suffix
 
 ================================================================================
 File: __init__.py
@@ -20651,7 +20848,8 @@ class PublicationBaseSchema(ETLRecordSchema):
     - Publication metadata: journal, year, publication_date, doc_type, language
     - Metrics: citation_count
     - Open Access: is_oa
-    - Lookup tracking: _lookup_method, _original_id, source
+    - Lookup tracking: _lookup_method, _original_id
+    - System: _source (data source identifier)
     """
 
     # === Cross-reference IDs (common to all providers) ===
@@ -20732,9 +20930,11 @@ class PublicationBaseSchema(ETLRecordSchema):
         nullable=True,
         description="Original identifier from input (for fallback records)",
     )
-    source: Series[str] = pa.Field(
+
+    # === System field (per SYSTEM_FIELDS_PREFIX) ===
+    _source: Series[str] = pa.Field(
         nullable=True,
-        description="Data source identifier (e.g., pubmed, crossref, openalex)",
+        description="Data source identifier (e.g., chembl, pubmed, crossref, openalex)",
     )
 
     class Config:
@@ -30736,6 +30936,9 @@ class RunContext:
         entity: Entity type (e.g., 'activity').
         transform_version: Optional semver version of transform (e.g., '1.0.0').
         transform_steps: Tuple of transform step names applied.
+        pipeline_version: Pipeline version for reproducibility (e.g., '1.0.0').
+        git_commit: Git commit hash for reproducibility.
+        config_hash: SHA256 hash of pipeline configuration for change detection.
 
     Example:
         >>> from datetime import UTC, datetime
@@ -30749,6 +30952,9 @@ class RunContext:
         ...     entity="activity",
         ...     transform_version="1.0.0",
         ...     transform_steps=("normalize_values", "add_metadata"),
+        ...     pipeline_version="1.0.0",
+        ...     git_commit="abc123",
+        ...     config_hash="sha256:...",
         ... )
     """
 
@@ -30760,6 +30966,9 @@ class RunContext:
     entity: str
     transform_version: str | None = None
     transform_steps: tuple[str, ...] = ()
+    pipeline_version: str | None = None
+    git_commit: str | None = None
+    config_hash: str | None = None
 
     def __post_init__(self) -> None:
         """Validate run context after initialization."""
@@ -30788,6 +30997,9 @@ class RunContext:
         entity: str,
         transform_version: str | None = None,
         transform_steps: tuple[str, ...] | None = None,
+        pipeline_version: str | None = None,
+        git_commit: str | None = None,
+        config_hash: str | None = None,
     ) -> RunContext:
         """Factory method to create RunContext with derived pipeline_name.
 
@@ -30799,6 +31011,9 @@ class RunContext:
             entity: Entity type.
             transform_version: Optional semver version of transform.
             transform_steps: Optional tuple of transform step names.
+            pipeline_version: Optional pipeline version for metadata.
+            git_commit: Optional git commit hash for reproducibility.
+            config_hash: Optional SHA256 hash of pipeline config.
 
         Returns:
             RunContext with pipeline_name derived as '{provider}_{entity}'.
@@ -30812,6 +31027,9 @@ class RunContext:
             entity=entity,
             transform_version=transform_version,
             transform_steps=transform_steps or (),
+            pipeline_version=pipeline_version,
+            git_commit=git_commit,
+            config_hash=config_hash,
         )
 
 ================================================================================

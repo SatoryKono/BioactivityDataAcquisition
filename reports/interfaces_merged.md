@@ -1018,6 +1018,53 @@ maintenance.add_command(archive_command)
 maintenance.add_command(bronze_cleanup_command)
 
 ================================================================================
+File: metrics_server_integration.py
+Path: cli\commands\metrics_server_integration.py
+================================================================================
+"""Metrics server integration for CLI commands.
+
+Provides utilities for starting the Prometheus metrics HTTP server
+alongside pipeline operations. The metrics server exposes Prometheus-compatible
+metrics endpoint while pipelines execute.
+
+This module follows the thin controller pattern - it delegates to
+composition layer for server startup, keeping side-effects out of bootstrap.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Iterator
+from contextlib import contextmanager
+
+from bioetl.composition.entrypoints import ensure_metrics_server_started
+
+__all__ = [
+    "ensure_metrics_server_started",
+    "metrics_server_context",
+]
+
+
+@contextmanager
+def metrics_server_context() -> Iterator[bool]:
+    """Context manager that ensures metrics server is started.
+
+    Starts the Prometheus metrics HTTP server before yielding.
+    The server runs as a daemon thread and doesn't need explicit shutdown.
+
+    Yields:
+        True if server was started, False if disabled.
+
+    Example:
+        with metrics_server_context():
+            # Metrics server is running
+            await run_pipeline()
+        # Server continues running (daemon thread)
+    """
+    # Re-exported from entrypoints, use directly
+    started = ensure_metrics_server_started()
+    yield started
+
+================================================================================
 File: quarantine.py
 Path: cli\commands\quarantine.py
 ================================================================================
@@ -1301,6 +1348,9 @@ from bioetl.interfaces.cli.commands.health_server_integration import (
     echo_health_server_info,
     health_server_context,
 )
+from bioetl.interfaces.cli.commands.metrics_server_integration import (
+    ensure_metrics_server_started,
+)
 from bioetl.interfaces.cli.commands.run_helpers import (
     get_runner_logger,
     handle_destructive_run_confirmation,
@@ -1363,6 +1413,9 @@ async def _run_pipeline_async(
     Returns:
         Tuple of (status, error_message, error_type, run_id).
     """
+    # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
+    ensure_metrics_server_started()
+
     async with health_server_context(
         enabled=health_server_enabled,
         port=health_port,
@@ -1577,6 +1630,9 @@ from bioetl.interfaces.cli.commands.health_server_integration import (
     echo_health_server_info,
     health_server_context,
 )
+from bioetl.interfaces.cli.commands.metrics_server_integration import (
+    ensure_metrics_server_started,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
@@ -1685,6 +1741,9 @@ async def _run_all_pipelines_async(
     health_port: int = DEFAULT_HEALTH_SERVER_PORT,
 ) -> BatchRunResult:
     """Run all pipelines sequentially with optional health server."""
+    # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
+    ensure_metrics_server_started()
+
     async with health_server_context(enabled=health_server_enabled, port=health_port):
         service = get_pipeline_runner_service()
         return await _run_pipelines_batch(service, pipelines, options)
@@ -1921,6 +1980,9 @@ from bioetl.interfaces.cli.commands.health_server_integration import (
     echo_health_server_info,
     health_server_context,
 )
+from bioetl.interfaces.cli.commands.metrics_server_integration import (
+    ensure_metrics_server_started,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
@@ -1986,6 +2048,9 @@ async def _run_composite_async(
     Returns:
         Tuple of (success, error_message).
     """
+    # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
+    ensure_metrics_server_started()
+
     async with health_server_context(
         enabled=health_server_enabled,
         port=health_port,

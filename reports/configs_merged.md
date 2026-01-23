@@ -3312,8 +3312,8 @@ sink:
     # Metadata configuration (when save_metadata: true)
     metadata:
         lineage:
-        source_layer: "silver"
-        filters_applied: true
+          source_layer: "silver"
+          filters_applied: true
         business_domain: "drug-discovery"
         use_cases: ["ml-training", "reporting", "analytics"]
         description: "Business-ready <provider> <entity> data"

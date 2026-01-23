@@ -21425,6 +21425,7 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering.input_config import (
         InputFilterConfig as DomainInputFilterConfig,
     )
+    from bioetl.domain.models.metadata import GovernanceMetadata
 
 
 class FieldValidationConfig(BaseModel):
@@ -21914,6 +21915,132 @@ class SinkDQReportConfig(BaseModel):
     )
 
 
+class SinkLineageConfig(BaseModel):
+    """Lineage configuration within sink metadata.
+
+    Captures static lineage information for governance purposes.
+    """
+
+    source_system: str | None = Field(
+        default=None, description="Source system identifier"
+    )
+    source_version: str | None = Field(
+        default=None, description="Version of source system"
+    )
+    extraction_method: str | None = Field(
+        default=None, description="Extraction method (api, csv, parquet)"
+    )
+    source_layer: str | None = Field(
+        default=None, description="Source Medallion layer (bronze, silver)"
+    )
+    transformations: list[str] = Field(
+        default_factory=list, description="Transformation steps applied"
+    )
+    filters_applied: bool | None = Field(
+        default=None, description="Whether filters were applied"
+    )
+    business_domain: str | None = Field(
+        default=None, description="Business domain classification"
+    )
+    use_cases: list[str] = Field(default_factory=list, description="Intended use cases")
+
+
+class SinkQualityExpectationsConfig(BaseModel):
+    """Quality expectations configuration."""
+
+    completeness: float | None = Field(
+        default=None, ge=0.0, le=1.0, description="Expected completeness (0-1)"
+    )
+    accuracy: float | None = Field(
+        default=None, ge=0.0, le=1.0, description="Expected accuracy (0-1)"
+    )
+
+
+class SinkMetadataConfig(BaseModel):
+    """Governance metadata configuration for sink layers.
+
+    Captures data stewardship and compliance information from pipeline YAML.
+    This is written to the _metadata.yaml sidecar file alongside execution metadata.
+
+    Example YAML:
+        sink:
+          bronze:
+            save_metadata: true
+            metadata:
+              owner: "data-team"
+              steward: "chembl-owner"
+              description: "Raw ChEMBL activity data"
+              tags: ["chembl", "activity", "raw"]
+              retention_days: 90
+              sla_freshness_hours: 24
+              lineage:
+                source_system: "chembl"
+                extraction_method: "api"
+    """
+
+    owner: str | None = Field(default=None, description="Data owner team/individual")
+    steward: str | None = Field(default=None, description="Data steward")
+    description: str | None = Field(
+        default=None, description="Human-readable data description"
+    )
+    tags: list[str] = Field(
+        default_factory=list, description="Classification tags for discovery"
+    )
+    retention_days: int | None = Field(
+        default=None, ge=1, description="Data retention period in days"
+    )
+    sla_freshness_hours: int | None = Field(
+        default=None, ge=1, description="SLA for data freshness in hours"
+    )
+    lineage: SinkLineageConfig = Field(
+        default_factory=SinkLineageConfig,
+        description="Static lineage configuration",
+    )
+    quality_expectations: SinkQualityExpectationsConfig = Field(
+        default_factory=SinkQualityExpectationsConfig,
+        description="Target quality metrics",
+    )
+    classification: str | None = Field(
+        default=None, description="Data classification (public, internal, restricted)"
+    )
+
+    def to_domain(self) -> GovernanceMetadata:
+        """Convert to domain GovernanceMetadata model.
+
+        Returns:
+            GovernanceMetadata: Domain model for sidecar file.
+        """
+        from bioetl.domain.models.metadata import (
+            GovernanceLineageConfig,
+            GovernanceMetadata,
+            QualityExpectations,
+        )
+
+        return GovernanceMetadata(
+            owner=self.owner,
+            steward=self.steward,
+            description=self.description,
+            tags=self.tags,
+            retention_days=self.retention_days,
+            sla_freshness_hours=self.sla_freshness_hours,
+            lineage=GovernanceLineageConfig(
+                source_system=self.lineage.source_system,
+                source_version=self.lineage.source_version,
+                extraction_method=self.lineage.extraction_method,
+                source_layer=self.lineage.source_layer,
+                transformations=self.lineage.transformations,
+                filters_applied=self.lineage.filters_applied,
+                business_domain=self.lineage.business_domain,
+                use_cases=self.lineage.use_cases,
+            ),
+            quality_expectations=QualityExpectations(
+                completeness=self.quality_expectations.completeness,
+                accuracy=self.quality_expectations.accuracy,
+            ),
+            classification=self.classification,
+        )
+
+
 class SinkLayerConfig(BaseModel):
     """Configuration for a specific data layer (Bronze, Silver, Gold)."""
 
@@ -21948,6 +22075,12 @@ class SinkLayerConfig(BaseModel):
         default=False,
         description="If True, Delta data written directly to path without table_name subdirectory. "
         "CSV, metadata, and DQ reports use {table_name}_* naming pattern.",
+    )
+    # Governance metadata configuration
+    metadata: SinkMetadataConfig | None = Field(
+        default=None,
+        description="Governance metadata configuration for sidecar files. "
+        "Includes owner, steward, tags, retention, SLA, and lineage info.",
     )
 
 
@@ -22315,6 +22448,57 @@ from __future__ import annotations
 
 import pyarrow as pa
 
+# ---------------------------------------------------------
+# Schema for ChEMBL Publication (formerly Document)
+# See: https://www.ebi.ac.uk/chembl/api/data/document
+# Column order: SYSTEM_FIELDS_PREFIX, LOOKUP_FIELDS_PREFIX,
+#               PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS,
+#               other fields (alphabetical), DQ_FIELDS_SUFFIX
+# ---------------------------------------------------------
+CHEMBL_PUBLICATION_SCHEMA = pa.schema(
+    [
+        # === SYSTEM_FIELDS_PREFIX ===
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_source", pa.string()),  # Data source identifier: "chembl"
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+        # === LOOKUP_FIELDS_PREFIX ===
+        pa.field("_lookup_method", pa.string()),
+        pa.field("_original_id", pa.string()),
+        # === PUBLICATION_METADATA_FIELDS ===
+        pa.field("authors", pa.string()),  # JSON array of author names
+        pa.field("title", pa.string()),
+        pa.field("journal", pa.string()),
+        pa.field("year", pa.int64()),
+        pa.field("volume", pa.string()),
+        pa.field("issue", pa.string()),
+        pa.field("first_page", pa.string()),
+        pa.field("last_page", pa.string()),
+        pa.field("language", pa.string()),  # Unified field, null for ChEMBL
+        # === PUBLICATION_CROSSREF_FIELDS ===
+        pa.field("document_chembl_id", pa.string()),  # Primary key
+        pa.field("doi", pa.string()),
+        pa.field("pmid", pa.string()),  # PubMed ID (numeric string)
+        pa.field("pmc_id", pa.string()),  # PubMed Central ID, null for ChEMBL
+        # === Other fields (alphabetical) ===
+        pa.field("abstract", pa.string()),
+        pa.field("citation_count", pa.int64()),  # Unified field, null for ChEMBL
+        pa.field("doc_type", pa.string()),  # PUBLICATION, PATENT, DATASET, BOOK
+        pa.field("is_oa", pa.bool_()),  # Unified field, null for ChEMBL
+        pa.field("journal_full_title", pa.string()),
+        pa.field("publication_date", pa.string()),  # Unified field, null for ChEMBL
+        pa.field("src_id", pa.int64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
+    ]
+)
+
+# ---------------------------------------------------------
 # Schema for ChEMBL Activity (all fields from ChEMBL API)
 # See: https://www.ebi.ac.uk/chembl/api/data/activity
 CHEMBL_ACTIVITY_SCHEMA = pa.schema(
@@ -22699,51 +22883,6 @@ CHEMBL_CELL_LINE_SCHEMA = pa.schema(
         pa.field("cellosaurus_id", pa.string()),
         pa.field("cl_lincs_id", pa.string()),
         pa.field("efo_id", pa.string()),
-    ]
-)
-
-# Schema for ChEMBL Publication (formerly Document)
-# See: https://www.ebi.ac.uk/chembl/api/data/document
-CHEMBL_PUBLICATION_SCHEMA = pa.schema(
-    [
-        # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
-        # === Business fields (alphabetical order) ===
-        # Lookup metadata
-        # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-        # _original_id: Original identifier used for lookup (document_chembl_id for direct)
-        pa.field("_lookup_method", pa.string()),
-        pa.field("_original_id", pa.string()),
-        pa.field("abstract", pa.string()),
-        pa.field("authors", pa.string()),
-        pa.field("doc_type", pa.string()),
-        pa.field("document_chembl_id", pa.string()),
-        pa.field("doi", pa.string()),
-        pa.field("first_page", pa.string()),
-        pa.field("issue", pa.string()),
-        pa.field("journal", pa.string()),
-        pa.field("journal_full_title", pa.string()),
-        pa.field("last_page", pa.string()),
-        pa.field("patent_id", pa.string()),
-        # Cross-reference IDs for linking publications across providers
-        # pmc_id: PubMed Central ID (format: "PMC1234567") - nullable, may not exist for all publications
-        pa.field("pmc_id", pa.string()),
-        # pmid: PubMed ID (numeric string: "12345678")
-        pa.field("pmid", pa.string()),
-        pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD (from year)
-        pa.field("src_id", pa.int64()),
-        pa.field("title", pa.string()),
-        pa.field("volume", pa.string()),
-        pa.field("year", pa.int64()),
-        # === DQ suffix (MUST be last, per RULES.md §2.4) ===
-        pa.field("_dq_warn", pa.bool_()),
-        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -24193,6 +24332,176 @@ class AtomicWriteGroup:
         if exc_type is not None:
             self.rollback()
         # If no exception, user should have called commit()
+
+================================================================================
+File: arrow_converter.py
+Path: storage\arrow_converter.py
+================================================================================
+"""Arrow table conversion utilities for Delta Lake writers.
+
+Extracts Arrow table preparation logic from GoldWriter to reduce
+file size and improve reusability.
+
+Implements RULES.md §2.4 and ADR-014 for deterministic writes.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
+import pyarrow as pa
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort
+
+
+class ArrowDataConverter:
+    """Converter for preparing PyArrow tables for Delta Lake writes.
+
+    Handles:
+    - Null type coercion (Delta Lake doesn't support null type)
+    - Canonical column ordering (ADR-014)
+    - Primary key sorting for deterministic writes
+
+    This class extracts the Arrow table preparation logic from GoldWriter
+    to reduce file size and improve testability.
+    """
+
+    def __init__(self, logger: LoggerPort | None = None) -> None:
+        """Initialize Arrow converter.
+
+        Args:
+            logger: Optional logger for diagnostics.
+        """
+        self._logger = logger
+
+    def sanitize_type_for_delta(self, dtype: pa.DataType) -> pa.DataType:
+        """Recursively replace null types with string for Delta Lake compatibility.
+
+        Delta Lake doesn't support null type in any form. This method converts:
+        - null -> string
+        - list<null> -> list<string>
+        - struct with null fields -> struct with string fields
+        - map with null key/value types -> map with string types
+
+        Args:
+            dtype: PyArrow DataType to sanitize.
+
+        Returns:
+            Sanitized DataType with null replaced by string.
+        """
+        if pa.types.is_null(dtype):
+            return pa.string()
+        elif pa.types.is_list(dtype):
+            inner = self.sanitize_type_for_delta(dtype.value_type)
+            return pa.list_(inner)
+        elif pa.types.is_large_list(dtype):
+            inner = self.sanitize_type_for_delta(dtype.value_type)
+            return pa.large_list(inner)
+        elif pa.types.is_struct(dtype):
+            new_fields = [
+                pa.field(f.name, self.sanitize_type_for_delta(f.type), f.nullable)
+                for f in dtype
+            ]
+            return pa.struct(new_fields)
+        elif pa.types.is_map(dtype):
+            key_type = self.sanitize_type_for_delta(dtype.key_type)
+            item_type = self.sanitize_type_for_delta(dtype.item_type)
+            return pa.map_(key_type, item_type)
+        return dtype
+
+    def convert_records_to_arrow(
+        self,
+        records: list[dict[str, Any]],
+        primary_keys: list[str] | None = None,
+    ) -> pa.Table:
+        """Convert records to PyArrow table with null type handling.
+
+        Performs:
+        1. Convert records to Arrow table
+        2. Apply canonical column order (ADR-014)
+        3. Coerce null types to string (Delta Lake compatibility)
+        4. Sort by primary keys for deterministic writes
+
+        Args:
+            records: List of record dictionaries.
+            primary_keys: Optional list of columns for sorting.
+
+        Returns:
+            PyArrow Table ready for Delta Lake write.
+        """
+        from bioetl.domain.schemas.column_order import canonical_column_order
+
+        arrow_data = pa.Table.from_pylist(records)
+
+        # Enforce canonical column order (ADR-014, RULES.md §2.4)
+        ordered_columns = canonical_column_order(list(arrow_data.column_names))
+        arrow_data = arrow_data.select(ordered_columns)
+
+        # Check if schema needs sanitization (contains null types)
+        schema_str = str(arrow_data.schema).lower()
+        if "null" in schema_str:
+            arrow_data = self._sanitize_null_columns(arrow_data)
+
+        # Sort by primary keys for deterministic writes
+        if primary_keys:
+            valid_keys = [pk for pk in primary_keys if pk in arrow_data.schema.names]
+            if valid_keys:
+                arrow_data = arrow_data.sort_by(
+                    [(pk, "ascending") for pk in valid_keys]
+                )
+
+        return arrow_data
+
+    def _sanitize_null_columns(self, arrow_data: pa.Table) -> pa.Table:
+        """Sanitize null-typed columns in Arrow table.
+
+        Converts columns with null type to string type while preserving
+        the null values. This is necessary because Delta Lake doesn't
+        support null type.
+
+        Args:
+            arrow_data: Arrow table that may contain null-typed columns.
+
+        Returns:
+            Arrow table with null columns converted to string type.
+        """
+        new_columns = []
+        new_fields = []
+
+        for i, field in enumerate(arrow_data.schema):
+            col = arrow_data.column(i)
+            new_type = self.sanitize_type_for_delta(field.type)
+
+            if pa.types.is_null(field.type):
+                # Create string array with all nulls
+                new_col = pa.array([None] * len(col), type=pa.string())
+                new_columns.append(new_col)
+            elif new_type != field.type:
+                # Try to cast for nested types
+                try:
+                    new_columns.append(col.cast(new_type))
+                except pa.ArrowInvalid:
+                    # If cast fails, convert to string via Python
+                    new_columns.append(
+                        pa.array(
+                            [
+                                str(v) if v is not None else None
+                                for v in col.to_pylist()
+                            ],
+                            type=pa.string(),
+                        )
+                    )
+            else:
+                new_columns.append(col)
+
+            new_fields.append(pa.field(field.name, new_type, field.nullable))
+
+        new_schema = pa.schema(new_fields)
+        return pa.Table.from_arrays(new_columns, schema=new_schema)
+
+
+__all__ = ["ArrowDataConverter"]
 
 ================================================================================
 File: base_delta_writer.py
@@ -25801,6 +26110,7 @@ class GoldWriter(BaseDeltaWriter):
                 ingestion_ts=ingestion_ts,
                 run_id=run_id,
                 silver_refs=silver_refs,
+                gold_schema=schema,
             )
 
     def _validate_write_mode(self, mode: str) -> GoldWriteMode:
@@ -25949,19 +26259,12 @@ class GoldWriter(BaseDeltaWriter):
         if not records:
             return
 
-        # Extract provider/entity from table_name for filename generation
-        if "/" in table_name:
-            # Handle path-like table names (e.g., 'composite/publication')
-            parts = table_name.split("/")
-            provider_name = parts[0] if len(parts) > 1 else "composite"
-            entity_name = parts[-1]
-        elif "_" in table_name:
-            parts = table_name.split("_", 1)
-            provider_name = parts[0]
-            entity_name = parts[1] if len(parts) > 1 else parts[0]
-        else:
-            provider_name = "composite"
-            entity_name = table_name if table_name else "unknown"
+        from bioetl.infrastructure.storage.metadata_builder import (
+            GoldMetadataBuilder,
+            _parse_table_name,
+        )
+
+        provider_name, entity_name = _parse_table_name(table_name)
 
         if self._metadata_coordinator is None:
             self.logger.debug(
@@ -25971,80 +26274,18 @@ class GoldWriter(BaseDeltaWriter):
             )
             return
 
-        from datetime import UTC, datetime
-        from importlib.metadata import version as pkg_version
-        from platform import node as hostname
-        from platform import python_version
-
-        from bioetl.domain.models.metadata import (
-            DQSummary,
-            EnvironmentMetadata,
-            GoldMetadata,
-            GoldOutputMetadata,
-            LineageMetadata,
-            PipelineMetadata,
-            RuntimeMetadata,
-            RunTypeEnum,
+        # Build metadata using the extracted builder
+        builder = GoldMetadataBuilder(
+            transform_version=self._transform_version,
+            transform_steps=self._transform_steps,
         )
-
-        # Build metadata
-        now = datetime.now(UTC)
-        runtime = RuntimeMetadata(
-            run_id=run_id or "",
-            run_type=RunTypeEnum.INCREMENTAL,
-            started_at_utc=now,
-            completed_at_utc=now,
-        )
-
-        pipeline = PipelineMetadata(
-            name=f"composite_{entity_name}",
-            provider=provider_name,
-            entity=entity_name,
-        )
-
-        # Build lineage with sources_used via source_tables
-        lineage = LineageMetadata(
-            bronze_paths=[],
-            transform_version=self._transform_version or "1.0.0",
-            transform_steps=list(self._transform_steps)
-            if self._transform_steps
-            else ["merge"],
-            source_tables=dict.fromkeys(sources_used or [], 0),
-        )
-
-        # Build DQ summary
-        dq_summary = DQSummary(
-            total_records=len(records),
-            valid_records=len(records),
-            error_records=0,
-            error_rate=0.0,
-        )
-
-        # Build output metadata
-        output = GoldOutputMetadata(
-            record_count=len(records),
-        )
-
-        # Build environment metadata
-        try:
-            bioetl_version = pkg_version("bioetl")
-        except Exception:
-            bioetl_version = "unknown"
-
-        environment = EnvironmentMetadata(
-            hostname=hostname(),
-            python_version=python_version(),
-            bioetl_version=bioetl_version,
-        )
-
-        # Build complete metadata
-        metadata = GoldMetadata(
-            runtime=runtime,
-            pipeline=pipeline,
-            lineage=lineage,
-            dq_summary=dq_summary,
-            output=output,
-            environment=environment,
+        metadata = builder.build_merged_metadata(
+            table_path=table_path,
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+            run_id=run_id,
+            sources_used=sources_used,
         )
 
         await self._metadata_writer.write_gold_metadata(
@@ -26197,6 +26438,7 @@ class GoldWriter(BaseDeltaWriter):
         ingestion_ts: datetime | None,
         run_id: RunID | None,
         silver_refs: list[Any] | None = None,
+        gold_schema: Any | None = None,
     ) -> None:
         """Write Gold layer metadata sidecar file.
 
@@ -26209,24 +26451,14 @@ class GoldWriter(BaseDeltaWriter):
             ingestion_ts: Ingestion timestamp.
             run_id: Run identifier.
             silver_refs: List of SilverRef for Gold lineage tracking.
+            gold_schema: Optional Pandera schema class for extracting schema metadata.
         """
         if not records:
             return
 
-        # Extract pipeline info from table name for filename generation
-        # table_name format: {provider}.{entity}, {provider}_{entity}, or just {entity}
-        if "." in table_name:
-            parts = table_name.split(".")
-            provider_name = parts[0]
-            entity_name = parts[1] if len(parts) > 1 else parts[0]
-        elif "_" in table_name:
-            # Try underscore format (e.g., chembl_publication)
-            parts = table_name.split("_", 1)  # Split only on first underscore
-            provider_name = parts[0]
-            entity_name = parts[1] if len(parts) > 1 else parts[0]
-        else:
-            provider_name = "unknown"
-            entity_name = table_name if table_name else "unknown"
+        from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
+
+        provider_name, entity_name = _parse_table_name(table_name)
 
         # Use MetadataCoordinator if available (centralized metadata)
         if self._metadata_coordinator is not None:
@@ -26254,6 +26486,7 @@ class GoldWriter(BaseDeltaWriter):
                 silver_refs=converted_refs,
                 transform_version=self._transform_version,
                 transform_steps=self._transform_steps,
+                gold_schema=gold_schema,
             )
             metadata = self._metadata_coordinator.create_gold_metadata(gold_input)
             await self._metadata_writer.write_gold_metadata(
@@ -26267,84 +26500,20 @@ class GoldWriter(BaseDeltaWriter):
             return
 
         # Fallback to local metadata building (backward compatibility)
-        from datetime import UTC
-        from importlib.metadata import version as pkg_version
-        from platform import node as hostname
-        from platform import python_version
+        from bioetl.infrastructure.storage.metadata_builder import GoldMetadataBuilder
 
-        from bioetl.domain.models.metadata import (
-            DQSummary,
-            EnvironmentMetadata,
-            GoldMetadata,
-            GoldOutputMetadata,
-            LineageMetadata,
-            PipelineMetadata,
-            RuntimeMetadata,
-            RunTypeEnum,
-            SCDMetadata,
+        builder = GoldMetadataBuilder(
+            transform_version=self._transform_version,
+            transform_steps=self._transform_steps,
         )
-
-        # Build runtime metadata
-        now = ingestion_ts or datetime.now(UTC)
-        runtime = RuntimeMetadata(
-            run_id=str(run_id) if run_id else "",
-            run_type=RunTypeEnum.INCREMENTAL,  # Gold is always incremental
-            started_at_utc=now,
-            completed_at_utc=now,
-        )
-
-        # Use already extracted provider/entity from top of method
-        pipeline = PipelineMetadata(
-            name=f"{provider_name}_{entity_name}",
-            provider=provider_name,
-            entity=entity_name,
-        )
-
-        # Build lineage (Gold layer sources from Silver)
-        lineage = LineageMetadata()
-
-        # Build DQ summary (basic metrics)
-        dq_summary = DQSummary(
-            total_records=len(records),
-            valid_records=len(records),
-        )
-
-        # Build output metrics
-        output = GoldOutputMetadata(
-            record_count=len(records),
-        )
-
-        # Build SCD metadata if applicable
-        scd = None
-        if mode == GoldWriteMode.SCD2 and scd_config:
-            scd = SCDMetadata(
-                enabled=True,
-                effective_date_column=scd_config.get("valid_from_col", "_valid_from"),
-                end_date_column=scd_config.get("valid_to_col", "_valid_to"),
-                current_flag_column=scd_config.get("current_flag_col", "_is_current"),
-            )
-
-        # Build environment info
-        try:
-            bioetl_version = pkg_version("bioetl")
-        except Exception:
-            bioetl_version = "unknown"
-
-        environment = EnvironmentMetadata(
-            hostname=hostname(),
-            python_version=python_version(),
-            bioetl_version=bioetl_version,
-        )
-
-        # Build complete metadata
-        metadata = GoldMetadata(
-            runtime=runtime,
-            pipeline=pipeline,
-            lineage=lineage,
-            dq_summary=dq_summary,
-            output=output,
-            scd=scd,
-            environment=environment,
+        metadata = builder.build_fallback_metadata(
+            table_name=table_name,
+            records=records,
+            mode=mode,
+            scd_config=scd_config,
+            ingestion_ts=ingestion_ts,
+            run_id=run_id,
+            gold_schema=gold_schema,
         )
 
         # Write metadata sidecar file
@@ -26362,80 +26531,18 @@ class GoldWriter(BaseDeltaWriter):
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, func, *args)
 
-    def _sanitize_type_for_delta(self, dtype: pa.DataType) -> pa.DataType:
-        """Recursively replace null types with string (Delta Lake doesn't support null)."""
-        if pa.types.is_null(dtype):
-            return pa.string()
-        elif pa.types.is_list(dtype):
-            inner = self._sanitize_type_for_delta(dtype.value_type)
-            return pa.list_(inner)
-        elif pa.types.is_large_list(dtype):
-            inner = self._sanitize_type_for_delta(dtype.value_type)
-            return pa.large_list(inner)
-        elif pa.types.is_struct(dtype):
-            new_fields = [
-                pa.field(f.name, self._sanitize_type_for_delta(f.type), f.nullable)
-                for f in dtype
-            ]
-            return pa.struct(new_fields)
-        elif pa.types.is_map(dtype):
-            key_type = self._sanitize_type_for_delta(dtype.key_type)
-            item_type = self._sanitize_type_for_delta(dtype.item_type)
-            return pa.map_(key_type, item_type)
-        return dtype
-
     def _to_arrow_table(self, records: list[dict[str, Any]]) -> pa.Table:
         """Convert records to PyArrow table, handling null types.
 
         Delta Lake doesn't support null type, so we convert null columns to string.
         This includes nested null types (e.g., list<null>).
+
+        Delegates to ArrowDataConverter for the actual conversion.
         """
-        from bioetl.domain.schemas.column_order import canonical_column_order
+        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
 
-        arrow_data = pa.Table.from_pylist(records)
-
-        # Enforce canonical column order (not alphabetical!)
-        # Per ADR-014 Deterministic Writes and RULES.md §2.4
-        ordered_columns = canonical_column_order(list(arrow_data.column_names))
-        arrow_data = arrow_data.select(ordered_columns)
-
-        # Check if schema needs sanitization (contains null types anywhere)
-        # Use lowercase check since PyArrow may print "null" or "Null"
-        schema_str = str(arrow_data.schema).lower()
-        if "null" in schema_str:
-            # Can't cast null to string directly, need to rebuild columns
-            new_columns = []
-            new_fields = []
-            for i, field in enumerate(arrow_data.schema):
-                col = arrow_data.column(i)
-                new_type = self._sanitize_type_for_delta(field.type)
-                if pa.types.is_null(field.type):
-                    # Create string array with all nulls
-                    new_col = pa.array([None] * len(col), type=pa.string())
-                    new_columns.append(new_col)
-                elif new_type != field.type:
-                    # Try to cast for nested types
-                    try:
-                        new_columns.append(col.cast(new_type))
-                    except pa.ArrowInvalid:
-                        # If cast fails, convert to string via Python
-                        new_columns.append(
-                            pa.array(
-                                [
-                                    str(v) if v is not None else None
-                                    for v in col.to_pylist()
-                                ],
-                                type=pa.string(),
-                            )
-                        )
-                else:
-                    new_columns.append(col)
-                new_fields.append(pa.field(field.name, new_type, field.nullable))
-
-            new_schema = pa.schema(new_fields)
-            arrow_data = pa.Table.from_arrays(new_columns, schema=new_schema)
-
-        return arrow_data
+        converter = ArrowDataConverter(logger=self.logger)
+        return converter.convert_records_to_arrow(records)
 
     async def _write_simple(
         self,
@@ -26683,6 +26790,531 @@ class GoldWriter(BaseDeltaWriter):
             arrow_table = arrow_table.sort_by([("valid_from", "ascending")])
         result: list[dict[str, Any]] = arrow_table.to_pylist()
         return result
+
+================================================================================
+File: metadata_builder.py
+Path: storage\metadata_builder.py
+================================================================================
+"""Metadata builder services for Medallion layer sidecar files.
+
+Extracts metadata building logic from SilverWriter and GoldWriter
+to reduce file size and improve maintainability.
+
+Implements RULES.md §2.3 and ADR-026 for metadata creation.
+"""
+
+from __future__ import annotations
+
+import inspect
+from datetime import UTC, datetime
+from importlib.metadata import version as pkg_version
+from platform import node as hostname
+from platform import python_version
+from typing import TYPE_CHECKING, Any, Literal
+
+if TYPE_CHECKING:
+    from bioetl.domain.medallion import GoldWriteMode
+    from bioetl.domain.models.metadata import (
+        GoldMetadata,
+        SchemaMetadata,
+        SilverMetadata,
+    )
+
+
+def _get_bioetl_version() -> str:
+    """Get bioetl package version.
+
+    Returns:
+        Version string or 'unknown' if not installed.
+    """
+    try:
+        return pkg_version("bioetl")
+    except Exception:
+        return "unknown"
+
+
+def _get_git_commit_cached() -> str | None:
+    """Get git commit hash directly via subprocess.
+
+    This is a fallback for metadata builders when MetadataCoordinator
+    is not available. Uses subprocess directly to avoid layer violations
+    (infrastructure cannot import composition).
+
+    Returns:
+        Short git commit hash or None.
+    """
+    import subprocess
+
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+        return None
+    except (subprocess.SubprocessError, FileNotFoundError, OSError):
+        return None
+
+
+def _parse_table_name(table_name: str) -> tuple[str, str]:
+    """Parse table name into provider and entity components.
+
+    Handles multiple formats:
+    - Dot notation: 'chembl.activity' -> ('chembl', 'activity')
+    - Path notation: 'composite/publication' -> ('composite', 'publication')
+    - Underscore notation: 'chembl_activity' -> ('chembl', 'activity')
+    - Plain name: 'activity' -> ('unknown', 'activity')
+
+    Args:
+        table_name: Table name in any supported format.
+
+    Returns:
+        Tuple of (provider_name, entity_name).
+    """
+    if "." in table_name:
+        parts = table_name.split(".")
+        return parts[0], parts[1] if len(parts) > 1 else parts[0]
+    elif "/" in table_name:
+        parts = table_name.split("/")
+        return (parts[0] if len(parts) > 1 else "composite"), parts[-1]
+    elif "_" in table_name:
+        parts = table_name.split("_", 1)
+        return parts[0], parts[1] if len(parts) > 1 else parts[0]
+    return "unknown", table_name if table_name else "unknown"
+
+
+def _extract_schema_metadata(gold_schema: Any | None) -> SchemaMetadata:
+    """Extract schema metadata from a Pandera DataFrameModel.
+
+    Extracts contract_path, version, columns, and validation mode from
+    the Pandera schema class for Gold layer metadata tracking.
+
+    Args:
+        gold_schema: Pandera DataFrameModel class (not instance).
+
+    Returns:
+        SchemaMetadata with populated fields, or default if schema is None.
+    """
+    from bioetl.domain.models.metadata import SchemaColumnMetadata, SchemaMetadata
+
+    if gold_schema is None:
+        return SchemaMetadata()
+
+    # Extract contract_path from module path
+    contract_path: str | None = None
+    try:
+        module = inspect.getmodule(gold_schema)
+        if module and module.__file__:
+            # Convert absolute path to relative path from project root
+            # e.g., .../src/bioetl/domain/contracts/gold/chembl.py
+            # -> src/bioetl/domain/contracts/gold/chembl.py
+            file_path = module.__file__
+            if "src/bioetl" in file_path:
+                idx = file_path.find("src/bioetl")
+                contract_path = file_path[idx:]
+    except Exception:
+        pass
+
+    # Extract schema version from Config if defined
+    version = "1.0"
+    if hasattr(gold_schema, "Config"):
+        config = gold_schema.Config
+        version = getattr(config, "version", "1.0")
+        if not isinstance(version, str):
+            version = str(version)
+
+    # Determine validation mode
+    validation: Literal["strict", "lenient"] = "strict"
+    if hasattr(gold_schema, "Config"):
+        config = gold_schema.Config
+        is_strict = getattr(config, "strict", True)
+        validation = "strict" if is_strict else "lenient"
+
+    # Extract column definitions
+    columns: list[SchemaColumnMetadata] = []
+    try:
+        # Try to get schema columns using Pandera's to_schema() method
+        if hasattr(gold_schema, "to_schema"):
+            schema_instance = gold_schema.to_schema()
+            if hasattr(schema_instance, "columns"):
+                for col_name, col_schema in schema_instance.columns.items():
+                    # Get the dtype as string
+                    dtype_str = str(col_schema.dtype) if col_schema.dtype else "object"
+                    # Simplify dtype string (remove pandera.dtypes. prefix)
+                    if "." in dtype_str:
+                        dtype_str = dtype_str.split(".")[-1]
+
+                    nullable = getattr(col_schema, "nullable", True)
+                    columns.append(
+                        SchemaColumnMetadata(
+                            name=col_name,
+                            type=dtype_str,
+                            nullable=nullable,
+                        )
+                    )
+    except Exception:
+        # If schema extraction fails, leave columns empty
+        pass
+
+    return SchemaMetadata(
+        contract_path=contract_path,
+        version=version,
+        validation=validation,
+        columns=columns,
+    )
+
+
+class SilverMetadataBuilder:
+    """Builder for Silver layer metadata objects.
+
+    Extracts the metadata building logic from SilverWriter to reduce
+    file size and improve testability.
+
+    Used for:
+    - Standard Silver metadata (when MetadataCoordinator is not available)
+    - Merged Silver metadata (for composite pipelines)
+    """
+
+    def __init__(
+        self,
+        transform_version: str | None = None,
+        transform_steps: tuple[str, ...] | None = None,
+    ) -> None:
+        """Initialize metadata builder.
+
+        Args:
+            transform_version: Semver version of transform (e.g., '1.0.0').
+            transform_steps: Tuple of transform step names.
+        """
+        self._transform_version = transform_version
+        self._transform_steps = transform_steps or ()
+
+    def build_merged_metadata(
+        self,
+        table_path: str,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str],
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+        version_after: int | None = None,
+        partition_by: list[str] | None = None,
+    ) -> SilverMetadata:
+        """Build Silver metadata for merged composite data.
+
+        Args:
+            table_path: Full path to the Delta table.
+            table_name: Table name for pipeline identification.
+            records: List of records written.
+            primary_keys: Primary key columns used.
+            run_id: Composite run ID.
+            sources_used: List of source pipelines (e.g., ['seed', 'crossref']).
+            version_after: Delta table version after write.
+            partition_by: Partition columns used for the Delta table.
+
+        Returns:
+            SilverMetadata object ready for serialization.
+        """
+        from bioetl.domain.models.metadata import (
+            DeltaMetrics,
+            DQSummary,
+            EnvironmentMetadata,
+            LineageMetadata,
+            PipelineMetadata,
+            RuntimeMetadata,
+            RunTypeEnum,
+            SilverMetadata,
+            SilverOutputMetadata,
+        )
+
+        provider_name, entity_name = _parse_table_name(table_name)
+
+        now = datetime.now(UTC)
+        runtime = RuntimeMetadata(
+            run_id=run_id or "",
+            run_type=RunTypeEnum.INCREMENTAL,
+            started_at_utc=now,
+            completed_at_utc=now,
+        )
+
+        pipeline = PipelineMetadata(
+            name=f"composite_{entity_name}",
+            provider=provider_name,
+            entity=entity_name,
+            version=_get_bioetl_version(),
+            git_commit=_get_git_commit_cached(),
+        )
+
+        lineage = LineageMetadata(
+            bronze_paths=[],
+            transform_version=self._transform_version or "1.0.0",
+            transform_steps=list(self._transform_steps)
+            if self._transform_steps
+            else ["merge"],
+            source_tables=dict.fromkeys(sources_used or [], 0),
+        )
+
+        delta = DeltaMetrics(
+            table_path=table_path,
+            operation="overwrite",
+            primary_key=primary_keys,
+            partition_by=partition_by or [],
+            version_after=version_after,
+            rows_inserted=len(records),
+        )
+
+        dq_summary = DQSummary(
+            total_records=len(records),
+            valid_records=len(records),
+            error_records=0,
+            error_rate=0.0,
+        )
+
+        output = SilverOutputMetadata(
+            record_count=len(records),
+        )
+
+        environment = EnvironmentMetadata(
+            hostname=hostname(),
+            python_version=python_version(),
+            bioetl_version=_get_bioetl_version(),
+        )
+
+        return SilverMetadata(
+            runtime=runtime,
+            pipeline=pipeline,
+            lineage=lineage,
+            delta=delta,
+            dq_summary=dq_summary,
+            output=output,
+            environment=environment,
+        )
+
+
+class GoldMetadataBuilder:
+    """Builder for Gold layer metadata objects.
+
+    Extracts the metadata building logic from GoldWriter to reduce
+    file size and improve testability.
+
+    Used for:
+    - Standard Gold metadata (when MetadataCoordinator is not available)
+    - Merged Gold metadata (for composite pipelines)
+    """
+
+    def __init__(
+        self,
+        transform_version: str | None = None,
+        transform_steps: tuple[str, ...] | None = None,
+    ) -> None:
+        """Initialize metadata builder.
+
+        Args:
+            transform_version: Semver version of transform (e.g., '1.0.0').
+            transform_steps: Tuple of transform step names.
+        """
+        self._transform_version = transform_version
+        self._transform_steps = transform_steps or ()
+
+    def build_fallback_metadata(
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
+        mode: GoldWriteMode,
+        scd_config: dict[str, Any] | None = None,
+        ingestion_ts: datetime | None = None,
+        run_id: Any | None = None,
+        gold_schema: Any | None = None,
+    ) -> GoldMetadata:
+        """Build Gold metadata using fallback logic (no coordinator).
+
+        Args:
+            table_name: Table name for pipeline identification.
+            records: List of records written.
+            mode: Gold write mode (overwrite, append, scd2).
+            scd_config: SCD2 configuration if applicable.
+            ingestion_ts: Ingestion timestamp.
+            run_id: Run identifier.
+            gold_schema: Optional Pandera schema class for extracting schema metadata.
+
+        Returns:
+            GoldMetadata object ready for serialization.
+        """
+        from bioetl.domain.medallion import GoldWriteMode
+        from bioetl.domain.models.metadata import (
+            DQSummary,
+            EnvironmentMetadata,
+            GoldMetadata,
+            GoldOutputMetadata,
+            LineageMetadata,
+            PipelineMetadata,
+            RuntimeMetadata,
+            RunTypeEnum,
+            SCDMetadata,
+        )
+
+        provider_name, entity_name = _parse_table_name(table_name)
+
+        now = ingestion_ts or datetime.now(UTC)
+        runtime = RuntimeMetadata(
+            run_id=str(run_id) if run_id else "",
+            run_type=RunTypeEnum.INCREMENTAL,
+            started_at_utc=now,
+            completed_at_utc=now,
+        )
+
+        pipeline = PipelineMetadata(
+            name=f"{provider_name}_{entity_name}",
+            provider=provider_name,
+            entity=entity_name,
+            version=_get_bioetl_version(),
+            git_commit=_get_git_commit_cached(),
+        )
+
+        lineage = LineageMetadata()
+
+        dq_summary = DQSummary(
+            total_records=len(records),
+            valid_records=len(records),
+        )
+
+        output = GoldOutputMetadata(
+            record_count=len(records),
+        )
+
+        scd = None
+        if mode == GoldWriteMode.SCD2 and scd_config:
+            scd = SCDMetadata(
+                enabled=True,
+                effective_date_column=scd_config.get("valid_from_col", "_valid_from"),
+                end_date_column=scd_config.get("valid_to_col", "_valid_to"),
+                current_flag_column=scd_config.get("current_flag_col", "_is_current"),
+            )
+
+        environment = EnvironmentMetadata(
+            hostname=hostname(),
+            python_version=python_version(),
+            bioetl_version=_get_bioetl_version(),
+        )
+
+        # Extract schema metadata from Gold schema
+        schema_info = _extract_schema_metadata(gold_schema)
+
+        # Note: schema_info uses Field(alias="schema") with populate_by_name=True
+        # mypy doesn't understand this Pydantic feature, but it works at runtime
+        return GoldMetadata(  # type: ignore[call-arg]
+            runtime=runtime,
+            pipeline=pipeline,
+            lineage=lineage,
+            schema_info=schema_info,
+            dq_summary=dq_summary,
+            output=output,
+            scd=scd,
+            environment=environment,
+        )
+
+    def build_merged_metadata(
+        self,
+        table_path: str,
+        table_name: str,
+        records: list[dict[str, Any]],
+        primary_keys: list[str],
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+        gold_schema: Any | None = None,
+    ) -> GoldMetadata:
+        """Build Gold metadata for merged composite data.
+
+        Args:
+            table_path: Full path to the Delta table.
+            table_name: Table name for pipeline identification.
+            records: List of records written.
+            primary_keys: Primary key columns (unused but kept for symmetry).
+            run_id: Composite run ID.
+            sources_used: List of source pipelines.
+            gold_schema: Optional Pandera schema class for extracting schema metadata.
+
+        Returns:
+            GoldMetadata object ready for serialization.
+        """
+        from bioetl.domain.models.metadata import (
+            DQSummary,
+            EnvironmentMetadata,
+            GoldMetadata,
+            GoldOutputMetadata,
+            LineageMetadata,
+            PipelineMetadata,
+            RuntimeMetadata,
+            RunTypeEnum,
+        )
+
+        provider_name, entity_name = _parse_table_name(table_name)
+
+        now = datetime.now(UTC)
+        runtime = RuntimeMetadata(
+            run_id=run_id or "",
+            run_type=RunTypeEnum.INCREMENTAL,
+            started_at_utc=now,
+            completed_at_utc=now,
+        )
+
+        pipeline = PipelineMetadata(
+            name=f"composite_{entity_name}",
+            provider=provider_name,
+            entity=entity_name,
+            version=_get_bioetl_version(),
+            git_commit=_get_git_commit_cached(),
+        )
+
+        lineage = LineageMetadata(
+            bronze_paths=[],
+            transform_version=self._transform_version or "1.0.0",
+            transform_steps=list(self._transform_steps)
+            if self._transform_steps
+            else ["merge"],
+            source_tables=dict.fromkeys(sources_used or [], 0),
+        )
+
+        dq_summary = DQSummary(
+            total_records=len(records),
+            valid_records=len(records),
+            error_records=0,
+            error_rate=0.0,
+        )
+
+        output = GoldOutputMetadata(
+            record_count=len(records),
+        )
+
+        environment = EnvironmentMetadata(
+            hostname=hostname(),
+            python_version=python_version(),
+            bioetl_version=_get_bioetl_version(),
+        )
+
+        # Extract schema metadata from Gold schema
+        schema_info = _extract_schema_metadata(gold_schema)
+
+        # Note: schema_info uses Field(alias="schema") with populate_by_name=True
+        return GoldMetadata(  # type: ignore[call-arg]
+            runtime=runtime,
+            pipeline=pipeline,
+            lineage=lineage,
+            schema_info=schema_info,
+            dq_summary=dq_summary,
+            output=output,
+            environment=environment,
+        )
+
+
+__all__ = [
+    "GoldMetadataBuilder",
+    "SilverMetadataBuilder",
+]
 
 ================================================================================
 File: metadata_writer.py
@@ -27228,6 +27860,8 @@ Note:
 from __future__ import annotations
 
 import asyncio
+import time
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any, Literal
 
 import orjson
@@ -27250,7 +27884,6 @@ from bioetl.infrastructure.storage.base_delta_writer import (
 )
 
 if TYPE_CHECKING:
-    from datetime import datetime
     from pathlib import Path
 
     from bioetl.domain.ports import (
@@ -27748,6 +28381,7 @@ class SilverWriter(BaseDeltaWriter):
             Lock validation is performed at Application layer (BatchWriter)
             per RULES.md §4.6 Safety Guard.
         """
+        started_at, start_perf = datetime.now(UTC), time.perf_counter()
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_silver") as span:
             span.set_attribute("table_name", table_name)
@@ -27810,7 +28444,10 @@ class SilverWriter(BaseDeltaWriter):
 
             # Get Delta version after write for lineage tracking (REQ-LINEAGE-002)
             version_after = await self._get_delta_version(table_path)
-
+            # Calculate completed_at (ADR-014: deterministic from start + duration)
+            completed_at = started_at + timedelta(
+                seconds=time.perf_counter() - start_perf
+            )
             # Write metadata sidecar file if configured
             await self._write_silver_metadata(
                 table_path=table_path,
@@ -27820,6 +28457,9 @@ class SilverWriter(BaseDeltaWriter):
                 mode=validated_mode,
                 bronze_refs=bronze_refs,
                 dq_metrics=dq_metrics,
+                partition_by=partition_cols,
+                started_at=started_at,
+                completed_at=completed_at,
             )
 
             # Return SilverWriteResult for Gold lineage tracking (REQ-LINEAGE-002)
@@ -27973,6 +28613,9 @@ class SilverWriter(BaseDeltaWriter):
         bronze_refs: list[BronzeWriteResult] | None = None,
         dq_metrics: BatchDQMetrics | None = None,
         dq_report_path: str | None = None,
+        partition_by: list[str] | None = None,
+        started_at: datetime | None = None,
+        completed_at: datetime | None = None,
     ) -> None:
         """Write Silver layer metadata sidecar file.
 
@@ -27982,33 +28625,19 @@ class SilverWriter(BaseDeltaWriter):
             records: List of records written.
             primary_keys: Primary key columns used.
             mode: Write mode used (merge, append, delete).
-            bronze_refs: Optional list of BronzeWriteResult for lineage tracking.
-                If provided, bronze_paths will be populated from relative_path
-                of each BronzeWriteResult (REQ-LINEAGE-001).
-            dq_metrics: Optional BatchDQMetrics with computed DQ metrics.
-                If provided, dq_summary will contain real column metrics,
-                schema drift info, and error rates (REQ-DQ-001).
-            dq_report_path: Optional path to generated DQ report for cross-reference.
+            bronze_refs: Optional BronzeWriteResult list for lineage (REQ-LINEAGE-001).
+            dq_metrics: Optional BatchDQMetrics for DQ summary (REQ-DQ-001).
+            dq_report_path: Optional path to generated DQ report.
+            partition_by: Partition columns used for the Delta table.
+            started_at: UTC timestamp when Silver write started.
+            completed_at: UTC timestamp when Silver write completed.
         """
         if not records:
             return
 
-        # Extract pipeline info from table_name for filename generation
-        # table_name format: {provider}.{entity}, {provider}_{entity}, or just {entity}
-        # Note: We use table_name instead of table_path to be platform-independent
-        # and support flat_structure mode where path doesn't contain entity info.
-        if "." in table_name:
-            parts = table_name.split(".")
-            provider_name = parts[0]
-            entity_name = parts[1] if len(parts) > 1 else parts[0]
-        elif "_" in table_name:
-            # Split on first underscore (e.g., chembl_publication -> chembl, publication)
-            parts = table_name.split("_", 1)
-            provider_name = parts[0]
-            entity_name = parts[1] if len(parts) > 1 else parts[0]
-        else:
-            provider_name = "unknown"
-            entity_name = table_name if table_name else "unknown"
+        from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
+
+        provider_name, entity_name = _parse_table_name(table_name)
 
         if self._metadata_coordinator is None:
             self.logger.warning(
@@ -28020,7 +28649,6 @@ class SilverWriter(BaseDeltaWriter):
 
         from bioetl.domain.ports import SilverMetadataInput
 
-        # Get Delta version after write
         version_after = await self._get_delta_version(table_path)
 
         silver_input = SilverMetadataInput(
@@ -28034,6 +28662,9 @@ class SilverWriter(BaseDeltaWriter):
             transform_version=self._transform_version,
             transform_steps=self._transform_steps,
             dq_report_path=dq_report_path,
+            partition_by=partition_by,
+            started_at=started_at,
+            completed_at=completed_at,
         )
         metadata = self._metadata_coordinator.create_silver_metadata(silver_input)
         await self._metadata_writer.write_silver_metadata(
@@ -28291,19 +28922,12 @@ class SilverWriter(BaseDeltaWriter):
         if not records:
             return
 
-        # Extract provider/entity from table_name for filename generation
-        if "/" in table_name:
-            # Handle path-like table names (e.g., 'composite/publication')
-            parts = table_name.split("/")
-            provider_name = parts[0] if len(parts) > 1 else "composite"
-            entity_name = parts[-1]
-        elif "_" in table_name:
-            parts = table_name.split("_", 1)
-            provider_name = parts[0]
-            entity_name = parts[1] if len(parts) > 1 else parts[0]
-        else:
-            provider_name = "composite"
-            entity_name = table_name if table_name else "unknown"
+        from bioetl.infrastructure.storage.metadata_builder import (
+            SilverMetadataBuilder,
+            _parse_table_name,
+        )
+
+        provider_name, entity_name = _parse_table_name(table_name)
 
         if self._metadata_coordinator is None:
             self.logger.debug(
@@ -28313,94 +28937,22 @@ class SilverWriter(BaseDeltaWriter):
             )
             return
 
-        from datetime import UTC, datetime
-        from importlib.metadata import version as pkg_version
-        from platform import node as hostname
-        from platform import python_version
-
-        from bioetl.domain.models.metadata import (
-            DeltaMetrics,
-            DQSummary,
-            EnvironmentMetadata,
-            LineageMetadata,
-            PipelineMetadata,
-            RuntimeMetadata,
-            RunTypeEnum,
-            SilverMetadata,
-            SilverOutputMetadata,
-        )
-
         # Get Delta version after write
         version_after = await self._get_delta_version(table_path)
 
-        # Build metadata
-        now = datetime.now(UTC)
-        runtime = RuntimeMetadata(
-            run_id=run_id or "",
-            run_type=RunTypeEnum.INCREMENTAL,
-            started_at_utc=now,
-            completed_at_utc=now,
+        # Build metadata using the extracted builder
+        builder = SilverMetadataBuilder(
+            transform_version=self._transform_version,
+            transform_steps=self._transform_steps,
         )
-
-        pipeline = PipelineMetadata(
-            name=f"composite_{entity_name}",
-            provider=provider_name,
-            entity=entity_name,
-        )
-
-        # Build lineage with sources_used via source_tables
-        lineage = LineageMetadata(
-            bronze_paths=[],
-            transform_version=self._transform_version or "1.0.0",
-            transform_steps=list(self._transform_steps)
-            if self._transform_steps
-            else ["merge"],
-            source_tables=dict.fromkeys(sources_used or [], 0),
-        )
-
-        # Build Delta metrics
-        delta = DeltaMetrics(
+        metadata = builder.build_merged_metadata(
             table_path=table_path,
-            operation="overwrite",
-            primary_key=primary_keys,
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+            run_id=run_id,
+            sources_used=sources_used,
             version_after=version_after,
-            rows_inserted=len(records),
-        )
-
-        # Build DQ summary
-        dq_summary = DQSummary(
-            total_records=len(records),
-            valid_records=len(records),
-            error_records=0,
-            error_rate=0.0,
-        )
-
-        # Build output metadata
-        output = SilverOutputMetadata(
-            record_count=len(records),
-        )
-
-        # Build environment metadata
-        try:
-            bioetl_version = pkg_version("bioetl")
-        except Exception:
-            bioetl_version = "unknown"
-
-        environment = EnvironmentMetadata(
-            hostname=hostname(),
-            python_version=python_version(),
-            bioetl_version=bioetl_version,
-        )
-
-        # Build complete metadata
-        metadata = SilverMetadata(
-            runtime=runtime,
-            pipeline=pipeline,
-            lineage=lineage,
-            delta=delta,
-            dq_summary=dq_summary,
-            output=output,
-            environment=environment,
         )
 
         await self._metadata_writer.write_silver_metadata(
