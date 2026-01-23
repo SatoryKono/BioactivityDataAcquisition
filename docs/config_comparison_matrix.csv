@@ -1,4 +1,4 @@
-Parameter Path,_base,chembl/activity,chembl/assay,chembl/assay_parameters,chembl/cell_line,chembl/compound_record,chembl/molecule,chembl/protein_class,chembl/publication,chembl/publication_similarity,chembl/publication_term,chembl/target,chembl/target_component,composite/publication,crossref/publication,openalex/publication,pubchem/compound,pubmed/publications,semanticscholar/publication,uniprot/idmapping,uniprot/protein
+Parameter Path,_base,chembl/activity,chembl/assay,chembl/assay_parameters,chembl/cell_line,chembl/compound_record,chembl/molecule,chembl/protein_class,chembl/publication,chembl/publication_similarity,chembl/publication_term,chembl/target,chembl/target_component,composite/publication,crossref/publication,openalex/publication,pubchem/compound,pubmed/publication,semanticscholar/publication,uniprot/idmapping,uniprot/protein
 batch_size,—,—,—,—,—,—,—,500,—,—,—,—,—,—,—,—,—,—,—,—,—
 checkpoint_interval,—,—,—,—,—,—,—,500,—,—,—,—,—,—,—,—,—,—,—,—,—
 circuit_breaker,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
@@ -7,12 +7,12 @@ description,—,Extract biological activity records from ChEMBL API,Extract bioa
 dq_config_file,—,—,—,../../dq/entities/chembl/assay_parameters.yaml,../../dq/entities/chembl/cell_line.yaml,../../dq/entities/chembl/compound_record.yaml,../../dq/entities/chembl/molecule.yaml,../../dq/entities/chembl/protein_class.yaml,../../dq/entities/chembl/publication.yaml,../../dq/entities/chembl/publication_similarity.yaml,../../dq/entities/chembl/publication_term.yaml,../../dq/entities/chembl/target.yaml,../../dq/entities/chembl/target_component.yaml,—,../../dq/entities/crossref/publication.yaml,../../dq/entities/openalex/publication.yaml,../../dq/entities/pubchem/compound.yaml,—,../../dq/entities/semanticscholar/publication.yaml,../../dq/entities/uniprot/idmapping.yaml,—
 dq_rules,(dict),(dict),(dict),—,—,—,(dict),—,—,—,—,(dict),—,—,—,—,(dict),—,—,—,—
 entity_type,—,activity,assay,assay_parameters,cell_line,compound_record,molecule,protein_class,document,document_similarity,document_term,target,target_component,—,work,publication,compound,publication,publication,idmapping,protein
-filter_config_file,—,—,—,—,—,—,—,—,../../filter/entities/chembl/publication.yaml,../../filter/entities/chembl/publication_similarity.yaml,../../filter/entities/chembl/publication_term.yaml,—,—,../../filter/entities/composite/publication.yaml,—,—,—,../../filter/entities/pubmed/publications.yaml,—,—,—
+filter_config_file,—,—,—,—,—,—,—,—,../../filter/entities/chembl/publication.yaml,../../filter/entities/chembl/publication_similarity.yaml,../../filter/entities/chembl/publication_term.yaml,—,—,../../filter/entities/composite/publication.yaml,—,—,—,../../filter/entities/pubmed/publication.yaml,—,—,—
 gold_filters,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—
 gold_table,—,chembl_activity,chembl_assay,chembl_assay_parameters,chembl_cell_line,chembl_compound_record,chembl_molecule,chembl_protein_class,chembl_publication,chembl_publication_similarity,chembl_publication_term,chembl_target,chembl_target_component,—,crossref_publication,openalex_publication,pubchem_compound,pubmed_publication,semanticscholar_publication,uniprot_idmapping,uniprot_protein
 input_filter,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 maintenance,(dict),—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
-pipeline_name,—,chembl_activity,chembl_assay,chembl_assay_parameters,chembl_cell_line,chembl_compound_record,chembl_molecule,chembl_protein_class,chembl_publication,chembl_publication_similarity,chembl_publication_term,chembl_target,chembl_target_component,—,crossref_publication,openalex_publication,pubchem_compound,pubmed_publications,semanticscholar_publication,uniprot_idmapping,uniprot_protein
+pipeline_name,—,chembl_activity,chembl_assay,chembl_assay_parameters,chembl_cell_line,chembl_compound_record,chembl_molecule,chembl_protein_class,chembl_publication,chembl_publication_similarity,chembl_publication_term,chembl_target,chembl_target_component,—,crossref_publication,openalex_publication,pubchem_compound,pubmed_publication,semanticscholar_publication,uniprot_idmapping,uniprot_protein
 primary_keys,—,"[""activity_id""]","[""assay_chembl_id""]","[""assay_param_id""]","[""cell_chembl_id""]","[""record_id""]","[""molecule_chembl_id""]","[""protein_class_id""]","[""document_chembl_id""]","[""sim_id""]","[""entity_id""]","[""target_chembl_id""]","[""component_id""]",—,"[""doi""]","[""openalex_id""]","[""cid""]","[""pmid""]","[""paper_id""]","[""target_chembl_id""]","[""accession""]"
 provider,—,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,—,crossref,openalex,pubchem,pubmed,semanticscholar,uniprot,uniprot
 schema_version,2.0.0,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
@@ -25,7 +25,7 @@ version,—,1.2.0,1.2.0,1.2.0,1.2.0,1.2.0,1.2.0,1.2.0,2.1.0,2.1.0,2.1.0,1.2.0,1.
 circuit_breaker.failure_threshold,5,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 circuit_breaker.recovery_timeout,300,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 composite.dq_rules,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—
-composite.enrichers,—,—,—,—,—,—,—,—,—,—,—,—,—,"[{""pipeline"": ""crossref_publication"", ""join_keys"": [""doi"", ""title""], ""required"": false, ""filter_condition"": ""doi IS NOT NULL"", ""timeout_seconds"": 900, ""silver_table"": ""silver/crossref/publication""}, {""pipeline"": ""openalex_publication"", ""join_keys"": [""doi"", ""title""], ""required"": false, ""filter_condition"": ""doi IS NOT NULL OR pmid IS NOT NULL"", ""timeout_seconds"": 600, ""silver_table"": ""silver/openalex/publication""}, {""pipeline"": ""pubmed_publications"", ""join_keys"": [""pmid"", ""doi""], ""required"": false, ""filter_condition"": ""pmid IS NOT NULL"", ""timeout_seconds"": 600, ""silver_table"": ""silver/pubmed/publication""}, {""pipeline"": ""semanticscholar_publication"", ""join_keys"": [""doi"", ""title""], ""required"": false, ""filter_condition"": ""doi IS NOT NULL OR pmid IS NOT NULL"", ""timeout_seconds"": 1200, ""fallback_strategy"": ""skip"", ""silver_table"": ""silver/semanticscholar/publication""}]",—,—,—,—,—,—,—
+composite.enrichers,—,—,—,—,—,—,—,—,—,—,—,—,—,"[{""pipeline"": ""crossref_publication"", ""join_keys"": [""doi"", ""title""], ""required"": false, ""filter_condition"": ""doi IS NOT NULL"", ""timeout_seconds"": 900, ""silver_table"": ""silver/crossref/publication""}, {""pipeline"": ""openalex_publication"", ""join_keys"": [""doi"", ""title""], ""required"": false, ""filter_condition"": ""doi IS NOT NULL OR pmid IS NOT NULL"", ""timeout_seconds"": 600, ""silver_table"": ""silver/openalex/publication""}, {""pipeline"": ""pubmed_publication"", ""join_keys"": [""pmid"", ""doi""], ""required"": false, ""filter_condition"": ""pmid IS NOT NULL"", ""timeout_seconds"": 600, ""silver_table"": ""silver/pubmed/publication""}, {""pipeline"": ""semanticscholar_publication"", ""join_keys"": [""doi"", ""title""], ""required"": false, ""filter_condition"": ""doi IS NOT NULL OR pmid IS NOT NULL"", ""timeout_seconds"": 1200, ""fallback_strategy"": ""skip"", ""silver_table"": ""silver/semanticscholar/publication""}]",—,—,—,—,—,—,—
 composite.execution,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—
 composite.lineage,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—
 composite.merge,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—
@@ -116,7 +116,7 @@ sink.silver.sort_by,(dict),—,—,(dict),(dict),(dict),(dict),(dict),(dict),(di
 source.api.base_url,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,https://rest.uniprot.org,—
 source.api.from_db,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,ChEMBL,—
 source.api.to_db,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,UniProtKB,—
-composite.dq_rules.enricher_overrides.pubmed_publications,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—
+composite.dq_rules.enricher_overrides.pubmed_publication,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—
 composite.dq_rules.enricher_overrides.semanticscholar_publication,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—
 composite.execution.retry.backoff_multiplier,—,—,—,—,—,—,—,—,—,—,—,—,—,2.0,—,—,—,—,—,—,—
 composite.execution.retry.max_attempts,—,—,—,—,—,—,—,—,—,—,—,—,—,3,—,—,—,—,—,—,—
@@ -162,8 +162,8 @@ sink.silver.metadata.quality_expectations,(dict),—,—,—,—,—,—,—,—
 sink.silver.metadata.tags,"[""<provider>"", ""<entity>"", ""silver"", ""validated""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 sink.silver.sort_by.ascending,True,—,—,True,True,True,True,True,True,True,True,True,True,—,True,True,True,—,True,True,—
 sink.silver.sort_by.columns,—,—,—,"[""assay_param_id""]","[""cell_chembl_id""]","[""record_id""]","[""molecule_chembl_id""]","[""protein_class_id""]","[""document_chembl_id""]","[""sim_id""]","[""entity_id""]","[""target_chembl_id""]","[""component_id""]",—,"[""doi""]","[""openalex_id""]","[""cid""]",—,"[""paper_id""]","[""target_chembl_id""]",—
-composite.dq_rules.enricher_overrides.pubmed_publications.hard_fail_threshold,—,—,—,—,—,—,—,—,—,—,—,—,—,0.4,—,—,—,—,—,—,—
-composite.dq_rules.enricher_overrides.pubmed_publications.soft_fail_threshold,—,—,—,—,—,—,—,—,—,—,—,—,—,0.15,—,—,—,—,—,—,—
+composite.dq_rules.enricher_overrides.pubmed_publication.hard_fail_threshold,—,—,—,—,—,—,—,—,—,—,—,—,—,0.4,—,—,—,—,—,—,—
+composite.dq_rules.enricher_overrides.pubmed_publication.soft_fail_threshold,—,—,—,—,—,—,—,—,—,—,—,—,—,0.15,—,—,—,—,—,—,—
 composite.dq_rules.enricher_overrides.semanticscholar_publication.hard_fail_threshold,—,—,—,—,—,—,—,—,—,—,—,—,—,0.5,—,—,—,—,—,—,—
 composite.dq_rules.enricher_overrides.semanticscholar_publication.soft_fail_threshold,—,—,—,—,—,—,—,—,—,—,—,—,—,0.2,—,—,—,—,—,—,—
 sink.bronze.metadata.lineage.extraction_method,api,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—

@@ -57,7 +57,7 @@ Total unique parameters: 176
 | `composite.seed.output_keys` | 1/21 |
 | `composite.seed.pipeline` | 1/21 |
 | `composite.seed.silver_table` | 1/21 |
-| `composite.dq_rules.enricher_overrides.pubmed_publications` | 1/21 |
+| `composite.dq_rules.enricher_overrides.pubmed_publication` | 1/21 |
 | `composite.dq_rules.enricher_overrides.semanticscholar_publication` | 1/21 |
 | `composite.execution.retry.backoff_multiplier` | 1/21 |
 | `composite.execution.retry.max_attempts` | 1/21 |
@@ -69,8 +69,8 @@ Total unique parameters: 176
 | `composite.merge.field_priorities.tldr` | 1/21 |
 | `composite.merge.output.gold` | 1/21 |
 | `composite.merge.output.silver` | 1/21 |
-| `composite.dq_rules.enricher_overrides.pubmed_publications.hard_fail_threshold` | 1/21 |
-| `composite.dq_rules.enricher_overrides.pubmed_publications.soft_fail_threshold` | 1/21 |
+| `composite.dq_rules.enricher_overrides.pubmed_publication.hard_fail_threshold` | 1/21 |
+| `composite.dq_rules.enricher_overrides.pubmed_publication.soft_fail_threshold` | 1/21 |
 | `composite.dq_rules.enricher_overrides.semanticscholar_publication.hard_fail_threshold` | 1/21 |
 | `composite.dq_rules.enricher_overrides.semanticscholar_publication.soft_fail_threshold` | 1/21 |
 
@@ -336,9 +336,9 @@ Total unique parameters: 176
 - `composite` - present in: composite/publication
 - `composite.dq_rules` - present in: composite/publication
 - `composite.dq_rules.enricher_overrides` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides.pubmed_publications` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides.pubmed_publications.hard_fail_threshold` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides.pubmed_publications.soft_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.pubmed_publication` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.pubmed_publication.hard_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.pubmed_publication.soft_fail_threshold` - present in: composite/publication
 - `composite.dq_rules.enricher_overrides.semanticscholar_publication` - present in: composite/publication
 - `composite.dq_rules.enricher_overrides.semanticscholar_publication.hard_fail_threshold` - present in: composite/publication
 - `composite.dq_rules.enricher_overrides.semanticscholar_publication.soft_fail_threshold` - present in: composite/publication

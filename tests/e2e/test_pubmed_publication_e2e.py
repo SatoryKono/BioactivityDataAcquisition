@@ -57,7 +57,7 @@ def vcr_config() -> dict[str, Any]:
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_pubmed_publications_full_cycle(e2e_data_dir: Path):
+async def test_pubmed_publication_full_cycle(e2e_data_dir: Path):
     """E2E: PubMed Publications pipeline from fetch to Silver.
 
     Verifies:
@@ -67,7 +67,7 @@ async def test_pubmed_publications_full_cycle(e2e_data_dir: Path):
     4. Core publication fields are present
     """
     # Arrange
-    ctx = create_test_context("pubmed_publications", limit=5)
+    ctx = create_test_context("pubmed_publication", limit=5)
 
     # Act
     runner = bootstrap_pipeline(ctx)
@@ -94,7 +94,7 @@ async def test_pubmed_publications_full_cycle(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_pubmed_publications_date_fields(e2e_data_dir: Path):
+async def test_pubmed_publication_date_fields(e2e_data_dir: Path):
     """E2E: Verify date fields are extracted correctly.
 
     Publications should have various date fields:
@@ -107,7 +107,7 @@ async def test_pubmed_publications_date_fields(e2e_data_dir: Path):
     All date fields (except year) must be in YYYY-MM-DD format.
     """
     # Arrange
-    ctx = create_test_context("pubmed_publications", limit=5)
+    ctx = create_test_context("pubmed_publication", limit=5)
 
     # Act
     runner = bootstrap_pipeline(ctx)
@@ -139,7 +139,7 @@ async def test_pubmed_publications_date_fields(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_pubmed_publications_journal_fields(e2e_data_dir: Path):
+async def test_pubmed_publication_journal_fields(e2e_data_dir: Path):
     """E2E: Verify journal metadata is extracted.
 
     Publications should have journal information:
@@ -149,7 +149,7 @@ async def test_pubmed_publications_journal_fields(e2e_data_dir: Path):
     - volume, issue, pages
     """
     # Arrange
-    ctx = create_test_context("pubmed_publications", limit=5)
+    ctx = create_test_context("pubmed_publication", limit=5)
 
     # Act
     runner = bootstrap_pipeline(ctx)
@@ -165,7 +165,7 @@ async def test_pubmed_publications_journal_fields(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_pubmed_publications_classification_fields(e2e_data_dir: Path):
+async def test_pubmed_publication_classification_fields(e2e_data_dir: Path):
     """E2E: Verify classification fields are extracted.
 
     Publications may have:
@@ -174,7 +174,7 @@ async def test_pubmed_publications_classification_fields(e2e_data_dir: Path):
     - publication_types: Type of publication (Journal Article, Review, etc.)
     """
     # Arrange
-    ctx = create_test_context("pubmed_publications", limit=5)
+    ctx = create_test_context("pubmed_publication", limit=5)
 
     # Act
     runner = bootstrap_pipeline(ctx)
@@ -208,7 +208,7 @@ async def test_pubmed_publications_classification_fields(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-async def test_pubmed_publications_identifier_fields(e2e_data_dir: Path):
+async def test_pubmed_publication_identifier_fields(e2e_data_dir: Path):
     """E2E: Verify external identifier fields are extracted.
 
     Publications should have:
@@ -217,7 +217,7 @@ async def test_pubmed_publications_identifier_fields(e2e_data_dir: Path):
     - pmc_id: PubMed Central ID
     """
     # Arrange
-    ctx = create_test_context("pubmed_publications", limit=5)
+    ctx = create_test_context("pubmed_publication", limit=5)
 
     # Act
     runner = bootstrap_pipeline(ctx)

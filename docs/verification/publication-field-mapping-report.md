@@ -19,7 +19,7 @@ Systematic verification of field mapping across all publication pipeline layers 
 | 1 | `chembl_publication` | ChEMBL | document | ⚠️ Missing Gold fields |
 | 2 | `chembl_publication_similarity` | ChEMBL | document_similarity | ✅ Correct |
 | 3 | `chembl_publication_term` | ChEMBL | document_term | ✅ Correct |
-| 4 | `pubmed_publications` | PubMed | publication | ⚠️ Missing Gold fields + Type mismatch |
+| 4 | `pubmed_publication` | PubMed | publication | ⚠️ Missing Gold fields + Type mismatch |
 | 5 | `crossref_publication` | CrossRef | work | ⚠️ Missing Gold fields + Type mismatch |
 | 6 | `openalex_publication` | OpenAlex | publication | ⚠️ Type mismatch |
 | 7 | `semanticscholar_publication` | SemanticScholar | publication | ✅ Correct |
@@ -29,7 +29,7 @@ Systematic verification of field mapping across all publication pipeline layers 
 ## Finding 1: TYPE_MISMATCH - `authors` Field Type Inconsistency
 
 **Severity**: HIGH
-**Affected Pipelines**: `pubmed_publications`, `crossref_publication`, `openalex_publication`
+**Affected Pipelines**: `pubmed_publication`, `crossref_publication`, `openalex_publication`
 
 ### Issue
 
@@ -114,7 +114,7 @@ original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 ## Finding 3: MISSING_FIELD - PubMed Gold Schema
 
 **Severity**: MEDIUM
-**Pipeline**: `pubmed_publications`
+**Pipeline**: `pubmed_publication`
 **Location**: `gold.py:211-262`
 
 ### Missing Fields

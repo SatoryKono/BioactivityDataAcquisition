@@ -114,7 +114,7 @@ ProviderRegistry.register(
     ProviderConfig(
         data_source_creator=_create_pubmed_data_source,
         transformers={"publication": PubMedPublicationTransformer},
-        pipelines=["pubmed_publications"],
+        pipelines=["pubmed_publication"],
     ),
 )
 ```
@@ -144,13 +144,13 @@ class PubMedPublicationTransformer(BaseTransformer):
 Добавьте фабрику пайплайна в `src/bioetl/composition/factories/pipeline_factories.py`:
 
 ```python
-from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
+from bioetl.application.pipelines.pubmed.publication import PubMedPublicationPipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.infrastructure.schemas.gold import PubMedPublicationGoldSchema
 
-pubmed_publications_factory = GenericPipelineFactory(
-    pipeline_name="pubmed_publications",
-    pipeline_class=PubMedPublicationsPipeline,
+pubmed_publication_factory = GenericPipelineFactory(
+    pipeline_name="pubmed_publication",
+    pipeline_class=PubMedPublicationPipeline,
     provider="pubmed",
     transformer_class=PubMedPublicationTransformer,  # DI через GenericPipelineFactory
     gold_schema=PubMedPublicationGoldSchema,
@@ -158,10 +158,10 @@ pubmed_publications_factory = GenericPipelineFactory(
 
 def register_all_pipelines() -> None:
     # ...
-    PipelineRegistry.register_factory(pubmed_publications_factory)
+    PipelineRegistry.register_factory(pubmed_publication_factory)
 ```
 
-Теперь ваш пайплайн автоматически доступен через CLI по имени `pubmed_publications`.
+Теперь ваш пайплайн автоматически доступен через CLI по имени `pubmed_publication`.
 
 ## Чек-лист
 
