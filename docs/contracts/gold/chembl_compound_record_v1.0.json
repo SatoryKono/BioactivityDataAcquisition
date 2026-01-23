@@ -1,48 +1,45 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "UniProt Protein Gold Contract",
-  "description": "Gold layer data contract for UniProt Protein Gold Contract. Auto-generated from Pandera schema UniProtProteinGoldSchema.",
+  "title": "ChEMBL Compound Record Gold Contract",
+  "description": "Gold layer data contract for ChEMBL Compound Record Gold Contract. Auto-generated from Pandera schema ChEMBLCompoundRecordGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
       "type": "string"
     },
-    "accession": {
-      "type": "string"
-    },
-    "entry_name": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "protein_name": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "gene_names": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "organism_id": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "sequence_length": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
     "content_hash": {
       "type": "string"
+    },
+    "record_id": {
+      "type": "number"
+    },
+    "molecule_chembl_id": {
+      "type": "string"
+    },
+    "document_chembl_id": {
+      "type": "string"
+    },
+    "compound_key": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "compound_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "src_id": {
+      "type": "number"
+    },
+    "src_compound_id": {
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "_run_id": {
       "type": "string"
@@ -68,8 +65,11 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "accession",
     "content_hash",
-    "entity_id"
+    "document_chembl_id",
+    "entity_id",
+    "molecule_chembl_id",
+    "record_id",
+    "src_id"
   ]
 }
