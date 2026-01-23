@@ -46,7 +46,8 @@ _PUBLICATION_IDS = FieldGroup(
     fields=(
         # Rename pubmed_id -> pmid for cross-provider consistency (PMID standardization)
         FieldSpec("pubmed_id", target="pmid", converter=PMID),
-        *simple_fields("doi", "patent_id"),
+        *simple_fields("doi"),
+        # Note: patent_id excluded - not needed for unified publication schema
     ),
 )
 
@@ -184,6 +185,14 @@ class PublicationTransformer(BaseChemblTransformer):
         # Lookup metadata (direct extraction, no enrichment)
         data["_lookup_method"] = "direct"
         data["_original_id"] = str(primary_id)
+
+        # System field: data source identifier
+        data["_source"] = "chembl"
+
+        # Unified publication fields (ChEMBL API doesn't provide these)
+        data["citation_count"] = None  # Not available from ChEMBL API
+        data["is_oa"] = None  # Not available from ChEMBL API
+        data["language"] = None  # Not available from ChEMBL API
 
         # Cross-reference IDs (ChEMBL API doesn't provide PMC ID)
         data["pmc_id"] = None

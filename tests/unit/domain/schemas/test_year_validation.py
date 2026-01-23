@@ -226,10 +226,11 @@ class TestChemblYearValidation:
             # Lookup tracking
             "_lookup_method": "direct",
             "_original_id": None,
-            "source": "chembl",
+            # System field (per SYSTEM_FIELDS_PREFIX)
+            "_source": "chembl",
             # ChEMBL-specific fields
             "document_chembl_id": "CHEMBL1234567",
-            "patent_id": None,
+            # patent_id excluded from unified publication schema
             "src_id": 1,
             "journal_full_title": "Nature Journal",
             "volume": "1",

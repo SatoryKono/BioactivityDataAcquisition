@@ -29,13 +29,12 @@ class ChemblPublication(BaseEntity):
     # Standardized to 'pmid' for cross-provider JOIN consistency (was 'pubmed_id')
     pmid: str | None = None  # Numeric string for cross-provider consistency
     doi: str | None = None
-    patent_id: str | None = None
 
     # Core metadata
     title: str | None = None
-    authors: str | None = None  # Combined authors string
+    authors: str | None = None  # JSON array of hashed author names
     abstract: str | None = None
-    doc_type: str | None = None  # PUBLICATION, PATENT, etc.
+    doc_type: str | None = None  # PUBLICATION, PATENT, DATASET, BOOK
 
     # Journal information
     journal: str | None = None
@@ -50,8 +49,16 @@ class ChemblPublication(BaseEntity):
     # Cross-reference IDs (ChEMBL doesn't provide PMC ID)
     pmc_id: str | None = None
 
+    # Unified publication fields (not available from ChEMBL API)
+    citation_count: int | None = None
+    is_oa: bool | None = None
+    language: str | None = None
+
     # Source information
     src_id: int | None = None
+
+    # System fields
+    _source: str = "chembl"  # Data source identifier
 
     # Lookup metadata (tracks resolution strategy)
     _lookup_method: str = "direct"  # ChEMBL uses direct extraction
