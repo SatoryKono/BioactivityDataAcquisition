@@ -387,7 +387,7 @@
     'last_page': '110',
     'pmc_id': None,
     'pmid': '12345678',
-    'publication_date': '2024-01-01',
+    'publication_date': None,
     'src_id': 1,
     'title': 'Test Document Title',
     'volume': '10',
