@@ -61,7 +61,7 @@ class MockMetadataCoordinator:
 
     def create_gold_metadata(self, input_data: Any) -> GoldMetadata:
         """Create minimal GoldMetadata for testing."""
-        from bioetl.domain.models.metadata import GoldOutputMetadata
+        from bioetl.domain.models.metadata import BaseOutputMetadata, GoldOutputExt
 
         runtime = RuntimeMetadata(
             run_id="test-run-id",
@@ -72,15 +72,15 @@ class MockMetadataCoordinator:
         environment = EnvironmentMetadata(
             hostname="test", python_version="3.11", bioetl_version="1.0"
         )
-        output = GoldOutputMetadata(
-            table_path=str(input_data.table_path),
+        output = BaseOutputMetadata(
             record_count=len(input_data.records),
-            operation="overwrite",
         )
+        output_ext = GoldOutputExt()
         return GoldMetadata(
             runtime=runtime,
             pipeline=pipeline,
             output=output,
+            output_ext=output_ext,
             environment=environment,
         )
 

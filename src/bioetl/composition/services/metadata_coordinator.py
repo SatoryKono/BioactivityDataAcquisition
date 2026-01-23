@@ -27,15 +27,16 @@ from typing import Any, Literal
 
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.models.metadata import (
+    BaseOutputMetadata,
     BronzeMetadata,
+    BronzeOutputExt,
     DeltaMetrics,
     DQSummary,
     EnvironmentMetadata,
     FileOutputMetadata,
     GoldMetadata,
-    GoldOutputMetadata,
+    GoldOutputExt,
     LineageMetadata,
-    OutputMetadata,
     PipelineMetadata,
     RuntimeMetadata,
     RunTypeEnum,
@@ -43,7 +44,7 @@ from bioetl.domain.models.metadata import (
     SchemaColumnMetadata,
     SchemaMetadata,
     SilverMetadata,
-    SilverOutputMetadata,
+    SilverOutputExt,
     SourceMetadata,
 )
 from bioetl.domain.ports import (
@@ -192,6 +193,13 @@ class MetadataCoordinator:
                 query_string=input_data.query_string,
             )
 
+        # Build file metadata for output_ext
+        file_metadata = FileOutputMetadata(
+            path=input_data.output_path,
+            size_bytes=input_data.compressed_size,
+            record_count=input_data.record_count,
+        )
+
         return BronzeMetadata(
             runtime=self._build_runtime_metadata(
                 started_at=input_data.started_at,
@@ -200,16 +208,14 @@ class MetadataCoordinator:
             ),
             pipeline=self._build_pipeline_metadata(),
             source=source,
-            output=OutputMetadata(
-                files=[
-                    FileOutputMetadata(
-                        path=input_data.output_path,
-                        size_bytes=input_data.compressed_size,
-                        record_count=input_data.record_count,
-                    )
-                ],
-                total_records=input_data.record_count,
+            output=BaseOutputMetadata(
+                record_count=input_data.record_count,
                 total_bytes=input_data.compressed_size,
+                write_started_at=input_data.started_at,
+                write_completed_at=input_data.completed_at,
+            ),
+            output_ext=BronzeOutputExt(
+                files=[file_metadata],
             ),
             environment=self._get_environment_metadata(),
             governance=input_data.governance,
@@ -284,13 +290,28 @@ class MetadataCoordinator:
             if input_data.dq_metrics
             else DQSummary(total_records=rec_count, valid_records=rec_count)
         )
-        output = SilverOutputMetadata(record_count=rec_count)
+
         # Calculate duration if both timestamps provided
         duration_seconds = (
             (input_data.completed_at - input_data.started_at).total_seconds()
             if input_data.started_at and input_data.completed_at
             else None
         )
+
+        # Build unified output metadata (ADR-029)
+        output = BaseOutputMetadata(
+            record_count=rec_count,
+            total_bytes=getattr(input_data, "total_bytes", 0),
+            write_started_at=input_data.started_at,
+            write_completed_at=input_data.completed_at,
+        )
+
+        # Build Silver-specific output extension with delta versions
+        output_ext = SilverOutputExt(
+            delta_version_before=getattr(input_data, "version_before", None),
+            delta_version_after=input_data.version_after,
+        )
+
         return SilverMetadata(
             runtime=self._build_runtime_metadata(
                 started_at=input_data.started_at,
@@ -302,6 +323,7 @@ class MetadataCoordinator:
             delta=delta,
             dq_summary=dq_summary,
             output=output,
+            output_ext=output_ext,
             environment=self._get_environment_metadata(),
             dq_report_path=input_data.dq_report_path,
             governance=input_data.governance,
@@ -425,14 +447,23 @@ class MetadataCoordinator:
         )
 
         # Build DQ summary (basic metrics)
+        rec_count = len(input_data.records)
         dq_summary = DQSummary(
-            total_records=len(input_data.records),
-            valid_records=len(input_data.records),
+            total_records=rec_count,
+            valid_records=rec_count,
         )
 
-        # Build output metrics
-        output = GoldOutputMetadata(
-            record_count=len(input_data.records),
+        # Build unified output metadata (ADR-029)
+        output = BaseOutputMetadata(
+            record_count=rec_count,
+            total_bytes=getattr(input_data, "total_bytes", 0),
+            write_started_at=getattr(input_data, "started_at", None),
+            write_completed_at=input_data.completed_at,
+        )
+
+        # Build Gold-specific output extension
+        output_ext = GoldOutputExt(
+            partition_count=getattr(input_data, "partition_count", 0),
         )
 
         # Build SCD metadata if applicable
@@ -463,6 +494,7 @@ class MetadataCoordinator:
             schema_info=schema_info,
             dq_summary=dq_summary,
             output=output,
+            output_ext=output_ext,
             scd=scd,
             environment=self._get_environment_metadata(),
             governance=input_data.governance,
