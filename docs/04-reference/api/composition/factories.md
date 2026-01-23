@@ -235,7 +235,7 @@ Factory for PubMed publication pipeline.
 classDiagram
     class GenericPipelineFactory {
         +create_runner() PipelineRunner
-        +create_executor() PipelineExecutor
+        +create_executor() BatchExecutor
     }
 
     class DataSourceFactory {

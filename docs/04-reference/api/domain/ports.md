@@ -179,6 +179,35 @@ Interface for monitoring system health.
         show_root_heading: true
         show_source: false
 
+### HealthStatePort
+
+Protocol for provider health state (read-only view).
+
+::: bioetl.domain.ports.HealthStatePort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### HealthCheckResult
+
+Detailed result of a health check operation.
+
+::: bioetl.domain.ports.HealthCheckResult
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Security
+
+### PiiHasherPort
+
+Interface for hashing PII (Personal Identifiable Information) fields.
+
+::: bioetl.domain.ports.PiiHasherPort
+    options:
+        show_root_heading: true
+        show_source: false
+
 ## Resilience
 
 ### CircuitBreakerPort
@@ -385,6 +414,129 @@ Interface for extracting metrics from runners.
         show_root_heading: true
         show_source: false
 
+## Supporting Types
+
+### AuditEntry
+
+Data class for audit log entries.
+
+::: bioetl.domain.ports.AuditEntry
+    options:
+        show_root_heading: true
+        show_source: false
+
+### AuditLayer
+
+Enumeration for audit layer types (BRONZE, SILVER, GOLD).
+
+::: bioetl.domain.ports.AuditLayer
+    options:
+        show_root_heading: true
+        show_source: false
+
+### AuditOperation
+
+Enumeration for audit operation types (WRITE, DELETE, VACUUM).
+
+::: bioetl.domain.ports.AuditOperation
+    options:
+        show_root_heading: true
+        show_source: false
+
+### MemoryStats
+
+Data class for memory usage statistics.
+
+::: bioetl.domain.ports.MemoryStats
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Metadata Types
+
+### MetadataCoordinatorPort Inputs
+
+Supporting types for `MetadataCoordinatorPort`:
+
+::: bioetl.domain.ports.BronzeMetadataInput
+    options:
+        show_root_heading: true
+        show_source: false
+
+::: bioetl.domain.ports.SilverMetadataInput
+    options:
+        show_root_heading: true
+        show_source: false
+
+::: bioetl.domain.ports.GoldMetadataInput
+    options:
+        show_root_heading: true
+        show_source: false
+
+::: bioetl.domain.ports.SilverRef
+    options:
+        show_root_heading: true
+        show_source: false
+
+## NoOp Implementations
+
+Null Object Pattern implementations for optional observability components.
+These allow domain/application code to work without depending on concrete implementations.
+
+### NoOpTracing
+
+No-operation implementation of `TracingPort`.
+
+::: bioetl.domain.ports.NoOpTracing
+    options:
+        show_root_heading: true
+        show_source: false
+
+### NoOpMetrics
+
+No-operation implementation of `MetricsPort`.
+
+::: bioetl.domain.ports.NoOpMetrics
+    options:
+        show_root_heading: true
+        show_source: false
+
+### NoOpAudit
+
+No-operation implementation of `AuditPort`.
+
+::: bioetl.domain.ports.NoOpAudit
+    options:
+        show_root_heading: true
+        show_source: false
+
+### NoOpMemoryMonitor
+
+No-operation implementation of `MemoryMonitorPort`.
+
+::: bioetl.domain.ports.NoOpMemoryMonitor
+    options:
+        show_root_heading: true
+        show_source: false
+
+### NoOpMetadataWriter
+
+No-operation implementation of `MetadataWriterPort`.
+
+::: bioetl.domain.ports.NoOpMetadataWriter
+    options:
+        show_root_heading: true
+        show_source: false
+
+### NoOpPiiHasher
+
+No-operation implementation of `PiiHasherPort`.
+
+::: bioetl.domain.ports.NoOpPiiHasher
+    options:
+        show_root_heading: true
+        show_source: false
+
 ## Usage Example
 
 ```python
@@ -397,6 +549,17 @@ async def process_data(
 ) -> None:
     async for records in source.fetch():
         await storage.write_bronze(records, ...)
+```
+
+```python
+# Using NoOp implementations for testing
+from bioetl.domain.ports import NoOpTracing, NoOpMetrics
+
+tracer = NoOpTracing()
+metrics = NoOpMetrics()
+
+# These can be passed where TracingPort/MetricsPort are expected
+# without any external dependencies
 ```
 
 ## See Also
