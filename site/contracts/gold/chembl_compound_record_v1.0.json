@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$version": "1.0.0",
+  "title": "ChEMBL Compound Record Gold Contract",
+  "description": "Gold layer data contract for ChEMBL Compound Record Gold Contract. Auto-generated from Pandera schema ChEMBLCompoundRecordGoldSchema.",
+  "type": "object",
+  "properties": {
+    "entity_id": {
+      "type": "string"
+    },
+    "content_hash": {
+      "type": "string"
+    },
+    "record_id": {
+      "type": "number"
+    },
+    "molecule_chembl_id": {
+      "type": "string"
+    },
+    "document_chembl_id": {
+      "type": "string"
+    },
+    "compound_key": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "compound_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "src_id": {
+      "type": "number"
+    },
+    "src_compound_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "_run_id": {
+      "type": "string"
+    },
+    "_run_type": {
+      "type": "string"
+    },
+    "_source_batch_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "_ingestion_ts": {
+      "type": "string"
+    },
+    "_index": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "_index",
+    "_ingestion_ts",
+    "_run_id",
+    "_run_type",
+    "content_hash",
+    "document_chembl_id",
+    "entity_id",
+    "molecule_chembl_id",
+    "record_id",
+    "src_id"
+  ]
+}

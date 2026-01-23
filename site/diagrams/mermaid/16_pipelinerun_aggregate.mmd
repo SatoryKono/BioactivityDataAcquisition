@@ -1,0 +1,150 @@
+%%{init: {'theme':'base', 'themeVariables': { 'fontSize':'13px'}}}%%
+classDiagram
+    class PipelineRun {
+        <<Aggregate Root - 567 LOC>>
+        -run_id: str [PK, Immutable]
+        -pipeline_name: str
+        -provider: str
+        -entity: str
+        -run_type: RunType
+        -state: PipelineState
+        -stages: dict~str, StageResult~
+        -started_at: datetime [Immutable]
+        -completed_at: datetime | None
+        -error: Exception | None
+        -_events: list~DomainEvent~
+
+        +start() void
+        +record_stage_start(stage: str) void
+        +record_stage_success(stage: str, result: StageResult) void
+        +record_stage_failure(stage: str, error: Exception) void
+        +complete() void
+        +fail(error: Exception) void
+        +shutdown() void
+        +is_running() bool
+        +is_completed() bool
+        +is_failed() bool
+        +get_duration_ms() int
+        +get_stage_result(stage: str) StageResult | None
+        +collect_events() list~DomainEvent~
+        -_validate_state_transition(from_state, to_state) void
+        -_emit_event(event: DomainEvent) void
+        -_add_stage_result(stage: str, result: StageResult) void
+    }
+
+    class PipelineState {
+        <<enumeration>>
+        PENDING
+        RUNNING
+        COMPLETED
+        FAILED
+        SHUTDOWN
+    }
+
+    class RunType {
+        <<enumeration>>
+        INCREMENTAL
+        BACKFILL
+        REBUILD
+    }
+
+    class StageResult {
+        <<Value Object>>
+        +stage: str
+        +status: StageStatus
+        +started_at: datetime
+        +completed_at: datetime
+        +duration_ms: int
+        +error: Exception | None
+        +metrics: dict~str, Any~
+    }
+
+    class StageStatus {
+        <<enumeration>>
+        SUCCESS
+        FAILED
+        SKIPPED
+    }
+
+    class DomainEvent {
+        <<abstract>>
+        +event_id: str
+        +aggregate_id: str
+        +aggregate_type: str
+        +occurred_at: datetime
+        +event_type: str
+    }
+
+    class PipelineStarted {
+        <<Event>>
+        +run_id: str
+        +pipeline_name: str
+        +provider: str
+        +entity: str
+        +run_type: RunType
+    }
+
+    class StageStarted {
+        <<Event>>
+        +run_id: str
+        +stage: str
+        +started_at: datetime
+    }
+
+    class StageCompleted {
+        <<Event>>
+        +run_id: str
+        +stage: str
+        +result: StageResult
+    }
+
+    class PipelineCompleted {
+        <<Event>>
+        +run_id: str
+        +completed_at: datetime
+        +total_duration_ms: int
+    }
+
+    class PipelineFailed {
+        <<Event>>
+        +run_id: str
+        +error: Exception
+        +failed_stage: str | None
+    }
+
+    class PipelineShutdown {
+        <<Event>>
+        +run_id: str
+        +reason: str
+    }
+
+    PipelineRun "1" *-- "*" StageResult : contains
+    PipelineRun -- PipelineState : has
+    PipelineRun -- RunType : created with
+    StageResult -- StageStatus : has
+
+    PipelineRun ..> PipelineStarted : emits on start()
+    PipelineRun ..> StageStarted : emits on record_stage_start()
+    PipelineRun ..> StageCompleted : emits on record_stage_success()
+    PipelineRun ..> PipelineCompleted : emits on complete()
+    PipelineRun ..> PipelineFailed : emits on fail()
+    PipelineRun ..> PipelineShutdown : emits on shutdown()
+
+    DomainEvent <|-- PipelineStarted
+    DomainEvent <|-- StageStarted
+    DomainEvent <|-- StageCompleted
+    DomainEvent <|-- PipelineCompleted
+    DomainEvent <|-- PipelineFailed
+    DomainEvent <|-- PipelineShutdown
+
+    note for PipelineRun "KEY INVARIANTS:<br/>✓ run_id is unique, immutable<br/>✓ Cannot start() twice<br/>✓ Cannot complete() without RUNNING<br/>✓ State transitions validated:<br/>  PENDING → RUNNING → {COMPLETED|FAILED|SHUTDOWN}<br/>✓ All stage results recorded<br/>✓ Events collected before state change<br/>✓ started_at immutable"
+
+    note for StageResult "Immutable Value Object<br/>Created once per stage<br/>Contains metrics: records_processed, duration_ms, etc."
+
+    note "State Transition Rules" as StateRules
+    StateRules : PENDING → RUNNING: start()
+    StateRules : RUNNING → COMPLETED: complete()
+    StateRules : RUNNING → FAILED: fail()
+    StateRules : RUNNING → SHUTDOWN: shutdown()
+    StateRules : ❌ COMPLETED → * : Invalid
+    StateRules : ❌ FAILED → * : Invalid

@@ -1,0 +1,233 @@
+%%{init: {'theme':'base', 'themeVariables': { 'fontSize':'13px'}}}%%
+classDiagram
+    %% DDD Aggregates (Root Entities)
+    class PipelineRun {
+        <<Aggregate Root>>
+        +run_id: str
+        +pipeline_name: str
+        +provider: str
+        +entity: str
+        +run_type: RunType
+        +state: PipelineState
+        +started_at: datetime
+        +completed_at: datetime | None
+        -_events: list~DomainEvent~
+        +start() void
+        +record_stage_start(stage: str) void
+        +record_stage_success(stage: str, result: StageResult) void
+        +record_stage_failure(stage: str, error: Exception) void
+        +complete() void
+        +fail(error: Exception) void
+        +shutdown() void
+        +collect_events() list~DomainEvent~
+    }
+
+    class Batch {
+        <<Aggregate Root>>
+        +batch_id: str
+        +run_id: str
+        +records: list~BatchRecord~
+        +state: BatchState
+        +created_at: datetime
+        +sealed_at: datetime | None
+        +max_size: int
+        -_events: list~DomainEvent~
+        +add_record(record: BatchRecord) void
+        +add_records(records: list) void
+        +quarantine_record(record, reason: str) void
+        +seal() void
+        +mark_writing() void
+        +mark_committed() void
+        +mark_failed(error: Exception) void
+        +is_full() bool
+        +collect_events() list~DomainEvent~
+    }
+
+    class QuarantineEntry {
+        <<Aggregate Root>>
+        +entry_id: str
+        +run_id: str
+        +payload: dict
+        +reason: str
+        +status: QuarantineStatus
+        +created_at: datetime
+        -_events: list~DomainEvent~
+        +start_review() void
+        +mark_ignored(reason: str) void
+        +mark_reprocessed() void
+        +mark_expired() void
+        +add_metadata(key: str, value: Any) void
+        +collect_events() list~DomainEvent~
+    }
+
+    %% Entities
+    class ChemblActivity {
+        <<Entity>>
+        +molregno: int
+        +activity_id: int
+        +assay_id: int
+        +doc_id: int
+        +standard_value: float | None
+        +standard_units: str | None
+        +standard_relation: str | None
+        +pchembl_value: float | None
+        +activity_comment: str | None
+    }
+
+    class UniProtProtein {
+        <<Entity>>
+        +accession: str
+        +name: str
+        +gene_names: list~str~
+        +organism_name: str
+        +taxonomy_id: int
+        +protein_existence: str
+        +sequence_length: int
+    }
+
+    class PubChemMolecule {
+        <<Entity>>
+        +cid: int
+        +iupac_name: str | None
+        +molecular_formula: str
+        +molecular_weight: float
+        +canonical_smiles: str | None
+        +inchi: str | None
+    }
+
+    %% Value Objects
+    class Activity {
+        <<Value Object>>
+        +value: float
+        +units: str
+        +relation: str | None
+        +type: str
+        +is_valid() bool
+        +normalize() Activity
+    }
+
+    class DQMetrics {
+        <<Value Object>>
+        +total_records: int
+        +valid_records: int
+        +invalid_records: int
+        +completeness: float
+        +duplicates: int
+        +quarantined: int
+        +calculate_quality_score() float
+    }
+
+    class RunContext {
+        <<Value Object>>
+        +run_id: str
+        +run_type: RunType
+        +provider: str
+        +entity: str
+        +config: PipelineConfig
+        +started_at: datetime
+    }
+
+    class StageResult {
+        <<Value Object>>
+        +stage: str
+        +status: StageStatus
+        +started_at: datetime
+        +completed_at: datetime
+        +duration_ms: int
+        +error: Exception | None
+    }
+
+    class BatchRecord {
+        <<Value Object>>
+        +index: int
+        +entity_id: str
+        +content_hash: str
+        +data: dict
+        +metadata: dict
+    }
+
+    class CompoundIds {
+        <<Value Object>>
+        +smiles: str | None
+        +inchi: str | None
+        +inchi_key: str | None
+        +normalize_smiles() str
+        +validate() bool
+    }
+
+    %% Enums
+    class PipelineState {
+        <<enumeration>>
+        PENDING
+        RUNNING
+        COMPLETED
+        FAILED
+        SHUTDOWN
+    }
+
+    class BatchState {
+        <<enumeration>>
+        OPEN
+        SEALED
+        WRITING
+        COMMITTED
+        FAILED
+    }
+
+    class QuarantineStatus {
+        <<enumeration>>
+        NEW
+        UNDER_REVIEW
+        IGNORED
+        REPROCESSED
+        EXPIRED
+    }
+
+    class RunType {
+        <<enumeration>>
+        INCREMENTAL
+        BACKFILL
+        REBUILD
+    }
+
+    %% Relationships
+    PipelineRun *-- StageResult : contains
+    PipelineRun -- PipelineState : has
+    PipelineRun -- RunContext : created with
+
+    Batch *-- BatchRecord : contains
+    Batch -- BatchState : has
+    Batch -- DQMetrics : produces
+
+    QuarantineEntry -- QuarantineStatus : has
+    QuarantineEntry -- RunContext : references
+
+    ChemblActivity -- Activity : has
+    ChemblActivity -- CompoundIds : references
+
+    BatchRecord -- DQMetrics : validated by
+
+    %% Domain Services (separate from aggregates)
+    class DataNormalizationService {
+        <<Domain Service>>
+        +normalize_text(text: str) str
+        +normalize_value(value: float, precision: int) float
+        +normalize_identifier(id: str, id_type: str) str
+    }
+
+    class IdentityService {
+        <<Domain Service>>
+        +normalize(identifier: str) str
+        +hash(identifier: str) str
+        +validate_format(identifier: str, format: str) bool
+    }
+
+    class UnitConverter {
+        <<Domain Service>>
+        +convert(value: float, from_unit: str, to_unit: str) float
+        +parse_value_with_unit(text: str) tuple
+    }
+
+    DataNormalizationService ..> Activity : normalizes
+    IdentityService ..> CompoundIds : validates
+    UnitConverter ..> Activity : converts

@@ -1,0 +1,120 @@
+%%{init: {'theme':'base', 'themeVariables': { 'fontSize':'13px'}}}%%
+graph TB
+    subgraph providers["7 Provider Adapters"]
+        direction LR
+
+        ChEMBL["ChEMBL<br/>13 pipelines<br/>694 LOC"]
+        PubChem["PubChem<br/>1 pipeline<br/>~400 LOC"]
+        UniProt["UniProt<br/>2 pipelines<br/>~500 LOC"]
+        CrossRef["CrossRef<br/>1 pipeline<br/>~350 LOC"]
+        OpenAlex["OpenAlex<br/>1 pipeline<br/>~300 LOC"]
+        PubMed["PubMed<br/>1 pipeline<br/>~450 LOC"]
+        SemanticScholar["SemanticScholar<br/>1 pipeline<br/>~300 LOC"]
+    end
+
+    subgraph common["Common Infrastructure"]
+        direction TB
+
+        BaseHttpAdapter["BaseHttpAdapter<br/>- health_check()<br/>- fetch()<br/>- _handle_error()"]
+
+        BaseSyncAdapter["BaseSyncAdapter<br/>- _run_in_executor()<br/>- Wraps sync libraries"]
+
+        UnifiedClient["UnifiedHTTPClient<br/>- RateLimiter<br/>- CircuitBreaker<br/>- Retry logic"]
+    end
+
+    subgraph chembl["ChEMBL Adapter (13 entities)"]
+        direction TB
+
+        ChemblAdapter["ChemblAdapter (694 LOC)"]
+        ChemblMapper["ChemblEntityMapper<br/>URL/entity mapping"]
+        ChemblDTO["DTO Models:<br/>- ActivityDTO<br/>- MoleculeDTO<br/>- TargetDTO<br/>- AssayDTO<br/>etc."]
+
+        ChemblEntities["Entities:<br/>activity, molecule, target,<br/>assay, assay_parameters,<br/>compound_record, cell_line,<br/>protein_class, publication,<br/>publication_term,<br/>publication_similarity,<br/>target_component, mechanism"]
+
+        ChemblAdapter --> ChemblMapper
+        ChemblMapper --> ChemblDTO
+        ChemblDTO --> ChemblEntities
+    end
+
+    subgraph pubchem["PubChem Adapter"]
+        direction TB
+
+        PubChemAdapter["PubChemAdapter<br/>pubchempy wrapper"]
+        PubChemStrategies["Fetch Strategies:<br/>- by_cid<br/>- by_name<br/>- by_smiles<br/>- by_inchi"]
+        PubChemDTO["CompoundDTO"]
+
+        PubChemAdapter --> PubChemStrategies
+        PubChemStrategies --> PubChemDTO
+    end
+
+    subgraph uniprot["UniProt Adapter"]
+        direction TB
+
+        UniProtAdapter["UniProtAdapter<br/>unipressed wrapper"]
+        IDMapping["IDMappingClient<br/>Cross-database mapping"]
+        FastaParser["FastaParser<br/>Sequence parsing"]
+        UniProtDTO["ProteinDTO"]
+
+        UniProtAdapter --> IDMapping
+        UniProtAdapter --> FastaParser
+        IDMapping --> UniProtDTO
+        FastaParser --> UniProtDTO
+    end
+
+    subgraph crossref["CrossRef Adapter"]
+        direction TB
+
+        CrossRefAdapter["CrossRefAdapter"]
+        CrossRefFallback["Fallback Strategy<br/>Primary → Secondary"]
+        CrossRefDTO["PublicationDTO"]
+
+        CrossRefAdapter --> CrossRefFallback
+        CrossRefFallback --> CrossRefDTO
+    end
+
+    subgraph rate_limits["Rate Limits per Provider"]
+        direction TB
+
+        RL_ChEMBL["ChEMBL: None"]
+        RL_PubChem["PubChem: 5 req/sec"]
+        RL_UniProt["UniProt: 100 req/sec with key"]
+        RL_CrossRef["CrossRef: Polite pool"]
+        RL_OpenAlex["OpenAlex: 10 req/sec"]
+        RL_PubMed["PubMed: 3 req/sec"]
+        RL_SS["SemanticScholar: 100 req/5min"]
+    end
+
+    %% Connections
+    ChEMBL -.-> chembl
+    PubChem -.-> pubchem
+    UniProt -.-> uniprot
+    CrossRef -.-> crossref
+
+    ChemblAdapter -.->|Extends| BaseHttpAdapter
+    CrossRefAdapter -.->|Extends| BaseHttpAdapter
+
+    PubChemAdapter -.->|Extends| BaseSyncAdapter
+    UniProtAdapter -.->|Extends| BaseSyncAdapter
+
+    BaseHttpAdapter --> UnifiedClient
+    BaseSyncAdapter --> UnifiedClient
+
+    ChEMBL -.-> RL_ChEMBL
+    PubChem -.-> RL_PubChem
+    UniProt -.-> RL_UniProt
+    CrossRef -.-> RL_CrossRef
+    OpenAlex -.-> RL_OpenAlex
+    PubMed -.-> RL_PubMed
+    SemanticScholar -.-> RL_SS
+
+    classDef chemblStyle fill:#ffebee,stroke:#c62828,stroke-width:2px
+    classDef pubchemStyle fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef uniprotStyle fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef crossrefStyle fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef commonStyle fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+
+    class ChEMBL,chembl,ChemblAdapter,ChemblMapper,ChemblDTO,ChemblEntities chemblStyle
+    class PubChem,pubchem,PubChemAdapter,PubChemStrategies,PubChemDTO pubchemStyle
+    class UniProt,uniprot,UniProtAdapter,IDMapping,FastaParser,UniProtDTO uniprotStyle
+    class CrossRef,crossref,CrossRefAdapter,CrossRefFallback,CrossRefDTO crossrefStyle
+    class common,BaseHttpAdapter,BaseSyncAdapter,UnifiedClient commonStyle
