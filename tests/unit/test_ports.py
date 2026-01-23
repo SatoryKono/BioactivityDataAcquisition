@@ -120,6 +120,9 @@ class TestStoragePortProtocol:
         from collections.abc import Iterator
         from typing import Literal
 
+        from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+        from bioetl.domain.value_objects.silver_result import SilverWriteResult
+
         class ValidStorage:
             async def write_bronze(
                 self,
@@ -131,8 +134,15 @@ class TestStoragePortProtocol:
                 run_id: Any,
                 run_type: Any,
                 ingestion_ts: Any,  # Required per ADR-014
-            ) -> None:
-                pass
+                source_metadata: Any = None,
+            ) -> BronzeWriteResult:
+                return BronzeWriteResult(
+                    path="bronze/test",
+                    record_count=0,
+                    compressed_size=0,
+                    raw_size=0,
+                    checksum="sha256:test",
+                )
 
             async def write_silver(
                 self,
@@ -143,8 +153,9 @@ class TestStoragePortProtocol:
                 mode: Literal["merge", "append", "delete"] = "merge",
                 partition_cols: list[str] | None = None,
                 on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
-            ) -> None:
-                pass
+                bronze_refs: list[BronzeWriteResult] | None = None,
+            ) -> SilverWriteResult | None:
+                return None
 
             async def write_gold(
                 self,
@@ -156,6 +167,7 @@ class TestStoragePortProtocol:
                 *,
                 ingestion_ts: Any = None,
                 run_id: Any = None,
+                silver_refs: list[Any] | None = None,
             ) -> None:
                 pass
 
@@ -171,6 +183,9 @@ class TestStoragePortProtocol:
                 table_name: str,
                 records: list[dict[str, Any]],
                 primary_keys: list[str] | None = None,
+                *,
+                run_id: str | None = None,
+                sources_used: list[str] | None = None,
             ) -> None:
                 pass
 
@@ -179,6 +194,9 @@ class TestStoragePortProtocol:
                 table_name: str,
                 records: list[dict[str, Any]],
                 primary_keys: list[str] | None = None,
+                *,
+                run_id: str | None = None,
+                sources_used: list[str] | None = None,
             ) -> None:
                 pass
 
@@ -224,6 +242,14 @@ class TestStoragePortProtocol:
                 gold_table: str | None = None,
             ) -> dict[str, Any]:
                 return {}
+
+            async def optimize(
+                self,
+                table_name: str,
+                retention_hours: int = 168,
+                dry_run: bool = False,
+            ) -> None:
+                pass
 
             async def cleanup_bronze(
                 self,

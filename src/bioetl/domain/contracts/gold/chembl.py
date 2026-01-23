@@ -324,7 +324,7 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     pmc_id: Series[str] = pa.Field(nullable=True)
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
     doi: Series[str] = pa.Field(nullable=True)
-    patent_id: Series[str] = pa.Field(nullable=True)
+    # patent_id excluded from unified publication schema
     title: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
@@ -340,6 +340,14 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     first_page: Series[str] = pa.Field(nullable=True)
     last_page: Series[str] = pa.Field(nullable=True)
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)
+
+    # Unified publication fields
+    citation_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
+    language: Series[str] = pa.Field(nullable=True)
+
+    # System field (per SYSTEM_FIELDS_PREFIX)
+    source: Series[str] = pa.Field(nullable=True, alias="_source")
 
     # Lookup metadata
     # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"

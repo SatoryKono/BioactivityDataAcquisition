@@ -207,7 +207,7 @@ def register_all_transformers() -> None:
     register_transformer("uniprot", "idmapping", IDMappingTransformer)
 
     # PubMed transformers
-    register_transformer("pubmed", "publications", PubMedPublicationTransformer)
+    register_transformer("pubmed", "publication", PubMedPublicationTransformer)
 
     # CrossRef transformers
     register_transformer("crossref", "publication", CrossRefPublicationTransformer)

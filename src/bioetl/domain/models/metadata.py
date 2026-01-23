@@ -8,16 +8,19 @@ Implements RULES.md 2.3 and 02-user-rules.md 2.4:
 - QC information
 - Runtime context
 
-Version: 1.0
+ADR-029: Output metadata unification across Medallion layers.
+
+Version: 1.1
 """
 
 from __future__ import annotations
 
+import warnings
 from datetime import datetime
 from enum import Enum
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
 class LayerType(str, Enum):
@@ -34,6 +37,110 @@ class RunTypeEnum(str, Enum):
     INCREMENTAL = "incremental"
     BACKFILL = "backfill"
     REBUILD = "rebuild"
+
+
+# =============================================================================
+# Governance Metadata Components
+# =============================================================================
+
+
+class GovernanceLineageConfig(BaseModel):
+    """Governance-level lineage configuration from pipeline config.
+
+    Captures static lineage information defined in pipeline YAML,
+    separate from runtime lineage tracked in LineageMetadata.
+
+    Attributes:
+        source_system: Source system identifier (e.g., "chembl", "pubchem").
+        source_version: Version of source system/API.
+        extraction_method: How data was extracted (api, csv, parquet).
+        source_layer: Source Medallion layer (for Silver/Gold).
+        transformations: List of transformation steps applied.
+        filters_applied: Whether Gold filters were applied.
+        business_domain: Business domain classification.
+        use_cases: Intended use cases for the data.
+    """
+
+    source_system: str | None = Field(
+        default=None, description="Source system identifier"
+    )
+    source_version: str | None = Field(
+        default=None, description="Version of source system"
+    )
+    extraction_method: str | None = Field(
+        default=None, description="Extraction method (api, csv, parquet)"
+    )
+    source_layer: str | None = Field(default=None, description="Source Medallion layer")
+    transformations: list[str] = Field(
+        default_factory=list, description="Transformation steps applied"
+    )
+    filters_applied: bool | None = Field(
+        default=None, description="Whether filters were applied"
+    )
+    business_domain: str | None = Field(
+        default=None, description="Business domain classification"
+    )
+    use_cases: list[str] = Field(default_factory=list, description="Intended use cases")
+
+
+class QualityExpectations(BaseModel):
+    """Quality expectations for data governance.
+
+    Defines target quality metrics for the data layer.
+
+    Attributes:
+        completeness: Expected completeness rate (0.0-1.0).
+        accuracy: Expected accuracy rate (0.0-1.0).
+    """
+
+    completeness: float | None = Field(
+        default=None, ge=0.0, le=1.0, description="Expected completeness (0-1)"
+    )
+    accuracy: float | None = Field(
+        default=None, ge=0.0, le=1.0, description="Expected accuracy (0-1)"
+    )
+
+
+class GovernanceMetadata(BaseModel):
+    """Governance metadata for data stewardship and compliance.
+
+    Captures static governance information from pipeline configuration
+    that describes data ownership, retention, and SLA requirements.
+    This is separate from execution metadata (runtime, DQ metrics, etc.).
+
+    Attributes:
+        owner: Data owner team or individual.
+        steward: Data steward responsible for quality.
+        description: Human-readable description of the data.
+        tags: Classification tags for discovery.
+        retention_days: Data retention period in days.
+        sla_freshness_hours: SLA for data freshness in hours.
+        lineage: Static lineage configuration from pipeline config.
+        quality_expectations: Target quality metrics.
+        classification: Data classification level (public, internal, restricted).
+    """
+
+    owner: str | None = Field(default=None, description="Data owner")
+    steward: str | None = Field(default=None, description="Data steward")
+    description: str | None = Field(default=None, description="Data description")
+    tags: list[str] = Field(default_factory=list, description="Classification tags")
+    retention_days: int | None = Field(
+        default=None, ge=1, description="Retention period in days"
+    )
+    sla_freshness_hours: int | None = Field(
+        default=None, ge=1, description="SLA freshness in hours"
+    )
+    lineage: GovernanceLineageConfig = Field(
+        default_factory=GovernanceLineageConfig,
+        description="Static lineage configuration",
+    )
+    quality_expectations: QualityExpectations = Field(
+        default_factory=QualityExpectations,
+        description="Target quality metrics",
+    )
+    classification: str | None = Field(
+        default=None, description="Data classification (public, internal, restricted)"
+    )
 
 
 # =============================================================================
@@ -234,8 +341,144 @@ class FileOutputMetadata(BaseModel):
     checksum_blake2: str | None = Field(default=None, description="BLAKE2 checksum")
 
 
+# =============================================================================
+# Unified Output Metadata (ADR-029)
+# =============================================================================
+
+
+class BaseOutputMetadata(BaseModel):
+    """Base output metadata contract for all Medallion layers.
+
+    Provides common fields required for downstream analytics,
+    monitoring, and data lineage tracking. All layer-specific
+    output metadata classes use this as the common output field.
+
+    ADR-029: Output metadata unification.
+
+    Attributes:
+        record_count: Total records written to layer.
+        total_bytes: Total size in bytes (compressed for Bronze, on-disk for Delta).
+        content_hash: SHA256 hash of content for change detection.
+        write_started_at: UTC timestamp when write operation started.
+        write_completed_at: UTC timestamp when write operation completed.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    record_count: int = Field(
+        default=0,
+        ge=0,
+        description="Total records written to layer",
+    )
+    total_bytes: int = Field(
+        default=0,
+        ge=0,
+        description="Total size in bytes (compressed for Bronze, on-disk for Delta)",
+    )
+    content_hash: str | None = Field(
+        default=None,
+        description="SHA256 hash of content for change detection",
+    )
+    write_started_at: datetime | None = Field(
+        default=None,
+        description="UTC timestamp when write operation started",
+    )
+    write_completed_at: datetime | None = Field(
+        default=None,
+        description="UTC timestamp when write operation completed",
+    )
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def write_duration_ms(self) -> int | None:
+        """Calculate write duration in milliseconds.
+
+        Returns:
+            Duration in milliseconds, or None if timestamps missing.
+        """
+        if self.write_started_at and self.write_completed_at:
+            delta = self.write_completed_at - self.write_started_at
+            return int(delta.total_seconds() * 1000)
+        return None
+
+
+class BronzeOutputExt(BaseModel):
+    """Bronze-specific output metadata extension.
+
+    Tracks individual files for append-only Bronze layer.
+
+    Attributes:
+        files: List of output files with per-file metrics.
+        format: Output format (jsonl+zstd, jsonl, etc.).
+        compression: Compression algorithm.
+    """
+
+    files: list[FileOutputMetadata] = Field(
+        default_factory=list,
+        description="List of output files with per-file metrics",
+    )
+    format: str = Field(
+        default="jsonl+zstd",
+        description="Output format (jsonl+zstd, jsonl, etc.)",
+    )
+    compression: str = Field(
+        default="zstd",
+        description="Compression algorithm",
+    )
+
+
+class SilverOutputExt(BaseModel):
+    """Silver-specific output metadata extension.
+
+    Tracks Delta Lake versioning for merge operations.
+
+    Attributes:
+        delta_version_before: Delta table version before write.
+        delta_version_after: Delta table version after write.
+    """
+
+    delta_version_before: int | None = Field(
+        default=None,
+        description="Delta table version before write",
+    )
+    delta_version_after: int | None = Field(
+        default=None,
+        description="Delta table version after write",
+    )
+
+
+class GoldOutputExt(BaseModel):
+    """Gold-specific output metadata extension.
+
+    Tracks partitioning and format for consumption layer.
+
+    Attributes:
+        partition_count: Number of partitions.
+        format: Output format (delta or parquet).
+    """
+
+    partition_count: int = Field(
+        default=0,
+        ge=0,
+        description="Number of partitions",
+    )
+    format: Literal["delta", "parquet"] = Field(
+        default="delta",
+        description="Output format",
+    )
+
+
+# =============================================================================
+# Legacy Output Metadata (Deprecated - ADR-029)
+# =============================================================================
+
+
 class OutputMetadata(BaseModel):
-    """Bronze output information.
+    """Bronze output information (DEPRECATED).
+
+    .. deprecated:: 5.10.0
+        Use BaseOutputMetadata + BronzeOutputExt composition instead.
+        Will be removed in v6.0.
 
     Attributes:
         files: List of output files.
@@ -252,6 +495,16 @@ class OutputMetadata(BaseModel):
     total_bytes: int = Field(default=0, description="Total bytes")
     format: str = Field(default="jsonl+zstd", description="Output format")
     compression: str = Field(default="zstd", description="Compression algorithm")
+
+    def __init__(self, **data: object) -> None:
+        """Initialize with deprecation warning."""
+        warnings.warn(
+            "OutputMetadata is deprecated, use BaseOutputMetadata + BronzeOutputExt "
+            "composition instead. Will be removed in v6.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(**data)
 
 
 # =============================================================================
@@ -458,7 +711,11 @@ class SCDMetadata(BaseModel):
 
 
 class GoldOutputMetadata(BaseModel):
-    """Gold layer output metrics.
+    """Gold layer output metrics (DEPRECATED).
+
+    .. deprecated:: 5.10.0
+        Use BaseOutputMetadata + GoldOutputExt composition instead.
+        Will be removed in v6.0.
 
     Attributes:
         record_count: Number of records.
@@ -474,9 +731,23 @@ class GoldOutputMetadata(BaseModel):
         default="delta", description="Output format"
     )
 
+    def __init__(self, **data: object) -> None:
+        """Initialize with deprecation warning."""
+        warnings.warn(
+            "GoldOutputMetadata is deprecated, use BaseOutputMetadata + "
+            "GoldOutputExt composition instead. Will be removed in v6.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(**data)
+
 
 class SilverOutputMetadata(BaseModel):
-    """Silver layer output metrics.
+    """Silver layer output metrics (DEPRECATED).
+
+    .. deprecated:: 5.10.0
+        Use BaseOutputMetadata + SilverOutputExt composition instead.
+        Will be removed in v6.0.
 
     Attributes:
         record_count: Number of records written.
@@ -488,6 +759,16 @@ class SilverOutputMetadata(BaseModel):
         default=None, description="Content hash for change detection"
     )
 
+    def __init__(self, **data: object) -> None:
+        """Initialize with deprecation warning."""
+        warnings.warn(
+            "SilverOutputMetadata is deprecated, use BaseOutputMetadata + "
+            "SilverOutputExt composition instead. Will be removed in v6.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(**data)
+
 
 # =============================================================================
 # Complete Layer Metadata Models
@@ -498,28 +779,39 @@ class BronzeMetadata(BaseModel):
     """Complete metadata for Bronze layer sidecar file.
 
     Structure follows RULES.md 2.4 lineage requirements.
+    Includes governance metadata block for data stewardship.
+
+    ADR-029: Uses unified BaseOutputMetadata + BronzeOutputExt composition.
     """
 
-    version: str = Field(default="1.0", description="Metadata schema version")
+    version: str = Field(default="1.1", description="Metadata schema version")
     layer: LayerType = Field(default=LayerType.BRONZE, description="Medallion layer")
     runtime: RuntimeMetadata = Field(description="Runtime context")
     pipeline: PipelineMetadata = Field(description="Pipeline identification")
     source: SourceMetadata = Field(
         default_factory=SourceMetadata, description="Source information"
     )
-    output: OutputMetadata = Field(
-        default_factory=OutputMetadata, description="Output information"
+    output: BaseOutputMetadata = Field(
+        default_factory=BaseOutputMetadata, description="Base output metrics"
+    )
+    output_ext: BronzeOutputExt = Field(
+        default_factory=BronzeOutputExt, description="Bronze-specific output metrics"
     )
     environment: EnvironmentMetadata = Field(description="Environment information")
+    governance: GovernanceMetadata | None = Field(
+        default=None, description="Governance metadata for data stewardship"
+    )
 
 
 class SilverMetadata(BaseModel):
     """Complete metadata for Silver layer sidecar file.
 
-    Includes lineage tracking from Bronze and DQ metrics.
+    Includes lineage tracking from Bronze, DQ metrics, and governance metadata.
+
+    ADR-029: Uses unified BaseOutputMetadata + SilverOutputExt composition.
     """
 
-    version: str = Field(default="1.0", description="Metadata schema version")
+    version: str = Field(default="1.1", description="Metadata schema version")
     layer: LayerType = Field(default=LayerType.SILVER, description="Medallion layer")
     runtime: RuntimeMetadata = Field(description="Runtime context")
     pipeline: PipelineMetadata = Field(description="Pipeline identification")
@@ -530,8 +822,11 @@ class SilverMetadata(BaseModel):
     dq_summary: DQSummary = Field(
         default_factory=DQSummary, description="Data quality summary"
     )
-    output: SilverOutputMetadata = Field(
-        default_factory=SilverOutputMetadata, description="Output metrics"
+    output: BaseOutputMetadata = Field(
+        default_factory=BaseOutputMetadata, description="Base output metrics"
+    )
+    output_ext: SilverOutputExt = Field(
+        default_factory=SilverOutputExt, description="Silver-specific output metrics"
     )
     environment: EnvironmentMetadata = Field(description="Environment information")
     # Cross-reference to DQ report
@@ -539,17 +834,22 @@ class SilverMetadata(BaseModel):
         default=None,
         description="Path to corresponding DQ report file (if generated)",
     )
+    governance: GovernanceMetadata | None = Field(
+        default=None, description="Governance metadata for data stewardship"
+    )
 
 
 class GoldMetadata(BaseModel):
     """Complete metadata for Gold layer sidecar file.
 
-    Includes schema contract and SCD tracking.
+    Includes schema contract, SCD tracking, and governance metadata.
+
+    ADR-029: Uses unified BaseOutputMetadata + GoldOutputExt composition.
     """
 
     model_config = ConfigDict(populate_by_name=True)
 
-    version: str = Field(default="1.0", description="Metadata schema version")
+    version: str = Field(default="1.1", description="Metadata schema version")
     layer: LayerType = Field(default=LayerType.GOLD, description="Medallion layer")
     runtime: RuntimeMetadata = Field(description="Runtime context")
     pipeline: PipelineMetadata = Field(description="Pipeline identification")
@@ -564,8 +864,14 @@ class GoldMetadata(BaseModel):
     dq_summary: DQSummary = Field(
         default_factory=DQSummary, description="Data quality summary"
     )
-    output: GoldOutputMetadata = Field(
-        default_factory=GoldOutputMetadata, description="Output metrics"
+    output: BaseOutputMetadata = Field(
+        default_factory=BaseOutputMetadata, description="Base output metrics"
+    )
+    output_ext: GoldOutputExt = Field(
+        default_factory=GoldOutputExt, description="Gold-specific output metrics"
     )
     scd: SCDMetadata | None = Field(default=None, description="SCD Type 2 metadata")
     environment: EnvironmentMetadata = Field(description="Environment information")
+    governance: GovernanceMetadata | None = Field(
+        default=None, description="Governance metadata for data stewardship"
+    )

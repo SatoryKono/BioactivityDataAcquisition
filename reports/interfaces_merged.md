@@ -610,8 +610,8 @@ def health() -> None:
 @health.command("server")
 @click.option(
     "--host",
-    default="0.0.0.0",
-    help="Host to bind to.",
+    default="127.0.0.1",
+    help="Host to bind to. Use 0.0.0.0 to expose externally.",
     show_default=True,
 )
 @click.option(
@@ -792,7 +792,7 @@ DEFAULT_HEALTH_SERVER_PORT = 8080
 @asynccontextmanager
 async def health_server_context(
     enabled: bool,
-    host: str = "0.0.0.0",
+    host: str = "127.0.0.1",
     port: int = DEFAULT_HEALTH_SERVER_PORT,
 ) -> AsyncIterator[HealthServer | None]:
     """Context manager that optionally runs a health server.
@@ -870,15 +870,16 @@ def add_health_server_options(cmd: click.Command) -> click.Command:
     return cmd
 
 
-def echo_health_server_info(enabled: bool, port: int) -> None:
+def echo_health_server_info(enabled: bool, port: int, host: str = "127.0.0.1") -> None:
     """Output health server status information.
 
     Args:
         enabled: Whether health server is enabled.
         port: Port the server is listening on.
+        host: Host the server is bound to (default: 127.0.0.1 for security).
     """
     if enabled:
-        click.echo(f"Health server: http://0.0.0.0:{port}/health")
+        click.echo(f"Health server: http://{host}:{port}/health")
 
 
 __all__ = [
@@ -1015,6 +1016,53 @@ maintenance.add_command(vacuum_command)
 maintenance.add_command(vacuum_all_command)
 maintenance.add_command(archive_command)
 maintenance.add_command(bronze_cleanup_command)
+
+================================================================================
+File: metrics_server_integration.py
+Path: cli\commands\metrics_server_integration.py
+================================================================================
+"""Metrics server integration for CLI commands.
+
+Provides utilities for starting the Prometheus metrics HTTP server
+alongside pipeline operations. The metrics server exposes Prometheus-compatible
+metrics endpoint while pipelines execute.
+
+This module follows the thin controller pattern - it delegates to
+composition layer for server startup, keeping side-effects out of bootstrap.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Iterator
+from contextlib import contextmanager
+
+from bioetl.composition.entrypoints import ensure_metrics_server_started
+
+__all__ = [
+    "ensure_metrics_server_started",
+    "metrics_server_context",
+]
+
+
+@contextmanager
+def metrics_server_context() -> Iterator[bool]:
+    """Context manager that ensures metrics server is started.
+
+    Starts the Prometheus metrics HTTP server before yielding.
+    The server runs as a daemon thread and doesn't need explicit shutdown.
+
+    Yields:
+        True if server was started, False if disabled.
+
+    Example:
+        with metrics_server_context():
+            # Metrics server is running
+            await run_pipeline()
+        # Server continues running (daemon thread)
+    """
+    # Re-exported from entrypoints, use directly
+    started = ensure_metrics_server_started()
+    yield started
 
 ================================================================================
 File: quarantine.py
@@ -1300,6 +1348,9 @@ from bioetl.interfaces.cli.commands.health_server_integration import (
     echo_health_server_info,
     health_server_context,
 )
+from bioetl.interfaces.cli.commands.metrics_server_integration import (
+    ensure_metrics_server_started,
+)
 from bioetl.interfaces.cli.commands.run_helpers import (
     get_runner_logger,
     handle_destructive_run_confirmation,
@@ -1362,6 +1413,9 @@ async def _run_pipeline_async(
     Returns:
         Tuple of (status, error_message, error_type, run_id).
     """
+    # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
+    ensure_metrics_server_started()
+
     async with health_server_context(
         enabled=health_server_enabled,
         port=health_port,
@@ -1576,6 +1630,9 @@ from bioetl.interfaces.cli.commands.health_server_integration import (
     echo_health_server_info,
     health_server_context,
 )
+from bioetl.interfaces.cli.commands.metrics_server_integration import (
+    ensure_metrics_server_started,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
@@ -1684,6 +1741,9 @@ async def _run_all_pipelines_async(
     health_port: int = DEFAULT_HEALTH_SERVER_PORT,
 ) -> BatchRunResult:
     """Run all pipelines sequentially with optional health server."""
+    # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
+    ensure_metrics_server_started()
+
     async with health_server_context(enabled=health_server_enabled, port=health_port):
         service = get_pipeline_runner_service()
         return await _run_pipelines_batch(service, pipelines, options)
@@ -1920,6 +1980,9 @@ from bioetl.interfaces.cli.commands.health_server_integration import (
     echo_health_server_info,
     health_server_context,
 )
+from bioetl.interfaces.cli.commands.metrics_server_integration import (
+    ensure_metrics_server_started,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
@@ -1985,6 +2048,9 @@ async def _run_composite_async(
     Returns:
         Tuple of (success, error_message).
     """
+    # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
+    ensure_metrics_server_started()
+
     async with health_server_context(
         enabled=health_server_enabled,
         port=health_port,
@@ -2846,7 +2912,7 @@ class HealthServer:
 
     def __init__(
         self,
-        host: str = "0.0.0.0",
+        host: str = "127.0.0.1",
         port: int = 8080,
         health_monitor: HealthMonitorPort | None = None,
         logger: LoggerPort | None = None,
@@ -3176,21 +3242,18 @@ Path: observability.py
 ================================================================================
 """Observability interface for BioETL.
 
-Re-exports observability components from the composition layer.
-This module exists for backward compatibility and provides a clean
-interface for external consumers.
+Re-exports observability components for external consumers.
 
 Note:
-    For architectural purity, these components are managed by the
-    composition layer and re-exported here for the interfaces layer.
+    MetricsServerError is defined in domain.exceptions (value object,
+    can be imported by all layers). start_metrics_server is re-exported
+    from infrastructure.observability.
 """
 
 from __future__ import annotations
 
-from bioetl.composition._bootstrap import (
-    MetricsServerError,
-    start_metrics_server,
-)
+from bioetl.domain.exceptions import MetricsServerError
+from bioetl.infrastructure.observability import start_metrics_server
 
 __all__ = [
     "MetricsServerError",

@@ -17,7 +17,9 @@ from uuid import uuid4
 
 # Re-export canonical DTO classes from application.services (H1 refactoring)
 # These are the single source of truth for pipeline execution interfaces.
+from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.application.services import RunOptions, RunResult, RunStatus
+from bioetl.infrastructure.config import get_settings
 
 __all__ = [
     # Configuration
@@ -58,6 +60,9 @@ __all__ = [
     # Inspection
     "inspect_quarantine",
     "list_checkpoints",
+    # Metrics server entrypoint
+    "ensure_metrics_server_started",
+    "maybe_start_metrics_server",
 ]
 
 from bioetl.composition._bootstrap import (
@@ -82,6 +87,7 @@ from bioetl.composition.bootstrap import (
     bootstrap_pipeline,
     bootstrap_quarantine_manager,
     load_pipeline_config,
+    maybe_start_metrics_server,
 )
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
@@ -110,6 +116,24 @@ if TYPE_CHECKING:
         MedallionLifecycleService,
     )
     from bioetl.domain.ports import QuarantinePort
+
+
+def ensure_metrics_server_started() -> bool:
+    """Ensure metrics server is started if enabled in settings.
+
+    This function should be called at the start of pipeline execution
+    to start the Prometheus HTTP server. It's idempotent - calling it
+    multiple times is safe.
+
+    Returns:
+        True if server was started or already running, False if disabled.
+
+    Example:
+        >>> ensure_metrics_server_started()
+        True  # Server started on configured port
+    """
+    settings = get_settings()
+    return maybe_start_metrics_server(settings)
 
 
 @dataclass(frozen=True)
@@ -265,7 +289,9 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
         >>> else:
         ...     logger.error("pipeline_failed", error_message=result.error_message)
     """
-    from bioetl.application.core.shutdown import PipelineShutdownError
+    # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
+    settings = get_settings()
+    maybe_start_metrics_server(settings)
 
     started_at = datetime.now(tz=UTC)
     runner = create_pipeline_runner(name, options)

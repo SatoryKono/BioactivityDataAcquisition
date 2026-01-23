@@ -45,11 +45,13 @@ BioactivityDataAcquisition2/
     │   │   ├── 0019f1f0b729c113
     │   │   ├── 001a12cb383c6505
     │   │   ├── 001e2dbef10a8aa6
+    │   │   ├── 0024557226af70cf
     │   │   ├── 005fa3df6752b1fe
     │   │   ├── 007729d42446623e
     │   │   ├── 008e17f188054d5d
     │   │   ├── 009d3c10440224d1
     │   │   ├── 009edca8bd16b08c
+    │   │   ├── 00b6e67f83ee1249
     │   │   ├── 00cb01155267c94f
     │   │   ├── 00e38d371691b5c4
     │   │   ├── 00f13d9da31ef86e
@@ -94,6 +96,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 041a28d705df8a86
     │   │   ├── 041bbf0e7c6c4327
     │   │   ├── 04327d317750f5d8
+    │   │   ├── 043d4d66e93879d6
     │   │   ├── 044b52eb3f01cd1c
     │   │   ├── 044fbced797f1f39
     │   │   ├── 046ddec3b6890ad2
@@ -115,6 +118,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 0612dfac2154532e
     │   │   ├── 06245019d9882aa8
     │   │   ├── 062908ed326b162e
+    │   │   ├── 06332b73f89ed5e0
     │   │   ├── 06538e20f76890cf
     │   │   ├── 0693ccfbb4d0f8cb
     │   │   ├── 069688e4afe97a2d
@@ -124,6 +128,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 06be3fa8d929d072
     │   │   ├── 06c631230e01680d
     │   │   ├── 06ea5de8a57ed029
+    │   │   ├── 06f0c5ea153d0e14
     │   │   ├── 06fdf4512200d80d
     │   │   ├── 0714fb795bc18ef2
     │   │   ├── 071c84a49496f4b8
@@ -135,6 +140,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 076e43433c76339f
     │   │   ├── 07780ce68dd9fe97
     │   │   ├── 077ed666f8d5d843
+    │   │   ├── 078615b10ec78aee
     │   │   ├── 078d88060992c447
     │   │   ├── 07943819dbaec99e
     │   │   ├── 07e533d26c65983a
@@ -172,6 +178,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 0ae3f151fbdaf271
     │   │   ├── 0b04aaea51d3c299
     │   │   ├── 0b0e1b22ee150205
+    │   │   ├── 0b13554b32973240
     │   │   ├── 0b293ce77a49d586
     │   │   ├── 0b3169ba0a02b442
     │   │   ├── 0b3bd5f99e3b0f74
@@ -188,6 +195,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 0c34b9e78cc7cf3c
     │   │   ├── 0c415e98e9a22fd9
     │   │   ├── 0c47fb866cb32fc5
+    │   │   ├── 0c507e967f7d3125
     │   │   ├── 0c7e98e9c77f5213
     │   │   ├── 0c8236a6a7f79b9f
     │   │   ├── 0ca69100080a598c
@@ -256,6 +264,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 11cea0c8b68acc68
     │   │   ├── 11d4a5d12aae527b
     │   │   ├── 11fe6653446add7e
+    │   │   ├── 1240ce62e99772f4
     │   │   ├── 125dad93185fb2b7
     │   │   ├── 129f405e38c743f3
     │   │   ├── 12ca60eb440bce90
@@ -298,6 +307,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 15ad6cb86706daf0
     │   │   ├── 15b2d48a3c08bb1f
     │   │   ├── 15b6bbaf060d2770
+    │   │   ├── 15d2b181bd55060b
     │   │   ├── 15d723b7038d4c2f
     │   │   ├── 15d760205906c795
     │   │   ├── 15de59cccada148e
@@ -307,6 +317,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 1658fb534fa9931c
     │   │   ├── 16602d39bfb705fd
     │   │   ├── 1684431b2a754b7a
+    │   │   ├── 16b60b56cb5a0241
     │   │   ├── 16f9a0650d5758e7
     │   │   ├── 173220ebf1b09443
     │   │   ├── 173c8207fb82e4e1
@@ -327,6 +338,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 189a64f85aa1cf02
     │   │   ├── 18d0a3666b447969
     │   │   ├── 18e7e3119c1ccba7
+    │   │   ├── 1900a94ee46161de
     │   │   ├── 19102c10e7a9be8e
     │   │   ├── 1926f0cea68461ff
     │   │   ├── 192721418f13beb3
@@ -375,6 +387,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 1c750f3efba474e0
     │   │   ├── 1ca3bd4595a73ebe
     │   │   ├── 1ca69de4d57cc8c7
+    │   │   ├── 1cb67778210116fb
     │   │   ├── 1cdb4cf1b50125d8
     │   │   ├── 1cf3039f9b05c2a8
     │   │   ├── 1cf5fe02537db129
@@ -382,6 +395,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 1d3143e5cf24c732
     │   │   ├── 1d3bbe7aeddfaf5f
     │   │   ├── 1d3cd6856b30bfc7
+    │   │   ├── 1d5eb67c0d5d6311
     │   │   ├── 1d659897dd5eb730
     │   │   ├── 1d789ce64c05e694
     │   │   ├── 1d93f911c1e27518
@@ -405,8 +419,11 @@ BioactivityDataAcquisition2/
     │   │   ├── 1ec11c5b46fa6fd8
     │   │   ├── 1ec5098b1538c4b8
     │   │   ├── 1f021a42ea03faec
+    │   │   ├── 1f567c9878db2eaf
     │   │   ├── 1fa4c124bc2ccf34
     │   │   ├── 20272946973653f2
+    │   │   ├── 2030988c4617ddc8
+    │   │   ├── 203a2993772855e0
     │   │   ├── 2048a252569f4033
     │   │   ├── 205f006580fb351d
     │   │   ├── 20661de105a69596
@@ -469,6 +486,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 25231687df8c16fc
     │   │   ├── 2545a1d9fb491ef1
     │   │   ├── 25476121bf842340
+    │   │   ├── 25478e2cebf49982
     │   │   ├── 2569c3179f48c788
     │   │   ├── 257b7560edd29559
     │   │   ├── 258cb2de75c42cd5
@@ -485,6 +503,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 26362c38fc1e7993
     │   │   ├── 264e0ab49afa3666
     │   │   ├── 265ddac7e1fd0b38
+    │   │   ├── 26672701cf0377e3
     │   │   ├── 267227b0c2625f7e
     │   │   ├── 2691cf9978dd8e00
     │   │   ├── 26a89b05af9b0668
@@ -499,6 +518,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 27275eec728daa87
     │   │   ├── 273a4140ebc9929d
     │   │   ├── 27706fa3ed306ac4
+    │   │   ├── 2786a241a115c341
     │   │   ├── 279fc75668773f16
     │   │   ├── 27c29d1d7a460a43
     │   │   ├── 27c54c29e9cd7c13
@@ -514,6 +534,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 288cdf61344914dc
     │   │   ├── 289b80106a8f62fa
     │   │   ├── 28a97c2eebec5880
+    │   │   ├── 28b129bf764fb4fa
     │   │   ├── 28b9fb74573446e6
     │   │   ├── 28eb107116556413
     │   │   ├── 294e13965437b784
@@ -557,6 +578,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 2c6819f50ab8fb2d
     │   │   ├── 2c8e884345ce817b
     │   │   ├── 2ce86d05e6738c9b
+    │   │   ├── 2d2d5837aa1f2716
     │   │   ├── 2d2f01d82bb21a58
     │   │   ├── 2d3126f6c60419e3
     │   │   ├── 2d59de6085159da7
@@ -577,6 +599,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 2e501519b34014a8
     │   │   ├── 2e5c2f08a9f3b4fd
     │   │   ├── 2e63e853f6276b47
+    │   │   ├── 2e643691291ea9a4
     │   │   ├── 2e855c937b52c0fe
     │   │   ├── 2e9ae9e1144950fc
     │   │   ├── 2ea480296dc76c14
@@ -595,6 +618,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 302d98d363c713a4
     │   │   ├── 30456912036f4fc1
     │   │   ├── 3049d20763c3ff9a
+    │   │   ├── 30660b6cb43c013b
     │   │   ├── 308c7e035f029982
     │   │   ├── 3098794fa7b330e9
     │   │   ├── 30a5724caf5d8e92
@@ -616,6 +640,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 318846b0ac0f3c37
     │   │   ├── 318cc5c44ac4dc3c
     │   │   ├── 3199aef98c4cde87
+    │   │   ├── 31a30cdab1ad6aac
     │   │   ├── 31a33c380cbecdac
     │   │   ├── 31b37da81bd7c4d5
     │   │   ├── 31ce9be32c11f712
@@ -638,6 +663,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 331a95ffe05df4ec
     │   │   ├── 3320758f1af44a21
     │   │   ├── 334a03547b441ddb
+    │   │   ├── 3354bf6b72433dd8
     │   │   ├── 33678c9605c18452
     │   │   ├── 336fb146b83b3e6d
     │   │   ├── 3374ffd893662e6b
@@ -651,6 +677,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 344751395270fd1f
     │   │   ├── 344b71bb69289b06
     │   │   ├── 3474fe35755e4ddf
+    │   │   ├── 3493ba1369c4095f
     │   │   ├── 34cecc7f2f268e7c
     │   │   ├── 34f1a63b32abc775
     │   │   ├── 35110f98c39deb55
@@ -666,6 +693,8 @@ BioactivityDataAcquisition2/
     │   │   ├── 364e6e1128ce3b40
     │   │   ├── 3653c455d8874948
     │   │   ├── 368380199d3478d3
+    │   │   ├── 36870587afd536c0
+    │   │   ├── 36929e5b0bc72ac2
     │   │   ├── 369d2ff964a28294
     │   │   ├── 369d451a4fc42ba6
     │   │   ├── 36a63890b118fde2
@@ -679,6 +708,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 374b8fa3945baf2a
     │   │   ├── 375f79fc511346a1
     │   │   ├── 37675b559a58450b
+    │   │   ├── 379995172aac131b
     │   │   ├── 37ac9f66ce239de3
     │   │   ├── 37c23a8bd5764a4e
     │   │   ├── 37d2a04e0b83bcf0
@@ -703,6 +733,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 38e5e011e220e006
     │   │   ├── 38f2dfa605ab5f1f
     │   │   ├── 39271889e837ec30
+    │   │   ├── 394e44a6a95749a9
     │   │   ├── 394e5d95a13afcec
     │   │   ├── 395f801997ba7aea
     │   │   ├── 39779b94332111e4
@@ -738,6 +769,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 3b922b6aa33b75e2
     │   │   ├── 3b95bdde7cf0247f
     │   │   ├── 3ba2b80017df4401
+    │   │   ├── 3babe7bf04183d68
     │   │   ├── 3bbf36a32c9b671d
     │   │   ├── 3bcdd67b0e4aaf5d
     │   │   ├── 3bd12b5a806028fb
@@ -751,6 +783,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 3c8beec56a15ccc3
     │   │   ├── 3c9dde0c52af4395
     │   │   ├── 3ccb0384904a1e39
+    │   │   ├── 3cd346f634f7222a
     │   │   ├── 3cd86140beabfec9
     │   │   ├── 3cd906ca5e6b88e3
     │   │   ├── 3cf8efb2532222ca
@@ -799,10 +832,12 @@ BioactivityDataAcquisition2/
     │   │   ├── 40aaf98d867bf384
     │   │   ├── 40af6947870c4c18
     │   │   ├── 40be1ae1f3f9eb8e
+    │   │   ├── 40f90aaa7d1e169f
     │   │   ├── 410c748c7f0187b0
     │   │   ├── 41114abf85aab6c8
     │   │   ├── 411f8a1ef231f63f
     │   │   ├── 41200d99a081bfed
+    │   │   ├── 41215d9f58e8f78d
     │   │   ├── 413287729a2e60b0
     │   │   ├── 41477dde83580922
     │   │   ├── 415d91f1329d4e24
@@ -841,6 +876,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 43eba95f08763bec
     │   │   ├── 43ec2aebcb80b48b
     │   │   ├── 43f29035b10daca6
+    │   │   ├── 44151109c767790d
     │   │   ├── 4432a371803c8c1f
     │   │   ├── 445adab1c322471c
     │   │   ├── 44607f8b9c776766
@@ -869,6 +905,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 45f36b4646b9d776
     │   │   ├── 45f67927966357c8
     │   │   ├── 4604b910d163c5c5
+    │   │   ├── 4609178ff8ffe39b
     │   │   ├── 463effe4a596d488
     │   │   ├── 46450a90538c361b
     │   │   ├── 466c6aadc5977f2b
@@ -903,6 +940,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 494695e41aa398c2
     │   │   ├── 494863565d724961
     │   │   ├── 494ca1f9d2a54cc1
+    │   │   ├── 496e1e1e234c4f7c
     │   │   ├── 49734c19dc91041b
     │   │   ├── 497641960e530e3c
     │   │   ├── 498c2b21a0257d51
@@ -913,6 +951,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 49bdec03cb408074
     │   │   ├── 49f284d52c5b1894
     │   │   ├── 4a1b99aa946b4241
+    │   │   ├── 4a2ed26cb0b8f525
     │   │   ├── 4a347d66c7270f5f
     │   │   ├── 4a388beb45edc108
     │   │   ├── 4a4aa9fea5d9bd74
@@ -933,8 +972,10 @@ BioactivityDataAcquisition2/
     │   │   ├── 4b4d5528fbbb1654
     │   │   ├── 4b6bf92a665f85cb
     │   │   ├── 4b9154b8d51c2947
+    │   │   ├── 4ba9f176f41ec269
     │   │   ├── 4bc262feede522d2
     │   │   ├── 4bdbf0705fba7ac2
+    │   │   ├── 4bf0c74e62defcaa
     │   │   ├── 4bf1c5d68efac2f3
     │   │   ├── 4c067f46e5fdfa30
     │   │   ├── 4c4584e3779de420
@@ -950,7 +991,9 @@ BioactivityDataAcquisition2/
     │   │   ├── 4d143dca8572361f
     │   │   ├── 4d14b1bfa0a77dea
     │   │   ├── 4d15cb8d496ca98b
+    │   │   ├── 4d33bd865e91067d
     │   │   ├── 4d87cf5651e53e97
+    │   │   ├── 4d9cdb0753cfa52c
     │   │   ├── 4da2ab91978821c8
     │   │   ├── 4da36df3da06a15a
     │   │   ├── 4da8c543d19227b9
@@ -962,6 +1005,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 4dcbe6c59d328dcb
     │   │   ├── 4df206564a1f9812
     │   │   ├── 4dfaf439cabc4d50
+    │   │   ├── 4e3306a66dcfdc43
     │   │   ├── 4e4338e53ef1b536
     │   │   ├── 4e43e8939aed40a1
     │   │   ├── 4e50cecbaa36223f
@@ -976,6 +1020,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 4ec43af0fa5e28dd
     │   │   ├── 4ed7e1e7ca014d9d
     │   │   ├── 4ef20576cfd818ba
+    │   │   ├── 4ef3bbd0ec0ea217
     │   │   ├── 4f05a82fdd0032f2
     │   │   ├── 4f0d6c15d3d3b247
     │   │   ├── 4f1683e207fa9035
@@ -995,6 +1040,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 503bbc3eae1c89ed
     │   │   ├── 505d29d8f15ea822
     │   │   ├── 507f27c58b7494d9
+    │   │   ├── 507f7756bb3b3f38
     │   │   ├── 50831a75e2d17ae1
     │   │   ├── 508d1bc5c931645d
     │   │   ├── 508fa9a2ce565589
@@ -1021,6 +1067,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 5245bc922e990355
     │   │   ├── 524ccc2384450b08
     │   │   ├── 52530752dd5666a8
+    │   │   ├── 528d5fabdda93e9b
     │   │   ├── 52a9ea25ccd5a672
     │   │   ├── 52be4c5cb3671cca
     │   │   ├── 52cc4ce6964a542f
@@ -1028,7 +1075,9 @@ BioactivityDataAcquisition2/
     │   │   ├── 52e66cce57d4f11a
     │   │   ├── 52e8de17116427ed
     │   │   ├── 52ee27048aaddefe
+    │   │   ├── 52f97516ed1411ab
     │   │   ├── 530229c93c9251b4
+    │   │   ├── 53072f7d604eff93
     │   │   ├── 531b5bc1cba68d19
     │   │   ├── 533986b311d48b83
     │   │   ├── 533c7eab76dca101
@@ -1065,6 +1114,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 5605a6627e0cf963
     │   │   ├── 56147d16ab3c2612
     │   │   ├── 562028af5f2e0c57
+    │   │   ├── 56366fe14074f0c4
     │   │   ├── 5651a81c37cb0bd2
     │   │   ├── 5657ad2c99ecea24
     │   │   ├── 5665c8ecf6303efd
@@ -1096,6 +1146,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 5897c35658b46310
     │   │   ├── 58a9cb89d80145cc
     │   │   ├── 58ab9665c2f838f7
+    │   │   ├── 58ad00c45725e1af
     │   │   ├── 58dd885c0ed737be
     │   │   ├── 58f643fd63bf5f67
     │   │   ├── 58fee6a31e7be330
@@ -1149,19 +1200,23 @@ BioactivityDataAcquisition2/
     │   │   ├── 5c4263a120e14fea
     │   │   ├── 5c47794c2913b74b
     │   │   ├── 5c7cc662a945f27b
+    │   │   ├── 5c82f9f2129e10fa
     │   │   ├── 5c983888428668fb
     │   │   ├── 5c98549cf26aee39
     │   │   ├── 5ca4b81b28786a20
     │   │   ├── 5cbcac8c3713901f
     │   │   ├── 5cd1d12b9a21f028
+    │   │   ├── 5cd6d6e5ad0dcdcc
     │   │   ├── 5cf4662dc9cdf208
     │   │   ├── 5d127582daad65f5
+    │   │   ├── 5d19397f0fb7247b
     │   │   ├── 5d2c66cf98a5a18b
     │   │   ├── 5d52afab2c713cfe
     │   │   ├── 5d5572c484685793
     │   │   ├── 5d586256b5658b5c
     │   │   ├── 5d5dcb48852cb6e7
     │   │   ├── 5d627c52ec8e2e59
+    │   │   ├── 5d71d6071a60d472
     │   │   ├── 5de46f7d90d2a75d
     │   │   ├── 5dfca4b232a3a006
     │   │   ├── 5e291872e844fd0d
@@ -1174,6 +1229,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 5ea8afad659ac039
     │   │   ├── 5eb6c0ef69e1253d
     │   │   ├── 5ebf9faf294cfc07
+    │   │   ├── 5ec014087a1e22c7
     │   │   ├── 5efeb3603de1140a
     │   │   ├── 5f12ee49bc79856f
     │   │   ├── 5f151208e56efff6
@@ -1182,6 +1238,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 5f2dd7621c7f73bb
     │   │   ├── 5f48a70d047860b7
     │   │   ├── 5fb85857f5dbb735
+    │   │   ├── 5fc01e08e41fda0f
     │   │   ├── 5fc56e037ded1c65
     │   │   ├── 5fd677c46c94c982
     │   │   ├── 5fdab385310663dd
@@ -1217,6 +1274,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 61fb6c125b22a056
     │   │   ├── 61fc928ed89ac6d9
     │   │   ├── 62018fac962157b2
+    │   │   ├── 62082eff06c7c647
     │   │   ├── 621a3186810119b4
     │   │   ├── 621cda013847e3b1
     │   │   ├── 623edb35fede9661
@@ -1231,6 +1289,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 62eed0a5ce7ef18f
     │   │   ├── 631dc599d596d673
     │   │   ├── 6327390b02092e7f
+    │   │   ├── 634b6b2345279fbc
     │   │   ├── 634cb0dcc6c2abce
     │   │   ├── 63808a626cb9f030
     │   │   ├── 639a15c1caaa7b0f
@@ -1263,6 +1322,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 657e4e544abd6af7
     │   │   ├── 65850d4c113d560d
     │   │   ├── 65a64878d69c612a
+    │   │   ├── 65adb13729342875
     │   │   ├── 65beca8b6d0d89b4
     │   │   ├── 65ea978a99cf85fd
     │   │   ├── 65f1b9715452bb4b
@@ -1298,7 +1358,9 @@ BioactivityDataAcquisition2/
     │   │   ├── 67fa5405618773dd
     │   │   ├── 6801adf08d318b8f
     │   │   ├── 681404c9f0ac3d98
+    │   │   ├── 68289c71e1073218
     │   │   ├── 688341dd8a088f42
+    │   │   ├── 688852183ab7f3c4
     │   │   ├── 68888a440151c477
     │   │   ├── 68998c3171a65702
     │   │   ├── 68a4db8a70923531
@@ -1336,6 +1398,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 6b2b14f73469c7e0
     │   │   ├── 6b323d92fb5cbf7c
     │   │   ├── 6b38afd6935b6a4a
+    │   │   ├── 6b576125f12a452d
     │   │   ├── 6b5f5c82b0315069
     │   │   ├── 6b607c17b770fb40
     │   │   ├── 6b642688d3703c24
@@ -1350,7 +1413,9 @@ BioactivityDataAcquisition2/
     │   │   ├── 6c4a4f5efaa68d30
     │   │   ├── 6c56c8241852633a
     │   │   ├── 6c75809445665042
+    │   │   ├── 6c9132d602195638
     │   │   ├── 6cb71a517efcd81f
+    │   │   ├── 6cc305cafe99ab59
     │   │   ├── 6cd1bea458f90754
     │   │   ├── 6cd3a17bc5f4804e
     │   │   ├── 6cd68734018ffd0f
@@ -1373,6 +1438,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 6e4cf9e7fbe42380
     │   │   ├── 6e4ed7fef5ce10df
     │   │   ├── 6e5621d8a4dc63af
+    │   │   ├── 6e700fbe0ae0ede3
     │   │   ├── 6e8949c58fa328b0
     │   │   ├── 6ea8cf1532509216
     │   │   ├── 6eae51d2a159127a
@@ -1392,9 +1458,11 @@ BioactivityDataAcquisition2/
     │   │   ├── 6fcb2dd9455beea6
     │   │   ├── 6fd636917371ad45
     │   │   ├── 6ffb2049ef23a680
+    │   │   ├── 704385e170db3fb3
     │   │   ├── 708b627a64171e85
     │   │   ├── 70a48e5f31c53bb2
     │   │   ├── 70b0b71bfb34d5d8
+    │   │   ├── 70c2444c2636e804
     │   │   ├── 70c91f1751c26eae
     │   │   ├── 70d4bc7ae35ab921
     │   │   ├── 70ef46fe8ca9cec8
@@ -1429,6 +1497,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 730324df9c303ec9
     │   │   ├── 7316e8e794775794
     │   │   ├── 731b95806c6de252
+    │   │   ├── 733ec5546fb87aa1
     │   │   ├── 7354fe09e8e30094
     │   │   ├── 739b6ffd7c103501
     │   │   ├── 73c7f66537886681
@@ -1459,6 +1528,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 765635b800d0cc0c
     │   │   ├── 765cf9f776a202d3
     │   │   ├── 766daad65a1bfc5a
+    │   │   ├── 766dd15a926cac82
     │   │   ├── 76b07c840f79809f
     │   │   ├── 76ceb2eaa919973a
     │   │   ├── 76d944da1226cfe7
@@ -1466,7 +1536,9 @@ BioactivityDataAcquisition2/
     │   │   ├── 76eb7a2508fedae1
     │   │   ├── 770139477b9603f5
     │   │   ├── 772051ece07469be
+    │   │   ├── 7720ed9c1254aa3f
     │   │   ├── 77252a1bc0149c91
+    │   │   ├── 77306486dd59f345
     │   │   ├── 7756c4a7f59a7b0b
     │   │   ├── 776410ebbc1f04e0
     │   │   ├── 776bb40957e76711
@@ -1477,6 +1549,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 779ad10191bee404
     │   │   ├── 77b70b2109f8b924
     │   │   ├── 77c3a7db601e455d
+    │   │   ├── 77c754c97e64e8a8
     │   │   ├── 77d08529129279ee
     │   │   ├── 78070c9792ed364d
     │   │   ├── 782b2b053f1f4b67
@@ -1491,6 +1564,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 78b2ae07bd13c4b7
     │   │   ├── 78bf163aeeb86ea0
     │   │   ├── 78dfa31e258cb64d
+    │   │   ├── 78ec4382f297f09a
     │   │   ├── 78f21398e3cd69f0
     │   │   ├── 78fc3a0f6756b92d
     │   │   ├── 79228f8eb0573ce3
@@ -1548,8 +1622,10 @@ BioactivityDataAcquisition2/
     │   │   ├── 7c81af12dcc59b22
     │   │   ├── 7c9345995f981047
     │   │   ├── 7c98bc542660e962
+    │   │   ├── 7c9ce454174962b0
     │   │   ├── 7c9efab190ec2bd9
     │   │   ├── 7caf458fe9775320
+    │   │   ├── 7caff21279b241bc
     │   │   ├── 7ccd970b5507c532
     │   │   ├── 7ce8c3e8c1456813
     │   │   ├── 7cf94e9074f59534
@@ -1557,6 +1633,8 @@ BioactivityDataAcquisition2/
     │   │   ├── 7d14d4a79f45329b
     │   │   ├── 7d655e3780d264f4
     │   │   ├── 7d6f331d07682aae
+    │   │   ├── 7d82e0cfbb7a3c4d
+    │   │   ├── 7d9e3deddda0f16a
     │   │   ├── 7da3365158091cd1
     │   │   ├── 7dbf5f77536e7f34
     │   │   ├── 7dc0a8597ece08af
@@ -1570,6 +1648,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 7e7a675fc7d7fb19
     │   │   ├── 7e91fc2c4fd4ced2
     │   │   ├── 7eae20721a9ed02f
+    │   │   ├── 7ebde033c1582f75
     │   │   ├── 7ee4568765799bb0
     │   │   ├── 7ef33e3d8e07758d
     │   │   ├── 7f11336f05dffcbc
@@ -1577,17 +1656,20 @@ BioactivityDataAcquisition2/
     │   │   ├── 7f3a380d38d3ed77
     │   │   ├── 7f418e80bae278c7
     │   │   ├── 7f4bc60f343b44f9
+    │   │   ├── 7f735034c8748aa9
     │   │   ├── 7f742d0006e93b24
     │   │   ├── 7f85c4ef769478e9
     │   │   ├── 7f9aeea3afc76962
     │   │   ├── 7fc1f2df0ee9df85
     │   │   ├── 7fca5a7cd045e865
     │   │   ├── 7fcdb6c7a5e7862b
+    │   │   ├── 7fd076b51e62fde9
     │   │   ├── 7fd737dea8958dde
     │   │   ├── 7fe06140f31644b9
     │   │   ├── 7fe2f04bd7589644
     │   │   ├── 8012089b1d2ec4da
     │   │   ├── 80297e8233384390
+    │   │   ├── 80438f2990f6053c
     │   │   ├── 80565c2bd62a9049
     │   │   ├── 80866e6717ecba2a
     │   │   ├── 809501633aaf0271
@@ -1596,6 +1678,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 80b312296a171ff6
     │   │   ├── 80d258cb3820fdb7
     │   │   ├── 810717502bfa83d0
+    │   │   ├── 81093ee79a138e1f
     │   │   ├── 8109d5451e657c70
     │   │   ├── 811af4f2088e734a
     │   │   ├── 8164d8bc2083a8ed
@@ -1627,6 +1710,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 83467c804dc5fafc
     │   │   ├── 835d8454f3298dc0
     │   │   ├── 8373538356262908
+    │   │   ├── 8385eda8816b7b89
     │   │   ├── 8393ea64790c42cc
     │   │   ├── 83b6e3e3be8a5614
     │   │   ├── 83bfb24fb91c7da9
@@ -1668,6 +1752,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 86a3963f622142e5
     │   │   ├── 86c73fdf0c39996f
     │   │   ├── 86de2c38f3344124
+    │   │   ├── 86e41f3060357e1d
     │   │   ├── 870082e05f6fbecd
     │   │   ├── 870b51e7f7ace316
     │   │   ├── 87135ca783b3a320
@@ -1675,9 +1760,11 @@ BioactivityDataAcquisition2/
     │   │   ├── 87b3e89c5d3d22a3
     │   │   ├── 87d46cca92c49d93
     │   │   ├── 87dcc97e17406b3d
+    │   │   ├── 87e7325b9d999f75
     │   │   ├── 88111ac390cb120b
     │   │   ├── 882e48d5dacf146b
     │   │   ├── 88368e7a7b370805
+    │   │   ├── 88640e675d5f9fb9
     │   │   ├── 8866ab3e4ad27e3c
     │   │   ├── 8869d0059bcb6898
     │   │   ├── 886bc936029d86d5
@@ -1753,6 +1840,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 8ca33f76f3312874
     │   │   ├── 8ca97e7c55a7837b
     │   │   ├── 8cb12c7ff457201c
+    │   │   ├── 8cdf52b64b204069
     │   │   ├── 8cec1199515c2402
     │   │   ├── 8d05e15c770e7d25
     │   │   ├── 8d1937b9bbcc2f2f
@@ -1770,6 +1858,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 8e22e8c598dca85c
     │   │   ├── 8e2925a1c7958c59
     │   │   ├── 8e308a4f3d7555b9
+    │   │   ├── 8e3190d8594ad6d1
     │   │   ├── 8e3f562d02249f87
     │   │   ├── 8e401cb318602c40
     │   │   ├── 8e46119a8fa73261
@@ -1792,6 +1881,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 8f57dcf5387dc7bb
     │   │   ├── 8f5966af8b5fdc81
     │   │   ├── 8f73841d91081e46
+    │   │   ├── 8f93fdd87076b074
     │   │   ├── 8fadcce9fd924046
     │   │   ├── 8fadfaa53ce5f8f7
     │   │   ├── 8fb604b7d1eac10a
@@ -1801,6 +1891,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 90008a2aca6814ef
     │   │   ├── 90036dd989cb6d11
     │   │   ├── 9003da371904b65d
+    │   │   ├── 9027dea51440eae4
     │   │   ├── 903947e491b1b727
     │   │   ├── 903a3c43d8238ef1
     │   │   ├── 9057731cc56c26c5
@@ -1827,6 +1918,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 91bf9280518847c9
     │   │   ├── 91c236f52e5e35b6
     │   │   ├── 91d191f88a2a8c9b
+    │   │   ├── 91d696d35c9abb2f
     │   │   ├── 91e38ef3d4350044
     │   │   ├── 91e82d4607eea70c
     │   │   ├── 92189d5d408b2599
@@ -1840,6 +1932,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 92b434f6be31026b
     │   │   ├── 92bcb49cfe9409cc
     │   │   ├── 92c4429adcc48bcc
+    │   │   ├── 92d9901ea743b9a1
     │   │   ├── 92e04897133b1541
     │   │   ├── 93172cb45c35b2f9
     │   │   ├── 93202863a3826e0f
@@ -1856,8 +1949,10 @@ BioactivityDataAcquisition2/
     │   │   ├── 9433c01434fbbcc3
     │   │   ├── 943e178cead4619f
     │   │   ├── 9448eb36cb92285a
+    │   │   ├── 9456936ab178364f
     │   │   ├── 9474ec8014f52251
     │   │   ├── 94755467ddee3502
+    │   │   ├── 9491b03ca5ec140e
     │   │   ├── 9498c760f0c38f7a
     │   │   ├── 94cd322bb903a654
     │   │   ├── 94dc460f99725e9f
@@ -1865,14 +1960,17 @@ BioactivityDataAcquisition2/
     │   │   ├── 94f020cff00266c8
     │   │   ├── 94fa67c44ba8fe93
     │   │   ├── 9546ddd892c6477f
+    │   │   ├── 955df1e0f87f6939
     │   │   ├── 9565ab926c4accda
     │   │   ├── 9566444b7766a917
     │   │   ├── 9577a89521f8005a
     │   │   ├── 958da3b07c2bf564
     │   │   ├── 95a38951080bb84a
     │   │   ├── 95a3dcedabb066c0
+    │   │   ├── 95a9bf7396d69bd8
     │   │   ├── 95af17f399ea131d
     │   │   ├── 95bb9a8f9c0c464b
+    │   │   ├── 95ea9ebcbb01c870
     │   │   ├── 960537e152f3c40d
     │   │   ├── 960f395a19af33fa
     │   │   ├── 9628a36a755c9c61
@@ -1900,6 +1998,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 978bb43801c5e582
     │   │   ├── 9796ad38ef2df468
     │   │   ├── 97982c5e38732c97
+    │   │   ├── 979c75ae4f18caa5
     │   │   ├── 979f645f0ecbc54c
     │   │   ├── 97cad2df6be7cfc8
     │   │   ├── 97e4de026a4415dc
@@ -1927,6 +2026,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 99977b844cf6e772
     │   │   ├── 99afe72f1958c173
     │   │   ├── 99be0bcd34908169
+    │   │   ├── 99cead82bbb494a1
     │   │   ├── 99df177629afe81f
     │   │   ├── 99edc60c22f6c8cb
     │   │   ├── 9a16744f37a90ff0
@@ -1965,6 +2065,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 9cf620129ba6e2d0
     │   │   ├── 9cfc212ef5cbcb3a
     │   │   ├── 9d0c0d64727c1be6
+    │   │   ├── 9d240970b323ec4c
     │   │   ├── 9d3e0113888da8c8
     │   │   ├── 9d510d7e21510560
     │   │   ├── 9d5c80a614b97901
@@ -2013,6 +2114,7 @@ BioactivityDataAcquisition2/
     │   │   ├── a16b5365e9ae91d6
     │   │   ├── a170d500b9e42128
     │   │   ├── a18bc4dfb5759b82
+    │   │   ├── a19dcda4ddf927dd
     │   │   ├── a1aef0ad2bab8d8b
     │   │   ├── a1cdd56513eb42a0
     │   │   ├── a20583a7bbaa1123
@@ -2020,12 +2122,14 @@ BioactivityDataAcquisition2/
     │   │   ├── a23a0c7ebc4bcc46
     │   │   ├── a252105ee0d53314
     │   │   ├── a263124cf63ef81c
+    │   │   ├── a269d46f7a776702
     │   │   ├── a26b57b1d53c0e45
     │   │   ├── a288400f77b3b2ca
     │   │   ├── a2caa9487c689bee
     │   │   ├── a2ced8abef458872
     │   │   ├── a2e759c0bf85b295
     │   │   ├── a2fc817e9ea1d4ad
+    │   │   ├── a33b29be924660e4
     │   │   ├── a34cc1952d05ec1e
     │   │   ├── a3739a5d159e1cd4
     │   │   ├── a38ba78afa9a3d43
@@ -2042,11 +2146,14 @@ BioactivityDataAcquisition2/
     │   │   ├── a494ad0587be9042
     │   │   ├── a49c35468593d24b
     │   │   ├── a4a19012517ff99a
+    │   │   ├── a4b143aa38e6ca1c
     │   │   ├── a4cbd892630abf59
     │   │   ├── a4eac7b884086b9d
     │   │   ├── a4f2ad1e6bb67df6
+    │   │   ├── a4f59ec4c04f6046
     │   │   ├── a50b8eb2bcf597d5
     │   │   ├── a51e84d9935bd208
+    │   │   ├── a51fa94f0d905d7c
     │   │   ├── a5294f1abcc5a2e2
     │   │   ├── a539f588055f465c
     │   │   ├── a567f535a27eaf52
@@ -2058,6 +2165,8 @@ BioactivityDataAcquisition2/
     │   │   ├── a5aa6186789bb902
     │   │   ├── a5c966fc0e090cd4
     │   │   ├── a5d646f05c8ac96f
+    │   │   ├── a5e208fd3582aec0
+    │   │   ├── a5eeeba0f33a884f
     │   │   ├── a5f122955d48577f
     │   │   ├── a601c68cbb13f177
     │   │   ├── a60e8bff0787e1c0
@@ -2068,6 +2177,7 @@ BioactivityDataAcquisition2/
     │   │   ├── a670b9ceb47ee54b
     │   │   ├── a696e32578cbb2fa
     │   │   ├── a698a3ab7fc3531d
+    │   │   ├── a6a324f7b5271fad
     │   │   ├── a6bc2bb6d70d4e41
     │   │   ├── a6dcd5cd2a05a6ee
     │   │   ├── a7262c8138dbd2b1
@@ -2100,6 +2210,7 @@ BioactivityDataAcquisition2/
     │   │   ├── a9984367a7050459
     │   │   ├── a99fbf1e30a2dd65
     │   │   ├── a9a813a038afcaad
+    │   │   ├── a9ad86ea9701b240
     │   │   ├── a9d410a6277694ee
     │   │   ├── a9f227e95ce7c6a2
     │   │   ├── a9f3179f91e43f8e
@@ -2145,6 +2256,7 @@ BioactivityDataAcquisition2/
     │   │   ├── acb4951537e1d051
     │   │   ├── acb9b44a131bc19f
     │   │   ├── acbff73a70f1c768
+    │   │   ├── acf135cd1ce7f6fb
     │   │   ├── acfe73297c5159b9
     │   │   ├── ad101d2f8c377897
     │   │   ├── ad1d4c21e467afe8
@@ -2163,6 +2275,7 @@ BioactivityDataAcquisition2/
     │   │   ├── ae4c4770ae427ece
     │   │   ├── ae7e887b3881ae24
     │   │   ├── ae85fc0ea2336091
+    │   │   ├── aea3099c8b3cfa0e
     │   │   ├── aea8664ae5ac512c
     │   │   ├── aebcea5cd80ff9aa
     │   │   ├── aec2ef59e074c350
@@ -2183,7 +2296,9 @@ BioactivityDataAcquisition2/
     │   │   ├── b02d9644e3400ab4
     │   │   ├── b02fbcd616b1b227
     │   │   ├── b042a8bc2b3b3abd
+    │   │   ├── b06a3d9adbd9ba25
     │   │   ├── b0836d58ee615faf
+    │   │   ├── b083f584e5dd62f2
     │   │   ├── b0a63b36037f9995
     │   │   ├── b0b5521dcd702ad7
     │   │   ├── b0d03ccc7ecd8820
@@ -2227,11 +2342,13 @@ BioactivityDataAcquisition2/
     │   │   ├── b2faec279a9fb811
     │   │   ├── b3046bab96c6c026
     │   │   ├── b312ee1be73e2d6c
+    │   │   ├── b32e3f25f954f039
     │   │   ├── b33afd68f05185bb
     │   │   ├── b36254e003e67d44
     │   │   ├── b36faa0bd80a5b90
     │   │   ├── b37def02c2de5733
     │   │   ├── b37e8ce4630051f8
+    │   │   ├── b38fe0bd06288f3a
     │   │   ├── b3ced88c7281c94f
     │   │   ├── b3d8a4d6026f6a4a
     │   │   ├── b3e9e14087c84ec1
@@ -2251,6 +2368,7 @@ BioactivityDataAcquisition2/
     │   │   ├── b55cc282c1b695e3
     │   │   ├── b579464eafbc75f7
     │   │   ├── b592c2d3b240f09b
+    │   │   ├── b5941e993349dced
     │   │   ├── b5c5757694dda6c0
     │   │   ├── b5dd87a8555513dd
     │   │   ├── b5f62b2a85b6ef6a
@@ -2283,6 +2401,7 @@ BioactivityDataAcquisition2/
     │   │   ├── b7c37812affa6f83
     │   │   ├── b7c61a83800365e1
     │   │   ├── b813c20c642e36a8
+    │   │   ├── b81a3ce6a8cdfb23
     │   │   ├── b81b3e85bf1da2dd
     │   │   ├── b81bf1fe2766ab5f
     │   │   ├── b8270f81d41d3163
@@ -2303,6 +2422,7 @@ BioactivityDataAcquisition2/
     │   │   ├── b94b5b7870d3e547
     │   │   ├── b94d484ef12524d6
     │   │   ├── b954fb06423855ed
+    │   │   ├── b9a438a25dba08f4
     │   │   ├── b9a6b1350c05df8a
     │   │   ├── b9c9c04f3ce1ac2b
     │   │   ├── b9d3996513cecc2f
@@ -2338,6 +2458,7 @@ BioactivityDataAcquisition2/
     │   │   ├── bc465f236c46777f
     │   │   ├── bc5f128c1eefa430
     │   │   ├── bc71402a0f5e59c7
+    │   │   ├── bc79766f1d715103
     │   │   ├── bc7afd34fee81deb
     │   │   ├── bc7dbbb0946bc2d7
     │   │   ├── bc841dab773eaf36
@@ -2377,6 +2498,7 @@ BioactivityDataAcquisition2/
     │   │   ├── bf6e593d1da87518
     │   │   ├── bf7734b7f3e3c2b7
     │   │   ├── bf827f3fb3f68acd
+    │   │   ├── bf89a8eecfa033ee
     │   │   ├── bf93ef036ef0d6a9
     │   │   ├── bf99501f40a3669e
     │   │   ├── bfb0ee0b936c6de8
@@ -2384,6 +2506,7 @@ BioactivityDataAcquisition2/
     │   │   ├── bfc3a9f6f2f5956a
     │   │   ├── bfd4e6686cf84ec3
     │   │   ├── bfdc2aa3c8331974
+    │   │   ├── bfe63e8bf1fc5915
     │   │   ├── bff1435589b23c3f
     │   │   ├── bffa072cbf0329c6
     │   │   ├── c04efb7e7b2e6dc8
@@ -2394,15 +2517,19 @@ BioactivityDataAcquisition2/
     │   │   ├── c0ca805db45cdef3
     │   │   ├── c0d9bf0dbde8ad9e
     │   │   ├── c102ef39c01f7a35
+    │   │   ├── c11f15c519594224
     │   │   ├── c12375e4a6d3e929
     │   │   ├── c12e8590c7256d29
+    │   │   ├── c16559a85d7530cc
     │   │   ├── c182368b534167f3
     │   │   ├── c192545d6a826718
     │   │   ├── c197aef26a4e5252
     │   │   ├── c1a2c3a4f26f9ba8
     │   │   ├── c1a9c54612d81e96
+    │   │   ├── c1aef3489213629e
     │   │   ├── c1b087eaa31690ee
     │   │   ├── c1c8bc072bf49230
+    │   │   ├── c1e3d4505b5c1274
     │   │   ├── c1e5d76350f1b1f3
     │   │   ├── c20033a9d14de75e
     │   │   ├── c2576fd04f5c4949
@@ -2423,7 +2550,9 @@ BioactivityDataAcquisition2/
     │   │   ├── c393b623f67711d8
     │   │   ├── c39c411788a0a60d
     │   │   ├── c39d58f84096da09
+    │   │   ├── c3af29576d15cb8d
     │   │   ├── c3b1fa54a6eda2d4
+    │   │   ├── c3b7d4ad236324ae
     │   │   ├── c3ff89c9927b108a
     │   │   ├── c40a3f9378f2da92
     │   │   ├── c427abcd3e0bec2d
@@ -2452,6 +2581,7 @@ BioactivityDataAcquisition2/
     │   │   ├── c56860ab56aa48ce
     │   │   ├── c579eec0ed1b5b31
     │   │   ├── c59853c4514cc1e1
+    │   │   ├── c5aac036f1e141c3
     │   │   ├── c5acbf545554052d
     │   │   ├── c5ce3b493abff9a7
     │   │   ├── c5f60a3e41d66a3d
@@ -2469,6 +2599,7 @@ BioactivityDataAcquisition2/
     │   │   ├── c679ac6d0bf88920
     │   │   ├── c6806e0aeadf58ba
     │   │   ├── c686bd26b9ea373a
+    │   │   ├── c6ada47ef28dcc14
     │   │   ├── c6b4d930101025d6
     │   │   ├── c6bdfd29c3ef3895
     │   │   ├── c6c4c8f70e9a4ef9
@@ -2502,6 +2633,7 @@ BioactivityDataAcquisition2/
     │   │   ├── c8cd4790a6e3115f
     │   │   ├── c8e5af24288a0aeb
     │   │   ├── c8ed99d35d90ba32
+    │   │   ├── c91978ca9a212744
     │   │   ├── c91c8f12ab10647c
     │   │   ├── c922df173c5dadde
     │   │   ├── c938704157e68186
@@ -2532,6 +2664,7 @@ BioactivityDataAcquisition2/
     │   │   ├── cae2ed7c289ae170
     │   │   ├── caeb5662592f5b4e
     │   │   ├── caeb5947d8ac521d
+    │   │   ├── cb0173e4b561b778
     │   │   ├── cb01fe7f60c256fe
     │   │   ├── cb24fcb5d8abdf6b
     │   │   ├── cb425d523a58c32f
@@ -2558,13 +2691,17 @@ BioactivityDataAcquisition2/
     │   │   ├── ccea2ea5a7286e0b
     │   │   ├── cd03768486a23f37
     │   │   ├── cd0a43a33d7b9c90
+    │   │   ├── cd0d227295e5bd7a
     │   │   ├── cd0e4ace256394c2
     │   │   ├── cd0fb86d645cb9b8
     │   │   ├── cd1adc7c09bd403c
+    │   │   ├── cd260a61af542ef8
     │   │   ├── cd3f504c9a562d84
+    │   │   ├── cd595086ff8c3910
     │   │   ├── cd7dacb748b6ba8b
     │   │   ├── cdaadc6b7cb5d9b8
     │   │   ├── cdb3c5c7b1af2d4a
+    │   │   ├── cdeac8d6f4186acb
     │   │   ├── ce16563d942e4231
     │   │   ├── ce27c2bf5bedc6ea
     │   │   ├── ce6ae74ba46fb35e
@@ -2592,6 +2729,7 @@ BioactivityDataAcquisition2/
     │   │   ├── cfdd23ab46cf986b
     │   │   ├── cfed0fc180ae9fe5
     │   │   ├── d030f9cd982c2ec7
+    │   │   ├── d03835b6a1b88393
     │   │   ├── d0567c03c95ff119
     │   │   ├── d083dc50dba030b9
     │   │   ├── d0ab0df247c0ef3f
@@ -2641,6 +2779,7 @@ BioactivityDataAcquisition2/
     │   │   ├── d3c4cbfac877d38a
     │   │   ├── d3cabebdb1dd698f
     │   │   ├── d3dd5a44c735d6e2
+    │   │   ├── d3f25523d963c90f
     │   │   ├── d413f1dec8c54a0f
     │   │   ├── d436ec812429b660
     │   │   ├── d440379c0f0808fd
@@ -2656,7 +2795,9 @@ BioactivityDataAcquisition2/
     │   │   ├── d5085db5723ba8b5
     │   │   ├── d50dd6f8a2615c67
     │   │   ├── d51385a337a9e3e4
+    │   │   ├── d51bf89234d153c6
     │   │   ├── d575789d595af093
+    │   │   ├── d5c0f9477898705b
     │   │   ├── d5c902bd9dbb2ae3
     │   │   ├── d5caf00bc1b76890
     │   │   ├── d5dc8c78f7e95303
@@ -2676,12 +2817,15 @@ BioactivityDataAcquisition2/
     │   │   ├── d75056e7ddf03a2a
     │   │   ├── d7519856817cd7fa
     │   │   ├── d7534f2aca38bddb
+    │   │   ├── d754adb227969cd9
     │   │   ├── d765b17652a3cfb4
     │   │   ├── d78abbac5d54ede0
+    │   │   ├── d7a5bd93cafe50ae
     │   │   ├── d7dbe5f77eab6605
     │   │   ├── d7e71a44ab281688
     │   │   ├── d81af12d59a1a843
     │   │   ├── d837998c604c9e0c
+    │   │   ├── d84ae486fe4f4c9e
     │   │   ├── d867df1bcd90b40a
     │   │   ├── d872275471087cf7
     │   │   ├── d888bb9c2f36ef00
@@ -2711,6 +2855,7 @@ BioactivityDataAcquisition2/
     │   │   ├── da946392d0472b73
     │   │   ├── da95b86dae6a4fdb
     │   │   ├── da9a04df58a46437
+    │   │   ├── daa016a215e1ed1a
     │   │   ├── daadc26353d5db80
     │   │   ├── dacabfe86a4807ac
     │   │   ├── dad47da15fe32f96
@@ -2726,6 +2871,7 @@ BioactivityDataAcquisition2/
     │   │   ├── db9bd210fb8beb2d
     │   │   ├── dbd2b5971ff3ae13
     │   │   ├── dbdb96a8d4f48fb4
+    │   │   ├── dbe89045204c7c8f
     │   │   ├── dbf5d2f9564de6db
     │   │   ├── dc3420caaed4f552
     │   │   ├── dc3ba413d2937fdd
@@ -2765,6 +2911,8 @@ BioactivityDataAcquisition2/
     │   │   ├── df05a283a7caa48f
     │   │   ├── df256f4bfd0d65e0
     │   │   ├── df44fa9da38251ee
+    │   │   ├── df48cf29e47e947b
+    │   │   ├── df7072bb5ca1778c
     │   │   ├── df716bcbe1885141
     │   │   ├── df87488da9e244cc
     │   │   ├── dfd3085389736ebe
@@ -2772,6 +2920,7 @@ BioactivityDataAcquisition2/
     │   │   ├── dfe87fe434943a0b
     │   │   ├── dff990b67c346360
     │   │   ├── dffced06d1fde3e1
+    │   │   ├── dffe5ae097b3266b
     │   │   ├── e01071867ad8847a
     │   │   ├── e017693a0ac53236
     │   │   ├── e020a5bf98c9faac
@@ -2790,18 +2939,22 @@ BioactivityDataAcquisition2/
     │   │   ├── e16d2c3e5d075246
     │   │   ├── e1908ed356e867b4
     │   │   ├── e1937848b01ff16a
+    │   │   ├── e198420d34e2d0c7
     │   │   ├── e1a581363a7405c0
     │   │   ├── e1af2b5eccd01633
+    │   │   ├── e1cd1823b149d355
     │   │   ├── e1d718e96ca45363
     │   │   ├── e1d975b7c382a31f
     │   │   ├── e1da525415c69ba9
     │   │   ├── e1dd2569bd635681
+    │   │   ├── e1eb787dc7130dbf
     │   │   ├── e1eea513e357d536
     │   │   ├── e1f2fc037980ca88
     │   │   ├── e2242bbcb04a3e1c
     │   │   ├── e22a20ca67ddc911
     │   │   ├── e231ca08763e2faf
     │   │   ├── e234576fc4ba1be0
+    │   │   ├── e23a0431db0bec2e
     │   │   ├── e258af6f4bc42cfc
     │   │   ├── e26531a2e0dd62ef
     │   │   ├── e2bdae5ec5bd7ff7
@@ -2820,6 +2973,7 @@ BioactivityDataAcquisition2/
     │   │   ├── e41f858cd4152ca5
     │   │   ├── e42df697410ef730
     │   │   ├── e45b2c4675bef2bb
+    │   │   ├── e4723c826d4d6fae
     │   │   ├── e48854aba26a9855
     │   │   ├── e4ac93a902443b37
     │   │   ├── e4b1ab6ea1a7b5cf
@@ -2836,8 +2990,11 @@ BioactivityDataAcquisition2/
     │   │   ├── e5710846032dc39b
     │   │   ├── e5768ba4f390147d
     │   │   ├── e58bb45976c4fa86
+    │   │   ├── e598781e796424c9
     │   │   ├── e5ba3f10950e0a8b
     │   │   ├── e5bb246d980f0338
+    │   │   ├── e5d92822842d26a5
+    │   │   ├── e5f9ede31fa5508e
     │   │   ├── e5fe9afa7b005992
     │   │   ├── e60d000567240260
     │   │   ├── e61199c95186ac93
@@ -2868,12 +3025,14 @@ BioactivityDataAcquisition2/
     │   │   ├── e7c07df3466ea09a
     │   │   ├── e7ce1c0eebf3aa5a
     │   │   ├── e80e639a3c21c5db
+    │   │   ├── e81e792267eae8a1
     │   │   ├── e857f5b43ca73d35
     │   │   ├── e85cab895c8a4a7c
     │   │   ├── e8b05661c0f24e5e
     │   │   ├── e90110fb8be9915f
     │   │   ├── e92665a06e30d703
     │   │   ├── e92fe1ad1125a184
+    │   │   ├── e93428e3ac903c6e
     │   │   ├── e950b25eddc7b6c5
     │   │   ├── e9551b4a051c31bc
     │   │   ├── e9556761a96d5c54
@@ -2883,6 +3042,7 @@ BioactivityDataAcquisition2/
     │   │   ├── e9cadc41ab565484
     │   │   ├── e9cce55c1a2aada1
     │   │   ├── e9eca987aa1240ac
+    │   │   ├── ea0c05c6ff678ad2
     │   │   ├── ea1785d9cacf0c5c
     │   │   ├── ea331dda5eb2fde1
     │   │   ├── ea3e28e0881fbcbc
@@ -2903,6 +3063,7 @@ BioactivityDataAcquisition2/
     │   │   ├── eb4dc5b9550f829e
     │   │   ├── eb9eb7a1cf38b6d4
     │   │   ├── ebabd269ddbaac9f
+    │   │   ├── ebb052d7ef6950e9
     │   │   ├── ebc67ce5a65fe576
     │   │   ├── ebd6ac859bbe61bc
     │   │   ├── ebd87fe27a0727a6
@@ -2918,6 +3079,7 @@ BioactivityDataAcquisition2/
     │   │   ├── ecee963f80adf1b2
     │   │   ├── ecf2e35ba0d555a5
     │   │   ├── ed2ab224966a2094
+    │   │   ├── ed2e520da5d2d6d6
     │   │   ├── ed30d447a544b0bb
     │   │   ├── ed386b1d272e86c9
     │   │   ├── ed4051f23cd77560
@@ -2961,7 +3123,9 @@ BioactivityDataAcquisition2/
     │   │   ├── f01867760d6572db
     │   │   ├── f04df701dec6a483
     │   │   ├── f05787a52cc1c813
+    │   │   ├── f0830373e759ea22
     │   │   ├── f0b002161cbaf7bf
+    │   │   ├── f0b22aa208203d4d
     │   │   ├── f0c7fbec86c017f5
     │   │   ├── f0ddc7161c7ae537
     │   │   ├── f0e1ad5883b9d4e7
@@ -2971,6 +3135,7 @@ BioactivityDataAcquisition2/
     │   │   ├── f14528595857c1bf
     │   │   ├── f19997f1e036ba78
     │   │   ├── f1a38808fcff0109
+    │   │   ├── f1aaa453d12b97a4
     │   │   ├── f1bb9fe375e29ed7
     │   │   ├── f1f4c0777c85dfe8
     │   │   ├── f1fea824c9e35a39
@@ -2997,6 +3162,8 @@ BioactivityDataAcquisition2/
     │   │   ├── f398f6ae0028599c
     │   │   ├── f39dc60bb5ff0f17
     │   │   ├── f3cb3eb3825de95b
+    │   │   ├── f3d572a1e559ed34
+    │   │   ├── f3fa8da091702c96
     │   │   ├── f3fe812a3f1a7d9f
     │   │   ├── f3fe8472b2fec5a8
     │   │   ├── f4078d311da78e4a
@@ -3029,7 +3196,9 @@ BioactivityDataAcquisition2/
     │   │   ├── f5f2d0ce6fc1e6c2
     │   │   ├── f5f32fa56e203a55
     │   │   ├── f5fed4a20eca3fea
+    │   │   ├── f60ab13d3261ae5a
     │   │   ├── f6422be523824065
+    │   │   ├── f654154deb1fae36
     │   │   ├── f65661afce97e672
     │   │   ├── f6573cbbfc58f926
     │   │   ├── f66b656350e7b63d
@@ -3040,9 +3209,11 @@ BioactivityDataAcquisition2/
     │   │   ├── f6d49afb0d3397e1
     │   │   ├── f708fd5edf866dab
     │   │   ├── f7099e71339ea2ed
+    │   │   ├── f716d744365e87c3
     │   │   ├── f72d0a5ecd325006
     │   │   ├── f73006560e58d273
     │   │   ├── f736614970e14ee9
+    │   │   ├── f76e8b59fdd54d13
     │   │   ├── f787dec9c7962669
     │   │   ├── f796536fdc670940
     │   │   ├── f7afcdac08b7fbcc
@@ -3052,6 +3223,7 @@ BioactivityDataAcquisition2/
     │   │   ├── f81234bdedd394fe
     │   │   ├── f8214cf5c113494e
     │   │   ├── f8278bfc80867710
+    │   │   ├── f82b0cfc0c826433
     │   │   ├── f8366362f523aef8
     │   │   ├── f84bff15349c9b99
     │   │   ├── f8564cc2a984114e
@@ -3081,6 +3253,7 @@ BioactivityDataAcquisition2/
     │   │   ├── fa5f9108849a1598
     │   │   ├── fa905456266ce0a5
     │   │   ├── fa9ca68d10cccbd3
+    │   │   ├── fb05b9eecce5778d
     │   │   ├── fb23b05c6e03e453
     │   │   ├── fb2a256044bd0c75
     │   │   ├── fb49d6214be62d5a
@@ -3120,6 +3293,7 @@ BioactivityDataAcquisition2/
     │   │   ├── fd14ae4795c2435b
     │   │   ├── fd43b87a166b630d
     │   │   ├── fd4ed073a707133f
+    │   │   ├── fd5eff29661c94de
     │   │   ├── fd8143688d43f9a7
     │   │   ├── fd956db302bcccf5
     │   │   ├── fdaa932ecbf9b587
@@ -3142,6 +3316,7 @@ BioactivityDataAcquisition2/
     │   │   ├── ff18df3ed75e9866
     │   │   ├── ff1b0221069d8c7c
     │   │   ├── ff3406be5a2a569f
+    │   │   ├── ff9aca6d626afbf4
     │   │   ├── ffaa7c064a54a967
     │   │   ├── ffc06b966ca2ddd3
     │   │   ├── ffd19b5bdb242b63
@@ -3169,6 +3344,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp0lpe90kn
     │   │   ├── tmp0lyi7skh
     │   │   ├── tmp0mjvl00d
+    │   │   ├── tmp0q57qbkt
     │   │   ├── tmp0qu8ptnl
     │   │   ├── tmp0qzd81jq
     │   │   ├── tmp0sn192hz
@@ -3271,9 +3447,11 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp3ipo8hp3
     │   │   ├── tmp3jzn1mha
     │   │   ├── tmp3k1zllsr
+    │   │   ├── tmp3m0e14bq
     │   │   ├── tmp3maqfoi1
     │   │   ├── tmp3me56zbk
     │   │   ├── tmp3mysd17i
+    │   │   ├── tmp3nmlvf2f
     │   │   ├── tmp3orw82qc
     │   │   ├── tmp3ovvi33x
     │   │   ├── tmp3pqc7cuo
@@ -3291,6 +3469,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp3zujr8fz
     │   │   ├── tmp41onxfwy
     │   │   ├── tmp41z06e_1
+    │   │   ├── tmp42i1n0i5
     │   │   ├── tmp437fu0yy
     │   │   ├── tmp44c2x1x4
     │   │   ├── tmp44h6nhug
@@ -3299,6 +3478,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp463ojyeh
     │   │   ├── tmp46azwl40
     │   │   ├── tmp487d_m6t
+    │   │   ├── tmp49rasy69
     │   │   ├── tmp4_s1ekxs
     │   │   ├── tmp4a95fgjs
     │   │   ├── tmp4bcv8369
@@ -3317,6 +3497,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp4q5pt478
     │   │   ├── tmp4s6fbzyl
     │   │   ├── tmp4seuycol
+    │   │   ├── tmp4sf7i777
     │   │   ├── tmp4t7ezk3b
     │   │   ├── tmp4tdeja08
     │   │   ├── tmp4u91h08j
@@ -3370,6 +3551,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp65yedaj0
     │   │   ├── tmp678erj7a
     │   │   ├── tmp68vvdtal
+    │   │   ├── tmp6_kgum18
     │   │   ├── tmp6_x_ehsu
     │   │   ├── tmp6apvupj_
     │   │   ├── tmp6bt_v129
@@ -3384,6 +3566,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp6lnvmq_r
     │   │   ├── tmp6mbuc_bk
     │   │   ├── tmp6n8jh4sr
+    │   │   ├── tmp6pau3bsx
     │   │   ├── tmp6pg6nnxn
     │   │   ├── tmp6py4zvbi
     │   │   ├── tmp6shlypkn
@@ -3456,6 +3639,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp958at609
     │   │   ├── tmp960248oq
     │   │   ├── tmp96aekob4
+    │   │   ├── tmp972m4uzq
     │   │   ├── tmp97h23whv
     │   │   ├── tmp97xxbl5c
     │   │   ├── tmp98b1k5la
@@ -3501,6 +3685,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp_9x6m149
     │   │   ├── tmp_a1smyn1
     │   │   ├── tmp_aoa56wa
+    │   │   ├── tmp_bjf2og0
     │   │   ├── tmp_ckgibpf
     │   │   ├── tmp_fpr7214
     │   │   ├── tmp_fpt2kb8
@@ -3582,6 +3767,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpbmf8d8d5
     │   │   ├── tmpbmi3snk2
     │   │   ├── tmpbobv5ahg
+    │   │   ├── tmpbpkdbzos
     │   │   ├── tmpbpu16syn
     │   │   ├── tmpbrhr467s
     │   │   ├── tmpbrr6cahs
@@ -3595,6 +3781,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpc34numsm
     │   │   ├── tmpc494egmi
     │   │   ├── tmpc5z39jo1
+    │   │   ├── tmpc7_q0q97
     │   │   ├── tmpc82piv0x
     │   │   ├── tmpc8mkepr6
     │   │   ├── tmpc8ok60w_
@@ -3613,6 +3800,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpcig4k1zz
     │   │   ├── tmpcj77qzkq
     │   │   ├── tmpcjfba22s
+    │   │   ├── tmpcjlmfjj4
     │   │   ├── tmpcligggt0
     │   │   ├── tmpcnw3db1l
     │   │   ├── tmpcocz4rm1
@@ -3691,6 +3879,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpeod2rm6l
     │   │   ├── tmpeqc6bx5d
     │   │   ├── tmpeqc_inmy
+    │   │   ├── tmpeqkf2ywe
     │   │   ├── tmper61t4hd
     │   │   ├── tmpew5y7rmc
     │   │   ├── tmpewu3mv3b
@@ -3704,6 +3893,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpf7xmn5gd
     │   │   ├── tmpf84pv52c
     │   │   ├── tmpf8dszjf7
+    │   │   ├── tmpf9gcfxmg
     │   │   ├── tmpf_2sl2pc
     │   │   ├── tmpf_4qjs9b
     │   │   ├── tmpfb71t38_
@@ -3728,6 +3918,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpfwwn_x8f
     │   │   ├── tmpg07xqh9y
     │   │   ├── tmpg0tdcp3g
+    │   │   ├── tmpg1n1q210
     │   │   ├── tmpg2lswpyu
     │   │   ├── tmpg2maz4et
     │   │   ├── tmpg2qidgbq
@@ -3756,6 +3947,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpgivfuxa_
     │   │   ├── tmpgj_gjpog
     │   │   ├── tmpgjykfu73
+    │   │   ├── tmpgmv3jat8
     │   │   ├── tmpgo9melhj
     │   │   ├── tmpgq4ynylw
     │   │   ├── tmpgqki1rxv
@@ -3774,6 +3966,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmph7b1p6lj
     │   │   ├── tmph82rrfu7
     │   │   ├── tmphay0x6h3
+    │   │   ├── tmphcrjr1oy
     │   │   ├── tmphdqy9n1z
     │   │   ├── tmphewus7ud
     │   │   ├── tmphey3gwhq
@@ -3793,6 +3986,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmphrpgkb1l
     │   │   ├── tmphru19ymp
     │   │   ├── tmphtrt6ril
+    │   │   ├── tmphtuv1e20
     │   │   ├── tmphv2qg6_h
     │   │   ├── tmphv3wg6_9
     │   │   ├── tmphvcwfd5u
@@ -3817,6 +4011,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpieq38jhu
     │   │   ├── tmpif6ufwpp
     │   │   ├── tmpihac5x78
+    │   │   ├── tmpii_10so4
     │   │   ├── tmpiik_5jml
     │   │   ├── tmpiip6i9cr
     │   │   ├── tmpil0o9fcb
@@ -3830,6 +4025,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpit7qh6x1
     │   │   ├── tmpiun6ex9z
     │   │   ├── tmpiv48cvgp
+    │   │   ├── tmpiw2ztike
     │   │   ├── tmpiwtfrz1o
     │   │   ├── tmpiyy1sf7d
     │   │   ├── tmpiz6vhg9e
@@ -3848,6 +4044,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpja_q9v_9
     │   │   ├── tmpjbj_peqj
     │   │   ├── tmpjdaplq94
+    │   │   ├── tmpjf1dhz80
     │   │   ├── tmpjf5pdaol
     │   │   ├── tmpjfjc7gxk
     │   │   ├── tmpjgif1urj
@@ -3914,6 +4111,8 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpl4b8rh3j
     │   │   ├── tmpl5atx6sr
     │   │   ├── tmpl68e6vnp
+    │   │   ├── tmpl97s6y01
+    │   │   ├── tmplc8mnkuu
     │   │   ├── tmplclne6l4
     │   │   ├── tmplgadxtxs
     │   │   ├── tmplgulgna5
@@ -4033,6 +4232,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpp1bewbjb
     │   │   ├── tmpp3e4hxse
     │   │   ├── tmpp3qd7bax
+    │   │   ├── tmpp4__iyj_
     │   │   ├── tmpp4iymhll
     │   │   ├── tmpp4j75ngc
     │   │   ├── tmpp68biget
@@ -4172,6 +4372,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmptsvdvtl4
     │   │   ├── tmptuef_hmb
     │   │   ├── tmptvvj5h6i
+    │   │   ├── tmptz6_xmmg
     │   │   ├── tmpu10b3ark
     │   │   ├── tmpu1ckb8xk
     │   │   ├── tmpu1yig6wf
@@ -4182,6 +4383,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpu8aeb_gs
     │   │   ├── tmpu8hg5hms
     │   │   ├── tmpu_hy8sre
+    │   │   ├── tmpu_kbzlp3
     │   │   ├── tmpu_ng6c0g
     │   │   ├── tmpua_e_dks
     │   │   ├── tmpuc0x9eog
@@ -4260,6 +4462,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpwh7zv82m
     │   │   ├── tmpwimnk3ik
     │   │   ├── tmpwkq8e0hr
+    │   │   ├── tmpwl3r00hk
     │   │   ├── tmpwl52q9oo
     │   │   ├── tmpwlkyovbf
     │   │   ├── tmpwm6_eg5_
@@ -4604,7 +4807,9 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── merger.data.json
     │   │   │   │   │   ├── merger.meta.json
     │   │   │   │   │   ├── runner.data.json
-    │   │   │   │   │   └── runner.meta.json
+    │   │   │   │   │   ├── runner.meta.json
+    │   │   │   │   │   ├── runner_helpers.data.json
+    │   │   │   │   │   └── runner_helpers.meta.json
     │   │   │   │   ├── core/
     │   │   │   │   │   ├── __init__.data.json
     │   │   │   │   │   ├── __init__.meta.json
@@ -4862,6 +5067,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── lock_service.meta.json
     │   │   │   │   │   ├── medallion_lifecycle.data.json
     │   │   │   │   │   ├── medallion_lifecycle.meta.json
+    │   │   │   │   │   ├── medallion_types.data.json
+    │   │   │   │   │   ├── medallion_types.meta.json
     │   │   │   │   │   ├── metrics_service.data.json
     │   │   │   │   │   ├── metrics_service.meta.json
     │   │   │   │   │   ├── pipeline_runner_service.data.json
@@ -4974,6 +5181,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── lineage.meta.json
     │   │   │   │   │   ├── result.data.json
     │   │   │   │   │   ├── result.meta.json
+    │   │   │   │   │   ├── state.data.json
+    │   │   │   │   │   ├── state.meta.json
     │   │   │   │   │   ├── strategy.data.json
     │   │   │   │   │   └── strategy.meta.json
     │   │   │   │   ├── configs/
@@ -4981,6 +5190,22 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── __init__.meta.json
     │   │   │   │   │   ├── base.data.json
     │   │   │   │   │   └── base.meta.json
+    │   │   │   │   ├── contracts/
+    │   │   │   │   │   ├── gold/
+    │   │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── _base.data.json
+    │   │   │   │   │   │   ├── _base.meta.json
+    │   │   │   │   │   │   ├── chembl.data.json
+    │   │   │   │   │   │   ├── chembl.meta.json
+    │   │   │   │   │   │   ├── pubchem.data.json
+    │   │   │   │   │   │   ├── pubchem.meta.json
+    │   │   │   │   │   │   ├── publications.data.json
+    │   │   │   │   │   │   ├── publications.meta.json
+    │   │   │   │   │   │   ├── uniprot.data.json
+    │   │   │   │   │   │   └── uniprot.meta.json
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   └── __init__.meta.json
     │   │   │   │   ├── entities/
     │   │   │   │   │   ├── __init__.data.json
     │   │   │   │   │   ├── __init__.meta.json
@@ -5023,10 +5248,18 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── data_quality.meta.json
     │   │   │   │   │   ├── external_service.data.json
     │   │   │   │   │   ├── external_service.meta.json
+    │   │   │   │   │   ├── infrastructure.data.json
+    │   │   │   │   │   ├── infrastructure.meta.json
+    │   │   │   │   │   ├── internal.data.json
+    │   │   │   │   │   ├── internal.meta.json
+    │   │   │   │   │   ├── network.data.json
+    │   │   │   │   │   ├── network.meta.json
     │   │   │   │   │   ├── recoverable.data.json
     │   │   │   │   │   ├── recoverable.meta.json
     │   │   │   │   │   ├── storage.data.json
-    │   │   │   │   │   └── storage.meta.json
+    │   │   │   │   │   ├── storage.meta.json
+    │   │   │   │   │   ├── validation.data.json
+    │   │   │   │   │   └── validation.meta.json
     │   │   │   │   ├── filtering/
     │   │   │   │   │   ├── __init__.data.json
     │   │   │   │   │   ├── __init__.meta.json
@@ -5314,6 +5547,13 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── fallback.meta.json
     │   │   │   │   │   │   ├── models.data.json
     │   │   │   │   │   │   └── models.meta.json
+    │   │   │   │   │   ├── decorators/
+    │   │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── circuit_breaker.data.json
+    │   │   │   │   │   │   ├── circuit_breaker.meta.json
+    │   │   │   │   │   │   ├── retry.data.json
+    │   │   │   │   │   │   └── retry.meta.json
     │   │   │   │   │   ├── http/
     │   │   │   │   │   │   ├── __init__.data.json
     │   │   │   │   │   │   ├── __init__.meta.json
@@ -8931,7 +9171,8 @@ BioactivityDataAcquisition2/
     │   │   ├── zlib.data.json
     │   │   └── zlib.meta.json
     │   ├── .gitignore
-    │   └── CACHEDIR.TAG
+    │   ├── CACHEDIR.TAG
+    │   └── missing_stubs
     ├── .pytest_cache/
     │   ├── v/
     │   │   └── cache/
@@ -9224,9 +9465,7 @@ BioactivityDataAcquisition2/
     ├── data/
     │   ├── checkpoints/
     │   │   └── composite/
-    │   │       ├── composite_composite_publication_4bca1010-3a0a-4e31-a932-27dc40fe5611.json
-    │   │       ├── composite_composite_publication_51a36405-57e2-40c6-80c2-6bd831af2c12.json
-    │   │       └── composite_composite_publication_96197c6f-0c5c-46ea-9c5e-c69fd84ff7dc.json
+    │   │       └── composite_composite_publication_9ff79b9b-7db2-451e-8467-bfafdeadf7c2.json
     │   ├── input/
     │   │   ├── activity.csv
     │   │   ├── assay.csv
@@ -9238,7 +9477,7 @@ BioactivityDataAcquisition2/
     │   │   ├── protein_classification.csv
     │   │   ├── publication.csv
     │   │   ├── pubmed.csv
-    │   │   ├── pubmed_publications.csv
+    │   │   ├── pubmed_publication.csv
     │   │   ├── target.csv
     │   │   ├── target_component.csv
     │   │   └── tissue.csv
@@ -9246,12 +9485,12 @@ BioactivityDataAcquisition2/
     │       ├── bronze/
     │       │   ├── chembl/
     │       │   │   ├── publication/
-    │       │   │   │   ├── 2026-01-21/
-    │       │   │   │   │   ├── batch_2026-01-21_026207ad-d479-4ed0-9364-49ce908f7279.jsonl
-    │       │   │   │   │   ├── batch_2026-01-21_026207ad-d479-4ed0-9364-49ce908f7279.jsonl.zst
-    │       │   │   │   │   ├── batch_2026-01-21_026207ad-d479-4ed0-9364-49ce908f7279.jsonl.zst.meta.json
-    │       │   │   │   │   └── chembl_document_metadata.yaml
-    │       │   │   │   └── batch_2026-01-21_chembl_publication_dq_report.json
+    │       │   │   │   ├── 2026-01-22/
+    │       │   │   │   │   ├── batch_2026-01-22_4e77ca7c-9718-417e-9bca-1534952c1d50.jsonl
+    │       │   │   │   │   ├── batch_2026-01-22_4e77ca7c-9718-417e-9bca-1534952c1d50.jsonl.zst
+    │       │   │   │   │   └── batch_2026-01-22_4e77ca7c-9718-417e-9bca-1534952c1d50.jsonl.zst.meta.json
+    │       │   │   │   ├── bronze_chembl_publication_dq_report.json
+    │       │   │   │   └── chembl_document_metadata.yaml
     │       │   │   ├── activity
     │       │   │   ├── assay
     │       │   │   ├── cell_line
@@ -9262,38 +9501,38 @@ BioactivityDataAcquisition2/
     │       │   │   └── target_component
     │       │   ├── crossref/
     │       │   │   └── publication/
-    │       │   │       ├── 2026-01-21/
-    │       │   │       │   ├── batch_2026-01-21_74d8ec55-daee-4909-a303-abcae2e476d4.jsonl
-    │       │   │       │   ├── batch_2026-01-21_74d8ec55-daee-4909-a303-abcae2e476d4.jsonl.zst
-    │       │   │       │   ├── batch_2026-01-21_74d8ec55-daee-4909-a303-abcae2e476d4.jsonl.zst.meta.json
-    │       │   │       │   └── crossref_work_metadata.yaml
-    │       │   │       └── batch_2026-01-21_crossref_publication_dq_report.json
+    │       │   │       ├── 2026-01-22/
+    │       │   │       │   ├── batch_2026-01-22_ab759372-dace-49a9-8b13-9b09025443ad.jsonl
+    │       │   │       │   ├── batch_2026-01-22_ab759372-dace-49a9-8b13-9b09025443ad.jsonl.zst
+    │       │   │       │   └── batch_2026-01-22_ab759372-dace-49a9-8b13-9b09025443ad.jsonl.zst.meta.json
+    │       │   │       ├── bronze_crossref_publication_dq_report.json
+    │       │   │       └── crossref_work_metadata.yaml
     │       │   ├── openalex/
     │       │   │   └── publication/
-    │       │   │       ├── 2026-01-21/
-    │       │   │       │   ├── batch_2026-01-21_b3d59d26-0354-4340-b2a9-f732828e4f53.jsonl
-    │       │   │       │   ├── batch_2026-01-21_b3d59d26-0354-4340-b2a9-f732828e4f53.jsonl.zst
-    │       │   │       │   ├── batch_2026-01-21_b3d59d26-0354-4340-b2a9-f732828e4f53.jsonl.zst.meta.json
-    │       │   │       │   └── openalex_publication_metadata.yaml
-    │       │   │       └── batch_2026-01-21_openalex_publication_dq_report.json
+    │       │   │       ├── 2026-01-22/
+    │       │   │       │   ├── batch_2026-01-22_186851ec-abb4-40c5-924a-ad531e5fb629.jsonl
+    │       │   │       │   ├── batch_2026-01-22_186851ec-abb4-40c5-924a-ad531e5fb629.jsonl.zst
+    │       │   │       │   └── batch_2026-01-22_186851ec-abb4-40c5-924a-ad531e5fb629.jsonl.zst.meta.json
+    │       │   │       ├── bronze_openalex_publication_dq_report.json
+    │       │   │       └── openalex_publication_metadata.yaml
     │       │   ├── pubchem/
     │       │   │   └── compound
     │       │   ├── pubmed/
     │       │   │   └── publication/
-    │       │   │       ├── 2026-01-21/
-    │       │   │       │   ├── batch_2026-01-21_c3c7f715-2b70-45b9-b661-ebcc5bbdfada.jsonl
-    │       │   │       │   ├── batch_2026-01-21_c3c7f715-2b70-45b9-b661-ebcc5bbdfada.jsonl.zst
-    │       │   │       │   ├── batch_2026-01-21_c3c7f715-2b70-45b9-b661-ebcc5bbdfada.jsonl.zst.meta.json
-    │       │   │       │   └── pubmed_publication_metadata.yaml
-    │       │   │       └── batch_2026-01-21_pubmed_publication_dq_report.json
+    │       │   │       ├── 2026-01-22/
+    │       │   │       │   ├── batch_2026-01-22_c9ca8572-2934-481a-b3d9-f583a8b2a98e.jsonl
+    │       │   │       │   ├── batch_2026-01-22_c9ca8572-2934-481a-b3d9-f583a8b2a98e.jsonl.zst
+    │       │   │       │   └── batch_2026-01-22_c9ca8572-2934-481a-b3d9-f583a8b2a98e.jsonl.zst.meta.json
+    │       │   │       ├── bronze_pubmed_publication_dq_report.json
+    │       │   │       └── pubmed_publication_metadata.yaml
     │       │   ├── semanticscholar/
     │       │   │   └── publication/
-    │       │   │       ├── 2026-01-21/
-    │       │   │       │   ├── batch_2026-01-21_c37ab13b-c8ff-4eb1-9ad1-682f4c6d5273.jsonl
-    │       │   │       │   ├── batch_2026-01-21_c37ab13b-c8ff-4eb1-9ad1-682f4c6d5273.jsonl.zst
-    │       │   │       │   ├── batch_2026-01-21_c37ab13b-c8ff-4eb1-9ad1-682f4c6d5273.jsonl.zst.meta.json
-    │       │   │       │   └── semanticscholar_publication_metadata.yaml
-    │       │   │       └── batch_2026-01-21_semanticscholar_publication_dq_report.json
+    │       │   │       ├── 2026-01-22/
+    │       │   │       │   ├── batch_2026-01-22_5cda0604-fc6e-4f98-a268-ed28bf7a59b2.jsonl
+    │       │   │       │   ├── batch_2026-01-22_5cda0604-fc6e-4f98-a268-ed28bf7a59b2.jsonl.zst
+    │       │   │       │   └── batch_2026-01-22_5cda0604-fc6e-4f98-a268-ed28bf7a59b2.jsonl.zst.meta.json
+    │       │   │       ├── bronze_semanticscholar_publication_dq_report.json
+    │       │   │       └── semanticscholar_publication_metadata.yaml
     │       │   └── uniprot/
     │       │       └── protein
     │       ├── gold/
@@ -9304,7 +9543,7 @@ BioactivityDataAcquisition2/
     │       │   │   │   ├── chembl_publication.csv
     │       │   │   │   ├── chembl_publication_metadata.yaml
     │       │   │   │   ├── gold_chembl_publication_dq_report.json
-    │       │   │   │   └── part-00000-79e61912-3240-4c6f-81ac-adb3f0624106-c000.snappy.parquet
+    │       │   │   │   └── part-00000-7287f8eb-7256-4c29-82d2-66027b0e1f73-c000.snappy.parquet
     │       │   │   ├── activity
     │       │   │   ├── cell_line
     │       │   │   ├── compound_record
@@ -9312,11 +9551,12 @@ BioactivityDataAcquisition2/
     │       │   │   ├── target
     │       │   │   └── target_component
     │       │   ├── composite/
-    │       │   │   └── publication/
-    │       │   │       ├── _delta_log/
-    │       │   │       │   └── 00000000000000000000.json
-    │       │   │       ├── composite_publication_metadata.yaml
-    │       │   │       └── part-00000-21211ff4-0dc4-4c46-b34d-4ada859ffc78-c000.snappy.parquet
+    │       │   │   ├── publication/
+    │       │   │   │   ├── _delta_log/
+    │       │   │   │   │   └── 00000000000000000000.json
+    │       │   │   │   ├── composite_publication_metadata.yaml
+    │       │   │   │   └── part-00000-7b956ff0-f5b7-4192-809b-f6c6550ba519-c000.snappy.parquet
+    │       │   │   └── publication.csv
     │       │   ├── crossref/
     │       │   │   └── publication/
     │       │   │       ├── _delta_log/
@@ -9324,7 +9564,7 @@ BioactivityDataAcquisition2/
     │       │   │       ├── crossref_publication.csv
     │       │   │       ├── crossref_publication_metadata.yaml
     │       │   │       ├── gold_crossref_publication_dq_report.json
-    │       │   │       └── part-00000-6713880f-bd23-4c42-ae27-30bcc9aaa994-c000.snappy.parquet
+    │       │   │       └── part-00000-7536cd34-e0f8-4ffe-b5cf-0a8e84a4efb3-c000.snappy.parquet
     │       │   ├── openalex/
     │       │   │   └── publication/
     │       │   │       ├── _delta_log/
@@ -9332,7 +9572,7 @@ BioactivityDataAcquisition2/
     │       │   │       ├── gold_openalex_publication_dq_report.json
     │       │   │       ├── openalex_publication.csv
     │       │   │       ├── openalex_publication_metadata.yaml
-    │       │   │       └── part-00000-23282a29-8db2-4b00-89ce-84b667734e7d-c000.snappy.parquet
+    │       │   │       └── part-00000-ea1c458e-b2ae-43df-a92a-1b6fa490841c-c000.snappy.parquet
     │       │   ├── pubchem/
     │       │   │   └── compound
     │       │   ├── pubmed/
@@ -9340,7 +9580,7 @@ BioactivityDataAcquisition2/
     │       │   │       ├── _delta_log/
     │       │   │       │   └── 00000000000000000000.json
     │       │   │       ├── gold_pubmed_publication_dq_report.json
-    │       │   │       ├── part-00000-fb458113-7d2c-42bc-a29b-c7b2a6177442-c000.snappy.parquet
+    │       │   │       ├── part-00000-18ba6324-0fae-4986-bba6-a4bf77388344-c000.snappy.parquet
     │       │   │       ├── pubmed_publication.csv
     │       │   │       └── pubmed_publication_metadata.yaml
     │       │   └── semanticscholar/
@@ -9348,7 +9588,7 @@ BioactivityDataAcquisition2/
     │       │           ├── _delta_log/
     │       │           │   └── 00000000000000000000.json
     │       │           ├── gold_semanticscholar_publication_dq_report.json
-    │       │           ├── part-00000-e1a29979-853a-4f4a-9fbc-a9992161c400-c000.snappy.parquet
+    │       │           ├── part-00000-cd7cf2a9-176b-481c-befb-0534eb4dc0a9-c000.snappy.parquet
     │       │           ├── semanticscholar_publication.csv
     │       │           └── semanticscholar_publication_metadata.yaml
     │       └── silver/
@@ -9358,7 +9598,7 @@ BioactivityDataAcquisition2/
     │           │   │   │   └── 00000000000000000000.json
     │           │   │   ├── chembl_publication.csv
     │           │   │   ├── chembl_publication_metadata.yaml
-    │           │   │   ├── part-00000-0046e976-fef8-414d-bff0-e590f6815c7a-c000.snappy.parquet
+    │           │   │   ├── part-00000-5ad67ea2-f336-4834-a51a-50289330496f-c000.snappy.parquet
     │           │   │   └── silver_chembl_publication_dq_report.json
     │           │   ├── activity
     │           │   ├── assay
@@ -9369,18 +9609,19 @@ BioactivityDataAcquisition2/
     │           │   ├── target
     │           │   └── target_component
     │           ├── composite/
-    │           │   └── publication/
-    │           │       ├── _delta_log/
-    │           │       │   └── 00000000000000000000.json
-    │           │       ├── composite_publication_metadata.yaml
-    │           │       └── part-00000-b00477e6-7c25-4cd0-af92-45452c6dfaa4-c000.snappy.parquet
+    │           │   ├── publication/
+    │           │   │   ├── _delta_log/
+    │           │   │   │   └── 00000000000000000000.json
+    │           │   │   ├── composite_publication_metadata.yaml
+    │           │   │   └── part-00000-d357a4b0-71f2-425e-8f64-3c7c604c6889-c000.snappy.parquet
+    │           │   └── publication.csv
     │           ├── crossref/
     │           │   └── publication/
     │           │       ├── _delta_log/
     │           │       │   └── 00000000000000000000.json
     │           │       ├── crossref_publication.csv
     │           │       ├── crossref_publication_metadata.yaml
-    │           │       ├── part-00000-7d2437c0-a4ba-4922-8175-3b82ff8b0906-c000.snappy.parquet
+    │           │       ├── part-00000-b339932b-a331-42f4-a2b9-26b5dbc4b011-c000.snappy.parquet
     │           │       └── silver_crossref_publication_dq_report.json
     │           ├── openalex/
     │           │   └── publication/
@@ -9388,7 +9629,7 @@ BioactivityDataAcquisition2/
     │           │       │   └── 00000000000000000000.json
     │           │       ├── openalex_publication.csv
     │           │       ├── openalex_publication_metadata.yaml
-    │           │       ├── part-00000-ee125750-4c42-4eda-ba62-26b708ae8c22-c000.snappy.parquet
+    │           │       ├── part-00000-2c4d5d31-dd9f-476e-941f-c3fb75222c65-c000.snappy.parquet
     │           │       └── silver_openalex_publication_dq_report.json
     │           ├── pubchem/
     │           │   └── compound
@@ -9396,7 +9637,7 @@ BioactivityDataAcquisition2/
     │           │   └── publication/
     │           │       ├── _delta_log/
     │           │       │   └── 00000000000000000000.json
-    │           │       ├── part-00000-726eebce-0388-4505-bb52-c8961a352c63-c000.snappy.parquet
+    │           │       ├── part-00000-541859f7-f275-4a64-aaf5-2a2a723b8d44-c000.snappy.parquet
     │           │       ├── pubmed_publication.csv
     │           │       ├── pubmed_publication_metadata.yaml
     │           │       └── silver_pubmed_publication_dq_report.json
@@ -9404,7 +9645,7 @@ BioactivityDataAcquisition2/
     │           │   └── publication/
     │           │       ├── _delta_log/
     │           │       │   └── 00000000000000000000.json
-    │           │       ├── part-00000-048d8c41-2dab-423d-95c0-71207f2beb7a-c000.snappy.parquet
+    │           │       ├── part-00000-fe3f3524-6855-4a65-aa56-08e1cc22aa7a-c000.snappy.parquet
     │           │       ├── semanticscholar_publication.csv
     │           │       ├── semanticscholar_publication_metadata.yaml
     │           │       └── silver_semanticscholar_publication_dq_report.json
@@ -9581,6 +9822,7 @@ BioactivityDataAcquisition2/
     │   │   │   ├── architecture-audit-2026-01-06.md
     │   │   │   ├── architecture-audit-2026-01-12.md
     │   │   │   ├── architecture-audit-2026-01-20.md
+    │   │   │   ├── architecture-audit-2026-01-21.md
     │   │   │   ├── architecture-audit-report-2026-01-05.md
     │   │   │   ├── architecture-audit-report-2026-01-06.md
     │   │   │   ├── architecture-review-2025-12-30.md
@@ -9652,16 +9894,20 @@ BioactivityDataAcquisition2/
     │   │   └── javascripts/
     │   │       └── mermaid-init.js
     │   ├── audit/
+    │   │   ├── architecture-audit-report-2026-01-22.md
     │   │   └── naming-compliance-report.md
     │   ├── audits/
+    │   │   ├── architecture-audit-2026-01-22.md
     │   │   ├── config_gaps_2026-01-19.md
     │   │   ├── config_gaps_final_2026-01-19.md
     │   │   ├── config_inventory_2026-01-19.md
     │   │   ├── config_unification_report_2026-01-19.md
     │   │   ├── date-handling-audit-2026-01-19.md
+    │   │   ├── documentation-security-audit-2026-01-21.md
     │   │   ├── dq_redundancy_audit_2026-01-20.md
     │   │   ├── file-path-audit-2026-01-21.md
     │   │   ├── metadata-audit-report-2026-01-19.md
+    │   │   ├── metadata_audit_2026_jan.md
     │   │   └── metadata_inventory.csv
     │   ├── contracts/
     │   │   ├── gold/
@@ -9837,9 +10083,11 @@ BioactivityDataAcquisition2/
     │   ├── pipeline-config-issues.md
     │   ├── pipeline-config-matrix.csv
     │   ├── pipeline-config-migration-plan.md
-    │   └── project_structure.md
+    │   ├── project_structure.md
+    │   └── Архитектурный обзор BioETL.docx
     ├── scripts/
     │   ├── analyze_config_duplication.py
+    │   ├── audit_metadata.py
     │   ├── audit_structure.py
     │   ├── cleanup_project.py
     │   ├── config_gap_analysis.py
@@ -9885,9 +10133,11 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── checkpoint.py
     │   │   │   │   ├── coordinator.py
+    │   │   │   │   ├── fsm_helper.py
     │   │   │   │   ├── key_extractor.py
     │   │   │   │   ├── merger.py
-    │   │   │   │   └── runner.py
+    │   │   │   │   ├── runner.py
+    │   │   │   │   └── runner_helpers.py
     │   │   │   ├── core/
     │   │   │   │   ├── .gitkeep
     │   │   │   │   ├── __init__.py
@@ -10013,6 +10263,7 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── health_service.py
     │   │   │   │   ├── lock_service.py
     │   │   │   │   ├── medallion_lifecycle.py
+    │   │   │   │   ├── medallion_types.py
     │   │   │   │   ├── metrics_service.py
     │   │   │   │   ├── pipeline_runner_service.py
     │   │   │   │   ├── quarantine_service.py
@@ -10029,6 +10280,28 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── observability.py
     │   │   │   │   ├── runner.py
     │   │   │   │   └── storage.py
+    │   │   │   ├── bootstrap/
+    │   │   │   │   ├── assembly/
+    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── checkpoint.py
+    │   │   │   │   │   └── storage.py
+    │   │   │   │   ├── cli/
+    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── checkpoint.py
+    │   │   │   │   │   ├── config.py
+    │   │   │   │   │   ├── health.py
+    │   │   │   │   │   ├── lock.py
+    │   │   │   │   │   ├── metrics.py
+    │   │   │   │   │   ├── noop.py
+    │   │   │   │   │   └── storage.py
+    │   │   │   │   ├── runtime/
+    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── assembly.py
+    │   │   │   │   │   ├── composite.py
+    │   │   │   │   │   ├── observability.py
+    │   │   │   │   │   ├── pipeline.py
+    │   │   │   │   │   └── runner.py
+    │   │   │   │   └── __init__.py
     │   │   │   ├── factories/
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── data_source_factory.py
@@ -10050,10 +10323,11 @@ BioactivityDataAcquisition2/
     │   │   │   │   └── registration.py
     │   │   │   ├── services/
     │   │   │   │   ├── __init__.py
-    │   │   │   │   └── metadata_coordinator.py
+    │   │   │   │   ├── metadata_coordinator.py
+    │   │   │   │   └── versioning.py
     │   │   │   ├── __init__.py
-    │   │   │   ├── bootstrap.py
     │   │   │   ├── bootstrap_composite.py
+    │   │   │   ├── bootstrap_contexts.py
     │   │   │   ├── bootstrap_logger.py
     │   │   │   ├── builders.py
     │   │   │   ├── entrypoints.py
@@ -10072,10 +10346,20 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── config.py
     │   │   │   │   ├── lineage.py
     │   │   │   │   ├── result.py
+    │   │   │   │   ├── state.py
     │   │   │   │   └── strategy.py
     │   │   │   ├── configs/
     │   │   │   │   ├── __init__.py
     │   │   │   │   └── base.py
+    │   │   │   ├── contracts/
+    │   │   │   │   ├── gold/
+    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── _base.py
+    │   │   │   │   │   ├── chembl.py
+    │   │   │   │   │   ├── pubchem.py
+    │   │   │   │   │   ├── publications.py
+    │   │   │   │   │   └── uniprot.py
+    │   │   │   │   └── __init__.py
     │   │   │   ├── entities/
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── base.py
@@ -10095,11 +10379,11 @@ BioactivityDataAcquisition2/
     │   │   │   ├── exceptions/
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── base.py
-    │   │   │   │   ├── critical.py
     │   │   │   │   ├── data_quality.py
-    │   │   │   │   ├── external_service.py
-    │   │   │   │   ├── recoverable.py
-    │   │   │   │   └── storage.py
+    │   │   │   │   ├── infrastructure.py
+    │   │   │   │   ├── internal.py
+    │   │   │   │   ├── network.py
+    │   │   │   │   └── validation.py
     │   │   │   ├── filtering/
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── column_filter.py
@@ -10244,6 +10528,10 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── exceptions.py
     │   │   │   │   │   ├── fallback.py
     │   │   │   │   │   └── models.py
+    │   │   │   │   ├── decorators/
+    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── circuit_breaker.py
+    │   │   │   │   │   └── retry.py
     │   │   │   │   ├── http/
     │   │   │   │   │   ├── __init__.py
     │   │   │   │   │   ├── circuit_breaker.py
@@ -10345,7 +10633,6 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── dq_config.py
     │   │   │   │   ├── dq_report_config.py
     │   │   │   │   ├── filter_config.py
-    │   │   │   │   ├── gold.py
     │   │   │   │   ├── pipeline_config.py
     │   │   │   │   ├── silver.py
     │   │   │   │   └── source_config.py
@@ -10358,10 +10645,12 @@ BioactivityDataAcquisition2/
     │   │   │   ├── storage/
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── _atomic.py
+    │   │   │   │   ├── arrow_converter.py
     │   │   │   │   ├── base_delta_writer.py
     │   │   │   │   ├── bronze_writer.py
     │   │   │   │   ├── delta_reader.py
     │   │   │   │   ├── gold_writer.py
+    │   │   │   │   ├── metadata_builder.py
     │   │   │   │   ├── metadata_writer.py
     │   │   │   │   ├── retention_manager.py
     │   │   │   │   └── silver_writer.py
@@ -10383,6 +10672,7 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── health_server_integration.py
     │   │   │   │   │   ├── lock.py
     │   │   │   │   │   ├── maintenance.py
+    │   │   │   │   │   ├── metrics_server_integration.py
     │   │   │   │   │   ├── quarantine.py
     │   │   │   │   │   ├── run.py
     │   │   │   │   │   ├── run_all.py
@@ -10394,6 +10684,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── exit_codes.py
     │   │   │   │   ├── formatters.py
     │   │   │   │   └── main.py
+    │   │   │   ├── contracts/
+    │   │   │   │   └── gold/
     │   │   │   ├── http/
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── health_server.py
@@ -10451,9 +10743,11 @@ BioactivityDataAcquisition2/
     │   │   ├── test_adapter_contracts.py
     │   │   ├── test_aggregate_boundaries.py
     │   │   ├── test_base_pipeline_purity.py
+    │   │   ├── test_bootstrap_layer_boundaries.py
     │   │   ├── test_code_formatting.py
     │   │   ├── test_code_metrics.py
     │   │   ├── test_column_order.py
+    │   │   ├── test_composite_layer_boundaries.py
     │   │   ├── test_config_golden_master.py
     │   │   ├── test_di_compliance.py
     │   │   ├── test_di_constructors.py
@@ -10519,7 +10813,7 @@ BioactivityDataAcquisition2/
     │   │   ├── test_pipeline_with_dq_errors_e2e.py
     │   │   ├── test_pipeline_with_schema_drift_e2e.py
     │   │   ├── test_pubchem_compound_e2e.py
-    │   │   ├── test_pubmed_publications_e2e.py
+    │   │   ├── test_pubmed_publication_e2e.py
     │   │   ├── test_resilience_scenarios_e2e.py
     │   │   ├── test_run_types_e2e.py
     │   │   └── test_uniprot_protein_e2e.py
@@ -10606,11 +10900,11 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── .gitkeep
     │   │   │   │   ├── test_fetch_publications.yaml
     │   │   │   │   ├── test_health_check.yaml
-    │   │   │   │   ├── test_pubmed_publications_classification_fields.yaml
-    │   │   │   │   ├── test_pubmed_publications_date_fields.yaml
-    │   │   │   │   ├── test_pubmed_publications_full_cycle.yaml
-    │   │   │   │   ├── test_pubmed_publications_identifier_fields.yaml
-    │   │   │   │   └── test_pubmed_publications_journal_fields.yaml
+    │   │   │   │   ├── test_pubmed_publication_classification_fields.yaml
+    │   │   │   │   ├── test_pubmed_publication_date_fields.yaml
+    │   │   │   │   ├── test_pubmed_publication_full_cycle.yaml
+    │   │   │   │   ├── test_pubmed_publication_identifier_fields.yaml
+    │   │   │   │   └── test_pubmed_publication_journal_fields.yaml
     │   │   │   ├── semanticscholar/
     │   │   │   │   ├── .gitkeep
     │   │   │   │   ├── TestSemanticScholarAdapterIntegration.test_fetch_batch_dois.yaml
@@ -10727,7 +11021,18 @@ BioactivityDataAcquisition2/
     │   │   ├── application/
     │   │   │   ├── composite/
     │   │   │   │   ├── __init__.py
-    │   │   │   │   └── test_merger.py
+    │   │   │   │   ├── test_checkpoint.py
+    │   │   │   │   ├── test_coordinator_logging.py
+    │   │   │   │   ├── test_fsm_helper.py
+    │   │   │   │   ├── test_fsm_pipeline_scenarios.py
+    │   │   │   │   ├── test_merger.py
+    │   │   │   │   ├── test_runner.py
+    │   │   │   │   ├── test_runner_checkpoint_resume.py
+    │   │   │   │   ├── test_runner_enrichment_fsm.py
+    │   │   │   │   ├── test_runner_fsm.py
+    │   │   │   │   ├── test_runner_fsm_logging.py
+    │   │   │   │   ├── test_runner_required_flag.py
+    │   │   │   │   └── test_runner_robustness.py
     │   │   │   ├── core/
     │   │   │   │   ├── test_base_transformer.py
     │   │   │   │   ├── test_batch_executor.py
@@ -10830,6 +11135,9 @@ BioactivityDataAcquisition2/
     │   │   │   └── test_registry_consistency.py
     │   │   ├── composition/
     │   │   │   ├── bootstrap/
+    │   │   │   │   ├── runtime/
+    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   └── test_assembly.py
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── test_checkpoint_bootstrap.py
     │   │   │   │   ├── test_health_bootstrap.py
@@ -10852,6 +11160,9 @@ BioactivityDataAcquisition2/
     │   │   │   ├── test_observability_contract.py
     │   │   │   ├── test_registry_protocol.py
     │   │   │   └── test_types.py
+    │   │   ├── contracts/
+    │   │   │   ├── __init__.py
+    │   │   │   └── test_contracts_exports.py
     │   │   ├── domain/
     │   │   │   ├── aggregates/
     │   │   │   │   ├── __init__.py
@@ -10862,7 +11173,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── test_composite_config.py
     │   │   │   │   ├── test_composite_result.py
-    │   │   │   │   └── test_lineage.py
+    │   │   │   │   ├── test_lineage.py
+    │   │   │   │   └── test_state.py
     │   │   │   ├── configs/
     │   │   │   │   ├── __init__.py
     │   │   │   │   └── test_base_configs.py
@@ -10930,6 +11242,7 @@ BioactivityDataAcquisition2/
     │   │   │   ├── test_medallion.py
     │   │   │   ├── test_normalization.py
     │   │   │   ├── test_pipeline_config.py
+    │   │   │   ├── test_runtime_config.py
     │   │   │   ├── test_serialization.py
     │   │   │   ├── test_transformations.py
     │   │   │   ├── test_types.py
@@ -10949,6 +11262,11 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── test_batch.py
     │   │   │   │   │   ├── test_crossref_client.py
     │   │   │   │   │   └── test_fallback.py
+    │   │   │   │   ├── decorators/
+    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── test_circuit_breaker_decorator.py
+    │   │   │   │   │   ├── test_retry_decorator.py
+    │   │   │   │   │   └── test_wrap_with_resilience.py
     │   │   │   │   ├── http/
     │   │   │   │   │   ├── __init__.py
     │   │   │   │   │   ├── test_health_monitor.py
@@ -11021,7 +11339,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── test_common_config.py
     │   │   │   │   ├── test_dq_config.py
     │   │   │   │   ├── test_gold.py
-    │   │   │   │   └── test_silver.py
+    │   │   │   │   ├── test_silver.py
+    │   │   │   │   └── test_sink_metadata_config.py
     │   │   │   ├── security/
     │   │   │   │   ├── __init__.py
     │   │   │   │   └── test_pii_hasher.py
@@ -11030,11 +11349,14 @@ BioactivityDataAcquisition2/
     │   │   │   │   └── test_json_encoders.py
     │   │   │   ├── storage/
     │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── test_arrow_converter.py
     │   │   │   │   ├── test_atomic.py
     │   │   │   │   ├── test_base_delta_writer.py
     │   │   │   │   ├── test_bronze_writer.py
+    │   │   │   │   ├── test_delta_reader.py
     │   │   │   │   ├── test_deterministic_write.py
     │   │   │   │   ├── test_gold_writer.py
+    │   │   │   │   ├── test_metadata_builder.py
     │   │   │   │   ├── test_metadata_integration.py
     │   │   │   │   ├── test_metadata_writer.py
     │   │   │   │   ├── test_silver_writer.py
@@ -11060,9 +11382,11 @@ BioactivityDataAcquisition2/
     │   │   │   ├── cli/
     │   │   │   │   ├── commands/
     │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── test_export.py
     │   │   │   │   │   ├── test_health.py
     │   │   │   │   │   ├── test_health_server_integration.py
-    │   │   │   │   │   └── test_quarantine.py
+    │   │   │   │   │   ├── test_quarantine.py
+    │   │   │   │   │   └── test_run_composite.py
     │   │   │   │   ├── __init__.py
     │   │   │   │   └── test_cli_main_module.py
     │   │   │   ├── factories/
@@ -11098,7 +11422,7 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── test_extractor_edge_cases.py
     │   │   │   │   │   ├── test_identifier_extractor.py
     │   │   │   │   │   └── test_xml_utils.py
-    │   │   │   │   ├── test_pubmed_publications.py
+    │   │   │   │   ├── test_pubmed_publication.py
     │   │   │   │   └── test_pubmed_transformer.py
     │   │   │   ├── __init__.py
     │   │   │   └── test_chembl_ddd.py
@@ -11117,7 +11441,6 @@ BioactivityDataAcquisition2/
     │   ├── strategies.py
     │   ├── test_architecture.py
     │   └── test_data_storage.py
-    ├── .coverage
     ├── .editorconfig
     ├── .env
     ├── .env.example
@@ -11132,6 +11455,7 @@ BioactivityDataAcquisition2/
     ├── CHANGELOG.md
     ├── CLAUDE.md
     ├── CODE_OF_CONDUCT.md
+    ├── CODE_QUALITY_REPORT.md
     ├── CONTRIBUTING.md
     ├── LICENSE
     ├── Makefile
@@ -11147,6 +11471,6 @@ BioactivityDataAcquisition2/
 ```
 
 **Statistics:**
-- Directories: 735
-- Files: 10406
-- Total items: 11141
+- Directories: 750
+- Files: 10715
+- Total items: 11465

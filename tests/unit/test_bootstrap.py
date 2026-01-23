@@ -89,16 +89,14 @@ class TestBootstrapLogger:
 class TestBootstrapPipeline:
     """Tests for bootstrap_pipeline function."""
 
-    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
-    @patch("bioetl.composition.bootstrap.bootstrap_tracer")
-    @patch("bioetl.composition.bootstrap.get_settings")
-    @patch("bioetl.composition.bootstrap.bootstrap_logger")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
+    )
+    @patch("bioetl.infrastructure.config.get_settings")
     def test_bootstrap_pipeline_unknown_pipeline_raises(
         self,
-        mock_bootstrap_logger: MagicMock,
         mock_get_settings: MagicMock,
-        mock_bootstrap_tracer: MagicMock,
-        mock_start_metrics: MagicMock,
+        mock_bootstrap_observability_bundle: MagicMock,
         mock_settings: MagicMock,
         mock_logger: MagicMock,
     ):
@@ -107,6 +105,7 @@ class TestBootstrapPipeline:
 
         # Configure settings with required observability attributes
         mock_settings.metrics_port = 8000
+        mock_settings.test_mode = False
         mock_settings.observability = MagicMock()
         mock_settings.observability.metrics_enabled = True
         mock_settings.observability.metrics_server_enabled = True
@@ -121,8 +120,6 @@ class TestBootstrapPipeline:
         mock_settings.observability.dq_quality_score_min = 0.80
 
         mock_get_settings.return_value = mock_settings
-        mock_bootstrap_logger.return_value = mock_logger
-        mock_bootstrap_tracer.return_value = MagicMock()
 
         # Now raises "Configuration file not found" because load_pipeline_config is called first
         ctx = PipelineRunContext(
@@ -135,30 +132,35 @@ class TestBootstrapPipeline:
         with pytest.raises(ValueError, match="Configuration file not found"):
             bootstrap_pipeline(ctx)
 
-    @patch("bioetl.composition.bootstrap.get_default_registry")
-    @patch("bioetl.composition.bootstrap.FilterConfigBuilder")
-    @patch("bioetl.composition.bootstrap.load_pipeline_config")
-    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
-    @patch("bioetl.composition.bootstrap.bootstrap_tracer")
-    @patch("bioetl.composition.bootstrap.bootstrap_logger")
-    @patch("bioetl.composition.bootstrap.get_settings")
-    def test_bootstrap_pipeline_metrics_server_failure_non_blocking(
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
+    )
+    @patch("bioetl.infrastructure.config.get_settings")
+    def test_bootstrap_pipeline_creates_runner_without_starting_server(
         self,
         mock_get_settings: MagicMock,
-        mock_bootstrap_logger: MagicMock,
-        mock_bootstrap_tracer: MagicMock,
-        mock_start_metrics: MagicMock,
+        mock_bootstrap_observability_bundle: MagicMock,
         mock_load_config: MagicMock,
-        mock_filter_builder: MagicMock,
+        mock_assemble_filter: MagicMock,
         mock_get_registry: MagicMock,
         mock_logger: MagicMock,
     ) -> None:
-        """Test that metrics server failure doesn't block pipeline bootstrap."""
+        """Test that bootstrap_pipeline creates runner without starting metrics server.
+
+        After refactoring, bootstrap_metrics() no longer starts the metrics server.
+        Server startup is handled by entrypoints via maybe_start_metrics_server().
+        This test verifies that bootstrap_pipeline creates a runner successfully
+        regardless of metrics server state.
+        """
         from bioetl.composition.bootstrap import bootstrap_pipeline
 
         # Create proper mock settings with required attributes
         test_settings = MagicMock()
         test_settings.metrics_port = 8000
+        test_settings.test_mode = False
         test_settings.pipeline = MagicMock()
         test_settings.pipeline.heartbeat_interval = 30
         test_settings.pipeline.vacuum_retention_days = 7
@@ -170,23 +172,22 @@ class TestBootstrapPipeline:
         test_settings.observability.metrics_retry_count = 3
         test_settings.observability.metrics_retry_delay = 1.0
         test_settings.observability.tracing_enabled = False
-        test_settings.observability.dq_baseline_window = 7
-        test_settings.observability.dq_z_score_threshold = 2.5
-        test_settings.observability.dq_min_baseline_samples = 3
-        test_settings.observability.dq_error_rate_max = 0.10
-        test_settings.observability.dq_quality_score_min = 0.80
+        test_settings.observability.dq_monitor_enabled = False
 
         mock_get_settings.return_value = test_settings
-        mock_bootstrap_logger.return_value = mock_logger
-        mock_bootstrap_tracer.return_value = MagicMock()
-        mock_filter_builder.build.return_value = None
 
-        # Simulate metrics server failure
-        mock_start_metrics.side_effect = Exception("Port already in use")
+        # Mock observability bundle
+        mock_obs = MagicMock()
+        mock_obs.logger = mock_logger
+        mock_bootstrap_observability_bundle.return_value = mock_obs
+
+        mock_assemble_filter.return_value = None
 
         # Setup pipeline registry mock
         mock_config = MagicMock()
+        mock_config.maintenance.auto_vacuum = False
         mock_config.maintenance.vacuum_retention_days = 7
+        mock_config.input_filter = MagicMock()
         mock_load_config.return_value = mock_config
         mock_factory = MagicMock()
         mock_runner = MagicMock()
@@ -203,30 +204,27 @@ class TestBootstrapPipeline:
             limit=None,
         )
 
-        # Should not raise, should return runner despite metrics failure
-        # (error is suppressed via contextlib.suppress in bootstrap_metrics)
+        # Should return runner - bootstrap no longer starts metrics server
         result = bootstrap_pipeline(ctx)
 
         assert result is mock_runner
-        mock_start_metrics.assert_called_once_with(
-            port=test_settings.metrics_port,
-            fail_fast=False,
-            retry_count=3,
-            retry_delay=1.0,
-        )
+        # Verify observability was bootstrapped (creates MetricsPort, but doesn't start server)
+        mock_bootstrap_observability_bundle.assert_called_once()
 
-    @patch("bioetl.composition.bootstrap.get_settings")
-    @patch("bioetl.composition.bootstrap.get_default_registry")
-    @patch("bioetl.composition.bootstrap.bootstrap_observability")
-    @patch("bioetl.composition.bootstrap.register_all_providers")
-    @patch("bioetl.composition.bootstrap.register_all_pipelines")
-    @patch("bioetl.composition.bootstrap.load_pipeline_config")
+    @patch("bioetl.infrastructure.config.get_settings")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
+    )
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_providers")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.register_all_pipelines")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
     def test_bootstrap_pipeline_chembl_activity(
         self,
         mock_load_config,
         mock_register_pipelines,
         mock_register_providers,
-        mock_observability,
+        mock_observability_bundle,
         mock_get_registry,
         mock_get_settings,
         mock_settings,
@@ -235,6 +233,7 @@ class TestBootstrapPipeline:
         """Test bootstrap_pipeline creates chembl_activity pipeline."""
         from bioetl.composition.bootstrap import bootstrap_pipeline
 
+        mock_settings.test_mode = False
         mock_get_settings.return_value = mock_settings
 
         # Mock YAML config with maintenance settings
@@ -251,7 +250,7 @@ class TestBootstrapPipeline:
         # Mock observability with logger
         mock_obs = MagicMock()
         mock_obs.logger = mock_logger
-        mock_observability.return_value = mock_obs
+        mock_observability_bundle.return_value = mock_obs
 
         # Mock factory and runner
         mock_runner = MagicMock(spec=PipelineRunner)
@@ -387,6 +386,7 @@ class TestChemblActivityFactory:
         # Should NOT call load_pipeline_config when config is provided
         mock_load_config.assert_not_called()
 
+    @patch("bioetl.composition.factories.pipeline_factory.compute_config_hash")
     @patch("bioetl.composition.factories.pipeline_factory.yaml_config_to_domain")
     @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
     @patch("bioetl.composition.factories.pipeline_factory.BaseServicesFactory")
@@ -395,6 +395,7 @@ class TestChemblActivityFactory:
         mock_base_services,
         mock_load_config,
         mock_yaml_to_domain,
+        mock_compute_hash,
         mock_settings,
         mock_logger,
         mock_services,
@@ -410,6 +411,7 @@ class TestChemblActivityFactory:
         mock_base_services.create_common_services.return_value = mock_services
         mock_domain_config = MagicMock()
         mock_yaml_to_domain.return_value = mock_domain_config
+        mock_compute_hash.return_value = "mock_config_hash_12345"
 
         # Mock the data source creator
         mock_data_source = MagicMock()
@@ -453,26 +455,24 @@ class TestChemblActivityFactory:
 
 @pytest.mark.unit
 class TestBootstrapMetrics:
-    """Tests for bootstrap_metrics function with metrics configuration."""
+    """Tests for bootstrap_metrics function with metrics configuration.
 
-    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
-    @patch("bioetl.composition._bootstrap.observability.PrometheusMetrics")
-    def test_bootstrap_metrics_passes_config_params(
+    Note: After refactoring, bootstrap_metrics() only creates the MetricsPort
+    without starting the server. Server startup is now handled by
+    maybe_start_metrics_server() which is called by entrypoints.
+    """
+
+    @patch("bioetl.composition.bootstrap.runtime.observability.PrometheusMetrics")
+    def test_bootstrap_metrics_returns_prometheus_when_enabled(
         self,
         mock_prometheus: MagicMock,
-        mock_start_server: MagicMock,
     ) -> None:
-        """Test that bootstrap_metrics passes config params to start_metrics_server."""
+        """Test that bootstrap_metrics returns PrometheusMetrics when enabled."""
         from bioetl.composition.bootstrap import bootstrap_metrics
 
         # Create mock settings with metrics config
         settings = MagicMock()
-        settings.metrics_port = 9090
         settings.observability.metrics_enabled = True
-        settings.observability.metrics_server_enabled = True
-        settings.observability.metrics_fail_fast = False
-        settings.observability.metrics_retry_count = 5
-        settings.observability.metrics_retry_delay = 2.0
 
         mock_metrics = MagicMock()
         mock_prometheus.return_value = mock_metrics
@@ -480,71 +480,7 @@ class TestBootstrapMetrics:
         result = bootstrap_metrics(settings)
 
         assert result is mock_metrics
-        mock_start_server.assert_called_once_with(
-            port=9090,
-            fail_fast=False,
-            retry_count=5,
-            retry_delay=2.0,
-        )
-
-    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
-    @patch("bioetl.composition._bootstrap.observability.PrometheusMetrics")
-    def test_bootstrap_metrics_fail_fast_true_raises_error(
-        self,
-        mock_prometheus: MagicMock,
-        mock_start_server: MagicMock,
-    ) -> None:
-        """Test that fail_fast=True propagates MetricsServerError."""
-        from bioetl.composition.bootstrap import bootstrap_metrics
-        from bioetl.interfaces.observability import MetricsServerError
-
-        settings = MagicMock()
-        settings.metrics_port = 8000
-        settings.observability.metrics_enabled = True
-        settings.observability.metrics_server_enabled = True
-        settings.observability.metrics_fail_fast = True
-        settings.observability.metrics_retry_count = 3
-        settings.observability.metrics_retry_delay = 1.0
-
-        # Simulate server failure in fail_fast mode
-        mock_start_server.side_effect = MetricsServerError(
-            port=8000, reason="port_in_use"
-        )
-
-        with pytest.raises(MetricsServerError) as exc_info:
-            bootstrap_metrics(settings)
-
-        assert exc_info.value.port == 8000
-        assert exc_info.value.reason == "port_in_use"
-
-    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
-    @patch("bioetl.composition._bootstrap.observability.PrometheusMetrics")
-    def test_bootstrap_metrics_fail_fast_false_suppresses_error(
-        self,
-        mock_prometheus: MagicMock,
-        mock_start_server: MagicMock,
-    ) -> None:
-        """Test that fail_fast=False suppresses exceptions."""
-        from bioetl.composition.bootstrap import bootstrap_metrics
-
-        settings = MagicMock()
-        settings.metrics_port = 8000
-        settings.observability.metrics_enabled = True
-        settings.observability.metrics_server_enabled = True
-        settings.observability.metrics_fail_fast = False
-        settings.observability.metrics_retry_count = 3
-        settings.observability.metrics_retry_delay = 1.0
-
-        mock_metrics = MagicMock()
-        mock_prometheus.return_value = mock_metrics
-
-        # Simulate exception in lenient mode
-        mock_start_server.side_effect = Exception("Random failure")
-
-        # Should not raise, should return metrics
-        result = bootstrap_metrics(settings)
-
-        assert result is mock_metrics
+        mock_prometheus.assert_called_once()
 
     def test_bootstrap_metrics_disabled_returns_noop_metrics(self) -> None:
         """Test that disabled metrics returns NoOpMetrics (not None).
@@ -566,24 +502,134 @@ class TestBootstrapMetrics:
 
 
 @pytest.mark.unit
+class TestMaybeStartMetricsServer:
+    """Tests for maybe_start_metrics_server function.
+
+    This function handles metrics server startup as a side-effect
+    that was removed from bootstrap_metrics() to keep bootstrap pure.
+    """
+
+    @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
+    def test_maybe_start_metrics_server_passes_config_params(
+        self,
+        mock_start_server: MagicMock,
+    ) -> None:
+        """Test that maybe_start_metrics_server passes config params correctly."""
+        from bioetl.composition.bootstrap import maybe_start_metrics_server
+
+        # Create mock settings with metrics config
+        settings = MagicMock()
+        settings.metrics_port = 9090
+        settings.observability.metrics_enabled = True
+        settings.observability.metrics_server_enabled = True
+        settings.observability.metrics_fail_fast = False
+        settings.observability.metrics_retry_count = 5
+        settings.observability.metrics_retry_delay = 2.0
+
+        mock_start_server.return_value = True
+
+        result = maybe_start_metrics_server(settings)
+
+        assert result is True
+        mock_start_server.assert_called_once_with(
+            port=9090,
+            fail_fast=False,
+            retry_count=5,
+            retry_delay=2.0,
+        )
+
+    @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
+    def test_maybe_start_metrics_server_fail_fast_true_raises_error(
+        self,
+        mock_start_server: MagicMock,
+    ) -> None:
+        """Test that fail_fast=True propagates MetricsServerError."""
+        from bioetl.composition.bootstrap import maybe_start_metrics_server
+        from bioetl.interfaces.observability import MetricsServerError
+
+        settings = MagicMock()
+        settings.metrics_port = 8000
+        settings.observability.metrics_enabled = True
+        settings.observability.metrics_server_enabled = True
+        settings.observability.metrics_fail_fast = True
+        settings.observability.metrics_retry_count = 3
+        settings.observability.metrics_retry_delay = 1.0
+
+        # Simulate server failure in fail_fast mode
+        mock_start_server.side_effect = MetricsServerError(
+            port=8000, reason="port_in_use"
+        )
+
+        with pytest.raises(MetricsServerError) as exc_info:
+            maybe_start_metrics_server(settings)
+
+        assert exc_info.value.port == 8000
+        assert exc_info.value.reason == "port_in_use"
+
+    @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
+    def test_maybe_start_metrics_server_fail_fast_false_propagates_error(
+        self,
+        mock_start_server: MagicMock,
+    ) -> None:
+        """Test that fail_fast=False still propagates exceptions to entrypoints."""
+        from bioetl.composition.bootstrap import maybe_start_metrics_server
+
+        settings = MagicMock()
+        settings.metrics_port = 8000
+        settings.observability.metrics_enabled = True
+        settings.observability.metrics_server_enabled = True
+        settings.observability.metrics_fail_fast = False
+        settings.observability.metrics_retry_count = 3
+        settings.observability.metrics_retry_delay = 1.0
+
+        # Simulate exception - should propagate to entrypoints for handling
+        mock_start_server.side_effect = Exception("Random failure")
+
+        # Exceptions now propagate instead of being suppressed
+        with pytest.raises(Exception, match="Random failure"):
+            maybe_start_metrics_server(settings)
+
+    def test_maybe_start_metrics_server_disabled_returns_false(self) -> None:
+        """Test that disabled metrics returns False without calling server."""
+        from bioetl.composition.bootstrap import maybe_start_metrics_server
+
+        settings = MagicMock()
+        settings.observability.metrics_enabled = False
+
+        result = maybe_start_metrics_server(settings)
+
+        assert result is False
+
+    def test_maybe_start_metrics_server_server_disabled_returns_false(self) -> None:
+        """Test that disabled metrics server returns False."""
+        from bioetl.composition.bootstrap import maybe_start_metrics_server
+
+        settings = MagicMock()
+        settings.observability.metrics_enabled = True
+        settings.observability.metrics_server_enabled = False
+
+        result = maybe_start_metrics_server(settings)
+
+        assert result is False
+
+
+@pytest.mark.unit
 class TestBootstrapVacuumConfig:
     """Tests for bootstrap_pipeline vacuum configuration merging."""
 
-    @patch("bioetl.composition.bootstrap.get_default_registry")
-    @patch("bioetl.composition.bootstrap.FilterConfigBuilder")
-    @patch("bioetl.composition.bootstrap.load_pipeline_config")
-    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
-    @patch("bioetl.composition.bootstrap.bootstrap_tracer")
-    @patch("bioetl.composition.bootstrap.bootstrap_logger")
-    @patch("bioetl.composition.bootstrap.get_settings")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
+    )
+    @patch("bioetl.infrastructure.config.get_settings")
     def test_bootstrap_uses_yaml_vacuum_config_when_cli_not_set(
         self,
         mock_get_settings: MagicMock,
-        mock_bootstrap_logger: MagicMock,
-        mock_bootstrap_tracer: MagicMock,
-        mock_start_metrics: MagicMock,
+        mock_bootstrap_observability_bundle: MagicMock,
         mock_load_config: MagicMock,
-        mock_filter_builder: MagicMock,
+        mock_assemble_filter: MagicMock,
         mock_get_registry: MagicMock,
     ) -> None:
         """Test that YAML auto_vacuum config is used when CLI doesn't override."""
@@ -592,26 +638,20 @@ class TestBootstrapVacuumConfig:
         # Create settings with all required observability attributes
         settings = MagicMock()
         settings.metrics_port = 8000
+        settings.test_mode = False
         settings.pipeline.heartbeat_interval = 30
         settings.observability.metrics_enabled = False
         settings.observability.metrics_server_enabled = False
-        settings.observability.metrics_fail_fast = False
-        settings.observability.metrics_retry_count = 3
-        settings.observability.metrics_retry_delay = 1.0
-        settings.observability.tracing_enabled = False
-        settings.observability.dq_baseline_window = 7
-        settings.observability.dq_z_score_threshold = 2.5
-        settings.observability.dq_min_baseline_samples = 3
-        settings.observability.dq_error_rate_max = 0.10
-        settings.observability.dq_quality_score_min = 0.80
+        settings.observability.dq_monitor_enabled = False
         mock_get_settings.return_value = settings
 
         # Create logger
         logger = MagicMock()
         logger.bind.return_value = logger
-        mock_bootstrap_logger.return_value = logger
-        mock_bootstrap_tracer.return_value = MagicMock()
-        mock_filter_builder.build.return_value = None
+        mock_obs = MagicMock()
+        mock_obs.logger = logger
+        mock_bootstrap_observability_bundle.return_value = mock_obs
+        mock_assemble_filter.return_value = None
 
         # Setup YAML config with auto_vacuum enabled
         yaml_config = MagicMock()
@@ -644,21 +684,19 @@ class TestBootstrapVacuumConfig:
         assert runtime.vacuum_after_run is True
         assert runtime.vacuum_retention_days == 14
 
-    @patch("bioetl.composition.bootstrap.get_default_registry")
-    @patch("bioetl.composition.bootstrap.FilterConfigBuilder")
-    @patch("bioetl.composition.bootstrap.load_pipeline_config")
-    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
-    @patch("bioetl.composition.bootstrap.bootstrap_tracer")
-    @patch("bioetl.composition.bootstrap.bootstrap_logger")
-    @patch("bioetl.composition.bootstrap.get_settings")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
+    @patch("bioetl.composition.bootstrap.runtime.pipeline.load_pipeline_config")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
+    )
+    @patch("bioetl.infrastructure.config.get_settings")
     def test_bootstrap_cli_vacuum_overrides_yaml_config(
         self,
         mock_get_settings: MagicMock,
-        mock_bootstrap_logger: MagicMock,
-        mock_bootstrap_tracer: MagicMock,
-        mock_start_metrics: MagicMock,
+        mock_bootstrap_observability_bundle: MagicMock,
         mock_load_config: MagicMock,
-        mock_filter_builder: MagicMock,
+        mock_assemble_filter: MagicMock,
         mock_get_registry: MagicMock,
     ) -> None:
         """Test that CLI vacuum options override YAML config."""
@@ -667,26 +705,20 @@ class TestBootstrapVacuumConfig:
         # Create settings with all required observability attributes
         settings = MagicMock()
         settings.metrics_port = 8000
+        settings.test_mode = False
         settings.pipeline.heartbeat_interval = 30
         settings.observability.metrics_enabled = False
         settings.observability.metrics_server_enabled = False
-        settings.observability.metrics_fail_fast = False
-        settings.observability.metrics_retry_count = 3
-        settings.observability.metrics_retry_delay = 1.0
-        settings.observability.tracing_enabled = False
-        settings.observability.dq_baseline_window = 7
-        settings.observability.dq_z_score_threshold = 2.5
-        settings.observability.dq_min_baseline_samples = 3
-        settings.observability.dq_error_rate_max = 0.10
-        settings.observability.dq_quality_score_min = 0.80
+        settings.observability.dq_monitor_enabled = False
         mock_get_settings.return_value = settings
 
         # Create logger
         logger = MagicMock()
         logger.bind.return_value = logger
-        mock_bootstrap_logger.return_value = logger
-        mock_bootstrap_tracer.return_value = MagicMock()
-        mock_filter_builder.build.return_value = None
+        mock_obs = MagicMock()
+        mock_obs.logger = logger
+        mock_bootstrap_observability_bundle.return_value = mock_obs
+        mock_assemble_filter.return_value = None
 
         # Setup YAML config with auto_vacuum enabled
         yaml_config = MagicMock()

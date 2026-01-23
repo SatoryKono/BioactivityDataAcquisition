@@ -482,3 +482,39 @@ class TestHappyPathScenario:
 
         assert state.is_terminal is True
         assert state.is_success is False
+
+
+class TestResumableStates:
+    """Tests for resumable state detection."""
+
+    def test_seed_completed_is_resumable(self):
+        """SEED_COMPLETED should be resumable."""
+        assert CompositePipelineState.SEED_COMPLETED.is_resumable is True
+
+    def test_enriching_is_resumable(self):
+        """ENRICHING should be resumable."""
+        assert CompositePipelineState.ENRICHING.is_resumable is True
+
+    def test_enrichment_completed_is_resumable(self):
+        """ENRICHMENT_COMPLETED should be resumable."""
+        assert CompositePipelineState.ENRICHMENT_COMPLETED.is_resumable is True
+
+    def test_failed_is_resumable(self):
+        """FAILED should be resumable to allow merge retry."""
+        assert CompositePipelineState.FAILED.is_resumable is True
+
+    def test_not_started_not_resumable(self):
+        """NOT_STARTED should not be resumable."""
+        assert CompositePipelineState.NOT_STARTED.is_resumable is False
+
+    def test_seed_running_not_resumable(self):
+        """SEED_RUNNING should not be resumable (work in progress)."""
+        assert CompositePipelineState.SEED_RUNNING.is_resumable is False
+
+    def test_merging_not_resumable(self):
+        """MERGING should not be resumable (work in progress)."""
+        assert CompositePipelineState.MERGING.is_resumable is False
+
+    def test_completed_not_resumable(self):
+        """COMPLETED should not be resumable (already done)."""
+        assert CompositePipelineState.COMPLETED.is_resumable is False

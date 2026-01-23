@@ -77,9 +77,12 @@ class TestResolvePath:
         result = reader._resolve_path("provider/entity")
         assert result == tmp_path / "provider" / "entity"
 
-    def test_absolute_path_returned_unchanged(self, reader: DeltaReader) -> None:
+    def test_absolute_path_returned_unchanged(
+        self, reader: DeltaReader, tmp_path: Path
+    ) -> None:
         """Test absolute path is returned as-is."""
-        absolute_path = "/some/absolute/path"
+        # Use tmp_path to get a valid absolute path on any platform
+        absolute_path = str(tmp_path / "some" / "absolute" / "path")
         result = reader._resolve_path(absolute_path)
         assert result == Path(absolute_path)
 

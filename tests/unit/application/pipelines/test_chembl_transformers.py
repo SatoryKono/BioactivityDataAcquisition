@@ -230,7 +230,7 @@ class TestPublicationTransformer:
             "document_chembl_id": "CHEMBL1234567",
             "pubmed_id": "12345678",  # Source API field name
             "doi": "10.1000/test",
-            "patent_id": "US1234567",
+            # patent_id excluded from unified publication schema
             "title": "Full Title",
             "authors": "Author1, Author2",
             "abstract": "Test abstract text",
@@ -250,6 +250,7 @@ class TestPublicationTransformer:
         assert result is not None
         assert result["journal_full_title"] == "Full Journal Name"
         assert result["src_id"] == 1
+        assert result["_source"] == "chembl"  # System field
 
 
 @pytest.mark.unit

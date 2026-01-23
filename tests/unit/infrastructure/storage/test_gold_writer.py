@@ -503,51 +503,62 @@ class TestGoldWriterHistory:
 
 @pytest.mark.unit
 class TestGoldWriterTypeSanitization:
-    """Tests for type sanitization methods."""
+    """Tests for type sanitization methods.
 
-    def test_sanitize_null_type(self, gold_writer):
+    Note: The _sanitize_type_for_delta method has been extracted to
+    ArrowDataConverter. These tests now use the converter directly.
+    """
+
+    @pytest.fixture
+    def arrow_converter(self):
+        """Create an ArrowDataConverter instance for testing."""
+        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+
+        return ArrowDataConverter()
+
+    def test_sanitize_null_type(self, arrow_converter):
         """Test sanitization of null type to string."""
 
-        result = gold_writer._sanitize_type_for_delta(pa.null())
+        result = arrow_converter.sanitize_type_for_delta(pa.null())
         assert result == pa.string()
 
-    def test_sanitize_list_with_null_inner(self, gold_writer):
+    def test_sanitize_list_with_null_inner(self, arrow_converter):
         """Test sanitization of list<null> to list<string>."""
 
         null_list_type = pa.list_(pa.null())
-        result = gold_writer._sanitize_type_for_delta(null_list_type)
+        result = arrow_converter.sanitize_type_for_delta(null_list_type)
         assert result == pa.list_(pa.string())
 
-    def test_sanitize_large_list_type(self, gold_writer):
+    def test_sanitize_large_list_type(self, arrow_converter):
         """Test sanitization of large_list type."""
 
         large_list_type = pa.large_list(pa.null())
-        result = gold_writer._sanitize_type_for_delta(large_list_type)
+        result = arrow_converter.sanitize_type_for_delta(large_list_type)
         assert result == pa.large_list(pa.string())
 
-    def test_sanitize_struct_with_null_field(self, gold_writer):
+    def test_sanitize_struct_with_null_field(self, arrow_converter):
         """Test sanitization of struct with null field."""
 
         struct_type = pa.struct(
             [pa.field("name", pa.string()), pa.field("value", pa.null())]
         )
-        result = gold_writer._sanitize_type_for_delta(struct_type)
+        result = arrow_converter.sanitize_type_for_delta(struct_type)
 
         # Check the value field is now string
         assert result[1].type == pa.string()
 
-    def test_sanitize_map_type(self, gold_writer):
+    def test_sanitize_map_type(self, arrow_converter):
         """Test sanitization of map type."""
 
         map_type = pa.map_(pa.string(), pa.null())
-        result = gold_writer._sanitize_type_for_delta(map_type)
+        result = arrow_converter.sanitize_type_for_delta(map_type)
         assert result.item_type == pa.string()
 
-    def test_sanitize_non_null_type_unchanged(self, gold_writer):
+    def test_sanitize_non_null_type_unchanged(self, arrow_converter):
         """Test that non-null types are unchanged."""
 
         int_type = pa.int64()
-        result = gold_writer._sanitize_type_for_delta(int_type)
+        result = arrow_converter.sanitize_type_for_delta(int_type)
         assert result == pa.int64()
 
 
@@ -807,45 +818,60 @@ class TestGoldWriterArrowConversion:
         # Columns should be sorted alphabetically
         assert result.column_names == ["a_field", "m_field", "z_field"]
 
-    def test_sanitize_type_for_delta_null_type(self, gold_writer):
-        """Test _sanitize_type_for_delta converts null to string."""
+    def test_sanitize_type_for_delta_null_type(self):
+        """Test sanitize_type_for_delta converts null to string."""
         import pyarrow as pa
 
-        result = gold_writer._sanitize_type_for_delta(pa.null())
+        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+
+        converter = ArrowDataConverter()
+        result = converter.sanitize_type_for_delta(pa.null())
         assert result == pa.string()
 
-    def test_sanitize_type_for_delta_list_with_null(self, gold_writer):
-        """Test _sanitize_type_for_delta handles list<null>."""
+    def test_sanitize_type_for_delta_list_with_null(self):
+        """Test sanitize_type_for_delta handles list<null>."""
         import pyarrow as pa
 
-        result = gold_writer._sanitize_type_for_delta(pa.list_(pa.null()))
+        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+
+        converter = ArrowDataConverter()
+        result = converter.sanitize_type_for_delta(pa.list_(pa.null()))
         assert result == pa.list_(pa.string())
 
-    def test_sanitize_type_for_delta_struct_with_null(self, gold_writer):
-        """Test _sanitize_type_for_delta handles struct with null field."""
+    def test_sanitize_type_for_delta_struct_with_null(self):
+        """Test sanitize_type_for_delta handles struct with null field."""
         import pyarrow as pa
 
+        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+
+        converter = ArrowDataConverter()
         struct_type = pa.struct([pa.field("null_field", pa.null())])
-        result = gold_writer._sanitize_type_for_delta(struct_type)
+        result = converter.sanitize_type_for_delta(struct_type)
 
         expected = pa.struct([pa.field("null_field", pa.string())])
         assert result == expected
 
-    def test_sanitize_type_for_delta_preserves_normal_types(self, gold_writer):
-        """Test _sanitize_type_for_delta preserves non-null types."""
+    def test_sanitize_type_for_delta_preserves_normal_types(self):
+        """Test sanitize_type_for_delta preserves non-null types."""
         import pyarrow as pa
 
+        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+
+        converter = ArrowDataConverter()
         # Test various normal types
         for dtype in [pa.int64(), pa.float64(), pa.string(), pa.bool_()]:
-            result = gold_writer._sanitize_type_for_delta(dtype)
+            result = converter.sanitize_type_for_delta(dtype)
             assert result == dtype
 
-    def test_sanitize_type_for_delta_map_type(self, gold_writer):
-        """Test _sanitize_type_for_delta handles map types."""
+    def test_sanitize_type_for_delta_map_type(self):
+        """Test sanitize_type_for_delta handles map types."""
         import pyarrow as pa
 
+        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
+
+        converter = ArrowDataConverter()
         map_type = pa.map_(pa.string(), pa.null())
-        result = gold_writer._sanitize_type_for_delta(map_type)
+        result = converter.sanitize_type_for_delta(map_type)
 
         expected = pa.map_(pa.string(), pa.string())
         assert result == expected

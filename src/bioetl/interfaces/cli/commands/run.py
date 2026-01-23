@@ -21,6 +21,9 @@ from bioetl.interfaces.cli.commands.health_server_integration import (
     echo_health_server_info,
     health_server_context,
 )
+from bioetl.interfaces.cli.commands.metrics_server_integration import (
+    ensure_metrics_server_started,
+)
 from bioetl.interfaces.cli.commands.run_helpers import (
     get_runner_logger,
     handle_destructive_run_confirmation,
@@ -83,6 +86,9 @@ async def _run_pipeline_async(
     Returns:
         Tuple of (status, error_message, error_type, run_id).
     """
+    # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
+    ensure_metrics_server_started()
+
     async with health_server_context(
         enabled=health_server_enabled,
         port=health_port,

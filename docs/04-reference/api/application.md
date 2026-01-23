@@ -9,8 +9,14 @@ flowchart TB
     subgraph Application["Application Layer"]
         subgraph Core["Core"]
             Runner[PipelineRunner]
-            Executor[PipelineExecutor]
+            Executor[BatchExecutor]
             Services[PipelineServices]
+        end
+
+        subgraph AppServices["Services"]
+            Medallion[MedallionLifecycle]
+            DQ[DQService]
+            Health[HealthService]
         end
 
         subgraph Transform["Transformation"]
@@ -27,6 +33,8 @@ flowchart TB
 
         Runner --> Executor
         Executor --> Services
+        Runner --> Medallion
+        Runner --> DQ
         BaseT --> BatchT
         Pipelines --> BaseT
     end
@@ -41,13 +49,22 @@ flowchart TB
 Pipeline execution infrastructure:
 
 - `PipelineRunner` - Lifecycle orchestrator for pipeline execution
-- `PipelineExecutor` - Data flow orchestrator (fetch → transform → write)
+- `BatchExecutor` - Data flow orchestrator (fetch → transform → write)
 - `PipelineServices` - Service bundle for dependency injection
 - `CheckpointManager` - Checkpoint persistence for resume capability
 - `LockManager` - Distributed locking coordination
 - `PreflightService` - Pre-flight infrastructure validation
 - `PostrunService` - Post-run DQ checks, VACUUM, cleanup
-- `LifecycleOrchestrator` - Medallion layer clearing policies
+
+### [Services](application/services.md)
+
+Specialized application services:
+
+- `MedallionLifecycleService` - Medallion layer management
+- `DataQualityService` - DQ checks and validation orchestration
+- `HealthService` - System health aggregation
+- `VacuumService` - Storage maintenance
+- `LockService`, `CheckpointService`, `ShutdownService` - Infrastructure services
 
 ### [Transformers](application/transformers.md)
 
@@ -100,50 +117,14 @@ PipelineRunner delegates to specialized services:
 | Service | Responsibility |
 |---------|---------------|
 | `PreflightService` | Health checks, lock acquisition |
-| `PipelineExecutor` | Data flow orchestration |
+| `BatchExecutor` | Data flow orchestration |
 | `PostrunService` | DQ validation, VACUUM |
-| `LifecycleOrchestrator` | Layer clearing policies |
-
-### Template Method Pattern
-
-`BaseTransformer` implements Template Method for consistent transformation:
-
-```python
-# Fixed algorithm, customizable steps
-async def transform_batch(self, records: list[dict]) -> TransformResult:
-    # 1. Pre-transform hook (overridable)
-    records = await self._pre_transform_hook(records)
-
-    # 2. Transform each record (abstract method)
-    transformed = []
-    for record in records:
-        result = await self._transform_record(record)
-        transformed.append(result)
-
-    # 3. Post-transform hook (overridable)
-    return await self._post_transform_hook(transformed)
-```
-
-## Import Structure
-
-```python
-# Preferred: Import from core package
-from bioetl.application.core import (
-    PipelineRunner,
-    PipelineExecutor,
-    BaseTransformer,
-    PipelineServices,
-)
-
-# Alternative: Import from specific modules
-from bioetl.application.core.runner import PipelineRunner
-from bioetl.application.core.executor import PipelineExecutor
-from bioetl.application.core.base_transformer import BaseTransformer
-```
+| `MedallionLifecycleService` | Layer clearing policies |
 
 ## See Also
 
 - [Core Components](application/core.md) - Detailed core component documentation
+- [Services](application/services.md) - Application services reference
 - [Transformers](application/transformers.md) - Transformer framework
 - [Pipelines](application/pipelines.md) - Provider-specific pipelines
 - [Domain Layer](domain.md) - Port interfaces used by application

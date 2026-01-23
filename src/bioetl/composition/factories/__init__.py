@@ -31,7 +31,7 @@ from bioetl.composition.factories.dq_factory import DQServicesFactory
 from bioetl.composition.factories.pipeline_factories import (
     chembl_activity_factory,
     pubchem_compound_factory,
-    pubmed_publications_factory,
+    pubmed_publication_factory,
     uniprot_protein_factory,
 )
 
@@ -84,7 +84,7 @@ __all__ = [
     "create_transformer",
     "get_transformer_class",
     "pubchem_compound_factory",
-    "pubmed_publications_factory",
+    "pubmed_publication_factory",
     "register_all_transformers",
     "register_transformer",
     "uniprot_protein_factory",

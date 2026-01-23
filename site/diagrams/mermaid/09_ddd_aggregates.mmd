@@ -1,0 +1,209 @@
+%%{init: {'theme':'base', 'themeVariables': { 'fontSize':'14px'}}}%%
+classDiagram
+    %% Aggregate Roots with Boundaries
+    class PipelineRun {
+        <<Aggregate Root - 567 LOC>>
+        -run_id: str [Identity]
+        -pipeline_name: str
+        -provider: str
+        -entity: str
+        -run_type: RunType
+        -state: PipelineState
+        -stages: dict~str,StageResult~
+        -started_at: datetime
+        -completed_at: datetime | None
+        -error: Exception | None
+        -_events: list~DomainEvent~
+
+        +start() void
+        +record_stage_start(stage: str) void
+        +record_stage_success(stage, result) void
+        +record_stage_failure(stage, error) void
+        +complete() void
+        +fail(error: Exception) void
+        +shutdown() void
+        +collect_events() list
+        -_validate_state_transition() void
+        -_emit_event(event) void
+    }
+
+    class Batch {
+        <<Aggregate Root - 537 LOC>>
+        -batch_id: str [Identity]
+        -run_id: str [Foreign Key to PipelineRun]
+        -records: list~BatchRecord~
+        -quarantined_records: list~BatchRecord~
+        -state: BatchState
+        -created_at: datetime
+        -sealed_at: datetime | None
+        -max_size: int
+        -_events: list~DomainEvent~
+
+        +add_record(record: BatchRecord) void
+        +add_records(records: list) void
+        +quarantine_record(record, reason) void
+        +seal() void
+        +mark_writing() void
+        +mark_committed() void
+        +mark_failed(error) void
+        +is_full() bool
+        +is_sealed() bool
+        +get_dq_metrics() DQMetrics
+        +collect_events() list
+        -_enforce_max_size() void
+        -_validate_not_sealed() void
+    }
+
+    class QuarantineEntry {
+        <<Aggregate Root - 518 LOC>>
+        -entry_id: str [Identity]
+        -run_id: str [Foreign Key to PipelineRun]
+        -batch_id: str | None
+        -payload: dict [Immutable]
+        -reason: str
+        -status: QuarantineStatus
+        -created_at: datetime
+        -reviewed_at: datetime | None
+        -resolution: ResolutionInfo | None
+        -metadata: dict
+        -_events: list~DomainEvent~
+
+        +start_review() void
+        +mark_ignored(reason: str) void
+        +mark_reprocessed() void
+        +mark_expired() void
+        +add_metadata(key, value) void
+        +get_payload() dict [Read-only]
+        +collect_events() list
+        -_validate_status_transition() void
+    }
+
+    %% Value Objects (Part of Aggregates)
+    class StageResult {
+        <<Value Object>>
+        +stage: str
+        +status: StageStatus
+        +started_at: datetime
+        +completed_at: datetime
+        +duration_ms: int
+        +error: Exception | None
+        +metrics: dict
+    }
+
+    class BatchRecord {
+        <<Value Object>>
+        +index: int
+        +entity_id: str
+        +content_hash: str [Immutable]
+        +data: dict
+        +metadata: dict
+        +dq_checks: list~DQCheck~
+    }
+
+    class ResolutionInfo {
+        <<Value Object>>
+        +resolution_type: ResolutionType
+        +resolved_by: str
+        +resolved_at: datetime
+        +notes: str | None
+    }
+
+    %% Enums
+    class PipelineState {
+        <<enumeration>>
+        PENDING
+        RUNNING
+        COMPLETED
+        FAILED
+        SHUTDOWN
+    }
+
+    class BatchState {
+        <<enumeration>>
+        OPEN
+        SEALED
+        WRITING
+        COMMITTED
+        FAILED
+    }
+
+    class QuarantineStatus {
+        <<enumeration>>
+        NEW
+        UNDER_REVIEW
+        IGNORED
+        REPROCESSED
+        EXPIRED
+    }
+
+    class StageStatus {
+        <<enumeration>>
+        SUCCESS
+        FAILED
+        SKIPPED
+    }
+
+    %% Domain Events
+    class DomainEvent {
+        <<abstract>>
+        +event_id: str
+        +aggregate_id: str
+        +aggregate_type: str
+        +occurred_at: datetime
+        +event_type: str
+    }
+
+    class PipelineStarted {
+        <<Event>>
+        +run_id: str
+        +pipeline_name: str
+    }
+
+    class StageCompleted {
+        <<Event>>
+        +run_id: str
+        +stage: str
+        +result: StageResult
+    }
+
+    class BatchSealed {
+        <<Event>>
+        +batch_id: str
+        +record_count: int
+    }
+
+    class RecordQuarantined {
+        <<Event>>
+        +entry_id: str
+        +reason: str
+    }
+
+    %% Aggregate Relationships
+    PipelineRun "1" *-- "*" StageResult : contains
+    PipelineRun -- PipelineState : has state
+    PipelineRun ..> PipelineStarted : emits
+    PipelineRun ..> StageCompleted : emits
+
+    Batch "1" *-- "*" BatchRecord : contains
+    Batch -- BatchState : has state
+    Batch ..> BatchSealed : emits
+    Batch -- QuarantineEntry : creates
+
+    QuarantineEntry "1" *-- "0..1" ResolutionInfo : has
+    QuarantineEntry -- QuarantineStatus : has state
+    QuarantineEntry ..> RecordQuarantined : emits
+
+    BatchRecord -- StageStatus : validated with
+
+    %% Event Sourcing
+    DomainEvent <|-- PipelineStarted
+    DomainEvent <|-- StageCompleted
+    DomainEvent <|-- BatchSealed
+    DomainEvent <|-- RecordQuarantined
+
+    %% Invariants
+    note for PipelineRun "INVARIANTS:<br/>- run_id is unique and immutable<br/>- State transitions follow PENDING→RUNNING→COMPLETED/FAILED/SHUTDOWN<br/>- Cannot start twice<br/>- Cannot complete without all stages<br/>- Events collected before state change"
+
+    note for Batch "INVARIANTS:<br/>- batch_id is unique and immutable<br/>- Records immutable after seal()<br/>- Cannot add records after SEALED<br/>- Max size enforced (default 1000)<br/>- State transitions: OPEN→SEALED→WRITING→COMMITTED/FAILED<br/>- All records have unique content_hash"
+
+    note for QuarantineEntry "INVARIANTS:<br/>- entry_id is unique and immutable<br/>- Payload is immutable<br/>- Status transitions: NEW→UNDER_REVIEW→IGNORED/REPROCESSED/EXPIRED<br/>- Cannot change status without resolution<br/>- Created_at is immutable"

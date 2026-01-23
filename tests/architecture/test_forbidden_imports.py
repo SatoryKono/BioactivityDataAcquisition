@@ -66,6 +66,7 @@ class TestObservabilityInitialization:
             r"from.*import.*start_metrics_server",  # Import is allowed
             r"#.*start_metrics_server",  # Comments are allowed
             r"\"\"\".*start_metrics_server",  # Docstrings are allowed
+            r"maybe_start_metrics_server",  # Entrypoint wrapper is allowed
         ]
 
         violations = []
@@ -164,7 +165,7 @@ class TestBootstrapAdapterIsolation:
     """Tests ensuring bootstrap doesn't directly import adapters."""
 
     def test_bootstrap_no_direct_adapter_imports(self, src_dir: Path) -> None:
-        """bootstrap.py MUST NOT import concrete adapters directly.
+        """bootstrap_pipeline MUST NOT import concrete adapters directly.
 
         REQ-ARCH-COMP-001: Composition Root delegates adapter creation to factories.
         Adding a new provider should only require changes in:
@@ -172,10 +173,16 @@ class TestBootstrapAdapterIsolation:
         - factories/data_source_registry.py (DataSourceRegistry)
 
         This prevents tight coupling and ensures the factory pattern is enforced.
+
+        Note: bootstrap_pipeline() is now defined in composition/bootstrap/runtime/pipeline.py
+        as part of the CLI/runtime split (see CLAUDE.md §2.1).
         """
-        bootstrap_file = src_dir / "bioetl" / "composition" / "bootstrap.py"
+        # bootstrap_pipeline is now in composition/bootstrap/runtime/pipeline.py
+        bootstrap_file = (
+            src_dir / "bioetl" / "composition" / "bootstrap" / "runtime" / "pipeline.py"
+        )
         if not bootstrap_file.exists():
-            pytest.skip("bootstrap.py not found")
+            pytest.skip("bootstrap/runtime/pipeline.py not found")
 
         content = bootstrap_file.read_text(encoding="utf-8")
 
@@ -207,7 +214,7 @@ class TestBootstrapAdapterIsolation:
                 violations.append(f"{description}: {matches}")
 
         assert not violations, (
-            "bootstrap.py must not import concrete adapters directly.\n"
+            "bootstrap_pipeline() must not import concrete adapters directly.\n"
             "Use ProviderRegistry and factories "
             "(DataSourceFactory, HttpClientFactory) instead.\n"
             "Violations:\n" + "\n".join(f"  - {v}" for v in violations)

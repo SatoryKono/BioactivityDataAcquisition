@@ -279,10 +279,11 @@ class BronzeWriter:
 
         from bioetl import __version__
         from bioetl.domain.models.metadata import (
+            BaseOutputMetadata,
             BronzeMetadata,
+            BronzeOutputExt,
             EnvironmentMetadata,
             FileOutputMetadata,
-            OutputMetadata,
             PipelineMetadata,
             RuntimeMetadata,
             RunTypeEnum,
@@ -300,6 +301,13 @@ class BronzeWriter:
         if source_metadata is None:
             source_metadata = SourceMetadataModel(type="api")
 
+        # Build file metadata for output_ext
+        file_metadata = FileOutputMetadata(
+            path=output_path,
+            size_bytes=compressed_size,
+            record_count=record_count,
+        )
+
         return BronzeMetadata(
             runtime=RuntimeMetadata(
                 run_id=str(run_id),
@@ -314,16 +322,14 @@ class BronzeWriter:
                 entity=entity,
             ),
             source=source_metadata,
-            output=OutputMetadata(
-                files=[
-                    FileOutputMetadata(
-                        path=output_path,
-                        size_bytes=compressed_size,
-                        record_count=record_count,
-                    )
-                ],
-                total_records=record_count,
+            output=BaseOutputMetadata(
+                record_count=record_count,
                 total_bytes=compressed_size,
+                write_started_at=started_at,
+                write_completed_at=completed_at,
+            ),
+            output_ext=BronzeOutputExt(
+                files=[file_metadata],
             ),
             environment=EnvironmentMetadata(
                 hostname=socket.gethostname(),
@@ -597,8 +603,13 @@ class BronzeWriter:
                         source_metadata=source_metadata,
                     )
 
-                # Write to batch directory (same level as data file)
-                metadata_base_path = full_path.parent
+                # Write to entity directory (not date subdirectory) - unified with Silver
+                # flat_structure=True: base_path already includes provider/entity
+                # flat_structure=False: base_path/{provider}/{entity}/
+                if self._flat_structure:
+                    metadata_base_path = self.base_path
+                else:
+                    metadata_base_path = self.base_path / provider / entity
                 await self._metadata_writer.write_bronze_metadata(
                     base_path=metadata_base_path,
                     metadata=bronze_metadata,

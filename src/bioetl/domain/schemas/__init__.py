@@ -11,6 +11,7 @@ from __future__ import annotations
 from bioetl.domain.schemas.column_order import (
     ALL_SYSTEM_FIELDS,
     DQ_FIELDS_SUFFIX,
+    LOOKUP_FIELDS_PREFIX,
     SYSTEM_FIELDS_PREFIX,
     canonical_column_order,
 )
@@ -18,6 +19,7 @@ from bioetl.domain.schemas.column_order import (
 __all__ = [
     "ALL_SYSTEM_FIELDS",
     "DQ_FIELDS_SUFFIX",
+    "LOOKUP_FIELDS_PREFIX",
     "SYSTEM_FIELDS_PREFIX",
     "canonical_column_order",
 ]
