@@ -52,8 +52,14 @@ class ChemblPublicationSchema(PublicationBaseSchema):
         description="Document type.",
     )
 
+    # === System Fields ===
+    _source: Series[str] = pa.Field(
+        nullable=False,
+        default="chembl",
+        description="Data source identifier.",
+    )
+
     # === Provider-specific Identifiers ===
-    patent_id: Series[str] = pa.Field(nullable=True, description="Patent ID.")
     src_id: Series[int] = pa.Field(nullable=True, description="Source ID.")
 
     # === Provider-specific Journal Fields ===

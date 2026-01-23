@@ -46,7 +46,8 @@ _PUBLICATION_IDS = FieldGroup(
     fields=(
         # Rename pubmed_id -> pmid for cross-provider consistency (PMID standardization)
         FieldSpec("pubmed_id", target="pmid", converter=PMID),
-        *simple_fields("doi", "patent_id"),
+        *simple_fields("doi"),
+        # Note: patent_id excluded - not needed for unified publication schema
     ),
 )
 
@@ -167,8 +168,9 @@ class PublicationTransformer(BaseChemblTransformer):
         validated_year = year_vo.value if year_vo else None
         data["year"] = validated_year
 
-        # Compute unified publication_date from year (ChEMBL only provides year)
-        data["publication_date"] = f"{validated_year}-01-01" if validated_year else None
+        # publication_date: ChEMBL API doesn't provide full date, only year
+        # Set to null rather than computing from year to avoid false precision
+        data["publication_date"] = None
 
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON
@@ -184,6 +186,14 @@ class PublicationTransformer(BaseChemblTransformer):
         # Lookup metadata (direct extraction, no enrichment)
         data["_lookup_method"] = "direct"
         data["_original_id"] = str(primary_id)
+
+        # System field: data source identifier
+        data["_source"] = "chembl"
+
+        # Unified publication fields (ChEMBL API doesn't provide these)
+        data["citation_count"] = None  # Not available from ChEMBL API
+        data["is_oa"] = None  # Not available from ChEMBL API
+        data["language"] = None  # Not available from ChEMBL API
 
         # Cross-reference IDs (ChEMBL API doesn't provide PMC ID)
         data["pmc_id"] = None
