@@ -13,13 +13,13 @@ from __future__ import annotations
 
 import pyarrow as pa
 
-#---------------------------------------------------------
+# ---------------------------------------------------------
 # Schema for ChEMBL Publication (formerly Document)
 # See: https://www.ebi.ac.uk/chembl/api/data/document
 # Column order: SYSTEM_FIELDS_PREFIX, LOOKUP_FIELDS_PREFIX,
 #               PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS,
 #               other fields (alphabetical), DQ_FIELDS_SUFFIX
-#---------------------------------------------------------
+# ---------------------------------------------------------
 CHEMBL_PUBLICATION_SCHEMA = pa.schema(
     [
         # === SYSTEM_FIELDS_PREFIX ===
@@ -63,9 +63,7 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
     ]
 )
 
-#---------------------------------------------------------
-#---------------------------------------------------------
-
+# ---------------------------------------------------------
 # Schema for ChEMBL Activity (all fields from ChEMBL API)
 # See: https://www.ebi.ac.uk/chembl/api/data/activity
 CHEMBL_ACTIVITY_SCHEMA = pa.schema(
