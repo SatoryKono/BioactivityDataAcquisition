@@ -1,0 +1,125 @@
+%%{init: {'theme':'base', 'themeVariables': { 'fontSize':'14px'}}}%%
+flowchart LR
+    subgraph sources["Data Sources"]
+        ChEMBL[(ChEMBL)]
+        PubChem[(PubChem)]
+        UniProt[(UniProt)]
+        CrossRef[(CrossRef)]
+        Others[(OpenAlex<br/>PubMed<br/>SemanticScholar)]
+    end
+
+    subgraph bronze["<b>BRONZE LAYER</b><br/>Raw Data (As-Is)"]
+        direction TB
+
+        BronzeDesc["Format: JSONL + zstd<br/>Storage: Local FileSystem<br/>Retention: 90 days → Archive<br/>Idempotency: Append-only<br/>Path: bronze/v1/{provider}/{entity}/{date}/"]
+
+        BronzeFiles[("files.jsonl.zst<br/>_metadata.yaml")]
+
+        BronzeWriter["BronzeWriter<br/>(400 LOC)"]
+
+        BronzeMetadata["Metadata:<br/>- _run_id<br/>- _run_type<br/>- _ingestion_ts<br/>- _provider<br/>- _entity"]
+    end
+
+    subgraph silver["<b>SILVER LAYER</b><br/>Validated & Deduplicated"]
+        direction TB
+
+        SilverDesc["Format: Delta Lake<br/>Storage: Local Delta Tables<br/>Retention: Permanent<br/>Idempotency: Merge by content_hash<br/>ACID: Required"]
+
+        SilverTable[("Delta Table<br/>Partitioned by date")]
+
+        SilverWriter["SilverWriter<br/>(500 LOC)"]
+
+        SilverOps["Operations:<br/>- MERGE (by content_hash)<br/>- APPEND<br/>- DELETE<br/><br/>Schema: Validated by Pandera"]
+
+        ContentHash["content_hash =<br/>sha256(provider +<br/>canonical_json(record))"]
+    end
+
+    subgraph gold["<b>GOLD LAYER</b><br/>Analytics-Ready"]
+        direction TB
+
+        GoldDesc["Format: Delta Lake (Validated)<br/>Storage: Local Delta Tables<br/>Retention: Permanent<br/>Idempotency: SCD2 or Overwrite<br/>Schema: Strict (Only Scalars)"]
+
+        GoldTable[("Gold Delta Table<br/>Flat Schema")]
+
+        GoldWriter["GoldWriter<br/>(650 LOC)"]
+
+        GoldOps["Operations:<br/>- OVERWRITE (full table)<br/>- APPEND (new data)<br/>- SCD2 (slowly changing)<br/><br/>JSON Fields: Excluded"]
+
+        GoldValidation["Strict Validation:<br/>- No JSON columns<br/>- Only scalar types<br/>- All fields validated<br/>- Pandera strict mode"]
+    end
+
+    subgraph transformations["Transformations"]
+        direction TB
+
+        BronzeToSilver["Bronze → Silver<br/><br/>- Parse JSONL<br/>- Apply BaseTransformer<br/>- Schema validation<br/>- DQ checks<br/>- Calculate content_hash<br/>- Quarantine failures"]
+
+        SilverToGold["Silver → Gold<br/><br/>- Filter JSON fields<br/>- Flatten structure<br/>- Type coercion<br/>- Strict validation<br/>- Analytics schema"]
+    end
+
+    subgraph lifecycle["Medallion Lifecycle"]
+        direction TB
+
+        ClearPolicy["Clear Policy<br/><br/>- NONE<br/>- SILVER_ONLY<br/>- GOLD_ONLY<br/>- ALL"]
+
+        RunType["Run Type:<br/><br/>Incremental: No clear<br/>Backfill: Clear Silver<br/>Rebuild: Clear All"]
+
+        VacuumPolicy["VACUUM Policy<br/><br/>- Weekly schedule<br/>- retention_period = 7d<br/>- Forensic: 30d for critical"]
+    end
+
+    subgraph forensics["Forensic Analysis"]
+        direction TB
+
+        ForensicRetention["7-Day History<br/>Delta Lake Time Travel"]
+
+        ForensicQuery["SELECT * FROM table<br/>VERSION AS OF 123<br/>TIMESTAMP AS OF '2024-01-15'"]
+
+        Audit["Audit Trail:<br/>- _run_id tracking<br/>- _ingestion_ts<br/>- content_hash lineage"]
+    end
+
+    %% Data Flow
+    ChEMBL --> |HTTP API| BronzeWriter
+    PubChem --> |HTTP API| BronzeWriter
+    UniProt --> |HTTP API| BronzeWriter
+    CrossRef --> |HTTP API| BronzeWriter
+    Others --> |HTTP API| BronzeWriter
+
+    BronzeWriter --> BronzeFiles
+    BronzeFiles --> BronzeToSilver
+    BronzeToSilver --> SilverWriter
+
+    SilverWriter --> |Delta Merge| SilverTable
+    SilverWriter --> |content_hash dedup| ContentHash
+
+    SilverTable --> SilverToGold
+    SilverToGold --> GoldWriter
+
+    GoldWriter --> |Strict Validation| GoldValidation
+    GoldValidation --> GoldTable
+
+    %% Lifecycle
+    RunType --> ClearPolicy
+    ClearPolicy --> |Clear layers| SilverTable
+    ClearPolicy --> |Clear layers| GoldTable
+
+    VacuumPolicy --> |Cleanup| SilverTable
+    VacuumPolicy --> |Cleanup| GoldTable
+
+    %% Forensics
+    SilverTable -.-> |Time Travel| ForensicRetention
+    GoldTable -.-> |Time Travel| ForensicRetention
+    ForensicRetention --> ForensicQuery
+    BronzeMetadata --> Audit
+
+    classDef bronzeStyle fill:#d7ccc8,stroke:#5d4037,stroke-width:3px,color:#000
+    classDef silverStyle fill:#cfd8dc,stroke:#455a64,stroke-width:3px,color:#000
+    classDef goldStyle fill:#fff9c4,stroke:#f57f17,stroke-width:3px,color:#000
+    classDef transformStyle fill:#c5cae9,stroke:#3f51b5,stroke-width:2px,color:#000
+    classDef lifecycleStyle fill:#f8bbd0,stroke:#c2185b,stroke-width:2px,color:#000
+    classDef forensicStyle fill:#e1bee7,stroke:#7b1fa2,stroke-width:2px,color:#000
+
+    class bronze,BronzeDesc,BronzeFiles,BronzeWriter,BronzeMetadata bronzeStyle
+    class silver,SilverDesc,SilverTable,SilverWriter,SilverOps,ContentHash silverStyle
+    class gold,GoldDesc,GoldTable,GoldWriter,GoldOps,GoldValidation goldStyle
+    class transformations,BronzeToSilver,SilverToGold transformStyle
+    class lifecycle,ClearPolicy,RunType,VacuumPolicy lifecycleStyle
+    class forensics,ForensicRetention,ForensicQuery,Audit forensicStyle

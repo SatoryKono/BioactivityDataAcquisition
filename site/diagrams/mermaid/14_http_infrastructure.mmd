@@ -1,0 +1,164 @@
+%%{init: {'theme':'base', 'themeVariables': { 'fontSize':'13px'}}}%%
+graph TB
+    subgraph unified["UnifiedHTTPClient"]
+        direction TB
+
+        Client["UnifiedHTTPClient<br/>(httpx.AsyncClient wrapper)"]
+        Request["async request(method, url, **kwargs)"]
+        Get["async get(url, **kwargs)"]
+        Post["async post(url, **kwargs)"]
+    end
+
+    subgraph rate_limiter["Rate Limiter"]
+        direction TB
+
+        RateLimiterClass["RateLimiter<br/>(Token Bucket Algorithm)"]
+        Acquire["async acquire(tokens=1)"]
+        TokenBucket["Token Bucket:<br/>- capacity: int<br/>- tokens: float<br/>- refill_rate: float"]
+
+        RateLimiterClass --> Acquire
+        Acquire --> TokenBucket
+    end
+
+    subgraph circuit_breaker["Circuit Breaker"]
+        direction TB
+
+        CBClass["CircuitBreaker<br/>(Fault Tolerance)"]
+        States["States:<br/>CLOSED → OPEN → HALF_OPEN"]
+        Config["Config:<br/>- failure_threshold: 5<br/>- timeout: 300s<br/>- probe_count: 1"]
+
+        CBClass --> States
+        States --> Config
+    end
+
+    subgraph health_monitor["Health Monitor"]
+        direction TB
+
+        HealthMonitorClass["HealthMonitor"]
+        ProviderHealth["check_provider_health(provider)"]
+        Probes["Health Probes:<br/>- ChEMBL: /status.json<br/>- PubChem: lightweight query<br/>- UniProt: search probe<br/>- CrossRef: /works<br/>- PubMed: EInfo"]
+
+        HealthMonitorClass --> ProviderHealth
+        ProviderHealth --> Probes
+    end
+
+    subgraph pagination["Pagination"]
+        direction TB
+
+        PaginationClass["Pagination Handler"]
+        OffsetBased["Offset-Based<br/>(limit, offset)"]
+        CursorBased["Cursor-Based<br/>(next_cursor)"]
+        PageBased["Page-Based<br/>(page, per_page)"]
+
+        PaginationClass --> OffsetBased
+        PaginationClass --> CursorBased
+        PaginationClass --> PageBased
+    end
+
+    subgraph request_flow["HTTP Request Flow"]
+        direction TB
+
+        Start([Request Start])
+        RateLimit{Rate Limit<br/>Available?}
+        Wait["Wait for Token"]
+        CBCheck{Circuit<br/>Breaker<br/>Closed?}
+        CBOpen["Return Error:<br/>Circuit Open"]
+
+        SendRequest["Send HTTP Request"]
+        Response{Response<br/>Status}
+
+        Success["200 OK<br/>Return Response"]
+        RateLimitResp["429 Rate Limit<br/>Backoff & Retry"]
+        ServerError["5xx Server Error<br/>Retry Logic"]
+        ClientError["4xx Client Error<br/>Log & Raise"]
+
+        Start --> RateLimit
+        RateLimit -->|No| Wait
+        RateLimit -->|Yes| CBCheck
+        Wait --> CBCheck
+
+        CBCheck -->|Open| CBOpen
+        CBCheck -->|Closed| SendRequest
+
+        SendRequest --> Response
+        Response -->|2xx| Success
+        Response -->|429| RateLimitResp
+        Response -->|5xx| ServerError
+        Response -->|4xx| ClientError
+
+        RateLimitResp --> Wait
+        ServerError --> RetryLogic
+    end
+
+    subgraph retry_logic["Retry Logic"]
+        direction TB
+
+        RetryLogic{Retry Count<br/>< 3?}
+        Backoff["Exponential Backoff<br/>delay = 2^n * base"]
+        Jitter["Add Jitter<br/>random(0.1, 0.5)s"]
+        RetryRequest["Retry Request"]
+        RecordFailure["Record Failure<br/>Circuit Breaker"]
+
+        RetryLogic -->|Yes| Backoff
+        Backoff --> Jitter
+        Jitter --> RetryRequest
+        RetryRequest --> SendRequest
+
+        RetryLogic -->|No| RecordFailure
+        RecordFailure --> CBCheck
+    end
+
+    subgraph base_adapter["BaseHttpAdapter"]
+        direction TB
+
+        BaseClass["BaseHttpAdapter<br/>(Abstract Base)"]
+        HTTPClient["_http_client: UnifiedHTTPClient"]
+        RateLimiterField["_rate_limiter: RateLimiter"]
+        CBField["_circuit_breaker: CircuitBreaker"]
+
+        HealthCheck["async health_check() → HealthStatus"]
+        FetchMethod["async fetch(url, **kwargs) → Response"]
+
+        BaseClass --> HTTPClient
+        BaseClass --> RateLimiterField
+        BaseClass --> CBField
+        BaseClass --> HealthCheck
+        BaseClass --> FetchMethod
+    end
+
+    subgraph provider_limits["Provider Rate Limits"]
+        direction TB
+
+        ChEMBL["ChEMBL: None"]
+        PubChem["PubChem: 5 req/sec"]
+        UniProt["UniProt: 100 req/sec with API key"]
+        CrossRef["CrossRef: Polite pool"]
+        OpenAlex["OpenAlex: 10 req/sec"]
+        PubMed["PubMed: 3 req/sec"]
+        SemanticScholar["SemanticScholar: 100 req/5min"]
+    end
+
+    %% Connections
+    Client --> RateLimiterClass
+    Client --> CBClass
+    Client --> request_flow
+
+    BaseClass -.->|Uses| Client
+    BaseClass -.->|Uses| RateLimiterClass
+    BaseClass -.->|Uses| CBClass
+
+    HealthMonitorClass -.->|Uses| Client
+
+    RateLimiterClass -.->|Configured for| provider_limits
+
+    classDef clientStyle fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef rateLimitStyle fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef cbStyle fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef healthStyle fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef flowStyle fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+
+    class unified,Client,Request,Get,Post clientStyle
+    class rate_limiter,RateLimiterClass,Acquire,TokenBucket rateLimitStyle
+    class circuit_breaker,CBClass,States,Config cbStyle
+    class health_monitor,HealthMonitorClass,ProviderHealth,Probes healthStyle
+    class request_flow,retry_logic,Start,SendRequest,Response,RetryLogic flowStyle

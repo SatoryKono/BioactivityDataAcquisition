@@ -1,0 +1,35 @@
+%%{init: {'theme': 'base'}}%%
+sequenceDiagram
+    title Pipeline Execution Sequence
+
+    actor User
+    participant CLI
+    participant bootstrap as bootstrap.py
+    participant Factory as GenericPipelineFactory
+    participant Registry as DataSourceRegistry
+    participant Storage as StorageFactory
+    participant Orchestrator as Pipeline Orchestrator
+    participant Extractor
+    participant Transformer
+    participant Loader
+    participant Lake as Data Lake
+
+    User->>CLI: bioetl run --pipeline chembl_activity
+    CLI->>bootstrap: bootstrap_pipeline("chembl_activity")
+    bootstrap->>Factory: create_with_services()
+    Factory->>Registry: get_creator("chembl")
+    Factory->>Storage: create()
+    Factory-->>CLI: Pipeline instance created
+
+    CLI->>Orchestrator: start_pipeline(pipeline_instance)
+
+    Orchestrator->>Extractor: run()
+    Extractor->>Lake: write to Bronze
+    Orchestrator->>Transformer: run()
+    Transformer->>Lake: read from Bronze
+    Transformer->>Lake: write to Silver
+    Orchestrator->>Loader: run()
+    Loader->>Lake: read from Silver
+    Loader->>Lake: write to Gold
+
+    Orchestrator-->>User: Pipeline finished

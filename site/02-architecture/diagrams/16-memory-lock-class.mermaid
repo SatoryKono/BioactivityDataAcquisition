@@ -1,0 +1,103 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+classDiagram
+    direction TB
+
+    class LockPort {
+        <<Protocol>>
+        +acquire(key: str, owner_id: str, ttl: int, wait: bool, timeout: int, exclusive: bool) bool
+        +release(key: str, owner_id: str, exclusive: bool) bool
+        +heartbeat(key: str, owner_id: str, exclusive: bool) bool
+        +validate_owner(key: str, owner_id: str) bool
+        +aclose() None
+    }
+
+    class MemoryLock {
+        -_locks: dict~str, LockEntry~
+        -_lock: asyncio.Lock
+        -_ttl_check_interval: float = 1.0
+        -_ttl_task: asyncio.Task | None
+        -_running: bool = True
+
+        +acquire(key: str, owner_id: str, ttl: int = 90, wait: bool = False, timeout: int = 300, exclusive: bool = False) bool
+        +release(key: str, owner_id: str, exclusive: bool = False) bool
+        +heartbeat(key: str, owner_id: str, exclusive: bool = False) bool
+        +validate_owner(key: str, owner_id: str) bool
+        +aclose() None
+
+        -_start_ttl_checker() None
+        -_ttl_checker_loop() None
+        -_cleanup_expired() None
+        -_is_expired(entry: LockEntry) bool
+        -_wait_for_lock(key: str, timeout: int) bool
+    }
+
+    class LockEntry {
+        <<dataclass>>
+        +owner_id: str
+        +lock: asyncio.Lock
+        +expires_at: float
+        +original_ttl: int
+        +exclusive: bool = False
+    }
+
+    class LockResult {
+        <<dataclass>>
+        +acquired: bool
+        +owner_id: str
+        +key: str
+        +ttl: int
+        +message: str | None
+    }
+
+    class LockNotHeldError {
+        <<Exception>>
+        +key: str
+        +expected_owner: str
+        +actual_owner: str | None
+        +message: str
+    }
+
+    class LockManager {
+        -_lock: LockPort
+        -_logger: LoggerPort
+        -_ttl: int = 90
+        -_heartbeat_interval: int = 30
+        -_wait_for_lock: bool = False
+        -_wait_timeout: int = 300
+        -_heartbeat_task: asyncio.Task | None
+
+        +acquire_lock(resource: str, owner_id: str) LockResult
+        +release_lock(resource: str, owner_id: str) bool
+        +refresh_lock(resource: str, owner_id: str) bool
+        +start_heartbeat(resource: str, owner_id: str) None
+        +stop_heartbeat() None
+
+        -_heartbeat_loop(resource: str, owner_id: str) None
+        -_build_lock_key(resource: str) str
+    }
+
+    class BackfillLock {
+        -_lock: LockPort
+        -_run_type: RunType
+        -_logger: LoggerPort
+
+        +acquire_exclusive(resource: str, owner_id: str, wait_timeout: int) bool
+        +release_exclusive(resource: str, owner_id: str) bool
+
+        +get_lock_key(provider: str, entity: str, run_type: RunType)$ str
+    }
+
+    %% Relationships
+    LockPort <|.. MemoryLock : implements
+    MemoryLock --> LockEntry : stores
+    MemoryLock ..> LockNotHeldError : throws
+
+    LockManager --> LockPort : uses
+    LockManager --> LockResult : returns
+    BackfillLock --> LockPort : uses
+
+    note for MemoryLock "Local-Only Architecture\n━━━━━━━━━━━━━━━━━━━━━━\nDesigned for single-process execution.\nNO Redis dependency required.\n\nKey Features:\n• TTL-based auto-expiration\n• Heartbeat refresh support\n• Ownership validation (Safety Guard)\n• Async-safe operations\n\nDefault Parameters:\n• TTL: 90 seconds\n• TTL check interval: 1 second\n• Heartbeat: 30 seconds"
+
+    note for LockManager "Orchestration Layer\n━━━━━━━━━━━━━━━━━━━━━━\nWraps LockPort with:\n• Automatic heartbeat management\n• Lock key construction\n• Logging integration\n\nKey Format:\nlock:{provider}_{entity}\nlock:{provider}_{entity}:exclusive"
+
+    note for BackfillLock "Exclusive Locking\n━━━━━━━━━━━━━━━━━━━━━━\nUsed for BACKFILL/REBUILD runs.\nPrevents concurrent modifications.\n\nLock Key Suffix: :exclusive"
