@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import pyarrow as pa
 
-
 #---------------------------------------------------------
 # Schema for ChEMBL Publication (formerly Document)
 # See: https://www.ebi.ac.uk/chembl/api/data/document
@@ -26,6 +25,7 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
+        pa.field("_source", pa.string()),  # Data source identifier: "chembl"
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # Lookup metadata
@@ -34,31 +34,28 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
         # === Business fields (alphabetical order) ===
-        # Publication Metadata
-        pa.field("authors", pa.string()),  #
-        pa.field("title", pa.string()),  #
-        pa.field("year", pa.int64()),  #
-        pa.field("journal", pa.string()),  #
-        pa.field("volume", pa.string()),  #
-        pa.field("issue", pa.string()),  #
-        pa.field("first_page", pa.string()),  #
-        pa.field("last_page", pa.string()),  #
-        pa.field("language", pa.string()),  #
-        # CROSSREF
-        pa.field("document_chembl_id", pa.string()),
-        # Cross-reference IDs for linking publications across providers
+        pa.field("abstract", pa.string()),
+        pa.field("authors", pa.string()),  # JSON array of hashed author names
+        pa.field("citation_count", pa.int64()),  # Unified field, null for ChEMBL
+        pa.field("doc_type", pa.string()),  # PUBLICATION, PATENT, DATASET, BOOK
+        pa.field("document_chembl_id", pa.string()),  # Primary key
         pa.field("doi", pa.string()),
-        # pmc_id: PubMed Central ID (format: "PMC1234567") - nullable, may not exist for all publications
+        pa.field("first_page", pa.string()),
+        pa.field("is_oa", pa.bool_()),  # Unified field, null for ChEMBL
+        pa.field("issue", pa.string()),
+        pa.field("journal", pa.string()),
+        pa.field("journal_full_title", pa.string()),
+        pa.field("language", pa.string()),  # Unified field, null for ChEMBL
+        pa.field("last_page", pa.string()),
+        # pmc_id: PubMed Central ID (format: "PMC1234567") - unified, null for ChEMBL
         pa.field("pmc_id", pa.string()),
         # pmid: PubMed ID (numeric string: "12345678")
         pa.field("pmid", pa.string()),
-
-        pa.field("journal_full_title", pa.string()),
-        pa.field("abstract", pa.string()),
-
-        pa.field("doc_type", pa.string()),
-        pa.field("chembl_release", pa.string()),
+        pa.field("publication_date", pa.string()),  # YYYY-MM-DD computed from year
         pa.field("src_id", pa.int64()),
+        pa.field("title", pa.string()),
+        pa.field("volume", pa.string()),
+        pa.field("year", pa.int64()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
         pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
