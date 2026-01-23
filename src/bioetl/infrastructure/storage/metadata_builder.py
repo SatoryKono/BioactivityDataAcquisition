@@ -277,8 +277,21 @@ class SilverMetadataBuilder:
             error_rate=0.0,
         )
 
+        output_ext = {
+            "silver": {
+                "content_hash": None,
+                "delta": {
+                    "table_path": table_path,
+                    "operation": "overwrite",
+                    "version_after": version_after,
+                },
+            }
+        }
+
         output = SilverOutputMetadata(
             record_count=len(records),
+            format="delta",
+            output_ext=output_ext,
         )
 
         environment = EnvironmentMetadata(
@@ -385,8 +398,16 @@ class GoldMetadataBuilder:
             valid_records=len(records),
         )
 
+        output_ext_gold: dict[str, Any] = {
+            "partition_count": 0,
+            "total_bytes": None,
+            "format": "delta",
+        }
+
         output = GoldOutputMetadata(
             record_count=len(records),
+            format="delta",
+            output_ext={"gold": output_ext_gold},
         )
 
         scd = None
@@ -397,6 +418,13 @@ class GoldMetadataBuilder:
                 end_date_column=scd_config.get("valid_to_col", "_valid_to"),
                 current_flag_column=scd_config.get("current_flag_col", "_is_current"),
             )
+
+            output_ext_gold["scd"] = {
+                "enabled": True,
+                "new_versions_created": 0,
+                "records_expired": 0,
+            }
+            output.output_ext = {"gold": output_ext_gold}
 
         environment = EnvironmentMetadata(
             hostname=hostname(),
@@ -489,8 +517,16 @@ class GoldMetadataBuilder:
             error_rate=0.0,
         )
 
+        output_ext_gold = {
+            "partition_count": 0,
+            "total_bytes": None,
+            "format": "delta",
+        }
+
         output = GoldOutputMetadata(
             record_count=len(records),
+            format="delta",
+            output_ext={"gold": output_ext_gold},
         )
 
         environment = EnvironmentMetadata(

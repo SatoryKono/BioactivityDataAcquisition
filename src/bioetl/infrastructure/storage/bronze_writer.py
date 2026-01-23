@@ -300,6 +300,14 @@ class BronzeWriter:
         if source_metadata is None:
             source_metadata = SourceMetadataModel(type="api")
 
+        files_list = [
+            FileOutputMetadata(
+                path=output_path,
+                size_bytes=compressed_size,
+                record_count=record_count,
+            )
+        ]
+
         return BronzeMetadata(
             runtime=RuntimeMetadata(
                 run_id=str(run_id),
@@ -315,15 +323,18 @@ class BronzeWriter:
             ),
             source=source_metadata,
             output=OutputMetadata(
-                files=[
-                    FileOutputMetadata(
-                        path=output_path,
-                        size_bytes=compressed_size,
-                        record_count=record_count,
-                    )
-                ],
+                files=files_list,
                 total_records=record_count,
                 total_bytes=compressed_size,
+                # New Base Contract fields
+                record_count=record_count,
+                format="jsonl+zstd",
+                output_ext={
+                    "bronze": {
+                        "files": [f.model_dump() for f in files_list],
+                        "compression": "zstd",
+                    }
+                },
             ),
             environment=EnvironmentMetadata(
                 hostname=socket.gethostname(),

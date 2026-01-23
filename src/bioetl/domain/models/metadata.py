@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -322,6 +322,24 @@ class SourceMetadata(BaseModel):
     )
 
 
+class OutputBaseMetadata(BaseModel):
+    """Base contract for output metadata across all layers.
+
+    Standardizes key metrics for downstream analytics and monitoring.
+    """
+
+    record_count: int = Field(default=0, description="Number of records on output")
+    total_bytes: int | None = Field(
+        default=None, description="Total size in bytes (if available)"
+    )
+    format: str | None = Field(
+        default=None, description="Output format (e.g. jsonl+zstd, delta, parquet)"
+    )
+    output_ext: dict[str, Any] | None = Field(
+        default=None, description="Layer-specific output extension"
+    )
+
+
 class FileOutputMetadata(BaseModel):
     """Individual file output information.
 
@@ -338,7 +356,7 @@ class FileOutputMetadata(BaseModel):
     checksum_blake2: str | None = Field(default=None, description="BLAKE2 checksum")
 
 
-class OutputMetadata(BaseModel):
+class OutputMetadata(OutputBaseMetadata):
     """Bronze output information.
 
     Attributes:
@@ -353,6 +371,7 @@ class OutputMetadata(BaseModel):
         default_factory=list, description="Output files"
     )
     total_records: int = Field(default=0, description="Total records")
+    # total_bytes and format are inherited from OutputBaseMetadata but redefined here with defaults
     total_bytes: int = Field(default=0, description="Total bytes")
     format: str = Field(default="jsonl+zstd", description="Output format")
     compression: str = Field(default="zstd", description="Compression algorithm")
@@ -561,7 +580,7 @@ class SCDMetadata(BaseModel):
     records_expired: int = Field(default=0, description="Records expired")
 
 
-class GoldOutputMetadata(BaseModel):
+class GoldOutputMetadata(OutputBaseMetadata):
     """Gold layer output metrics.
 
     Attributes:
@@ -571,15 +590,15 @@ class GoldOutputMetadata(BaseModel):
         format: Output format (delta or parquet).
     """
 
-    record_count: int = Field(default=0, description="Record count")
+    # record_count is inherited
     partition_count: int = Field(default=0, description="Partition count")
-    total_bytes: int = Field(default=0, description="Total bytes")
+    total_bytes: int | None = Field(default=None, description="Total bytes")
     format: Literal["delta", "parquet"] = Field(
         default="delta", description="Output format"
     )
 
 
-class SilverOutputMetadata(BaseModel):
+class SilverOutputMetadata(OutputBaseMetadata):
     """Silver layer output metrics.
 
     Attributes:
@@ -587,7 +606,7 @@ class SilverOutputMetadata(BaseModel):
         content_hash: SHA256 hash of content for change detection.
     """
 
-    record_count: int = Field(default=0, description="Record count")
+    # record_count is inherited
     content_hash: str | None = Field(
         default=None, description="Content hash for change detection"
     )

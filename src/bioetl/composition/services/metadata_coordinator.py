@@ -192,6 +192,14 @@ class MetadataCoordinator:
                 query_string=input_data.query_string,
             )
 
+        files_list = [
+            FileOutputMetadata(
+                path=input_data.output_path,
+                size_bytes=input_data.compressed_size,
+                record_count=input_data.record_count,
+            )
+        ]
+
         return BronzeMetadata(
             runtime=self._build_runtime_metadata(
                 started_at=input_data.started_at,
@@ -201,15 +209,18 @@ class MetadataCoordinator:
             pipeline=self._build_pipeline_metadata(),
             source=source,
             output=OutputMetadata(
-                files=[
-                    FileOutputMetadata(
-                        path=input_data.output_path,
-                        size_bytes=input_data.compressed_size,
-                        record_count=input_data.record_count,
-                    )
-                ],
+                files=files_list,
                 total_records=input_data.record_count,
                 total_bytes=input_data.compressed_size,
+                # New Base Contract fields
+                record_count=input_data.record_count,
+                format="jsonl+zstd",
+                output_ext={
+                    "bronze": {
+                        "files": [f.model_dump() for f in files_list],
+                        "compression": "zstd",
+                    }
+                },
             ),
             environment=self._get_environment_metadata(),
             governance=input_data.governance,
@@ -284,7 +295,24 @@ class MetadataCoordinator:
             if input_data.dq_metrics
             else DQSummary(total_records=rec_count, valid_records=rec_count)
         )
-        output = SilverOutputMetadata(record_count=rec_count)
+
+        # Prepare output_ext for Silver
+        output_ext = {
+            "silver": {
+                "content_hash": None,
+                "delta": {
+                    "table_path": input_data.table_path,
+                    "operation": operation_map[input_data.mode],
+                    "version_after": input_data.version_after,
+                },
+            }
+        }
+
+        output = SilverOutputMetadata(
+            record_count=rec_count,
+            format="delta",
+            output_ext=output_ext,
+        )
         # Calculate duration if both timestamps provided
         duration_seconds = (
             (input_data.completed_at - input_data.started_at).total_seconds()
@@ -431,8 +459,16 @@ class MetadataCoordinator:
         )
 
         # Build output metrics
+        output_ext_gold: dict[str, Any] = {
+            "partition_count": 0,  # Not tracked in input
+            "total_bytes": None,  # Not tracked in input
+            "format": "delta",
+        }
+
         output = GoldOutputMetadata(
             record_count=len(input_data.records),
+            format="delta",
+            output_ext={"gold": output_ext_gold},
         )
 
         # Build SCD metadata if applicable
@@ -448,6 +484,15 @@ class MetadataCoordinator:
                     "current_flag_col", "_is_current"
                 ),
             )
+
+            # Add SCD stats to output_ext if available
+            output_ext_gold["scd"] = {
+                "enabled": True,
+                "new_versions_created": 0,  # Placeholder until tracked
+                "records_expired": 0,  # Placeholder until tracked
+            }
+            # Update output_ext with SCD info
+            output.output_ext = {"gold": output_ext_gold}
 
         # Extract schema metadata from Gold schema (contract_path, version, columns)
         schema_info = self._extract_schema_metadata(input_data.gold_schema)
