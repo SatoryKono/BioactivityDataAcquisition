@@ -6,6 +6,7 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal
 
+from bioetl.application.composite.deduplication import EnricherDeduplicator
 from bioetl.domain.composite.result import EnrichmentResult, MergeResult
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
@@ -66,6 +67,7 @@ class MergeService:
         self._storage = storage
         self._logger = logger
         self._delta_reader = delta_reader
+        self._deduplicator = EnricherDeduplicator(logger)
 
     async def merge(
         self,
@@ -703,6 +705,13 @@ class MergeService:
             enricher_df = enricher_dfs[enricher.pipeline]
             join_keys = set(enricher.join_keys)
             join_keys_list = list(join_keys)
+
+            # Deduplicate enricher before join to prevent fan-out
+            enricher_df = self._deduplicator.deduplicate(
+                enricher_df=enricher_df,
+                join_keys=join_keys_list,
+                enricher_name=enricher.pipeline,
+            )
 
             # Normalize join key columns for case-insensitive matching
             # This ensures DOIs like "10.1038/NATURE" match "10.1038/nature"
