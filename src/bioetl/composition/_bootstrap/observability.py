@@ -13,13 +13,13 @@ Unified Observability Contract:
 
 from __future__ import annotations
 
-import contextlib
 from typing import TYPE_CHECKING
-from uuid import UUID
+from uuid import UUID, uuid4
 
+from bioetl.application.services.metrics_service import MetricsService
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.exceptions import MetricsServerError
-from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
+from bioetl.domain.ports import DQMonitorPort, LoggerPort, MetricsPort, TracingPort
 from bioetl.infrastructure.observability import (
     NoOpMetrics,
     NoOpTracing,
@@ -28,10 +28,13 @@ from bioetl.infrastructure.observability import (
     UnifiedLogger,
     start_metrics_server,
 )
+from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
+from bioetl.infrastructure.observability.metrics_server_adapter import (
+    MetricsServerAdapter,
+)
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
-    from bioetl.application.services.metrics_service import MetricsService
-    from bioetl.domain.ports import DQMonitorPort
     from bioetl.infrastructure.config import Settings
 
 __all__ = [
@@ -42,6 +45,7 @@ __all__ = [
     "bootstrap_metrics_service",
     "bootstrap_observability",
     "bootstrap_tracer",
+    "maybe_start_metrics_server",
     "start_metrics_server",
     "validate_observability_preflight",
 ]
@@ -111,8 +115,6 @@ def bootstrap_logger(
     Returns:
         UnifiedLogger implementing LoggerPort with Log Schema enforcement.
     """
-    from uuid import uuid4
-
     effective_run_id = run_id if run_id is not None else uuid4()
     return UnifiedLogger(
         pipeline=pipeline,
@@ -128,9 +130,8 @@ def bootstrap_tracer(
 ) -> TracingPort:
     """Bootstrap distributed tracing.
 
-    Unified Observability Contract: Always returns a valid TracingPort.
-    When tracing is disabled or OpenTelemetry is not installed,
-    returns NoOpTracing (silent fallback).
+    When tracing is disabled, returns NoOpTracing.
+    When tracing is enabled, returns OpenTelemetryTracer.
 
     Args:
         settings: Application settings (MUST be injected, not loaded globally).
@@ -138,25 +139,25 @@ def bootstrap_tracer(
 
     Returns:
         TracingPort instance (OpenTelemetryTracer or NoOpTracing).
-        Never returns None - uses NoOpTracing as fallback.
+
+    Raises:
+        ImportError: If tracing is enabled but OpenTelemetry is not installed.
     """
     if settings.observability.tracing_enabled:
-        try:
-            return OpenTelemetryTracer(service_name=service_name)
-        except ImportError:
-            # OpenTelemetry not installed, fall back to no-op
-            pass
+        return OpenTelemetryTracer(service_name=service_name)
     return NoOpTracing()
 
 
 def bootstrap_metrics(settings: Settings) -> MetricsPort:
-    """Bootstrap metrics with optional server start.
+    """Bootstrap metrics collector.
 
     Unified Observability Contract: Always returns a valid MetricsPort.
     When metrics are disabled, returns NoOpMetrics (silent fallback).
 
-    Server is started only if explicitly enabled in settings.
-    Supports fail_fast mode for strict startup validation.
+    Note:
+        This function only creates the metrics collector.
+        Server startup is handled separately by entrypoints via
+        maybe_start_metrics_server() to keep bootstrap side-effect free.
 
     Args:
         settings: Application settings.
@@ -164,38 +165,46 @@ def bootstrap_metrics(settings: Settings) -> MetricsPort:
     Returns:
         MetricsPort instance (PrometheusMetrics or NoOpMetrics).
         Never returns None - uses NoOpMetrics as fallback.
-
-    Raises:
-        MetricsServerError: If fail_fast=True and server fails to start.
     """
     if not settings.observability.metrics_enabled:
         # Silent fallback - no warning since explicitly disabled
         return NoOpMetrics(warn_on_use=False)
 
-    metrics = PrometheusMetrics()
+    return PrometheusMetrics()
 
-    if settings.observability.metrics_server_enabled:
-        obs = settings.observability
 
-        if obs.metrics_fail_fast:
-            # In fail_fast mode, let MetricsServerError propagate
-            start_metrics_server(
-                port=settings.metrics_port,
-                fail_fast=True,
-                retry_count=obs.metrics_retry_count,
-                retry_delay=obs.metrics_retry_delay,
-            )
-        else:
-            # Lenient mode: log but don't fail - metrics collection still works
-            with contextlib.suppress(Exception):
-                start_metrics_server(
-                    port=settings.metrics_port,
-                    fail_fast=False,
-                    retry_count=obs.metrics_retry_count,
-                    retry_delay=obs.metrics_retry_delay,
-                )
+def maybe_start_metrics_server(settings: Settings) -> bool:
+    """Start metrics server if enabled in settings.
 
-    return metrics
+    This function should be called by entrypoints (CLI, REST API) after
+    bootstrap to start the Prometheus HTTP server. Separating server
+    startup from bootstrap keeps the composition layer side-effect free.
+
+    Args:
+        settings: Application settings.
+
+    Returns:
+        True if server was started or already running, False if disabled
+        or failed to start.
+
+    Raises:
+        MetricsServerError: If fail_fast=True and server fails to start.
+    """
+    if not settings.observability.metrics_enabled:
+        return False
+
+    if not settings.observability.metrics_server_enabled:
+        return False
+
+    obs = settings.observability
+
+    # Start metrics server - let exceptions propagate to entrypoints
+    return start_metrics_server(
+        port=settings.metrics_port,
+        fail_fast=obs.metrics_fail_fast,
+        retry_count=obs.metrics_retry_count,
+        retry_delay=obs.metrics_retry_delay,
+    )
 
 
 def bootstrap_dq_monitor(
@@ -217,9 +226,6 @@ def bootstrap_dq_monitor(
 
     if not obs_settings.dq_monitor_enabled:
         return None
-
-    from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
-    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
     effective_logger = logger if logger is not None else NoOpLogger()
 
@@ -325,12 +331,6 @@ def bootstrap_metrics_service() -> MetricsService:
         >>> result = service.start(port=8000)
         >>> # result.success is True if server started
     """
-    from bioetl.application.services.metrics_service import MetricsService
-    from bioetl.infrastructure.observability.metrics_server_adapter import (
-        MetricsServerAdapter,
-    )
-    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-
     logger = NoOpLogger()
     server = MetricsServerAdapter(logger=logger)
 

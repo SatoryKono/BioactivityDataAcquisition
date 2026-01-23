@@ -1,0 +1,36 @@
+# configs/filter/entities/pubmed/publication.yaml
+# =============================================================================
+# PubMed Publication Filter Configuration
+# =============================================================================
+# Entity-specific filter rules for PubMed publication data.
+# Reference: ADR-028 (Filter Rules Externalization)
+
+version: "1.0.0"
+provider: pubmed
+entity: publication
+
+# -----------------------------------------------------------------------------
+# Input Filter
+# -----------------------------------------------------------------------------
+# Filter publications by PMID from CSV
+# Supports fallback to title search if PMID not found
+input_filter:
+  enabled: true
+  source_path: "data/input/pubmed.csv"
+  column_name: "pubmed_id"
+  filter_field: "pmid"
+  batch_size: 100
+  fallback_column: "title"  # Search by title if PMID not found or empty
+
+# -----------------------------------------------------------------------------
+# Gold Filters
+# -----------------------------------------------------------------------------
+# Criteria for valid publications
+gold_filters:
+  # Required fields
+  required_fields:
+    - pmid
+    - title
+
+  # Empty columns filter (use defaults)
+  columns: {}

@@ -77,7 +77,7 @@ def test_registry_contains_expected_pipelines():
         "chembl_activity",
         "pubchem_compound",
         "uniprot_protein",
-        "pubmed_publications",
+        "pubmed_publication",
     ]
     registered = registry.list_pipelines()
 

@@ -9,8 +9,8 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-# Import from contracts package (canonical location in interfaces layer)
-from bioetl.interfaces.contracts import (
+# Import from contracts package (canonical location in domain layer)
+from bioetl.domain.contracts import (
     ChEMBLDocumentGoldSchema,
     CrossRefPublicationGoldSchema,
     OpenAlexPublicationGoldSchema,
@@ -366,7 +366,7 @@ class TestGoldSchemaValidation:
             "pmid": "12345678",
             "pmc_id": "PMC1234567",
             "doi": "10.1234/test",
-            "patent_id": None,
+            # patent_id excluded from unified publication schema
             "title": "Test Publication",
             "authors": '["Author One"]',
             "abstract": "Test abstract",
@@ -380,8 +380,13 @@ class TestGoldSchemaValidation:
             "first_page": "100",
             "last_page": "110",
             "src_id": 1,
+            # Unified publication fields (ChEMBL doesn't provide these)
+            "citation_count": None,
+            "is_oa": False,  # Use False for nullable bool compatibility
+            "language": None,
             "_lookup_method": "direct",
             "_original_id": "CHEMBL12345",
+            "_source": "chembl",
             "_dq_warn": False,
             "_dq_error": False,
             "_run_id": "run-001",

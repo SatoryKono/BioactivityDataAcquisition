@@ -37,7 +37,7 @@ SNAPSHOT_FILE = SNAPSHOT_DIR / "pipeline_configs.json"
 PIPELINES = [
     "chembl_activity",
     "pubchem_compound",
-    "pubmed_publications",
+    "pubmed_publication",
     "uniprot_protein",
 ]
 

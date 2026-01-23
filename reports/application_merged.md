@@ -68,6 +68,7 @@ from bioetl.domain.composite.result import (
     EnrichmentStatus,
     SeedResult,
 )
+from bioetl.domain.composite.state import CompositePipelineState
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -78,6 +79,7 @@ class CompositeCheckpointState:
     """Immutable checkpoint state for composite pipeline.
 
     Tracks progress through composite execution phases:
+    - FSM state (current phase of execution)
     - Seed completion
     - Individual enricher completions
     - Any intermediate state needed for resume
@@ -85,6 +87,7 @@ class CompositeCheckpointState:
     Attributes:
         composite_name: Name of the composite pipeline.
         run_id: Composite run ID.
+        state: Current FSM state of the pipeline.
         seed_completed: Whether seed pipeline completed.
         seed_result: Result from seed if completed.
         completed_enrichers: Set of completed enricher names.
@@ -97,15 +100,20 @@ class CompositeCheckpointState:
         ...     composite_name="composite_publication",
         ...     run_id="abc-123",
         ... )
+        >>> state.state
+        <CompositePipelineState.NOT_STARTED: 'NOT_STARTED'>
         >>> state.seed_completed
         False
         >>> new_state = state.with_seed_completed(seed_result)
         >>> new_state.seed_completed
         True
+        >>> new_state.state
+        <CompositePipelineState.SEED_COMPLETED: 'SEED_COMPLETED'>
     """
 
     composite_name: str
     run_id: str
+    state: CompositePipelineState = CompositePipelineState.NOT_STARTED
     seed_completed: bool = False
     seed_result: SeedResult | None = None
     completed_enrichers: frozenset[str] = field(default_factory=frozenset)
@@ -114,10 +122,14 @@ class CompositeCheckpointState:
     updated_at: datetime | None = None
 
     def with_seed_completed(self, result: SeedResult) -> CompositeCheckpointState:
-        """Create new state with seed marked as completed."""
+        """Create new state with seed marked as completed.
+
+        Sets state to SEED_COMPLETED to indicate seed phase is done.
+        """
         return CompositeCheckpointState(
             composite_name=self.composite_name,
             run_id=self.run_id,
+            state=CompositePipelineState.SEED_COMPLETED,
             seed_completed=True,
             seed_result=result,
             completed_enrichers=self.completed_enrichers,
@@ -129,12 +141,18 @@ class CompositeCheckpointState:
     def with_enricher_completed(
         self, enricher_name: str, result: EnrichmentResult
     ) -> CompositeCheckpointState:
-        """Create new state with enricher marked as completed."""
+        """Create new state with enricher marked as completed.
+
+        Sets state to ENRICHING to indicate enrichment phase is in progress.
+        The transition to ENRICHMENT_COMPLETED should be done explicitly
+        via with_state() when all enrichers are done.
+        """
         new_completed = self.completed_enrichers | {enricher_name}
         new_results = {**self.enrichment_results, enricher_name: result}
         return CompositeCheckpointState(
             composite_name=self.composite_name,
             run_id=self.run_id,
+            state=CompositePipelineState.ENRICHING,
             seed_completed=self.seed_completed,
             seed_result=self.seed_result,
             completed_enrichers=frozenset(new_completed),
@@ -143,9 +161,41 @@ class CompositeCheckpointState:
             updated_at=datetime.now(tz=UTC),
         )
 
+    def with_state(self, new_state: CompositePipelineState) -> CompositeCheckpointState:
+        """Create new state with updated FSM state.
+
+        Allows Runner to explicitly set state transitions (e.g., to MERGING,
+        ENRICHMENT_COMPLETED, FAILED, or COMPLETED) without modifying other fields.
+
+        Args:
+            new_state: New FSM state to set.
+
+        Returns:
+            New checkpoint state with updated FSM state.
+        """
+        return CompositeCheckpointState(
+            composite_name=self.composite_name,
+            run_id=self.run_id,
+            state=new_state,
+            seed_completed=self.seed_completed,
+            seed_result=self.seed_result,
+            completed_enrichers=self.completed_enrichers,
+            enrichment_results=self.enrichment_results,
+            created_at=self.created_at,
+            updated_at=datetime.now(tz=UTC),
+        )
+
     @property
     def is_resumable(self) -> bool:
-        """Check if this checkpoint can be resumed."""
+        """Check if this checkpoint can be resumed.
+
+        Uses FSM state for more precise resume capability check.
+        Falls back to flags for backward compatibility.
+        """
+        # Use FSM state if available and meaningful
+        if self.state.is_resumable:
+            return True
+        # Fallback to flags for backward compatibility
         return self.seed_completed or bool(self.completed_enrichers)
 
     def to_dict(self) -> dict[str, object]:
@@ -153,6 +203,7 @@ class CompositeCheckpointState:
         return {
             "composite_name": self.composite_name,
             "run_id": self.run_id,
+            "state": self.state.value,
             "seed_completed": self.seed_completed,
             "seed_result": self._serialize_seed_result(),
             "completed_enrichers": list(self.completed_enrichers),
@@ -193,7 +244,11 @@ class CompositeCheckpointState:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> CompositeCheckpointState:
-        """Create state from dictionary."""
+        """Create state from dictionary.
+
+        Handles backward compatibility for checkpoints without state field.
+        Gracefully handles corrupted state values by defaulting to NOT_STARTED.
+        """
         seed_result = None
         if data.get("seed_result"):
             sr = data["seed_result"]
@@ -232,9 +287,21 @@ class CompositeCheckpointState:
             if updated_at.tzinfo is None:
                 updated_at = updated_at.replace(tzinfo=UTC)
 
+        # Parse state with backward compatibility and error handling
+        state = CompositePipelineState.NOT_STARTED
+        state_value = data.get("state")
+        if state_value is not None:
+            try:
+                state = CompositePipelineState(state_value)
+            except ValueError:
+                # Corrupted state value - use conservative default
+                # Logging will be handled by CompositeCheckpointManager
+                state = CompositePipelineState.NOT_STARTED
+
         return cls(
             composite_name=data["composite_name"],
             run_id=data["run_id"],
+            state=state,
             seed_completed=data.get("seed_completed", False),
             seed_result=seed_result,
             completed_enrichers=frozenset(data.get("completed_enrichers", [])),
@@ -306,11 +373,45 @@ class CompositeCheckpointManager:
         # Sort by modification time, return newest
         return max(checkpoints, key=lambda p: p.stat().st_mtime)
 
+    def _warn_if_checkpoint_exists_with_progress(self) -> None:
+        """Warn if an existing checkpoint with progress will be overwritten.
+
+        Called when resume=False to notify user that previous progress exists
+        and will be lost. This helps prevent accidental data loss when user
+        forgets to pass --resume flag.
+        """
+        checkpoint_path = self._get_latest_checkpoint_path()
+        if checkpoint_path is None or not checkpoint_path.exists():
+            return
+
+        try:
+            data = json.loads(checkpoint_path.read_text())
+            state = CompositeCheckpointState.from_dict(data)
+
+            # Only warn if checkpoint has actual progress
+            if state.is_resumable:
+                self._logger.warning(
+                    "Existing checkpoint with progress will be overwritten",
+                    composite=self._composite_name,
+                    checkpoint_path=str(checkpoint_path),
+                    checkpoint_state=state.state.value,
+                    seed_completed=state.seed_completed,
+                    completed_enrichers=len(state.completed_enrichers),
+                    hint="Use --resume flag to continue from previous progress",
+                )
+        except Exception:
+            # Silently ignore if we can't read the checkpoint
+            # (corrupted file will be overwritten anyway)
+            pass
+
     async def load(self) -> CompositeCheckpointState:
         """Load checkpoint state.
 
         If resume=True and checkpoint exists, load it.
         Otherwise, create fresh state.
+
+        When resume=False but a checkpoint with progress exists, logs a warning
+        that the checkpoint will be overwritten.
 
         Returns:
             Checkpoint state (loaded or fresh).
@@ -328,10 +429,20 @@ class CompositeCheckpointManager:
                 try:
                     data = json.loads(checkpoint_path.read_text())
                     state = CompositeCheckpointState.from_dict(data)
+                    # Check for state mismatch (corrupted file)
+                    raw_state = data.get("state")
+                    if raw_state is not None and state.state.value != raw_state:
+                        self._logger.warning(
+                            "Checkpoint state value corrupted, using default",
+                            composite=self._composite_name,
+                            raw_state=raw_state,
+                            parsed_state=state.state.value,
+                        )
                     self._logger.info(
                         "Loaded checkpoint",
                         composite=self._composite_name,
                         checkpoint_path=str(checkpoint_path),
+                        state=state.state.value,
                         seed_completed=state.seed_completed,
                         completed_enrichers=list(state.completed_enrichers),
                     )
@@ -342,6 +453,9 @@ class CompositeCheckpointManager:
                         composite=self._composite_name,
                         error=str(e),
                     )
+        else:
+            # resume=False: check if existing checkpoint with progress will be overwritten
+            self._warn_if_checkpoint_exists_with_progress()
 
         # Create fresh state
         return CompositeCheckpointState(
@@ -371,6 +485,8 @@ class CompositeCheckpointManager:
                 "Saved checkpoint",
                 composite=self._composite_name,
                 checkpoint_path=str(self._checkpoint_path),
+                state=state.state.value,
+                completed_enrichers=len(state.completed_enrichers),
             )
         except Exception as e:
             self._logger.error(
@@ -758,15 +874,24 @@ class EnrichmentCoordinator:
 
             except Exception as e:
                 duration = (datetime.now(tz=UTC) - started_at).total_seconds()
-                self._logger.error(
-                    "Enricher failed",
+
+                # Re-raise for required enrichers (logged as error)
+                if enricher.required:
+                    self._logger.error(
+                        "Required enricher failed",
+                        enricher=enricher.pipeline,
+                        error=str(e),
+                        required=True,
+                    )
+                    raise
+
+                # Optional enricher failures are warnings (pipeline continues)
+                self._logger.warning(
+                    "Optional enricher failed",
                     enricher=enricher.pipeline,
                     error=str(e),
+                    required=False,
                 )
-
-                # Re-raise for required enrichers
-                if enricher.required:
-                    raise
 
                 return EnrichmentResult.failed(
                     enricher_name=enricher.pipeline,
@@ -806,6 +931,229 @@ class EnrichmentCoordinator:
                 processed[name] = result
 
         return processed
+
+================================================================================
+File: fsm_helper.py
+Path: composite\fsm_helper.py
+================================================================================
+"""FSM (Finite State Machine) helpers for Composite Pipeline.
+
+Extracts FSM-related logic from CompositePipelineRunner to reduce
+file size and improve testability.
+
+Implements state transition validation and logging for composite pipeline
+execution states (ADR-026).
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bioetl.application.composite.checkpoint import CompositeCheckpointState
+    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite.state import CompositePipelineState
+    from bioetl.domain.ports import LoggerPort
+
+
+class FSMStateHelper:
+    """Helper for FSM state transitions and logging.
+
+    Provides methods for:
+    - Validating FSM state transitions
+    - Logging state transitions
+    - Handling resume from failed state
+    - Logging resume context
+
+    This class extracts the FSM-related logic from CompositePipelineRunner
+    to reduce file size and improve testability.
+
+    Attributes:
+        config: Composite pipeline configuration.
+        logger: Structured logger.
+        run_id: Run identifier.
+    """
+
+    def __init__(
+        self,
+        config: CompositeConfig,
+        logger: LoggerPort,
+        run_id: str,
+    ) -> None:
+        """Initialize FSM helper.
+
+        Args:
+            config: Composite pipeline configuration.
+            logger: Structured logger for observability.
+            run_id: Run identifier for correlation.
+        """
+        self._config = config
+        self._logger = logger
+        self._run_id = run_id
+
+    def log_fsm_transition(
+        self,
+        from_state: CompositePipelineState,
+        to_state: CompositePipelineState,
+        stage: str,
+        **extra: object,
+    ) -> None:
+        """Log FSM state transition.
+
+        Args:
+            from_state: Previous FSM state.
+            to_state: New FSM state.
+            stage: Pipeline stage identifier (e.g., 'seed_start', 'seed_complete').
+            **extra: Additional context for logging.
+        """
+        self._logger.info(
+            "FSM state transition",
+            from_state=from_state.value,
+            to_state=to_state.value,
+            composite=self._config.name,
+            run_id=self._run_id,
+            stage=stage,
+            **extra,
+        )
+
+    def validate_fsm_transition(
+        self,
+        from_state: CompositePipelineState,
+        to_state: CompositePipelineState,
+        allow_resume: bool = False,
+    ) -> bool:
+        """Validate FSM state transition and log warning if invalid.
+
+        This method validates transitions according to FSM rules. Invalid transitions
+        are logged as warnings rather than raising exceptions to avoid breaking
+        pipeline execution. This is primarily a debug/development safety net.
+
+        Args:
+            from_state: Current FSM state.
+            to_state: Target FSM state.
+            allow_resume: If True, allows transitions from FAILED state (for resume).
+
+        Returns:
+            True if transition is valid, False otherwise.
+
+        Note:
+            When allow_resume=True, transitions from FAILED to any resumable state
+            are permitted. This is needed for resume-from-failed functionality.
+        """
+        from bioetl.domain.composite.state import CompositePipelineState
+
+        # Special case: allow resume from FAILED state
+        if allow_resume and from_state == CompositePipelineState.FAILED:
+            self._logger.debug(
+                "FSM resume transition from FAILED",
+                from_state=from_state.value,
+                to_state=to_state.value,
+                composite=self._config.name,
+            )
+            return True
+
+        # Check if transition is valid according to FSM rules
+        if not from_state.can_transition_to(to_state):
+            self._logger.warning(
+                "Invalid FSM transition detected",
+                from_state=from_state.value,
+                to_state=to_state.value,
+                allowed_transitions=[s.value for s in from_state.allowed_transitions],
+                composite=self._config.name,
+                run_id=self._run_id,
+                note="This may indicate a programming error in the Runner",
+            )
+            return False
+
+        return True
+
+    def handle_resume_from_failed(
+        self, state: CompositeCheckpointState
+    ) -> CompositeCheckpointState:
+        """Handle resuming from FAILED state by determining correct phase.
+
+        When checkpoint has state=FAILED, we need to determine the actual phase
+        to resume from based on seed_completed and completed_enrichers flags.
+
+        Args:
+            state: Checkpoint state with FAILED status.
+
+        Returns:
+            Updated state with corrected FSM state for resumption.
+        """
+        from bioetl.domain.composite.state import CompositePipelineState
+
+        total_enrichers = len(self._config.enrichers)
+        completed_count = len(state.completed_enrichers)
+
+        if not state.seed_completed:
+            # Seed failed - resume from NOT_STARTED (will re-run seed)
+            resume_phase = CompositePipelineState.NOT_STARTED
+            phase_description = "seed (seed not completed)"
+        elif completed_count < total_enrichers:
+            # Enrichment failed - resume from ENRICHING (will run remaining enrichers)
+            resume_phase = CompositePipelineState.ENRICHING
+            phase_description = (
+                f"enrichment ({completed_count}/{total_enrichers} enrichers completed)"
+            )
+        else:
+            # Merge failed - resume from ENRICHMENT_COMPLETED (will re-run merge)
+            resume_phase = CompositePipelineState.ENRICHMENT_COMPLETED
+            phase_description = "merge (all enrichers completed)"
+
+        self._logger.info(
+            "Checkpoint indicates previous failure, resuming from phase",
+            composite=self._config.name,
+            run_id=self._run_id,
+            previous_state=state.state.value,
+            resume_phase=resume_phase.value,
+            phase_description=phase_description,
+            seed_completed=state.seed_completed,
+            completed_enrichers=completed_count,
+            total_enrichers=total_enrichers,
+        )
+
+        # Validate and log FSM transition from FAILED to resume phase
+        # allow_resume=True permits transitions from terminal FAILED state
+        self.validate_fsm_transition(state.state, resume_phase, allow_resume=True)
+        self.log_fsm_transition(
+            from_state=state.state,
+            to_state=resume_phase,
+            stage="resume_from_failed",
+            phase_description=phase_description,
+        )
+
+        return state.with_state(resume_phase)
+
+    def log_resume_context(self, state: CompositeCheckpointState) -> None:
+        """Log detailed resume context when resuming from checkpoint.
+
+        Provides visibility into what was completed previously and what
+        will be executed in this run.
+
+        Args:
+            state: Current checkpoint state being resumed from.
+        """
+        total_enrichers = len(self._config.enrichers)
+        completed_count = len(state.completed_enrichers)
+        remaining_count = total_enrichers - completed_count
+
+        self._logger.info(
+            "Resuming from checkpoint",
+            composite=self._config.name,
+            run_id=self._run_id,
+            last_state=state.state.value,
+            seed_completed=state.seed_completed,
+            completed_enrichers_count=completed_count,
+            total_enrichers_count=total_enrichers,
+            remaining_enrichers_count=remaining_count,
+            completed_enrichers=list(state.completed_enrichers)
+            if completed_count > 0
+            else None,
+        )
+
+
+__all__ = ["FSMStateHelper"]
 
 ================================================================================
 File: key_extractor.py
@@ -975,6 +1323,7 @@ from bioetl.domain.composite.result import EnrichmentResult, MergeResult
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
 JoinHow = Literal["inner", "left", "right", "full", "semi", "anti", "cross", "outer"]
+PrefixStrategy = Literal["provider", "entity", "both", "pipeline"]
 
 if TYPE_CHECKING:
     import polars as pl
@@ -1037,8 +1386,22 @@ class MergeService:
         enrichers: Sequence[EnricherConfig],
         enrichment_results: dict[str, EnrichmentResult],
         run_id: str,
+        seed_pipeline: str | None = None,
     ) -> MergeResult:
-        """Merge seed and enricher data into unified output."""
+        """Merge seed and enricher data into unified output.
+
+        Args:
+            seed_table: Path to seed Silver table (e.g., "silver/chembl/publication").
+            enrichers: Sequence of enricher configurations.
+            enrichment_results: Results from enricher execution.
+            run_id: Composite pipeline run ID.
+            seed_pipeline: Seed pipeline name (e.g., "chembl_publication").
+                If None, will be inferred from seed_table path.
+                Used for intelligent column renaming during merge.
+
+        Returns:
+            MergeResult with statistics and output paths.
+        """
         started_at = datetime.now(tz=UTC)
 
         # Step 1: Read seed data
@@ -1048,6 +1411,16 @@ class MergeService:
         )
         seed_df = await self._read_silver_table(seed_table)
         records_from_seed = len(seed_df)
+
+        # Determine seed pipeline for intelligent column renaming
+        effective_seed_pipeline = seed_pipeline or self._infer_pipeline_from_table(
+            seed_table
+        )
+        if effective_seed_pipeline:
+            self._logger.debug(
+                "Using seed pipeline for column renaming",
+                seed_pipeline=effective_seed_pipeline,
+            )
 
         # Track sources used
         sources_used = ["seed"]
@@ -1080,11 +1453,12 @@ class MergeService:
                     error=str(e),
                 )
 
-        # Step 3: Apply joins
+        # Step 3: Apply joins with intelligent column renaming
         merged_df = await self._apply_joins(
             seed_df=seed_df,
             enricher_dfs=enricher_dfs,
             enrichers=enrichers,
+            seed_pipeline=effective_seed_pipeline,
         )
 
         # Step 4: Resolve conflicts
@@ -1092,6 +1466,7 @@ class MergeService:
             df=merged_df,
             enricher_dfs=enricher_dfs,
             enrichers=enrichers,
+            seed_pipeline=effective_seed_pipeline,
         )
 
         # Step 5: Add lineage metadata
@@ -1104,7 +1479,9 @@ class MergeService:
 
         # Calculate statistics before writing
         records_merged = len(merged_df)
-        records_enriched = self._count_enriched_records(merged_df, enrichers)
+        records_enriched = self._count_enriched_records(
+            merged_df, enrichers, effective_seed_pipeline
+        )
 
         # Step 6: Write to Silver via StoragePort
         self._logger.info(
@@ -1260,6 +1637,37 @@ class MergeService:
             return f"silver/{provider}/{entity}"
         return f"silver/{pipeline_name}"
 
+    def _infer_pipeline_from_table(self, table_path: str) -> str | None:
+        """Infer pipeline name from Silver table path.
+
+        Converts a table path like "silver/chembl/publication" to
+        pipeline name "chembl_publication".
+
+        Args:
+            table_path: Silver table path.
+
+        Returns:
+            Pipeline name or None if cannot be inferred.
+
+        Example:
+            >>> merger._infer_pipeline_from_table("silver/chembl/publication")
+            'chembl_publication'
+            >>> merger._infer_pipeline_from_table("silver/crossref/publication")
+            'crossref_publication'
+        """
+        # Check if path contains a recognized layer prefix
+        normalized = table_path.replace("\\", "/")
+        has_layer = any(layer in normalized for layer in ("silver/", "gold/", "bronze/"))
+        if not has_layer:
+            return None
+
+        table_name = _path_to_table_name(table_path)
+        # table_name is now like "chembl/publication"
+        parts = table_name.split("/")
+        if len(parts) == 2:
+            return f"{parts[0]}_{parts[1]}"
+        return None
+
     def _normalize_join_key_columns(
         self,
         df: pl.DataFrame,
@@ -1300,60 +1708,389 @@ class MergeService:
             [pl.col(col).str.to_lowercase().alias(col) for col in normalize_cols]
         )
 
+    def _parse_pipeline_name(self, pipeline: str) -> tuple[str, str]:
+        """Parse pipeline name into (provider, entity).
+
+        Pipeline names follow the format "{provider}_{entity}".
+        For example: 'chembl_publication' → ('chembl', 'publication').
+
+        Args:
+            pipeline: Pipeline name in format "provider_entity".
+
+        Returns:
+            Tuple of (provider, entity).
+
+        Raises:
+            ValueError: If pipeline name doesn't contain underscore separator.
+
+        Example:
+            >>> merger._parse_pipeline_name("chembl_publication")
+            ('chembl', 'publication')
+            >>> merger._parse_pipeline_name("crossref_publication")
+            ('crossref', 'publication')
+        """
+        if "_" not in pipeline:
+            raise ValueError(
+                f"Pipeline name '{pipeline}' must be in format 'provider_entity'"
+            )
+        parts = pipeline.split("_", 1)
+        return (parts[0], parts[1])
+
+    def _determine_prefix_strategy(
+        self,
+        seed_provider: str,
+        seed_entity: str,
+        enricher_provider: str,
+        enricher_entity: str,
+    ) -> PrefixStrategy:
+        """Determine column prefix strategy based on provider/entity relationship.
+
+        Determines how to prefix enricher columns to avoid conflicts
+        while maintaining semantic clarity.
+
+        Args:
+            seed_provider: Provider name of the seed pipeline.
+            seed_entity: Entity name of the seed pipeline.
+            enricher_provider: Provider name of the enricher pipeline.
+            enricher_entity: Entity name of the enricher pipeline.
+
+        Returns:
+            Strategy to use:
+            - "provider": Cross-provider merge (same entity, different providers).
+              Prefix with provider name. Example: "crossref.doi"
+            - "entity": Cross-entity merge (same provider, different entities).
+              Prefix with entity name. Example: "activity.chembl_id"
+            - "both": Cross-provider-entity merge (different providers AND entities).
+              Prefix with provider.entity. Example: "pubchem.compound.name"
+            - "pipeline": Fallback when same provider and entity.
+              Use full pipeline name. Example: "chembl_publication_extra.doi"
+
+        Example:
+            >>> merger._determine_prefix_strategy("chembl", "publication",
+            ...                                    "crossref", "publication")
+            'provider'
+            >>> merger._determine_prefix_strategy("chembl", "publication",
+            ...                                    "chembl", "activity")
+            'entity'
+            >>> merger._determine_prefix_strategy("chembl", "publication",
+            ...                                    "pubchem", "compound")
+            'both'
+        """
+        same_provider = seed_provider.lower() == enricher_provider.lower()
+        same_entity = seed_entity.lower() == enricher_entity.lower()
+
+        if same_entity and not same_provider:
+            # Cross-provider merge: same entity, different providers
+            return "provider"
+        elif same_provider and not same_entity:
+            # Cross-entity merge: same provider, different entities
+            return "entity"
+        elif not same_provider and not same_entity:
+            # Cross-provider-entity merge: different providers AND entities
+            return "both"
+        else:
+            # Same provider and entity - use full pipeline name
+            return "pipeline"
+
+    def _column_contains_identifier(
+        self,
+        column: str,
+        identifier: str,
+    ) -> bool:
+        """Check if column name already contains the identifier (case-insensitive).
+
+        Used to avoid redundant prefixes like "crossref.crossref_doi".
+
+        Args:
+            column: Column name to check.
+            identifier: Identifier to search for (provider or entity name).
+
+        Returns:
+            True if column contains the identifier (case-insensitive).
+
+        Example:
+            >>> merger._column_contains_identifier("crossref_doi", "crossref")
+            True
+            >>> merger._column_contains_identifier("doi", "crossref")
+            False
+            >>> merger._column_contains_identifier("CROSSREF.DOI", "crossref")
+            True
+            >>> merger._column_contains_identifier("chembl_id", "chembl")
+            True
+        """
+        return identifier.lower() in column.lower()
+
+    def _build_prefix(
+        self,
+        strategy: PrefixStrategy,
+        provider: str,
+        entity: str,
+        pipeline: str,
+    ) -> str:
+        """Build column prefix based on strategy.
+
+        Args:
+            strategy: Prefix strategy to use.
+            provider: Provider name.
+            entity: Entity name.
+            pipeline: Full pipeline name (fallback).
+
+        Returns:
+            Prefix string WITHOUT trailing dot.
+
+        Example:
+            >>> merger._build_prefix("provider", "crossref", "publication",
+            ...                       "crossref_publication")
+            'crossref'
+            >>> merger._build_prefix("entity", "chembl", "activity",
+            ...                       "chembl_activity")
+            'activity'
+            >>> merger._build_prefix("both", "pubchem", "compound",
+            ...                       "pubchem_compound")
+            'pubchem.compound'
+        """
+        match strategy:
+            case "provider":
+                return provider
+            case "entity":
+                return entity
+            case "both":
+                return f"{provider}.{entity}"
+            case "pipeline":
+                return pipeline
+
+    def _apply_column_prefix(
+        self,
+        df: pl.DataFrame,
+        columns: set[str],
+        prefix: str,
+        exclude_columns: set[str],
+    ) -> pl.DataFrame:
+        """Apply prefix to specified columns.
+
+        Renames columns by adding a prefix with dot separator.
+        Excludes join keys and columns already containing the identifier.
+
+        Args:
+            df: DataFrame to modify.
+            columns: Set of column names to potentially rename.
+            prefix: Prefix to add (WITHOUT trailing dot).
+            exclude_columns: Columns to exclude from renaming (join keys, etc.).
+
+        Returns:
+            DataFrame with renamed columns.
+
+        Example:
+            >>> df = pl.DataFrame({"doi": ["10.1/a"], "title": ["T1"]})
+            >>> result = merger._apply_column_prefix(
+            ...     df, {"title"}, "crossref", {"doi"}
+            ... )
+            >>> result.columns
+            ['doi', 'crossref.title']
+        """
+        rename_map = {}
+        for col in columns:
+            if col not in exclude_columns:
+                rename_map[col] = f"{prefix}.{col}"
+
+        if rename_map:
+            self._logger.debug(
+                "Applying column prefix",
+                prefix=prefix,
+                columns=list(rename_map.keys()),
+            )
+            return df.rename(rename_map)
+        return df
+
+    def _detect_and_resolve_conflicts(
+        self,
+        seed_df: pl.DataFrame,
+        enricher_df: pl.DataFrame,
+        join_keys: set[str],
+    ) -> tuple[pl.DataFrame, pl.DataFrame]:
+        """Detect and resolve column name conflicts between seed and enricher.
+
+        After prefix application, there may still be conflicts when:
+        - Seed already has a prefixed column (e.g., "crossref.title")
+        - Enricher gets the same prefix (e.g., "crossref.title")
+
+        Resolution: Add .A suffix to seed, .B suffix to enricher.
+
+        Args:
+            seed_df: Seed DataFrame.
+            enricher_df: Enricher DataFrame (already with prefixes applied).
+            join_keys: Set of join key columns to exclude from conflict resolution.
+
+        Returns:
+            Tuple of (modified_seed_df, modified_enricher_df) with conflicts resolved.
+
+        Example:
+            >>> seed = pl.DataFrame({"doi": ["10.1/a"], "crossref.title": ["T1"]})
+            >>> enricher = pl.DataFrame({"doi": ["10.1/a"], "crossref.title": ["T2"]})
+            >>> seed_out, enricher_out = merger._detect_and_resolve_conflicts(
+            ...     seed, enricher, {"doi"}
+            ... )
+            >>> seed_out.columns
+            ['doi', 'crossref.title.A']
+            >>> enricher_out.columns
+            ['doi', 'crossref.title.B']
+        """
+        seed_cols = set(seed_df.columns)
+        enricher_cols = set(enricher_df.columns)
+
+        # Find conflicts (excluding join keys)
+        conflicts = (seed_cols & enricher_cols) - join_keys
+
+        if not conflicts:
+            return seed_df, enricher_df
+
+        self._logger.warning(
+            "Column name conflicts detected after prefixing",
+            conflicts=list(conflicts),
+            resolution="Adding .A/.B suffixes",
+        )
+
+        # Rename conflicting columns
+        seed_rename = {col: f"{col}.A" for col in conflicts}
+        enricher_rename = {col: f"{col}.B" for col in conflicts}
+
+        return seed_df.rename(seed_rename), enricher_df.rename(enricher_rename)
+
     async def _apply_joins(
         self,
         seed_df: pl.DataFrame,
         enricher_dfs: dict[str, pl.DataFrame],
         enrichers: Sequence[EnricherConfig],
+        seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Apply join strategy (LEFT_OUTER/INNER/UNION) to combine DataFrames.
+        """Apply join strategy with intelligent column renaming.
 
-        Note: Join keys (doi, pmid, pmc_id) are normalized to lowercase before
-        joining to ensure case-insensitive matching across providers.
+        Column renaming strategy (by merge type):
+        - Cross-provider (same entity): prefix with provider name (e.g., "crossref.doi")
+        - Cross-entity (same provider): prefix with entity name (e.g., "activity.name")
+        - Cross-provider-entity: prefix with provider.entity (e.g., "pubchem.compound.name")
+
+        Join keys (doi, pmid, pmc_id) are normalized to lowercase for
+        case-insensitive matching across providers.
+
+        Conflict resolution:
+        - After prefixing, remaining conflicts get .A/.B suffixes
+
+        Args:
+            seed_df: Seed DataFrame to join to.
+            enricher_dfs: Mapping of enricher pipeline name to DataFrame.
+            enrichers: Sequence of enricher configurations.
+            seed_pipeline: Seed pipeline name (e.g., "chembl_publication").
+                If None, falls back to legacy underscore prefix naming.
+
+        Returns:
+            Merged DataFrame with all enricher data joined.
+
+        Example:
+            >>> # Cross-provider merge: chembl_publication + crossref_publication
+            >>> # Column "title" in enricher → "crossref.title"
+            >>> merged = await merger._apply_joins(
+            ...     seed_df, enricher_dfs, enrichers, "chembl_publication"
+            ... )
         """
         merged = seed_df
+
+        # Parse seed pipeline for intelligent prefix strategy
+        seed_provider: str | None = None
+        seed_entity: str | None = None
+        if seed_pipeline:
+            try:
+                seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
+            except ValueError:
+                self._logger.warning(
+                    "Could not parse seed pipeline name, using legacy prefix",
+                    seed_pipeline=seed_pipeline,
+                )
 
         for enricher in enrichers:
             if enricher.pipeline not in enricher_dfs:
                 continue
 
             enricher_df = enricher_dfs[enricher.pipeline]
-            join_keys = list(enricher.join_keys)
+            join_keys = set(enricher.join_keys)
+            join_keys_list = list(join_keys)
 
             # Normalize join key columns for case-insensitive matching
             # This ensures DOIs like "10.1038/NATURE" match "10.1038/nature"
-            merged = self._normalize_join_key_columns(merged, join_keys)
-            enricher_df = self._normalize_join_key_columns(enricher_df, join_keys)
+            merged = self._normalize_join_key_columns(merged, join_keys_list)
+            enricher_df = self._normalize_join_key_columns(enricher_df, join_keys_list)
 
-            # Find common columns to avoid duplicates
-            seed_cols = set(merged.columns)
-            enricher_cols = set(enricher_df.columns)
-            common_cols = seed_cols & enricher_cols - set(join_keys)
+            # Find non-join columns in enricher
+            non_join_cols = set(enricher_df.columns) - join_keys
 
-            # Rename common columns in enricher with prefix
-            prefix = f"{enricher.pipeline}_"
-            enricher_df = enricher_df.rename(
-                {col: f"{prefix}{col}" for col in common_cols}
+            # Determine prefix strategy
+            if seed_provider is not None and seed_entity is not None:
+                try:
+                    enricher_provider, enricher_entity = self._parse_pipeline_name(
+                        enricher.pipeline
+                    )
+
+                    strategy = self._determine_prefix_strategy(
+                        seed_provider,
+                        seed_entity,
+                        enricher_provider,
+                        enricher_entity,
+                    )
+
+                    prefix = self._build_prefix(
+                        strategy,
+                        enricher_provider,
+                        enricher_entity,
+                        enricher.pipeline,
+                    )
+
+                    self._logger.debug(
+                        "Column rename strategy determined",
+                        enricher=enricher.pipeline,
+                        strategy=strategy,
+                        prefix=prefix,
+                    )
+
+                    # Find columns that already contain the identifier
+                    already_prefixed = {
+                        col
+                        for col in non_join_cols
+                        if self._column_contains_identifier(col, enricher_provider)
+                        or self._column_contains_identifier(col, enricher_entity)
+                    }
+
+                    # Apply prefix to non-join columns
+                    enricher_df = self._apply_column_prefix(
+                        enricher_df,
+                        non_join_cols - already_prefixed,
+                        prefix,
+                        join_keys,
+                    )
+
+                except ValueError:
+                    # Fallback to legacy prefix if parsing fails
+                    self._logger.warning(
+                        "Could not parse enricher pipeline, using legacy prefix",
+                        enricher=enricher.pipeline,
+                    )
+                    enricher_df = self._apply_legacy_prefix(
+                        enricher_df, enricher.pipeline, non_join_cols, join_keys
+                    )
+            else:
+                # No seed pipeline provided - use legacy prefix
+                enricher_df = self._apply_legacy_prefix(
+                    enricher_df, enricher.pipeline, non_join_cols, join_keys
+                )
+
+            # Detect and resolve remaining conflicts
+            merged, enricher_df = self._detect_and_resolve_conflicts(
+                merged, enricher_df, join_keys
             )
 
             # Apply join based on strategy
             how = self._get_polars_join_type()
+            primary_key = join_keys_list[0]
 
-            # Handle multiple join keys with fallback
-            if len(join_keys) > 1:
-                # Try primary key first
-                primary_key = join_keys[0]
-                if primary_key in merged.columns and primary_key in enricher_df.columns:
-                    merged = merged.join(
-                        enricher_df,
-                        on=primary_key,
-                        how=how,
-                        suffix=f"_{enricher.pipeline}",
-                    )
-                    continue
-
-            # Single key join
-            primary_key = join_keys[0]
             if primary_key in merged.columns and primary_key in enricher_df.columns:
                 merged = merged.join(
                     enricher_df,
@@ -1363,6 +2100,37 @@ class MergeService:
                 )
 
         return merged
+
+    def _apply_legacy_prefix(
+        self,
+        df: pl.DataFrame,
+        pipeline: str,
+        columns: set[str],
+        join_keys: set[str],
+    ) -> pl.DataFrame:
+        """Apply legacy underscore prefix to columns (backwards compatibility).
+
+        Args:
+            df: DataFrame to modify.
+            pipeline: Pipeline name to use as prefix.
+            columns: Columns to potentially rename.
+            join_keys: Columns to exclude (join keys).
+
+        Returns:
+            DataFrame with legacy-prefixed columns.
+        """
+        # Find common columns between seed and enricher
+        common_cols = columns - join_keys
+        rename_map = {col: f"{pipeline}_{col}" for col in common_cols}
+
+        if rename_map:
+            self._logger.debug(
+                "Applying legacy underscore prefix",
+                pipeline=pipeline,
+                columns=list(rename_map.keys()),
+            )
+            return df.rename(rename_map)
+        return df
 
     def _get_polars_join_type(self) -> JoinHow:
         """Convert MergeStrategy to Polars join type."""
@@ -1376,26 +2144,106 @@ class MergeService:
             case _:
                 return "left"
 
+    def _get_enricher_prefix(
+        self,
+        enricher_pipeline: str,
+        seed_pipeline: str | None,
+    ) -> str:
+        """Get the column prefix used for an enricher.
+
+        Computes the prefix that was (or would be) applied to enricher columns
+        during `_apply_joins`. Used for conflict resolution.
+
+        Args:
+            enricher_pipeline: Enricher pipeline name.
+            seed_pipeline: Seed pipeline name (may be None for legacy mode).
+
+        Returns:
+            Prefix string WITH trailing dot or underscore.
+
+        Example:
+            >>> merger._get_enricher_prefix("crossref_publication", "chembl_publication")
+            'crossref.'  # Cross-provider (same entity)
+            >>> merger._get_enricher_prefix("chembl_activity", "chembl_publication")
+            'activity.'  # Cross-entity (same provider)
+            >>> merger._get_enricher_prefix("crossref_publication", None)
+            'crossref_publication_'  # Legacy mode
+        """
+        if not seed_pipeline:
+            # Legacy mode: use full pipeline name with underscore
+            return f"{enricher_pipeline}_"
+
+        try:
+            seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
+            enricher_provider, enricher_entity = self._parse_pipeline_name(
+                enricher_pipeline
+            )
+
+            strategy = self._determine_prefix_strategy(
+                seed_provider, seed_entity, enricher_provider, enricher_entity
+            )
+
+            prefix = self._build_prefix(
+                strategy, enricher_provider, enricher_entity, enricher_pipeline
+            )
+            return f"{prefix}."
+
+        except ValueError:
+            # Fallback to legacy if parsing fails
+            return f"{enricher_pipeline}_"
+
+    def _extract_base_column(self, column: str, prefix: str) -> str | None:
+        """Extract base column name from a prefixed column.
+
+        Args:
+            column: Column name that may have a prefix.
+            prefix: Prefix to strip (WITH trailing dot or underscore).
+
+        Returns:
+            Base column name if column starts with prefix, None otherwise.
+
+        Example:
+            >>> merger._extract_base_column("crossref.title", "crossref.")
+            'title'
+            >>> merger._extract_base_column("activity.name", "activity.")
+            'name'
+            >>> merger._extract_base_column("title", "crossref.")
+            None
+        """
+        if column.startswith(prefix):
+            return column[len(prefix) :]
+        return None
+
     def _resolve_conflicts(
         self,
         df: pl.DataFrame,
         enricher_dfs: dict[str, pl.DataFrame],
         enrichers: Sequence[EnricherConfig],
+        seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Apply conflict resolution based on configured strategy."""
+        """Apply conflict resolution based on configured strategy.
 
+        Args:
+            df: Merged DataFrame with prefixed columns.
+            enricher_dfs: Original enricher DataFrames (for reference).
+            enrichers: Enricher configurations.
+            seed_pipeline: Seed pipeline name for prefix computation.
+
+        Returns:
+            DataFrame with conflicts resolved.
+        """
         match self._config.conflict_resolution:
             case ConflictResolution.SEED_PRIORITY:
-                return self._coalesce_prefer_seed(df, enrichers)
+                return self._coalesce_prefer_seed(df, enrichers, seed_pipeline)
             case ConflictResolution.ENRICHER_PRIORITY:
-                return self._coalesce_prefer_enricher(df, enrichers)
+                return self._coalesce_prefer_enricher(df, enrichers, seed_pipeline)
             case ConflictResolution.COALESCE:
-                return self._coalesce_first_non_null(df, enrichers)
+                return self._coalesce_first_non_null(df, enrichers, seed_pipeline)
             case ConflictResolution.EXPLICIT_RULES:
-                return self._apply_explicit_rules(df, enrichers)
+                return self._apply_explicit_rules(df, enrichers, seed_pipeline)
             case ConflictResolution.LATEST_TIMESTAMP:
                 # Would require timestamp columns - fall back to seed
-                return self._coalesce_prefer_seed(df, enrichers)
+                return self._coalesce_prefer_seed(df, enrichers, seed_pipeline)
             case _:
                 return df
 
@@ -1428,147 +2276,283 @@ class MergeService:
         return isinstance(type1, pl.List) == isinstance(type2, pl.List)
 
     def _coalesce_prefer_seed(
-        self, df: pl.DataFrame, enrichers: Sequence[EnricherConfig]
+        self,
+        df: pl.DataFrame,
+        enrichers: Sequence[EnricherConfig],
+        seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Coalesce preferring seed values."""
+        """Coalesce preferring seed values.
+
+        Args:
+            df: Merged DataFrame with prefixed columns.
+            enrichers: Enricher configurations.
+            seed_pipeline: Seed pipeline name for prefix computation.
+
+        Returns:
+            DataFrame with enricher columns coalesced into base columns.
+        """
         import polars as pl
 
         result = df
         for enricher in enrichers:
-            prefix = f"{enricher.pipeline}_"
+            prefix = self._get_enricher_prefix(enricher.pipeline, seed_pipeline)
             for col in list(
                 result.columns
             ):  # Copy list to avoid mutation during iteration
-                if col.startswith(prefix):
-                    base_col = col[len(prefix) :]
-                    if base_col in result.columns:
-                        # Check type compatibility before coalescing
-                        if self._can_coalesce(result, base_col, col):
-                            # Coalesce seed (base) over enricher
-                            result = result.with_columns(
-                                pl.coalesce(pl.col(base_col), pl.col(col)).alias(
-                                    base_col
-                                )
-                            ).drop(col)
-                        else:
-                            # Incompatible types - keep seed value, drop enricher
-                            self._logger.debug(
-                                "Skipping coalesce for incompatible types",
-                                seed_col=base_col,
-                                enricher_col=col,
-                                seed_type=str(result[base_col].dtype),
-                                enricher_type=str(result[col].dtype),
-                            )
-                            result = result.drop(col)
+                base_col = self._extract_base_column(col, prefix)
+                if base_col is not None and base_col in result.columns:
+                    # Check type compatibility before coalescing
+                    if self._can_coalesce(result, base_col, col):
+                        # Coalesce seed (base) over enricher
+                        result = result.with_columns(
+                            pl.coalesce(pl.col(base_col), pl.col(col)).alias(base_col)
+                        ).drop(col)
+                    else:
+                        # Incompatible types - keep seed value, drop enricher
+                        self._logger.debug(
+                            "Skipping coalesce for incompatible types",
+                            seed_col=base_col,
+                            enricher_col=col,
+                            seed_type=str(result[base_col].dtype),
+                            enricher_type=str(result[col].dtype),
+                        )
+                        result = result.drop(col)
         return result
 
     def _coalesce_prefer_enricher(
-        self, df: pl.DataFrame, enrichers: Sequence[EnricherConfig]
+        self,
+        df: pl.DataFrame,
+        enrichers: Sequence[EnricherConfig],
+        seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Coalesce preferring enricher values."""
+        """Coalesce preferring enricher values.
+
+        Args:
+            df: Merged DataFrame with prefixed columns.
+            enrichers: Enricher configurations.
+            seed_pipeline: Seed pipeline name for prefix computation.
+
+        Returns:
+            DataFrame with enricher columns coalesced into base columns.
+        """
         import polars as pl
 
         result = df
         for enricher in enrichers:
-            prefix = f"{enricher.pipeline}_"
+            prefix = self._get_enricher_prefix(enricher.pipeline, seed_pipeline)
             for col in list(
                 result.columns
             ):  # Copy list to avoid mutation during iteration
-                if col.startswith(prefix):
-                    base_col = col[len(prefix) :]
-                    if base_col in result.columns:
-                        # Check type compatibility before coalescing
-                        if self._can_coalesce(result, base_col, col):
-                            # Coalesce enricher over seed (base)
-                            result = result.with_columns(
-                                pl.coalesce(pl.col(col), pl.col(base_col)).alias(
-                                    base_col
-                                )
-                            ).drop(col)
-                        else:
-                            # Incompatible types - prefer enricher if non-null exists
-                            self._logger.debug(
-                                "Skipping coalesce for incompatible types",
-                                seed_col=base_col,
-                                enricher_col=col,
-                                seed_type=str(result[base_col].dtype),
-                                enricher_type=str(result[col].dtype),
-                            )
-                            result = result.drop(col)
+                base_col = self._extract_base_column(col, prefix)
+                if base_col is not None and base_col in result.columns:
+                    # Check type compatibility before coalescing
+                    if self._can_coalesce(result, base_col, col):
+                        # Coalesce enricher over seed (base)
+                        result = result.with_columns(
+                            pl.coalesce(pl.col(col), pl.col(base_col)).alias(base_col)
+                        ).drop(col)
+                    else:
+                        # Incompatible types - prefer enricher if non-null exists
+                        self._logger.debug(
+                            "Skipping coalesce for incompatible types",
+                            seed_col=base_col,
+                            enricher_col=col,
+                            seed_type=str(result[base_col].dtype),
+                            enricher_type=str(result[col].dtype),
+                        )
+                        result = result.drop(col)
         return result
 
     def _coalesce_first_non_null(
-        self, df: pl.DataFrame, enrichers: Sequence[EnricherConfig]
+        self,
+        df: pl.DataFrame,
+        enrichers: Sequence[EnricherConfig],
+        seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Coalesce taking first non-null value."""
+        """Coalesce taking first non-null value.
+
+        Args:
+            df: Merged DataFrame with prefixed columns.
+            enrichers: Enricher configurations.
+            seed_pipeline: Seed pipeline name for prefix computation.
+
+        Returns:
+            DataFrame with coalesced columns.
+        """
         # Same as seed priority for now
-        return self._coalesce_prefer_seed(df, enrichers)
+        return self._coalesce_prefer_seed(df, enrichers, seed_pipeline)
+
+    def _collect_field_columns(
+        self,
+        field: str,
+        enrichers: Sequence[EnricherConfig],
+        available_columns: set[str],
+        seed_pipeline: str | None = None,
+    ) -> list[str]:
+        """Collect all columns for a field including enricher prefixed versions.
+
+        Supports both new dot-based prefixes (crossref.title) and legacy
+        underscore prefixes (crossref_publication_title).
+
+        Args:
+            field: Base field name.
+            enrichers: Sequence of enricher configurations.
+            available_columns: Set of available column names in DataFrame.
+            seed_pipeline: Seed pipeline name for prefix computation.
+
+        Returns:
+            List of column names including seed and enricher versions.
+        """
+        columns = [field] if field in available_columns else []
+        for enricher in enrichers:
+            # Get the prefix that was used for this enricher
+            prefix = self._get_enricher_prefix(enricher.pipeline, seed_pipeline)
+            # Prefix includes trailing dot/underscore, so: "crossref." + "title"
+            prefixed = f"{prefix}{field}"
+            if prefixed in available_columns:
+                columns.append(prefixed)
+        return columns
+
+    def _order_columns_by_priority(
+        self,
+        field: str,
+        columns: list[str],
+        priorities: Sequence[str],
+        seed_pipeline: str | None = None,
+    ) -> list[str]:
+        """Order columns by priority list, appending any remaining columns.
+
+        Args:
+            field: Base field name.
+            columns: List of available columns for this field.
+            priorities: Ordered list of source priorities (provider names or "seed").
+            seed_pipeline: Seed pipeline name for prefix computation.
+
+        Returns:
+            Ordered list of columns by priority.
+        """
+        ordered_cols: list[str] = []
+
+        for source in priorities:
+            if source in ("seed", "chembl"):  # Seed convention
+                if field in columns and field not in ordered_cols:
+                    ordered_cols.append(field)
+            else:
+                # Try new dot-based prefix: "crossref.title"
+                dot_prefixed = f"{source}.{field}"
+                if dot_prefixed in columns and dot_prefixed not in ordered_cols:
+                    ordered_cols.append(dot_prefixed)
+                    continue
+
+                # Try legacy underscore prefix: "crossref_publication_title"
+                # The source might be just "crossref" but column is "crossref_publication_title"
+                for col in columns:
+                    if col.startswith(f"{source}_") and col.endswith(f"_{field}"):
+                        if col not in ordered_cols:
+                            ordered_cols.append(col)
+                        break
+
+        # Add remaining columns not in priority list
+        for col in columns:
+            if col not in ordered_cols:
+                ordered_cols.append(col)
+
+        return ordered_cols
+
+    def _filter_compatible_columns(
+        self,
+        df: pl.DataFrame,
+        field: str,
+        ordered_cols: list[str],
+    ) -> tuple[list[str], list[str]]:
+        """Filter columns to only those compatible for coalescing.
+
+        Args:
+            df: DataFrame containing the columns.
+            field: Base field name for logging.
+            ordered_cols: Ordered list of column names.
+
+        Returns:
+            Tuple of (compatible_columns, incompatible_columns).
+        """
+        if not ordered_cols:
+            return [], []
+
+        base_col = ordered_cols[0]
+        compatible_cols = [base_col]
+        incompatible_cols: list[str] = []
+
+        for col in ordered_cols[1:]:
+            if self._can_coalesce(df, base_col, col):
+                compatible_cols.append(col)
+            else:
+                self._logger.debug(
+                    "Skipping column with incompatible type in explicit rules",
+                    field=field,
+                    incompatible_col=col,
+                    base_type=str(df[base_col].dtype),
+                    col_type=str(df[col].dtype),
+                )
+                incompatible_cols.append(col)
+
+        return compatible_cols, incompatible_cols
 
     def _apply_explicit_rules(
-        self, df: pl.DataFrame, enrichers: Sequence[EnricherConfig]
+        self,
+        df: pl.DataFrame,
+        enrichers: Sequence[EnricherConfig],
+        seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Apply explicit field priority rules."""
+        """Apply explicit field priority rules.
+
+        Coalesces columns by priority, handling type compatibility.
+
+        Args:
+            df: Merged DataFrame with prefixed columns.
+            enrichers: Enricher configurations.
+            seed_pipeline: Seed pipeline name for prefix computation.
+
+        Returns:
+            DataFrame with explicit rules applied.
+        """
         import polars as pl
 
         result = df
+        available_columns = set(df.columns)
 
         for field, priorities in self._config.field_priorities.items():
-            # Find all columns for this field
-            columns = [field]  # Seed column
-            for enricher in enrichers:
-                prefixed = f"{enricher.pipeline}_{field}"
-                if prefixed in df.columns:
-                    columns.append(prefixed)
+            columns = self._collect_field_columns(
+                field, enrichers, available_columns, seed_pipeline
+            )
 
             if len(columns) <= 1:
                 continue
 
-            # Reorder columns by priority
-            ordered_cols = []
-            for source in priorities:
-                if source == "seed" or source == "chembl":  # Seed convention
-                    if field in columns:
-                        ordered_cols.append(field)
-                else:
-                    prefixed = f"{source}_{field}"
-                    if prefixed in columns:
-                        ordered_cols.append(prefixed)
+            ordered_cols = self._order_columns_by_priority(
+                field, columns, priorities, seed_pipeline
+            )
 
-            # Add any remaining columns not in priority list
-            for col in columns:
-                if col not in ordered_cols:
-                    ordered_cols.append(col)
+            if not ordered_cols:
+                continue
 
-            if ordered_cols:
-                # Filter to only compatible types for coalescing
-                base_col = ordered_cols[0]
-                compatible_cols = [base_col]
-                cols_to_drop = []
+            compatible_cols, _ = self._filter_compatible_columns(
+                result, field, ordered_cols
+            )
 
-                for col in ordered_cols[1:]:
-                    if self._can_coalesce(result, base_col, col):
-                        compatible_cols.append(col)
-                    else:
-                        # Incompatible type - mark for dropping
-                        self._logger.debug(
-                            "Skipping column with incompatible type in explicit rules",
-                            field=field,
-                            incompatible_col=col,
-                            base_type=str(result[base_col].dtype),
-                            col_type=str(result[col].dtype),
-                        )
-                        cols_to_drop.append(col)
+            # Coalesce compatible columns
+            if len(compatible_cols) > 1:
+                result = result.with_columns(
+                    pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(field)
+                )
 
-                # Coalesce only compatible columns
-                if len(compatible_cols) > 1:
-                    result = result.with_columns(
-                        pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(field)
-                    )
-
-                # Drop all non-base columns (both coalesced and incompatible)
-                for col in ordered_cols[1:]:
-                    if col != field and col in result.columns:
-                        result = result.drop(col)
+            # Drop all non-base columns
+            cols_to_drop = [
+                col
+                for col in ordered_cols[1:]
+                if col != field and col in result.columns
+            ]
+            if cols_to_drop:
+                result = result.drop(cols_to_drop)
 
         return result
 
@@ -1598,14 +2582,26 @@ class MergeService:
         )
 
     def _count_enriched_records(
-        self, df: pl.DataFrame, enrichers: Sequence[EnricherConfig]
+        self,
+        df: pl.DataFrame,
+        enrichers: Sequence[EnricherConfig],
+        seed_pipeline: str | None = None,
     ) -> int:
-        """Count records with at least one enrichment."""
+        """Count records with at least one enrichment.
+
+        Args:
+            df: Merged DataFrame with prefixed columns.
+            enrichers: Enricher configurations.
+            seed_pipeline: Seed pipeline name for prefix computation.
+
+        Returns:
+            Count of records with at least one non-null enricher column.
+        """
         # Check if any enricher-prefixed columns are non-null
         # This is approximate - relies on column naming convention
         enriched_count = 0
         for enricher in enrichers:
-            prefix = f"{enricher.pipeline}_"
+            prefix = self._get_enricher_prefix(enricher.pipeline, seed_pipeline)
             enricher_cols = [c for c in df.columns if c.startswith(prefix)]
             if enricher_cols:
                 # Check first enricher column for non-null
@@ -1655,29 +2651,34 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
+from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from bioetl.application.composite.runner_helpers import (
+    add_not_run_results,
+    calculate_had_warnings,
+    get_mergeable_enrichers,
+    log_enrichment_summary,
+)
 from bioetl.domain.composite.result import (
     CompositeResult,
+    EnrichmentResult,
     EnrichmentStatus,
     MergeResult,
     SeedResult,
 )
+from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.composite.checkpoint import (
-        CompositeCheckpointManager,
-        CompositeCheckpointState,
-    )
+    from bioetl.application.composite.checkpoint import CompositeCheckpointManager
     from bioetl.application.composite.coordinator import EnrichmentCoordinator
     from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.composite.merger import MergeService
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
-    from bioetl.domain.composite.result import EnrichmentResult
     from bioetl.domain.ports import LockPort, LoggerPort
 
 
@@ -1783,7 +2784,18 @@ class CompositePipelineRunner:
         self._run_id_str = run_id or str(uuid4())
         self._run_id: RunID = cast(RunID, UUID(self._run_id_str))
         self._started_at: datetime | None = None
+        self._finished: bool = False
+        self._final_state: CompositePipelineState | None = None
         self._dq_report_service = dq_report_service
+
+        # Initialize FSM helper for state transition logic
+        from bioetl.application.composite.fsm_helper import FSMStateHelper
+
+        self._fsm = FSMStateHelper(
+            config=config,
+            logger=logger,
+            run_id=self._run_id_str,
+        )
 
     @property
     def run_id(self) -> str:
@@ -1812,7 +2824,21 @@ class CompositePipelineRunner:
 
         Raises:
             CriticalError: If seed or required enricher fails.
+            RunnerAlreadyExecutedError: If this Runner instance was already executed.
         """
+        # Protection against double execution
+        if self._finished:
+            from bioetl.domain.exceptions import RunnerAlreadyExecutedError
+
+            raise RunnerAlreadyExecutedError(
+                runner_type="CompositePipelineRunner",
+                run_id=self._run_id_str,
+                final_state=self._final_state.value if self._final_state else None,
+            )
+
+        # Validate configuration consistency on startup
+        self._validate_config_consistency()
+
         self._started_at = datetime.now(tz=UTC)
         self._logger.info(
             PipelineEvent.START,
@@ -1835,11 +2861,18 @@ class CompositePipelineRunner:
                 )
 
             try:
-                return await self._run_with_lock()
+                result = await self._run_with_lock()
+                # Mark as finished with success
+                self._finished = True
+                self._final_state = CompositePipelineState.COMPLETED
+                return result
             finally:
                 await self._lock.release(key=lock_key, owner_id=self._run_id)
 
         except Exception as e:
+            # Mark as finished with failure
+            self._finished = True
+            self._final_state = CompositePipelineState.FAILED
             self._logger.error(
                 PipelineEvent.FAILED,
                 composite=self._config.name,
@@ -1853,6 +2886,14 @@ class CompositePipelineRunner:
         # Load checkpoint (for resume)
         state = await self._checkpoint_manager.load()
 
+        # Handle resume from FAILED state - determine correct phase to continue from
+        if self._runtime.resume and state.state == CompositePipelineState.FAILED:
+            state = self._fsm.handle_resume_from_failed(state)
+
+        # Log resume context if resuming with progress
+        if self._runtime.resume and state.is_resumable:
+            self._fsm.log_resume_context(state)
+
         # Track results
         seed_result: SeedResult | None = None
         enrichment_results: dict[str, EnrichmentResult] = {}
@@ -1860,14 +2901,83 @@ class CompositePipelineRunner:
 
         # Step 1: Run seed (if not completed)
         if not state.seed_completed:
-            seed_result = await self._run_seed()
+            # Validate and transition to SEED_RUNNING before starting seed
+            previous_state = state.state
+            self._fsm.validate_fsm_transition(
+                previous_state, CompositePipelineState.SEED_RUNNING
+            )
+            state = state.with_state(CompositePipelineState.SEED_RUNNING)
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.SEED_RUNNING,
+                stage="seed_start",
+            )
+            # Log phase event for seed start
+            self._logger.info(
+                PipelineEvent.phase_started("seed"),
+                composite=self._config.name,
+                run_id=self._run_id_str,
+            )
+            await self._save_checkpoint_safe(state, "seed_running")
+
+            # Execute seed with error handling
+            try:
+                seed_result = await self._run_seed()
+            except Exception as e:
+                # Seed failed - transition to FAILED state
+                self._logger.error(
+                    "Seed pipeline failed",
+                    composite=self._config.name,
+                    run_id=self._run_id_str,
+                    seed_pipeline=self._config.seed.pipeline,
+                    error=str(e),
+                )
+                self._fsm.log_fsm_transition(
+                    from_state=CompositePipelineState.SEED_RUNNING,
+                    to_state=CompositePipelineState.FAILED,
+                    stage="seed_failed",
+                    error=str(e),
+                )
+                # Save FAILED state to checkpoint for resume awareness
+                failed_state = state.with_state(CompositePipelineState.FAILED)
+                await self._save_checkpoint_safe(failed_state, "seed_failed")
+                # Re-raise to trigger outer error handling and lock release
+                raise
+
+            # Seed succeeded - transition to SEED_COMPLETED
             state = state.with_seed_completed(seed_result)
-            await self._checkpoint_manager.save(state)
+            self._fsm.log_fsm_transition(
+                from_state=CompositePipelineState.SEED_RUNNING,
+                to_state=CompositePipelineState.SEED_COMPLETED,
+                stage="seed_complete",
+                records_extracted=seed_result.records_extracted,
+                records_silver=seed_result.records_silver,
+            )
+            # Log phase event for seed completion
+            self._logger.info(
+                PipelineEvent.phase_completed("seed"),
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                records_extracted=seed_result.records_extracted,
+                records_silver=seed_result.records_silver,
+            )
+            await self._save_checkpoint_safe(state, "seed_completed")
         else:
+            # Resume: seed already completed
             self._logger.info(
                 "Seed already completed, resuming from checkpoint",
                 composite=self._config.name,
+                run_id=self._run_id_str,
             )
+            # Ensure FSM state reflects SEED_COMPLETED when resuming
+            if state.state != CompositePipelineState.SEED_COMPLETED:
+                previous_state = state.state
+                state = state.with_state(CompositePipelineState.SEED_COMPLETED)
+                self._fsm.log_fsm_transition(
+                    from_state=previous_state,
+                    to_state=CompositePipelineState.SEED_COMPLETED,
+                    stage="seed_resume",
+                )
             seed_result = SeedResult(
                 pipeline_name=self._config.seed.pipeline,
                 resumed=True,
@@ -1888,8 +2998,34 @@ class CompositePipelineRunner:
         # Step 3: Determine which enrichers to run
         enrichers_to_run = self._get_enrichers_to_run(state)
 
-        # Step 4: Run enrichers (fan-out)
+        # Step 4: Run enrichers (fan-out) with FSM state management
         if enrichers_to_run:
+            # Validate and transition to ENRICHING state before starting enrichments
+            enricher_names = [e.pipeline for e in enrichers_to_run]
+            previous_state = state.state
+            self._fsm.validate_fsm_transition(
+                previous_state, CompositePipelineState.ENRICHING
+            )
+            state = state.with_state(CompositePipelineState.ENRICHING)
+            await self._checkpoint_manager.save(state)
+
+            # Log FSM transition to ENRICHING
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.ENRICHING,
+                stage="enrichment_start",
+                enrichers=enricher_names,
+                count=len(enrichers_to_run),
+            )
+            # Log phase event for enrichment start
+            self._logger.info(
+                PipelineEvent.phase_started("enrichment"),
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                enrichers=enricher_names,
+                count=len(enrichers_to_run),
+            )
+
             enrichment_results = await self._coordinator.run_enrichers(
                 keys=keys_df,
                 enrichers=enrichers_to_run,
@@ -1903,43 +3039,102 @@ class CompositePipelineRunner:
                     state = state.with_enricher_completed(name, result)
             await self._checkpoint_manager.save(state)
 
+            # Log aggregated enrichment results
+            log_enrichment_summary(enrichment_results, self._config.name, self._logger)
+        else:
+            # No enrichers to run - skip enrichment stage
+            self._logger.info(
+                "No enrichers to run, skipping enrichment stage",
+                composite=self._config.name,
+                reason="all_completed_or_filtered",
+            )
+
         # Merge with previously completed enrichers
         enrichment_results.update(state.enrichment_results)
 
-        # Step 5: Check required enrichers
-        self._check_required_enrichers(enrichment_results)
+        # Step 4b: Add NOT_RUN results for optional enrichers skipped due to required_only
+        enrichment_results = add_not_run_results(
+            enrichment_results,
+            enrichers_to_run,
+            self._config.enrichers,
+            state.completed_enrichers,
+            self._runtime.required_only,
+            self._config.name,
+            self._logger,
+        )
 
-        # Step 6: Merge results
-        if not self._runtime.dry_run:
-            merge_result = await self._merger.merge(
-                seed_table=self._config.seed.silver_table,
-                enrichers=self._config.enrichers,
-                enrichment_results=enrichment_results,
-                run_id=self._run_id_str,
+        # Step 5: Check required enrichers with FSM FAILED transition on error
+        try:
+            self._check_required_enrichers(enrichment_results)
+        except RuntimeError as e:
+            # Required enricher failed - transition to FAILED state
+            previous_state = state.state
+            state = state.with_state(CompositePipelineState.FAILED)
+
+            # Log FSM transition to FAILED
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.FAILED,
+                stage="required_enricher_failed",
+                error=str(e),
             )
 
-            self._logger.info(
-                "Merge completed",
+            try:
+                await self._checkpoint_manager.save(state)
+            except Exception as save_error:
+                self._logger.warning(
+                    "Failed to save FAILED state to checkpoint",
+                    composite=self._config.name,
+                    run_id=self._run_id_str,
+                    error=str(save_error),
+                )
+
+            self._logger.error(
+                "Required enricher failed, pipeline transitioning to FAILED",
                 composite=self._config.name,
-                records_merged=merge_result.records_merged,
+                run_id=self._run_id_str,
+                error=str(e),
             )
+            raise
 
-            # Step 6b: Generate DQ reports if service is available
-            await self._generate_dq_reports(merge_result)
+        # Step 5b: Transition to ENRICHMENT_COMPLETED
+        state = await self._transition_to_enrichment_completed(state)
 
-        # Step 7: Cleanup checkpoint on success
-        await self._checkpoint_manager.delete()
+        # Step 6: Execute merge or skip in dry run mode
+        state, merge_result = await self._execute_merge_stage(state, enrichment_results)
+
+        # Step 7: Finalize - set COMPLETED and cleanup checkpoint
+        await self._finalize_pipeline(state)
 
         completed_at = datetime.now(tz=UTC)
         started = self._started_at or completed_at  # Fallback if not set
         total_duration = (completed_at - started).total_seconds()
 
-        self._logger.info(
-            PipelineEvent.COMPLETE,
-            composite=self._config.name,
-            run_id=self._run_id_str,
-            duration_seconds=total_duration,
+        # Calculate if we had warnings from optional enricher failures
+        had_warnings = calculate_had_warnings(
+            enrichment_results,
+            frozenset(self._config.required_enrichers),
+            self._config.name,
+            self._logger,
         )
+
+        # Log completion with appropriate status
+        if had_warnings:
+            self._logger.info(
+                PipelineEvent.COMPLETE,
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                duration_seconds=total_duration,
+                status="completed_with_warnings",
+                had_warnings=True,
+            )
+        else:
+            self._logger.info(
+                PipelineEvent.COMPLETE,
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                duration_seconds=total_duration,
+            )
 
         return CompositeResult(
             composite_name=self._config.name,
@@ -1950,8 +3145,244 @@ class CompositePipelineRunner:
             total_duration_seconds=total_duration,
             started_at=self._started_at,
             completed_at=completed_at,
+            had_warnings=had_warnings,
             _required_enrichers=frozenset(self._config.required_enrichers),
         )
+
+    async def _transition_to_enrichment_completed(
+        self, state: CompositeCheckpointState
+    ) -> CompositeCheckpointState:
+        """Transition FSM state to ENRICHMENT_COMPLETED.
+
+        Handles the case where no enrichers were run (state is still SEED_COMPLETED).
+        Must go through ENRICHING first per FSM rules.
+        """
+        from bioetl.domain.composite.state import CompositePipelineState
+
+        if state.state == CompositePipelineState.SEED_COMPLETED:
+            # Must go through ENRICHING first per FSM rules (no enrichers case)
+            previous_state = state.state
+            self._fsm.validate_fsm_transition(
+                previous_state, CompositePipelineState.ENRICHING
+            )
+            state = state.with_state(CompositePipelineState.ENRICHING)
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.ENRICHING,
+                stage="enrichment_start_empty",
+                reason="no_enrichers_to_run",
+            )
+
+        if state.state == CompositePipelineState.ENRICHING:
+            enriching_state: CompositePipelineState = state.state
+            self._fsm.validate_fsm_transition(
+                enriching_state, CompositePipelineState.ENRICHMENT_COMPLETED
+            )
+            state = state.with_state(CompositePipelineState.ENRICHMENT_COMPLETED)
+            await self._save_checkpoint_safe(state, "enrichment_completed")
+
+            # Log FSM transition to ENRICHMENT_COMPLETED
+            self._fsm.log_fsm_transition(
+                from_state=enriching_state,
+                to_state=CompositePipelineState.ENRICHMENT_COMPLETED,
+                stage="enrichment_complete",
+            )
+            # Log phase event for enrichment completion
+            self._logger.info(
+                PipelineEvent.phase_completed("enrichment"),
+                composite=self._config.name,
+                run_id=self._run_id_str,
+            )
+        return state
+
+    async def _execute_merge_stage(
+        self,
+        state: CompositeCheckpointState,
+        enrichment_results: dict[str, EnrichmentResult],
+    ) -> tuple[CompositeCheckpointState, MergeResult | None]:
+        """Execute merge stage or skip in dry run mode.
+
+        Returns updated state and merge result (None for dry run).
+        """
+        from bioetl.domain.composite.state import CompositePipelineState
+
+        merge_result: MergeResult | None = None
+
+        if not self._runtime.dry_run:
+            # Validate and transition to MERGING state
+            previous_state = state.state
+            self._fsm.validate_fsm_transition(
+                previous_state, CompositePipelineState.MERGING
+            )
+            state = state.with_state(CompositePipelineState.MERGING)
+            await self._save_checkpoint_safe(state, "merging")
+
+            # Log FSM transition to MERGING
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.MERGING,
+                stage="merge_start",
+            )
+            # Log phase event for merge start
+            self._logger.info(
+                PipelineEvent.phase_started("merge"),
+                composite=self._config.name,
+                run_id=self._run_id_str,
+            )
+
+            try:
+                # Get only enrichers with data to merge (exclude SKIPPED/NOT_RUN)
+                mergeable_enrichers = get_mergeable_enrichers(
+                    enrichment_results, self._config.enrichers, self._logger
+                )
+
+                merge_result = await self._merger.merge(
+                    seed_table=self._config.seed.silver_table,
+                    enrichers=mergeable_enrichers,
+                    enrichment_results=enrichment_results,
+                    run_id=self._run_id_str,
+                )
+
+                # Log phase event for merge completion
+                self._logger.info(
+                    PipelineEvent.phase_completed("merge"),
+                    composite=self._config.name,
+                    run_id=self._run_id_str,
+                    records_merged=merge_result.records_merged,
+                )
+
+                # Generate DQ reports if service is available
+                await self._generate_dq_reports(merge_result)
+
+            except Exception as merge_error:
+                # Log FSM transition to FAILED
+                self._fsm.log_fsm_transition(
+                    from_state=CompositePipelineState.MERGING,
+                    to_state=CompositePipelineState.FAILED,
+                    stage="merge_failed",
+                    error=str(merge_error),
+                )
+                self._logger.error(
+                    "Merge failed",
+                    composite=self._config.name,
+                    run_id=self._run_id_str,
+                    error=str(merge_error),
+                )
+                state = state.with_state(CompositePipelineState.FAILED)
+                await self._save_checkpoint_safe(state, "merge_failed")
+                raise
+        else:
+            # Dry run mode - skip merge, transition directly to COMPLETED
+            self._fsm.log_fsm_transition(
+                from_state=state.state,
+                to_state=CompositePipelineState.COMPLETED,
+                stage="dry_run_skip_merge",
+                reason="dry_run_mode",
+            )
+            self._logger.info(
+                "Dry run: merge skipped, pipeline completing",
+                composite=self._config.name,
+                run_id=self._run_id_str,
+            )
+
+        return state, merge_result
+
+    async def _finalize_pipeline(self, state: CompositeCheckpointState) -> None:
+        """Finalize pipeline - set COMPLETED state and cleanup checkpoint."""
+        from bioetl.domain.composite.state import CompositePipelineState
+
+        # Validate and transition to COMPLETED state (only if not already COMPLETED from dry run)
+        if state.state != CompositePipelineState.COMPLETED:
+            previous_state = state.state
+            self._fsm.validate_fsm_transition(
+                previous_state, CompositePipelineState.COMPLETED
+            )
+            state = state.with_state(CompositePipelineState.COMPLETED)
+
+            # Log FSM transition to COMPLETED
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.COMPLETED,
+                stage="pipeline_complete",
+            )
+        await self._save_checkpoint_safe(state, "completed")
+
+        # Cleanup checkpoint on success
+        try:
+            await self._checkpoint_manager.delete()
+        except Exception as delete_error:
+            # Checkpoint deletion failure is non-critical
+            self._logger.warning(
+                "Failed to delete checkpoint",
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                error=str(delete_error),
+            )
+
+    def _validate_config_consistency(self) -> None:
+        """Validate configuration consistency and log warnings for anomalies.
+
+        Checks for potential issues in CompositeConfig that might indicate
+        misconfiguration:
+        - required_enrichers property matches actual required flags
+        - All enrichers are optional warning (valid but notable)
+
+        This is a defensive check to catch configuration errors early.
+        """
+        # Check required_enrichers consistency
+        expected_required = frozenset(
+            e.pipeline for e in self._config.enrichers if e.required
+        )
+        actual_required = frozenset(self._config.required_enrichers)
+
+        if expected_required != actual_required:
+            self._logger.warning(
+                "Config inconsistency: required_enrichers mismatch",
+                composite=self._config.name,
+                expected_required=list(expected_required),
+                actual_required=list(actual_required),
+                note="This may indicate a bug in CompositeConfig",
+            )
+
+        # Log info if all enrichers are optional
+        if not expected_required and self._config.enrichers:
+            self._logger.info(
+                "All enrichers are optional",
+                composite=self._config.name,
+                enricher_count=len(self._config.enrichers),
+                note="Pipeline will succeed even if all enrichers fail",
+            )
+
+    async def _save_checkpoint_safe(
+        self,
+        state: CompositeCheckpointState,
+        operation: str,
+    ) -> bool:
+        """Save checkpoint with graceful error handling.
+
+        Checkpoint save failures should not stop pipeline execution, but
+        resume capability will be affected.
+
+        Args:
+            state: Checkpoint state to save.
+            operation: Description of the operation for logging.
+
+        Returns:
+            True if save succeeded, False otherwise.
+        """
+        try:
+            await self._checkpoint_manager.save(state)
+            return True
+        except Exception as e:
+            self._logger.warning(
+                "checkpoint_save_failed",
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                operation=operation,
+                error=str(e),
+                note="Resume capability may be affected",
+            )
+            return False
 
     async def _run_seed(self) -> SeedResult:
         """Run the seed pipeline."""
@@ -2079,6 +3510,244 @@ class CompositePipelineRunner:
             )
 
 ================================================================================
+File: runner_helpers.py
+Path: composite\runner_helpers.py
+================================================================================
+"""Helper functions for CompositePipelineRunner.
+
+Pure functions extracted to reduce class size while maintaining cohesion.
+These functions have no side effects and operate on data passed as arguments.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Iterable
+from typing import TYPE_CHECKING
+
+from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
+
+if TYPE_CHECKING:
+    from collections.abc import Set
+
+    from bioetl.domain.composite.config import EnricherConfig
+    from bioetl.domain.ports import LoggerPort
+
+
+def log_enrichment_summary(
+    enrichment_results: dict[str, EnrichmentResult],
+    composite_name: str,
+    logger: LoggerPort,
+) -> None:
+    """Log aggregated summary of enrichment results.
+
+    Args:
+        enrichment_results: Results from enrichers.
+        composite_name: Name of the composite pipeline.
+        logger: Logger port for structured logging.
+    """
+    if not enrichment_results:
+        return
+
+    # Aggregate by status using counter
+    status_counts: dict[EnrichmentStatus, int] = dict.fromkeys(EnrichmentStatus, 0)
+    total_records_input = 0
+    total_records_enriched = 0
+    total_records_errored = 0
+
+    failed_enrichers: list[str] = []
+    successful_enrichers: list[str] = []
+    not_run_enrichers: list[str] = []
+
+    # Track which statuses map to which enricher lists
+    success_statuses = {EnrichmentStatus.SUCCESS, EnrichmentStatus.PARTIAL}
+    failure_statuses = {EnrichmentStatus.FAILED, EnrichmentStatus.TIMEOUT}
+
+    for name, result in enrichment_results.items():
+        total_records_input += result.records_input
+        total_records_enriched += result.records_enriched
+        total_records_errored += result.records_errored
+        status_counts[result.status] += 1
+
+        # Categorize enrichers
+        if result.status in success_statuses:
+            successful_enrichers.append(name)
+        elif result.status in failure_statuses:
+            failed_enrichers.append(name)
+        elif result.status == EnrichmentStatus.NOT_RUN:
+            not_run_enrichers.append(name)
+
+    logger.info(
+        "Enrichment summary",
+        composite=composite_name,
+        total_enrichers=len(enrichment_results),
+        success=status_counts[EnrichmentStatus.SUCCESS],
+        partial=status_counts[EnrichmentStatus.PARTIAL],
+        failed=status_counts[EnrichmentStatus.FAILED],
+        skipped=status_counts[EnrichmentStatus.SKIPPED],
+        timeout=status_counts[EnrichmentStatus.TIMEOUT],
+        not_run=status_counts[EnrichmentStatus.NOT_RUN],
+        successful_enrichers=successful_enrichers,
+        failed_enrichers=failed_enrichers if failed_enrichers else None,
+        not_run_enrichers=not_run_enrichers if not_run_enrichers else None,
+        total_records_input=total_records_input,
+        total_records_enriched=total_records_enriched,
+        total_records_errored=total_records_errored,
+    )
+
+
+def calculate_had_warnings(
+    enrichment_results: dict[str, EnrichmentResult],
+    required_enrichers: frozenset[str],
+    composite_name: str,
+    logger: LoggerPort,
+) -> bool:
+    """Calculate if the pipeline had warnings from optional enricher failures.
+
+    A warning occurs when an optional (non-required) enricher fails but the
+    pipeline can still complete successfully. This allows users to distinguish
+    between clean completions and completions with issues.
+
+    Args:
+        enrichment_results: All enrichment results.
+        required_enrichers: Set of required enricher names.
+        composite_name: Name of the composite pipeline.
+        logger: Logger port for structured logging.
+
+    Returns:
+        True if any optional enricher failed (status FAILED or TIMEOUT).
+    """
+    for name, result in enrichment_results.items():
+        # Skip required enrichers - their failures would already have raised
+        if name in required_enrichers:
+            continue
+
+        # Check for failure statuses (FAILED, TIMEOUT)
+        if result.status in (EnrichmentStatus.FAILED, EnrichmentStatus.TIMEOUT):
+            logger.warning(
+                "Optional enricher failed",
+                composite=composite_name,
+                enricher=name,
+                status=result.status.value,
+                error_message=result.error_message,
+            )
+            return True
+
+    return False
+
+
+def add_not_run_results(
+    enrichment_results: dict[str, EnrichmentResult],
+    enrichers_to_run: list[EnricherConfig],
+    all_enrichers: Iterable[EnricherConfig],
+    completed_enrichers: Set[str],
+    required_only: bool,
+    composite_name: str,
+    logger: LoggerPort,
+) -> dict[str, EnrichmentResult]:
+    """Add NOT_RUN results for optional enrichers skipped due to required_only mode.
+
+    When required_only is True, optional enrichers are not executed. This function
+    adds explicit NOT_RUN results for these enrichers so they appear in the
+    final enrichment_results for complete lineage tracking.
+
+    Args:
+        enrichment_results: Current enrichment results from executed enrichers.
+        enrichers_to_run: List of enrichers that were actually run.
+        all_enrichers: All enrichers in the config.
+        completed_enrichers: Set of previously completed enricher names.
+        required_only: Whether required_only mode is active.
+        composite_name: Name of the composite pipeline.
+        logger: Logger port for structured logging.
+
+    Returns:
+        Updated enrichment_results with NOT_RUN entries for skipped optional enrichers.
+    """
+    if not required_only:
+        return enrichment_results
+
+    # Get set of enrichers that were actually run or previously completed
+    run_names = {e.pipeline for e in enrichers_to_run}
+
+    # Find optional enrichers that were skipped due to required_only
+    for enricher in all_enrichers:
+        # Only process optional enrichers
+        if enricher.required:
+            continue
+
+        # Skip if this enricher was run or previously completed
+        if enricher.pipeline in run_names:
+            continue
+        if enricher.pipeline in completed_enrichers:
+            continue
+
+        # Skip if already in results (shouldn't happen, but defensive)
+        if enricher.pipeline in enrichment_results:
+            continue
+
+        # Add NOT_RUN result for this skipped optional enricher
+        enrichment_results[enricher.pipeline] = EnrichmentResult.not_run(
+            enricher_name=enricher.pipeline,
+            reason="Skipped due to required_only mode",
+        )
+
+        logger.info(
+            "Optional enricher not run",
+            composite=composite_name,
+            enricher=enricher.pipeline,
+            reason="required_only_mode",
+        )
+
+    return enrichment_results
+
+
+def get_mergeable_enrichers(
+    enrichment_results: dict[str, EnrichmentResult],
+    all_enrichers: Iterable[EnricherConfig],
+    logger: LoggerPort,
+) -> list[EnricherConfig]:
+    """Get list of enrichers that should be included in merge.
+
+    Excludes enrichers with NOT_RUN or SKIPPED status since they have no
+    data to merge. This prevents file I/O errors when trying to read
+    non-existent or empty Silver tables.
+
+    Args:
+        enrichment_results: All enrichment results.
+        all_enrichers: All enricher configs.
+        logger: Logger port for structured logging.
+
+    Returns:
+        List of EnricherConfig for enrichers that have data to merge.
+    """
+    # Statuses that indicate no data to merge
+    non_mergeable_statuses = (
+        EnrichmentStatus.SKIPPED,
+        EnrichmentStatus.NOT_RUN,
+    )
+
+    mergeable: list[EnricherConfig] = []
+    for enricher_cfg in all_enrichers:
+        result = enrichment_results.get(enricher_cfg.pipeline)
+
+        # If no result, don't include in merge
+        if result is None:
+            continue
+
+        # If status indicates no data, don't include in merge
+        if result.status in non_mergeable_statuses:
+            logger.debug(
+                "Excluding enricher from merge",
+                enricher=enricher_cfg.pipeline,
+                status=result.status.value,
+                reason="no_data_to_merge",
+            )
+            continue
+
+        mergeable.append(enricher_cfg)
+
+    return mergeable
+
+================================================================================
 File: __init__.py
 Path: core\__init__.py
 ================================================================================
@@ -2145,9 +3814,9 @@ from bioetl.application.core.transform_utils import (
     safe_extract,
     validate_smiles,
 )
-from bioetl.application.services.medallion_lifecycle import (
+from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
+from bioetl.application.services.medallion_types import (
     ClearResult,
-    MedallionLifecycleService,
     PrepareResult,
 )
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
@@ -7378,7 +9047,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.application.services.data_quality_service import DataQualityService
-from bioetl.application.services.medallion_lifecycle import VacuumResult
+from bioetl.application.services.medallion_types import VacuumResult
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
 if TYPE_CHECKING:
@@ -12769,7 +14438,8 @@ _PUBLICATION_IDS = FieldGroup(
     fields=(
         # Rename pubmed_id -> pmid for cross-provider consistency (PMID standardization)
         FieldSpec("pubmed_id", target="pmid", converter=PMID),
-        *simple_fields("doi", "patent_id"),
+        *simple_fields("doi"),
+        # Note: patent_id excluded - not needed for unified publication schema
     ),
 )
 
@@ -12890,8 +14560,9 @@ class PublicationTransformer(BaseChemblTransformer):
         validated_year = year_vo.value if year_vo else None
         data["year"] = validated_year
 
-        # Compute unified publication_date from year (ChEMBL only provides year)
-        data["publication_date"] = f"{validated_year}-01-01" if validated_year else None
+        # publication_date: ChEMBL API doesn't provide full date, only year
+        # Set to null rather than computing from year to avoid false precision
+        data["publication_date"] = None
 
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON
@@ -12907,6 +14578,14 @@ class PublicationTransformer(BaseChemblTransformer):
         # Lookup metadata (direct extraction, no enrichment)
         data["_lookup_method"] = "direct"
         data["_original_id"] = str(primary_id)
+
+        # System field: data source identifier
+        data["_source"] = "chembl"
+
+        # Unified publication fields (ChEMBL API doesn't provide these)
+        data["citation_count"] = None  # Not available from ChEMBL API
+        data["is_oa"] = None  # Not available from ChEMBL API
+        data["language"] = None  # Not available from ChEMBL API
 
         # Cross-reference IDs (ChEMBL API doesn't provide PMC ID)
         data["pmc_id"] = None
@@ -19841,6 +21520,121 @@ class GoldDQAnalyzer:
     FRESHNESS_WARNING_HOURS = 24
     FRESHNESS_CRITICAL_HOURS = 72
 
+    def _execute_checks(
+        self,
+        df: pl.DataFrame,
+        enabled_checks: set[GoldDQCheckType],
+        required_fields: list[str],
+        completeness_threshold: float,
+        business_rules: list[dict[str, Any]],
+        reference_tables: dict[str, pl.DataFrame | pa.Table],
+        baseline_stats: dict[str, Any] | None,
+        scd_config: dict[str, Any] | None,
+    ) -> tuple[dict[str, Any], int, int, int]:
+        """Execute all enabled DQ checks and collect results.
+
+        Args:
+            df: Polars DataFrame with Gold data.
+            enabled_checks: Set of enabled check types.
+            required_fields: List of required fields for completeness.
+            completeness_threshold: Minimum completeness score threshold.
+            business_rules: List of business rule definitions.
+            reference_tables: Tables for referential integrity checks.
+            baseline_stats: Historical baseline for anomaly detection.
+            scd_config: SCD configuration if applicable.
+
+        Returns:
+            Tuple of (checks dict, passed count, failed count, warnings count).
+        """
+        checks: dict[str, Any] = {}
+        passed, failed, warnings = 0, 0, 0
+
+        if GoldDQCheckType.RECORD_COUNT in enabled_checks:
+            record_count_result = self._check_record_count(df, baseline_stats)
+            checks["record_count"] = _result_to_dict(record_count_result)
+            passed, failed, warnings = _update_counts(
+                record_count_result.status, passed, failed, warnings
+            )
+
+        if GoldDQCheckType.COMPLETENESS in enabled_checks:
+            completeness_result = self._check_completeness(
+                df, required_fields, completeness_threshold
+            )
+            checks["completeness"] = _result_to_dict(completeness_result)
+            passed, failed, warnings = _update_counts(
+                completeness_result.status, passed, failed, warnings
+            )
+
+        if GoldDQCheckType.BUSINESS_RULES in enabled_checks:
+            business_rules_result = self._check_business_rules(df, business_rules)
+            checks["business_rules"] = _result_to_dict(business_rules_result)
+            passed, failed, warnings = _update_counts(
+                business_rules_result.status, passed, failed, warnings
+            )
+
+        if GoldDQCheckType.REFERENTIAL_INTEGRITY in enabled_checks:
+            ref_integrity_result = self._check_referential_integrity(
+                df, reference_tables
+            )
+            checks["referential_integrity"] = _result_to_dict(ref_integrity_result)
+            passed, failed, warnings = _update_counts(
+                ref_integrity_result.status, passed, failed, warnings
+            )
+
+        if GoldDQCheckType.STATISTICAL_PROFILE in enabled_checks:
+            stat_profile_result = self._check_statistical_profile(df, baseline_stats)
+            checks["statistical_profile"] = _result_to_dict(stat_profile_result)
+            passed, failed, warnings = _update_counts(
+                stat_profile_result.status, passed, failed, warnings
+            )
+
+        if GoldDQCheckType.ANOMALY_DETECTION in enabled_checks:
+            anomaly_result = self._check_anomaly_detection(df, baseline_stats)
+            checks["anomaly_detection"] = _result_to_dict(anomaly_result)
+            passed, failed, warnings = _update_counts(
+                anomaly_result.status, passed, failed, warnings
+            )
+
+        if GoldDQCheckType.SCD_INTEGRITY in enabled_checks:
+            scd_result = self._check_scd_integrity(df, scd_config)
+            checks["scd_integrity"] = _result_to_dict(scd_result)
+            passed, failed, warnings = _update_counts(
+                scd_result.status, passed, failed, warnings
+            )
+
+        return checks, passed, failed, warnings
+
+    def _build_summary(
+        self,
+        passed: int,
+        failed: int,
+        warnings: int,
+    ) -> DQReportSummary:
+        """Build DQ report summary with overall status.
+
+        Args:
+            passed: Number of passed checks.
+            failed: Number of failed checks.
+            warnings: Number of warning checks.
+
+        Returns:
+            DQReportSummary with overall status.
+        """
+        if failed > 0:
+            overall_status = DQReportStatus.FAIL
+        elif warnings > 0:
+            overall_status = DQReportStatus.WARNING
+        else:
+            overall_status = DQReportStatus.PASS
+
+        return DQReportSummary(
+            total_checks=passed + failed + warnings,
+            passed=passed,
+            failed=failed,
+            warnings=warnings,
+            overall_status=overall_status,
+        )
+
     def analyze(
         self,
         data: pl.DataFrame | pa.Table,
@@ -19884,91 +21678,23 @@ class GoldDQAnalyzer:
 
         enabled_checks = set(config.get_checks_enums())
 
-        checks: dict[str, Any] = {}
-        passed = 0
-        failed = 0
-        warnings = 0
-
-        # Record count check
-        if GoldDQCheckType.RECORD_COUNT in enabled_checks:
-            record_count_result = self._check_record_count(df, baseline_stats)
-            checks["record_count"] = _result_to_dict(record_count_result)
-            passed, failed, warnings = _update_counts(
-                record_count_result.status, passed, failed, warnings
-            )
-
-        # Completeness check
-        if GoldDQCheckType.COMPLETENESS in enabled_checks:
-            completeness_result = self._check_completeness(
-                df, required_fields or [], completeness_threshold
-            )
-            checks["completeness"] = _result_to_dict(completeness_result)
-            passed, failed, warnings = _update_counts(
-                completeness_result.status, passed, failed, warnings
-            )
-
-        # Business rules check
-        if GoldDQCheckType.BUSINESS_RULES in enabled_checks:
-            business_rules_result = self._check_business_rules(df, business_rules or [])
-            checks["business_rules"] = _result_to_dict(business_rules_result)
-            passed, failed, warnings = _update_counts(
-                business_rules_result.status, passed, failed, warnings
-            )
-
-        # Referential integrity check
-        if GoldDQCheckType.REFERENTIAL_INTEGRITY in enabled_checks:
-            ref_integrity_result = self._check_referential_integrity(
-                df, reference_tables or {}
-            )
-            checks["referential_integrity"] = _result_to_dict(ref_integrity_result)
-            passed, failed, warnings = _update_counts(
-                ref_integrity_result.status, passed, failed, warnings
-            )
-
-        # Statistical profile check
-        if GoldDQCheckType.STATISTICAL_PROFILE in enabled_checks:
-            stat_profile_result = self._check_statistical_profile(df, baseline_stats)
-            checks["statistical_profile"] = _result_to_dict(stat_profile_result)
-            passed, failed, warnings = _update_counts(
-                stat_profile_result.status, passed, failed, warnings
-            )
-
-        # Anomaly detection
-        if GoldDQCheckType.ANOMALY_DETECTION in enabled_checks:
-            anomaly_result = self._check_anomaly_detection(df, baseline_stats)
-            checks["anomaly_detection"] = _result_to_dict(anomaly_result)
-            passed, failed, warnings = _update_counts(
-                anomaly_result.status, passed, failed, warnings
-            )
-
-        # SCD integrity check
-        if GoldDQCheckType.SCD_INTEGRITY in enabled_checks:
-            scd_result = self._check_scd_integrity(df, scd_config)
-            checks["scd_integrity"] = _result_to_dict(scd_result)
-            passed, failed, warnings = _update_counts(
-                scd_result.status, passed, failed, warnings
-            )
-
-        total_checks = passed + failed + warnings
+        # Execute all enabled checks
+        checks, passed, failed, warnings = self._execute_checks(
+            df=df,
+            enabled_checks=enabled_checks,
+            required_fields=required_fields or [],
+            completeness_threshold=completeness_threshold,
+            business_rules=business_rules or [],
+            reference_tables=reference_tables or {},
+            baseline_stats=baseline_stats,
+            scd_config=scd_config,
+        )
 
         # Data freshness check
         data_freshness = self._check_data_freshness(df, timestamp)
 
-        # Determine overall status
-        if failed > 0:
-            overall_status = DQReportStatus.FAIL
-        elif warnings > 0:
-            overall_status = DQReportStatus.WARNING
-        else:
-            overall_status = DQReportStatus.PASS
-
-        summary = DQReportSummary(
-            total_checks=total_checks,
-            passed=passed,
-            failed=failed,
-            warnings=warnings,
-            overall_status=overall_status,
-        )
+        # Build summary
+        summary = self._build_summary(passed, failed, warnings)
 
         return GoldDQReport(
             layer=MedallionLayer.GOLD,
@@ -20584,6 +22310,167 @@ class SilverDQAnalyzer:
     Implements SilverDQAnalyzerPort.
     """
 
+    def _execute_checks(
+        self,
+        df: pl.DataFrame,
+        enabled_checks: set[SilverDQCheckType],
+        primary_keys: list[str],
+        input_record_count: int | None,
+        quarantined_count: int,
+        previous_schema: dict[str, str] | None,
+    ) -> tuple[dict[str, Any], int, int, int]:
+        """Execute all enabled DQ checks and collect results.
+
+        Args:
+            df: Polars DataFrame with Silver data.
+            enabled_checks: Set of enabled check types.
+            primary_keys: List of primary key columns.
+            input_record_count: Original record count before transforms.
+            quarantined_count: Number of quarantined records.
+            previous_schema: Previous schema for drift detection.
+
+        Returns:
+            Tuple of (checks dict, passed count, failed count, warnings count).
+        """
+        checks: dict[str, Any] = {}
+        passed, failed, warnings = 0, 0, 0
+
+        if SilverDQCheckType.RECORD_COUNT in enabled_checks:
+            record_count_result = self._check_record_count(
+                df, input_record_count, quarantined_count
+            )
+            checks["record_count"] = self._result_to_dict(record_count_result)
+            passed, failed, warnings = self._update_counts(
+                record_count_result.status, passed, failed, warnings
+            )
+
+        if SilverDQCheckType.NULL_RATE in enabled_checks:
+            null_results, overall_rate = self._check_null_rates(df)
+            checks["null_rate"] = {
+                "columns": {
+                    r.column_name: self._result_to_dict(r) for r in null_results
+                },
+                "overall_null_rate": overall_rate,
+                "status": DQCheckStatus.PASS.value,
+            }
+            passed += 1
+
+        if SilverDQCheckType.UNIQUENESS in enabled_checks:
+            uniqueness_result = self._check_uniqueness(df, primary_keys)
+            checks["uniqueness"] = self._result_to_dict(uniqueness_result)
+            passed, failed, warnings = self._update_counts(
+                uniqueness_result.status, passed, failed, warnings
+            )
+
+        if SilverDQCheckType.TYPE_CONFORMANCE in enabled_checks:
+            conformance_result = self._check_type_conformance(df)
+            checks["type_conformance"] = self._result_to_dict(conformance_result)
+            passed, failed, warnings = self._update_counts(
+                conformance_result.status, passed, failed, warnings
+            )
+
+        if SilverDQCheckType.VALUE_DISTRIBUTION in enabled_checks:
+            distribution_result = self._check_value_distribution(df)
+            checks["value_distribution"] = self._distribution_to_dict(
+                distribution_result
+            )
+            passed += 1
+
+        if SilverDQCheckType.SCHEMA_DRIFT in enabled_checks:
+            drift_result = self._check_schema_drift(df, previous_schema)
+            checks["schema_drift"] = self._result_to_dict(drift_result)
+            passed, failed, warnings = self._update_counts(
+                drift_result.status, passed, failed, warnings
+            )
+
+        if SilverDQCheckType.DEDUPLICATION_STATS in enabled_checks:
+            dedup_result = self._check_deduplication(
+                df, primary_keys, input_record_count or len(df)
+            )
+            checks["deduplication_stats"] = self._result_to_dict(dedup_result)
+            passed, failed, warnings = self._update_counts(
+                dedup_result.status, passed, failed, warnings
+            )
+
+        if SilverDQCheckType.CONTENT_HASH_INTEGRITY in enabled_checks:
+            hash_result = self._check_content_hash_integrity(df)
+            checks["content_hash_integrity"] = self._result_to_dict(hash_result)
+            passed, failed, warnings = self._update_counts(
+                hash_result.status, passed, failed, warnings
+            )
+
+        return checks, passed, failed, warnings
+
+    def _calculate_thresholds(
+        self,
+        df_len: int,
+        input_record_count: int | None,
+        quarantined_count: int,
+        soft_fail_threshold: float,
+        hard_fail_threshold: float,
+    ) -> DQThresholds:
+        """Calculate DQ thresholds and error rate status.
+
+        Args:
+            df_len: Length of the DataFrame.
+            input_record_count: Original record count before transforms.
+            quarantined_count: Number of quarantined records.
+            soft_fail_threshold: Warning threshold for error rate.
+            hard_fail_threshold: Failure threshold for error rate.
+
+        Returns:
+            DQThresholds with calculated error rate and status.
+        """
+        total_input = input_record_count or df_len + quarantined_count
+        error_rate = quarantined_count / total_input if total_input > 0 else 0.0
+
+        if error_rate >= hard_fail_threshold:
+            threshold_status = DQCheckStatus.FAIL
+        elif error_rate >= soft_fail_threshold:
+            threshold_status = DQCheckStatus.WARN
+        else:
+            threshold_status = DQCheckStatus.PASS
+
+        return DQThresholds(
+            soft_fail_threshold=soft_fail_threshold,
+            hard_fail_threshold=hard_fail_threshold,
+            current_error_rate=round(error_rate, 4),
+            threshold_status=threshold_status,
+        )
+
+    def _build_summary(
+        self,
+        passed: int,
+        failed: int,
+        warnings: int,
+        threshold_status: DQCheckStatus,
+    ) -> DQReportSummary:
+        """Build DQ report summary with overall status.
+
+        Args:
+            passed: Number of passed checks.
+            failed: Number of failed checks.
+            warnings: Number of warning checks.
+            threshold_status: Status from threshold calculation.
+
+        Returns:
+            DQReportSummary with overall status.
+        """
+        if failed > 0 or threshold_status == DQCheckStatus.FAIL:
+            overall_status = DQReportStatus.FAIL
+        elif warnings > 0 or threshold_status == DQCheckStatus.WARN:
+            overall_status = DQReportStatus.WARNING
+        else:
+            overall_status = DQReportStatus.PASS
+
+        return DQReportSummary(
+            total_checks=passed + failed + warnings,
+            passed=passed,
+            failed=failed,
+            warnings=warnings,
+            overall_status=overall_status,
+        )
+
     def analyze(
         self,
         data: pl.DataFrame | pa.Table,
@@ -20629,120 +22516,31 @@ class SilverDQAnalyzer:
 
         enabled_checks = set(config.get_checks_enums())
 
-        checks: dict[str, Any] = {}
-        passed = 0
-        failed = 0
-        warnings = 0
-
-        # Record count check
-        if SilverDQCheckType.RECORD_COUNT in enabled_checks:
-            record_count_result = self._check_record_count(
-                df, input_record_count, quarantined_count
-            )
-            checks["record_count"] = self._result_to_dict(record_count_result)
-            passed, failed, warnings = self._update_counts(
-                record_count_result.status, passed, failed, warnings
-            )
-
-        # Null rate check
-        if SilverDQCheckType.NULL_RATE in enabled_checks:
-            null_results, overall_null_rate = self._check_null_rates(df)
-            checks["null_rate"] = {
-                "columns": {
-                    r.column_name: self._result_to_dict(r) for r in null_results
-                },
-                "overall_null_rate": overall_null_rate,
-                "status": DQCheckStatus.PASS.value,
-            }
-            passed += 1
-
-        # Uniqueness check
-        if SilverDQCheckType.UNIQUENESS in enabled_checks:
-            uniqueness_result = self._check_uniqueness(df, primary_keys)
-            checks["uniqueness"] = self._result_to_dict(uniqueness_result)
-            passed, failed, warnings = self._update_counts(
-                uniqueness_result.status, passed, failed, warnings
-            )
-
-        # Type conformance check
-        if SilverDQCheckType.TYPE_CONFORMANCE in enabled_checks:
-            type_conformance_result = self._check_type_conformance(df)
-            checks["type_conformance"] = self._result_to_dict(type_conformance_result)
-            passed, failed, warnings = self._update_counts(
-                type_conformance_result.status, passed, failed, warnings
-            )
-
-        # Value distribution
-        if SilverDQCheckType.VALUE_DISTRIBUTION in enabled_checks:
-            distribution_result = self._check_value_distribution(df)
-            checks["value_distribution"] = self._distribution_to_dict(
-                distribution_result
-            )
-            passed += 1
-
-        # Schema drift
-        if SilverDQCheckType.SCHEMA_DRIFT in enabled_checks:
-            schema_drift_result = self._check_schema_drift(df, previous_schema)
-            checks["schema_drift"] = self._result_to_dict(schema_drift_result)
-            passed, failed, warnings = self._update_counts(
-                schema_drift_result.status, passed, failed, warnings
-            )
-
-        # Deduplication stats
-        if SilverDQCheckType.DEDUPLICATION_STATS in enabled_checks:
-            dedup_result = self._check_deduplication(
-                df, primary_keys, input_record_count or len(df)
-            )
-            checks["deduplication_stats"] = self._result_to_dict(dedup_result)
-            passed, failed, warnings = self._update_counts(
-                dedup_result.status, passed, failed, warnings
-            )
-
-        # Content hash integrity
-        if SilverDQCheckType.CONTENT_HASH_INTEGRITY in enabled_checks:
-            hash_integrity_result = self._check_content_hash_integrity(df)
-            checks["content_hash_integrity"] = self._result_to_dict(
-                hash_integrity_result
-            )
-            passed, failed, warnings = self._update_counts(
-                hash_integrity_result.status, passed, failed, warnings
-            )
-
-        total_checks = passed + failed + warnings
-
-        # Calculate error rate for threshold check
-        total_input = input_record_count or len(df) + quarantined_count
-        error_rate = quarantined_count / total_input if total_input > 0 else 0.0
-
-        # Determine threshold status
-        if error_rate >= hard_fail_threshold:
-            threshold_status = DQCheckStatus.FAIL
-        elif error_rate >= soft_fail_threshold:
-            threshold_status = DQCheckStatus.WARN
-        else:
-            threshold_status = DQCheckStatus.PASS
-
-        thresholds = DQThresholds(
-            soft_fail_threshold=soft_fail_threshold,
-            hard_fail_threshold=hard_fail_threshold,
-            current_error_rate=round(error_rate, 4),
-            threshold_status=threshold_status,
+        # Execute all enabled checks
+        checks, passed, failed, warnings = self._execute_checks(
+            df=df,
+            enabled_checks=enabled_checks,
+            primary_keys=primary_keys,
+            input_record_count=input_record_count,
+            quarantined_count=quarantined_count,
+            previous_schema=previous_schema,
         )
 
-        # Determine overall status
-        if failed > 0 or threshold_status == DQCheckStatus.FAIL:
-            overall_status = DQReportStatus.FAIL
-        elif warnings > 0 or threshold_status == DQCheckStatus.WARN:
-            overall_status = DQReportStatus.WARNING
-        else:
-            overall_status = DQReportStatus.PASS
+        # Calculate thresholds
+        thresholds = self._calculate_thresholds(
+            df_len=len(df),
+            input_record_count=input_record_count,
+            quarantined_count=quarantined_count,
+            soft_fail_threshold=soft_fail_threshold,
+            hard_fail_threshold=hard_fail_threshold,
+        )
 
-        summary = DQReportSummary(
-            total_checks=total_checks,
+        # Build summary
+        summary = self._build_summary(
             passed=passed,
             failed=failed,
             warnings=warnings,
-            overall_status=overall_status,
+            threshold_status=thresholds.threshold_status,
         )
 
         return SilverDQReport(
@@ -22569,64 +24367,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.medallion_types import (
+    ClearResult,
+    PrepareResult,
+    VacuumResult,
+)
+
 if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.medallion import MedallionPolicy
     from bioetl.domain.ports import LoggerPort, MetricsPort, StoragePort
-
-
-@dataclass(frozen=True, slots=True)
-class ClearResult:
-    """Result of clear operation.
-
-    Attributes:
-        silver_cleared: Number of Silver records cleared.
-        gold_cleared: Number of Gold records cleared.
-        dry_run: Whether this was a dry run (no actual deletion).
-    """
-
-    silver_cleared: int
-    gold_cleared: int
-    dry_run: bool
-
-    @property
-    def total_cleared(self) -> int:
-        """Get total records cleared.
-
-        Returns:
-            Sum of silver and gold cleared records.
-        """
-        return self.silver_cleared + self.gold_cleared
-
-
-@dataclass(frozen=True, slots=True)
-class VacuumResult:
-    """Result of VACUUM operation.
-
-    Attributes:
-        silver_files_removed: Number of files removed from Silver table.
-        gold_files_removed: Number of files removed from Gold table.
-        skipped: Whether VACUUM was skipped.
-    """
-
-    silver_files_removed: int
-    gold_files_removed: int
-    skipped: bool
-
-
-@dataclass(frozen=True, slots=True)
-class PrepareResult:
-    """Result of prepare_for_run operation.
-
-    Combines clear result with policy used for transparency.
-
-    Attributes:
-        clear_result: Result of clear operation.
-        policy: MedallionPolicy used for the operation.
-    """
-
-    clear_result: ClearResult
-    policy: MedallionPolicy
 
 
 @dataclass
@@ -22900,11 +24650,9 @@ class MedallionLifecycleService:
     ) -> VacuumResult:
         """Finalize medallion layers after pipeline run.
 
-        Vacuums Silver and Gold tables if enabled:
-        - Skipped if runtime.vacuum_after_run is False
-        - Skipped in dry-run mode
-
-        This method consolidates vacuum logic previously scattered in PostrunService.
+        Optimizes storage (Vacuum/Cleanup) if enabled:
+        - Skipped if neither optimize_storage nor vacuum_after_run is True
+        - Uses StoragePort.optimize() for unified maintenance
 
         Args:
             config: Pipeline configuration with table names.
@@ -22912,104 +24660,82 @@ class MedallionLifecycleService:
             metrics: Optional metrics port for observability.
 
         Returns:
-            VacuumResult with files removed counts.
+            VacuumResult (counts are 0 as implementation details are hidden).
         """
-        if not runtime.vacuum_after_run:
-            return VacuumResult(
-                silver_files_removed=0, gold_files_removed=0, skipped=True
-            )
+        # Support both new flag and legacy flag
+        enabled = runtime.optimize_storage or runtime.vacuum_after_run
 
-        if runtime.dry_run:
-            self.logger.info(
-                "VACUUM skipped in dry-run mode",
-                extra={"stage": "vacuum"},
-            )
+        if not enabled:
             return VacuumResult(
                 silver_files_removed=0, gold_files_removed=0, skipped=True
             )
 
         self.logger.info(
-            "Starting VACUUM operation",
+            "Starting storage optimization",
             extra={
-                "stage": "vacuum",
+                "stage": "optimize",
                 "retention_days": runtime.vacuum_retention_days,
+                "dry_run": runtime.dry_run,
+                "target": config.silver_table,
             },
         )
 
-        gold_table = config.gold_table or f"{config.provider}.{config.entity_type}"
-
-        silver_files = await self._vacuum_table_safe(
-            table=config.silver_table,
-            layer="silver",
-            retention_days=runtime.vacuum_retention_days,
-            metrics=metrics,
-            pipeline_name=config.pipeline_name,
-        )
-        gold_files = await self._vacuum_table_safe(
-            table=gold_table,
-            layer="gold",
-            retention_days=runtime.vacuum_retention_days,
-            metrics=metrics,
-            pipeline_name=config.pipeline_name,
-        )
-
-        return VacuumResult(
-            silver_files_removed=silver_files,
-            gold_files_removed=gold_files,
-            skipped=False,
-        )
-
-    async def _vacuum_table_safe(
-        self,
-        table: str,
-        layer: str,
-        retention_days: int,
-        metrics: MetricsPort | None,
-        pipeline_name: str,
-    ) -> int:
-        """Vacuum a single table with error handling.
-
-        Gracefully handles errors to avoid failing the entire pipeline
-        due to vacuum issues.
-
-        Args:
-            table: Table name to vacuum.
-            layer: Layer name for metrics (silver/gold).
-            retention_days: Retention period in days.
-            metrics: Optional metrics port.
-            pipeline_name: Pipeline name for metrics tags.
-
-        Returns:
-            Number of files removed (0 on error).
-        """
         try:
-            files_removed = await self.vacuum(
-                table=table,
-                retention_days=retention_days,
-                dry_run=False,
-            )
-            self.logger.info(
-                "vacuum_completed",
-                layer=layer,
-                table=table,
-                files_removed=files_removed,
+            # StoragePort.optimize unifies vacuum and file cleanup
+            # We call it for both Silver and Gold tables to ensure all layers are covered
+            # even if table names differ (custom Gold table).
+
+            # Optimize based on Silver table name (covers Silver layer + Bronze)
+            await self.storage.optimize(
+                table_name=config.silver_table,
+                retention_hours=runtime.vacuum_retention_days * 24,
+                dry_run=runtime.dry_run,
             )
 
+            gold_table = config.gold_table or f"{config.provider}.{config.entity_type}"
+
+            # Optimize based on Gold table name if different (covers Gold layer)
+            if gold_table != config.silver_table:
+                await self.storage.optimize(
+                    table_name=gold_table,
+                    retention_hours=runtime.vacuum_retention_days * 24,
+                    dry_run=runtime.dry_run,
+                )
+
+            # Metrics for success
             if metrics:
                 metrics.increment_counter(
-                    "vacuum_files_removed",
-                    files_removed,
-                    {"pipeline": pipeline_name, "layer": layer},
+                    "storage_optimization_total",
+                    1,
+                    {"pipeline": config.pipeline_name, "status": "success"},
                 )
-            return files_removed
+
+            # Implementation details are hidden, so we return 0 counts
+            # This is acceptable as the unification hides explicit layer operations
+            return VacuumResult(
+                silver_files_removed=0,
+                gold_files_removed=0,
+                skipped=False,
+            )
+
         except Exception as e:
-            self.logger.warning(
-                "vacuum_failed",
-                layer=layer,
-                table=table,
+            self.logger.error(
+                "storage_optimization_failed",
+                pipeline=config.pipeline_name,
                 error=str(e),
             )
-            return 0
+            if metrics:
+                metrics.increment_counter(
+                    "storage_optimization_total",
+                    1,
+                    {"pipeline": config.pipeline_name, "status": "failed"},
+                )
+            # Don't fail the pipeline for maintenance tasks
+            return VacuumResult(
+                silver_files_removed=0,
+                gold_files_removed=0,
+                skipped=False,
+            )
 
 
 __all__ = [
@@ -23018,6 +24744,77 @@ __all__ = [
     "PrepareResult",
     "VacuumResult",
 ]
+
+================================================================================
+File: medallion_types.py
+Path: services\medallion_types.py
+================================================================================
+"""Value objects for Medallion lifecycle operations.
+
+Extracted from medallion_lifecycle.py to reduce file size and coupling.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bioetl.domain.medallion import MedallionPolicy
+
+
+@dataclass(frozen=True, slots=True)
+class ClearResult:
+    """Result of clear operation.
+
+    Attributes:
+        silver_cleared: Number of Silver records cleared.
+        gold_cleared: Number of Gold records cleared.
+        dry_run: Whether this was a dry run (no actual deletion).
+    """
+
+    silver_cleared: int
+    gold_cleared: int
+    dry_run: bool
+
+    @property
+    def total_cleared(self) -> int:
+        """Get total records cleared.
+
+        Returns:
+            Sum of silver and gold cleared records.
+        """
+        return self.silver_cleared + self.gold_cleared
+
+
+@dataclass(frozen=True, slots=True)
+class VacuumResult:
+    """Result of VACUUM operation.
+
+    Attributes:
+        silver_files_removed: Number of files removed from Silver table.
+        gold_files_removed: Number of files removed from Gold table.
+        skipped: Whether VACUUM was skipped.
+    """
+
+    silver_files_removed: int
+    gold_files_removed: int
+    skipped: bool
+
+
+@dataclass(frozen=True, slots=True)
+class PrepareResult:
+    """Result of prepare_for_run operation.
+
+    Combines clear result with policy used for transparency.
+
+    Attributes:
+        clear_result: Result of clear operation.
+        policy: MedallionPolicy used for the operation.
+    """
+
+    clear_result: ClearResult
+    policy: MedallionPolicy
 
 ================================================================================
 File: metrics_service.py
@@ -23029,6 +24826,10 @@ Provides high-level operations for managing the Prometheus metrics server.
 Abstracts infrastructure concerns from CLI and other interfaces.
 
 Implements RULES.md §1.1 - Application layer depends only on Domain.
+
+Note:
+    MetricsServerError is defined in domain.exceptions.critical
+    and re-exported here for backward compatibility.
 """
 
 from __future__ import annotations
@@ -23037,26 +24838,19 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
+from bioetl.domain.exceptions import MetricsServerError
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
-
-class MetricsServerError(Exception):
-    """Raised when metrics server fails to start."""
-
-    def __init__(self, port: int, reason: str, original_error: Exception | None = None):
-        """Initialize MetricsServerError.
-
-        Args:
-            port: Port that failed.
-            reason: Reason for failure.
-            original_error: Underlying exception.
-
-        """
-        super().__init__(f"Failed to start metrics server on port {port}: {reason}")
-        self.port = port
-        self.reason = reason
-        self.original_error = original_error
+# Re-export for backward compatibility
+__all__ = [
+    "MetricsServerError",
+    "MetricsServerPort",
+    "MetricsServerStatus",
+    "MetricsService",
+    "StartResult",
+]
 
 
 @runtime_checkable

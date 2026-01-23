@@ -268,14 +268,14 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     ),
     PipelineFactoryConfig(
         pipeline_name="uniprot_idmapping",
-        provider="uniprot_idmapping",
+        provider="uniprot",
         transformer_class=IDMappingTransformer,
         silver_schema=UNIPROT_ID_MAPPING_SCHEMA,
         gold_schema=UniProtIDMappingGoldSchema,
     ),
     # PubMed pipeline
     PipelineFactoryConfig(
-        pipeline_name="pubmed_publications",
+        pipeline_name="pubmed_publication",
         provider="pubmed",
         transformer_class=PubMedPublicationTransformer,
         silver_schema=PUBMED_PUBLICATION_SCHEMA,
@@ -354,7 +354,7 @@ chembl_protein_class_factory = _factories["chembl_protein_class"]
 pubchem_compound_factory = _factories["pubchem_compound"]
 uniprot_protein_factory = _factories["uniprot_protein"]
 uniprot_idmapping_factory = _factories["uniprot_idmapping"]
-pubmed_publications_factory = _factories["pubmed_publications"]
+pubmed_publication_factory = _factories["pubmed_publication"]
 crossref_publication_factory = _factories["crossref_publication"]
 openalex_publication_factory = _factories["openalex_publication"]
 semanticscholar_publication_factory = _factories["semanticscholar_publication"]
@@ -501,7 +501,7 @@ __all__ = [
     "list_available_pipelines",
     "openalex_publication_factory",
     "pubchem_compound_factory",
-    "pubmed_publications_factory",
+    "pubmed_publication_factory",
     "register_all_pipelines",
     "reset_registration",
     "semanticscholar_publication_factory",

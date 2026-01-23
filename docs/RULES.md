@@ -944,9 +944,9 @@ make run-local    # запуск сэмплового пайплайна на ф
 > **Note: Local-Only Deployment** (см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md))
 
 **Текущая реализация (Local-Only):**
-- **Storage**: Локальная файловая система (`data/bronze`, `data/silver`, `data/gold`)
+- **Storage**: Локальная файловая система (`data/output/bronze`, `data/output/silver`, `data/output/gold`)
 - **Locking**: In-memory (`MemoryLock`)
-- **Checkpoints**: Локальные файлы (`data/checkpoints`)
+- **Checkpoints**: Локальные файлы (`data/output/checkpoints`)
 - **Зависимости**: Только Python 3.11+ и pip
 
 **Для распределённого развёртывания (будущее):**

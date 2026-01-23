@@ -220,11 +220,11 @@ Factory for UniProt protein pipeline.
         show_root_heading: true
         show_source: false
 
-### pubmed_publications_factory
+### pubmed_publication_factory
 
-Factory for PubMed publications pipeline.
+Factory for PubMed publication pipeline.
 
-::: bioetl.composition.factories.pipeline_factories.pubmed_publications_factory
+::: bioetl.composition.factories.pipeline_factories.pubmed_publication_factory
     options:
         show_root_heading: true
         show_source: false
@@ -235,7 +235,7 @@ Factory for PubMed publications pipeline.
 classDiagram
     class GenericPipelineFactory {
         +create_runner() PipelineRunner
-        +create_executor() PipelineExecutor
+        +create_executor() BatchExecutor
     }
 
     class DataSourceFactory {

@@ -13,6 +13,57 @@ from __future__ import annotations
 
 import pyarrow as pa
 
+# ---------------------------------------------------------
+# Schema for ChEMBL Publication (formerly Document)
+# See: https://www.ebi.ac.uk/chembl/api/data/document
+# Column order: SYSTEM_FIELDS_PREFIX, LOOKUP_FIELDS_PREFIX,
+#               PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS,
+#               other fields (alphabetical), DQ_FIELDS_SUFFIX
+# ---------------------------------------------------------
+CHEMBL_PUBLICATION_SCHEMA = pa.schema(
+    [
+        # === SYSTEM_FIELDS_PREFIX ===
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_source", pa.string()),  # Data source identifier: "chembl"
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+        # === LOOKUP_FIELDS_PREFIX ===
+        pa.field("_lookup_method", pa.string()),
+        pa.field("_original_id", pa.string()),
+        # === PUBLICATION_METADATA_FIELDS ===
+        pa.field("authors", pa.string()),  # JSON array of author names
+        pa.field("title", pa.string()),
+        pa.field("journal", pa.string()),
+        pa.field("year", pa.int64()),
+        pa.field("volume", pa.string()),
+        pa.field("issue", pa.string()),
+        pa.field("first_page", pa.string()),
+        pa.field("last_page", pa.string()),
+        pa.field("language", pa.string()),  # Unified field, null for ChEMBL
+        # === PUBLICATION_CROSSREF_FIELDS ===
+        pa.field("document_chembl_id", pa.string()),  # Primary key
+        pa.field("doi", pa.string()),
+        pa.field("pmid", pa.string()),  # PubMed ID (numeric string)
+        pa.field("pmc_id", pa.string()),  # PubMed Central ID, null for ChEMBL
+        # === Other fields (alphabetical) ===
+        pa.field("abstract", pa.string()),
+        pa.field("citation_count", pa.int64()),  # Unified field, null for ChEMBL
+        pa.field("doc_type", pa.string()),  # PUBLICATION, PATENT, DATASET, BOOK
+        pa.field("is_oa", pa.bool_()),  # Unified field, null for ChEMBL
+        pa.field("journal_full_title", pa.string()),
+        pa.field("publication_date", pa.string()),  # Unified field, null for ChEMBL
+        pa.field("src_id", pa.int64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
+    ]
+)
+
+# ---------------------------------------------------------
 # Schema for ChEMBL Activity (all fields from ChEMBL API)
 # See: https://www.ebi.ac.uk/chembl/api/data/activity
 CHEMBL_ACTIVITY_SCHEMA = pa.schema(
@@ -79,6 +130,9 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("uo_units", pa.string()),
         pa.field("upper_value", pa.float64()),
         pa.field("value", pa.float64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -106,6 +160,9 @@ PUBCHEM_COMPOUND_SCHEMA = pa.schema(
         pa.field(
             "molecular_weight", pa.float64()
         ),  # Transformed to float by transformer
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -127,6 +184,9 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("organism_id", pa.int64()),
         pa.field("protein_name", pa.string()),
         pa.field("sequence_length", pa.int64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -152,6 +212,7 @@ UNIPROT_ID_MAPPING_SCHEMA = pa.schema(
         # === DQ suffix (MUST be last, if present) ===
         # DQ warning flag (True for not_found)
         pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -167,6 +228,7 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
+        pa.field("_source", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
@@ -298,6 +360,9 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field(
             "variant_taxonomy_id", pa.int64()
         ),  # Standardized name (was variant_tax_id)
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -341,6 +406,9 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
         # Note: protein_classifications not available in /target endpoint
         # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -369,6 +437,9 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_component_xrefs", pa.string()),
         pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -397,49 +468,7 @@ CHEMBL_CELL_LINE_SCHEMA = pa.schema(
         pa.field("cellosaurus_id", pa.string()),
         pa.field("cl_lincs_id", pa.string()),
         pa.field("efo_id", pa.string()),
-    ]
-)
-
-# Schema for ChEMBL Publication (formerly Document)
-# See: https://www.ebi.ac.uk/chembl/api/data/document
-CHEMBL_PUBLICATION_SCHEMA = pa.schema(
-    [
-        # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
-        # === Business fields (alphabetical order) ===
-        # Lookup metadata
-        # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-        # _original_id: Original identifier used for lookup (document_chembl_id for direct)
-        pa.field("_lookup_method", pa.string()),
-        pa.field("_original_id", pa.string()),
-        pa.field("abstract", pa.string()),
-        pa.field("authors", pa.string()),
-        pa.field("doc_type", pa.string()),
-        pa.field("document_chembl_id", pa.string()),
-        pa.field("doi", pa.string()),
-        pa.field("first_page", pa.string()),
-        pa.field("issue", pa.string()),
-        pa.field("journal", pa.string()),
-        pa.field("journal_full_title", pa.string()),
-        pa.field("last_page", pa.string()),
-        pa.field("patent_id", pa.string()),
-        # Cross-reference IDs for linking publications across providers
-        # pmc_id: PubMed Central ID (format: "PMC1234567") - nullable, may not exist for all publications
-        pa.field("pmc_id", pa.string()),
-        # pmid: PubMed ID (numeric string: "12345678")
-        pa.field("pmid", pa.string()),
-        pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD (from year)
-        pa.field("src_id", pa.int64()),
-        pa.field("title", pa.string()),
-        pa.field("volume", pa.string()),
-        pa.field("year", pa.int64()),
-        # === DQ suffix (MUST be last, per RULES.md §2.4) ===
+        # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
     ]
@@ -465,6 +494,9 @@ CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
         pa.field("qualifier", pa.string()),
         pa.field("term", pa.string()),
         pa.field("term_type", pa.string()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -538,6 +570,9 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("usan_substem", pa.string()),
         pa.field("usan_year", pa.int64()),
         pa.field("withdrawn_flag", pa.bool_()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -564,6 +599,9 @@ CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
         # Source information
         pa.field("src_compound_id", pa.string()),
         pa.field("src_id", pa.int64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -593,6 +631,9 @@ CHEMBL_DOCUMENT_SIMILARITY_SCHEMA = pa.schema(
         pa.field("pubmed_id2", pa.string()),
         pa.field("sim_id", pa.int64()),
         pa.field("tid_tani", pa.float64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -606,6 +647,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
+        pa.field("_source", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
@@ -668,6 +710,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
+        pa.field("_source", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
@@ -723,6 +766,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
+        pa.field("_source", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
@@ -795,6 +839,9 @@ CHEMBL_PROTEIN_CLASS_SCHEMA = pa.schema(
         pa.field("replaced_by", pa.int64()),
         pa.field("short_name", pa.string()),
         pa.field("sort_order", pa.int64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -829,5 +876,8 @@ CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
         pa.field("type", pa.string()),
         pa.field("units", pa.string()),
         pa.field("value", pa.float64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )

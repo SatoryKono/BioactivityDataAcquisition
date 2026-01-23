@@ -27,6 +27,8 @@ Note:
 from __future__ import annotations
 
 import asyncio
+import time
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any, Literal
 
 import orjson
@@ -49,7 +51,6 @@ from bioetl.infrastructure.storage.base_delta_writer import (
 )
 
 if TYPE_CHECKING:
-    from datetime import datetime
     from pathlib import Path
 
     from bioetl.domain.ports import (
@@ -547,6 +548,7 @@ class SilverWriter(BaseDeltaWriter):
             Lock validation is performed at Application layer (BatchWriter)
             per RULES.md §4.6 Safety Guard.
         """
+        started_at, start_perf = datetime.now(UTC), time.perf_counter()
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_silver") as span:
             span.set_attribute("table_name", table_name)
@@ -609,7 +611,10 @@ class SilverWriter(BaseDeltaWriter):
 
             # Get Delta version after write for lineage tracking (REQ-LINEAGE-002)
             version_after = await self._get_delta_version(table_path)
-
+            # Calculate completed_at (ADR-014: deterministic from start + duration)
+            completed_at = started_at + timedelta(
+                seconds=time.perf_counter() - start_perf
+            )
             # Write metadata sidecar file if configured
             await self._write_silver_metadata(
                 table_path=table_path,
@@ -619,6 +624,9 @@ class SilverWriter(BaseDeltaWriter):
                 mode=validated_mode,
                 bronze_refs=bronze_refs,
                 dq_metrics=dq_metrics,
+                partition_by=partition_cols,
+                started_at=started_at,
+                completed_at=completed_at,
             )
 
             # Return SilverWriteResult for Gold lineage tracking (REQ-LINEAGE-002)
@@ -772,6 +780,9 @@ class SilverWriter(BaseDeltaWriter):
         bronze_refs: list[BronzeWriteResult] | None = None,
         dq_metrics: BatchDQMetrics | None = None,
         dq_report_path: str | None = None,
+        partition_by: list[str] | None = None,
+        started_at: datetime | None = None,
+        completed_at: datetime | None = None,
     ) -> None:
         """Write Silver layer metadata sidecar file.
 
@@ -781,33 +792,19 @@ class SilverWriter(BaseDeltaWriter):
             records: List of records written.
             primary_keys: Primary key columns used.
             mode: Write mode used (merge, append, delete).
-            bronze_refs: Optional list of BronzeWriteResult for lineage tracking.
-                If provided, bronze_paths will be populated from relative_path
-                of each BronzeWriteResult (REQ-LINEAGE-001).
-            dq_metrics: Optional BatchDQMetrics with computed DQ metrics.
-                If provided, dq_summary will contain real column metrics,
-                schema drift info, and error rates (REQ-DQ-001).
-            dq_report_path: Optional path to generated DQ report for cross-reference.
+            bronze_refs: Optional BronzeWriteResult list for lineage (REQ-LINEAGE-001).
+            dq_metrics: Optional BatchDQMetrics for DQ summary (REQ-DQ-001).
+            dq_report_path: Optional path to generated DQ report.
+            partition_by: Partition columns used for the Delta table.
+            started_at: UTC timestamp when Silver write started.
+            completed_at: UTC timestamp when Silver write completed.
         """
         if not records:
             return
 
-        # Extract pipeline info from table_name for filename generation
-        # table_name format: {provider}.{entity}, {provider}_{entity}, or just {entity}
-        # Note: We use table_name instead of table_path to be platform-independent
-        # and support flat_structure mode where path doesn't contain entity info.
-        if "." in table_name:
-            parts = table_name.split(".")
-            provider_name = parts[0]
-            entity_name = parts[1] if len(parts) > 1 else parts[0]
-        elif "_" in table_name:
-            # Split on first underscore (e.g., chembl_publication -> chembl, publication)
-            parts = table_name.split("_", 1)
-            provider_name = parts[0]
-            entity_name = parts[1] if len(parts) > 1 else parts[0]
-        else:
-            provider_name = "unknown"
-            entity_name = table_name if table_name else "unknown"
+        from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
+
+        provider_name, entity_name = _parse_table_name(table_name)
 
         if self._metadata_coordinator is None:
             self.logger.warning(
@@ -819,7 +816,6 @@ class SilverWriter(BaseDeltaWriter):
 
         from bioetl.domain.ports import SilverMetadataInput
 
-        # Get Delta version after write
         version_after = await self._get_delta_version(table_path)
 
         silver_input = SilverMetadataInput(
@@ -833,6 +829,9 @@ class SilverWriter(BaseDeltaWriter):
             transform_version=self._transform_version,
             transform_steps=self._transform_steps,
             dq_report_path=dq_report_path,
+            partition_by=partition_by,
+            started_at=started_at,
+            completed_at=completed_at,
         )
         metadata = self._metadata_coordinator.create_silver_metadata(silver_input)
         await self._metadata_writer.write_silver_metadata(
@@ -1050,6 +1049,14 @@ class SilverWriter(BaseDeltaWriter):
             ),
         )
 
+        # Export to CSV if configured (composite pipelines use overwrite mode)
+        if self.csv_exporter:
+            await self.csv_exporter.export(
+                table_name,
+                arrow_table,
+                append=False,  # Merged data replaces existing CSV
+            )
+
         # Write metadata sidecar for composite merged data
         await self._write_silver_merged_metadata(
             table_path=table_path,
@@ -1082,19 +1089,12 @@ class SilverWriter(BaseDeltaWriter):
         if not records:
             return
 
-        # Extract provider/entity from table_name for filename generation
-        if "/" in table_name:
-            # Handle path-like table names (e.g., 'composite/publication')
-            parts = table_name.split("/")
-            provider_name = parts[0] if len(parts) > 1 else "composite"
-            entity_name = parts[-1]
-        elif "_" in table_name:
-            parts = table_name.split("_", 1)
-            provider_name = parts[0]
-            entity_name = parts[1] if len(parts) > 1 else parts[0]
-        else:
-            provider_name = "composite"
-            entity_name = table_name if table_name else "unknown"
+        from bioetl.infrastructure.storage.metadata_builder import (
+            SilverMetadataBuilder,
+            _parse_table_name,
+        )
+
+        provider_name, entity_name = _parse_table_name(table_name)
 
         if self._metadata_coordinator is None:
             self.logger.debug(
@@ -1104,94 +1104,22 @@ class SilverWriter(BaseDeltaWriter):
             )
             return
 
-        from datetime import UTC, datetime
-        from importlib.metadata import version as pkg_version
-        from platform import node as hostname
-        from platform import python_version
-
-        from bioetl.domain.models.metadata import (
-            DeltaMetrics,
-            DQSummary,
-            EnvironmentMetadata,
-            LineageMetadata,
-            PipelineMetadata,
-            RuntimeMetadata,
-            RunTypeEnum,
-            SilverMetadata,
-            SilverOutputMetadata,
-        )
-
         # Get Delta version after write
         version_after = await self._get_delta_version(table_path)
 
-        # Build metadata
-        now = datetime.now(UTC)
-        runtime = RuntimeMetadata(
-            run_id=run_id or "",
-            run_type=RunTypeEnum.INCREMENTAL,
-            started_at_utc=now,
-            completed_at_utc=now,
+        # Build metadata using the extracted builder
+        builder = SilverMetadataBuilder(
+            transform_version=self._transform_version,
+            transform_steps=self._transform_steps,
         )
-
-        pipeline = PipelineMetadata(
-            name=f"composite_{entity_name}",
-            provider=provider_name,
-            entity=entity_name,
-        )
-
-        # Build lineage with sources_used via source_tables
-        lineage = LineageMetadata(
-            bronze_paths=[],
-            transform_version=self._transform_version or "1.0.0",
-            transform_steps=list(self._transform_steps)
-            if self._transform_steps
-            else ["merge"],
-            source_tables=dict.fromkeys(sources_used or [], 0),
-        )
-
-        # Build Delta metrics
-        delta = DeltaMetrics(
+        metadata = builder.build_merged_metadata(
             table_path=table_path,
-            operation="overwrite",
-            primary_key=primary_keys,
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+            run_id=run_id,
+            sources_used=sources_used,
             version_after=version_after,
-            rows_inserted=len(records),
-        )
-
-        # Build DQ summary
-        dq_summary = DQSummary(
-            total_records=len(records),
-            valid_records=len(records),
-            error_records=0,
-            error_rate=0.0,
-        )
-
-        # Build output metadata
-        output = SilverOutputMetadata(
-            record_count=len(records),
-        )
-
-        # Build environment metadata
-        try:
-            bioetl_version = pkg_version("bioetl")
-        except Exception:
-            bioetl_version = "unknown"
-
-        environment = EnvironmentMetadata(
-            hostname=hostname(),
-            python_version=python_version(),
-            bioetl_version=bioetl_version,
-        )
-
-        # Build complete metadata
-        metadata = SilverMetadata(
-            runtime=runtime,
-            pipeline=pipeline,
-            lineage=lineage,
-            delta=delta,
-            dq_summary=dq_summary,
-            output=output,
-            environment=environment,
         )
 
         await self._metadata_writer.write_silver_metadata(

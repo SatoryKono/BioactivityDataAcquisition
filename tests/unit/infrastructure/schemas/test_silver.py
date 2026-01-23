@@ -304,7 +304,8 @@ class TestChemblDocumentSchema:
 
     def test_has_publication_identifiers(self):
         """Verify publication identifier fields exist."""
-        expected = ["pmid", "doi", "patent_id"]
+        # patent_id excluded from unified publication schema
+        expected = ["pmid", "doi", "pmc_id"]
         for field_name in expected:
             assert field_name in CHEMBL_PUBLICATION_SCHEMA.names
 

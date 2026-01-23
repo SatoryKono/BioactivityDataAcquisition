@@ -1,0 +1,81 @@
+%%{init: {'theme':'base', 'themeVariables': { 'fontSize':'13px'}}}%%
+sequenceDiagram
+    participant RecordProcessor
+    participant BatchTransformer
+    participant DQMonitor
+    participant BronzeDQAnalyzer
+    participant SilverDQAnalyzer
+    participant GoldDQAnalyzer
+    participant DQReportService
+    participant PostrunService
+    participant Metrics
+
+    RecordProcessor->>BatchTransformer: transform_batch(records)
+
+    loop For Each Record
+        BatchTransformer->>BatchTransformer: apply_transformer(record)
+        BatchTransformer->>BatchTransformer: validate_schema(record)
+
+        alt Schema Invalid
+            BatchTransformer->>DQMonitor: record_dq_check(result=FAIL)
+            BatchTransformer->>RecordProcessor: quarantine_record(reason)
+        else Schema Valid
+            BatchTransformer->>BatchTransformer: check_dq_rules(record)
+
+            alt DQ Rules Fail
+                BatchTransformer->>DQMonitor: record_dq_check(result=SOFT_FAIL)
+                DQMonitor->>DQMonitor: increment_error_count()
+                BatchTransformer->>RecordProcessor: log_warning()
+            else DQ Rules Pass
+                BatchTransformer->>DQMonitor: record_dq_check(result=PASS)
+                BatchTransformer->>RecordProcessor: accept_record()
+            end
+        end
+    end
+
+    RecordProcessor->>RecordProcessor: calculate_dq_rate()
+
+    alt DQ Error Rate > 20% (Hard Threshold)
+        RecordProcessor->>DQMonitor: emit_hard_threshold_exceeded()
+        RecordProcessor->>Metrics: increment(dq_hard_threshold_exceeded)
+        RecordProcessor->>RecordProcessor: fail_batch()
+    else DQ Error Rate 5-20% (Soft Threshold)
+        RecordProcessor->>DQMonitor: emit_soft_threshold_exceeded()
+        RecordProcessor->>Metrics: increment(dq_soft_threshold_exceeded)
+        RecordProcessor->>RecordProcessor: continue_with_warning()
+    else DQ Error Rate < 5%
+        RecordProcessor->>RecordProcessor: continue_normally()
+    end
+
+    Note over RecordProcessor,Metrics: Postrun DQ Analysis
+
+    RecordProcessor->>PostrunService: trigger_postrun()
+    PostrunService->>BronzeDQAnalyzer: analyze(bronze_path)
+    BronzeDQAnalyzer-->>PostrunService: bronze_metrics
+
+    PostrunService->>SilverDQAnalyzer: analyze(silver_table)
+    SilverDQAnalyzer-->>PostrunService: silver_metrics
+
+    PostrunService->>GoldDQAnalyzer: analyze(gold_table)
+    GoldDQAnalyzer-->>PostrunService: gold_metrics
+
+    PostrunService->>PostrunService: aggregate_metrics()
+
+    PostrunService->>DQReportService: generate_report(all_metrics)
+    DQReportService->>DQReportService: create_report()
+    DQReportService->>DQReportService: write_report(path)
+
+    PostrunService->>Metrics: emit_dq_metrics()
+
+    alt DQ Thresholds Exceeded
+        PostrunService->>Metrics: gauge(dq_completeness, value)
+        PostrunService->>Metrics: gauge(dq_duplicates, value)
+        PostrunService->>Metrics: histogram(dq_check_duration_ms)
+        PostrunService->>Metrics: counter(dq_soft_threshold_exceeded)
+        PostrunService-->>RecordProcessor: DQ_CHECK_FAILED
+    else DQ Thresholds OK
+        PostrunService->>Metrics: emit_success_metrics()
+        PostrunService-->>RecordProcessor: DQ_CHECK_PASSED
+    end
+
+    Note over DQMonitor,Metrics: DQ Metrics Emitted:<br/>- dq_soft_threshold_exceeded (counter)<br/>- dq_hard_threshold_exceeded (counter)<br/>- dq_check_duration_ms (histogram)<br/>- dq_completeness (gauge)<br/>- dq_duplicates (gauge)<br/>- dq_quarantine_total (counter)

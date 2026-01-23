@@ -18,29 +18,33 @@ Architecture:
 
 from __future__ import annotations
 
+import inspect
 import platform
 import socket
 from datetime import datetime
 from functools import cached_property
-from typing import Literal
+from typing import Any, Literal
 
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.models.metadata import (
+    BaseOutputMetadata,
     BronzeMetadata,
+    BronzeOutputExt,
     DeltaMetrics,
     DQSummary,
     EnvironmentMetadata,
     FileOutputMetadata,
     GoldMetadata,
-    GoldOutputMetadata,
+    GoldOutputExt,
     LineageMetadata,
-    OutputMetadata,
     PipelineMetadata,
     RuntimeMetadata,
     RunTypeEnum,
     SCDMetadata,
+    SchemaColumnMetadata,
+    SchemaMetadata,
     SilverMetadata,
-    SilverOutputMetadata,
+    SilverOutputExt,
     SourceMetadata,
 )
 from bioetl.domain.ports import (
@@ -53,18 +57,17 @@ from bioetl.domain.value_objects.run_context import RunContext
 
 
 def _get_bioetl_version() -> str:
-    """Get BioETL package version safely."""
-    try:
-        from bioetl import __version__
+    """Get BioETL package version.
 
-        return __version__
-    except ImportError:
-        try:
-            from importlib.metadata import version as pkg_version
+    Returns:
+        Package version string.
 
-            return pkg_version("bioetl")
-        except Exception:
-            return "unknown"
+    Raises:
+        PackageNotFoundError: If bioetl package is not installed.
+    """
+    from importlib.metadata import version as pkg_version
+
+    return pkg_version("bioetl")
 
 
 class MetadataCoordinator:
@@ -154,15 +157,14 @@ class MetadataCoordinator:
         )
 
     def _build_pipeline_metadata(self) -> PipelineMetadata:
-        """Build PipelineMetadata from run context.
-
-        Returns:
-            PipelineMetadata with pipeline identification.
-        """
+        """Build PipelineMetadata with versioning from run context."""
         return PipelineMetadata(
             name=self._context.pipeline_name,
             provider=self._context.provider,
             entity=self._context.entity,
+            version=self._context.pipeline_version or "1.0.0",
+            git_commit=self._context.git_commit,
+            config_hash=self._context.config_hash,
         )
 
     def create_bronze_metadata(self, input_data: BronzeMetadataInput) -> BronzeMetadata:
@@ -191,6 +193,13 @@ class MetadataCoordinator:
                 query_string=input_data.query_string,
             )
 
+        # Build file metadata for output_ext
+        file_metadata = FileOutputMetadata(
+            path=input_data.output_path,
+            size_bytes=input_data.compressed_size,
+            record_count=input_data.record_count,
+        )
+
         return BronzeMetadata(
             runtime=self._build_runtime_metadata(
                 started_at=input_data.started_at,
@@ -199,18 +208,17 @@ class MetadataCoordinator:
             ),
             pipeline=self._build_pipeline_metadata(),
             source=source,
-            output=OutputMetadata(
-                files=[
-                    FileOutputMetadata(
-                        path=input_data.output_path,
-                        size_bytes=input_data.compressed_size,
-                        record_count=input_data.record_count,
-                    )
-                ],
-                total_records=input_data.record_count,
+            output=BaseOutputMetadata(
+                record_count=input_data.record_count,
                 total_bytes=input_data.compressed_size,
+                write_started_at=input_data.started_at,
+                write_completed_at=input_data.completed_at,
+            ),
+            output_ext=BronzeOutputExt(
+                files=[file_metadata],
             ),
             environment=self._get_environment_metadata(),
+            governance=input_data.governance,
         )
 
     def create_silver_metadata(self, input_data: SilverMetadataInput) -> SilverMetadata:
@@ -270,32 +278,135 @@ class MetadataCoordinator:
             table_path=input_data.table_path,
             operation=operation_map[input_data.mode],
             primary_key=input_data.primary_keys,
+            partition_by=input_data.partition_by or [],
             version_after=input_data.version_after,
             rows_inserted=len(input_data.records),
         )
 
         # Build DQ summary from computed metrics or use basic fallback
-        if input_data.dq_metrics is not None:
-            dq_summary = input_data.dq_metrics.to_dq_summary()
-        else:
-            dq_summary = DQSummary(
-                total_records=len(input_data.records),
-                valid_records=len(input_data.records),
-            )
+        rec_count = len(input_data.records)
+        dq_summary = (
+            input_data.dq_metrics.to_dq_summary()
+            if input_data.dq_metrics
+            else DQSummary(total_records=rec_count, valid_records=rec_count)
+        )
 
-        output = SilverOutputMetadata(
-            record_count=len(input_data.records),
+        # Calculate duration if both timestamps provided
+        duration_seconds = (
+            (input_data.completed_at - input_data.started_at).total_seconds()
+            if input_data.started_at and input_data.completed_at
+            else None
+        )
+
+        # Build unified output metadata (ADR-029)
+        output = BaseOutputMetadata(
+            record_count=rec_count,
+            total_bytes=getattr(input_data, "total_bytes", 0),
+            write_started_at=input_data.started_at,
+            write_completed_at=input_data.completed_at,
+        )
+
+        # Build Silver-specific output extension with delta versions
+        output_ext = SilverOutputExt(
+            delta_version_before=getattr(input_data, "version_before", None),
+            delta_version_after=input_data.version_after,
         )
 
         return SilverMetadata(
-            runtime=self._build_runtime_metadata(),
+            runtime=self._build_runtime_metadata(
+                started_at=input_data.started_at,
+                completed_at=input_data.completed_at,
+                duration_seconds=duration_seconds,
+            ),
             pipeline=self._build_pipeline_metadata(),
             lineage=lineage,
             delta=delta,
             dq_summary=dq_summary,
             output=output,
+            output_ext=output_ext,
             environment=self._get_environment_metadata(),
             dq_report_path=input_data.dq_report_path,
+            governance=input_data.governance,
+        )
+
+    def _extract_schema_metadata(self, gold_schema: Any | None) -> SchemaMetadata:
+        """Extract schema metadata from a Pandera DataFrameModel.
+
+        Extracts contract_path, version, columns, and validation mode from
+        the Pandera schema class for Gold layer metadata tracking.
+
+        Args:
+            gold_schema: Pandera DataFrameModel class (not instance).
+
+        Returns:
+            SchemaMetadata with populated fields, or default if schema is None.
+        """
+        if gold_schema is None:
+            return SchemaMetadata()
+
+        # Extract contract_path from module path
+        contract_path: str | None = None
+        try:
+            module = inspect.getmodule(gold_schema)
+            if module and module.__file__:
+                # Convert absolute path to relative path from project root
+                # e.g., .../src/bioetl/domain/contracts/gold/chembl.py
+                # -> src/bioetl/domain/contracts/gold/chembl.py
+                file_path = module.__file__
+                if "src/bioetl" in file_path:
+                    idx = file_path.find("src/bioetl")
+                    contract_path = file_path[idx:]
+        except Exception:
+            pass
+
+        # Extract schema version from Config if defined
+        version = "1.0"
+        if hasattr(gold_schema, "Config"):
+            config = gold_schema.Config
+            version = getattr(config, "version", "1.0")
+            if not isinstance(version, str):
+                version = str(version)
+
+        # Determine validation mode
+        validation: Literal["strict", "lenient"] = "strict"
+        if hasattr(gold_schema, "Config"):
+            config = gold_schema.Config
+            is_strict = getattr(config, "strict", True)
+            validation = "strict" if is_strict else "lenient"
+
+        # Extract column definitions
+        columns: list[SchemaColumnMetadata] = []
+        try:
+            # Try to get schema columns using Pandera's to_schema() method
+            if hasattr(gold_schema, "to_schema"):
+                schema_instance = gold_schema.to_schema()
+                if hasattr(schema_instance, "columns"):
+                    for col_name, col_schema in schema_instance.columns.items():
+                        # Get the dtype as string
+                        dtype_str = (
+                            str(col_schema.dtype) if col_schema.dtype else "object"
+                        )
+                        # Simplify dtype string (remove pandera.dtypes. prefix)
+                        if "." in dtype_str:
+                            dtype_str = dtype_str.split(".")[-1]
+
+                        nullable = getattr(col_schema, "nullable", True)
+                        columns.append(
+                            SchemaColumnMetadata(
+                                name=col_name,
+                                type=dtype_str,
+                                nullable=nullable,
+                            )
+                        )
+        except Exception:
+            # If schema extraction fails, leave columns empty
+            pass
+
+        return SchemaMetadata(
+            contract_path=contract_path,
+            version=version,
+            validation=validation,
+            columns=columns,
         )
 
     def create_gold_metadata(self, input_data: GoldMetadataInput) -> GoldMetadata:
@@ -336,14 +447,23 @@ class MetadataCoordinator:
         )
 
         # Build DQ summary (basic metrics)
+        rec_count = len(input_data.records)
         dq_summary = DQSummary(
-            total_records=len(input_data.records),
-            valid_records=len(input_data.records),
+            total_records=rec_count,
+            valid_records=rec_count,
         )
 
-        # Build output metrics
-        output = GoldOutputMetadata(
-            record_count=len(input_data.records),
+        # Build unified output metadata (ADR-029)
+        output = BaseOutputMetadata(
+            record_count=rec_count,
+            total_bytes=getattr(input_data, "total_bytes", 0),
+            write_started_at=getattr(input_data, "started_at", None),
+            write_completed_at=input_data.completed_at,
+        )
+
+        # Build Gold-specific output extension
+        output_ext = GoldOutputExt(
+            partition_count=getattr(input_data, "partition_count", 0),
         )
 
         # Build SCD metadata if applicable
@@ -360,16 +480,24 @@ class MetadataCoordinator:
                 ),
             )
 
-        return GoldMetadata(
+        # Extract schema metadata from Gold schema (contract_path, version, columns)
+        schema_info = self._extract_schema_metadata(input_data.gold_schema)
+
+        # Note: schema_info uses Field(alias="schema") with populate_by_name=True
+        # mypy doesn't understand this Pydantic feature, but it works at runtime
+        return GoldMetadata(  # type: ignore[call-arg]
             runtime=self._build_runtime_metadata(
                 completed_at=input_data.completed_at,
             ),
             pipeline=self._build_pipeline_metadata(),
             lineage=lineage,
+            schema_info=schema_info,
             dq_summary=dq_summary,
             output=output,
+            output_ext=output_ext,
             scd=scd,
             environment=self._get_environment_metadata(),
+            governance=input_data.governance,
         )
 
     @classmethod

@@ -15,6 +15,12 @@ from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from bioetl.application.composite.runner_helpers import (
+    add_not_run_results,
+    calculate_had_warnings,
+    get_mergeable_enrichers,
+    log_enrichment_summary,
+)
 from bioetl.domain.composite.result import (
     CompositeResult,
     EnrichmentResult,
@@ -141,7 +147,18 @@ class CompositePipelineRunner:
         self._run_id_str = run_id or str(uuid4())
         self._run_id: RunID = cast(RunID, UUID(self._run_id_str))
         self._started_at: datetime | None = None
+        self._finished: bool = False
+        self._final_state: CompositePipelineState | None = None
         self._dq_report_service = dq_report_service
+
+        # Initialize FSM helper for state transition logic
+        from bioetl.application.composite.fsm_helper import FSMStateHelper
+
+        self._fsm = FSMStateHelper(
+            config=config,
+            logger=logger,
+            run_id=self._run_id_str,
+        )
 
     @property
     def run_id(self) -> str:
@@ -170,7 +187,21 @@ class CompositePipelineRunner:
 
         Raises:
             CriticalError: If seed or required enricher fails.
+            RunnerAlreadyExecutedError: If this Runner instance was already executed.
         """
+        # Protection against double execution
+        if self._finished:
+            from bioetl.domain.exceptions import RunnerAlreadyExecutedError
+
+            raise RunnerAlreadyExecutedError(
+                runner_type="CompositePipelineRunner",
+                run_id=self._run_id_str,
+                final_state=self._final_state.value if self._final_state else None,
+            )
+
+        # Validate configuration consistency on startup
+        self._validate_config_consistency()
+
         self._started_at = datetime.now(tz=UTC)
         self._logger.info(
             PipelineEvent.START,
@@ -193,11 +224,18 @@ class CompositePipelineRunner:
                 )
 
             try:
-                return await self._run_with_lock()
+                result = await self._run_with_lock()
+                # Mark as finished with success
+                self._finished = True
+                self._final_state = CompositePipelineState.COMPLETED
+                return result
             finally:
                 await self._lock.release(key=lock_key, owner_id=self._run_id)
 
         except Exception as e:
+            # Mark as finished with failure
+            self._finished = True
+            self._final_state = CompositePipelineState.FAILED
             self._logger.error(
                 PipelineEvent.FAILED,
                 composite=self._config.name,
@@ -211,6 +249,14 @@ class CompositePipelineRunner:
         # Load checkpoint (for resume)
         state = await self._checkpoint_manager.load()
 
+        # Handle resume from FAILED state - determine correct phase to continue from
+        if self._runtime.resume and state.state == CompositePipelineState.FAILED:
+            state = self._fsm.handle_resume_from_failed(state)
+
+        # Log resume context if resuming with progress
+        if self._runtime.resume and state.is_resumable:
+            self._fsm.log_resume_context(state)
+
         # Track results
         seed_result: SeedResult | None = None
         enrichment_results: dict[str, EnrichmentResult] = {}
@@ -218,13 +264,22 @@ class CompositePipelineRunner:
 
         # Step 1: Run seed (if not completed)
         if not state.seed_completed:
-            # Transition to SEED_RUNNING before starting seed
+            # Validate and transition to SEED_RUNNING before starting seed
             previous_state = state.state
+            self._fsm.validate_fsm_transition(
+                previous_state, CompositePipelineState.SEED_RUNNING
+            )
             state = state.with_state(CompositePipelineState.SEED_RUNNING)
-            self._log_fsm_transition(
+            self._fsm.log_fsm_transition(
                 from_state=previous_state,
                 to_state=CompositePipelineState.SEED_RUNNING,
                 stage="seed_start",
+            )
+            # Log phase event for seed start
+            self._logger.info(
+                PipelineEvent.phase_started("seed"),
+                composite=self._config.name,
+                run_id=self._run_id_str,
             )
             await self._save_checkpoint_safe(state, "seed_running")
 
@@ -240,7 +295,7 @@ class CompositePipelineRunner:
                     seed_pipeline=self._config.seed.pipeline,
                     error=str(e),
                 )
-                self._log_fsm_transition(
+                self._fsm.log_fsm_transition(
                     from_state=CompositePipelineState.SEED_RUNNING,
                     to_state=CompositePipelineState.FAILED,
                     stage="seed_failed",
@@ -254,10 +309,18 @@ class CompositePipelineRunner:
 
             # Seed succeeded - transition to SEED_COMPLETED
             state = state.with_seed_completed(seed_result)
-            self._log_fsm_transition(
+            self._fsm.log_fsm_transition(
                 from_state=CompositePipelineState.SEED_RUNNING,
                 to_state=CompositePipelineState.SEED_COMPLETED,
                 stage="seed_complete",
+                records_extracted=seed_result.records_extracted,
+                records_silver=seed_result.records_silver,
+            )
+            # Log phase event for seed completion
+            self._logger.info(
+                PipelineEvent.phase_completed("seed"),
+                composite=self._config.name,
+                run_id=self._run_id_str,
                 records_extracted=seed_result.records_extracted,
                 records_silver=seed_result.records_silver,
             )
@@ -273,7 +336,7 @@ class CompositePipelineRunner:
             if state.state != CompositePipelineState.SEED_COMPLETED:
                 previous_state = state.state
                 state = state.with_state(CompositePipelineState.SEED_COMPLETED)
-                self._log_fsm_transition(
+                self._fsm.log_fsm_transition(
                     from_state=previous_state,
                     to_state=CompositePipelineState.SEED_COMPLETED,
                     stage="seed_resume",
@@ -300,17 +363,30 @@ class CompositePipelineRunner:
 
         # Step 4: Run enrichers (fan-out) with FSM state management
         if enrichers_to_run:
-            # Transition to ENRICHING state before starting enrichments
+            # Validate and transition to ENRICHING state before starting enrichments
             enricher_names = [e.pipeline for e in enrichers_to_run]
+            previous_state = state.state
+            self._fsm.validate_fsm_transition(
+                previous_state, CompositePipelineState.ENRICHING
+            )
             state = state.with_state(CompositePipelineState.ENRICHING)
             await self._checkpoint_manager.save(state)
 
-            self._logger.info(
-                "Enrichment stage started",
-                composite=self._config.name,
+            # Log FSM transition to ENRICHING
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.ENRICHING,
+                stage="enrichment_start",
                 enrichers=enricher_names,
                 count=len(enrichers_to_run),
-                state="ENRICHING",
+            )
+            # Log phase event for enrichment start
+            self._logger.info(
+                PipelineEvent.phase_started("enrichment"),
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                enrichers=enricher_names,
+                count=len(enrichers_to_run),
             )
 
             enrichment_results = await self._coordinator.run_enrichers(
@@ -327,7 +403,7 @@ class CompositePipelineRunner:
             await self._checkpoint_manager.save(state)
 
             # Log aggregated enrichment results
-            self._log_enrichment_summary(enrichment_results)
+            log_enrichment_summary(enrichment_results, self._config.name, self._logger)
         else:
             # No enrichers to run - skip enrichment stage
             self._logger.info(
@@ -339,18 +415,40 @@ class CompositePipelineRunner:
         # Merge with previously completed enrichers
         enrichment_results.update(state.enrichment_results)
 
+        # Step 4b: Add NOT_RUN results for optional enrichers skipped due to required_only
+        enrichment_results = add_not_run_results(
+            enrichment_results,
+            enrichers_to_run,
+            self._config.enrichers,
+            state.completed_enrichers,
+            self._runtime.required_only,
+            self._config.name,
+            self._logger,
+        )
+
         # Step 5: Check required enrichers with FSM FAILED transition on error
         try:
             self._check_required_enrichers(enrichment_results)
         except RuntimeError as e:
             # Required enricher failed - transition to FAILED state
+            previous_state = state.state
             state = state.with_state(CompositePipelineState.FAILED)
+
+            # Log FSM transition to FAILED
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.FAILED,
+                stage="required_enricher_failed",
+                error=str(e),
+            )
+
             try:
                 await self._checkpoint_manager.save(state)
             except Exception as save_error:
                 self._logger.warning(
                     "Failed to save FAILED state to checkpoint",
                     composite=self._config.name,
+                    run_id=self._run_id_str,
                     error=str(save_error),
                 )
 
@@ -359,61 +457,47 @@ class CompositePipelineRunner:
                 composite=self._config.name,
                 run_id=self._run_id_str,
                 error=str(e),
-                state="FAILED",
             )
             raise
 
         # Step 5b: Transition to ENRICHMENT_COMPLETED
-        state = state.with_state(CompositePipelineState.ENRICHMENT_COMPLETED)
-        await self._checkpoint_manager.save(state)
+        state = await self._transition_to_enrichment_completed(state)
 
-        self._logger.info(
-            "Enrichment stage completed",
-            composite=self._config.name,
-            state="ENRICHMENT_COMPLETED",
-            total_enrichers=len(enrichment_results),
-        )
+        # Step 6: Execute merge or skip in dry run mode
+        state, merge_result = await self._execute_merge_stage(state, enrichment_results)
 
-        # Step 6: Transition to MERGING and merge results
-        if not self._runtime.dry_run:
-            state = state.with_state(CompositePipelineState.MERGING)
-            await self._checkpoint_manager.save(state)
-
-            self._logger.info(
-                "Merge stage started",
-                composite=self._config.name,
-                state="MERGING",
-            )
-
-            merge_result = await self._merger.merge(
-                seed_table=self._config.seed.silver_table,
-                enrichers=self._config.enrichers,
-                enrichment_results=enrichment_results,
-                run_id=self._run_id_str,
-            )
-
-            self._logger.info(
-                "Merge completed",
-                composite=self._config.name,
-                records_merged=merge_result.records_merged,
-            )
-
-            # Step 6b: Generate DQ reports if service is available
-            await self._generate_dq_reports(merge_result)
-
-        # Step 7: Cleanup checkpoint on success
-        await self._checkpoint_manager.delete()
+        # Step 7: Finalize - set COMPLETED and cleanup checkpoint
+        await self._finalize_pipeline(state)
 
         completed_at = datetime.now(tz=UTC)
         started = self._started_at or completed_at  # Fallback if not set
         total_duration = (completed_at - started).total_seconds()
 
-        self._logger.info(
-            PipelineEvent.COMPLETE,
-            composite=self._config.name,
-            run_id=self._run_id_str,
-            duration_seconds=total_duration,
+        # Calculate if we had warnings from optional enricher failures
+        had_warnings = calculate_had_warnings(
+            enrichment_results,
+            frozenset(self._config.required_enrichers),
+            self._config.name,
+            self._logger,
         )
+
+        # Log completion with appropriate status
+        if had_warnings:
+            self._logger.info(
+                PipelineEvent.COMPLETE,
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                duration_seconds=total_duration,
+                status="completed_with_warnings",
+                had_warnings=True,
+            )
+        else:
+            self._logger.info(
+                PipelineEvent.COMPLETE,
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                duration_seconds=total_duration,
+            )
 
         return CompositeResult(
             composite_name=self._config.name,
@@ -424,33 +508,213 @@ class CompositePipelineRunner:
             total_duration_seconds=total_duration,
             started_at=self._started_at,
             completed_at=completed_at,
+            had_warnings=had_warnings,
             _required_enrichers=frozenset(self._config.required_enrichers),
         )
 
-    def _log_fsm_transition(
-        self,
-        from_state: CompositePipelineState,
-        to_state: CompositePipelineState,
-        stage: str,
-        **extra: object,
-    ) -> None:
-        """Log FSM state transition.
+    async def _transition_to_enrichment_completed(
+        self, state: CompositeCheckpointState
+    ) -> CompositeCheckpointState:
+        """Transition FSM state to ENRICHMENT_COMPLETED.
 
-        Args:
-            from_state: Previous FSM state.
-            to_state: New FSM state.
-            stage: Pipeline stage identifier (e.g., 'seed_start', 'seed_complete').
-            **extra: Additional context for logging.
+        Handles the case where no enrichers were run (state is still SEED_COMPLETED).
+        Must go through ENRICHING first per FSM rules.
         """
-        self._logger.info(
-            "FSM state transition",
-            from_state=from_state.value,
-            to_state=to_state.value,
-            composite=self._config.name,
-            run_id=self._run_id_str,
-            stage=stage,
-            **extra,
+        from bioetl.domain.composite.state import CompositePipelineState
+
+        if state.state == CompositePipelineState.SEED_COMPLETED:
+            # Must go through ENRICHING first per FSM rules (no enrichers case)
+            previous_state = state.state
+            self._fsm.validate_fsm_transition(
+                previous_state, CompositePipelineState.ENRICHING
+            )
+            state = state.with_state(CompositePipelineState.ENRICHING)
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.ENRICHING,
+                stage="enrichment_start_empty",
+                reason="no_enrichers_to_run",
+            )
+
+        if state.state == CompositePipelineState.ENRICHING:
+            enriching_state: CompositePipelineState = state.state
+            self._fsm.validate_fsm_transition(
+                enriching_state, CompositePipelineState.ENRICHMENT_COMPLETED
+            )
+            state = state.with_state(CompositePipelineState.ENRICHMENT_COMPLETED)
+            await self._save_checkpoint_safe(state, "enrichment_completed")
+
+            # Log FSM transition to ENRICHMENT_COMPLETED
+            self._fsm.log_fsm_transition(
+                from_state=enriching_state,
+                to_state=CompositePipelineState.ENRICHMENT_COMPLETED,
+                stage="enrichment_complete",
+            )
+            # Log phase event for enrichment completion
+            self._logger.info(
+                PipelineEvent.phase_completed("enrichment"),
+                composite=self._config.name,
+                run_id=self._run_id_str,
+            )
+        return state
+
+    async def _execute_merge_stage(
+        self,
+        state: CompositeCheckpointState,
+        enrichment_results: dict[str, EnrichmentResult],
+    ) -> tuple[CompositeCheckpointState, MergeResult | None]:
+        """Execute merge stage or skip in dry run mode.
+
+        Returns updated state and merge result (None for dry run).
+        """
+        from bioetl.domain.composite.state import CompositePipelineState
+
+        merge_result: MergeResult | None = None
+
+        if not self._runtime.dry_run:
+            # Validate and transition to MERGING state
+            previous_state = state.state
+            self._fsm.validate_fsm_transition(
+                previous_state, CompositePipelineState.MERGING
+            )
+            state = state.with_state(CompositePipelineState.MERGING)
+            await self._save_checkpoint_safe(state, "merging")
+
+            # Log FSM transition to MERGING
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.MERGING,
+                stage="merge_start",
+            )
+            # Log phase event for merge start
+            self._logger.info(
+                PipelineEvent.phase_started("merge"),
+                composite=self._config.name,
+                run_id=self._run_id_str,
+            )
+
+            try:
+                # Get only enrichers with data to merge (exclude SKIPPED/NOT_RUN)
+                mergeable_enrichers = get_mergeable_enrichers(
+                    enrichment_results, self._config.enrichers, self._logger
+                )
+
+                merge_result = await self._merger.merge(
+                    seed_table=self._config.seed.silver_table,
+                    enrichers=mergeable_enrichers,
+                    enrichment_results=enrichment_results,
+                    run_id=self._run_id_str,
+                )
+
+                # Log phase event for merge completion
+                self._logger.info(
+                    PipelineEvent.phase_completed("merge"),
+                    composite=self._config.name,
+                    run_id=self._run_id_str,
+                    records_merged=merge_result.records_merged,
+                )
+
+                # Generate DQ reports if service is available
+                await self._generate_dq_reports(merge_result)
+
+            except Exception as merge_error:
+                # Log FSM transition to FAILED
+                self._fsm.log_fsm_transition(
+                    from_state=CompositePipelineState.MERGING,
+                    to_state=CompositePipelineState.FAILED,
+                    stage="merge_failed",
+                    error=str(merge_error),
+                )
+                self._logger.error(
+                    "Merge failed",
+                    composite=self._config.name,
+                    run_id=self._run_id_str,
+                    error=str(merge_error),
+                )
+                state = state.with_state(CompositePipelineState.FAILED)
+                await self._save_checkpoint_safe(state, "merge_failed")
+                raise
+        else:
+            # Dry run mode - skip merge, transition directly to COMPLETED
+            self._fsm.log_fsm_transition(
+                from_state=state.state,
+                to_state=CompositePipelineState.COMPLETED,
+                stage="dry_run_skip_merge",
+                reason="dry_run_mode",
+            )
+            self._logger.info(
+                "Dry run: merge skipped, pipeline completing",
+                composite=self._config.name,
+                run_id=self._run_id_str,
+            )
+
+        return state, merge_result
+
+    async def _finalize_pipeline(self, state: CompositeCheckpointState) -> None:
+        """Finalize pipeline - set COMPLETED state and cleanup checkpoint."""
+        from bioetl.domain.composite.state import CompositePipelineState
+
+        # Validate and transition to COMPLETED state (only if not already COMPLETED from dry run)
+        if state.state != CompositePipelineState.COMPLETED:
+            previous_state = state.state
+            self._fsm.validate_fsm_transition(
+                previous_state, CompositePipelineState.COMPLETED
+            )
+            state = state.with_state(CompositePipelineState.COMPLETED)
+
+            # Log FSM transition to COMPLETED
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.COMPLETED,
+                stage="pipeline_complete",
+            )
+        await self._save_checkpoint_safe(state, "completed")
+
+        # Cleanup checkpoint on success
+        try:
+            await self._checkpoint_manager.delete()
+        except Exception as delete_error:
+            # Checkpoint deletion failure is non-critical
+            self._logger.warning(
+                "Failed to delete checkpoint",
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                error=str(delete_error),
+            )
+
+    def _validate_config_consistency(self) -> None:
+        """Validate configuration consistency and log warnings for anomalies.
+
+        Checks for potential issues in CompositeConfig that might indicate
+        misconfiguration:
+        - required_enrichers property matches actual required flags
+        - All enrichers are optional warning (valid but notable)
+
+        This is a defensive check to catch configuration errors early.
+        """
+        # Check required_enrichers consistency
+        expected_required = frozenset(
+            e.pipeline for e in self._config.enrichers if e.required
         )
+        actual_required = frozenset(self._config.required_enrichers)
+
+        if expected_required != actual_required:
+            self._logger.warning(
+                "Config inconsistency: required_enrichers mismatch",
+                composite=self._config.name,
+                expected_required=list(expected_required),
+                actual_required=list(actual_required),
+                note="This may indicate a bug in CompositeConfig",
+            )
+
+        # Log info if all enrichers are optional
+        if not expected_required and self._config.enrichers:
+            self._logger.info(
+                "All enrichers are optional",
+                composite=self._config.name,
+                enricher_count=len(self._config.enrichers),
+                note="Pipeline will succeed even if all enrichers fail",
+            )
 
     async def _save_checkpoint_safe(
         self,
@@ -556,67 +820,6 @@ class CompositePipelineRunner:
                     f"Required enricher '{enricher_name}' failed: "
                     f"{result.error_message or result.status.value}"
                 )
-
-    def _log_enrichment_summary(
-        self, enrichment_results: dict[str, EnrichmentResult]
-    ) -> None:
-        """Log aggregated summary of enrichment results.
-
-        Args:
-            enrichment_results: Results from enrichers.
-        """
-        if not enrichment_results:
-            return
-
-        # Aggregate by status
-        success_count = 0
-        partial_count = 0
-        failed_count = 0
-        skipped_count = 0
-        timeout_count = 0
-
-        total_records_input = 0
-        total_records_enriched = 0
-        total_records_errored = 0
-
-        failed_enrichers: list[str] = []
-        successful_enrichers: list[str] = []
-
-        for name, result in enrichment_results.items():
-            total_records_input += result.records_input
-            total_records_enriched += result.records_enriched
-            total_records_errored += result.records_errored
-
-            if result.status == EnrichmentStatus.SUCCESS:
-                success_count += 1
-                successful_enrichers.append(name)
-            elif result.status == EnrichmentStatus.PARTIAL:
-                partial_count += 1
-                successful_enrichers.append(name)
-            elif result.status == EnrichmentStatus.FAILED:
-                failed_count += 1
-                failed_enrichers.append(name)
-            elif result.status == EnrichmentStatus.SKIPPED:
-                skipped_count += 1
-            elif result.status == EnrichmentStatus.TIMEOUT:
-                timeout_count += 1
-                failed_enrichers.append(name)
-
-        self._logger.info(
-            "Enrichment summary",
-            composite=self._config.name,
-            total_enrichers=len(enrichment_results),
-            success=success_count,
-            partial=partial_count,
-            failed=failed_count,
-            skipped=skipped_count,
-            timeout=timeout_count,
-            successful_enrichers=successful_enrichers,
-            failed_enrichers=failed_enrichers if failed_enrichers else None,
-            total_records_input=total_records_input,
-            total_records_enriched=total_records_enriched,
-            total_records_errored=total_records_errored,
-        )
 
     async def _generate_dq_reports(self, merge_result: MergeResult) -> None:
         """Generate DQ reports for composite pipeline.

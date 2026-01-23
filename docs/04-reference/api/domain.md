@@ -34,7 +34,7 @@ classDiagram
         +histogram()
     }
 
-    StoragePort <|.. DeltaWriter
+    StoragePort <|.. SilverWriter
     DataSourcePort <|.. ChemblAdapter
     LockPort <|.. MemoryLock
 ```
@@ -103,10 +103,10 @@ class StoragePort(Protocol):
 Infrastructure provides **Adapters** that implement these ports:
 
 ```python
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-# DeltaWriter implements StoragePort
-writer: StoragePort = DeltaWriter(...)
+# SilverWriter implements StoragePort
+writer: StoragePort = SilverWriter(...)
 ```
 
 ### Content Hash

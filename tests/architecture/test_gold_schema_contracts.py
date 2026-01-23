@@ -16,12 +16,27 @@ CONTRACTS_DIR = Path("docs/contracts/gold")
 
 # Required Gold schema contracts with version 1.0
 # Note: Using sorted tuple for deterministic pytest-xdist test collection order
+# Generated from Pandera schemas by scripts/generate_gold_contracts.py
 REQUIRED_SCHEMAS = (
-    "activity_v1.0.json",
-    "assay_v1.0.json",
-    "molecule_v1.0.json",
-    "publication_v1.0.json",
-    "target_v1.0.json",
+    "chembl_activity_v1.0.json",
+    "chembl_assay_v1.0.json",
+    "chembl_assay_parameters_v1.0.json",
+    "chembl_cell_line_v1.0.json",
+    "chembl_compound_record_v1.0.json",
+    "chembl_document_v1.0.json",
+    "chembl_document_similarity_v1.0.json",
+    "chembl_document_term_v1.0.json",
+    "chembl_molecule_v1.0.json",
+    "chembl_protein_class_v1.0.json",
+    "chembl_target_v1.0.json",
+    "chembl_target_component_v1.0.json",
+    "crossref_publication_v1.0.json",
+    "openalex_publication_v1.0.json",
+    "pubchem_compound_v1.0.json",
+    "pubmed_publication_v1.0.json",
+    "semanticscholar_publication_v1.0.json",
+    "uniprot_idmapping_v1.0.json",
+    "uniprot_protein_v1.0.json",
 )
 
 # Required JSON Schema properties
@@ -156,16 +171,9 @@ class TestGoldSchemaContracts:
 
         properties = set(schema.get("properties", {}).keys())
 
-        # Core lineage field required for all Gold schemas
-        required_lineage = {"_ingestion_ts"}
-
-        # Molecule uses _run_id for lineage (simpler pattern)
-        # Other schemas use _content_hash + _source_batch_id
-        if schema_name == "molecule_v1.0.json":
-            required_lineage.add("_run_id")
-        else:
-            required_lineage.add("_content_hash")
-            required_lineage.add("_source_batch_id")
+        # Core lineage fields required for all Gold schemas (from Pandera schemas)
+        # All schemas now use the same lineage pattern: _run_id, _run_type, _ingestion_ts
+        required_lineage = {"_ingestion_ts", "_run_id", "_run_type"}
 
         missing_lineage = required_lineage - properties
 

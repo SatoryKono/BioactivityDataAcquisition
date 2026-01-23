@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
-from unittest.mock import AsyncMock, MagicMock, call
+from unittest.mock import AsyncMock, MagicMock
 
 import polars as pl
 import pytest
@@ -20,11 +20,11 @@ from bioetl.application.composite.runner import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
 )
+from bioetl.application.composite.runner_helpers import log_enrichment_summary
 from bioetl.domain.composite.result import (
     EnrichmentResult,
     EnrichmentStatus,
     MergeResult,
-    SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
 
@@ -296,15 +296,15 @@ class TestEnrichmentFSMTransitions:
         assert enrichment_completed_idx >= 0, "ENRICHMENT_COMPLETED should be saved"
         assert merging_idx >= 0, "MERGING should be saved"
 
-        assert (
-            seed_completed_idx < enriching_idx
-        ), "SEED_COMPLETED should come before ENRICHING"
-        assert (
-            enriching_idx < enrichment_completed_idx
-        ), "ENRICHING should come before ENRICHMENT_COMPLETED"
-        assert (
-            enrichment_completed_idx < merging_idx
-        ), "ENRICHMENT_COMPLETED should come before MERGING"
+        assert seed_completed_idx < enriching_idx, (
+            "SEED_COMPLETED should come before ENRICHING"
+        )
+        assert enriching_idx < enrichment_completed_idx, (
+            "ENRICHING should come before ENRICHMENT_COMPLETED"
+        )
+        assert enrichment_completed_idx < merging_idx, (
+            "ENRICHMENT_COMPLETED should come before MERGING"
+        )
 
 
 @pytest.mark.unit
@@ -403,9 +403,9 @@ class TestEnrichmentFSMFailure:
 
         # Verify checkpoint.save was called with FAILED state
         saved_states = mock_checkpoint_manager._saved_states
-        assert any(
-            s.state == CompositePipelineState.FAILED for s in saved_states
-        ), "FAILED state must be saved"
+        assert any(s.state == CompositePipelineState.FAILED for s in saved_states), (
+            "FAILED state must be saved"
+        )
 
     @pytest.mark.asyncio
     async def test_logs_error_when_required_enricher_fails(
@@ -690,11 +690,11 @@ class TestEnrichmentLogging:
         """Test logging when enrichment stage starts."""
         await runner.run()
 
-        # Find log call with ENRICHING state
+        # Find log call with enriching state (lowercase) or phase event
         enriching_calls = [
             c
             for c in mock_logger.info.call_args_list
-            if "ENRICHING" in str(c) or "Enrichment stage started" in str(c)
+            if "enriching" in str(c).lower() or "enrichment_started" in str(c)
         ]
         assert len(enriching_calls) >= 1
 
@@ -703,11 +703,11 @@ class TestEnrichmentLogging:
         """Test logging when enrichment stage completes."""
         await runner.run()
 
-        # Find log call with ENRICHMENT_COMPLETED
+        # Find log call with enrichment_completed (lowercase) or phase event
         completed_calls = [
             c
             for c in mock_logger.info.call_args_list
-            if "ENRICHMENT_COMPLETED" in str(c) or "Enrichment stage completed" in str(c)
+            if "enrichment_completed" in str(c).lower()
         ]
         assert len(completed_calls) >= 1
 
@@ -727,12 +727,10 @@ class TestEnrichmentLogging:
 
 @pytest.mark.unit
 class TestEnrichmentSummaryAggregation:
-    """Tests for _log_enrichment_summary method."""
+    """Tests for log_enrichment_summary helper function."""
 
-    def test_log_enrichment_summary_counts_statuses(
-        self, runner, mock_logger
-    ):
-        """Test _log_enrichment_summary correctly counts statuses."""
+    def test_log_enrichment_summary_counts_statuses(self, runner, mock_logger):
+        """Test log_enrichment_summary correctly counts statuses."""
         results = {
             "enricher1": EnrichmentResult.success(
                 enricher_name="enricher1",
@@ -760,7 +758,7 @@ class TestEnrichmentSummaryAggregation:
             ),
         }
 
-        runner._log_enrichment_summary(results)
+        log_enrichment_summary(results, runner._config.name, mock_logger)
 
         # Verify logger.info was called with summary
         mock_logger.info.assert_called()
@@ -775,13 +773,11 @@ class TestEnrichmentSummaryAggregation:
         assert summary_call is not None
 
     def test_log_enrichment_summary_empty_results(self, runner, mock_logger):
-        """Test _log_enrichment_summary handles empty results."""
-        runner._log_enrichment_summary({})
+        """Test log_enrichment_summary handles empty results."""
+        log_enrichment_summary({}, runner._config.name, mock_logger)
 
         # Should not log anything for empty results
         summary_calls = [
-            c
-            for c in mock_logger.info.call_args_list
-            if "Enrichment summary" in str(c)
+            c for c in mock_logger.info.call_args_list if "Enrichment summary" in str(c)
         ]
         assert len(summary_calls) == 0

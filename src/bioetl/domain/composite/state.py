@@ -57,7 +57,10 @@ class CompositePipelineState(str, Enum):
         """Check if execution can be resumed from this state.
 
         Resumable states have completed work that can be skipped on resume:
-        SEED_COMPLETED, ENRICHING, ENRICHMENT_COMPLETED.
+        SEED_COMPLETED, ENRICHING, ENRICHMENT_COMPLETED, FAILED.
+
+        FAILED is resumable to allow retry after merge failure - the seed
+        and enrichment results are preserved in the checkpoint.
 
         Returns:
             True if this state allows resume with partial progress preserved.
@@ -67,11 +70,14 @@ class CompositePipelineState(str, Enum):
             True
             >>> CompositePipelineState.NOT_STARTED.is_resumable
             False
+            >>> CompositePipelineState.FAILED.is_resumable
+            True
         """
         return self in {
             CompositePipelineState.SEED_COMPLETED,
             CompositePipelineState.ENRICHING,
             CompositePipelineState.ENRICHMENT_COMPLETED,
+            CompositePipelineState.FAILED,
         }
 
     @property

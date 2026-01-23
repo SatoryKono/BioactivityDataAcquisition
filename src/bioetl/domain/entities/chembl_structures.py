@@ -29,13 +29,12 @@ class ChemblPublication(BaseEntity):
     # Standardized to 'pmid' for cross-provider JOIN consistency (was 'pubmed_id')
     pmid: str | None = None  # Numeric string for cross-provider consistency
     doi: str | None = None
-    patent_id: str | None = None
 
     # Core metadata
     title: str | None = None
-    authors: str | None = None  # Combined authors string
+    authors: str | None = None  # JSON array of hashed author names
     abstract: str | None = None
-    doc_type: str | None = None  # PUBLICATION, PATENT, etc.
+    doc_type: str | None = None  # PUBLICATION, PATENT, DATASET, BOOK
 
     # Journal information
     journal: str | None = None
@@ -50,8 +49,16 @@ class ChemblPublication(BaseEntity):
     # Cross-reference IDs (ChEMBL doesn't provide PMC ID)
     pmc_id: str | None = None
 
+    # Unified publication fields (not available from ChEMBL API)
+    citation_count: int | None = None
+    is_oa: bool | None = None
+    language: str | None = None
+
     # Source information
     src_id: int | None = None
+
+    # System fields
+    _source: str = "chembl"  # Data source identifier
 
     # Lookup metadata (tracks resolution strategy)
     _lookup_method: str = "direct"  # ChEMBL uses direct extraction
@@ -478,29 +485,3 @@ __all__ = [
     "Target",
     "TargetComponent",
 ]
-# Note: Deprecated alias (Document) is provided via __getattr__
-# but not listed in __all__ since it is deprecated (ADR-024, glossary v2.0)
-
-
-# === Deprecated Alias (ADR-024, glossary v2.0) ===
-# This alias is retained for backward compatibility.
-# Use ChemblPublication in new code.
-
-
-def __getattr__(name: str) -> type:
-    """Provide deprecated alias with warning.
-
-    Deprecated:
-        Document: Use ChemblPublication instead.
-    """
-    import warnings
-
-    if name == "Document":
-        warnings.warn(
-            "Document is deprecated, use ChemblPublication instead "
-            "(ADR-024, glossary v2.0)",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return ChemblPublication
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

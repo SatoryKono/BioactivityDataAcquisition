@@ -10,22 +10,23 @@ import pytest
 import yaml
 
 from bioetl.domain.models.metadata import (
+    BaseOutputMetadata,
     BronzeMetadata,
+    BronzeOutputExt,
     DeltaMetrics,
     DQSummary,
     EnvironmentMetadata,
     FileOutputMetadata,
     GoldMetadata,
-    GoldOutputMetadata,
+    GoldOutputExt,
     LayerType,
     LineageMetadata,
-    OutputMetadata,
     PipelineMetadata,
     RuntimeMetadata,
     RunTypeEnum,
     SchemaMetadata,
     SilverMetadata,
-    SilverOutputMetadata,
+    SilverOutputExt,
     SourceMetadata,
 )
 from bioetl.domain.ports.noop import NoOpMetadataWriter
@@ -91,7 +92,7 @@ def bronze_metadata(
 ) -> BronzeMetadata:
     """Create sample Bronze metadata."""
     return BronzeMetadata(
-        version="1.0",
+        version="1.1",
         layer=LayerType.BRONZE,
         runtime=runtime_metadata,
         pipeline=pipeline_metadata,
@@ -100,7 +101,11 @@ def bronze_metadata(
             url="https://www.ebi.ac.uk/chembl/api/data/activity",
             api_version="33",
         ),
-        output=OutputMetadata(
+        output=BaseOutputMetadata(
+            record_count=10000,
+            total_bytes=1048576,
+        ),
+        output_ext=BronzeOutputExt(
             files=[
                 FileOutputMetadata(
                     path="batch_001.jsonl.zst",
@@ -109,8 +114,6 @@ def bronze_metadata(
                     checksum_blake2="abc123",
                 ),
             ],
-            total_records=10000,
-            total_bytes=1048576,
             format="jsonl+zstd",
             compression="zstd",
         ),
@@ -126,7 +129,7 @@ def silver_metadata(
 ) -> SilverMetadata:
     """Create sample Silver metadata."""
     return SilverMetadata(
-        version="1.0",
+        version="1.1",
         layer=LayerType.SILVER,
         runtime=runtime_metadata,
         pipeline=pipeline_metadata,
@@ -151,9 +154,13 @@ def silver_metadata(
             error_records=750,
             error_rate=0.05,
         ),
-        output=SilverOutputMetadata(
+        output=BaseOutputMetadata(
             record_count=14250,
             content_hash="sha256:abc123",
+        ),
+        output_ext=SilverOutputExt(
+            delta_version_before=42,
+            delta_version_after=43,
         ),
         environment=environment_metadata,
     )
@@ -167,7 +174,7 @@ def gold_metadata(
 ) -> GoldMetadata:
     """Create sample Gold metadata."""
     return GoldMetadata(
-        version="1.0",
+        version="1.1",
         layer=LayerType.GOLD,
         runtime=runtime_metadata,
         pipeline=pipeline_metadata,
@@ -184,10 +191,12 @@ def gold_metadata(
             valid_records=1250,
             validation_passed=True,
         ),
-        output=GoldOutputMetadata(
+        output=BaseOutputMetadata(
             record_count=1250,
-            partition_count=50,
             total_bytes=10485760,
+        ),
+        output_ext=GoldOutputExt(
+            partition_count=50,
             format="delta",
         ),
         environment=environment_metadata,
@@ -231,12 +240,12 @@ class TestMetadataWriter:
         metadata_path = base_path / METADATA_FILENAME
         content = yaml.safe_load(metadata_path.read_text())
 
-        assert content["version"] == "1.0"
+        assert content["version"] == "1.1"  # ADR-029 version bump
         assert content["layer"] == "bronze"
         assert content["pipeline"]["name"] == "chembl_activity"
         assert content["pipeline"]["provider"] == "chembl"
         assert content["source"]["type"] == "api"
-        assert content["output"]["total_records"] == 10000
+        assert content["output"]["record_count"] == 10000  # ADR-029: unified field name
 
     @pytest.mark.asyncio
     async def test_write_silver_metadata_creates_file(
@@ -454,7 +463,7 @@ class TestMetadataModels:
         """Test Bronze metadata can be serialized to dict."""
         data = bronze_metadata.model_dump(mode="json")
 
-        assert data["version"] == "1.0"
+        assert data["version"] == "1.1"  # ADR-029 version bump
         assert data["layer"] == "bronze"
         assert data["runtime"]["run_type"] == "incremental"
         assert "started_at_utc" in data["runtime"]
@@ -466,7 +475,7 @@ class TestMetadataModels:
         """Test Silver metadata can be serialized to dict."""
         data = silver_metadata.model_dump(mode="json")
 
-        assert data["version"] == "1.0"
+        assert data["version"] == "1.1"  # ADR-029 version bump
         assert data["layer"] == "silver"
         assert "lineage" in data
         assert "delta" in data
@@ -479,7 +488,7 @@ class TestMetadataModels:
         """Test Gold metadata can be serialized to dict."""
         data = gold_metadata.model_dump(mode="json", by_alias=True)
 
-        assert data["version"] == "1.0"
+        assert data["version"] == "1.1"  # ADR-029 version bump
         assert data["layer"] == "gold"
         assert "schema" in data  # Uses alias
         assert "dq_summary" in data

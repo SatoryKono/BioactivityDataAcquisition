@@ -1,0 +1,156 @@
+%%{init: {'theme':'base', 'themeVariables': { 'fontSize':'13px'}}}%%
+stateDiagram-v2
+    [*] --> OPEN: Create Batch
+
+    state OPEN {
+        [*] --> AddingRecords
+        AddingRecords --> CheckingSize: add_record()
+        CheckingSize --> AddingRecords: Not full
+        CheckingSize --> ReadyToSeal: Full (batch_size reached)
+
+        state "DQ Checks" as DQChecks {
+            ValidateRecord --> SchemaCheck
+            SchemaCheck --> QuarantineOrAdd: Invalid schema
+            SchemaCheck --> DQRules: Valid schema
+            DQRules --> QuarantineOrAdd: DQ fail
+            DQRules --> AcceptRecord: DQ pass
+
+            state choice_quarantine <<choice>>
+            QuarantineOrAdd --> choice_quarantine
+            choice_quarantine --> QuarantineRecord: DQ fail or invalid
+            choice_quarantine --> AcceptRecord: Valid
+        }
+
+        AddingRecords --> DQChecks: Validate each record
+        DQChecks --> AddingRecords: Continue
+    }
+
+    OPEN --> SEALED: seal()
+
+    state SEALED {
+        [*] --> Immutable
+        Immutable: No more records can be added
+        Immutable: Records list frozen
+        Immutable: content_hash calculated for all
+        Immutable: Ready for writing
+    }
+
+    SEALED --> WRITING: mark_writing()
+
+    state WRITING {
+        [*] --> WriteBronze
+
+        state "Bronze Write" as WriteBronze {
+            SerializeJSONL --> CompressZstd
+            CompressZstd --> WriteToDisk
+            WriteToDisk --> WriteMetadataYAML
+            WriteMetadataYAML --> BronzeSuccess
+        }
+
+        WriteBronze --> WriteSilver
+
+        state "Silver Write" as WriteSilver {
+            DeltaMerge: Merge by content_hash
+            DeltaMerge --> ACIDTransaction
+            ACIDTransaction --> SilverSuccess
+        }
+
+        WriteSilver --> WriteGold
+
+        state "Gold Write" as WriteGold {
+            FilterJSON: Exclude JSON columns
+            FilterJSON --> StrictValidation
+            StrictValidation --> GoldMode
+            GoldMode --> GoldSuccess
+
+            state gold_mode_choice <<choice>>
+            GoldMode --> gold_mode_choice
+            gold_mode_choice --> SCD2: mode=SCD2
+            gold_mode_choice --> Overwrite: mode=OVERWRITE
+            gold_mode_choice --> Append: mode=APPEND
+
+            SCD2 --> GoldSuccess
+            Overwrite --> GoldSuccess
+            Append --> GoldSuccess
+        }
+
+        WriteGold --> AllWritesComplete
+    }
+
+    WRITING --> COMMITTED: mark_committed()
+
+    state COMMITTED {
+        [*] --> RecordMetrics
+        RecordMetrics --> SaveCheckpoint
+        SaveCheckpoint --> EmitObservability
+        EmitObservability --> BatchComplete
+
+        state "Metrics" as RecordMetrics {
+            CountRecords
+            CalculateDurations
+            RecordDQMetrics
+            EmitToPrometheus
+        }
+
+        state "Observability" as EmitObservability {
+            CloseSpan
+            LogCompletion
+            IncrementCounters
+        }
+    }
+
+    COMMITTED --> [*]: Batch lifecycle complete
+
+    state "Error Handling" as ErrorStates {
+        WRITING --> FAILED: mark_failed()
+
+        state FAILED {
+            [*] --> RollbackWrites
+            RollbackWrites --> QuarantineFailedRecords
+            QuarantineFailedRecords --> LogError
+            LogError --> EmitErrorMetrics
+            EmitErrorMetrics --> [*]
+        }
+
+        FAILED --> [*]: Error handled
+    }
+
+    state "Quarantine Flow" as QuarantineFlow {
+        QuarantineRecord --> CreateQuarantineEntry
+        CreateQuarantineEntry --> SaveToQuarantineStorage
+        SaveToQuarantineStorage --> IncrementQuarantineMetric
+    }
+
+    note right of OPEN
+        Max batch size configurable
+        Default: 1000 records
+        Adaptive sizing based on memory
+    end note
+
+    note right of SEALED
+        Immutable state
+        content_hash for all records
+        DQ metrics calculated
+    end note
+
+    note right of WRITING
+        ACID guarantees
+        All-or-nothing commit
+        Rollback on failure
+    end note
+
+    note right of COMMITTED
+        Metrics emitted:
+        - batch_duration_ms
+        - records_processed
+        - dq_soft_threshold_exceeded
+        - write_duration_ms
+    end note
+
+    note left of QuarantineFlow
+        Quarantine reasons:
+        - Schema validation fail
+        - DQ soft threshold (>5%)
+        - Transform exception
+        - Content hash conflict
+    end note

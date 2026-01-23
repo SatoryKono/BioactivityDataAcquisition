@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from bioetl.domain.models.metadata import (
         BronzeMetadata,
         GoldMetadata,
+        GovernanceMetadata,
         SilverMetadata,
         SourceMetadata,
     )
@@ -37,6 +38,7 @@ class BronzeMetadataInput:
                         details for rich lineage tracking.
         query_string: Query string from PipelineRunContext used for data
                      source filtering (e.g., 'assay_type=B').
+        governance: Optional governance metadata from pipeline config.
     """
 
     batch_id: BatchID
@@ -47,6 +49,7 @@ class BronzeMetadataInput:
     completed_at: datetime
     source_metadata: SourceMetadata | None = None
     query_string: str | None = None
+    governance: GovernanceMetadata | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -60,10 +63,16 @@ class SilverMetadataInput:
         mode: Write mode (merge, append, delete).
         bronze_refs: Optional list of BronzeWriteResult for lineage.
         dq_metrics: Optional BatchDQMetrics for DQ summary.
+        version_before: Delta table version before write (ADR-029).
         version_after: Delta table version after write.
         transform_version: Optional semver version of transform applied.
         transform_steps: Optional list of transform step names applied.
         dq_report_path: Optional path to generated DQ report for cross-reference.
+        partition_by: Partition columns used for the Delta table.
+        governance: Optional governance metadata from pipeline config.
+        started_at: UTC timestamp when Silver write started.
+        completed_at: UTC timestamp when Silver write completed.
+        total_bytes: Total size in bytes (ADR-029).
     """
 
     table_path: str
@@ -72,10 +81,16 @@ class SilverMetadataInput:
     mode: Any  # SilverWriteMode - avoid circular import
     bronze_refs: Any | None = None  # list[BronzeWriteResult] | None
     dq_metrics: Any | None = None  # BatchDQMetrics | None
+    version_before: int | None = None  # ADR-029: Delta version before write
     version_after: int | None = None
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
     dq_report_path: str | None = None
+    partition_by: list[str] | None = None
+    governance: GovernanceMetadata | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    total_bytes: int = 0  # ADR-029: Total size in bytes
 
 
 @dataclass(frozen=True, slots=True)
@@ -106,10 +121,16 @@ class GoldMetadataInput:
         records: List of records written.
         mode: Write mode (overwrite, append, scd2).
         scd_config: SCD2 configuration if applicable.
+        started_at: UTC timestamp when write started (ADR-029).
         completed_at: UTC timestamp when write completed.
         silver_refs: List of Silver source references for lineage tracking.
         transform_version: Optional semver version of transform applied.
         transform_steps: Optional list of transform step names applied.
+        gold_schema: Optional Pandera schema class for extracting schema metadata
+                    (contract_path, version, columns).
+        governance: Optional governance metadata from pipeline config.
+        total_bytes: Total size in bytes (ADR-029).
+        partition_count: Number of partitions (ADR-029).
     """
 
     table_path: str
@@ -117,10 +138,15 @@ class GoldMetadataInput:
     records: list[dict[str, Any]]
     mode: Any  # GoldWriteMode - avoid circular import
     scd_config: dict[str, Any] | None = None
+    started_at: datetime | None = None  # ADR-029: Write start timestamp
     completed_at: datetime | None = None
     silver_refs: list[SilverRef] | None = None
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
+    gold_schema: Any | None = None  # Pandera DataFrameModel class
+    governance: GovernanceMetadata | None = None
+    total_bytes: int = 0  # ADR-029: Total size in bytes
+    partition_count: int = 0  # ADR-029: Number of partitions
 
 
 @runtime_checkable

@@ -29,81 +29,107 @@ Path: _bootstrap\__init__.py
 ================================================================================
 """Bootstrap submodule for BioETL Composition Root.
 
-Provides modular bootstrap functions organized by responsibility:
-- observability: logging, tracing, metrics, data quality monitoring
-- storage: storage adapters, cleanup, lifecycle services
-- checkpoint: checkpoint and quarantine management
-- config: configuration service
-- health: health service
+DEPRECATED: This module is maintained for backward compatibility.
+New code should import from composition/bootstrap/ package instead:
 
-All functions are re-exported for backward compatibility with
-the main bootstrap module.
+- Assembly (shared): composition.bootstrap.assembly
+- CLI services: composition.bootstrap.cli
+- Runtime services: composition.bootstrap.runtime
+
+All functions are re-exported from the new package structure.
 """
 
 from __future__ import annotations
 
-from bioetl.composition._bootstrap.checkpoint import (
+# Re-export everything from the new bootstrap package for backward compatibility
+from bioetl.composition.bootstrap import (
+    HealthServerDependencies,
+    MetricsServerError,
+    bootstrap_bronze_cleanup_service,
+    # Deprecated aliases (backward compatibility)
     bootstrap_checkpoint,
     bootstrap_checkpoint_manager,
+    # Canonical names (use these)
+    bootstrap_checkpoint_port,
     bootstrap_checkpoint_service,
-    bootstrap_quarantine,
-    bootstrap_quarantine_manager,
-    bootstrap_quarantine_service,
-)
-from bioetl.composition._bootstrap.config import bootstrap_config_service
-from bioetl.composition._bootstrap.health import (
-    HealthServerDependencies,
+    bootstrap_cleanup,
+    bootstrap_cleanup_service,
+    bootstrap_composite_pipeline,
+    bootstrap_composite_runner,
+    bootstrap_config_service,
+    bootstrap_dq_monitor,
+    bootstrap_dq_monitor_port,
+    bootstrap_export_service,
     bootstrap_health_server_dependencies,
     bootstrap_health_service,
-)
-from bioetl.composition._bootstrap.lock import bootstrap_lock_service
-from bioetl.composition._bootstrap.observability import (
-    MetricsServerError,
-    bootstrap_dq_monitor,
+    bootstrap_lifecycle_service,
+    bootstrap_lock_service,
     bootstrap_logger,
+    bootstrap_logger_port,
     bootstrap_metrics,
+    bootstrap_metrics_port,
     bootstrap_metrics_service,
     bootstrap_observability,
+    bootstrap_observability_bundle,
+    bootstrap_pipeline,
+    bootstrap_pipeline_runner,
+    bootstrap_pipeline_runner_service,
+    bootstrap_quarantine,
+    bootstrap_quarantine_manager,
+    bootstrap_quarantine_port,
+    bootstrap_quarantine_service,
+    bootstrap_storage,
+    bootstrap_storage_adapter,
     bootstrap_tracer,
+    bootstrap_tracer_port,
+    bootstrap_vacuum_service,
+    maybe_start_metrics_server,
     start_metrics_server,
     validate_observability_preflight,
-)
-from bioetl.composition._bootstrap.runner import bootstrap_pipeline_runner_service
-from bioetl.composition._bootstrap.storage import (
-    bootstrap_bronze_cleanup_service,
-    bootstrap_cleanup,
-    bootstrap_export_service,
-    bootstrap_lifecycle_service,
-    bootstrap_storage,
-    bootstrap_vacuum_service,
 )
 
 __all__ = [
     "HealthServerDependencies",
     "MetricsServerError",
     "bootstrap_bronze_cleanup_service",
+    # Deprecated aliases (backward compatibility)
     "bootstrap_checkpoint",
     "bootstrap_checkpoint_manager",
+    # Canonical names (use these)
+    "bootstrap_checkpoint_port",
     "bootstrap_checkpoint_service",
     "bootstrap_cleanup",
+    "bootstrap_cleanup_service",
+    "bootstrap_composite_pipeline",
+    "bootstrap_composite_runner",
     "bootstrap_config_service",
     "bootstrap_dq_monitor",
+    "bootstrap_dq_monitor_port",
     "bootstrap_export_service",
     "bootstrap_health_server_dependencies",
     "bootstrap_health_service",
     "bootstrap_lifecycle_service",
     "bootstrap_lock_service",
     "bootstrap_logger",
+    "bootstrap_logger_port",
     "bootstrap_metrics",
+    "bootstrap_metrics_port",
     "bootstrap_metrics_service",
     "bootstrap_observability",
+    "bootstrap_observability_bundle",
+    "bootstrap_pipeline",
+    "bootstrap_pipeline_runner",
     "bootstrap_pipeline_runner_service",
     "bootstrap_quarantine",
     "bootstrap_quarantine_manager",
+    "bootstrap_quarantine_port",
     "bootstrap_quarantine_service",
     "bootstrap_storage",
+    "bootstrap_storage_adapter",
     "bootstrap_tracer",
+    "bootstrap_tracer_port",
     "bootstrap_vacuum_service",
+    "maybe_start_metrics_server",
     "start_metrics_server",
     "validate_observability_preflight",
 ]
@@ -269,8 +295,7 @@ Used primarily by CLI configuration operations.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
+from bioetl.application.services import ConfigService
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.registry import get_default_registry
 from bioetl.infrastructure.config import (
@@ -279,9 +304,6 @@ from bioetl.infrastructure.config import (
     yaml_config_to_domain,
 )
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-
-if TYPE_CHECKING:
-    from bioetl.application.services import ConfigService
 
 __all__ = [
     "bootstrap_config_service",
@@ -302,8 +324,6 @@ def bootstrap_config_service() -> ConfigService:
         >>> settings = service.get_settings()
         >>> logger.info("environment", env=settings.env)
     """
-    from bioetl.application.services import ConfigService
-
     noop_logger = NoOpLogger()
 
     # Ensure pipelines are registered for list_pipelines()
@@ -437,13 +457,9 @@ Contains bootstrap functions for lock service used by CLI operations.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
+from bioetl.application.services.lock_service import LockService
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-
-if TYPE_CHECKING:
-    from bioetl.application.services.lock_service import LockService
 
 __all__ = ["bootstrap_lock_service"]
 
@@ -461,8 +477,6 @@ def bootstrap_lock_service() -> LockService:
     Returns:
         LockService configured for the current environment.
     """
-    from bioetl.application.services.lock_service import LockService
-
     lock_port = MemoryLock()
     noop_logger = NoOpLogger()
 
@@ -487,25 +501,28 @@ Unified Observability Contract:
 
 from __future__ import annotations
 
-import contextlib
 from typing import TYPE_CHECKING
-from uuid import UUID
+from uuid import UUID, uuid4
 
+from bioetl.application.services.metrics_service import MetricsService
 from bioetl.composition.observability import ObservabilityBundle
-from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
-from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
-from bioetl.infrastructure.observability.server import (
-    MetricsServerError,
+from bioetl.domain.exceptions import MetricsServerError
+from bioetl.domain.ports import DQMonitorPort, LoggerPort, MetricsPort, TracingPort
+from bioetl.infrastructure.observability import (
+    NoOpMetrics,
+    NoOpTracing,
+    OpenTelemetryTracer,
+    PrometheusMetrics,
+    UnifiedLogger,
     start_metrics_server,
 )
-from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
-from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
+from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
+from bioetl.infrastructure.observability.metrics_server_adapter import (
+    MetricsServerAdapter,
+)
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
-    from bioetl.application.services.metrics_service import MetricsService
-    from bioetl.domain.ports import DQMonitorPort
     from bioetl.infrastructure.config import Settings
 
 __all__ = [
@@ -516,6 +533,7 @@ __all__ = [
     "bootstrap_metrics_service",
     "bootstrap_observability",
     "bootstrap_tracer",
+    "maybe_start_metrics_server",
     "start_metrics_server",
     "validate_observability_preflight",
 ]
@@ -585,8 +603,6 @@ def bootstrap_logger(
     Returns:
         UnifiedLogger implementing LoggerPort with Log Schema enforcement.
     """
-    from uuid import uuid4
-
     effective_run_id = run_id if run_id is not None else uuid4()
     return UnifiedLogger(
         pipeline=pipeline,
@@ -602,9 +618,8 @@ def bootstrap_tracer(
 ) -> TracingPort:
     """Bootstrap distributed tracing.
 
-    Unified Observability Contract: Always returns a valid TracingPort.
-    When tracing is disabled or OpenTelemetry is not installed,
-    returns NoOpTracing (silent fallback).
+    When tracing is disabled, returns NoOpTracing.
+    When tracing is enabled, returns OpenTelemetryTracer.
 
     Args:
         settings: Application settings (MUST be injected, not loaded globally).
@@ -612,25 +627,25 @@ def bootstrap_tracer(
 
     Returns:
         TracingPort instance (OpenTelemetryTracer or NoOpTracing).
-        Never returns None - uses NoOpTracing as fallback.
+
+    Raises:
+        ImportError: If tracing is enabled but OpenTelemetry is not installed.
     """
     if settings.observability.tracing_enabled:
-        try:
-            return OpenTelemetryTracer(service_name=service_name)
-        except ImportError:
-            # OpenTelemetry not installed, fall back to no-op
-            pass
+        return OpenTelemetryTracer(service_name=service_name)
     return NoOpTracing()
 
 
 def bootstrap_metrics(settings: Settings) -> MetricsPort:
-    """Bootstrap metrics with optional server start.
+    """Bootstrap metrics collector.
 
     Unified Observability Contract: Always returns a valid MetricsPort.
     When metrics are disabled, returns NoOpMetrics (silent fallback).
 
-    Server is started only if explicitly enabled in settings.
-    Supports fail_fast mode for strict startup validation.
+    Note:
+        This function only creates the metrics collector.
+        Server startup is handled separately by entrypoints via
+        maybe_start_metrics_server() to keep bootstrap side-effect free.
 
     Args:
         settings: Application settings.
@@ -638,38 +653,46 @@ def bootstrap_metrics(settings: Settings) -> MetricsPort:
     Returns:
         MetricsPort instance (PrometheusMetrics or NoOpMetrics).
         Never returns None - uses NoOpMetrics as fallback.
-
-    Raises:
-        MetricsServerError: If fail_fast=True and server fails to start.
     """
     if not settings.observability.metrics_enabled:
         # Silent fallback - no warning since explicitly disabled
         return NoOpMetrics(warn_on_use=False)
 
-    metrics = PrometheusMetrics()
+    return PrometheusMetrics()
 
-    if settings.observability.metrics_server_enabled:
-        obs = settings.observability
 
-        if obs.metrics_fail_fast:
-            # In fail_fast mode, let MetricsServerError propagate
-            start_metrics_server(
-                port=settings.metrics_port,
-                fail_fast=True,
-                retry_count=obs.metrics_retry_count,
-                retry_delay=obs.metrics_retry_delay,
-            )
-        else:
-            # Lenient mode: log but don't fail - metrics collection still works
-            with contextlib.suppress(Exception):
-                start_metrics_server(
-                    port=settings.metrics_port,
-                    fail_fast=False,
-                    retry_count=obs.metrics_retry_count,
-                    retry_delay=obs.metrics_retry_delay,
-                )
+def maybe_start_metrics_server(settings: Settings) -> bool:
+    """Start metrics server if enabled in settings.
 
-    return metrics
+    This function should be called by entrypoints (CLI, REST API) after
+    bootstrap to start the Prometheus HTTP server. Separating server
+    startup from bootstrap keeps the composition layer side-effect free.
+
+    Args:
+        settings: Application settings.
+
+    Returns:
+        True if server was started or already running, False if disabled
+        or failed to start.
+
+    Raises:
+        MetricsServerError: If fail_fast=True and server fails to start.
+    """
+    if not settings.observability.metrics_enabled:
+        return False
+
+    if not settings.observability.metrics_server_enabled:
+        return False
+
+    obs = settings.observability
+
+    # Start metrics server - let exceptions propagate to entrypoints
+    return start_metrics_server(
+        port=settings.metrics_port,
+        fail_fast=obs.metrics_fail_fast,
+        retry_count=obs.metrics_retry_count,
+        retry_delay=obs.metrics_retry_delay,
+    )
 
 
 def bootstrap_dq_monitor(
@@ -691,9 +714,6 @@ def bootstrap_dq_monitor(
 
     if not obs_settings.dq_monitor_enabled:
         return None
-
-    from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
-    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
     effective_logger = logger if logger is not None else NoOpLogger()
 
@@ -799,12 +819,6 @@ def bootstrap_metrics_service() -> MetricsService:
         >>> result = service.start(port=8000)
         >>> # result.success is True if server started
     """
-    from bioetl.application.services.metrics_service import MetricsService
-    from bioetl.infrastructure.observability.metrics_server_adapter import (
-        MetricsServerAdapter,
-    )
-    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-
     logger = NoOpLogger()
     server = MetricsServerAdapter(logger=logger)
 
@@ -918,16 +932,22 @@ __all__ = [
 ]
 
 
-def bootstrap_storage() -> StorageAdapter:
-    """Bootstrap a read-only storage adapter for CLI operations.
+def bootstrap_storage(*, enable_csv_export: bool = False) -> StorageAdapter:
+    """Bootstrap a storage adapter for CLI and composite pipeline operations.
 
-    Creates a minimal StorageAdapter suitable for preview operations.
-    No CSV export is configured since this is for read-only inspection.
+    Creates a StorageAdapter suitable for preview operations and composite
+    pipelines. CSV export is disabled by default for read-only inspection
+    but can be enabled for composite pipelines that need CSV output.
+
     Uses NoOpLogger since this is for CLI preview operations without observability.
 
     Note:
         Lock validation is performed at Application layer (BatchWriter)
         per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
+
+    Args:
+        enable_csv_export: If True, creates CsvExporters for Silver and Gold
+            layers. Used by composite pipelines that need CSV output.
 
     Returns:
         StorageAdapter configured for the current environment.
@@ -938,6 +958,7 @@ def bootstrap_storage() -> StorageAdapter:
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.types import RunID, RunType
     from bioetl.domain.value_objects.run_context import RunContext
+    from bioetl.infrastructure.export.csv_exporter import CsvExporter
     from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
     settings = get_settings()
@@ -960,6 +981,19 @@ def bootstrap_storage() -> StorageAdapter:
     )
     metadata_coordinator = MetadataCoordinator(run_context=run_context)
 
+    # Create CSV exporters if enabled (for composite pipelines)
+    silver_csv_exporter = None
+    gold_csv_exporter = None
+    if enable_csv_export:
+        silver_csv_exporter = CsvExporter(
+            base_path=str(output_dir / "silver"),
+            logger=noop_logger,
+        )
+        gold_csv_exporter = CsvExporter(
+            base_path=str(output_dir / "gold"),
+            logger=noop_logger,
+        )
+
     return StorageAdapter(
         bronze_writer=BronzeWriter(
             base_path=output_dir / "bronze",  # data/output/bronze
@@ -973,7 +1007,7 @@ def bootstrap_storage() -> StorageAdapter:
             base_path=output_dir / "silver",  # data/output/silver
             logger=noop_logger,
             tracing=noop_tracing,
-            csv_exporter=None,
+            csv_exporter=silver_csv_exporter,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
         ),
@@ -981,7 +1015,7 @@ def bootstrap_storage() -> StorageAdapter:
             base_path=output_dir / "gold",  # data/output/gold
             logger=noop_logger,
             tracing=noop_tracing,
-            csv_exporter=None,
+            csv_exporter=gold_csv_exporter,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
         ),
@@ -1056,7 +1090,7 @@ def bootstrap_vacuum_service() -> VacuumService:
     noop_logger = NoOpLogger()
 
     # Create table collector that queries the registry (DI pattern)
-    table_collector = _create_table_collector(noop_logger)
+    table_collector = _create_table_collector()
 
     return VacuumService(
         lifecycle=lifecycle,
@@ -1065,20 +1099,18 @@ def bootstrap_vacuum_service() -> VacuumService:
     )
 
 
-def _create_table_collector(
-    logger: NoOpLogger,
-) -> Callable[[str], list[tuple[str, str]]]:
+def _create_table_collector() -> Callable[[str], list[tuple[str, str]]]:
     """Create a table collector function for VacuumService.
 
     This function queries the pipeline registry and config loader
     to collect silver/gold tables. It lives in composition layer
     to maintain proper dependency direction (application -> domain <- composition).
 
-    Args:
-        logger: Logger for warnings when configs are not found.
-
     Returns:
         Callable that collects tables for a given layer.
+
+    Raises:
+        ValueError: If config file for a registered pipeline is not found.
     """
     from bioetl.composition.entrypoints import load_pipeline_config
     from bioetl.composition.registry import get_default_registry
@@ -1091,6 +1123,9 @@ def _create_table_collector(
 
         Returns:
             List of (table_name, layer) tuples sorted alphabetically.
+
+        Raises:
+            ValueError: If config file for a registered pipeline is not found.
         """
         registry = get_default_registry()
         pipelines = registry.list_pipelines()
@@ -1099,17 +1134,11 @@ def _create_table_collector(
         gold_tables: set[str] = set()
 
         for pipeline_name in pipelines:
-            try:
-                config = load_pipeline_config(pipeline_name)
-                if config.silver_table:
-                    silver_tables.add(config.silver_table)
-                if config.gold_table:
-                    gold_tables.add(config.gold_table)
-            except FileNotFoundError:
-                logger.warning(
-                    "Config not found for pipeline",
-                    pipeline_name=pipeline_name,
-                )
+            config = load_pipeline_config(pipeline_name)
+            if config.silver_table:
+                silver_tables.add(config.silver_table)
+            if config.gold_table:
+                gold_tables.add(config.gold_table)
 
         tables: list[tuple[str, str]] = []
         if layer in ("all", "silver"):
@@ -1158,207 +1187,1560 @@ def bootstrap_export_service() -> ExportService:
     )
 
 ================================================================================
-File: bootstrap.py
-Path: bootstrap.py
+File: __init__.py
+Path: bootstrap\__init__.py
 ================================================================================
-"""Composition Root for BioETL.
+"""Bootstrap package for BioETL Composition Root.
 
-Handles the initialization and wiring of infrastructure components (adapters)
-to provide a ready-to-use PipelineRunner for execution.
+Provides modular bootstrap functions organized by context:
 
-Bootstrap functions are organized into submodules:
-- bootstrap.observability: logging, tracing, metrics, DQ monitor
-- bootstrap.storage: storage adapters, cleanup, lifecycle services
-- bootstrap.checkpoint: checkpoint and quarantine management
+- **assembly**: Shared infrastructure components (ports, storage adapters)
+  without side-effects. Used by both CLI and runtime.
+- **cli**: Bootstrap functions for CLI-only commands (inspect, list, maintenance,
+  admin operations). These use NoOp observability implementations.
+- **runtime**: Bootstrap functions for actual pipeline execution (pipeline run,
+  composite pipelines). These use full observability stack.
 
-All bootstrap functions are re-exported here for convenience.
+Import Rules:
+- runtime MUST NOT import from cli
+- cli MAY import from runtime (for runner access)
+- Both MUST import shared code from assembly
+
+All functions are re-exported here for backward compatibility with existing code.
+"""
+
+from __future__ import annotations
+
+# =============================================================================
+# Assembly (shared infrastructure without side-effects)
+# =============================================================================
+from bioetl.composition.bootstrap.assembly import (
+    # Deprecated aliases
+    bootstrap_checkpoint,
+    # Canonical names
+    bootstrap_checkpoint_port,
+    bootstrap_quarantine,
+    bootstrap_quarantine_port,
+    bootstrap_storage,
+    bootstrap_storage_adapter,
+)
+
+# =============================================================================
+# CLI-specific services (NoOp observability, admin operations)
+# =============================================================================
+from bioetl.composition.bootstrap.cli import (
+    HealthServerDependencies,
+    bootstrap_bronze_cleanup_service,
+    bootstrap_checkpoint_manager,
+    bootstrap_checkpoint_service,
+    # Deprecated alias
+    bootstrap_cleanup,
+    # Canonical name
+    bootstrap_cleanup_service,
+    bootstrap_config_service,
+    bootstrap_export_service,
+    bootstrap_health_server_dependencies,
+    bootstrap_health_service,
+    bootstrap_lifecycle_service,
+    bootstrap_lock_service,
+    bootstrap_metrics_service,
+    bootstrap_quarantine_manager,
+    bootstrap_quarantine_service,
+    bootstrap_vacuum_service,
+)
+
+# =============================================================================
+# Runtime services (full observability, pipeline execution)
+# =============================================================================
+from bioetl.composition.bootstrap.runtime import (
+    MetricsServerError,
+    # Assembly (pure functions)
+    VacuumSettings,
+    assemble_filter_config,
+    assemble_runtime_config,
+    assemble_vacuum_settings,
+    # Deprecated aliases
+    bootstrap_composite_pipeline,
+    # Canonical names
+    bootstrap_composite_runner,
+    bootstrap_dq_monitor,
+    bootstrap_dq_monitor_port,
+    bootstrap_logger,
+    bootstrap_logger_port,
+    bootstrap_metrics,
+    bootstrap_metrics_port,
+    bootstrap_observability,
+    bootstrap_observability_bundle,
+    bootstrap_pipeline,
+    bootstrap_pipeline_runner,
+    bootstrap_pipeline_runner_service,
+    bootstrap_tracer,
+    bootstrap_tracer_port,
+    load_composite_config,
+    maybe_start_metrics_server,
+    start_metrics_server,
+    validate_observability_preflight,
+)
+
+# =============================================================================
+# Config loader (re-exported for convenience)
+# =============================================================================
+from bioetl.infrastructure.config import load_pipeline_config
+
+__all__ = [
+    # CLI services
+    "HealthServerDependencies",
+    # Runtime services
+    "MetricsServerError",
+    # Runtime assembly (pure functions)
+    "VacuumSettings",
+    "assemble_filter_config",
+    "assemble_runtime_config",
+    "assemble_vacuum_settings",
+    "bootstrap_bronze_cleanup_service",
+    # Assembly (deprecated aliases)
+    "bootstrap_checkpoint",
+    # Checkpoint & Quarantine managers/services
+    "bootstrap_checkpoint_manager",
+    # Assembly (canonical)
+    "bootstrap_checkpoint_port",
+    "bootstrap_checkpoint_service",
+    # CLI cleanup (deprecated alias)
+    "bootstrap_cleanup",
+    # CLI cleanup (canonical)
+    "bootstrap_cleanup_service",
+    # Runtime composite (deprecated alias)
+    "bootstrap_composite_pipeline",
+    # Runtime composite (canonical)
+    "bootstrap_composite_runner",
+    "bootstrap_config_service",
+    # Runtime observability (deprecated aliases)
+    "bootstrap_dq_monitor",
+    # Runtime observability (canonical)
+    "bootstrap_dq_monitor_port",
+    "bootstrap_export_service",
+    "bootstrap_health_server_dependencies",
+    "bootstrap_health_service",
+    "bootstrap_lifecycle_service",
+    "bootstrap_lock_service",
+    "bootstrap_logger",
+    "bootstrap_logger_port",
+    "bootstrap_metrics",
+    "bootstrap_metrics_port",
+    "bootstrap_metrics_service",
+    "bootstrap_observability",
+    "bootstrap_observability_bundle",
+    # Runtime pipeline (deprecated alias)
+    "bootstrap_pipeline",
+    # Runtime pipeline (canonical)
+    "bootstrap_pipeline_runner",
+    "bootstrap_pipeline_runner_service",
+    "bootstrap_quarantine",
+    "bootstrap_quarantine_manager",
+    "bootstrap_quarantine_port",
+    "bootstrap_quarantine_service",
+    "bootstrap_storage",
+    "bootstrap_storage_adapter",
+    "bootstrap_tracer",
+    "bootstrap_tracer_port",
+    "bootstrap_vacuum_service",
+    "load_composite_config",
+    # Config loader
+    "load_pipeline_config",
+    "maybe_start_metrics_server",
+    "start_metrics_server",
+    "validate_observability_preflight",
+]
+
+================================================================================
+File: __init__.py
+Path: bootstrap\assembly\__init__.py
+================================================================================
+"""Assembly module for shared bootstrap infrastructure.
+
+Contains bootstrap functions for infrastructure components that are used by
+both CLI and runtime contexts. These functions have no side-effects and
+create pure infrastructure adapters.
+
+Components:
+- checkpoint: Checkpoint and quarantine port creation
+- storage: Storage adapter assembly for I/O operations
 
 Note:
-    Infrastructure types (BronzeWriter, SilverWriter, etc.) are NOT exported
-    from this module. Import them directly from infrastructure modules or
-    use composition/types.py for type annotations.
+    This module should NOT contain any NoOp implementations or CLI-specific
+    logic. It provides neutral building blocks for higher-level bootstrap.
+"""
+
+from __future__ import annotations
+
+from bioetl.composition.bootstrap.assembly.checkpoint import (
+    # Deprecated aliases
+    bootstrap_checkpoint,
+    # Canonical names
+    bootstrap_checkpoint_port,
+    bootstrap_quarantine,
+    bootstrap_quarantine_port,
+)
+from bioetl.composition.bootstrap.assembly.storage import (
+    # Deprecated alias
+    bootstrap_storage,
+    # Canonical name
+    bootstrap_storage_adapter,
+)
+
+__all__ = [
+    # Deprecated aliases (backward compatibility)
+    "bootstrap_checkpoint",
+    # Canonical names (use these)
+    "bootstrap_checkpoint_port",
+    "bootstrap_quarantine",
+    "bootstrap_quarantine_port",
+    "bootstrap_storage",
+    "bootstrap_storage_adapter",
+]
+
+================================================================================
+File: checkpoint.py
+Path: bootstrap\assembly\checkpoint.py
+================================================================================
+"""Bootstrap functions for checkpoint and quarantine ports.
+
+Provides basic port creation for checkpoint and quarantine infrastructure.
+These are low-level building blocks used by both CLI and runtime.
+
+Note:
+    Higher-level managers and services are created in cli/ module
+    since they require additional context (pipeline_name, run_id, etc.)
+    and use NoOp observability for CLI operations.
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition._bootstrap import (
-    bootstrap_checkpoint,
-    bootstrap_checkpoint_manager,
-    bootstrap_cleanup,
-    bootstrap_dq_monitor,
-    bootstrap_lifecycle_service,
-    bootstrap_logger,
-    bootstrap_metrics,
-    bootstrap_observability,
-    bootstrap_quarantine,
-    bootstrap_quarantine_manager,
-    bootstrap_storage,
-    bootstrap_tracer,
-)
-from bioetl.composition.builders import FilterConfigBuilder
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
-from bioetl.composition.providers.registration import register_all_providers
-from bioetl.composition.registry import PipelineRegistry, get_default_registry
-from bioetl.domain.config import RuntimeConfig
-from bioetl.infrastructure.config import get_settings, load_pipeline_config
-
-__all__ = [
-    # Bootstrap functions (from submodules)
-    "bootstrap_checkpoint",
-    "bootstrap_checkpoint_manager",
-    "bootstrap_cleanup",
-    "bootstrap_dq_monitor",
-    "bootstrap_lifecycle_service",
-    "bootstrap_logger",
-    "bootstrap_metrics",
-    "bootstrap_observability",
-    "bootstrap_pipeline",
-    "bootstrap_quarantine",
-    "bootstrap_quarantine_manager",
-    "bootstrap_storage",
-    "bootstrap_tracer",
-    # Config loader
-    "load_pipeline_config",
-]
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.quarantine import UnifiedQuarantine
 
 if TYPE_CHECKING:
-    from bioetl.application.core.runner import PipelineRunner
-    from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.ports import CheckpointPort, QuarantinePort
+
+__all__ = [
+    # Deprecated aliases (backward compatibility)
+    "bootstrap_checkpoint",
+    # Canonical names (use these)
+    "bootstrap_checkpoint_port",
+    "bootstrap_quarantine",
+    "bootstrap_quarantine_port",
+]
 
 
-def bootstrap_pipeline(
-    ctx: PipelineRunContext,
-    registry: PipelineRegistry | None = None,
-) -> PipelineRunner:
-    """Composition Root: Assembles and returns a fully configured PipelineRunner.
+def bootstrap_quarantine_port() -> QuarantinePort:
+    """Create a quarantine port implementation for record quarantine storage.
 
-    This is the main entry point for creating a pipeline runner. It:
-    1. Registers all providers and pipelines (idempotent)
-    2. Loads settings and YAML configuration
-    3. Bootstraps observability (logging, tracing, metrics)
-    4. Builds filter configuration from CLI/YAML
-    5. Delegates to the appropriate factory to create the runner
+    Creates a UnifiedQuarantine adapter using centralized quarantine_path
+    from settings (data_dir/quarantine) for unified quarantine storage
+    independent of entity paths.
 
-    Args:
-        ctx: Pipeline run context containing launch parameters including
-            pipeline_name, run_id, run_type, resume flag, limit, filters, etc.
-        registry: Optional PipelineRegistry instance. If None, uses the
-            default global registry. Pass a custom registry for test isolation.
+    Layer: Returns domain port implementation (QuarantinePort).
 
     Returns:
-        PipelineRunner: Fully configured runner ready for execution.
+        QuarantinePort implementation for quarantine operations.
+    """
+    settings = get_settings()
+    return UnifiedQuarantine(base_path=str(settings.quarantine_path))
+
+
+def bootstrap_quarantine() -> QuarantinePort:
+    """Bootstrap the quarantine port for record quarantine storage.
+
+    .. deprecated::
+        Use :func:`bootstrap_quarantine_port` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Returns:
+        QuarantinePort implementation for quarantine operations.
+    """
+    return bootstrap_quarantine_port()
+
+
+def bootstrap_checkpoint_port(pipeline_name: str) -> CheckpointPort:
+    """Create a checkpoint port implementation for pipeline state persistence.
+
+    Creates a LocalCheckpoint adapter for the specified pipeline using
+    the checkpoint_path from settings.
+
+    Layer: Returns domain port implementation (CheckpointPort).
+
+    Args:
+        pipeline_name: Name of the pipeline for checkpoint scoping.
+
+    Returns:
+        CheckpointPort implementation for checkpoint operations.
+    """
+    settings = get_settings()
+    return LocalCheckpoint(
+        base_path=settings.checkpoint_path,
+        pipeline_name=pipeline_name,
+    )
+
+
+def bootstrap_checkpoint(pipeline_name: str) -> CheckpointPort:
+    """Bootstrap the checkpoint port for pipeline state persistence.
+
+    .. deprecated::
+        Use :func:`bootstrap_checkpoint_port` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        pipeline_name: Name of the pipeline for checkpoint scoping.
+
+    Returns:
+        CheckpointPort implementation for checkpoint operations.
+    """
+    return bootstrap_checkpoint_port(pipeline_name=pipeline_name)
+
+================================================================================
+File: storage.py
+Path: bootstrap\assembly\storage.py
+================================================================================
+"""Bootstrap functions for storage adapter assembly.
+
+Provides storage adapter creation for both CLI preview operations and
+composite pipeline execution. This is a shared building block.
+
+Note:
+    This function uses NoOpLogger internally as observability is not
+    required for storage adapter assembly. The actual observability
+    is provided at a higher level (BatchWriter, RecordProcessor).
+"""
+
+from __future__ import annotations
+
+from datetime import UTC, datetime
+from pathlib import Path
+from uuid import uuid4
+
+from bioetl.composition.factories.storage import StorageAdapter
+from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
+from bioetl.domain.types import RunID, RunType
+from bioetl.domain.value_objects.run_context import RunContext
+from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.export.csv_exporter import CsvExporter
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+__all__ = [
+    # Deprecated alias (backward compatibility)
+    "bootstrap_storage",
+    # Canonical name (use this)
+    "bootstrap_storage_adapter",
+]
+
+
+def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdapter:
+    """Create a storage adapter for CLI and composite pipeline operations.
+
+    Creates a StorageAdapter suitable for preview operations and composite
+    pipelines. CSV export is disabled by default for read-only inspection
+    but can be enabled for composite pipelines that need CSV output.
+
+    Uses NoOpLogger since this is for CLI preview operations without observability.
+
+    Layer: Returns infrastructure adapter (StorageAdapter) containing
+    Bronze, Silver, and Gold writers.
+
+    Note:
+        Lock validation is performed at Application layer (BatchWriter)
+        per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
+
+    Args:
+        enable_csv_export: If True, creates CsvExporters for Silver and Gold
+            layers. Used by composite pipelines that need CSV output.
+
+    Returns:
+        StorageAdapter configured for the current environment.
+    """
+    settings = get_settings()
+    noop_logger = NoOpLogger()
+    noop_metrics = NoOpMetrics()
+    noop_tracing = NoOpTracing()
+
+    # ADR-025: Use data/output/ hierarchy for consistency with pipeline configs
+    output_dir = Path(settings.data_dir) / "output"
+
+    # Create metadata services for composite pipelines
+    metadata_writer = MetadataWriter(logger=noop_logger)
+    run_context = RunContext(
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        started_at=datetime.now(UTC),
+        pipeline_name="composite",
+        provider="composite",
+        entity="merged",
+    )
+    metadata_coordinator = MetadataCoordinator(run_context=run_context)
+
+    # Create CSV exporters if enabled (for composite pipelines)
+    silver_csv_exporter = None
+    gold_csv_exporter = None
+    if enable_csv_export:
+        silver_csv_exporter = CsvExporter(
+            base_path=str(output_dir / "silver"),
+            logger=noop_logger,
+        )
+        gold_csv_exporter = CsvExporter(
+            base_path=str(output_dir / "gold"),
+            logger=noop_logger,
+        )
+
+    return StorageAdapter(
+        bronze_writer=BronzeWriter(
+            base_path=output_dir / "bronze",  # data/output/bronze
+            logger=noop_logger,
+            metrics=noop_metrics,
+            tracing=noop_tracing,
+            save_json=False,
+            json_path=None,
+        ),
+        silver_writer=SilverWriter(
+            base_path=output_dir / "silver",  # data/output/silver
+            logger=noop_logger,
+            tracing=noop_tracing,
+            csv_exporter=silver_csv_exporter,
+            metadata_writer=metadata_writer,
+            metadata_coordinator=metadata_coordinator,
+        ),
+        gold_writer=GoldWriter(
+            base_path=output_dir / "gold",  # data/output/gold
+            logger=noop_logger,
+            tracing=noop_tracing,
+            csv_exporter=gold_csv_exporter,
+            metadata_writer=metadata_writer,
+            metadata_coordinator=metadata_coordinator,
+        ),
+    )
+
+
+def bootstrap_storage(*, enable_csv_export: bool = False) -> StorageAdapter:
+    """Bootstrap a storage adapter for CLI and composite pipeline operations.
+
+    .. deprecated::
+        Use :func:`bootstrap_storage_adapter` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        enable_csv_export: If True, creates CsvExporters for Silver and Gold
+            layers. Used by composite pipelines that need CSV output.
+
+    Returns:
+        StorageAdapter configured for the current environment.
+    """
+    return bootstrap_storage_adapter(enable_csv_export=enable_csv_export)
+
+================================================================================
+File: __init__.py
+Path: bootstrap\cli\__init__.py
+================================================================================
+"""CLI bootstrap module for administrative operations.
+
+Contains bootstrap functions for CLI-only commands:
+- Inspection: quarantine inspect, checkpoint list
+- Maintenance: vacuum, archive, bronze cleanup
+- Admin: lock management, health checks, metrics server
+- Configuration: settings access, pipeline config loading
+
+These functions use NoOp observability implementations since CLI operations
+don't require full runtime observability (no run_id, no metrics collection).
+
+IMPORTANT: This module MUST NOT be imported by bootstrap/runtime/.
+CLI may import from runtime for runner access, but not vice versa.
+
+Components:
+- checkpoint: Manager and service bootstrap for checkpoint operations
+- config: ConfigService bootstrap
+- health: HealthService and health server dependencies
+- lock: LockService bootstrap
+- metrics: MetricsService for server management (not metrics collection)
+- storage: Maintenance services (cleanup, vacuum, export, lifecycle)
+"""
+
+from __future__ import annotations
+
+from bioetl.composition.bootstrap.cli.checkpoint import (
+    bootstrap_checkpoint_manager,
+    bootstrap_checkpoint_service,
+    bootstrap_quarantine_manager,
+    bootstrap_quarantine_service,
+)
+from bioetl.composition.bootstrap.cli.config import bootstrap_config_service
+from bioetl.composition.bootstrap.cli.health import (
+    HealthServerDependencies,
+    bootstrap_health_server_dependencies,
+    bootstrap_health_service,
+)
+from bioetl.composition.bootstrap.cli.lock import bootstrap_lock_service
+from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
+from bioetl.composition.bootstrap.cli.noop import (
+    create_noop_logger,
+    create_noop_metrics,
+    create_noop_observability_bundle,
+    create_noop_tracing,
+)
+from bioetl.composition.bootstrap.cli.storage import (
+    bootstrap_bronze_cleanup_service,
+    # Deprecated alias
+    bootstrap_cleanup,
+    # Canonical name
+    bootstrap_cleanup_service,
+    bootstrap_export_service,
+    bootstrap_lifecycle_service,
+    bootstrap_vacuum_service,
+)
+
+__all__ = [
+    # Health
+    "HealthServerDependencies",
+    # Storage & Maintenance (canonical)
+    "bootstrap_bronze_cleanup_service",
+    # Checkpoint & Quarantine
+    "bootstrap_checkpoint_manager",
+    "bootstrap_checkpoint_service",
+    # Storage & Maintenance (deprecated alias)
+    "bootstrap_cleanup",
+    "bootstrap_cleanup_service",
+    # Config
+    "bootstrap_config_service",
+    "bootstrap_export_service",
+    "bootstrap_health_server_dependencies",
+    "bootstrap_health_service",
+    "bootstrap_lifecycle_service",
+    # Lock
+    "bootstrap_lock_service",
+    # Metrics
+    "bootstrap_metrics_service",
+    "bootstrap_quarantine_manager",
+    "bootstrap_quarantine_service",
+    "bootstrap_vacuum_service",
+    # NoOp factories (centralized)
+    "create_noop_logger",
+    "create_noop_metrics",
+    "create_noop_observability_bundle",
+    "create_noop_tracing",
+]
+
+================================================================================
+File: checkpoint.py
+Path: bootstrap\cli\checkpoint.py
+================================================================================
+"""Bootstrap functions for checkpoint and quarantine CLI operations.
+
+Contains bootstrap functions for checkpoint manager, checkpoint service,
+quarantine manager, and quarantine service. Used for CLI inspection
+and administrative operations.
+
+Note:
+    These functions use NoOp observability since CLI operations don't
+    require full runtime observability.
+"""
+
+from __future__ import annotations
+
+from uuid import uuid4
+
+from bioetl.application.core.checkpoint_manager import CheckpointManager
+from bioetl.application.core.quarantine_manager import QuarantineManager
+from bioetl.application.services import CheckpointService, QuarantineService
+from bioetl.composition.bootstrap.assembly.checkpoint import (
+    bootstrap_checkpoint_port,
+    bootstrap_quarantine_port,
+)
+from bioetl.composition.bootstrap.cli.noop import create_noop_logger
+from bioetl.domain.types import RunID
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+from bioetl.infrastructure.config import get_settings
+
+__all__ = [
+    "bootstrap_checkpoint_manager",
+    "bootstrap_checkpoint_service",
+    "bootstrap_quarantine_manager",
+    "bootstrap_quarantine_service",
+]
+
+
+def bootstrap_quarantine_manager(pipeline_name: str) -> QuarantineManager:
+    """Bootstrap QuarantineManager for CLI inspection operations.
+
+    Creates a QuarantineManager for quarantine inspection and reporting.
+    Used by CLI for `quarantine inspect` and similar commands.
+
+    Args:
+        pipeline_name: Name of the pipeline to inspect.
+
+    Returns:
+        QuarantineManager configured for the specified pipeline.
+    """
+    quarantine_port = bootstrap_quarantine_port()
+    return QuarantineManager(
+        quarantine_port=quarantine_port,
+        pipeline_name=pipeline_name,
+    )
+
+
+def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointManager:
+    """Bootstrap CheckpointManager for CLI inspection operations.
+
+    Creates a minimal CheckpointManager for checkpoint listing and inspection.
+    Uses NoOpLogger and dummy run_id since CLI operations don't need full
+    pipeline execution context.
+
+    Args:
+        pipeline_name: Name of the pipeline (used for context, may be ignored
+            for operations like list_all).
+
+    Returns:
+        CheckpointManager configured for CLI inspection.
+    """
+    checkpoint_port = bootstrap_checkpoint_port(pipeline_name)
+    noop_logger = create_noop_logger()
+
+    return CheckpointManager(
+        checkpoint_port=checkpoint_port,
+        logger=noop_logger,
+        pipeline_name=pipeline_name,
+        run_id=RunID(uuid4()),  # Dummy run_id for CLI inspection
+        resume=False,
+    )
+
+
+def bootstrap_checkpoint_service() -> CheckpointService:
+    """Bootstrap CheckpointService for CLI administrative operations.
+
+    Creates a CheckpointService for checkpoint listing, deletion, and inspection.
+    Uses a generic checkpoint port that can list all pipelines.
+
+    Returns:
+        CheckpointService configured for CLI operations.
+    """
+    settings = get_settings()
+    # Use empty pipeline name for global operations
+    checkpoint_port = LocalCheckpoint(
+        base_path=settings.checkpoint_path,
+        pipeline_name="",
+    )
+    noop_logger = create_noop_logger()
+
+    return CheckpointService(
+        checkpoint_port=checkpoint_port,
+        logger=noop_logger,
+    )
+
+
+def bootstrap_quarantine_service() -> QuarantineService:
+    """Bootstrap QuarantineService for CLI administrative operations.
+
+    Creates a QuarantineService for quarantine inspection, replay, and purge.
+
+    Returns:
+        QuarantineService configured for CLI operations.
+    """
+    quarantine_port = bootstrap_quarantine_port()
+    noop_logger = create_noop_logger()
+
+    return QuarantineService(
+        quarantine_port=quarantine_port,
+        logger=noop_logger,
+    )
+
+================================================================================
+File: config.py
+Path: bootstrap\cli\config.py
+================================================================================
+"""Bootstrap functions for configuration CLI operations.
+
+Contains bootstrap functions for ConfigService.
+Used primarily by CLI configuration operations.
+"""
+
+from __future__ import annotations
+
+from bioetl.application.services import ConfigService
+from bioetl.composition.bootstrap.cli.noop import create_noop_logger
+from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.registry import get_default_registry
+from bioetl.infrastructure.config import (
+    get_settings,
+    load_pipeline_config,
+    yaml_config_to_domain,
+)
+
+__all__ = ["bootstrap_config_service"]
+
+
+def bootstrap_config_service() -> ConfigService:
+    """Bootstrap ConfigService for CLI configuration operations.
+
+    Creates a ConfigService for configuration access and validation.
+    Wires up infrastructure dependencies for configuration loading.
+
+    Returns:
+        ConfigService configured for CLI operations.
 
     Example:
-        >>> from bioetl.domain.context import PipelineRunContext
-        >>> from bioetl.domain.types import RunType
-        >>> from uuid import uuid4
-        >>>
-        >>> ctx = PipelineRunContext(
-        ...     pipeline_name="chembl_activity",
-        ...     run_id=uuid4(),
-        ...     run_type=RunType.INCREMENTAL,
-        ... )
-        >>> runner = bootstrap_pipeline(ctx)
-        >>> await runner.run()
-
-        # For test isolation:
-        >>> from bioetl.composition.registry import create_registry
-        >>> registry = create_registry()
-        >>> register_all_pipelines(registry=registry)
-        >>> runner = bootstrap_pipeline(ctx, registry=registry)
+        >>> service = bootstrap_config_service()
+        >>> settings = service.get_settings()
+        >>> logger.info("environment", env=settings.env)
     """
-    # Use provided registry or default
-    effective_registry = registry if registry is not None else get_default_registry()
+    noop_logger = create_noop_logger()
 
-    # Explicit registration (idempotent for default registry)
-    register_all_providers()
-    register_all_pipelines(registry=registry)
+    # Ensure pipelines are registered for list_pipelines()
+    register_all_pipelines()
 
+    return ConfigService(
+        logger=noop_logger,
+        _settings_loader=get_settings,
+        _pipeline_config_loader=load_pipeline_config,
+        _domain_config_mapper=yaml_config_to_domain,
+        _registry_accessor=get_default_registry,
+    )
+
+================================================================================
+File: health.py
+Path: bootstrap\cli\health.py
+================================================================================
+"""Bootstrap functions for health CLI operations.
+
+Contains bootstrap functions for HealthService and health server dependencies.
+Used primarily by CLI health operations.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from bioetl.application.services import HealthService
+from bioetl.composition.bootstrap.cli.noop import create_noop_logger
+from bioetl.composition.factories.data_source_factory import DataSourceFactory
+from bioetl.domain.ports import MetricsPort
+from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
+from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+
+__all__ = [
+    "HealthServerDependencies",
+    "bootstrap_health_server_dependencies",
+    "bootstrap_health_service",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class HealthServerDependencies:
+    """Dependencies for HealthServer, provided by composition layer.
+
+    This dataclass allows composition to provide dependencies without
+    importing from interfaces layer (which would violate layer rules).
+
+    Attributes:
+        health_monitor: ProviderHealthMonitor for health state tracking.
+        metrics: MetricsPort for observability.
+    """
+
+    health_monitor: ProviderHealthMonitor
+    metrics: MetricsPort
+
+
+def bootstrap_health_service() -> HealthService:
+    """Bootstrap HealthService for CLI health operations.
+
+    Creates a HealthService for checking provider health.
+    Wires up DataSourceFactory for adapter creation.
+
+    Returns:
+        HealthService configured for CLI operations.
+
+    Example:
+        >>> service = bootstrap_health_service()
+        >>> summary = await service.check_providers()
+        >>> if summary.all_healthy:
+        ...     logger.info("All providers healthy")
+    """
+    noop_logger = create_noop_logger()
+
+    return HealthService(
+        logger=noop_logger,
+        _factory=DataSourceFactory,
+    )
+
+
+def bootstrap_health_server_dependencies() -> HealthServerDependencies:
+    """Bootstrap dependencies for HealthServer via DI.
+
+    Creates and wires up:
+    - PrometheusMetrics for observability
+    - ProviderHealthMonitor for health state tracking
+
+    The actual HealthServer is created in the interfaces layer
+    to maintain proper layer separation (composition cannot import interfaces).
+
+    Returns:
+        HealthServerDependencies with metrics and health_monitor.
+
+    Example:
+        >>> deps = bootstrap_health_server_dependencies()
+        >>> server = HealthServer(host="127.0.0.1", port=9090,
+        ...                       health_monitor=deps.health_monitor)
+    """
+    # Create metrics port for health monitor
+    metrics = PrometheusMetrics()
+
+    # Create health monitor with injected metrics
+    health_monitor = ProviderHealthMonitor(metrics=metrics)
+
+    return HealthServerDependencies(
+        health_monitor=health_monitor,
+        metrics=metrics,
+    )
+
+================================================================================
+File: lock.py
+Path: bootstrap\cli\lock.py
+================================================================================
+"""Bootstrap functions for lock CLI operations.
+
+Contains bootstrap functions for lock service used by CLI operations.
+"""
+
+from __future__ import annotations
+
+from bioetl.application.services.lock_service import LockService
+from bioetl.composition.bootstrap.cli.noop import create_noop_logger
+from bioetl.infrastructure.locking.memory_lock import MemoryLock
+
+__all__ = ["bootstrap_lock_service"]
+
+
+def bootstrap_lock_service() -> LockService:
+    """Bootstrap LockService for CLI lock management commands.
+
+    Creates a LockService for administrative lock operations.
+    Used by CLI for `lock release` and `lock list` commands.
+
+    Note: Uses MemoryLock which is the in-process lock implementation.
+    Lock operations only affect the current process. For distributed
+    scenarios, a Redis-based implementation would be needed.
+
+    Returns:
+        LockService configured for the current environment.
+    """
+    lock_port = MemoryLock()
+    noop_logger = create_noop_logger()
+
+    return LockService(lock_port=lock_port, logger=noop_logger)
+
+================================================================================
+File: metrics.py
+Path: bootstrap\cli\metrics.py
+================================================================================
+"""Bootstrap functions for metrics CLI operations.
+
+Contains bootstrap functions for MetricsService.
+Used for metrics server management from CLI (start, stop, status).
+
+Note:
+    This is for managing the metrics server, not for metrics collection.
+    Runtime metrics collection uses bootstrap/runtime/observability.py.
+"""
+
+from __future__ import annotations
+
+from bioetl.application.services.metrics_service import MetricsService
+from bioetl.composition.bootstrap.cli.noop import create_noop_logger
+from bioetl.infrastructure.observability.metrics_server_adapter import (
+    MetricsServerAdapter,
+)
+
+__all__ = ["bootstrap_metrics_service"]
+
+
+def bootstrap_metrics_service() -> MetricsService:
+    """Bootstrap metrics service for administrative operations.
+
+    Creates a MetricsService with infrastructure dependencies injected.
+    Used by CLI and other interfaces for metrics server management.
+
+    Returns:
+        MetricsService instance ready for use.
+
+    Example:
+        >>> service = bootstrap_metrics_service()
+        >>> result = service.start(port=8000)
+        >>> # result.success is True if server started
+    """
+    logger = create_noop_logger()
+    server = MetricsServerAdapter(logger=logger)
+
+    return MetricsService(
+        logger=logger,
+        _server=server,
+    )
+
+================================================================================
+File: noop.py
+Path: bootstrap\cli\noop.py
+================================================================================
+"""Centralized NoOp dependency factory functions for CLI bootstrap.
+
+Contains pure factory functions for creating NoOp implementations used by
+CLI-specific bootstrap functions. These provide silent/null implementations
+for observability dependencies when full observability is not needed.
+
+Usage:
+    # In CLI bootstrap modules
+    from bioetl.composition.bootstrap.cli.noop import create_noop_logger
+
+    logger = create_noop_logger()
+
+Design Decisions:
+    - Pure functions, not singletons or factory objects
+    - Each call creates a new instance (no hidden state sharing)
+    - CLI-specific: warn_on_use=False for metrics (intentional opt-out)
+    - MUST NOT be imported by runtime code
+
+Note:
+    This module centralizes NoOp creation to eliminate duplication across
+    CLI bootstrap modules. Runtime observability uses different bootstrap
+    functions from composition/bootstrap/runtime/observability.py.
+"""
+
+from __future__ import annotations
+
+from bioetl.domain.ports import MetricsPort, TracingPort
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+
+__all__ = [
+    "create_noop_logger",
+    "create_noop_metrics",
+    "create_noop_observability_bundle",
+    "create_noop_tracing",
+]
+
+
+def create_noop_logger() -> NoOpLogger:
+    """Create a NoOpLogger instance for CLI operations.
+
+    Returns a logger that silently ignores all logging calls.
+    Used by CLI bootstrap functions that don't require full observability.
+
+    Returns:
+        NoOpLogger instance implementing LoggerPort interface.
+
+    Example:
+        >>> logger = create_noop_logger()
+        >>> logger.info("This will be silently ignored")
+    """
+    return NoOpLogger()
+
+
+def create_noop_metrics() -> MetricsPort:
+    """Create a NoOpMetrics instance for CLI operations.
+
+    Returns a metrics collector that silently ignores all metrics.
+    Uses warn_on_use=False since CLI intentionally opts out of metrics.
+
+    Returns:
+        NoOpMetrics instance implementing MetricsPort interface.
+
+    Example:
+        >>> metrics = create_noop_metrics()
+        >>> metrics.increment_counter("test", 1, {"label": "value"})
+    """
+    return NoOpMetrics(warn_on_use=False)
+
+
+def create_noop_tracing() -> TracingPort:
+    """Create a NoOpTracing instance for CLI operations.
+
+    Returns a tracer that does nothing when spans are created.
+    Used when distributed tracing is not needed for CLI commands.
+
+    Returns:
+        NoOpTracing instance implementing TracingPort interface.
+
+    Example:
+        >>> tracing = create_noop_tracing()
+        >>> tracer = tracing.get_tracer("cli")
+        >>> with tracer.start_as_current_span("operation"):
+        ...     pass  # Span is silently ignored
+    """
+    return NoOpTracing()
+
+
+def create_noop_observability_bundle() -> tuple[NoOpLogger, MetricsPort, TracingPort]:
+    """Create a complete NoOp observability bundle for CLI operations.
+
+    Convenience function that creates all three NoOp implementations
+    in a single call. Useful when a CLI bootstrap function needs
+    multiple observability dependencies.
+
+    Returns:
+        Tuple of (NoOpLogger, NoOpMetrics, NoOpTracing) instances.
+
+    Example:
+        >>> logger, metrics, tracing = create_noop_observability_bundle()
+        >>> # Use in service construction
+        >>> service = SomeService(logger=logger, metrics=metrics)
+    """
+    return (
+        create_noop_logger(),
+        create_noop_metrics(),
+        create_noop_tracing(),
+    )
+
+================================================================================
+File: storage.py
+Path: bootstrap\cli\storage.py
+================================================================================
+"""Bootstrap functions for storage-related CLI operations.
+
+Contains bootstrap functions for maintenance services:
+- CleanupService: Preview and execute cleanup operations
+- MedallionLifecycleService: Vacuum and archive Delta tables
+- BronzeCleanupService: Bronze layer retention cleanup
+- VacuumService: Batch vacuum operations
+- ExportService: Export Delta tables to various formats
+
+Note:
+    Uses NoOp observability since these are CLI operations.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from pathlib import Path
+
+from bioetl.application.core.cleanup_service import CleanupService
+from bioetl.application.services import (
+    BronzeCleanupService,
+    ExportService,
+    VacuumService,
+)
+from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
+from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
+from bioetl.composition.bootstrap.cli.noop import create_noop_logger
+from bioetl.composition.registry import get_default_registry
+from bioetl.infrastructure.config import get_settings, load_pipeline_config
+from bioetl.infrastructure.storage.delta_reader import DeltaReader
+
+__all__ = [
+    "bootstrap_bronze_cleanup_service",
+    # Deprecated alias (backward compatibility)
+    "bootstrap_cleanup",
+    # Canonical name (use this)
+    "bootstrap_cleanup_service",
+    "bootstrap_export_service",
+    "bootstrap_lifecycle_service",
+    "bootstrap_vacuum_service",
+]
+
+
+def bootstrap_cleanup_service() -> CleanupService:
+    """Create a cleanup service for CLI operations.
+
+    Creates a CleanupService with storage and logger for cleanup operations.
+    Used by CLI for --dry-run preview and actual cleanup.
+
+    Layer: Returns application service (CleanupService).
+
+    Returns:
+        CleanupService configured for the current environment.
+    """
+    storage = bootstrap_storage_adapter()
+    noop_logger = create_noop_logger()
+
+    return CleanupService(storage=storage, logger=noop_logger)
+
+
+def bootstrap_cleanup() -> CleanupService:
+    """Bootstrap the cleanup service for CLI operations.
+
+    .. deprecated::
+        Use :func:`bootstrap_cleanup_service` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Returns:
+        CleanupService configured for the current environment.
+    """
+    return bootstrap_cleanup_service()
+
+
+def bootstrap_lifecycle_service() -> MedallionLifecycleService:
+    """Bootstrap MedallionLifecycleService for CLI maintenance commands.
+
+    Creates a MedallionLifecycleService for vacuum and archive operations.
+    Used by CLI for `maintenance vacuum` and `maintenance archive` commands.
+
+    Returns:
+        MedallionLifecycleService configured for the current environment.
+    """
+    storage = bootstrap_storage_adapter()
+    noop_logger = create_noop_logger()
+
+    return MedallionLifecycleService(storage=storage, logger=noop_logger)
+
+
+def bootstrap_bronze_cleanup_service() -> BronzeCleanupService:
+    """Bootstrap BronzeCleanupService for CLI maintenance commands.
+
+    Creates a BronzeCleanupService for Bronze layer retention cleanup.
+    Used by CLI for `maintenance bronze-cleanup` command.
+
+    Returns:
+        BronzeCleanupService configured for the current environment.
+    """
+    storage = bootstrap_storage_adapter()
+    noop_logger = create_noop_logger()
+
+    return BronzeCleanupService(storage=storage, logger=noop_logger)
+
+
+def bootstrap_vacuum_service() -> VacuumService:
+    """Bootstrap VacuumService for CLI maintenance commands.
+
+    Creates a VacuumService for batch vacuum operations.
+    Used by CLI for `maintenance vacuum-all` command.
+
+    Returns:
+        VacuumService configured for the current environment.
+    """
+    lifecycle = bootstrap_lifecycle_service()
+    noop_logger = create_noop_logger()
+
+    # Create table collector that queries the registry (DI pattern)
+    table_collector = _create_table_collector()
+
+    return VacuumService(
+        lifecycle=lifecycle,
+        logger=noop_logger,
+        table_collector=table_collector,
+    )
+
+
+def _create_table_collector() -> Callable[[str], list[tuple[str, str]]]:
+    """Create a table collector function for VacuumService.
+
+    This function queries the pipeline registry and config loader
+    to collect silver/gold tables. It lives in composition layer
+    to maintain proper dependency direction (application -> domain <- composition).
+
+    Returns:
+        Callable that collects tables for a given layer.
+
+    Raises:
+        ValueError: If config file for a registered pipeline is not found.
+    """
+
+    def collect_tables(layer: str) -> list[tuple[str, str]]:
+        """Collect tables from all registered pipelines.
+
+        Args:
+            layer: Which layer to collect - "all", "silver", or "gold".
+
+        Returns:
+            List of (table_name, layer) tuples sorted alphabetically.
+
+        Raises:
+            ValueError: If config file for a registered pipeline is not found.
+        """
+        registry = get_default_registry()
+        pipelines = registry.list_pipelines()
+
+        silver_tables: set[str] = set()
+        gold_tables: set[str] = set()
+
+        for pipeline_name in pipelines:
+            config = load_pipeline_config(pipeline_name)
+            if config.silver_table:
+                silver_tables.add(config.silver_table)
+            if config.gold_table:
+                gold_tables.add(config.gold_table)
+
+        tables: list[tuple[str, str]] = []
+        if layer in ("all", "silver"):
+            tables.extend((t, "silver") for t in sorted(silver_tables))
+        if layer in ("all", "gold"):
+            tables.extend((t, "gold") for t in sorted(gold_tables))
+
+        return tables
+
+    return collect_tables
+
+
+def bootstrap_export_service() -> ExportService:
+    """Bootstrap ExportService for CLI export commands.
+
+    Creates an ExportService for exporting Delta Lake tables to
+    CSV, XLSX, and TSV formats.
+
+    Returns:
+        ExportService configured for the current environment.
+    """
     settings = get_settings()
+    noop_logger = create_noop_logger()
 
-    # Load validated YAML config first to check for existence
-    yaml_config = load_pipeline_config(ctx.pipeline_name)
+    # Use data/output/ subdirectory for actual data paths (matches pipeline configs)
+    # The pipeline configs use data/output/silver, data/output/gold
+    output_dir = Path(settings.data_dir) / "output"
+    silver_path = output_dir / "silver"
+    gold_path = output_dir / "gold"
 
-    # Bootstrap unified observability (includes metrics server start if enabled)
-    observability = bootstrap_observability(
-        pipeline=ctx.pipeline_name,
-        run_id=ctx.run_id,
-        settings=settings,
-        log_level=ctx.log_level,
+    # Create Delta reader for Silver and Gold paths
+    reader = DeltaReader(
+        base_path=silver_path,  # Base path for relative paths
+        logger=noop_logger,
     )
 
-    # Merge YAML maintenance config with CLI overrides
-    # CLI flags take precedence over YAML config (tri-state: None/True/False)
-    # None means no CLI override -> use YAML
-    # True/False means explicit CLI override
-    vacuum_after_run = (
-        ctx.vacuum.enabled
-        if ctx.vacuum.enabled is not None
-        else yaml_config.maintenance.auto_vacuum
-    )
-    vacuum_retention_days = (
-        ctx.vacuum.retention_days
-        if ctx.vacuum.enabled is not None
-        else yaml_config.maintenance.vacuum_retention_days
+    return ExportService(
+        reader=reader,
+        logger=noop_logger,
+        silver_path=silver_path,
+        gold_path=gold_path,
+        export_path=output_dir / "exports",
     )
 
-    runtime_config = RuntimeConfig(
-        run_type=ctx.run_type,
-        resume=ctx.resume,
-        limit=ctx.limit,
-        heartbeat_interval=settings.pipeline.heartbeat_interval,
-        query=ctx.query,
-        dry_run=ctx.dry_run,
-        vacuum_after_run=vacuum_after_run,
-        vacuum_retention_days=vacuum_retention_days,
+================================================================================
+File: __init__.py
+Path: bootstrap\runtime\__init__.py
+================================================================================
+"""Runtime bootstrap module for pipeline execution.
+
+Contains bootstrap functions for actual pipeline execution scenarios:
+- Single pipeline runs (incremental, backfill, rebuild)
+- Composite pipeline runs with enrichment coordination
+- Full observability stack (logging, tracing, metrics, DQ monitoring)
+
+IMPORTANT: This module MUST NOT import from bootstrap/cli/.
+CLI modules may import from runtime for runner access, but not vice versa.
+
+Components:
+- assembly: Pure configuration assembly functions (no I/O)
+- observability: Full observability stack bootstrap
+- pipeline: Main pipeline bootstrap entry point
+- composite: Composite pipeline bootstrap
+- runner: PipelineRunnerService bootstrap
+"""
+
+from __future__ import annotations
+
+from bioetl.composition.bootstrap.runtime.assembly import (
+    VacuumSettings,
+    assemble_filter_config,
+    assemble_runtime_config,
+    assemble_vacuum_settings,
+)
+from bioetl.composition.bootstrap.runtime.composite import (
+    # Deprecated alias
+    bootstrap_composite_pipeline,
+    # Canonical name
+    bootstrap_composite_runner,
+    load_composite_config,
+)
+from bioetl.composition.bootstrap.runtime.observability import (
+    MetricsServerError,
+    # Deprecated aliases
+    bootstrap_dq_monitor,
+    # Canonical names
+    bootstrap_dq_monitor_port,
+    bootstrap_logger,
+    bootstrap_logger_port,
+    bootstrap_metrics,
+    bootstrap_metrics_port,
+    bootstrap_observability,
+    bootstrap_observability_bundle,
+    bootstrap_tracer,
+    bootstrap_tracer_port,
+    maybe_start_metrics_server,
+    start_metrics_server,
+    validate_observability_preflight,
+)
+from bioetl.composition.bootstrap.runtime.pipeline import (
+    # Deprecated alias
+    bootstrap_pipeline,
+    # Canonical name
+    bootstrap_pipeline_runner,
+)
+from bioetl.composition.bootstrap.runtime.runner import (
+    bootstrap_pipeline_runner_service,
+)
+
+__all__ = [
+    # Observability (canonical)
+    "MetricsServerError",
+    # Assembly (pure functions)
+    "VacuumSettings",
+    "assemble_filter_config",
+    "assemble_runtime_config",
+    "assemble_vacuum_settings",
+    # Composite (deprecated alias)
+    "bootstrap_composite_pipeline",
+    # Composite (canonical)
+    "bootstrap_composite_runner",
+    # Observability (deprecated aliases)
+    "bootstrap_dq_monitor",
+    "bootstrap_dq_monitor_port",
+    "bootstrap_logger",
+    "bootstrap_logger_port",
+    "bootstrap_metrics",
+    "bootstrap_metrics_port",
+    "bootstrap_observability",
+    "bootstrap_observability_bundle",
+    # Pipeline (deprecated alias)
+    "bootstrap_pipeline",
+    # Pipeline (canonical)
+    "bootstrap_pipeline_runner",
+    # Runner service
+    "bootstrap_pipeline_runner_service",
+    "bootstrap_tracer",
+    "bootstrap_tracer_port",
+    # Utilities
+    "load_composite_config",
+    "maybe_start_metrics_server",
+    "start_metrics_server",
+    "validate_observability_preflight",
+]
+
+================================================================================
+File: assembly.py
+Path: bootstrap\runtime\assembly.py
+================================================================================
+"""Pure assembly functions for pipeline bootstrap.
+
+Contains pure, testable functions for assembling configuration objects
+during pipeline bootstrap. These functions:
+- Accept only data (no I/O, no settings loading, no DI)
+- Return data (configuration objects or values)
+- Are deterministic and side-effect free
+
+This module reduces cognitive load in bootstrap_pipeline_runner by
+extracting configuration assembly logic into discrete, testable units.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+from bioetl.composition.builders import FilterConfigBuilder
+from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.types import RunType
+
+if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineRunContext, VacuumConfig
+    from bioetl.domain.filtering import InputFilterConfig
+    from bioetl.infrastructure.schemas.pipeline_config import (
+        InputFilterConfig as YamlInputFilter,
+    )
+    from bioetl.infrastructure.schemas.pipeline_config import (
+        MaintenanceConfig,
     )
 
-    # Build filter config using the dedicated builder or CLI input_filter
-    # In test mode or composite mode, YAML-based filters are disabled
-    # - test_mode: E2E tests run without requiring filter CSV files
-    # - ignore_yaml_filter: composite enrichers use seed keys, not YAML filter
-    # - direct_filter_ids: composite enrichers pass DOIs directly (no CSV)
-    filter_config = FilterConfigBuilder.build(
-        yaml_filter=yaml_config.input_filter,
+__all__ = [
+    "VacuumSettings",
+    "assemble_filter_config",
+    "assemble_runtime_config",
+    "assemble_vacuum_settings",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class VacuumSettings:
+    """Resolved vacuum settings after merging CLI and YAML config.
+
+    This is a pure data object representing the effective vacuum configuration
+    after applying CLI overrides to YAML defaults.
+
+    Attributes:
+        enabled: Whether vacuum should run after pipeline execution.
+        retention_days: Number of days to retain data during vacuum.
+    """
+
+    enabled: bool
+    retention_days: int
+
+
+def assemble_vacuum_settings(
+    *,
+    cli_vacuum: VacuumConfig,
+    yaml_maintenance: MaintenanceConfig,
+) -> VacuumSettings:
+    """Assemble effective vacuum settings from CLI overrides and YAML config.
+
+    Implements tri-state merge logic:
+    - CLI `enabled=None` → use YAML `auto_vacuum`
+    - CLI `enabled=True/False` → explicit CLI override takes precedence
+
+    Retention days follow same pattern: CLI override if vacuum explicitly enabled,
+    otherwise YAML default.
+
+    Args:
+        cli_vacuum: Vacuum configuration from CLI (VacuumConfig with tri-state enabled).
+        yaml_maintenance: Maintenance configuration from pipeline YAML.
+
+    Returns:
+        VacuumSettings with resolved enabled flag and retention days.
+
+    Example:
+        >>> from bioetl.domain.context import VacuumConfig
+        >>> # CLI doesn't override -> use YAML
+        >>> cli = VacuumConfig(enabled=None, retention_days=7)
+        >>> yaml = MaintenanceConfig(auto_vacuum=True, vacuum_retention_days=14)
+        >>> result = assemble_vacuum_settings(cli_vacuum=cli, yaml_maintenance=yaml)
+        >>> result.enabled
+        True
+        >>> result.retention_days
+        14
+
+        >>> # CLI explicitly overrides -> use CLI values
+        >>> cli = VacuumConfig(enabled=False, retention_days=3)
+        >>> result = assemble_vacuum_settings(cli_vacuum=cli, yaml_maintenance=yaml)
+        >>> result.enabled
+        False
+        >>> result.retention_days
+        3
+    """
+    # CLI explicit override takes precedence
+    if cli_vacuum.enabled is not None:
+        return VacuumSettings(
+            enabled=cli_vacuum.enabled,
+            retention_days=cli_vacuum.retention_days,
+        )
+
+    # No CLI override -> use YAML defaults
+    return VacuumSettings(
+        enabled=yaml_maintenance.auto_vacuum,
+        retention_days=yaml_maintenance.vacuum_retention_days,
+    )
+
+
+def assemble_runtime_config(
+    *,
+    run_type: RunType,
+    resume: bool,
+    limit: int | None,
+    query: str | None,
+    dry_run: bool,
+    heartbeat_interval: int,
+    vacuum: VacuumSettings,
+) -> RuntimeConfig:
+    """Assemble RuntimeConfig from resolved parameters.
+
+    Creates an immutable RuntimeConfig value object from pre-resolved
+    parameters. This function is pure and does not perform any I/O.
+
+    Args:
+        run_type: Type of pipeline run (incremental, backfill, rebuild).
+        resume: Whether to resume from last checkpoint.
+        limit: Optional record limit for the run.
+        query: Optional query string for filtering.
+        dry_run: Whether this is a dry run (no writes).
+        heartbeat_interval: Interval in seconds for lock heartbeat.
+        vacuum: Resolved vacuum settings.
+
+    Returns:
+        Immutable RuntimeConfig instance.
+
+    Example:
+        >>> from bioetl.domain.types import RunType
+        >>> vacuum = VacuumSettings(enabled=True, retention_days=7)
+        >>> config = assemble_runtime_config(
+        ...     run_type=RunType.INCREMENTAL,
+        ...     resume=False,
+        ...     limit=100,
+        ...     query=None,
+        ...     dry_run=False,
+        ...     heartbeat_interval=30,
+        ...     vacuum=vacuum,
+        ... )
+        >>> config.run_type
+        <RunType.INCREMENTAL: 'incremental'>
+        >>> config.vacuum_after_run
+        True
+    """
+    return RuntimeConfig(
+        run_type=run_type,
+        resume=resume,
+        limit=limit,
+        heartbeat_interval=heartbeat_interval,
+        query=query,
+        dry_run=dry_run,
+        vacuum_after_run=vacuum.enabled,
+        vacuum_retention_days=vacuum.retention_days,
+    )
+
+
+def assemble_filter_config(
+    *,
+    yaml_filter: YamlInputFilter,
+    ctx: PipelineRunContext,
+    test_mode: bool,
+) -> InputFilterConfig | None:
+    """Assemble filter configuration from YAML and CLI context.
+
+    Delegates to FilterConfigBuilder with parameters extracted from context.
+    This wrapper provides a cleaner interface and makes the filter assembly
+    logic explicit in the bootstrap pipeline.
+
+    Priority (highest to lowest):
+    1. direct_filter_ids from context (for composite mode)
+    2. CLI input_filter (if enabled)
+    3. YAML input_filter (disabled in test_mode or ignore_yaml_filter mode)
+
+    Args:
+        yaml_filter: Filter configuration from pipeline YAML.
+        ctx: Pipeline run context containing CLI filter settings.
+        test_mode: If True, YAML-based filters are disabled.
+
+    Returns:
+        Configured InputFilterConfig or None if filtering is disabled.
+
+    Example:
+        >>> # When CLI filter is enabled
+        >>> result = assemble_filter_config(
+        ...     yaml_filter=yaml_config.input_filter,
+        ...     ctx=context,
+        ...     test_mode=False,
+        ... )
+    """
+    # Determine effective test_mode (includes ignore_yaml_filter from composite mode)
+    effective_test_mode = test_mode or ctx.ignore_yaml_filter
+
+    return FilterConfigBuilder.build(
+        yaml_filter=yaml_filter,
         cli_csv=ctx.input_filter.source_path if ctx.input_filter.enabled else None,
         cli_column=ctx.input_filter.column_name if ctx.input_filter.enabled else None,
         cli_field=ctx.input_filter.filter_field if ctx.input_filter.enabled else None,
-        test_mode=settings.test_mode or ctx.ignore_yaml_filter,
+        test_mode=effective_test_mode,
         direct_filter_ids=ctx.input_filter.filter_ids,
     )
 
-    if filter_config:
-        observability.logger.info(
-            "input_filter_enabled",
-            csv_path=filter_config.source_path,
-            column=filter_config.column_name,
-            filter_field=filter_config.filter_field,
-            source="cli" if ctx.input_filter.enabled else "config",
-        )
-
-    # Resolve pipeline factory and delegate runner creation
-    pipeline_def = effective_registry.get(ctx.pipeline_name)
-    factory = pipeline_def.factory
-
-    return factory.create_runner(
-        run_id=ctx.run_id,
-        runtime=runtime_config,
-        settings=settings,
-        observability=observability,
-        filter_config=filter_config,
-        config=yaml_config,
-    )
-
 ================================================================================
-File: bootstrap_composite.py
-Path: bootstrap_composite.py
+File: composite.py
+Path: bootstrap\runtime\composite.py
 ================================================================================
-"""Bootstrap functions for Composite Pipeline.
+"""Bootstrap functions for Composite Pipeline execution.
 
 Handles initialization and wiring for CompositePipelineRunner.
 See ADR-026 for architectural decisions.
+
+Composite pipelines execute multiple related pipelines in sequence:
+1. Seed phase: Fetch primary entities (e.g., publications)
+2. Enrichment phase: Fetch supplementary data using seed keys
+3. Merge phase: Combine results into unified datasets
 """
 
 from __future__ import annotations
@@ -1378,9 +2760,9 @@ from bioetl.application.composite.runner import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
 )
-from bioetl.composition._bootstrap import bootstrap_logger, bootstrap_storage
-from bioetl.composition.bootstrap import bootstrap_pipeline
-from bioetl.composition.entrypoints import RunOptions, build_pipeline_context
+from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
+from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
+from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
@@ -1394,6 +2776,15 @@ if TYPE_CHECKING:
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.config import Settings
+
+__all__ = [
+    "CompositeRuntimeConfig",
+    # Deprecated alias (backward compatibility)
+    "bootstrap_composite_pipeline",
+    # Canonical name (use this)
+    "bootstrap_composite_runner",
+    "load_composite_config",
+]
 
 # Default composite config path
 COMPOSITE_CONFIG_DIR = Path("configs/pipelines/composite")
@@ -1432,12 +2823,15 @@ def load_composite_config(name: str) -> CompositeConfig:
         raise ValueError(f"Invalid composite config '{name}': {e}") from e
 
 
-def bootstrap_composite_pipeline(
+def bootstrap_composite_runner(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     run_id: str | None = None,
 ) -> CompositePipelineRunner:
-    """Bootstrap a CompositePipelineRunner with all dependencies.
+    """Create a CompositePipelineRunner with all dependencies.
+
+    Layer: Returns application-level runner (CompositePipelineRunner) ready
+    for execution.
 
     Args:
         config: Composite pipeline configuration.
@@ -1447,18 +2841,24 @@ def bootstrap_composite_pipeline(
     Returns:
         CompositePipelineRunner ready for execution.
     """
+    # CIRCULAR-DEPENDENCY: Local import required to break circular dependency.
+    # Import chain: entrypoints -> _bootstrap -> bootstrap -> runtime -> composite -> entrypoints
+    # Moving this import to module level would cause ImportError at startup.
+    from bioetl.composition.entrypoints import RunOptions, build_pipeline_context
+
     effective_run_id = run_id or str(uuid4())
     settings = get_settings()
 
     # Bootstrap logger (without settings - uses log_level parameter)
-    logger = bootstrap_logger(
+    logger = bootstrap_logger_port(
         pipeline=config.name,
         run_id=UUID(effective_run_id),
         log_level="INFO",
     )
 
-    # Bootstrap storage for reading Silver tables
-    storage = bootstrap_storage()
+    # Bootstrap storage for reading Silver tables and writing merged data
+    # Enable CSV export for composite pipelines (merged Silver/Gold data)
+    storage = bootstrap_storage_adapter(enable_csv_export=True)
 
     # Bootstrap lock (using in-memory lock for local execution)
     lock = MemoryLock()
@@ -1479,7 +2879,7 @@ def bootstrap_composite_pipeline(
             limit=runtime.seed_limit,
         )
         ctx = build_pipeline_context(config.seed.pipeline, options)
-        return bootstrap_pipeline(ctx)
+        return bootstrap_pipeline_runner(ctx)
 
     # Build enricher config lookup for fast access
     enricher_configs = {e.pipeline: e for e in config.enrichers}
@@ -1541,7 +2941,7 @@ def bootstrap_composite_pipeline(
             filter_field=filter_field,
         )
         ctx = build_pipeline_context(pipeline_name, options)
-        return bootstrap_pipeline(ctx)
+        return bootstrap_pipeline_runner(ctx)
 
     # Create services
     # Base path for resolving Silver table locations
@@ -1580,7 +2980,7 @@ def bootstrap_composite_pipeline(
         resume=runtime.resume,
     )
 
-    # Create DQ report service for composite (optional)
+    # Create DQ report service for composite
     dq_report_service = _create_dq_report_service(logger, settings)
 
     return CompositePipelineRunner(
@@ -1599,51 +2999,911 @@ def bootstrap_composite_pipeline(
     )
 
 
+def bootstrap_composite_pipeline(
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    run_id: str | None = None,
+) -> CompositePipelineRunner:
+    """Bootstrap a CompositePipelineRunner with all dependencies.
+
+    .. deprecated::
+        Use :func:`bootstrap_composite_runner` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        config: Composite pipeline configuration.
+        runtime: Runtime options (resume, dry_run, etc.).
+        run_id: Optional run ID (generated if not provided).
+
+    Returns:
+        CompositePipelineRunner ready for execution.
+    """
+    return bootstrap_composite_runner(config=config, runtime=runtime, run_id=run_id)
+
+
 def _create_dq_report_service(
     logger: LoggerPort,
     settings: Settings,
-) -> DQReportService | None:
+) -> DQReportService:
     """Create DQ report service for composite pipelines.
-
-    Returns None if DQ reporting is not configured.
 
     Args:
         logger: Structured logger.
         settings: Application settings.
 
     Returns:
-        DQReportService instance or None.
+        DQReportService instance.
+
+    Raises:
+        ImportError: If required modules are not available.
     """
-    try:
-        from bioetl.application.services.dq_report_service import DQReportService
-        from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
+    from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
 
-        # Create DQ report writer
-        reports_base_path = Path(settings.data_dir) / "output" / "reports" / "dq"
-        report_writer = DQReportWriter(
-            base_path=reports_base_path,
-            logger=logger,
+    # Create DQ report writer
+    reports_base_path = Path(settings.data_dir) / "output" / "reports" / "dq"
+    report_writer = DQReportWriter(
+        base_path=reports_base_path,
+        logger=logger,
+    )
+
+    return DQReportService(
+        logger=logger,
+        report_writer=report_writer,
+    )
+
+================================================================================
+File: observability.py
+Path: bootstrap\runtime\observability.py
+================================================================================
+"""Bootstrap functions for runtime observability components.
+
+Contains bootstrap functions for logging, tracing, metrics, and data quality
+monitoring. These functions configure the full observability stack for
+pipeline execution.
+
+Unified Observability Contract:
+- bootstrap_observability() always returns valid implementations
+- Logger: UnifiedLogger with Log Schema enforcement (run_id, pipeline, stage)
+- Metrics: PrometheusMetrics or NoOpMetrics (never None)
+- Tracer: OpenTelemetryTracer or NoOpTracing (never None)
+- DQMonitor: DataQualityMonitor or None (optional)
+
+Note:
+    CLI uses NoOp implementations via bootstrap/cli/metrics.py.
+    This module provides full observability for runtime execution.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+from uuid import UUID, uuid4
+
+from bioetl.composition.observability import ObservabilityBundle
+from bioetl.domain.exceptions import MetricsServerError
+from bioetl.domain.ports import DQMonitorPort, LoggerPort, MetricsPort, TracingPort
+from bioetl.infrastructure.observability import (
+    NoOpMetrics,
+    NoOpTracing,
+    OpenTelemetryTracer,
+    PrometheusMetrics,
+    UnifiedLogger,
+    start_metrics_server,
+)
+from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.config import Settings
+
+__all__ = [
+    "MetricsServerError",
+    # Deprecated aliases (backward compatibility)
+    "bootstrap_dq_monitor",
+    # Canonical names (use these)
+    "bootstrap_dq_monitor_port",
+    "bootstrap_logger",
+    "bootstrap_logger_port",
+    "bootstrap_metrics",
+    "bootstrap_metrics_port",
+    "bootstrap_observability",
+    "bootstrap_observability_bundle",
+    "bootstrap_tracer",
+    "bootstrap_tracer_port",
+    "maybe_start_metrics_server",
+    "start_metrics_server",
+    "validate_observability_preflight",
+]
+
+
+def validate_observability_preflight(
+    tracer: TracingPort,
+    metrics: MetricsPort,
+    environment: str,
+    logger: LoggerPort,
+) -> None:
+    """Validate observability components for production readiness.
+
+    Performs preflight validation to detect NoOp implementations in production.
+    Emits warnings when observability data will be lost due to NoOp fallbacks.
+
+    This function helps prevent silent data loss in production environments
+    where NoOpTracing or NoOpMetrics would discard traces/metrics without
+    any visible indication.
+
+    Args:
+        tracer: The tracing port implementation (may be NoOpTracing).
+        metrics: The metrics port implementation (may be NoOpMetrics).
+        environment: Environment name from settings (e.g., "dev", "staging", "prod").
+        logger: Logger for emitting warnings.
+
+    Note:
+        In non-production environments, NoOp implementations are acceptable
+        and no warnings are emitted.
+    """
+    if environment != "prod":
+        return
+
+    if isinstance(tracer, NoOpTracing):
+        logger.warning(
+            "noop_tracing_in_production",
+            message="NoOpTracing in production - traces will be lost",
+            recommendation="Set BIOETL_OBSERVABILITY__TRACING_ENABLED=true "
+            "and configure OpenTelemetry endpoint",
         )
 
-        return DQReportService(
-            logger=logger,
-            report_writer=report_writer,
-            # Analyzers are optional - reports will be generated
-            # for layers where analyzers are available
+    if isinstance(metrics, NoOpMetrics):
+        logger.warning(
+            "noop_metrics_in_production",
+            message="NoOpMetrics in production - metrics will be lost",
+            recommendation="Set BIOETL_OBSERVABILITY__METRICS_ENABLED=true "
+            "to enable Prometheus metrics collection",
         )
-    except Exception as e:
-        logger.debug(
-            "dq_report_service_creation_failed",
-            error=str(e),
-        )
+
+
+def bootstrap_logger_port(
+    pipeline: str,
+    run_id: UUID | None = None,
+    log_level: str = "INFO",
+) -> LoggerPort:
+    """Create a logger port implementation for pipeline execution.
+
+    Uses UnifiedLogger which enforces the Log Schema from RULES.md §3.2.1:
+    - Mandatory fields: run_id, pipeline (bound at initialization)
+    - Stage field: defaults to "init" for LoggerPort compatibility
+
+    Layer: Returns domain port implementation (LoggerPort).
+
+    Args:
+        pipeline: Pipeline name for logger context.
+        run_id: Unique run identifier. If None, generates a new UUID.
+        log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
+
+    Returns:
+        UnifiedLogger implementing LoggerPort with Log Schema enforcement.
+    """
+    effective_run_id = run_id if run_id is not None else uuid4()
+    return UnifiedLogger(
+        pipeline=pipeline,
+        run_id=effective_run_id,
+        log_level=log_level,
+        json_format=True,
+    )
+
+
+def bootstrap_logger(
+    pipeline: str,
+    run_id: UUID | None = None,
+    log_level: str = "INFO",
+) -> LoggerPort:
+    """Create a logger for pipeline execution.
+
+    .. deprecated::
+        Use :func:`bootstrap_logger_port` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        pipeline: Pipeline name for logger context.
+        run_id: Unique run identifier. If None, generates a new UUID.
+        log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
+
+    Returns:
+        UnifiedLogger implementing LoggerPort with Log Schema enforcement.
+    """
+    return bootstrap_logger_port(pipeline=pipeline, run_id=run_id, log_level=log_level)
+
+
+def bootstrap_tracer_port(
+    settings: Settings,
+    service_name: str = "bioetl",
+) -> TracingPort:
+    """Create a tracing port implementation for distributed tracing.
+
+    When tracing is disabled, returns NoOpTracing.
+    When tracing is enabled, returns OpenTelemetryTracer.
+
+    Layer: Returns domain port implementation (TracingPort).
+
+    Args:
+        settings: Application settings (MUST be injected, not loaded globally).
+        service_name: Name of the service for tracing context.
+
+    Returns:
+        TracingPort instance (OpenTelemetryTracer or NoOpTracing).
+
+    Raises:
+        ImportError: If tracing is enabled but OpenTelemetry is not installed.
+    """
+    if settings.observability.tracing_enabled:
+        return OpenTelemetryTracer(service_name=service_name)
+    return NoOpTracing()
+
+
+def bootstrap_tracer(
+    settings: Settings,
+    service_name: str = "bioetl",
+) -> TracingPort:
+    """Bootstrap distributed tracing for runtime execution.
+
+    .. deprecated::
+        Use :func:`bootstrap_tracer_port` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        settings: Application settings (MUST be injected, not loaded globally).
+        service_name: Name of the service for tracing context.
+
+    Returns:
+        TracingPort instance (OpenTelemetryTracer or NoOpTracing).
+    """
+    return bootstrap_tracer_port(settings=settings, service_name=service_name)
+
+
+def bootstrap_metrics_port(settings: Settings) -> MetricsPort:
+    """Create a metrics port implementation.
+
+    Unified Observability Contract: Always returns a valid MetricsPort.
+    When metrics are disabled, returns NoOpMetrics (silent fallback).
+
+    Note:
+        This function only creates the metrics collector.
+        Server startup is handled separately by entrypoints via
+        maybe_start_metrics_server() to keep bootstrap side-effect free.
+
+    Layer: Returns domain port implementation (MetricsPort).
+
+    Args:
+        settings: Application settings.
+
+    Returns:
+        MetricsPort instance (PrometheusMetrics or NoOpMetrics).
+        Never returns None - uses NoOpMetrics as fallback.
+    """
+    if not settings.observability.metrics_enabled:
+        # Silent fallback - no warning since explicitly disabled
+        return NoOpMetrics(warn_on_use=False)
+
+    return PrometheusMetrics()
+
+
+def maybe_start_metrics_server(settings: Settings) -> bool:
+    """Start metrics server if enabled in settings.
+
+    This function should be called by entrypoints (CLI, REST API) after
+    bootstrap to start the Prometheus HTTP server. Separating server
+    startup from bootstrap keeps the composition layer side-effect free.
+
+    Args:
+        settings: Application settings.
+
+    Returns:
+        True if server was started or already running, False if disabled
+        or failed to start.
+
+    Raises:
+        MetricsServerError: If fail_fast=True and server fails to start.
+    """
+    if not settings.observability.metrics_enabled:
+        return False
+
+    if not settings.observability.metrics_server_enabled:
+        return False
+
+    obs = settings.observability
+
+    # Start metrics server - let exceptions propagate to entrypoints
+    return start_metrics_server(
+        port=settings.metrics_port,
+        fail_fast=obs.metrics_fail_fast,
+        retry_count=obs.metrics_retry_count,
+        retry_delay=obs.metrics_retry_delay,
+    )
+
+
+def bootstrap_metrics(settings: Settings) -> MetricsPort:
+    """Bootstrap metrics with optional server start for runtime execution.
+
+    .. deprecated::
+        Use :func:`bootstrap_metrics_port` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        settings: Application settings.
+
+    Returns:
+        MetricsPort instance (PrometheusMetrics or NoOpMetrics).
+
+    Raises:
+        MetricsServerError: If fail_fast=True and server fails to start.
+    """
+    return bootstrap_metrics_port(settings=settings)
+
+
+def bootstrap_dq_monitor_port(
+    settings: Settings, logger: LoggerPort | None = None
+) -> DQMonitorPort | None:
+    """Create a data quality monitor port implementation.
+
+    Creates a DataQualityMonitor configured with settings from ObservabilitySettings.
+    Returns None if dq_monitor_enabled=False.
+
+    Layer: Returns domain port implementation (DQMonitorPort) or None.
+
+    Args:
+        settings: Application settings.
+        logger: Optional logger for DQ monitor. If None, uses NoOpLogger.
+
+    Returns:
+        Configured DQMonitorPort or None if disabled.
+    """
+    obs_settings = settings.observability
+
+    if not obs_settings.dq_monitor_enabled:
         return None
 
+    effective_logger = logger if logger is not None else NoOpLogger()
+
+    monitor = DataQualityMonitor(
+        logger=effective_logger,
+        baseline_window=obs_settings.dq_baseline_window,
+        z_score_threshold=obs_settings.dq_z_score_threshold,
+    )
+
+    # Configure min baseline samples
+    monitor.detector.min_baseline_samples = obs_settings.dq_min_baseline_samples
+
+    # Set absolute thresholds for critical metrics
+    monitor.detector.set_threshold(
+        "error_rate",
+        min_value=0.0,
+        max_value=obs_settings.dq_error_rate_max,
+    )
+    monitor.detector.set_threshold(
+        "quality_score",
+        min_value=obs_settings.dq_quality_score_min,
+        max_value=1.0,
+    )
+
+    return monitor
+
+
+def bootstrap_dq_monitor(
+    settings: Settings, logger: LoggerPort | None = None
+) -> DQMonitorPort | None:
+    """Bootstrap data quality monitor for anomaly detection.
+
+    .. deprecated::
+        Use :func:`bootstrap_dq_monitor_port` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        settings: Application settings.
+        logger: Optional logger for DQ monitor. If None, uses NoOpLogger.
+
+    Returns:
+        Configured DQMonitorPort or None if disabled.
+    """
+    return bootstrap_dq_monitor_port(settings=settings, logger=logger)
+
+
+def bootstrap_observability_bundle(
+    pipeline: str,
+    run_id: UUID,
+    settings: Settings,
+    log_level: str = "INFO",
+) -> ObservabilityBundle:
+    """Create a complete observability bundle for pipeline execution.
+
+    Unified Observability Contract:
+    - Always returns a valid ObservabilityBundle with non-None logger and metrics
+    - Logger: UnifiedLogger with Log Schema enforcement (run_id, pipeline, stage)
+    - Fallback to NoOpMetrics when Prometheus is disabled
+    - Tracer and DQ monitor remain optional
+
+    Creates a unified observability bundle containing logger, tracer, metrics,
+    and data quality monitor.
+
+    Layer: Returns application-level bundle (ObservabilityBundle) containing
+    port implementations.
+
+    Args:
+        pipeline: Pipeline name for logger context.
+        run_id: Unique run identifier.
+        settings: Application settings.
+        log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
+
+    Returns:
+        Configured ObservabilityBundle instance with valid implementations.
+        Logger and metrics are guaranteed to be non-None.
+
+    Raises:
+        ObservabilityContractError: If bundle creation fails validation.
+    """
+    logger = bootstrap_logger_port(
+        pipeline=pipeline, run_id=run_id, log_level=log_level
+    )
+    tracer = bootstrap_tracer_port(settings)
+    metrics = bootstrap_metrics_port(settings)
+    dq_monitor = bootstrap_dq_monitor_port(settings, logger)
+
+    bundle = ObservabilityBundle(
+        logger=logger,
+        metrics=metrics,
+        tracer=tracer,
+        dq_monitor=dq_monitor,
+    )
+
+    # Log observability initialization status
+    logger.info(
+        "observability_initialized",
+        extra={
+            "stage": "bootstrap",
+            "metrics_type": type(metrics).__name__,
+            "tracer_type": type(tracer).__name__,
+            "dq_monitor_enabled": dq_monitor is not None,
+        },
+    )
+
+    # Preflight validation: warn if NoOp implementations in production
+    validate_observability_preflight(
+        tracer=tracer,
+        metrics=metrics,
+        environment=settings.env,
+        logger=logger,
+    )
+
+    return bundle
+
+
+def bootstrap_observability(
+    pipeline: str,
+    run_id: UUID,
+    settings: Settings,
+    log_level: str = "INFO",
+) -> ObservabilityBundle:
+    """Bootstrap all observability components for pipeline execution.
+
+    .. deprecated::
+        Use :func:`bootstrap_observability_bundle` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        pipeline: Pipeline name for logger context.
+        run_id: Unique run identifier.
+        settings: Application settings.
+        log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
+
+    Returns:
+        Configured ObservabilityBundle instance with valid implementations.
+
+    Raises:
+        ObservabilityContractError: If bundle creation fails validation.
+    """
+    return bootstrap_observability_bundle(
+        pipeline=pipeline, run_id=run_id, settings=settings, log_level=log_level
+    )
+
+================================================================================
+File: pipeline.py
+Path: bootstrap\runtime\pipeline.py
+================================================================================
+"""Bootstrap function for main pipeline execution.
+
+Contains the primary Composition Root entry point for creating
+a fully configured PipelineRunner ready for execution.
+
+This is the main entry point for runtime pipeline execution.
+CLI commands should use this via composition/entrypoints.py.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from bioetl.composition.bootstrap.runtime.assembly import (
+    assemble_filter_config,
+    assemble_runtime_config,
+    assemble_vacuum_settings,
+)
+from bioetl.composition.bootstrap.runtime.observability import (
+    bootstrap_observability_bundle,
+)
+from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.providers.registration import register_all_providers
+from bioetl.composition.registry import PipelineRegistry, get_default_registry
+from bioetl.infrastructure.config import get_settings, load_pipeline_config
+
+if TYPE_CHECKING:
+    from bioetl.application.core.runner import PipelineRunner
+    from bioetl.domain.context import PipelineRunContext
+
+__all__ = [
+    # Deprecated alias (backward compatibility)
+    "bootstrap_pipeline",
+    # Canonical name (use this)
+    "bootstrap_pipeline_runner",
+]
+
+
+def bootstrap_pipeline_runner(
+    ctx: PipelineRunContext,
+    registry: PipelineRegistry | None = None,
+) -> PipelineRunner:
+    """Composition Root: Assembles and returns a fully configured PipelineRunner.
+
+    This is the main entry point for creating a pipeline runner. It:
+    1. Registers all providers and pipelines (idempotent)
+    2. Loads settings and YAML configuration
+    3. Bootstraps observability (logging, tracing, metrics)
+    4. Builds filter configuration from CLI/YAML
+    5. Delegates to the appropriate factory to create the runner
+
+    Layer: Returns application-level runner (PipelineRunner) ready for execution.
+
+    Args:
+        ctx: Pipeline run context containing launch parameters including
+            pipeline_name, run_id, run_type, resume flag, limit, filters, etc.
+        registry: Optional PipelineRegistry instance. If None, uses the
+            default global registry. Pass a custom registry for test isolation.
+
+    Returns:
+        PipelineRunner: Fully configured runner ready for execution.
+
+    Example:
+        >>> from bioetl.domain.context import PipelineRunContext
+        >>> from bioetl.domain.types import RunType
+        >>> from uuid import uuid4
+        >>>
+        >>> ctx = PipelineRunContext(
+        ...     pipeline_name="chembl_activity",
+        ...     run_id=uuid4(),
+        ...     run_type=RunType.INCREMENTAL,
+        ... )
+        >>> runner = bootstrap_pipeline_runner(ctx)
+        >>> await runner.run()
+
+        # For test isolation:
+        >>> from bioetl.composition.registry import create_registry
+        >>> registry = create_registry()
+        >>> register_all_pipelines(registry=registry)
+        >>> runner = bootstrap_pipeline_runner(ctx, registry=registry)
+    """
+    # Use provided registry or default
+    effective_registry = registry if registry is not None else get_default_registry()
+
+    # Explicit registration (idempotent for default registry)
+    register_all_providers()
+    register_all_pipelines(registry=registry)
+
+    settings = get_settings()
+
+    # Load validated YAML config first to check for existence
+    yaml_config = load_pipeline_config(ctx.pipeline_name)
+
+    # Bootstrap unified observability (includes metrics server start if enabled)
+    observability = bootstrap_observability_bundle(
+        pipeline=ctx.pipeline_name,
+        run_id=ctx.run_id,
+        settings=settings,
+        log_level=ctx.log_level,
+    )
+
+    # Assemble vacuum settings (CLI overrides YAML)
+    vacuum = assemble_vacuum_settings(
+        cli_vacuum=ctx.vacuum,
+        yaml_maintenance=yaml_config.maintenance,
+    )
+
+    # Assemble runtime config from resolved parameters
+    runtime_config = assemble_runtime_config(
+        run_type=ctx.run_type,
+        resume=ctx.resume,
+        limit=ctx.limit,
+        query=ctx.query,
+        dry_run=ctx.dry_run,
+        heartbeat_interval=settings.pipeline.heartbeat_interval,
+        vacuum=vacuum,
+    )
+
+    # Assemble filter config (CLI/direct IDs override YAML)
+    filter_config = assemble_filter_config(
+        yaml_filter=yaml_config.input_filter,
+        ctx=ctx,
+        test_mode=settings.test_mode,
+    )
+
+    if filter_config:
+        observability.logger.info(
+            "input_filter_enabled",
+            csv_path=filter_config.source_path,
+            column=filter_config.column_name,
+            filter_field=filter_config.filter_field,
+            source="cli" if ctx.input_filter.enabled else "config",
+        )
+
+    # Resolve pipeline factory and delegate runner creation
+    pipeline_def = effective_registry.get(ctx.pipeline_name)
+    factory = pipeline_def.factory
+
+    return factory.create_runner(
+        run_id=ctx.run_id,
+        runtime=runtime_config,
+        settings=settings,
+        observability=observability,
+        filter_config=filter_config,
+        config=yaml_config,
+    )
+
+
+def bootstrap_pipeline(
+    ctx: PipelineRunContext,
+    registry: PipelineRegistry | None = None,
+) -> PipelineRunner:
+    """Composition Root: Assembles and returns a fully configured PipelineRunner.
+
+    .. deprecated::
+        Use :func:`bootstrap_pipeline_runner` instead. This alias is kept for
+        backward compatibility and will be removed in a future version.
+
+    Args:
+        ctx: Pipeline run context containing launch parameters.
+        registry: Optional PipelineRegistry instance.
+
+    Returns:
+        PipelineRunner: Fully configured runner ready for execution.
+    """
+    return bootstrap_pipeline_runner(ctx=ctx, registry=registry)
+
+================================================================================
+File: runner.py
+Path: bootstrap\runtime\runner.py
+================================================================================
+"""Bootstrap functions for pipeline runner service.
+
+Provides bootstrap functions for PipelineRunnerService assembly.
+This service provides a unified interface for running pipelines
+from any orchestration layer (CLI, REST API, etc.).
+"""
+
+from __future__ import annotations
+
+from uuid import uuid4
+
+from bioetl.application.services import PipelineRunnerService
+from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
+from bioetl.composition.factories.runner_factory import (
+    create_metrics_extractor,
+    create_runner_factory,
+)
+from bioetl.composition.registry import PipelineRegistry
+
+__all__ = ["bootstrap_pipeline_runner_service"]
+
+
+def bootstrap_pipeline_runner_service(
+    registry: PipelineRegistry | None = None,
+) -> PipelineRunnerService:
+    """Bootstrap the PipelineRunnerService with all dependencies.
+
+    Creates a fully configured PipelineRunnerService that can be used
+    to run pipelines from any interface (CLI, REST API, etc.).
+
+    Args:
+        registry: Optional custom registry for test isolation.
+            If None, uses the default global registry.
+
+    Returns:
+        PipelineRunnerService ready for use.
+
+    Example:
+        >>> service = bootstrap_pipeline_runner_service()
+        >>> options = RunOptions(run_type="incremental", limit=100)
+        >>> result = await service.run("chembl_activity", options=options)
+    """
+    # Bootstrap logger for the service (using a unique ID for service-level logging)
+    logger = bootstrap_logger_port(
+        pipeline="pipeline_runner_service",
+        run_id=uuid4(),
+        log_level="INFO",
+    )
+
+    # Create factory and extractor
+    runner_factory = create_runner_factory(registry=registry)
+    metrics_extractor = create_metrics_extractor()
+
+    return PipelineRunnerService(
+        runner_factory=runner_factory,
+        metrics_extractor=metrics_extractor,
+        logger=logger,
+    )
+
+================================================================================
+File: bootstrap_composite.py
+Path: bootstrap_composite.py
+================================================================================
+"""Bootstrap functions for Composite Pipeline.
+
+DEPRECATED: This module is maintained for backward compatibility.
+New code should import from composition/bootstrap/runtime/ instead:
+
+    from bioetl.composition.bootstrap.runtime import (
+        bootstrap_composite_pipeline,
+        load_composite_config,
+    )
+
+See ADR-026 for architectural decisions on composite pipelines.
+"""
+
+from __future__ import annotations
+
+# Re-export from the new bootstrap package for backward compatibility
+from bioetl.application.composite.runner import CompositeRuntimeConfig
+from bioetl.composition.bootstrap.runtime.composite import (
+    bootstrap_composite_pipeline,
+    load_composite_config,
+)
 
 __all__ = [
     "CompositeRuntimeConfig",
     "bootstrap_composite_pipeline",
     "load_composite_config",
 ]
+
+================================================================================
+File: bootstrap_contexts.py
+Path: bootstrap_contexts.py
+================================================================================
+"""Typed contexts for bootstrap functions returning multiple dependencies.
+
+This module provides frozen dataclasses that replace untyped tuples
+in bootstrap and factory functions, enabling IDE autocomplete and
+type-safe access to returned dependencies.
+
+All contexts are immutable (frozen=True) and contain only data, no logic.
+
+Usage:
+    >>> context = PipelineCallbacksContext(
+    ...     transform=transform_fn,
+    ...     gold_filter=filter_fn,
+    ...     gold_transform=gold_transform_fn,
+    ... )
+    >>> context.transform  # IDE autocomplete works
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import (
+        BronzeDQConfigPort,
+        GoldDQConfigPort,
+        SilverDQConfigPort,
+    )
+
+
+__all__ = [
+    "CircuitBreakerConfig",
+    "DQConfigsContext",
+    "DQOutputPathsContext",
+    "PipelineCallbacksContext",
+    "RateLimitConfig",
+]
+
+
+@dataclass(frozen=True)
+class PipelineCallbacksContext:
+    """Typed context for pipeline transformation callbacks.
+
+    Replaces untyped tuple[Any, Any, Any] from extract_pipeline_callbacks().
+
+    The callback types use Any for compatibility with various transformer
+    implementations (TypedDict-based BronzeRecord/SilverRecord vs dict[str, Any]).
+
+    Attributes:
+        transform: Bronze to Silver transformation callback.
+            Expected signature: (context, record, index) -> Awaitable[dict | None]
+            Implements TransformCallback protocol.
+        gold_filter: Callback to determine if record should be written to Gold.
+            Expected signature: (context, record) -> bool
+            Implements GoldFilterCallback protocol.
+        gold_transform: Silver to Gold transformation callback.
+            Expected signature: (context, silver_record) -> dict
+            Implements GoldTransformCallback protocol.
+    """
+
+    transform: Any  # TransformCallback protocol
+    gold_filter: Any  # GoldFilterCallback protocol
+    gold_transform: Any  # GoldTransformCallback protocol
+
+
+@dataclass(frozen=True)
+class DQConfigsContext:
+    """Typed context for Data Quality report configurations.
+
+    Replaces untyped tuple[BronzeDQConfigPort | None, SilverDQConfigPort | None,
+    GoldDQConfigPort | None] from _extract_dq_configs().
+
+    Attributes:
+        bronze: DQ report configuration for Bronze layer (None if disabled).
+        silver: DQ report configuration for Silver layer (None if disabled).
+        gold: DQ report configuration for Gold layer (None if disabled).
+    """
+
+    bronze: BronzeDQConfigPort | None
+    silver: SilverDQConfigPort | None
+    gold: GoldDQConfigPort | None
+
+
+@dataclass(frozen=True)
+class DQOutputPathsContext:
+    """Typed context for DQ report output paths.
+
+    Replaces untyped tuple[str | None, str | None, str | None, bool]
+    from _extract_dq_output_paths().
+
+    Attributes:
+        bronze_path: Output path for Bronze DQ reports (None if not configured).
+        silver_path: Output path for Silver DQ reports (None if not configured).
+        gold_path: Output path for Gold DQ reports (None if not configured).
+        flat_structure: Whether to use flat directory structure for DQ reports.
+    """
+
+    bronze_path: str | None
+    silver_path: str | None
+    gold_path: str | None
+    flat_structure: bool = False
+
+
+@dataclass(frozen=True)
+class RateLimitConfig:
+    """Typed context for rate limiting configuration.
+
+    Replaces untyped tuple[float, int] from _get_rate_limit_from_config().
+
+    Attributes:
+        rate: Requests per second.
+        capacity: Token bucket capacity (burst limit).
+    """
+
+    rate: float
+    capacity: int
+
+
+@dataclass(frozen=True)
+class CircuitBreakerConfig:
+    """Typed context for circuit breaker configuration.
+
+    Replaces untyped tuple[int, int] from _get_circuit_breaker_from_config().
+
+    Attributes:
+        failure_threshold: Number of failures before opening circuit.
+        recovery_timeout: Seconds to wait before attempting recovery.
+    """
+
+    failure_threshold: int
+    recovery_timeout: int
 
 ================================================================================
 File: bootstrap_logger.py
@@ -1970,7 +4230,9 @@ from uuid import uuid4
 
 # Re-export canonical DTO classes from application.services (H1 refactoring)
 # These are the single source of truth for pipeline execution interfaces.
+from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.application.services import RunOptions, RunResult, RunStatus
+from bioetl.infrastructure.config import get_settings
 
 __all__ = [
     # Configuration
@@ -2011,6 +4273,9 @@ __all__ = [
     # Inspection
     "inspect_quarantine",
     "list_checkpoints",
+    # Metrics server entrypoint
+    "ensure_metrics_server_started",
+    "maybe_start_metrics_server",
 ]
 
 from bioetl.composition._bootstrap import (
@@ -2035,6 +4300,7 @@ from bioetl.composition.bootstrap import (
     bootstrap_pipeline,
     bootstrap_quarantine_manager,
     load_pipeline_config,
+    maybe_start_metrics_server,
 )
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
@@ -2063,6 +4329,24 @@ if TYPE_CHECKING:
         MedallionLifecycleService,
     )
     from bioetl.domain.ports import QuarantinePort
+
+
+def ensure_metrics_server_started() -> bool:
+    """Ensure metrics server is started if enabled in settings.
+
+    This function should be called at the start of pipeline execution
+    to start the Prometheus HTTP server. It's idempotent - calling it
+    multiple times is safe.
+
+    Returns:
+        True if server was started or already running, False if disabled.
+
+    Example:
+        >>> ensure_metrics_server_started()
+        True  # Server started on configured port
+    """
+    settings = get_settings()
+    return maybe_start_metrics_server(settings)
 
 
 @dataclass(frozen=True)
@@ -2218,7 +4502,9 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
         >>> else:
         ...     logger.error("pipeline_failed", error_message=result.error_message)
     """
-    from bioetl.application.core.shutdown import PipelineShutdownError
+    # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
+    settings = get_settings()
+    maybe_start_metrics_server(settings)
 
     started_at = datetime.now(tz=UTC)
     runner = create_pipeline_runner(name, options)
@@ -2735,7 +5021,7 @@ from bioetl.composition.factories.dq_factory import DQServicesFactory
 from bioetl.composition.factories.pipeline_factories import (
     chembl_activity_factory,
     pubchem_compound_factory,
-    pubmed_publications_factory,
+    pubmed_publication_factory,
     uniprot_protein_factory,
 )
 
@@ -2788,7 +5074,7 @@ __all__ = [
     "create_transformer",
     "get_transformer_class",
     "pubchem_compound_factory",
-    "pubmed_publications_factory",
+    "pubmed_publication_factory",
     "register_all_transformers",
     "register_transformer",
     "uniprot_protein_factory",
@@ -3161,7 +5447,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition.bootstrap_logger import BootstrapLogger
 from bioetl.composition.providers import ProviderRegistry, ensure_providers_loaded
 from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
@@ -3173,8 +5458,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
-
-_logger = BootstrapLogger()
 
 
 class HttpClientFactory:
@@ -3257,16 +5540,11 @@ class HttpClientFactory:
         Returns:
             Configured UnifiedHTTPClient with observability
         """
-        # Try to load source config from YAML (primary source)
-        source_config = None
-        try:
-            source_config = load_source_config(provider)
-        except ValueError:
-            _logger.debug(
-                "source_config_not_found",
-                provider=provider,
-                fallback="ProviderRegistry defaults",
-            )
+        # Load source config from YAML (primary source) if exists
+        from pathlib import Path
+
+        config_path = Path(f"configs/sources/{provider}.yaml")
+        source_config = load_source_config(provider) if config_path.exists() else None
 
         # Get rate limit, circuit breaker, and client settings
         if source_config is not None:
@@ -3428,7 +5706,8 @@ from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
 
 # Gold schemas (required for all pipelines)
-from bioetl.infrastructure.schemas.gold import (
+# Imported from domain.contracts package for clean separation of data contracts
+from bioetl.domain.contracts import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
     ChEMBLAssayParametersGoldSchema,
@@ -3617,7 +5896,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     ),
     # PubMed pipeline
     PipelineFactoryConfig(
-        pipeline_name="pubmed_publications",
+        pipeline_name="pubmed_publication",
         provider="pubmed",
         transformer_class=PubMedPublicationTransformer,
         silver_schema=PUBMED_PUBLICATION_SCHEMA,
@@ -3696,7 +5975,7 @@ chembl_protein_class_factory = _factories["chembl_protein_class"]
 pubchem_compound_factory = _factories["pubchem_compound"]
 uniprot_protein_factory = _factories["uniprot_protein"]
 uniprot_idmapping_factory = _factories["uniprot_idmapping"]
-pubmed_publications_factory = _factories["pubmed_publications"]
+pubmed_publication_factory = _factories["pubmed_publication"]
 crossref_publication_factory = _factories["crossref_publication"]
 openalex_publication_factory = _factories["openalex_publication"]
 semanticscholar_publication_factory = _factories["semanticscholar_publication"]
@@ -3843,7 +6122,7 @@ __all__ = [
     "list_available_pipelines",
     "openalex_publication_factory",
     "pubchem_compound_factory",
-    "pubmed_publications_factory",
+    "pubmed_publication_factory",
     "register_all_pipelines",
     "reset_registration",
     "semanticscholar_publication_factory",
@@ -3855,19 +6134,11 @@ __all__ = [
 File: pipeline_factory.py
 Path: factories\pipeline_factory.py
 ================================================================================
-"""Pipeline Factory.
+"""Pipeline Factory - consolidated module for pipeline and runner creation.
 
-Consolidated module for pipeline and runner creation.
-
-Contains:
-- GenericPipelineFactory: Configurable factory for creating pipelines
-- create_pipeline_factory: Convenience function for creating factories
-- assemble_runner: Assembles PipelineRunner from pipeline instance
-- build_pipeline_services: Builds PipelineServices from settings
-- create_pipeline_with_services: Creates pipeline with injected services
-
-This module follows the DI pattern: pipelines are configured declaratively
-and assembled with all dependencies in the composition layer.
+Contains GenericPipelineFactory, assemble_runner, build_pipeline_services,
+and create_pipeline_with_services. Follows DI pattern with declarative
+configuration and assembly in the composition layer.
 """
 
 from __future__ import annotations
@@ -3882,6 +6153,7 @@ from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
+from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
 from bioetl.composition.factories.data_source_factory import (
     DataSourceCreator,
     DataSourceRegistry,
@@ -3891,6 +6163,11 @@ from bioetl.composition.factories.services_factory import (
     ServicesBuilder,
 )
 from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
+from bioetl.composition.services.versioning import (
+    compute_config_hash,
+    get_git_commit,
+    get_pipeline_version,
+)
 from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
@@ -3906,14 +6183,11 @@ if TYPE_CHECKING:
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig
     from bioetl.domain.ports import (
-        BronzeDQConfigPort,
         DataSourcePort,
         DQMonitorPort,
-        GoldDQConfigPort,
         LoggerPort,
         MetricsPort,
         PiiHasherPort,
-        SilverDQConfigPort,
         TracingPort,
     )
     from bioetl.domain.services import IdentityService
@@ -4262,20 +6536,19 @@ def create_pipeline_with_services(
         Configured pipeline instance
     """
     yaml_config = config or load_pipeline_config(pipeline_name)
-
-    # Extract entity from pipeline_name (e.g., "chembl_publication" → "publication")
     entity = _extract_entity_type(pipeline_name) or pipeline_name
 
-    # Create RunContext for MetadataCoordinator
+    # Create RunContext with versioning metadata for MetadataCoordinator
     run_context = RunContext.create(
         run_id=run_id,
         run_type=runtime.run_type,
         started_at=datetime.now(UTC),
         provider=provider,
         entity=entity,
+        pipeline_version=get_pipeline_version(yaml_config),
+        git_commit=get_git_commit(),
+        config_hash=compute_config_hash(yaml_config),
     )
-
-    # Create MetadataCoordinator with run context for centralized metadata
     metadata_coordinator = MetadataCoordinator(run_context)
 
     services = build_pipeline_services(
@@ -4394,9 +6667,7 @@ def assemble_runner(
     )
 
     # Extract DQ configs from YAML config for DQ report generation
-    bronze_dq_config, silver_dq_config, gold_dq_config = _extract_dq_configs(
-        yaml_config
-    )
+    dq_configs = _extract_dq_configs(yaml_config)
 
     postrun_service = PostrunService(
         config=pipeline.config,
@@ -4407,9 +6678,9 @@ def assemble_runner(
         logger=logger_port,
         # DQ Report parameters
         dq_report_service=pipeline.services.dq_report_service,
-        bronze_dq_config=bronze_dq_config,
-        silver_dq_config=silver_dq_config,
-        gold_dq_config=gold_dq_config,
+        bronze_dq_config=dq_configs.bronze,
+        silver_dq_config=dq_configs.silver,
+        gold_dq_config=dq_configs.gold,
     )
 
     observer = PipelineObserver(
@@ -4422,9 +6693,7 @@ def assemble_runner(
     )
 
     # Extract sink paths for DQ report generation
-    bronze_output_path, silver_output_path, gold_output_path, flat_structure = (
-        _extract_dq_output_paths(yaml_config)
-    )
+    dq_output_paths = _extract_dq_output_paths(yaml_config)
 
     # Create unified BatchExecutor (replaces PipelineExecutor + RecordProcessor)
     # Safety Guard §4.6: lock validation via lock_validator callback
@@ -4438,10 +6707,10 @@ def assemble_runner(
         lock_validator=lock_manager.validate,
         tracer=observability.tracer,
         # DQ report output paths for flat_structure support
-        bronze_output_path=bronze_output_path,
-        silver_output_path=silver_output_path,
-        gold_output_path=gold_output_path,
-        flat_structure=flat_structure,
+        bronze_output_path=dq_output_paths.bronze_path,
+        silver_output_path=dq_output_paths.silver_path,
+        gold_output_path=dq_output_paths.gold_path,
+        flat_structure=dq_output_paths.flat_structure,
     )
 
     # Assemble Runner with directly injected services (explicit DI)
@@ -4478,33 +6747,34 @@ def _extract_single_dq_config(
 
     Returns:
         DQ report config if enabled, None otherwise.
+
+    Raises:
+        ValidationError: If sink config exists but is invalid.
     """
     sink_config = sink.get(layer_name)
     if not sink_config:
         return None
-    try:
-        validated = config_class.model_validate(sink_config.model_dump())
-        if validated.dq_report.enabled:
-            return validated.dq_report
-    except Exception:
-        pass
+
+    # Check if sink_config has model_dump (is a Pydantic model)
+    if not hasattr(sink_config, "model_dump"):
+        return None
+
+    validated = config_class.model_validate(sink_config.model_dump())
+    if hasattr(validated, "dq_report") and validated.dq_report.enabled:
+        return validated.dq_report
     return None
 
 
 def _extract_dq_configs(
     yaml_config: PipelineYamlConfig | None,
-) -> tuple[
-    BronzeDQConfigPort | None,
-    SilverDQConfigPort | None,
-    GoldDQConfigPort | None,
-]:
+) -> DQConfigsContext:
     """Extract DQ report configs for each layer from YAML config.
 
     Args:
         yaml_config: Pipeline YAML configuration with sink settings.
 
     Returns:
-        Tuple of (bronze_config, silver_config, gold_config).
+        DQConfigsContext with bronze, silver, and gold DQ configurations.
         All values may be None if DQ reports are not configured.
     """
     from bioetl.infrastructure.schemas.dq_report_config import (
@@ -4514,17 +6784,21 @@ def _extract_dq_configs(
     )
 
     if yaml_config is None:
-        return None, None, None
+        return DQConfigsContext(bronze=None, silver=None, gold=None)
 
     sink = getattr(yaml_config, "sink", None)
     if sink is None:
-        return None, None, None
+        return DQConfigsContext(bronze=None, silver=None, gold=None)
 
     bronze_config = _extract_single_dq_config(sink, "bronze", BronzeSinkConfig)
     silver_config = _extract_single_dq_config(sink, "silver", SilverSinkConfig)
     gold_config = _extract_single_dq_config(sink, "gold", GoldSinkConfig)
 
-    return bronze_config, silver_config, gold_config
+    return DQConfigsContext(
+        bronze=bronze_config,
+        silver=silver_config,
+        gold=gold_config,
+    )
 
 
 def _get_layer_path(config: Any) -> str | None:
@@ -4539,22 +6813,26 @@ def _has_flat_structure(config: Any) -> bool:
 
 def _extract_dq_output_paths(
     yaml_config: PipelineYamlConfig | None,
-) -> tuple[str | None, str | None, str | None, bool]:
+) -> DQOutputPathsContext:
     """Extract DQ report output paths and flat_structure from YAML config.
 
     Args:
         yaml_config: Pipeline YAML configuration with sink settings.
 
     Returns:
-        Tuple of (bronze_path, silver_path, gold_path, flat_structure).
+        DQOutputPathsContext with bronze_path, silver_path, gold_path, and flat_structure.
         Paths may be None if not configured.
     """
     if yaml_config is None:
-        return None, None, None, False
+        return DQOutputPathsContext(
+            bronze_path=None, silver_path=None, gold_path=None, flat_structure=False
+        )
 
     sink = getattr(yaml_config, "sink", None)
     if sink is None:
-        return None, None, None, False
+        return DQOutputPathsContext(
+            bronze_path=None, silver_path=None, gold_path=None, flat_structure=False
+        )
 
     bronze_config = sink.get("bronze")
     silver_config = sink.get("silver")
@@ -4564,11 +6842,11 @@ def _extract_dq_output_paths(
         gold_config
     )
 
-    return (
-        _get_layer_path(bronze_config),
-        _get_layer_path(silver_config),
-        _get_layer_path(gold_config),
-        flat_structure,
+    return DQOutputPathsContext(
+        bronze_path=_get_layer_path(bronze_config),
+        silver_path=_get_layer_path(silver_config),
+        gold_path=_get_layer_path(gold_config),
+        flat_structure=flat_structure,
     )
 
 ================================================================================
@@ -4763,6 +7041,7 @@ from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.record_processor import RecordProcessor
+from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.dq_factory import DQServicesFactory
 from bioetl.composition.factories.storage import StorageContext, StorageFactory
 from bioetl.domain.config import TableConfig
@@ -4802,6 +7081,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "BaseServicesFactory",
+    "PipelineCallbacksContext",
     "ServicesBuilder",
     "create_data_normalization_service",
     "extract_pipeline_callbacks",
@@ -4815,7 +7095,7 @@ __all__ = [
 
 def extract_pipeline_callbacks(
     pipeline: BasePipeline,
-) -> tuple[Any, Any, Any]:
+) -> PipelineCallbacksContext:
     """Extract transformation callbacks from pipeline.
 
     Extracts callbacks from the pipeline's transformer if available,
@@ -4825,7 +7105,7 @@ def extract_pipeline_callbacks(
         pipeline: Pipeline instance with transformer or legacy methods.
 
     Returns:
-        Tuple of (transform_callback, gold_filter_callback, gold_transform_callback).
+        PipelineCallbacksContext with transform, gold_filter, and gold_transform callbacks.
 
     Raises:
         AttributeError: If pipeline has no transformer and doesn't implement
@@ -4833,10 +7113,10 @@ def extract_pipeline_callbacks(
     """
     transformer = pipeline.transformer
     if transformer is not None:
-        return (
-            transformer.transform,
-            transformer.should_write_gold,
-            transformer.transform_for_gold,
+        return PipelineCallbacksContext(
+            transform=transformer.transform,
+            gold_filter=transformer.should_write_gold,
+            gold_transform=transformer.transform_for_gold,
         )
 
     # Fallback for pipelines without explicit transformer (legacy)
@@ -4852,7 +7132,11 @@ def extract_pipeline_callbacks(
         "transform_for_gold",
         lambda _context, silver_record: silver_record,
     )
-    return (transform_cb, gold_filter_cb, gold_transform_cb)
+    return PipelineCallbacksContext(
+        transform=transform_cb,
+        gold_filter=gold_filter_cb,
+        gold_transform=gold_transform_cb,
+    )
 
 
 # =============================================================================
@@ -5252,9 +7536,7 @@ class ServicesBuilder:
         Returns:
             Configured RecordProcessor instance
         """
-        transform_cb, gold_filter_cb, gold_transform_cb = extract_pipeline_callbacks(
-            pipeline
-        )
+        callbacks = extract_pipeline_callbacks(pipeline)
 
         return ServicesBuilder.create_record_processor(
             services=pipeline.services,
@@ -5271,9 +7553,9 @@ class ServicesBuilder:
             silver_write_mode=pipeline.config.write_mode,
             gold_write_mode=pipeline.config.gold_write_mode,
             on_schema_mismatch=pipeline.config.on_schema_mismatch,
-            transform_callback=transform_cb,
-            gold_filter_callback=gold_filter_cb,
-            gold_transform_callback=gold_transform_cb,
+            transform_callback=callbacks.transform,
+            gold_filter_callback=callbacks.gold_filter,
+            gold_transform_callback=callbacks.gold_transform,
             strict_gold_validation=strict_gold_validation,
             lock_validator=lock_validator,
         )
@@ -5317,9 +7599,7 @@ class ServicesBuilder:
         Returns:
             Configured BatchExecutor instance.
         """
-        transform_cb, gold_filter_cb, gold_transform_cb = extract_pipeline_callbacks(
-            pipeline
-        )
+        callbacks = extract_pipeline_callbacks(pipeline)
 
         # Build configuration
         error_classifier = ErrorClassifier()
@@ -5357,9 +7637,9 @@ class ServicesBuilder:
             context=pipeline.context,
             config=processor_config,
             error_classifier=error_classifier,
-            transform_callback=transform_cb,
-            gold_filter_callback=gold_filter_cb,
-            gold_transform_callback=gold_transform_cb,
+            transform_callback=callbacks.transform,
+            gold_filter_callback=callbacks.gold_filter,
+            gold_transform_callback=callbacks.gold_transform,
             gold_validator=gold_validator,
             checkpoint_manager=checkpoint_manager,
             shutdown_signal=shutdown_signal,
@@ -5469,6 +7749,7 @@ Note:
 from __future__ import annotations
 
 import asyncio
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -5723,95 +8004,59 @@ class StorageAdapter:
 
         Implements StoragePort.clear_silver().
         Clears both Delta tables and CSV exports (if configured).
-        Should only be called for rebuild/backfill runs, NOT for incremental.
-
-        Args:
-            table_name: The name of the table to clear.
-            dry_run: If True, only count what would be deleted.
-
-        Returns:
-            Count of cleared items (tables + files).
         """
-        loop = asyncio.get_running_loop()
-        cleared_count = 0
-
-        # Clear Silver Delta table (sync operation wrapped in executor)
-        cleared_count += await loop.run_in_executor(
-            None, lambda: self.silver.clear(table_name, dry_run=dry_run)
-        )
-
-        # Clear Silver CSV if exporter is configured
-        if self.silver.csv_exporter and not dry_run:
-            exporter = self.silver.csv_exporter
-            deleted = await loop.run_in_executor(
-                None, lambda: exporter.clear(table_name)
-            )
-            cleared_count += len(deleted)
-
-        return cleared_count
+        return await self._run_clear(self.silver, table_name, dry_run)
 
     async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Gold layer data for a specific table.
 
         Implements StoragePort.clear_gold().
         Clears both Delta tables and CSV exports (if configured).
-        Should only be called for rebuild/backfill runs, NOT for incremental.
-
-        Args:
-            table_name: The name of the table to clear.
-            dry_run: If True, only count what would be deleted.
-
-        Returns:
-            Count of cleared items (tables + files).
         """
+        return await self._run_clear(self.gold, table_name, dry_run)
+
+    async def _run_clear(
+        self,
+        writer: SilverWriter | GoldWriter,
+        table_name: str,
+        dry_run: bool,
+    ) -> int:
+        """Execute clear operation for a writer."""
         loop = asyncio.get_running_loop()
-        cleared_count = 0
-
-        # Clear Gold Delta table (sync operation wrapped in executor)
-        cleared_count += await loop.run_in_executor(
-            None, lambda: self.gold.clear(table_name, dry_run=dry_run)
+        cleared = await loop.run_in_executor(
+            None, lambda: writer.clear(table_name, dry_run=dry_run)
         )
-
-        # Clear Gold CSV if exporter is configured
-        if self.gold.csv_exporter and not dry_run:
-            exporter = self.gold.csv_exporter
+        if writer.csv_exporter and not dry_run:
+            exporter = writer.csv_exporter
             deleted = await loop.run_in_executor(
                 None, lambda: exporter.clear(table_name)
             )
-            cleared_count += len(deleted)
-
-        return cleared_count
+            cleared += len(deleted)
+        return cleared
 
     async def clear_csv(self, table_name: str | None = None) -> int:
         """Clear CSV export files for Silver and Gold layers.
 
         Implements StoragePort.clear_csv().
-
-        Args:
-            table_name: If provided, only clear CSV for this table.
-                       If None, clear all CSV files.
-
-        Returns:
-            Number of files cleared.
         """
+        count = 0
         loop = asyncio.get_running_loop()
-        cleared_count = 0
 
         if self.silver.csv_exporter:
             exporter = self.silver.csv_exporter
             deleted = await loop.run_in_executor(
                 None, lambda: exporter.clear(table_name)
             )
-            cleared_count += len(deleted) if isinstance(deleted, list) else deleted
+            count += len(deleted) if isinstance(deleted, list) else deleted
 
         if self.gold.csv_exporter:
             exporter = self.gold.csv_exporter
             deleted = await loop.run_in_executor(
                 None, lambda: exporter.clear(table_name)
             )
-            cleared_count += len(deleted) if isinstance(deleted, list) else deleted
+            count += len(deleted) if isinstance(deleted, list) else deleted
 
-        return cleared_count
+        return count
 
     async def clear_delta(self, table_name: str | None = None) -> int:
         """Clear Delta tables for Silver and Gold layers.
@@ -5942,6 +8187,38 @@ class StorageAdapter:
         else:
             return HealthStatus.UNHEALTHY
 
+    async def optimize(
+        self,
+        table_name: str,
+        retention_hours: int = 168,
+        dry_run: bool = False,
+    ) -> None:
+        """Optimize storage for a specific table/entity.
+
+        Performs maintenance operations appropriate for the storage layer:
+        - Delta Lake: Runs VACUUM to remove old files
+        - JSONL/File: Removes files older than retention period
+
+        Args:
+            table_name: Target identifier (e.g., 'provider.entity' for Delta/Bronze)
+            retention_hours: Retention period in hours (default 168h = 7 days)
+            dry_run: If True, only log what would be done without action
+        """
+        # 1. Optimize Silver/Gold Delta Tables
+        await self.vacuum(table_name, retention_hours, dry_run)
+
+        # 2. Optimize Bronze (File cleanup)
+        # Parse table_name to get provider/entity for targeted cleanup
+        if "." in table_name:
+            provider, entity = table_name.split(".", 1)
+            cutoff_date = datetime.now(UTC) - timedelta(hours=retention_hours)
+            await self.bronze.cleanup_old_files(
+                cutoff_date=cutoff_date,
+                dry_run=dry_run,
+                provider=provider,
+                entity=entity,
+            )
+
     async def vacuum(
         self,
         table_name: str,
@@ -5963,42 +8240,31 @@ class StorageAdapter:
         """
         total_removed = 0
 
-        # Vacuum Silver
-        try:
+        # Vacuum Silver (only if table exists)
+        silver_table_path = self.silver.get_table_path(table_name)
+        if silver_table_path.exists():
             removed = await self.silver.vacuum(
                 table_name=table_name,
                 retention_hours=retention_hours,
                 dry_run=dry_run,
             )
             total_removed += len(removed)
-        except Exception:
-            # Log but continue to Gold (table may not exist)
-            pass
 
-        # Vacuum Gold (GoldWriter uses SilverWriter internally, need to add vacuum)
-        # Gold layer uses same Delta format, so we can vacuum via path
-        try:
-            gold_table_path = f"{self.gold.base_path}/{table_name.replace('.', '/')}"
-            loop = asyncio.get_running_loop()
+        # Vacuum Gold (only if table exists)
+        gold_table_path = self.gold.get_table_path(table_name)
+        if gold_table_path.exists():
             from deltalake import DeltaTable
-            from deltalake.exceptions import (
-                TableNotFoundError as DeltaTableNotFoundError,
-            )
 
-            try:
-                dt = await loop.run_in_executor(
-                    None,
-                    lambda: DeltaTable(gold_table_path),
-                )
-                removed = await loop.run_in_executor(
-                    None,
-                    lambda: dt.vacuum(retention_hours=retention_hours, dry_run=dry_run),
-                )
-                total_removed += len(removed)
-            except DeltaTableNotFoundError:
-                pass
-        except Exception:
-            pass
+            loop = asyncio.get_running_loop()
+            dt = await loop.run_in_executor(
+                None,
+                lambda: DeltaTable(str(gold_table_path)),
+            )
+            removed = await loop.run_in_executor(
+                None,
+                lambda: dt.vacuum(retention_hours=retention_hours, dry_run=dry_run),
+            )
+            total_removed += len(removed)
 
         return total_removed
 
@@ -7388,7 +9654,10 @@ from bioetl.application.core.idmapping_data_source import IDMappingDataSource
 from bioetl.application.core.publication_term_data_source import (
     PublicationTermDataSource,
 )
-from bioetl.composition.bootstrap_logger import BootstrapLogger
+from bioetl.composition.bootstrap_contexts import (
+    CircuitBreakerConfig,
+    RateLimitConfig,
+)
 from bioetl.composition.providers.provider_registry import (
     HttpConfig,
     ProviderConfig,
@@ -7431,8 +9700,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
     from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
-_logger = BootstrapLogger()
-
 
 def _get_factories() -> tuple[Any, Any]:
     """Lazy import factories to avoid circular imports."""
@@ -7443,12 +9710,20 @@ def _get_factories() -> tuple[Any, Any]:
 
 
 def _get_source_config(provider: str) -> SourceYamlConfig | None:
-    """Load config from configs/sources/{provider}.yaml or return None."""
-    try:
-        return load_source_config(provider)
-    except ValueError:
-        _logger.debug("source_config_not_found", provider=provider, fallback="defaults")
+    """Load config from configs/sources/{provider}.yaml or return None.
+
+    Returns:
+        SourceYamlConfig if found, None if config file does not exist.
+
+    Raises:
+        ValueError: If config file exists but is invalid.
+    """
+    from pathlib import Path
+
+    config_path = Path(f"configs/sources/{provider}.yaml")
+    if not config_path.exists():
         return None
+    return load_source_config(provider)
 
 
 def _get_batch_size_from_config(provider: str, default: int = 100) -> int:
@@ -7457,26 +9732,40 @@ def _get_batch_size_from_config(provider: str, default: int = 100) -> int:
     return source_config.batch_size if source_config else default
 
 
-def _get_rate_limit_from_config(provider: str) -> tuple[float, int]:
-    """Get (rate, capacity) from source config or defaults (5.0, 10)."""
+def _get_rate_limit_from_config(provider: str) -> RateLimitConfig:
+    """Get rate limit configuration from source config or defaults.
+
+    Args:
+        provider: Provider name (e.g., 'chembl', 'pubchem').
+
+    Returns:
+        RateLimitConfig with rate and capacity values.
+    """
     source_config = _get_source_config(provider)
     if source_config:
-        return (
-            source_config.rate_limit.requests_per_second,
-            source_config.rate_limit.burst,
+        return RateLimitConfig(
+            rate=source_config.rate_limit.requests_per_second,
+            capacity=source_config.rate_limit.burst,
         )
-    return 5.0, 10
+    return RateLimitConfig(rate=5.0, capacity=10)
 
 
-def _get_circuit_breaker_from_config(provider: str) -> tuple[int, int]:
-    """Get (failure_threshold, recovery_timeout) from config or defaults (5, 300)."""
+def _get_circuit_breaker_from_config(provider: str) -> CircuitBreakerConfig:
+    """Get circuit breaker configuration from source config or defaults.
+
+    Args:
+        provider: Provider name (e.g., 'chembl', 'pubchem').
+
+    Returns:
+        CircuitBreakerConfig with failure_threshold and recovery_timeout.
+    """
     source_config = _get_source_config(provider)
     if source_config:
-        return (
-            source_config.circuit_breaker.failure_threshold,
-            source_config.circuit_breaker.recovery_timeout,
+        return CircuitBreakerConfig(
+            failure_threshold=source_config.circuit_breaker.failure_threshold,
+            recovery_timeout=source_config.circuit_breaker.recovery_timeout,
         )
-    return 5, 300
+    return CircuitBreakerConfig(failure_threshold=5, recovery_timeout=300)
 
 
 def _get_adapter_config(provider: str, default_page_size: int = 1000) -> AdapterConfig:
@@ -7493,19 +9782,13 @@ def _get_adapter_config(provider: str, default_page_size: int = 1000) -> Adapter
         AdapterConfig: Immutable adapter configuration
 
     Raises:
-        ValueError: If source config is missing and fail_fast is True
+        ValueError: If source config file exists but is invalid.
     """
     source_config = _get_source_config(provider)
     if source_config is not None:
         return source_config.to_adapter_config(default_page_size=default_page_size)
 
-    # Fallback to domain defaults
-    _logger.warning(
-        "source_config_missing",
-        provider=provider,
-        fallback="AdapterConfig defaults",
-        recommendation=f"Create configs/sources/{provider}.yaml to configure adapter parameters",
-    )
+    # Fallback to domain defaults when config file does not exist
     return AdapterConfig(page_size=default_page_size)
 
 
@@ -7579,13 +9862,13 @@ def _create_pubchem_adapter(
     if logger is None:
         raise ValueError("PubChem adapter requires logger")
 
-    rate, capacity = _get_rate_limit_from_config("pubchem")
-    cb_threshold, cb_timeout = _get_circuit_breaker_from_config("pubchem")
+    rate_limit = _get_rate_limit_from_config("pubchem")
+    cb_config = _get_circuit_breaker_from_config("pubchem")
 
-    rate = kwargs.pop("rate", rate)
-    capacity = kwargs.pop("capacity", capacity)
-    cb_threshold = kwargs.pop("circuit_breaker_threshold", cb_threshold)
-    cb_timeout = kwargs.pop("circuit_breaker_timeout", cb_timeout)
+    rate = kwargs.pop("rate", rate_limit.rate)
+    capacity = kwargs.pop("capacity", rate_limit.capacity)
+    cb_threshold = kwargs.pop("circuit_breaker_threshold", cb_config.failure_threshold)
+    cb_timeout = kwargs.pop("circuit_breaker_timeout", cb_config.recovery_timeout)
     max_workers = kwargs.pop("max_workers", 4)
     strict_error_handling = kwargs.pop("strict_error_handling", False)
     metrics = kwargs.pop("metrics", None)
@@ -7916,11 +10199,11 @@ def register_all_providers() -> None:
     Each provider includes a data_source_creator for unified registry access.
     """
     # Load rate limits from source configs (with fallback defaults)
-    chembl_rate, chembl_capacity = _get_rate_limit_from_config("chembl")
-    pubchem_rate, pubchem_capacity = _get_rate_limit_from_config("pubchem")
-    uniprot_rate, uniprot_capacity = _get_rate_limit_from_config("uniprot")
-    pubmed_rate, pubmed_capacity = _get_rate_limit_from_config("pubmed")
-    crossref_rate, crossref_capacity = _get_rate_limit_from_config("crossref")
+    chembl_rate_limit = _get_rate_limit_from_config("chembl")
+    pubchem_rate_limit = _get_rate_limit_from_config("pubchem")
+    uniprot_rate_limit = _get_rate_limit_from_config("uniprot")
+    pubmed_rate_limit = _get_rate_limit_from_config("pubmed")
+    crossref_rate_limit = _get_rate_limit_from_config("crossref")
 
     # ChEMBL - async HTTP adapter
     if not ProviderRegistry.is_registered("chembl"):
@@ -7929,8 +10212,8 @@ def register_all_providers() -> None:
             ProviderConfig(
                 adapter_class=ChemblAdapter,
                 http_config=HttpConfig(
-                    rate=chembl_rate,
-                    capacity=chembl_capacity,
+                    rate=chembl_rate_limit.rate,
+                    capacity=chembl_rate_limit.capacity,
                 ),
                 requires_http_client=True,
                 requires_logger=True,
@@ -7947,8 +10230,8 @@ def register_all_providers() -> None:
             ProviderConfig(
                 adapter_class=PubChemAdapter,
                 http_config=HttpConfig(
-                    rate=pubchem_rate,
-                    capacity=pubchem_capacity,
+                    rate=pubchem_rate_limit.rate,
+                    capacity=pubchem_rate_limit.capacity,
                 ),
                 requires_http_client=False,
                 requires_logger=True,
@@ -7964,8 +10247,8 @@ def register_all_providers() -> None:
             ProviderConfig(
                 adapter_class=UniProtAdapter,
                 http_config=HttpConfig(
-                    rate=uniprot_rate,
-                    capacity=uniprot_capacity,
+                    rate=uniprot_rate_limit.rate,
+                    capacity=uniprot_rate_limit.capacity,
                     rate_overrides={"uniprot_api_key": 100.0},
                 ),
                 requires_http_client=True,
@@ -7981,8 +10264,8 @@ def register_all_providers() -> None:
             ProviderConfig(
                 adapter_class=PubMedAdapter,
                 http_config=HttpConfig(
-                    rate=pubmed_rate,
-                    capacity=pubmed_capacity,
+                    rate=pubmed_rate_limit.rate,
+                    capacity=pubmed_rate_limit.capacity,
                     rate_overrides={"pubmed_api_key": 10.0},
                 ),
                 requires_http_client=True,
@@ -8000,8 +10283,8 @@ def register_all_providers() -> None:
             ProviderConfig(
                 adapter_class=CrossRefAdapter,
                 http_config=HttpConfig(
-                    rate=crossref_rate,
-                    capacity=crossref_capacity,
+                    rate=crossref_rate_limit.rate,
+                    capacity=crossref_rate_limit.capacity,
                 ),
                 requires_http_client=True,
                 requires_logger=True,
@@ -8013,15 +10296,15 @@ def register_all_providers() -> None:
     # OpenAlex - async HTTP adapter for open scholarly metadata
     # Requires mailto for polite pool access (10 req/sec)
     # Supports batch DOI resolution with title fallback
-    openalex_rate, openalex_capacity = _get_rate_limit_from_config("openalex")
+    openalex_rate_limit = _get_rate_limit_from_config("openalex")
     if not ProviderRegistry.is_registered("openalex"):
         ProviderRegistry.register(
             "openalex",
             ProviderConfig(
                 adapter_class=OpenAlexAdapter,
                 http_config=HttpConfig(
-                    rate=openalex_rate,
-                    capacity=openalex_capacity,
+                    rate=openalex_rate_limit.rate,
+                    capacity=openalex_rate_limit.capacity,
                 ),
                 requires_http_client=True,
                 requires_logger=True,
@@ -8032,15 +10315,15 @@ def register_all_providers() -> None:
 
     # Semantic Scholar - async HTTP adapter for DOI resolution with title fallback
     # API key recommended for stable rate limits (1 req/sec guaranteed)
-    s2_rate, s2_capacity = _get_rate_limit_from_config("semanticscholar")
+    s2_rate_limit = _get_rate_limit_from_config("semanticscholar")
     if not ProviderRegistry.is_registered("semanticscholar"):
         ProviderRegistry.register(
             "semanticscholar",
             ProviderConfig(
                 adapter_class=SemanticScholarAdapter,
                 http_config=HttpConfig(
-                    rate=s2_rate,
-                    capacity=s2_capacity,
+                    rate=s2_rate_limit.rate,
+                    capacity=s2_rate_limit.capacity,
                 ),
                 requires_http_client=True,
                 requires_logger=True,
@@ -8053,17 +10336,15 @@ def register_all_providers() -> None:
     # Input comes from CSV file, not external API filtering
     # Note: IDMappingDataSource is a lightweight wrapper, actual API client is
     # UniProtIDMappingClient created in the data_source_creator
-    uniprot_idmapping_rate, uniprot_idmapping_capacity = _get_rate_limit_from_config(
-        "uniprot"
-    )
+    uniprot_idmapping_rate_limit = _get_rate_limit_from_config("uniprot")
     if not ProviderRegistry.is_registered("uniprot_idmapping"):
         ProviderRegistry.register(
             "uniprot_idmapping",
             ProviderConfig(
                 adapter_class=IDMappingDataSource,
                 http_config=HttpConfig(
-                    rate=uniprot_idmapping_rate,
-                    capacity=uniprot_idmapping_capacity,
+                    rate=uniprot_idmapping_rate_limit.rate,
+                    capacity=uniprot_idmapping_rate_limit.capacity,
                 ),
                 requires_http_client=True,
                 requires_logger=True,
@@ -8360,9 +10641,15 @@ business logic but rather assemble components.
 
 Services:
 - MetadataCoordinator: Centralized metadata creation for Medallion layers
+- Versioning utilities: Git commit, config hash, pipeline version
 """
 
 from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
+from bioetl.composition.services.versioning import (
+    compute_config_hash,
+    get_git_commit,
+    get_pipeline_version,
+)
 
 # Re-export input types from domain.ports for convenience
 from bioetl.domain.ports import (
@@ -8376,6 +10663,9 @@ __all__ = [
     "GoldMetadataInput",
     "MetadataCoordinator",
     "SilverMetadataInput",
+    "compute_config_hash",
+    "get_git_commit",
+    "get_pipeline_version",
 ]
 
 ================================================================================
@@ -8402,11 +10692,12 @@ Architecture:
 
 from __future__ import annotations
 
+import inspect
 import platform
 import socket
 from datetime import datetime
 from functools import cached_property
-from typing import Literal
+from typing import Any, Literal
 
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.models.metadata import (
@@ -8423,6 +10714,8 @@ from bioetl.domain.models.metadata import (
     RuntimeMetadata,
     RunTypeEnum,
     SCDMetadata,
+    SchemaColumnMetadata,
+    SchemaMetadata,
     SilverMetadata,
     SilverOutputMetadata,
     SourceMetadata,
@@ -8437,18 +10730,17 @@ from bioetl.domain.value_objects.run_context import RunContext
 
 
 def _get_bioetl_version() -> str:
-    """Get BioETL package version safely."""
-    try:
-        from bioetl import __version__
+    """Get BioETL package version.
 
-        return __version__
-    except ImportError:
-        try:
-            from importlib.metadata import version as pkg_version
+    Returns:
+        Package version string.
 
-            return pkg_version("bioetl")
-        except Exception:
-            return "unknown"
+    Raises:
+        PackageNotFoundError: If bioetl package is not installed.
+    """
+    from importlib.metadata import version as pkg_version
+
+    return pkg_version("bioetl")
 
 
 class MetadataCoordinator:
@@ -8538,15 +10830,14 @@ class MetadataCoordinator:
         )
 
     def _build_pipeline_metadata(self) -> PipelineMetadata:
-        """Build PipelineMetadata from run context.
-
-        Returns:
-            PipelineMetadata with pipeline identification.
-        """
+        """Build PipelineMetadata with versioning from run context."""
         return PipelineMetadata(
             name=self._context.pipeline_name,
             provider=self._context.provider,
             entity=self._context.entity,
+            version=self._context.pipeline_version or "1.0.0",
+            git_commit=self._context.git_commit,
+            config_hash=self._context.config_hash,
         )
 
     def create_bronze_metadata(self, input_data: BronzeMetadataInput) -> BronzeMetadata:
@@ -8595,6 +10886,7 @@ class MetadataCoordinator:
                 total_bytes=input_data.compressed_size,
             ),
             environment=self._get_environment_metadata(),
+            governance=input_data.governance,
         )
 
     def create_silver_metadata(self, input_data: SilverMetadataInput) -> SilverMetadata:
@@ -8654,25 +10946,31 @@ class MetadataCoordinator:
             table_path=input_data.table_path,
             operation=operation_map[input_data.mode],
             primary_key=input_data.primary_keys,
+            partition_by=input_data.partition_by or [],
             version_after=input_data.version_after,
             rows_inserted=len(input_data.records),
         )
 
         # Build DQ summary from computed metrics or use basic fallback
-        if input_data.dq_metrics is not None:
-            dq_summary = input_data.dq_metrics.to_dq_summary()
-        else:
-            dq_summary = DQSummary(
-                total_records=len(input_data.records),
-                valid_records=len(input_data.records),
-            )
-
-        output = SilverOutputMetadata(
-            record_count=len(input_data.records),
+        rec_count = len(input_data.records)
+        dq_summary = (
+            input_data.dq_metrics.to_dq_summary()
+            if input_data.dq_metrics
+            else DQSummary(total_records=rec_count, valid_records=rec_count)
         )
-
+        output = SilverOutputMetadata(record_count=rec_count)
+        # Calculate duration if both timestamps provided
+        duration_seconds = (
+            (input_data.completed_at - input_data.started_at).total_seconds()
+            if input_data.started_at and input_data.completed_at
+            else None
+        )
         return SilverMetadata(
-            runtime=self._build_runtime_metadata(),
+            runtime=self._build_runtime_metadata(
+                started_at=input_data.started_at,
+                completed_at=input_data.completed_at,
+                duration_seconds=duration_seconds,
+            ),
             pipeline=self._build_pipeline_metadata(),
             lineage=lineage,
             delta=delta,
@@ -8680,6 +10978,87 @@ class MetadataCoordinator:
             output=output,
             environment=self._get_environment_metadata(),
             dq_report_path=input_data.dq_report_path,
+            governance=input_data.governance,
+        )
+
+    def _extract_schema_metadata(self, gold_schema: Any | None) -> SchemaMetadata:
+        """Extract schema metadata from a Pandera DataFrameModel.
+
+        Extracts contract_path, version, columns, and validation mode from
+        the Pandera schema class for Gold layer metadata tracking.
+
+        Args:
+            gold_schema: Pandera DataFrameModel class (not instance).
+
+        Returns:
+            SchemaMetadata with populated fields, or default if schema is None.
+        """
+        if gold_schema is None:
+            return SchemaMetadata()
+
+        # Extract contract_path from module path
+        contract_path: str | None = None
+        try:
+            module = inspect.getmodule(gold_schema)
+            if module and module.__file__:
+                # Convert absolute path to relative path from project root
+                # e.g., .../src/bioetl/domain/contracts/gold/chembl.py
+                # -> src/bioetl/domain/contracts/gold/chembl.py
+                file_path = module.__file__
+                if "src/bioetl" in file_path:
+                    idx = file_path.find("src/bioetl")
+                    contract_path = file_path[idx:]
+        except Exception:
+            pass
+
+        # Extract schema version from Config if defined
+        version = "1.0"
+        if hasattr(gold_schema, "Config"):
+            config = gold_schema.Config
+            version = getattr(config, "version", "1.0")
+            if not isinstance(version, str):
+                version = str(version)
+
+        # Determine validation mode
+        validation: Literal["strict", "lenient"] = "strict"
+        if hasattr(gold_schema, "Config"):
+            config = gold_schema.Config
+            is_strict = getattr(config, "strict", True)
+            validation = "strict" if is_strict else "lenient"
+
+        # Extract column definitions
+        columns: list[SchemaColumnMetadata] = []
+        try:
+            # Try to get schema columns using Pandera's to_schema() method
+            if hasattr(gold_schema, "to_schema"):
+                schema_instance = gold_schema.to_schema()
+                if hasattr(schema_instance, "columns"):
+                    for col_name, col_schema in schema_instance.columns.items():
+                        # Get the dtype as string
+                        dtype_str = (
+                            str(col_schema.dtype) if col_schema.dtype else "object"
+                        )
+                        # Simplify dtype string (remove pandera.dtypes. prefix)
+                        if "." in dtype_str:
+                            dtype_str = dtype_str.split(".")[-1]
+
+                        nullable = getattr(col_schema, "nullable", True)
+                        columns.append(
+                            SchemaColumnMetadata(
+                                name=col_name,
+                                type=dtype_str,
+                                nullable=nullable,
+                            )
+                        )
+        except Exception:
+            # If schema extraction fails, leave columns empty
+            pass
+
+        return SchemaMetadata(
+            contract_path=contract_path,
+            version=version,
+            validation=validation,
+            columns=columns,
         )
 
     def create_gold_metadata(self, input_data: GoldMetadataInput) -> GoldMetadata:
@@ -8744,22 +11123,241 @@ class MetadataCoordinator:
                 ),
             )
 
-        return GoldMetadata(
+        # Extract schema metadata from Gold schema (contract_path, version, columns)
+        schema_info = self._extract_schema_metadata(input_data.gold_schema)
+
+        # Note: schema_info uses Field(alias="schema") with populate_by_name=True
+        # mypy doesn't understand this Pydantic feature, but it works at runtime
+        return GoldMetadata(  # type: ignore[call-arg]
             runtime=self._build_runtime_metadata(
                 completed_at=input_data.completed_at,
             ),
             pipeline=self._build_pipeline_metadata(),
             lineage=lineage,
+            schema_info=schema_info,
             dq_summary=dq_summary,
             output=output,
             scd=scd,
             environment=self._get_environment_metadata(),
+            governance=input_data.governance,
         )
 
     @classmethod
     def reset_environment_cache(cls) -> None:
         """Reset the environment metadata cache (useful for testing)."""
         cls._cached_environment = None
+
+================================================================================
+File: versioning.py
+Path: services\versioning.py
+================================================================================
+"""Versioning and reproducibility utilities for pipeline metadata.
+
+Provides functions to compute:
+- Git commit hash for reproducibility tracking
+- Config hash for change detection
+- Pipeline version from config or package
+
+These utilities support PipelineMetadata population as per RULES.md §2.3.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import subprocess
+from functools import lru_cache
+from importlib.metadata import version as pkg_version
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+__all__ = [
+    "compute_config_hash",
+    "get_git_commit",
+    "get_pipeline_version",
+]
+
+
+@lru_cache(maxsize=1)
+def get_git_commit() -> str | None:
+    """Get the current git commit hash.
+
+    Returns the short (7-character) git commit hash of HEAD.
+    Returns None if:
+    - Not in a git repository
+    - Git is not installed
+    - Any other git error occurs
+
+    Results are cached for the process lifetime since the commit
+    doesn't change during execution.
+
+    Returns:
+        Short git commit hash (e.g., 'abc1234') or None.
+
+    Example:
+        >>> commit = get_git_commit()
+        >>> commit  # 'abc1234' or None
+    """
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+        return None
+    except (subprocess.SubprocessError, FileNotFoundError, OSError):
+        return None
+
+
+def _normalize_for_hash(obj: Any) -> Any:
+    """Normalize object for deterministic hashing.
+
+    Converts:
+    - Lists to sorted lists (for sets represented as lists)
+    - Dicts to sorted key-value pairs
+    - None to null string
+    - Other values as-is
+
+    Args:
+        obj: Object to normalize.
+
+    Returns:
+        Normalized object suitable for deterministic JSON serialization.
+    """
+    if obj is None:
+        return None
+    if isinstance(obj, dict):
+        return {k: _normalize_for_hash(v) for k, v in sorted(obj.items())}
+    if isinstance(obj, list):
+        return [_normalize_for_hash(item) for item in obj]
+    if isinstance(obj, tuple):
+        return [_normalize_for_hash(item) for item in obj]
+    return obj
+
+
+def compute_config_hash(config: PipelineYamlConfig | dict[str, Any]) -> str:
+    """Compute SHA256 hash of pipeline configuration.
+
+    Creates a deterministic hash of the configuration for change detection.
+    The hash is computed from a normalized JSON representation to ensure
+    consistency regardless of dict ordering or whitespace.
+
+    Args:
+        config: Pipeline configuration (PipelineYamlConfig or dict).
+
+    Returns:
+        SHA256 hash string (64 characters).
+
+    Example:
+        >>> config = load_pipeline_config("chembl_activity")
+        >>> hash_value = compute_config_hash(config)
+        >>> hash_value  # '3a7bd3e2...'
+    """
+    # Convert Pydantic model to dict if needed
+    if hasattr(config, "model_dump"):
+        config_dict = config.model_dump(mode="json", exclude_none=True)
+    elif hasattr(config, "dict"):
+        # Legacy Pydantic v1 support
+        config_dict = config.dict(exclude_none=True)
+    else:
+        config_dict = dict(config)
+
+    # Normalize for deterministic serialization
+    normalized = _normalize_for_hash(config_dict)
+
+    # Serialize to JSON with sorted keys and no whitespace
+    json_str = json.dumps(normalized, sort_keys=True, separators=(",", ":"))
+
+    # Compute SHA256 hash
+    return hashlib.sha256(json_str.encode("utf-8")).hexdigest()
+
+
+def get_pipeline_version(
+    config: PipelineYamlConfig | dict[str, Any] | None = None,
+) -> str:
+    """Get pipeline version from config or fallback to package version.
+
+    Priority:
+    1. config.version if available
+    2. bioetl package version
+    3. "unknown" as last resort
+
+    Args:
+        config: Optional pipeline configuration.
+
+    Returns:
+        Version string (e.g., '1.0.0' or package version).
+
+    Example:
+        >>> version = get_pipeline_version(config)
+        >>> version  # '1.0.0'
+    """
+    # Try to get version from config
+    if config is not None:
+        # Handle Pydantic model
+        if hasattr(config, "version") and config.version:
+            return str(config.version)
+        # Handle dict
+        if isinstance(config, dict) and config.get("version"):
+            return str(config["version"])
+
+    # Fallback to bioetl package version
+    try:
+        return pkg_version("bioetl")
+    except Exception:
+        return "unknown"
+
+
+def get_full_git_commit() -> str | None:
+    """Get the full git commit hash (40 characters).
+
+    Similar to get_git_commit() but returns the full hash instead of
+    the short version. Useful for exact reproducibility tracking.
+
+    Returns:
+        Full git commit hash (e.g., 'abc1234...') or None.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+        return None
+    except (subprocess.SubprocessError, FileNotFoundError, OSError):
+        return None
+
+
+def is_git_dirty() -> bool:
+    """Check if the git working directory has uncommitted changes.
+
+    Returns:
+        True if there are uncommitted changes, False otherwise.
+        Returns False if not in a git repository or git is unavailable.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "status", "--porcelain"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+        if result.returncode == 0:
+            return bool(result.stdout.strip())
+        return False
+    except (subprocess.SubprocessError, FileNotFoundError, OSError):
+        return False
 
 ================================================================================
 File: types.py
@@ -8777,10 +11375,24 @@ For actual runtime imports, use the specific modules:
 - PipelineRegistry: from bioetl.composition.registry
 - get_default_registry: from bioetl.composition.registry (default instance)
 - create_registry: from bioetl.composition.registry (isolated instance for tests)
+
+Typed contexts for bootstrap functions (replacing untyped tuples):
+- PipelineCallbacksContext: transform, gold_filter, gold_transform callbacks
+- DQConfigsContext: Bronze/Silver/Gold DQ report configurations
+- DQOutputPathsContext: DQ report output paths and flat_structure flag
+- RateLimitConfig: rate and capacity for token bucket
+- CircuitBreakerConfig: failure_threshold and recovery_timeout
 """
 
 from __future__ import annotations
 
+from bioetl.composition.bootstrap_contexts import (
+    CircuitBreakerConfig,
+    DQConfigsContext,
+    DQOutputPathsContext,
+    PipelineCallbacksContext,
+    RateLimitConfig,
+)
 from bioetl.composition.factories.storage import StorageAdapter
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.registry import (
@@ -8791,9 +11403,14 @@ from bioetl.composition.registry import (
 )
 
 __all__ = [
+    "CircuitBreakerConfig",
+    "DQConfigsContext",
+    "DQOutputPathsContext",
     "ObservabilityBundle",
+    "PipelineCallbacksContext",
     "PipelineDefinition",
     "PipelineRegistry",
+    "RateLimitConfig",
     "StorageAdapter",
     "create_registry",
     "get_default_registry",

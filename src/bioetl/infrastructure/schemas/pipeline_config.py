@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering.input_config import (
         InputFilterConfig as DomainInputFilterConfig,
     )
+    from bioetl.domain.models.metadata import GovernanceMetadata
 
 
 class FieldValidationConfig(BaseModel):
@@ -522,6 +523,132 @@ class SinkDQReportConfig(BaseModel):
     )
 
 
+class SinkLineageConfig(BaseModel):
+    """Lineage configuration within sink metadata.
+
+    Captures static lineage information for governance purposes.
+    """
+
+    source_system: str | None = Field(
+        default=None, description="Source system identifier"
+    )
+    source_version: str | None = Field(
+        default=None, description="Version of source system"
+    )
+    extraction_method: str | None = Field(
+        default=None, description="Extraction method (api, csv, parquet)"
+    )
+    source_layer: str | None = Field(
+        default=None, description="Source Medallion layer (bronze, silver)"
+    )
+    transformations: list[str] = Field(
+        default_factory=list, description="Transformation steps applied"
+    )
+    filters_applied: bool | None = Field(
+        default=None, description="Whether filters were applied"
+    )
+    business_domain: str | None = Field(
+        default=None, description="Business domain classification"
+    )
+    use_cases: list[str] = Field(default_factory=list, description="Intended use cases")
+
+
+class SinkQualityExpectationsConfig(BaseModel):
+    """Quality expectations configuration."""
+
+    completeness: float | None = Field(
+        default=None, ge=0.0, le=1.0, description="Expected completeness (0-1)"
+    )
+    accuracy: float | None = Field(
+        default=None, ge=0.0, le=1.0, description="Expected accuracy (0-1)"
+    )
+
+
+class SinkMetadataConfig(BaseModel):
+    """Governance metadata configuration for sink layers.
+
+    Captures data stewardship and compliance information from pipeline YAML.
+    This is written to the _metadata.yaml sidecar file alongside execution metadata.
+
+    Example YAML:
+        sink:
+          bronze:
+            save_metadata: true
+            metadata:
+              owner: "data-team"
+              steward: "chembl-owner"
+              description: "Raw ChEMBL activity data"
+              tags: ["chembl", "activity", "raw"]
+              retention_days: 90
+              sla_freshness_hours: 24
+              lineage:
+                source_system: "chembl"
+                extraction_method: "api"
+    """
+
+    owner: str | None = Field(default=None, description="Data owner team/individual")
+    steward: str | None = Field(default=None, description="Data steward")
+    description: str | None = Field(
+        default=None, description="Human-readable data description"
+    )
+    tags: list[str] = Field(
+        default_factory=list, description="Classification tags for discovery"
+    )
+    retention_days: int | None = Field(
+        default=None, ge=1, description="Data retention period in days"
+    )
+    sla_freshness_hours: int | None = Field(
+        default=None, ge=1, description="SLA for data freshness in hours"
+    )
+    lineage: SinkLineageConfig = Field(
+        default_factory=SinkLineageConfig,
+        description="Static lineage configuration",
+    )
+    quality_expectations: SinkQualityExpectationsConfig = Field(
+        default_factory=SinkQualityExpectationsConfig,
+        description="Target quality metrics",
+    )
+    classification: str | None = Field(
+        default=None, description="Data classification (public, internal, restricted)"
+    )
+
+    def to_domain(self) -> GovernanceMetadata:
+        """Convert to domain GovernanceMetadata model.
+
+        Returns:
+            GovernanceMetadata: Domain model for sidecar file.
+        """
+        from bioetl.domain.models.metadata import (
+            GovernanceLineageConfig,
+            GovernanceMetadata,
+            QualityExpectations,
+        )
+
+        return GovernanceMetadata(
+            owner=self.owner,
+            steward=self.steward,
+            description=self.description,
+            tags=self.tags,
+            retention_days=self.retention_days,
+            sla_freshness_hours=self.sla_freshness_hours,
+            lineage=GovernanceLineageConfig(
+                source_system=self.lineage.source_system,
+                source_version=self.lineage.source_version,
+                extraction_method=self.lineage.extraction_method,
+                source_layer=self.lineage.source_layer,
+                transformations=self.lineage.transformations,
+                filters_applied=self.lineage.filters_applied,
+                business_domain=self.lineage.business_domain,
+                use_cases=self.lineage.use_cases,
+            ),
+            quality_expectations=QualityExpectations(
+                completeness=self.quality_expectations.completeness,
+                accuracy=self.quality_expectations.accuracy,
+            ),
+            classification=self.classification,
+        )
+
+
 class SinkLayerConfig(BaseModel):
     """Configuration for a specific data layer (Bronze, Silver, Gold)."""
 
@@ -556,6 +683,12 @@ class SinkLayerConfig(BaseModel):
         default=False,
         description="If True, Delta data written directly to path without table_name subdirectory. "
         "CSV, metadata, and DQ reports use {table_name}_* naming pattern.",
+    )
+    # Governance metadata configuration
+    metadata: SinkMetadataConfig | None = Field(
+        default=None,
+        description="Governance metadata configuration for sidecar files. "
+        "Includes owner, steward, tags, retention, SLA, and lineage info.",
     )
 
 

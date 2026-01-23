@@ -1,0 +1,343 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$version": "1.0.0",
+  "title": "ChEMBL Activity Gold Contract",
+  "description": "Gold layer data contract for ChEMBL Activity Gold Contract. Auto-generated from Pandera schema ChEMBLActivityGoldSchema.",
+  "type": "object",
+  "properties": {
+    "entity_id": {
+      "type": "string"
+    },
+    "content_hash": {
+      "type": "string"
+    },
+    "activity_id": {
+      "type": "string"
+    },
+    "molecule_chembl_id": {
+      "type": "string"
+    },
+    "target_chembl_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "assay_chembl_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "document_chembl_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "record_id": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "src_id": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "canonical_smiles": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "molecule_pref_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "parent_molecule_chembl_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "target_pref_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "target_organism": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "target_taxonomy_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "assay_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "assay_description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "assay_variant_accession": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "assay_variant_mutation": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bao_endpoint": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bao_format": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bao_label": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "units": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "relation": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "upper_value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "text_value": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "standard_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "standard_value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "standard_units": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "standard_relation": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "standard_upper_value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "standard_text_value": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "standard_flag": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "pchembl_value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "ligand_efficiency_bei": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "ligand_efficiency_le": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "ligand_efficiency_lle": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "ligand_efficiency_sei": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "qudt_units": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "uo_units": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "document_journal": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "document_year": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "activity_comment": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "data_validity_comment": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "data_validity_description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "potential_duplicate": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "action_type_action_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "action_type_description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "action_type_parent_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "activity_properties": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "toid": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "_run_id": {
+      "type": "string"
+    },
+    "_run_type": {
+      "type": "string"
+    },
+    "_source_batch_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "_ingestion_ts": {
+      "type": "string"
+    },
+    "_index": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "_index",
+    "_ingestion_ts",
+    "_run_id",
+    "_run_type",
+    "activity_id",
+    "content_hash",
+    "entity_id",
+    "molecule_chembl_id"
+  ]
+}

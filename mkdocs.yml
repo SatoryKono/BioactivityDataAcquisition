@@ -102,6 +102,7 @@ nav:
                     -   Application:
                             -   Overview: 04-reference/api/application.md
                             -   Core: 04-reference/api/application/core.md
+                            -   Services: 04-reference/api/application/services.md
                             -   Transformers: 04-reference/api/application/transformers.md
                             -   Pipelines: 04-reference/api/application/pipelines.md
                     -   Infrastructure:
