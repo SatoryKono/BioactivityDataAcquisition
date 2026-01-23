@@ -400,11 +400,11 @@ class TestTransformerClassConsistency:
 
         Note: Some pipelines use specialized providers that don't follow
         the standard {provider}_{entity} naming convention, e.g.,
-        'uniprot_idmapping' uses provider 'uniprot_idmapping' (not 'uniprot').
+        'uniprot_idmapping' uses provider 'uniprot' (not 'uniprot_idmapping').
         """
         # Pipelines with specialized providers that don't follow naming convention
         specialized_providers = {
-            "uniprot_idmapping": "uniprot_idmapping",
+            "uniprot_idmapping": "uniprot",
         }
 
         for config in PIPELINE_CONFIGS:
