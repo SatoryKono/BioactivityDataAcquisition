@@ -183,31 +183,37 @@ class SilverWriter(BaseDeltaWriter):
         """Prepare Arrow table from records with schema filtering and sorting."""
         from bioetl.domain.schemas.column_order import canonical_column_order
 
-        schema_fields = set(schema.names)
         string_fields = {
             field.name
             for field in schema
             if pa.types.is_string(field.type) or pa.types.is_large_string(field.type)
         }
 
-        filtered_records = [
-            {
-                k: (
+        # Optimized preparation: iterate only string fields for serialization checks
+        # and avoid full dictionary copy unless modifications are needed.
+        # Note: pa.Table.from_pylist handles schema filtering automatically (ignoring extra keys).
+        processed_records = []
+        for rec in records:
+            modifications = {}
+            for k in string_fields:
+                v = rec.get(k)
+                if v is not None and isinstance(v, (dict, list)):
                     # Uses OPT_SORT_KEYS for deterministic serialization (§2.8.1).
                     # Complex objects in Gold layer are flattened; Silver preserves
                     # JSON for forensic purposes.
-                    orjson.dumps(v, option=orjson.OPT_SORT_KEYS).decode("utf-8")
-                    if v is not None
-                    and k in string_fields
-                    and isinstance(v, (dict, list))
-                    else v
-                )
-                for k, v in rec.items()
-                if k in schema_fields
-            }
-            for rec in records
-        ]
-        arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
+                    modifications[k] = orjson.dumps(
+                        v, option=orjson.OPT_SORT_KEYS
+                    ).decode("utf-8")
+
+            if modifications:
+                # Only copy if serialization was performed
+                new_rec = rec.copy()
+                new_rec.update(modifications)
+                processed_records.append(new_rec)
+            else:
+                processed_records.append(rec)
+
+        arrow_data = pa.Table.from_pylist(processed_records, schema=schema)
 
         # Enforce canonical column order (ADR-014, RULES.md §2.4)
         ordered_columns = canonical_column_order(list(arrow_data.column_names))
@@ -283,6 +289,13 @@ class SilverWriter(BaseDeltaWriter):
         """Deduplicate records based on primary keys to prevent duplicates in batch."""
         if not primary_keys or not records:
             return records
+
+        # Optimization for common case: single primary key
+        if len(primary_keys) == 1:
+            pk = primary_keys[0]
+            # Use dict comprehension which is faster than tuple generation
+            return list({r.get(pk): r for r in records}.values())
+
         unique_records: dict[tuple[Any, ...], dict[str, Any]] = {}
         for record in records:
             key = tuple(record.get(pk) for pk in primary_keys)
