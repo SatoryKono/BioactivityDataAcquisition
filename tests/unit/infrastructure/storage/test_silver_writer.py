@@ -45,6 +45,7 @@ def mock_metadata_coordinator():
     from datetime import UTC, datetime
 
     from bioetl.domain.models.metadata import (
+        BaseOutputMetadata,
         DeltaMetrics,
         DQSummary,
         EnvironmentMetadata,
@@ -53,7 +54,7 @@ def mock_metadata_coordinator():
         RuntimeMetadata,
         RunTypeEnum,
         SilverMetadata,
-        SilverOutputMetadata,
+        SilverOutputExt,
     )
     from bioetl.domain.ports import SilverMetadataInput
 
@@ -101,7 +102,10 @@ def mock_metadata_coordinator():
                 total_records=len(input_data.records),
                 valid_records=len(input_data.records),
             ),
-            output=SilverOutputMetadata(record_count=len(input_data.records)),
+            output=BaseOutputMetadata(record_count=len(input_data.records)),
+            output_ext=SilverOutputExt(
+                delta_version_after=input_data.version_after,
+            ),
             environment=EnvironmentMetadata(
                 hostname="test-host",
                 python_version="3.11.0",

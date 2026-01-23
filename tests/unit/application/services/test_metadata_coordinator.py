@@ -169,7 +169,7 @@ class TestBronzeMetadata:
 
         assert isinstance(metadata, BronzeMetadata)
         assert metadata.layer == LayerType.BRONZE
-        assert metadata.version == "1.0"
+        assert metadata.version == "1.1"  # ADR-029 version bump
 
     def test_bronze_runtime_metadata(self, coordinator: MetadataCoordinator) -> None:
         """Test Bronze runtime metadata contains correct values."""
@@ -211,23 +211,31 @@ class TestBronzeMetadata:
         assert metadata.pipeline.entity == "activity"
 
     def test_bronze_output_metadata(self, coordinator: MetadataCoordinator) -> None:
-        """Test Bronze output metadata contains file info."""
+        """Test Bronze output metadata contains file info (ADR-029 unified structure)."""
+        started_at = datetime.now(UTC)
+        completed_at = started_at
+
         input_data = BronzeMetadataInput(
             batch_id=BatchID(uuid4()),
             record_count=500,
             compressed_size=25000,
             output_path="v1/chembl/activity/2024-01-15/batch_abc.jsonl.zst",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=started_at,
+            completed_at=completed_at,
         )
 
         metadata = coordinator.create_bronze_metadata(input_data)
 
-        assert metadata.output.total_records == 500
+        # Unified output (ADR-029)
+        assert metadata.output.record_count == 500
         assert metadata.output.total_bytes == 25000
-        assert len(metadata.output.files) == 1
-        assert metadata.output.files[0].path == input_data.output_path
-        assert metadata.output.files[0].record_count == 500
+        assert metadata.output.write_started_at == started_at
+        assert metadata.output.write_completed_at == completed_at
+
+        # Bronze-specific extension
+        assert len(metadata.output_ext.files) == 1
+        assert metadata.output_ext.files[0].path == input_data.output_path
+        assert metadata.output_ext.files[0].record_count == 500
 
     def test_bronze_metadata_includes_query_string_from_input(
         self, coordinator: MetadataCoordinator
@@ -379,7 +387,7 @@ class TestSilverMetadata:
 
         assert isinstance(metadata, SilverMetadata)
         assert metadata.layer == LayerType.SILVER
-        assert metadata.version == "1.0"
+        assert metadata.version == "1.1"  # ADR-029 version bump
 
     def test_silver_with_empty_records_raises(
         self, coordinator: MetadataCoordinator
@@ -497,7 +505,7 @@ class TestGoldMetadata:
 
         assert isinstance(metadata, GoldMetadata)
         assert metadata.layer == LayerType.GOLD
-        assert metadata.version == "1.0"
+        assert metadata.version == "1.1"  # ADR-029 version bump
 
     def test_gold_with_empty_records_raises(
         self, coordinator: MetadataCoordinator

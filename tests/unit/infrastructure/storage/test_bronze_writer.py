@@ -2141,7 +2141,7 @@ class TestBronzeWriterMetadataSidecar:
         assert metadata.runtime.run_id == str(run_id)
         assert metadata.pipeline.provider == "chembl"
         assert metadata.pipeline.entity == "activity"
-        assert metadata.output.total_records == len(sample_records)
+        assert metadata.output.record_count == len(sample_records)
 
     @pytest.mark.asyncio
     async def test_metadata_writer_not_called_when_save_metadata_disabled(
@@ -2262,12 +2262,16 @@ class TestBronzeWriterMetadataSidecar:
         assert metadata.pipeline.provider == "chembl"
         assert metadata.pipeline.entity == "activity"
 
-        # Verify output metadata
-        assert metadata.output.total_records == 100
+        # Verify output metadata (ADR-029 unified structure)
+        assert metadata.output.record_count == 100
         assert metadata.output.total_bytes == 5000
-        assert len(metadata.output.files) == 1
-        assert metadata.output.files[0].record_count == 100
-        assert metadata.output.files[0].size_bytes == 5000
+        assert metadata.output.write_started_at == ingestion_ts
+        assert metadata.output.write_completed_at == ingestion_ts
+
+        # Verify Bronze-specific output extension
+        assert len(metadata.output_ext.files) == 1
+        assert metadata.output_ext.files[0].record_count == 100
+        assert metadata.output_ext.files[0].size_bytes == 5000
 
         # Verify environment metadata exists
         assert metadata.environment.hostname is not None
