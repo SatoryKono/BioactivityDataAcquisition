@@ -223,6 +223,7 @@ class SilverMetadataBuilder:
             SilverMetadata object ready for serialization.
         """
         from bioetl.domain.models.metadata import (
+            BaseOutputMetadata,
             DeltaMetrics,
             DQSummary,
             EnvironmentMetadata,
@@ -231,7 +232,7 @@ class SilverMetadataBuilder:
             RuntimeMetadata,
             RunTypeEnum,
             SilverMetadata,
-            SilverOutputMetadata,
+            SilverOutputExt,
         )
 
         provider_name, entity_name = _parse_table_name(table_name)
@@ -277,8 +278,15 @@ class SilverMetadataBuilder:
             error_rate=0.0,
         )
 
-        output = SilverOutputMetadata(
+        # Use unified output structure (ADR-029)
+        output = BaseOutputMetadata(
             record_count=len(records),
+            write_started_at=now,
+            write_completed_at=now,
+        )
+
+        output_ext = SilverOutputExt(
+            delta_version_after=version_after,
         )
 
         environment = EnvironmentMetadata(
@@ -294,6 +302,7 @@ class SilverMetadataBuilder:
             delta=delta,
             dq_summary=dq_summary,
             output=output,
+            output_ext=output_ext,
             environment=environment,
         )
 
@@ -349,10 +358,11 @@ class GoldMetadataBuilder:
         """
         from bioetl.domain.medallion import GoldWriteMode
         from bioetl.domain.models.metadata import (
+            BaseOutputMetadata,
             DQSummary,
             EnvironmentMetadata,
             GoldMetadata,
-            GoldOutputMetadata,
+            GoldOutputExt,
             LineageMetadata,
             PipelineMetadata,
             RuntimeMetadata,
@@ -385,9 +395,14 @@ class GoldMetadataBuilder:
             valid_records=len(records),
         )
 
-        output = GoldOutputMetadata(
+        # Use unified output structure (ADR-029)
+        output = BaseOutputMetadata(
             record_count=len(records),
+            write_started_at=now,
+            write_completed_at=now,
         )
+
+        output_ext = GoldOutputExt()
 
         scd = None
         if mode == GoldWriteMode.SCD2 and scd_config:
@@ -416,6 +431,7 @@ class GoldMetadataBuilder:
             schema_info=schema_info,
             dq_summary=dq_summary,
             output=output,
+            output_ext=output_ext,
             scd=scd,
             environment=environment,
         )
@@ -445,10 +461,11 @@ class GoldMetadataBuilder:
             GoldMetadata object ready for serialization.
         """
         from bioetl.domain.models.metadata import (
+            BaseOutputMetadata,
             DQSummary,
             EnvironmentMetadata,
             GoldMetadata,
-            GoldOutputMetadata,
+            GoldOutputExt,
             LineageMetadata,
             PipelineMetadata,
             RuntimeMetadata,
@@ -489,9 +506,14 @@ class GoldMetadataBuilder:
             error_rate=0.0,
         )
 
-        output = GoldOutputMetadata(
+        # Use unified output structure (ADR-029)
+        output = BaseOutputMetadata(
             record_count=len(records),
+            write_started_at=now,
+            write_completed_at=now,
         )
+
+        output_ext = GoldOutputExt()
 
         environment = EnvironmentMetadata(
             hostname=hostname(),
@@ -510,6 +532,7 @@ class GoldMetadataBuilder:
             schema_info=schema_info,
             dq_summary=dq_summary,
             output=output,
+            output_ext=output_ext,
             environment=environment,
         )
 
