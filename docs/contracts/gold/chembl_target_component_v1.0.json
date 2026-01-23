@@ -1,48 +1,72 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "UniProt Protein Gold Contract",
-  "description": "Gold layer data contract for UniProt Protein Gold Contract. Auto-generated from Pandera schema UniProtProteinGoldSchema.",
+  "title": "ChEMBL Target Component Gold Contract",
+  "description": "Gold layer data contract for ChEMBL Target Component Gold Contract. Auto-generated from Pandera schema ChEMBLTargetComponentGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
       "type": "string"
     },
-    "accession": {
-      "type": "string"
-    },
-    "entry_name": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "protein_name": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "gene_names": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "organism_id": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "sequence_length": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
     "content_hash": {
       "type": "string"
+    },
+    "component_id": {
+      "type": "number"
+    },
+    "accession": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "component_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "organism": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "taxonomy_id": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "target_component_synonyms": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "target_component_xrefs": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "protein_classifications": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "protein_classification_ids": {
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "_run_id": {
       "type": "string"
@@ -68,7 +92,7 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "accession",
+    "component_id",
     "content_hash",
     "entity_id"
   ]
