@@ -621,11 +621,13 @@ class TestDetectAndResolveConflicts:
         assert "pub_date.A" in enricher_out1.columns  # First enricher gets A
 
         # Simulate merged state after first join
-        merged = pl.DataFrame({
-            "doi": ["10.1/a"],
-            "pub_date": ["2024-01-01"],
-            "pub_date.A": ["2024-02-01"],
-        })
+        merged = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "pub_date": ["2024-01-01"],
+                "pub_date.A": ["2024-02-01"],
+            }
+        )
 
         # Second enricher conflict - should get B suffix
         enricher2 = pl.DataFrame({"doi": ["10.1/a"], "pub_date": ["2024-03-01"]})
@@ -775,6 +777,117 @@ class TestApplyJoinsSmartColumnRenaming:
         # Seed column unchanged, enricher gets incremental suffix
         assert "crossref.title" in result.columns
         assert "crossref.title.A" in result.columns
+
+    @pytest.mark.asyncio
+    async def test_secondary_join_keys_are_prefixed(self, merge_service):
+        """Test secondary join keys (not used in actual join) are prefixed.
+
+        When join_keys has multiple values, only the first (primary) key is used
+        for the actual join. Secondary keys should be prefixed to avoid Polars
+        adding its own suffix.
+        """
+        import polars as pl
+
+        # Seed has both doi and title
+        seed_df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "title": ["Seed Title"],
+                "abstract": ["Seed Abstract"],
+            }
+        )
+        # Enricher also has doi and title - title is secondary join key
+        enricher_df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "title": ["CrossRef Title"],
+                "citation_count": [42],
+            }
+        )
+
+        # title is listed as secondary join key but NOT used in actual join
+        enricher_config = EnricherConfig(
+            pipeline="crossref_publication",
+            join_keys=("doi", "title"),  # doi is primary, title is secondary
+            required=False,
+        )
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"crossref_publication": enricher_df},
+            enrichers=[enricher_config],
+            seed_pipeline="chembl_publication",
+        )
+
+        # Primary key (doi) is used for join - single column in result
+        assert "doi" in result.columns
+        assert result.columns.count("doi") == 1
+
+        # Secondary key (title) should be prefixed, NOT get Polars suffix
+        assert "title" in result.columns  # Seed title
+        assert "crossref.title" in result.columns  # Enricher title with prefix
+        assert "title_crossref_publication" not in result.columns  # NO Polars suffix
+
+        # Regular columns should also be prefixed
+        assert "crossref.citation_count" in result.columns
+
+    @pytest.mark.asyncio
+    async def test_multiple_enrichers_secondary_keys_prefixed(self, merge_service):
+        """Test multiple enrichers with secondary join keys all get prefixed."""
+        import polars as pl
+
+        seed_df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "title": ["Seed Title"],
+            }
+        )
+
+        crossref_df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "title": ["CrossRef Title"],
+            }
+        )
+
+        openalex_df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "title": ["OpenAlex Title"],
+            }
+        )
+
+        enrichers = [
+            EnricherConfig(
+                pipeline="crossref_publication",
+                join_keys=("doi", "title"),
+                required=False,
+            ),
+            EnricherConfig(
+                pipeline="openalex_publication",
+                join_keys=("doi", "title"),
+                required=False,
+            ),
+        ]
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={
+                "crossref_publication": crossref_df,
+                "openalex_publication": openalex_df,
+            },
+            enrichers=enrichers,
+            seed_pipeline="chembl_publication",
+        )
+
+        # Seed title unchanged
+        assert "title" in result.columns
+        # Each enricher's title is prefixed with provider name
+        assert "crossref.title" in result.columns
+        assert "openalex.title" in result.columns
+        # NO Polars suffixes
+        assert "title_crossref_publication" not in result.columns
+        assert "title_openalex_publication" not in result.columns
 
     @pytest.mark.asyncio
     async def test_legacy_prefix_when_no_seed_pipeline(self, merge_service):

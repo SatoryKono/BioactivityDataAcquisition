@@ -746,8 +746,12 @@ class MergeService:
                 continue
 
             enricher_df = enricher_dfs[enricher.pipeline]
-            join_keys = set(enricher.join_keys)
-            join_keys_list = list(join_keys)
+            join_keys_list = list(enricher.join_keys)
+
+            # Primary key is the FIRST join key - used for actual join
+            # Secondary keys are fallbacks but NOT used in join operation
+            primary_key = join_keys_list[0]
+            primary_key_set = {primary_key}
 
             # Deduplicate enricher before join to prevent fan-out
             enricher_df = self._deduplicator.deduplicate(
@@ -761,8 +765,10 @@ class MergeService:
             merged = self._normalize_join_key_columns(merged, join_keys_list)
             enricher_df = self._normalize_join_key_columns(enricher_df, join_keys_list)
 
-            # Find non-join columns in enricher
-            non_join_cols = set(enricher_df.columns) - join_keys
+            # Find columns to prefix: all columns EXCEPT the primary join key
+            # Secondary join keys (title, doi when not primary) SHOULD be prefixed
+            # to avoid Polars adding its own suffix during join
+            non_join_cols = set(enricher_df.columns) - primary_key_set
 
             # Determine prefix strategy
             if seed_provider is not None and seed_entity is not None:
@@ -801,11 +807,12 @@ class MergeService:
                     }
 
                     # Apply prefix to non-join columns
+                    # Only exclude primary key, secondary keys get prefixed
                     enricher_df = self._apply_column_prefix(
                         enricher_df,
                         non_join_cols - already_prefixed,
                         prefix,
-                        join_keys,
+                        primary_key_set,
                     )
 
                 except ValueError:
@@ -815,22 +822,22 @@ class MergeService:
                         enricher=enricher.pipeline,
                     )
                     enricher_df = self._apply_legacy_prefix(
-                        enricher_df, enricher.pipeline, non_join_cols, join_keys
+                        enricher_df, enricher.pipeline, non_join_cols, primary_key_set
                     )
             else:
                 # No seed pipeline provided - use legacy prefix
                 enricher_df = self._apply_legacy_prefix(
-                    enricher_df, enricher.pipeline, non_join_cols, join_keys
+                    enricher_df, enricher.pipeline, non_join_cols, primary_key_set
                 )
 
             # Detect and resolve remaining conflicts
+            # Only exclude primary key - secondary keys should be checked for conflicts
             merged, enricher_df = self._detect_and_resolve_conflicts(
-                merged, enricher_df, join_keys
+                merged, enricher_df, primary_key_set
             )
 
             # Apply join based on strategy
             how = self._get_polars_join_type()
-            primary_key = join_keys_list[0]
 
             if primary_key in merged.columns and primary_key in enricher_df.columns:
                 merged = merged.join(
