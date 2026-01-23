@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "PubMed Publication Gold Contract",
-  "description": "Gold layer data contract for PubMed Publication Gold Contract. Auto-generated from Pandera schema PubMedPublicationGoldSchema.",
+  "title": "ChEMBL Activity Gold Contract",
+  "description": "Gold layer data contract for ChEMBL Activity Gold Contract. Auto-generated from Pandera schema ChEMBLActivityGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
@@ -11,315 +11,305 @@
     "content_hash": {
       "type": "string"
     },
-    "pmid": {
+    "activity_id": {
       "type": "string"
     },
-    "doi": {
+    "molecule_chembl_id": {
+      "type": "string"
+    },
+    "target_chembl_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "pmc_id": {
+    "assay_chembl_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "title": {
+    "document_chembl_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "abstract": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "abstract_structured": {
-      "type": [
-        "boolean",
-        "null"
-      ]
-    },
-    "vernacular_title": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "journal": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "journal_abbrev": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "journal_title": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "journal_iso_abbrev": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "journal_issn_type": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "issn": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "nlm_unique_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "volume": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "issue": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "pages": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "medline_pgn": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "first_page": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "last_page": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "authors": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "pub_date": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "pub_month": {
+    "record_id": {
       "type": [
         "number",
         "null"
       ]
     },
-    "pub_day": {
+    "src_id": {
       "type": [
         "number",
         "null"
       ]
     },
-    "publication_date": {
+    "canonical_smiles": {
       "type": [
         "string",
         "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      ]
     },
-    "year": {
+    "molecule_pref_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "parent_molecule_chembl_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "target_pref_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "target_organism": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "target_taxonomy_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "assay_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "assay_description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "assay_variant_accession": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "assay_variant_mutation": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bao_endpoint": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bao_format": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bao_label": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "value": {
       "type": [
         "number",
         "null"
       ]
     },
-    "publication_year": {
+    "units": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "relation": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "upper_value": {
       "type": [
         "number",
         "null"
       ]
     },
-    "accepted_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "received_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "revised_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "epub_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "date_completed": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "date_revised": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "publication_status": {
+    "text_value": {
       "type": [
         "string",
         "null"
       ]
     },
-    "publication_type_list": {
+    "standard_type": {
       "type": [
         "string",
         "null"
       ]
     },
-    "publication_types": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "keywords": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "mesh_terms": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "citation_subset": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "language": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "country": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "author_count": {
+    "standard_value": {
       "type": [
         "number",
         "null"
       ]
     },
-    "mesh_heading_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "keyword_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "grant_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "reference_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "chemical_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "source": {
+    "standard_units": {
       "type": [
         "string",
         "null"
       ]
     },
-    "_lookup_method": {
+    "standard_relation": {
       "type": [
         "string",
         "null"
       ]
     },
-    "_original_id": {
+    "standard_upper_value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "standard_text_value": {
       "type": [
         "string",
         "null"
       ]
     },
-    "_dq_warn": {
-      "type": "boolean"
+    "standard_flag": {
+      "type": [
+        "number",
+        "null"
+      ]
     },
-    "_dq_error": {
-      "type": "boolean"
+    "pchembl_value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "ligand_efficiency_bei": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "ligand_efficiency_le": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "ligand_efficiency_lle": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "ligand_efficiency_sei": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "qudt_units": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "uo_units": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "document_journal": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "document_year": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "activity_comment": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "data_validity_comment": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "data_validity_description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "potential_duplicate": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "action_type_action_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "action_type_description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "action_type_parent_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "activity_properties": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "toid": {
+      "type": [
+        "number",
+        "null"
+      ]
     },
     "_run_id": {
       "type": "string"
@@ -341,14 +331,13 @@
     }
   },
   "required": [
-    "_dq_error",
-    "_dq_warn",
     "_index",
     "_ingestion_ts",
     "_run_id",
     "_run_type",
+    "activity_id",
     "content_hash",
     "entity_id",
-    "pmid"
+    "molecule_chembl_id"
   ]
 }
