@@ -105,6 +105,69 @@ Writer for Gold layer (validated, analytics-ready data).
 - Flattened structure (no JSON blobs)
 - Query-optimized partitioning
 
+## Delta Reader
+
+### DeltaReader
+
+Read-only access to Delta Lake tables for querying Silver/Gold data.
+
+::: bioetl.infrastructure.storage.delta_reader.DeltaReader
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - read_table
+            - query
+            - get_table_info
+            - list_tables
+
+## Retention Management
+
+### RetentionManager
+
+Manages VACUUM, OPTIMIZE, and time travel operations for Delta tables.
+
+::: bioetl.infrastructure.storage.retention_manager.RetentionManager
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - vacuum
+            - optimize
+            - get_history
+            - restore_to_version
+
+## Metadata Writers
+
+### MetadataWriter
+
+Writes metadata for Bronze/Silver/Gold layers.
+
+::: bioetl.infrastructure.storage.metadata_writer.MetadataWriter
+    options:
+        show_root_heading: true
+        show_source: false
+
+### SilverMetadataBuilder
+
+Builder for Silver layer metadata.
+
+::: bioetl.infrastructure.storage.metadata_builder.SilverMetadataBuilder
+    options:
+        show_root_heading: true
+        show_source: false
+
+### GoldMetadataBuilder
+
+Builder for Gold layer metadata.
+
+::: bioetl.infrastructure.storage.metadata_builder.GoldMetadataBuilder
+    options:
+        show_root_heading: true
+        show_source: false
+
 ## Write Modes
 
 | Mode | Description | Use Case |
