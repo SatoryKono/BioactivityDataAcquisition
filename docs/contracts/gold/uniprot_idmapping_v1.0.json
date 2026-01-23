@@ -1,60 +1,59 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$version": "1.0.0",
-    "title": "UniProt ID Mapping (Isoform) Data Contract",
-    "description": "Defines the schema for the gold 'UniProtIdMapping' entity, aligned with RULES.md §7.1. This contract is for data consumers. Alternative protein isoforms from alternative splicing.",
-    "type": "object",
-    "properties": {
-        "accession": {
-            "type": "string",
-            "description": "FK to parent protein accession."
-        },
-        "isoform_id": {
-            "type": "string",
-            "description": "Isoform accession (PK, e.g., P12345-2)."
-        },
-        "isoform_name": {
-            "type": ["string", "null"],
-            "description": "Isoform name."
-        },
-        "sequence_status": {
-            "type": ["string", "null"],
-            "description": "Sequence display status.",
-            "enum": ["displayed", "described", "not described", "external", null]
-        },
-        "sequence": {
-            "type": ["string", "null"],
-            "description": "Isoform amino acid sequence.",
-            "pattern": "^[ACDEFGHIKLMNPQRSTVWY]+$"
-        },
-        "sequence_length": {
-            "type": ["integer", "null"],
-            "description": "Isoform sequence length.",
-            "minimum": 1
-        },
-        "note": {
-            "type": ["string", "null"],
-            "description": "Isoform description/note."
-        },
-        "_source_batch_id": {
-            "type": "string",
-            "description": "Internal ID linking to the source Bronze batch for lineage.",
-            "format": "uuid"
-        },
-        "_content_hash": {
-            "type": "string",
-            "description": "SHA-256 hash of the record's content for versioning and deduplication."
-        },
-        "_ingestion_ts": {
-            "type": "string",
-            "format": "date-time",
-            "description": "UTC timestamp of when the record was ingested."
-        }
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$version": "1.0.0",
+  "title": "UniProt ID Mapping Gold Contract",
+  "description": "Gold layer data contract for UniProt ID Mapping Gold Contract. Auto-generated from Pandera schema UniProtIDMappingGoldSchema.",
+  "type": "object",
+  "properties": {
+    "entity_id": {
+      "type": "string"
     },
-    "required": [
-        "accession",
-        "isoform_id",
-        "_content_hash",
-        "_ingestion_ts"
-    ]
+    "content_hash": {
+      "type": "string"
+    },
+    "target_chembl_id": {
+      "type": "string"
+    },
+    "uniprot_accession": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "mapping_status": {
+      "type": "string"
+    },
+    "_dq_warn": {
+      "type": "boolean"
+    },
+    "_run_id": {
+      "type": "string"
+    },
+    "_run_type": {
+      "type": "string"
+    },
+    "_source_batch_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "_ingestion_ts": {
+      "type": "string"
+    },
+    "_index": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "_dq_warn",
+    "_index",
+    "_ingestion_ts",
+    "_run_id",
+    "_run_type",
+    "content_hash",
+    "entity_id",
+    "mapping_status",
+    "target_chembl_id"
+  ]
 }
