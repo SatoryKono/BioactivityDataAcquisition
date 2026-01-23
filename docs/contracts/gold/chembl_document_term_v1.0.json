@@ -1,48 +1,36 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "UniProt Protein Gold Contract",
-  "description": "Gold layer data contract for UniProt Protein Gold Contract. Auto-generated from Pandera schema UniProtProteinGoldSchema.",
+  "title": "ChEMBL Document Term Gold Contract",
+  "description": "Gold layer data contract for ChEMBL Document Term Gold Contract. Auto-generated from Pandera schema ChEMBLDocumentTermGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
       "type": "string"
     },
-    "accession": {
-      "type": "string"
-    },
-    "entry_name": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "protein_name": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "gene_names": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "organism_id": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "sequence_length": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
     "content_hash": {
       "type": "string"
+    },
+    "document_chembl_id": {
+      "type": "string"
+    },
+    "term": {
+      "type": "string"
+    },
+    "term_type": {
+      "type": "string"
+    },
+    "mesh_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "qualifier": {
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "_run_id": {
       "type": "string"
@@ -68,8 +56,10 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "accession",
     "content_hash",
-    "entity_id"
+    "document_chembl_id",
+    "entity_id",
+    "term",
+    "term_type"
   ]
 }

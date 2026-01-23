@@ -62,8 +62,8 @@ async def test_chembl_publication_term_full_cycle(e2e_data_dir: Path):
     runner = bootstrap_pipeline(ctx)
     await runner.run()
 
-    # Assert - Bronze layer (uses document entity from parent)
-    bronze_files = assert_bronze_files_exist(e2e_data_dir, "chembl", "document_term")
+    # Assert - Bronze layer (uses publication_term path per ADR-024 naming)
+    bronze_files = assert_bronze_files_exist(e2e_data_dir, "chembl", "publication_term")
     assert len(bronze_files) >= 1
 
     # Assert - Silver layer

@@ -1,4 +1,4 @@
-# configs/filter/entities/pubmed/publications.yaml
+# configs/filter/entities/pubmed/publication.yaml
 # =============================================================================
 # PubMed Publication Filter Configuration
 # =============================================================================
@@ -7,7 +7,7 @@
 
 version: "1.0.0"
 provider: pubmed
-entity: publications
+entity: publication
 
 # -----------------------------------------------------------------------------
 # Input Filter

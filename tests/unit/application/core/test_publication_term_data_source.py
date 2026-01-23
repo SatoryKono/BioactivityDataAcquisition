@@ -117,8 +117,8 @@ class TestPublicationTermDataSourceInit:
 
     def test_entity_type_constants(self):
         """Test entity type constants are set correctly."""
-        assert PublicationTermDataSource.SOURCE_ENTITY_TYPE == "document"
-        assert PublicationTermDataSource.TARGET_ENTITY_TYPE == "document_term"
+        assert PublicationTermDataSource.SOURCE_ENTITY_TYPE == "publication"
+        assert PublicationTermDataSource.TARGET_ENTITY_TYPE == "publication_term"
 
 
 @pytest.mark.unit
@@ -161,16 +161,16 @@ class TestPublicationTermDataSourceFetch:
     """Tests for fetch method."""
 
     @pytest.mark.asyncio
-    async def test_fetch_document_term_extracts_terms(
+    async def test_fetch_publication_term_extracts_terms(
         self, mock_data_source_single_document
     ):
-        """Test fetch('document_term') extracts terms from documents."""
+        """Test fetch('publication_term') extracts terms from documents."""
         wrapper = PublicationTermDataSource(
             data_source=mock_data_source_single_document
         )
 
         terms = []
-        async for term in wrapper.fetch("document_term"):
+        async for term in wrapper.fetch("publication_term"):
             terms.append(term)
 
         # Expected: 2 MESH_HEADING + 1 MESH_QUALIFIER + 3 KEYWORD = 6 terms
@@ -183,16 +183,16 @@ class TestPublicationTermDataSourceFetch:
         assert term_types.count("KEYWORD") == 3
 
     @pytest.mark.asyncio
-    async def test_fetch_document_term_with_limit(
+    async def test_fetch_publication_term_with_limit(
         self, mock_data_source_single_document
     ):
-        """Test fetch('document_term') respects limit parameter."""
+        """Test fetch('publication_term') respects limit parameter."""
         wrapper = PublicationTermDataSource(
             data_source=mock_data_source_single_document
         )
 
         terms = []
-        async for term in wrapper.fetch("document_term", limit=3):
+        async for term in wrapper.fetch("publication_term", limit=3):
             terms.append(term)
 
         assert len(terms) == 3
@@ -211,14 +211,14 @@ class TestPublicationTermDataSourceFetch:
         assert all("document_chembl_id" in r for r in records)
 
     @pytest.mark.asyncio
-    async def test_fetch_document_term_empty_result(
+    async def test_fetch_publication_term_empty_result(
         self, mock_data_source_no_documents
     ):
-        """Test fetch('document_term') with no documents yields nothing."""
+        """Test fetch('publication_term') with no documents yields nothing."""
         wrapper = PublicationTermDataSource(data_source=mock_data_source_no_documents)
 
         terms = []
-        async for term in wrapper.fetch("document_term"):
+        async for term in wrapper.fetch("publication_term"):
             terms.append(term)
 
         assert len(terms) == 0
@@ -235,7 +235,7 @@ class TestPublicationTermDataSourceTermExtraction:
         wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
-        async for term in wrapper.fetch("document_term"):
+        async for term in wrapper.fetch("publication_term"):
             if term["term_type"] == "MESH_HEADING":
                 terms.append(term)
 
@@ -250,7 +250,7 @@ class TestPublicationTermDataSourceTermExtraction:
         wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
-        async for term in wrapper.fetch("document_term"):
+        async for term in wrapper.fetch("publication_term"):
             if term["term_type"] == "MESH_QUALIFIER":
                 terms.append(term)
 
@@ -264,7 +264,7 @@ class TestPublicationTermDataSourceTermExtraction:
         wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
-        async for term in wrapper.fetch("document_term"):
+        async for term in wrapper.fetch("publication_term"):
             if term["term_type"] == "KEYWORD":
                 terms.append(term)
 
@@ -281,7 +281,7 @@ class TestPublicationTermDataSourceTermExtraction:
         wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
-        async for term in wrapper.fetch("document_term"):
+        async for term in wrapper.fetch("publication_term"):
             terms.append(term)
 
         assert len(terms) == 0
@@ -293,7 +293,7 @@ class TestPublicationTermDataSourceTermExtraction:
         wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
-        async for term in wrapper.fetch("document_term"):
+        async for term in wrapper.fetch("publication_term"):
             terms.append(term)
 
         assert len(terms) == 0
@@ -305,7 +305,7 @@ class TestPublicationTermDataSourceTermExtraction:
         wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
-        async for term in wrapper.fetch("document_term"):
+        async for term in wrapper.fetch("publication_term"):
             terms.append(term)
 
         # Should only get the valid keyword
@@ -324,7 +324,7 @@ class TestPublicationTermDataSourceRecordFormat:
         wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
-        async for term in wrapper.fetch("document_term"):
+        async for term in wrapper.fetch("publication_term"):
             terms.append(term)
 
         for term in terms:
@@ -342,7 +342,7 @@ class TestPublicationTermDataSourceRecordFormat:
         wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
-        async for term in wrapper.fetch("document_term"):
+        async for term in wrapper.fetch("publication_term"):
             terms.append(term)
 
         # All entity_ids should be 16-char hex strings
@@ -357,7 +357,7 @@ class TestPublicationTermDataSourceRecordFormat:
         wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
-        async for term in wrapper.fetch("document_term"):
+        async for term in wrapper.fetch("publication_term"):
             terms.append(term)
 
         entity_ids = [t["entity_id"] for t in terms]
@@ -372,11 +372,11 @@ class TestPublicationTermDataSourceRecordFormat:
         wrapper2 = PublicationTermDataSource(data_source=source2)
 
         terms1 = []
-        async for term in wrapper1.fetch("document_term"):
+        async for term in wrapper1.fetch("publication_term"):
             terms1.append(term)
 
         terms2 = []
-        async for term in wrapper2.fetch("document_term"):
+        async for term in wrapper2.fetch("publication_term"):
             terms2.append(term)
 
         # Same inputs should produce same entity_ids
@@ -391,7 +391,7 @@ class TestPublicationTermDataSourceRecordFormat:
         wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
-        async for term in wrapper.fetch("document_term"):
+        async for term in wrapper.fetch("publication_term"):
             if term["term_type"] == "MESH_HEADING":
                 terms.append(term)
 
@@ -439,7 +439,7 @@ class TestPublicationTermDataSourceEdgeCases:
         wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
-        async for term in wrapper.fetch("document_term"):
+        async for term in wrapper.fetch("publication_term"):
             terms.append(term)
 
         assert len(terms) == 0
@@ -459,7 +459,7 @@ class TestPublicationTermDataSourceEdgeCases:
         wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
-        async for term in wrapper.fetch("document_term"):
+        async for term in wrapper.fetch("publication_term"):
             terms.append(term)
 
         # Only non-empty after stripping
@@ -487,7 +487,7 @@ class TestPublicationTermDataSourceEdgeCases:
         wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
-        async for term in wrapper.fetch("document_term"):
+        async for term in wrapper.fetch("publication_term"):
             terms.append(term)
 
         assert len(terms) == 2
@@ -519,13 +519,13 @@ class TestPublicationTermDataSourceEdgeCases:
 
         terms = []
         async for term in wrapper.fetch(
-            "document_term",
+            "publication_term",
             filter_ids=["CHEMBL1", "CHEMBL2"],
             filter_field="document_chembl_id",
         ):
             terms.append(term)
 
-        # Verify fetch was called with document entity type
-        assert call_args["entity_type"] == "document"
+        # Verify fetch was called with publication entity type (ADR-024 naming)
+        assert call_args["entity_type"] == "publication"
         assert call_args["filter_ids"] == ["CHEMBL1", "CHEMBL2"]
         assert call_args["filter_field"] == "document_chembl_id"

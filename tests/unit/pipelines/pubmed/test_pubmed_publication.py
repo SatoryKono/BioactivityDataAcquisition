@@ -1,4 +1,4 @@
-"""Unit tests for PubMed Publications Pipeline."""
+"""Unit tests for PubMed Publication Pipeline."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
+from bioetl.application.pipelines.pubmed.publication import PubMedPublicationPipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import BronzeRecord, RunType
@@ -38,7 +38,7 @@ def mock_runtime():
 def pipeline(mock_config, mock_runtime, mock_services):
     run_id = uuid4()
     transformer = PubMedPublicationTransformer(provider="pubmed")
-    return PubMedPublicationsPipeline(
+    return PubMedPublicationPipeline(
         mock_config, mock_runtime, mock_services, run_id, transformer=transformer
     )
 
