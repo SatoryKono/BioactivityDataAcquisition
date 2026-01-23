@@ -26,8 +26,8 @@
       "reason": "pipeline_name 'crossref_publication' differs from entity_type 'work' - API endpoint mapping"
     },
     {
-      "file": "pubmed/publications.yaml",
-      "reason": "pipeline_name 'pubmed_publications' differs from entity_type 'publication' - API endpoint mapping"
+      "file": "pubmed/publication.yaml",
+      "reason": "pubmed_publication entity naming unified with entity_type 'publication'"
     }
   ],
   "changes_made": [

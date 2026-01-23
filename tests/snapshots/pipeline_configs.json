@@ -435,7 +435,7 @@
     "transform_version": null,
     "write_mode": "merge"
   },
-  "pubmed_publications": {
+  "pubmed_publication": {
     "batch_size": 100,
     "checkpoint_interval": 1000,
     "dq": {
@@ -471,7 +471,7 @@
     "gold_write_mode": "overwrite",
     "on_schema_mismatch": "evolve",
     "partition_cols": [],
-    "pipeline_name": "pubmed_publications",
+    "pipeline_name": "pubmed_publication",
     "primary_keys": [
       "pmid"
     ],
