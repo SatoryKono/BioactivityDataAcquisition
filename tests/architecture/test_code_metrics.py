@@ -61,8 +61,8 @@ class TestFileSizeLimits:
         "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
         # Domain ports NoOp implementations
         "noop.py": 475,  # 470 LOC - NoOp implementations for Null Object Pattern (+ NoOpMetadataWriter with provider/entity params)
-        # Domain models/metadata.py (models/metadata.py 685 LOC, ports/metadata.py only 104 LOC)
-        "metadata.py": 690,  # 685 LOC - Metadata models with APIRequestDetails + RateLimitInfo for Bronze layer enrichment + extended fields
+        # Domain models/metadata.py (models/metadata.py 877 LOC, ports/metadata.py only 104 LOC)
+        "metadata.py": 880,  # 877 LOC - Metadata models with APIRequestDetails + RateLimitInfo for Bronze layer enrichment + extended fields + unified output metadata (ADR-029)
         # Domain ports (Protocol definitions with comprehensive docstrings)
         "data_normalization.py": 330,  # 321 LOC - DataNormalizationPort with partial date normalization
         "storage.py": 405,  # 400 LOC - StoragePort with read_silver, write_*_merged for composite pipelines + SourceMetadata param + Silver lineage
@@ -84,7 +84,7 @@ class TestFileSizeLimits:
         "silver_analyzer.py": 650,  # 642 LOC - Silver layer analysis with extracted helper methods
         "dq_report_service.py": 565,  # 561 LOC - DQ report service with extracted helpers for CC reduction
         # Composition layer exemptions
-        "metadata_coordinator.py": 480,  # 474 LOC - MetadataCoordinator with centralized metadata management
+        "metadata_coordinator.py": 510,  # 506 LOC - MetadataCoordinator with centralized metadata management + extended lineage
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "entrypoints.py": 780,  # 775 LOC - pipeline entrypoints (run_pipeline expanded + services + export + ensure_metrics_server_started)
         "registration.py": 720,  # 705 LOC - provider registration with data source creators (OpenAlex + SemanticScholar + UniProt IDMapping)
@@ -460,8 +460,8 @@ class TestFunctionLength:
     }
 
     # Maximum allowed violations (for tracking technical debt)
-    # Baseline updated 2026-01-22: added FSM/runner helper exemptions after decomposition
-    MAX_VIOLATIONS = 95
+    # Baseline updated 2026-01-23: added BatchExecutor DQ context methods
+    MAX_VIOLATIONS = 98
 
     def test_functions_under_50_lines(self, src_dir: Path) -> None:
         """All functions must be under 50 lines (with exemptions)."""
@@ -581,7 +581,7 @@ class TestClassSize:
         # Derived entity data source wrappers (comprehensive docstrings)
         "PublicationTermDataSource": 585,  # 579 lines - Wrapper with FilterableDataSourcePort delegation + get_source_metadata
         # Composition services
-        "MetadataCoordinator": 410,  # 403 lines - Metadata coordination for Medallion layers + extended lineage
+        "MetadataCoordinator": 435,  # 434 lines - Metadata coordination for Medallion layers + extended lineage
         # Composite pipeline services (ADR-026)
         "MergeService": 1280,  # 1272 lines - Composite merge service with conflict resolution + column priority ordering
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
