@@ -593,6 +593,44 @@ class MergeService:
             return df.rename(rename_map)
         return df
 
+    def _find_next_suffix(self, base_col: str, existing_cols: set[str]) -> str:
+        """Find next available suffix for a conflicting column.
+
+        Iterates through A, B, C, ... Z, AA, AB, ... to find an unused suffix.
+
+        Args:
+            base_col: Base column name without suffix.
+            existing_cols: Set of existing column names.
+
+        Returns:
+            Next available suffix letter(s).
+
+        Example:
+            >>> merger._find_next_suffix("title", {"title", "title.A", "title.B"})
+            'C'
+            >>> merger._find_next_suffix("title", {"title"})
+            'A'
+        """
+        # Generate suffixes: A, B, C, ..., Z, AA, AB, ...
+        suffix_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+        # Try single letters first
+        for char in suffix_chars:
+            candidate = f"{base_col}.{char}"
+            if candidate not in existing_cols:
+                return char
+
+        # Try double letters (AA, AB, ..., ZZ)
+        for first in suffix_chars:
+            for second in suffix_chars:
+                suffix = f"{first}{second}"
+                candidate = f"{base_col}.{suffix}"
+                if candidate not in existing_cols:
+                    return suffix
+
+        # Fallback (should never reach here with 702 possible suffixes)
+        raise ValueError(f"Exhausted all suffixes for column '{base_col}'")
+
     def _detect_and_resolve_conflicts(
         self,
         seed_df: pl.DataFrame,
@@ -605,26 +643,27 @@ class MergeService:
         - Seed already has a prefixed column (e.g., "crossref.title")
         - Enricher gets the same prefix (e.g., "crossref.title")
 
-        Resolution: Add .A suffix to seed, .B suffix to enricher.
+        Resolution: Keep seed columns unchanged, add incremental suffixes
+        (A, B, C, ...) to enricher columns.
 
         Args:
-            seed_df: Seed DataFrame.
+            seed_df: Seed DataFrame (columns are NOT renamed).
             enricher_df: Enricher DataFrame (already with prefixes applied).
             join_keys: Set of join key columns to exclude from conflict resolution.
 
         Returns:
-            Tuple of (modified_seed_df, modified_enricher_df) with conflicts resolved.
+            Tuple of (seed_df unchanged, modified_enricher_df) with conflicts resolved.
 
         Example:
-            >>> seed = pl.DataFrame({"doi": ["10.1/a"], "crossref.title": ["T1"]})
-            >>> enricher = pl.DataFrame({"doi": ["10.1/a"], "crossref.title": ["T2"]})
+            >>> seed = pl.DataFrame({"doi": ["10.1/a"], "title": ["T1"]})
+            >>> enricher = pl.DataFrame({"doi": ["10.1/a"], "title": ["T2"]})
             >>> seed_out, enricher_out = merger._detect_and_resolve_conflicts(
             ...     seed, enricher, {"doi"}
             ... )
             >>> seed_out.columns
-            ['doi', 'crossref.title.A']
+            ['doi', 'title']
             >>> enricher_out.columns
-            ['doi', 'crossref.title.B']
+            ['doi', 'title.A']
         """
         seed_cols = set(seed_df.columns)
         enricher_cols = set(enricher_df.columns)
@@ -635,17 +674,21 @@ class MergeService:
         if not conflicts:
             return seed_df, enricher_df
 
+        # Build rename map for enricher columns only
+        # Use incremental suffixes, checking existing columns
+        enricher_rename = {}
+        for col in conflicts:
+            suffix = self._find_next_suffix(col, seed_cols)
+            enricher_rename[col] = f"{col}.{suffix}"
+
         self._logger.warning(
             "Column name conflicts detected after prefixing",
             conflicts=list(conflicts),
-            resolution="Adding .A/.B suffixes",
+            resolution=f"Renaming enricher columns: {enricher_rename}",
         )
 
-        # Rename conflicting columns
-        seed_rename = {col: f"{col}.A" for col in conflicts}
-        enricher_rename = {col: f"{col}.B" for col in conflicts}
-
-        return seed_df.rename(seed_rename), enricher_df.rename(enricher_rename)
+        # Seed columns remain unchanged, only enricher gets renamed
+        return seed_df, enricher_df.rename(enricher_rename)
 
     async def _apply_joins(
         self,
