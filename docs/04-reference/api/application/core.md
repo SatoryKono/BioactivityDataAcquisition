@@ -29,7 +29,7 @@ Abstract base class for all ETL pipelines. Provides template method pattern for 
 
 ### BatchExecutor
 
-Unified batch executor for ETL pipeline orchestration. Handles extraction → transformation → writing flow.
+Unified batch executor for ETL pipeline orchestration. Handles extraction → transformation → writing flow with adaptive batch sizing.
 
 ::: bioetl.application.core.batch_executor.BatchExecutor
     options:
