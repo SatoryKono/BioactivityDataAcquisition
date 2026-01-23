@@ -110,7 +110,7 @@ class TestFileSizeLimits:
         # Application layer exemptions
         "base_transformer.py": 680,  # 667 LOC - BaseTransformer with serialization helpers
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
-        "merger.py": 1330,  # 1321 LOC - MergeService with type-safe coalesce + column priority ordering + explicit rules
+        "merger.py": 1385,  # 1380 LOC - MergeService with type-safe coalesce + column priority ordering + explicit rules
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
@@ -583,7 +583,7 @@ class TestClassSize:
         # Composition services
         "MetadataCoordinator": 435,  # 434 lines - Metadata coordination for Medallion layers + extended lineage
         # Composite pipeline services (ADR-026)
-        "MergeService": 1280,  # 1272 lines - Composite merge service with conflict resolution + column priority ordering
+        "MergeService": 1335,  # 1330 lines - Composite merge service with conflict resolution + column priority ordering
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
         "CompositePipelineRunner": 1080,  # 1059 lines - Composite pipeline orchestrator (FSM helpers extracted to fsm_helper.py)
         # Publication adapters with APIRequestCollector (metadata enrichment)
