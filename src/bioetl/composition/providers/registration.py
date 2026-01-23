@@ -17,7 +17,6 @@ from bioetl.composition.bootstrap_contexts import (
     CircuitBreakerConfig,
     RateLimitConfig,
 )
-from bioetl.composition.bootstrap_logger import BootstrapLogger
 from bioetl.composition.providers.provider_registry import (
     HttpConfig,
     ProviderConfig,

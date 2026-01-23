@@ -36,7 +36,8 @@ class PublicationBaseSchema(ETLRecordSchema):
     - Publication metadata: journal, year, publication_date, doc_type, language
     - Metrics: citation_count
     - Open Access: is_oa
-    - Lookup tracking: _lookup_method, _original_id, source
+    - Lookup tracking: _lookup_method, _original_id
+    - System: _source (data source identifier)
     """
 
     # === Cross-reference IDs (common to all providers) ===
@@ -117,9 +118,11 @@ class PublicationBaseSchema(ETLRecordSchema):
         nullable=True,
         description="Original identifier from input (for fallback records)",
     )
-    source: Series[str] = pa.Field(
+
+    # === System field (per SYSTEM_FIELDS_PREFIX) ===
+    _source: Series[str] = pa.Field(
         nullable=True,
-        description="Data source identifier (e.g., pubmed, crossref, openalex)",
+        description="Data source identifier (e.g., chembl, pubmed, crossref, openalex)",
     )
 
     class Config:
