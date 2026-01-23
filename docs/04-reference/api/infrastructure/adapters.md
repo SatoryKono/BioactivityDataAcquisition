@@ -56,6 +56,180 @@ Mixin for handling paginated API responses.
         members:
             - fetch_all_pages
 
+## Base Adapters
+
+### BaseHttpAdapter
+
+Abstract base class for HTTP-based data source adapters.
+
+::: bioetl.infrastructure.adapters.base.BaseHttpAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - fetch
+            - health_check
+
+### BaseSyncAdapter
+
+Base class for synchronous data source adapters (e.g., PubChem via pubchempy).
+
+::: bioetl.infrastructure.adapters.sync_base.BaseSyncAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - fetch
+            - _run_in_executor
+
+### AdapterMetrics
+
+Metrics collection for data source adapters.
+
+::: bioetl.infrastructure.adapters.base_metrics.AdapterMetrics
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Provider Adapters
+
+### ChemblAdapter
+
+Data source adapter for ChEMBL database.
+
+::: bioetl.infrastructure.adapters.chembl.client.ChemblAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - fetch
+            - health_check
+
+**Features**:
+- Async HTTP requests with rate limiting
+- Entity mapping via `EntityMapper`
+- Circuit breaker integration
+- Structured error classification
+
+### PubChemAdapter
+
+Data source adapter for PubChem database (via pubchempy library).
+
+::: bioetl.infrastructure.adapters.pubchem.client.PubChemAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - fetch
+            - health_check
+
+**Features**:
+- Sync library wrapped with `run_in_executor`
+- Rate limiting (5 req/sec)
+- Compound property extraction
+
+### UniProtAdapter
+
+Data source adapter for UniProt protein database.
+
+::: bioetl.infrastructure.adapters.uniprot.client.UniProtAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - fetch
+            - health_check
+
+**Features**:
+- Paginated fetching via `PaginatedFetcherMixin`
+- ID mapping support
+- Rate limiting (100 req/sec with API key)
+
+### UniProtIDMappingClient
+
+Specialized client for UniProt ID mapping operations.
+
+::: bioetl.infrastructure.adapters.uniprot.idmapping_client.UniProtIDMappingClient
+    options:
+        show_root_heading: true
+        show_source: false
+
+### PubMedAdapter
+
+Data source adapter for PubMed/NCBI E-utilities.
+
+::: bioetl.infrastructure.adapters.pubmed.pubmed_client.PubMedAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - fetch
+            - health_check
+
+**Features**:
+- ESearch/EFetch API integration
+- Rate limiting (3 req/sec)
+- XML response parsing
+
+### CrossRefAdapter
+
+Data source adapter for CrossRef metadata API.
+
+::: bioetl.infrastructure.adapters.crossref.client.CrossRefAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - fetch
+            - health_check
+
+**Features**:
+- Polite pool rate limiting
+- DOI-based lookups
+- Works endpoint integration
+
+### OpenAlexAdapter
+
+Data source adapter for OpenAlex scholarly data API.
+
+::: bioetl.infrastructure.adapters.openalex.client.OpenAlexAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - fetch
+            - health_check
+
+**Features**:
+- Rate limiting (10 req/sec)
+- Cursor-based pagination
+- Rich metadata extraction
+
+### SemanticScholarAdapter
+
+Data source adapter for Semantic Scholar API.
+
+::: bioetl.infrastructure.adapters.semanticscholar.adapter.SemanticScholarAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - fetch
+            - health_check
+
+**Features**:
+- Rate limiting (100 req/5min)
+- Paper and author endpoints
+- Citation graph access
+
 ## Storage Adapters
 
 ### SilverWriter
