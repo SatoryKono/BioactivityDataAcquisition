@@ -228,6 +228,7 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
+        pa.field("_source", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
@@ -646,6 +647,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
+        pa.field("_source", pa.string())
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
@@ -708,6 +710,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
+        pa.field("_source", pa.string())
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
@@ -763,6 +766,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
+        pa.field("_source", pa.string())
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===

@@ -257,7 +257,7 @@ class TestRegisterAllTransformers:
         assert ("uniprot", "protein") in _TRANSFORMER_REGISTRY
 
         # Check PubMed transformers
-        assert ("pubmed", "publications") in _TRANSFORMER_REGISTRY
+        assert ("pubmed", "publication") in _TRANSFORMER_REGISTRY
 
     def test_register_all_is_idempotent(self) -> None:
         """register_all_transformers can be called multiple times."""
