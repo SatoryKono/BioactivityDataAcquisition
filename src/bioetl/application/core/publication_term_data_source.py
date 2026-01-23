@@ -8,13 +8,16 @@ Architecture:
     ChEMBL API (document endpoint)
            ↓
     PublicationTermDataSource (wrapper)
-      - fetch("document_term") → wrapped.fetch("document")
+      - fetch("publication_term") → wrapped.fetch("publication")
       - transforms each publication → yields term records
            ↓
     Pipeline receives term records
 
 .. versionchanged:: 2.0.0
     Renamed from DocumentTermDataSource to PublicationTermDataSource (ADR-024).
+.. versionchanged:: 2.1.0
+    Changed entity types from document/document_term to publication/publication_term
+    for naming consistency (ADR-024 naming unification).
 """
 
 from __future__ import annotations
@@ -44,8 +47,8 @@ class PublicationTermDataSource:
     - KEYWORD: Author-provided keywords from keywords array
 
     The wrapper:
-    1. Intercepts fetch("document_term") calls
-    2. Fetches publications from the wrapped adapter via fetch("document")
+    1. Intercepts fetch("publication_term") calls
+    2. Fetches publications from the wrapped adapter via fetch("publication")
     3. Extracts terms from each publication (1:M relationship)
     4. Yields individual term records with computed entity_id
     5. Delegates all other operations to the wrapped adapter
@@ -53,7 +56,7 @@ class PublicationTermDataSource:
     Example:
         >>> wrapped = PublicationTermDataSource(chembl_adapter)
         >>> async with wrapped:
-        ...     async for term in wrapped.fetch("document_term", limit=100):
+        ...     async for term in wrapped.fetch("publication_term", limit=100):
         ...         process_term(term)  # term has keys: term, term_type, etc.
 
     .. versionchanged:: 2.0.0
@@ -61,9 +64,11 @@ class PublicationTermDataSource:
     """
 
     # Source entity type to fetch from wrapped adapter
-    SOURCE_ENTITY_TYPE = "document"
+    # Uses canonical "publication" name (ADR-024 naming unification)
+    SOURCE_ENTITY_TYPE = "publication"
     # Target entity type this wrapper provides
-    TARGET_ENTITY_TYPE = "document_term"
+    # Uses canonical "publication_term" name (ADR-024 naming unification)
+    TARGET_ENTITY_TYPE = "publication_term"
     # Multiplier for publication limit estimation.
     # Not all publications have terms (mesh_terms/keywords may be empty).
     # Analysis shows ~20-30% of ChEMBL publications have terms.
@@ -109,11 +114,11 @@ class PublicationTermDataSource:
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records, extracting terms if entity_type is document_term.
+        """Fetch records, extracting terms if entity_type is publication_term.
 
-        For document_term entity type:
-        - Fetches documents from wrapped adapter
-        - Extracts terms from each document
+        For publication_term entity type:
+        - Fetches publications from wrapped adapter
+        - Extracts terms from each publication
         - Yields individual term records
 
         For other entity types:
@@ -121,7 +126,7 @@ class PublicationTermDataSource:
 
         Args:
             entity_type: Type of entity to fetch.
-            limit: Maximum number of records (for document_term, limits total terms).
+            limit: Maximum number of records (for publication_term, limits total terms).
             query: Optional search query.
             filter_ids: Optional filter IDs (passed to wrapped adapter).
             filter_field: Optional filter field (passed to wrapped adapter).
@@ -362,20 +367,20 @@ class PublicationTermDataSource:
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch filtered records, extracting terms if entity_type is document_term.
+        """Fetch filtered records, extracting terms if entity_type is publication_term.
 
         Implements FilterableDataSourcePort.fetch_filtered().
 
-        For document_term entity type:
-        - Delegates to wrapped adapter's fetch_filtered("document", ...)
-        - Extracts terms from each document
+        For publication_term entity type:
+        - Delegates to wrapped adapter's fetch_filtered("publication", ...)
+        - Extracts terms from each publication
 
         For other entity types:
         - Delegates directly to wrapped adapter
 
         Args:
             entity_type: Type of entity to fetch.
-            filter_ids: List of IDs to filter by (document_chembl_id for document_term).
+            filter_ids: List of IDs to filter by (document_chembl_id for publication_term).
             filter_field: Field name to filter on.
             limit: Maximum number of records to fetch.
 
