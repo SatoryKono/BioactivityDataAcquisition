@@ -29,8 +29,42 @@ SYSTEM_FIELDS_PREFIX: Final[tuple[str, ...]] = (
     "_run_id",
     "_run_type",
     "_source_batch_id",
+    "_source",
     "_ingestion_ts",
     "_index",
+)
+
+LOOKUP_FIELDS_PREFIX: Final[tuple[str, ...]] = (
+    "_lookup_method",
+    "_original_id",
+)
+
+PUBLICATION_METADATA_FIELDS: Final[tuple[str, ...]] = (
+    "authors",
+    "title",
+    "journal",
+    "year",
+    "volume",
+    "issue",
+    "first_page",
+    "last_page",
+    "language",
+)
+
+PUBLICATION_CROSSREF_FIELDS: Final[tuple[str, ...]] = (
+    "document_chembl_id"
+    "doi",
+    "pmid",
+    "pmc_id",
+)
+
+
+PUBLICATION_UNIFIED_FIELDS: Final[tuple[str, ...]] = (
+    "doc_type",
+    "is_oa",
+    "abstract",
+    "citation_count",
+    "publication_date",
 )
 
 # DQ flags that MUST appear last (in order), if present
@@ -40,12 +74,17 @@ DQ_FIELDS_SUFFIX: Final[tuple[str, ...]] = (
     "_dq_error",
 )
 
+
+
+
 # All system fields (prefix + suffix) for quick membership check
 ALL_SYSTEM_FIELDS: Final[frozenset[str]] = frozenset(
-    SYSTEM_FIELDS_PREFIX + DQ_FIELDS_SUFFIX
+    SYSTEM_FIELDS_PREFIX + LOOKUP_FIELDS_PREFIX + DQ_FIELDS_SUFFIX
 )
 
-
+ALL_PUBLICATION_FIELDS: Final[frozenset[str]] = frozenset(
+    PUBLICATION_METADATA_FIELDS  + PUBLICATION_CROSSREF_FIELDS  + PUBLICATION_UNIFIED_FIELDS
+)
 def _filter_present(
     ordered_fields: tuple[str, ...], present: frozenset[str]
 ) -> list[str]:
@@ -82,10 +121,13 @@ def canonical_column_order(columns: list[str] | tuple[str, ...]) -> list[str]:
     # 1. System prefix fields (preserve defined order, skip missing)
     prefix = _filter_present(SYSTEM_FIELDS_PREFIX, columns_set)
 
+    # 2. Lookup fields (preserve defined order)
+    lookup = _filter_present(LOOKUP_FIELDS_PREFIX, columns_set)
+
     # 2. DQ suffix fields (preserve defined order, skip missing)
     suffix = _filter_present(DQ_FIELDS_SUFFIX, columns_set)
 
     # 3. Business fields (sorted alphabetically)
     business = sorted(columns_set - ALL_SYSTEM_FIELDS)
 
-    return prefix + business + suffix
+    return prefix + lookup + business + suffix
