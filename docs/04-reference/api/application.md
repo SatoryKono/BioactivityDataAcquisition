@@ -9,7 +9,7 @@ flowchart TB
     subgraph Application["Application Layer"]
         subgraph Core["Core"]
             Runner[PipelineRunner]
-            Executor[PipelineExecutor]
+            Executor[BatchExecutor]
             Services[PipelineServices]
         end
 
@@ -49,7 +49,7 @@ flowchart TB
 Pipeline execution infrastructure:
 
 - `PipelineRunner` - Lifecycle orchestrator for pipeline execution
-- `PipelineExecutor` - Data flow orchestrator (fetch → transform → write)
+- `BatchExecutor` - Data flow orchestrator (fetch → transform → write)
 - `PipelineServices` - Service bundle for dependency injection
 - `CheckpointManager` - Checkpoint persistence for resume capability
 - `LockManager` - Distributed locking coordination
@@ -117,7 +117,7 @@ PipelineRunner delegates to specialized services:
 | Service | Responsibility |
 |---------|---------------|
 | `PreflightService` | Health checks, lock acquisition |
-| `PipelineExecutor` | Data flow orchestration |
+| `BatchExecutor` | Data flow orchestration |
 | `PostrunService` | DQ validation, VACUUM |
 | `MedallionLifecycleService` | Layer clearing policies |
 
