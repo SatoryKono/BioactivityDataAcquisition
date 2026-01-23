@@ -12,6 +12,9 @@ CHEMBL_API_BASE = "https://www.ebi.ac.uk/chembl/api/data"
 CHEMBL_STATUS_URL = f"{CHEMBL_API_BASE}/status"
 
 # Entity type to ChEMBL resource mapping
+# Note: publication/publication_term/publication_similarity are canonical names (ADR-024)
+# that map to the same ChEMBL API resources as document/document_term/document_similarity.
+# The document* aliases are kept for backward compatibility.
 ENTITY_MAPPING: dict[str, str] = {
     "activity": "activity",
     "assay": "assay",
@@ -20,6 +23,11 @@ ENTITY_MAPPING: dict[str, str] = {
     "molecule": "molecule",
     "target": "target",
     "target_component": "target_component",
+    # Canonical publication names (ADR-024)
+    "publication": "document",
+    "publication_similarity": "document_similarity",
+    "publication_term": "document",
+    # Legacy document aliases (backward compatibility)
     "document": "document",
     "document_similarity": "document_similarity",
     "document_term": "document",
@@ -30,6 +38,8 @@ ENTITY_MAPPING: dict[str, str] = {
 }
 
 # Plural forms for API response keys (ChEMBL uses irregular plurals)
+# Note: These map to ChEMBL API response keys, not entity_type values.
+# publication* entity types map to document* API resources.
 ENTITY_PLURAL: dict[str, str] = {
     "activity": "activities",
     "assay": "assays",
@@ -45,11 +55,17 @@ ENTITY_PLURAL: dict[str, str] = {
 }
 
 # Primary key field overrides by entity type
+# Note: publication* entity types use the same PK fields as document* entities
 PK_FIELD_OVERRIDES: dict[str, str] = {
     "assay": "assay_chembl_id",
     "assay_parameters": "assay_param_id",
     "molecule": "molecule_chembl_id",
     "compound": "molecule_chembl_id",
+    # Canonical publication names (ADR-024)
+    "publication": "document_chembl_id",
+    "publication_similarity": "sim_id",
+    "publication_term": "document_chembl_id",
+    # Legacy document aliases (backward compatibility)
     "document": "document_chembl_id",
     "document_similarity": "sim_id",
     "document_term": "document_chembl_id",

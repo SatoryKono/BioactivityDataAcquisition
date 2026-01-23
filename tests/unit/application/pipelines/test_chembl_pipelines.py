@@ -129,11 +129,11 @@ class TestChEMBLPublicationPipeline:
 
     @pytest.fixture
     def pipeline(self, mock_services, runtime_config, run_id):
-        """Create document pipeline instance."""
+        """Create publication pipeline instance."""
         config = create_pipeline_config(
-            pipeline_name="chembl_document",
-            entity_type="document",
-            silver_table="chembl.document",
+            pipeline_name="chembl_publication",
+            entity_type="publication",
+            silver_table="chembl.publication",
             primary_keys=["document_chembl_id"],
         )
         return ChEMBLPublicationPipeline(
