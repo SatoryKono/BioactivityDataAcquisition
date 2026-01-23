@@ -1,0 +1,66 @@
+warning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead
+................F....................F...                                [100%]
+=================================== FAILURES ===================================
+_______ TestRegisterAllTransformers.test_register_all_populates_registry _______
+
+self = <test_transformer_factory.TestRegisterAllTransformers object at 0x7f75202f3650>
+
+    def test_register_all_populates_registry(self) -> None:
+        """register_all_transformers populates the registry."""
+        register_all_transformers()
+
+        # Check ChEMBL transformers
+        assert ("chembl", "activity") in _TRANSFORMER_REGISTRY
+        assert ("chembl", "assay") in _TRANSFORMER_REGISTRY
+        assert ("chembl", "molecule") in _TRANSFORMER_REGISTRY
+        assert ("chembl", "target") in _TRANSFORMER_REGISTRY
+        assert ("chembl", "document") in _TRANSFORMER_REGISTRY
+        assert ("chembl", "target_component") in _TRANSFORMER_REGISTRY
+
+        # Check PubChem transformers
+        assert ("pubchem", "compound") in _TRANSFORMER_REGISTRY
+
+        # Check UniProt transformers
+        assert ("uniprot", "protein") in _TRANSFORMER_REGISTRY
+
+        # Check PubMed transformers
+>       assert ("pubmed", "publications") in _TRANSFORMER_REGISTRY
+E       AssertionError: assert ('pubmed', 'publications') in {('chembl', 'activity'): <class 'bioetl.application.pipelines.chembl.activity_transformer.ActivityTransformer'>, ('che... ('chembl', 'cell_line'): <class 'bioetl.application.pipelines.chembl.cell_line_transformer.CellLineTransformer'>, ...}
+
+tests/unit/composition/factories/test_transformer_factory.py:260: AssertionError
+___ TestTransformerClassConsistency.test_all_configs_have_matching_provider ____
+
+self = <tests.unit.cli.test_registry_consistency.TestTransformerClassConsistency object at 0x7f7520127a10>
+
+    def test_all_configs_have_matching_provider(self) -> None:
+        """Verify PIPELINE_CONFIG.provider matches pipeline_name prefix.
+
+        Note: Some pipelines use specialized providers that don't follow
+        the standard {provider}_{entity} naming convention, e.g.,
+        'uniprot_idmapping' uses provider 'uniprot_idmapping' (not 'uniprot').
+        """
+        # Pipelines with specialized providers that don't follow naming convention
+        specialized_providers = {
+            "uniprot_idmapping": "uniprot_idmapping",
+        }
+
+        for config in PIPELINE_CONFIGS:
+            if config.pipeline_name in specialized_providers:
+                expected = specialized_providers[config.pipeline_name]
+>               assert config.provider == expected, (
+                    f"Pipeline {config.pipeline_name}: "
+                    f"provider '{config.provider}' doesn't match expected '{expected}'"
+                )
+E               AssertionError: Pipeline uniprot_idmapping: provider 'uniprot' doesn't match expected 'uniprot_idmapping'
+E               assert 'uniprot' == 'uniprot_idmapping'
+E
+E                 - uniprot_idmapping
+E                 + uniprot
+
+tests/unit/cli/test_registry_consistency.py:413: AssertionError
+--------------------------- snapshot report summary ----------------------------
+1 snapshot passed.
+=========================== short test summary info ============================
+FAILED tests/unit/composition/factories/test_transformer_factory.py::TestRegisterAllTransformers::test_register_all_populates_registry
+FAILED tests/unit/cli/test_registry_consistency.py::TestTransformerClassConsistency::test_all_configs_have_matching_provider
+2 failed, 39 passed in 3.57s
