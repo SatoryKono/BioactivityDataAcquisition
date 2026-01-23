@@ -52,15 +52,6 @@ Bundle of common pipeline services injected via DI.
         show_root_heading: true
         show_source: false
 
-### RunnerServices
-
-Bundle of application services for PipelineRunner.
-
-::: bioetl.application.core.runner_services.RunnerServices
-    options:
-        show_root_heading: true
-        show_source: false
-
 ## Infrastructure Services
 
 ### PreflightService
@@ -84,24 +75,6 @@ Post-run operations: DQ checks, VACUUM, cleanup.
         show_source: false
         members:
             - execute
-
-### LifecycleOrchestrator
-
-Medallion layer clearing policy orchestration.
-
-::: bioetl.application.core.lifecycle_orchestrator.LifecycleOrchestrator
-    options:
-        show_root_heading: true
-        show_source: false
-
-### ClearDecision
-
-Decision result for layer clearing.
-
-::: bioetl.application.core.lifecycle_orchestrator.ClearDecision
-    options:
-        show_root_heading: true
-        show_source: false
 
 ## State Management
 
@@ -168,46 +141,6 @@ Memory usage statistics.
         show_root_heading: true
         show_source: false
 
-## Medallion Policy
-
-### WriteModePolicy
-
-Write mode policy for different run types.
-
-::: bioetl.application.core.medallion_policy.WriteModePolicy
-    options:
-        show_root_heading: true
-        show_source: false
-
-### WriteMode
-
-Silver layer write strategy enum.
-
-::: bioetl.application.core.medallion_policy.WriteMode
-    options:
-        show_root_heading: true
-        show_source: false
-
-### Layer
-
-Medallion layer enum.
-
-::: bioetl.application.core.medallion_policy.Layer
-    options:
-        show_root_heading: true
-        show_source: false
-
-## Health Monitoring
-
-### HealthAggregator
-
-Aggregates health status from multiple components.
-
-::: bioetl.application.core.health_aggregator.HealthAggregator
-    options:
-        show_root_heading: true
-        show_source: false
-
 ## Shutdown Handling
 
 ### ShutdownSignal
@@ -269,23 +202,11 @@ from bioetl.application.core import (
 
 # Components are assembled in composition layer
 # See: bioetl.composition.bootstrap.bootstrap_pipeline()
-
-# Example: Direct executor usage
-# executor = PipelineExecutor(
-#     services=pipeline_services,
-#     record_processor=processor,
-#     checkpoint_manager=checkpoint_manager,
-#     shutdown_signal=shutdown_signal,
-#     entity_type="activity",
-#     batch_size=100,
-# )
-
-# Execute data flow
-# await executor.execute()
 ```
 
 ## See Also
 
+- [Services](services.md) - Application services
 - [Transformers](transformers.md) - Data transformation framework
 - [Pipelines](pipelines.md) - Provider-specific pipelines
 - [Bootstrap](../composition/bootstrap.md) - Component assembly

@@ -40,7 +40,7 @@
 | 13 | `pubchem_compound` | PubChem | compound | Production | 13 | 5 | ✅ |
 | 14 | `uniprot_protein` | UniProt | protein | Production | 17 | 8 | ✅ |
 | 15 | `uniprot_idmapping` | UniProt | idmapping | Production | 18 | 7 | — |
-| 16 | `pubmed_publications` | PubMed | publication | Production | — | 14 | ✅ |
+| 16 | `pubmed_publication` | PubMed | publication | Production | — | 14 | ✅ |
 | 17 | `crossref_publication_enrichment` | CrossRef | work | Production | 42 | 11 | ✅ |
 | 18 | `openalex_publication` | OpenAlex | publication | Production | 42 | 14 | ✅ |
 | 19 | `semanticscholar_publication` | SemanticScholar | publication | Production | 43 | 11 | ✅ |
@@ -73,7 +73,7 @@
 | `crossref_publication` | 262 | BaseTransformer | DOI resolution, citation counts |
 | `openalex_publication` | 240 | BaseTransformer | Abstract reconstruction, concepts |
 | `semanticscholar_publication` | 224 | BaseTransformer | TL;DR, fields of study |
-| `pubmed_publications` | 177 | BaseTransformer | XML parsing, MeSH, dates |
+| `pubmed_publication` | 177 | BaseTransformer | XML parsing, MeSH, dates |
 | `uniprot_protein` | 176 | BaseTransformer | Organism filtering |
 | `uniprot_idmapping` | 119 | BaseTransformer | ChEMBL→UniProt mapping |
 | `pubchem_compound` | 115 | BaseTransformer | SMILES search |
@@ -90,7 +90,7 @@
 | `openalex_publication` | openalex_id, title | — | year: 1900-2100 |
 | `semanticscholar_publication` | paper_id, title | — | year: 1900-2100 |
 | `crossref_publication` | doi, title | — | year: 1900-2100 |
-| `pubmed_publications` | pmid, title | — | — |
+| `pubmed_publication` | pmid, title | — | — |
 | `uniprot_protein` | accession, entry_name, organism | reviewed=[true] | — |
 | `uniprot_idmapping` | target_chembl_id, mapping_status | — | — |
 | `pubchem_compound` | cid, molecular_formula | — | — |
@@ -114,7 +114,7 @@
 | `openalex_publication` | 22 | 22 | authors, concepts |
 | `semanticscholar_publication` | 28 | 28 | fields_of_study, publication_types, authors |
 | `crossref_publication` | 22 | 22 | authors, issn, subjects |
-| `pubmed_publications` | 25 | 25 | authors, publication_types, keywords, mesh_terms |
+| `pubmed_publication` | 25 | 25 | authors, publication_types, keywords, mesh_terms |
 | `uniprot_protein` | 12 | 12 | gene_names |
 | `uniprot_idmapping` | 10 | 10 | — |
 | `pubchem_compound` | 14 | 14 | — |

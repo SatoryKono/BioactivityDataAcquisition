@@ -17,7 +17,7 @@
     - crossref_publication
     - openalex_publication
     - pubchem_compound
-    - pubmed_publications
+    - pubmed_publication
     - semanticscholar_publication
     - uniprot_idmapping
     - uniprot_protein

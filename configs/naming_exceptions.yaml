@@ -183,7 +183,7 @@ pipeline_id_format:
     - chembl_target_component
     - pubchem_compound   # Uses API term per glossary.md CLI conventions
     - uniprot_protein    # Uses API term per glossary.md CLI conventions
-    - pubmed_publications
+    - pubmed_publication
 
 # Notes on enforcement
 # - The naming_audit.py tool uses this file's content as reference

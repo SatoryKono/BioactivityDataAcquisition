@@ -90,6 +90,9 @@ docs/
 │
 ├── 04-reference/                # Reference documentation
 │   ├── api/                     # API reference by layer
+|   │   ├── application/         # Application layer docs
+|   │   │   ├── core.md          # Core components
+|   │   │   └── services.md      # Application services
 │   ├── cli.md                   # CLI reference
 │   └── pipelines/               # Pipeline-specific reference
 │
@@ -357,7 +360,7 @@ graph TD
 | RULES.md                 | 2026-01-21   | v5.12 (ADR Registry Update)  |
 | REQUIREMENTS.md          | 2026-01-21   | v1.4 (156 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
-| 00-map.md                | 2026-01-21   | v6.8 RULES v5.12, REQ v1.4   |
+| 00-map.md                | 2026-01-21   | v6.9 API Sync Completed      |
 | rules-summary.md         | 2026-01-21   | v5.12 Synced                 |
 | 03-guides/               | 2026-01-20   | Consolidated (13 guides)     |
 | ADR-001..028             | 2026-01-21   | All 28 ADRs documented       |

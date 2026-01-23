@@ -130,6 +130,9 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("uo_units", pa.string()),
         pa.field("upper_value", pa.float64()),
         pa.field("value", pa.float64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -157,6 +160,9 @@ PUBCHEM_COMPOUND_SCHEMA = pa.schema(
         pa.field(
             "molecular_weight", pa.float64()
         ),  # Transformed to float by transformer
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -178,6 +184,9 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("organism_id", pa.int64()),
         pa.field("protein_name", pa.string()),
         pa.field("sequence_length", pa.int64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -203,6 +212,7 @@ UNIPROT_ID_MAPPING_SCHEMA = pa.schema(
         # === DQ suffix (MUST be last, if present) ===
         # DQ warning flag (True for not_found)
         pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -349,6 +359,9 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field(
             "variant_taxonomy_id", pa.int64()
         ),  # Standardized name (was variant_tax_id)
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -392,6 +405,9 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
         # Note: protein_classifications not available in /target endpoint
         # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -420,6 +436,9 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_component_xrefs", pa.string()),
         pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -448,6 +467,9 @@ CHEMBL_CELL_LINE_SCHEMA = pa.schema(
         pa.field("cellosaurus_id", pa.string()),
         pa.field("cl_lincs_id", pa.string()),
         pa.field("efo_id", pa.string()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -471,6 +493,9 @@ CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
         pa.field("qualifier", pa.string()),
         pa.field("term", pa.string()),
         pa.field("term_type", pa.string()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -544,6 +569,9 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("usan_substem", pa.string()),
         pa.field("usan_year", pa.int64()),
         pa.field("withdrawn_flag", pa.bool_()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -570,6 +598,9 @@ CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
         # Source information
         pa.field("src_compound_id", pa.string()),
         pa.field("src_id", pa.int64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -599,6 +630,9 @@ CHEMBL_DOCUMENT_SIMILARITY_SCHEMA = pa.schema(
         pa.field("pubmed_id2", pa.string()),
         pa.field("sim_id", pa.int64()),
         pa.field("tid_tani", pa.float64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -801,6 +835,9 @@ CHEMBL_PROTEIN_CLASS_SCHEMA = pa.schema(
         pa.field("replaced_by", pa.int64()),
         pa.field("short_name", pa.string()),
         pa.field("sort_order", pa.int64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -835,5 +872,8 @@ CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
         pa.field("type", pa.string()),
         pa.field("units", pa.string()),
         pa.field("value", pa.float64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )

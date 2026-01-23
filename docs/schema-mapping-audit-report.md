@@ -98,7 +98,7 @@ This is **acceptable behavior** for nullable integer handling in Pandas. Documen
 ## Finding 2: PMID Type Mismatch (PubMed)
 
 **Severity**: HIGH
-**Affected Pipeline**: `pubmed_publications`
+**Affected Pipeline**: `pubmed_publication`
 
 ### Issue
 
@@ -176,7 +176,7 @@ Add all 26 fields to `MoleculeSchema` in Silver layer for complete validation co
 ## Finding 4: Missing Fields in Gold (PubMed Publication)
 
 **Severity**: MEDIUM
-**Affected Pipeline**: `pubmed_publications`
+**Affected Pipeline**: `pubmed_publication`
 **Count**: 18 missing fields
 
 ### Issue

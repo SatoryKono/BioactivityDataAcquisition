@@ -3,11 +3,11 @@
 #
 # Derived entity: Extracts and flattens terms from Publication records.
 # Inherits defaults from ../_base.yaml
-# Note: entity_type=document_term maps to ChEMBL API /document endpoint (derived entity)
+# Note: entity_type=publication_term maps to ChEMBL API /document endpoint (derived entity, ADR-024)
 
 pipeline_name: chembl_publication_term
 provider: chembl
-entity_type: document_term
+entity_type: publication_term
 version: "2.1.0"
 description: "Extract publication terms (MeSH, keywords) from ChEMBL Publication records"
 
@@ -36,27 +36,26 @@ dq_config_file: ../../dq/entities/chembl/publication_term.yaml
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/publication_term.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
-# Note: explicit filter_config_file because entity_type=document_term differs from file name
 filter_config_file: ../../filter/entities/chembl/publication_term.yaml
 
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze/chembl/document_term"
+    path: "data/output/bronze/chembl/publication_term"
   silver:
-    path: "data/output/silver/chembl/document_term"
+    path: "data/output/silver/chembl/publication_term"
     primary_key: ["entity_id"]
     partition_by: ["term_type"]
     sort_by:
       columns: ["entity_id"]
       ascending: true
     csv_export:
-      path: "data/output/silver/chembl/document_term"
+      path: "data/output/silver/chembl/publication_term"
   gold:
-    path: "data/output/gold/chembl/document_term"
+    path: "data/output/gold/chembl/publication_term"
     sort_by:
       columns: ["entity_id"]
       ascending: true
     csv_export:
-      path: "data/output/gold/chembl/document_term"
+      path: "data/output/gold/chembl/publication_term"
 

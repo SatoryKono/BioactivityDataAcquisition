@@ -202,8 +202,8 @@ def _create_chembl_data_source(
     )
 
     # Wrap with PublicationTermDataSource for derived entity extraction
-    # document_term is extracted from publication records (1:M relationship)
-    if pipeline_config.entity_type == "document_term":
+    # publication_term is extracted from publication records (1:M relationship)
+    if pipeline_config.entity_type == "publication_term":
         base_adapter = PublicationTermDataSource(base_adapter)
 
     return _wrap_with_filter(

@@ -2,11 +2,11 @@
 # Pipeline configuration for ChEMBL Publication Similarity entity.
 #
 # Inherits defaults from ../_base.yaml
-# Note: entity_type=document_similarity maps to ChEMBL API /document_similarity endpoint
+# Note: entity_type=publication_similarity maps to ChEMBL API /document_similarity endpoint (ADR-024)
 
 pipeline_name: chembl_publication_similarity
 provider: chembl
-entity_type: document_similarity
+entity_type: publication_similarity
 version: "2.1.0"
 description: "Extract publication similarity data (Tanimoto coefficients) from ChEMBL API"
 
@@ -33,27 +33,26 @@ dq_config_file: ../../dq/entities/chembl/publication_similarity.yaml
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/publication_similarity.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
-# Note: explicit filter_config_file because entity_type=document_similarity differs from file name
 filter_config_file: ../../filter/entities/chembl/publication_similarity.yaml
 
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze/chembl/document_similarity"
+    path: "data/output/bronze/chembl/publication_similarity"
   silver:
-    path: "data/output/silver/chembl/document_similarity"
+    path: "data/output/silver/chembl/publication_similarity"
     primary_key: ["sim_id"]
     partition_by: []  # No good partition key
     sort_by:
       columns: ["sim_id"]
       ascending: true
     csv_export:
-      path: "data/output/silver/chembl/document_similarity"
+      path: "data/output/silver/chembl/publication_similarity"
   gold:
-    path: "data/output/gold/chembl/document_similarity"
+    path: "data/output/gold/chembl/publication_similarity"
     sort_by:
       columns: ["sim_id"]
       ascending: true
     csv_export:
-      path: "data/output/gold/chembl/document_similarity"
+      path: "data/output/gold/chembl/publication_similarity"
 

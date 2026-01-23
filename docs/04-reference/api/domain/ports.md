@@ -2,7 +2,7 @@
 
 Port interfaces define contracts that infrastructure adapters must implement. All ports use Python's `Protocol` for structural typing.
 
-## Storage Ports
+## Storage & Data Access
 
 ### StoragePort
 
@@ -12,14 +12,15 @@ Main storage interface for writing data to all Medallion layers.
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - write_bronze
-            - write_silver
-            - write_gold
-            - health_check
-            - aclose
 
-## Data Source Ports
+### DeltaReaderPort
+
+Interface for read-only access to Delta tables.
+
+::: bioetl.domain.ports.DeltaReaderPort
+    options:
+        show_root_heading: true
+        show_source: false
 
 ### DataSourcePort
 
@@ -29,9 +30,6 @@ Interface for fetching data from external APIs.
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - fetch
-            - health_check
 
 ### FilterableDataSourcePort
 
@@ -42,7 +40,16 @@ Extended interface for data sources supporting server-side filtering.
         show_root_heading: true
         show_source: false
 
-## Infrastructure Ports
+### IDMappingPort
+
+Interface for ID mapping operations (e.g., UniProt mapping).
+
+::: bioetl.domain.ports.IDMappingPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Infrastructure Coordination
 
 ### LockPort
 
@@ -52,11 +59,6 @@ Distributed locking interface for pipeline coordination.
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - acquire
-            - release
-            - refresh
-            - is_held
 
 ### CheckpointPort
 
@@ -66,10 +68,6 @@ Pipeline state persistence interface.
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - save
-            - load
-            - delete
 
 ### QuarantinePort
 
@@ -79,12 +77,44 @@ Dead-letter queue for failed records.
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - write
-            - read
-            - purge
 
-## Observability Ports
+### ShutdownPort
+
+Graceful termination coordination interface.
+
+::: bioetl.domain.ports.ShutdownPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### AuditPort
+
+Interface for write operation traceability.
+
+::: bioetl.domain.ports.AuditPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### MetadataWriterPort
+
+Interface for writing metadata.
+
+::: bioetl.domain.ports.MetadataWriterPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### MetadataCoordinatorPort
+
+Interface for coordinating metadata operations.
+
+::: bioetl.domain.ports.MetadataCoordinatorPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Observability
 
 ### MetricsPort
 
@@ -94,11 +124,6 @@ Prometheus-compatible metrics interface.
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - increment_counter
-            - set_gauge
-            - observe_histogram
-            - close
 
 ### TracingPort
 
@@ -108,9 +133,6 @@ Distributed tracing interface (OpenTelemetry compatible).
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - get_tracer
-            - close
 
 ### LoggerPort
 
@@ -120,15 +142,64 @@ Structured logging interface.
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - info
-            - warning
-            - error
-            - debug
-            - exception
-            - bind
 
-## Validation Ports
+### DQMonitorPort
+
+Interface for monitoring data quality anomalies.
+
+::: bioetl.domain.ports.DQMonitorPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### MemoryMonitorPort
+
+Interface for monitoring memory usage.
+
+::: bioetl.domain.ports.MemoryMonitorPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### HealthCheckPort
+
+Interface for component health checks.
+
+::: bioetl.domain.ports.HealthCheckPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### HealthMonitorPort
+
+Interface for monitoring system health.
+
+::: bioetl.domain.ports.HealthMonitorPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Resilience
+
+### CircuitBreakerPort
+
+Interface for circuit breaker pattern.
+
+::: bioetl.domain.ports.CircuitBreakerPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### RateLimiterPort
+
+Interface for rate limiting.
+
+::: bioetl.domain.ports.RateLimiterPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Data Quality & Validation
 
 ### GoldValidatorPort
 
@@ -139,7 +210,133 @@ Schema validation interface for Gold layer.
         show_root_heading: true
         show_source: false
 
-## Filtering Ports
+### SilverValidatorPort
+
+Schema validation interface for Silver layer.
+
+::: bioetl.domain.ports.SilverValidatorPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### DQReportWriterPort
+
+Interface for writing DQ reports.
+
+::: bioetl.domain.ports.DQReportWriterPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### BronzeDQAnalyzerPort
+
+Interface for analyzing Bronze layer data quality.
+
+::: bioetl.domain.ports.BronzeDQAnalyzerPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### SilverDQAnalyzerPort
+
+Interface for analyzing Silver layer data quality.
+
+::: bioetl.domain.ports.SilverDQAnalyzerPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### GoldDQAnalyzerPort
+
+Interface for analyzing Gold layer data quality.
+
+::: bioetl.domain.ports.GoldDQAnalyzerPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### BronzeDQConfigPort
+
+Interface for Bronze DQ configuration.
+
+::: bioetl.domain.ports.BronzeDQConfigPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### SilverDQConfigPort
+
+Interface for Silver DQ configuration.
+
+::: bioetl.domain.ports.SilverDQConfigPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### GoldDQConfigPort
+
+Interface for Gold DQ configuration.
+
+::: bioetl.domain.ports.GoldDQConfigPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Transformation & Normalization
+
+### NormalizationServicePort
+
+Interface for normalization services.
+
+::: bioetl.domain.ports.NormalizationServicePort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### DataNormalizationPort
+
+Interface for general data normalization.
+
+::: bioetl.domain.ports.DataNormalizationPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### UnitConverterPort
+
+Interface for unit conversion.
+
+::: bioetl.domain.ports.UnitConverterPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### ValueValidatorPort
+
+Interface for value validation.
+
+::: bioetl.domain.ports.ValueValidatorPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### ActivityAggregatorPort
+
+Interface for activity aggregation.
+
+::: bioetl.domain.ports.ActivityAggregatorPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### OutlierFilterPort
+
+Interface for filtering outliers.
+
+::: bioetl.domain.ports.OutlierFilterPort
+    options:
+        show_root_heading: true
+        show_source: false
 
 ### InputFilterPort
 
@@ -149,8 +346,44 @@ Interface for loading filter IDs from external sources.
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - load_filter_ids
+
+### JsonEncoderPort
+
+Interface for JSON encoding.
+
+::: bioetl.domain.ports.JsonEncoderPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Runner
+
+### RunnablePort
+
+Interface for runnable components.
+
+::: bioetl.domain.ports.RunnablePort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### RunnerFactoryPort
+
+Interface for creating runners.
+
+::: bioetl.domain.ports.RunnerFactoryPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### MetricsExtractorPort
+
+Interface for extracting metrics from runners.
+
+::: bioetl.domain.ports.MetricsExtractorPort
+    options:
+        show_root_heading: true
+        show_source: false
 
 ## Usage Example
 
