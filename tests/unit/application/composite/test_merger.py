@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.application.composite.deduplication import EnricherDeduplicator
 from bioetl.application.composite.merger import MergeService, _path_to_table_name
 from bioetl.domain.composite.config import EnricherConfig, MergeConfig
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
@@ -26,6 +27,12 @@ def mock_storage():
 def mock_logger():
     """Create a mock LoggerPort."""
     return MagicMock()
+
+
+@pytest.fixture
+def deduplicator(mock_logger):
+    """Create an EnricherDeduplicator instance."""
+    return EnricherDeduplicator(mock_logger)
 
 
 @pytest.fixture
@@ -823,3 +830,352 @@ class TestInferPipelineFromTable:
         """Test returns None for path without layer prefix."""
         pipeline = merge_service._infer_pipeline_from_table("invalid/path")
         assert pipeline is None
+
+
+@pytest.mark.unit
+class TestCheckDuplicates:
+    """Tests for EnricherDeduplicator._check_duplicates helper."""
+
+    def test_no_duplicates(self, deduplicator):
+        """Test returns False when no duplicates."""
+        import polars as pl
+
+        df = pl.DataFrame({"doi": ["a", "b", "c"], "val": [1, 2, 3]})
+        assert deduplicator._check_duplicates(df, ["doi"]) is False
+
+    def test_has_duplicates(self, deduplicator):
+        """Test returns True when duplicates exist."""
+        import polars as pl
+
+        df = pl.DataFrame({"doi": ["a", "a", "b"], "val": [1, 2, 3]})
+        assert deduplicator._check_duplicates(df, ["doi"]) is True
+
+    def test_empty_dataframe(self, deduplicator):
+        """Test returns False for empty DataFrame."""
+        import polars as pl
+
+        df = pl.DataFrame({"doi": [], "val": []}).cast(
+            {"doi": pl.String, "val": pl.Int64}
+        )
+        assert deduplicator._check_duplicates(df, ["doi"]) is False
+
+    def test_missing_key_column(self, deduplicator):
+        """Test returns False when key column doesn't exist."""
+        import polars as pl
+
+        df = pl.DataFrame({"val": [1, 2, 3]})
+        assert deduplicator._check_duplicates(df, ["doi"]) is False
+
+    def test_composite_key(self, deduplicator):
+        """Test composite key detection."""
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a", "a"],
+                "pmid": ["1", "1", "2"],
+                "val": [1, 2, 3],
+            }
+        )
+        # (a, 1) and (a, 2) are unique composite keys, but (a, 1) has duplicate
+        # Wait, actually: (a, 1), (a, 1), (a, 2) → (a, 1) is duplicated
+        assert deduplicator._check_duplicates(df, ["doi", "pmid"]) is True
+
+        # No duplicates
+        df2 = pl.DataFrame(
+            {
+                "doi": ["a", "a", "b"],
+                "pmid": ["1", "2", "1"],
+                "val": [1, 2, 3],
+            }
+        )
+        assert deduplicator._check_duplicates(df2, ["doi", "pmid"]) is False
+
+
+@pytest.mark.unit
+class TestDeduplicateEnricher:
+    """Tests for EnricherDeduplicator.deduplicate and related helpers."""
+
+    def test_no_duplicates_returns_unchanged(self, deduplicator):
+        """Test no duplicates returns DataFrame unchanged."""
+        import polars as pl
+
+        df = pl.DataFrame({"doi": ["a", "b"], "title": ["T1", "T2"]})
+        result = deduplicator.deduplicate(df, ["doi"], "test")
+        assert result.equals(df)
+
+    def test_identical_values_preserves_type(self, deduplicator):
+        """Test identical values preserve original type."""
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a", "b"],
+                "title": ["Same", "Same", "Other"],
+                "count": [10, 10, 20],
+            }
+        )
+        result = deduplicator.deduplicate(df, ["doi"], "test")
+        assert len(result) == 2
+        row_a = result.filter(pl.col("doi") == "a")
+        assert row_a["title"][0] == "Same"
+        assert row_a["count"][0] == 10
+        # Type should be preserved
+        assert row_a["count"].dtype == pl.Int64
+
+    def test_different_values_concatenated(self, deduplicator):
+        """Test different values are concatenated with | in original order."""
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a", "b"],
+                "title": ["T1", "T2", "T3"],
+                "count": [10, 20, 30],
+            }
+        )
+        result = deduplicator.deduplicate(df, ["doi"], "test")
+        assert len(result) == 2
+        row_a = result.filter(pl.col("doi") == "a")
+        assert row_a["title"][0] == "T1|T2"
+        assert row_a["count"][0] == "10|20"
+
+    def test_all_null_remains_null(self, deduplicator):
+        """Test all null values remain null (no conflict when all identical)."""
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a"],
+                "title": [None, None],
+            }
+        )
+        result = deduplicator.deduplicate(df, ["doi"], "test")
+        assert len(result) == 1
+        # All nulls → remains null (no conflict, uses first() which preserves null)
+        assert result["title"][0] is None
+
+    def test_mixed_null_values(self, deduplicator):
+        """Test mixed null and values include null as string in original order."""
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a", "a"],
+                "title": ["T1", None, "T2"],
+            }
+        )
+        result = deduplicator.deduplicate(df, ["doi"], "test")
+        assert len(result) == 1
+        # Order preserved: T1, null, T2
+        assert result["title"][0] == "T1|null|T2"
+
+    def test_single_value_plus_null(self, deduplicator):
+        """Test single value plus null are concatenated in original order."""
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a"],
+                "title": ["Same", None],
+            }
+        )
+        result = deduplicator.deduplicate(df, ["doi"], "test")
+        assert len(result) == 1
+        assert result["title"][0] == "Same|null"
+
+    def test_numeric_with_null(self, deduplicator):
+        """Test numeric values with null in original order."""
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a", "a"],
+                "count": [10, None, 20],
+            }
+        )
+        result = deduplicator.deduplicate(df, ["doi"], "test")
+        assert len(result) == 1
+        # Order preserved: 10, null, 20
+        assert result["count"][0] == "10|null|20"
+
+    def test_boolean_values(self, deduplicator):
+        """Test boolean values are converted to lowercase strings in original order."""
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a"],
+                "is_oa": [True, False],
+            }
+        )
+        result = deduplicator.deduplicate(df, ["doi"], "test")
+        assert len(result) == 1
+        # Order preserved: true, false
+        assert result["is_oa"][0] == "true|false"
+
+    def test_date_values(self, deduplicator):
+        """Test date values are converted to ISO format in original order."""
+        import polars as pl
+        from datetime import date
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a"],
+                "pub_date": [date(2024, 1, 1), date(2024, 6, 15)],
+            }
+        )
+        result = deduplicator.deduplicate(df, ["doi"], "test")
+        assert len(result) == 1
+        assert result["pub_date"][0] == "2024-01-01|2024-06-15"
+
+    def test_composite_key(self, deduplicator):
+        """Test deduplication with composite key."""
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a", "a"],
+                "pmid": ["1", "1", "2"],
+                "val": ["X", "Y", "Z"],
+            }
+        )
+        result = deduplicator.deduplicate(df, ["doi", "pmid"], "test")
+        assert len(result) == 2
+        row_a1 = result.filter((pl.col("doi") == "a") & (pl.col("pmid") == "1"))
+        assert row_a1["val"][0] == "X|Y"
+
+    def test_empty_dataframe(self, deduplicator):
+        """Test empty DataFrame returns unchanged."""
+        import polars as pl
+
+        df = pl.DataFrame({"doi": [], "title": []}).cast(
+            {"doi": pl.String, "title": pl.String}
+        )
+        result = deduplicator.deduplicate(df, ["doi"], "test")
+        assert len(result) == 0
+
+    def test_duplicate_values_in_group_preserved(self, deduplicator):
+        """Test duplicate values within a group are preserved (not deduplicated)."""
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a", "a"],
+                "title": ["Same", "Same", "Different"],
+            }
+        )
+        result = deduplicator.deduplicate(df, ["doi"], "test")
+        assert len(result) == 1
+        # Order and duplicates preserved: Same, Same, Different
+        assert result["title"][0] == "Same|Same|Different"
+
+    def test_logs_warning_on_duplicates(self, deduplicator, mock_logger):
+        """Test warning is logged when duplicates are found."""
+        import polars as pl
+
+        df = pl.DataFrame(
+            {
+                "doi": ["a", "a"],
+                "title": ["T1", "T2"],
+            }
+        )
+        deduplicator.deduplicate(df, ["doi"], "test_enricher")
+
+        mock_logger.warning.assert_called_once()
+        call_kwargs = mock_logger.warning.call_args[1]
+        assert call_kwargs["enricher"] == "test_enricher"
+        assert call_kwargs["join_keys"] == ["doi"]
+        assert call_kwargs["duplicate_count"] == 1
+        assert "title" in call_kwargs["columns_with_conflicts"]
+
+
+@pytest.mark.unit
+class TestApplyJoinsWithDeduplication:
+    """Tests for _apply_joins with enricher deduplication."""
+
+    @pytest.mark.asyncio
+    async def test_deduplicates_enricher_before_join(self, merge_service):
+        """Test enricher is deduplicated before join to prevent fan-out."""
+        import polars as pl
+
+        # Seed has 2 unique DOIs
+        seed_df = pl.DataFrame(
+            {
+                "doi": ["10.1/aaa", "10.1/bbb"],
+                "title": ["Study A", "Study B"],
+            }
+        )
+
+        # Enricher has duplicates for 10.1/aaa
+        enricher_df = pl.DataFrame(
+            {
+                "doi": ["10.1/aaa", "10.1/aaa", "10.1/bbb"],
+                "citation_count": [150, 200, 50],
+            }
+        )
+
+        enricher_config = EnricherConfig(
+            pipeline="crossref_publication",
+            join_keys=("doi",),
+            required=False,
+        )
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"crossref_publication": enricher_df},
+            enrichers=[enricher_config],
+            seed_pipeline="chembl_publication",
+        )
+
+        # Result should have exactly 2 rows (no fan-out)
+        assert len(result) == 2
+
+        # Citation count for aaa should be aggregated
+        row_aaa = result.filter(pl.col("doi") == "10.1/aaa")
+        assert "150|200" in str(row_aaa["crossref.citation_count"][0])
+
+        # Citation count for bbb - no duplicates, but column type is String
+        # because other groups have conflicts (Polars requires uniform column type)
+        row_bbb = result.filter(pl.col("doi") == "10.1/bbb")
+        assert row_bbb["crossref.citation_count"][0] == "50"
+
+    @pytest.mark.asyncio
+    async def test_no_deduplication_when_no_duplicates(
+        self, merge_service, mock_logger
+    ):
+        """Test no deduplication overhead when enricher has no duplicates."""
+        import polars as pl
+
+        seed_df = pl.DataFrame(
+            {
+                "doi": ["10.1/aaa", "10.1/bbb"],
+                "title": ["Study A", "Study B"],
+            }
+        )
+
+        enricher_df = pl.DataFrame(
+            {
+                "doi": ["10.1/aaa", "10.1/bbb"],
+                "citation_count": [150, 50],
+            }
+        )
+
+        enricher_config = EnricherConfig(
+            pipeline="crossref_publication",
+            join_keys=("doi",),
+            required=False,
+        )
+
+        await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"crossref_publication": enricher_df},
+            enrichers=[enricher_config],
+            seed_pipeline="chembl_publication",
+        )
+
+        # Warning should NOT be called (no duplicates)
+        for call in mock_logger.warning.call_args_list:
+            # Check that we didn't log about duplicate aggregation
+            if call[0] and "Duplicates aggregated" in str(call[0][0]):
+                pytest.fail("Should not log duplicate warning when no duplicates")
