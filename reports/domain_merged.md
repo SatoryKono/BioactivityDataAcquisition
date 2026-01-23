@@ -5927,7 +5927,7 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
 
     # Unified publication fields
     citation_count: Series[float] = pa.Field(nullable=True, coerce=True)
-    is_oa: Series[bool] = pa.Field(nullable=True)
+    is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
     language: Series[str] = pa.Field(nullable=True)
 
     # System field (per SYSTEM_FIELDS_PREFIX)
@@ -6558,7 +6558,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
 
     # Metadata
     doc_type: Series[str] = pa.Field(nullable=False)
-    is_oa: Series[bool] = pa.Field(nullable=True)
+    is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
     oa_status: Series[str] = pa.Field(nullable=True)
     # OpenAlex source field: cited_by_count
     # Unified BioETL field: citation_count (standardized across all providers)

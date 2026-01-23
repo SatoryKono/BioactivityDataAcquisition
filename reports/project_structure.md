@@ -640,6 +640,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 318846b0ac0f3c37
     │   │   ├── 318cc5c44ac4dc3c
     │   │   ├── 3199aef98c4cde87
+    │   │   ├── 31a30cdab1ad6aac
     │   │   ├── 31a33c380cbecdac
     │   │   ├── 31b37da81bd7c4d5
     │   │   ├── 31ce9be32c11f712
@@ -2824,6 +2825,7 @@ BioactivityDataAcquisition2/
     │   │   ├── d7e71a44ab281688
     │   │   ├── d81af12d59a1a843
     │   │   ├── d837998c604c9e0c
+    │   │   ├── d84ae486fe4f4c9e
     │   │   ├── d867df1bcd90b40a
     │   │   ├── d872275471087cf7
     │   │   ├── d888bb9c2f36ef00
@@ -3683,6 +3685,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp_9x6m149
     │   │   ├── tmp_a1smyn1
     │   │   ├── tmp_aoa56wa
+    │   │   ├── tmp_bjf2og0
     │   │   ├── tmp_ckgibpf
     │   │   ├── tmp_fpr7214
     │   │   ├── tmp_fpt2kb8
@@ -9490,9 +9493,12 @@ BioactivityDataAcquisition2/
     │       │   │   │   └── chembl_document_metadata.yaml
     │       │   │   ├── activity
     │       │   │   ├── assay
+    │       │   │   ├── cell_line
+    │       │   │   ├── compound_record
     │       │   │   ├── document_term
     │       │   │   ├── molecule
-    │       │   │   └── target
+    │       │   │   ├── target
+    │       │   │   └── target_component
     │       │   ├── crossref/
     │       │   │   └── publication/
     │       │   │       ├── 2026-01-22/
@@ -9539,8 +9545,11 @@ BioactivityDataAcquisition2/
     │       │   │   │   ├── gold_chembl_publication_dq_report.json
     │       │   │   │   └── part-00000-7287f8eb-7256-4c29-82d2-66027b0e1f73-c000.snappy.parquet
     │       │   │   ├── activity
+    │       │   │   ├── cell_line
+    │       │   │   ├── compound_record
     │       │   │   ├── document_term
-    │       │   │   └── target
+    │       │   │   ├── target
+    │       │   │   └── target_component
     │       │   ├── composite/
     │       │   │   ├── publication/
     │       │   │   │   ├── _delta_log/
@@ -9593,9 +9602,12 @@ BioactivityDataAcquisition2/
     │           │   │   └── silver_chembl_publication_dq_report.json
     │           │   ├── activity
     │           │   ├── assay
+    │           │   ├── cell_line
+    │           │   ├── compound_record
     │           │   ├── document_term
     │           │   ├── molecule
-    │           │   └── target
+    │           │   ├── target
+    │           │   └── target_component
     │           ├── composite/
     │           │   ├── publication/
     │           │   │   ├── _delta_log/
@@ -11460,5 +11472,5 @@ BioactivityDataAcquisition2/
 
 **Statistics:**
 - Directories: 750
-- Files: 10703
-- Total items: 11453
+- Files: 10715
+- Total items: 11465
