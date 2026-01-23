@@ -9477,7 +9477,7 @@ BioactivityDataAcquisition2/
     │   │   ├── protein_classification.csv
     │   │   ├── publication.csv
     │   │   ├── pubmed.csv
-    │   │   ├── pubmed_publications.csv
+    │   │   ├── pubmed_publication.csv
     │   │   ├── target.csv
     │   │   ├── target_component.csv
     │   │   └── tissue.csv
@@ -10813,7 +10813,7 @@ BioactivityDataAcquisition2/
     │   │   ├── test_pipeline_with_dq_errors_e2e.py
     │   │   ├── test_pipeline_with_schema_drift_e2e.py
     │   │   ├── test_pubchem_compound_e2e.py
-    │   │   ├── test_pubmed_publications_e2e.py
+    │   │   ├── test_pubmed_publication_e2e.py
     │   │   ├── test_resilience_scenarios_e2e.py
     │   │   ├── test_run_types_e2e.py
     │   │   └── test_uniprot_protein_e2e.py
@@ -10900,11 +10900,11 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── .gitkeep
     │   │   │   │   ├── test_fetch_publications.yaml
     │   │   │   │   ├── test_health_check.yaml
-    │   │   │   │   ├── test_pubmed_publications_classification_fields.yaml
-    │   │   │   │   ├── test_pubmed_publications_date_fields.yaml
-    │   │   │   │   ├── test_pubmed_publications_full_cycle.yaml
-    │   │   │   │   ├── test_pubmed_publications_identifier_fields.yaml
-    │   │   │   │   └── test_pubmed_publications_journal_fields.yaml
+    │   │   │   │   ├── test_pubmed_publication_classification_fields.yaml
+    │   │   │   │   ├── test_pubmed_publication_date_fields.yaml
+    │   │   │   │   ├── test_pubmed_publication_full_cycle.yaml
+    │   │   │   │   ├── test_pubmed_publication_identifier_fields.yaml
+    │   │   │   │   └── test_pubmed_publication_journal_fields.yaml
     │   │   │   ├── semanticscholar/
     │   │   │   │   ├── .gitkeep
     │   │   │   │   ├── TestSemanticScholarAdapterIntegration.test_fetch_batch_dois.yaml
@@ -11422,7 +11422,7 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── test_extractor_edge_cases.py
     │   │   │   │   │   ├── test_identifier_extractor.py
     │   │   │   │   │   └── test_xml_utils.py
-    │   │   │   │   ├── test_pubmed_publications.py
+    │   │   │   │   ├── test_pubmed_publication.py
     │   │   │   │   └── test_pubmed_transformer.py
     │   │   │   ├── __init__.py
     │   │   │   └── test_chembl_ddd.py

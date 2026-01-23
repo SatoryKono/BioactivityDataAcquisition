@@ -446,7 +446,7 @@ class TestListAvailablePipelinesFunction:
             "chembl_assay",
             "chembl_molecule",
             "pubchem_compound",
-            "pubmed_publications",
+            "pubmed_publication",
             "uniprot_protein",
         ]
 
