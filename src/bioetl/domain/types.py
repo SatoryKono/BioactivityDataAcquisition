@@ -1,7 +1,7 @@
 """Core domain types for BioETL.
 
 Implements RULES.md §1 - Domain Layer with pure types and value objects.
-No I/O operations allowed (REQ-ARCH-003).
+No I/O operations are allowed (REQ-ARCH-003).
 
 Type Safety: NewType for IDs, TypedDict for records, frozen dataclasses for VOs.
 See RULES.md §1.3 for Any usage justification (external APIs, logging, protocols).
@@ -40,7 +40,7 @@ in the domain layer. At runtime, this is a pyarrow.Schema object.
 
 
 class BronzeRecord(TypedDict):
-    """Untyped dictionary representing a raw record from source."""
+    """Untyped dictionary representing a raw record from the source."""
 
     # We use NotRequired for dynamic fields, but TypedDict doesn't allow mixing optional/required well in old python
     # For now, we assume keys are strings and values Any
@@ -170,7 +170,7 @@ class ErrorType(str, Enum):
     """Error classification (RULES.md §3.1.1).
 
     Determines pipeline behavior:
-    - CRITICAL: Fail pipeline immediately
+    - CRITICAL: Fail the pipeline immediately
     - RECOVERABLE: Retry with exponential backoff
     - DATA_QUALITY: Log and skip record (quarantine)
     """
@@ -215,7 +215,7 @@ class ErrorType(str, Enum):
     """General data quality error (e.g. thresholds)."""
 
     def is_critical(self) -> bool:
-        """Check if error should fail pipeline."""
+        """Check if error should fail the pipeline."""
         return self in {
             ErrorType.AUTH_FAILURE,
             ErrorType.SCHEMA_MISMATCH_GOLD,
@@ -370,7 +370,7 @@ class PreflightReport:
     health_report: HealthReport
     medallion_policy_valid: bool
     config_errors: list[ConfigValidationError] = field(default_factory=list)
-    checked_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
+    checked_at: datetime
 
     @property
     def is_valid(self) -> bool:

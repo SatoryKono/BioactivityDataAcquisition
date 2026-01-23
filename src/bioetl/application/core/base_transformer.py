@@ -533,7 +533,7 @@ class BaseTransformer(ABC):
         *,
         allow_empty: bool = False,
     ) -> Any:
-        """Extract and validate a required field from record.
+        """Extract and validate a required field from the record.
 
         Args:
             record: Bronze record dictionary.

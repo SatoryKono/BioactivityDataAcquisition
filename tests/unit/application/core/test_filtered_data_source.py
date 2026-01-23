@@ -13,7 +13,7 @@ from bioetl.domain.types import HealthStatus
 
 
 class MockDataSource:
-    """Mock data source that does NOT implement FilterableDataSourcePort.
+    """Mock the data source that does NOT implement FilterableDataSourcePort.
 
     Tracks method calls for test assertions.
     """
@@ -32,7 +32,7 @@ class MockDataSource:
 
 
 class MockFilterableDataSource:
-    """Mock data source that implements FilterableDataSourcePort.
+    """Mock the data source that implements FilterableDataSourcePort.
 
     Tracks method calls for test assertions.
     """

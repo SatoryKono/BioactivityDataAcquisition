@@ -15,10 +15,15 @@ Int→Float coercion note:
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pandera.pandas as pa
 from pandera.typing import Series
 
-from bioetl.domain.contracts.gold._base import DATE_REGEX
+from bioetl.domain.contracts.gold._base import validate_date_format
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class PubMedPublicationGoldSchema(pa.DataFrameModel):
@@ -69,24 +74,18 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     pub_date: Series[str] = pa.Field(nullable=True)
     pub_month: Series[float] = pa.Field(nullable=True, coerce=True)  # Month (1-12)
     pub_day: Series[float] = pa.Field(nullable=True, coerce=True)  # Day (1-31)
-    publication_date: Series[str] = pa.Field(
-        nullable=True, str_matches=DATE_REGEX
-    )  # Unified: YYYY-MM-DD
+    publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
     year: Series[float] = pa.Field(nullable=True, coerce=True)
     publication_year: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # Legacy alias
-    accepted_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
-    received_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
-    revised_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
-    epub_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
+    accepted_date: Series[str] = pa.Field(nullable=True)
+    received_date: Series[str] = pa.Field(nullable=True)
+    revised_date: Series[str] = pa.Field(nullable=True)
+    epub_date: Series[str] = pa.Field(nullable=True)
     # MEDLINE-specific dates
-    date_completed: Series[str] = pa.Field(
-        nullable=True, str_matches=DATE_REGEX
-    )  # MEDLINE processing completion
-    date_revised: Series[str] = pa.Field(
-        nullable=True, str_matches=DATE_REGEX
-    )  # Record revision date (MEDLINE)
+    date_completed: Series[str] = pa.Field(nullable=True)  # MEDLINE processing completion
+    date_revised: Series[str] = pa.Field(nullable=True)  # Record revision date (MEDLINE)
 
     # Publication status and types
     publication_status: Series[str] = pa.Field(
@@ -175,15 +174,9 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
 
     # Date fields
     year: Series[float] = pa.Field(nullable=True, ge=1900, le=2100, coerce=True)
-    publication_date: Series[str] = pa.Field(
-        nullable=True, str_matches=DATE_REGEX
-    )  # Unified: YYYY-MM-DD
-    published_print: Series[str] = pa.Field(
-        nullable=True, str_matches=DATE_REGEX
-    )  # Legacy: provider-specific
-    published_online: Series[str] = pa.Field(
-        nullable=True, str_matches=DATE_REGEX
-    )  # Legacy: provider-specific
+    publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
+    published_print: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
+    published_online: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
 
     # Metadata
     doc_type: Series[str] = pa.Field(nullable=True)
@@ -254,7 +247,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
 
     # Date fields
     year: Series[float] = pa.Field(nullable=True, ge=1500, le=2100, coerce=True)
-    publication_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
+    publication_date: Series[str] = pa.Field(nullable=True, checks=date_check())
 
     # Metadata
     doc_type: Series[str] = pa.Field(nullable=False)
@@ -316,7 +309,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     abstract: Series[str] = pa.Field(nullable=True)
     tldr: Series[str] = pa.Field(nullable=True)
     year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    publication_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
+    publication_date: Series[str] = pa.Field(nullable=True, checks=date_check())
 
     # Journal/Venue
     journal: Series[str] = pa.Field(nullable=True)

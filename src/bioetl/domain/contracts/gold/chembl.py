@@ -22,10 +22,15 @@ Int→Float coercion note:
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pandera.pandas as pa
 from pandera.typing import Series
 
-from bioetl.domain.contracts.gold._base import DATE_REGEX
+from bioetl.domain.contracts.gold._base import validate_date_format
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class ChEMBLActivityGoldSchema(pa.DataFrameModel):
@@ -332,9 +337,7 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     journal: Series[str] = pa.Field(nullable=True)
     journal_full_title: Series[str] = pa.Field(nullable=True)
     year: Series[float] = pa.Field(nullable=True, coerce=True)
-    publication_date: Series[str] = pa.Field(
-        nullable=True, str_matches=DATE_REGEX
-    )  # Unified: YYYY-MM-DD
+    publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)
     first_page: Series[str] = pa.Field(nullable=True)
@@ -370,6 +373,12 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
         """Pandera configuration for strict schema validation."""
 
         strict = True
+
+    @pa.check("publication_date")
+    @staticmethod
+    def check_publication_date_format(series: "pd.Series[str]") -> "pd.Series[bool]":
+        """Validate publication_date has YYYY-MM-DD format."""
+        return validate_date_format(series)
 
 
 class ChEMBLDocumentSimilarityGoldSchema(pa.DataFrameModel):
