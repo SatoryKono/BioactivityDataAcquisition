@@ -15,15 +15,8 @@ Int→Float coercion note:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import pandera.pandas as pa
 from pandera.typing import Series
-
-from bioetl.domain.contracts.gold._base import validate_date_format
-
-if TYPE_CHECKING:
-    import pandas as pd
 
 
 class PubMedPublicationGoldSchema(pa.DataFrameModel):
@@ -247,7 +240,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
 
     # Date fields
     year: Series[float] = pa.Field(nullable=True, ge=1500, le=2100, coerce=True)
-    publication_date: Series[str] = pa.Field(nullable=True, checks=date_check())
+    publication_date: Series[str] = pa.Field(nullable=True)
 
     # Metadata
     doc_type: Series[str] = pa.Field(nullable=False)
@@ -309,7 +302,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     abstract: Series[str] = pa.Field(nullable=True)
     tldr: Series[str] = pa.Field(nullable=True)
     year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    publication_date: Series[str] = pa.Field(nullable=True, checks=date_check())
+    publication_date: Series[str] = pa.Field(nullable=True)
 
     # Journal/Venue
     journal: Series[str] = pa.Field(nullable=True)

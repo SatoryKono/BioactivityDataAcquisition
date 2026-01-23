@@ -22,15 +22,8 @@ Int→Float coercion note:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import pandera.pandas as pa
 from pandera.typing import Series
-
-from bioetl.domain.contracts.gold._base import validate_date_format
-
-if TYPE_CHECKING:
-    import pandas as pd
 
 
 class ChEMBLActivityGoldSchema(pa.DataFrameModel):
@@ -373,12 +366,6 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
         """Pandera configuration for strict schema validation."""
 
         strict = True
-
-    @pa.check("publication_date")
-    @staticmethod
-    def check_publication_date_format(series: "pd.Series[str]") -> "pd.Series[bool]":
-        """Validate publication_date has YYYY-MM-DD format."""
-        return validate_date_format(series)
 
 
 class ChEMBLDocumentSimilarityGoldSchema(pa.DataFrameModel):
