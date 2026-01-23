@@ -558,7 +558,7 @@ class TestDetectAndResolveConflicts:
         assert enricher_out.columns == ["doi", "crossref.author"]
 
     def test_resolves_conflicts_with_suffixes(self, merge_service):
-        """Test conflicts are resolved with .A/.B suffixes."""
+        """Test conflicts are resolved: seed unchanged, enricher gets suffix."""
         import polars as pl
 
         seed = pl.DataFrame({"doi": ["10.1/a"], "crossref.title": ["T1"]})
@@ -568,9 +568,10 @@ class TestDetectAndResolveConflicts:
             seed, enricher, {"doi"}
         )
 
-        assert "crossref.title.A" in seed_out.columns
-        assert "crossref.title.B" in enricher_out.columns
-        assert "crossref.title" not in seed_out.columns
+        # Seed columns remain unchanged
+        assert "crossref.title" in seed_out.columns
+        # Enricher gets incremental suffix
+        assert "crossref.title.A" in enricher_out.columns
         assert "crossref.title" not in enricher_out.columns
 
     def test_join_keys_not_affected(self, merge_service):
@@ -588,9 +589,52 @@ class TestDetectAndResolveConflicts:
         # doi should remain unchanged in both
         assert "doi" in seed_out.columns
         assert "doi" in enricher_out.columns
-        # value should be renamed
-        assert "value.A" in seed_out.columns
-        assert "value.B" in enricher_out.columns
+        # seed value unchanged, enricher value gets suffix
+        assert "value" in seed_out.columns
+        assert "value.A" in enricher_out.columns
+
+    def test_find_next_suffix_basic(self, merge_service):
+        """Test _find_next_suffix returns first available suffix."""
+        # No existing suffixes → returns A
+        assert merge_service._find_next_suffix("title", {"title"}) == "A"
+        # A exists → returns B
+        assert merge_service._find_next_suffix("title", {"title", "title.A"}) == "B"
+        # A, B exist → returns C
+        assert (
+            merge_service._find_next_suffix("title", {"title", "title.A", "title.B"})
+            == "C"
+        )
+
+    def test_incremental_suffixes_multiple_enrichers(self, merge_service):
+        """Test incremental suffixes when multiple enrichers conflict."""
+        import polars as pl
+
+        # Seed with a column that will conflict
+        seed = pl.DataFrame({"doi": ["10.1/a"], "pub_date": ["2024-01-01"]})
+
+        # First enricher conflict
+        enricher1 = pl.DataFrame({"doi": ["10.1/a"], "pub_date": ["2024-02-01"]})
+        seed_out1, enricher_out1 = merge_service._detect_and_resolve_conflicts(
+            seed, enricher1, {"doi"}
+        )
+        assert "pub_date" in seed_out1.columns  # Seed unchanged
+        assert "pub_date.A" in enricher_out1.columns  # First enricher gets A
+
+        # Simulate merged state after first join
+        merged = pl.DataFrame({
+            "doi": ["10.1/a"],
+            "pub_date": ["2024-01-01"],
+            "pub_date.A": ["2024-02-01"],
+        })
+
+        # Second enricher conflict - should get B suffix
+        enricher2 = pl.DataFrame({"doi": ["10.1/a"], "pub_date": ["2024-03-01"]})
+        merged_out, enricher_out2 = merge_service._detect_and_resolve_conflicts(
+            merged, enricher2, {"doi"}
+        )
+        assert "pub_date" in merged_out.columns  # Original seed column unchanged
+        assert "pub_date.A" in merged_out.columns  # First enricher column unchanged
+        assert "pub_date.B" in enricher_out2.columns  # Second enricher gets B
 
 
 @pytest.mark.unit
@@ -707,7 +751,7 @@ class TestApplyJoinsSmartColumnRenaming:
 
     @pytest.mark.asyncio
     async def test_conflict_after_prefixing_gets_suffixes(self, merge_service):
-        """Test conflict after prefixing gets .A/.B suffixes."""
+        """Test conflict after prefixing: seed unchanged, enricher gets suffix."""
         import polars as pl
 
         # Seed already has crossref.title
@@ -728,9 +772,9 @@ class TestApplyJoinsSmartColumnRenaming:
             seed_pipeline="chembl_publication",
         )
 
-        # Conflict resolved with .A/.B suffixes
+        # Seed column unchanged, enricher gets incremental suffix
+        assert "crossref.title" in result.columns
         assert "crossref.title.A" in result.columns
-        assert "crossref.title.B" in result.columns
 
     @pytest.mark.asyncio
     async def test_legacy_prefix_when_no_seed_pipeline(self, merge_service):
