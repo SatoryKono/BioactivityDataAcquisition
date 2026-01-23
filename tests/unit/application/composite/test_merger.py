@@ -823,3 +823,363 @@ class TestInferPipelineFromTable:
         """Test returns None for path without layer prefix."""
         pipeline = merge_service._infer_pipeline_from_table("invalid/path")
         assert pipeline is None
+
+
+@pytest.mark.unit
+class TestCheckDuplicates:
+    """Tests for _check_duplicates helper."""
+
+    def test_no_duplicates(self, merge_service):
+        """Test returns False when no duplicates."""
+        import polars as pl
+
+        df = pl.DataFrame({"doi": ["a", "b", "c"], "val": [1, 2, 3]})
+        assert merge_service._check_duplicates(df, ["doi"]) is False
+
+    def test_has_duplicates(self, merge_service):
+        """Test returns True when duplicates exist."""
+        import polars as pl
+
+        df = pl.DataFrame({"doi": ["a", "a", "b"], "val": [1, 2, 3]})
+        assert merge_service._check_duplicates(df, ["doi"]) is True
+
+    def test_empty_dataframe(self, merge_service):
+        """Test returns False for empty DataFrame."""
+        import polars as pl
+
+        df = pl.DataFrame({"doi": [], "val": []}).cast({"doi": pl.String, "val": pl.Int64})
+        assert merge_service._check_duplicates(df, ["doi"]) is False
+
+    def test_missing_key_column(self, merge_service):
+        """Test returns False when key column doesn't exist."""
+        import polars as pl
+
+        df = pl.DataFrame({"val": [1, 2, 3]})
+        assert merge_service._check_duplicates(df, ["doi"]) is False
+
+    def test_composite_key(self, merge_service):
+        """Test composite key detection."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "doi": ["a", "a", "a"],
+            "pmid": ["1", "1", "2"],
+            "val": [1, 2, 3],
+        })
+        # (a, 1) and (a, 2) are unique composite keys, but (a, 1) has duplicate
+        # Wait, actually: (a, 1), (a, 1), (a, 2) → (a, 1) is duplicated
+        assert merge_service._check_duplicates(df, ["doi", "pmid"]) is True
+
+        # No duplicates
+        df2 = pl.DataFrame({
+            "doi": ["a", "a", "b"],
+            "pmid": ["1", "2", "1"],
+            "val": [1, 2, 3],
+        })
+        assert merge_service._check_duplicates(df2, ["doi", "pmid"]) is False
+
+
+@pytest.mark.unit
+class TestDeduplicateEnricher:
+    """Tests for _deduplicate_enricher and related helpers."""
+
+    def test_no_duplicates_returns_unchanged(self, merge_service):
+        """Test no duplicates returns DataFrame unchanged."""
+        import polars as pl
+
+        df = pl.DataFrame({"doi": ["a", "b"], "title": ["T1", "T2"]})
+        result = merge_service._deduplicate_enricher(df, ["doi"], "test")
+        assert result.equals(df)
+
+    def test_identical_values_preserves_type(self, merge_service):
+        """Test identical values preserve original type."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "doi": ["a", "a", "b"],
+            "title": ["Same", "Same", "Other"],
+            "count": [10, 10, 20],
+        })
+        result = merge_service._deduplicate_enricher(df, ["doi"], "test")
+        assert len(result) == 2
+        row_a = result.filter(pl.col("doi") == "a")
+        assert row_a["title"][0] == "Same"
+        assert row_a["count"][0] == 10
+        # Type should be preserved
+        assert row_a["count"].dtype == pl.Int64
+
+    def test_different_values_concatenated(self, merge_service):
+        """Test different values are concatenated with |."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "doi": ["a", "a", "b"],
+            "title": ["T1", "T2", "T3"],
+            "count": [10, 20, 30],
+        })
+        result = merge_service._deduplicate_enricher(df, ["doi"], "test")
+        assert len(result) == 2
+        row_a = result.filter(pl.col("doi") == "a")
+        assert row_a["title"][0] == "T1|T2"
+        assert row_a["count"][0] == "10|20"
+
+    def test_all_null_remains_null(self, merge_service):
+        """Test all null values remain null."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "doi": ["a", "a"],
+            "title": [None, None],
+        })
+        result = merge_service._deduplicate_enricher(df, ["doi"], "test")
+        assert len(result) == 1
+        assert result["title"][0] is None
+
+    def test_mixed_null_values(self, merge_service):
+        """Test mixed null and values include null as string."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "doi": ["a", "a", "a"],
+            "title": ["T1", None, "T2"],
+        })
+        result = merge_service._deduplicate_enricher(df, ["doi"], "test")
+        assert len(result) == 1
+        # Values sorted: T1, T2, null → should be T1|T2|null
+        assert result["title"][0] == "T1|T2|null"
+
+    def test_single_value_plus_null(self, merge_service):
+        """Test single value plus null are concatenated."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "doi": ["a", "a"],
+            "title": ["Same", None],
+        })
+        result = merge_service._deduplicate_enricher(df, ["doi"], "test")
+        assert len(result) == 1
+        assert result["title"][0] == "Same|null"
+
+    def test_numeric_with_null(self, merge_service):
+        """Test numeric values with null."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "doi": ["a", "a", "a"],
+            "count": [10, None, 20],
+        })
+        result = merge_service._deduplicate_enricher(df, ["doi"], "test")
+        assert len(result) == 1
+        assert result["count"][0] == "10|20|null"
+
+    def test_boolean_values(self, merge_service):
+        """Test boolean values are converted to lowercase strings."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "doi": ["a", "a"],
+            "is_oa": [True, False],
+        })
+        result = merge_service._deduplicate_enricher(df, ["doi"], "test")
+        assert len(result) == 1
+        # Sorted: false, true
+        assert result["is_oa"][0] == "false|true"
+
+    def test_date_values(self, merge_service):
+        """Test date values are converted to ISO format."""
+        import polars as pl
+        from datetime import date
+
+        df = pl.DataFrame({
+            "doi": ["a", "a"],
+            "pub_date": [date(2024, 1, 1), date(2024, 6, 15)],
+        })
+        result = merge_service._deduplicate_enricher(df, ["doi"], "test")
+        assert len(result) == 1
+        assert result["pub_date"][0] == "2024-01-01|2024-06-15"
+
+    def test_composite_key(self, merge_service):
+        """Test deduplication with composite key."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "doi": ["a", "a", "a"],
+            "pmid": ["1", "1", "2"],
+            "val": ["X", "Y", "Z"],
+        })
+        result = merge_service._deduplicate_enricher(df, ["doi", "pmid"], "test")
+        assert len(result) == 2
+        row_a1 = result.filter((pl.col("doi") == "a") & (pl.col("pmid") == "1"))
+        assert row_a1["val"][0] == "X|Y"
+
+    def test_empty_dataframe(self, merge_service):
+        """Test empty DataFrame returns unchanged."""
+        import polars as pl
+
+        df = pl.DataFrame({"doi": [], "title": []}).cast(
+            {"doi": pl.String, "title": pl.String}
+        )
+        result = merge_service._deduplicate_enricher(df, ["doi"], "test")
+        assert len(result) == 0
+
+    def test_duplicate_values_in_group_deduplicated(self, merge_service):
+        """Test duplicate values within a group are removed."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "doi": ["a", "a", "a"],
+            "title": ["Same", "Same", "Different"],
+        })
+        result = merge_service._deduplicate_enricher(df, ["doi"], "test")
+        assert len(result) == 1
+        # unique values sorted: Different, Same
+        assert result["title"][0] == "Different|Same"
+
+    def test_logs_warning_on_duplicates(self, merge_service, mock_logger):
+        """Test warning is logged when duplicates are found."""
+        import polars as pl
+
+        df = pl.DataFrame({
+            "doi": ["a", "a"],
+            "title": ["T1", "T2"],
+        })
+        merge_service._deduplicate_enricher(df, ["doi"], "test_enricher")
+
+        mock_logger.warning.assert_called_once()
+        call_kwargs = mock_logger.warning.call_args[1]
+        assert call_kwargs["enricher"] == "test_enricher"
+        assert call_kwargs["join_keys"] == ["doi"]
+        assert call_kwargs["duplicate_count"] == 1
+        assert "title" in call_kwargs["columns_with_conflicts"]
+
+
+@pytest.mark.unit
+class TestApplyJoinsWithDeduplication:
+    """Tests for _apply_joins with enricher deduplication."""
+
+    @pytest.mark.asyncio
+    async def test_deduplicates_enricher_before_join(self, merge_service):
+        """Test enricher is deduplicated before join to prevent fan-out."""
+        import polars as pl
+
+        # Seed has 2 unique DOIs
+        seed_df = pl.DataFrame({
+            "doi": ["10.1/aaa", "10.1/bbb"],
+            "title": ["Study A", "Study B"],
+        })
+
+        # Enricher has duplicates for 10.1/aaa
+        enricher_df = pl.DataFrame({
+            "doi": ["10.1/aaa", "10.1/aaa", "10.1/bbb"],
+            "citation_count": [150, 200, 50],
+        })
+
+        enricher_config = EnricherConfig(
+            pipeline="crossref_publication",
+            join_keys=("doi",),
+            required=False,
+        )
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"crossref_publication": enricher_df},
+            enrichers=[enricher_config],
+            seed_pipeline="chembl_publication",
+        )
+
+        # Result should have exactly 2 rows (no fan-out)
+        assert len(result) == 2
+
+        # Citation count for aaa should be aggregated
+        row_aaa = result.filter(pl.col("doi") == "10.1/aaa")
+        assert "150|200" in str(row_aaa["crossref.citation_count"][0])
+
+        # Citation count for bbb - no duplicates, but column type is String
+        # because other groups have conflicts (Polars requires uniform column type)
+        row_bbb = result.filter(pl.col("doi") == "10.1/bbb")
+        assert row_bbb["crossref.citation_count"][0] == "50"
+
+    @pytest.mark.asyncio
+    async def test_no_deduplication_when_no_duplicates(self, merge_service, mock_logger):
+        """Test no deduplication overhead when enricher has no duplicates."""
+        import polars as pl
+
+        seed_df = pl.DataFrame({
+            "doi": ["10.1/aaa", "10.1/bbb"],
+            "title": ["Study A", "Study B"],
+        })
+
+        enricher_df = pl.DataFrame({
+            "doi": ["10.1/aaa", "10.1/bbb"],
+            "citation_count": [150, 50],
+        })
+
+        enricher_config = EnricherConfig(
+            pipeline="crossref_publication",
+            join_keys=("doi",),
+            required=False,
+        )
+
+        await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"crossref_publication": enricher_df},
+            enrichers=[enricher_config],
+            seed_pipeline="chembl_publication",
+        )
+
+        # Warning should NOT be called (no duplicates)
+        for call in mock_logger.warning.call_args_list:
+            # Check that we didn't log about duplicate aggregation
+            if call[0] and "Duplicates aggregated" in str(call[0][0]):
+                pytest.fail("Should not log duplicate warning when no duplicates")
+
+
+@pytest.mark.unit
+class TestConvertToStringForConcat:
+    """Tests for _convert_to_string_for_concat helper."""
+
+    def test_string_type(self, merge_service):
+        """Test string type is passed through."""
+        import polars as pl
+
+        df = pl.DataFrame({"col": ["a", "b"]})
+        expr = merge_service._convert_to_string_for_concat("col", pl.String)
+        result = df.select(expr.alias("result"))
+        assert result["result"].to_list() == ["a", "b"]
+
+    def test_int_type(self, merge_service):
+        """Test int type is cast to string."""
+        import polars as pl
+
+        df = pl.DataFrame({"col": [10, 20]})
+        expr = merge_service._convert_to_string_for_concat("col", pl.Int64)
+        result = df.select(expr.alias("result"))
+        assert result["result"].to_list() == ["10", "20"]
+
+    def test_float_type(self, merge_service):
+        """Test float type is cast to string."""
+        import polars as pl
+
+        df = pl.DataFrame({"col": [1.5, 2.5]})
+        expr = merge_service._convert_to_string_for_concat("col", pl.Float64)
+        result = df.select(expr.alias("result"))
+        assert result["result"].to_list() == ["1.5", "2.5"]
+
+    def test_boolean_type(self, merge_service):
+        """Test boolean type is converted to lowercase."""
+        import polars as pl
+
+        df = pl.DataFrame({"col": [True, False]})
+        expr = merge_service._convert_to_string_for_concat("col", pl.Boolean)
+        result = df.select(expr.alias("result"))
+        assert result["result"].to_list() == ["true", "false"]
+
+    def test_date_type(self, merge_service):
+        """Test date type is converted to ISO format."""
+        import polars as pl
+        from datetime import date
+
+        df = pl.DataFrame({"col": [date(2024, 1, 15), date(2024, 6, 30)]})
+        expr = merge_service._convert_to_string_for_concat("col", pl.Date)
+        result = df.select(expr.alias("result"))
+        assert result["result"].to_list() == ["2024-01-15", "2024-06-30"]
