@@ -344,7 +344,9 @@ class MergeService:
         """
         # Check if path contains a recognized layer prefix
         normalized = table_path.replace("\\", "/")
-        has_layer = any(layer in normalized for layer in ("silver/", "gold/", "bronze/"))
+        has_layer = any(
+            layer in normalized for layer in ("silver/", "gold/", "bronze/")
+        )
         if not has_layer:
             return None
 
