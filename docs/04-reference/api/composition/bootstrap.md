@@ -2,80 +2,156 @@
 
 Composition Root and bootstrap functions for pipeline initialization.
 
-## Main Entry Point
+## Overview
+
+The bootstrap package is organized into three modules:
+
+- **assembly**: Shared infrastructure components (ports, storage adapters) without side-effects. Used by both CLI and runtime.
+- **cli**: Bootstrap functions for CLI-only commands (inspect, list, maintenance). Uses NoOp observability implementations.
+- **runtime**: Bootstrap functions for actual pipeline execution. Uses full observability stack.
+
+```mermaid
+flowchart TB
+    subgraph Assembly["assembly/"]
+        StorageAdapter[bootstrap_storage_adapter]
+        CheckpointPort[bootstrap_checkpoint_port]
+        QuarantinePort[bootstrap_quarantine_port]
+    end
+
+    subgraph CLI["cli/"]
+        CleanupService[bootstrap_cleanup_service]
+        HealthService[bootstrap_health_service]
+        MetricsService[bootstrap_metrics_service]
+    end
+
+    subgraph Runtime["runtime/"]
+        PipelineRunner[bootstrap_pipeline_runner]
+        Observability[bootstrap_observability_bundle]
+        CompositeRunner[bootstrap_composite_runner]
+    end
+
+    CLI --> Assembly
+    Runtime --> Assembly
+```
+
+## Main Entry Points
 
 ### bootstrap_pipeline
 
-The main entry point for creating a fully configured PipelineRunner.
+The main entry point for creating a fully configured PipelineRunner (deprecated alias for `bootstrap_pipeline_runner`).
 
 ::: bioetl.composition.bootstrap.bootstrap_pipeline
     options:
         show_root_heading: true
         show_source: false
 
-## Observability Bootstrap
+### bootstrap_pipeline_runner
 
-### bootstrap_observability
+Canonical function for creating a PipelineRunner with full observability.
 
-Initialize all observability components (logging, tracing, metrics).
-
-::: bioetl.composition._bootstrap.observability.bootstrap_observability
+::: bioetl.composition.bootstrap.bootstrap_pipeline_runner
     options:
         show_root_heading: true
         show_source: false
 
-### bootstrap_logger
+### bootstrap_composite_runner
+
+Bootstrap function for composite pipelines (multiple data sources).
+
+::: bioetl.composition.bootstrap.bootstrap_composite_runner
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Runtime Observability
+
+Functions for initializing the full observability stack during pipeline execution.
+
+### bootstrap_observability_bundle
+
+Initialize all observability components (logging, tracing, metrics) as a bundle.
+
+::: bioetl.composition.bootstrap.bootstrap_observability_bundle
+    options:
+        show_root_heading: true
+        show_source: false
+
+### bootstrap_logger_port
 
 Create structured logger instance.
 
-::: bioetl.composition._bootstrap.observability.bootstrap_logger
+::: bioetl.composition.bootstrap.bootstrap_logger_port
     options:
         show_root_heading: true
         show_source: false
 
-### bootstrap_tracer
+### bootstrap_tracer_port
 
 Create tracing exporter instance.
 
-::: bioetl.composition._bootstrap.observability.bootstrap_tracer
+::: bioetl.composition.bootstrap.bootstrap_tracer_port
     options:
         show_root_heading: true
         show_source: false
 
-### bootstrap_metrics
+### bootstrap_metrics_port
 
 Create metrics exporter instance.
 
-::: bioetl.composition._bootstrap.observability.bootstrap_metrics
+::: bioetl.composition.bootstrap.bootstrap_metrics_port
     options:
         show_root_heading: true
         show_source: false
 
-### bootstrap_dq_monitor
+### bootstrap_dq_monitor_port
 
 Create data quality anomaly monitor.
 
-::: bioetl.composition._bootstrap.observability.bootstrap_dq_monitor
+::: bioetl.composition.bootstrap.bootstrap_dq_monitor_port
     options:
         show_root_heading: true
         show_source: false
 
-## Storage Bootstrap
+## Assembly (Shared Infrastructure)
 
-### bootstrap_storage
+Functions for creating infrastructure components used by both CLI and runtime.
 
-Create storage adapters for all Medallion layers.
+### bootstrap_storage_adapter
 
-::: bioetl.composition._bootstrap.storage.bootstrap_storage
+Create storage adapter for all Medallion layers.
+
+::: bioetl.composition.bootstrap.bootstrap_storage_adapter
     options:
         show_root_heading: true
         show_source: false
 
-### bootstrap_cleanup
+### bootstrap_checkpoint_port
+
+Create checkpoint port implementation.
+
+::: bioetl.composition.bootstrap.bootstrap_checkpoint_port
+    options:
+        show_root_heading: true
+        show_source: false
+
+### bootstrap_quarantine_port
+
+Create quarantine port implementation.
+
+::: bioetl.composition.bootstrap.bootstrap_quarantine_port
+    options:
+        show_root_heading: true
+        show_source: false
+
+## CLI Services
+
+Bootstrap functions for CLI-only commands. These use NoOp observability implementations for admin/maintenance operations.
+
+### bootstrap_cleanup_service
 
 Create cleanup service for storage management.
 
-::: bioetl.composition._bootstrap.storage.bootstrap_cleanup
+::: bioetl.composition.bootstrap.bootstrap_cleanup_service
     options:
         show_root_heading: true
         show_source: false
@@ -84,18 +160,7 @@ Create cleanup service for storage management.
 
 Create Medallion lifecycle service.
 
-::: bioetl.composition._bootstrap.storage.bootstrap_lifecycle_service
-    options:
-        show_root_heading: true
-        show_source: false
-
-## Checkpoint Bootstrap
-
-### bootstrap_checkpoint
-
-Create checkpoint port implementation.
-
-::: bioetl.composition._bootstrap.checkpoint.bootstrap_checkpoint
+::: bioetl.composition.bootstrap.bootstrap_lifecycle_service
     options:
         show_root_heading: true
         show_source: false
@@ -104,16 +169,7 @@ Create checkpoint port implementation.
 
 Create checkpoint manager instance.
 
-::: bioetl.composition._bootstrap.checkpoint.bootstrap_checkpoint_manager
-    options:
-        show_root_heading: true
-        show_source: false
-
-### bootstrap_quarantine
-
-Create quarantine port implementation.
-
-::: bioetl.composition._bootstrap.checkpoint.bootstrap_quarantine
+::: bioetl.composition.bootstrap.bootstrap_checkpoint_manager
     options:
         show_root_heading: true
         show_source: false
@@ -122,7 +178,92 @@ Create quarantine port implementation.
 
 Create quarantine manager instance.
 
-::: bioetl.composition._bootstrap.checkpoint.bootstrap_quarantine_manager
+::: bioetl.composition.bootstrap.bootstrap_quarantine_manager
+    options:
+        show_root_heading: true
+        show_source: false
+
+### bootstrap_health_service
+
+Create health check service for CLI.
+
+::: bioetl.composition.bootstrap.bootstrap_health_service
+    options:
+        show_root_heading: true
+        show_source: false
+
+### bootstrap_lock_service
+
+Create lock service for CLI.
+
+::: bioetl.composition.bootstrap.bootstrap_lock_service
+    options:
+        show_root_heading: true
+        show_source: false
+
+### bootstrap_vacuum_service
+
+Create vacuum service for Delta table maintenance.
+
+::: bioetl.composition.bootstrap.bootstrap_vacuum_service
+    options:
+        show_root_heading: true
+        show_source: false
+
+### bootstrap_metrics_service
+
+Create metrics service for CLI.
+
+::: bioetl.composition.bootstrap.bootstrap_metrics_service
+    options:
+        show_root_heading: true
+        show_source: false
+
+### bootstrap_export_service
+
+Create export service for CLI.
+
+::: bioetl.composition.bootstrap.bootstrap_export_service
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Runtime Assembly Functions
+
+Pure functions for assembling configuration without side effects.
+
+### assemble_runtime_config
+
+Assemble runtime configuration from CLI arguments and environment.
+
+::: bioetl.composition.bootstrap.assemble_runtime_config
+    options:
+        show_root_heading: true
+        show_source: false
+
+### assemble_filter_config
+
+Assemble filter configuration from YAML and CLI overrides.
+
+::: bioetl.composition.bootstrap.assemble_filter_config
+    options:
+        show_root_heading: true
+        show_source: false
+
+### assemble_vacuum_settings
+
+Assemble VACUUM settings for Delta table maintenance.
+
+::: bioetl.composition.bootstrap.assemble_vacuum_settings
+    options:
+        show_root_heading: true
+        show_source: false
+
+### VacuumSettings
+
+Configuration for VACUUM operations.
+
+::: bioetl.composition.bootstrap.VacuumSettings
     options:
         show_root_heading: true
         show_source: false
@@ -151,13 +292,31 @@ Get the global default registry instance.
         show_root_heading: true
         show_source: false
 
-## Builders
+## Metrics Server
 
-### FilterConfigBuilder
+### start_metrics_server
 
-Builder for filter configuration from CLI/YAML.
+Start Prometheus metrics HTTP server.
 
-::: bioetl.composition.builders.FilterConfigBuilder
+::: bioetl.composition.bootstrap.start_metrics_server
+    options:
+        show_root_heading: true
+        show_source: false
+
+### maybe_start_metrics_server
+
+Conditionally start metrics server if enabled.
+
+::: bioetl.composition.bootstrap.maybe_start_metrics_server
+    options:
+        show_root_heading: true
+        show_source: false
+
+### MetricsServerError
+
+Error raised when metrics server fails to start.
+
+::: bioetl.composition.bootstrap.MetricsServerError
     options:
         show_root_heading: true
         show_source: false
@@ -172,12 +331,12 @@ sequenceDiagram
     participant Factory
     participant Runner
 
-    CLI->>Bootstrap: bootstrap_pipeline(ctx)
+    CLI->>Bootstrap: bootstrap_pipeline_runner(ctx)
     Bootstrap->>Bootstrap: register_all_providers()
     Bootstrap->>Bootstrap: register_all_pipelines()
     Bootstrap->>Bootstrap: load_pipeline_config()
-    Bootstrap->>Bootstrap: bootstrap_observability()
-    Bootstrap->>Bootstrap: build_filter_config()
+    Bootstrap->>Bootstrap: bootstrap_observability_bundle()
+    Bootstrap->>Bootstrap: assemble_filter_config()
     Bootstrap->>Registry: get(pipeline_name)
     Registry-->>Bootstrap: factory
     Bootstrap->>Factory: create_runner(ctx, ...)
@@ -196,11 +355,11 @@ Load pipeline configuration from YAML file.
         show_root_heading: true
         show_source: false
 
-### get_settings
+### load_composite_config
 
-Get application settings from environment.
+Load composite pipeline configuration.
 
-::: bioetl.infrastructure.config.get_settings
+::: bioetl.composition.bootstrap.load_composite_config
     options:
         show_root_heading: true
         show_source: false
@@ -209,10 +368,11 @@ Get application settings from environment.
 
 ```python
 from bioetl.composition.bootstrap import (
-    bootstrap_pipeline,
+    bootstrap_pipeline_runner,
+    bootstrap_observability_bundle,
+    bootstrap_storage_adapter,
+    assemble_runtime_config,
 )
-from bioetl.composition._bootstrap.observability import bootstrap_observability
-from bioetl.composition._bootstrap.storage import bootstrap_storage
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 
@@ -221,13 +381,49 @@ ctx = PipelineContext(
     pipeline_name="chembl_activity",
     run_type=RunType.INCREMENTAL,
 )
-runner = bootstrap_pipeline(ctx)
+runner = bootstrap_pipeline_runner(ctx)
 await runner.run()
-
-# Partial bootstrap (for testing)
-logger, tracer, metrics = bootstrap_observability(ctx)
-storage = bootstrap_storage(ctx, logger, metrics)
 ```
+
+```python
+# Partial bootstrap (for testing or custom assembly)
+from bioetl.composition.bootstrap import (
+    bootstrap_observability_bundle,
+    bootstrap_storage_adapter,
+    bootstrap_checkpoint_port,
+)
+
+# Create observability components
+obs = bootstrap_observability_bundle(ctx)
+
+# Create storage adapter
+storage = bootstrap_storage_adapter(
+    ctx,
+    logger=obs.logger,
+    metrics=obs.metrics,
+)
+
+# Create checkpoint port
+checkpoint = bootstrap_checkpoint_port(ctx)
+```
+
+## Deprecated Aliases
+
+The following functions are deprecated aliases maintained for backward compatibility:
+
+| Deprecated | Canonical |
+|------------|-----------|
+| `bootstrap_pipeline` | `bootstrap_pipeline_runner` |
+| `bootstrap_composite_pipeline` | `bootstrap_composite_runner` |
+| `bootstrap_storage` | `bootstrap_storage_adapter` |
+| `bootstrap_checkpoint` | `bootstrap_checkpoint_port` |
+| `bootstrap_quarantine` | `bootstrap_quarantine_port` |
+| `bootstrap_cleanup` | `bootstrap_cleanup_service` |
+| `bootstrap_observability` | `bootstrap_observability_bundle` |
+| `bootstrap_logger` | `bootstrap_logger_port` |
+| `bootstrap_tracer` | `bootstrap_tracer_port` |
+| `bootstrap_metrics` | `bootstrap_metrics_port` |
+| `bootstrap_dq_monitor` | `bootstrap_dq_monitor_port` |
 
 ## See Also
 

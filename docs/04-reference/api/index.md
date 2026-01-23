@@ -19,7 +19,7 @@ flowchart TB
 
     subgraph Application["Application Layer"]
         Runner[PipelineRunner]
-        Executor[PipelineExecutor]
+        Executor[BatchExecutor]
         Transformer[BaseTransformer]
     end
 
@@ -69,7 +69,7 @@ Pipeline orchestration and use cases:
 External system adapters and I/O:
 
 - **[Adapters](infrastructure/adapters.md)** - ChEMBL, PubChem, UniProt clients
-- **[Storage](infrastructure/storage.md)** - BronzeWriter, DeltaWriter, GoldWriter
+- **[Storage](infrastructure/storage.md)** - BronzeWriter, SilverWriter, GoldWriter
 - **[Observability](infrastructure/observability.md)** - Logging, Metrics, Tracing
 
 ### [Composition Layer](composition.md)
@@ -88,7 +88,7 @@ Dependency injection and bootstrapping:
 | `BaseTransformer` | `bioetl.application.core.base_transformer` | Template Method for data transformation |
 | `StoragePort` | `bioetl.domain.ports` | Storage interface contract |
 | `DataSourcePort` | `bioetl.domain.ports` | Data fetching interface contract |
-| `DeltaWriter` | `bioetl.infrastructure.storage.delta_writer` | Silver layer Delta Lake writer |
+| `SilverWriter` | `bioetl.infrastructure.storage.silver_writer` | Silver layer Delta Lake writer |
 | `BronzeWriter` | `bioetl.infrastructure.storage.bronze_writer` | Bronze layer JSONL writer |
 
 ## Usage Example
