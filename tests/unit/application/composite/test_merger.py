@@ -284,16 +284,19 @@ class TestMergeServiceJoinKeyNormalization:
             silver_table="silver/crossref/publication",
         )
 
+        # When seed_pipeline is provided, uses smart prefix (crossref.)
         result = await merge_service._apply_joins(
             seed_df=seed_df,
             enricher_dfs={"crossref_publication": enricher_df},
             enrichers=[enricher_config],
+            seed_pipeline="chembl_publication",
         )
 
         # Should successfully join despite case difference
         assert len(result) == 1
-        assert "enricher_value" in result.columns
-        assert result["enricher_value"].to_list() == ["from_enricher"]
+        # With smart prefix, enricher_value becomes crossref.enricher_value
+        assert "crossref.enricher_value" in result.columns
+        assert result["crossref.enricher_value"].to_list() == ["from_enricher"]
         # DOI should be normalized to lowercase
         assert result["doi"].to_list() == ["10.1038/nature12373"]
 
@@ -375,3 +378,448 @@ class TestMergeServiceMergeOperation:
         assert mock_storage.read_silver.call_count == 2
         assert result.records_from_seed == 1
         assert "test_enricher" in result.sources_used
+
+
+@pytest.mark.unit
+class TestParsePipelineName:
+    """Tests for _parse_pipeline_name helper."""
+
+    def test_parses_standard_pipeline_name(self, merge_service):
+        """Test parsing standard pipeline name."""
+        provider, entity = merge_service._parse_pipeline_name("chembl_publication")
+        assert provider == "chembl"
+        assert entity == "publication"
+
+    def test_parses_pipeline_with_underscore_in_entity(self, merge_service):
+        """Test parsing pipeline name with underscore in entity."""
+        provider, entity = merge_service._parse_pipeline_name("chembl_target_component")
+        assert provider == "chembl"
+        assert entity == "target_component"
+
+    def test_raises_on_invalid_format(self, merge_service):
+        """Test error on invalid pipeline name format."""
+        with pytest.raises(ValueError, match="must be in format"):
+            merge_service._parse_pipeline_name("invalidpipelinename")
+
+
+@pytest.mark.unit
+class TestDeterminePrefixStrategy:
+    """Tests for _determine_prefix_strategy helper."""
+
+    def test_cross_provider_same_entity(self, merge_service):
+        """Test cross-provider merge (same entity, different providers)."""
+        strategy = merge_service._determine_prefix_strategy(
+            "chembl", "publication", "crossref", "publication"
+        )
+        assert strategy == "provider"
+
+    def test_cross_entity_same_provider(self, merge_service):
+        """Test cross-entity merge (same provider, different entities)."""
+        strategy = merge_service._determine_prefix_strategy(
+            "chembl", "publication", "chembl", "activity"
+        )
+        assert strategy == "entity"
+
+    def test_cross_provider_and_entity(self, merge_service):
+        """Test cross-provider-entity merge (different both)."""
+        strategy = merge_service._determine_prefix_strategy(
+            "chembl", "publication", "pubchem", "compound"
+        )
+        assert strategy == "both"
+
+    def test_same_provider_and_entity(self, merge_service):
+        """Test same provider and entity uses pipeline prefix."""
+        strategy = merge_service._determine_prefix_strategy(
+            "chembl", "publication", "chembl", "publication"
+        )
+        assert strategy == "pipeline"
+
+    def test_case_insensitive_comparison(self, merge_service):
+        """Test provider/entity comparison is case-insensitive."""
+        strategy = merge_service._determine_prefix_strategy(
+            "ChEMBL", "Publication", "chembl", "publication"
+        )
+        assert strategy == "pipeline"
+
+
+@pytest.mark.unit
+class TestColumnContainsIdentifier:
+    """Tests for _column_contains_identifier helper."""
+
+    def test_contains_identifier_lowercase(self, merge_service):
+        """Test identifier match in lowercase."""
+        assert merge_service._column_contains_identifier("crossref_doi", "crossref")
+
+    def test_contains_identifier_uppercase(self, merge_service):
+        """Test identifier match in uppercase."""
+        assert merge_service._column_contains_identifier("CROSSREF.DOI", "crossref")
+
+    def test_does_not_contain_identifier(self, merge_service):
+        """Test no match when identifier not present."""
+        assert not merge_service._column_contains_identifier("doi", "crossref")
+
+    def test_partial_match(self, merge_service):
+        """Test partial match is detected."""
+        assert merge_service._column_contains_identifier("chembl_id", "chembl")
+
+
+@pytest.mark.unit
+class TestBuildPrefix:
+    """Tests for _build_prefix helper."""
+
+    def test_provider_strategy(self, merge_service):
+        """Test prefix for provider strategy."""
+        prefix = merge_service._build_prefix(
+            "provider", "crossref", "publication", "crossref_publication"
+        )
+        assert prefix == "crossref"
+
+    def test_entity_strategy(self, merge_service):
+        """Test prefix for entity strategy."""
+        prefix = merge_service._build_prefix(
+            "entity", "chembl", "activity", "chembl_activity"
+        )
+        assert prefix == "activity"
+
+    def test_both_strategy(self, merge_service):
+        """Test prefix for both strategy."""
+        prefix = merge_service._build_prefix(
+            "both", "pubchem", "compound", "pubchem_compound"
+        )
+        assert prefix == "pubchem.compound"
+
+    def test_pipeline_strategy(self, merge_service):
+        """Test prefix for pipeline strategy (fallback)."""
+        prefix = merge_service._build_prefix(
+            "pipeline", "chembl", "publication", "chembl_publication"
+        )
+        assert prefix == "chembl_publication"
+
+
+@pytest.mark.unit
+class TestApplyColumnPrefix:
+    """Tests for _apply_column_prefix helper."""
+
+    def test_applies_prefix_to_columns(self, merge_service):
+        """Test prefix is applied to specified columns."""
+        import polars as pl
+
+        df = pl.DataFrame({"doi": ["10.1/a"], "title": ["T1"], "year": [2024]})
+
+        result = merge_service._apply_column_prefix(
+            df, {"title", "year"}, "crossref", {"doi"}
+        )
+
+        assert "doi" in result.columns
+        assert "crossref.title" in result.columns
+        assert "crossref.year" in result.columns
+        assert "title" not in result.columns
+        assert "year" not in result.columns
+
+    def test_excludes_join_keys(self, merge_service):
+        """Test join keys are not renamed."""
+        import polars as pl
+
+        df = pl.DataFrame({"doi": ["10.1/a"], "title": ["T1"]})
+
+        result = merge_service._apply_column_prefix(
+            df, {"doi", "title"}, "crossref", {"doi"}
+        )
+
+        assert "doi" in result.columns
+        assert "crossref.title" in result.columns
+        # doi should NOT be renamed
+        assert "crossref.doi" not in result.columns
+
+
+@pytest.mark.unit
+class TestDetectAndResolveConflicts:
+    """Tests for _detect_and_resolve_conflicts helper."""
+
+    def test_no_conflicts(self, merge_service):
+        """Test no changes when no conflicts."""
+        import polars as pl
+
+        seed = pl.DataFrame({"doi": ["10.1/a"], "title": ["T1"]})
+        enricher = pl.DataFrame({"doi": ["10.1/a"], "crossref.author": ["A1"]})
+
+        seed_out, enricher_out = merge_service._detect_and_resolve_conflicts(
+            seed, enricher, {"doi"}
+        )
+
+        assert seed_out.columns == ["doi", "title"]
+        assert enricher_out.columns == ["doi", "crossref.author"]
+
+    def test_resolves_conflicts_with_suffixes(self, merge_service):
+        """Test conflicts are resolved with .A/.B suffixes."""
+        import polars as pl
+
+        seed = pl.DataFrame({"doi": ["10.1/a"], "crossref.title": ["T1"]})
+        enricher = pl.DataFrame({"doi": ["10.1/a"], "crossref.title": ["T2"]})
+
+        seed_out, enricher_out = merge_service._detect_and_resolve_conflicts(
+            seed, enricher, {"doi"}
+        )
+
+        assert "crossref.title.A" in seed_out.columns
+        assert "crossref.title.B" in enricher_out.columns
+        assert "crossref.title" not in seed_out.columns
+        assert "crossref.title" not in enricher_out.columns
+
+    def test_join_keys_not_affected(self, merge_service):
+        """Test join keys are not affected by conflict resolution."""
+        import polars as pl
+
+        seed = pl.DataFrame({"doi": ["10.1/a"], "value": ["V1"]})
+        enricher = pl.DataFrame({"doi": ["10.1/a"], "value": ["V2"]})
+
+        # doi is join key, value is a conflict
+        seed_out, enricher_out = merge_service._detect_and_resolve_conflicts(
+            seed, enricher, {"doi"}
+        )
+
+        # doi should remain unchanged in both
+        assert "doi" in seed_out.columns
+        assert "doi" in enricher_out.columns
+        # value should be renamed
+        assert "value.A" in seed_out.columns
+        assert "value.B" in enricher_out.columns
+
+
+@pytest.mark.unit
+class TestApplyJoinsSmartColumnRenaming:
+    """Tests for _apply_joins with smart column renaming."""
+
+    @pytest.mark.asyncio
+    async def test_cross_provider_merge_uses_provider_prefix(self, merge_service):
+        """Test cross-provider merge uses provider name as prefix."""
+        import polars as pl
+
+        seed_df = pl.DataFrame({"doi": ["10.1/a"], "title": ["Seed Title"]})
+        enricher_df = pl.DataFrame({"doi": ["10.1/a"], "title": ["Crossref Title"]})
+
+        enricher_config = EnricherConfig(
+            pipeline="crossref_publication",
+            join_keys=("doi",),
+            required=False,
+        )
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"crossref_publication": enricher_df},
+            enrichers=[enricher_config],
+            seed_pipeline="chembl_publication",
+        )
+
+        # Should have: doi, title, crossref.title
+        assert "doi" in result.columns
+        assert "title" in result.columns
+        assert "crossref.title" in result.columns
+
+    @pytest.mark.asyncio
+    async def test_cross_entity_merge_uses_entity_prefix(self, merge_service):
+        """Test cross-entity merge uses entity name as prefix."""
+        import polars as pl
+
+        seed_df = pl.DataFrame({"chembl_id": ["C1"], "name": ["Drug A"]})
+        enricher_df = pl.DataFrame({"chembl_id": ["C1"], "name": ["Activity Name"]})
+
+        enricher_config = EnricherConfig(
+            pipeline="chembl_activity",
+            join_keys=("chembl_id",),
+            required=False,
+        )
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"chembl_activity": enricher_df},
+            enrichers=[enricher_config],
+            seed_pipeline="chembl_publication",
+        )
+
+        # Should have: chembl_id, name, activity.name
+        assert "chembl_id" in result.columns
+        assert "name" in result.columns
+        assert "activity.name" in result.columns
+
+    @pytest.mark.asyncio
+    async def test_cross_provider_entity_merge_uses_both_prefix(self, merge_service):
+        """Test cross-provider-entity merge uses provider.entity prefix."""
+        import polars as pl
+
+        seed_df = pl.DataFrame({"id": ["1"], "name": ["Seed Name"]})
+        enricher_df = pl.DataFrame({"id": ["1"], "name": ["Compound Name"]})
+
+        enricher_config = EnricherConfig(
+            pipeline="pubchem_compound",
+            join_keys=("id",),
+            required=False,
+        )
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"pubchem_compound": enricher_df},
+            enrichers=[enricher_config],
+            seed_pipeline="chembl_publication",
+        )
+
+        # Should have: id, name, pubchem.compound.name
+        assert "id" in result.columns
+        assert "name" in result.columns
+        assert "pubchem.compound.name" in result.columns
+
+    @pytest.mark.asyncio
+    async def test_skips_already_prefixed_columns(self, merge_service):
+        """Test columns already containing identifier are not re-prefixed."""
+        import polars as pl
+
+        seed_df = pl.DataFrame({"doi": ["10.1/a"], "title": ["Seed"]})
+        # crossref_doi already contains "crossref"
+        enricher_df = pl.DataFrame(
+            {"doi": ["10.1/a"], "crossref_doi": ["10.1/a"], "author": ["A1"]}
+        )
+
+        enricher_config = EnricherConfig(
+            pipeline="crossref_publication",
+            join_keys=("doi",),
+            required=False,
+        )
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"crossref_publication": enricher_df},
+            enrichers=[enricher_config],
+            seed_pipeline="chembl_publication",
+        )
+
+        # crossref_doi should NOT become crossref.crossref_doi
+        assert "crossref_doi" in result.columns
+        assert "crossref.crossref_doi" not in result.columns
+        # author should become crossref.author
+        assert "crossref.author" in result.columns
+
+    @pytest.mark.asyncio
+    async def test_conflict_after_prefixing_gets_suffixes(self, merge_service):
+        """Test conflict after prefixing gets .A/.B suffixes."""
+        import polars as pl
+
+        # Seed already has crossref.title
+        seed_df = pl.DataFrame({"doi": ["10.1/a"], "crossref.title": ["Seed CT"]})
+        # Enricher title becomes crossref.title → conflict!
+        enricher_df = pl.DataFrame({"doi": ["10.1/a"], "title": ["Enricher Title"]})
+
+        enricher_config = EnricherConfig(
+            pipeline="crossref_publication",
+            join_keys=("doi",),
+            required=False,
+        )
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"crossref_publication": enricher_df},
+            enrichers=[enricher_config],
+            seed_pipeline="chembl_publication",
+        )
+
+        # Conflict resolved with .A/.B suffixes
+        assert "crossref.title.A" in result.columns
+        assert "crossref.title.B" in result.columns
+
+    @pytest.mark.asyncio
+    async def test_legacy_prefix_when_no_seed_pipeline(self, merge_service):
+        """Test legacy prefix when seed_pipeline not provided."""
+        import polars as pl
+
+        seed_df = pl.DataFrame({"doi": ["10.1/a"], "title": ["Seed Title"]})
+        enricher_df = pl.DataFrame({"doi": ["10.1/a"], "title": ["Enricher Title"]})
+
+        enricher_config = EnricherConfig(
+            pipeline="crossref_publication",
+            join_keys=("doi",),
+            required=False,
+        )
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"crossref_publication": enricher_df},
+            enrichers=[enricher_config],
+            seed_pipeline=None,  # No seed pipeline
+        )
+
+        # Should use legacy prefix: crossref_publication_title
+        assert "crossref_publication_title" in result.columns
+
+
+@pytest.mark.unit
+class TestGetEnricherPrefix:
+    """Tests for _get_enricher_prefix helper."""
+
+    def test_cross_provider_prefix(self, merge_service):
+        """Test cross-provider prefix ends with dot."""
+        prefix = merge_service._get_enricher_prefix(
+            "crossref_publication", "chembl_publication"
+        )
+        assert prefix == "crossref."
+
+    def test_cross_entity_prefix(self, merge_service):
+        """Test cross-entity prefix ends with dot."""
+        prefix = merge_service._get_enricher_prefix(
+            "chembl_activity", "chembl_publication"
+        )
+        assert prefix == "activity."
+
+    def test_cross_both_prefix(self, merge_service):
+        """Test cross-both prefix ends with dot."""
+        prefix = merge_service._get_enricher_prefix(
+            "pubchem_compound", "chembl_publication"
+        )
+        assert prefix == "pubchem.compound."
+
+    def test_legacy_prefix_when_no_seed(self, merge_service):
+        """Test legacy prefix when seed is None."""
+        prefix = merge_service._get_enricher_prefix("crossref_publication", None)
+        assert prefix == "crossref_publication_"
+
+
+@pytest.mark.unit
+class TestExtractBaseColumn:
+    """Tests for _extract_base_column helper."""
+
+    def test_extracts_base_from_dot_prefix(self, merge_service):
+        """Test extraction from dot-based prefix."""
+        base = merge_service._extract_base_column("crossref.title", "crossref.")
+        assert base == "title"
+
+    def test_extracts_base_from_legacy_prefix(self, merge_service):
+        """Test extraction from legacy underscore prefix."""
+        base = merge_service._extract_base_column(
+            "crossref_publication_title", "crossref_publication_"
+        )
+        assert base == "title"
+
+    def test_returns_none_for_no_match(self, merge_service):
+        """Test returns None when prefix doesn't match."""
+        base = merge_service._extract_base_column("title", "crossref.")
+        assert base is None
+
+
+@pytest.mark.unit
+class TestInferPipelineFromTable:
+    """Tests for _infer_pipeline_from_table helper."""
+
+    def test_infers_from_silver_path(self, merge_service):
+        """Test inferring pipeline from silver table path."""
+        pipeline = merge_service._infer_pipeline_from_table("silver/chembl/publication")
+        assert pipeline == "chembl_publication"
+
+    def test_infers_from_absolute_path(self, merge_service):
+        """Test inferring pipeline from absolute path."""
+        pipeline = merge_service._infer_pipeline_from_table(
+            "/data/output/silver/crossref/publication"
+        )
+        assert pipeline == "crossref_publication"
+
+    def test_returns_none_for_invalid_path(self, merge_service):
+        """Test returns None for path without layer prefix."""
+        pipeline = merge_service._infer_pipeline_from_table("invalid/path")
+        assert pipeline is None
