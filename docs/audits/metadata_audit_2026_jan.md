@@ -23,7 +23,7 @@ Total Pipelines: 19
 - [CROSSREF / work: crossref_publication](#crossref-work)
 - [OPENALEX / publication: openalex_publication](#openalex-publication)
 - [PUBCHEM / compound: pubchem_compound](#pubchem-compound)
-- [PUBMED / publication: pubmed_publications](#pubmed-publication)
+- [PUBMED / publication: pubmed_publication](#pubmed-publication)
 - [SEMANTICSCHOLAR / publication: semanticscholar_publication](#semanticscholar-publication)
 - [UNIPROT / idmapping: uniprot_idmapping](#uniprot-idmapping)
 - [UNIPROT / protein: uniprot_protein](#uniprot-protein)
@@ -711,9 +711,9 @@ Total Pipelines: 19
 
 ---
 
-## PUBMED / publication: pubmed_publications <a name='pubmed-publication'></a>
+## PUBMED / publication: pubmed_publication <a name='pubmed-publication'></a>
 
-- **Config**: `configs/pipelines/pubmed/publications.yaml`
+- **Config**: `configs/pipelines/pubmed/publication.yaml`
 - **Schema Class**: `ArticleSchema`
 
 ### Field Specifications (Silver/Gold)

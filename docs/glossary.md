@@ -169,7 +169,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 - `chembl_molecule`, `chembl_activity`, `chembl_assay`
 - `pubchem_compound`
 - `uniprot_protein`
-- `pubmed_publications`
+- `pubmed_publication`
 
 **Language Policy**: All CLI help texts, error messages, and user-facing output use **English** for consistency and international accessibility. Internal documentation (CLAUDE.md, RULES.md) may use Russian per project convention.
 

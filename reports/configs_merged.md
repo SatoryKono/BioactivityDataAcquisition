@@ -2913,7 +2913,7 @@ pipeline_id_format:
     - chembl_target_component
     - pubchem_compound   # Uses API term per glossary.md CLI conventions
     - uniprot_protein    # Uses API term per glossary.md CLI conventions
-    - pubmed_publications
+    - pubmed_publication
 
 # Notes on enforcement
 # - The naming_audit.py tool uses this file's content as reference
@@ -4328,7 +4328,7 @@ composite:
 
     # PubMed: MeSH terms and medical metadata
     # OPTIONAL: Only processes records with pmid
-    - pipeline: pubmed_publications
+    - pipeline: pubmed_publication
       join_keys:
         - pmid           # PubMed-specific identifier
         - doi
@@ -4401,7 +4401,7 @@ composite:
         soft_fail_threshold: 0.20
         hard_fail_threshold: 0.50
       # PubMed may have many pmid-less records filtered
-      pubmed_publications:
+      pubmed_publication:
         soft_fail_threshold: 0.15
         hard_fail_threshold: 0.40
 
@@ -4733,7 +4733,7 @@ Path: pipelines\pubmed\publications.yaml
 # Note: filter_config_file is explicit because entity file uses plural name
 #       (publications.yaml) which differs from entity_type (publication).
 
-pipeline_name: pubmed_publications
+pipeline_name: pubmed_publication
 provider: pubmed
 entity_type: publication
 version: "1.2.0"

@@ -10861,7 +10861,7 @@ ProviderRegistry.register(
     ProviderConfig(
         data_source_creator=_create_pubmed_data_source,
         transformers={"publication": PubMedPublicationTransformer},
-        pipelines=["pubmed_publications"],
+        pipelines=["pubmed_publication"],
     ),
 )
 ```
@@ -10895,8 +10895,8 @@ from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsP
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.infrastructure.schemas.gold import PubMedPublicationGoldSchema
 
-pubmed_publications_factory = GenericPipelineFactory(
-    pipeline_name="pubmed_publications",
+pubmed_publication_factory = GenericPipelineFactory(
+    pipeline_name="pubmed_publication",
     pipeline_class=PubMedPublicationsPipeline,
     provider="pubmed",
     transformer_class=PubMedPublicationTransformer,  # DI через GenericPipelineFactory
@@ -10905,10 +10905,10 @@ pubmed_publications_factory = GenericPipelineFactory(
 
 def register_all_pipelines() -> None:
     # ...
-    PipelineRegistry.register_factory(pubmed_publications_factory)
+    PipelineRegistry.register_factory(pubmed_publication_factory)
 ```
 
-Теперь ваш пайплайн автоматически доступен через CLI по имени `pubmed_publications`.
+Теперь ваш пайплайн автоматически доступен через CLI по имени `pubmed_publication`.
 
 ## Чек-лист
 
@@ -15124,11 +15124,11 @@ Factory for UniProt protein pipeline.
         show_root_heading: true
         show_source: false
 
-### pubmed_publications_factory
+### pubmed_publication_factory
 
 Factory for PubMed publications pipeline.
 
-::: bioetl.composition.factories.pipeline_factories.pubmed_publications_factory
+::: bioetl.composition.factories.pipeline_factories.pubmed_publication_factory
     options:
         show_root_heading: true
         show_source: false
@@ -37634,7 +37634,7 @@ Path: archived\audits\pipeline-analysis-report.md
 | 13 | `pubchem_compound` | PubChem | compound | Production | 13 | 5 | ✅ |
 | 14 | `uniprot_protein` | UniProt | protein | Production | 17 | 8 | ✅ |
 | 15 | `uniprot_idmapping` | UniProt | idmapping | Production | 18 | 7 | — |
-| 16 | `pubmed_publications` | PubMed | publication | Production | — | 14 | ✅ |
+| 16 | `pubmed_publication` | PubMed | publication | Production | — | 14 | ✅ |
 | 17 | `crossref_publication_enrichment` | CrossRef | work | Production | 42 | 11 | ✅ |
 | 18 | `openalex_publication` | OpenAlex | publication | Production | 42 | 14 | ✅ |
 | 19 | `semanticscholar_publication` | SemanticScholar | publication | Production | 43 | 11 | ✅ |
@@ -37667,7 +37667,7 @@ Path: archived\audits\pipeline-analysis-report.md
 | `crossref_publication` | 262 | BaseTransformer | DOI resolution, citation counts |
 | `openalex_publication` | 240 | BaseTransformer | Abstract reconstruction, concepts |
 | `semanticscholar_publication` | 224 | BaseTransformer | TL;DR, fields of study |
-| `pubmed_publications` | 177 | BaseTransformer | XML parsing, MeSH, dates |
+| `pubmed_publication` | 177 | BaseTransformer | XML parsing, MeSH, dates |
 | `uniprot_protein` | 176 | BaseTransformer | Organism filtering |
 | `uniprot_idmapping` | 119 | BaseTransformer | ChEMBL→UniProt mapping |
 | `pubchem_compound` | 115 | BaseTransformer | SMILES search |
@@ -37684,7 +37684,7 @@ Path: archived\audits\pipeline-analysis-report.md
 | `openalex_publication` | openalex_id, title | — | year: 1900-2100 |
 | `semanticscholar_publication` | paper_id, title | — | year: 1900-2100 |
 | `crossref_publication` | doi, title | — | year: 1900-2100 |
-| `pubmed_publications` | pmid, title | — | — |
+| `pubmed_publication` | pmid, title | — | — |
 | `uniprot_protein` | accession, entry_name, organism | reviewed=[true] | — |
 | `uniprot_idmapping` | target_chembl_id, mapping_status | — | — |
 | `pubchem_compound` | cid, molecular_formula | — | — |
@@ -37708,7 +37708,7 @@ Path: archived\audits\pipeline-analysis-report.md
 | `openalex_publication` | 22 | 22 | authors, concepts |
 | `semanticscholar_publication` | 28 | 28 | fields_of_study, publication_types, authors |
 | `crossref_publication` | 22 | 22 | authors, issn, subjects |
-| `pubmed_publications` | 25 | 25 | authors, publication_types, keywords, mesh_terms |
+| `pubmed_publication` | 25 | 25 | authors, publication_types, keywords, mesh_terms |
 | `uniprot_protein` | 12 | 12 | gene_names |
 | `uniprot_idmapping` | 10 | 10 | — |
 | `pubchem_compound` | 14 | 14 | — |
@@ -49197,7 +49197,7 @@ Total Pipelines: 19
 - [CROSSREF / work: crossref_publication](#crossref-work)
 - [OPENALEX / publication: openalex_publication](#openalex-publication)
 - [PUBCHEM / compound: pubchem_compound](#pubchem-compound)
-- [PUBMED / publication: pubmed_publications](#pubmed-publication)
+- [PUBMED / publication: pubmed_publication](#pubmed-publication)
 - [SEMANTICSCHOLAR / publication: semanticscholar_publication](#semanticscholar-publication)
 - [UNIPROT / idmapping: uniprot_idmapping](#uniprot-idmapping)
 - [UNIPROT / protein: uniprot_protein](#uniprot-protein)
@@ -49885,7 +49885,7 @@ Total Pipelines: 19
 
 ---
 
-## PUBMED / publication: pubmed_publications <a name='pubmed-publication'></a>
+## PUBMED / publication: pubmed_publication <a name='pubmed-publication'></a>
 
 - **Config**: `configs/pipelines/pubmed/publications.yaml`
 - **Schema Class**: `ArticleSchema`
@@ -53385,7 +53385,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 - `chembl_molecule`, `chembl_activity`, `chembl_assay`
 - `pubchem_compound`
 - `uniprot_protein`
-- `pubmed_publications`
+- `pubmed_publication`
 
 **Language Policy**: All CLI help texts, error messages, and user-facing output use **English** for consistency and international accessibility. Internal documentation (CLAUDE.md, RULES.md) may use Russian per project convention.
 
@@ -64544,7 +64544,7 @@ This is **acceptable behavior** for nullable integer handling in Pandas. Documen
 ## Finding 2: PMID Type Mismatch (PubMed)
 
 **Severity**: HIGH
-**Affected Pipeline**: `pubmed_publications`
+**Affected Pipeline**: `pubmed_publication`
 
 ### Issue
 
@@ -64622,7 +64622,7 @@ Add all 26 fields to `MoleculeSchema` in Silver layer for complete validation co
 ## Finding 4: Missing Fields in Gold (PubMed Publication)
 
 **Severity**: MEDIUM
-**Affected Pipeline**: `pubmed_publications`
+**Affected Pipeline**: `pubmed_publication`
 **Count**: 18 missing fields
 
 ### Issue
@@ -65055,7 +65055,7 @@ Systematic verification of field mapping across all publication pipeline layers 
 | 1 | `chembl_publication` | ChEMBL | document | ⚠️ Missing Gold fields |
 | 2 | `chembl_publication_similarity` | ChEMBL | document_similarity | ✅ Correct |
 | 3 | `chembl_publication_term` | ChEMBL | document_term | ✅ Correct |
-| 4 | `pubmed_publications` | PubMed | publication | ⚠️ Missing Gold fields + Type mismatch |
+| 4 | `pubmed_publication` | PubMed | publication | ⚠️ Missing Gold fields + Type mismatch |
 | 5 | `crossref_publication` | CrossRef | work | ⚠️ Missing Gold fields + Type mismatch |
 | 6 | `openalex_publication` | OpenAlex | publication | ⚠️ Type mismatch |
 | 7 | `semanticscholar_publication` | SemanticScholar | publication | ✅ Correct |
@@ -65065,7 +65065,7 @@ Systematic verification of field mapping across all publication pipeline layers 
 ## Finding 1: TYPE_MISMATCH - `authors` Field Type Inconsistency
 
 **Severity**: HIGH
-**Affected Pipelines**: `pubmed_publications`, `crossref_publication`, `openalex_publication`
+**Affected Pipelines**: `pubmed_publication`, `crossref_publication`, `openalex_publication`
 
 ### Issue
 
@@ -65150,7 +65150,7 @@ original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 ## Finding 3: MISSING_FIELD - PubMed Gold Schema
 
 **Severity**: MEDIUM
-**Pipeline**: `pubmed_publications`
+**Pipeline**: `pubmed_publication`
 **Location**: `gold.py:211-262`
 
 ### Missing Fields

@@ -1,14 +1,11 @@
-# configs/pipelines/pubmed/publications.yaml
+# configs/pipelines/pubmed/publication.yaml
 # =============================================================================
-# PubMed Publications Pipeline Configuration
+# PubMed Publication Pipeline Configuration
 # =============================================================================
 # Minimal config using convention-based path resolution (ADR-029).
 # Inherits from _base.yaml with most paths/filters auto-computed.
-#
-# Note: filter_config_file is explicit because entity file uses plural name
-#       (publications.yaml) which differs from entity_type (publication).
 
-pipeline_name: pubmed_publications
+pipeline_name: pubmed_publication
 provider: pubmed
 entity_type: publication
 version: "1.2.0"
@@ -27,9 +24,9 @@ source:
   api_key: "${BIOETL_NCBI_API_KEY}"
 
 # -----------------------------------------------------------------------------
-# Override: Filter config uses plural "publications.yaml" not "publication.yaml"
+# Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-filter_config_file: ../../filter/entities/pubmed/publications.yaml
+filter_config_file: ../../filter/entities/pubmed/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Sink Overrides
