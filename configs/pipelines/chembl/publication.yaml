@@ -2,11 +2,11 @@
 # Pipeline configuration for ChEMBL Publication entity.
 #
 # Inherits defaults from ../_base.yaml
-# Note: entity_type=document maps to ChEMBL API /document endpoint
+# Note: entity_type=publication maps to ChEMBL API /document endpoint (ADR-024 naming)
 
 pipeline_name: chembl_publication
 provider: chembl
-entity_type: document
+entity_type: publication
 version: "2.1.0"
 description: "Extract scientific publications from ChEMBL API"
 
@@ -33,7 +33,6 @@ dq_config_file: ../../dq/entities/chembl/publication.yaml
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/publication.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
-# Note: explicit filter_config_file because entity_type=document differs from file name
 filter_config_file: ../../filter/entities/chembl/publication.yaml
 
 # Entity-specific sink overrides
