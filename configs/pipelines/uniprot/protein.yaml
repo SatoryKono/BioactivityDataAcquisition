@@ -3,9 +3,9 @@
 # UniProt Protein Pipeline Configuration
 # =============================================================================
 # Minimal config using convention-based path resolution (ADR-029).
-# Inherits from _base.yaml with paths/filters auto-computed from provider/entity.
+# Inherits from _base.yaml with paths/filters auto-computed from the provider/entity.
 #
-# Auto-computed by convention (see _base.yaml for full list)
+# Auto-computed by convention (see _base.yaml for a full list)
 
 pipeline_name: uniprot_protein
 provider: uniprot
