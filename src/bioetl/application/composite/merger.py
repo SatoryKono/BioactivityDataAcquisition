@@ -355,6 +355,401 @@ class MergeService:
             return f"{parts[0]}_{parts[1]}"
         return None
 
+    # ========== Enricher Deduplication Methods ==========
+
+    def _check_duplicates(
+        self,
+        df: pl.DataFrame,
+        key_columns: list[str],
+    ) -> bool:
+        """Check for duplicates by key columns.
+
+        Args:
+            df: DataFrame to check.
+            key_columns: Columns to check uniqueness by.
+
+        Returns:
+            True if duplicates exist, False if all records are unique.
+
+        Example:
+            >>> df = pl.DataFrame({"doi": ["a", "a", "b"], "val": [1, 2, 3]})
+            >>> self._check_duplicates(df, ["doi"])
+            True
+        """
+        if len(df) == 0:
+            return False
+
+        # Check if all key_columns exist in DataFrame
+        missing_cols = [c for c in key_columns if c not in df.columns]
+        if missing_cols:
+            return False
+
+        # Count unique combinations vs total rows
+        unique_count = df.select(key_columns).n_unique()
+        return unique_count < len(df)
+
+    def _convert_to_string_for_concat(
+        self,
+        column: str,
+        dtype: pl.DataType,
+    ) -> pl.Expr:
+        """Convert column to string for concatenation.
+
+        Handles type conversion according to REQ-3:
+        - String: as-is
+        - Int/Float: cast to string
+        - Boolean: lowercase string ("true"/"false")
+        - Date: ISO format (YYYY-MM-DD)
+        - Datetime: ISO format (YYYY-MM-DDTHH:MM:SSZ)
+        - List/Struct: JSON serialize
+        - Null handling is done separately in _build_aggregation_expr.
+
+        Args:
+            column: Column name.
+            dtype: Data type of the column.
+
+        Returns:
+            Polars expression converting values to string.
+        """
+        import polars as pl
+
+        col_expr = pl.col(column)
+
+        # Handle List types - JSON serialize
+        if isinstance(dtype, pl.List):
+            return col_expr.map_elements(
+                lambda x: str(x) if x is not None else None,
+                return_dtype=pl.String,
+            )
+
+        # Handle Struct types - JSON serialize
+        if isinstance(dtype, pl.Struct):
+            return col_expr.map_elements(
+                lambda x: str(x) if x is not None else None,
+                return_dtype=pl.String,
+            )
+
+        # Handle Boolean - lowercase string
+        if dtype == pl.Boolean:
+            return (
+                pl.when(col_expr.is_null())
+                .then(pl.lit(None))
+                .when(col_expr)
+                .then(pl.lit("true"))
+                .otherwise(pl.lit("false"))
+            )
+
+        # Handle Date - ISO format
+        if dtype == pl.Date:
+            return col_expr.cast(pl.String)
+
+        # Handle Datetime - ISO format
+        if isinstance(dtype, pl.Datetime):
+            return col_expr.dt.to_string("%Y-%m-%dT%H:%M:%SZ")
+
+        # Handle Duration
+        if isinstance(dtype, pl.Duration):
+            return col_expr.cast(pl.String)
+
+        # Handle Time
+        if dtype == pl.Time:
+            return col_expr.cast(pl.String)
+
+        # Handle numeric types (Int/Float) - cast to string
+        if dtype.is_numeric():
+            return col_expr.cast(pl.String)
+
+        # Default: cast to String (handles String, Categorical, etc.)
+        return col_expr.cast(pl.String)
+
+    def _aggregate_group_values(
+        self,
+        values: list,
+        dtype: pl.DataType,
+    ) -> object:
+        """Aggregate a list of values from a group.
+
+        Logic:
+        1. All values null → return None
+        2. One unique non-null value AND no nulls → preserve original value/type
+        3. Otherwise → join all unique values with "|" (including "null" as string)
+
+        Values are sorted lexicographically for determinism (ADR-014).
+        Duplicate values are removed.
+
+        Args:
+            values: List of values from the group.
+            dtype: Original data type of the column.
+
+        Returns:
+            Aggregated value (original type or string).
+        """
+        # Handle empty list
+        if not values:
+            return None
+
+        # Separate nulls and non-nulls
+        non_null_values = [v for v in values if v is not None]
+        has_null = len(non_null_values) < len(values)
+
+        # Case 1: All values null
+        if not non_null_values:
+            return None
+
+        # Get unique non-null values
+        unique_non_null = list(set(non_null_values))
+
+        # Case 2: One unique non-null value AND no nulls → preserve type
+        if len(unique_non_null) == 1 and not has_null:
+            return unique_non_null[0]
+
+        # Case 3: Multiple values OR nulls mixed with values → join with "|"
+        # Convert all values to strings
+        string_values = []
+        for v in values:
+            if v is None:
+                string_values.append("null")
+            else:
+                string_values.append(self._value_to_string(v, dtype))
+
+        # Get unique sorted values
+        unique_strings = sorted(set(string_values))
+        return "|".join(unique_strings)
+
+    def _value_to_string(self, value: object, dtype: pl.DataType) -> str:
+        """Convert a single value to string representation.
+
+        Args:
+            value: Value to convert.
+            dtype: Original data type.
+
+        Returns:
+            String representation.
+        """
+        from datetime import date, datetime, time, timedelta
+
+        if value is None:
+            return "null"
+
+        # Boolean - lowercase
+        if isinstance(value, bool):
+            return "true" if value else "false"
+
+        # Date - ISO format
+        if isinstance(value, date) and not isinstance(value, datetime):
+            return value.isoformat()
+
+        # Datetime - ISO format
+        if isinstance(value, datetime):
+            return value.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        # Time
+        if isinstance(value, time):
+            return value.isoformat()
+
+        # Timedelta/Duration
+        if isinstance(value, timedelta):
+            return str(value)
+
+        # List/Struct - JSON-like representation
+        if isinstance(value, (list, dict)):
+            return str(value)
+
+        # Default - string conversion
+        return str(value)
+
+    def _has_group_conflicts(
+        self,
+        df: pl.DataFrame,
+        key_columns: list[str],
+        column: str,
+    ) -> bool:
+        """Check if a column has conflicting values in any group.
+
+        A conflict exists when:
+        - Any group has more than one unique non-null value, OR
+        - Any group has both null and non-null values
+
+        Args:
+            df: DataFrame to check.
+            key_columns: Columns defining groups.
+            column: Column to check for conflicts.
+
+        Returns:
+            True if any group has conflicts, False otherwise.
+        """
+        import polars as pl
+
+        # Check for groups with multiple unique non-null values OR mixed null/non-null
+        conflict_check = df.group_by(key_columns).agg(
+            [
+                pl.col(column).drop_nulls().n_unique().alias("n_unique"),
+                pl.col(column).is_null().any().alias("has_null"),
+                pl.col(column).is_null().all().alias("all_null"),
+            ]
+        )
+
+        # Conflict if: (more than 1 unique value) OR (has null AND not all null)
+        conflicts = conflict_check.filter(
+            (pl.col("n_unique") > 1) | (pl.col("has_null") & ~pl.col("all_null"))
+        )
+        return conflicts.height > 0
+
+    def _build_concat_aggregation_expr(
+        self,
+        column: str,
+        dtype: pl.DataType,
+    ) -> pl.Expr:
+        """Build aggregation expression that concatenates values with |.
+
+        Used for columns with conflicts. Values are sorted for determinism.
+
+        Args:
+            column: Column name.
+            dtype: Original data type.
+
+        Returns:
+            Polars aggregation expression returning String.
+        """
+        import polars as pl
+
+        # Convert to string and concatenate
+        as_string = self._convert_to_string_for_concat(column, dtype)
+
+        # Replace null with "null" literal, get unique sorted, join with |
+        return (
+            pl.when(pl.col(column).is_null())
+            .then(pl.lit("null"))
+            .otherwise(as_string)
+            .unique()
+            .sort()
+            .str.join("|")
+            .alias(column)
+        )
+
+    def _build_first_aggregation_expr(
+        self,
+        column: str,
+    ) -> pl.Expr:
+        """Build aggregation expression that takes first value.
+
+        Used for columns without conflicts. Preserves original type.
+
+        Args:
+            column: Column name.
+
+        Returns:
+            Polars aggregation expression preserving original type.
+        """
+        import polars as pl
+
+        return pl.col(column).first().alias(column)
+
+    def _aggregate_duplicates(
+        self,
+        df: pl.DataFrame,
+        key_columns: list[str],
+        enricher_name: str,
+    ) -> pl.DataFrame:
+        """Aggregate duplicates by merging differing values.
+
+        Strategy:
+        - Columns without conflicts: use first() to preserve type
+        - Columns with conflicts: concatenate unique values with "|"
+
+        Args:
+            df: DataFrame with duplicates.
+            key_columns: Columns to group by (join keys).
+            enricher_name: Enricher name for logging.
+
+        Returns:
+            DataFrame without duplicates by key_columns.
+        """
+        records_before = len(df)
+        non_key_columns = [c for c in df.columns if c not in key_columns]
+
+        if not non_key_columns:
+            # Only key columns - just unique
+            result = df.select(key_columns).unique(maintain_order=True)
+            records_after = len(result)
+            self._logger.warning(
+                "Duplicates aggregated in enricher",
+                enricher=enricher_name,
+                join_keys=key_columns,
+                duplicate_count=records_before - records_after,
+                records_before=records_before,
+                records_after=records_after,
+                columns_with_conflicts=[],
+            )
+            return result
+
+        # Determine which columns have conflicts
+        columns_with_conflicts: list[str] = []
+        columns_without_conflicts: list[str] = []
+        for col in non_key_columns:
+            if self._has_group_conflicts(df, key_columns, col):
+                columns_with_conflicts.append(col)
+            else:
+                columns_without_conflicts.append(col)
+
+        # Build aggregation expressions
+        agg_exprs: list[pl.Expr] = []
+
+        # Columns without conflicts: first() preserves type
+        for col in columns_without_conflicts:
+            agg_exprs.append(self._build_first_aggregation_expr(col))
+
+        # Columns with conflicts: concatenate as string
+        for col in columns_with_conflicts:
+            agg_exprs.append(
+                self._build_concat_aggregation_expr(col, df.schema[col])
+            )
+
+        # Perform aggregation
+        result = df.group_by(key_columns, maintain_order=True).agg(agg_exprs)
+
+        records_after = len(result)
+
+        self._logger.warning(
+            "Duplicates aggregated in enricher",
+            enricher=enricher_name,
+            join_keys=key_columns,
+            duplicate_count=records_before - records_after,
+            records_before=records_before,
+            records_after=records_after,
+            columns_with_conflicts=columns_with_conflicts,
+        )
+
+        return result
+
+    def _deduplicate_enricher(
+        self,
+        enricher_df: pl.DataFrame,
+        join_keys: list[str],
+        enricher_name: str,
+    ) -> pl.DataFrame:
+        """Check and deduplicate enricher before join.
+
+        Workflow:
+        1. Check for duplicates by join_keys
+        2. If no duplicates → return df unchanged
+        3. If duplicates exist → aggregate and log
+
+        Args:
+            enricher_df: Enricher DataFrame.
+            join_keys: Columns for join (grouping keys).
+            enricher_name: Name for logging.
+
+        Returns:
+            DataFrame with unique values by join_keys.
+        """
+        if not self._check_duplicates(enricher_df, join_keys):
+            return enricher_df
+
+        return self._aggregate_duplicates(enricher_df, join_keys, enricher_name)
+
+    # ========== End Enricher Deduplication Methods ==========
+
     def _normalize_join_key_columns(
         self,
         df: pl.DataFrame,
@@ -701,6 +1096,13 @@ class MergeService:
             enricher_df = enricher_dfs[enricher.pipeline]
             join_keys = set(enricher.join_keys)
             join_keys_list = list(join_keys)
+
+            # Deduplicate enricher before join to prevent fan-out
+            enricher_df = self._deduplicate_enricher(
+                enricher_df=enricher_df,
+                join_keys=join_keys_list,
+                enricher_name=enricher.pipeline,
+            )
 
             # Normalize join key columns for case-insensitive matching
             # This ensures DOIs like "10.1038/NATURE" match "10.1038/nature"
