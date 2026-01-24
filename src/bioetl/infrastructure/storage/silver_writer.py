@@ -183,31 +183,46 @@ class SilverWriter(BaseDeltaWriter):
         """Prepare Arrow table from records with schema filtering and sorting."""
         from bioetl.domain.schemas.column_order import canonical_column_order
 
-        schema_fields = set(schema.names)
+        # Identify string fields that might contain nested objects
         string_fields = {
             field.name
             for field in schema
             if pa.types.is_string(field.type) or pa.types.is_large_string(field.type)
         }
 
-        filtered_records = [
-            {
-                k: (
+        # Optimized hybrid approach:
+        # 1. Iterate records and check ONLY string_fields for nested types (dict/list).
+        # 2. If no serialization needed -> keep original record (Arrow filters extra keys fast).
+        # 3. If serialization needed -> create new dict with ONLY schema fields (slow path).
+        new_records = []
+        schema_names = schema.names  # Ordered list of schema fields
+
+        for rec in records:
+            rec_updates = {}
+            for k in string_fields:
+                v = rec.get(k)
+                if v is not None and isinstance(v, (dict, list)):
                     # Uses OPT_SORT_KEYS for deterministic serialization (§2.8.1).
                     # Complex objects in Gold layer are flattened; Silver preserves
                     # JSON for forensic purposes.
-                    orjson.dumps(v, option=orjson.OPT_SORT_KEYS).decode("utf-8")
-                    if v is not None
-                    and k in string_fields
-                    and isinstance(v, (dict, list))
-                    else v
-                )
-                for k, v in rec.items()
-                if k in schema_fields
-            }
-            for rec in records
-        ]
-        arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
+                    rec_updates[k] = orjson.dumps(
+                        v, option=orjson.OPT_SORT_KEYS
+                    ).decode("utf-8")
+
+            if rec_updates:
+                # Slow path: reconstruct dict with schema fields only + updates
+                new_rec = {}
+                for k in schema_names:
+                    if k in rec_updates:
+                        new_rec[k] = rec_updates[k]
+                    elif k in rec:
+                        new_rec[k] = rec[k]
+                new_records.append(new_rec)
+            else:
+                # Fast path: use original record, let Arrow handle filtering
+                new_records.append(rec)
+
+        arrow_data = pa.Table.from_pylist(new_records, schema=schema)
 
         # Enforce canonical column order (ADR-014, RULES.md §2.4)
         ordered_columns = canonical_column_order(list(arrow_data.column_names))
