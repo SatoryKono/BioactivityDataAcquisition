@@ -1,9 +1,9 @@
 # Config Discrepancies Report
 
-Generated: 2026-01-06T18:30:06.183527
+Generated: 2026-01-23T09:37:25.950380
 
-Total configs: 20
-Total unique parameters: 129
+Total configs: 21
+Total unique parameters: 176
 
 ## 1. Parameters by Category
 
@@ -11,278 +11,400 @@ Total unique parameters: 129
 
 | Parameter | Presence |
 |-----------|----------|
-| `batch_size` | 2/20 |
+| `batch_size` | 1/21 |
 
 ### checkpoint_interval
 
 | Parameter | Presence |
 |-----------|----------|
-| `checkpoint_interval` | 2/20 |
+| `checkpoint_interval` | 1/21 |
 
 ### circuit_breaker
 
 | Parameter | Presence |
 |-----------|----------|
-| `circuit_breaker` | 2/20 |
-| `circuit_breaker.failure_threshold` | 2/20 |
-| `circuit_breaker.recovery_timeout` | 2/20 |
+| `circuit_breaker` | 1/21 |
+| `circuit_breaker.failure_threshold` | 1/21 |
+| `circuit_breaker.recovery_timeout` | 1/21 |
 
-### defaults_version
+### composite
 
 | Parameter | Presence |
 |-----------|----------|
-| `defaults_version` | 1/20 |
+| `composite` | 1/21 |
+| `composite.dq_rules` | 1/21 |
+| `composite.enrichers` | 1/21 |
+| `composite.execution` | 1/21 |
+| `composite.lineage` | 1/21 |
+| `composite.merge` | 1/21 |
+| `composite.name` | 1/21 |
+| `composite.seed` | 1/21 |
+| `composite.version` | 1/21 |
+| `composite.dq_rules.enricher_overrides` | 1/21 |
+| `composite.dq_rules.hard_fail_threshold` | 1/21 |
+| `composite.dq_rules.required_fields` | 1/21 |
+| `composite.dq_rules.soft_fail_threshold` | 1/21 |
+| `composite.execution.checkpoint_enabled` | 1/21 |
+| `composite.execution.max_concurrency` | 1/21 |
+| `composite.execution.retry` | 1/21 |
+| `composite.lineage.track_field_sources` | 1/21 |
+| `composite.lineage.track_status` | 1/21 |
+| `composite.lineage.track_timestamps` | 1/21 |
+| `composite.merge.conflict_resolution` | 1/21 |
+| `composite.merge.field_priorities` | 1/21 |
+| `composite.merge.output` | 1/21 |
+| `composite.merge.strategy` | 1/21 |
+| `composite.seed.output_keys` | 1/21 |
+| `composite.seed.pipeline` | 1/21 |
+| `composite.seed.silver_table` | 1/21 |
+| `composite.dq_rules.enricher_overrides.pubmed_publication` | 1/21 |
+| `composite.dq_rules.enricher_overrides.semanticscholar_publication` | 1/21 |
+| `composite.execution.retry.backoff_multiplier` | 1/21 |
+| `composite.execution.retry.max_attempts` | 1/21 |
+| `composite.merge.field_priorities.abstract` | 1/21 |
+| `composite.merge.field_priorities.citations_count` | 1/21 |
+| `composite.merge.field_priorities.concepts` | 1/21 |
+| `composite.merge.field_priorities.mesh_terms` | 1/21 |
+| `composite.merge.field_priorities.title` | 1/21 |
+| `composite.merge.field_priorities.tldr` | 1/21 |
+| `composite.merge.output.gold` | 1/21 |
+| `composite.merge.output.silver` | 1/21 |
+| `composite.dq_rules.enricher_overrides.pubmed_publication.hard_fail_threshold` | 1/21 |
+| `composite.dq_rules.enricher_overrides.pubmed_publication.soft_fail_threshold` | 1/21 |
+| `composite.dq_rules.enricher_overrides.semanticscholar_publication.hard_fail_threshold` | 1/21 |
+| `composite.dq_rules.enricher_overrides.semanticscholar_publication.soft_fail_threshold` | 1/21 |
 
 ### description
 
 | Parameter | Presence |
 |-----------|----------|
-| `description` | 19/20 |
+| `description` | 19/21 |
+
+### dq_config_file
+
+| Parameter | Presence |
+|-----------|----------|
+| `dq_config_file` | 15/21 |
 
 ### dq_rules
 
 | Parameter | Presence |
 |-----------|----------|
-| `dq_rules` | 2/20 |
-| `dq_rules.hard_fail_threshold` | 2/20 |
-| `dq_rules.soft_fail_threshold` | 2/20 |
+| `dq_rules` | 6/21 |
+| `dq_rules.conditional_validations` | 2/21 |
+| `dq_rules.cross_field_validations` | 6/21 |
+| `dq_rules.field_validations` | 6/21 |
+| `dq_rules.hard_fail_threshold` | 1/21 |
+| `dq_rules.invalid_record_policy` | 1/21 |
+| `dq_rules.report` | 1/21 |
+| `dq_rules.soft_fail_threshold` | 1/21 |
+| `dq_rules.strict_validation` | 1/21 |
+| `dq_rules.report.enabled` | 1/21 |
+| `dq_rules.report.format` | 1/21 |
+| `dq_rules.report.include_sample_failures` | 1/21 |
+| `dq_rules.report.sample_size` | 1/21 |
 
 ### entity_type
 
 | Parameter | Presence |
 |-----------|----------|
-| `entity_type` | 19/20 |
+| `entity_type` | 19/21 |
+
+### filter_config_file
+
+| Parameter | Presence |
+|-----------|----------|
+| `filter_config_file` | 5/21 |
 
 ### gold_filters
 
 | Parameter | Presence |
 |-----------|----------|
-| `gold_filters` | 19/20 |
-| `gold_filters.columns` | 11/20 |
-| `gold_filters.list_contains` | 1/20 |
-| `gold_filters.list_lengths` | 1/20 |
-| `gold_filters.ranges` | 6/20 |
-| `gold_filters.required_fields` | 19/20 |
-| `gold_filters.columns.assay_type` | 2/20 |
-| `gold_filters.columns.component_type` | 1/20 |
-| `gold_filters.columns.confidence_score` | 1/20 |
-| `gold_filters.columns.doc_type` | 1/20 |
-| `gold_filters.columns.downgraded` | 1/20 |
-| `gold_filters.columns.inorganic_flag` | 1/20 |
-| `gold_filters.columns.molecule_type` | 1/20 |
-| `gold_filters.columns.potential_duplicate` | 1/20 |
-| `gold_filters.columns.relationship_type` | 1/20 |
-| `gold_filters.columns.reviewed` | 1/20 |
-| `gold_filters.columns.standard_relation` | 1/20 |
-| `gold_filters.columns.standard_type` | 1/20 |
-| `gold_filters.columns.standard_units` | 1/20 |
-| `gold_filters.columns.structure_type` | 1/20 |
-| `gold_filters.columns.target_type` | 1/20 |
-| `gold_filters.columns.term_type` | 1/20 |
-| `gold_filters.list_contains.component_types` | 1/20 |
-| `gold_filters.list_lengths.component_accessions` | 1/20 |
-| `gold_filters.list_lengths.component_ids` | 1/20 |
-| `gold_filters.ranges.max_tani` | 1/20 |
-| `gold_filters.ranges.standard_value` | 1/20 |
-| `gold_filters.ranges.year` | 4/20 |
-| `gold_filters.list_contains.component_types.mode` | 1/20 |
-| `gold_filters.list_contains.component_types.values` | 1/20 |
-| `gold_filters.list_lengths.component_accessions.max` | 1/20 |
-| `gold_filters.list_lengths.component_accessions.min` | 1/20 |
-| `gold_filters.list_lengths.component_ids.min` | 1/20 |
-| `gold_filters.ranges.max_tani.include_min` | 1/20 |
-| `gold_filters.ranges.max_tani.min` | 1/20 |
-| `gold_filters.ranges.standard_value.include_min` | 1/20 |
-| `gold_filters.ranges.standard_value.min` | 1/20 |
-| `gold_filters.ranges.year.include_min` | 1/20 |
-| `gold_filters.ranges.year.max` | 3/20 |
-| `gold_filters.ranges.year.min` | 4/20 |
+| `gold_filters` | 1/21 |
+| `gold_filters.required_fields` | 1/21 |
 
 ### gold_table
 
 | Parameter | Presence |
 |-----------|----------|
-| `gold_table` | 8/20 |
+| `gold_table` | 19/21 |
 
 ### input_filter
 
 | Parameter | Presence |
 |-----------|----------|
-| `input_filter` | 20/20 |
-| `input_filter.batch_size` | 17/20 |
-| `input_filter.column_name` | 16/20 |
-| `input_filter.enabled` | 20/20 |
-| `input_filter.fallback_column` | 3/20 |
-| `input_filter.filter_field` | 16/20 |
-| `input_filter.source_path` | 16/20 |
+| `input_filter` | 1/21 |
+| `input_filter.batch_size` | 1/21 |
+| `input_filter.enabled` | 1/21 |
 
 ### maintenance
 
 | Parameter | Presence |
 |-----------|----------|
-| `maintenance` | 1/20 |
-| `maintenance.auto_vacuum` | 1/20 |
-| `maintenance.vacuum_retention_days` | 1/20 |
+| `maintenance` | 1/21 |
+| `maintenance.auto_vacuum` | 1/21 |
+| `maintenance.vacuum_retention_days` | 1/21 |
 
 ### pipeline_name
 
 | Parameter | Presence |
 |-----------|----------|
-| `pipeline_name` | 19/20 |
+| `pipeline_name` | 19/21 |
 
 ### primary_keys
 
 | Parameter | Presence |
 |-----------|----------|
-| `primary_keys` | 19/20 |
+| `primary_keys` | 19/21 |
 
 ### provider
 
 | Parameter | Presence |
 |-----------|----------|
-| `provider` | 19/20 |
+| `provider` | 19/21 |
 
-### rate_limit
+### schema_version
 
 | Parameter | Presence |
 |-----------|----------|
-| `rate_limit` | 1/20 |
-| `rate_limit.burst` | 1/20 |
-| `rate_limit.requests_per_second` | 1/20 |
+| `schema_version` | 1/21 |
 
 ### silver_table
 
 | Parameter | Presence |
 |-----------|----------|
-| `silver_table` | 19/20 |
+| `silver_table` | 19/21 |
 
 ### sink
 
 | Parameter | Presence |
 |-----------|----------|
-| `sink` | 20/20 |
-| `sink.bronze` | 20/20 |
-| `sink.gold` | 20/20 |
-| `sink.silver` | 20/20 |
-| `sink.bronze.deterministic` | 1/20 |
-| `sink.bronze.enabled` | 1/20 |
-| `sink.bronze.format` | 1/20 |
-| `sink.bronze.path` | 18/20 |
-| `sink.bronze.save_json` | 1/20 |
-| `sink.gold.csv_export` | 20/20 |
-| `sink.gold.deterministic` | 1/20 |
-| `sink.gold.enabled` | 2/20 |
-| `sink.gold.format` | 2/20 |
-| `sink.gold.mode` | 2/20 |
-| `sink.gold.path` | 19/20 |
-| `sink.gold.sort_by` | 4/20 |
-| `sink.gold.validation` | 1/20 |
-| `sink.silver.classification` | 2/20 |
-| `sink.silver.csv_export` | 20/20 |
-| `sink.silver.deterministic` | 1/20 |
-| `sink.silver.forensic_retention` | 1/20 |
-| `sink.silver.format` | 2/20 |
-| `sink.silver.mode` | 2/20 |
-| `sink.silver.on_schema_mismatch` | 1/20 |
-| `sink.silver.partition_by` | 16/20 |
-| `sink.silver.path` | 19/20 |
-| `sink.silver.primary_key` | 17/20 |
-| `sink.silver.sort_by` | 4/20 |
-| `sink.gold.csv_export.delimiter` | 1/20 |
-| `sink.gold.csv_export.enabled` | 2/20 |
-| `sink.gold.csv_export.encoding` | 1/20 |
-| `sink.gold.csv_export.header` | 1/20 |
-| `sink.gold.csv_export.path` | 19/20 |
-| `sink.gold.sort_by.ascending` | 4/20 |
-| `sink.gold.sort_by.columns` | 4/20 |
-| `sink.gold.validation.strict` | 1/20 |
-| `sink.silver.csv_export.delimiter` | 2/20 |
-| `sink.silver.csv_export.enabled` | 2/20 |
-| `sink.silver.csv_export.encoding` | 2/20 |
-| `sink.silver.csv_export.header` | 2/20 |
-| `sink.silver.csv_export.path` | 19/20 |
-| `sink.silver.sort_by.ascending` | 4/20 |
-| `sink.silver.sort_by.columns` | 4/20 |
+| `sink` | 19/21 |
+| `sink.bronze` | 17/21 |
+| `sink.gold` | 17/21 |
+| `sink.silver` | 19/21 |
+| `sink.bronze.deterministic` | 1/21 |
+| `sink.bronze.dq_report` | 1/21 |
+| `sink.bronze.flat_structure` | 6/21 |
+| `sink.bronze.format` | 1/21 |
+| `sink.bronze.metadata` | 1/21 |
+| `sink.bronze.path` | 16/21 |
+| `sink.bronze.save_json` | 1/21 |
+| `sink.bronze.save_metadata` | 1/21 |
+| `sink.gold.csv_export` | 17/21 |
+| `sink.gold.deterministic` | 1/21 |
+| `sink.gold.dq_report` | 1/21 |
+| `sink.gold.enabled` | 1/21 |
+| `sink.gold.flat_structure` | 6/21 |
+| `sink.gold.format` | 1/21 |
+| `sink.gold.metadata` | 1/21 |
+| `sink.gold.mode` | 1/21 |
+| `sink.gold.path` | 16/21 |
+| `sink.gold.save_metadata` | 1/21 |
+| `sink.gold.sort_by` | 16/21 |
+| `sink.gold.validation` | 1/21 |
+| `sink.silver.classification` | 1/21 |
+| `sink.silver.csv_export` | 17/21 |
+| `sink.silver.deterministic` | 1/21 |
+| `sink.silver.dq_report` | 1/21 |
+| `sink.silver.flat_structure` | 6/21 |
+| `sink.silver.forensic_retention` | 1/21 |
+| `sink.silver.format` | 1/21 |
+| `sink.silver.metadata` | 1/21 |
+| `sink.silver.mode` | 1/21 |
+| `sink.silver.on_schema_mismatch` | 1/21 |
+| `sink.silver.partition_by` | 16/21 |
+| `sink.silver.path` | 16/21 |
+| `sink.silver.primary_key` | 15/21 |
+| `sink.silver.save_metadata` | 1/21 |
+| `sink.silver.sort_by` | 16/21 |
+| `sink.bronze.dq_report.enabled` | 1/21 |
+| `sink.bronze.metadata.description` | 1/21 |
+| `sink.bronze.metadata.lineage` | 1/21 |
+| `sink.bronze.metadata.owner` | 1/21 |
+| `sink.bronze.metadata.retention_days` | 1/21 |
+| `sink.bronze.metadata.sla_freshness_hours` | 1/21 |
+| `sink.bronze.metadata.steward` | 1/21 |
+| `sink.bronze.metadata.tags` | 1/21 |
+| `sink.gold.csv_export.delimiter` | 1/21 |
+| `sink.gold.csv_export.enabled` | 1/21 |
+| `sink.gold.csv_export.encoding` | 1/21 |
+| `sink.gold.csv_export.header` | 1/21 |
+| `sink.gold.csv_export.path` | 16/21 |
+| `sink.gold.dq_report.enabled` | 1/21 |
+| `sink.gold.metadata.business_domain` | 1/21 |
+| `sink.gold.metadata.description` | 1/21 |
+| `sink.gold.metadata.lineage` | 1/21 |
+| `sink.gold.metadata.tags` | 1/21 |
+| `sink.gold.metadata.use_cases` | 1/21 |
+| `sink.gold.sort_by.ascending` | 16/21 |
+| `sink.gold.sort_by.columns` | 15/21 |
+| `sink.gold.validation.strict` | 1/21 |
+| `sink.silver.csv_export.delimiter` | 1/21 |
+| `sink.silver.csv_export.enabled` | 1/21 |
+| `sink.silver.csv_export.encoding` | 1/21 |
+| `sink.silver.csv_export.header` | 1/21 |
+| `sink.silver.csv_export.path` | 16/21 |
+| `sink.silver.dq_report.enabled` | 1/21 |
+| `sink.silver.metadata.description` | 1/21 |
+| `sink.silver.metadata.lineage` | 1/21 |
+| `sink.silver.metadata.quality_expectations` | 1/21 |
+| `sink.silver.metadata.tags` | 1/21 |
+| `sink.silver.sort_by.ascending` | 16/21 |
+| `sink.silver.sort_by.columns` | 15/21 |
+| `sink.bronze.metadata.lineage.extraction_method` | 1/21 |
+| `sink.bronze.metadata.lineage.source_system` | 1/21 |
+| `sink.bronze.metadata.lineage.source_version` | 1/21 |
+| `sink.gold.metadata.lineage.filters_applied` | 1/21 |
+| `sink.gold.metadata.lineage.source_layer` | 1/21 |
+| `sink.silver.metadata.lineage.source_layer` | 1/21 |
+| `sink.silver.metadata.lineage.transformations` | 1/21 |
+| `sink.silver.metadata.quality_expectations.accuracy` | 1/21 |
+| `sink.silver.metadata.quality_expectations.completeness` | 1/21 |
 
 ### source
 
 | Parameter | Presence |
 |-----------|----------|
-| `source` | 3/20 |
-| `source.api` | 1/20 |
-| `source.api_key` | 1/20 |
-| `source.batch_size` | 1/20 |
-| `source.email` | 2/20 |
-| `source.input_path` | 1/20 |
-| `source.load_strategy` | 1/20 |
-| `source.search_term` | 1/20 |
-| `source.type` | 1/20 |
-| `source.api.base_url` | 1/20 |
-| `source.api.from_db` | 1/20 |
-| `source.api.to_db` | 1/20 |
+| `source` | 4/21 |
+| `source.api` | 1/21 |
+| `source.api_key` | 1/21 |
+| `source.batch_size` | 1/21 |
+| `source.email` | 2/21 |
+| `source.input_path` | 1/21 |
+| `source.load_strategy` | 2/21 |
+| `source.search_term` | 1/21 |
+| `source.type` | 2/21 |
+| `source.api.base_url` | 1/21 |
+| `source.api.from_db` | 1/21 |
+| `source.api.to_db` | 1/21 |
 
 ### source_file
 
 | Parameter | Presence |
 |-----------|----------|
-| `source_file` | 18/20 |
+| `source_file` | 15/21 |
 
 ### transform
 
 | Parameter | Presence |
 |-----------|----------|
-| `transform` | 7/20 |
-| `transform.steps` | 7/20 |
-| `transform.version` | 7/20 |
+| `transform` | 1/21 |
+| `transform.steps` | 1/21 |
 
 ### version
 
 | Parameter | Presence |
 |-----------|----------|
-| `version` | 19/20 |
+| `version` | 19/21 |
 
 ## 2. Entity Config Comparison
 
 | Config | pipeline_name | provider | entity_type | version | description | primary_keys | silver_table | gold_table | source_file | source | transform | dq_rules | circuit_breaker | rate_limit | gold_filters | sink | input_filter |
 |--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
-| chembl/activity | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/assay | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/assay_parameters | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/cell_line | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/compound_record | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/document | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/document_similarity | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/document_term | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/molecule | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/protein_class | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/target | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/target_component | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| crossref/publication_enrichment | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | ✓ | — | — | — | ✓ | ✓ | ✓ |
-| openalex/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | ✓ | ✓ | ✓ |
-| pubchem/compound | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | ✓ | ✓ | ✓ |
-| pubmed/publications | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | ✓ | ✓ | ✓ |
-| semanticscholar/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | ✓ | ✓ | ✓ |
-| uniprot/idmapping | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| uniprot/protein | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | ✓ | ✓ | ✓ |
+| _base | — | — | — | — | — | — | — | — | — | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | ✓ |
+| chembl/activity | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | ✓ | — | — | — | — | — |
+| chembl/assay | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | ✓ | — | — | — | ✓ | — |
+| chembl/assay_parameters | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/cell_line | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/compound_record | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/molecule | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | — | — | — | ✓ | — |
+| chembl/protein_class | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/publication_similarity | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/publication_term | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/target | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | — | — | — | ✓ | — |
+| chembl/target_component | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| composite/publication | — | — | — | — | — | — | — | — | — | — | — | — | — | — | ✓ | — | — |
+| crossref/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| openalex/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | ✓ | — |
+| pubchem/compound | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | — | — | — | ✓ | — |
+| pubmed/publications | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | — |
+| semanticscholar/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| uniprot/idmapping | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | ✓ | — |
+| uniprot/protein | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | — | ✓ | — |
 
 ## 3. Discrepancy Categories
 
 ### A. Missing in _defaults (should be added)
 
-- `batch_size` - present in: chembl/protein_class, chembl/target_component
-- `checkpoint_interval` - present in: chembl/protein_class, chembl/target_component
-- `description` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `entity_type` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `gold_filters` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `gold_table` - present in: chembl/protein_class, chembl/target_component, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `pipeline_name` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `primary_keys` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `provider` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `rate_limit` - present in: uniprot/idmapping
-- `rate_limit.burst` - present in: uniprot/idmapping
-- `rate_limit.requests_per_second` - present in: uniprot/idmapping
-- `silver_table` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `source` - present in: openalex/publication, pubmed/publications, uniprot/idmapping
+- `batch_size` - present in: chembl/protein_class
+- `checkpoint_interval` - present in: chembl/protein_class
+- `circuit_breaker` - present in: _base
+- `circuit_breaker.failure_threshold` - present in: _base
+- `circuit_breaker.recovery_timeout` - present in: _base
+- `composite` - present in: composite/publication
+- `composite.dq_rules` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.pubmed_publication` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.pubmed_publication.hard_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.pubmed_publication.soft_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.semanticscholar_publication` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.semanticscholar_publication.hard_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.semanticscholar_publication.soft_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.hard_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.required_fields` - present in: composite/publication
+- `composite.dq_rules.soft_fail_threshold` - present in: composite/publication
+- `composite.enrichers` - present in: composite/publication
+- `composite.execution` - present in: composite/publication
+- `composite.execution.checkpoint_enabled` - present in: composite/publication
+- `composite.execution.max_concurrency` - present in: composite/publication
+- `composite.execution.retry` - present in: composite/publication
+- `composite.execution.retry.backoff_multiplier` - present in: composite/publication
+- `composite.execution.retry.max_attempts` - present in: composite/publication
+- `composite.lineage` - present in: composite/publication
+- `composite.lineage.track_field_sources` - present in: composite/publication
+- `composite.lineage.track_status` - present in: composite/publication
+- `composite.lineage.track_timestamps` - present in: composite/publication
+- `composite.merge` - present in: composite/publication
+- `composite.merge.conflict_resolution` - present in: composite/publication
+- `composite.merge.field_priorities` - present in: composite/publication
+- `composite.merge.field_priorities.abstract` - present in: composite/publication
+- `composite.merge.field_priorities.citations_count` - present in: composite/publication
+- `composite.merge.field_priorities.concepts` - present in: composite/publication
+- `composite.merge.field_priorities.mesh_terms` - present in: composite/publication
+- `composite.merge.field_priorities.title` - present in: composite/publication
+- `composite.merge.field_priorities.tldr` - present in: composite/publication
+- `composite.merge.output` - present in: composite/publication
+- `composite.merge.output.gold` - present in: composite/publication
+- `composite.merge.output.silver` - present in: composite/publication
+- `composite.merge.strategy` - present in: composite/publication
+- `composite.name` - present in: composite/publication
+- `composite.seed` - present in: composite/publication
+- `composite.seed.output_keys` - present in: composite/publication
+- `composite.seed.pipeline` - present in: composite/publication
+- `composite.seed.silver_table` - present in: composite/publication
+- `composite.version` - present in: composite/publication
+- `description` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `dq_config_file` - present in: chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+- `dq_rules` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+- `dq_rules.conditional_validations` - present in: _base, chembl/activity
+- `dq_rules.cross_field_validations` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+- `dq_rules.field_validations` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+- `dq_rules.hard_fail_threshold` - present in: _base
+- `dq_rules.invalid_record_policy` - present in: _base
+- `dq_rules.report` - present in: _base
+- `dq_rules.report.enabled` - present in: _base
+- `dq_rules.report.format` - present in: _base
+- `dq_rules.report.include_sample_failures` - present in: _base
+- `dq_rules.report.sample_size` - present in: _base
+- `dq_rules.soft_fail_threshold` - present in: _base
+- `dq_rules.strict_validation` - present in: _base
+- `entity_type` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `filter_config_file` - present in: chembl/publication, chembl/publication_similarity, chembl/publication_term, composite/publication, pubmed/publications
+- `gold_filters` - present in: composite/publication
+- `gold_table` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `input_filter` - present in: _base
+- `maintenance` - present in: _base
+- `maintenance.auto_vacuum` - present in: _base
+- `maintenance.vacuum_retention_days` - present in: _base
+- `pipeline_name` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `primary_keys` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `provider` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `schema_version` - present in: _base
+- `silver_table` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `sink` - present in: _base, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `source` - present in: _base, openalex/publication, pubmed/publications, uniprot/idmapping
 - `source.api` - present in: uniprot/idmapping
 - `source.api.base_url` - present in: uniprot/idmapping
 - `source.api.from_db` - present in: uniprot/idmapping
@@ -291,118 +413,153 @@ Total unique parameters: 129
 - `source.batch_size` - present in: openalex/publication
 - `source.email` - present in: openalex/publication, pubmed/publications
 - `source.input_path` - present in: uniprot/idmapping
-- `source.load_strategy` - present in: uniprot/idmapping
+- `source.load_strategy` - present in: _base, uniprot/idmapping
 - `source.search_term` - present in: pubmed/publications
-- `source.type` - present in: uniprot/idmapping
-- `source_file` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/protein
-- `transform` - present in: crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `transform.steps` - present in: crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `transform.version` - present in: crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `version` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `source.type` - present in: _base, uniprot/idmapping
+- `source_file` - present in: chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+- `transform` - present in: _base
+- `transform.steps` - present in: _base
+- `version` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
 
 ### B. Inconsistent presence across entity configs
 
-- `batch_size`
-  - Present in (2): chembl/protein_class, chembl/target_component
-  - Missing in (17): chembl/document_similarity, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/assay_parameters, semanticscholar/publication, chembl/target, chembl/activity, chembl/molecule, openalex/publication, pubmed/publications, chembl/assay, chembl/cell_line, chembl/document, chembl/compound_record, uniprot/idmapping, uniprot/protein
-- `checkpoint_interval`
-  - Present in (2): chembl/protein_class, chembl/target_component
-  - Missing in (17): chembl/document_similarity, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/assay_parameters, semanticscholar/publication, chembl/target, chembl/activity, chembl/molecule, openalex/publication, pubmed/publications, chembl/assay, chembl/cell_line, chembl/document, chembl/compound_record, uniprot/idmapping, uniprot/protein
-- `gold_filters.columns`
-  - Present in (11): chembl/activity, chembl/assay, chembl/document, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, pubchem/compound, pubmed/publications, uniprot/protein
-  - Missing in (8): openalex/publication, chembl/document_similarity, crossref/publication_enrichment, chembl/cell_line, chembl/compound_record, chembl/assay_parameters, uniprot/idmapping, semanticscholar/publication
-- `gold_filters.columns.assay_type`
-  - Present in (2): chembl/activity, chembl/assay
-  - Missing in (17): chembl/protein_class, chembl/document_similarity, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/assay_parameters, semanticscholar/publication, chembl/target, chembl/molecule, openalex/publication, pubmed/publications, chembl/target_component, chembl/cell_line, chembl/document, chembl/compound_record, uniprot/idmapping, uniprot/protein
-- `gold_filters.ranges`
-  - Present in (6): chembl/activity, chembl/document, chembl/document_similarity, crossref/publication_enrichment, openalex/publication, semanticscholar/publication
-  - Missing in (13): pubmed/publications, chembl/assay, chembl/protein_class, chembl/target_component, pubchem/compound, chembl/document_term, chembl/cell_line, chembl/compound_record, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, chembl/target, chembl/molecule
-- `gold_filters.ranges.year`
-  - Present in (4): chembl/document, crossref/publication_enrichment, openalex/publication, semanticscholar/publication
-  - Missing in (15): pubmed/publications, chembl/assay, chembl/protein_class, chembl/document_similarity, chembl/target_component, pubchem/compound, chembl/document_term, chembl/cell_line, chembl/compound_record, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, chembl/target, chembl/activity, chembl/molecule
-- `gold_filters.ranges.year.max`
-  - Present in (3): crossref/publication_enrichment, openalex/publication, semanticscholar/publication
-  - Missing in (16): chembl/protein_class, chembl/document_similarity, pubchem/compound, chembl/document_term, chembl/assay_parameters, chembl/target, chembl/activity, chembl/molecule, pubmed/publications, chembl/assay, chembl/target_component, chembl/cell_line, chembl/document, chembl/compound_record, uniprot/idmapping, uniprot/protein
-- `gold_filters.ranges.year.min`
-  - Present in (4): chembl/document, crossref/publication_enrichment, openalex/publication, semanticscholar/publication
-  - Missing in (15): pubmed/publications, chembl/assay, chembl/protein_class, chembl/document_similarity, chembl/target_component, pubchem/compound, chembl/document_term, chembl/cell_line, chembl/compound_record, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, chembl/target, chembl/activity, chembl/molecule
+- `description`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `dq_config_file`
+  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
+- `dq_rules`
+  - Present in (6): _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+  - Missing in (15): composite/publication, uniprot/idmapping, chembl/protein_class, chembl/compound_record, crossref/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, pubmed/publications, openalex/publication, uniprot/protein, semanticscholar/publication, chembl/publication
+- `dq_rules.conditional_validations`
+  - Present in (2): _base, chembl/activity
+  - Missing in (19): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, uniprot/idmapping, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
+- `dq_rules.cross_field_validations`
+  - Present in (6): _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+  - Missing in (15): composite/publication, uniprot/idmapping, chembl/protein_class, chembl/compound_record, crossref/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, pubmed/publications, openalex/publication, uniprot/protein, semanticscholar/publication, chembl/publication
+- `dq_rules.field_validations`
+  - Present in (6): _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+  - Missing in (15): composite/publication, uniprot/idmapping, chembl/protein_class, chembl/compound_record, crossref/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, pubmed/publications, openalex/publication, uniprot/protein, semanticscholar/publication, chembl/publication
+- `entity_type`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `filter_config_file`
+  - Present in (5): chembl/publication, chembl/publication_similarity, chembl/publication_term, composite/publication, pubmed/publications
+  - Missing in (16): chembl/target, uniprot/idmapping, _base, chembl/protein_class, semanticscholar/publication, crossref/publication, chembl/molecule, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/assay, chembl/activity, openalex/publication, uniprot/protein, pubchem/compound, chembl/compound_record
 - `gold_table`
-  - Present in (8): chembl/protein_class, chembl/target_component, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (11): chembl/assay, chembl/document_similarity, crossref/publication_enrichment, chembl/document_term, chembl/cell_line, chembl/document, chembl/compound_record, chembl/assay_parameters, chembl/target, chembl/activity, chembl/molecule
-- `input_filter.batch_size`
-  - Present in (16): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_term, chembl/molecule, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/protein
-  - Missing in (3): uniprot/idmapping, chembl/protein_class, chembl/document_similarity
-- `input_filter.column_name`
-  - Present in (16): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_term, chembl/molecule, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/protein
-  - Missing in (3): uniprot/idmapping, chembl/protein_class, chembl/document_similarity
-- `input_filter.fallback_column`
-  - Present in (3): crossref/publication_enrichment, openalex/publication, semanticscholar/publication
-  - Missing in (16): chembl/protein_class, chembl/document_similarity, pubchem/compound, chembl/document_term, chembl/assay_parameters, chembl/target, chembl/activity, chembl/molecule, pubmed/publications, chembl/assay, chembl/target_component, chembl/cell_line, chembl/document, chembl/compound_record, uniprot/idmapping, uniprot/protein
-- `input_filter.filter_field`
-  - Present in (16): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_term, chembl/molecule, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/protein
-  - Missing in (3): uniprot/idmapping, chembl/protein_class, chembl/document_similarity
-- `input_filter.source_path`
-  - Present in (16): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_term, chembl/molecule, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/protein
-  - Missing in (3): uniprot/idmapping, chembl/protein_class, chembl/document_similarity
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `pipeline_name`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `primary_keys`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `provider`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `silver_table`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `sink`
+  - Present in (19): _base, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, chembl/activity
+- `sink.bronze`
+  - Present in (17): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (4): composite/publication, chembl/assay, uniprot/protein, chembl/activity
+- `sink.bronze.flat_structure`
+  - Present in (6): _base, chembl/publication, crossref/publication, openalex/publication, pubmed/publications, semanticscholar/publication
+  - Missing in (15): composite/publication, chembl/target, uniprot/idmapping, chembl/protein_class, chembl/publication_similarity, chembl/molecule, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/assay, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/compound_record
 - `sink.bronze.path`
-  - Present in (18): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/protein
-  - Missing in (1): uniprot/idmapping
+  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
+- `sink.gold`
+  - Present in (17): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (4): composite/publication, chembl/assay, uniprot/protein, chembl/activity
+- `sink.gold.csv_export`
+  - Present in (17): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (4): composite/publication, chembl/assay, uniprot/protein, chembl/activity
+- `sink.gold.csv_export.path`
+  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
+- `sink.gold.flat_structure`
+  - Present in (6): _base, chembl/publication, crossref/publication, openalex/publication, pubmed/publications, semanticscholar/publication
+  - Missing in (15): composite/publication, chembl/target, uniprot/idmapping, chembl/protein_class, chembl/publication_similarity, chembl/molecule, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/assay, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/compound_record
+- `sink.gold.path`
+  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
 - `sink.gold.sort_by`
-  - Present in (4): chembl/cell_line, chembl/compound_record, chembl/protein_class, chembl/target
-  - Missing in (15): openalex/publication, pubmed/publications, chembl/assay, chembl/document_similarity, chembl/target_component, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/document, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, semanticscholar/publication, chembl/activity, chembl/molecule
+  - Present in (16): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
 - `sink.gold.sort_by.ascending`
-  - Present in (4): chembl/cell_line, chembl/compound_record, chembl/protein_class, chembl/target
-  - Missing in (15): openalex/publication, pubmed/publications, chembl/assay, chembl/document_similarity, chembl/target_component, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/document, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, semanticscholar/publication, chembl/activity, chembl/molecule
+  - Present in (16): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
 - `sink.gold.sort_by.columns`
-  - Present in (4): chembl/cell_line, chembl/compound_record, chembl/protein_class, chembl/target
-  - Missing in (15): openalex/publication, pubmed/publications, chembl/assay, chembl/document_similarity, chembl/target_component, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/document, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, semanticscholar/publication, chembl/activity, chembl/molecule
+  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
+- `sink.silver`
+  - Present in (19): _base, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, chembl/activity
+- `sink.silver.csv_export`
+  - Present in (17): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (4): composite/publication, chembl/assay, uniprot/protein, chembl/activity
+- `sink.silver.csv_export.path`
+  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
+- `sink.silver.flat_structure`
+  - Present in (6): _base, chembl/publication, crossref/publication, openalex/publication, pubmed/publications, semanticscholar/publication
+  - Missing in (15): composite/publication, chembl/target, uniprot/idmapping, chembl/protein_class, chembl/publication_similarity, chembl/molecule, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/assay, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/compound_record
 - `sink.silver.partition_by`
-  - Present in (16): chembl/assay, chembl/assay_parameters, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (3): crossref/publication_enrichment, chembl/cell_line, chembl/activity
+  - Present in (16): _base, chembl/assay, chembl/assay_parameters, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (5): composite/publication, crossref/publication, chembl/cell_line, chembl/activity, chembl/compound_record
+- `sink.silver.path`
+  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
 - `sink.silver.primary_key`
-  - Present in (17): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/target, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (2): chembl/protein_class, chembl/target_component
+  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
 - `sink.silver.sort_by`
-  - Present in (4): chembl/cell_line, chembl/compound_record, chembl/protein_class, chembl/target
-  - Missing in (15): openalex/publication, pubmed/publications, chembl/assay, chembl/document_similarity, chembl/target_component, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/document, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, semanticscholar/publication, chembl/activity, chembl/molecule
+  - Present in (16): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
 - `sink.silver.sort_by.ascending`
-  - Present in (4): chembl/cell_line, chembl/compound_record, chembl/protein_class, chembl/target
-  - Missing in (15): openalex/publication, pubmed/publications, chembl/assay, chembl/document_similarity, chembl/target_component, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/document, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, semanticscholar/publication, chembl/activity, chembl/molecule
+  - Present in (16): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
 - `sink.silver.sort_by.columns`
-  - Present in (4): chembl/cell_line, chembl/compound_record, chembl/protein_class, chembl/target
-  - Missing in (15): openalex/publication, pubmed/publications, chembl/assay, chembl/document_similarity, chembl/target_component, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/document, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, semanticscholar/publication, chembl/activity, chembl/molecule
+  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
 - `source`
-  - Present in (3): openalex/publication, pubmed/publications, uniprot/idmapping
-  - Missing in (16): chembl/protein_class, chembl/document_similarity, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/assay_parameters, semanticscholar/publication, chembl/target, chembl/activity, chembl/molecule, chembl/assay, chembl/target_component, chembl/cell_line, chembl/document, chembl/compound_record, uniprot/protein
+  - Present in (4): _base, openalex/publication, pubmed/publications, uniprot/idmapping
+  - Missing in (17): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, chembl/target, crossref/publication, chembl/molecule, chembl/assay
 - `source.email`
   - Present in (2): openalex/publication, pubmed/publications
-  - Missing in (17): chembl/protein_class, chembl/document_similarity, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/assay_parameters, semanticscholar/publication, chembl/target, chembl/activity, chembl/molecule, chembl/assay, chembl/target_component, chembl/cell_line, chembl/document, chembl/compound_record, uniprot/idmapping, uniprot/protein
+  - Missing in (19): composite/publication, _base, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, uniprot/idmapping, chembl/target, crossref/publication, chembl/molecule, chembl/assay
+- `source.load_strategy`
+  - Present in (2): _base, uniprot/idmapping
+  - Missing in (19): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
+- `source.type`
+  - Present in (2): _base, uniprot/idmapping
+  - Missing in (19): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
 - `source_file`
-  - Present in (18): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/protein
-  - Missing in (1): uniprot/idmapping
-- `transform`
-  - Present in (7): crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (12): chembl/assay, chembl/protein_class, chembl/document_similarity, chembl/target_component, chembl/document_term, chembl/cell_line, chembl/document, chembl/compound_record, chembl/assay_parameters, chembl/target, chembl/activity, chembl/molecule
-- `transform.steps`
-  - Present in (7): crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (12): chembl/assay, chembl/protein_class, chembl/document_similarity, chembl/target_component, chembl/document_term, chembl/cell_line, chembl/document, chembl/compound_record, chembl/assay_parameters, chembl/target, chembl/activity, chembl/molecule
-- `transform.version`
-  - Present in (7): crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (12): chembl/assay, chembl/protein_class, chembl/document_similarity, chembl/target_component, chembl/document_term, chembl/cell_line, chembl/document, chembl/compound_record, chembl/assay_parameters, chembl/target, chembl/activity, chembl/molecule
+  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
+- `version`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
 
 ### C. Structural inconsistencies
 
 #### source vs source_file
 
-- Using `source`: openalex/publication, pubmed/publications, uniprot/idmapping
-- Using `source_file`: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/protein
+- Using `source`: _base, openalex/publication, pubmed/publications, uniprot/idmapping
+- Using `source_file`: chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
 
 #### transform block
 
-- Has `transform`: crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- No `transform`: chembl/assay, chembl/protein_class, chembl/document_similarity, chembl/target_component, chembl/document_term, chembl/cell_line, chembl/document, chembl/compound_record, chembl/assay_parameters, chembl/target, chembl/activity, chembl/molecule
+- Has `transform`: _base
+- No `transform`: composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, uniprot/idmapping, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
 
 #### gold_table presence
 
-- Has `gold_table`: chembl/protein_class, chembl/target_component, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- Missing `gold_table`: chembl/assay, chembl/document_similarity, crossref/publication_enrichment, chembl/document_term, chembl/cell_line, chembl/document, chembl/compound_record, chembl/assay_parameters, chembl/target, chembl/activity, chembl/molecule
+- Has `gold_table`: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- Missing `gold_table`: composite/publication, _base

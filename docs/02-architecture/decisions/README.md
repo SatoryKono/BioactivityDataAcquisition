@@ -34,6 +34,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-026](ADR-026-composite-pipeline-pattern.md) | Composite Pipeline Pattern | Accepted | Architecture | 2026-01-15 |
 | [ADR-027](ADR-027-dq-rules-externalization.md) | DQ Rules Externalization | Accepted | Data Quality | 2026-01-19 |
 | [ADR-028](ADR-028-filter-rules-externalization.md) | Filter Rules Externalization | Accepted | Configuration | 2026-01-20 |
+| [ADR-029](ADR-029-output-metadata-unification.md) | Output Metadata Unification | Accepted | Data Modeling | 2026-01-23 |
 
 ## ADRs by Category
 
@@ -71,6 +72,7 @@ This directory contains Architecture Decision Records documenting significant ar
 ### Domain Model
 - [ADR-004](ADR-004-pydantic-vs-dataclasses.md): Pydantic vs Dataclasses
 - [ADR-021](ADR-021-ddd-aggregates-adoption.md): DDD Aggregates Adoption
+- [ADR-029](ADR-029-output-metadata-unification.md): Output Metadata Unification — Unified output metadata contracts
 
 ### Data Fetching
 - [ADR-009](ADR-009-paginated-fetcher-mixin.md): PaginatedFetcherMixin Design
