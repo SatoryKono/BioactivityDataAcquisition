@@ -48,14 +48,10 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("document_chembl_id", pa.string()),  # Primary key
         pa.field("doi", pa.string()),
         pa.field("pmid", pa.string()),  # PubMed ID (numeric string)
-        pa.field("pmc_id", pa.string()),  # PubMed Central ID, null for ChEMBL
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
-        pa.field("citation_count", pa.int64()),  # Unified field, null for ChEMBL
         pa.field("doc_type", pa.string()),  # PUBLICATION, PATENT, DATASET, BOOK
-        pa.field("is_oa", pa.bool_()),  # Unified field, null for ChEMBL
         pa.field("journal_full_title", pa.string()),
-        pa.field("publication_date", pa.string()),  # Unified field, null for ChEMBL
         pa.field("src_id", pa.int64()),
         # === ChEMBL Release Metadata ===
         pa.field("chembl_release", pa.string()),  # e.g., CHEMBL_1, CHEMBL_34

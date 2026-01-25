@@ -40,16 +40,16 @@ class ChemblPublication(BaseEntity):
     journal: str | None = None
     journal_full_title: str | None = None
     year: int | None = None
-    publication_date: str | None = None  # ISO format: YYYY-MM-DD (computed from year)
+    publication_date: str | None = None  # Always NULL for ChEMBL (excluded from output)
     volume: str | None = None
     issue: str | None = None
     first_page: str | None = None
     last_page: str | None = None
 
-    # Cross-reference IDs (ChEMBL doesn't provide PMC ID)
+    # Cross-reference IDs (pmc_id always NULL for ChEMBL, excluded from output)
     pmc_id: str | None = None
 
-    # Unified publication fields (not available from ChEMBL API)
+    # Unified publication fields (always NULL for ChEMBL, excluded from output)
     citation_count: int | None = None
     is_oa: bool | None = None
     language: str | None = None
