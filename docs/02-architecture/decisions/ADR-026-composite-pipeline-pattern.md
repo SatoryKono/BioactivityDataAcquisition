@@ -395,6 +395,89 @@ class ConflictResolution(str, Enum):
     COALESCE = "coalesce"              # First non-null value
 ```
 
+## Column Naming Convention
+
+### Status: Accepted (Updated 2025-01-25)
+
+### Context
+
+При объединении данных из разных источников возникают конфликты имён колонок.
+Предыдущая реализация переименовывала только enricher колонки с разными
+стратегиями prefix (provider/entity/both), что приводило к:
+
+1. Неконсистентности: seed колонки без prefix, enricher — с prefix
+2. Сложной логике определения стратегии
+3. Трудностям при coalesce из-за разных форматов
+
+### Decision
+
+**Все** бизнес-колонки (seed и enricher) переименовываются в единый формат:
+```
+{provider}.{entity}.{field}
+```
+
+**Примеры**:
+| Source | Original | Qualified |
+|--------|----------|-----------|
+| chembl_publication (seed) | title | chembl.publication.title |
+| crossref_publication (enricher) | title | crossref.publication.title |
+| crossref_publication (enricher) | citation_count | crossref.publication.citation_count |
+
+**Исключения** (НЕ переименовываются):
+1. **Join keys**: `doi`, `pmid`, `pmc_id` — для совместимости с join операциями
+2. **System columns**: колонки с prefix `_` (`_run_id`, `_ingestion_ts`, etc.)
+3. **Entity ID columns**: `entity_id`, `content_hash` — системные идентификаторы
+
+### Column Ordering
+
+Колонки в output упорядочены по семантическим группам:
+
+| Order | Group | Examples |
+|-------|-------|----------|
+| 1 | System | entity_id, content_hash, _run_id, _ingestion_ts |
+| 2 | Identifiers | doi, pmid, pmc_id, document_chembl_id |
+| 3 | Title | title, chembl.publication.title, crossref.publication.title |
+| 4 | Abstract | abstract, chembl.publication.abstract |
+| 5 | Authors | authors, first_author, affiliations |
+| 6 | Journal | journal, publisher, volume, issue |
+| 7 | Dates | publication_date, year, created_at |
+| 8 | Metrics | citation_count, reference_count |
+| 9 | Classification | mesh_terms, keywords, subjects |
+| 10 | URLs | url, pdf_url, landing_page |
+| 11 | Other | All remaining fields |
+
+Внутри каждой группы колонки упорядочены по:
+1. Provider priority: chembl → crossref → pubmed → openalex
+2. Alphabetically для одного провайдера
+
+### Implementation
+
+- `ColumnRenamer`: Переименование колонок в qualified format
+- `ColumnOrderer`: Упорядочивание колонок по семантическим группам
+- `ColumnQualifier`: Value object для qualified имён
+- `ColumnOrderConfig`: Конфигурация семантических групп
+
+### Consequences
+
+**Positive**:
+- Единообразный формат всех колонок
+- Явная атрибуция источника данных
+- Устранение конфликтов имён без сложной логики
+- Консистентный порядок колонок в output
+- Улучшенная читаемость для downstream consumers
+
+**Negative**:
+- **Breaking change** для downstream consumers
+- Более длинные имена колонок (3 компонента вместо 1)
+- Требуется миграция существующих Silver/Gold таблиц
+
+### References
+
+- ColumnRenamer: `src/bioetl/application/composite/column_renamer.py`
+- ColumnOrderer: `src/bioetl/application/composite/column_orderer.py`
+- ColumnQualifier: `src/bioetl/domain/value_objects/column_qualifier.py`
+- ColumnOrderConfig: `src/bioetl/domain/value_objects/column_order.py`
+
 ## Application Layer
 
 ### CompositePipelineRunner
