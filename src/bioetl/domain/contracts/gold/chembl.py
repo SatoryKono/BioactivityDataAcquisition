@@ -337,6 +337,10 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     last_page: Series[str] = pa.Field(nullable=True)
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)
 
+    # ChEMBL release metadata
+    chembl_release: Series[str] = pa.Field(nullable=True)
+    creation_date: Series[str] = pa.Field(nullable=True)
+
     # Unified publication fields
     citation_count: Series[float] = pa.Field(nullable=True, coerce=True)
     is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)

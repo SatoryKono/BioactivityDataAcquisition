@@ -448,6 +448,22 @@ class ChemblTargetResponse(BaseModel):
 # === Publication Models (ChEMBL API: /document endpoint) ===
 
 
+class ChemblReleaseInfo(BaseModel):
+    """Nested chembl_release object from ChEMBL API.
+
+    Contains metadata about which ChEMBL release the record was added in.
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    chembl_release: str | None = Field(
+        default=None, description="ChEMBL release version (e.g., CHEMBL_1)"
+    )
+    creation_date: str | None = Field(
+        default=None, description="Record creation date in ChEMBL (YYYY-MM-DD)"
+    )
+
+
 class ChemblPublicationRecord(BaseModel):
     """Individual publication record from ChEMBL API.
 
@@ -484,6 +500,11 @@ class ChemblPublicationRecord(BaseModel):
 
     # Source
     src_id: int | None = Field(default=None, description="Source ID")
+
+    # ChEMBL Release Info (nested object)
+    chembl_release: ChemblReleaseInfo | None = Field(
+        default=None, description="ChEMBL release metadata"
+    )
 
 
 class ChemblPublicationResponse(BaseModel):

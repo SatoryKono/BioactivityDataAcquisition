@@ -57,6 +57,10 @@ class ChemblPublication(BaseEntity):
     # Source information
     src_id: int | None = None
 
+    # ChEMBL release metadata
+    chembl_release: str | None = None  # e.g., CHEMBL_1, CHEMBL_34
+    creation_date: str | None = None  # Record creation date in ChEMBL (YYYY-MM-DD)
+
     # System fields
     _source: str = "chembl"  # Data source identifier
 
