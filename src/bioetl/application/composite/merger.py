@@ -410,27 +410,9 @@ class MergeService:
         return None
 
     def _find_join_key_column(
-        self,
-        key: str,
-        columns: list[str],
-        pipeline: str | None = None,
+        self, key: str, columns: list[str], pipeline: str | None = None
     ) -> str | None:
-        """Find column name for a join key in DataFrame.
-
-        Searches for:
-        1. Qualified name ({provider}.{entity}.{key}) if pipeline provided
-        2. Unqualified name ({key})
-        3. Any column ending with .{key}
-
-        Args:
-            key: Base join key name (e.g., "doi").
-            columns: List of available column names.
-            pipeline: Optional pipeline name for qualified lookup.
-
-        Returns:
-            Column name if found, None otherwise.
-        """
-        # Try qualified name if pipeline provided
+        """Find column name for a join key (qualified or unqualified)."""
         if pipeline:
             try:
                 provider, entity = self._parse_pipeline_name(pipeline)
@@ -439,66 +421,28 @@ class MergeService:
                     return qualified
             except ValueError:
                 pass
-
-        # Try unqualified name
         if key in columns:
             return key
-
-        # Search for any column ending with the key
-        for col in columns:
-            if col.endswith(f".{key}"):
-                return col
-
-        return None
+        return next((c for c in columns if c.endswith(f".{key}")), None)
 
     def _normalize_join_key_columns(
-        self,
-        df: pl.DataFrame,
-        join_keys: list[str],
-        pipeline: str | None = None,
+        self, df: pl.DataFrame, join_keys: list[str], pipeline: str | None = None
     ) -> pl.DataFrame:
-        """Normalize join key columns for case-insensitive matching.
-
-        Converts DOI, PMID, and other identifier columns to lowercase
-        to ensure consistent joins across providers that may store
-        identifiers in different cases.
-
-        Supports both unqualified (doi) and qualified (chembl.publication.doi) names.
-
-        Args:
-            df: DataFrame to normalize.
-            join_keys: List of base join key names (e.g., ["doi", "pmid"]).
-            pipeline: Optional pipeline name for qualified column lookup.
-
-        Returns:
-            DataFrame with normalized join key columns.
-
-        Example:
-            >>> df = pl.DataFrame({"chembl.publication.doi": ["10.1038/NATURE12373"]})
-            >>> normalized = merger._normalize_join_key_columns(
-            ...     df, ["doi"], "chembl_publication"
-            ... )
-            >>> normalized["chembl.publication.doi"][0]
-            '10.1038/nature12373'
-        """
+        """Normalize join key columns to lowercase for case-insensitive matching."""
         import polars as pl
 
-        columns = df.columns
-        normalize_cols: list[str] = []
-
-        for key in join_keys:
-            if key not in self._NORMALIZE_JOIN_KEYS:
-                continue
-            col = self._find_join_key_column(key, columns, pipeline)
-            if col and col not in normalize_cols:
-                normalize_cols.append(col)
-
-        if not normalize_cols:
+        cols = df.columns
+        normalize = [
+            c
+            for key in join_keys
+            if key in self._NORMALIZE_JOIN_KEYS
+            for c in [self._find_join_key_column(key, cols, pipeline)]
+            if c
+        ]
+        if not normalize:
             return df
-
-        # Apply lowercase normalization to identifier columns
         return df.with_columns(
-            [pl.col(col).str.to_lowercase().alias(col) for col in normalize_cols]
+            [pl.col(c).str.to_lowercase().alias(c) for c in normalize]
         )
 
     def _parse_pipeline_name(self, pipeline: str) -> tuple[str, str]:
