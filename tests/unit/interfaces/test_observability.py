@@ -4,7 +4,9 @@ from unittest import mock
 
 import pytest
 
-from bioetl.composition._bootstrap import observability as composition_observability
+from bioetl.composition.bootstrap.runtime import (
+    observability as composition_observability,
+)
 from bioetl.domain import exceptions as domain_exceptions
 from bioetl.infrastructure import observability as infra_observability
 from bioetl.infrastructure.observability import server as obs_server
