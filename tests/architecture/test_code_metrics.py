@@ -584,7 +584,7 @@ class TestClassSize:
         # Composition services
         "MetadataCoordinator": 435,  # 434 lines - Metadata coordination for Medallion layers + extended lineage
         # Composite pipeline services (ADR-026)
-        "MergeService": 1335,  # 1330 lines - Composite merge service with conflict resolution + column priority ordering
+        "MergeService": 1350,  # 1347 lines - Composite merge service with conflict resolution + column priority ordering + secondary join key prefixing
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
         "CompositePipelineRunner": 1080,  # 1059 lines - Composite pipeline orchestrator (FSM helpers extracted to fsm_helper.py)
         # Publication adapters with APIRequestCollector (metadata enrichment)
