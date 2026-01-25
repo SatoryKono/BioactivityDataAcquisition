@@ -428,7 +428,6 @@ def test_doc_type_mapping_all_types():
         "journal-article",
         "proceedings-article",
         "peer-review",
-        "other",
     ]
     for doc_type in publication_types:
         assert CROSSREF_TYPE_MAP[doc_type] == "PUBLICATION", (
@@ -458,7 +457,7 @@ def test_doc_type_mapping_all_types():
     assert CROSSREF_TYPE_MAP["dataset"] == "DATASET"
     assert CROSSREF_TYPE_MAP["database"] == "DATASET"
 
-    # OTHER types (reports, standards, supplementary, container/series, funding)
+    # OTHER types (reports, standards, supplementary, container/series, funding, unclassified)
     other_types = [
         "report",  # Technical report
         "report-component",  # Part of report
@@ -473,6 +472,7 @@ def test_doc_type_mapping_all_types():
         "book-set",
         "report-series",
         "grant",
+        "other",  # Unclassified content
     ]
     for doc_type in other_types:
         assert CROSSREF_TYPE_MAP[doc_type] == "OTHER", f"{doc_type} should map to OTHER"

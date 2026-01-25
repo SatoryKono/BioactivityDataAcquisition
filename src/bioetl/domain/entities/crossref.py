@@ -36,7 +36,7 @@ from bioetl.domain.entities.publication_base import PublicationEntityBase
 # - BOOK: Books, monographs, book chapters, dissertations, reference entries
 # - PREPRINT: Pre-publication works (posted-content)
 # - DATASET: Research data and databases
-# - OTHER: Reports, standards, container types, supplementary materials, funding
+# - OTHER: Reports, standards, container types, supplementary materials, funding, unclassified
 #
 # Rationale:
 # - BOOK includes dissertations (thesis = monograph) and reference entries
@@ -48,7 +48,6 @@ CROSSREF_TYPE_MAP: dict[str, str] = {
     "journal-article": "PUBLICATION",
     "proceedings-article": "PUBLICATION",
     "peer-review": "PUBLICATION",  # Published peer review
-    "other": "PUBLICATION",  # Unclassified scholarly work
     # === Books & Book Parts → BOOK ===
     "book": "BOOK",
     "monograph": "BOOK",
@@ -83,6 +82,8 @@ CROSSREF_TYPE_MAP: dict[str, str] = {
     "report-series": "OTHER",
     # === Funding → OTHER ===
     "grant": "OTHER",
+    # === Unclassified → OTHER ===
+    "other": "OTHER",  # Unclassified content
 }
 
 # Default type for unknown CrossRef types (conservative fallback)
