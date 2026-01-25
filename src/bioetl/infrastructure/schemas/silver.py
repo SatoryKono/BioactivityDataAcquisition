@@ -733,10 +733,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("language", pa.string()),
         pa.field("last_page", pa.string()),
         pa.field("license_url", pa.string()),
-        # pmc_id: PubMed Central ID (format: "PMC1234567") - nullable, may not exist for all publications
-        pa.field("pmc_id", pa.string()),
-        # pmid: PubMed ID (numeric string: "12345678") - nullable, may not exist for all publications
-        pa.field("pmid", pa.string()),
+        # Note: pmid/pmc_id excluded - CrossRef doesn't provide these IDs natively
         # Date fields
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
         pa.field("published_online", pa.string()),  # Legacy: provider-specific
