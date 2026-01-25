@@ -990,7 +990,10 @@ class MergeService:
             try:
                 provider, entity = self._parse_pipeline_name(enricher.pipeline)
                 enricher_qualified = f"{provider}.{entity}.{field}"
-                if enricher_qualified in available_columns and enricher_qualified not in columns:
+                if (
+                    enricher_qualified in available_columns
+                    and enricher_qualified not in columns
+                ):
                     columns.append(enricher_qualified)
             except ValueError:
                 # Fallback: legacy prefix format {pipeline}_{field}
@@ -1157,17 +1160,15 @@ class MergeService:
 
             # Coalesce compatible columns into the first (highest priority) column
             if len(compatible_cols) > 1:
-                target_col = compatible_cols[0]  # Keep the first column name (qualified)
+                target_col = compatible_cols[
+                    0
+                ]  # Keep the first column name (qualified)
                 result = result.with_columns(
                     pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(target_col)
                 )
 
             # Drop all non-target columns
-            cols_to_drop = [
-                col
-                for col in compatible_cols[1:]
-                if col in result.columns
-            ]
+            cols_to_drop = [col for col in compatible_cols[1:] if col in result.columns]
             if cols_to_drop:
                 result = result.drop(cols_to_drop)
 
@@ -1234,7 +1235,9 @@ class MergeService:
             return 0
 
         # Count records where at least one enricher column is non-null
-        any_enriched = pl.any_horizontal([pl.col(c).is_not_null() for c in enricher_cols])
+        any_enriched = pl.any_horizontal(
+            [pl.col(c).is_not_null() for c in enricher_cols]
+        )
         return len(df.filter(any_enriched))
 
     def _count_fully_enriched(

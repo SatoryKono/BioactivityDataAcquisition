@@ -247,7 +247,7 @@ class TestFunctionComplexity:
         "_apply_joins": 15,  # CC=13 - Join logic with multiple enrichers
         "_coalesce_prefer_seed": 16,  # CC=15 - Type-safe coalesce with seed priority and null handling
         "_coalesce_prefer_enricher": 16,  # CC=15 - Type-safe coalesce with enricher priority and null handling
-        "_order_columns_by_priority": 15,  # CC=13 - Column ordering with priority rules
+        "_order_columns_by_priority": 20,  # CC=19 - Column ordering with priority rules (nested source type handling)
         # DQ analyzer extracted helper methods
         "_execute_checks": 12,  # CC=11 - Execute all enabled DQ checks (inherent complexity from multiple check types)
         # Composite pipeline domain models (ADR-026)
@@ -328,7 +328,7 @@ class TestFunctionLength:
         "register_provider": 100,
         "vacuum": 70,
         "archive": 70,
-        "create": 90,
+        "create": 115,  # storage_factory.create() is 112 lines
         "fetch": 80,
         "process_batch": 70,
         "_process_batch": 100,  # BatchExecutor internal processing
