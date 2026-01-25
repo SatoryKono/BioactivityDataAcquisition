@@ -192,26 +192,9 @@ class SilverWriter(BaseDeltaWriter):
         # Optimized preparation: iterate only string fields for serialization checks
         # and avoid full dictionary copy unless modifications are needed.
         # Note: pa.Table.from_pylist handles schema filtering automatically (ignoring extra keys).
-        processed_records = []
-        for rec in records:
-            modifications = {}
-            for k in string_fields:
-                v = rec.get(k)
-                if v is not None and isinstance(v, (dict, list)):
-                    # Uses OPT_SORT_KEYS for deterministic serialization (§2.8.1).
-                    # Complex objects in Gold layer are flattened; Silver preserves
-                    # JSON for forensic purposes.
-                    modifications[k] = orjson.dumps(
-                        v, option=orjson.OPT_SORT_KEYS
-                    ).decode("utf-8")
-
-            if modifications:
-                # Only copy if serialization was performed
-                new_rec = rec.copy()
-                new_rec.update(modifications)
-                processed_records.append(new_rec)
-            else:
-                processed_records.append(rec)
+        processed_records = [
+            self._serialize_record(rec, string_fields) for rec in records
+        ]
 
         arrow_data = pa.Table.from_pylist(processed_records, schema=schema)
 
@@ -223,6 +206,32 @@ class SilverWriter(BaseDeltaWriter):
         if primary_keys:
             arrow_data = arrow_data.sort_by([(pk, "ascending") for pk in primary_keys])
         return arrow_data
+
+    def _serialize_record(
+        self, record: dict[str, Any], string_fields: set[str]
+    ) -> dict[str, Any]:
+        """Serialize complex objects in record to JSON strings.
+
+        Extracts logic from _prepare_arrow_data to reduce complexity.
+        Uses copy-on-write optimization.
+        """
+        modifications = {}
+        for k in string_fields:
+            v = record.get(k)
+            if v is not None and isinstance(v, (dict, list)):
+                # Uses OPT_SORT_KEYS for deterministic serialization (§2.8.1).
+                # Complex objects in Gold layer are flattened; Silver preserves
+                # JSON for forensic purposes.
+                modifications[k] = orjson.dumps(
+                    v, option=orjson.OPT_SORT_KEYS
+                ).decode("utf-8")
+
+        if modifications:
+            # Only copy if serialization was performed
+            new_rec = record.copy()
+            new_rec.update(modifications)
+            return new_rec
+        return record
 
     async def _write_delete(
         self, table_path: str, data: pa.Table, partition_cols: list[str] | None
