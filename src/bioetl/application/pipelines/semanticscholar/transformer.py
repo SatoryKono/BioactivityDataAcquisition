@@ -43,6 +43,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - doi: externalIds.DOI
     - pmid: externalIds.PubMed
     - arxiv_id: externalIds.ArXiv
+    - dblp_id: externalIds.DBLP
     - title: title
     - abstract: abstract
     - tldr: tldr.text (AI-generated summary)
@@ -52,6 +53,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - publication_date: publicationDate
     - citation_count: citationCount
     - reference_count: referenceCount
+    - influential_citation_count: influentialCitationCount
     - is_oa: isOpenAccess (normalized)
     - oa_status: openAccessPdf.status (normalized to lowercase)
     - open_access_url: openAccessPdf.url
@@ -173,6 +175,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
                 external_ids.get("pmcid")
             ),  # API uses "pmcid", we use "pmc_id"
             "arxiv_id": external_ids.get("arxiv"),
+            "dblp_id": external_ids.get("dblp"),
             "corpus_id": external_ids.get("corpus_id"),
             "title": rec.get("title"),
             "abstract": self._data_normalizer.strip_html_tags(rec.get("abstract")),
@@ -190,6 +193,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             ),
             "citation_count": rec.get("citationCount"),
             "reference_count": rec.get("referenceCount"),
+            "influential_citation_count": rec.get("influentialCitationCount"),
             "is_oa": oa_info.get("is_oa"),
             "open_access_url": oa_info.get("url"),
             "oa_status": oa_info.get("oa_status"),
