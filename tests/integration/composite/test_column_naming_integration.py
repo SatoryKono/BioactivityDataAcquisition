@@ -37,30 +37,34 @@ def orderer(mock_logger: MagicMock) -> ColumnOrderer:
 @pytest.fixture
 def seed_df() -> pl.DataFrame:
     """Seed DataFrame simulating chembl_publication output."""
-    return pl.DataFrame({
-        "doi": ["10.1000/test1", "10.1000/test2", "10.1000/test3"],
-        "pmid": ["111", "222", None],
-        "title": ["ChEMBL Title 1", "ChEMBL Title 2", "ChEMBL Title 3"],
-        "abstract": ["Abstract 1", None, "Abstract 3"],
-        "journal": ["Journal A", "Journal B", "Journal C"],
-        "authors": [["A1"], ["A2"], ["A3"]],
-        "publication_date": ["2025-01-01", "2025-01-02", "2025-01-03"],
-        "_run_id": ["run1", "run1", "run1"],
-        "_ingestion_ts": ["2025-01-01T00:00:00Z"] * 3,
-        "entity_id": ["e1", "e2", "e3"],
-        "content_hash": ["h1", "h2", "h3"],
-    })
+    return pl.DataFrame(
+        {
+            "doi": ["10.1000/test1", "10.1000/test2", "10.1000/test3"],
+            "pmid": ["111", "222", None],
+            "title": ["ChEMBL Title 1", "ChEMBL Title 2", "ChEMBL Title 3"],
+            "abstract": ["Abstract 1", None, "Abstract 3"],
+            "journal": ["Journal A", "Journal B", "Journal C"],
+            "authors": [["A1"], ["A2"], ["A3"]],
+            "publication_date": ["2025-01-01", "2025-01-02", "2025-01-03"],
+            "_run_id": ["run1", "run1", "run1"],
+            "_ingestion_ts": ["2025-01-01T00:00:00Z"] * 3,
+            "entity_id": ["e1", "e2", "e3"],
+            "content_hash": ["h1", "h2", "h3"],
+        }
+    )
 
 
 @pytest.fixture
 def enricher_crossref_df() -> pl.DataFrame:
     """Enricher DataFrame simulating crossref_publication output."""
-    return pl.DataFrame({
-        "doi": ["10.1000/test1", "10.1000/test2"],
-        "title": ["CrossRef Title 1", "CrossRef Title 2"],
-        "citation_count": [100, 200],
-        "publisher": ["Publisher A", "Publisher B"],
-    })
+    return pl.DataFrame(
+        {
+            "doi": ["10.1000/test1", "10.1000/test2"],
+            "title": ["CrossRef Title 1", "CrossRef Title 2"],
+            "citation_count": [100, 200],
+            "publisher": ["Publisher A", "Publisher B"],
+        }
+    )
 
 
 class TestFullPipelineColumnOrder:
@@ -93,16 +97,15 @@ class TestFullPipelineColumnOrder:
 
         # System fields first
         system_cols = [
-            c for c in columns
-            if orderer._config.get_group(c) == SemanticGroup.SYSTEM
+            c for c in columns if orderer._config.get_group(c) == SemanticGroup.SYSTEM
         ]
         identifier_cols = [
-            c for c in columns
+            c
+            for c in columns
             if orderer._config.get_group(c) == SemanticGroup.IDENTIFIERS
         ]
         title_cols = [
-            c for c in columns
-            if orderer._config.get_group(c) == SemanticGroup.TITLE
+            c for c in columns if orderer._config.get_group(c) == SemanticGroup.TITLE
         ]
 
         # Get indices
@@ -125,12 +128,14 @@ class TestFullPipelineColumnOrder:
     ) -> None:
         """Within same semantic group, chembl comes before crossref."""
         # Create DataFrame with multiple providers for same field
-        df = pl.DataFrame({
-            "crossref.publication.title": ["T1"],
-            "chembl.publication.title": ["T2"],
-            "pubmed.publication.title": ["T3"],
-            "doi": ["10.1/a"],
-        })
+        df = pl.DataFrame(
+            {
+                "crossref.publication.title": ["T1"],
+                "chembl.publication.title": ["T2"],
+                "pubmed.publication.title": ["T3"],
+                "doi": ["10.1/a"],
+            }
+        )
 
         ordered = orderer.order_columns(df)
 
@@ -147,21 +152,23 @@ class TestFullPipelineColumnOrder:
         orderer: ColumnOrderer,
     ) -> None:
         """Verify expected column order for publication composite."""
-        df = pl.DataFrame({
-            "citation_count": [100],
-            "authors": [["Author"]],
-            "journal": ["Nature"],
-            "publication_date": ["2025-01-01"],
-            "abstract": ["Abstract"],
-            "title": ["Title"],
-            "mesh_terms": [["term"]],
-            "doi": ["10.1/a"],
-            "pmid": ["123"],
-            "_run_id": ["r1"],
-            "entity_id": ["e1"],
-            "content_hash": ["hash"],
-            "pdf_url": ["http://example.com"],
-        })
+        df = pl.DataFrame(
+            {
+                "citation_count": [100],
+                "authors": [["Author"]],
+                "journal": ["Nature"],
+                "publication_date": ["2025-01-01"],
+                "abstract": ["Abstract"],
+                "title": ["Title"],
+                "mesh_terms": [["term"]],
+                "doi": ["10.1/a"],
+                "pmid": ["123"],
+                "_run_id": ["r1"],
+                "entity_id": ["e1"],
+                "content_hash": ["hash"],
+                "pdf_url": ["http://example.com"],
+            }
+        )
 
         ordered = orderer.order_columns(df)
 
@@ -177,19 +184,19 @@ class TestFullPipelineColumnOrder:
         # - CLASSIFICATION: mesh_terms
         # - URLS: pdf_url
         expected_order = [
-            "_run_id",           # SYSTEM
-            "content_hash",      # SYSTEM
-            "entity_id",         # SYSTEM
-            "doi",               # IDENTIFIERS
-            "pmid",              # IDENTIFIERS
-            "title",             # TITLE
-            "abstract",          # ABSTRACT
-            "authors",           # AUTHORS
-            "journal",           # JOURNAL
+            "_run_id",  # SYSTEM
+            "content_hash",  # SYSTEM
+            "entity_id",  # SYSTEM
+            "doi",  # IDENTIFIERS
+            "pmid",  # IDENTIFIERS
+            "title",  # TITLE
+            "abstract",  # ABSTRACT
+            "authors",  # AUTHORS
+            "journal",  # JOURNAL
             "publication_date",  # DATES
-            "citation_count",    # METRICS
-            "mesh_terms",        # CLASSIFICATION
-            "pdf_url",           # URLS
+            "citation_count",  # METRICS
+            "mesh_terms",  # CLASSIFICATION
+            "pdf_url",  # URLS
         ]
 
         assert ordered.columns == expected_order
@@ -245,9 +252,7 @@ class TestEnricherColumnRenaming:
         self, renamer: ColumnRenamer, enricher_crossref_df: pl.DataFrame
     ) -> None:
         """Enricher business columns become {provider}.{entity}.{field}."""
-        result = renamer.rename_dataframe(
-            enricher_crossref_df, "crossref_publication"
-        )
+        result = renamer.rename_dataframe(enricher_crossref_df, "crossref_publication")
 
         assert "crossref.publication.title" in result.columns
         assert "crossref.publication.citation_count" in result.columns
@@ -293,10 +298,12 @@ class TestEdgeCases:
         self, renamer: ColumnRenamer, orderer: ColumnOrderer
     ) -> None:
         """DataFrame with only system columns."""
-        df = pl.DataFrame({
-            "_run_id": ["r1"],
-            "_ingestion_ts": ["2025-01-01"],
-        })
+        df = pl.DataFrame(
+            {
+                "_run_id": ["r1"],
+                "_ingestion_ts": ["2025-01-01"],
+            }
+        )
         renamed = renamer.rename_dataframe(df, "chembl_publication")
         ordered = orderer.order_columns(renamed)
 
@@ -307,15 +314,15 @@ class TestEdgeCases:
 class TestDataPreservation:
     """Tests verifying data integrity through the pipeline."""
 
-    def test_data_values_preserved_through_rename(
-        self, renamer: ColumnRenamer
-    ) -> None:
+    def test_data_values_preserved_through_rename(self, renamer: ColumnRenamer) -> None:
         """Data values are preserved after renaming."""
-        df = pl.DataFrame({
-            "title": ["Test Title"],
-            "abstract": ["Test Abstract"],
-            "doi": ["10.1/test"],
-        })
+        df = pl.DataFrame(
+            {
+                "title": ["Test Title"],
+                "abstract": ["Test Abstract"],
+                "doi": ["10.1/test"],
+            }
+        )
 
         result = renamer.rename_dataframe(df, "chembl_publication")
 
@@ -328,11 +335,13 @@ class TestDataPreservation:
         self, orderer: ColumnOrderer
     ) -> None:
         """Data values are preserved after ordering."""
-        df = pl.DataFrame({
-            "citation_count": [100],
-            "title": ["Test"],
-            "_run_id": ["r1"],
-        })
+        df = pl.DataFrame(
+            {
+                "citation_count": [100],
+                "title": ["Test"],
+                "_run_id": ["r1"],
+            }
+        )
 
         result = orderer.order_columns(df)
 
@@ -364,29 +373,33 @@ class TestMultipleEnrichers:
     ) -> None:
         """Columns from three providers merge and order correctly."""
         # Seed from ChEMBL
-        seed = pl.DataFrame({
-            "doi": ["10.1/a", "10.1/b"],
-            "title": ["ChEMBL 1", "ChEMBL 2"],
-            "entity_id": ["e1", "e2"],
-        })
+        seed = pl.DataFrame(
+            {
+                "doi": ["10.1/a", "10.1/b"],
+                "title": ["ChEMBL 1", "ChEMBL 2"],
+                "entity_id": ["e1", "e2"],
+            }
+        )
 
         # Enricher from CrossRef
-        crossref = pl.DataFrame({
-            "doi": ["10.1/a", "10.1/b"],
-            "citation_count": [100, 200],
-        })
+        crossref = pl.DataFrame(
+            {
+                "doi": ["10.1/a", "10.1/b"],
+                "citation_count": [100, 200],
+            }
+        )
 
         # Enricher from PubMed
-        pubmed = pl.DataFrame({
-            "doi": ["10.1/a"],
-            "mesh_terms": [["term1"]],
-        })
+        pubmed = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "mesh_terms": [["term1"]],
+            }
+        )
 
         # Rename
         seed_renamed = renamer.rename_dataframe(seed, "chembl_publication")
-        crossref_renamed = renamer.rename_dataframe(
-            crossref, "crossref_publication"
-        )
+        crossref_renamed = renamer.rename_dataframe(crossref, "crossref_publication")
         pubmed_renamed = renamer.rename_dataframe(pubmed, "pubmed_publication")
 
         # Join
@@ -417,10 +430,12 @@ class TestQualifiedColumnHandling:
         self, renamer: ColumnRenamer
     ) -> None:
         """Already qualified columns are not renamed again."""
-        df = pl.DataFrame({
-            "chembl.publication.title": ["Title"],
-            "new_field": ["Value"],
-        })
+        df = pl.DataFrame(
+            {
+                "chembl.publication.title": ["Title"],
+                "new_field": ["Value"],
+            }
+        )
 
         result = renamer.rename_dataframe(df, "crossref_publication")
 
@@ -431,15 +446,15 @@ class TestQualifiedColumnHandling:
         # Should not create double-qualified name
         assert "crossref.publication.chembl.publication.title" not in result.columns
 
-    def test_qualified_columns_grouped_by_field(
-        self, orderer: ColumnOrderer
-    ) -> None:
+    def test_qualified_columns_grouped_by_field(self, orderer: ColumnOrderer) -> None:
         """Qualified columns are grouped by their field semantic group."""
-        df = pl.DataFrame({
-            "chembl.publication.title": ["T1"],
-            "crossref.publication.abstract": ["A1"],
-            "entity_id": ["e1"],
-        })
+        df = pl.DataFrame(
+            {
+                "chembl.publication.title": ["T1"],
+                "crossref.publication.abstract": ["A1"],
+                "entity_id": ["e1"],
+            }
+        )
 
         ordered = orderer.order_columns(df)
 
