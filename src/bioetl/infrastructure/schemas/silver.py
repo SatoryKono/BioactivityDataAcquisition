@@ -745,6 +745,14 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
         pa.field("year", pa.int64()),
+        # === NEW: Additional CrossRef fields ===
+        pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
+        pa.field("content_domain_crossmark_restriction", pa.bool_()),
+        pa.field("content_domain_domains", pa.list_(pa.string())),
+        pa.field("issn_electronic", pa.string()),  # Electronic ISSN
+        pa.field("issn_print", pa.string()),  # Print ISSN
+        pa.field("published", pa.string()),  # Canonical publication date
+        pa.field("short_container_title", pa.list_(pa.string())),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
         pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),

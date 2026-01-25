@@ -5,10 +5,13 @@ Transformers and utilities for CrossRef data processing.
 
 from bioetl.application.pipelines.crossref.extractors import (
     extract_authors,
+    extract_content_domain,
     extract_dates,
+    extract_issn_by_type,
     extract_journal_info,
     extract_license_url,
     extract_page_info,
+    extract_published_date,
     extract_year,
 )
 from bioetl.application.pipelines.crossref.transformer import (
@@ -18,9 +21,12 @@ from bioetl.application.pipelines.crossref.transformer import (
 __all__ = [
     "CrossRefPublicationTransformer",
     "extract_authors",
+    "extract_content_domain",
     "extract_dates",
+    "extract_issn_by_type",
     "extract_journal_info",
     "extract_license_url",
     "extract_page_info",
+    "extract_published_date",
     "extract_year",
 ]
