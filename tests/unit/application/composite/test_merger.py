@@ -1213,3 +1213,156 @@ class TestApplyJoinsWithDeduplication:
             # Check that we didn't log about duplicate aggregation
             if call[0] and "Duplicates aggregated" in str(call[0][0]):
                 pytest.fail("Should not log duplicate warning when no duplicates")
+
+
+@pytest.mark.unit
+class TestDropSystemColumns:
+    """Tests for _drop_system_columns method."""
+
+    def test_drops_system_columns_from_enricher(self, merge_service):
+        """Test that system columns are dropped from enricher DataFrame."""
+        import polars as pl
+
+        enricher_df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "title": ["Test"],
+                "_dq_error": [False],
+                "_dq_warn": [False],
+                "_run_id": ["run-1"],
+                "_ingestion_ts": ["2024-01-01T00:00:00Z"],
+            }
+        )
+
+        result = merge_service._drop_system_columns(enricher_df)
+
+        # Business columns preserved
+        assert "doi" in result.columns
+        assert "title" in result.columns
+        # System columns dropped
+        assert "_dq_error" not in result.columns
+        assert "_dq_warn" not in result.columns
+        assert "_run_id" not in result.columns
+        assert "_ingestion_ts" not in result.columns
+
+    def test_no_change_when_no_system_columns(self, merge_service):
+        """Test no change when enricher has no system columns."""
+        import polars as pl
+
+        enricher_df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "title": ["Test"],
+                "citation_count": [42],
+            }
+        )
+
+        result = merge_service._drop_system_columns(enricher_df)
+
+        assert result.columns == enricher_df.columns
+        assert len(result) == len(enricher_df)
+
+    @pytest.mark.asyncio
+    async def test_system_columns_not_duplicated_after_join(self, merge_service):
+        """Test that system columns don't get .A, .B suffixes after merge."""
+        import polars as pl
+
+        seed_df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "title": ["Seed Title"],
+                "_dq_error": [False],
+                "_dq_warn": [False],
+                "_run_id": ["run-1"],
+            }
+        )
+
+        # Enricher has same system columns - they should be dropped before join
+        enricher_df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "citation_count": [42],
+                "_dq_error": [True],  # Different value - but should be dropped
+                "_dq_warn": [True],
+                "_run_id": ["run-2"],
+            }
+        )
+
+        enricher_config = EnricherConfig(
+            pipeline="crossref_publication",
+            join_keys=("doi",),
+            required=False,
+        )
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"crossref_publication": enricher_df},
+            enrichers=[enricher_config],
+            seed_pipeline="chembl_publication",
+        )
+
+        # Seed system columns preserved
+        assert "_dq_error" in result.columns
+        assert "_dq_warn" in result.columns
+        assert "_run_id" in result.columns
+
+        # NO duplicate system columns with suffixes
+        assert "_dq_error.A" not in result.columns
+        assert "_dq_warn.A" not in result.columns
+        assert "_dq_error_crossref_publication" not in result.columns
+        assert "_dq_warn_crossref_publication" not in result.columns
+
+        # Seed values preserved (enricher values dropped)
+        assert result["_dq_error"][0] is False
+        assert result["_run_id"][0] == "run-1"
+
+    @pytest.mark.asyncio
+    async def test_multiple_enrichers_no_system_column_duplicates(self, merge_service):
+        """Test multiple enrichers don't create _dq_error.A, .B, .C, .D."""
+        import polars as pl
+
+        seed_df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "_dq_error": [False],
+            }
+        )
+
+        # All enrichers have _dq_error - should all be dropped
+        enrichers = []
+        enricher_dfs = {}
+        for provider in ["crossref", "openalex", "pubmed", "semanticscholar"]:
+            pipeline = f"{provider}_publication"
+            enricher_dfs[pipeline] = pl.DataFrame(
+                {
+                    "doi": ["10.1/a"],
+                    f"{provider}_field": [f"value_{provider}"],
+                    "_dq_error": [True],  # Should be dropped
+                }
+            )
+            enrichers.append(
+                EnricherConfig(
+                    pipeline=pipeline,
+                    join_keys=("doi",),
+                    required=False,
+                )
+            )
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs=enricher_dfs,
+            enrichers=enrichers,
+            seed_pipeline="chembl_publication",
+        )
+
+        # Only one _dq_error column (from seed)
+        dq_error_cols = [c for c in result.columns if "_dq_error" in c]
+        assert dq_error_cols == ["_dq_error"], (
+            f"Expected only '_dq_error', got: {dq_error_cols}"
+        )
+
+        # No .A, .B, .C, .D suffixes
+        assert "_dq_error.A" not in result.columns
+        assert "_dq_error.B" not in result.columns
+        assert "_dq_error.C" not in result.columns
+        assert "_dq_error.D" not in result.columns

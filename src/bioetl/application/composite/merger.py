@@ -57,6 +57,23 @@ class MergeService:
     # PMID: Typically numeric but may have inconsistent formatting
     _NORMALIZE_JOIN_KEYS: frozenset[str] = frozenset({"doi", "pmid", "pmc_id"})
 
+    # System columns to drop from enrichers before join
+    # These are ETL metadata columns that should only come from seed
+    # Prevents duplicate columns like _dq_error.A, _dq_error.B after merge
+    _SYSTEM_COLUMNS_TO_DROP: frozenset[str] = frozenset(
+        {
+            "_run_id",
+            "_run_type",
+            "_source_batch_id",
+            "_ingestion_ts",
+            "_dq_warn",
+            "_dq_error",
+            "_index",
+            "_lookup_method",
+            "_original_id",
+        }
+    )
+
     def __init__(
         self,
         merge_config: MergeConfig,
@@ -70,7 +87,11 @@ class MergeService:
         self._delta_reader = delta_reader
         self._deduplicator = EnricherDeduplicator(logger)
         self._renamer = ColumnRenamer(logger)
-        self._orderer = ColumnOrderer(logger)
+        # Pass column_groups from config if available for YAML-based ordering
+        self._orderer = ColumnOrderer(
+            logger,
+            column_groups=merge_config.column_groups if merge_config.column_groups else None,
+        )
 
     async def merge(
         self,
@@ -651,6 +672,10 @@ class MergeService:
                 ),
             )
 
+            # Drop system columns from enricher to prevent duplicates like _dq_error.A
+            # System columns should only come from seed (ETL metadata)
+            enricher_df = self._drop_system_columns(enricher_df)
+
             # Detect and resolve remaining conflicts
             # Only exclude primary key - secondary keys should be checked for conflicts
             merged, enricher_df = self._detect_and_resolve_conflicts(
@@ -681,6 +706,32 @@ class MergeService:
                 return "full"
             case _:
                 return "left"
+
+    def _drop_system_columns(self, df: pl.DataFrame) -> pl.DataFrame:
+        """Drop system columns from DataFrame to prevent duplicates after join.
+
+        System columns (_dq_error, _run_id, etc.) should only come from the seed.
+        Dropping them from enrichers prevents columns like _dq_error.A, _dq_error.B
+        after multiple joins.
+
+        Args:
+            df: Enricher DataFrame.
+
+        Returns:
+            DataFrame with system columns removed.
+        """
+        columns_to_drop = [
+            col for col in df.columns if col in self._SYSTEM_COLUMNS_TO_DROP
+        ]
+
+        if columns_to_drop:
+            self._logger.debug(
+                "Dropping system columns from enricher",
+                columns=columns_to_drop,
+            )
+            return df.drop(columns_to_drop)
+
+        return df
 
     def _get_enricher_prefix(
         self,
