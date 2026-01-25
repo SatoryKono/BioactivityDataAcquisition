@@ -163,13 +163,13 @@ class PublicationTransformer(BaseChemblTransformer):
         doi = DOI.from_raw(data.get("doi"))
         data["doi"] = str(doi) if doi else None
 
-        # Vali2date year using PublicationYear Value Object
+        # Validate year using PublicationYear Value Object
         year_vo = PublicationYear.from_raw(data.get("year"))
         validated_year = year_vo.value if year_vo else None
         data["year"] = validated_year
 
         # publication_date: ChEMBL API doesn't provide full date, only year
-        # Set to null rather than computing from year to avoid false precision
+        # Set to null (excluded from PyArrow/Gold schemas)
         data["publication_date"] = None
 
         # Hash PII field (RULES.md §5.4)
@@ -199,12 +199,12 @@ class PublicationTransformer(BaseChemblTransformer):
         # System field: data source identifier
         data["_source"] = "chembl"
 
-        # Unified publication fields (ChEMBL API doesn't provide these)
-        data["citation_count"] = None  # Not available from ChEMBL API
-        data["is_oa"] = None  # Not available from ChEMBL API
-        data["language"] = None  # Not available from ChEMBL API
+        # Unified publication fields (always NULL, excluded from PyArrow/Gold schemas)
+        data["citation_count"] = None
+        data["is_oa"] = None
+        data["language"] = None
 
-        # Cross-reference IDs (ChEMBL API doesn't provide PMC ID)
+        # Cross-reference IDs (pmc_id always NULL, excluded from PyArrow/Gold schemas)
         data["pmc_id"] = None
 
         # DQ flags (default: no warnings or errors)

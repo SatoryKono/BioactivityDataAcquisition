@@ -208,7 +208,7 @@ class TestChemblYearValidation:
             # Cross-reference IDs
             "pmid": "12345678",
             "doi": "10.1038/nature12373",
-            "pmc_id": None,
+            "pmc_id": None,  # Always NULL for ChEMBL
             # Core content
             "title": "Test Publication",
             "abstract": "Abstract text",
@@ -216,12 +216,12 @@ class TestChemblYearValidation:
             # Publication metadata
             "journal": "Nature",
             "year": 2020,
-            "publication_date": "2020-01-01",  # Unified date field
+            "publication_date": None,  # Always NULL for ChEMBL
             "doc_type": "PUBLICATION",
             "language": None,
-            # Metrics
-            "citation_count": None,  # Not available from ChEMBL
-            # Open Access
+            # Metrics (always NULL for ChEMBL)
+            "citation_count": None,
+            # Open Access (always NULL for ChEMBL)
             "is_oa": None,
             # Lookup tracking
             "_lookup_method": "direct",
@@ -230,7 +230,6 @@ class TestChemblYearValidation:
             "_source": "chembl",
             # ChEMBL-specific fields
             "document_chembl_id": "CHEMBL1234567",
-            # patent_id excluded from unified publication schema
             "src_id": 1,
             "journal_full_title": "Nature Journal",
             "volume": "1",

@@ -28,6 +28,9 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     - Metrics: citation_count
     - Open Access: is_oa
     - Lookup tracking: lookup_method (overridden), original_id, source
+
+    Note: pmc_id, publication_date, citation_count, is_oa are always NULL for ChEMBL
+    (not available from ChEMBL API) and excluded from PyArrow/Gold schemas.
     """
 
     # === Primary Key (ChEMBL-specific) ===
