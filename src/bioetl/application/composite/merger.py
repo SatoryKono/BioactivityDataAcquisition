@@ -925,7 +925,7 @@ class MergeService:
 
         # Process each group with multiple columns
         for _field, columns in field_groups.items():
-            if len(columns) <= 4:
+            if len(columns) <= 1:
                 continue
 
             # Sort: seed columns first, then enrichers
