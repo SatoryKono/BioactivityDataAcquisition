@@ -67,6 +67,13 @@ Original plan (not implemented):
 | `DocumentSchema` | `ChemblPublicationSchema` |
 | `CompoundSchema` | `PubchemMoleculeSchema` |
 | `ProteinSchema` | `UniprotTargetSchema` |
+| `ArticleSchema` | `PubMedPublicationSchema` |
+
+**Note:** PubMed's `ArticleSchema` was renamed to `PubMedPublicationSchema` (2026-01-25)
+to align with `entity_type: publication` in pipeline config and maintain consistency
+with other publication schemas (`ChemblPublicationSchema`, `OpenAlexPublicationSchema`,
+`SemanticScholarPublicationSchema`). A backward-compatibility alias `ArticleSchema`
+is provided but deprecated.
 
 ## Consequences
 
@@ -127,6 +134,7 @@ Original plan (not implemented):
 - `src/bioetl/domain/schemas/chembl/document.py` → `publication.py`
 - `src/bioetl/domain/schemas/chembl/document_similarity.py` → `publication_similarity.py`
 - `src/bioetl/domain/schemas/chembl/document_term.py` → `publication_term.py`
+- `src/bioetl/domain/schemas/pubmed/article.py` → `publication.py` — `ArticleSchema` → `PubMedPublicationSchema` (2026-01-25)
 
 **Factory Updates:**
 - `transformer_factory.py` — imports and registrations updated
@@ -149,8 +157,11 @@ Original plan (not implemented):
 
 ### Migration Guide
 
-**Note:** Since aliases were never implemented, old imports will raise `ImportError`.
+**Note:** Since aliases were never implemented for domain entities, old imports will raise `ImportError`.
 All code must use canonical names directly.
+
+**Exception:** `ArticleSchema` is provided as a deprecated alias for `PubMedPublicationSchema`
+for backward compatibility. Prefer `PubMedPublicationSchema` in new code.
 
 **Domain Entities:**
 ```python
