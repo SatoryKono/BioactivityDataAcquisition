@@ -59,6 +59,14 @@ def valid_record() -> dict:
         "oa_status": "gold",
         # Metrics
         "citation_count": 42,  # Unified field name (from OpenAlex cited_by_count)
+        # Bibliographic info (from biblio object)
+        "volume": "42",
+        "issue": "3",
+        # Additional metrics
+        "fwci": 1.5,  # Field-Weighted Citation Impact
+        "referenced_works_count": 25,
+        # Quality indicators
+        "is_retracted": False,
         # Lookup tracking
         "source": "openalex",
         "_lookup_method": "doi",
@@ -246,3 +254,85 @@ class TestOpenAlexPublicationSchema:
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             OpenAlexPublicationSchema.validate(df)
+
+    def test_volume_nullable(self, valid_record: dict) -> None:
+        """Should allow null volume."""
+        valid_record["volume"] = None
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert pd.isna(validated["volume"].iloc[0])
+
+    def test_issue_nullable(self, valid_record: dict) -> None:
+        """Should allow null issue."""
+        valid_record["issue"] = None
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert pd.isna(validated["issue"].iloc[0])
+
+    def test_fwci_non_negative(self, valid_record: dict) -> None:
+        """Should validate fwci is non-negative."""
+        # Valid fwci
+        valid_record["fwci"] = 1.5
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["fwci"].iloc[0] == 1.5
+
+        # Zero is valid
+        valid_record["fwci"] = 0.0
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["fwci"].iloc[0] == 0.0
+
+        # Negative fwci
+        valid_record["fwci"] = -1.0
+        df = pd.DataFrame([valid_record])
+        with pytest.raises(SchemaError):
+            OpenAlexPublicationSchema.validate(df)
+
+    def test_fwci_nullable(self, valid_record: dict) -> None:
+        """Should allow null fwci."""
+        valid_record["fwci"] = None
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert pd.isna(validated["fwci"].iloc[0])
+
+    def test_referenced_works_count_non_negative(self, valid_record: dict) -> None:
+        """Should validate referenced_works_count is non-negative."""
+        # Valid count
+        valid_record["referenced_works_count"] = 25
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["referenced_works_count"].iloc[0] == 25
+
+        # Zero is valid
+        valid_record["referenced_works_count"] = 0
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["referenced_works_count"].iloc[0] == 0
+
+        # Negative count
+        valid_record["referenced_works_count"] = -1
+        df = pd.DataFrame([valid_record])
+        with pytest.raises(SchemaError):
+            OpenAlexPublicationSchema.validate(df)
+
+    def test_referenced_works_count_nullable(self, valid_record: dict) -> None:
+        """Should allow null referenced_works_count."""
+        valid_record["referenced_works_count"] = None
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert pd.isna(validated["referenced_works_count"].iloc[0])
+
+    def test_is_retracted_values(self, valid_record: dict) -> None:
+        """Should validate is_retracted boolean values."""
+        # False (not retracted)
+        valid_record["is_retracted"] = False
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["is_retracted"].iloc[0] == False  # noqa: E712
+
+        # True (retracted)
+        valid_record["is_retracted"] = True
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["is_retracted"].iloc[0] == True  # noqa: E712

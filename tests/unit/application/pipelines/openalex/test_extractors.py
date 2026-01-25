@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from bioetl.application.pipelines.openalex.extractors import (
     extract_authors,
+    extract_biblio_info,
     extract_concepts,
     extract_doi,
     extract_external_ids,
@@ -434,3 +435,65 @@ class TestExtractKeywords:
         ]
         result = extract_keywords(keywords)  # type: ignore[arg-type]
         assert result == ["Valid"]
+
+
+class TestExtractBiblioInfo:
+    """Tests for extract_biblio_info function."""
+
+    def test_extract_biblio_info_complete(self) -> None:
+        """Should extract all biblio fields."""
+        biblio = {
+            "volume": "42",
+            "issue": "3",
+            "first_page": "123",
+            "last_page": "145",
+        }
+        result = extract_biblio_info(biblio)
+        assert result == {
+            "volume": "42",
+            "issue": "3",
+            "first_page": "123",
+            "last_page": "145",
+        }
+
+    def test_extract_biblio_info_partial(self) -> None:
+        """Should handle missing fields gracefully."""
+        biblio = {
+            "volume": "42",
+            "first_page": "123",
+        }
+        result = extract_biblio_info(biblio)
+        assert result["volume"] == "42"
+        assert result["issue"] is None
+        assert result["first_page"] == "123"
+        assert result["last_page"] is None
+
+    def test_extract_biblio_info_none(self) -> None:
+        """Should return None values for None input."""
+        result = extract_biblio_info(None)
+        assert result == {
+            "volume": None,
+            "issue": None,
+            "first_page": None,
+            "last_page": None,
+        }
+
+    def test_extract_biblio_info_empty(self) -> None:
+        """Should return None values for empty dict."""
+        result = extract_biblio_info({})
+        assert result == {
+            "volume": None,
+            "issue": None,
+            "first_page": None,
+            "last_page": None,
+        }
+
+    def test_extract_biblio_info_invalid_type(self) -> None:
+        """Should return None values for invalid type."""
+        result = extract_biblio_info("not_a_dict")  # type: ignore[arg-type]
+        assert result == {
+            "volume": None,
+            "issue": None,
+            "first_page": None,
+            "last_page": None,
+        }
