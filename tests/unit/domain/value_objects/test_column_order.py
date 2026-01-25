@@ -40,14 +40,18 @@ class TestColumnOrderConfig:
         """Qualified columns extract field correctly."""
         config = ColumnOrderConfig()
         assert config.get_group("chembl.publication.title") == SemanticGroup.TITLE
-        assert config.get_group("crossref.publication.abstract") == SemanticGroup.ABSTRACT
+        assert (
+            config.get_group("crossref.publication.abstract") == SemanticGroup.ABSTRACT
+        )
         assert config.get_group("pubmed.publication.authors") == SemanticGroup.AUTHORS
 
     def test_get_group_unknown_field(self) -> None:
         """Unknown fields return OTHER group."""
         config = ColumnOrderConfig()
         assert config.get_group("random_field") == SemanticGroup.OTHER
-        assert config.get_group("chembl.publication.custom_field") == SemanticGroup.OTHER
+        assert (
+            config.get_group("chembl.publication.custom_field") == SemanticGroup.OTHER
+        )
 
     def test_get_group_case_insensitive(self) -> None:
         """Field matching is case-insensitive."""
@@ -76,9 +80,7 @@ class TestColumnOrderConfig:
 
     def test_custom_provider_priority(self) -> None:
         """Custom provider priority is respected."""
-        config = ColumnOrderConfig(
-            provider_priority=("crossref", "chembl", "pubmed")
-        )
+        config = ColumnOrderConfig(provider_priority=("crossref", "chembl", "pubmed"))
         assert config.get_provider_rank("crossref.publication.title") == 0
         assert config.get_provider_rank("chembl.publication.title") == 1
 
