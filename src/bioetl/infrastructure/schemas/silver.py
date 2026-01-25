@@ -47,10 +47,12 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("document_chembl_id", pa.string()),  # Primary key
         pa.field("doi", pa.string()),
         pa.field("pmid", pa.string()),  # PubMed ID (numeric string)
+        pa.field("pmc_id", pa.string()),  # PubMed Central ID
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
         pa.field("doc_type", pa.string()),  # PUBLICATION, PATENT, DATASET, BOOK
         pa.field("journal_full_title", pa.string()),
+        pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
         pa.field("src_id", pa.int64()),
         # === ChEMBL Release Metadata ===
         pa.field("chembl_release", pa.string()),  # e.g., CHEMBL_1, CHEMBL_34
@@ -718,41 +720,42 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
         pa.field("abstract", pa.string()),
+        pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
         pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("citation_count", pa.int64()),
-        # Metadata
+        pa.field("content_domain_crossmark_restriction", pa.bool_()),
+        pa.field("content_domain_domains", pa.list_(pa.string())),
         pa.field("doc_type", pa.string()),
         # Cross-reference IDs for linking publications across providers
         # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
         pa.field("doi", pa.string()),
         pa.field("first_page", pa.string()),
         pa.field("issn", pa.list_(pa.string())),
+        pa.field("issn_electronic", pa.string()),  # Electronic ISSN
+        pa.field("issn_print", pa.string()),  # Print ISSN
         pa.field("issue", pa.string()),
-        # Core fields
         pa.field("journal", pa.string()),
         pa.field("language", pa.string()),
         pa.field("last_page", pa.string()),
         pa.field("license_url", pa.string()),
-        # Note: pmid/pmc_id excluded - CrossRef doesn't provide these IDs natively
+        # Note: pmid/pmc_id added for cross-provider linking consistency (may be null)
+        pa.field(
+            "pmc_id", pa.string()
+        ),  # PubMed Central ID (for cross-provider linking)
+        pa.field("pmid", pa.string()),  # PubMed ID (for cross-provider linking)
         # Date fields
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
+        pa.field("published", pa.string()),  # Canonical publication date
         pa.field("published_online", pa.string()),  # Legacy: provider-specific
         pa.field("published_print", pa.string()),  # Legacy: provider-specific
         pa.field("publisher", pa.string()),
         pa.field("reference_count", pa.int64()),
+        pa.field("short_container_title", pa.list_(pa.string())),
         pa.field("source", pa.string()),
         pa.field("subjects", pa.list_(pa.string())),
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
         pa.field("year", pa.int64()),
-        # === NEW: Additional CrossRef fields ===
-        pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
-        pa.field("content_domain_crossmark_restriction", pa.bool_()),
-        pa.field("content_domain_domains", pa.list_(pa.string())),
-        pa.field("issn_electronic", pa.string()),  # Electronic ISSN
-        pa.field("issn_print", pa.string()),  # Print ISSN
-        pa.field("published", pa.string()),  # Canonical publication date
-        pa.field("short_container_title", pa.list_(pa.string())),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
         pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
