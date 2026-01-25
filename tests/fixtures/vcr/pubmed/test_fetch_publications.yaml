@@ -235,7 +235,7 @@ interactions:
       User-Agent:
       - BioETL/0.1.0 (contact@example.com)
     method: GET
-    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=41413662%2C41413567%2C41413213%2C41413028%2C41412877&retmode=xml&rettype=abstract&api_key=REDACTED&email=821311%40gmail.com
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=41413662%2C41413567%2C41413213%2C41413028%2C41412877&retmode=xml&rettype=abstract&api_key=REDACTED&email=default%40example.com
   response:
     body:
       string: '{"error":"API key invalid","api-key":"your_ncbi_api_key_here","type":"invalid",
@@ -285,7 +285,7 @@ interactions:
       User-Agent:
       - BioETL/0.1.0 (contact@example.com)
     method: GET
-    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=41413662%2C41413567%2C41413213%2C41413028%2C41412877&retmode=xml&rettype=abstract&email=821311%40gmail.com
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=41413662%2C41413567%2C41413213%2C41413028%2C41412877&retmode=xml&rettype=abstract&email=default%40example.com
   response:
     body:
       string: '<?xml version="1.0" ?>

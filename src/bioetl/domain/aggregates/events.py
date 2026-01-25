@@ -190,7 +190,7 @@ class RecordQuarantined(DomainEvent):
     run_id: RunID
     batch_id: BatchID
     record_id: str | None
-    error_code: str
+    error_code: str | None
     error_message: str
     content_hash: ContentHash | None = None
 

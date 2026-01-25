@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - BioETL/0.1.0 (contact@example.com)
     method: GET
-    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=10021918%2C10021922%2C10052961%2C10052966%2C10052969&retmode=xml&rettype=abstract&email=821311%40gmail.com
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=10021918%2C10021922%2C10052961%2C10052966%2C10052969&retmode=xml&rettype=abstract&email=default%40example.com
   response:
     body:
       string: '<?xml version="1.0" ?>
@@ -426,7 +426,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=health&retmax=1&retmode=json&email=821311%40gmail.com
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=health&retmax=1&retmode=json&email=default%40example.com
   response:
     body:
       string: '{"header":{"type":"esearch","version":"0.3"},"esearchresult":{"count":"7746716","retmax":"1","retstart":"0","idlist":["41442815"],"translationset":[{"from":"health","to":"\"health\"[MeSH

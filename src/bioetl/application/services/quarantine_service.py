@@ -23,7 +23,7 @@ class QuarantineRecord:
     """Representation of a quarantined record.
 
     Attributes:
-        error_code: Error code that caused quarantine.
+        error_code: Error code that caused quarantine, or None if unknown.
         payload: Original record data.
         batch_id: Bronze batch ID.
         pipeline: Pipeline name.
@@ -31,7 +31,7 @@ class QuarantineRecord:
         metadata: Additional metadata.
     """
 
-    error_code: str
+    error_code: str | None
     payload: dict[str, Any]
     batch_id: str | None
     pipeline: str
@@ -92,7 +92,7 @@ class QuarantineService:
 
         records = [
             QuarantineRecord(
-                error_code=rec.get("error_code", "UNKNOWN"),
+                error_code=rec.get("error_code"),
                 payload=rec.get("payload", {}),
                 batch_id=rec.get("bronze_batch_id"),
                 pipeline=pipeline,
