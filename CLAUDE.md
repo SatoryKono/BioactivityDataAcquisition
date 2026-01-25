@@ -131,7 +131,7 @@ ls tests/architecture/test_*.py
 | **Python-файлов** | ~485 |
 | **Строк кода** | ~68,400 |
 | **Тестов** | ~5,277 |
-| **ADR** | 24 |
+| **ADR** | 29 |
 | **Провайдеров** | 7 |
 | **Pipeline-конфигураций** | 20 |
 
@@ -406,7 +406,7 @@ sha256(provider + canonical_json(record))
 
 ### 4.5. Архитектурные Решения (ADR)
 
-**27 ADR** определяют ключевые архитектурные решения проекта:
+**29 ADR** определяют ключевые архитектурные решения проекта:
 
 | ADR | Название | Описание |
 |-----|----------|----------|
@@ -437,6 +437,8 @@ sha256(provider + canonical_json(record))
 | 025 | Pipeline Config Unification | Унификация конфигурации пайплайнов |
 | 026 | Composite Pipeline Pattern | Паттерн композитного пайплайна |
 | 027 | DQ Rules Externalization | Иерархическая конфигурация DQ правил |
+| 028 | Filter Rules Externalization | Иерархическая конфигурация фильтров |
+| 029 | Output Metadata Unification | Унификация output-метаданных |
 
 Документы: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
 
@@ -821,7 +823,7 @@ git commit -m "..."
 | `docs/RULES.md` | Конституция проекта v5.12 |
 | `docs/REQUIREMENTS.md` | 127 тестируемых требований |
 | `docs/CHANGELOG.md` | История изменений |
-| `docs/02-architecture/decisions/` | ADR (001-026) — 26 архитектурных решений |
+| `docs/02-architecture/decisions/` | ADR (001-029) — 29 архитектурных решений |
 | `AGENT.md` | Детальные инструкции для агента v2.2 |
 | `.claude/PROJECT_CONTEXT.md` | Компактный контекст |
 
