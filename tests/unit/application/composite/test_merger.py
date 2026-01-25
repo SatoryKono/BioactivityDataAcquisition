@@ -303,7 +303,9 @@ class TestMergeServiceJoinKeyNormalization:
         assert len(result) == 1
         # With qualified naming, enricher_value becomes crossref.publication.enricher_value
         assert "crossref.publication.enricher_value" in result.columns
-        assert result["crossref.publication.enricher_value"].to_list() == ["from_enricher"]
+        assert result["crossref.publication.enricher_value"].to_list() == [
+            "from_enricher"
+        ]
         # DOI should be normalized to lowercase
         assert result["doi"].to_list() == ["10.1038/nature12373"]
 
@@ -628,7 +630,9 @@ class TestApplyJoinsSmartColumnRenaming:
         import polars as pl
 
         # Seed already has crossref.publication.title
-        seed_df = pl.DataFrame({"doi": ["10.1/a"], "crossref.publication.title": ["Seed CT"]})
+        seed_df = pl.DataFrame(
+            {"doi": ["10.1/a"], "crossref.publication.title": ["Seed CT"]}
+        )
         # Enricher title becomes crossref.publication.title → conflict!
         enricher_df = pl.DataFrame({"doi": ["10.1/a"], "title": ["Enricher Title"]})
 
@@ -696,7 +700,9 @@ class TestApplyJoinsSmartColumnRenaming:
 
         # Secondary key (title) should be prefixed, NOT get Polars suffix
         assert "title" in result.columns  # Seed title
-        assert "crossref.publication.title" in result.columns  # Enricher title with qualified name
+        assert (
+            "crossref.publication.title" in result.columns
+        )  # Enricher title with qualified name
         assert "title_crossref_publication" not in result.columns  # NO Polars suffix
 
         # Regular columns should also be prefixed with qualified name
