@@ -23,7 +23,7 @@ def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
         external_ids: Dict of external IDs from S2 response.
 
     Returns:
-        Dict with normalized keys: doi, pmid, pmcid (maps to pmc_id), arxiv, corpus_id, mag, acl.
+        Dict with normalized keys: doi, pmid, pmcid, arxiv, corpus_id, mag, dblp, acl.
 
     Example:
         >>> ids = {"DOI": "10.1038/...", "PubMed": "12345678", "CorpusId": 123}
@@ -41,6 +41,7 @@ def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
         "arxiv": external_ids.get("ArXiv"),
         "corpus_id": external_ids.get("CorpusId"),
         "mag": external_ids.get("MAG"),
+        "dblp": external_ids.get("DBLP"),
         "acl": external_ids.get("ACL"),
     }
 
@@ -48,16 +49,21 @@ def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
 def extract_authors(authors: list[dict[str, Any]] | None) -> list[str]:
     """Extract author display names from authors list.
 
+    Filters out None, empty strings, and whitespace-only names.
+
     Args:
         authors: List of author objects from S2.
 
     Returns:
-        List of author names.
+        List of author names (non-empty, stripped).
 
     Example:
         >>> authors = [{"authorId": "123", "name": "John Doe"}]
         >>> extract_authors(authors)
         ['John Doe']
+        >>> authors = [{"name": "  "}, {"name": ""}, {"name": None}]
+        >>> extract_authors(authors)
+        []
 
     """
     if not authors:
@@ -66,8 +72,8 @@ def extract_authors(authors: list[dict[str, Any]] | None) -> list[str]:
     result = []
     for author in authors:
         name = author.get("name")
-        if name:
-            result.append(name)
+        if name and name.strip():
+            result.append(name.strip())
     return result
 
 
@@ -212,22 +218,28 @@ def extract_fields_of_study(
 ) -> list[str]:
     """Extract fields of study.
 
+    Filters out None and empty string elements from the list.
+
     Args:
         fields_of_study: List of field names from S2.
         max_count: Maximum fields to extract.
 
     Returns:
-        List of field names (capped at max_count).
+        List of non-empty field names (capped at max_count).
 
     Example:
         >>> fields = ["Biology", "Medicine", "Genetics"]
         >>> extract_fields_of_study(fields, max_count=2)
         ['Biology', 'Medicine']
+        >>> fields = ["Biology", None, "", "Medicine"]
+        >>> extract_fields_of_study(fields)
+        ['Biology', 'Medicine']
 
     """
     if not fields_of_study:
         return []
-    return fields_of_study[:max_count]
+    # Filter out None and empty strings, then cap at max_count
+    return [f for f in fields_of_study if f and isinstance(f, str)][:max_count]
 
 
 def validate_year(year: int | None) -> int | None:
