@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Final
 
-__all__ = ["ColumnQualifier"]
+__all__ = ["JOIN_KEY_COLUMNS", "ColumnQualifier"]
 
 # Join keys excluded from renaming (case-insensitive)
 JOIN_KEY_COLUMNS: Final[frozenset[str]] = frozenset({"doi", "pmid", "pmc_id"})
@@ -41,15 +41,17 @@ class ColumnQualifier:
 
     def __post_init__(self) -> None:
         """Validate and normalize fields."""
-        self._validate_and_normalize("provider", self.provider)
-        self._validate_and_normalize("entity", self.entity)
-        self._validate_and_normalize("field", self.field)
+        for attr in ("provider", "entity", "field"):
+            value = getattr(self, attr)
+            normalized = self._validate_field(value, attr)
+            object.__setattr__(self, attr, normalized)
 
-    def _validate_and_normalize(self, attr: str, value: str) -> None:
+    @staticmethod
+    def _validate_field(value: str, name: str) -> str:
         """Validate non-empty and normalize to lowercase."""
         if not value or not value.strip():
-            raise ValueError(f"{attr} cannot be empty")
-        object.__setattr__(self, attr, value.strip().lower())
+            raise ValueError(f"{name} cannot be empty")
+        return value.strip().lower()
 
     def __str__(self) -> str:
         """Return qualified name: {provider}.{entity}.{field}."""
@@ -129,3 +131,27 @@ class ColumnQualifier:
         """
         parts = column.split(".")
         return len(parts) == 3 and all(p.strip() for p in parts)
+
+    @staticmethod
+    def extract_field(column: str) -> str:
+        """Extract field name from column (qualified or unqualified).
+
+        For qualified names (provider.entity.field), returns the field part.
+        For unqualified names, returns the original column name.
+
+        Args:
+            column: Column name (qualified or unqualified).
+
+        Returns:
+            Field name.
+
+        Example:
+            >>> ColumnQualifier.extract_field("chembl.publication.title")
+            'title'
+            >>> ColumnQualifier.extract_field("title")
+            'title'
+        """
+        parts = column.split(".")
+        if len(parts) == 3:
+            return parts[2]
+        return column
