@@ -112,9 +112,8 @@ class TestAbstractExtractorEdgeCases:
 class TestDateExtractorEdgeCases:
     """Edge case tests for DateExtractor."""
 
-    def test_medline_date_format(self):
-        """Test handling of MedlineDate element (alternative date format)."""
-        # Note: Current implementation may not handle MedlineDate
+    def test_medline_date_month_range(self):
+        """Test handling of MedlineDate with month range (end-of-period)."""
         xml = """
         <PubDate>
             <MedlineDate>2023 Jan-Feb</MedlineDate>
@@ -122,7 +121,97 @@ class TestDateExtractorEdgeCases:
         """
         node = ET.fromstring(xml)
         date_str, year_int = DateExtractor.extract_date(node)
-        # MedlineDate is not in Year/Month/Day format, should return None
+        # MedlineDate "2023 Jan-Feb" → year=2023, month=Feb (end of range)
+        assert year_int == 2023
+        assert date_str == "2023-02-30"  # Feb + end-of-period day
+
+    def test_medline_date_season_spring(self):
+        """Test handling of MedlineDate with season (Spring)."""
+        xml = """
+        <PubDate>
+            <MedlineDate>2023 Spring</MedlineDate>
+        </PubDate>
+        """
+        node = ET.fromstring(xml)
+        date_str, year_int = DateExtractor.extract_date(node)
+        # Spring → May (end of Mar-May period)
+        assert year_int == 2023
+        assert date_str == "2023-05-30"
+
+    def test_medline_date_season_winter(self):
+        """Test handling of MedlineDate with season (Winter)."""
+        xml = """
+        <PubDate>
+            <MedlineDate>2023 Winter</MedlineDate>
+        </PubDate>
+        """
+        node = ET.fromstring(xml)
+        date_str, year_int = DateExtractor.extract_date(node)
+        # Winter → Feb (end of Dec-Feb period)
+        assert year_int == 2023
+        assert date_str == "2023-02-30"
+
+    def test_medline_date_quarter(self):
+        """Test handling of MedlineDate with quarter."""
+        xml = """
+        <PubDate>
+            <MedlineDate>2023 2nd Quart</MedlineDate>
+        </PubDate>
+        """
+        node = ET.fromstring(xml)
+        date_str, year_int = DateExtractor.extract_date(node)
+        # 2nd Quart (Q2) → Jun (end of Apr-Jun)
+        assert year_int == 2023
+        assert date_str == "2023-06-30"
+
+    def test_medline_date_single_month(self):
+        """Test handling of MedlineDate with single month."""
+        xml = """
+        <PubDate>
+            <MedlineDate>2023 September</MedlineDate>
+        </PubDate>
+        """
+        node = ET.fromstring(xml)
+        date_str, year_int = DateExtractor.extract_date(node)
+        assert year_int == 2023
+        assert date_str == "2023-09-30"
+
+    def test_medline_date_year_only(self):
+        """Test handling of MedlineDate with year only."""
+        xml = """
+        <PubDate>
+            <MedlineDate>2023</MedlineDate>
+        </PubDate>
+        """
+        node = ET.fromstring(xml)
+        date_str, year_int = DateExtractor.extract_date(node)
+        # Year only → end-of-year (Dec 31)
+        assert year_int == 2023
+        assert date_str == "2023-12-31"
+
+    def test_medline_date_cross_year_range(self):
+        """Test handling of MedlineDate with cross-year range."""
+        xml = """
+        <PubDate>
+            <MedlineDate>2022 Dec-2023 Jan</MedlineDate>
+        </PubDate>
+        """
+        node = ET.fromstring(xml)
+        date_str, year_int = DateExtractor.extract_date(node)
+        # Cross-year: take second year (2023) and second month (Jan)
+        assert year_int == 2023
+        assert date_str == "2023-01-30"
+
+    def test_medline_date_invalid(self):
+        """Test handling of invalid MedlineDate (no year)."""
+        xml = """
+        <PubDate>
+            <MedlineDate>TBD</MedlineDate>
+        </PubDate>
+        """
+        node = ET.fromstring(xml)
+        date_str, year_int = DateExtractor.extract_date(node)
+        # No valid year found
         assert date_str is None
         assert year_int is None
 
