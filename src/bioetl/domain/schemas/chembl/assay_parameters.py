@@ -34,9 +34,9 @@ class AssayParametersSchema(ETLRecordSchema):
         description="FK → Assay (ChEMBL ID format).",
     )
 
-    # === Parameter Type (Required) ===
-    type: Series[str] = pa.Field(
-        nullable=False,
+    # === Parameter Type (Optional, may be None if not provided by API) ===
+    type: Series[str] | None = pa.Field(
+        nullable=True,
         coerce=True,
         description="Parameter type (e.g., CONC, PH, TEMP, TIME).",
     )

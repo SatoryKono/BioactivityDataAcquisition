@@ -1,11 +1,12 @@
 """CSV Filter Reader adapter.
 
 Implements InputFilterPort for reading filter IDs from CSV files.
-Uses Polars for efficient CSV parsing.
+Uses Polars for efficient CSV parsing with asyncio.to_thread for non-blocking I/O.
 """
 
 from __future__ import annotations
 
+import asyncio
 from collections import Counter
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -97,7 +98,7 @@ class CsvFilterReader:
         self, source_path: str, column_name: str
     ) -> FilterLoadResult:
         """Load unique IDs from a CSV file."""
-        df = self._read_csv_dataframe(source_path)
+        df = await asyncio.to_thread(self._read_csv_dataframe, source_path)
         all_ids = self._extract_column_ids(df, column_name)
         unique_ids, unique_count, duplicate_count, duplicates = (
             self._compute_duplicate_stats(all_ids)
@@ -142,7 +143,7 @@ class CsvFilterReader:
             Tuple of (FilterLoadResult, fallback_mapping).
             fallback_mapping maps primary values to fallback values.
         """
-        df = self._read_csv_dataframe(source_path)
+        df = await asyncio.to_thread(self._read_csv_dataframe, source_path)
 
         # Standard loading of primary IDs
         all_ids = self._extract_column_ids(df, primary_column)
@@ -226,7 +227,7 @@ class CsvFilterReader:
         Returns:
             FilterLoadResult with column_ids and valid_combinations.
         """
-        df = self._read_csv_dataframe(source_path)
+        df = await asyncio.to_thread(self._read_csv_dataframe, source_path)
         column_ids = self._extract_column_ids_map(df, columns)
 
         column_names = [col.column_name for col in columns]
