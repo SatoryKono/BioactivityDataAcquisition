@@ -64,6 +64,12 @@ from bioetl.domain.value_objects.activity_values import (
 )
 from bioetl.domain.value_objects.base import ValueObject
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+from bioetl.domain.value_objects.column_order import (
+    DEFAULT_COLUMN_ORDER,
+    PUBLICATION_FIELD_GROUPS,
+    ColumnOrderConfig,
+    SemanticGroup,
+)
 from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
 from bioetl.domain.value_objects.chemical import (
     SMILES,
@@ -159,6 +165,7 @@ __all__ = [
     "BusinessRulesResult",
     "CategoricalDistribution",
     "ChemblId",
+    "ColumnOrderConfig",
     "ColumnQualifier",
     "ColumnStats",
     "CompletenessResult",
@@ -177,6 +184,7 @@ __all__ = [
     "DQReportSummary",
     "DQResult",
     "DQThresholds",
+    "DEFAULT_COLUMN_ORDER",
     "DataFreshnessResult",
     "DeduplicationStatsResult",
     "DriftLevel",
@@ -195,6 +203,7 @@ __all__ = [
     "PChemblValue",
     "PubChemCid",
     "PubMedId",
+    "PUBLICATION_FIELD_GROUPS",
     "PublicationYear",
     "RecordCountResult",
     "ReferentialIntegrityResult",
@@ -204,6 +213,7 @@ __all__ = [
     "SchemaDriftInfo",
     "SchemaDriftResult",
     "SchemaSnapshotResult",
+    "SemanticGroup",
     "SemanticScholarId",
     "SilverDQCheckType",
     "SilverDQReport",
