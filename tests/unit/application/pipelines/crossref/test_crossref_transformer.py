@@ -19,7 +19,7 @@ from bioetl.application.pipelines.crossref import (
     extract_year,
 )
 from bioetl.domain.context import PipelineContext
-from bioetl.domain.entities.crossref import CROSSREF_TYPE_MAP
+from bioetl.domain.entities.crossref import CROSSREF_TYPE_DEFAULT, CROSSREF_TYPE_MAP
 from bioetl.domain.normalization import extract_first_string, normalize_doi
 from bioetl.domain.types import RunID, RunType
 
@@ -418,18 +418,70 @@ async def test_transform_normalized_doi_in_entity_id(transformer, pipeline_conte
 
 
 def test_doc_type_mapping_all_types():
-    """Test all documented document type mappings."""
-    assert CROSSREF_TYPE_MAP["journal-article"] == "PUBLICATION"
+    """Test all 30 CrossRef document type mappings.
+
+    See: https://api.crossref.org/types for complete list.
+    """
+    # PUBLICATION types (primary scholarly content)
+    publication_types = [
+        "journal-article",
+        "proceedings-article",
+        "book-chapter",
+        "book",
+        "monograph",
+        "edited-book",
+        "reference-book",
+        "book-section",
+        "book-part",
+        "book-track",
+        "dissertation",
+        "report",
+        "report-component",
+        "standard",
+        "reference-entry",
+        "peer-review",
+        "component",
+        "other",
+    ]
+    for doc_type in publication_types:
+        assert CROSSREF_TYPE_MAP[doc_type] == "PUBLICATION", f"{doc_type} should map to PUBLICATION"
+
+    # PREPRINT types
     assert CROSSREF_TYPE_MAP["posted-content"] == "PREPRINT"
-    assert CROSSREF_TYPE_MAP["proceedings-article"] == "PUBLICATION"
-    assert CROSSREF_TYPE_MAP["book-chapter"] == "PUBLICATION"
-    assert CROSSREF_TYPE_MAP["dissertation"] == "PUBLICATION"
+
+    # DATASET types
+    assert CROSSREF_TYPE_MAP["dataset"] == "DATASET"
+    assert CROSSREF_TYPE_MAP["database"] == "DATASET"
+
+    # OTHER types (container/series types)
+    other_types = [
+        "journal",
+        "journal-volume",
+        "journal-issue",
+        "proceedings",
+        "proceedings-series",
+        "book-series",
+        "book-set",
+        "report-series",
+        "grant",
+    ]
+    for doc_type in other_types:
+        assert CROSSREF_TYPE_MAP[doc_type] == "OTHER", f"{doc_type} should map to OTHER"
+
+    # Verify total count matches CrossRef API (30 types)
+    assert len(CROSSREF_TYPE_MAP) == 30
+
+
+def test_doc_type_default_constant():
+    """Test that CROSSREF_TYPE_DEFAULT is PUBLICATION."""
+    assert CROSSREF_TYPE_DEFAULT == "PUBLICATION"
 
 
 def test_doc_type_mapping_unknown_defaults_to_publication(transformer):
-    """Test that unknown type defaults to PUBLICATION."""
-    publication = {"DOI": "10.1234/test", "type": "unknown-type"}
+    """Test that unknown type defaults to PUBLICATION via CROSSREF_TYPE_DEFAULT."""
+    publication = {"DOI": "10.1234/test", "type": "unknown-future-type"}
     data = transformer._extract_business_data(publication)
+    assert data["doc_type"] == CROSSREF_TYPE_DEFAULT
     assert data["doc_type"] == "PUBLICATION"
 
 

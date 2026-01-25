@@ -137,11 +137,56 @@ def _to_none_if_empty(s: str) -> str | None:
     return s.strip() or None
 
 
+# Pattern for electronic/article page identifiers that should NOT be split on hyphen.
+# Examples: e-123, E-456, e123 (electronic articles)
+_ELECTRONIC_PAGE_PATTERN = re.compile(r"^[eE]-?\d+$")
+
+
+def _is_electronic_page(page: str) -> bool:
+    """Check if page is electronic article number that shouldn't be split.
+
+    Electronic page identifiers like 'e-123' or 'e123' represent article
+    numbers, not page ranges. The hyphen in 'e-123' is part of the identifier.
+
+    Args:
+        page: Stripped page string.
+
+    Returns:
+        True if page matches electronic article pattern.
+    """
+    return bool(_ELECTRONIC_PAGE_PATTERN.match(page))
+
+
 def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
-    """Parse page range '123-456' to (first, last) tuple."""
+    """Parse page range '123-456' to (first, last) tuple.
+
+    Handles various page formats:
+    - Standard ranges: "123-456" → ("123", "456")
+    - Single pages: "42" → ("42", None)
+    - Electronic pages: "e12345", "e-123" → (original, None)
+    - Article numbers: "100234" → ("100234", None)
+    - Supplements: "S1-S15" → ("S1", "S15")
+
+    Args:
+        page: Page string from publication metadata.
+
+    Returns:
+        Tuple of (first_page, last_page). last_page is None for single pages
+        or electronic article identifiers.
+    """
     if not page:
         return None, None
-    first, sep, last = page.partition("-")
+
+    stripped = page.strip()
+    if not stripped:
+        return None, None
+
+    # Electronic article numbers: don't split on hyphen (e.g., e-123)
+    if _is_electronic_page(stripped):
+        return stripped, None
+
+    # Standard range parsing
+    first, sep, last = stripped.partition("-")
     return _to_none_if_empty(first), _to_none_if_empty(last) if sep else None
 
 

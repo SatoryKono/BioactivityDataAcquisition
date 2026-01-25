@@ -28,14 +28,56 @@ from pydantic import Field as PydanticField
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 
-# Document type mapping from CrossRef types to internal types
-CROSSREF_TYPE_MAP = {
+# Document type mapping from CrossRef types to BioETL unified types.
+# See: https://api.crossref.org/types for complete list.
+#
+# Mapping strategy:
+# - PUBLICATION: Published scholarly works (articles, books, chapters, reports, etc.)
+# - PREPRINT: Pre-publication works (posted-content)
+# - DATASET: Research data and databases
+# - OTHER: Container/series types and funding (typically not indexed directly)
+#
+# Default for unknown types: PUBLICATION (conservative fallback)
+CROSSREF_TYPE_MAP: dict[str, str] = {
+    # Primary scholarly content → PUBLICATION
     "journal-article": "PUBLICATION",
-    "posted-content": "PREPRINT",
     "proceedings-article": "PUBLICATION",
     "book-chapter": "PUBLICATION",
+    "book": "PUBLICATION",
+    "monograph": "PUBLICATION",
+    "edited-book": "PUBLICATION",
+    "reference-book": "PUBLICATION",
+    "book-section": "PUBLICATION",
+    "book-part": "PUBLICATION",
+    "book-track": "PUBLICATION",
     "dissertation": "PUBLICATION",
+    "report": "PUBLICATION",
+    "report-component": "PUBLICATION",
+    "standard": "PUBLICATION",
+    "reference-entry": "PUBLICATION",
+    "peer-review": "PUBLICATION",
+    "component": "PUBLICATION",
+    "other": "PUBLICATION",
+    # Pre-publication → PREPRINT
+    "posted-content": "PREPRINT",
+    # Research data → DATASET
+    "dataset": "DATASET",
+    "database": "DATASET",
+    # Container/series types → OTHER (typically not indexed directly)
+    "journal": "OTHER",
+    "journal-volume": "OTHER",
+    "journal-issue": "OTHER",
+    "proceedings": "OTHER",
+    "proceedings-series": "OTHER",
+    "book-series": "OTHER",
+    "book-set": "OTHER",
+    "report-series": "OTHER",
+    # Funding → OTHER
+    "grant": "OTHER",
 }
+
+# Default type for unknown CrossRef types (conservative fallback)
+CROSSREF_TYPE_DEFAULT = "PUBLICATION"
 
 
 # === Pydantic DTO Model ===
@@ -217,6 +259,7 @@ class CrossRefPublicationEntity(PublicationEntityBase):
 
 
 __all__ = [
+    "CROSSREF_TYPE_DEFAULT",
     "CROSSREF_TYPE_MAP",
     "CrossRefPublicationEntity",
     "PublicationRecord",

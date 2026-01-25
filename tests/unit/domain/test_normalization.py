@@ -242,19 +242,59 @@ class TestParsePageRange:
     @pytest.mark.parametrize(
         "page,expected",
         [
+            # Standard ranges
             ("123-456", ("123", "456")),
+            ("1-999", ("1", "999")),
+            # Single pages
             ("123", ("123", None)),
+            ("100234", ("100234", None)),
+            # Trailing/leading hyphen
             ("123-", ("123", None)),
             ("-456", (None, "456")),
+            # Whitespace handling
             ("  123  -  456  ", ("123", "456")),
+            # Empty/None
             ("", (None, None)),
             (None, (None, None)),
+            # Supplements (should split - these are actual ranges)
+            ("S1-S15", ("S1", "S15")),
+            ("A1-A10", ("A1", "A10")),
         ],
     )
     def test_parse_page_range(
         self, page: str | None, expected: tuple[str | None, str | None]
     ) -> None:
         """Test page range parsing."""
+        assert parse_page_range(page) == expected
+
+
+class TestParsePageRangeElectronic:
+    """Tests for electronic pagination handling in parse_page_range.
+
+    Electronic article identifiers like 'e-123' or 'e123' should NOT be split
+    on hyphen - the hyphen is part of the identifier, not a range separator.
+    """
+
+    @pytest.mark.parametrize(
+        "page,expected",
+        [
+            # Electronic pages with hyphen (should NOT split)
+            ("e-123", ("e-123", None)),
+            ("E-456", ("E-456", None)),
+            ("e-1", ("e-1", None)),
+            ("E-99999", ("E-99999", None)),
+            # Electronic pages without hyphen
+            ("e12345", ("e12345", None)),
+            ("E789", ("E789", None)),
+            # Not electronic pages (should still split)
+            ("e100-e200", ("e100", "e200")),  # Range of electronic pages
+            ("ex-123", ("ex", "123")),  # Not matching pattern
+        ],
+    )
+    def test_electronic_pagination(
+        self, page: str, expected: tuple[str | None, str | None]
+    ) -> None:
+        """Test electronic page identifiers are not split incorrectly."""
         assert parse_page_range(page) == expected
 
 

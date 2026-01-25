@@ -87,6 +87,42 @@ class TestExtractAuthors:
         result = extract_authors(publication)
         assert result == ["First Last", "OnlyFamily", "OnlyGiven"]
 
+    def test_extract_authors_organization(self) -> None:
+        """Should extract organization authors with 'name' field."""
+        publication = {"author": [{"name": "World Health Organization"}]}
+        result = extract_authors(publication)
+        assert result == ["World Health Organization"]
+
+    def test_extract_authors_mixed_personal_and_org(self) -> None:
+        """Should handle mixed personal and organizational authors."""
+        publication = {
+            "author": [
+                {"given": "John", "family": "Doe"},
+                {"name": "World Health Organization"},
+                {"family": "Anonymous"},
+            ]
+        }
+        result = extract_authors(publication)
+        assert result == ["John Doe", "World Health Organization", "Anonymous"]
+
+    def test_extract_authors_org_with_whitespace(self) -> None:
+        """Should strip whitespace from organization names."""
+        publication = {"author": [{"name": "  WHO  "}]}
+        result = extract_authors(publication)
+        assert result == ["WHO"]
+
+    def test_extract_authors_empty_org_name_skipped(self) -> None:
+        """Should skip organizations with empty name field."""
+        publication = {
+            "author": [
+                {"name": ""},
+                {"name": "   "},
+                {"given": "Valid", "family": "Author"},
+            ]
+        }
+        result = extract_authors(publication)
+        assert result == ["Valid Author"]
+
 
 class TestExtractYear:
     """Tests for extract_year function."""
