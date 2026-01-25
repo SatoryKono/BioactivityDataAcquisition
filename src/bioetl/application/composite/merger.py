@@ -635,7 +635,13 @@ class MergeService:
             self._logger.debug(
                 "Renamed enricher columns to qualified format",
                 enricher=enricher.pipeline,
-                qualified_count=len([c for c in enricher_df.columns if "." in c and not c.startswith("_")]),
+                qualified_count=len(
+                    [
+                        c
+                        for c in enricher_df.columns
+                        if "." in c and not c.startswith("_")
+                    ]
+                ),
             )
 
             # Detect and resolve remaining conflicts
@@ -707,7 +713,7 @@ class MergeService:
             Base column name if column starts with prefix, None otherwise.
         """
         if column.startswith(prefix):
-            return column[len(prefix):]
+            return column[len(prefix) :]
         return None
 
     def _resolve_conflicts(
