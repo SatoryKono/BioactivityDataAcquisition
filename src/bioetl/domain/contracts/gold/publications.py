@@ -77,8 +77,12 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     revised_date: Series[str] = pa.Field(nullable=True)
     epub_date: Series[str] = pa.Field(nullable=True)
     # MEDLINE-specific dates
-    date_completed: Series[str] = pa.Field(nullable=True)  # MEDLINE processing completion
-    date_revised: Series[str] = pa.Field(nullable=True)  # Record revision date (MEDLINE)
+    date_completed: Series[str] = pa.Field(
+        nullable=True
+    )  # MEDLINE processing completion
+    date_revised: Series[str] = pa.Field(
+        nullable=True
+    )  # Record revision date (MEDLINE)
 
     # Publication status and types
     publication_status: Series[str] = pa.Field(

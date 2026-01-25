@@ -370,7 +370,7 @@ class PreflightReport:
     health_report: HealthReport
     medallion_policy_valid: bool
     config_errors: list[ConfigValidationError] = field(default_factory=list)
-    checked_at: datetime
+    checked_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
 
     @property
     def is_valid(self) -> bool:
