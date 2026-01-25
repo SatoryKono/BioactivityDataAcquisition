@@ -160,7 +160,9 @@ class OpenAlexPublicationRecord(BaseModel):
     language: str | None = PydanticField(default=None, description="Language code")
 
     # Bibliographic info (from biblio object)
-    volume: str | None = PydanticField(default=None, description="Journal volume number")
+    volume: str | None = PydanticField(
+        default=None, description="Journal volume number"
+    )
     issue: str | None = PydanticField(default=None, description="Journal issue number")
 
     # Additional metrics
