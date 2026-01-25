@@ -76,7 +76,10 @@ from bioetl.domain.value_objects.column_order import (
     ColumnOrderConfig,
     SemanticGroup,
 )
-from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
+from bioetl.domain.value_objects.column_qualifier import (
+    JOIN_KEY_COLUMNS,
+    ColumnQualifier,
+)
 from bioetl.domain.value_objects.compound_ids import (
     AssayId,
     CompoundId,
@@ -151,6 +154,7 @@ __all__ = [
     "DEFAULT_COLUMN_ORDER",
     "DOI",
     "ISSN",
+    "JOIN_KEY_COLUMNS",
     "ORCID",
     "PUBLICATION_FIELD_GROUPS",
     "SMILES",
