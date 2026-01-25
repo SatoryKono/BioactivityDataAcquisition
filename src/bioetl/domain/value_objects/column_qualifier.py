@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Final
 
-__all__ = ["ColumnQualifier"]
+__all__ = ["JOIN_KEY_COLUMNS", "ColumnQualifier"]
 
 # Join keys excluded from renaming (case-insensitive)
 JOIN_KEY_COLUMNS: Final[frozenset[str]] = frozenset({"doi", "pmid", "pmc_id"})
@@ -131,3 +131,27 @@ class ColumnQualifier:
         """
         parts = column.split(".")
         return len(parts) == 3 and all(p.strip() for p in parts)
+
+    @staticmethod
+    def extract_field(column: str) -> str:
+        """Extract field name from column (qualified or unqualified).
+
+        For qualified names (provider.entity.field), returns the field part.
+        For unqualified names, returns the original column name.
+
+        Args:
+            column: Column name (qualified or unqualified).
+
+        Returns:
+            Field name.
+
+        Example:
+            >>> ColumnQualifier.extract_field("chembl.publication.title")
+            'title'
+            >>> ColumnQualifier.extract_field("title")
+            'title'
+        """
+        parts = column.split(".")
+        if len(parts) == 3:
+            return parts[2]
+        return column
