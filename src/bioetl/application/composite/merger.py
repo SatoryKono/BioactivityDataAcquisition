@@ -6,6 +6,8 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal
 
+from bioetl.application.composite.column_orderer import ColumnOrderer
+from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.deduplication import EnricherDeduplicator
 from bioetl.domain.composite.result import EnrichmentResult, MergeResult
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
@@ -68,6 +70,8 @@ class MergeService:
         self._logger = logger
         self._delta_reader = delta_reader
         self._deduplicator = EnricherDeduplicator(logger)
+        self._renamer = ColumnRenamer(logger)
+        self._orderer = ColumnOrderer(logger)
 
     async def merge(
         self,
@@ -101,14 +105,27 @@ class MergeService:
         seed_df = await self._read_silver_table(seed_table)
         records_from_seed = len(seed_df)
 
-        # Determine seed pipeline for intelligent column renaming
+        # Determine effective seed pipeline name
+        # Priority: explicit parameter > inferred from path
         effective_seed_pipeline = seed_pipeline or self._infer_pipeline_from_table(
             seed_table
         )
+
+        # Rename seed columns to qualified format: {provider}.{entity}.{field}
         if effective_seed_pipeline:
             self._logger.debug(
                 "Using seed pipeline for column renaming",
                 seed_pipeline=effective_seed_pipeline,
+            )
+            seed_df = self._renamer.rename_dataframe(
+                seed_df,
+                effective_seed_pipeline,
+                exclude_join_keys=True,
+            )
+            self._logger.info(
+                "Renamed seed columns to qualified format",
+                pipeline=effective_seed_pipeline,
+                qualified_count=len([c for c in seed_df.columns if "." in c and not c.startswith("_")]),
             )
 
         # Track sources used
