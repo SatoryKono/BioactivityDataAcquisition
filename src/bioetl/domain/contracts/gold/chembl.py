@@ -345,7 +345,7 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     # Unified publication fields (for cross-provider data linking)
     # Note: ChEMBL doesn't provide these natively, but included for schema consistency
     citation_count: Series[float] = pa.Field(nullable=True, coerce=True)
-    is_oa: Series[bool] = pa.Field(nullable=True)
+    is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
     language: Series[str] = pa.Field(nullable=True)
 
     # System field (per SYSTEM_FIELDS_PREFIX)
