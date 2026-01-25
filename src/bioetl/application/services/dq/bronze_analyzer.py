@@ -20,13 +20,16 @@ from typing import Any
 
 import orjson
 
+from bioetl.application.services.dq.utils import (
+    build_summary,
+    result_to_dict,
+    update_counts,
+)
 from bioetl.domain.ports import BronzeDQConfigPort
 from bioetl.domain.value_objects.dq_report import (
     BronzeDQCheckType,
     BronzeDQReport,
     DQCheckStatus,
-    DQReportStatus,
-    DQReportSummary,
     EncodingValidationResult,
     FileIntegrityResult,
     MedallionLayer,
@@ -79,24 +82,24 @@ class BronzeDQAnalyzer:
         # Record count check
         if BronzeDQCheckType.RECORD_COUNT in enabled_checks:
             record_count_result = self._check_record_count(record_list)
-            checks["record_count"] = self._result_to_dict(record_count_result)
-            passed, failed, warnings = self._update_counts(
+            checks["record_count"] = result_to_dict(record_count_result)
+            passed, failed, warnings = update_counts(
                 record_count_result.status, passed, failed, warnings
             )
 
         # File integrity check
         if BronzeDQCheckType.FILE_INTEGRITY in enabled_checks:
             file_integrity_result = self._check_file_integrity(record_list)
-            checks["file_integrity"] = self._result_to_dict(file_integrity_result)
-            passed, failed, warnings = self._update_counts(
+            checks["file_integrity"] = result_to_dict(file_integrity_result)
+            passed, failed, warnings = update_counts(
                 file_integrity_result.status, passed, failed, warnings
             )
 
         # Schema snapshot
         if BronzeDQCheckType.SCHEMA_SNAPSHOT in enabled_checks:
             schema_snapshot_result = self._check_schema_snapshot(record_list)
-            checks["schema_snapshot"] = self._result_to_dict(schema_snapshot_result)
-            passed, failed, warnings = self._update_counts(
+            checks["schema_snapshot"] = result_to_dict(schema_snapshot_result)
+            passed, failed, warnings = update_counts(
                 schema_snapshot_result.status, passed, failed, warnings
             )
 
@@ -110,28 +113,12 @@ class BronzeDQAnalyzer:
         # Encoding validation
         if BronzeDQCheckType.ENCODING_VALIDATION in enabled_checks:
             encoding_result = self._check_encoding(record_list)
-            checks["encoding_validation"] = self._result_to_dict(encoding_result)
-            passed, failed, warnings = self._update_counts(
+            checks["encoding_validation"] = result_to_dict(encoding_result)
+            passed, failed, warnings = update_counts(
                 encoding_result.status, passed, failed, warnings
             )
 
-        total_checks = passed + failed + warnings
-
-        # Determine overall status
-        if failed > 0:
-            overall_status = DQReportStatus.FAIL
-        elif warnings > 0:
-            overall_status = DQReportStatus.WARNING
-        else:
-            overall_status = DQReportStatus.PASS
-
-        summary = DQReportSummary(
-            total_checks=total_checks,
-            passed=passed,
-            failed=failed,
-            warnings=warnings,
-            overall_status=overall_status,
-        )
+        summary = build_summary(passed, failed, warnings)
 
         return BronzeDQReport(
             layer=MedallionLayer.BRONZE,
@@ -262,31 +249,6 @@ class BronzeDQAnalyzer:
             return "object"
         else:
             return "unknown"
-
-    def _result_to_dict(self, result: Any) -> dict[str, Any]:
-        """Convert dataclass result to dict for serialization."""
-        if hasattr(result, "__dataclass_fields__"):
-            return {
-                field: getattr(result, field)
-                for field in result.__dataclass_fields__
-                if not field.startswith("_")
-            }
-        return {"value": result}
-
-    def _update_counts(
-        self,
-        status: DQCheckStatus,
-        passed: int,
-        failed: int,
-        warnings: int,
-    ) -> tuple[int, int, int]:
-        """Update check counts based on status."""
-        if status == DQCheckStatus.PASS:
-            return passed + 1, failed, warnings
-        elif status == DQCheckStatus.FAIL:
-            return passed, failed + 1, warnings
-        else:  # WARN
-            return passed, failed, warnings + 1
 
 
 __all__ = ["BronzeDQAnalyzer"]
