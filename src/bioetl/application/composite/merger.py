@@ -90,7 +90,9 @@ class MergeService:
         # Pass column_groups from config if available for YAML-based ordering
         self._orderer = ColumnOrderer(
             logger,
-            column_groups=merge_config.column_groups if merge_config.column_groups else None,
+            column_groups=merge_config.column_groups
+            if merge_config.column_groups
+            else None,
         )
 
     async def merge(
