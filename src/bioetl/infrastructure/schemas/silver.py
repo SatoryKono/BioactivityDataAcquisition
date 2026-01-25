@@ -46,13 +46,17 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         # === PUBLICATION_CROSSREF_FIELDS ===
         pa.field("document_chembl_id", pa.string()),  # Primary key
         pa.field("doi", pa.string()),
-        pa.field("pmc_id", pa.string()),  # PubMed Central ID (nullable - not in ChEMBL API)
+        pa.field(
+            "pmc_id", pa.string()
+        ),  # PubMed Central ID (nullable - not in ChEMBL API)
         pa.field("pmid", pa.string()),  # PubMed ID (numeric string)
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
         pa.field("doc_type", pa.string()),  # PUBLICATION, PATENT, DATASET, BOOK
         pa.field("journal_full_title", pa.string()),
-        pa.field("publication_date", pa.string()),  # Unified date (YYYY-MM-DD, nullable)
+        pa.field(
+            "publication_date", pa.string()
+        ),  # Unified date (YYYY-MM-DD, nullable)
         pa.field("src_id", pa.int64()),
         # === ChEMBL Release Metadata ===
         pa.field("chembl_release", pa.string()),  # e.g., CHEMBL_1, CHEMBL_34
