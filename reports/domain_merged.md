@@ -5568,12 +5568,19 @@ Path: contracts\gold\_base.py
 """Base utilities for Gold layer data contracts.
 
 Contains shared constants and utilities used across all Gold schemas.
+
+Note on str_matches validation:
+    The DATE_REGEX was previously used with pa.Field(str_matches=DATE_REGEX) for date
+    validation. However, Pandera 0.26.1 has a compatibility issue with Python 3.14 where
+    the str_matches parameter fails with KeyError for pandas.Series due to function
+    dispatch not recognizing the type. Date format validation is now delegated to
+    transformers which ensure correct YYYY-MM-DD format during data processing.
 """
 
 from __future__ import annotations
 
 # Regex pattern for date validation (YYYY-MM-DD format)
-# Used for fields like publication_date, accepted_date, etc.
+# Retained for documentation and potential future use when Pandera fixes the issue.
 DATE_REGEX = r"^\d{4}-\d{2}-\d{2}$"
 
 __all__ = ["DATE_REGEX"]
@@ -5608,8 +5615,6 @@ from __future__ import annotations
 
 import pandera.pandas as pa
 from pandera.typing import Series
-
-from bioetl.domain.contracts.gold._base import DATE_REGEX
 
 
 class ChEMBLActivityGoldSchema(pa.DataFrameModel):
@@ -5916,9 +5921,7 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     journal: Series[str] = pa.Field(nullable=True)
     journal_full_title: Series[str] = pa.Field(nullable=True)
     year: Series[float] = pa.Field(nullable=True, coerce=True)
-    publication_date: Series[str] = pa.Field(
-        nullable=True, str_matches=DATE_REGEX
-    )  # Unified: YYYY-MM-DD
+    publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)
     first_page: Series[str] = pa.Field(nullable=True)
@@ -6318,8 +6321,6 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
-from bioetl.domain.contracts.gold._base import DATE_REGEX
-
 
 class PubMedPublicationGoldSchema(pa.DataFrameModel):
     """Schema for PubMed Publication in Gold layer.
@@ -6369,23 +6370,21 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     pub_date: Series[str] = pa.Field(nullable=True)
     pub_month: Series[float] = pa.Field(nullable=True, coerce=True)  # Month (1-12)
     pub_day: Series[float] = pa.Field(nullable=True, coerce=True)  # Day (1-31)
-    publication_date: Series[str] = pa.Field(
-        nullable=True, str_matches=DATE_REGEX
-    )  # Unified: YYYY-MM-DD
+    publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
     year: Series[float] = pa.Field(nullable=True, coerce=True)
     publication_year: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # Legacy alias
-    accepted_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
-    received_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
-    revised_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
-    epub_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
+    accepted_date: Series[str] = pa.Field(nullable=True)
+    received_date: Series[str] = pa.Field(nullable=True)
+    revised_date: Series[str] = pa.Field(nullable=True)
+    epub_date: Series[str] = pa.Field(nullable=True)
     # MEDLINE-specific dates
     date_completed: Series[str] = pa.Field(
-        nullable=True, str_matches=DATE_REGEX
+        nullable=True
     )  # MEDLINE processing completion
     date_revised: Series[str] = pa.Field(
-        nullable=True, str_matches=DATE_REGEX
+        nullable=True
     )  # Record revision date (MEDLINE)
 
     # Publication status and types
@@ -6475,15 +6474,9 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
 
     # Date fields
     year: Series[float] = pa.Field(nullable=True, ge=1900, le=2100, coerce=True)
-    publication_date: Series[str] = pa.Field(
-        nullable=True, str_matches=DATE_REGEX
-    )  # Unified: YYYY-MM-DD
-    published_print: Series[str] = pa.Field(
-        nullable=True, str_matches=DATE_REGEX
-    )  # Legacy: provider-specific
-    published_online: Series[str] = pa.Field(
-        nullable=True, str_matches=DATE_REGEX
-    )  # Legacy: provider-specific
+    publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
+    published_print: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
+    published_online: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
 
     # Metadata
     doc_type: Series[str] = pa.Field(nullable=True)
@@ -6554,7 +6547,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
 
     # Date fields
     year: Series[float] = pa.Field(nullable=True, ge=1500, le=2100, coerce=True)
-    publication_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
+    publication_date: Series[str] = pa.Field(nullable=True)
 
     # Metadata
     doc_type: Series[str] = pa.Field(nullable=False)
@@ -6616,7 +6609,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     abstract: Series[str] = pa.Field(nullable=True)
     tldr: Series[str] = pa.Field(nullable=True)
     year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    publication_date: Series[str] = pa.Field(nullable=True, str_matches=DATE_REGEX)
+    publication_date: Series[str] = pa.Field(nullable=True)
 
     # Journal/Venue
     journal: Series[str] = pa.Field(nullable=True)
@@ -6631,7 +6624,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     reference_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)  # int64
 
     # Open Access
-    is_oa: Series[bool] = pa.Field(nullable=True)
+    is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
     open_access_url: Series[str] = pa.Field(nullable=True)
     oa_status: Series[str] = pa.Field(nullable=True)
 
@@ -13377,16 +13370,19 @@ Implements RULES.md 2.3 and 02-user-rules.md 2.4:
 - QC information
 - Runtime context
 
-Version: 1.0
+ADR-029: Output metadata unification across Medallion layers.
+
+Version: 1.1
 """
 
 from __future__ import annotations
 
+import warnings
 from datetime import datetime
 from enum import Enum
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
 class LayerType(str, Enum):
@@ -13707,8 +13703,144 @@ class FileOutputMetadata(BaseModel):
     checksum_blake2: str | None = Field(default=None, description="BLAKE2 checksum")
 
 
+# =============================================================================
+# Unified Output Metadata (ADR-029)
+# =============================================================================
+
+
+class BaseOutputMetadata(BaseModel):
+    """Base output metadata contract for all Medallion layers.
+
+    Provides common fields required for downstream analytics,
+    monitoring, and data lineage tracking. All layer-specific
+    output metadata classes use this as the common output field.
+
+    ADR-029: Output metadata unification.
+
+    Attributes:
+        record_count: Total records written to layer.
+        total_bytes: Total size in bytes (compressed for Bronze, on-disk for Delta).
+        content_hash: SHA256 hash of content for change detection.
+        write_started_at: UTC timestamp when write operation started.
+        write_completed_at: UTC timestamp when write operation completed.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    record_count: int = Field(
+        default=0,
+        ge=0,
+        description="Total records written to layer",
+    )
+    total_bytes: int = Field(
+        default=0,
+        ge=0,
+        description="Total size in bytes (compressed for Bronze, on-disk for Delta)",
+    )
+    content_hash: str | None = Field(
+        default=None,
+        description="SHA256 hash of content for change detection",
+    )
+    write_started_at: datetime | None = Field(
+        default=None,
+        description="UTC timestamp when write operation started",
+    )
+    write_completed_at: datetime | None = Field(
+        default=None,
+        description="UTC timestamp when write operation completed",
+    )
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def write_duration_ms(self) -> int | None:
+        """Calculate write duration in milliseconds.
+
+        Returns:
+            Duration in milliseconds, or None if timestamps missing.
+        """
+        if self.write_started_at and self.write_completed_at:
+            delta = self.write_completed_at - self.write_started_at
+            return int(delta.total_seconds() * 1000)
+        return None
+
+
+class BronzeOutputExt(BaseModel):
+    """Bronze-specific output metadata extension.
+
+    Tracks individual files for append-only Bronze layer.
+
+    Attributes:
+        files: List of output files with per-file metrics.
+        format: Output format (jsonl+zstd, jsonl, etc.).
+        compression: Compression algorithm.
+    """
+
+    files: list[FileOutputMetadata] = Field(
+        default_factory=list,
+        description="List of output files with per-file metrics",
+    )
+    format: str = Field(
+        default="jsonl+zstd",
+        description="Output format (jsonl+zstd, jsonl, etc.)",
+    )
+    compression: str = Field(
+        default="zstd",
+        description="Compression algorithm",
+    )
+
+
+class SilverOutputExt(BaseModel):
+    """Silver-specific output metadata extension.
+
+    Tracks Delta Lake versioning for merge operations.
+
+    Attributes:
+        delta_version_before: Delta table version before write.
+        delta_version_after: Delta table version after write.
+    """
+
+    delta_version_before: int | None = Field(
+        default=None,
+        description="Delta table version before write",
+    )
+    delta_version_after: int | None = Field(
+        default=None,
+        description="Delta table version after write",
+    )
+
+
+class GoldOutputExt(BaseModel):
+    """Gold-specific output metadata extension.
+
+    Tracks partitioning and format for consumption layer.
+
+    Attributes:
+        partition_count: Number of partitions.
+        format: Output format (delta or parquet).
+    """
+
+    partition_count: int = Field(
+        default=0,
+        ge=0,
+        description="Number of partitions",
+    )
+    format: Literal["delta", "parquet"] = Field(
+        default="delta",
+        description="Output format",
+    )
+
+
+# =============================================================================
+# Legacy Output Metadata (Deprecated - ADR-029)
+# =============================================================================
+
+
 class OutputMetadata(BaseModel):
-    """Bronze output information.
+    """Bronze output information (DEPRECATED).
+
+    .. deprecated:: 5.10.0
+        Use BaseOutputMetadata + BronzeOutputExt composition instead.
+        Will be removed in v6.0.
 
     Attributes:
         files: List of output files.
@@ -13725,6 +13857,16 @@ class OutputMetadata(BaseModel):
     total_bytes: int = Field(default=0, description="Total bytes")
     format: str = Field(default="jsonl+zstd", description="Output format")
     compression: str = Field(default="zstd", description="Compression algorithm")
+
+    def __init__(self, **data: object) -> None:
+        """Initialize with deprecation warning."""
+        warnings.warn(
+            "OutputMetadata is deprecated, use BaseOutputMetadata + BronzeOutputExt "
+            "composition instead. Will be removed in v6.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(**data)
 
 
 # =============================================================================
@@ -13931,7 +14073,11 @@ class SCDMetadata(BaseModel):
 
 
 class GoldOutputMetadata(BaseModel):
-    """Gold layer output metrics.
+    """Gold layer output metrics (DEPRECATED).
+
+    .. deprecated:: 5.10.0
+        Use BaseOutputMetadata + GoldOutputExt composition instead.
+        Will be removed in v6.0.
 
     Attributes:
         record_count: Number of records.
@@ -13947,9 +14093,23 @@ class GoldOutputMetadata(BaseModel):
         default="delta", description="Output format"
     )
 
+    def __init__(self, **data: object) -> None:
+        """Initialize with deprecation warning."""
+        warnings.warn(
+            "GoldOutputMetadata is deprecated, use BaseOutputMetadata + "
+            "GoldOutputExt composition instead. Will be removed in v6.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(**data)
+
 
 class SilverOutputMetadata(BaseModel):
-    """Silver layer output metrics.
+    """Silver layer output metrics (DEPRECATED).
+
+    .. deprecated:: 5.10.0
+        Use BaseOutputMetadata + SilverOutputExt composition instead.
+        Will be removed in v6.0.
 
     Attributes:
         record_count: Number of records written.
@@ -13960,6 +14120,16 @@ class SilverOutputMetadata(BaseModel):
     content_hash: str | None = Field(
         default=None, description="Content hash for change detection"
     )
+
+    def __init__(self, **data: object) -> None:
+        """Initialize with deprecation warning."""
+        warnings.warn(
+            "SilverOutputMetadata is deprecated, use BaseOutputMetadata + "
+            "SilverOutputExt composition instead. Will be removed in v6.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(**data)
 
 
 # =============================================================================
@@ -13972,17 +14142,22 @@ class BronzeMetadata(BaseModel):
 
     Structure follows RULES.md 2.4 lineage requirements.
     Includes governance metadata block for data stewardship.
+
+    ADR-029: Uses unified BaseOutputMetadata + BronzeOutputExt composition.
     """
 
-    version: str = Field(default="1.0", description="Metadata schema version")
+    version: str = Field(default="1.1", description="Metadata schema version")
     layer: LayerType = Field(default=LayerType.BRONZE, description="Medallion layer")
     runtime: RuntimeMetadata = Field(description="Runtime context")
     pipeline: PipelineMetadata = Field(description="Pipeline identification")
     source: SourceMetadata = Field(
         default_factory=SourceMetadata, description="Source information"
     )
-    output: OutputMetadata = Field(
-        default_factory=OutputMetadata, description="Output information"
+    output: BaseOutputMetadata = Field(
+        default_factory=BaseOutputMetadata, description="Base output metrics"
+    )
+    output_ext: BronzeOutputExt = Field(
+        default_factory=BronzeOutputExt, description="Bronze-specific output metrics"
     )
     environment: EnvironmentMetadata = Field(description="Environment information")
     governance: GovernanceMetadata | None = Field(
@@ -13994,9 +14169,11 @@ class SilverMetadata(BaseModel):
     """Complete metadata for Silver layer sidecar file.
 
     Includes lineage tracking from Bronze, DQ metrics, and governance metadata.
+
+    ADR-029: Uses unified BaseOutputMetadata + SilverOutputExt composition.
     """
 
-    version: str = Field(default="1.0", description="Metadata schema version")
+    version: str = Field(default="1.1", description="Metadata schema version")
     layer: LayerType = Field(default=LayerType.SILVER, description="Medallion layer")
     runtime: RuntimeMetadata = Field(description="Runtime context")
     pipeline: PipelineMetadata = Field(description="Pipeline identification")
@@ -14007,8 +14184,11 @@ class SilverMetadata(BaseModel):
     dq_summary: DQSummary = Field(
         default_factory=DQSummary, description="Data quality summary"
     )
-    output: SilverOutputMetadata = Field(
-        default_factory=SilverOutputMetadata, description="Output metrics"
+    output: BaseOutputMetadata = Field(
+        default_factory=BaseOutputMetadata, description="Base output metrics"
+    )
+    output_ext: SilverOutputExt = Field(
+        default_factory=SilverOutputExt, description="Silver-specific output metrics"
     )
     environment: EnvironmentMetadata = Field(description="Environment information")
     # Cross-reference to DQ report
@@ -14025,11 +14205,13 @@ class GoldMetadata(BaseModel):
     """Complete metadata for Gold layer sidecar file.
 
     Includes schema contract, SCD tracking, and governance metadata.
+
+    ADR-029: Uses unified BaseOutputMetadata + GoldOutputExt composition.
     """
 
     model_config = ConfigDict(populate_by_name=True)
 
-    version: str = Field(default="1.0", description="Metadata schema version")
+    version: str = Field(default="1.1", description="Metadata schema version")
     layer: LayerType = Field(default=LayerType.GOLD, description="Medallion layer")
     runtime: RuntimeMetadata = Field(description="Runtime context")
     pipeline: PipelineMetadata = Field(description="Pipeline identification")
@@ -14044,8 +14226,11 @@ class GoldMetadata(BaseModel):
     dq_summary: DQSummary = Field(
         default_factory=DQSummary, description="Data quality summary"
     )
-    output: GoldOutputMetadata = Field(
-        default_factory=GoldOutputMetadata, description="Output metrics"
+    output: BaseOutputMetadata = Field(
+        default_factory=BaseOutputMetadata, description="Base output metrics"
+    )
+    output_ext: GoldOutputExt = Field(
+        default_factory=GoldOutputExt, description="Gold-specific output metrics"
     )
     scd: SCDMetadata | None = Field(default=None, description="SCD Type 2 metadata")
     environment: EnvironmentMetadata = Field(description="Environment information")
@@ -16448,6 +16633,7 @@ class SilverMetadataInput:
         mode: Write mode (merge, append, delete).
         bronze_refs: Optional list of BronzeWriteResult for lineage.
         dq_metrics: Optional BatchDQMetrics for DQ summary.
+        version_before: Delta table version before write (ADR-029).
         version_after: Delta table version after write.
         transform_version: Optional semver version of transform applied.
         transform_steps: Optional list of transform step names applied.
@@ -16456,6 +16642,7 @@ class SilverMetadataInput:
         governance: Optional governance metadata from pipeline config.
         started_at: UTC timestamp when Silver write started.
         completed_at: UTC timestamp when Silver write completed.
+        total_bytes: Total size in bytes (ADR-029).
     """
 
     table_path: str
@@ -16464,6 +16651,7 @@ class SilverMetadataInput:
     mode: Any  # SilverWriteMode - avoid circular import
     bronze_refs: Any | None = None  # list[BronzeWriteResult] | None
     dq_metrics: Any | None = None  # BatchDQMetrics | None
+    version_before: int | None = None  # ADR-029: Delta version before write
     version_after: int | None = None
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
@@ -16472,6 +16660,7 @@ class SilverMetadataInput:
     governance: GovernanceMetadata | None = None
     started_at: datetime | None = None
     completed_at: datetime | None = None
+    total_bytes: int = 0  # ADR-029: Total size in bytes
 
 
 @dataclass(frozen=True, slots=True)
@@ -16502,6 +16691,7 @@ class GoldMetadataInput:
         records: List of records written.
         mode: Write mode (overwrite, append, scd2).
         scd_config: SCD2 configuration if applicable.
+        started_at: UTC timestamp when write started (ADR-029).
         completed_at: UTC timestamp when write completed.
         silver_refs: List of Silver source references for lineage tracking.
         transform_version: Optional semver version of transform applied.
@@ -16509,6 +16699,8 @@ class GoldMetadataInput:
         gold_schema: Optional Pandera schema class for extracting schema metadata
                     (contract_path, version, columns).
         governance: Optional governance metadata from pipeline config.
+        total_bytes: Total size in bytes (ADR-029).
+        partition_count: Number of partitions (ADR-029).
     """
 
     table_path: str
@@ -16516,12 +16708,15 @@ class GoldMetadataInput:
     records: list[dict[str, Any]]
     mode: Any  # GoldWriteMode - avoid circular import
     scd_config: dict[str, Any] | None = None
+    started_at: datetime | None = None  # ADR-029: Write start timestamp
     completed_at: datetime | None = None
     silver_refs: list[SilverRef] | None = None
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
     gold_schema: Any | None = None  # Pandera DataFrameModel class
     governance: GovernanceMetadata | None = None
+    total_bytes: int = 0  # ADR-029: Total size in bytes
+    partition_count: int = 0  # ADR-029: Number of partitions
 
 
 @runtime_checkable
@@ -26133,7 +26328,7 @@ Path: types.py
 """Core domain types for BioETL.
 
 Implements RULES.md §1 - Domain Layer with pure types and value objects.
-No I/O operations allowed (REQ-ARCH-003).
+No I/O operations are allowed (REQ-ARCH-003).
 
 Type Safety: NewType for IDs, TypedDict for records, frozen dataclasses for VOs.
 See RULES.md §1.3 for Any usage justification (external APIs, logging, protocols).
@@ -26172,7 +26367,7 @@ in the domain layer. At runtime, this is a pyarrow.Schema object.
 
 
 class BronzeRecord(TypedDict):
-    """Untyped dictionary representing a raw record from source."""
+    """Untyped dictionary representing a raw record from the source."""
 
     # We use NotRequired for dynamic fields, but TypedDict doesn't allow mixing optional/required well in old python
     # For now, we assume keys are strings and values Any
@@ -26302,7 +26497,7 @@ class ErrorType(str, Enum):
     """Error classification (RULES.md §3.1.1).
 
     Determines pipeline behavior:
-    - CRITICAL: Fail pipeline immediately
+    - CRITICAL: Fail the pipeline immediately
     - RECOVERABLE: Retry with exponential backoff
     - DATA_QUALITY: Log and skip record (quarantine)
     """
@@ -26347,7 +26542,7 @@ class ErrorType(str, Enum):
     """General data quality error (e.g. thresholds)."""
 
     def is_critical(self) -> bool:
-        """Check if error should fail pipeline."""
+        """Check if error should fail the pipeline."""
         return self in {
             ErrorType.AUTH_FAILURE,
             ErrorType.SCHEMA_MISMATCH_GOLD,

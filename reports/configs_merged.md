@@ -2356,10 +2356,10 @@ gold_filters:
   columns: {}
 
 ================================================================================
-File: publications.yaml
-Path: filter\entities\pubmed\publications.yaml
+File: publication.yaml
+Path: filter\entities\pubmed\publication.yaml
 ================================================================================
-# configs/filter/entities/pubmed/publications.yaml
+# configs/filter/entities/pubmed/publication.yaml
 # =============================================================================
 # PubMed Publication Filter Configuration
 # =============================================================================
@@ -2368,7 +2368,7 @@ Path: filter\entities\pubmed\publications.yaml
 
 version: "1.0.0"
 provider: pubmed
-entity: publications
+entity: publication
 
 # -----------------------------------------------------------------------------
 # Input Filter
@@ -3912,11 +3912,11 @@ Path: pipelines\chembl\publication.yaml
 # Pipeline configuration for ChEMBL Publication entity.
 #
 # Inherits defaults from ../_base.yaml
-# Note: entity_type=document maps to ChEMBL API /document endpoint
+# Note: entity_type=publication maps to ChEMBL API /document endpoint (ADR-024 naming)
 
 pipeline_name: chembl_publication
 provider: chembl
-entity_type: document
+entity_type: publication
 version: "2.1.0"
 description: "Extract scientific publications from ChEMBL API"
 
@@ -3943,7 +3943,6 @@ dq_config_file: ../../dq/entities/chembl/publication.yaml
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/publication.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
-# Note: explicit filter_config_file because entity_type=document differs from file name
 filter_config_file: ../../filter/entities/chembl/publication.yaml
 
 # Entity-specific sink overrides
@@ -3980,11 +3979,11 @@ Path: pipelines\chembl\publication_similarity.yaml
 # Pipeline configuration for ChEMBL Publication Similarity entity.
 #
 # Inherits defaults from ../_base.yaml
-# Note: entity_type=document_similarity maps to ChEMBL API /document_similarity endpoint
+# Note: entity_type=publication_similarity maps to ChEMBL API /document_similarity endpoint (ADR-024)
 
 pipeline_name: chembl_publication_similarity
 provider: chembl
-entity_type: document_similarity
+entity_type: publication_similarity
 version: "2.1.0"
 description: "Extract publication similarity data (Tanimoto coefficients) from ChEMBL API"
 
@@ -4011,29 +4010,28 @@ dq_config_file: ../../dq/entities/chembl/publication_similarity.yaml
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/publication_similarity.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
-# Note: explicit filter_config_file because entity_type=document_similarity differs from file name
 filter_config_file: ../../filter/entities/chembl/publication_similarity.yaml
 
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze/chembl/document_similarity"
+    path: "data/output/bronze/chembl/publication_similarity"
   silver:
-    path: "data/output/silver/chembl/document_similarity"
+    path: "data/output/silver/chembl/publication_similarity"
     primary_key: ["sim_id"]
     partition_by: []  # No good partition key
     sort_by:
       columns: ["sim_id"]
       ascending: true
     csv_export:
-      path: "data/output/silver/chembl/document_similarity"
+      path: "data/output/silver/chembl/publication_similarity"
   gold:
-    path: "data/output/gold/chembl/document_similarity"
+    path: "data/output/gold/chembl/publication_similarity"
     sort_by:
       columns: ["sim_id"]
       ascending: true
     csv_export:
-      path: "data/output/gold/chembl/document_similarity"
+      path: "data/output/gold/chembl/publication_similarity"
 
 
 ================================================================================
@@ -4045,11 +4043,11 @@ Path: pipelines\chembl\publication_term.yaml
 #
 # Derived entity: Extracts and flattens terms from Publication records.
 # Inherits defaults from ../_base.yaml
-# Note: entity_type=document_term maps to ChEMBL API /document endpoint (derived entity)
+# Note: entity_type=publication_term maps to ChEMBL API /document endpoint (derived entity, ADR-024)
 
 pipeline_name: chembl_publication_term
 provider: chembl
-entity_type: document_term
+entity_type: publication_term
 version: "2.1.0"
 description: "Extract publication terms (MeSH, keywords) from ChEMBL Publication records"
 
@@ -4078,29 +4076,28 @@ dq_config_file: ../../dq/entities/chembl/publication_term.yaml
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/publication_term.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
-# Note: explicit filter_config_file because entity_type=document_term differs from file name
 filter_config_file: ../../filter/entities/chembl/publication_term.yaml
 
 # Entity-specific sink overrides
 sink:
   bronze:
-    path: "data/output/bronze/chembl/document_term"
+    path: "data/output/bronze/chembl/publication_term"
   silver:
-    path: "data/output/silver/chembl/document_term"
+    path: "data/output/silver/chembl/publication_term"
     primary_key: ["entity_id"]
     partition_by: ["term_type"]
     sort_by:
       columns: ["entity_id"]
       ascending: true
     csv_export:
-      path: "data/output/silver/chembl/document_term"
+      path: "data/output/silver/chembl/publication_term"
   gold:
-    path: "data/output/gold/chembl/document_term"
+    path: "data/output/gold/chembl/publication_term"
     sort_by:
       columns: ["entity_id"]
       ascending: true
     csv_export:
-      path: "data/output/gold/chembl/document_term"
+      path: "data/output/gold/chembl/publication_term"
 
 
 ================================================================================
@@ -4720,18 +4717,15 @@ sink:
 
 
 ================================================================================
-File: publications.yaml
-Path: pipelines\pubmed\publications.yaml
+File: publication.yaml
+Path: pipelines\pubmed\publication.yaml
 ================================================================================
-# configs/pipelines/pubmed/publications.yaml
+# configs/pipelines/pubmed/publication.yaml
 # =============================================================================
-# PubMed Publications Pipeline Configuration
+# PubMed Publication Pipeline Configuration
 # =============================================================================
 # Minimal config using convention-based path resolution (ADR-029).
 # Inherits from _base.yaml with most paths/filters auto-computed.
-#
-# Note: filter_config_file is explicit because entity file uses plural name
-#       (publications.yaml) which differs from entity_type (publication).
 
 pipeline_name: pubmed_publication
 provider: pubmed
@@ -4752,9 +4746,9 @@ source:
   api_key: "${BIOETL_NCBI_API_KEY}"
 
 # -----------------------------------------------------------------------------
-# Override: Filter config uses plural "publications.yaml" not "publication.yaml"
+# Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-filter_config_file: ../../filter/entities/pubmed/publications.yaml
+filter_config_file: ../../filter/entities/pubmed/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Sink Overrides
@@ -4942,9 +4936,9 @@ Path: pipelines\uniprot\protein.yaml
 # UniProt Protein Pipeline Configuration
 # =============================================================================
 # Minimal config using convention-based path resolution (ADR-029).
-# Inherits from _base.yaml with paths/filters auto-computed from provider/entity.
+# Inherits from _base.yaml with paths/filters auto-computed from the provider/entity.
 #
-# Auto-computed by convention (see _base.yaml for full list)
+# Auto-computed by convention (see _base.yaml for a full list)
 
 pipeline_name: uniprot_protein
 provider: uniprot

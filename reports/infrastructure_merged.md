@@ -1183,6 +1183,9 @@ CHEMBL_API_BASE = "https://www.ebi.ac.uk/chembl/api/data"
 CHEMBL_STATUS_URL = f"{CHEMBL_API_BASE}/status"
 
 # Entity type to ChEMBL resource mapping
+# Note: publication/publication_term/publication_similarity are canonical names (ADR-024)
+# that map to the same ChEMBL API resources as document/document_term/document_similarity.
+# The document* aliases are kept for backward compatibility.
 ENTITY_MAPPING: dict[str, str] = {
     "activity": "activity",
     "assay": "assay",
@@ -1191,6 +1194,11 @@ ENTITY_MAPPING: dict[str, str] = {
     "molecule": "molecule",
     "target": "target",
     "target_component": "target_component",
+    # Canonical publication names (ADR-024)
+    "publication": "document",
+    "publication_similarity": "document_similarity",
+    "publication_term": "document",
+    # Legacy document aliases (backward compatibility)
     "document": "document",
     "document_similarity": "document_similarity",
     "document_term": "document",
@@ -1201,6 +1209,8 @@ ENTITY_MAPPING: dict[str, str] = {
 }
 
 # Plural forms for API response keys (ChEMBL uses irregular plurals)
+# Note: These map to ChEMBL API response keys, not entity_type values.
+# publication* entity types map to document* API resources.
 ENTITY_PLURAL: dict[str, str] = {
     "activity": "activities",
     "assay": "assays",
@@ -1216,11 +1226,17 @@ ENTITY_PLURAL: dict[str, str] = {
 }
 
 # Primary key field overrides by entity type
+# Note: publication* entity types use the same PK fields as document* entities
 PK_FIELD_OVERRIDES: dict[str, str] = {
     "assay": "assay_chembl_id",
     "assay_parameters": "assay_param_id",
     "molecule": "molecule_chembl_id",
     "compound": "molecule_chembl_id",
+    # Canonical publication names (ADR-024)
+    "publication": "document_chembl_id",
+    "publication_similarity": "sim_id",
+    "publication_term": "document_chembl_id",
+    # Legacy document aliases (backward compatibility)
     "document": "document_chembl_id",
     "document_similarity": "sim_id",
     "document_term": "document_chembl_id",
@@ -22565,6 +22581,9 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("uo_units", pa.string()),
         pa.field("upper_value", pa.float64()),
         pa.field("value", pa.float64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -22592,6 +22611,9 @@ PUBCHEM_COMPOUND_SCHEMA = pa.schema(
         pa.field(
             "molecular_weight", pa.float64()
         ),  # Transformed to float by transformer
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -22613,6 +22635,9 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("organism_id", pa.int64()),
         pa.field("protein_name", pa.string()),
         pa.field("sequence_length", pa.int64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -22638,6 +22663,7 @@ UNIPROT_ID_MAPPING_SCHEMA = pa.schema(
         # === DQ suffix (MUST be last, if present) ===
         # DQ warning flag (True for not_found)
         pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -22653,6 +22679,7 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
+        pa.field("_source", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
@@ -22784,6 +22811,9 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field(
             "variant_taxonomy_id", pa.int64()
         ),  # Standardized name (was variant_tax_id)
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -22827,6 +22857,9 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
         # Note: protein_classifications not available in /target endpoint
         # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -22855,6 +22888,9 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_component_xrefs", pa.string()),
         pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -22883,6 +22919,9 @@ CHEMBL_CELL_LINE_SCHEMA = pa.schema(
         pa.field("cellosaurus_id", pa.string()),
         pa.field("cl_lincs_id", pa.string()),
         pa.field("efo_id", pa.string()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -22906,6 +22945,9 @@ CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
         pa.field("qualifier", pa.string()),
         pa.field("term", pa.string()),
         pa.field("term_type", pa.string()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -22979,6 +23021,9 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("usan_substem", pa.string()),
         pa.field("usan_year", pa.int64()),
         pa.field("withdrawn_flag", pa.bool_()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -23005,6 +23050,9 @@ CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
         # Source information
         pa.field("src_compound_id", pa.string()),
         pa.field("src_id", pa.int64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -23034,6 +23082,9 @@ CHEMBL_DOCUMENT_SIMILARITY_SCHEMA = pa.schema(
         pa.field("pubmed_id2", pa.string()),
         pa.field("sim_id", pa.int64()),
         pa.field("tid_tani", pa.float64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -23047,6 +23098,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
+        pa.field("_source", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
@@ -23109,6 +23161,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
+        pa.field("_source", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
@@ -23164,6 +23217,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_source_batch_id", pa.string()),
+        pa.field("_source", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
@@ -23236,6 +23290,9 @@ CHEMBL_PROTEIN_CLASS_SCHEMA = pa.schema(
         pa.field("replaced_by", pa.int64()),
         pa.field("short_name", pa.string()),
         pa.field("sort_order", pa.int64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -23270,6 +23327,9 @@ CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
         pa.field("type", pa.string()),
         pa.field("units", pa.string()),
         pa.field("value", pa.float64()),
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_warn", pa.bool_()),
+        pa.field("_dq_error", pa.bool_()),
     ]
 )
 
@@ -25176,10 +25236,11 @@ class BronzeWriter:
 
         from bioetl import __version__
         from bioetl.domain.models.metadata import (
+            BaseOutputMetadata,
             BronzeMetadata,
+            BronzeOutputExt,
             EnvironmentMetadata,
             FileOutputMetadata,
-            OutputMetadata,
             PipelineMetadata,
             RuntimeMetadata,
             RunTypeEnum,
@@ -25197,6 +25258,13 @@ class BronzeWriter:
         if source_metadata is None:
             source_metadata = SourceMetadataModel(type="api")
 
+        # Build file metadata for output_ext
+        file_metadata = FileOutputMetadata(
+            path=output_path,
+            size_bytes=compressed_size,
+            record_count=record_count,
+        )
+
         return BronzeMetadata(
             runtime=RuntimeMetadata(
                 run_id=str(run_id),
@@ -25211,16 +25279,14 @@ class BronzeWriter:
                 entity=entity,
             ),
             source=source_metadata,
-            output=OutputMetadata(
-                files=[
-                    FileOutputMetadata(
-                        path=output_path,
-                        size_bytes=compressed_size,
-                        record_count=record_count,
-                    )
-                ],
-                total_records=record_count,
+            output=BaseOutputMetadata(
+                record_count=record_count,
                 total_bytes=compressed_size,
+                write_started_at=started_at,
+                write_completed_at=completed_at,
+            ),
+            output_ext=BronzeOutputExt(
+                files=[file_metadata],
             ),
             environment=EnvironmentMetadata(
                 hostname=socket.gethostname(),
@@ -27020,6 +27086,7 @@ class SilverMetadataBuilder:
             SilverMetadata object ready for serialization.
         """
         from bioetl.domain.models.metadata import (
+            BaseOutputMetadata,
             DeltaMetrics,
             DQSummary,
             EnvironmentMetadata,
@@ -27028,7 +27095,7 @@ class SilverMetadataBuilder:
             RuntimeMetadata,
             RunTypeEnum,
             SilverMetadata,
-            SilverOutputMetadata,
+            SilverOutputExt,
         )
 
         provider_name, entity_name = _parse_table_name(table_name)
@@ -27074,8 +27141,15 @@ class SilverMetadataBuilder:
             error_rate=0.0,
         )
 
-        output = SilverOutputMetadata(
+        # Use unified output structure (ADR-029)
+        output = BaseOutputMetadata(
             record_count=len(records),
+            write_started_at=now,
+            write_completed_at=now,
+        )
+
+        output_ext = SilverOutputExt(
+            delta_version_after=version_after,
         )
 
         environment = EnvironmentMetadata(
@@ -27091,6 +27165,7 @@ class SilverMetadataBuilder:
             delta=delta,
             dq_summary=dq_summary,
             output=output,
+            output_ext=output_ext,
             environment=environment,
         )
 
@@ -27146,10 +27221,11 @@ class GoldMetadataBuilder:
         """
         from bioetl.domain.medallion import GoldWriteMode
         from bioetl.domain.models.metadata import (
+            BaseOutputMetadata,
             DQSummary,
             EnvironmentMetadata,
             GoldMetadata,
-            GoldOutputMetadata,
+            GoldOutputExt,
             LineageMetadata,
             PipelineMetadata,
             RuntimeMetadata,
@@ -27182,9 +27258,14 @@ class GoldMetadataBuilder:
             valid_records=len(records),
         )
 
-        output = GoldOutputMetadata(
+        # Use unified output structure (ADR-029)
+        output = BaseOutputMetadata(
             record_count=len(records),
+            write_started_at=now,
+            write_completed_at=now,
         )
+
+        output_ext = GoldOutputExt()
 
         scd = None
         if mode == GoldWriteMode.SCD2 and scd_config:
@@ -27213,6 +27294,7 @@ class GoldMetadataBuilder:
             schema_info=schema_info,
             dq_summary=dq_summary,
             output=output,
+            output_ext=output_ext,
             scd=scd,
             environment=environment,
         )
@@ -27242,10 +27324,11 @@ class GoldMetadataBuilder:
             GoldMetadata object ready for serialization.
         """
         from bioetl.domain.models.metadata import (
+            BaseOutputMetadata,
             DQSummary,
             EnvironmentMetadata,
             GoldMetadata,
-            GoldOutputMetadata,
+            GoldOutputExt,
             LineageMetadata,
             PipelineMetadata,
             RuntimeMetadata,
@@ -27286,9 +27369,14 @@ class GoldMetadataBuilder:
             error_rate=0.0,
         )
 
-        output = GoldOutputMetadata(
+        # Use unified output structure (ADR-029)
+        output = BaseOutputMetadata(
             record_count=len(records),
+            write_started_at=now,
+            write_completed_at=now,
         )
+
+        output_ext = GoldOutputExt()
 
         environment = EnvironmentMetadata(
             hostname=hostname(),
@@ -27307,6 +27395,7 @@ class GoldMetadataBuilder:
             schema_info=schema_info,
             dq_summary=dq_summary,
             output=output,
+            output_ext=output_ext,
             environment=environment,
         )
 
