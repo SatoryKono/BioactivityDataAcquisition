@@ -98,6 +98,36 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="OA status (gold, green, hybrid, bronze, closed)",
     )
 
+    # === Bibliographic Info (from biblio object) ===
+    volume: Series[str] = pa.Field(
+        nullable=True,
+        description="Journal volume number",
+    )
+
+    issue: Series[str] = pa.Field(
+        nullable=True,
+        description="Journal issue number",
+    )
+
+    # === Additional Metrics ===
+    fwci: Series[float] = pa.Field(
+        nullable=True,
+        ge=0,
+        description="Field-Weighted Citation Impact (must be non-negative)",
+    )
+
+    referenced_works_count: Series[pd.Int64Dtype] = pa.Field(
+        nullable=True,
+        ge=0,
+        description="Number of works referenced (must be non-negative)",
+    )
+
+    # === Quality Indicators ===
+    is_retracted: Series[bool] = pa.Field(
+        nullable=False,
+        description="Whether the publication has been retracted",
+    )
+
     class Config:
         """Pandera configuration."""
 

@@ -58,6 +58,18 @@ entity_field_validations:
     nullable: true
     error_message: "Citation count must be non-negative"
 
+  - field: fwci
+    type: range
+    min: 0
+    nullable: true
+    error_message: "FWCI must be non-negative"
+
+  - field: referenced_works_count
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Reference count must be non-negative"
+
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================
@@ -68,6 +80,13 @@ entity_cross_field_validations:
       - title
     condition: all_present
     error_message: "Publication must have OpenAlex ID and title"
+
+  - name: retracted_publication_warning
+    fields:
+      - is_retracted
+    condition: "is_retracted == true"
+    severity: warn
+    error_message: "Publication has been retracted"
 
 # =============================================================================
 # Conditional Validations

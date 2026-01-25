@@ -159,6 +159,25 @@ class OpenAlexPublicationRecord(BaseModel):
     # Additional metadata
     language: str | None = PydanticField(default=None, description="Language code")
 
+    # Bibliographic info (from biblio object)
+    volume: str | None = PydanticField(
+        default=None, description="Journal volume number"
+    )
+    issue: str | None = PydanticField(default=None, description="Journal issue number")
+
+    # Additional metrics
+    fwci: float | None = PydanticField(
+        default=None, description="Field-Weighted Citation Impact"
+    )
+    referenced_works_count: int | None = PydanticField(
+        default=None, description="Number of works referenced"
+    )
+
+    # Quality indicators
+    is_retracted: bool = PydanticField(
+        default=False, description="Whether the publication has been retracted"
+    )
+
     # Lookup metadata (from adapter)
     # Note: Pydantic doesn't allow underscore-prefixed fields, so these use public names
     lookup_method: str = PydanticField(
@@ -217,6 +236,17 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
     # Keywords (author-assigned)
     keywords: list[str] = field(default_factory=list)
+
+    # Bibliographic info (from biblio object)
+    volume: str | None = None
+    issue: str | None = None
+
+    # Additional metrics
+    fwci: float | None = None  # Field-Weighted Citation Impact
+    referenced_works_count: int | None = None
+
+    # Quality indicators
+    is_retracted: bool = False
 
     # Override: Default source for OpenAlex
     source: str = "openalex"
