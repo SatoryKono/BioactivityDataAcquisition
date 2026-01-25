@@ -30,12 +30,14 @@ class TestColumnOrderer:
 
     def test_system_columns_first(self, orderer: ColumnOrderer) -> None:
         """System columns appear first."""
-        df = pl.DataFrame({
-            "title": ["T1"],
-            "_run_id": ["r1"],
-            "doi": ["10.1/a"],
-            "entity_id": ["e1"],
-        })
+        df = pl.DataFrame(
+            {
+                "title": ["T1"],
+                "_run_id": ["r1"],
+                "doi": ["10.1/a"],
+                "entity_id": ["e1"],
+            }
+        )
         result = orderer.order_columns(df)
 
         # System columns should be first
@@ -44,12 +46,14 @@ class TestColumnOrderer:
 
     def test_identifiers_before_content(self, orderer: ColumnOrderer) -> None:
         """Identifiers appear before content fields."""
-        df = pl.DataFrame({
-            "abstract": ["A1"],
-            "doi": ["10.1/a"],
-            "title": ["T1"],
-            "pmid": ["123"],
-        })
+        df = pl.DataFrame(
+            {
+                "abstract": ["A1"],
+                "doi": ["10.1/a"],
+                "title": ["T1"],
+                "pmid": ["123"],
+            }
+        )
         result = orderer.order_columns(df)
 
         doi_idx = result.columns.index("doi")
@@ -63,11 +67,13 @@ class TestColumnOrderer:
 
     def test_title_before_abstract(self, orderer: ColumnOrderer) -> None:
         """Title fields appear before abstract fields."""
-        df = pl.DataFrame({
-            "chembl.publication.abstract": ["A1"],
-            "chembl.publication.title": ["T1"],
-            "crossref.publication.title": ["T2"],
-        })
+        df = pl.DataFrame(
+            {
+                "chembl.publication.abstract": ["A1"],
+                "chembl.publication.title": ["T1"],
+                "crossref.publication.title": ["T2"],
+            }
+        )
         result = orderer.order_columns(df)
 
         # All titles before abstracts
@@ -82,11 +88,13 @@ class TestColumnOrderer:
 
     def test_provider_priority_within_group(self, orderer: ColumnOrderer) -> None:
         """Within same group, chembl comes before crossref."""
-        df = pl.DataFrame({
-            "crossref.publication.title": ["T1"],
-            "chembl.publication.title": ["T2"],
-            "pubmed.publication.title": ["T3"],
-        })
+        df = pl.DataFrame(
+            {
+                "crossref.publication.title": ["T1"],
+                "chembl.publication.title": ["T2"],
+                "pubmed.publication.title": ["T3"],
+            }
+        )
         result = orderer.order_columns(df)
 
         chembl_idx = result.columns.index("chembl.publication.title")
@@ -97,10 +105,12 @@ class TestColumnOrderer:
 
     def test_unqualified_columns_have_priority(self, orderer: ColumnOrderer) -> None:
         """Unqualified columns appear before qualified in same group."""
-        df = pl.DataFrame({
-            "crossref.publication.title": ["T1"],
-            "title": ["T2"],  # Unqualified = seed
-        })
+        df = pl.DataFrame(
+            {
+                "crossref.publication.title": ["T1"],
+                "title": ["T2"],  # Unqualified = seed
+            }
+        )
         result = orderer.order_columns(df)
 
         title_idx = result.columns.index("title")
@@ -140,11 +150,13 @@ class TestColumnOrderer:
 
     def test_data_preserved_after_reorder(self, orderer: ColumnOrderer) -> None:
         """Data values are preserved after reordering."""
-        df = pl.DataFrame({
-            "title": ["Title 1"],
-            "_run_id": ["r1"],
-            "doi": ["10.1/a"],
-        })
+        df = pl.DataFrame(
+            {
+                "title": ["Title 1"],
+                "_run_id": ["r1"],
+                "doi": ["10.1/a"],
+            }
+        )
         result = orderer.order_columns(df)
 
         assert result["title"][0] == "Title 1"
@@ -158,10 +170,12 @@ class TestColumnOrderer:
         )
         orderer = ColumnOrderer(mock_logger, config)
 
-        df = pl.DataFrame({
-            "chembl.publication.title": ["T1"],
-            "crossref.publication.title": ["T2"],
-        })
+        df = pl.DataFrame(
+            {
+                "chembl.publication.title": ["T1"],
+                "crossref.publication.title": ["T2"],
+            }
+        )
         result = orderer.order_columns(df)
 
         # Crossref should come first with custom config
@@ -172,40 +186,42 @@ class TestColumnOrderer:
 
     def test_full_publication_order(self, orderer: ColumnOrderer) -> None:
         """Full publication DataFrame is ordered correctly."""
-        df = pl.DataFrame({
-            "citation_count": [100],
-            "authors": [["Author 1"]],
-            "journal": ["Nature"],
-            "publication_date": ["2025-01-01"],
-            "abstract": ["Abstract text"],
-            "title": ["Title text"],
-            "mesh_terms": [["term1"]],
-            "doi": ["10.1/a"],
-            "pmid": ["123"],
-            "_run_id": ["r1"],
-            "entity_id": ["e1"],
-            "content_hash": ["hash1"],
-            "pdf_url": ["http://example.com/pdf"],
-        })
+        df = pl.DataFrame(
+            {
+                "citation_count": [100],
+                "authors": [["Author 1"]],
+                "journal": ["Nature"],
+                "publication_date": ["2025-01-01"],
+                "abstract": ["Abstract text"],
+                "title": ["Title text"],
+                "mesh_terms": [["term1"]],
+                "doi": ["10.1/a"],
+                "pmid": ["123"],
+                "_run_id": ["r1"],
+                "entity_id": ["e1"],
+                "content_hash": ["hash1"],
+                "pdf_url": ["http://example.com/pdf"],
+            }
+        )
         result = orderer.order_columns(df)
 
         # Verify semantic order
         # Within each group, columns are sorted alphabetically by field name
         # Note: underscore has lower ASCII value than letters, so _run_id comes first
         expected_order = [
-            "_run_id",       # SYSTEM (underscore sorts before letters)
+            "_run_id",  # SYSTEM (underscore sorts before letters)
             "content_hash",  # SYSTEM
-            "entity_id",     # SYSTEM
-            "doi",           # IDENTIFIERS
-            "pmid",          # IDENTIFIERS
-            "title",         # TITLE
-            "abstract",      # ABSTRACT
-            "authors",       # AUTHORS
-            "journal",       # JOURNAL
+            "entity_id",  # SYSTEM
+            "doi",  # IDENTIFIERS
+            "pmid",  # IDENTIFIERS
+            "title",  # TITLE
+            "abstract",  # ABSTRACT
+            "authors",  # AUTHORS
+            "journal",  # JOURNAL
             "publication_date",  # DATES
-            "citation_count",    # METRICS
-            "mesh_terms",        # CLASSIFICATION
-            "pdf_url",           # URLS
+            "citation_count",  # METRICS
+            "mesh_terms",  # CLASSIFICATION
+            "pdf_url",  # URLS
         ]
 
         assert result.columns == expected_order

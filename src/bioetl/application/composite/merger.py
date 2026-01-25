@@ -125,7 +125,9 @@ class MergeService:
             self._logger.info(
                 "Renamed seed columns to qualified format",
                 pipeline=effective_seed_pipeline,
-                qualified_count=len([c for c in seed_df.columns if "." in c and not c.startswith("_")]),
+                qualified_count=len(
+                    [c for c in seed_df.columns if "." in c and not c.startswith("_")]
+                ),
             )
 
         # Track sources used

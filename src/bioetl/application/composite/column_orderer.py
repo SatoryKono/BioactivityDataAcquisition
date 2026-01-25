@@ -96,6 +96,7 @@ class ColumnOrderer:
         Returns:
             Ordered list of column names.
         """
+
         # Create sort key for each column
         def sort_key(col: str) -> tuple[int, int, str]:
             """Sort by (group, provider_rank, column_name)."""
@@ -123,9 +124,7 @@ class ColumnOrderer:
             counts[group_name] = counts.get(group_name, 0) + 1
         return counts
 
-    def group_columns(
-        self, columns: Sequence[str]
-    ) -> dict[SemanticGroup, list[str]]:
+    def group_columns(self, columns: Sequence[str]) -> dict[SemanticGroup, list[str]]:
         """Group columns by semantic type.
 
         Useful for debugging and documentation.

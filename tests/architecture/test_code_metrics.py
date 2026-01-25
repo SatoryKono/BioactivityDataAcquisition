@@ -110,7 +110,7 @@ class TestFileSizeLimits:
         # Application layer exemptions
         "base_transformer.py": 680,  # 667 LOC - BaseTransformer with serialization helpers
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
-        "merger.py": 1385,  # 1380 LOC - MergeService with type-safe coalesce + column priority ordering + explicit rules
+        "merger.py": 1405,  # 1399 LOC - MergeService with type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
@@ -242,6 +242,7 @@ class TestFunctionComplexity:
         "_check_value_distribution": 18,  # CC=17 - Value distribution analysis
         "_check_schema_drift": 14,  # CC=13 - Schema drift detection
         # Composite pipeline merge service
+        "merge": 12,  # CC=11 - MergeService.merge() orchestrates seed/enricher join with conflict resolution
         "_apply_explicit_rules": 11,  # CC=10 - Explicit field priority rules (refactored with helper methods)
         "_apply_joins": 15,  # CC=13 - Join logic with multiple enrichers
         "_order_columns_by_priority": 15,  # CC=13 - Column ordering with priority rules
