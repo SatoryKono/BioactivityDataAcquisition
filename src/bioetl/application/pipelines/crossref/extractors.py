@@ -24,16 +24,17 @@ from bioetl.domain.value_objects import PublicationYear
 
 
 def extract_authors(publication: dict[str, Any]) -> list[str]:
-    """Extract author names in 'given family' format.
+    """Extract author names from CrossRef publication.
 
-    CrossRef stores author information in an "author" array with
-    "given" and "family" fields for each author.
+    CrossRef stores author information in an "author" array with:
+    - Personal authors: "given" and "family" fields
+    - Organizational authors: "name" field only (e.g., "World Health Organization")
 
     Args:
         publication: CrossRef publication record.
 
     Returns:
-        List of author names in "given family" format.
+        List of author names (personal: "given family", org: "name").
 
     Example:
         >>> extract_authors({
@@ -45,6 +46,8 @@ def extract_authors(publication: dict[str, Any]) -> list[str]:
         ['John Doe', 'Jane Smith']
         >>> extract_authors({"author": [{"family": "Anonymous"}]})
         ['Anonymous']
+        >>> extract_authors({"author": [{"name": "World Health Organization"}]})
+        ['World Health Organization']
         >>> extract_authors({})
         []
 
@@ -59,6 +62,9 @@ def extract_authors(publication: dict[str, Any]) -> list[str]:
             authors.append(family)
         elif given:
             authors.append(given)
+        elif name := author.get("name", "").strip():
+            # Organizational author (e.g., "World Health Organization")
+            authors.append(name)
     return authors
 
 
