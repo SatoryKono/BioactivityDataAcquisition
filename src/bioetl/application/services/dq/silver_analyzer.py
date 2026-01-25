@@ -91,9 +91,7 @@ class SilverDQAnalyzer:
         if SilverDQCheckType.NULL_RATE in enabled_checks:
             null_results, overall_rate = self._check_null_rates(df)
             checks["null_rate"] = {
-                "columns": {
-                    r.column_name: result_to_dict(r) for r in null_results
-                },
+                "columns": {r.column_name: result_to_dict(r) for r in null_results},
                 "overall_null_rate": overall_rate,
                 "status": DQCheckStatus.PASS.value,
             }
