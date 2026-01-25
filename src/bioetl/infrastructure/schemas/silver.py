@@ -589,7 +589,7 @@ CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        # Original compound names from document
+        # Original compound names from the document
         pa.field("compound_key", pa.string()),
         pa.field("compound_name", pa.string()),
         # Foreign keys

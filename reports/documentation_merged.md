@@ -94,6 +94,9 @@ docs/
 │
 ├── 04-reference/                # Reference documentation
 │   ├── api/                     # API reference by layer
+|   │   ├── application/         # Application layer docs
+|   │   │   ├── core.md          # Core components
+|   │   │   └── services.md      # Application services
 │   ├── cli.md                   # CLI reference
 │   └── pipelines/               # Pipeline-specific reference
 │
@@ -361,7 +364,7 @@ graph TD
 | RULES.md                 | 2026-01-21   | v5.12 (ADR Registry Update)  |
 | REQUIREMENTS.md          | 2026-01-21   | v1.4 (156 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
-| 00-map.md                | 2026-01-21   | v6.8 RULES v5.12, REQ v1.4   |
+| 00-map.md                | 2026-01-21   | v6.9 API Sync Completed      |
 | rules-summary.md         | 2026-01-21   | v5.12 Synced                 |
 | 03-guides/               | 2026-01-20   | Consolidated (13 guides)     |
 | ADR-001..028             | 2026-01-21   | All 28 ADRs documented       |
@@ -8954,6 +8957,202 @@ Define filters in Python code. Rejected because:
 | 2026-01-20 | Claude Code | Initial version |
 
 ================================================================================
+File: ADR-029-output-metadata-unification.md
+Path: 02-architecture\decisions\ADR-029-output-metadata-unification.md
+================================================================================
+# ADR-029: Output Metadata Unification
+
+**Status:** Accepted
+**Date:** 2026-01-23
+**Decision makers:** @BioETL-Team
+**Relates to:** RULES.md §2.4 (Lineage Requirements), ADR-014 (Deterministic Writes)
+
+## Context
+
+Bronze/Silver/Gold Medallion layers использовали разные структуры для `output`-метаданных в sidecar-файлах:
+
+| Layer | Класс | Поля |
+|-------|-------|------|
+| Bronze | `OutputMetadata` | `total_records`, `total_bytes`, `files`, `format`, `compression` |
+| Silver | `SilverOutputMetadata` | `record_count`, `content_hash` |
+| Gold | `GoldOutputMetadata` | `record_count`, `partition_count`, `total_bytes`, `format` |
+
+### Проблемы
+
+1. **Несогласованное именование**: `total_records` vs `record_count`
+2. **Отсутствует общий контракт**: Усложняет downstream-аналитику и мониторинг
+3. **Пропущенные поля**: `total_bytes` отсутствует в Silver
+4. **Нет timestamps записи**: Отсутствуют `write_started_at`/`write_completed_at`
+5. **Дублирование delta_version**: В Silver версии есть в `DeltaMetrics`, но не в output
+
+## Decision
+
+Унифицировать output-метаданные через паттерн **Base + Extension**:
+
+### BaseOutputMetadata (Общий контракт)
+
+```python
+class BaseOutputMetadata(BaseModel):
+    """Base output metadata contract for all Medallion layers."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    record_count: int = Field(ge=0, description="Total records written")
+    total_bytes: int = Field(ge=0, description="Total size in bytes")
+    content_hash: str | None = Field(description="SHA256 hash for change detection")
+    write_started_at: datetime | None = Field(description="Write start timestamp")
+    write_completed_at: datetime | None = Field(description="Write completion timestamp")
+
+    @computed_field
+    @property
+    def write_duration_ms(self) -> int | None:
+        """Calculate write duration in milliseconds."""
+```
+
+### Layer-Specific Extensions
+
+```python
+class BronzeOutputExt(BaseModel):
+    files: list[FileOutputMetadata]
+    format: str = "jsonl+zstd"
+    compression: str = "zstd"
+
+class SilverOutputExt(BaseModel):
+    delta_version_before: int | None
+    delta_version_after: int | None
+
+class GoldOutputExt(BaseModel):
+    partition_count: int = 0
+    format: Literal["delta", "parquet"] = "delta"
+```
+
+### Layer Metadata Composition
+
+```python
+class BronzeMetadata(BaseModel):
+    output: BaseOutputMetadata          # Unified base
+    output_ext: BronzeOutputExt         # Layer-specific
+
+class SilverMetadata(BaseModel):
+    output: BaseOutputMetadata          # Unified base
+    output_ext: SilverOutputExt         # Layer-specific
+
+class GoldMetadata(BaseModel):
+    output: BaseOutputMetadata          # Unified base
+    output_ext: GoldOutputExt           # Layer-specific
+```
+
+### Metadata Schema Version Bump
+
+Версия metadata schema увеличена с `1.0` до `1.1` для всех слоёв.
+
+### Backward Compatibility
+
+Старые классы (`OutputMetadata`, `SilverOutputMetadata`, `GoldOutputMetadata`) сохранены как deprecated:
+
+```python
+class OutputMetadata(BaseModel):
+    """Bronze output information (DEPRECATED).
+
+    .. deprecated:: 5.10.0
+        Use BaseOutputMetadata + BronzeOutputExt composition instead.
+        Will be removed in v6.0.
+    """
+
+    def __init__(self, **data: object) -> None:
+        warnings.warn(
+            "OutputMetadata is deprecated, use BaseOutputMetadata + BronzeOutputExt...",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(**data)
+```
+
+## Consequences
+
+### Positive
+
+1. **Unified analytics**: Все слои экспортируют одинаковые базовые метрики
+2. **Duration tracking**: `write_duration_ms` доступен через computed field
+3. **Change detection**: `content_hash` доступен на всех слоях
+4. **Monitoring consistency**: Prometheus/Grafana dashboards могут использовать единый набор метрик
+5. **Type safety**: `extra="forbid"` предотвращает случайные поля
+
+### Negative
+
+1. **Breaking change**: Существующий код использующий `output.total_records` (Bronze) требует обновления
+2. **Schema migration**: Существующие sidecar-файлы v1.0 не совместимы с v1.1
+
+### Neutral
+
+- Delta versions дублируются в Silver: `DeltaMetrics.version_*` и `SilverOutputExt.delta_version_*`
+- Это осознанное решение для полноты output-контракта
+
+## Implementation
+
+### Files Modified
+
+**Domain Models:**
+- `src/bioetl/domain/models/metadata.py` — BaseOutputMetadata, *OutputExt классы
+
+**DTOs:**
+- `src/bioetl/domain/ports/metadata_coordinator.py` — Добавлены `version_before`, `total_bytes`, `partition_count`
+
+**Services:**
+- `src/bioetl/composition/services/metadata_coordinator.py` — Обновлены create_*_metadata методы
+
+**Infrastructure:**
+- `src/bioetl/infrastructure/storage/bronze_writer.py` — _build_full_bronze_metadata
+- `src/bioetl/infrastructure/storage/metadata_builder.py` — Silver/Gold builders
+
+### JSON Output Format
+
+**Before (v1.0):**
+```json
+{
+  "output": {
+    "total_records": 1000,
+    "total_bytes": 50000,
+    "files": [...]
+  }
+}
+```
+
+**After (v1.1):**
+```json
+{
+  "output": {
+    "record_count": 1000,
+    "total_bytes": 50000,
+    "content_hash": "sha256:...",
+    "write_started_at": "2026-01-23T12:00:00Z",
+    "write_completed_at": "2026-01-23T12:00:05Z"
+  },
+  "output_ext": {
+    "files": [...],
+    "format": "jsonl+zstd",
+    "compression": "zstd"
+  }
+}
+```
+
+## Tests
+
+### Unit Tests
+
+- `tests/unit/domain/models/test_metadata_output.py` — BaseOutputMetadata, *OutputExt
+
+### Architecture Tests
+
+- `tests/architecture/test_metadata_output_contract.py` — Contract validation
+
+## References
+
+- RULES.md §2.4 — Lineage Requirements
+- ADR-014 — Deterministic Writes (content hash)
+- glossary.md — Ubiquitous Language definitions
+
+================================================================================
 File: README.md
 Path: 02-architecture\decisions\README.md
 ================================================================================
@@ -10891,13 +11090,13 @@ class PubMedPublicationTransformer(BaseTransformer):
 Добавьте фабрику пайплайна в `src/bioetl/composition/factories/pipeline_factories.py`:
 
 ```python
-from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
+from bioetl.application.pipelines.pubmed.publication import PubMedPublicationPipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.infrastructure.schemas.gold import PubMedPublicationGoldSchema
 
 pubmed_publication_factory = GenericPipelineFactory(
     pipeline_name="pubmed_publication",
-    pipeline_class=PubMedPublicationsPipeline,
+    pipeline_class=PubMedPublicationPipeline,
     provider="pubmed",
     transformer_class=PubMedPublicationTransformer,  # DI через GenericPipelineFactory
     gold_schema=PubMedPublicationGoldSchema,
@@ -13555,8 +13754,14 @@ flowchart TB
     subgraph Application["Application Layer"]
         subgraph Core["Core"]
             Runner[PipelineRunner]
-            Executor[PipelineExecutor]
+            Executor[BatchExecutor]
             Services[PipelineServices]
+        end
+
+        subgraph AppServices["Services"]
+            Medallion[MedallionLifecycle]
+            DQ[DQService]
+            Health[HealthService]
         end
 
         subgraph Transform["Transformation"]
@@ -13573,6 +13778,8 @@ flowchart TB
 
         Runner --> Executor
         Executor --> Services
+        Runner --> Medallion
+        Runner --> DQ
         BaseT --> BatchT
         Pipelines --> BaseT
     end
@@ -13587,13 +13794,22 @@ flowchart TB
 Pipeline execution infrastructure:
 
 - `PipelineRunner` - Lifecycle orchestrator for pipeline execution
-- `PipelineExecutor` - Data flow orchestrator (fetch → transform → write)
+- `BatchExecutor` - Data flow orchestrator (fetch → transform → write)
 - `PipelineServices` - Service bundle for dependency injection
 - `CheckpointManager` - Checkpoint persistence for resume capability
 - `LockManager` - Distributed locking coordination
 - `PreflightService` - Pre-flight infrastructure validation
 - `PostrunService` - Post-run DQ checks, VACUUM, cleanup
-- `LifecycleOrchestrator` - Medallion layer clearing policies
+
+### [Services](application/services.md)
+
+Specialized application services:
+
+- `MedallionLifecycleService` - Medallion layer management
+- `DataQualityService` - DQ checks and validation orchestration
+- `HealthService` - System health aggregation
+- `VacuumService` - Storage maintenance
+- `LockService`, `CheckpointService`, `ShutdownService` - Infrastructure services
 
 ### [Transformers](application/transformers.md)
 
@@ -13646,50 +13862,14 @@ PipelineRunner delegates to specialized services:
 | Service | Responsibility |
 |---------|---------------|
 | `PreflightService` | Health checks, lock acquisition |
-| `PipelineExecutor` | Data flow orchestration |
+| `BatchExecutor` | Data flow orchestration |
 | `PostrunService` | DQ validation, VACUUM |
-| `LifecycleOrchestrator` | Layer clearing policies |
-
-### Template Method Pattern
-
-`BaseTransformer` implements Template Method for consistent transformation:
-
-```python
-# Fixed algorithm, customizable steps
-async def transform_batch(self, records: list[dict]) -> TransformResult:
-    # 1. Pre-transform hook (overridable)
-    records = await self._pre_transform_hook(records)
-
-    # 2. Transform each record (abstract method)
-    transformed = []
-    for record in records:
-        result = await self._transform_record(record)
-        transformed.append(result)
-
-    # 3. Post-transform hook (overridable)
-    return await self._post_transform_hook(transformed)
-```
-
-## Import Structure
-
-```python
-# Preferred: Import from core package
-from bioetl.application.core import (
-    PipelineRunner,
-    PipelineExecutor,
-    BaseTransformer,
-    PipelineServices,
-)
-
-# Alternative: Import from specific modules
-from bioetl.application.core.runner import PipelineRunner
-from bioetl.application.core.executor import PipelineExecutor
-from bioetl.application.core.base_transformer import BaseTransformer
-```
+| `MedallionLifecycleService` | Layer clearing policies |
 
 ## See Also
 
 - [Core Components](application/core.md) - Detailed core component documentation
+- [Services](application/services.md) - Application services reference
 - [Transformers](application/transformers.md) - Transformer framework
 - [Pipelines](application/pipelines.md) - Provider-specific pipelines
 - [Domain Layer](domain.md) - Port interfaces used by application
@@ -13718,25 +13898,91 @@ Orchestrates pipeline execution lifecycle. Coordinates locking, checkpointing, a
             - logger
             - services
 
-### PipelineExecutor
+### BasePipeline
 
-Orchestrates data flow: extraction → transformation → writing.
+Abstract base class for all ETL pipelines. Provides template method pattern for pipeline configuration.
 
-::: bioetl.application.core.executor.PipelineExecutor
+::: bioetl.application.core.base.BasePipeline
+    options:
+        show_root_heading: true
+        show_source: false
+
+### BatchExecutor
+
+Unified batch executor for ETL pipeline orchestration. Handles extraction → transformation → writing flow with adaptive batch sizing.
+
+::: bioetl.application.core.batch_executor.BatchExecutor
     options:
         show_root_heading: true
         show_source: false
         members:
             - __init__
             - execute
-            - batch_size
-            - checkpoint_interval
+            - execute_batch
+
+### BatchResult
+
+Result of batch execution containing metrics and status.
+
+::: bioetl.application.core.batch_executor.BatchResult
+    options:
+        show_root_heading: true
+        show_source: false
 
 ### RecordProcessor
 
 Processes individual records through the transformation pipeline.
 
 ::: bioetl.application.core.record_processor.RecordProcessor
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Batch Transformation
+
+### BatchTransformer
+
+Transforms batches of records from Bronze to Silver/Gold layers.
+
+::: bioetl.application.core.batch_transformer.BatchTransformer
+    options:
+        show_root_heading: true
+        show_source: false
+
+### StreamingBatchProcessor
+
+Streaming processor for large batches with memory management.
+
+::: bioetl.application.core.batch_transformer.StreamingBatchProcessor
+    options:
+        show_root_heading: true
+        show_source: false
+
+### TransformResult
+
+Result of a transformation operation.
+
+::: bioetl.application.core.batch_transformer.TransformResult
+    options:
+        show_root_heading: true
+        show_source: false
+
+### TransformedRecord
+
+Container for a transformed record with metadata.
+
+::: bioetl.application.core.batch_transformer.TransformedRecord
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Batch Writing
+
+### BatchWriter
+
+Writes transformed batches to storage layers.
+
+::: bioetl.application.core.batch_writer.BatchWriter
     options:
         show_root_heading: true
         show_source: false
@@ -13748,15 +13994,6 @@ Processes individual records through the transformation pipeline.
 Bundle of common pipeline services injected via DI.
 
 ::: bioetl.application.core.pipeline_services.PipelineServices
-    options:
-        show_root_heading: true
-        show_source: false
-
-### RunnerServices
-
-Bundle of application services for PipelineRunner.
-
-::: bioetl.application.core.runner_services.RunnerServices
     options:
         show_root_heading: true
         show_source: false
@@ -13785,20 +14022,38 @@ Post-run operations: DQ checks, VACUUM, cleanup.
         members:
             - execute
 
-### LifecycleOrchestrator
+### PostrunResult
 
-Medallion layer clearing policy orchestration.
+Result of post-run operations.
 
-::: bioetl.application.core.lifecycle_orchestrator.LifecycleOrchestrator
+::: bioetl.application.core.postrun_service.PostrunResult
     options:
         show_root_heading: true
         show_source: false
 
-### ClearDecision
+### DQResult
 
-Decision result for layer clearing.
+Data quality check result.
 
-::: bioetl.application.core.lifecycle_orchestrator.ClearDecision
+::: bioetl.application.core.postrun_service.DQResult
+    options:
+        show_root_heading: true
+        show_source: false
+
+### DQEvaluationStatus
+
+Enumeration for DQ evaluation status (PASSED, SOFT_FAIL, HARD_FAIL).
+
+::: bioetl.application.core.postrun_service.DQEvaluationStatus
+    options:
+        show_root_heading: true
+        show_source: false
+
+### VacuumResult
+
+Result of VACUUM operation.
+
+::: bioetl.application.core.postrun_service.VacuumResult
     options:
         show_root_heading: true
         show_source: false
@@ -13868,46 +14123,6 @@ Memory usage statistics.
         show_root_heading: true
         show_source: false
 
-## Medallion Policy
-
-### WriteModePolicy
-
-Write mode policy for different run types.
-
-::: bioetl.application.core.medallion_policy.WriteModePolicy
-    options:
-        show_root_heading: true
-        show_source: false
-
-### WriteMode
-
-Silver layer write strategy enum.
-
-::: bioetl.application.core.medallion_policy.WriteMode
-    options:
-        show_root_heading: true
-        show_source: false
-
-### Layer
-
-Medallion layer enum.
-
-::: bioetl.application.core.medallion_policy.Layer
-    options:
-        show_root_heading: true
-        show_source: false
-
-## Health Monitoring
-
-### HealthAggregator
-
-Aggregates health status from multiple components.
-
-::: bioetl.application.core.health_aggregator.HealthAggregator
-    options:
-        show_root_heading: true
-        show_source: false
-
 ## Shutdown Handling
 
 ### ShutdownSignal
@@ -13919,11 +14134,38 @@ Graceful shutdown signal handler.
         show_root_heading: true
         show_source: false
 
+### ShutdownService
+
+Service for coordinating graceful shutdown.
+
+::: bioetl.application.core.shutdown.ShutdownService
+    options:
+        show_root_heading: true
+        show_source: false
+
+### ShutdownReason
+
+Enumeration for shutdown reasons.
+
+::: bioetl.application.core.shutdown.ShutdownReason
+    options:
+        show_root_heading: true
+        show_source: false
+
 ### PipelineShutdownError
 
 Raised when pipeline receives shutdown signal.
 
 ::: bioetl.application.core.shutdown.PipelineShutdownError
+    options:
+        show_root_heading: true
+        show_source: false
+
+### create_shutdown_service
+
+Factory function for creating shutdown service.
+
+::: bioetl.application.core.shutdown.create_shutdown_service
     options:
         show_root_heading: true
         show_source: false
@@ -13957,6 +14199,146 @@ Preview of files to be cleaned up.
         show_root_heading: true
         show_source: false
 
+### LayerInfo
+
+Information about a storage layer.
+
+::: bioetl.application.core.cleanup_service.LayerInfo
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Medallion Lifecycle
+
+### MedallionLifecycleService
+
+Service for managing Medallion layer lifecycle operations.
+
+::: bioetl.application.services.medallion_lifecycle.MedallionLifecycleService
+    options:
+        show_root_heading: true
+        show_source: false
+
+### ClearResult
+
+Result of a layer clear operation.
+
+::: bioetl.application.services.medallion_types.ClearResult
+    options:
+        show_root_heading: true
+        show_source: false
+
+### PrepareResult
+
+Result of a layer prepare operation.
+
+::: bioetl.application.services.medallion_types.PrepareResult
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Transform Utilities
+
+Utility functions for data transformation.
+
+### normalize_string
+
+::: bioetl.application.core.transform_utils.normalize_string
+    options:
+        show_root_heading: true
+        show_source: false
+
+### safe_extract
+
+::: bioetl.application.core.transform_utils.safe_extract
+    options:
+        show_root_heading: true
+        show_source: false
+
+### flatten_nested_dict
+
+::: bioetl.application.core.transform_utils.flatten_nested_dict
+    options:
+        show_root_heading: true
+        show_source: false
+
+### extract_list_field
+
+::: bioetl.application.core.transform_utils.extract_list_field
+    options:
+        show_root_heading: true
+        show_source: false
+
+### aggregate_nested_lists
+
+::: bioetl.application.core.transform_utils.aggregate_nested_lists
+    options:
+        show_root_heading: true
+        show_source: false
+
+### parse_date_field
+
+::: bioetl.application.core.transform_utils.parse_date_field
+    options:
+        show_root_heading: true
+        show_source: false
+
+### validate_smiles
+
+::: bioetl.application.core.transform_utils.validate_smiles
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Configuration
+
+### PipelineConfig
+
+Static pipeline configuration loaded from YAML.
+
+::: bioetl.domain.config.PipelineConfig
+    options:
+        show_root_heading: true
+        show_source: false
+
+### RuntimeConfig
+
+Runtime configuration from CLI/environment.
+
+::: bioetl.domain.config.RuntimeConfig
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Medallion Types
+
+### Layer
+
+Enumeration for Medallion layers (BRONZE, SILVER, GOLD).
+
+::: bioetl.domain.medallion.Layer
+    options:
+        show_root_heading: true
+        show_source: false
+
+### WriteMode
+
+Enumeration for write modes (MERGE, APPEND, OVERWRITE).
+
+::: bioetl.domain.medallion.WriteMode
+    options:
+        show_root_heading: true
+        show_source: false
+
+### WriteModePolicy
+
+Policy for determining write mode based on run type and layer.
+
+::: bioetl.domain.medallion.WriteModePolicy
+    options:
+        show_root_heading: true
+        show_source: false
+
 ## Usage Example
 
 ```python
@@ -13965,27 +14347,43 @@ from bioetl.application.core import (
     PipelineServices,
     CheckpointManager,
     PreflightService,
+    BatchExecutor,
+    BatchTransformer,
+    BatchWriter,
+    PipelineConfig,
+    RuntimeConfig,
+    WriteMode,
 )
 
 # Components are assembled in composition layer
 # See: bioetl.composition.bootstrap.bootstrap_pipeline()
+```
 
-# Example: Direct executor usage
-# executor = PipelineExecutor(
-#     services=pipeline_services,
-#     record_processor=processor,
-#     checkpoint_manager=checkpoint_manager,
-#     shutdown_signal=shutdown_signal,
-#     entity_type="activity",
-#     batch_size=100,
-# )
+```python
+# Transform utilities example
+from bioetl.application.core import (
+    normalize_string,
+    safe_extract,
+    parse_date_field,
+    validate_smiles,
+)
 
-# Execute data flow
-# await executor.execute()
+# Normalize strings for consistent comparison
+name = normalize_string("  John Doe  ")  # "john doe"
+
+# Safely extract nested values
+value = safe_extract(data, "nested.path.to.value", default=None)
+
+# Parse date strings
+date = parse_date_field("2024-01-15", "%Y-%m-%d")
+
+# Validate SMILES notation
+is_valid = validate_smiles("CCO")  # True for ethanol
 ```
 
 ## See Also
 
+- [Services](services.md) - Application services
 - [Transformers](transformers.md) - Data transformation framework
 - [Pipelines](pipelines.md) - Provider-specific pipelines
 - [Bootstrap](../composition/bootstrap.md) - Component assembly
@@ -14235,6 +14633,161 @@ await runner.run()
 - [Transformers](transformers.md) - BaseTransformer framework
 - [Bootstrap](../composition/bootstrap.md) - Pipeline assembly
 - [CLI Reference](../../cli.md) - Command-line interface
+
+================================================================================
+File: services.md
+Path: 04-reference\api\application\services.md
+================================================================================
+# Application Services
+
+Specialized services that encapsulate business logic and orchestration rules. These services are typically injected into the PipelineRunner or used by other application components.
+
+## Medallion Lifecycle
+
+### MedallionLifecycleService
+
+Orchestrates the lifecycle of Medallion layers, including clearing data before runs and managing retention.
+
+::: bioetl.application.services.medallion_lifecycle.MedallionLifecycleService
+    options:
+        show_root_heading: true
+        show_source: false
+
+### VacuumService
+
+Manages Delta Lake VACUUM operations to remove old files.
+
+::: bioetl.application.services.vacuum_service.VacuumService
+    options:
+        show_root_heading: true
+        show_source: false
+
+### BronzeCleanupService
+
+Manages cleanup of Bronze layer files (JSONL) based on retention policies.
+
+::: bioetl.application.services.bronze_cleanup_service.BronzeCleanupService
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Data Quality & Reporting
+
+### DataQualityService
+
+Orchestrates data quality checks and validation.
+
+::: bioetl.application.services.data_quality_service.DataQualityService
+    options:
+        show_root_heading: true
+        show_source: false
+
+### DQReportService
+
+Generates and persists data quality reports.
+
+::: bioetl.application.services.dq_report_service.DQReportService
+    options:
+        show_root_heading: true
+        show_source: false
+
+### DQMetricsCalculator
+
+Calculates aggregated DQ metrics from raw validation results.
+
+::: bioetl.application.services.dq_metrics_calculator.DQMetricsCalculator
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Infrastructure Management
+
+### LockService
+
+Manages distributed locks for pipeline coordination.
+
+::: bioetl.application.services.lock_service.LockService
+    options:
+        show_root_heading: true
+        show_source: false
+
+### CheckpointService
+
+Manages pipeline state persistence and recovery.
+
+::: bioetl.application.services.checkpoint_service.CheckpointService
+    options:
+        show_root_heading: true
+        show_source: false
+
+### QuarantineService
+
+Manages failed records and quarantine operations.
+
+::: bioetl.application.services.quarantine_service.QuarantineService
+    options:
+        show_root_heading: true
+        show_source: false
+
+### ShutdownService
+
+Coordinates graceful shutdown of pipeline components.
+
+::: bioetl.application.services.shutdown_service.ShutdownService
+    options:
+        show_root_heading: true
+        show_source: false
+
+### ConfigService
+
+Manages configuration loading and validation.
+
+::: bioetl.application.services.config_service.ConfigService
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Observability & Health
+
+### HealthService
+
+Aggregates health status from multiple components.
+
+::: bioetl.application.services.health_service.HealthService
+    options:
+        show_root_heading: true
+        show_source: false
+
+### MetricsService
+
+Manages application-level metrics collection.
+
+::: bioetl.application.services.metrics_service.MetricsService
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Data Export
+
+### ExportService
+
+Manages data export operations (e.g., to CSV/Parquet).
+
+::: bioetl.application.services.export_service.ExportService
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Orchestration
+
+### PipelineRunnerService
+
+Higher-level service for managing multiple pipeline runners.
+
+::: bioetl.application.services.pipeline_runner_service.PipelineRunnerService
+    options:
+        show_root_heading: true
+        show_source: false
 
 ================================================================================
 File: transformers.md
@@ -14665,80 +15218,156 @@ Path: 04-reference\api\composition\bootstrap.md
 
 Composition Root and bootstrap functions for pipeline initialization.
 
-## Main Entry Point
+## Overview
+
+The bootstrap package is organized into three modules:
+
+- **assembly**: Shared infrastructure components (ports, storage adapters) without side-effects. Used by both CLI and runtime.
+- **cli**: Bootstrap functions for CLI-only commands (inspect, list, maintenance). Uses NoOp observability implementations.
+- **runtime**: Bootstrap functions for actual pipeline execution. Uses full observability stack.
+
+```mermaid
+flowchart TB
+    subgraph Assembly["assembly/"]
+        StorageAdapter[bootstrap_storage_adapter]
+        CheckpointPort[bootstrap_checkpoint_port]
+        QuarantinePort[bootstrap_quarantine_port]
+    end
+
+    subgraph CLI["cli/"]
+        CleanupService[bootstrap_cleanup_service]
+        HealthService[bootstrap_health_service]
+        MetricsService[bootstrap_metrics_service]
+    end
+
+    subgraph Runtime["runtime/"]
+        PipelineRunner[bootstrap_pipeline_runner]
+        Observability[bootstrap_observability_bundle]
+        CompositeRunner[bootstrap_composite_runner]
+    end
+
+    CLI --> Assembly
+    Runtime --> Assembly
+```
+
+## Main Entry Points
 
 ### bootstrap_pipeline
 
-The main entry point for creating a fully configured PipelineRunner.
+The main entry point for creating a fully configured PipelineRunner (deprecated alias for `bootstrap_pipeline_runner`).
 
 ::: bioetl.composition.bootstrap.bootstrap_pipeline
     options:
         show_root_heading: true
         show_source: false
 
-## Observability Bootstrap
+### bootstrap_pipeline_runner
 
-### bootstrap_observability
+Canonical function for creating a PipelineRunner with full observability.
 
-Initialize all observability components (logging, tracing, metrics).
-
-::: bioetl.composition._bootstrap.observability.bootstrap_observability
+::: bioetl.composition.bootstrap.bootstrap_pipeline_runner
     options:
         show_root_heading: true
         show_source: false
 
-### bootstrap_logger
+### bootstrap_composite_runner
+
+Bootstrap function for composite pipelines (multiple data sources).
+
+::: bioetl.composition.bootstrap.bootstrap_composite_runner
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Runtime Observability
+
+Functions for initializing the full observability stack during pipeline execution.
+
+### bootstrap_observability_bundle
+
+Initialize all observability components (logging, tracing, metrics) as a bundle.
+
+::: bioetl.composition.bootstrap.bootstrap_observability_bundle
+    options:
+        show_root_heading: true
+        show_source: false
+
+### bootstrap_logger_port
 
 Create structured logger instance.
 
-::: bioetl.composition._bootstrap.observability.bootstrap_logger
+::: bioetl.composition.bootstrap.bootstrap_logger_port
     options:
         show_root_heading: true
         show_source: false
 
-### bootstrap_tracer
+### bootstrap_tracer_port
 
 Create tracing exporter instance.
 
-::: bioetl.composition._bootstrap.observability.bootstrap_tracer
+::: bioetl.composition.bootstrap.bootstrap_tracer_port
     options:
         show_root_heading: true
         show_source: false
 
-### bootstrap_metrics
+### bootstrap_metrics_port
 
 Create metrics exporter instance.
 
-::: bioetl.composition._bootstrap.observability.bootstrap_metrics
+::: bioetl.composition.bootstrap.bootstrap_metrics_port
     options:
         show_root_heading: true
         show_source: false
 
-### bootstrap_dq_monitor
+### bootstrap_dq_monitor_port
 
 Create data quality anomaly monitor.
 
-::: bioetl.composition._bootstrap.observability.bootstrap_dq_monitor
+::: bioetl.composition.bootstrap.bootstrap_dq_monitor_port
     options:
         show_root_heading: true
         show_source: false
 
-## Storage Bootstrap
+## Assembly (Shared Infrastructure)
 
-### bootstrap_storage
+Functions for creating infrastructure components used by both CLI and runtime.
 
-Create storage adapters for all Medallion layers.
+### bootstrap_storage_adapter
 
-::: bioetl.composition._bootstrap.storage.bootstrap_storage
+Create storage adapter for all Medallion layers.
+
+::: bioetl.composition.bootstrap.bootstrap_storage_adapter
     options:
         show_root_heading: true
         show_source: false
 
-### bootstrap_cleanup
+### bootstrap_checkpoint_port
+
+Create checkpoint port implementation.
+
+::: bioetl.composition.bootstrap.bootstrap_checkpoint_port
+    options:
+        show_root_heading: true
+        show_source: false
+
+### bootstrap_quarantine_port
+
+Create quarantine port implementation.
+
+::: bioetl.composition.bootstrap.bootstrap_quarantine_port
+    options:
+        show_root_heading: true
+        show_source: false
+
+## CLI Services
+
+Bootstrap functions for CLI-only commands. These use NoOp observability implementations for admin/maintenance operations.
+
+### bootstrap_cleanup_service
 
 Create cleanup service for storage management.
 
-::: bioetl.composition._bootstrap.storage.bootstrap_cleanup
+::: bioetl.composition.bootstrap.bootstrap_cleanup_service
     options:
         show_root_heading: true
         show_source: false
@@ -14747,18 +15376,7 @@ Create cleanup service for storage management.
 
 Create Medallion lifecycle service.
 
-::: bioetl.composition._bootstrap.storage.bootstrap_lifecycle_service
-    options:
-        show_root_heading: true
-        show_source: false
-
-## Checkpoint Bootstrap
-
-### bootstrap_checkpoint
-
-Create checkpoint port implementation.
-
-::: bioetl.composition._bootstrap.checkpoint.bootstrap_checkpoint
+::: bioetl.composition.bootstrap.bootstrap_lifecycle_service
     options:
         show_root_heading: true
         show_source: false
@@ -14767,16 +15385,7 @@ Create checkpoint port implementation.
 
 Create checkpoint manager instance.
 
-::: bioetl.composition._bootstrap.checkpoint.bootstrap_checkpoint_manager
-    options:
-        show_root_heading: true
-        show_source: false
-
-### bootstrap_quarantine
-
-Create quarantine port implementation.
-
-::: bioetl.composition._bootstrap.checkpoint.bootstrap_quarantine
+::: bioetl.composition.bootstrap.bootstrap_checkpoint_manager
     options:
         show_root_heading: true
         show_source: false
@@ -14785,7 +15394,92 @@ Create quarantine port implementation.
 
 Create quarantine manager instance.
 
-::: bioetl.composition._bootstrap.checkpoint.bootstrap_quarantine_manager
+::: bioetl.composition.bootstrap.bootstrap_quarantine_manager
+    options:
+        show_root_heading: true
+        show_source: false
+
+### bootstrap_health_service
+
+Create health check service for CLI.
+
+::: bioetl.composition.bootstrap.bootstrap_health_service
+    options:
+        show_root_heading: true
+        show_source: false
+
+### bootstrap_lock_service
+
+Create lock service for CLI.
+
+::: bioetl.composition.bootstrap.bootstrap_lock_service
+    options:
+        show_root_heading: true
+        show_source: false
+
+### bootstrap_vacuum_service
+
+Create vacuum service for Delta table maintenance.
+
+::: bioetl.composition.bootstrap.bootstrap_vacuum_service
+    options:
+        show_root_heading: true
+        show_source: false
+
+### bootstrap_metrics_service
+
+Create metrics service for CLI.
+
+::: bioetl.composition.bootstrap.bootstrap_metrics_service
+    options:
+        show_root_heading: true
+        show_source: false
+
+### bootstrap_export_service
+
+Create export service for CLI.
+
+::: bioetl.composition.bootstrap.bootstrap_export_service
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Runtime Assembly Functions
+
+Pure functions for assembling configuration without side effects.
+
+### assemble_runtime_config
+
+Assemble runtime configuration from CLI arguments and environment.
+
+::: bioetl.composition.bootstrap.assemble_runtime_config
+    options:
+        show_root_heading: true
+        show_source: false
+
+### assemble_filter_config
+
+Assemble filter configuration from YAML and CLI overrides.
+
+::: bioetl.composition.bootstrap.assemble_filter_config
+    options:
+        show_root_heading: true
+        show_source: false
+
+### assemble_vacuum_settings
+
+Assemble VACUUM settings for Delta table maintenance.
+
+::: bioetl.composition.bootstrap.assemble_vacuum_settings
+    options:
+        show_root_heading: true
+        show_source: false
+
+### VacuumSettings
+
+Configuration for VACUUM operations.
+
+::: bioetl.composition.bootstrap.VacuumSettings
     options:
         show_root_heading: true
         show_source: false
@@ -14814,13 +15508,31 @@ Get the global default registry instance.
         show_root_heading: true
         show_source: false
 
-## Builders
+## Metrics Server
 
-### FilterConfigBuilder
+### start_metrics_server
 
-Builder for filter configuration from CLI/YAML.
+Start Prometheus metrics HTTP server.
 
-::: bioetl.composition.builders.FilterConfigBuilder
+::: bioetl.composition.bootstrap.start_metrics_server
+    options:
+        show_root_heading: true
+        show_source: false
+
+### maybe_start_metrics_server
+
+Conditionally start metrics server if enabled.
+
+::: bioetl.composition.bootstrap.maybe_start_metrics_server
+    options:
+        show_root_heading: true
+        show_source: false
+
+### MetricsServerError
+
+Error raised when metrics server fails to start.
+
+::: bioetl.composition.bootstrap.MetricsServerError
     options:
         show_root_heading: true
         show_source: false
@@ -14835,12 +15547,12 @@ sequenceDiagram
     participant Factory
     participant Runner
 
-    CLI->>Bootstrap: bootstrap_pipeline(ctx)
+    CLI->>Bootstrap: bootstrap_pipeline_runner(ctx)
     Bootstrap->>Bootstrap: register_all_providers()
     Bootstrap->>Bootstrap: register_all_pipelines()
     Bootstrap->>Bootstrap: load_pipeline_config()
-    Bootstrap->>Bootstrap: bootstrap_observability()
-    Bootstrap->>Bootstrap: build_filter_config()
+    Bootstrap->>Bootstrap: bootstrap_observability_bundle()
+    Bootstrap->>Bootstrap: assemble_filter_config()
     Bootstrap->>Registry: get(pipeline_name)
     Registry-->>Bootstrap: factory
     Bootstrap->>Factory: create_runner(ctx, ...)
@@ -14859,11 +15571,11 @@ Load pipeline configuration from YAML file.
         show_root_heading: true
         show_source: false
 
-### get_settings
+### load_composite_config
 
-Get application settings from environment.
+Load composite pipeline configuration.
 
-::: bioetl.infrastructure.config.get_settings
+::: bioetl.composition.bootstrap.load_composite_config
     options:
         show_root_heading: true
         show_source: false
@@ -14872,10 +15584,11 @@ Get application settings from environment.
 
 ```python
 from bioetl.composition.bootstrap import (
-    bootstrap_pipeline,
+    bootstrap_pipeline_runner,
+    bootstrap_observability_bundle,
+    bootstrap_storage_adapter,
+    assemble_runtime_config,
 )
-from bioetl.composition._bootstrap.observability import bootstrap_observability
-from bioetl.composition._bootstrap.storage import bootstrap_storage
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 
@@ -14884,13 +15597,49 @@ ctx = PipelineContext(
     pipeline_name="chembl_activity",
     run_type=RunType.INCREMENTAL,
 )
-runner = bootstrap_pipeline(ctx)
+runner = bootstrap_pipeline_runner(ctx)
 await runner.run()
-
-# Partial bootstrap (for testing)
-logger, tracer, metrics = bootstrap_observability(ctx)
-storage = bootstrap_storage(ctx, logger, metrics)
 ```
+
+```python
+# Partial bootstrap (for testing or custom assembly)
+from bioetl.composition.bootstrap import (
+    bootstrap_observability_bundle,
+    bootstrap_storage_adapter,
+    bootstrap_checkpoint_port,
+)
+
+# Create observability components
+obs = bootstrap_observability_bundle(ctx)
+
+# Create storage adapter
+storage = bootstrap_storage_adapter(
+    ctx,
+    logger=obs.logger,
+    metrics=obs.metrics,
+)
+
+# Create checkpoint port
+checkpoint = bootstrap_checkpoint_port(ctx)
+```
+
+## Deprecated Aliases
+
+The following functions are deprecated aliases maintained for backward compatibility:
+
+| Deprecated | Canonical |
+|------------|-----------|
+| `bootstrap_pipeline` | `bootstrap_pipeline_runner` |
+| `bootstrap_composite_pipeline` | `bootstrap_composite_runner` |
+| `bootstrap_storage` | `bootstrap_storage_adapter` |
+| `bootstrap_checkpoint` | `bootstrap_checkpoint_port` |
+| `bootstrap_quarantine` | `bootstrap_quarantine_port` |
+| `bootstrap_cleanup` | `bootstrap_cleanup_service` |
+| `bootstrap_observability` | `bootstrap_observability_bundle` |
+| `bootstrap_logger` | `bootstrap_logger_port` |
+| `bootstrap_tracer` | `bootstrap_tracer_port` |
+| `bootstrap_metrics` | `bootstrap_metrics_port` |
+| `bootstrap_dq_monitor` | `bootstrap_dq_monitor_port` |
 
 ## See Also
 
@@ -15126,7 +15875,7 @@ Factory for UniProt protein pipeline.
 
 ### pubmed_publication_factory
 
-Factory for PubMed publications pipeline.
+Factory for PubMed publication pipeline.
 
 ::: bioetl.composition.factories.pipeline_factories.pubmed_publication_factory
     options:
@@ -15139,7 +15888,7 @@ Factory for PubMed publications pipeline.
 classDiagram
     class GenericPipelineFactory {
         +create_runner() PipelineRunner
-        +create_executor() PipelineExecutor
+        +create_executor() BatchExecutor
     }
 
     class DataSourceFactory {
@@ -15242,7 +15991,7 @@ classDiagram
         +histogram()
     }
 
-    StoragePort <|.. DeltaWriter
+    StoragePort <|.. SilverWriter
     DataSourcePort <|.. ChemblAdapter
     LockPort <|.. MemoryLock
 ```
@@ -15311,10 +16060,10 @@ class StoragePort(Protocol):
 Infrastructure provides **Adapters** that implement these ports:
 
 ```python
-from bioetl.infrastructure.storage.delta_writer import DeltaWriter
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-# DeltaWriter implements StoragePort
-writer: StoragePort = DeltaWriter(...)
+# SilverWriter implements StoragePort
+writer: StoragePort = SilverWriter(...)
 ```
 
 ### Content Hash
@@ -15915,7 +16664,7 @@ Path: 04-reference\api\domain\ports.md
 
 Port interfaces define contracts that infrastructure adapters must implement. All ports use Python's `Protocol` for structural typing.
 
-## Storage Ports
+## Storage & Data Access
 
 ### StoragePort
 
@@ -15925,14 +16674,15 @@ Main storage interface for writing data to all Medallion layers.
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - write_bronze
-            - write_silver
-            - write_gold
-            - health_check
-            - aclose
 
-## Data Source Ports
+### DeltaReaderPort
+
+Interface for read-only access to Delta tables.
+
+::: bioetl.domain.ports.DeltaReaderPort
+    options:
+        show_root_heading: true
+        show_source: false
 
 ### DataSourcePort
 
@@ -15942,9 +16692,6 @@ Interface for fetching data from external APIs.
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - fetch
-            - health_check
 
 ### FilterableDataSourcePort
 
@@ -15955,7 +16702,16 @@ Extended interface for data sources supporting server-side filtering.
         show_root_heading: true
         show_source: false
 
-## Infrastructure Ports
+### IDMappingPort
+
+Interface for ID mapping operations (e.g., UniProt mapping).
+
+::: bioetl.domain.ports.IDMappingPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Infrastructure Coordination
 
 ### LockPort
 
@@ -15965,11 +16721,6 @@ Distributed locking interface for pipeline coordination.
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - acquire
-            - release
-            - refresh
-            - is_held
 
 ### CheckpointPort
 
@@ -15979,10 +16730,6 @@ Pipeline state persistence interface.
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - save
-            - load
-            - delete
 
 ### QuarantinePort
 
@@ -15992,12 +16739,44 @@ Dead-letter queue for failed records.
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - write
-            - read
-            - purge
 
-## Observability Ports
+### ShutdownPort
+
+Graceful termination coordination interface.
+
+::: bioetl.domain.ports.ShutdownPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### AuditPort
+
+Interface for write operation traceability.
+
+::: bioetl.domain.ports.AuditPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### MetadataWriterPort
+
+Interface for writing metadata.
+
+::: bioetl.domain.ports.MetadataWriterPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### MetadataCoordinatorPort
+
+Interface for coordinating metadata operations.
+
+::: bioetl.domain.ports.MetadataCoordinatorPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Observability
 
 ### MetricsPort
 
@@ -16007,11 +16786,6 @@ Prometheus-compatible metrics interface.
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - increment_counter
-            - set_gauge
-            - observe_histogram
-            - close
 
 ### TracingPort
 
@@ -16021,9 +16795,6 @@ Distributed tracing interface (OpenTelemetry compatible).
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - get_tracer
-            - close
 
 ### LoggerPort
 
@@ -16033,15 +16804,93 @@ Structured logging interface.
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - info
-            - warning
-            - error
-            - debug
-            - exception
-            - bind
 
-## Validation Ports
+### DQMonitorPort
+
+Interface for monitoring data quality anomalies.
+
+::: bioetl.domain.ports.DQMonitorPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### MemoryMonitorPort
+
+Interface for monitoring memory usage.
+
+::: bioetl.domain.ports.MemoryMonitorPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### HealthCheckPort
+
+Interface for component health checks.
+
+::: bioetl.domain.ports.HealthCheckPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### HealthMonitorPort
+
+Interface for monitoring system health.
+
+::: bioetl.domain.ports.HealthMonitorPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### HealthStatePort
+
+Protocol for provider health state (read-only view).
+
+::: bioetl.domain.ports.HealthStatePort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### HealthCheckResult
+
+Detailed result of a health check operation.
+
+::: bioetl.domain.ports.HealthCheckResult
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Security
+
+### PiiHasherPort
+
+Interface for hashing PII (Personal Identifiable Information) fields.
+
+::: bioetl.domain.ports.PiiHasherPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Resilience
+
+### CircuitBreakerPort
+
+Interface for circuit breaker pattern.
+
+::: bioetl.domain.ports.CircuitBreakerPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### RateLimiterPort
+
+Interface for rate limiting.
+
+::: bioetl.domain.ports.RateLimiterPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Data Quality & Validation
 
 ### GoldValidatorPort
 
@@ -16052,7 +16901,133 @@ Schema validation interface for Gold layer.
         show_root_heading: true
         show_source: false
 
-## Filtering Ports
+### SilverValidatorPort
+
+Schema validation interface for Silver layer.
+
+::: bioetl.domain.ports.SilverValidatorPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### DQReportWriterPort
+
+Interface for writing DQ reports.
+
+::: bioetl.domain.ports.DQReportWriterPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### BronzeDQAnalyzerPort
+
+Interface for analyzing Bronze layer data quality.
+
+::: bioetl.domain.ports.BronzeDQAnalyzerPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### SilverDQAnalyzerPort
+
+Interface for analyzing Silver layer data quality.
+
+::: bioetl.domain.ports.SilverDQAnalyzerPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### GoldDQAnalyzerPort
+
+Interface for analyzing Gold layer data quality.
+
+::: bioetl.domain.ports.GoldDQAnalyzerPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### BronzeDQConfigPort
+
+Interface for Bronze DQ configuration.
+
+::: bioetl.domain.ports.BronzeDQConfigPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### SilverDQConfigPort
+
+Interface for Silver DQ configuration.
+
+::: bioetl.domain.ports.SilverDQConfigPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### GoldDQConfigPort
+
+Interface for Gold DQ configuration.
+
+::: bioetl.domain.ports.GoldDQConfigPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Transformation & Normalization
+
+### NormalizationServicePort
+
+Interface for normalization services.
+
+::: bioetl.domain.ports.NormalizationServicePort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### DataNormalizationPort
+
+Interface for general data normalization.
+
+::: bioetl.domain.ports.DataNormalizationPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### UnitConverterPort
+
+Interface for unit conversion.
+
+::: bioetl.domain.ports.UnitConverterPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### ValueValidatorPort
+
+Interface for value validation.
+
+::: bioetl.domain.ports.ValueValidatorPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### ActivityAggregatorPort
+
+Interface for activity aggregation.
+
+::: bioetl.domain.ports.ActivityAggregatorPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### OutlierFilterPort
+
+Interface for filtering outliers.
+
+::: bioetl.domain.ports.OutlierFilterPort
+    options:
+        show_root_heading: true
+        show_source: false
 
 ### InputFilterPort
 
@@ -16062,8 +17037,167 @@ Interface for loading filter IDs from external sources.
     options:
         show_root_heading: true
         show_source: false
-        members:
-            - load_filter_ids
+
+### JsonEncoderPort
+
+Interface for JSON encoding.
+
+::: bioetl.domain.ports.JsonEncoderPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Runner
+
+### RunnablePort
+
+Interface for runnable components.
+
+::: bioetl.domain.ports.RunnablePort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### RunnerFactoryPort
+
+Interface for creating runners.
+
+::: bioetl.domain.ports.RunnerFactoryPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+### MetricsExtractorPort
+
+Interface for extracting metrics from runners.
+
+::: bioetl.domain.ports.MetricsExtractorPort
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Supporting Types
+
+### AuditEntry
+
+Data class for audit log entries.
+
+::: bioetl.domain.ports.AuditEntry
+    options:
+        show_root_heading: true
+        show_source: false
+
+### AuditLayer
+
+Enumeration for audit layer types (BRONZE, SILVER, GOLD).
+
+::: bioetl.domain.ports.AuditLayer
+    options:
+        show_root_heading: true
+        show_source: false
+
+### AuditOperation
+
+Enumeration for audit operation types (WRITE, DELETE, VACUUM).
+
+::: bioetl.domain.ports.AuditOperation
+    options:
+        show_root_heading: true
+        show_source: false
+
+### MemoryStats
+
+Data class for memory usage statistics.
+
+::: bioetl.domain.ports.MemoryStats
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Metadata Types
+
+### MetadataCoordinatorPort Inputs
+
+Supporting types for `MetadataCoordinatorPort`:
+
+::: bioetl.domain.ports.BronzeMetadataInput
+    options:
+        show_root_heading: true
+        show_source: false
+
+::: bioetl.domain.ports.SilverMetadataInput
+    options:
+        show_root_heading: true
+        show_source: false
+
+::: bioetl.domain.ports.GoldMetadataInput
+    options:
+        show_root_heading: true
+        show_source: false
+
+::: bioetl.domain.ports.SilverRef
+    options:
+        show_root_heading: true
+        show_source: false
+
+## NoOp Implementations
+
+Null Object Pattern implementations for optional observability components.
+These allow domain/application code to work without depending on concrete implementations.
+
+### NoOpTracing
+
+No-operation implementation of `TracingPort`.
+
+::: bioetl.domain.ports.NoOpTracing
+    options:
+        show_root_heading: true
+        show_source: false
+
+### NoOpMetrics
+
+No-operation implementation of `MetricsPort`.
+
+::: bioetl.domain.ports.NoOpMetrics
+    options:
+        show_root_heading: true
+        show_source: false
+
+### NoOpAudit
+
+No-operation implementation of `AuditPort`.
+
+::: bioetl.domain.ports.NoOpAudit
+    options:
+        show_root_heading: true
+        show_source: false
+
+### NoOpMemoryMonitor
+
+No-operation implementation of `MemoryMonitorPort`.
+
+::: bioetl.domain.ports.NoOpMemoryMonitor
+    options:
+        show_root_heading: true
+        show_source: false
+
+### NoOpMetadataWriter
+
+No-operation implementation of `MetadataWriterPort`.
+
+::: bioetl.domain.ports.NoOpMetadataWriter
+    options:
+        show_root_heading: true
+        show_source: false
+
+### NoOpPiiHasher
+
+No-operation implementation of `PiiHasherPort`.
+
+::: bioetl.domain.ports.NoOpPiiHasher
+    options:
+        show_root_heading: true
+        show_source: false
 
 ## Usage Example
 
@@ -16077,6 +17211,17 @@ async def process_data(
 ) -> None:
     async for records in source.fetch():
         await storage.write_bronze(records, ...)
+```
+
+```python
+# Using NoOp implementations for testing
+from bioetl.domain.ports import NoOpTracing, NoOpMetrics
+
+tracer = NoOpTracing()
+metrics = NoOpMetrics()
+
+# These can be passed where TracingPort/MetricsPort are expected
+# without any external dependencies
 ```
 
 ## See Also
@@ -16315,7 +17460,7 @@ flowchart TB
 
     subgraph Application["Application Layer"]
         Runner[PipelineRunner]
-        Executor[PipelineExecutor]
+        Executor[BatchExecutor]
         Transformer[BaseTransformer]
     end
 
@@ -16365,7 +17510,7 @@ Pipeline orchestration and use cases:
 External system adapters and I/O:
 
 - **[Adapters](infrastructure/adapters.md)** - ChEMBL, PubChem, UniProt clients
-- **[Storage](infrastructure/storage.md)** - BronzeWriter, DeltaWriter, GoldWriter
+- **[Storage](infrastructure/storage.md)** - BronzeWriter, SilverWriter, GoldWriter
 - **[Observability](infrastructure/observability.md)** - Logging, Metrics, Tracing
 
 ### [Composition Layer](composition.md)
@@ -16384,7 +17529,7 @@ Dependency injection and bootstrapping:
 | `BaseTransformer` | `bioetl.application.core.base_transformer` | Template Method for data transformation |
 | `StoragePort` | `bioetl.domain.ports` | Storage interface contract |
 | `DataSourcePort` | `bioetl.domain.ports` | Data fetching interface contract |
-| `DeltaWriter` | `bioetl.infrastructure.storage.delta_writer` | Silver layer Delta Lake writer |
+| `SilverWriter` | `bioetl.infrastructure.storage.silver_writer` | Silver layer Delta Lake writer |
 | `BronzeWriter` | `bioetl.infrastructure.storage.bronze_writer` | Bronze layer JSONL writer |
 
 ## Usage Example
@@ -16644,6 +17789,180 @@ Mixin for handling paginated API responses.
         show_source: false
         members:
             - fetch_all_pages
+
+## Base Adapters
+
+### BaseHttpAdapter
+
+Abstract base class for HTTP-based data source adapters.
+
+::: bioetl.infrastructure.adapters.base.BaseHttpAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - fetch
+            - health_check
+
+### BaseSyncAdapter
+
+Base class for synchronous data source adapters (e.g., PubChem via pubchempy).
+
+::: bioetl.infrastructure.adapters.sync_base.BaseSyncAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - fetch
+            - _run_in_executor
+
+### AdapterMetrics
+
+Metrics collection for data source adapters.
+
+::: bioetl.infrastructure.adapters.base_metrics.AdapterMetrics
+    options:
+        show_root_heading: true
+        show_source: false
+
+## Provider Adapters
+
+### ChemblAdapter
+
+Data source adapter for ChEMBL database.
+
+::: bioetl.infrastructure.adapters.chembl.client.ChemblAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - fetch
+            - health_check
+
+**Features**:
+- Async HTTP requests with rate limiting
+- Entity mapping via `EntityMapper`
+- Circuit breaker integration
+- Structured error classification
+
+### PubChemAdapter
+
+Data source adapter for PubChem database (via pubchempy library).
+
+::: bioetl.infrastructure.adapters.pubchem.client.PubChemAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - fetch
+            - health_check
+
+**Features**:
+- Sync library wrapped with `run_in_executor`
+- Rate limiting (5 req/sec)
+- Compound property extraction
+
+### UniProtAdapter
+
+Data source adapter for UniProt protein database.
+
+::: bioetl.infrastructure.adapters.uniprot.client.UniProtAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - fetch
+            - health_check
+
+**Features**:
+- Paginated fetching via `PaginatedFetcherMixin`
+- ID mapping support
+- Rate limiting (100 req/sec with API key)
+
+### UniProtIDMappingClient
+
+Specialized client for UniProt ID mapping operations.
+
+::: bioetl.infrastructure.adapters.uniprot.idmapping_client.UniProtIDMappingClient
+    options:
+        show_root_heading: true
+        show_source: false
+
+### PubMedAdapter
+
+Data source adapter for PubMed/NCBI E-utilities.
+
+::: bioetl.infrastructure.adapters.pubmed.pubmed_client.PubMedAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - fetch
+            - health_check
+
+**Features**:
+- ESearch/EFetch API integration
+- Rate limiting (3 req/sec)
+- XML response parsing
+
+### CrossRefAdapter
+
+Data source adapter for CrossRef metadata API.
+
+::: bioetl.infrastructure.adapters.crossref.client.CrossRefAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - fetch
+            - health_check
+
+**Features**:
+- Polite pool rate limiting
+- DOI-based lookups
+- Works endpoint integration
+
+### OpenAlexAdapter
+
+Data source adapter for OpenAlex scholarly data API.
+
+::: bioetl.infrastructure.adapters.openalex.client.OpenAlexAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - fetch
+            - health_check
+
+**Features**:
+- Rate limiting (10 req/sec)
+- Cursor-based pagination
+- Rich metadata extraction
+
+### SemanticScholarAdapter
+
+Data source adapter for Semantic Scholar API.
+
+::: bioetl.infrastructure.adapters.semanticscholar.adapter.SemanticScholarAdapter
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - fetch
+            - health_check
+
+**Features**:
+- Rate limiting (100 req/5min)
+- Paper and author endpoints
+- Citation graph access
 
 ## Storage Adapters
 
@@ -17066,6 +18385,69 @@ Writer for Gold layer (validated, analytics-ready data).
 - Schema validation via Pandera
 - Flattened structure (no JSON blobs)
 - Query-optimized partitioning
+
+## Delta Reader
+
+### DeltaReader
+
+Read-only access to Delta Lake tables for querying Silver/Gold data.
+
+::: bioetl.infrastructure.storage.delta_reader.DeltaReader
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - read_table
+            - query
+            - get_table_info
+            - list_tables
+
+## Retention Management
+
+### RetentionManager
+
+Manages VACUUM, OPTIMIZE, and time travel operations for Delta tables.
+
+::: bioetl.infrastructure.storage.retention_manager.RetentionManager
+    options:
+        show_root_heading: true
+        show_source: false
+        members:
+            - __init__
+            - vacuum
+            - optimize
+            - get_history
+            - restore_to_version
+
+## Metadata Writers
+
+### MetadataWriter
+
+Writes metadata for Bronze/Silver/Gold layers.
+
+::: bioetl.infrastructure.storage.metadata_writer.MetadataWriter
+    options:
+        show_root_heading: true
+        show_source: false
+
+### SilverMetadataBuilder
+
+Builder for Silver layer metadata.
+
+::: bioetl.infrastructure.storage.metadata_builder.SilverMetadataBuilder
+    options:
+        show_root_heading: true
+        show_source: false
+
+### GoldMetadataBuilder
+
+Builder for Gold layer metadata.
+
+::: bioetl.infrastructure.storage.metadata_builder.GoldMetadataBuilder
+    options:
+        show_root_heading: true
+        show_source: false
 
 ## Write Modes
 
@@ -21515,9 +22897,9 @@ make run-local    # запуск сэмплового пайплайна на ф
 > **Note: Local-Only Deployment** (см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md))
 
 **Текущая реализация (Local-Only):**
-- **Storage**: Локальная файловая система (`data/bronze`, `data/silver`, `data/gold`)
+- **Storage**: Локальная файловая система (`data/output/bronze`, `data/output/silver`, `data/output/gold`)
 - **Locking**: In-memory (`MemoryLock`)
-- **Checkpoints**: Локальные файлы (`data/checkpoints`)
+- **Checkpoints**: Локальные файлы (`data/output/checkpoints`)
 - **Зависимости**: Только Python 3.11+ и pip
 
 **Для распределённого развёртывания (будущее):**
@@ -46890,6 +48272,160 @@ BioETL представляет собой **референсную реализ
 *Аудит выполнен с использованием двойной верификации согласно RULES.md §7 (REQ-ARCH-040)*
 
 ================================================================================
+File: config_gaps.md
+Path: audits\config_gaps.md
+================================================================================
+# Config Gap Analysis Report
+
+**Date**: 2026-01-23
+**Baseline**: ADR-014 (Deterministic Writes), ADR-025 (Config Unification), ADR-027 (DQ Externalization)
+
+## Summary
+
+| Metric | Count |
+|--------|-------|
+| Total configs analyzed | 20 |
+| Standard pipeline configs | 19 |
+| Composite pipeline configs | 1 |
+| With critical issues | 4 |
+| With medium issues | 3 |
+| With low issues | 19 |
+| Clean (no issues) | 1 |
+
+### Issue Counts by Severity
+
+| Severity | Total Issues |
+|----------|-------------|
+| Critical (MUST fix) | 8 |
+| Medium (SHOULD fix) | 6 |
+| Low (MAY fix) | 29 |
+
+## Critical Issues (MUST fix)
+
+### `chembl/activity.yaml`
+- ❌ Missing sink.silver section
+
+### `chembl/assay.yaml`
+- ❌ Missing sink.silver.sort_by (ADR-014)
+- ❌ Missing sink.silver.primary_key (ADR-025)
+
+### `pubmed/publications.yaml`
+- ❌ Missing sink.silver.sort_by (ADR-014)
+- ❌ Missing sink.silver.primary_key (ADR-025)
+- ❌ Missing sink.gold.sort_by (ADR-014)
+
+### `uniprot/protein.yaml`
+- ❌ Missing sink.silver.sort_by (ADR-014)
+- ❌ Missing sink.silver.primary_key (ADR-025)
+
+## Medium Issues (SHOULD fix)
+
+### `chembl/activity.yaml`
+- ⚠️ Missing sink.gold section
+- ⚠️ Missing sink.bronze section
+
+### `chembl/assay.yaml`
+- ⚠️ Missing sink.gold section
+- ⚠️ Missing sink.bronze section
+
+### `uniprot/protein.yaml`
+- ⚠️ Missing sink.gold section
+- ⚠️ Missing sink.bronze section
+
+## Low Issues (MAY fix)
+
+### `chembl/activity.yaml`
+- ℹ️ DQ file exists at configs/dq/entities/chembl/activity.yaml but not referenced
+- ℹ️ Missing gold_filters section
+
+### `chembl/assay.yaml`
+- ℹ️ DQ file exists at configs/dq/entities/chembl/assay.yaml but not referenced
+- ℹ️ Missing gold_filters section
+
+### `chembl/assay_parameters.yaml`
+- ℹ️ Missing gold_filters section
+
+### `chembl/cell_line.yaml`
+- ℹ️ Missing gold_filters section
+
+### `chembl/compound_record.yaml`
+- ℹ️ Missing gold_filters section
+
+### `chembl/molecule.yaml`
+- ℹ️ Missing gold_filters section
+
+### `chembl/protein_class.yaml`
+- ℹ️ Missing gold_filters section
+
+### `chembl/publication.yaml`
+- ℹ️ sink.bronze.path not hierarchical (chembl/document)
+- ℹ️ sink.silver.path not hierarchical (chembl/document)
+- ℹ️ sink.gold.path not hierarchical (chembl/document)
+- ℹ️ Missing gold_filters section
+
+### `chembl/publication_similarity.yaml`
+- ℹ️ Missing gold_filters section
+
+### `chembl/publication_term.yaml`
+- ℹ️ Missing gold_filters section
+
+### `chembl/target.yaml`
+- ℹ️ Missing gold_filters section
+
+### `chembl/target_component.yaml`
+- ℹ️ Missing gold_filters section
+
+### `crossref/publication.yaml`
+- ℹ️ sink.bronze.path not hierarchical (crossref/work)
+- ℹ️ sink.silver.path not hierarchical (crossref/work)
+- ℹ️ sink.gold.path not hierarchical (crossref/work)
+- ℹ️ Missing gold_filters section
+
+### `openalex/publication.yaml`
+- ℹ️ Missing gold_filters section
+
+### `pubchem/compound.yaml`
+- ℹ️ Missing gold_filters section
+
+### `pubmed/publications.yaml`
+- ℹ️ DQ file exists at configs/dq/entities/pubmed/publication.yaml but not referenced
+- ℹ️ Missing gold_filters section
+
+### `semanticscholar/publication.yaml`
+- ℹ️ Missing gold_filters section
+
+### `uniprot/idmapping.yaml`
+- ℹ️ Missing gold_filters section
+
+### `uniprot/protein.yaml`
+- ℹ️ DQ file exists at configs/dq/entities/uniprot/protein.yaml but not referenced
+- ℹ️ Missing gold_filters section
+
+## Recommended Actions
+
+### Priority 0 (Critical - Blocks CI)
+1. Add `sort_by` to all silver sinks (ADR-014 compliance)
+2. Add `sort_by` to all gold sinks where gold.enabled=true (ADR-014)
+3. Add `primary_key` to all silver sinks (ADR-025 compliance)
+4. Add required fields: `pipeline_name`, `provider`, `entity_type`, `primary_keys`, `silver_table`
+
+### Priority 1 (Medium - Should Fix)
+1. Add `version`, `description`, `gold_table` where missing (ADR-025)
+2. Migrate inline `dq_rules` thresholds to `dq_config_file` (ADR-027)
+3. Add missing `sink.bronze` and `sink.gold` sections
+
+### Priority 2 (Low - Nice to Have)
+1. Unify path patterns to `{provider}/{entity}` hierarchy
+2. Reference existing DQ config files via `dq_config_file`
+3. Add `gold_filters.required_fields` where missing
+
+## ADR References
+
+- [ADR-014](docs/02-architecture/decisions/ADR-014-deterministic-writes.md): Deterministic Writes
+- [ADR-025](docs/02-architecture/decisions/ADR-025-pipeline-config-unification.md): Pipeline Config Unification
+- [ADR-027](docs/02-architecture/decisions/ADR-027-dq-rules-externalization.md): DQ Rules Externalization
+
+================================================================================
 File: config_gaps_2026-01-19.md
 Path: audits\config_gaps_2026-01-19.md
 ================================================================================
@@ -49887,7 +51423,7 @@ Total Pipelines: 19
 
 ## PUBMED / publication: pubmed_publication <a name='pubmed-publication'></a>
 
-- **Config**: `configs/pipelines/pubmed/publications.yaml`
+- **Config**: `configs/pipelines/pubmed/publication.yaml`
 - **Schema Class**: `ArticleSchema`
 
 ### Field Specifications (Silver/Gold)
@@ -50491,6 +52027,576 @@ dq_rules:
 ---
 
 *Generated by config deduplication analysis tool*
+
+================================================================================
+File: config_discrepancies_report.md
+Path: config_discrepancies_report.md
+================================================================================
+# Config Discrepancies Report
+
+Generated: 2026-01-23T09:37:25.950380
+
+Total configs: 21
+Total unique parameters: 176
+
+## 1. Parameters by Category
+
+### batch_size
+
+| Parameter | Presence |
+|-----------|----------|
+| `batch_size` | 1/21 |
+
+### checkpoint_interval
+
+| Parameter | Presence |
+|-----------|----------|
+| `checkpoint_interval` | 1/21 |
+
+### circuit_breaker
+
+| Parameter | Presence |
+|-----------|----------|
+| `circuit_breaker` | 1/21 |
+| `circuit_breaker.failure_threshold` | 1/21 |
+| `circuit_breaker.recovery_timeout` | 1/21 |
+
+### composite
+
+| Parameter | Presence |
+|-----------|----------|
+| `composite` | 1/21 |
+| `composite.dq_rules` | 1/21 |
+| `composite.enrichers` | 1/21 |
+| `composite.execution` | 1/21 |
+| `composite.lineage` | 1/21 |
+| `composite.merge` | 1/21 |
+| `composite.name` | 1/21 |
+| `composite.seed` | 1/21 |
+| `composite.version` | 1/21 |
+| `composite.dq_rules.enricher_overrides` | 1/21 |
+| `composite.dq_rules.hard_fail_threshold` | 1/21 |
+| `composite.dq_rules.required_fields` | 1/21 |
+| `composite.dq_rules.soft_fail_threshold` | 1/21 |
+| `composite.execution.checkpoint_enabled` | 1/21 |
+| `composite.execution.max_concurrency` | 1/21 |
+| `composite.execution.retry` | 1/21 |
+| `composite.lineage.track_field_sources` | 1/21 |
+| `composite.lineage.track_status` | 1/21 |
+| `composite.lineage.track_timestamps` | 1/21 |
+| `composite.merge.conflict_resolution` | 1/21 |
+| `composite.merge.field_priorities` | 1/21 |
+| `composite.merge.output` | 1/21 |
+| `composite.merge.strategy` | 1/21 |
+| `composite.seed.output_keys` | 1/21 |
+| `composite.seed.pipeline` | 1/21 |
+| `composite.seed.silver_table` | 1/21 |
+| `composite.dq_rules.enricher_overrides.pubmed_publication` | 1/21 |
+| `composite.dq_rules.enricher_overrides.semanticscholar_publication` | 1/21 |
+| `composite.execution.retry.backoff_multiplier` | 1/21 |
+| `composite.execution.retry.max_attempts` | 1/21 |
+| `composite.merge.field_priorities.abstract` | 1/21 |
+| `composite.merge.field_priorities.citations_count` | 1/21 |
+| `composite.merge.field_priorities.concepts` | 1/21 |
+| `composite.merge.field_priorities.mesh_terms` | 1/21 |
+| `composite.merge.field_priorities.title` | 1/21 |
+| `composite.merge.field_priorities.tldr` | 1/21 |
+| `composite.merge.output.gold` | 1/21 |
+| `composite.merge.output.silver` | 1/21 |
+| `composite.dq_rules.enricher_overrides.pubmed_publication.hard_fail_threshold` | 1/21 |
+| `composite.dq_rules.enricher_overrides.pubmed_publication.soft_fail_threshold` | 1/21 |
+| `composite.dq_rules.enricher_overrides.semanticscholar_publication.hard_fail_threshold` | 1/21 |
+| `composite.dq_rules.enricher_overrides.semanticscholar_publication.soft_fail_threshold` | 1/21 |
+
+### description
+
+| Parameter | Presence |
+|-----------|----------|
+| `description` | 19/21 |
+
+### dq_config_file
+
+| Parameter | Presence |
+|-----------|----------|
+| `dq_config_file` | 15/21 |
+
+### dq_rules
+
+| Parameter | Presence |
+|-----------|----------|
+| `dq_rules` | 6/21 |
+| `dq_rules.conditional_validations` | 2/21 |
+| `dq_rules.cross_field_validations` | 6/21 |
+| `dq_rules.field_validations` | 6/21 |
+| `dq_rules.hard_fail_threshold` | 1/21 |
+| `dq_rules.invalid_record_policy` | 1/21 |
+| `dq_rules.report` | 1/21 |
+| `dq_rules.soft_fail_threshold` | 1/21 |
+| `dq_rules.strict_validation` | 1/21 |
+| `dq_rules.report.enabled` | 1/21 |
+| `dq_rules.report.format` | 1/21 |
+| `dq_rules.report.include_sample_failures` | 1/21 |
+| `dq_rules.report.sample_size` | 1/21 |
+
+### entity_type
+
+| Parameter | Presence |
+|-----------|----------|
+| `entity_type` | 19/21 |
+
+### filter_config_file
+
+| Parameter | Presence |
+|-----------|----------|
+| `filter_config_file` | 5/21 |
+
+### gold_filters
+
+| Parameter | Presence |
+|-----------|----------|
+| `gold_filters` | 1/21 |
+| `gold_filters.required_fields` | 1/21 |
+
+### gold_table
+
+| Parameter | Presence |
+|-----------|----------|
+| `gold_table` | 19/21 |
+
+### input_filter
+
+| Parameter | Presence |
+|-----------|----------|
+| `input_filter` | 1/21 |
+| `input_filter.batch_size` | 1/21 |
+| `input_filter.enabled` | 1/21 |
+
+### maintenance
+
+| Parameter | Presence |
+|-----------|----------|
+| `maintenance` | 1/21 |
+| `maintenance.auto_vacuum` | 1/21 |
+| `maintenance.vacuum_retention_days` | 1/21 |
+
+### pipeline_name
+
+| Parameter | Presence |
+|-----------|----------|
+| `pipeline_name` | 19/21 |
+
+### primary_keys
+
+| Parameter | Presence |
+|-----------|----------|
+| `primary_keys` | 19/21 |
+
+### provider
+
+| Parameter | Presence |
+|-----------|----------|
+| `provider` | 19/21 |
+
+### schema_version
+
+| Parameter | Presence |
+|-----------|----------|
+| `schema_version` | 1/21 |
+
+### silver_table
+
+| Parameter | Presence |
+|-----------|----------|
+| `silver_table` | 19/21 |
+
+### sink
+
+| Parameter | Presence |
+|-----------|----------|
+| `sink` | 19/21 |
+| `sink.bronze` | 17/21 |
+| `sink.gold` | 17/21 |
+| `sink.silver` | 19/21 |
+| `sink.bronze.deterministic` | 1/21 |
+| `sink.bronze.dq_report` | 1/21 |
+| `sink.bronze.flat_structure` | 6/21 |
+| `sink.bronze.format` | 1/21 |
+| `sink.bronze.metadata` | 1/21 |
+| `sink.bronze.path` | 16/21 |
+| `sink.bronze.save_json` | 1/21 |
+| `sink.bronze.save_metadata` | 1/21 |
+| `sink.gold.csv_export` | 17/21 |
+| `sink.gold.deterministic` | 1/21 |
+| `sink.gold.dq_report` | 1/21 |
+| `sink.gold.enabled` | 1/21 |
+| `sink.gold.flat_structure` | 6/21 |
+| `sink.gold.format` | 1/21 |
+| `sink.gold.metadata` | 1/21 |
+| `sink.gold.mode` | 1/21 |
+| `sink.gold.path` | 16/21 |
+| `sink.gold.save_metadata` | 1/21 |
+| `sink.gold.sort_by` | 16/21 |
+| `sink.gold.validation` | 1/21 |
+| `sink.silver.classification` | 1/21 |
+| `sink.silver.csv_export` | 17/21 |
+| `sink.silver.deterministic` | 1/21 |
+| `sink.silver.dq_report` | 1/21 |
+| `sink.silver.flat_structure` | 6/21 |
+| `sink.silver.forensic_retention` | 1/21 |
+| `sink.silver.format` | 1/21 |
+| `sink.silver.metadata` | 1/21 |
+| `sink.silver.mode` | 1/21 |
+| `sink.silver.on_schema_mismatch` | 1/21 |
+| `sink.silver.partition_by` | 16/21 |
+| `sink.silver.path` | 16/21 |
+| `sink.silver.primary_key` | 15/21 |
+| `sink.silver.save_metadata` | 1/21 |
+| `sink.silver.sort_by` | 16/21 |
+| `sink.bronze.dq_report.enabled` | 1/21 |
+| `sink.bronze.metadata.description` | 1/21 |
+| `sink.bronze.metadata.lineage` | 1/21 |
+| `sink.bronze.metadata.owner` | 1/21 |
+| `sink.bronze.metadata.retention_days` | 1/21 |
+| `sink.bronze.metadata.sla_freshness_hours` | 1/21 |
+| `sink.bronze.metadata.steward` | 1/21 |
+| `sink.bronze.metadata.tags` | 1/21 |
+| `sink.gold.csv_export.delimiter` | 1/21 |
+| `sink.gold.csv_export.enabled` | 1/21 |
+| `sink.gold.csv_export.encoding` | 1/21 |
+| `sink.gold.csv_export.header` | 1/21 |
+| `sink.gold.csv_export.path` | 16/21 |
+| `sink.gold.dq_report.enabled` | 1/21 |
+| `sink.gold.metadata.business_domain` | 1/21 |
+| `sink.gold.metadata.description` | 1/21 |
+| `sink.gold.metadata.lineage` | 1/21 |
+| `sink.gold.metadata.tags` | 1/21 |
+| `sink.gold.metadata.use_cases` | 1/21 |
+| `sink.gold.sort_by.ascending` | 16/21 |
+| `sink.gold.sort_by.columns` | 15/21 |
+| `sink.gold.validation.strict` | 1/21 |
+| `sink.silver.csv_export.delimiter` | 1/21 |
+| `sink.silver.csv_export.enabled` | 1/21 |
+| `sink.silver.csv_export.encoding` | 1/21 |
+| `sink.silver.csv_export.header` | 1/21 |
+| `sink.silver.csv_export.path` | 16/21 |
+| `sink.silver.dq_report.enabled` | 1/21 |
+| `sink.silver.metadata.description` | 1/21 |
+| `sink.silver.metadata.lineage` | 1/21 |
+| `sink.silver.metadata.quality_expectations` | 1/21 |
+| `sink.silver.metadata.tags` | 1/21 |
+| `sink.silver.sort_by.ascending` | 16/21 |
+| `sink.silver.sort_by.columns` | 15/21 |
+| `sink.bronze.metadata.lineage.extraction_method` | 1/21 |
+| `sink.bronze.metadata.lineage.source_system` | 1/21 |
+| `sink.bronze.metadata.lineage.source_version` | 1/21 |
+| `sink.gold.metadata.lineage.filters_applied` | 1/21 |
+| `sink.gold.metadata.lineage.source_layer` | 1/21 |
+| `sink.silver.metadata.lineage.source_layer` | 1/21 |
+| `sink.silver.metadata.lineage.transformations` | 1/21 |
+| `sink.silver.metadata.quality_expectations.accuracy` | 1/21 |
+| `sink.silver.metadata.quality_expectations.completeness` | 1/21 |
+
+### source
+
+| Parameter | Presence |
+|-----------|----------|
+| `source` | 4/21 |
+| `source.api` | 1/21 |
+| `source.api_key` | 1/21 |
+| `source.batch_size` | 1/21 |
+| `source.email` | 2/21 |
+| `source.input_path` | 1/21 |
+| `source.load_strategy` | 2/21 |
+| `source.search_term` | 1/21 |
+| `source.type` | 2/21 |
+| `source.api.base_url` | 1/21 |
+| `source.api.from_db` | 1/21 |
+| `source.api.to_db` | 1/21 |
+
+### source_file
+
+| Parameter | Presence |
+|-----------|----------|
+| `source_file` | 15/21 |
+
+### transform
+
+| Parameter | Presence |
+|-----------|----------|
+| `transform` | 1/21 |
+| `transform.steps` | 1/21 |
+
+### version
+
+| Parameter | Presence |
+|-----------|----------|
+| `version` | 19/21 |
+
+## 2. Entity Config Comparison
+
+| Config | pipeline_name | provider | entity_type | version | description | primary_keys | silver_table | gold_table | source_file | source | transform | dq_rules | circuit_breaker | rate_limit | gold_filters | sink | input_filter |
+|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
+| _base | — | — | — | — | — | — | — | — | — | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | ✓ |
+| chembl/activity | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | ✓ | — | — | — | — | — |
+| chembl/assay | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | ✓ | — | — | — | ✓ | — |
+| chembl/assay_parameters | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/cell_line | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/compound_record | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/molecule | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | — | — | — | ✓ | — |
+| chembl/protein_class | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/publication_similarity | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/publication_term | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/target | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | — | — | — | ✓ | — |
+| chembl/target_component | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| composite/publication | — | — | — | — | — | — | — | — | — | — | — | — | — | — | ✓ | — | — |
+| crossref/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| openalex/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | ✓ | — |
+| pubchem/compound | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | — | — | — | ✓ | — |
+| pubmed/publications | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | — |
+| semanticscholar/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| uniprot/idmapping | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | ✓ | — |
+| uniprot/protein | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | — | ✓ | — |
+
+## 3. Discrepancy Categories
+
+### A. Missing in _defaults (should be added)
+
+- `batch_size` - present in: chembl/protein_class
+- `checkpoint_interval` - present in: chembl/protein_class
+- `circuit_breaker` - present in: _base
+- `circuit_breaker.failure_threshold` - present in: _base
+- `circuit_breaker.recovery_timeout` - present in: _base
+- `composite` - present in: composite/publication
+- `composite.dq_rules` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.pubmed_publication` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.pubmed_publication.hard_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.pubmed_publication.soft_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.semanticscholar_publication` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.semanticscholar_publication.hard_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.semanticscholar_publication.soft_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.hard_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.required_fields` - present in: composite/publication
+- `composite.dq_rules.soft_fail_threshold` - present in: composite/publication
+- `composite.enrichers` - present in: composite/publication
+- `composite.execution` - present in: composite/publication
+- `composite.execution.checkpoint_enabled` - present in: composite/publication
+- `composite.execution.max_concurrency` - present in: composite/publication
+- `composite.execution.retry` - present in: composite/publication
+- `composite.execution.retry.backoff_multiplier` - present in: composite/publication
+- `composite.execution.retry.max_attempts` - present in: composite/publication
+- `composite.lineage` - present in: composite/publication
+- `composite.lineage.track_field_sources` - present in: composite/publication
+- `composite.lineage.track_status` - present in: composite/publication
+- `composite.lineage.track_timestamps` - present in: composite/publication
+- `composite.merge` - present in: composite/publication
+- `composite.merge.conflict_resolution` - present in: composite/publication
+- `composite.merge.field_priorities` - present in: composite/publication
+- `composite.merge.field_priorities.abstract` - present in: composite/publication
+- `composite.merge.field_priorities.citations_count` - present in: composite/publication
+- `composite.merge.field_priorities.concepts` - present in: composite/publication
+- `composite.merge.field_priorities.mesh_terms` - present in: composite/publication
+- `composite.merge.field_priorities.title` - present in: composite/publication
+- `composite.merge.field_priorities.tldr` - present in: composite/publication
+- `composite.merge.output` - present in: composite/publication
+- `composite.merge.output.gold` - present in: composite/publication
+- `composite.merge.output.silver` - present in: composite/publication
+- `composite.merge.strategy` - present in: composite/publication
+- `composite.name` - present in: composite/publication
+- `composite.seed` - present in: composite/publication
+- `composite.seed.output_keys` - present in: composite/publication
+- `composite.seed.pipeline` - present in: composite/publication
+- `composite.seed.silver_table` - present in: composite/publication
+- `composite.version` - present in: composite/publication
+- `description` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `dq_config_file` - present in: chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+- `dq_rules` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+- `dq_rules.conditional_validations` - present in: _base, chembl/activity
+- `dq_rules.cross_field_validations` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+- `dq_rules.field_validations` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+- `dq_rules.hard_fail_threshold` - present in: _base
+- `dq_rules.invalid_record_policy` - present in: _base
+- `dq_rules.report` - present in: _base
+- `dq_rules.report.enabled` - present in: _base
+- `dq_rules.report.format` - present in: _base
+- `dq_rules.report.include_sample_failures` - present in: _base
+- `dq_rules.report.sample_size` - present in: _base
+- `dq_rules.soft_fail_threshold` - present in: _base
+- `dq_rules.strict_validation` - present in: _base
+- `entity_type` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `filter_config_file` - present in: chembl/publication, chembl/publication_similarity, chembl/publication_term, composite/publication, pubmed/publications
+- `gold_filters` - present in: composite/publication
+- `gold_table` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `input_filter` - present in: _base
+- `maintenance` - present in: _base
+- `maintenance.auto_vacuum` - present in: _base
+- `maintenance.vacuum_retention_days` - present in: _base
+- `pipeline_name` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `primary_keys` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `provider` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `schema_version` - present in: _base
+- `silver_table` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `sink` - present in: _base, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `source` - present in: _base, openalex/publication, pubmed/publications, uniprot/idmapping
+- `source.api` - present in: uniprot/idmapping
+- `source.api.base_url` - present in: uniprot/idmapping
+- `source.api.from_db` - present in: uniprot/idmapping
+- `source.api.to_db` - present in: uniprot/idmapping
+- `source.api_key` - present in: pubmed/publications
+- `source.batch_size` - present in: openalex/publication
+- `source.email` - present in: openalex/publication, pubmed/publications
+- `source.input_path` - present in: uniprot/idmapping
+- `source.load_strategy` - present in: _base, uniprot/idmapping
+- `source.search_term` - present in: pubmed/publications
+- `source.type` - present in: _base, uniprot/idmapping
+- `source_file` - present in: chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+- `transform` - present in: _base
+- `transform.steps` - present in: _base
+- `version` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+
+### B. Inconsistent presence across entity configs
+
+- `description`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `dq_config_file`
+  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
+- `dq_rules`
+  - Present in (6): _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+  - Missing in (15): composite/publication, uniprot/idmapping, chembl/protein_class, chembl/compound_record, crossref/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, pubmed/publications, openalex/publication, uniprot/protein, semanticscholar/publication, chembl/publication
+- `dq_rules.conditional_validations`
+  - Present in (2): _base, chembl/activity
+  - Missing in (19): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, uniprot/idmapping, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
+- `dq_rules.cross_field_validations`
+  - Present in (6): _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+  - Missing in (15): composite/publication, uniprot/idmapping, chembl/protein_class, chembl/compound_record, crossref/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, pubmed/publications, openalex/publication, uniprot/protein, semanticscholar/publication, chembl/publication
+- `dq_rules.field_validations`
+  - Present in (6): _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+  - Missing in (15): composite/publication, uniprot/idmapping, chembl/protein_class, chembl/compound_record, crossref/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, pubmed/publications, openalex/publication, uniprot/protein, semanticscholar/publication, chembl/publication
+- `entity_type`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `filter_config_file`
+  - Present in (5): chembl/publication, chembl/publication_similarity, chembl/publication_term, composite/publication, pubmed/publications
+  - Missing in (16): chembl/target, uniprot/idmapping, _base, chembl/protein_class, semanticscholar/publication, crossref/publication, chembl/molecule, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/assay, chembl/activity, openalex/publication, uniprot/protein, pubchem/compound, chembl/compound_record
+- `gold_table`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `pipeline_name`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `primary_keys`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `provider`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `silver_table`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `sink`
+  - Present in (19): _base, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, chembl/activity
+- `sink.bronze`
+  - Present in (17): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (4): composite/publication, chembl/assay, uniprot/protein, chembl/activity
+- `sink.bronze.flat_structure`
+  - Present in (6): _base, chembl/publication, crossref/publication, openalex/publication, pubmed/publications, semanticscholar/publication
+  - Missing in (15): composite/publication, chembl/target, uniprot/idmapping, chembl/protein_class, chembl/publication_similarity, chembl/molecule, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/assay, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/compound_record
+- `sink.bronze.path`
+  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
+- `sink.gold`
+  - Present in (17): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (4): composite/publication, chembl/assay, uniprot/protein, chembl/activity
+- `sink.gold.csv_export`
+  - Present in (17): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (4): composite/publication, chembl/assay, uniprot/protein, chembl/activity
+- `sink.gold.csv_export.path`
+  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
+- `sink.gold.flat_structure`
+  - Present in (6): _base, chembl/publication, crossref/publication, openalex/publication, pubmed/publications, semanticscholar/publication
+  - Missing in (15): composite/publication, chembl/target, uniprot/idmapping, chembl/protein_class, chembl/publication_similarity, chembl/molecule, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/assay, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/compound_record
+- `sink.gold.path`
+  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
+- `sink.gold.sort_by`
+  - Present in (16): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
+- `sink.gold.sort_by.ascending`
+  - Present in (16): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
+- `sink.gold.sort_by.columns`
+  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
+- `sink.silver`
+  - Present in (19): _base, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, chembl/activity
+- `sink.silver.csv_export`
+  - Present in (17): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (4): composite/publication, chembl/assay, uniprot/protein, chembl/activity
+- `sink.silver.csv_export.path`
+  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
+- `sink.silver.flat_structure`
+  - Present in (6): _base, chembl/publication, crossref/publication, openalex/publication, pubmed/publications, semanticscholar/publication
+  - Missing in (15): composite/publication, chembl/target, uniprot/idmapping, chembl/protein_class, chembl/publication_similarity, chembl/molecule, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/assay, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/compound_record
+- `sink.silver.partition_by`
+  - Present in (16): _base, chembl/assay, chembl/assay_parameters, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (5): composite/publication, crossref/publication, chembl/cell_line, chembl/activity, chembl/compound_record
+- `sink.silver.path`
+  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
+- `sink.silver.primary_key`
+  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
+- `sink.silver.sort_by`
+  - Present in (16): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
+- `sink.silver.sort_by.ascending`
+  - Present in (16): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
+- `sink.silver.sort_by.columns`
+  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
+- `source`
+  - Present in (4): _base, openalex/publication, pubmed/publications, uniprot/idmapping
+  - Missing in (17): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, chembl/target, crossref/publication, chembl/molecule, chembl/assay
+- `source.email`
+  - Present in (2): openalex/publication, pubmed/publications
+  - Missing in (19): composite/publication, _base, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, uniprot/idmapping, chembl/target, crossref/publication, chembl/molecule, chembl/assay
+- `source.load_strategy`
+  - Present in (2): _base, uniprot/idmapping
+  - Missing in (19): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
+- `source.type`
+  - Present in (2): _base, uniprot/idmapping
+  - Missing in (19): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
+- `source_file`
+  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
+- `version`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+
+### C. Structural inconsistencies
+
+#### source vs source_file
+
+- Using `source`: _base, openalex/publication, pubmed/publications, uniprot/idmapping
+- Using `source_file`: chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+
+#### transform block
+
+- Has `transform`: _base
+- No `transform`: composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, uniprot/idmapping, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
+
+#### gold_table presence
+
+- Has `gold_table`: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- Missing `gold_table`: composite/publication, _base
 
 ================================================================================
 File: observability.md

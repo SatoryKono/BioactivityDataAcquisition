@@ -933,6 +933,252 @@ class EnrichmentCoordinator:
         return processed
 
 ================================================================================
+File: deduplication.py
+Path: composite\deduplication.py
+================================================================================
+"""Enricher deduplication logic for composite pipelines.
+
+Provides functionality to deduplicate enricher tables before join
+to prevent fan-out when enricher has duplicate values by join keys.
+"""
+
+from __future__ import annotations
+
+from datetime import date, datetime, time, timedelta
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import polars as pl
+
+    from bioetl.domain.ports import LoggerPort
+
+
+class EnricherDeduplicator:
+    """Handles deduplication of enricher tables before join operations."""
+
+    def __init__(self, logger: LoggerPort) -> None:
+        """Initialize deduplicator with logger.
+
+        Args:
+            logger: Logger port for warning messages.
+        """
+        self._logger = logger
+
+    def deduplicate(
+        self,
+        enricher_df: pl.DataFrame,
+        join_keys: list[str],
+        enricher_name: str,
+    ) -> pl.DataFrame:
+        """Check and deduplicate enricher before join.
+
+        Workflow:
+        1. Check for duplicates by join_keys
+        2. If no duplicates → return df unchanged
+        3. If duplicates exist → aggregate and log
+
+        Args:
+            enricher_df: Enricher DataFrame.
+            join_keys: Columns for join (grouping keys).
+            enricher_name: Name for logging.
+
+        Returns:
+            DataFrame with unique values by join_keys.
+        """
+        if not self._check_duplicates(enricher_df, join_keys):
+            return enricher_df
+        return self._aggregate_duplicates(enricher_df, join_keys, enricher_name)
+
+    def _check_duplicates(
+        self,
+        df: pl.DataFrame,
+        key_columns: list[str],
+    ) -> bool:
+        """Check for duplicates by key columns."""
+        if len(df) == 0:
+            return False
+        missing_cols = [c for c in key_columns if c not in df.columns]
+        if missing_cols:
+            return False
+        unique_count = df.select(key_columns).n_unique()
+        return unique_count < len(df)
+
+    def _aggregate_duplicates(
+        self,
+        df: pl.DataFrame,
+        key_columns: list[str],
+        enricher_name: str,
+    ) -> pl.DataFrame:
+        """Aggregate duplicates by merging differing values."""
+
+        records_before = len(df)
+        non_key_columns = [c for c in df.columns if c not in key_columns]
+
+        if not non_key_columns:
+            result = df.select(key_columns).unique(maintain_order=True)
+            self._log_deduplication(
+                enricher_name, key_columns, records_before, len(result), []
+            )
+            return result
+
+        columns_with_conflicts, columns_without_conflicts = self._classify_columns(
+            df, key_columns, non_key_columns
+        )
+
+        agg_exprs = self._build_aggregation_exprs(
+            df, columns_with_conflicts, columns_without_conflicts
+        )
+
+        result = df.group_by(key_columns, maintain_order=True).agg(agg_exprs)
+
+        self._log_deduplication(
+            enricher_name,
+            key_columns,
+            records_before,
+            len(result),
+            columns_with_conflicts,
+        )
+        return result
+
+    def _classify_columns(
+        self,
+        df: pl.DataFrame,
+        key_columns: list[str],
+        non_key_columns: list[str],
+    ) -> tuple[list[str], list[str]]:
+        """Classify columns into those with and without conflicts."""
+        columns_with_conflicts: list[str] = []
+        columns_without_conflicts: list[str] = []
+        for col in non_key_columns:
+            if self._has_group_conflicts(df, key_columns, col):
+                columns_with_conflicts.append(col)
+            else:
+                columns_without_conflicts.append(col)
+        return columns_with_conflicts, columns_without_conflicts
+
+    def _build_aggregation_exprs(
+        self,
+        df: pl.DataFrame,
+        columns_with_conflicts: list[str],
+        columns_without_conflicts: list[str],
+    ) -> list[pl.Expr]:
+        """Build aggregation expressions for all columns."""
+        import polars as pl
+
+        agg_exprs: list[pl.Expr] = []
+        for col in columns_without_conflicts:
+            agg_exprs.append(pl.col(col).first().alias(col))
+        for col in columns_with_conflicts:
+            agg_exprs.append(self._build_concat_expr(col, df.schema[col]))
+        return agg_exprs
+
+    def _has_group_conflicts(
+        self,
+        df: pl.DataFrame,
+        key_columns: list[str],
+        column: str,
+    ) -> bool:
+        """Check if column has conflicting values in any group."""
+        import polars as pl
+
+        conflict_check = df.group_by(key_columns).agg(
+            [
+                pl.col(column).drop_nulls().n_unique().alias("n_unique"),
+                pl.col(column).is_null().any().alias("has_null"),
+                pl.col(column).is_null().all().alias("all_null"),
+            ]
+        )
+        conflicts = conflict_check.filter(
+            (pl.col("n_unique") > 1) | (pl.col("has_null") & ~pl.col("all_null"))
+        )
+        return conflicts.height > 0
+
+    def _build_concat_expr(self, column: str, dtype: pl.DataType) -> pl.Expr:
+        """Build expression that concatenates values with |.
+
+        Note: Values are NOT sorted and duplicates are NOT removed.
+        The order is preserved from the original data.
+        """
+        import polars as pl
+
+        as_string = self._to_string_expr(column, dtype)
+        return (
+            pl.when(pl.col(column).is_null())
+            .then(pl.lit("null"))
+            .otherwise(as_string)
+            .str.join("|")
+            .alias(column)
+        )
+
+    def _to_string_expr(self, column: str, dtype: pl.DataType) -> pl.Expr:
+        """Convert column to string expression."""
+        import polars as pl
+
+        col_expr = pl.col(column)
+
+        if isinstance(dtype, (pl.List, pl.Struct)):
+            return col_expr.map_elements(
+                lambda x: str(x) if x is not None else None, return_dtype=pl.String
+            )
+        if dtype == pl.Boolean:
+            return (
+                pl.when(col_expr.is_null())
+                .then(pl.lit(None))
+                .when(col_expr)
+                .then(pl.lit("true"))
+                .otherwise(pl.lit("false"))
+            )
+        if isinstance(dtype, pl.Datetime):
+            return col_expr.dt.to_string("%Y-%m-%dT%H:%M:%SZ")
+        return col_expr.cast(pl.String)
+
+    def _log_deduplication(
+        self,
+        enricher_name: str,
+        key_columns: list[str],
+        records_before: int,
+        records_after: int,
+        columns_with_conflicts: list[str],
+    ) -> None:
+        """Log deduplication results."""
+        self._logger.warning(
+            "Duplicates aggregated in enricher",
+            enricher=enricher_name,
+            join_keys=key_columns,
+            duplicate_count=records_before - records_after,
+            records_before=records_before,
+            records_after=records_after,
+            columns_with_conflicts=columns_with_conflicts,
+        )
+
+
+def value_to_string(value: object, dtype: pl.DataType) -> str:
+    """Convert a single value to string representation.
+
+    Args:
+        value: Value to convert.
+        dtype: Original data type.
+
+    Returns:
+        String representation.
+    """
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, date) and not isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, datetime):
+        return value.strftime("%Y-%m-%dT%H:%M:%SZ")
+    if isinstance(value, time):
+        return value.isoformat()
+    if isinstance(value, timedelta):
+        return str(value)
+    if isinstance(value, (list, dict)):
+        return str(value)
+    return str(value)
+
+================================================================================
 File: fsm_helper.py
 Path: composite\fsm_helper.py
 ================================================================================
@@ -1319,6 +1565,7 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal
 
+from bioetl.application.composite.deduplication import EnricherDeduplicator
 from bioetl.domain.composite.result import EnrichmentResult, MergeResult
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
@@ -1379,6 +1626,7 @@ class MergeService:
         self._storage = storage
         self._logger = logger
         self._delta_reader = delta_reader
+        self._deduplicator = EnricherDeduplicator(logger)
 
     async def merge(
         self,
@@ -1657,7 +1905,9 @@ class MergeService:
         """
         # Check if path contains a recognized layer prefix
         normalized = table_path.replace("\\", "/")
-        has_layer = any(layer in normalized for layer in ("silver/", "gold/", "bronze/"))
+        has_layer = any(
+            layer in normalized for layer in ("silver/", "gold/", "bronze/")
+        )
         if not has_layer:
             return None
 
@@ -1902,6 +2152,44 @@ class MergeService:
             return df.rename(rename_map)
         return df
 
+    def _find_next_suffix(self, base_col: str, existing_cols: set[str]) -> str:
+        """Find next available suffix for a conflicting column.
+
+        Iterates through A, B, C, ... Z, AA, AB, ... to find an unused suffix.
+
+        Args:
+            base_col: Base column name without suffix.
+            existing_cols: Set of existing column names.
+
+        Returns:
+            Next available suffix letter(s).
+
+        Example:
+            >>> merger._find_next_suffix("title", {"title", "title.A", "title.B"})
+            'C'
+            >>> merger._find_next_suffix("title", {"title"})
+            'A'
+        """
+        # Generate suffixes: A, B, C, ..., Z, AA, AB, ...
+        suffix_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+        # Try single letters first
+        for char in suffix_chars:
+            candidate = f"{base_col}.{char}"
+            if candidate not in existing_cols:
+                return char
+
+        # Try double letters (AA, AB, ..., ZZ)
+        for first in suffix_chars:
+            for second in suffix_chars:
+                suffix = f"{first}{second}"
+                candidate = f"{base_col}.{suffix}"
+                if candidate not in existing_cols:
+                    return suffix
+
+        # Fallback (should never reach here with 702 possible suffixes)
+        raise ValueError(f"Exhausted all suffixes for column '{base_col}'")
+
     def _detect_and_resolve_conflicts(
         self,
         seed_df: pl.DataFrame,
@@ -1914,26 +2202,27 @@ class MergeService:
         - Seed already has a prefixed column (e.g., "crossref.title")
         - Enricher gets the same prefix (e.g., "crossref.title")
 
-        Resolution: Add .A suffix to seed, .B suffix to enricher.
+        Resolution: Keep seed columns unchanged, add incremental suffixes
+        (A, B, C, ...) to enricher columns.
 
         Args:
-            seed_df: Seed DataFrame.
+            seed_df: Seed DataFrame (columns are NOT renamed).
             enricher_df: Enricher DataFrame (already with prefixes applied).
             join_keys: Set of join key columns to exclude from conflict resolution.
 
         Returns:
-            Tuple of (modified_seed_df, modified_enricher_df) with conflicts resolved.
+            Tuple of (seed_df unchanged, modified_enricher_df) with conflicts resolved.
 
         Example:
-            >>> seed = pl.DataFrame({"doi": ["10.1/a"], "crossref.title": ["T1"]})
-            >>> enricher = pl.DataFrame({"doi": ["10.1/a"], "crossref.title": ["T2"]})
+            >>> seed = pl.DataFrame({"doi": ["10.1/a"], "title": ["T1"]})
+            >>> enricher = pl.DataFrame({"doi": ["10.1/a"], "title": ["T2"]})
             >>> seed_out, enricher_out = merger._detect_and_resolve_conflicts(
             ...     seed, enricher, {"doi"}
             ... )
             >>> seed_out.columns
-            ['doi', 'crossref.title.A']
+            ['doi', 'title']
             >>> enricher_out.columns
-            ['doi', 'crossref.title.B']
+            ['doi', 'title.A']
         """
         seed_cols = set(seed_df.columns)
         enricher_cols = set(enricher_df.columns)
@@ -1944,17 +2233,21 @@ class MergeService:
         if not conflicts:
             return seed_df, enricher_df
 
+        # Build rename map for enricher columns only
+        # Use incremental suffixes, checking existing columns
+        enricher_rename = {}
+        for col in conflicts:
+            suffix = self._find_next_suffix(col, seed_cols)
+            enricher_rename[col] = f"{col}.{suffix}"
+
         self._logger.warning(
             "Column name conflicts detected after prefixing",
             conflicts=list(conflicts),
-            resolution="Adding .A/.B suffixes",
+            resolution=f"Renaming enricher columns: {enricher_rename}",
         )
 
-        # Rename conflicting columns
-        seed_rename = {col: f"{col}.A" for col in conflicts}
-        enricher_rename = {col: f"{col}.B" for col in conflicts}
-
-        return seed_df.rename(seed_rename), enricher_df.rename(enricher_rename)
+        # Seed columns remain unchanged, only enricher gets renamed
+        return seed_df, enricher_df.rename(enricher_rename)
 
     async def _apply_joins(
         self,
@@ -2012,16 +2305,29 @@ class MergeService:
                 continue
 
             enricher_df = enricher_dfs[enricher.pipeline]
-            join_keys = set(enricher.join_keys)
-            join_keys_list = list(join_keys)
+            join_keys_list = list(enricher.join_keys)
+
+            # Primary key is the FIRST join key - used for actual join
+            # Secondary keys are fallbacks but NOT used in join operation
+            primary_key = join_keys_list[0]
+            primary_key_set = {primary_key}
+
+            # Deduplicate enricher before join to prevent fan-out
+            enricher_df = self._deduplicator.deduplicate(
+                enricher_df=enricher_df,
+                join_keys=join_keys_list,
+                enricher_name=enricher.pipeline,
+            )
 
             # Normalize join key columns for case-insensitive matching
             # This ensures DOIs like "10.1038/NATURE" match "10.1038/nature"
             merged = self._normalize_join_key_columns(merged, join_keys_list)
             enricher_df = self._normalize_join_key_columns(enricher_df, join_keys_list)
 
-            # Find non-join columns in enricher
-            non_join_cols = set(enricher_df.columns) - join_keys
+            # Find columns to prefix: all columns EXCEPT the primary join key
+            # Secondary join keys (title, doi when not primary) SHOULD be prefixed
+            # to avoid Polars adding its own suffix during join
+            non_join_cols = set(enricher_df.columns) - primary_key_set
 
             # Determine prefix strategy
             if seed_provider is not None and seed_entity is not None:
@@ -2060,11 +2366,12 @@ class MergeService:
                     }
 
                     # Apply prefix to non-join columns
+                    # Only exclude primary key, secondary keys get prefixed
                     enricher_df = self._apply_column_prefix(
                         enricher_df,
                         non_join_cols - already_prefixed,
                         prefix,
-                        join_keys,
+                        primary_key_set,
                     )
 
                 except ValueError:
@@ -2074,22 +2381,22 @@ class MergeService:
                         enricher=enricher.pipeline,
                     )
                     enricher_df = self._apply_legacy_prefix(
-                        enricher_df, enricher.pipeline, non_join_cols, join_keys
+                        enricher_df, enricher.pipeline, non_join_cols, primary_key_set
                     )
             else:
                 # No seed pipeline provided - use legacy prefix
                 enricher_df = self._apply_legacy_prefix(
-                    enricher_df, enricher.pipeline, non_join_cols, join_keys
+                    enricher_df, enricher.pipeline, non_join_cols, primary_key_set
                 )
 
             # Detect and resolve remaining conflicts
+            # Only exclude primary key - secondary keys should be checked for conflicts
             merged, enricher_df = self._detect_and_resolve_conflicts(
-                merged, enricher_df, join_keys
+                merged, enricher_df, primary_key_set
             )
 
             # Apply join based on strategy
             how = self._get_polars_join_type()
-            primary_key = join_keys_list[0]
 
             if primary_key in merged.columns and primary_key in enricher_df.columns:
                 merged = merged.join(
@@ -4625,7 +4932,7 @@ class BaseTransformer(ABC):
         *,
         allow_empty: bool = False,
     ) -> Any:
-        """Extract and validate a required field from record.
+        """Extract and validate a required field from the record.
 
         Args:
             record: Bronze record dictionary.
@@ -10254,13 +10561,16 @@ Architecture:
     ChEMBL API (document endpoint)
            ↓
     PublicationTermDataSource (wrapper)
-      - fetch("document_term") → wrapped.fetch("document")
+      - fetch("publication_term") → wrapped.fetch("publication")
       - transforms each publication → yields term records
            ↓
     Pipeline receives term records
 
 .. versionchanged:: 2.0.0
     Renamed from DocumentTermDataSource to PublicationTermDataSource (ADR-024).
+.. versionchanged:: 2.1.0
+    Changed entity types from document/document_term to publication/publication_term
+    for naming consistency (ADR-024 naming unification).
 """
 
 from __future__ import annotations
@@ -10290,8 +10600,8 @@ class PublicationTermDataSource:
     - KEYWORD: Author-provided keywords from keywords array
 
     The wrapper:
-    1. Intercepts fetch("document_term") calls
-    2. Fetches publications from the wrapped adapter via fetch("document")
+    1. Intercepts fetch("publication_term") calls
+    2. Fetches publications from the wrapped adapter via fetch("publication")
     3. Extracts terms from each publication (1:M relationship)
     4. Yields individual term records with computed entity_id
     5. Delegates all other operations to the wrapped adapter
@@ -10299,7 +10609,7 @@ class PublicationTermDataSource:
     Example:
         >>> wrapped = PublicationTermDataSource(chembl_adapter)
         >>> async with wrapped:
-        ...     async for term in wrapped.fetch("document_term", limit=100):
+        ...     async for term in wrapped.fetch("publication_term", limit=100):
         ...         process_term(term)  # term has keys: term, term_type, etc.
 
     .. versionchanged:: 2.0.0
@@ -10307,9 +10617,11 @@ class PublicationTermDataSource:
     """
 
     # Source entity type to fetch from wrapped adapter
-    SOURCE_ENTITY_TYPE = "document"
+    # Uses canonical "publication" name (ADR-024 naming unification)
+    SOURCE_ENTITY_TYPE = "publication"
     # Target entity type this wrapper provides
-    TARGET_ENTITY_TYPE = "document_term"
+    # Uses canonical "publication_term" name (ADR-024 naming unification)
+    TARGET_ENTITY_TYPE = "publication_term"
     # Multiplier for publication limit estimation.
     # Not all publications have terms (mesh_terms/keywords may be empty).
     # Analysis shows ~20-30% of ChEMBL publications have terms.
@@ -10355,11 +10667,11 @@ class PublicationTermDataSource:
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records, extracting terms if entity_type is document_term.
+        """Fetch records, extracting terms if entity_type is publication_term.
 
-        For document_term entity type:
-        - Fetches documents from wrapped adapter
-        - Extracts terms from each document
+        For publication_term entity type:
+        - Fetches publications from wrapped adapter
+        - Extracts terms from each publication
         - Yields individual term records
 
         For other entity types:
@@ -10367,7 +10679,7 @@ class PublicationTermDataSource:
 
         Args:
             entity_type: Type of entity to fetch.
-            limit: Maximum number of records (for document_term, limits total terms).
+            limit: Maximum number of records (for publication_term, limits total terms).
             query: Optional search query.
             filter_ids: Optional filter IDs (passed to wrapped adapter).
             filter_field: Optional filter field (passed to wrapped adapter).
@@ -10608,20 +10920,20 @@ class PublicationTermDataSource:
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch filtered records, extracting terms if entity_type is document_term.
+        """Fetch filtered records, extracting terms if entity_type is publication_term.
 
         Implements FilterableDataSourcePort.fetch_filtered().
 
-        For document_term entity type:
-        - Delegates to wrapped adapter's fetch_filtered("document", ...)
-        - Extracts terms from each document
+        For publication_term entity type:
+        - Delegates to wrapped adapter's fetch_filtered("publication", ...)
+        - Extracts terms from each publication
 
         For other entity types:
         - Delegates directly to wrapped adapter
 
         Args:
             entity_type: Type of entity to fetch.
-            filter_ids: List of IDs to filter by (document_chembl_id for document_term).
+            filter_ids: List of IDs to filter by (document_chembl_id for publication_term).
             filter_field: Field name to filter on.
             limit: Maximum number of records to fetch.
 
@@ -16718,18 +17030,18 @@ This package provides pipelines and transformers for extracting and
 processing data from the PubMed database.
 
 Main Components:
-- PubMedPublicationsPipeline: Pipeline for publication data
+- PubMedPublicationPipeline: Pipeline for publication data
 - PubMedPublicationTransformer: Transformer for publication data
 """
 
 from __future__ import annotations
 
-from bioetl.application.pipelines.pubmed.publications import PubMedPublicationsPipeline
+from bioetl.application.pipelines.pubmed.publication import PubMedPublicationPipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 
 __all__ = [
+    "PubMedPublicationPipeline",
     "PubMedPublicationTransformer",
-    "PubMedPublicationsPipeline",
 ]
 
 ================================================================================
@@ -17681,11 +17993,11 @@ class IdentifierExtractor(BaseFieldExtractor):
         return extractor._normalize_text(raw)
 
 ================================================================================
-File: publications.py
-Path: pipelines\pubmed\publications.py
+File: publication.py
+Path: pipelines\pubmed\publication.py
 ================================================================================
-# src/bioetl/application/pipelines/pubmed/publications.py
-"""PubMed Publications Pipeline.
+# src/bioetl/application/pipelines/pubmed/publication.py
+"""PubMed Publication Pipeline.
 
 Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
 """
@@ -17695,7 +18007,7 @@ from __future__ import annotations
 from bioetl.application.core.base import BasePipeline
 
 
-class PubMedPublicationsPipeline(BasePipeline):
+class PubMedPublicationPipeline(BasePipeline):
     """Пайплайн для данных о публикациях из PubMed.
 
     Transformer is injected via DI from GenericPipelineFactory.
