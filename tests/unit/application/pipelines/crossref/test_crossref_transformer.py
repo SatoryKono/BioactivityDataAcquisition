@@ -444,7 +444,9 @@ def test_doc_type_mapping_all_types():
         "other",
     ]
     for doc_type in publication_types:
-        assert CROSSREF_TYPE_MAP[doc_type] == "PUBLICATION", f"{doc_type} should map to PUBLICATION"
+        assert CROSSREF_TYPE_MAP[doc_type] == "PUBLICATION", (
+            f"{doc_type} should map to PUBLICATION"
+        )
 
     # PREPRINT types
     assert CROSSREF_TYPE_MAP["posted-content"] == "PREPRINT"

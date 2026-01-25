@@ -156,7 +156,9 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             **dates,
             "year": extract_year(rec),
             "publication_date": publication_date,
-            "doc_type": CROSSREF_TYPE_MAP.get(rec.get("type", ""), CROSSREF_TYPE_DEFAULT),
+            "doc_type": CROSSREF_TYPE_MAP.get(
+                rec.get("type", ""), CROSSREF_TYPE_DEFAULT
+            ),
             "citation_count": rec.get("is-referenced-by-count"),
             "reference_count": rec.get("references-count"),
             "language": rec.get("language"),
