@@ -26,11 +26,13 @@ class TestColumnRenamer:
 
     def test_rename_all_business_columns(self, renamer: ColumnRenamer) -> None:
         """All business columns get qualified names."""
-        df = pl.DataFrame({
-            "title": ["T1"],
-            "abstract": ["A1"],
-            "journal": ["J1"],
-        })
+        df = pl.DataFrame(
+            {
+                "title": ["T1"],
+                "abstract": ["A1"],
+                "journal": ["J1"],
+            }
+        )
         result = renamer.rename_dataframe(df, "chembl_publication")
 
         assert "chembl.publication.title" in result.columns
@@ -39,12 +41,14 @@ class TestColumnRenamer:
 
     def test_exclude_join_keys_by_default(self, renamer: ColumnRenamer) -> None:
         """Join keys are not renamed by default."""
-        df = pl.DataFrame({
-            "doi": ["10.1/a"],
-            "pmid": ["123"],
-            "pmc_id": ["PMC456"],
-            "title": ["T1"],
-        })
+        df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "pmid": ["123"],
+                "pmc_id": ["PMC456"],
+                "title": ["T1"],
+            }
+        )
         result = renamer.rename_dataframe(df, "chembl_publication")
 
         assert "doi" in result.columns
@@ -64,11 +68,13 @@ class TestColumnRenamer:
 
     def test_skip_system_columns(self, renamer: ColumnRenamer) -> None:
         """System columns (starting with _) are not renamed."""
-        df = pl.DataFrame({
-            "_run_id": ["r1"],
-            "_ingestion_ts": ["2025-01-01"],
-            "title": ["T1"],
-        })
+        df = pl.DataFrame(
+            {
+                "_run_id": ["r1"],
+                "_ingestion_ts": ["2025-01-01"],
+                "title": ["T1"],
+            }
+        )
         result = renamer.rename_dataframe(df, "chembl_publication")
 
         assert "_run_id" in result.columns
@@ -77,10 +83,12 @@ class TestColumnRenamer:
 
     def test_skip_already_qualified(self, renamer: ColumnRenamer) -> None:
         """Already qualified columns are not renamed."""
-        df = pl.DataFrame({
-            "crossref.publication.title": ["T1"],
-            "abstract": ["A1"],
-        })
+        df = pl.DataFrame(
+            {
+                "crossref.publication.title": ["T1"],
+                "abstract": ["A1"],
+            }
+        )
         result = renamer.rename_dataframe(df, "chembl_publication")
 
         assert "crossref.publication.title" in result.columns
@@ -121,10 +129,12 @@ class TestColumnRenamer:
 
     def test_data_preserved_after_rename(self, renamer: ColumnRenamer) -> None:
         """Data values are preserved after renaming."""
-        df = pl.DataFrame({
-            "title": ["Title 1", "Title 2"],
-            "doi": ["10.1/a", "10.1/b"],
-        })
+        df = pl.DataFrame(
+            {
+                "title": ["Title 1", "Title 2"],
+                "doi": ["10.1/a", "10.1/b"],
+            }
+        )
         result = renamer.rename_dataframe(df, "chembl_publication")
 
         assert result["chembl.publication.title"].to_list() == ["Title 1", "Title 2"]
