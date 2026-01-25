@@ -369,7 +369,7 @@ class Batch:
                 run_id=self._run_id,
                 batch_id=self._batch_id,
                 record_id=str(record.entity_id) if record.entity_id else None,
-                error_code=error_code or "UNKNOWN",
+                error_code=error_code,
                 error_message=error,
                 content_hash=record.content_hash,
             )

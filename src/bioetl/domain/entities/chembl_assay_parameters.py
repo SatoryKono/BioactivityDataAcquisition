@@ -45,8 +45,8 @@ class AssayParameters(BaseEntity):
     # === Foreign Key (REQUIRED) ===
     assay_chembl_id: str
 
-    # === Parameter Type (REQUIRED) ===
-    type: str
+    # === Parameter Type (Optional, may be None if not provided by API) ===
+    type: str | None = None
 
     # === Raw Values (API-OPTIONAL) ===
     relation: str | None = None  # Relation (=, <, >, ~, >=, <=)
@@ -75,8 +75,6 @@ class AssayParameters(BaseEntity):
             )
         if not self.assay_chembl_id or not self.assay_chembl_id.startswith("CHEMBL"):
             raise ValueError(f"Invalid assay_chembl_id: {self.assay_chembl_id}")
-        if not self.type:
-            raise ValueError("type is required")
 
     def has_numeric_value(self) -> bool:
         """Check if parameter has numeric value (raw or standardized)."""
