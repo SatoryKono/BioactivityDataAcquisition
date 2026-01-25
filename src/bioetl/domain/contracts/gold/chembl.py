@@ -339,12 +339,14 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     # ChEMBL release metadata
     chembl_release: Series[str] = pa.Field(nullable=True)
     creation_date: Series[str] = pa.Field(nullable=True)
-
-    # publication_date: Unified date field (ChEMBL only provides year, so typically NULL)
+    # publication_date: Unified date field (YYYY-MM-DD) for cross-provider linking
     publication_date: Series[str] = pa.Field(nullable=True)
 
-    # Note: Unified publication fields (language, citation_count, is_oa)
-    # excluded - not available from ChEMBL API
+    # Unified publication fields (for cross-provider data linking)
+    # Note: ChEMBL doesn't provide these natively, but included for schema consistency
+    citation_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    is_oa: Series[bool] = pa.Field(nullable=True)
+    language: Series[str] = pa.Field(nullable=True)
 
     # System field (per SYSTEM_FIELDS_PREFIX)
     source: Series[str] = pa.Field(nullable=True, alias="_source")
