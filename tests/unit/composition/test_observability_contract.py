@@ -110,7 +110,9 @@ class TestBootstrapObservability:
         mock_start_server: MagicMock,
     ) -> None:
         """Test that bootstrap returns bundle with valid implementations."""
-        from bioetl.composition.bootstrap.runtime.observability import bootstrap_observability
+        from bioetl.composition.bootstrap.runtime.observability import (
+            bootstrap_observability,
+        )
 
         # Setup mocks
         mock_logger = MagicMock()
@@ -143,7 +145,9 @@ class TestBootstrapObservability:
         mock_unified_logger_cls: MagicMock,
     ) -> None:
         """Test that NoOpMetrics is used when metrics disabled."""
-        from bioetl.composition.bootstrap.runtime.observability import bootstrap_observability
+        from bioetl.composition.bootstrap.runtime.observability import (
+            bootstrap_observability,
+        )
 
         mock_logger = MagicMock()
         mock_logger.info = MagicMock()
@@ -168,7 +172,9 @@ class TestBootstrapObservability:
         mock_unified_logger_cls: MagicMock,
     ) -> None:
         """Test that bootstrap logs observability initialization."""
-        from bioetl.composition.bootstrap.runtime.observability import bootstrap_observability
+        from bioetl.composition.bootstrap.runtime.observability import (
+            bootstrap_observability,
+        )
 
         mock_logger = MagicMock()
         mock_unified_logger_cls.return_value = mock_logger
@@ -457,7 +463,9 @@ class TestObservabilityPreflightValidation:
         mock_start_server: MagicMock,
     ) -> None:
         """Test that bootstrap_observability calls preflight validation."""
-        from bioetl.composition.bootstrap.runtime.observability import bootstrap_observability
+        from bioetl.composition.bootstrap.runtime.observability import (
+            bootstrap_observability,
+        )
 
         mock_logger = MagicMock()
         mock_unified_logger_cls.return_value = mock_logger

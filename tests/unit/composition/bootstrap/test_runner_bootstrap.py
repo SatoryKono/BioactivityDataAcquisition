@@ -1,4 +1,4 @@
-"""Unit tests for composition/_bootstrap/runner.py.
+"""Unit tests for bootstrap pipeline runner service function.
 
 Tests bootstrap functions for PipelineRunnerService assembly.
 """
@@ -10,7 +10,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.application.services import PipelineRunnerService
-from bioetl.composition.bootstrap import bootstrap_pipeline_runner_service
+from bioetl.composition.bootstrap.runtime.runner import (
+    bootstrap_pipeline_runner_service,
+)
 from bioetl.composition.factories.runner_factory import (
     MetricsExtractor,
     RunnerFactory,

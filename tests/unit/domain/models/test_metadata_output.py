@@ -14,6 +14,7 @@ from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
     BronzeMetadata,
     BronzeOutputExt,
+    DeltaMetrics,
     EnvironmentMetadata,
     FileOutputMetadata,
     GoldMetadata,
@@ -23,7 +24,6 @@ from bioetl.domain.models.metadata import (
     RunTypeEnum,
     SilverMetadata,
     SilverOutputExt,
-    DeltaMetrics,
 )
 
 

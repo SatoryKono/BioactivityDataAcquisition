@@ -145,13 +145,13 @@ class TestDoiSchemaIntegration:
         assert hasattr(publication, "DOI_REGEX_PATTERN")
         assert publication.DOI_REGEX_PATTERN == DOI_REGEX_PATTERN
 
-    def test_pubmed_article_uses_doi_regex_pattern(self) -> None:
-        """Test PubMed ArticleSchema uses DOI_REGEX_PATTERN constant."""
-        from bioetl.domain.schemas.pubmed import article
+    def test_pubmed_publication_uses_doi_regex_pattern(self) -> None:
+        """Test PubMed PubMedPublicationSchema uses DOI_REGEX_PATTERN constant."""
+        from bioetl.domain.schemas.pubmed import publication
 
         # Verify the import exists
-        assert hasattr(article, "DOI_REGEX_PATTERN")
-        assert article.DOI_REGEX_PATTERN == DOI_REGEX_PATTERN
+        assert hasattr(publication, "DOI_REGEX_PATTERN")
+        assert publication.DOI_REGEX_PATTERN == DOI_REGEX_PATTERN
 
     def test_semanticscholar_publication_uses_doi_regex_pattern(self) -> None:
         """Test SemanticScholar PublicationSchema uses DOI_REGEX_PATTERN constant."""
@@ -191,12 +191,12 @@ class TestDoiSchemaIntegration:
         from bioetl.domain.schemas.crossref import publication as crossref_pub
         from bioetl.domain.schemas.crossref import work
         from bioetl.domain.schemas.openalex import publication as openalex_pub
-        from bioetl.domain.schemas.pubmed import article
+        from bioetl.domain.schemas.pubmed import publication as pubmed_pub
         from bioetl.domain.schemas.semanticscholar import publication as s2_pub
 
         patterns = [
             chembl_pub.DOI_REGEX_PATTERN,
-            article.DOI_REGEX_PATTERN,
+            pubmed_pub.DOI_REGEX_PATTERN,
             s2_pub.DOI_REGEX_PATTERN,
             openalex_pub.DOI_REGEX_PATTERN,
             crossref_pub.DOI_REGEX_PATTERN,

@@ -9,45 +9,45 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.composition.bootstrap import (
+from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
+from bioetl.composition.bootstrap.cli.storage import (
+    _create_table_collector,
     bootstrap_bronze_cleanup_service,
-    bootstrap_cleanup,
+    bootstrap_cleanup_service,
     bootstrap_lifecycle_service,
-    bootstrap_storage,
     bootstrap_vacuum_service,
 )
-from bioetl.composition.bootstrap.cli.storage import _create_table_collector
 from bioetl.composition.factories.storage import StorageAdapter
 
 
 @pytest.mark.unit
-class TestBootstrapStorage:
-    """Test bootstrap_storage function."""
+class TestBootstrapStorageAdapter:
+    """Test bootstrap_storage_adapter function."""
 
     @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
     def test_returns_storage_adapter(self, mock_settings: MagicMock) -> None:
-        """Test that bootstrap_storage returns a StorageAdapter."""
+        """Test that bootstrap_storage_adapter returns a StorageAdapter."""
         mock_settings.return_value.bronze_path = "/tmp/bronze"
         mock_settings.return_value.silver_path = "/tmp/silver"
         mock_settings.return_value.gold_path = "/tmp/gold"
 
-        result = bootstrap_storage()
+        result = bootstrap_storage_adapter()
 
         assert isinstance(result, StorageAdapter)
 
 
 @pytest.mark.unit
-class TestBootstrapCleanup:
-    """Test bootstrap_cleanup function."""
+class TestBootstrapCleanupService:
+    """Test bootstrap_cleanup_service function."""
 
-    @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
+    @patch("bioetl.composition.bootstrap.cli.storage.get_settings")
     def test_returns_cleanup_service(self, mock_settings: MagicMock) -> None:
-        """Test that bootstrap_cleanup returns a CleanupService."""
+        """Test that bootstrap_cleanup_service returns a CleanupService."""
         mock_settings.return_value.bronze_path = "/tmp/bronze"
         mock_settings.return_value.silver_path = "/tmp/silver"
         mock_settings.return_value.gold_path = "/tmp/gold"
 
-        result = bootstrap_cleanup()
+        result = bootstrap_cleanup_service()
 
         from bioetl.application.core.cleanup_service import CleanupService
 
@@ -58,7 +58,7 @@ class TestBootstrapCleanup:
 class TestBootstrapLifecycleService:
     """Test bootstrap_lifecycle_service function."""
 
-    @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
+    @patch("bioetl.composition.bootstrap.cli.storage.get_settings")
     def test_returns_medallion_lifecycle_service(
         self,
         mock_settings: MagicMock,
@@ -81,7 +81,7 @@ class TestBootstrapLifecycleService:
 class TestBootstrapBronzeCleanupService:
     """Test bootstrap_bronze_cleanup_service function."""
 
-    @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
+    @patch("bioetl.composition.bootstrap.cli.storage.get_settings")
     def test_returns_bronze_cleanup_service(
         self,
         mock_settings: MagicMock,
@@ -102,7 +102,7 @@ class TestBootstrapBronzeCleanupService:
 class TestBootstrapVacuumService:
     """Test bootstrap_vacuum_service function."""
 
-    @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
+    @patch("bioetl.composition.bootstrap.cli.storage.get_settings")
     def test_returns_vacuum_service(self, mock_settings: MagicMock) -> None:
         """Test that bootstrap_vacuum_service returns VacuumService."""
         mock_settings.return_value.bronze_path = "/tmp/bronze"
