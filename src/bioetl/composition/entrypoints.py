@@ -65,27 +65,25 @@ __all__ = [
     "maybe_start_metrics_server",
 ]
 
-from bioetl.composition._bootstrap import (
+from bioetl.composition.bootstrap import (
     HealthServerDependencies,
     bootstrap_bronze_cleanup_service,
+    bootstrap_checkpoint_manager,
     bootstrap_checkpoint_service,
+    bootstrap_cleanup,
     bootstrap_config_service,
     bootstrap_export_service,
     bootstrap_health_server_dependencies,
     bootstrap_health_service,
+    bootstrap_lifecycle_service,
     bootstrap_lock_service,
     bootstrap_metrics_service,
+    bootstrap_pipeline,
     bootstrap_pipeline_runner_service,
     bootstrap_quarantine,
+    bootstrap_quarantine_manager,
     bootstrap_quarantine_service,
     bootstrap_vacuum_service,
-)
-from bioetl.composition.bootstrap import (
-    bootstrap_checkpoint_manager,
-    bootstrap_cleanup,
-    bootstrap_lifecycle_service,
-    bootstrap_pipeline,
-    bootstrap_quarantine_manager,
     load_pipeline_config,
     maybe_start_metrics_server,
 )

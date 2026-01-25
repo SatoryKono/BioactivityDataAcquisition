@@ -301,14 +301,14 @@ class TestObservabilityBootstrap:
         factory_paths = [
             Path("src/bioetl/composition/factories/observability_factory.py"),
             Path("src/bioetl/composition/factories/observability.py"),
-            Path("src/bioetl/composition/_bootstrap/observability.py"),
+            Path("src/bioetl/composition/bootstrap/runtime/observability.py"),
         ]
 
         exists = any(p.exists() for p in factory_paths)
 
-        # If not a dedicated file, check bootstrap
+        # If not a dedicated file, check bootstrap package
         if not exists:
-            bootstrap_path = Path("src/bioetl/composition/bootstrap.py")
+            bootstrap_path = Path("src/bioetl/composition/bootstrap/__init__.py")
             if bootstrap_path.exists():
                 source = bootstrap_path.read_text()
                 exists = "bootstrap_observability" in source

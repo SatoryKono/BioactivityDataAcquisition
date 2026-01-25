@@ -178,7 +178,7 @@ class TestRunCompositeInner:
                 return_value=mock_config,
             ),
             patch(
-                "bioetl.interfaces.cli.commands.run_composite.bootstrap_composite_pipeline",
+                "bioetl.interfaces.cli.commands.run_composite.bootstrap_composite_runner",
                 return_value=mock_runner,
             ),
         ):
@@ -206,7 +206,7 @@ class TestRunCompositeInner:
                 return_value=mock_config,
             ),
             patch(
-                "bioetl.interfaces.cli.commands.run_composite.bootstrap_composite_pipeline",
+                "bioetl.interfaces.cli.commands.run_composite.bootstrap_composite_runner",
                 return_value=mock_runner,
             ),
         ):
@@ -244,7 +244,7 @@ class TestRunCompositeInner:
                 return_value=mock_config,
             ),
             patch(
-                "bioetl.interfaces.cli.commands.run_composite.bootstrap_composite_pipeline",
+                "bioetl.interfaces.cli.commands.run_composite.bootstrap_composite_runner",
                 return_value=mock_runner,
             ),
         ):
@@ -269,7 +269,7 @@ class TestRunCompositeInner:
                 return_value=mock_config,
             ),
             patch(
-                "bioetl.interfaces.cli.commands.run_composite.bootstrap_composite_pipeline",
+                "bioetl.interfaces.cli.commands.run_composite.bootstrap_composite_runner",
                 return_value=mock_runner,
             ),
         ):
