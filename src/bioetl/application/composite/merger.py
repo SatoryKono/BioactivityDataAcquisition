@@ -184,13 +184,20 @@ class MergeService:
             sources_used=sources_used,
         )
 
+        # Step 6: Order columns by semantic groups
+        merged_df = self._orderer.order_columns(merged_df)
+        self._logger.info(
+            "Ordered columns by semantic groups",
+            total_columns=len(merged_df.columns),
+        )
+
         # Calculate statistics before writing
         records_merged = len(merged_df)
         records_enriched = self._count_enriched_records(
             merged_df, enrichers, effective_seed_pipeline
         )
 
-        # Step 6: Write to Silver via StoragePort
+        # Step 7: Write to Silver via StoragePort
         self._logger.info(
             "Writing merged Silver table",
             path=self._config.output_silver_path,
@@ -200,7 +207,7 @@ class MergeService:
             merged_df, run_id=run_id, sources_used=sources_used
         )
 
-        # Step 7: Write to Gold via StoragePort
+        # Step 8: Write to Gold via StoragePort
         self._logger.info(
             "Writing merged Gold table",
             path=self._config.output_gold_path,
