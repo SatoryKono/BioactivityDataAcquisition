@@ -5,12 +5,17 @@ Tests the pure functions in extractors.py module.
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.pipelines.crossref.extractors import (
     extract_authors,
+    extract_content_domain,
     extract_dates,
+    extract_issn_by_type,
     extract_journal_info,
     extract_license_url,
     extract_page_info,
+    extract_published_date,
     extract_year,
 )
 
@@ -337,3 +342,201 @@ class TestExtractDates:
         }
         result = extract_dates(publication)
         assert result == {"published_print": None, "published_online": None}
+
+
+class TestExtractContentDomain:
+    """Tests for extract_content_domain function."""
+
+    def test_full_content_domain(self) -> None:
+        """Should extract both domain list and crossmark restriction."""
+        record = {
+            "content-domain": {
+                "domain": ["nature.com", "springernature.com"],
+                "crossmark-restriction": True,
+            }
+        }
+        result = extract_content_domain(record)
+        assert result["content_domain_domains"] == ["nature.com", "springernature.com"]
+        assert result["content_domain_crossmark_restriction"] is True
+
+    def test_empty_record(self) -> None:
+        """Should return empty list and None for empty record."""
+        result = extract_content_domain({})
+        assert result["content_domain_domains"] == []
+        assert result["content_domain_crossmark_restriction"] is None
+
+    def test_empty_domain_list(self) -> None:
+        """Should handle empty domain list with crossmark false."""
+        record = {"content-domain": {"domain": [], "crossmark-restriction": False}}
+        result = extract_content_domain(record)
+        assert result["content_domain_domains"] == []
+        assert result["content_domain_crossmark_restriction"] is False
+
+    def test_invalid_content_domain_type(self) -> None:
+        """Should handle non-dict content-domain gracefully."""
+        record = {"content-domain": "invalid"}
+        result = extract_content_domain(record)
+        assert result["content_domain_domains"] == []
+        assert result["content_domain_crossmark_restriction"] is None
+
+    def test_none_domain_list(self) -> None:
+        """Should handle None domain list."""
+        record = {"content-domain": {"domain": None}}
+        result = extract_content_domain(record)
+        assert result["content_domain_domains"] == []
+
+    def test_missing_crossmark_restriction(self) -> None:
+        """Should return None for missing crossmark-restriction."""
+        record = {"content-domain": {"domain": ["example.com"]}}
+        result = extract_content_domain(record)
+        assert result["content_domain_domains"] == ["example.com"]
+        assert result["content_domain_crossmark_restriction"] is None
+
+
+class TestExtractIssnByType:
+    """Tests for extract_issn_by_type function."""
+
+    @pytest.mark.parametrize(
+        ("input_data", "expected"),
+        [
+            pytest.param(
+                {"issn-type": [{"value": "0006-291X", "type": "print"}]},
+                {"issn_print": "0006-291X", "issn_electronic": None},
+                id="print_only",
+            ),
+            pytest.param(
+                {"issn-type": [{"value": "1090-2104", "type": "electronic"}]},
+                {"issn_print": None, "issn_electronic": "1090-2104"},
+                id="electronic_only",
+            ),
+            pytest.param(
+                {
+                    "issn-type": [
+                        {"value": "0006-291X", "type": "print"},
+                        {"value": "1090-2104", "type": "electronic"},
+                    ]
+                },
+                {"issn_print": "0006-291X", "issn_electronic": "1090-2104"},
+                id="both_types",
+            ),
+            pytest.param(
+                {},
+                {"issn_print": None, "issn_electronic": None},
+                id="empty_record",
+            ),
+            pytest.param(
+                {"issn-type": "invalid"},
+                {"issn_print": None, "issn_electronic": None},
+                id="invalid_type",
+            ),
+            pytest.param(
+                {"issn-type": [{"value": "1234-5678"}]},
+                {"issn_print": None, "issn_electronic": None},
+                id="missing_type_field",
+            ),
+            pytest.param(
+                {"issn-type": [None, {"value": "0006-291X", "type": "print"}]},
+                {"issn_print": "0006-291X", "issn_electronic": None},
+                id="none_in_list",
+            ),
+        ],
+    )
+    def test_extract_issn_by_type(
+        self,
+        input_data: dict,
+        expected: dict,
+    ) -> None:
+        """Should extract ISSNs correctly based on type field."""
+        result = extract_issn_by_type(input_data)
+        assert result == expected
+
+    def test_duplicate_types_takes_first(self) -> None:
+        """Should take first occurrence when duplicate types exist."""
+        record = {
+            "issn-type": [
+                {"value": "1111-1111", "type": "print"},
+                {"value": "2222-2222", "type": "print"},
+            ]
+        }
+        result = extract_issn_by_type(record)
+        assert result["issn_print"] == "1111-1111"
+
+    def test_order_independence(self) -> None:
+        """Should work regardless of item order in list."""
+        record = {
+            "issn-type": [
+                {"value": "1090-2104", "type": "electronic"},
+                {"value": "0006-291X", "type": "print"},
+            ]
+        }
+        result = extract_issn_by_type(record)
+        assert result["issn_print"] == "0006-291X"
+        assert result["issn_electronic"] == "1090-2104"
+
+
+class TestExtractPublishedDate:
+    """Tests for extract_published_date function.
+
+    Uses end-of-period normalization for partial dates:
+    - Month-only dates use last day of month
+    - Year-only dates use December 31st
+    """
+
+    def test_full_date(self) -> None:
+        """Should extract complete date."""
+        record = {"published": {"date-parts": [[2023, 6, 15]]}}
+        result = extract_published_date(record)
+        assert result == "2023-06-15"
+
+    def test_year_month_only(self) -> None:
+        """Should use last day of month for partial date."""
+        record = {"published": {"date-parts": [[2023, 6]]}}
+        result = extract_published_date(record)
+        assert result == "2023-06-30"  # Last day of June
+
+    def test_year_only(self) -> None:
+        """Should use December 31st for year-only date."""
+        record = {"published": {"date-parts": [[2023]]}}
+        result = extract_published_date(record)
+        assert result == "2023-12-31"  # Last day of year
+
+    def test_empty_record(self) -> None:
+        """Should return None for empty record."""
+        result = extract_published_date({})
+        assert result is None
+
+    def test_invalid_published_type(self) -> None:
+        """Should return None for non-dict published field."""
+        record = {"published": "2023-06-15"}
+        result = extract_published_date(record)
+        assert result is None
+
+    def test_missing_date_parts(self) -> None:
+        """Should return None when date-parts is missing."""
+        record = {"published": {}}
+        result = extract_published_date(record)
+        assert result is None
+
+    def test_february_leap_year(self) -> None:
+        """Should handle leap year February correctly."""
+        record = {"published": {"date-parts": [[2024, 2]]}}
+        result = extract_published_date(record)
+        assert result == "2024-02-29"  # Leap year
+
+    def test_february_non_leap_year(self) -> None:
+        """Should handle non-leap year February correctly."""
+        record = {"published": {"date-parts": [[2023, 2]]}}
+        result = extract_published_date(record)
+        assert result == "2023-02-28"  # Not a leap year
+
+    def test_empty_date_parts_list(self) -> None:
+        """Should return None for empty date-parts list."""
+        record = {"published": {"date-parts": [[]]}}
+        result = extract_published_date(record)
+        assert result is None
+
+    def test_null_date_parts(self) -> None:
+        """Should return None for null date-parts."""
+        record = {"published": {"date-parts": None}}
+        result = extract_published_date(record)
+        assert result is None

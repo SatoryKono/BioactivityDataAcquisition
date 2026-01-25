@@ -152,6 +152,48 @@ class PublicationSchema(ETLRecordSchema):
         nullable=True, description="DOI of update policy"
     )
 
+    # === Content Domain ===
+    content_domain_domains: Series[object] = pa.Field(
+        nullable=True,
+        description="Content domain domains (list of strings)",
+    )
+    content_domain_crossmark_restriction: Series[bool] = pa.Field(
+        nullable=True,
+        coerce=True,
+        description="Crossmark restriction flag",
+    )
+
+    # === Alternative Identifiers ===
+    alternative_id: Series[object] = pa.Field(
+        nullable=True,
+        description="Alternative IDs (publisher-specific, e.g., PII)",
+    )
+
+    # === Canonical Publication Date ===
+    published: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^\d{4}(-\d{2}(-\d{2})?)?$",
+        description="Canonical publication date (YYYY-MM-DD or partial)",
+    )
+
+    # === Short Container Title ===
+    short_container_title: Series[object] = pa.Field(
+        nullable=True,
+        description="Short journal/container title (list of strings)",
+    )
+
+    # === ISSN by Type ===
+    issn_print: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^\d{4}-\d{3}[\dX]$",
+        description="Print ISSN (format: XXXX-XXXX)",
+    )
+    issn_electronic: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^\d{4}-\d{3}[\dX]$",
+        description="Electronic ISSN (format: XXXX-XXXX)",
+    )
+
     class Config:
         """Pandera configuration."""
 

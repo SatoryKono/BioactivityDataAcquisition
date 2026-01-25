@@ -122,6 +122,38 @@ class PublicationRecord(BaseModel):
         default_factory=list, description="Subject areas"
     )
 
+    # Content domain (Crossmark/license restrictions)
+    content_domain_domains: list[str] = PydanticField(
+        default_factory=list, description="Content domain domains"
+    )
+    content_domain_crossmark_restriction: bool | None = PydanticField(
+        default=None, description="Crossmark restriction flag"
+    )
+
+    # Alternative identifiers
+    alternative_id: list[str] = PydanticField(
+        default_factory=list,
+        description="Alternative IDs (publisher-specific, e.g., PII)",
+    )
+
+    # Canonical publication date
+    published: str | None = PydanticField(
+        default=None, description="Canonical publication date (ISO format)"
+    )
+
+    # Short container title
+    short_container_title: list[str] = PydanticField(
+        default_factory=list, description="Short journal/container title"
+    )
+
+    # ISSN by type
+    issn_print: str | None = PydanticField(
+        default=None, description="Print ISSN (format: XXXX-XXXX)"
+    )
+    issn_electronic: str | None = PydanticField(
+        default=None, description="Electronic ISSN (format: XXXX-XXXX)"
+    )
+
     # Source tracking
     source: str = PydanticField(default="crossref", description="Data source")
 
@@ -157,6 +189,13 @@ class CrossRefPublicationEntity(PublicationEntityBase):
         reference_count: Number of references in the publication.
         license_url: License URL.
         subjects: Subject areas.
+        content_domain_domains: List of domains for content licensing.
+        content_domain_crossmark_restriction: Crossmark restriction flag.
+        alternative_id: Publisher-specific alternative IDs (e.g., PII).
+        published: Canonical publication date (ISO format).
+        short_container_title: Abbreviated journal/container title.
+        issn_print: Print ISSN.
+        issn_electronic: Electronic ISSN.
 
     Note: doi is required for CrossRef publications and validated in __post_init__.
 
@@ -185,6 +224,23 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     # CrossRef-specific metadata
     license_url: str | None = None
     subjects: list[str] = field(default_factory=list)
+
+    # Content domain (Crossmark/license restrictions)
+    content_domain_domains: list[str] = field(default_factory=list)
+    content_domain_crossmark_restriction: bool | None = None
+
+    # Alternative identifiers (publisher-specific IDs, e.g., PII)
+    alternative_id: list[str] = field(default_factory=list)
+
+    # Canonical publication date (preferred over print/online)
+    published: str | None = None
+
+    # Short journal/container title
+    short_container_title: list[str] = field(default_factory=list)
+
+    # ISSN by type (split from generic ISSN list)
+    issn_print: str | None = None
+    issn_electronic: str | None = None
 
     # Override: Default source for CrossRef
     source: str = "crossref"

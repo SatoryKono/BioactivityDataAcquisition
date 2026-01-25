@@ -229,3 +229,113 @@ def extract_dates(publication: dict[str, Any]) -> dict[str, Any]:
             else None
         ),
     }
+
+
+def extract_content_domain(publication: dict[str, Any]) -> dict[str, Any]:
+    """Extract content-domain metadata.
+
+    CrossRef content-domain indicates licensing/access restrictions
+    and Crossmark participation.
+
+    Args:
+        publication: CrossRef publication record.
+
+    Returns:
+        Dictionary with content_domain_domains, content_domain_crossmark_restriction.
+
+    Example:
+        >>> extract_content_domain({
+        ...     "content-domain": {"domain": ["nature.com"], "crossmark-restriction": True}
+        ... })
+        {'content_domain_domains': ['nature.com'], 'content_domain_crossmark_restriction': True}
+        >>> extract_content_domain({})
+        {'content_domain_domains': [], 'content_domain_crossmark_restriction': None}
+
+    """
+    content_domain = publication.get("content-domain", {})
+    if not isinstance(content_domain, dict):
+        content_domain = {}
+
+    return {
+        "content_domain_domains": content_domain.get("domain", []) or [],
+        "content_domain_crossmark_restriction": content_domain.get(
+            "crossmark-restriction"
+        ),
+    }
+
+
+def extract_issn_by_type(publication: dict[str, Any]) -> dict[str, Any]:
+    """Extract ISSN values by type (print/electronic).
+
+    Parses the issn-type array to separate print and electronic ISSNs.
+    Takes first occurrence of each type if duplicates exist.
+
+    Args:
+        publication: CrossRef publication record.
+
+    Returns:
+        Dictionary with issn_print and issn_electronic.
+
+    Example:
+        >>> extract_issn_by_type({
+        ...     "issn-type": [
+        ...         {"value": "0006-291X", "type": "print"},
+        ...         {"value": "1090-2104", "type": "electronic"}
+        ...     ]
+        ... })
+        {'issn_print': '0006-291X', 'issn_electronic': '1090-2104'}
+        >>> extract_issn_by_type({})
+        {'issn_print': None, 'issn_electronic': None}
+
+    """
+    issn_type_list = publication.get("issn-type", [])
+    if not isinstance(issn_type_list, list):
+        return {"issn_print": None, "issn_electronic": None}
+
+    issn_print: str | None = None
+    issn_electronic: str | None = None
+
+    for item in issn_type_list:
+        if not isinstance(item, dict):
+            continue
+        issn_value = item.get("value")
+        issn_kind = item.get("type")
+
+        if issn_kind == "print" and issn_print is None:
+            issn_print = issn_value
+        elif issn_kind == "electronic" and issn_electronic is None:
+            issn_electronic = issn_value
+
+    return {
+        "issn_print": issn_print,
+        "issn_electronic": issn_electronic,
+    }
+
+
+def extract_published_date(publication: dict[str, Any]) -> str | None:
+    """Extract 'published' date (canonical publication date).
+
+    CrossRef's 'published' field is the preferred publication date,
+    distinct from published-print and published-online which indicate
+    specific publication events.
+
+    Args:
+        publication: CrossRef publication record.
+
+    Returns:
+        ISO date string (YYYY-MM-DD) or None.
+
+    Example:
+        >>> extract_published_date({"published": {"date-parts": [[2023, 6, 15]]}})
+        '2023-06-15'
+        >>> extract_published_date({"published": {"date-parts": [[2023]]}})
+        '2023-12-31'
+        >>> extract_published_date({})
+        None
+
+    """
+    published = publication.get("published", {})
+    if not isinstance(published, dict):
+        return None
+
+    return format_date_parts(published.get("date-parts"))
