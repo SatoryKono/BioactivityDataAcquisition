@@ -70,6 +70,12 @@ from bioetl.domain.value_objects.chemical import (
     MolecularWeight,
     PublicationYear,
 )
+from bioetl.domain.value_objects.column_order import (
+    DEFAULT_COLUMN_ORDER,
+    PUBLICATION_FIELD_GROUPS,
+    ColumnOrderConfig,
+    SemanticGroup,
+)
 from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
 from bioetl.domain.value_objects.compound_ids import (
     AssayId,
@@ -142,9 +148,11 @@ from bioetl.domain.value_objects.taxonomy_id import (
 )
 
 __all__ = [
+    "DEFAULT_COLUMN_ORDER",
     "DOI",
     "ISSN",
     "ORCID",
+    "PUBLICATION_FIELD_GROUPS",
     "SMILES",
     "ActivityType",
     "ActivityValue",
@@ -159,6 +167,7 @@ __all__ = [
     "BusinessRulesResult",
     "CategoricalDistribution",
     "ChemblId",
+    "ColumnOrderConfig",
     "ColumnQualifier",
     "ColumnStats",
     "CompletenessResult",
@@ -204,6 +213,7 @@ __all__ = [
     "SchemaDriftInfo",
     "SchemaDriftResult",
     "SchemaSnapshotResult",
+    "SemanticGroup",
     "SemanticScholarId",
     "SilverDQCheckType",
     "SilverDQReport",
