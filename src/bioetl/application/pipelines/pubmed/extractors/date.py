@@ -37,18 +37,22 @@ class NormalizedDate(TypedDict):
     year_int: int | None
 
 
-class DateExtractor(BaseFieldExtractor):
-    """Extractor for date fields from PubMed XML.
+class MedlineDateParser:
+    """Parser for PubMed MedlineDate free-text format.
 
-    Handles:
-    - Publication dates from JournalIssue/PubDate
-    - History dates (received, accepted, revised)
-    - Article dates (Electronic publication)
-    - Partial dates (year only, year-month)
-    - Month name to number conversion
-    - MedlineDate free-text format ("2023 Jan-Feb", "2023 Spring", etc.)
+    Handles formats like:
+    - "2023 Jan-Feb" → year=2023, month=Feb (end of range)
+    - "2023 Spring" → year=2023, month=May (end of season)
+    - "2023 1st Quart" → year=2023, month=Mar (end of Q1)
+    - "2023 Jan" → year=2023, month=Jan
+    - "2023" → year=2023
+    - "2022 Dec-2023 Jan" → year=2023, month=Jan (cross-year: take second year)
+
+    Uses end-of-period strategy: for ranges/seasons/quarters,
+    returns the END of the period.
     """
 
+    # Month abbreviation to number mapping
     MONTH_MAP: ClassVar[dict[str, str]] = {
         "jan": "01",
         "feb": "02",
@@ -64,7 +68,7 @@ class DateExtractor(BaseFieldExtractor):
         "dec": "12",
     }
 
-    # Season to end-of-period month mapping (end-of-period strategy)
+    # Season to end-of-period month mapping
     SEASON_MAP: ClassVar[dict[str, str]] = {
         "spring": "05",  # Mar-May → May (end)
         "spr": "05",
@@ -90,10 +94,105 @@ class DateExtractor(BaseFieldExtractor):
     }
 
     # Pattern for month range: "Jan-Feb", "Dec-Jan" (NOT "Dec-2023")
-    # Requires both sides to be alphabetic (not year)
     _MONTH_RANGE_PATTERN: ClassVar[re.Pattern[str]] = re.compile(
         r"\b([a-zA-Z]{3,9})-([a-zA-Z]{3,9})\b", re.IGNORECASE
     )
+
+    # Pattern to find 4-digit years in text
+    _YEAR_PATTERN: ClassVar[re.Pattern[str]] = re.compile(r"\b(19\d{2}|20\d{2})\b")
+
+    def parse(self, medline_date: str) -> RawDate | None:
+        """Parse MedlineDate free-text format into components.
+
+        Args:
+            medline_date: Free-text date string from MedlineDate element.
+
+        Returns:
+            RawDate with extracted year and month, or None if unparseable.
+        """
+        if not medline_date:
+            return None
+
+        text = medline_date.strip()
+        tokens = text.split()
+
+        if not tokens:
+            return None
+
+        year = self._extract_year(tokens)
+        if not year:
+            return None
+
+        month = self._extract_month(text, tokens)
+
+        return RawDate(year=year, month=month, day=None)
+
+    def _extract_year(self, tokens: list[str]) -> str | None:
+        """Extract year from MedlineDate text.
+
+        Handles cross-year ranges like "2022 Dec-2023 Jan" by preferring
+        the second (most recent) year if present.
+        """
+        text = " ".join(tokens)
+        years_found: list[str] = self._YEAR_PATTERN.findall(text)
+
+        if not years_found:
+            return None
+
+        # For cross-year ranges, take the last (most recent) year
+        return years_found[-1]
+
+    def _extract_month(self, text: str, tokens: list[str]) -> str | None:
+        """Extract month/season/quarter from MedlineDate text.
+
+        Uses end-of-period strategy for ranges.
+        """
+        # Check for month range pattern (e.g., "Jan-Feb")
+        range_match = self._MONTH_RANGE_PATTERN.search(text)
+        if range_match:
+            return range_match.group(2)  # End-of-period: second month
+
+        # Check for quarter (e.g., "1st Quart", "Q1")
+        text_lower = text.lower()
+        for quarter_key, month_num in self.QUARTER_MAP.items():
+            if quarter_key in text_lower:
+                return month_num
+
+        # Check for season
+        for token in tokens:
+            token_lower = token.lower()
+            if token_lower in self.SEASON_MAP:
+                return self.SEASON_MAP[token_lower]
+
+        # Check for single month name (pure alphabetic tokens only)
+        # Process in reverse order to prefer later months (end-of-period)
+        for token in reversed(tokens):
+            if not token.isalpha():
+                continue
+            token_lower = token.lower()[:3]
+            if token_lower in self.MONTH_MAP:
+                return token
+
+        return None
+
+
+class DateExtractor(BaseFieldExtractor):
+    """Extractor for date fields from PubMed XML.
+
+    Handles:
+    - Publication dates from JournalIssue/PubDate
+    - History dates (received, accepted, revised)
+    - Article dates (Electronic publication)
+    - Partial dates (year only, year-month)
+    - Month name to number conversion
+    - MedlineDate free-text format (delegated to MedlineDateParser)
+    """
+
+    MONTH_MAP: ClassVar[dict[str, str]] = MedlineDateParser.MONTH_MAP
+
+    def __init__(self) -> None:
+        """Initialize with MedlineDate parser."""
+        self._medline_parser = MedlineDateParser()
 
     def extract(self, element: Element | None) -> RawDate | None:
         """Извлечь сырые компоненты даты из XML элемента.
@@ -119,126 +218,10 @@ class DateExtractor(BaseFieldExtractor):
         if any([year, month, day]):
             return RawDate(year=year, month=month, day=day)
 
-        # Fallback: try MedlineDate free-text format
+        # Fallback: delegate to MedlineDate parser
         medline_date = get_text(element.find("MedlineDate"))
         if medline_date:
-            return self._parse_medline_date(medline_date)
-
-        return None
-
-    def _parse_medline_date(self, medline_date: str) -> RawDate | None:
-        """Parse MedlineDate free-text format into components.
-
-        Handles formats like:
-        - "2023 Jan-Feb" → year=2023, month=Feb (end of range)
-        - "2023 Spring" → year=2023, month=May (end of season)
-        - "2023 1st Quart" → year=2023, month=Mar (end of Q1)
-        - "2023 Jan" → year=2023, month=Jan
-        - "2023" → year=2023
-        - "2022 Dec-2023 Jan" → year=2023, month=Jan (cross-year: take second year)
-
-        Uses end-of-period strategy: for ranges/seasons/quarters,
-        returns the END of the period.
-
-        Args:
-            medline_date: Free-text date string from MedlineDate element.
-
-        Returns:
-            RawDate with extracted year and month, or None if unparseable.
-        """
-        if not medline_date:
-            return None
-
-        text = medline_date.strip()
-        tokens = text.split()
-
-        if not tokens:
-            return None
-
-        # Extract year (first 4-digit number)
-        year = self._extract_year_from_tokens(tokens)
-        if not year:
-            return None
-
-        month = self._extract_month_from_medline(text, tokens)
-
-        return RawDate(year=year, month=month, day=None)
-
-    # Pattern to find 4-digit years in text
-    _YEAR_PATTERN: ClassVar[re.Pattern[str]] = re.compile(r"\b(19\d{2}|20\d{2})\b")
-
-    def _extract_year_from_tokens(self, tokens: list[str]) -> str | None:
-        """Extract year from MedlineDate text.
-
-        Handles cross-year ranges like "2022 Dec-2023 Jan" by preferring
-        the second (most recent) year if present.
-
-        Uses regex to find all 4-digit years in the full text, since
-        tokenization may incorrectly join year with month (e.g., "Dec-2023").
-
-        Args:
-            tokens: List of tokens from MedlineDate string.
-
-        Returns:
-            Year string or None.
-        """
-        # Reconstruct text for regex search (handles "Dec-2023" cases)
-        text = " ".join(tokens)
-        years_found: list[str] = self._YEAR_PATTERN.findall(text)
-
-        if not years_found:
-            return None
-
-        # For cross-year ranges, take the last (most recent) year
-        # e.g., "2022 Dec-2023 Jan" → 2023
-        return years_found[-1]
-
-    def _extract_month_from_medline(
-        self, text: str, tokens: list[str]
-    ) -> str | None:
-        """Extract month/season/quarter from MedlineDate text.
-
-        Uses end-of-period strategy for ranges:
-        - "Jan-Feb" → "Feb"
-        - "Spring" → "May"
-        - "1st Quart" → "Mar"
-
-        Args:
-            text: Full MedlineDate string.
-            tokens: Tokenized MedlineDate.
-
-        Returns:
-            Month string (name or number) or None.
-        """
-        # Check for month range pattern (e.g., "Jan-Feb")
-        range_match = self._MONTH_RANGE_PATTERN.search(text)
-        if range_match:
-            # End-of-period: take second month
-            second_month = range_match.group(2)
-            return second_month
-
-        # Check for quarter (e.g., "1st Quart", "Q1")
-        text_lower = text.lower()
-        for quarter_key, month_num in self.QUARTER_MAP.items():
-            if quarter_key in text_lower:
-                return month_num
-
-        # Check for season
-        for token in tokens:
-            token_lower = token.lower()
-            if token_lower in self.SEASON_MAP:
-                return self.SEASON_MAP[token_lower]
-
-        # Check for single month name (pure alphabetic tokens only)
-        # Process in reverse order to prefer later months (end-of-period)
-        # This handles cross-year ranges like "2022 Dec-2023 Jan" → Jan
-        for token in reversed(tokens):
-            # Skip tokens that contain digits (e.g., "Dec-2023")
-            if not token.isalpha():
-                continue
-            token_lower = token.lower()[:3]
-            if token_lower in self.MONTH_MAP:
-                return token
+            return self._medline_parser.parse(medline_date)
 
         return None
 
