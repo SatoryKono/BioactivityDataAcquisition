@@ -281,9 +281,10 @@ class TestChemblYearValidation:
 
 @PANDERA_PYTHON314_SKIP
 class TestPubMedYearValidation:
-    """Year validation tests for ArticleSchema (PubMed).
+    """Year validation tests for PubMedPublicationSchema.
 
     Note: PubMed uses 'year' field (renamed from 'pub_year').
+    Schema renamed from ArticleSchema per ADR-024.
     """
 
     @pytest.fixture
@@ -341,38 +342,38 @@ class TestPubMedYearValidation:
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
         """Should accept year at boundaries (1800 and 2100)."""
-        from bioetl.domain.schemas.pubmed.article import ArticleSchema
+        from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
 
         for year in [MIN_PUBLICATION_YEAR, MAX_PUBLICATION_YEAR]:
             valid_record["year"] = year
             df = pd.DataFrame([valid_record])
-            validated = ArticleSchema.validate(df)
+            validated = PubMedPublicationSchema.validate(df)
             assert validated["year"].iloc[0] == year
 
     def test_year_outside_range_fails(self, valid_record: dict) -> None:
         """Should reject year outside valid range."""
-        from bioetl.domain.schemas.pubmed.article import ArticleSchema
+        from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
 
         # Year below minimum
         valid_record["year"] = MIN_PUBLICATION_YEAR - 1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
-            ArticleSchema.validate(df)
+            PubMedPublicationSchema.validate(df)
 
         # Year above maximum
         valid_record["year"] = MAX_PUBLICATION_YEAR + 1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
-            ArticleSchema.validate(df)
+            PubMedPublicationSchema.validate(df)
 
     def test_year_field_renamed_from_pub_year(self, valid_record: dict) -> None:
         """Verify 'year' field is used instead of legacy 'pub_year'."""
-        from bioetl.domain.schemas.pubmed.article import ArticleSchema
+        from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
 
         # Record with 'year' should work
         valid_record["year"] = 2020
         df = pd.DataFrame([valid_record])
-        validated = ArticleSchema.validate(df)
+        validated = PubMedPublicationSchema.validate(df)
         assert "year" in validated.columns
 
         # Verify there's no 'pub_year' column in schema
