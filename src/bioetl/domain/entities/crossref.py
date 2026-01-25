@@ -29,41 +29,49 @@ from pydantic import Field as PydanticField
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 
 # Document type mapping from CrossRef types to BioETL unified types.
-# See: https://api.crossref.org/types for complete list.
+# See: https://api.crossref.org/types for complete list (30 types).
 #
-# Mapping strategy:
-# - PUBLICATION: Published scholarly works (articles, books, chapters, reports, etc.)
+# Unified types (aligned with chembl/publication.py schema):
+# - PUBLICATION: Journal articles, conference papers, reports, standards
+# - BOOK: Books, monographs, book chapters, reference works
 # - PREPRINT: Pre-publication works (posted-content)
 # - DATASET: Research data and databases
-# - OTHER: Container/series types and funding (typically not indexed directly)
+# - OTHER: Container types, supplementary materials, funding
 #
-# Default for unknown types: PUBLICATION (conservative fallback)
+# Rationale:
+# - BOOK separated from PUBLICATION for bibliometric analysis granularity
+# - "component" → OTHER (supplementary material, not standalone scholarly work)
+# - Container types → OTHER (metadata records, not scholarly content)
 CROSSREF_TYPE_MAP: dict[str, str] = {
-    # Primary scholarly content → PUBLICATION
+    # === Journal/Conference Articles → PUBLICATION ===
     "journal-article": "PUBLICATION",
     "proceedings-article": "PUBLICATION",
-    "book-chapter": "PUBLICATION",
-    "book": "PUBLICATION",
-    "monograph": "PUBLICATION",
-    "edited-book": "PUBLICATION",
-    "reference-book": "PUBLICATION",
-    "book-section": "PUBLICATION",
-    "book-part": "PUBLICATION",
-    "book-track": "PUBLICATION",
+    # === Academic Works → PUBLICATION ===
     "dissertation": "PUBLICATION",
     "report": "PUBLICATION",
     "report-component": "PUBLICATION",
     "standard": "PUBLICATION",
-    "reference-entry": "PUBLICATION",
-    "peer-review": "PUBLICATION",
-    "component": "PUBLICATION",
-    "other": "PUBLICATION",
-    # Pre-publication → PREPRINT
+    "reference-entry": "PUBLICATION",  # Dictionary/encyclopedia entry
+    "peer-review": "PUBLICATION",  # Published peer review
+    "other": "PUBLICATION",  # Unclassified scholarly work
+    # === Books & Book Parts → BOOK ===
+    "book": "BOOK",
+    "monograph": "BOOK",
+    "edited-book": "BOOK",
+    "reference-book": "BOOK",  # Dictionary, encyclopedia
+    "book-chapter": "BOOK",
+    "book-section": "BOOK",
+    "book-part": "BOOK",
+    "book-track": "BOOK",  # Audio book track
+    # === Pre-publication → PREPRINT ===
     "posted-content": "PREPRINT",
-    # Research data → DATASET
+    # === Research Data → DATASET ===
     "dataset": "DATASET",
     "database": "DATASET",
-    # Container/series types → OTHER (typically not indexed directly)
+    # === Supplementary Material → OTHER ===
+    "component": "OTHER",  # Figures, tables, supplementary files
+    # === Container/Series Types → OTHER ===
+    # (Metadata records for series, not individual works)
     "journal": "OTHER",
     "journal-volume": "OTHER",
     "journal-issue": "OTHER",
@@ -72,7 +80,7 @@ CROSSREF_TYPE_MAP: dict[str, str] = {
     "book-series": "OTHER",
     "book-set": "OTHER",
     "report-series": "OTHER",
-    # Funding → OTHER
+    # === Funding → OTHER ===
     "grant": "OTHER",
 }
 
