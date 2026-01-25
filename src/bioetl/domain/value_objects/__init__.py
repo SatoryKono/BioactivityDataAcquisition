@@ -64,6 +64,12 @@ from bioetl.domain.value_objects.activity_values import (
 )
 from bioetl.domain.value_objects.base import ValueObject
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+from bioetl.domain.value_objects.chemical import (
+    SMILES,
+    InChIKey,
+    MolecularWeight,
+    PublicationYear,
+)
 from bioetl.domain.value_objects.column_order import (
     DEFAULT_COLUMN_ORDER,
     PUBLICATION_FIELD_GROUPS,
@@ -71,12 +77,6 @@ from bioetl.domain.value_objects.column_order import (
     SemanticGroup,
 )
 from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
-from bioetl.domain.value_objects.chemical import (
-    SMILES,
-    InChIKey,
-    MolecularWeight,
-    PublicationYear,
-)
 from bioetl.domain.value_objects.compound_ids import (
     AssayId,
     CompoundId,
@@ -148,9 +148,11 @@ from bioetl.domain.value_objects.taxonomy_id import (
 )
 
 __all__ = [
+    "DEFAULT_COLUMN_ORDER",
     "DOI",
     "ISSN",
     "ORCID",
+    "PUBLICATION_FIELD_GROUPS",
     "SMILES",
     "ActivityType",
     "ActivityValue",
@@ -184,7 +186,6 @@ __all__ = [
     "DQReportSummary",
     "DQResult",
     "DQThresholds",
-    "DEFAULT_COLUMN_ORDER",
     "DataFreshnessResult",
     "DeduplicationStatsResult",
     "DriftLevel",
@@ -203,7 +204,6 @@ __all__ = [
     "PChemblValue",
     "PubChemCid",
     "PubMedId",
-    "PUBLICATION_FIELD_GROUPS",
     "PublicationYear",
     "RecordCountResult",
     "ReferentialIntegrityResult",
