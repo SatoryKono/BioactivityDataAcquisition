@@ -14,8 +14,8 @@ import sys
 import click
 
 from bioetl.application.composite.runner import CompositeRuntimeConfig
-from bioetl.composition.bootstrap_composite import (
-    bootstrap_composite_pipeline,
+from bioetl.composition.bootstrap.runtime.composite import (
+    bootstrap_composite_runner,
     load_composite_config,
 )
 from bioetl.interfaces.cli.commands.health_server_integration import (
@@ -59,7 +59,7 @@ async def _run_composite_inner(
     except ValueError as e:
         return False, f"Invalid configuration: {e}"
 
-    runner = bootstrap_composite_pipeline(config, runtime)
+    runner = bootstrap_composite_runner(config, runtime)
 
     try:
         result = await runner.run()
