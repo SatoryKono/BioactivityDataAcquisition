@@ -939,28 +939,53 @@ class MergeService:
         available_columns: set[str],
         seed_pipeline: str | None = None,
     ) -> list[str]:
-        """Collect all columns for a field including enricher prefixed versions.
+        """Collect all columns for a field from all sources.
 
-        Supports both new dot-based prefixes (crossref.title) and legacy
-        underscore prefixes (crossref_publication_title).
+        Searches for qualified format ONLY:
+        - Seed: {seed_provider}.{seed_entity}.{field}
+        - Enrichers: {enricher_provider}.{enricher_entity}.{field}
+
+        Legacy unqualified names are NOT searched (seed already renamed).
 
         Args:
-            field: Base field name.
-            enrichers: Sequence of enricher configurations.
-            available_columns: Set of available column names in DataFrame.
-            seed_pipeline: Seed pipeline name for prefix computation.
+            field: Base field name (e.g., 'title').
+            enrichers: Enricher configurations.
+            available_columns: Columns present in DataFrame.
+            seed_pipeline: Seed pipeline name for qualified lookup.
 
         Returns:
-            List of column names including seed and enricher versions.
+            List of matching qualified column names.
         """
-        columns = [field] if field in available_columns else []
+        columns: list[str] = []
+
+        # 1. Seed qualified format: {seed_provider}.{seed_entity}.{field}
+        if seed_pipeline:
+            try:
+                seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
+                seed_qualified = f"{seed_provider}.{seed_entity}.{field}"
+                if seed_qualified in available_columns:
+                    columns.append(seed_qualified)
+            except ValueError:
+                self._logger.debug(
+                    "Could not parse seed pipeline for field collection",
+                    seed_pipeline=seed_pipeline,
+                    field=field,
+                )
+
+        # 2. Each enricher's qualified format: {provider}.{entity}.{field}
         for enricher in enrichers:
-            # Get the prefix that was used for this enricher
-            prefix = self._get_enricher_prefix(enricher.pipeline, seed_pipeline)
-            # Prefix includes trailing dot/underscore, so: "crossref." + "title"
-            prefixed = f"{prefix}{field}"
-            if prefixed in available_columns:
-                columns.append(prefixed)
+            try:
+                provider, entity = self._parse_pipeline_name(enricher.pipeline)
+                enricher_qualified = f"{provider}.{entity}.{field}"
+                if enricher_qualified in available_columns and enricher_qualified not in columns:
+                    columns.append(enricher_qualified)
+            except ValueError:
+                # Fallback: legacy prefix format {pipeline}_{field}
+                prefix = self._get_enricher_prefix(enricher.pipeline, seed_pipeline)
+                legacy_col = f"{prefix}{field}".rstrip(".")
+                if legacy_col in available_columns and legacy_col not in columns:
+                    columns.append(legacy_col)
+
         return columns
 
     def _order_columns_by_priority(
@@ -970,39 +995,67 @@ class MergeService:
         priorities: Sequence[str],
         seed_pipeline: str | None = None,
     ) -> list[str]:
-        """Order columns by priority list, appending any remaining columns.
+        """Order columns by source priority for coalescing.
+
+        Priority format in config:
+        - 'seed' - refers to seed pipeline (resolved dynamically)
+        - '{provider}' - matches {provider}.*.{field}
+        - '{provider}.{entity}' - explicit match
 
         Args:
             field: Base field name.
-            columns: List of available columns for this field.
-            priorities: Ordered list of source priorities (provider names or "seed").
-            seed_pipeline: Seed pipeline name for prefix computation.
+            columns: Available column names for this field.
+            priorities: Priority list from config (e.g., ['seed', 'crossref']).
+            seed_pipeline: Seed pipeline for resolving 'seed' priority.
 
         Returns:
             Ordered list of columns by priority.
         """
         ordered_cols: list[str] = []
+        columns_set = set(columns)
+
+        # Parse seed for matching
+        seed_provider: str | None = None
+        seed_entity: str | None = None
+        if seed_pipeline:
+            try:
+                seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
+            except ValueError:
+                pass
 
         for source in priorities:
-            if source in ("seed", "chembl"):  # Seed convention
-                if field in columns and field not in ordered_cols:
-                    ordered_cols.append(field)
+            source_lower = source.lower()
+            qualified: str | None = None
+
+            # Handle 'seed' keyword - resolve to actual seed provider.entity
+            if source_lower == "seed":
+                if seed_provider and seed_entity:
+                    qualified = f"{seed_provider}.{seed_entity}.{field}"
+
+            # Handle explicit provider.entity format: 'crossref.publication'
+            elif "." in source:
+                parts = source.split(".", 1)
+                provider, entity = parts[0].lower(), parts[1].lower()
+                qualified = f"{provider}.{entity}.{field}"
+
+            # Handle provider-only: find matching column
             else:
-                # Try new dot-based prefix: "crossref.title"
-                dot_prefixed = f"{source}.{field}"
-                if dot_prefixed in columns and dot_prefixed not in ordered_cols:
-                    ordered_cols.append(dot_prefixed)
-                    continue
+                provider = source_lower
+                # Check if this provider matches seed
+                if seed_provider and provider == seed_provider.lower():
+                    if seed_entity:
+                        qualified = f"{provider}.{seed_entity}.{field}"
+                else:
+                    # Try to find any column with this provider
+                    for col in columns_set:
+                        if col.startswith(f"{provider}.") and col.endswith(f".{field}"):
+                            qualified = col
+                            break
 
-                # Try legacy underscore prefix: "crossref_publication_title"
-                # The source might be just "crossref" but column is "crossref_publication_title"
-                for col in columns:
-                    if col.startswith(f"{source}_") and col.endswith(f"_{field}"):
-                        if col not in ordered_cols:
-                            ordered_cols.append(col)
-                        break
+            if qualified and qualified in columns_set and qualified not in ordered_cols:
+                ordered_cols.append(qualified)
 
-        # Add remaining columns not in priority list
+        # Append remaining columns not in priority list (preserving discovery order)
         for col in columns:
             if col not in ordered_cols:
                 ordered_cols.append(col)
@@ -1089,17 +1142,18 @@ class MergeService:
                 result, field, ordered_cols
             )
 
-            # Coalesce compatible columns
+            # Coalesce compatible columns into the first (highest priority) column
             if len(compatible_cols) > 1:
+                target_col = compatible_cols[0]  # Keep the first column name (qualified)
                 result = result.with_columns(
-                    pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(field)
+                    pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(target_col)
                 )
 
-            # Drop all non-base columns
+            # Drop all non-target columns
             cols_to_drop = [
                 col
-                for col in ordered_cols[1:]
-                if col != field and col in result.columns
+                for col in compatible_cols[1:]
+                if col in result.columns
             ]
             if cols_to_drop:
                 result = result.drop(cols_to_drop)
@@ -1139,27 +1193,36 @@ class MergeService:
     ) -> int:
         """Count records with at least one enrichment.
 
+        Counts records where at least one enricher-sourced column is non-null.
+        Works with qualified column names ({provider}.{entity}.{field}).
+
         Args:
-            df: Merged DataFrame with prefixed columns.
+            df: Merged DataFrame with qualified columns.
             enrichers: Enricher configurations.
-            seed_pipeline: Seed pipeline name for prefix computation.
+            seed_pipeline: Seed pipeline name (for identifying seed columns).
 
         Returns:
             Count of records with at least one non-null enricher column.
         """
-        # Check if any enricher-prefixed columns are non-null
-        # This is approximate - relies on column naming convention
-        enriched_count = 0
+        import polars as pl
+
+        enricher_cols: list[str] = []
+
         for enricher in enrichers:
-            prefix = self._get_enricher_prefix(enricher.pipeline, seed_pipeline)
-            enricher_cols = [c for c in df.columns if c.startswith(prefix)]
-            if enricher_cols:
-                # Check first enricher column for non-null
-                col = enricher_cols[0]
-                enriched_count = max(
-                    enriched_count, len(df.filter(df[col].is_not_null()))
-                )
-        return enriched_count
+            try:
+                provider, entity = self._parse_pipeline_name(enricher.pipeline)
+                prefix = f"{provider}.{entity}."
+            except ValueError:
+                prefix = f"{enricher.pipeline}_"
+
+            enricher_cols.extend([c for c in df.columns if c.startswith(prefix)])
+
+        if not enricher_cols:
+            return 0
+
+        # Count records where at least one enricher column is non-null
+        any_enriched = pl.any_horizontal([pl.col(c).is_not_null() for c in enricher_cols])
+        return len(df.filter(any_enriched))
 
     def _count_fully_enriched(
         self, df: pl.DataFrame, enrichers: Sequence[EnricherConfig]
