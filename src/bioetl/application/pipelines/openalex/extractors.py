@@ -353,3 +353,41 @@ def extract_keywords(keywords: list[dict[str, Any]] | None) -> list[str]:
             result.append(name.strip())
 
     return result
+
+
+def extract_biblio_info(biblio: dict[str, Any] | None) -> dict[str, Any]:
+    """Extract bibliographic info (volume, issue, pages) from biblio object.
+
+    OpenAlex provides bibliographic information in a "biblio" object
+    containing volume, issue, first_page, and last_page fields.
+
+    Args:
+        biblio: Biblio object from OpenAlex work.
+
+    Returns:
+        Dictionary with volume, issue, first_page, last_page.
+
+    Example:
+        >>> extract_biblio_info({
+        ...     "volume": "42",
+        ...     "issue": "3",
+        ...     "first_page": "123",
+        ...     "last_page": "145"
+        ... })
+        {'volume': '42', 'issue': '3', 'first_page': '123', 'last_page': '145'}
+        >>> extract_biblio_info(None)
+        {'volume': None, 'issue': None, 'first_page': None, 'last_page': None}
+    """
+    if not biblio or not isinstance(biblio, dict):
+        return {
+            "volume": None,
+            "issue": None,
+            "first_page": None,
+            "last_page": None,
+        }
+    return {
+        "volume": biblio.get("volume"),
+        "issue": biblio.get("issue"),
+        "first_page": biblio.get("first_page"),
+        "last_page": biblio.get("last_page"),
+    }

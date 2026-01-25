@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Any, cast
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.openalex.extractors import (
     extract_authors,
+    extract_biblio_info,
     extract_concepts,
     extract_external_ids,
     extract_journal_info,
@@ -159,6 +160,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         # Extract keywords
         keywords = extract_keywords(rec.get("keywords", []))
 
+        # Extract bibliographic info (volume, issue, pages)
+        biblio_info = extract_biblio_info(rec.get("biblio", {}))
+
         # Validate year using PublicationYear Value Object
         year_vo = PublicationYear.from_raw(rec.get("publication_year"))
         year = year_vo.value if year_vo else None
@@ -197,9 +201,16 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "mesh": mesh_terms,
             "keywords": keywords,
             "language": rec.get("language"),
-            # Pages (OpenAlex doesn't provide page info in standard fields)
-            "first_page": None,
-            "last_page": None,
+            # Bibliographic info (from biblio object)
+            "volume": biblio_info.get("volume"),
+            "issue": biblio_info.get("issue"),
+            "first_page": biblio_info.get("first_page"),
+            "last_page": biblio_info.get("last_page"),
+            # Additional metrics
+            "fwci": rec.get("fwci"),
+            "referenced_works_count": rec.get("referenced_works_count"),
+            # Quality indicators
+            "is_retracted": rec.get("is_retracted", False),
             "_lookup_method": lookup_method,
             "_original_id": original_id,
             "source": "openalex",
