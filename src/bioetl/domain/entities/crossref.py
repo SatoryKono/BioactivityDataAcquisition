@@ -32,26 +32,21 @@ from bioetl.domain.entities.publication_base import PublicationEntityBase
 # See: https://api.crossref.org/types for complete list (30 types).
 #
 # Unified types (aligned with chembl/publication.py schema):
-# - PUBLICATION: Journal articles, conference papers, reports, standards
-# - BOOK: Books, monographs, book chapters, reference works
+# - PUBLICATION: Journal articles, conference papers, peer reviews
+# - BOOK: Books, monographs, book chapters, dissertations, reference entries
 # - PREPRINT: Pre-publication works (posted-content)
 # - DATASET: Research data and databases
-# - OTHER: Container types, supplementary materials, funding
+# - OTHER: Reports, standards, container types, supplementary materials, funding
 #
 # Rationale:
-# - BOOK separated from PUBLICATION for bibliometric analysis granularity
+# - BOOK includes dissertations (thesis = monograph) and reference entries
+# - Reports/standards → OTHER (technical documents, not scholarly publications)
 # - "component" → OTHER (supplementary material, not standalone scholarly work)
 # - Container types → OTHER (metadata records, not scholarly content)
 CROSSREF_TYPE_MAP: dict[str, str] = {
     # === Journal/Conference Articles → PUBLICATION ===
     "journal-article": "PUBLICATION",
     "proceedings-article": "PUBLICATION",
-    # === Academic Works → PUBLICATION ===
-    "dissertation": "PUBLICATION",
-    "report": "PUBLICATION",
-    "report-component": "PUBLICATION",
-    "standard": "PUBLICATION",
-    "reference-entry": "PUBLICATION",  # Dictionary/encyclopedia entry
     "peer-review": "PUBLICATION",  # Published peer review
     "other": "PUBLICATION",  # Unclassified scholarly work
     # === Books & Book Parts → BOOK ===
@@ -63,11 +58,17 @@ CROSSREF_TYPE_MAP: dict[str, str] = {
     "book-section": "BOOK",
     "book-part": "BOOK",
     "book-track": "BOOK",  # Audio book track
+    "dissertation": "BOOK",  # Thesis/monograph
+    "reference-entry": "BOOK",  # Dictionary/encyclopedia entry
     # === Pre-publication → PREPRINT ===
     "posted-content": "PREPRINT",
     # === Research Data → DATASET ===
     "dataset": "DATASET",
     "database": "DATASET",
+    # === Reports & Standards → OTHER ===
+    "report": "OTHER",  # Technical report
+    "report-component": "OTHER",  # Part of a report
+    "standard": "OTHER",  # Technical standard
     # === Supplementary Material → OTHER ===
     "component": "OTHER",  # Figures, tables, supplementary files
     # === Container/Series Types → OTHER ===
