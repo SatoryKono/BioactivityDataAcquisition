@@ -11,8 +11,8 @@
 Проведена комплексная верификация корректности извлечения данных в PubMed Publication Pipeline. Все проверенные компоненты соответствуют спецификации.
 
 **Результаты тестирования:**
-- Unit тесты экстракторов: **128 passed**
-- Unit тесты трансформера: **26 passed** (154 total с экстракторами)
+- Unit тесты экстракторов: **135 passed** (+7 MedlineDate тестов)
+- Unit тесты трансформера: **26 passed** (161 total с экстракторами)
 - Architecture тесты PII: **16 passed**
 
 ---
@@ -194,14 +194,29 @@ format_date("2023", "06", None)  # → "2023-06-30"
 format_date("2023", "Mar", "15")  # → "2023-03-15"
 ```
 
-### 5.2. MedlineDate
+### 5.2. MedlineDate (добавлено 2026-01-25)
 
 | Аспект | Статус | Детали |
 |--------|--------|--------|
-| MedlineDate формат | ⚠️ | Не поддерживается, возвращает `(None, None)` |
-| Тест | ✅ | `test_medline_date_format` документирует поведение |
+| MedlineDate формат | ✅ | Полная поддержка через `_parse_medline_date()` |
+| Месячные диапазоны | ✅ | "Jan-Feb" → Feb (end-of-period) |
+| Сезоны | ✅ | Spring→May, Summer→Aug, Fall→Nov, Winter→Feb |
+| Кварталы | ✅ | "1st Quart"→Mar, "2nd Quart"→Jun, etc. |
+| Кросс-годовые диапазоны | ✅ | "2022 Dec-2023 Jan" → year=2023, month=Jan |
+| Тесты | ✅ | 8 новых тестов в `test_extractor_edge_cases.py` |
 
-**Примечание:** MedlineDate (например, "2023 Jan-Feb", "2023 Spring") не парсится текущей реализацией. Это известное ограничение, задокументированное в тестах.
+**Реализация:** `date.py:97-168` — метод `_parse_medline_date()` с вспомогательными методами:
+- `_extract_year_from_tokens()` — извлечение года (regex `\b(19\d{2}|20\d{2})\b`)
+- `_extract_month_from_medline()` — извлечение месяца/сезона/квартала
+
+**Стратегия end-of-period:**
+```python
+# Диапазоны: берём конец периода
+"2023 Jan-Feb"      → Feb (конец диапазона)
+"2023 Spring"       → May (конец Mar-May)
+"2023 2nd Quart"    → Jun (конец Apr-Jun)
+"2022 Dec-2023 Jan" → Jan 2023 (последний год + последний месяц)
+```
 
 ### 5.3. Журнальные метаданные
 
@@ -309,13 +324,13 @@ BaseFieldExtractor (Template Method)
 | AbstractExtractor | `test_abstract_extractor.py` | 10 |
 | DateExtractor | `test_date_extractor.py` | 23 |
 | ClassificationExtractor | `test_classification_extractor.py` | 16 |
-| Edge cases | `test_extractor_edge_cases.py` | 39 |
+| Edge cases + MedlineDate | `test_extractor_edge_cases.py` | 46 (+7 MedlineDate) |
 | xml_utils | `test_xml_utils.py` | 12 |
 | BaseFieldExtractor | `test_base_field_extractor.py` | 6 |
-| **Итого экстракторы** | | **128** |
+| **Итого экстракторы** | | **135** |
 | PubMedPublicationTransformer | `test_pubmed_transformer.py` | 24 |
 | PubMed Publication | `test_pubmed_publication.py` | 2 |
-| **Итого** | | **154** |
+| **Итого** | | **161** |
 
 ### 8.2. Architecture тесты
 
@@ -338,8 +353,7 @@ BaseFieldExtractor (Template Method)
 
 ### 9.2. Известные ограничения
 
-1. **MedlineDate**: Формат "2023 Jan-Feb" не парсится (возвращает None)
-2. **Suffix**: Элемент Suffix в Author не включается в выходное имя
+1. **Suffix**: Элемент Suffix в Author не включается в выходное имя
 
 ### 9.3. Рекомендации
 
@@ -347,4 +361,6 @@ BaseFieldExtractor (Template Method)
 
 ---
 
-**Верификация завершена**: 154 unit теста + 16 architecture тестов прошли успешно.
+**Верификация завершена**: 161 unit тест + 16 architecture тестов прошли успешно.
+
+**Обновление 2026-01-25**: Добавлена поддержка MedlineDate формата (+7 тестов).
