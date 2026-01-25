@@ -57,6 +57,9 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("journal_full_title", pa.string()),
         pa.field("publication_date", pa.string()),  # Unified field, null for ChEMBL
         pa.field("src_id", pa.int64()),
+        # === ChEMBL Release Metadata ===
+        pa.field("chembl_release", pa.string()),  # e.g., CHEMBL_1, CHEMBL_34
+        pa.field("creation_date", pa.string()),  # Record creation date (YYYY-MM-DD)
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
