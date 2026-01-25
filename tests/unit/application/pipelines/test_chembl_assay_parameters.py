@@ -98,12 +98,15 @@ class TestAssayParametersEntity:
         with pytest.raises(ValueError, match="Invalid assay_chembl_id"):
             AssayParameters(**valid_params)
 
-    def test_missing_type(self, valid_params: dict) -> None:
-        """Test that empty type raises ValueError."""
+    def test_missing_type_allowed(self, valid_params: dict) -> None:
+        """Test that empty/None type is allowed (no sentinel value)."""
         valid_params["type"] = ""
+        entity = AssayParameters(**valid_params)
+        assert entity.type == ""
 
-        with pytest.raises(ValueError, match="type is required"):
-            AssayParameters(**valid_params)
+        valid_params["type"] = None
+        entity = AssayParameters(**valid_params)
+        assert entity.type is None
 
     def test_has_numeric_value_with_value(self, valid_params: dict) -> None:
         """Test has_numeric_value returns True when value is present."""
@@ -312,7 +315,7 @@ class TestAssayParametersTransformer:
         transformer: AssayParametersTransformer,
         mock_context,
     ) -> None:
-        """Test that None type is normalized to 'UNKNOWN'."""
+        """Test that None type remains None (no sentinel value)."""
         record = {
             "assay_param_id": 12348,
             "assay_chembl_id": "CHEMBL1217643",
@@ -322,7 +325,7 @@ class TestAssayParametersTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["type"] == "UNKNOWN"
+        assert result["type"] is None
 
     @pytest.mark.asyncio
     async def test_transform_all_optional_fields_none(

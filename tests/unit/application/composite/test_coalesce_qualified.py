@@ -60,15 +60,25 @@ class TestExtractFieldFromQualified:
 
 
 class TestCoalescePreferSeed:
-    """Tests for _coalesce_prefer_seed with qualified names."""
+    """Tests for _coalesce_prefer_seed with qualified names.
+
+    Note: Coalescing only occurs when a field has more than 4 columns
+    (threshold set in commit 99e2391 to reduce processing for smaller groups).
+    """
 
     def test_seed_wins_over_enricher(self, merge_service: MergeService) -> None:
-        """Seed columns take priority in coalesce."""
+        """Seed columns take priority when >4 columns exist for a field.
+
+        With only 2 columns, coalesce is skipped (threshold is >4).
+        """
         df = pl.DataFrame(
             {
                 "doi": ["10.1/a"],
                 "chembl.publication.title": ["Seed Title"],
                 "crossref.publication.title": ["Enricher Title"],
+                "openalex.publication.title": ["OA Title"],
+                "pubmed.publication.title": ["PM Title"],
+                "semanticscholar.publication.title": ["SS Title"],
                 "_run_id": ["r1"],
             }
         )
@@ -78,15 +88,19 @@ class TestCoalescePreferSeed:
 
         assert "chembl.publication.title" in result.columns
         assert result["chembl.publication.title"][0] == "Seed Title"
+        # Enricher columns should be dropped after coalesce
         assert "crossref.publication.title" not in result.columns
 
     def test_fills_null_from_enricher(self, merge_service: MergeService) -> None:
-        """Coalesce fills nulls from lower priority columns."""
+        """Coalesce fills nulls from lower priority columns when >4 exist."""
         df = pl.DataFrame(
             {
                 "doi": ["10.1/a", "10.1/b"],
                 "chembl.publication.title": [None, "Seed Title 2"],
                 "crossref.publication.title": ["Enricher Title 1", "Enricher Title 2"],
+                "openalex.publication.title": ["OA 1", "OA 2"],
+                "pubmed.publication.title": ["PM 1", "PM 2"],
+                "semanticscholar.publication.title": ["SS 1", "SS 2"],
             }
         )
         result = merge_service._coalesce_prefer_seed(

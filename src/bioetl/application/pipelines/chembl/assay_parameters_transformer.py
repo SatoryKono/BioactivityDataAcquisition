@@ -96,7 +96,7 @@ class AssayParametersTransformer(BaseChemblTransformer):
     entity_class = AssayParameters
     primary_id_field = "assay_param_id"
 
-    def _normalize_type(self, param_type: Any) -> str:
+    def _normalize_type(self, param_type: Any) -> str | None:
         """Normalize parameter type to uppercase.
 
         Uses DataNormalizationService via DI for consistent normalization.
@@ -105,12 +105,12 @@ class AssayParametersTransformer(BaseChemblTransformer):
             param_type: Raw parameter type from API (may be Any type).
 
         Returns:
-            Normalized uppercase type or "UNKNOWN".
+            Normalized uppercase type or None if not available.
         """
         if param_type is None:
-            return "UNKNOWN"
+            return None
         normalized = self._data_normalizer.normalize_to_string(param_type)
-        return normalized.upper() if normalized else "UNKNOWN"
+        return normalized.upper() if normalized else None
 
     def _extract_business_data(
         self,
