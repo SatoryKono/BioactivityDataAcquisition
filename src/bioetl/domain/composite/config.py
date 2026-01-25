@@ -19,6 +19,7 @@ from bioetl.domain.composite.strategy import (
     FallbackStrategy,
     MergeStrategy,
 )
+from bioetl.domain.value_objects.column_qualifier import parse_pipeline_name
 
 if TYPE_CHECKING:
     pass
@@ -62,6 +63,18 @@ class SeedConfig:
         _require_non_empty(self.output_keys, "seed output_keys")
         _require_non_empty(self.silver_table, "seed silver_table")
         _validate_positive_limit(self.limit, "seed")
+
+    @property
+    def provider(self) -> str:
+        """Get provider name from pipeline."""
+        provider, _ = parse_pipeline_name(self.pipeline)
+        return provider
+
+    @property
+    def entity(self) -> str:
+        """Get entity name from pipeline."""
+        _, entity = parse_pipeline_name(self.pipeline)
+        return entity
 
 
 @dataclass(frozen=True, slots=True)
@@ -130,6 +143,18 @@ class EnricherConfig:
     def has_fallback_keys(self) -> bool:
         """Check if fallback join keys are available."""
         return len(self.join_keys) > 1
+
+    @property
+    def provider(self) -> str:
+        """Get provider name from pipeline."""
+        provider, _ = parse_pipeline_name(self.pipeline)
+        return provider
+
+    @property
+    def entity(self) -> str:
+        """Get entity name from pipeline."""
+        _, entity = parse_pipeline_name(self.pipeline)
+        return entity
 
 
 @dataclass(frozen=True, slots=True)
