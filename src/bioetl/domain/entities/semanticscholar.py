@@ -40,12 +40,14 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
         paper_id: Semantic Scholar Paper ID (40-char hex S2 ID). REQUIRED.
         pmc_id: PubMed Central ID (format: PMC1234567).
         arxiv_id: ArXiv ID.
+        dblp_id: DBLP publication key.
         corpus_id: Semantic Scholar Corpus ID.
         tldr: AI-generated summary (TL;DR).
         volume: Journal volume.
         pages: Page numbers.
         venue: Venue name (conference/journal).
         reference_count: Number of references.
+        influential_citation_count: Number of influential citations.
         open_access_url: URL to open access PDF.
         fields_of_study: JSON string of fields of study.
         publication_types: JSON string of publication types.
@@ -60,6 +62,7 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
 
     # SemanticScholar-specific external identifiers (in addition to inherited pmc_id)
     arxiv_id: str | None = None
+    dblp_id: str | None = None
     corpus_id: int | None = None
 
     # SemanticScholar-specific: AI-generated summary
@@ -73,6 +76,7 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
 
     # SemanticScholar-specific metrics
     reference_count: int | None = None
+    influential_citation_count: int | None = None
 
     # SemanticScholar-specific OA URL
     open_access_url: str | None = None

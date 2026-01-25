@@ -71,6 +71,42 @@ class TestExtractExternalIds:
 
         assert result["pmcid"] == "PMC7654321"
 
+    def test_extract_dblp_id(self) -> None:
+        """Test DBLP ID extraction."""
+        external_ids = {
+            "DOI": "10.1145/12345",
+            "DBLP": "journals/cacm/Smith24",
+        }
+
+        result = extract_external_ids(external_ids)
+
+        assert result["dblp"] == "journals/cacm/Smith24"
+        assert result["doi"] == "10.1145/12345"
+
+    def test_extract_all_ids_including_dblp(self) -> None:
+        """Test extracting all identifier types including DBLP."""
+        external_ids = {
+            "DOI": "10.1038/s41586-024-07487-w",
+            "PubMed": "12345678",
+            "PMCID": "PMC1234567",
+            "ArXiv": "2106.15928",
+            "CorpusId": 123456,
+            "MAG": 9876543,
+            "DBLP": "conf/icml/AuthorYear",
+            "ACL": "W19-1234",
+        }
+
+        result = extract_external_ids(external_ids)
+
+        assert result["doi"] == "10.1038/s41586-024-07487-w"
+        assert result["pmid"] == "12345678"
+        assert result["pmcid"] == "PMC1234567"
+        assert result["arxiv"] == "2106.15928"
+        assert result["corpus_id"] == 123456
+        assert result["mag"] == 9876543
+        assert result["dblp"] == "conf/icml/AuthorYear"
+        assert result["acl"] == "W19-1234"
+
 
 class TestExtractAuthors:
     """Tests for extract_authors function."""
@@ -117,6 +153,42 @@ class TestExtractAuthors:
         """Test extracting from None."""
         result = extract_authors(None)
         assert result == []
+
+    def test_skip_whitespace_only_names(self) -> None:
+        """Test that whitespace-only names are skipped."""
+        authors = [
+            {"authorId": "123", "name": "Valid Name"},
+            {"authorId": "456", "name": "   "},  # Whitespace only
+            {"authorId": "789", "name": "\t\n"},  # Tabs and newlines
+            {"authorId": "012", "name": "Another Valid"},
+        ]
+
+        result = extract_authors(authors)
+
+        assert result == ["Valid Name", "Another Valid"]
+
+    def test_skip_empty_string_names(self) -> None:
+        """Test that empty string names are skipped."""
+        authors = [
+            {"authorId": "123", "name": "Valid"},
+            {"authorId": "456", "name": ""},  # Empty string
+            {"authorId": "789", "name": "Also Valid"},
+        ]
+
+        result = extract_authors(authors)
+
+        assert result == ["Valid", "Also Valid"]
+
+    def test_names_are_stripped(self) -> None:
+        """Test that author names are stripped of whitespace."""
+        authors = [
+            {"authorId": "123", "name": "  John Doe  "},
+            {"authorId": "456", "name": "\tJane Smith\n"},
+        ]
+
+        result = extract_authors(authors)
+
+        assert result == ["John Doe", "Jane Smith"]
 
 
 class TestExtractJournalInfo:
@@ -272,6 +344,39 @@ class TestExtractFieldsOfStudy:
         """Test with None."""
         result = extract_fields_of_study(None)
         assert result == []
+
+    def test_filter_none_elements(self) -> None:
+        """Test that None elements are filtered out."""
+        fields = ["Biology", None, "Medicine", None, "Genetics"]
+
+        result = extract_fields_of_study(fields)
+
+        assert result == ["Biology", "Medicine", "Genetics"]
+
+    def test_filter_empty_string_elements(self) -> None:
+        """Test that empty string elements are filtered out."""
+        fields = ["Biology", "", "Medicine", "", "Genetics"]
+
+        result = extract_fields_of_study(fields)
+
+        assert result == ["Biology", "Medicine", "Genetics"]
+
+    def test_filter_mixed_invalid_elements(self) -> None:
+        """Test filtering both None and empty strings."""
+        fields = ["Biology", None, "", "Medicine", None, ""]
+
+        result = extract_fields_of_study(fields)
+
+        assert result == ["Biology", "Medicine"]
+
+    def test_max_count_applied_after_filtering(self) -> None:
+        """Test that max_count is applied after filtering invalid elements."""
+        fields = ["A", None, "B", "", "C", None, "D", "E"]
+
+        result = extract_fields_of_study(fields, max_count=3)
+
+        # Should filter first, then limit: ["A", "B", "C", "D", "E"][:3]
+        assert result == ["A", "B", "C"]
 
 
 class TestValidateYear:
