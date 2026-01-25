@@ -338,8 +338,8 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     chembl_release: Series[str] = pa.Field(nullable=True)
     creation_date: Series[str] = pa.Field(nullable=True)
 
-    # Unified publication fields (only language, others not available from ChEMBL)
-    language: Series[str] = pa.Field(nullable=True)
+    # Note: Unified publication fields (language, citation_count, is_oa, pmc_id,
+    # publication_date) excluded - not available from ChEMBL API
 
     # System field (per SYSTEM_FIELDS_PREFIX)
     source: Series[str] = pa.Field(nullable=True, alias="_source")

@@ -52,7 +52,7 @@ class ChemblPublication(BaseEntity):
     # Unified publication fields (always NULL for ChEMBL, excluded from output)
     citation_count: int | None = None
     is_oa: bool | None = None
-    language: str | None = None
+    language: str | None = None  # Excluded from PyArrow/Gold schemas
 
     # Source information
     src_id: int | None = None
