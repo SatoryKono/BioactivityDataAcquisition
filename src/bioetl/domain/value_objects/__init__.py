@@ -64,6 +64,7 @@ from bioetl.domain.value_objects.activity_values import (
 )
 from bioetl.domain.value_objects.base import ValueObject
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
 from bioetl.domain.value_objects.chemical import (
     SMILES,
     InChIKey,
@@ -158,6 +159,7 @@ __all__ = [
     "BusinessRulesResult",
     "CategoricalDistribution",
     "ChemblId",
+    "ColumnQualifier",
     "ColumnStats",
     "CompletenessResult",
     "CompoundId",
