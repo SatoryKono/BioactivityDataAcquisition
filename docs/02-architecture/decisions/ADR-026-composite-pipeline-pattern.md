@@ -156,6 +156,34 @@ Every Gold record includes:
 }
 ```
 
+### 7. Column Naming Convention
+
+**Status: Accepted (Updated 2025-01-25)**
+
+**Context:**
+Merging data from multiple sources leads to column name conflicts. Previous prefix strategies (provider/entity) were inconsistent.
+
+**Decision:**
+All business columns (seed and enricher) are renamed to a unified format:
+`{provider}.{entity}.{field}`
+
+**Examples:**
+- `title` (seed chembl_publication) → `chembl.publication.title`
+- `title` (enricher crossref_publication) → `crossref.publication.title`
+- `citation_count` (enricher crossref_publication) → `crossref.publication.citation_count`
+
+**Exceptions:**
+1. **Join keys** (`doi`, `pmid`, `pmc_id`) — NOT renamed for compatibility with join operations.
+2. **System columns** (starting with `_`) — NOT renamed.
+
+**Consequences:**
+- **Positive:** Uniform naming, clear attribution, no conflicts.
+- **Negative:** Longer column names, breaking change for downstream consumers.
+
+**Migration:**
+- Silver: Delta Lake ALTER TABLE RENAME COLUMN
+- Gold: Full rebuild required
+
 ## Architecture
 
 ### Layer Distribution

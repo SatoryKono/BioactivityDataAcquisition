@@ -91,6 +91,18 @@ composite:
   # Merge Configuration
   # ---------------------------------------------------------------------------
   # Defines how enriched data is combined into the final output.
+
+  # Column Naming Convention (ADR-026 v2)
+  # =====================================
+  # All business columns are renamed to: {provider}.{entity}.{field}
+  #
+  # Examples:
+  #   - seed (chembl_publication):     chembl.publication.title
+  #   - enricher (crossref_publication): crossref.publication.title
+  #   - enricher (pubmed_publication):   pubmed.publication.abstract
+  #
+  # Join keys (doi, pmid, pmc_id) are NOT renamed for compatibility.
+
   merge:
     # Join strategy: left_outer preserves all seed records
     strategy: left_outer
@@ -100,24 +112,25 @@ composite:
 
     # Field-level priority overrides (when using explicit_rules)
     # Maps field name to ordered list of source preferences
+    # Uses {provider}.{entity} format
     field_priorities:
       title:
-        - chembl         # ChEMBL title is authoritative
-        - crossref
-        - openalex
+        - chembl.publication    # ChEMBL title is authoritative
+        - crossref.publication
+        - openalex.publication
       abstract:
-        - pubmed         # PubMed has best abstracts
-        - openalex
-        - chembl
+        - pubmed.publication    # PubMed has best abstracts
+        - openalex.publication
+        - chembl.publication
       citations_count:
-        - crossref       # CrossRef is citation authority
-        - openalex
+        - crossref.publication  # CrossRef is citation authority
+        - openalex.publication
       mesh_terms:
-        - pubmed         # PubMed MeSH is authoritative
+        - pubmed.publication    # PubMed MeSH is authoritative
       concepts:
-        - openalex       # OpenAlex concepts are unique
+        - openalex.publication  # OpenAlex concepts are unique
       tldr:
-        - semanticscholar  # S2-only field
+        - semanticscholar.publication  # S2-only field
 
     # Output paths
     output:

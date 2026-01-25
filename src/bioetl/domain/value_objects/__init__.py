@@ -70,6 +70,7 @@ from bioetl.domain.value_objects.chemical import (
     MolecularWeight,
     PublicationYear,
 )
+from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
 from bioetl.domain.value_objects.compound_ids import (
     AssayId,
     CompoundId,
@@ -158,6 +159,7 @@ __all__ = [
     "BusinessRulesResult",
     "CategoricalDistribution",
     "ChemblId",
+    "ColumnQualifier",
     "ColumnStats",
     "CompletenessResult",
     "CompoundId",

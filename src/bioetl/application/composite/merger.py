@@ -6,6 +6,7 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal
 
+from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.deduplication import EnricherDeduplicator
 from bioetl.domain.composite.result import EnrichmentResult, MergeResult
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
@@ -68,6 +69,7 @@ class MergeService:
         self._logger = logger
         self._delta_reader = delta_reader
         self._deduplicator = EnricherDeduplicator(logger)
+        self._renamer = ColumnRenamer(logger)
 
     async def merge(
         self,
@@ -109,6 +111,17 @@ class MergeService:
             self._logger.debug(
                 "Using seed pipeline for column renaming",
                 seed_pipeline=effective_seed_pipeline,
+            )
+            # Rename seed columns to qualified format {provider}.{entity}.{field}
+            seed_df = self._renamer.rename_dataframe(
+                seed_df,
+                effective_seed_pipeline,
+                exclude_join_keys=True,
+            )
+            self._logger.debug(
+                "Renamed seed columns to qualified format",
+                pipeline=effective_seed_pipeline,
+                columns=seed_df.columns,
             )
 
         # Track sources used
@@ -427,171 +440,6 @@ class MergeService:
         parts = pipeline.split("_", 1)
         return (parts[0], parts[1])
 
-    def _determine_prefix_strategy(
-        self,
-        seed_provider: str,
-        seed_entity: str,
-        enricher_provider: str,
-        enricher_entity: str,
-    ) -> PrefixStrategy:
-        """Determine column prefix strategy based on provider/entity relationship.
-
-        Determines how to prefix enricher columns to avoid conflicts
-        while maintaining semantic clarity.
-
-        Args:
-            seed_provider: Provider name of the seed pipeline.
-            seed_entity: Entity name of the seed pipeline.
-            enricher_provider: Provider name of the enricher pipeline.
-            enricher_entity: Entity name of the enricher pipeline.
-
-        Returns:
-            Strategy to use:
-            - "provider": Cross-provider merge (same entity, different providers).
-              Prefix with provider name. Example: "crossref.doi"
-            - "entity": Cross-entity merge (same provider, different entities).
-              Prefix with entity name. Example: "activity.chembl_id"
-            - "both": Cross-provider-entity merge (different providers AND entities).
-              Prefix with provider.entity. Example: "pubchem.compound.name"
-            - "pipeline": Fallback when same provider and entity.
-              Use full pipeline name. Example: "chembl_publication_extra.doi"
-
-        Example:
-            >>> merger._determine_prefix_strategy("chembl", "publication",
-            ...                                    "crossref", "publication")
-            'provider'
-            >>> merger._determine_prefix_strategy("chembl", "publication",
-            ...                                    "chembl", "activity")
-            'entity'
-            >>> merger._determine_prefix_strategy("chembl", "publication",
-            ...                                    "pubchem", "compound")
-            'both'
-        """
-        same_provider = seed_provider.lower() == enricher_provider.lower()
-        same_entity = seed_entity.lower() == enricher_entity.lower()
-
-        if same_entity and not same_provider:
-            # Cross-provider merge: same entity, different providers
-            return "provider"
-        elif same_provider and not same_entity:
-            # Cross-entity merge: same provider, different entities
-            return "entity"
-        elif not same_provider and not same_entity:
-            # Cross-provider-entity merge: different providers AND entities
-            return "both"
-        else:
-            # Same provider and entity - use full pipeline name
-            return "pipeline"
-
-    def _column_contains_identifier(
-        self,
-        column: str,
-        identifier: str,
-    ) -> bool:
-        """Check if column name already contains the identifier (case-insensitive).
-
-        Used to avoid redundant prefixes like "crossref.crossref_doi".
-
-        Args:
-            column: Column name to check.
-            identifier: Identifier to search for (provider or entity name).
-
-        Returns:
-            True if column contains the identifier (case-insensitive).
-
-        Example:
-            >>> merger._column_contains_identifier("crossref_doi", "crossref")
-            True
-            >>> merger._column_contains_identifier("doi", "crossref")
-            False
-            >>> merger._column_contains_identifier("CROSSREF.DOI", "crossref")
-            True
-            >>> merger._column_contains_identifier("chembl_id", "chembl")
-            True
-        """
-        return identifier.lower() in column.lower()
-
-    def _build_prefix(
-        self,
-        strategy: PrefixStrategy,
-        provider: str,
-        entity: str,
-        pipeline: str,
-    ) -> str:
-        """Build column prefix based on strategy.
-
-        Args:
-            strategy: Prefix strategy to use.
-            provider: Provider name.
-            entity: Entity name.
-            pipeline: Full pipeline name (fallback).
-
-        Returns:
-            Prefix string WITHOUT trailing dot.
-
-        Example:
-            >>> merger._build_prefix("provider", "crossref", "publication",
-            ...                       "crossref_publication")
-            'crossref'
-            >>> merger._build_prefix("entity", "chembl", "activity",
-            ...                       "chembl_activity")
-            'activity'
-            >>> merger._build_prefix("both", "pubchem", "compound",
-            ...                       "pubchem_compound")
-            'pubchem.compound'
-        """
-        match strategy:
-            case "provider":
-                return provider
-            case "entity":
-                return entity
-            case "both":
-                return f"{provider}.{entity}"
-            case "pipeline":
-                return pipeline
-
-    def _apply_column_prefix(
-        self,
-        df: pl.DataFrame,
-        columns: set[str],
-        prefix: str,
-        exclude_columns: set[str],
-    ) -> pl.DataFrame:
-        """Apply prefix to specified columns.
-
-        Renames columns by adding a prefix with dot separator.
-        Excludes join keys and columns already containing the identifier.
-
-        Args:
-            df: DataFrame to modify.
-            columns: Set of column names to potentially rename.
-            prefix: Prefix to add (WITHOUT trailing dot).
-            exclude_columns: Columns to exclude from renaming (join keys, etc.).
-
-        Returns:
-            DataFrame with renamed columns.
-
-        Example:
-            >>> df = pl.DataFrame({"doi": ["10.1/a"], "title": ["T1"]})
-            >>> result = merger._apply_column_prefix(
-            ...     df, {"title"}, "crossref", {"doi"}
-            ... )
-            >>> result.columns
-            ['doi', 'crossref.title']
-        """
-        rename_map = {}
-        for col in columns:
-            if col not in exclude_columns:
-                rename_map[col] = f"{prefix}.{col}"
-
-        if rename_map:
-            self._logger.debug(
-                "Applying column prefix",
-                prefix=prefix,
-                columns=list(rename_map.keys()),
-            )
-            return df.rename(rename_map)
-        return df
 
     def _find_next_suffix(self, base_col: str, existing_cols: set[str]) -> str:
         """Find next available suffix for a conflicting column.
@@ -729,18 +577,6 @@ class MergeService:
         """
         merged = seed_df
 
-        # Parse seed pipeline for intelligent prefix strategy
-        seed_provider: str | None = None
-        seed_entity: str | None = None
-        if seed_pipeline:
-            try:
-                seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
-            except ValueError:
-                self._logger.warning(
-                    "Could not parse seed pipeline name, using legacy prefix",
-                    seed_pipeline=seed_pipeline,
-                )
-
         for enricher in enrichers:
             if enricher.pipeline not in enricher_dfs:
                 continue
@@ -765,70 +601,13 @@ class MergeService:
             merged = self._normalize_join_key_columns(merged, join_keys_list)
             enricher_df = self._normalize_join_key_columns(enricher_df, join_keys_list)
 
-            # Find columns to prefix: all columns EXCEPT the primary join key
-            # Secondary join keys (title, doi when not primary) SHOULD be prefixed
-            # to avoid Polars adding its own suffix during join
-            non_join_cols = set(enricher_df.columns) - primary_key_set
-
-            # Determine prefix strategy
-            if seed_provider is not None and seed_entity is not None:
-                try:
-                    enricher_provider, enricher_entity = self._parse_pipeline_name(
-                        enricher.pipeline
-                    )
-
-                    strategy = self._determine_prefix_strategy(
-                        seed_provider,
-                        seed_entity,
-                        enricher_provider,
-                        enricher_entity,
-                    )
-
-                    prefix = self._build_prefix(
-                        strategy,
-                        enricher_provider,
-                        enricher_entity,
-                        enricher.pipeline,
-                    )
-
-                    self._logger.debug(
-                        "Column rename strategy determined",
-                        enricher=enricher.pipeline,
-                        strategy=strategy,
-                        prefix=prefix,
-                    )
-
-                    # Find columns that already contain the identifier
-                    already_prefixed = {
-                        col
-                        for col in non_join_cols
-                        if self._column_contains_identifier(col, enricher_provider)
-                        or self._column_contains_identifier(col, enricher_entity)
-                    }
-
-                    # Apply prefix to non-join columns
-                    # Only exclude primary key, secondary keys get prefixed
-                    enricher_df = self._apply_column_prefix(
-                        enricher_df,
-                        non_join_cols - already_prefixed,
-                        prefix,
-                        primary_key_set,
-                    )
-
-                except ValueError:
-                    # Fallback to legacy prefix if parsing fails
-                    self._logger.warning(
-                        "Could not parse enricher pipeline, using legacy prefix",
-                        enricher=enricher.pipeline,
-                    )
-                    enricher_df = self._apply_legacy_prefix(
-                        enricher_df, enricher.pipeline, non_join_cols, primary_key_set
-                    )
-            else:
-                # No seed pipeline provided - use legacy prefix
-                enricher_df = self._apply_legacy_prefix(
-                    enricher_df, enricher.pipeline, non_join_cols, primary_key_set
-                )
+            # Rename enricher columns to qualified format {provider}.{entity}.{field}
+            # This replaces the old logic of determining prefix strategy
+            enricher_df = self._renamer.rename_dataframe(
+                enricher_df,
+                enricher.pipeline,
+                exclude_join_keys=True,
+            )
 
             # Detect and resolve remaining conflicts
             # Only exclude primary key - secondary keys should be checked for conflicts
@@ -849,36 +628,6 @@ class MergeService:
 
         return merged
 
-    def _apply_legacy_prefix(
-        self,
-        df: pl.DataFrame,
-        pipeline: str,
-        columns: set[str],
-        join_keys: set[str],
-    ) -> pl.DataFrame:
-        """Apply legacy underscore prefix to columns (backwards compatibility).
-
-        Args:
-            df: DataFrame to modify.
-            pipeline: Pipeline name to use as prefix.
-            columns: Columns to potentially rename.
-            join_keys: Columns to exclude (join keys).
-
-        Returns:
-            DataFrame with legacy-prefixed columns.
-        """
-        # Find common columns between seed and enricher
-        common_cols = columns - join_keys
-        rename_map = {col: f"{pipeline}_{col}" for col in common_cols}
-
-        if rename_map:
-            self._logger.debug(
-                "Applying legacy underscore prefix",
-                pipeline=pipeline,
-                columns=list(rename_map.keys()),
-            )
-            return df.rename(rename_map)
-        return df
 
     def _get_polars_join_type(self) -> JoinHow:
         """Convert MergeStrategy to Polars join type."""
@@ -895,50 +644,22 @@ class MergeService:
     def _get_enricher_prefix(
         self,
         enricher_pipeline: str,
-        seed_pipeline: str | None,
+        seed_pipeline: str | None = None,
     ) -> str:
-        """Get the column prefix used for an enricher.
-
-        Computes the prefix that was (or would be) applied to enricher columns
-        during `_apply_joins`. Used for conflict resolution.
+        """Get the column prefix for an enricher (always {provider}.{entity}.).
 
         Args:
             enricher_pipeline: Enricher pipeline name.
-            seed_pipeline: Seed pipeline name (may be None for legacy mode).
+            seed_pipeline: Unused, kept for compatibility.
 
         Returns:
-            Prefix string WITH trailing dot or underscore.
-
-        Example:
-            >>> merger._get_enricher_prefix("crossref_publication", "chembl_publication")
-            'crossref.'  # Cross-provider (same entity)
-            >>> merger._get_enricher_prefix("chembl_activity", "chembl_publication")
-            'activity.'  # Cross-entity (same provider)
-            >>> merger._get_enricher_prefix("crossref_publication", None)
-            'crossref_publication_'  # Legacy mode
+            Prefix string WITH trailing dot.
         """
-        if not seed_pipeline:
-            # Legacy mode: use full pipeline name with underscore
-            return f"{enricher_pipeline}_"
-
         try:
-            seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
-            enricher_provider, enricher_entity = self._parse_pipeline_name(
-                enricher_pipeline
-            )
-
-            strategy = self._determine_prefix_strategy(
-                seed_provider, seed_entity, enricher_provider, enricher_entity
-            )
-
-            prefix = self._build_prefix(
-                strategy, enricher_provider, enricher_entity, enricher_pipeline
-            )
-            return f"{prefix}."
-
+            provider, entity = self._parse_pipeline_name(enricher_pipeline)
+            return f"{provider}.{entity}."
         except ValueError:
-            # Fallback to legacy if parsing fails
-            return f"{enricher_pipeline}_"
+            return f"{enricher_pipeline}_"  # Legacy fallback
 
     def _extract_base_column(self, column: str, prefix: str) -> str | None:
         """Extract base column name from a prefixed column.
@@ -1168,39 +889,70 @@ class MergeService:
         priorities: Sequence[str],
         seed_pipeline: str | None = None,
     ) -> list[str]:
-        """Order columns by priority list, appending any remaining columns.
+        """Order columns by source priority for coalescing.
 
         Args:
             field: Base field name.
             columns: List of available columns for this field.
-            priorities: Ordered list of source priorities (provider names or "seed").
-            seed_pipeline: Seed pipeline name for prefix computation.
+            priorities: Ordered list of source priorities.
+            seed_pipeline: Seed pipeline name.
 
         Returns:
             Ordered list of columns by priority.
         """
         ordered_cols: list[str] = []
 
-        for source in priorities:
-            if source in ("seed", "chembl"):  # Seed convention
-                if field in columns and field not in ordered_cols:
-                    ordered_cols.append(field)
-            else:
-                # Try new dot-based prefix: "crossref.title"
-                dot_prefixed = f"{source}.{field}"
-                if dot_prefixed in columns and dot_prefixed not in ordered_cols:
-                    ordered_cols.append(dot_prefixed)
-                    continue
+        # Parse seed for matching
+        seed_entity = None
+        if seed_pipeline:
+            try:
+                _, seed_entity = self._parse_pipeline_name(seed_pipeline)
+            except ValueError:
+                pass
 
-                # Try legacy underscore prefix: "crossref_publication_title"
-                # The source might be just "crossref" but column is "crossref_publication_title"
+        for source in priorities:
+            # Try new format: {source}.{entity}.{field}
+            # source can be provider or provider.entity
+            if "." in source:
+                # Full source like "crossref.publication"
+                qualified = f"{source}.{field}"
+            else:
+                # Just provider - need to find matching entity
+                # Try same entity as seed first
+                if seed_entity:
+                    qualified = f"{source}.{seed_entity}.{field}"
+                else:
+                    qualified = f"{source}.*.{field}"  # Placeholder
+
+            # Direct match
+            if qualified in columns and qualified not in ordered_cols:
+                ordered_cols.append(qualified)
+                continue
+
+            # Wildcard match for {provider}.*.{field} or when we used placeholder
+            if "*" in qualified or not ("." in source):
+                # source is just provider, we want to match {provider}.*.{field}
+                provider = source.split(".")[0]
+                pattern_prefix = f"{provider}."
+                pattern_suffix = f".{field}"
                 for col in columns:
-                    if col.startswith(f"{source}_") and col.endswith(f"_{field}"):
+                    if col.startswith(pattern_prefix) and col.endswith(pattern_suffix):
                         if col not in ordered_cols:
                             ordered_cols.append(col)
+                        # We don't break here to collect all matches from this provider?
+                        # Usually priority list implies specific order. If we have multiple entities for same provider
+                        # for the same field, order between them is undefined here.
+                        # Prompt says "break" in the loop.
                         break
 
-        # Add remaining columns not in priority list
+            # Legacy format fallback: {source}_{field} or {source}_*_{field}
+            for col in columns:
+                if col.startswith(f"{source}_") and col.endswith(f"_{field}"):
+                    if col not in ordered_cols:
+                        ordered_cols.append(col)
+                    break
+
+        # Add remaining columns
         for col in columns:
             if col not in ordered_cols:
                 ordered_cols.append(col)
