@@ -23,17 +23,18 @@ class SemanticGroup(IntEnum):
 
     Lower values appear first in output.
     """
-    SYSTEM = auto()        # entity_id, content_hash, _run_id, _ingestion_ts
-    IDENTIFIERS = auto()   # document_chembl_id, doi, pmid, pmc_id
-    TITLE = auto()         # title, *.title
-    ABSTRACT = auto()      # abstract, *.abstract
-    AUTHORS = auto()       # authors, *.authors, first_author
-    JOURNAL = auto()       # journal, journal_name, source
-    DATES = auto()         # publication_date, year, created_at
-    METRICS = auto()       # citation_count, reference_count
+
+    SYSTEM = auto()  # entity_id, content_hash, _run_id, _ingestion_ts
+    IDENTIFIERS = auto()  # document_chembl_id, doi, pmid, pmc_id
+    TITLE = auto()  # title, *.title
+    ABSTRACT = auto()  # abstract, *.abstract
+    AUTHORS = auto()  # authors, *.authors, first_author
+    JOURNAL = auto()  # journal, journal_name, source
+    DATES = auto()  # publication_date, year, created_at
+    METRICS = auto()  # citation_count, reference_count
     CLASSIFICATION = auto()  # mesh_terms, keywords, subjects
-    URLS = auto()          # url, pdf_url, landing_page
-    OTHER = auto()         # Everything else
+    URLS = auto()  # url, pdf_url, landing_page
+    OTHER = auto()  # Everything else
 
 
 # Mapping of field patterns to semantic groups
@@ -50,7 +51,6 @@ PUBLICATION_FIELD_GROUPS: Final[dict[str, SemanticGroup]] = {
     "_dq_flags": SemanticGroup.SYSTEM,
     "_lineage": SemanticGroup.SYSTEM,
     "_sources": SemanticGroup.SYSTEM,
-
     # Identifiers
     "document_chembl_id": SemanticGroup.IDENTIFIERS,
     "chembl_id": SemanticGroup.IDENTIFIERS,
@@ -64,18 +64,15 @@ PUBLICATION_FIELD_GROUPS: Final[dict[str, SemanticGroup]] = {
     "crossref_id": SemanticGroup.IDENTIFIERS,
     "issn": SemanticGroup.IDENTIFIERS,
     "isbn": SemanticGroup.IDENTIFIERS,
-
     # Title
     "title": SemanticGroup.TITLE,
     "original_title": SemanticGroup.TITLE,
     "translated_title": SemanticGroup.TITLE,
     "subtitle": SemanticGroup.TITLE,
-
     # Abstract
     "abstract": SemanticGroup.ABSTRACT,
     "summary": SemanticGroup.ABSTRACT,
     "description": SemanticGroup.ABSTRACT,
-
     # Authors
     "authors": SemanticGroup.AUTHORS,
     "author": SemanticGroup.AUTHORS,
@@ -85,7 +82,6 @@ PUBLICATION_FIELD_GROUPS: Final[dict[str, SemanticGroup]] = {
     "author_count": SemanticGroup.AUTHORS,
     "affiliations": SemanticGroup.AUTHORS,
     "institutions": SemanticGroup.AUTHORS,
-
     # Journal/Source
     "journal": SemanticGroup.JOURNAL,
     "journal_name": SemanticGroup.JOURNAL,
@@ -97,7 +93,6 @@ PUBLICATION_FIELD_GROUPS: Final[dict[str, SemanticGroup]] = {
     "pages": SemanticGroup.JOURNAL,
     "first_page": SemanticGroup.JOURNAL,
     "last_page": SemanticGroup.JOURNAL,
-
     # Dates
     "publication_date": SemanticGroup.DATES,
     "pub_date": SemanticGroup.DATES,
@@ -107,7 +102,6 @@ PUBLICATION_FIELD_GROUPS: Final[dict[str, SemanticGroup]] = {
     "updated_at": SemanticGroup.DATES,
     "indexed_at": SemanticGroup.DATES,
     "deposited_at": SemanticGroup.DATES,
-
     # Metrics
     "citation_count": SemanticGroup.METRICS,
     "citations": SemanticGroup.METRICS,
@@ -117,7 +111,6 @@ PUBLICATION_FIELD_GROUPS: Final[dict[str, SemanticGroup]] = {
     "impact_factor": SemanticGroup.METRICS,
     "h_index": SemanticGroup.METRICS,
     "altmetric_score": SemanticGroup.METRICS,
-
     # Classification
     "mesh_terms": SemanticGroup.CLASSIFICATION,
     "mesh_headings": SemanticGroup.CLASSIFICATION,
@@ -128,7 +121,6 @@ PUBLICATION_FIELD_GROUPS: Final[dict[str, SemanticGroup]] = {
     "concepts": SemanticGroup.CLASSIFICATION,
     "publication_type": SemanticGroup.CLASSIFICATION,
     "document_type": SemanticGroup.CLASSIFICATION,
-
     # URLs
     "url": SemanticGroup.URLS,
     "pdf_url": SemanticGroup.URLS,
@@ -174,25 +166,13 @@ class ColumnOrderConfig:
         """
         # Handle system columns (start with _)
         if column.startswith("_"):
-            # Check exact match first
-            if column in self.field_groups:
-                return self.field_groups[column]
-            return SemanticGroup.SYSTEM
+            return self.field_groups.get(column, SemanticGroup.SYSTEM)
 
-        # Extract field name from qualified column
-        field_name = self._extract_field(column)
-        field_lower = field_name.lower()
+        # Extract and normalize field name
+        field_lower = self._extract_field(column).lower()
 
-        # Try exact match
-        if field_lower in self.field_groups:
-            return self.field_groups[field_lower]
-
-        # Try pattern matching for common suffixes
-        for pattern, group in self.field_groups.items():
-            if field_lower.endswith(f"_{pattern}") or field_lower == pattern:
-                return group
-
-        return SemanticGroup.OTHER
+        # Try exact match first, then fallback to OTHER
+        return self.field_groups.get(field_lower, SemanticGroup.OTHER)
 
     def get_provider_rank(self, column: str) -> int:
         """Get provider rank for ordering within semantic group.
