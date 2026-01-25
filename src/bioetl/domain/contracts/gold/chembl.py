@@ -318,10 +318,10 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     # Cross-reference IDs for linking publications across providers
     # pmid: PubMed ID (numeric string: "12345678")
     pmid: Series[str] = pa.Field(nullable=True)
+    # pmc_id: PubMed Central ID (string: "PMC12345678")
+    pmc_id: Series[str] = pa.Field(nullable=True)
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
     doi: Series[str] = pa.Field(nullable=True)
-    # pmc_id: PubMed Central ID (for cross-provider linking)
-    pmc_id: Series[str] = pa.Field(nullable=True)
     # patent_id excluded from unified publication schema
     title: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)
