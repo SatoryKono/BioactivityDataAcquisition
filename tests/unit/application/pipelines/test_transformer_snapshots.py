@@ -199,6 +199,11 @@ class TestPublicationTransformerSnapshot:
             "first_page": "100",
             "last_page": "110",
             "src_id": 1,
+            # ChEMBL release metadata
+            "chembl_release": {
+                "chembl_release": "CHEMBL_34",
+                "creation_date": "2024-01-15",
+            },
         }
 
     @pytest.mark.asyncio
