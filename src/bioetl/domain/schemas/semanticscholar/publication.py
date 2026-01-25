@@ -7,6 +7,7 @@ Includes lookup metadata fields for DOI/title resolution tracking.
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -67,7 +68,12 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="ArXiv ID",
     )
 
-    corpus_id: Series[int] = pa.Field(
+    dblp_id: Series[str] = pa.Field(
+        nullable=True,
+        description="DBLP publication key",
+    )
+
+    corpus_id: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
         ge=0,
         description="S2 Corpus ID",
@@ -94,10 +100,16 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     )
 
     # === Provider-specific Metrics ===
-    reference_count: Series[int] = pa.Field(
+    reference_count: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
         ge=0,
         description="Number of references",
+    )
+
+    influential_citation_count: Series[pd.Int64Dtype] = pa.Field(
+        nullable=True,
+        ge=0,
+        description="Number of influential citations",
     )
 
     # === Provider-specific Open Access ===

@@ -606,3 +606,132 @@ class TestSemanticScholarUnifiedPageFields:
         assert result["pages"] is None
         assert result["first_page"] is None
         assert result["last_page"] is None
+
+
+class TestSemanticScholarNewFields:
+    """Tests for newly added fields (dblp_id, influential_citation_count)."""
+
+    @pytest.fixture
+    def transformer(self) -> SemanticScholarPublicationTransformer:
+        """Create a transformer instance."""
+        return SemanticScholarPublicationTransformer()
+
+    @pytest.fixture
+    def mock_context(self) -> PipelineContext:
+        """Create a mock pipeline context."""
+        mock_logger = MagicMock()
+        mock_logger.info = MagicMock()
+        mock_logger.warning = MagicMock()
+        mock_logger.debug = MagicMock()
+
+        return PipelineContext(
+            run_id=UUID("12345678-1234-5678-1234-567812345678"),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC),
+            logger=mock_logger,
+        )
+
+    @pytest.mark.asyncio
+    async def test_dblp_id_extraction(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test DBLP ID is extracted from externalIds."""
+        record = {
+            "paperId": "649def34f8be52c8b66281af98ae884c09aef38b",
+            "externalIds": {
+                "DOI": "10.1145/12345",
+                "DBLP": "journals/cacm/Smith24",
+            },
+            "title": "Test Paper",
+            "_lookup_method": "doi",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["dblp_id"] == "journals/cacm/Smith24"
+
+    @pytest.mark.asyncio
+    async def test_dblp_id_none_when_missing(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test DBLP ID is None when not present in externalIds."""
+        record = {
+            "paperId": "649def34f8be52c8b66281af98ae884c09aef38b",
+            "externalIds": {"DOI": "10.1145/12345"},
+            "title": "Test Paper",
+            "_lookup_method": "doi",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["dblp_id"] is None
+
+    @pytest.mark.asyncio
+    async def test_influential_citation_count_extraction(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test influentialCitationCount is extracted."""
+        record = {
+            "paperId": "649def34f8be52c8b66281af98ae884c09aef38b",
+            "title": "Test Paper",
+            "citationCount": 100,
+            "referenceCount": 50,
+            "influentialCitationCount": 25,
+            "_lookup_method": "doi",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["citation_count"] == 100
+        assert result["reference_count"] == 50
+        assert result["influential_citation_count"] == 25
+
+    @pytest.mark.asyncio
+    async def test_influential_citation_count_none_when_missing(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test influentialCitationCount is None when not present."""
+        record = {
+            "paperId": "649def34f8be52c8b66281af98ae884c09aef38b",
+            "title": "Test Paper",
+            "citationCount": 100,
+            "_lookup_method": "doi",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["citation_count"] == 100
+        assert result["influential_citation_count"] is None
+
+    @pytest.mark.asyncio
+    async def test_influential_citation_count_zero(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test influentialCitationCount of 0 is preserved (not treated as None)."""
+        record = {
+            "paperId": "649def34f8be52c8b66281af98ae884c09aef38b",
+            "title": "Test Paper",
+            "citationCount": 10,
+            "influentialCitationCount": 0,
+            "_lookup_method": "doi",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["citation_count"] == 10
+        assert result["influential_citation_count"] == 0

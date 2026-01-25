@@ -161,12 +161,14 @@ class TestSemanticScholarYearValidation:
             # SemanticScholar-specific fields
             "paper_id": "a" * 40,  # 40-char hex
             "arxiv_id": None,
+            "dblp_id": None,
             "corpus_id": 12345,
             "tldr": None,
             "volume": None,
             "pages": None,
             "venue": None,
             "reference_count": 50,
+            "influential_citation_count": None,
             "open_access_url": None,
             "oa_status": None,
             "fields_of_study": None,

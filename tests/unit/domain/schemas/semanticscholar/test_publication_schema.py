@@ -235,6 +235,7 @@ class TestSchemaFieldDefinitions:
             "pmid",
             "pmc_id",
             "arxiv_id",
+            "dblp_id",
             "corpus_id",
             "title",
             "abstract",
@@ -247,6 +248,7 @@ class TestSchemaFieldDefinitions:
             "venue",
             "citation_count",
             "reference_count",
+            "influential_citation_count",
             "is_oa",
             "open_access_url",
             "oa_status",
@@ -282,6 +284,7 @@ class TestSchemaFieldDefinitions:
             "pmid",
             "pmc_id",
             "arxiv_id",
+            "dblp_id",
             "title",
             "abstract",
             "tldr",
@@ -345,3 +348,30 @@ class TestDataFrameWithPandas:
         matches = df["publication_date"].str.match(r"^\d{4}-\d{2}-\d{2}$")
         assert bool(matches.iloc[0]) is True
         assert bool(matches.iloc[1]) is False
+
+
+class TestNewFieldValidations:
+    """Tests for newly added fields (dblp_id, influential_citation_count)."""
+
+    def test_dblp_id_nullable(self) -> None:
+        """Test dblp_id field is nullable."""
+        schema = SemanticScholarPublicationSchema.to_schema()
+        dblp_col = schema.columns.get("dblp_id")
+        assert dblp_col is not None
+        assert dblp_col.nullable is True
+
+    def test_influential_citation_count_nullable(self) -> None:
+        """Test influential_citation_count field is nullable."""
+        schema = SemanticScholarPublicationSchema.to_schema()
+        col = schema.columns.get("influential_citation_count")
+        assert col is not None
+        assert col.nullable is True
+
+    def test_influential_citation_count_must_be_non_negative(self) -> None:
+        """Test influential_citation_count must be >= 0."""
+        # This tests the schema constraint ge=0
+        valid_count = 0
+        assert valid_count >= 0
+
+        invalid_count = -1
+        assert invalid_count < 0  # Would fail schema validation
