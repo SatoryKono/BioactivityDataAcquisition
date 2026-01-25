@@ -1,7 +1,10 @@
-"""Pandera schema for PubMed Article entity.
+"""Pandera schema for PubMed Publication entity.
 
 Aligned with RULES.md v5.10 and MEDLINE DTD.
 Source: https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_230101.dtd
+
+Note: File renamed from article.py to publication.py per ADR-024 Entity Naming Unification.
+PubMedPublicationSchema replaces ArticleSchema for consistency with other providers.
 """
 
 from __future__ import annotations
@@ -23,17 +26,20 @@ from bioetl.domain.validation import (
 )
 
 # Re-export for backwards compatibility
-__all__ = ["LOOKUP_METHODS", "ArticleSchema"]
+__all__ = ["LOOKUP_METHODS", "ArticleSchema", "PubMedPublicationSchema"]
 
 # === Fixed Value Constants ===
 PUBLICATION_STATUSES = ["ppublish", "epublish", "aheadofprint"]
 ISSN_TYPES = ["Print", "Electronic", "Linking"]
 
 
-class ArticleSchema(PublicationBaseSchema):
-    """PubMed Article validation schema for Silver layer.
+class PubMedPublicationSchema(PublicationBaseSchema):
+    """PubMed Publication validation schema for Silver layer.
 
     Represents a MEDLINE/PubMed citation record.
+
+    Note: Renamed from ArticleSchema per ADR-024 for consistency with
+    entity_type='publication' in pipeline configs and other providers.
     """
 
     # === Primary Key (str for cross-provider consistency) ===
@@ -236,5 +242,13 @@ class ArticleSchema(PublicationBaseSchema):
         strict = False  # Allow missing columns and extra columns
         ordered = False  # Changed to False for inheritance compatibility
         coerce = True
-        name = "ArticleSchema"
-        description = "PubMed Article Silver layer validation"
+        name = "PubMedPublicationSchema"
+        description = "PubMed Publication Silver layer validation"
+
+
+# Backward compatibility alias (deprecated)
+ArticleSchema = PubMedPublicationSchema
+"""Deprecated alias for PubMedPublicationSchema.
+
+Use PubMedPublicationSchema instead. This alias will be removed in v3.0.
+"""
