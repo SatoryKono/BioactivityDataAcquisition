@@ -133,6 +133,59 @@ class EnricherConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class ColumnGroupConfig:
+    """Configuration for a column group in output ordering.
+
+    Defines how columns are grouped and ordered in the merged output.
+    Columns can be matched by explicit field names or regex patterns.
+
+    Attributes:
+        name: Group name for logging/debugging.
+        fields: Explicit list of field names to include in this group.
+            Matches both exact field names and prefixed versions
+            (e.g., "title" matches "title" and "crossref.title").
+        pattern: Regex pattern to match field names.
+            Applied after explicit field matching.
+        provider_order: Order of providers within this group.
+            Seed columns (no prefix) always come first.
+
+    Example:
+        >>> group = ColumnGroupConfig(
+        ...     name="title",
+        ...     fields=("title", "vernacular_title"),
+        ...     provider_order=("chembl", "crossref", "openalex"),
+        ... )
+    """
+
+    name: str
+    fields: tuple[str, ...] = ()
+    pattern: str | None = None
+    provider_order: tuple[str, ...] = (
+        "chembl",
+        "crossref",
+        "openalex",
+        "pubmed",
+        "semanticscholar",
+    )
+
+    def __post_init__(self) -> None:
+        """Validate and convert types."""
+        if isinstance(self.fields, list):
+            object.__setattr__(self, "fields", tuple(self.fields))
+        if isinstance(self.provider_order, list):
+            object.__setattr__(self, "provider_order", tuple(self.provider_order))
+        self._validate()
+
+    def _validate(self) -> None:
+        """Validate configuration invariants."""
+        _require_non_empty(self.name, "column group name")
+        if not self.fields and not self.pattern:
+            raise ValueError(
+                f"Column group '{self.name}' must have either fields or pattern"
+            )
+
+
+@dataclass(frozen=True, slots=True)
 class MergeConfig:
     """Configuration for merge step.
 
@@ -164,12 +217,14 @@ class MergeConfig:
     output_gold_path: str
     field_priorities: dict[str, tuple[str, ...]] = field(default_factory=dict)
     field_mappings: dict[str, str] = field(default_factory=dict)
+    column_groups: tuple[ColumnGroupConfig, ...] = ()
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
         self._convert_strategy()
         self._convert_conflict_resolution()
         self._convert_field_priorities()
+        self._convert_column_groups()
         self._validate()
 
     def _convert_strategy(self) -> None:
@@ -196,6 +251,15 @@ class MergeConfig:
                 for k, v in self.field_priorities.items()
             }
             object.__setattr__(self, "field_priorities", converted)
+
+    def _convert_column_groups(self) -> None:
+        """Convert list of column groups to tuple of ColumnGroupConfig."""
+        if isinstance(self.column_groups, list):
+            converted = tuple(
+                ColumnGroupConfig(**g) if isinstance(g, dict) else g
+                for g in self.column_groups
+            )
+            object.__setattr__(self, "column_groups", converted)
 
     def _validate(self) -> None:
         """Validate configuration invariants."""

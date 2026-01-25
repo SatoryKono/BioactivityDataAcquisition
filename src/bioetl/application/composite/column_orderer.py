@@ -6,6 +6,7 @@ See ADR-026 for rationale.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
@@ -19,6 +20,7 @@ from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
 if TYPE_CHECKING:
     import polars as pl
 
+    from bioetl.domain.composite.config import ColumnGroupConfig
     from bioetl.domain.ports import LoggerPort
 
 __all__ = ["ColumnOrderer"]
@@ -55,18 +57,25 @@ class ColumnOrderer:
         self,
         logger: LoggerPort,
         config: ColumnOrderConfig | None = None,
+        column_groups: Sequence[ColumnGroupConfig] | None = None,
     ) -> None:
         """Initialize orderer.
 
         Args:
             logger: Logger port for diagnostics.
             config: Column order configuration. Uses DEFAULT_COLUMN_ORDER if None.
+            column_groups: Optional YAML-based column group configuration.
+                If provided, takes precedence over config.
         """
         self._logger = logger
         self._config = config or DEFAULT_COLUMN_ORDER
+        self._column_groups = tuple(column_groups) if column_groups else None
 
     def order_columns(self, df: pl.DataFrame) -> pl.DataFrame:
         """Order DataFrame columns by semantic groups.
+
+        If column_groups were provided in constructor, uses YAML-based ordering.
+        Otherwise falls back to hardcoded ColumnOrderConfig.
 
         Args:
             df: DataFrame to reorder.
@@ -77,13 +86,21 @@ class ColumnOrderer:
         if not df.columns:
             return df
 
-        ordered = self.get_ordered_columns(df.columns)
-
-        self._logger.debug(
-            "Ordered columns by semantic groups",
-            total_columns=len(ordered),
-            groups_used=self._count_groups(ordered),
-        )
+        # Use YAML-based column groups if available
+        if self._column_groups:
+            ordered = self._order_by_yaml_groups(df.columns)
+            self._logger.debug(
+                "Ordered columns by YAML groups",
+                total_columns=len(ordered),
+                groups_configured=len(self._column_groups),
+            )
+        else:
+            ordered = self.get_ordered_columns(df.columns)
+            self._logger.debug(
+                "Ordered columns by semantic groups",
+                total_columns=len(ordered),
+                groups_used=self._count_groups(ordered),
+            )
 
         return df.select(ordered)
 
@@ -154,3 +171,133 @@ class ColumnOrderer:
             )
 
         return groups
+
+    # === YAML-based column ordering methods ===
+
+    def _order_by_yaml_groups(self, columns: Sequence[str]) -> list[str]:
+        """Order columns using YAML-configured groups.
+
+        Args:
+            columns: Column names to order.
+
+        Returns:
+            Ordered list of column names.
+        """
+        if not self._column_groups:
+            return list(columns)
+
+        all_columns = set(columns)
+        ordered_columns: list[str] = []
+        used_columns: set[str] = set()
+
+        for group in self._column_groups:
+            group_columns = self._collect_group_columns(
+                all_columns - used_columns,
+                group,
+            )
+            ordered_columns.extend(group_columns)
+            used_columns.update(group_columns)
+
+        # Add remaining columns at the end (alphabetically)
+        remaining = sorted(all_columns - used_columns)
+        if remaining:
+            ordered_columns.extend(remaining)
+            self._logger.debug(
+                "Ungrouped columns added at end",
+                count=len(remaining),
+                sample=remaining[:5],
+            )
+
+        return ordered_columns
+
+    def _collect_group_columns(
+        self,
+        available: set[str],
+        group: ColumnGroupConfig,
+    ) -> list[str]:
+        """Collect columns for a group, ordered by provider.
+
+        Args:
+            available: Set of available column names.
+            group: Column group configuration.
+
+        Returns:
+            Ordered list of columns for this group.
+        """
+        matched: set[str] = set()
+
+        # Match by explicit field names
+        for field in group.fields:
+            for col in available:
+                # Match exact field name or suffixed versions
+                field_name = self._extract_field_from_qualified(col)
+                if field_name == field or col == field:
+                    matched.add(col)
+
+        # Match by pattern
+        if group.pattern:
+            try:
+                pattern = re.compile(group.pattern, re.IGNORECASE)
+                for col in available:
+                    if pattern.search(col):
+                        matched.add(col)
+            except re.error as e:
+                self._logger.warning(
+                    "Invalid regex pattern in column group",
+                    group=group.name,
+                    pattern=group.pattern,
+                    error=str(e),
+                )
+
+        # Sort by provider order
+        return self._sort_by_provider(list(matched), group.provider_order)
+
+    def _sort_by_provider(
+        self,
+        columns: list[str],
+        provider_order: tuple[str, ...],
+    ) -> list[str]:
+        """Sort columns by provider prefix order.
+
+        Seed columns (no dots) come first, then by provider order.
+
+        Args:
+            columns: List of column names.
+            provider_order: Tuple of provider names in desired order.
+
+        Returns:
+            Sorted list of columns.
+        """
+
+        def sort_key(col: str) -> tuple[int, str]:
+            # Seed columns (no dot or single dot like 'field.A') come first
+            parts = col.split(".")
+            if len(parts) < 3:
+                return (0, col.lower())
+
+            # Extract provider from qualified name (provider.entity.field)
+            provider = parts[0].lower()
+            try:
+                idx = provider_order.index(provider)
+                return (idx + 1, col.lower())
+            except ValueError:
+                # Unknown provider - at the end
+                return (len(provider_order) + 1, col.lower())
+
+        return sorted(columns, key=sort_key)
+
+    def _extract_field_from_qualified(self, column: str) -> str:
+        """Extract field name from qualified column name.
+
+        Args:
+            column: Column name (qualified or unqualified).
+
+        Returns:
+            Field name (last part of qualified name, or full name if unqualified).
+        """
+        parts = column.split(".")
+        if len(parts) == 3:
+            return parts[2]  # provider.entity.field -> field
+        if len(parts) == 2:
+            return parts[1]  # field.A -> A (conflict suffix) - keep original
+        return column
