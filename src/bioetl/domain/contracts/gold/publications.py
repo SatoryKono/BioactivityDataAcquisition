@@ -178,6 +178,25 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     subjects: Series[object] = pa.Field(nullable=True)  # list[str]
     source: Series[str] = pa.Field(nullable=True)
 
+    # Content domain (Crossmark/license restrictions)
+    content_domain_domains: Series[object] = pa.Field(nullable=True)  # list[str]
+    content_domain_crossmark_restriction: Series[bool] = pa.Field(
+        nullable=True, coerce=True
+    )
+
+    # Alternative identifiers (publisher-specific IDs, e.g., PII)
+    alternative_id: Series[object] = pa.Field(nullable=True)  # list[str]
+
+    # Canonical publication date
+    published: Series[str] = pa.Field(nullable=True)
+
+    # Short container title
+    short_container_title: Series[object] = pa.Field(nullable=True)  # list[str]
+
+    # ISSN by type
+    issn_print: Series[str] = pa.Field(nullable=True)
+    issn_electronic: Series[str] = pa.Field(nullable=True)
+
     # Lookup metadata
     # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
     # _original_id: Original identifier used for lookup

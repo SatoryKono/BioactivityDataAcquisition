@@ -21,10 +21,13 @@ from typing import TYPE_CHECKING, Any, cast
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.crossref.extractors import (
     extract_authors,
+    extract_content_domain,
     extract_dates,
+    extract_issn_by_type,
     extract_journal_info,
     extract_license_url,
     extract_page_info,
+    extract_published_date,
     extract_year,
 )
 from bioetl.domain.entities.crossref import CROSSREF_TYPE_MAP, CrossRefPublicationEntity
@@ -119,6 +122,9 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         journal_info = extract_journal_info(rec)
         page_info = extract_page_info(rec)
         dates = extract_dates(rec)
+        content_domain = extract_content_domain(rec)
+        issn_by_type = extract_issn_by_type(rec)
+        published_date = extract_published_date(rec)
 
         # Extract abstract with HTML stripping via normalizer service
         normalizer = self._data_normalizer
@@ -165,6 +171,12 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             # DQ flags (default: no warnings or errors)
             "_dq_warn": False,
             "_dq_error": False,
+            # NEW: Additional CrossRef fields
+            "alternative_id": rec.get("alternative-id", []) or [],
+            "short_container_title": rec.get("short-container-title", []) or [],
+            "published": published_date,
+            **content_domain,
+            **issn_by_type,
         }
 
     def _get_primary_id_field(self) -> str:

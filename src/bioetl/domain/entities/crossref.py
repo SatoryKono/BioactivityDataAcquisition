@@ -186,6 +186,23 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     license_url: str | None = None
     subjects: list[str] = field(default_factory=list)
 
+    # Content domain (Crossmark/license restrictions)
+    content_domain_domains: list[str] = field(default_factory=list)
+    content_domain_crossmark_restriction: bool | None = None
+
+    # Alternative identifiers (publisher-specific IDs, e.g., PII)
+    alternative_id: list[str] = field(default_factory=list)
+
+    # Canonical publication date (preferred over print/online)
+    published: str | None = None
+
+    # Short journal/container title
+    short_container_title: list[str] = field(default_factory=list)
+
+    # ISSN by type (split from generic ISSN list)
+    issn_print: str | None = None
+    issn_electronic: str | None = None
+
     # Override: Default source for CrossRef
     source: str = "crossref"
 
