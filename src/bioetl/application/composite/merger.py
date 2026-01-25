@@ -409,6 +409,48 @@ class MergeService:
             return f"{parts[0]}_{parts[1]}"
         return None
 
+    def _find_join_key_column(
+        self,
+        key: str,
+        columns: list[str],
+        pipeline: str | None = None,
+    ) -> str | None:
+        """Find column name for a join key in DataFrame.
+
+        Searches for:
+        1. Qualified name ({provider}.{entity}.{key}) if pipeline provided
+        2. Unqualified name ({key})
+        3. Any column ending with .{key}
+
+        Args:
+            key: Base join key name (e.g., "doi").
+            columns: List of available column names.
+            pipeline: Optional pipeline name for qualified lookup.
+
+        Returns:
+            Column name if found, None otherwise.
+        """
+        # Try qualified name if pipeline provided
+        if pipeline:
+            try:
+                provider, entity = self._parse_pipeline_name(pipeline)
+                qualified = f"{provider}.{entity}.{key}"
+                if qualified in columns:
+                    return qualified
+            except ValueError:
+                pass
+
+        # Try unqualified name
+        if key in columns:
+            return key
+
+        # Search for any column ending with the key
+        for col in columns:
+            if col.endswith(f".{key}"):
+                return col
+
+        return None
+
     def _normalize_join_key_columns(
         self,
         df: pl.DataFrame,
@@ -441,33 +483,15 @@ class MergeService:
         """
         import polars as pl
 
+        columns = df.columns
         normalize_cols: list[str] = []
 
         for key in join_keys:
             if key not in self._NORMALIZE_JOIN_KEYS:
                 continue
-
-            # Try qualified name if pipeline provided
-            if pipeline:
-                try:
-                    provider, entity = self._parse_pipeline_name(pipeline)
-                    qualified = f"{provider}.{entity}.{key}"
-                    if qualified in df.columns:
-                        normalize_cols.append(qualified)
-                        continue
-                except ValueError:
-                    pass
-
-            # Fallback: try unqualified name
-            if key in df.columns:
-                normalize_cols.append(key)
-                continue
-
-            # Fallback: search for any column ending with the key
-            for col in df.columns:
-                if col.endswith(f".{key}") and col not in normalize_cols:
-                    normalize_cols.append(col)
-                    break
+            col = self._find_join_key_column(key, columns, pipeline)
+            if col and col not in normalize_cols:
+                normalize_cols.append(col)
 
         if not normalize_cols:
             return df
@@ -686,7 +710,9 @@ class MergeService:
                 merged, join_keys_list, pipeline=seed_pipeline
             )
             enricher_df = self._normalize_join_key_columns(
-                enricher_df, join_keys_list, pipeline=None  # Still unqualified
+                enricher_df,
+                join_keys_list,
+                pipeline=None,  # Still unqualified
             )
 
             # Rename enricher columns to qualified format: {provider}.{entity}.{field}
@@ -720,7 +746,9 @@ class MergeService:
 
             if seed_pipeline is not None:
                 try:
-                    seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
+                    seed_provider, seed_entity = self._parse_pipeline_name(
+                        seed_pipeline
+                    )
                     seed_join_key_qualified = (
                         f"{seed_provider}.{seed_entity}.{primary_key}"
                     )
@@ -737,7 +765,9 @@ class MergeService:
                 enricher_provider, enricher_entity = self._parse_pipeline_name(
                     enricher.pipeline
                 )
-                enricher_join_key = f"{enricher_provider}.{enricher_entity}.{primary_key}"
+                enricher_join_key = (
+                    f"{enricher_provider}.{enricher_entity}.{primary_key}"
+                )
             except ValueError:
                 enricher_join_key = primary_key
 
@@ -753,7 +783,10 @@ class MergeService:
             # Apply join based on strategy using left_on/right_on for qualified keys
             how = self._get_polars_join_type()
 
-            if seed_join_key in merged.columns and enricher_join_key in enricher_df.columns:
+            if (
+                seed_join_key in merged.columns
+                and enricher_join_key in enricher_df.columns
+            ):
                 merged = merged.join(
                     enricher_df,
                     left_on=seed_join_key,
