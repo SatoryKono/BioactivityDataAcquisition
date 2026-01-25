@@ -43,7 +43,6 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("issue", pa.string()),
         pa.field("first_page", pa.string()),
         pa.field("last_page", pa.string()),
-        pa.field("language", pa.string()),  # Unified field, null for ChEMBL
         # === PUBLICATION_CROSSREF_FIELDS ===
         pa.field("document_chembl_id", pa.string()),  # Primary key
         pa.field("doi", pa.string()),
