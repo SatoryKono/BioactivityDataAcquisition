@@ -125,39 +125,15 @@ class MergeService:
             self._logger.info(
                 "Renamed seed columns to qualified format",
                 pipeline=effective_seed_pipeline,
-                qualified_count=len([c for c in seed_df.columns if "." in c and not c.startswith("_")]),
+                qualified_count=len(
+                    [c for c in seed_df.columns if "." in c and not c.startswith("_")]
+                ),
             )
-
-        # Track sources used
-        sources_used = ["seed"]
-        enricher_dfs: dict[str, pl.DataFrame] = {}
 
         # Step 2: Read successful enricher tables
-        for enricher in enrichers:
-            result = enrichment_results.get(enricher.pipeline)
-            if result is None or not result.is_success:
-                continue
-
-            enricher_table = enricher.silver_table or self._infer_silver_table(
-                enricher.pipeline
-            )
-
-            self._logger.info(
-                "Reading enricher table",
-                enricher=enricher.pipeline,
-                table=enricher_table,
-            )
-
-            try:
-                enricher_df = await self._read_silver_table(enricher_table)
-                enricher_dfs[enricher.pipeline] = enricher_df
-                sources_used.append(enricher.pipeline)
-            except Exception as e:
-                self._logger.warning(
-                    "Failed to read enricher table",
-                    enricher=enricher.pipeline,
-                    error=str(e),
-                )
+        enricher_dfs, sources_used = await self._read_enricher_tables(
+            enrichers, enrichment_results
+        )
 
         # Step 3: Apply joins with intelligent column renaming
         merged_df = await self._apply_joins(
@@ -260,6 +236,42 @@ class MergeService:
         if not records:
             return pl.DataFrame()
         return pl.DataFrame(records)
+
+    async def _read_enricher_tables(
+        self,
+        enrichers: Sequence[EnricherConfig],
+        enrichment_results: dict[str, EnrichmentResult],
+    ) -> tuple[dict[str, pl.DataFrame], list[str]]:
+        """Read successful enricher tables and return (dfs dict, sources list)."""
+        sources_used: list[str] = ["seed"]
+        enricher_dfs: dict[str, pl.DataFrame] = {}
+
+        for enricher in enrichers:
+            result = enrichment_results.get(enricher.pipeline)
+            if result is None or not result.is_success:
+                continue
+
+            enricher_table = enricher.silver_table or self._infer_silver_table(
+                enricher.pipeline
+            )
+            self._logger.info(
+                "Reading enricher table",
+                enricher=enricher.pipeline,
+                table=enricher_table,
+            )
+
+            try:
+                enricher_df = await self._read_silver_table(enricher_table)
+                enricher_dfs[enricher.pipeline] = enricher_df
+                sources_used.append(enricher.pipeline)
+            except Exception as e:
+                self._logger.warning(
+                    "Failed to read enricher table",
+                    enricher=enricher.pipeline,
+                    error=str(e),
+                )
+
+        return enricher_dfs, sources_used
 
     def _coerce_null_columns(self, df: pl.DataFrame) -> pl.DataFrame:
         """Coerce Null-typed columns to String for Delta Lake compatibility.
@@ -612,7 +624,13 @@ class MergeService:
             self._logger.debug(
                 "Renamed enricher columns to qualified format",
                 enricher=enricher.pipeline,
-                qualified_count=len([c for c in enricher_df.columns if "." in c and not c.startswith("_")]),
+                qualified_count=len(
+                    [
+                        c
+                        for c in enricher_df.columns
+                        if "." in c and not c.startswith("_")
+                    ]
+                ),
             )
 
             # Detect and resolve remaining conflicts
