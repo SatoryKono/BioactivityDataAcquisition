@@ -1,0 +1,133 @@
+"""Column qualifier value object for unified naming.
+
+Implements {provider}.{entity}.{field} naming convention.
+See ADR-026 for rationale.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Final
+
+__all__ = ["ColumnQualifier"]
+
+# Join keys excluded from renaming (case-insensitive)
+JOIN_KEY_COLUMNS: Final[frozenset[str]] = frozenset({"doi", "pmid", "pmc_id"})
+
+
+@dataclass(frozen=True, slots=True)
+class ColumnQualifier:
+    """Qualified column name in format {provider}.{entity}.{field}.
+
+    Immutable value object representing a fully qualified column name.
+    Used for consistent naming across composite pipelines.
+
+    Attributes:
+        provider: Data provider name (e.g., 'chembl', 'crossref').
+        entity: Entity type (e.g., 'publication', 'activity').
+        field: Field name (e.g., 'title', 'abstract').
+
+    Example:
+        >>> q = ColumnQualifier("chembl", "publication", "title")
+        >>> str(q)
+        'chembl.publication.title'
+        >>> q.is_join_key
+        False
+    """
+
+    provider: str
+    entity: str
+    field: str
+
+    def __post_init__(self) -> None:
+        """Validate and normalize fields."""
+        if not self.provider or not self.provider.strip():
+            raise ValueError("provider cannot be empty")
+        if not self.entity or not self.entity.strip():
+            raise ValueError("entity cannot be empty")
+        if not self.field or not self.field.strip():
+            raise ValueError("field cannot be empty")
+
+        # Normalize to lowercase
+        object.__setattr__(self, "provider", self.provider.strip().lower())
+        object.__setattr__(self, "entity", self.entity.strip().lower())
+        object.__setattr__(self, "field", self.field.strip().lower())
+
+    def __str__(self) -> str:
+        """Return qualified name: {provider}.{entity}.{field}."""
+        return f"{self.provider}.{self.entity}.{self.field}"
+
+    @property
+    def prefix(self) -> str:
+        """Return prefix without field: {provider}.{entity}."""
+        return f"{self.provider}.{self.entity}"
+
+    @property
+    def is_join_key(self) -> bool:
+        """Check if field is a join key (doi, pmid, pmc_id)."""
+        return self.field.lower() in JOIN_KEY_COLUMNS
+
+    @classmethod
+    def from_pipeline(cls, pipeline: str, field: str) -> ColumnQualifier:
+        """Create from pipeline name and field.
+
+        Args:
+            pipeline: Pipeline name in format 'provider_entity'.
+            field: Column field name.
+
+        Returns:
+            ColumnQualifier instance.
+
+        Raises:
+            ValueError: If pipeline format is invalid.
+
+        Example:
+            >>> q = ColumnQualifier.from_pipeline("chembl_publication", "title")
+            >>> str(q)
+            'chembl.publication.title'
+        """
+        if "_" not in pipeline:
+            raise ValueError(
+                f"Pipeline '{pipeline}' must be in format 'provider_entity'"
+            )
+        provider, entity = pipeline.split("_", 1)
+        return cls(provider=provider, entity=entity, field=field)
+
+    @classmethod
+    def parse(cls, qualified_name: str) -> ColumnQualifier:
+        """Parse qualified name back to ColumnQualifier.
+
+        Args:
+            qualified_name: Qualified name in format 'provider.entity.field'.
+
+        Returns:
+            ColumnQualifier instance.
+
+        Raises:
+            ValueError: If format is invalid.
+
+        Example:
+            >>> q = ColumnQualifier.parse("chembl.publication.title")
+            >>> q.provider
+            'chembl'
+        """
+        parts = qualified_name.split(".")
+        if len(parts) != 3:
+            raise ValueError(
+                f"Qualified name '{qualified_name}' must have exactly 3 parts "
+                "(provider.entity.field)"
+            )
+        return cls(provider=parts[0], entity=parts[1], field=parts[2])
+
+    @staticmethod
+    def is_qualified(column: str) -> bool:
+        """Check if column name is already in qualified format.
+
+        Args:
+            column: Column name to check.
+
+        Returns:
+            True if column has format x.y.z (3 dot-separated parts).
+        """
+        parts = column.split(".")
+        return len(parts) == 3 and all(p.strip() for p in parts)
