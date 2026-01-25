@@ -1231,6 +1231,7 @@ class TestDropSystemColumns:
                 "_dq_warn": [False],
                 "_run_id": ["run-1"],
                 "_ingestion_ts": ["2024-01-01T00:00:00Z"],
+                "_source": ["crossref"],
             }
         )
 
@@ -1244,6 +1245,7 @@ class TestDropSystemColumns:
         assert "_dq_warn" not in result.columns
         assert "_run_id" not in result.columns
         assert "_ingestion_ts" not in result.columns
+        assert "_source" not in result.columns
 
     def test_no_change_when_no_system_columns(self, merge_service):
         """Test no change when enricher has no system columns."""
@@ -1366,3 +1368,168 @@ class TestDropSystemColumns:
         assert "_dq_error.B" not in result.columns
         assert "_dq_error.C" not in result.columns
         assert "_dq_error.D" not in result.columns
+
+
+@pytest.mark.unit
+class TestQualifiedJoinKeys:
+    """Tests for qualified join key renaming feature."""
+
+    @pytest.mark.asyncio
+    async def test_join_with_pre_qualified_seed_columns(self, merge_service):
+        """Test JOIN works when seed columns are pre-qualified."""
+        import polars as pl
+
+        # Seed with qualified column names (as happens after merge() renaming)
+        seed_df = pl.DataFrame(
+            {
+                "chembl.publication.doi": ["10.1/a", "10.1/b"],
+                "chembl.publication.title": ["Title 1", "Title 2"],
+            }
+        )
+        enricher_df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "citation_count": [100],
+            }
+        )
+
+        enricher_config = EnricherConfig(
+            pipeline="crossref_publication",
+            join_keys=("doi",),
+            required=False,
+        )
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"crossref_publication": enricher_df},
+            enrichers=[enricher_config],
+            seed_pipeline="chembl_publication",
+        )
+
+        # Should join on chembl.publication.doi = crossref.publication.doi
+        assert "chembl.publication.doi" in result.columns
+        assert "chembl.publication.title" in result.columns
+        assert "crossref.publication.citation_count" in result.columns
+        # Both seed records preserved (left join)
+        assert len(result) == 2
+        # First record has enrichment
+        assert result["crossref.publication.citation_count"][0] == 100
+        # Second record has null (no match)
+        assert result["crossref.publication.citation_count"][1] is None
+
+    @pytest.mark.asyncio
+    async def test_normalization_with_qualified_columns(self, merge_service):
+        """Test case-insensitive normalization works with qualified columns."""
+        import polars as pl
+
+        # Seed with uppercase DOI
+        seed_df = pl.DataFrame(
+            {
+                "chembl.publication.doi": ["10.1038/NATURE12373"],
+                "chembl.publication.title": ["Test"],
+            }
+        )
+        # Enricher with lowercase DOI
+        enricher_df = pl.DataFrame(
+            {
+                "doi": ["10.1038/nature12373"],
+                "citation_count": [500],
+            }
+        )
+
+        enricher_config = EnricherConfig(
+            pipeline="crossref_publication",
+            join_keys=("doi",),
+            required=False,
+        )
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"crossref_publication": enricher_df},
+            enrichers=[enricher_config],
+            seed_pipeline="chembl_publication",
+        )
+
+        # Should match despite case difference
+        assert "crossref.publication.citation_count" in result.columns
+        assert result["crossref.publication.citation_count"][0] == 500
+
+    @pytest.mark.asyncio
+    async def test_multiple_enrichers_with_qualified_seed(self, merge_service):
+        """Test multiple enrichers work with pre-qualified seed columns."""
+        import polars as pl
+
+        seed_df = pl.DataFrame(
+            {
+                "chembl.publication.doi": ["10.1/a"],
+                "chembl.publication.title": ["Seed Title"],
+            }
+        )
+
+        enricher_dfs = {
+            "crossref_publication": pl.DataFrame(
+                {"doi": ["10.1/a"], "citation_count": [100]}
+            ),
+            "openalex_publication": pl.DataFrame(
+                {"doi": ["10.1/a"], "concepts": ["AI"]}
+            ),
+        }
+
+        enrichers = [
+            EnricherConfig(
+                pipeline="crossref_publication", join_keys=("doi",), required=False
+            ),
+            EnricherConfig(
+                pipeline="openalex_publication", join_keys=("doi",), required=False
+            ),
+        ]
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs=enricher_dfs,
+            enrichers=enrichers,
+            seed_pipeline="chembl_publication",
+        )
+
+        # All columns should be present
+        assert "chembl.publication.doi" in result.columns
+        assert "chembl.publication.title" in result.columns
+        assert "crossref.publication.citation_count" in result.columns
+        assert "openalex.publication.concepts" in result.columns
+
+    @pytest.mark.asyncio
+    async def test_enricher_join_key_becomes_qualified(self, merge_service):
+        """Test enricher join keys are renamed to qualified format."""
+        import polars as pl
+
+        seed_df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "title": ["Seed Title"],
+            }
+        )
+        enricher_df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "title": ["Enricher Title"],
+            }
+        )
+
+        enricher_config = EnricherConfig(
+            pipeline="crossref_publication",
+            join_keys=("doi",),
+            required=False,
+        )
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"crossref_publication": enricher_df},
+            enrichers=[enricher_config],
+            seed_pipeline="chembl_publication",
+        )
+
+        # Enricher title should be qualified
+        assert "crossref.publication.title" in result.columns
+        # Original seed columns preserved
+        assert "doi" in result.columns
+        assert "title" in result.columns

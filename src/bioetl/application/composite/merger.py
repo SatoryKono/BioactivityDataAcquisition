@@ -71,6 +71,7 @@ class MergeService:
             "_index",
             "_lookup_method",
             "_original_id",
+            "_source",  # Data source identifier (e.g., "chembl", "crossref")
         }
     )
 
@@ -134,6 +135,7 @@ class MergeService:
         )
 
         # Rename seed columns to qualified format: {provider}.{entity}.{field}
+        # Including join keys (doi, pmid, pmc_id) for full traceability
         if effective_seed_pipeline:
             self._logger.debug(
                 "Using seed pipeline for column renaming",
@@ -142,7 +144,7 @@ class MergeService:
             seed_df = self._renamer.rename_dataframe(
                 seed_df,
                 effective_seed_pipeline,
-                exclude_join_keys=True,
+                exclude_join_keys=False,  # Rename ALL columns including join keys
             )
             self._logger.info(
                 "Renamed seed columns to qualified format",
@@ -411,6 +413,7 @@ class MergeService:
         self,
         df: pl.DataFrame,
         join_keys: list[str],
+        pipeline: str | None = None,
     ) -> pl.DataFrame:
         """Normalize join key columns for case-insensitive matching.
 
@@ -418,26 +421,53 @@ class MergeService:
         to ensure consistent joins across providers that may store
         identifiers in different cases.
 
+        Supports both unqualified (doi) and qualified (chembl.publication.doi) names.
+
         Args:
             df: DataFrame to normalize.
-            join_keys: List of join key column names.
+            join_keys: List of base join key names (e.g., ["doi", "pmid"]).
+            pipeline: Optional pipeline name for qualified column lookup.
 
         Returns:
             DataFrame with normalized join key columns.
 
         Example:
-            >>> df = pl.DataFrame({"doi": ["10.1038/NATURE12373"]})
-            >>> normalized = merger._normalize_join_key_columns(df, ["doi"])
-            >>> normalized["doi"][0]
+            >>> df = pl.DataFrame({"chembl.publication.doi": ["10.1038/NATURE12373"]})
+            >>> normalized = merger._normalize_join_key_columns(
+            ...     df, ["doi"], "chembl_publication"
+            ... )
+            >>> normalized["chembl.publication.doi"][0]
             '10.1038/nature12373'
         """
         import polars as pl
 
-        normalize_cols = [
-            key
-            for key in join_keys
-            if key in self._NORMALIZE_JOIN_KEYS and key in df.columns
-        ]
+        normalize_cols: list[str] = []
+
+        for key in join_keys:
+            if key not in self._NORMALIZE_JOIN_KEYS:
+                continue
+
+            # Try qualified name if pipeline provided
+            if pipeline:
+                try:
+                    provider, entity = self._parse_pipeline_name(pipeline)
+                    qualified = f"{provider}.{entity}.{key}"
+                    if qualified in df.columns:
+                        normalize_cols.append(qualified)
+                        continue
+                except ValueError:
+                    pass
+
+            # Fallback: try unqualified name
+            if key in df.columns:
+                normalize_cols.append(key)
+                continue
+
+            # Fallback: search for any column ending with the key
+            for col in df.columns:
+                if col.endswith(f".{key}") and col not in normalize_cols:
+                    normalize_cols.append(col)
+                    break
 
         if not normalize_cols:
             return df
@@ -640,7 +670,6 @@ class MergeService:
             # Primary key is the FIRST join key - used for actual join
             # Secondary keys are fallbacks but NOT used in join operation
             primary_key = join_keys_list[0]
-            primary_key_set = {primary_key}
 
             # Deduplicate enricher before join to prevent fan-out
             enricher_df = self._deduplicator.deduplicate(
@@ -651,15 +680,21 @@ class MergeService:
 
             # Normalize join key columns for case-insensitive matching
             # This ensures DOIs like "10.1038/NATURE" match "10.1038/nature"
-            merged = self._normalize_join_key_columns(merged, join_keys_list)
-            enricher_df = self._normalize_join_key_columns(enricher_df, join_keys_list)
+            # For merged (seed), columns are already qualified (chembl.publication.doi)
+            # For enricher, columns are still unqualified at this point
+            merged = self._normalize_join_key_columns(
+                merged, join_keys_list, pipeline=seed_pipeline
+            )
+            enricher_df = self._normalize_join_key_columns(
+                enricher_df, join_keys_list, pipeline=None  # Still unqualified
+            )
 
             # Rename enricher columns to qualified format: {provider}.{entity}.{field}
-            # Uses ColumnRenamer which excludes join keys automatically
+            # Including join keys for full traceability
             enricher_df = self._renamer.rename_dataframe(
                 enricher_df,
                 enricher.pipeline,
-                exclude_join_keys=True,
+                exclude_join_keys=False,  # Rename ALL columns including join keys
             )
 
             self._logger.debug(
@@ -678,19 +713,51 @@ class MergeService:
             # System columns should only come from seed (ETL metadata)
             enricher_df = self._drop_system_columns(enricher_df)
 
+            # Calculate qualified join key names for both seed and enricher
+            # Support both pre-renamed (qualified) and unqualified seed columns
+            seed_join_key_qualified: str | None = None
+            seed_join_key: str = primary_key  # Default to unqualified
+
+            if seed_pipeline is not None:
+                try:
+                    seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
+                    seed_join_key_qualified = (
+                        f"{seed_provider}.{seed_entity}.{primary_key}"
+                    )
+                    # Use qualified if present, otherwise fallback to unqualified
+                    if seed_join_key_qualified in merged.columns:
+                        seed_join_key = seed_join_key_qualified
+                    elif primary_key in merged.columns:
+                        seed_join_key = primary_key
+                except ValueError:
+                    # Fallback if seed_pipeline is invalid
+                    seed_join_key = primary_key
+
+            try:
+                enricher_provider, enricher_entity = self._parse_pipeline_name(
+                    enricher.pipeline
+                )
+                enricher_join_key = f"{enricher_provider}.{enricher_entity}.{primary_key}"
+            except ValueError:
+                enricher_join_key = primary_key
+
             # Detect and resolve remaining conflicts
-            # Only exclude primary key - secondary keys should be checked for conflicts
+            # Exclude both seed and enricher join keys from conflict detection
+            join_key_set = {seed_join_key, enricher_join_key}
+            if seed_join_key_qualified and seed_join_key_qualified != seed_join_key:
+                join_key_set.add(seed_join_key_qualified)
             merged, enricher_df = self._detect_and_resolve_conflicts(
-                merged, enricher_df, primary_key_set
+                merged, enricher_df, join_key_set
             )
 
-            # Apply join based on strategy
+            # Apply join based on strategy using left_on/right_on for qualified keys
             how = self._get_polars_join_type()
 
-            if primary_key in merged.columns and primary_key in enricher_df.columns:
+            if seed_join_key in merged.columns and enricher_join_key in enricher_df.columns:
                 merged = merged.join(
                     enricher_df,
-                    on=primary_key,
+                    left_on=seed_join_key,
+                    right_on=enricher_join_key,
                     how=how,
                     suffix=f"_{enricher.pipeline}",
                 )
