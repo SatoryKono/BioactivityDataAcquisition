@@ -41,17 +41,15 @@ class ColumnQualifier:
 
     def __post_init__(self) -> None:
         """Validate and normalize fields."""
-        if not self.provider or not self.provider.strip():
-            raise ValueError("provider cannot be empty")
-        if not self.entity or not self.entity.strip():
-            raise ValueError("entity cannot be empty")
-        if not self.field or not self.field.strip():
-            raise ValueError("field cannot be empty")
+        self._validate_and_normalize("provider", self.provider)
+        self._validate_and_normalize("entity", self.entity)
+        self._validate_and_normalize("field", self.field)
 
-        # Normalize to lowercase
-        object.__setattr__(self, "provider", self.provider.strip().lower())
-        object.__setattr__(self, "entity", self.entity.strip().lower())
-        object.__setattr__(self, "field", self.field.strip().lower())
+    def _validate_and_normalize(self, attr: str, value: str) -> None:
+        """Validate non-empty and normalize to lowercase."""
+        if not value or not value.strip():
+            raise ValueError(f"{attr} cannot be empty")
+        object.__setattr__(self, attr, value.strip().lower())
 
     def __str__(self) -> str:
         """Return qualified name: {provider}.{entity}.{field}."""
