@@ -556,6 +556,14 @@ class ChemblPublicationRecord(BaseModel):
     # Source information
     src_id: int | None = Field(default=None, description="Data source ID")
 
+    # ChEMBL release metadata
+    chembl_release: str | None = Field(
+        default=None, description="ChEMBL release version (e.g., CHEMBL_1)"
+    )
+    creation_date: str | None = Field(
+        default=None, description="Record creation date in ChEMBL (YYYY-MM-DD)"
+    )
+
 
 class ChemblPublicationTermRecord(BaseModel):
     """Publication term DTO from ChEMBL.

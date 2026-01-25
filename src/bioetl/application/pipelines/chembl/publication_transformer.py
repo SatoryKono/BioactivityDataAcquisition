@@ -163,7 +163,7 @@ class PublicationTransformer(BaseChemblTransformer):
         doi = DOI.from_raw(data.get("doi"))
         data["doi"] = str(doi) if doi else None
 
-        # Validate year using PublicationYear Value Object
+        # Vali2date year using PublicationYear Value Object
         year_vo = PublicationYear.from_raw(data.get("year"))
         validated_year = year_vo.value if year_vo else None
         data["year"] = validated_year
@@ -186,6 +186,15 @@ class PublicationTransformer(BaseChemblTransformer):
         # Lookup metadata (direct extraction, no enrichment)
         data["_lookup_method"] = "direct"
         data["_original_id"] = str(primary_id)
+
+        # ChEMBL release metadata (nested object from API)
+        release_info = record.get("chembl_release")
+        if release_info and isinstance(release_info, dict):
+            data["chembl_release"] = release_info.get("chembl_release")
+            data["creation_date"] = release_info.get("creation_date")
+        else:
+            data["chembl_release"] = None
+            data["creation_date"] = None
 
         # System field: data source identifier
         data["_source"] = "chembl"

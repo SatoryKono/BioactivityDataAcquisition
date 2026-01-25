@@ -237,6 +237,9 @@ class TestChemblYearValidation:
             "issue": "1",
             "first_page": "1",
             "last_page": "10",
+            # ChEMBL release metadata
+            "chembl_release": "CHEMBL_34",
+            "creation_date": "2024-01-15",
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:

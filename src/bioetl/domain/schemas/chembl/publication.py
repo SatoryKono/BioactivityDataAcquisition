@@ -62,6 +62,17 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     # === Provider-specific Identifiers ===
     src_id: Series[int] = pa.Field(nullable=True, description="Source ID.")
 
+    # === ChEMBL Release Metadata ===
+    chembl_release: Series[str] = pa.Field(
+        nullable=True,
+        description="ChEMBL release version (e.g., CHEMBL_1, CHEMBL_34).",
+    )
+    creation_date: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^\d{4}-\d{2}-\d{2}$",
+        description="Record creation date in ChEMBL database (YYYY-MM-DD).",
+    )
+
     # === Provider-specific Journal Fields ===
     journal_full_title: Series[str] = pa.Field(
         nullable=True, description="Full journal title."
