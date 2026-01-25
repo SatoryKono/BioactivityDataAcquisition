@@ -421,32 +421,38 @@ def test_doc_type_mapping_all_types():
     """Test all 30 CrossRef document type mappings.
 
     See: https://api.crossref.org/types for complete list.
+    Aligned with chembl/publication.py schema: PUBLICATION, BOOK, PREPRINT, DATASET, OTHER.
     """
-    # PUBLICATION types (primary scholarly content)
+    # PUBLICATION types (journal/conference articles, academic works)
     publication_types = [
         "journal-article",
         "proceedings-article",
-        "book-chapter",
-        "book",
-        "monograph",
-        "edited-book",
-        "reference-book",
-        "book-section",
-        "book-part",
-        "book-track",
         "dissertation",
         "report",
         "report-component",
         "standard",
         "reference-entry",
         "peer-review",
-        "component",
         "other",
     ]
     for doc_type in publication_types:
         assert CROSSREF_TYPE_MAP[doc_type] == "PUBLICATION", (
             f"{doc_type} should map to PUBLICATION"
         )
+
+    # BOOK types (books and book parts)
+    book_types = [
+        "book",
+        "monograph",
+        "edited-book",
+        "reference-book",
+        "book-chapter",
+        "book-section",
+        "book-part",
+        "book-track",
+    ]
+    for doc_type in book_types:
+        assert CROSSREF_TYPE_MAP[doc_type] == "BOOK", f"{doc_type} should map to BOOK"
 
     # PREPRINT types
     assert CROSSREF_TYPE_MAP["posted-content"] == "PREPRINT"
@@ -455,8 +461,9 @@ def test_doc_type_mapping_all_types():
     assert CROSSREF_TYPE_MAP["dataset"] == "DATASET"
     assert CROSSREF_TYPE_MAP["database"] == "DATASET"
 
-    # OTHER types (container/series types)
+    # OTHER types (supplementary, container/series, funding)
     other_types = [
+        "component",  # Supplementary material
         "journal",
         "journal-volume",
         "journal-issue",
