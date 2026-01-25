@@ -42,9 +42,10 @@ class TestExtractFieldFromQualified:
 
     def test_three_parts_returns_field(self, merge_service: MergeService) -> None:
         """Extract field from three-part qualified name."""
-        assert merge_service._extract_field_from_qualified(
-            "chembl.publication.title"
-        ) == "title"
+        assert (
+            merge_service._extract_field_from_qualified("chembl.publication.title")
+            == "title"
+        )
 
     def test_one_part_returns_original(self, merge_service: MergeService) -> None:
         """Return original for non-qualified name."""
@@ -52,9 +53,10 @@ class TestExtractFieldFromQualified:
 
     def test_two_parts_returns_original(self, merge_service: MergeService) -> None:
         """Return original for two-part name (not valid qualified)."""
-        assert merge_service._extract_field_from_qualified(
-            "crossref.title"
-        ) == "crossref.title"
+        assert (
+            merge_service._extract_field_from_qualified("crossref.title")
+            == "crossref.title"
+        )
 
 
 class TestCoalescePreferSeed:
@@ -62,12 +64,14 @@ class TestCoalescePreferSeed:
 
     def test_seed_wins_over_enricher(self, merge_service: MergeService) -> None:
         """Seed columns take priority in coalesce."""
-        df = pl.DataFrame({
-            "doi": ["10.1/a"],
-            "chembl.publication.title": ["Seed Title"],
-            "crossref.publication.title": ["Enricher Title"],
-            "_run_id": ["r1"],
-        })
+        df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "chembl.publication.title": ["Seed Title"],
+                "crossref.publication.title": ["Enricher Title"],
+                "_run_id": ["r1"],
+            }
+        )
         result = merge_service._coalesce_prefer_seed(
             df, enrichers=[], seed_pipeline="chembl_publication"
         )
@@ -78,11 +82,13 @@ class TestCoalescePreferSeed:
 
     def test_fills_null_from_enricher(self, merge_service: MergeService) -> None:
         """Coalesce fills nulls from lower priority columns."""
-        df = pl.DataFrame({
-            "doi": ["10.1/a", "10.1/b"],
-            "chembl.publication.title": [None, "Seed Title 2"],
-            "crossref.publication.title": ["Enricher Title 1", "Enricher Title 2"],
-        })
+        df = pl.DataFrame(
+            {
+                "doi": ["10.1/a", "10.1/b"],
+                "chembl.publication.title": [None, "Seed Title 2"],
+                "crossref.publication.title": ["Enricher Title 1", "Enricher Title 2"],
+            }
+        )
         result = merge_service._coalesce_prefer_seed(
             df, enrichers=[], seed_pipeline="chembl_publication"
         )
@@ -97,11 +103,13 @@ class TestCoalescePreferEnricher:
 
     def test_enricher_wins_over_seed(self, merge_service: MergeService) -> None:
         """Enricher columns take priority in coalesce."""
-        df = pl.DataFrame({
-            "doi": ["10.1/a"],
-            "chembl.publication.title": ["Seed Title"],
-            "crossref.publication.title": ["Enricher Title"],
-        })
+        df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "chembl.publication.title": ["Seed Title"],
+                "crossref.publication.title": ["Enricher Title"],
+            }
+        )
         result = merge_service._coalesce_prefer_enricher(
             df, enrichers=[], seed_pipeline="chembl_publication"
         )
