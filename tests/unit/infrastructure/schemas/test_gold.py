@@ -380,10 +380,10 @@ class TestGoldSchemaValidation:
             "first_page": "100",
             "last_page": "110",
             "src_id": 1,
-            # Unified publication fields (ChEMBL doesn't provide these)
-            "citation_count": None,
-            "is_oa": False,  # Use False for nullable bool compatibility
-            "language": None,
+            # ChEMBL release metadata
+            "chembl_release": "chembl_34",
+            "creation_date": "2024-01-01",
+            # Note: citation_count, is_oa, language excluded from schema
             "_lookup_method": "direct",
             "_original_id": "CHEMBL12345",
             "_source": "chembl",

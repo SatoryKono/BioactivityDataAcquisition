@@ -84,6 +84,15 @@ class TestCrossRefYearValidation:
             "reference_count": 50,
             "license_url": None,
             "subjects": None,
+            # Content domain fields
+            "content_domain_domains": None,
+            "content_domain_crossmark_restriction": None,
+            # Additional CrossRef fields
+            "alternative_id": None,
+            "short_container_title": None,
+            "published": None,
+            "issn_print": None,
+            "issn_electronic": None,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:

@@ -318,6 +318,8 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     # Cross-reference IDs for linking publications across providers
     # pmid: PubMed ID (numeric string: "12345678")
     pmid: Series[str] = pa.Field(nullable=True)
+    # pmc_id: PubMed Central ID (string: "PMC12345678")
+    pmc_id: Series[str] = pa.Field(nullable=True)
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
     doi: Series[str] = pa.Field(nullable=True)
     # patent_id excluded from unified publication schema
@@ -338,8 +340,11 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     chembl_release: Series[str] = pa.Field(nullable=True)
     creation_date: Series[str] = pa.Field(nullable=True)
 
-    # Note: Unified publication fields (language, citation_count, is_oa, pmc_id,
-    # publication_date) excluded - not available from ChEMBL API
+    # publication_date: Unified date field (ChEMBL only provides year, so typically NULL)
+    publication_date: Series[str] = pa.Field(nullable=True)
+
+    # Note: Unified publication fields (language, citation_count, is_oa)
+    # excluded - not available from ChEMBL API
 
     # System field (per SYSTEM_FIELDS_PREFIX)
     source: Series[str] = pa.Field(nullable=True, alias="_source")

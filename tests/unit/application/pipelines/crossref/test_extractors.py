@@ -434,9 +434,7 @@ class TestExtractIssnByType:
             ),
         ],
     )
-    def test_extract_issn_by_type(
-        self, input_data: dict, expected: dict
-    ) -> None:
+    def test_extract_issn_by_type(self, input_data: dict, expected: dict) -> None:
         """Should extract ISSN values by type correctly."""
         result = extract_issn_by_type(input_data)
         assert result == expected
