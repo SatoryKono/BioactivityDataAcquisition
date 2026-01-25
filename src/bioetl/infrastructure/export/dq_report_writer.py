@@ -67,7 +67,6 @@ class DQReportWriter:
         *,
         provider: str | None = None,
         entity: str | None = None,
-        date_str: str | None = None,  # Deprecated: no longer used in path/filename
     ) -> Path:
         """Write Bronze DQ report to file.
 
@@ -81,7 +80,6 @@ class DQReportWriter:
             format: Output format (None = JSON).
             provider: Provider name for filename generation.
             entity: Entity name for filename generation.
-            date_str: Deprecated, kept for backward compatibility (ignored).
 
         Returns:
             Path to the written report file.

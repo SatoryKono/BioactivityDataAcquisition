@@ -72,9 +72,7 @@ if TYPE_CHECKING:
 
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
 
-# Re-export SilverWriteMode for backward compatibility
-# Consumers importing from silver_writer will still work
-__all__ = ["SilverWriteMode", "SilverWriter"]
+__all__ = ["SilverWriter"]
 
 
 class SilverWriter(BaseDeltaWriter):

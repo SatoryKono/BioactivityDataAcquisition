@@ -100,9 +100,9 @@ class TestObservabilityBundle:
 class TestBootstrapObservability:
     """Tests for bootstrap_observability() function."""
 
-    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
-    @patch("bioetl.composition._bootstrap.observability.PrometheusMetrics")
-    @patch("bioetl.composition._bootstrap.observability.UnifiedLogger")
+    @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
+    @patch("bioetl.composition.bootstrap.runtime.observability.PrometheusMetrics")
+    @patch("bioetl.composition.bootstrap.runtime.observability.UnifiedLogger")
     def test_bootstrap_returns_valid_bundle(
         self,
         mock_unified_logger_cls: MagicMock,
@@ -110,7 +110,7 @@ class TestBootstrapObservability:
         mock_start_server: MagicMock,
     ) -> None:
         """Test that bootstrap returns bundle with valid implementations."""
-        from bioetl.composition._bootstrap.observability import bootstrap_observability
+        from bioetl.composition.bootstrap.runtime.observability import bootstrap_observability
 
         # Setup mocks
         mock_logger = MagicMock()
@@ -137,13 +137,13 @@ class TestBootstrapObservability:
         assert bundle.tracer is not None  # NoOpTracing
         assert bundle.dq_monitor is None
 
-    @patch("bioetl.composition._bootstrap.observability.UnifiedLogger")
+    @patch("bioetl.composition.bootstrap.runtime.observability.UnifiedLogger")
     def test_bootstrap_uses_noop_metrics_when_disabled(
         self,
         mock_unified_logger_cls: MagicMock,
     ) -> None:
         """Test that NoOpMetrics is used when metrics disabled."""
-        from bioetl.composition._bootstrap.observability import bootstrap_observability
+        from bioetl.composition.bootstrap.runtime.observability import bootstrap_observability
 
         mock_logger = MagicMock()
         mock_logger.info = MagicMock()
@@ -162,13 +162,13 @@ class TestBootstrapObservability:
 
         assert isinstance(bundle.metrics, NoOpMetrics)
 
-    @patch("bioetl.composition._bootstrap.observability.UnifiedLogger")
+    @patch("bioetl.composition.bootstrap.runtime.observability.UnifiedLogger")
     def test_bootstrap_logs_initialization_status(
         self,
         mock_unified_logger_cls: MagicMock,
     ) -> None:
         """Test that bootstrap logs observability initialization."""
-        from bioetl.composition._bootstrap.observability import bootstrap_observability
+        from bioetl.composition.bootstrap.runtime.observability import bootstrap_observability
 
         mock_logger = MagicMock()
         mock_unified_logger_cls.return_value = mock_logger
@@ -202,7 +202,7 @@ class TestBootstrapMetrics:
 
     def test_disabled_metrics_returns_noop_metrics(self) -> None:
         """Test that disabled metrics returns NoOpMetrics, not None."""
-        from bioetl.composition._bootstrap.observability import bootstrap_metrics
+        from bioetl.composition.bootstrap.runtime.observability import bootstrap_metrics
 
         settings = MagicMock()
         settings.observability.metrics_enabled = False
@@ -214,7 +214,7 @@ class TestBootstrapMetrics:
 
     def test_noop_metrics_no_warning_when_disabled(self) -> None:
         """Test that NoOpMetrics doesn't warn when explicitly disabled."""
-        from bioetl.composition._bootstrap.observability import bootstrap_metrics
+        from bioetl.composition.bootstrap.runtime.observability import bootstrap_metrics
 
         # Reset warning state
         NoOpMetrics.reset_warning()
@@ -230,15 +230,15 @@ class TestBootstrapMetrics:
             # No warning should be raised
             assert len(w) == 0
 
-    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
-    @patch("bioetl.composition._bootstrap.observability.PrometheusMetrics")
+    @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
+    @patch("bioetl.composition.bootstrap.runtime.observability.PrometheusMetrics")
     def test_enabled_metrics_returns_prometheus_metrics(
         self,
         mock_prometheus: MagicMock,
         mock_start_server: MagicMock,
     ) -> None:
         """Test that enabled metrics returns PrometheusMetrics."""
-        from bioetl.composition._bootstrap.observability import bootstrap_metrics
+        from bioetl.composition.bootstrap.runtime.observability import bootstrap_metrics
 
         mock_metrics = MagicMock()
         mock_prometheus.return_value = mock_metrics
@@ -340,7 +340,7 @@ class TestObservabilityPreflightValidation:
 
     def test_observability_production_warning_noop_tracing(self) -> None:
         """Test that NoOpTracing in production logs warning."""
-        from bioetl.composition._bootstrap.observability import (
+        from bioetl.composition.bootstrap.runtime.observability import (
             validate_observability_preflight,
         )
         from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
@@ -364,7 +364,7 @@ class TestObservabilityPreflightValidation:
 
     def test_observability_production_warning_noop_metrics(self) -> None:
         """Test that NoOpMetrics in production logs warning."""
-        from bioetl.composition._bootstrap.observability import (
+        from bioetl.composition.bootstrap.runtime.observability import (
             validate_observability_preflight,
         )
         from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
@@ -389,7 +389,7 @@ class TestObservabilityPreflightValidation:
 
     def test_observability_no_warning_in_dev_environment(self) -> None:
         """Test that NoOp implementations in dev don't log warnings."""
-        from bioetl.composition._bootstrap.observability import (
+        from bioetl.composition.bootstrap.runtime.observability import (
             validate_observability_preflight,
         )
         from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
@@ -410,7 +410,7 @@ class TestObservabilityPreflightValidation:
 
     def test_observability_no_warning_in_staging_environment(self) -> None:
         """Test that NoOp implementations in staging don't log warnings."""
-        from bioetl.composition._bootstrap.observability import (
+        from bioetl.composition.bootstrap.runtime.observability import (
             validate_observability_preflight,
         )
         from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
@@ -431,7 +431,7 @@ class TestObservabilityPreflightValidation:
 
     def test_observability_no_warning_with_real_implementations(self) -> None:
         """Test that real implementations don't log warnings in production."""
-        from bioetl.composition._bootstrap.observability import (
+        from bioetl.composition.bootstrap.runtime.observability import (
             validate_observability_preflight,
         )
 
@@ -449,15 +449,15 @@ class TestObservabilityPreflightValidation:
         # No warnings for real implementations
         mock_logger.warning.assert_not_called()
 
-    @patch("bioetl.composition._bootstrap.observability.start_metrics_server")
-    @patch("bioetl.composition._bootstrap.observability.UnifiedLogger")
+    @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
+    @patch("bioetl.composition.bootstrap.runtime.observability.UnifiedLogger")
     def test_bootstrap_observability_calls_preflight_validation(
         self,
         mock_unified_logger_cls: MagicMock,
         mock_start_server: MagicMock,
     ) -> None:
         """Test that bootstrap_observability calls preflight validation."""
-        from bioetl.composition._bootstrap.observability import bootstrap_observability
+        from bioetl.composition.bootstrap.runtime.observability import bootstrap_observability
 
         mock_logger = MagicMock()
         mock_unified_logger_cls.return_value = mock_logger

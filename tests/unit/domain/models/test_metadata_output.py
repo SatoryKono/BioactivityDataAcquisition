@@ -18,7 +18,6 @@ from bioetl.domain.models.metadata import (
     FileOutputMetadata,
     GoldMetadata,
     GoldOutputExt,
-    OutputMetadata,
     PipelineMetadata,
     RuntimeMetadata,
     RunTypeEnum,
@@ -381,29 +380,6 @@ class TestLayerMetadataComposition:
         assert metadata.output.total_bytes == 45000
         assert metadata.output_ext.partition_count == 4
         assert metadata.output_ext.format == "delta"
-
-
-class TestDeprecatedOutputMetadata:
-    """Test deprecated output metadata classes emit warnings."""
-
-    def test_output_metadata_deprecated(self) -> None:
-        """GIVEN OutputMetadata usage WHEN creating THEN deprecation warning raised."""
-        with pytest.warns(DeprecationWarning, match="OutputMetadata is deprecated"):
-            OutputMetadata(total_records=100, total_bytes=5000)
-
-    def test_deprecated_output_metadata_still_works(self) -> None:
-        """GIVEN OutputMetadata WHEN using THEN still functional during deprecation period."""
-        with pytest.warns(DeprecationWarning):
-            output = OutputMetadata(
-                total_records=100,
-                total_bytes=5000,
-                format="jsonl+zstd",
-            )
-
-        # Legacy fields still work (deprecated class maintains old API)
-        assert output.total_records == 100
-        assert output.total_bytes == 5000
-        assert output.format == "jsonl+zstd"
 
 
 class TestMetadataVersionBump:

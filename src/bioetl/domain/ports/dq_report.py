@@ -189,7 +189,6 @@ class DQReportWriterPort(Protocol):
         *,
         provider: str | None = None,
         entity: str | None = None,
-        date_str: str | None = None,
     ) -> Path:
         """Write Bronze DQ report to file.
 
@@ -199,7 +198,6 @@ class DQReportWriterPort(Protocol):
             format: Output format (None = JSON).
             provider: Provider name for filename generation.
             entity: Entity name for filename generation.
-            date_str: Date string for path generation (YYYY-MM-DD).
 
         Returns:
             Path to the written report file.

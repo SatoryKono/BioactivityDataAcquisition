@@ -52,9 +52,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
-# Re-export GoldWriteMode for backward compatibility
-# Consumers importing from gold_writer will still work
-__all__ = ["GoldWriteMode", "GoldWriter"]
+__all__ = ["GoldWriter"]
 
 
 class GoldWriter(BaseDeltaWriter):

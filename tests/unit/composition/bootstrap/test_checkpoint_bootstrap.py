@@ -15,7 +15,7 @@ import pytest
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.services import CheckpointService, QuarantineService
-from bioetl.composition._bootstrap.checkpoint import (
+from bioetl.composition.bootstrap import (
     bootstrap_checkpoint,
     bootstrap_checkpoint_manager,
     bootstrap_checkpoint_service,
@@ -35,7 +35,7 @@ class TestBootstrapQuarantine:
     def test_bootstrap_quarantine_returns_quarantine_port(self):
         """Test that bootstrap_quarantine returns a QuarantinePort."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 quarantine_path=Path("/tmp/quarantine")
@@ -48,7 +48,7 @@ class TestBootstrapQuarantine:
     def test_bootstrap_quarantine_creates_valid_instance(self):
         """Test that bootstrap_quarantine creates a functional quarantine instance."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 quarantine_path=Path("/custom/quarantine")
@@ -69,7 +69,7 @@ class TestBootstrapCheckpoint:
     def test_bootstrap_checkpoint_returns_checkpoint_port(self):
         """Test that bootstrap_checkpoint returns a CheckpointPort."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 checkpoint_path=Path("/tmp/checkpoints")
@@ -82,7 +82,7 @@ class TestBootstrapCheckpoint:
     def test_bootstrap_checkpoint_passes_pipeline_name(self):
         """Test that bootstrap_checkpoint passes pipeline name correctly."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 checkpoint_path=Path("/tmp/checkpoints")
@@ -94,7 +94,7 @@ class TestBootstrapCheckpoint:
     def test_bootstrap_checkpoint_uses_settings_path(self):
         """Test that bootstrap_checkpoint uses path from settings."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 checkpoint_path=Path("/custom/checkpoint/path")
@@ -111,7 +111,7 @@ class TestBootstrapQuarantineManager:
     def test_bootstrap_quarantine_manager_returns_manager(self):
         """Test that bootstrap_quarantine_manager returns QuarantineManager."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 quarantine_path=Path("/tmp/quarantine")
@@ -123,7 +123,7 @@ class TestBootstrapQuarantineManager:
     def test_bootstrap_quarantine_manager_passes_pipeline_name(self):
         """Test that bootstrap_quarantine_manager passes pipeline name correctly."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 quarantine_path=Path("/tmp/quarantine")
@@ -135,7 +135,7 @@ class TestBootstrapQuarantineManager:
     def test_bootstrap_quarantine_manager_wires_quarantine_port(self):
         """Test that bootstrap_quarantine_manager wires QuarantinePort correctly."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 quarantine_path=Path("/tmp/quarantine")
@@ -153,7 +153,7 @@ class TestBootstrapCheckpointManager:
     def test_bootstrap_checkpoint_manager_returns_manager(self):
         """Test that bootstrap_checkpoint_manager returns CheckpointManager."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 checkpoint_path=Path("/tmp/checkpoints")
@@ -165,7 +165,7 @@ class TestBootstrapCheckpointManager:
     def test_bootstrap_checkpoint_manager_passes_pipeline_name(self):
         """Test that bootstrap_checkpoint_manager passes pipeline name correctly."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 checkpoint_path=Path("/tmp/checkpoints")
@@ -177,7 +177,7 @@ class TestBootstrapCheckpointManager:
     def test_bootstrap_checkpoint_manager_wires_checkpoint_port(self):
         """Test that bootstrap_checkpoint_manager wires CheckpointPort correctly."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 checkpoint_path=Path("/tmp/checkpoints")
@@ -190,7 +190,7 @@ class TestBootstrapCheckpointManager:
     def test_bootstrap_checkpoint_manager_generates_run_id(self):
         """Test that bootstrap_checkpoint_manager generates a UUID run_id."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 checkpoint_path=Path("/tmp/checkpoints")
@@ -202,7 +202,7 @@ class TestBootstrapCheckpointManager:
     def test_bootstrap_checkpoint_manager_sets_resume_false(self):
         """Test that bootstrap_checkpoint_manager sets resume to False."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 checkpoint_path=Path("/tmp/checkpoints")
@@ -219,7 +219,7 @@ class TestBootstrapCheckpointService:
     def test_bootstrap_checkpoint_service_returns_service(self):
         """Test that bootstrap_checkpoint_service returns CheckpointService."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 checkpoint_path=Path("/tmp/checkpoints")
@@ -231,7 +231,7 @@ class TestBootstrapCheckpointService:
     def test_bootstrap_checkpoint_service_uses_empty_pipeline_name(self):
         """Test that bootstrap_checkpoint_service uses empty pipeline name for global ops."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 checkpoint_path=Path("/tmp/checkpoints")
@@ -245,7 +245,7 @@ class TestBootstrapCheckpointService:
     def test_bootstrap_checkpoint_service_wires_checkpoint_port(self):
         """Test that bootstrap_checkpoint_service wires LocalCheckpoint."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 checkpoint_path=Path("/tmp/checkpoints")
@@ -263,7 +263,7 @@ class TestBootstrapQuarantineService:
     def test_bootstrap_quarantine_service_returns_service(self):
         """Test that bootstrap_quarantine_service returns QuarantineService."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 quarantine_path=Path("/tmp/quarantine")
@@ -275,7 +275,7 @@ class TestBootstrapQuarantineService:
     def test_bootstrap_quarantine_service_wires_quarantine_port(self):
         """Test that bootstrap_quarantine_service wires UnifiedQuarantine."""
         with patch(
-            "bioetl.composition._bootstrap.checkpoint.get_settings"
+            "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
                 quarantine_path=Path("/tmp/quarantine")

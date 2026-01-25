@@ -9,14 +9,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.composition._bootstrap.storage import (
-    _create_table_collector,
+from bioetl.composition.bootstrap import (
     bootstrap_bronze_cleanup_service,
     bootstrap_cleanup,
     bootstrap_lifecycle_service,
     bootstrap_storage,
     bootstrap_vacuum_service,
 )
+from bioetl.composition.bootstrap.cli.storage import _create_table_collector
 from bioetl.composition.factories.storage import StorageAdapter
 
 
@@ -24,7 +24,7 @@ from bioetl.composition.factories.storage import StorageAdapter
 class TestBootstrapStorage:
     """Test bootstrap_storage function."""
 
-    @patch("bioetl.composition._bootstrap.storage.get_settings")
+    @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
     def test_returns_storage_adapter(self, mock_settings: MagicMock) -> None:
         """Test that bootstrap_storage returns a StorageAdapter."""
         mock_settings.return_value.bronze_path = "/tmp/bronze"
@@ -40,7 +40,7 @@ class TestBootstrapStorage:
 class TestBootstrapCleanup:
     """Test bootstrap_cleanup function."""
 
-    @patch("bioetl.composition._bootstrap.storage.get_settings")
+    @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
     def test_returns_cleanup_service(self, mock_settings: MagicMock) -> None:
         """Test that bootstrap_cleanup returns a CleanupService."""
         mock_settings.return_value.bronze_path = "/tmp/bronze"
@@ -58,7 +58,7 @@ class TestBootstrapCleanup:
 class TestBootstrapLifecycleService:
     """Test bootstrap_lifecycle_service function."""
 
-    @patch("bioetl.composition._bootstrap.storage.get_settings")
+    @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
     def test_returns_medallion_lifecycle_service(
         self,
         mock_settings: MagicMock,
@@ -81,7 +81,7 @@ class TestBootstrapLifecycleService:
 class TestBootstrapBronzeCleanupService:
     """Test bootstrap_bronze_cleanup_service function."""
 
-    @patch("bioetl.composition._bootstrap.storage.get_settings")
+    @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
     def test_returns_bronze_cleanup_service(
         self,
         mock_settings: MagicMock,
@@ -102,7 +102,7 @@ class TestBootstrapBronzeCleanupService:
 class TestBootstrapVacuumService:
     """Test bootstrap_vacuum_service function."""
 
-    @patch("bioetl.composition._bootstrap.storage.get_settings")
+    @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
     def test_returns_vacuum_service(self, mock_settings: MagicMock) -> None:
         """Test that bootstrap_vacuum_service returns VacuumService."""
         mock_settings.return_value.bronze_path = "/tmp/bronze"
@@ -126,8 +126,8 @@ class TestCreateTableCollector:
 
         assert callable(collector)
 
-    @patch("bioetl.composition.entrypoints.load_pipeline_config")
-    @patch("bioetl.composition.registry.get_default_registry")
+    @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
+    @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
     def test_collects_silver_tables(
         self,
         mock_registry: MagicMock,
@@ -148,8 +148,8 @@ class TestCreateTableCollector:
         assert len(tables) == 1
         assert tables[0] == ("silver.table1", "silver")
 
-    @patch("bioetl.composition.entrypoints.load_pipeline_config")
-    @patch("bioetl.composition.registry.get_default_registry")
+    @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
+    @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
     def test_collects_gold_tables(
         self,
         mock_registry: MagicMock,
@@ -169,8 +169,8 @@ class TestCreateTableCollector:
         assert len(tables) == 1
         assert tables[0] == ("gold.table1", "gold")
 
-    @patch("bioetl.composition.entrypoints.load_pipeline_config")
-    @patch("bioetl.composition.registry.get_default_registry")
+    @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
+    @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
     def test_collects_all_tables(
         self,
         mock_registry: MagicMock,
@@ -192,8 +192,8 @@ class TestCreateTableCollector:
         layers = {t[1] for t in tables}
         assert layers == {"silver", "gold"}
 
-    @patch("bioetl.composition.entrypoints.load_pipeline_config")
-    @patch("bioetl.composition.registry.get_default_registry")
+    @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
+    @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
     def test_raises_on_missing_config(
         self,
         mock_registry: MagicMock,
@@ -209,8 +209,8 @@ class TestCreateTableCollector:
         with pytest.raises(ValueError, match="Config not found"):
             collector("all")
 
-    @patch("bioetl.composition.entrypoints.load_pipeline_config")
-    @patch("bioetl.composition.registry.get_default_registry")
+    @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
+    @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
     def test_deduplicates_tables(
         self,
         mock_registry: MagicMock,
@@ -234,8 +234,8 @@ class TestCreateTableCollector:
         # Should have only 2 unique tables, not 4
         assert len(tables) == 2
 
-    @patch("bioetl.composition.entrypoints.load_pipeline_config")
-    @patch("bioetl.composition.registry.get_default_registry")
+    @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
+    @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
     def test_handles_none_tables(
         self,
         mock_registry: MagicMock,
@@ -255,8 +255,8 @@ class TestCreateTableCollector:
         # Should return empty list when tables are None
         assert tables == []
 
-    @patch("bioetl.composition.entrypoints.load_pipeline_config")
-    @patch("bioetl.composition.registry.get_default_registry")
+    @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
+    @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
     def test_returns_sorted_tables(
         self,
         mock_registry: MagicMock,

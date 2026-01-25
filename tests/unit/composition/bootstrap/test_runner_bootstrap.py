@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.application.services import PipelineRunnerService
-from bioetl.composition._bootstrap.runner import bootstrap_pipeline_runner_service
+from bioetl.composition.bootstrap import bootstrap_pipeline_runner_service
 from bioetl.composition.factories.runner_factory import (
     MetricsExtractor,
     RunnerFactory,
@@ -68,7 +68,7 @@ class TestBootstrapPipelineRunnerService:
     def test_bootstrap_logger_has_correct_pipeline_name(self):
         """Test that the logger is configured with correct pipeline name."""
         with patch(
-            "bioetl.composition._bootstrap.runner.bootstrap_logger"
+            "bioetl.composition.bootstrap.runtime.runner.bootstrap_logger_port"
         ) as mock_bootstrap_logger:
             mock_logger = MagicMock()
             mock_bootstrap_logger.return_value = mock_logger

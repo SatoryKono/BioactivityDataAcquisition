@@ -15,7 +15,6 @@ Version: 1.1
 
 from __future__ import annotations
 
-import warnings
 from datetime import datetime
 from enum import Enum
 from typing import Literal
@@ -469,45 +468,6 @@ class GoldOutputExt(BaseModel):
 
 
 # =============================================================================
-# Legacy Output Metadata (Deprecated - ADR-029)
-# =============================================================================
-
-
-class OutputMetadata(BaseModel):
-    """Bronze output information (DEPRECATED).
-
-    .. deprecated:: 5.10.0
-        Use BaseOutputMetadata + BronzeOutputExt composition instead.
-        Will be removed in v6.0.
-
-    Attributes:
-        files: List of output files.
-        total_records: Total records across all files.
-        total_bytes: Total bytes across all files.
-        format: Output format (jsonl+zstd).
-        compression: Compression algorithm.
-    """
-
-    files: list[FileOutputMetadata] = Field(
-        default_factory=list, description="Output files"
-    )
-    total_records: int = Field(default=0, description="Total records")
-    total_bytes: int = Field(default=0, description="Total bytes")
-    format: str = Field(default="jsonl+zstd", description="Output format")
-    compression: str = Field(default="zstd", description="Compression algorithm")
-
-    def __init__(self, **data: object) -> None:
-        """Initialize with deprecation warning."""
-        warnings.warn(
-            "OutputMetadata is deprecated, use BaseOutputMetadata + BronzeOutputExt "
-            "composition instead. Will be removed in v6.0.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(**data)
-
-
-# =============================================================================
 # Silver Layer Components
 # =============================================================================
 
@@ -708,66 +668,6 @@ class SCDMetadata(BaseModel):
     )
     new_versions_created: int = Field(default=0, description="New versions created")
     records_expired: int = Field(default=0, description="Records expired")
-
-
-class GoldOutputMetadata(BaseModel):
-    """Gold layer output metrics (DEPRECATED).
-
-    .. deprecated:: 5.10.0
-        Use BaseOutputMetadata + GoldOutputExt composition instead.
-        Will be removed in v6.0.
-
-    Attributes:
-        record_count: Number of records.
-        partition_count: Number of partitions.
-        total_bytes: Total size in bytes.
-        format: Output format (delta or parquet).
-    """
-
-    record_count: int = Field(default=0, description="Record count")
-    partition_count: int = Field(default=0, description="Partition count")
-    total_bytes: int = Field(default=0, description="Total bytes")
-    format: Literal["delta", "parquet"] = Field(
-        default="delta", description="Output format"
-    )
-
-    def __init__(self, **data: object) -> None:
-        """Initialize with deprecation warning."""
-        warnings.warn(
-            "GoldOutputMetadata is deprecated, use BaseOutputMetadata + "
-            "GoldOutputExt composition instead. Will be removed in v6.0.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(**data)
-
-
-class SilverOutputMetadata(BaseModel):
-    """Silver layer output metrics (DEPRECATED).
-
-    .. deprecated:: 5.10.0
-        Use BaseOutputMetadata + SilverOutputExt composition instead.
-        Will be removed in v6.0.
-
-    Attributes:
-        record_count: Number of records written.
-        content_hash: SHA256 hash of content for change detection.
-    """
-
-    record_count: int = Field(default=0, description="Record count")
-    content_hash: str | None = Field(
-        default=None, description="Content hash for change detection"
-    )
-
-    def __init__(self, **data: object) -> None:
-        """Initialize with deprecation warning."""
-        warnings.warn(
-            "SilverOutputMetadata is deprecated, use BaseOutputMetadata + "
-            "SilverOutputExt composition instead. Will be removed in v6.0.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(**data)
 
 
 # =============================================================================

@@ -9,8 +9,6 @@ it's a concrete implementation detail, even though it does nothing.
 
 from __future__ import annotations
 
-import warnings
-
 from bioetl.domain.ports import MetricsPort
 
 
@@ -45,15 +43,7 @@ class NoOpMetrics(MetricsPort):
             warn_on_use: Whether to warn about disabled metrics.
 
         """
-        if warn_on_use and not NoOpMetrics._warned:
-            warnings.warn(
-                "NoOpMetrics is being used - metrics are NOT being collected. "
-                "Set BIOETL_METRICS_ENABLED=true or inject PrometheusMetrics "
-                "to enable metrics collection.",
-                UserWarning,
-                stacklevel=2,
-            )
-            NoOpMetrics._warned = True
+        pass
 
     def observe_histogram(
         self,

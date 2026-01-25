@@ -66,7 +66,7 @@ CHEMBL_DTO_MODELS: dict[str, type[BaseModel]] = {
     "compound": MoleculeRecord,  # Alias for molecule
     "target": TargetRecord,
     "target_component": TargetComponentRecord,
-    "document": ChemblPublicationRecord,
+    "publication": ChemblPublicationRecord,
     "cell_line": CellLineRecord,
     "protein_class": ProteinClassRecord,
 }
