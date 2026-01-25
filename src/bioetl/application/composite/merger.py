@@ -13,7 +13,6 @@ from bioetl.domain.composite.result import EnrichmentResult, MergeResult
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
 JoinHow = Literal["inner", "left", "right", "full", "semi", "anti", "cross", "outer"]
-PrefixStrategy = Literal["provider", "entity", "both", "pipeline"]
 
 if TYPE_CHECKING:
     import polars as pl
@@ -444,6 +443,28 @@ class MergeService:
         parts = pipeline.split("_", 1)
         return (parts[0], parts[1])
 
+    def _extract_field_from_qualified(self, column: str) -> str:
+        """Extract field name from qualified column name.
+
+        Args:
+            column: Column name, possibly in qualified format.
+
+        Returns:
+            Field name if qualified (x.y.z → z), or original column name if not.
+
+        Example:
+            >>> merger._extract_field_from_qualified("chembl.publication.title")
+            'title'
+            >>> merger._extract_field_from_qualified("title")
+            'title'
+            >>> merger._extract_field_from_qualified("crossref.title")
+            'crossref.title'
+        """
+        parts = column.split(".")
+        if len(parts) == 3:
+            return parts[2]
+        return column
+
     def _find_next_suffix(self, base_col: str, existing_cols: set[str]) -> str:
         """Find next available suffix for a conflicting column.
 
@@ -672,23 +693,19 @@ class MergeService:
     def _extract_base_column(self, column: str, prefix: str) -> str | None:
         """Extract base column name from a prefixed column.
 
+        Supports both:
+        - New format: "crossref.publication.title" with prefix "crossref.publication." → "title"
+        - Legacy format: "crossref_title" with prefix "crossref_" → "title"
+
         Args:
             column: Column name that may have a prefix.
             prefix: Prefix to strip (WITH trailing dot or underscore).
 
         Returns:
             Base column name if column starts with prefix, None otherwise.
-
-        Example:
-            >>> merger._extract_base_column("crossref.title", "crossref.")
-            'title'
-            >>> merger._extract_base_column("activity.name", "activity.")
-            'name'
-            >>> merger._extract_base_column("title", "crossref.")
-            None
         """
         if column.startswith(prefix):
-            return column[len(prefix) :]
+            return column[len(prefix):]
         return None
 
     def _resolve_conflicts(
@@ -760,40 +777,70 @@ class MergeService:
     ) -> pl.DataFrame:
         """Coalesce preferring seed values.
 
+        Groups columns by field name and coalesces within each group,
+        with seed columns having priority.
+
         Args:
-            df: Merged DataFrame with prefixed columns.
+            df: Merged DataFrame with qualified columns.
             enrichers: Enricher configurations.
-            seed_pipeline: Seed pipeline name for prefix computation.
+            seed_pipeline: Seed pipeline name for identifying seed columns.
 
         Returns:
-            DataFrame with enricher columns coalesced into base columns.
+            DataFrame with coalesced columns.
         """
         import polars as pl
 
         result = df
-        for enricher in enrichers:
-            prefix = self._get_enricher_prefix(enricher.pipeline, seed_pipeline)
-            for col in list(
-                result.columns
-            ):  # Copy list to avoid mutation during iteration
-                base_col = self._extract_base_column(col, prefix)
-                if base_col is not None and base_col in result.columns:
-                    # Check type compatibility before coalescing
-                    if self._can_coalesce(result, base_col, col):
-                        # Coalesce seed (base) over enricher
-                        result = result.with_columns(
-                            pl.coalesce(pl.col(base_col), pl.col(col)).alias(base_col)
-                        ).drop(col)
-                    else:
-                        # Incompatible types - keep seed value, drop enricher
-                        self._logger.debug(
-                            "Skipping coalesce for incompatible types",
-                            seed_col=base_col,
-                            enricher_col=col,
-                            seed_type=str(result[base_col].dtype),
-                            enricher_type=str(result[col].dtype),
-                        )
-                        result = result.drop(col)
+
+        # Parse seed prefix for identification
+        seed_prefix: str | None = None
+        if seed_pipeline:
+            try:
+                provider, entity = self._parse_pipeline_name(seed_pipeline)
+                seed_prefix = f"{provider}.{entity}."
+            except ValueError:
+                pass
+
+        # Group columns by field name
+        field_groups: dict[str, list[str]] = {}
+        for col in result.columns:
+            if col.startswith("_"):  # Skip system columns
+                continue
+            field = self._extract_field_from_qualified(col)
+            if field not in field_groups:
+                field_groups[field] = []
+            field_groups[field].append(col)
+
+        # Process each group with multiple columns
+        for _field, columns in field_groups.items():
+            if len(columns) <= 1:
+                continue
+
+            # Sort: seed columns first, then enrichers
+            def sort_key(c: str) -> int:
+                if seed_prefix and c.startswith(seed_prefix):
+                    return 0  # Seed first
+                return 1  # Enrichers after
+
+            sorted_cols = sorted(columns, key=sort_key)
+
+            # Filter compatible columns (same dtype)
+            compatible_cols = [sorted_cols[0]]
+            for col in sorted_cols[1:]:
+                if self._can_coalesce(result, sorted_cols[0], col):
+                    compatible_cols.append(col)
+
+            if len(compatible_cols) > 1:
+                # Coalesce into the first (seed) column
+                target_col = compatible_cols[0]
+                result = result.with_columns(
+                    pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(target_col)
+                )
+                # Drop non-target columns
+                cols_to_drop = [c for c in compatible_cols[1:] if c in result.columns]
+                if cols_to_drop:
+                    result = result.drop(cols_to_drop)
+
         return result
 
     def _coalesce_prefer_enricher(
@@ -804,40 +851,64 @@ class MergeService:
     ) -> pl.DataFrame:
         """Coalesce preferring enricher values.
 
+        Groups columns by field name and coalesces within each group,
+        with enricher columns having priority over seed.
+
         Args:
-            df: Merged DataFrame with prefixed columns.
+            df: Merged DataFrame with qualified columns.
             enrichers: Enricher configurations.
-            seed_pipeline: Seed pipeline name for prefix computation.
+            seed_pipeline: Seed pipeline name for identifying seed columns.
 
         Returns:
-            DataFrame with enricher columns coalesced into base columns.
+            DataFrame with coalesced columns.
         """
         import polars as pl
 
         result = df
-        for enricher in enrichers:
-            prefix = self._get_enricher_prefix(enricher.pipeline, seed_pipeline)
-            for col in list(
-                result.columns
-            ):  # Copy list to avoid mutation during iteration
-                base_col = self._extract_base_column(col, prefix)
-                if base_col is not None and base_col in result.columns:
-                    # Check type compatibility before coalescing
-                    if self._can_coalesce(result, base_col, col):
-                        # Coalesce enricher over seed (base)
-                        result = result.with_columns(
-                            pl.coalesce(pl.col(col), pl.col(base_col)).alias(base_col)
-                        ).drop(col)
-                    else:
-                        # Incompatible types - prefer enricher if non-null exists
-                        self._logger.debug(
-                            "Skipping coalesce for incompatible types",
-                            seed_col=base_col,
-                            enricher_col=col,
-                            seed_type=str(result[base_col].dtype),
-                            enricher_type=str(result[col].dtype),
-                        )
-                        result = result.drop(col)
+
+        seed_prefix: str | None = None
+        if seed_pipeline:
+            try:
+                provider, entity = self._parse_pipeline_name(seed_pipeline)
+                seed_prefix = f"{provider}.{entity}."
+            except ValueError:
+                pass
+
+        field_groups: dict[str, list[str]] = {}
+        for col in result.columns:
+            if col.startswith("_"):
+                continue
+            field = self._extract_field_from_qualified(col)
+            if field not in field_groups:
+                field_groups[field] = []
+            field_groups[field].append(col)
+
+        for _field, columns in field_groups.items():
+            if len(columns) <= 1:
+                continue
+
+            # Sort: enrichers first, seed last
+            def sort_key(c: str) -> int:
+                if seed_prefix and c.startswith(seed_prefix):
+                    return 1  # Seed last
+                return 0  # Enrichers first
+
+            sorted_cols = sorted(columns, key=sort_key)
+
+            compatible_cols = [sorted_cols[0]]
+            for col in sorted_cols[1:]:
+                if self._can_coalesce(result, sorted_cols[0], col):
+                    compatible_cols.append(col)
+
+            if len(compatible_cols) > 1:
+                target_col = compatible_cols[0]
+                result = result.with_columns(
+                    pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(target_col)
+                )
+                cols_to_drop = [c for c in compatible_cols[1:] if c in result.columns]
+                if cols_to_drop:
+                    result = result.drop(cols_to_drop)
+
         return result
 
     def _coalesce_first_non_null(
