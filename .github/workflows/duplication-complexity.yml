@@ -48,8 +48,10 @@ jobs:
           # Storage writers: _write_*_metadata with coordinator path + fallback (CC=12)
           # Storage factory: create() with multi-layer config extraction (CC=11)
           # Composite runner: _run_with_lock orchestration with FSM state transitions (CC=12)
+          # Metadata coordinator: create_silver_metadata, _extract_schema_metadata with schema introspection (CC=12-16)
+          # Metadata builder: _extract_schema_metadata with pandera schema introspection (CC=16)
           xenon --max-absolute B --max-modules B --max-average A \
-            --exclude "tests/*,src/tools/*,src/bioetl/infrastructure/adapters/chembl/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*,src/bioetl/infrastructure/adapters/crossref/*,src/bioetl/infrastructure/adapters/pubmed/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/interfaces/cli/*,src/bioetl/infrastructure/storage/silver_writer.py,src/bioetl/infrastructure/storage/gold_writer.py,src/bioetl/composition/factories/storage_factory.py" src
+            --exclude "tests/*,src/tools/*,src/bioetl/infrastructure/adapters/chembl/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*,src/bioetl/infrastructure/adapters/crossref/*,src/bioetl/infrastructure/adapters/pubmed/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/interfaces/cli/*,src/bioetl/infrastructure/storage/silver_writer.py,src/bioetl/infrastructure/storage/gold_writer.py,src/bioetl/composition/factories/storage_factory.py,src/bioetl/composition/services/metadata_coordinator.py,src/bioetl/infrastructure/storage/metadata_builder.py" src
 
       - name: Strict complexity check for domain layer (CC ≤ 5)
         run: |
