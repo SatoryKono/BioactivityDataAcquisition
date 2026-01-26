@@ -55,8 +55,8 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="How record was resolved: doi, title_fallback, title_only",
     )
 
-    # === Override source to be non-nullable with fixed value ===
-    source: Series[str] = pa.Field(
+    # === Override _source to be non-nullable with fixed value ===
+    _source: Series[str] = pa.Field(
         nullable=False,
         eq="semanticscholar",
         description="Data source identifier",

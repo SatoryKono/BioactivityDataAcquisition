@@ -61,8 +61,8 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
         description="Document type: PUBLICATION or PREPRINT",
     )
 
-    # === Override source to be non-nullable with fixed value ===
-    source: Series[str] = pa.Field(
+    # === Override _source to be non-nullable with fixed value ===
+    _source: Series[str] = pa.Field(
         nullable=False, eq="crossref", description="Data source identifier"
     )
 

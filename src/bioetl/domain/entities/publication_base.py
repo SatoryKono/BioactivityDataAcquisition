@@ -104,7 +104,9 @@ class PublicationEntityBase(BaseEntity):
     _original_id: str | None = None
 
     # Note: _dq_warn and _dq_error are inherited from BaseEntity
-    # Note: _source is set by transformer via entity_to_silver_record() mapping
+
+    # Data source identifier (system metadata field)
+    _source: str = ""
 
     def __post_init__(self) -> None:
         """Validate base entity constraints.

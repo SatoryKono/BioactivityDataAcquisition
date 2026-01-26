@@ -199,7 +199,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "oa_status": oa_info.get("oa_status"),
             "fields_of_study": self.serialize_json(fields_of_study),
             "publication_types": self.serialize_json(rec.get("publicationTypes")),
-            "source": "semanticscholar",
+            "_source": "semanticscholar",
             # Lookup metadata
             "_lookup_method": lookup_method,
             "_original_id": original_id,

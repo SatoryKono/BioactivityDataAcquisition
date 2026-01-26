@@ -477,7 +477,7 @@ class TestCrossRefPublicationEntity:
             doi="10.1234/test.article",
         )
         assert publication.doi == "10.1234/test.article"
-        assert publication.source == "crossref"
+        assert publication._source == "crossref"
         assert publication.doc_type == "PUBLICATION"
 
     def test_publication_with_all_optional_fields(self, base_entity_kwargs):
@@ -563,21 +563,21 @@ class TestCrossRefPublicationEntity:
             publication.doi = "10.9999/changed"
 
     def test_publication_default_source_is_crossref(self, base_entity_kwargs):
-        """Test that source defaults to 'crossref'."""
+        """Test that _source defaults to 'crossref'."""
         publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
         )
-        assert publication.source == "crossref"
+        assert publication._source == "crossref"
 
     def test_publication_custom_source(self, base_entity_kwargs):
-        """Test CrossRefPublicationEntity with custom source."""
+        """Test CrossRefPublicationEntity with custom _source."""
         publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
-            source="pubmed",
+            _source="pubmed",
         )
-        assert publication.source == "pubmed"
+        assert publication._source == "pubmed"
 
     def test_publication_with_citation_metrics(self, base_entity_kwargs):
         """Test CrossRefPublicationEntity with citation metrics."""
@@ -685,7 +685,7 @@ class TestPublicationRecord:
         assert record.authors is None  # JSON string format, defaults to None
         assert record.issn == []
         assert record.subjects == []
-        assert record.source == "crossref"
+        # Note: _source is set by transformer, not in DTO
         assert record.doc_type == "PUBLICATION"
 
     def test_publication_record_with_all_fields(self):
@@ -716,7 +716,7 @@ class TestPublicationRecord:
             language="en",
             license_url="https://license.com",
             subjects=["Science"],
-            source="crossref",
+            # Note: _source is set by transformer, not in DTO
         )
         assert record.citation_count == 892
         assert record.authors == authors_json
