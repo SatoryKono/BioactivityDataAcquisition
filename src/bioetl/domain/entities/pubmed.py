@@ -80,6 +80,9 @@ class ArticleRecord(BaseModel):
     authors: str | None = PydanticField(
         default=None, description="Author names (JSON array, hashed for PII)"
     )
+    affiliations: list[str] = PydanticField(
+        default_factory=list, description="List of unique affiliations"
+    )
 
     # Dates (ISO format: YYYY-MM-DD or partial)
     pub_date: str | None = PydanticField(
@@ -202,6 +205,7 @@ class PubMedPublicationEntity(PublicationEntityBase):
     country: str | None = None
     vernacular_title: str | None = None  # Original non-English title
     abstract_structured: bool = False  # Whether abstract has labeled sections (NLM)
+    affiliations: list[str] = field(default_factory=list)
 
     # Additional journal fields (Gold schema forensic retention)
     journal_title: str | None = None  # Full journal name (alias for journal)

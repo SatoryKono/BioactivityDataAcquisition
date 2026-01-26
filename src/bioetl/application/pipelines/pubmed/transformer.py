@@ -237,6 +237,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         # Extract and hash authors
         raw_authors = AuthorExtractor.parse_authors(article)
         hashed_authors = self.hash_pii_list(raw_authors) or []
+        affiliations = AuthorExtractor.parse_affiliations(article)
 
         # Validate DOI
         raw_doi = IdentifierExtractor.extract_doi(root)
@@ -254,6 +255,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "abstract_structured": AbstractExtractor.is_abstract_structured(article),
             "authors": self.serialize_json_list(hashed_authors),
             "author_count": len(hashed_authors),
+            "affiliations": affiliations,
             **self._extract_journal_data(article),
             **self._extract_date_data(article, pubmed_data),
             **self._extract_classification_data(article, medline),

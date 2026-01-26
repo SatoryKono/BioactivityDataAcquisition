@@ -19,6 +19,7 @@ class RawAuthor(TypedDict, total=False):
     initials: str | None
     fore_name: str | None
     collective_name: str | None
+    affiliations: list[str]
 
 
 class AuthorExtractor(BaseFieldExtractor):
@@ -48,12 +49,19 @@ class AuthorExtractor(BaseFieldExtractor):
 
         raw_authors: list[RawAuthor] = []
         for author in author_list.findall("Author"):
+            # Extract affiliations (list of strings)
+            aff_nodes = author.findall(".//AffiliationInfo/Affiliation")
+            affiliations = [get_text(node) for node in aff_nodes]
+            # Filter out None values
+            valid_affiliations = [aff for aff in affiliations if aff]
+
             raw_authors.append(
                 RawAuthor(
                     last_name=get_text(author.find("LastName")),
                     initials=get_text(author.find("Initials")),
                     fore_name=get_text(author.find("ForeName")),
                     collective_name=get_text(author.find("CollectiveName")),
+                    affiliations=valid_affiliations,
                 )
             )
 
@@ -110,3 +118,25 @@ class AuthorExtractor(BaseFieldExtractor):
             List of formatted author names.
         """
         return cls().process(article_node)
+
+    @classmethod
+    def parse_affiliations(cls, article_node: Element) -> list[str]:
+        """Extract deduplicated list of affiliations from all authors.
+
+        Args:
+            article_node: The Article element containing AuthorList.
+
+        Returns:
+            List of unique affiliation strings.
+        """
+        raw_authors = cls().extract(article_node)
+        if not raw_authors:
+            return []
+
+        all_affiliations = set()
+        for author in raw_authors:
+            affs = author.get("affiliations")
+            if affs:
+                all_affiliations.update(affs)
+
+        return sorted(list(all_affiliations))
