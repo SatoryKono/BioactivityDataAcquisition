@@ -161,7 +161,7 @@ class TestBasePublicationTransformerBasics:
         assert result["title"] == "Test Publication Title"
         assert result["abstract"] == "This is a test abstract."
         assert result["year"] == 2024
-        assert result["source"] == "test_provider"
+        assert result["_source"] == "test_provider"
 
     @pytest.mark.asyncio
     async def test_transform_generates_entity_id(
