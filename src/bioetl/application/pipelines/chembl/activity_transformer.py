@@ -119,7 +119,13 @@ _QUALITY_ANNOTATIONS = FieldGroup(
             "data_validity_comment",
             "data_validity_description",
         ),
-        *int_fields("document_year", "potential_duplicate", "toid"),
+        *int_fields(
+            "document_year",
+            "potential_duplicate",
+            "toid",
+            "manual_curation_flag",
+            "original_activity_id",
+        ),
     ),
 )
 
