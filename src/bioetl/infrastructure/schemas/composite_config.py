@@ -10,14 +10,18 @@ Usage:
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from bioetl.domain.composite.config import (
+    AggregationConfig,
+    AggregationFieldSpec,
+    AggregationFunction,
     CompositeConfig,
     CompositeDQConfig,
     DQOverrideConfig,
+    EnricherCardinality,
     EnricherConfig,
     ExecutionConfig,
     LineageConfig,
@@ -29,6 +33,63 @@ from bioetl.domain.composite.strategy import (
     FallbackStrategy,
     MergeStrategy,
 )
+
+
+class AggregationFieldSchema(BaseModel):
+    """Pydantic schema for aggregation field specification.
+
+    Defines how to aggregate a single field from a 1:M enricher.
+    """
+
+    source: str = Field(
+        ..., min_length=1, description="Source column name to aggregate"
+    )
+    agg: Literal["collect_list", "collect_set", "count", "first", "concat_str"] = Field(
+        ..., description="Aggregation function to apply"
+    )
+    filter: str | None = Field(
+        default=None, description="Optional filter condition (e.g., \"term_type == 'MESH'\")"
+    )
+
+    def to_domain(self, output_field: str) -> AggregationFieldSpec:
+        """Convert to domain AggregationFieldSpec.
+
+        Args:
+            output_field: The output field name (from the dict key).
+
+        Returns:
+            Domain AggregationFieldSpec object.
+        """
+        return AggregationFieldSpec(
+            source_field=self.source,
+            agg_function=AggregationFunction.from_string(self.agg),
+            filter_condition=self.filter,
+            output_field=output_field,
+        )
+
+
+class AggregationSchema(BaseModel):
+    """Pydantic schema for 1:M enricher aggregation config.
+
+    Defines how to aggregate multiple rows per join key into a single row.
+    """
+
+    group_by: str = Field(
+        ..., min_length=1, description="Join key to group by"
+    )
+    fields: dict[str, AggregationFieldSchema] = Field(
+        ..., min_length=1, description="Map of output_field -> aggregation spec"
+    )
+
+    def to_domain(self) -> AggregationConfig:
+        """Convert to domain AggregationConfig."""
+        return AggregationConfig(
+            group_by=self.group_by,
+            fields=tuple(
+                spec.to_domain(output_field=name)
+                for name, spec in self.fields.items()
+            ),
+        )
 
 
 class SeedSchema(BaseModel):
@@ -93,6 +154,14 @@ class EnricherSchema(BaseModel):
     limit: int | None = Field(
         default=None, gt=0, description="Optional limit on records to enrich"
     )
+    cardinality: Literal["one_to_one", "many_to_one"] = Field(
+        default="one_to_one",
+        description="Cardinality of enricher data (one_to_one or many_to_one)",
+    )
+    aggregation: AggregationSchema | None = Field(
+        default=None,
+        description="Aggregation config for many_to_one enrichers",
+    )
 
     @field_validator("join_keys")
     @classmethod
@@ -105,6 +174,16 @@ class EnricherSchema(BaseModel):
                 raise ValueError("join_keys cannot contain empty strings")
         return v
 
+    @model_validator(mode="after")
+    def validate_aggregation_required(self) -> Self:
+        """Ensure aggregation is provided when cardinality is many_to_one."""
+        if self.cardinality == "many_to_one" and self.aggregation is None:
+            raise ValueError(
+                f"Enricher '{self.pipeline}' with cardinality=many_to_one "
+                "requires aggregation config"
+            )
+        return self
+
     def to_domain(self) -> EnricherConfig:
         """Convert to immutable domain EnricherConfig."""
         return EnricherConfig(
@@ -116,6 +195,8 @@ class EnricherSchema(BaseModel):
             fallback_strategy=FallbackStrategy.from_string(self.fallback_strategy),
             silver_table=self.silver_table,
             limit=self.limit,
+            cardinality=EnricherCardinality.from_string(self.cardinality),
+            aggregation=self.aggregation.to_domain() if self.aggregation else None,
         )
 
 
@@ -391,6 +472,8 @@ class CompositeConfigFileSchema(BaseModel):
 
 
 __all__ = [
+    "AggregationFieldSchema",
+    "AggregationSchema",
     "CompositeConfigFileSchema",
     "CompositeConfigSchema",
     "CompositeDQSchema",
