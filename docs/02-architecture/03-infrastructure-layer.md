@@ -35,10 +35,13 @@
 
 | Адаптер | Базовый класс | HTTP-клиент | Примечание |
 |---------|---------------|-------------|------------|
-| **ChemblAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP |
-| **UniProtAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP |
-| **PubMedAdapter** | `@dataclass` | `UnifiedHTTPClient` | Async HTTP |
-| **PubChemAdapter** | `BaseSyncAdapter` | `pubchempy` + ThreadPool | Legacy sync библиотека |
+| **ChemblAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 13 entities |
+| **UniProtAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 100 req/sec |
+| **PubMedAdapter** | `@dataclass` | `UnifiedHTTPClient` | Async HTTP, 3 req/sec |
+| **PubChemAdapter** | `BaseSyncAdapter` | `pubchempy` + ThreadPool | Legacy sync, 5 req/sec |
+| **CrossRefAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, polite pool |
+| **OpenAlexAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 10 req/sec |
+| **SemanticScholarAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 100 req/5min |
 
 **Архитектура HTTP-адаптеров:**
 
@@ -114,3 +117,40 @@ Redis-адаптер без изменения domain/application слоёв.
 - **Запрет на бизнес-логику:** В этом слое не должно быть бизнес-правил. Его задача — получить данные "как есть" или записать их "как сказано".
 - **Инверсия зависимостей:** Классы из `Infrastructure` зависят от абстракций (`Protocol`) из `Domain`, а не наоборот. Это позволяет подменять реализации без изменения ядра системы.
 - **Конфигурация:** Все необходимые параметры (API-ключи, пути, адреса серверов) адаптеры получают через DI из конфигурационных объектов.
+
+---
+
+## 4. Связанные Материалы
+
+### Навигация по Слоям
+
+| ← Предыдущий | Текущий | Следующий → |
+|--------------|---------|-------------|
+| [Application Layer](02-application-layer.md) | **Infrastructure** | [Interfaces Layer](04-interfaces-layer.md) |
+
+### Связанные Диаграммы
+
+| Диаграмма | Файл | Описание |
+|-----------|------|----------|
+| Infrastructure Classes | [10-infrastructure-layer-class-diagram.mermaid](diagrams/10-infrastructure-layer-class-diagram.mermaid) | Классы слоя Infrastructure |
+| Provider Adapters | [../diagrams/mermaid/23_provider_adapters_overview.mmd](../diagrams/mermaid/23_provider_adapters_overview.mmd) | Обзор 7 провайдеров и их rate limits |
+| HTTP Infrastructure | [../diagrams/mermaid/14_http_infrastructure.mmd](../diagrams/mermaid/14_http_infrastructure.mmd) | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
+| Circuit Breaker | [07-circuit-breaker-states.mermaid](diagrams/07-circuit-breaker-states.mermaid) | Состояния Circuit Breaker |
+| Storage Architecture | [../diagrams/mermaid/13_storage_architecture.mmd](../diagrams/mermaid/13_storage_architecture.mmd) | Bronze, Silver, Gold writers |
+| MemoryLock | [16-memory-lock-class.mermaid](diagrams/16-memory-lock-class.mermaid) | Класс MemoryLock |
+
+### Связанные ADR
+
+| ADR | Тема |
+|-----|------|
+| [ADR-003](decisions/ADR-003-in-memory-locking-strategy.md) | In-Memory Locking Strategy |
+| [ADR-007](decisions/ADR-007-circuit-breaker-implementation.md) | Circuit Breaker Implementation |
+| [ADR-010](decisions/ADR-010-local-only-deployment.md) | Local-Only Deployment |
+| [ADR-017](decisions/ADR-017-observability-architecture.md) | Observability Architecture |
+
+### Смежные Разделы Документации
+
+- [Domain Layer](01-domain-layer.md) — порты, реализуемые адаптерами
+- [Composition Layer](05-composition-layer.md) — фабрики создания адаптеров
+- [API Reference: Infrastructure](../04-reference/api/infrastructure.md) — API документация слоя
+- [RULES.md §3 "Ошибки"](../RULES.md) — классификация ошибок, retry logic

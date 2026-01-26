@@ -28,63 +28,103 @@ class BaseTitleFallbackHandler(ABC):
         Phase 1: Batch ID lookup - implemented by adapter
         Phase 2: Title fallback - process_missing_dois() for unresolved IDs
         Phase 3: Title-only - process_title_only_entries() for empty IDs
+
+    Event Naming Convention:
+        When provider_prefix is set, event names are auto-generated:
+        - {provider}_no_fallback_title
+        - {provider}_title_fallback_attempt
+        - {provider}_title_fallback_success
+        - {provider}_title_fallback_not_found
+        - {provider}_title_only_attempt
+        - {provider}_title_only_success
+        - {provider}_title_only_not_found
+
+        Subclasses can override individual event properties if needed.
     """
 
-    def __init__(self, logger: LoggerPort) -> None:
+    def __init__(
+        self, logger: LoggerPort, *, provider_prefix: str | None = None
+    ) -> None:
         """Initialize base fallback handler.
 
         Args:
             logger: Logger port for structured logging.
+            provider_prefix: Provider name prefix for auto-generating event names.
+                If provided, default event properties use this prefix.
+                Example: provider_prefix="crossref" generates
+                    "crossref_title_fallback_attempt" etc.
         """
         self._logger = logger
+        self._provider_prefix = provider_prefix
 
     @property
-    @abstractmethod
     def _event_no_fallback_title(self) -> str:
-        """Return log event name for missing fallback title."""
-        ...
+        """Return log event name for missing fallback title.
+
+        Default: '{provider}_no_fallback_title' if provider_prefix is set.
+        """
+        if self._provider_prefix:
+            return f"{self._provider_prefix}_no_fallback_title"
+        return "no_fallback_title"
 
     @property
-    @abstractmethod
     def _event_fallback_attempt(self) -> str:
-        """Return log event name for fallback attempt."""
-        ...
+        """Return log event name for fallback attempt.
+
+        Default: '{provider}_title_fallback_attempt' if provider_prefix is set.
+        """
+        if self._provider_prefix:
+            return f"{self._provider_prefix}_title_fallback_attempt"
+        return "title_fallback_attempt"
 
     @property
-    @abstractmethod
     def _event_fallback_success(self) -> str:
-        """Return log event name for successful fallback."""
-        ...
+        """Return log event name for successful fallback.
+
+        Default: '{provider}_title_fallback_success' if provider_prefix is set.
+        """
+        if self._provider_prefix:
+            return f"{self._provider_prefix}_title_fallback_success"
+        return "title_fallback_success"
 
     @property
-    @abstractmethod
     def _event_fallback_not_found(self) -> str:
-        """Return log event name for failed fallback."""
-        ...
+        """Return log event name for failed fallback.
+
+        Default: '{provider}_title_fallback_not_found' if provider_prefix is set.
+        """
+        if self._provider_prefix:
+            return f"{self._provider_prefix}_title_fallback_not_found"
+        return "title_fallback_not_found"
 
     @property
     def _event_title_only_attempt(self) -> str:
         """Return log event name for title-only lookup attempt.
 
-        Override in subclass to customize event name.
-        Default implementation returns '{provider}_title_only_attempt'.
+        Default: '{provider}_title_only_attempt' if provider_prefix is set.
         """
+        if self._provider_prefix:
+            return f"{self._provider_prefix}_title_only_attempt"
         return "title_only_attempt"
 
     @property
     def _event_title_only_success(self) -> str:
         """Return log event name for successful title-only lookup.
 
-        Override in subclass to customize event name.
+        Default: '{provider}_title_only_success' if provider_prefix is set.
         """
+        if self._provider_prefix:
+            return f"{self._provider_prefix}_title_only_success"
         return "title_only_success"
 
     @property
     def _event_title_only_not_found(self) -> str:
         """Return log event name for failed title-only lookup.
 
-        Override in subclass to customize event name.
+        Default: '{provider}_title_only_not_found' if provider_prefix is set.
         """
+        if self._provider_prefix:
+            return f"{self._provider_prefix}_title_only_not_found"
         return "title_only_not_found"
 
     @abstractmethod
@@ -115,15 +155,21 @@ class BaseTitleFallbackHandler(ABC):
     ) -> dict[str, Any]:
         """Process found result before yielding.
 
-        Override to add metadata like _lookup_method.
+        Default implementation adds standard metadata fields:
+        - _lookup_method = "title_fallback"
+        - _original_id = original_doi
+
+        Override to customize or extend.
 
         Args:
             result: The found publication record.
             original_doi: The DOI that was originally searched.
 
         Returns:
-            Processed result (may be modified or returned as-is).
+            Processed result with _lookup_method and _original_id added.
         """
+        result["_lookup_method"] = "title_fallback"
+        result["_original_id"] = original_doi
         return result
 
     def _get_fallback_title(

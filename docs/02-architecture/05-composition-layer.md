@@ -51,13 +51,16 @@ data_source = ProviderRegistry.create_data_source(
 )
 ```
 
-**Зарегистрированные провайдеры:**
-| Provider | Data Sources | Pipelines |
-|----------|--------------|-----------|
-| chembl | ChemblAdapter | activity, assay, molecule, target, document, target_component |
-| pubchem | PubChemAdapter | compound |
-| uniprot | UniProtAdapter | protein |
-| pubmed | PubMedAdapter | publications |
+**Зарегистрированные провайдеры (7 шт):**
+| Provider | Data Sources | Pipelines | Rate Limit |
+|----------|--------------|-----------|------------|
+| chembl | ChemblAdapter | activity, assay, molecule, target, document, target_component (13) | None |
+| pubchem | PubChemAdapter | compound | 5 req/sec |
+| uniprot | UniProtAdapter | protein | 100 req/sec |
+| pubmed | PubMedAdapter | publications | 3 req/sec |
+| crossref | CrossRefAdapter | publication | Polite pool |
+| openalex | OpenAlexAdapter | publication | 10 req/sec |
+| semanticscholar | SemanticScholarAdapter | publication | 100 req/5min |
 
 ### 2.3. `registry.py` — Реестр пайплайнов
 
@@ -68,3 +71,53 @@ data_source = ProviderRegistry.create_data_source(
 - **Composition Root:** Вся логика создания объектов должна находиться как можно ближе к точке входа в приложение. В BioETL это `src/bioetl/composition/`.
 - **Dependency Injection (DI):** Объекты никогда не создают свои зависимости сами. Если пайплайну нужен доступ к базе данных, он запрашивает `StoragePort` в конструкторе, а фабрика из слоя Composition предоставляет ему конкретную реализацию.
 - **Декларативность:** Использование `GenericPipelineFactory` позволяет добавлять новые пайплайны простым объявлением в `pipeline_factories.py` без написания шаблонного кода сборки.
+
+### 3.1. Composite Pipeline Bootstrap (ADR-026)
+
+Для композитных пайплайнов доступна функция `bootstrap_composite_pipeline()`:
+
+```python
+from bioetl.composition.composite.bootstrap import bootstrap_composite_pipeline
+
+runner = await bootstrap_composite_pipeline(
+    "composite_publication",
+    limit=1000,
+)
+result = await runner.run()
+```
+
+См. [ADR-026: Composite Pipeline Pattern](decisions/ADR-026-composite-pipeline-pattern.md) для деталей.
+
+---
+
+## 4. Связанные Материалы
+
+### Навигация по Слоям
+
+| ← Предыдущий | Текущий | Следующий → |
+|--------------|---------|-------------|
+| [Interfaces Layer](04-interfaces-layer.md) | **Composition** | — |
+
+### Связанные Диаграммы
+
+| Диаграмма | Файл | Описание |
+|-----------|------|----------|
+| Composition Root | [../diagrams/mermaid/11_composition_root.mmd](../diagrams/mermaid/11_composition_root.mmd) | DI container, factories, bootstrap |
+| Factory Pattern | [../diagrams/mermaid/20_factory_pattern_usage.mmd](../diagrams/mermaid/20_factory_pattern_usage.mmd) | Использование Factory паттерна |
+| Five Layer Architecture | [../diagrams/mermaid/01_five_layer_architecture.mmd](../diagrams/mermaid/01_five_layer_architecture.mmd) | Composition слой в архитектуре |
+| Layers Interaction | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid) | Bootstrap → Factories → Runner |
+
+### Связанные ADR
+
+| ADR | Тема |
+|-----|------|
+| [ADR-005](decisions/ADR-005-composition-layer-separation.md) | Composition Layer Separation |
+| [ADR-025](decisions/ADR-025-pipeline-config-unification.md) | Pipeline Config Unification |
+| [ADR-026](decisions/ADR-026-composite-pipeline-pattern.md) | Composite Pipeline Pattern |
+
+### Смежные Разделы Документации
+
+- [Interfaces Layer](04-interfaces-layer.md) — CLI использует bootstrap
+- [Application Layer](02-application-layer.md) — пайплайны, создаваемые фабриками
+- [Infrastructure Layer](03-infrastructure-layer.md) — адаптеры, регистрируемые в ProviderRegistry
+- [API Reference: Composition](../04-reference/api/composition.md) — API документация слоя
