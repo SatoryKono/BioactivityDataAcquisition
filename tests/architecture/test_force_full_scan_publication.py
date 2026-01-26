@@ -94,7 +94,9 @@ class TestForceFullScanPublicationConfigs:
 
         # Check that we test all found configs (except composite)
         # Normalize paths to use forward slashes for cross-platform comparison
-        normalized_test_configs = {p.replace("\\", "/") for p in PUBLICATION_PIPELINE_CONFIGS}
+        normalized_test_configs = {
+            p.replace("\\", "/") for p in PUBLICATION_PIPELINE_CONFIGS
+        }
         missing_from_tests = []
         for config_path in found_publication_configs:
             # Skip composite publication config

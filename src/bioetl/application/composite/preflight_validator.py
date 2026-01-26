@@ -121,7 +121,9 @@ class CompositePreflightValidator:
     # Types within the same group can be coalesced
     _COMPATIBLE_TYPES: tuple[frozenset[str], ...] = (
         frozenset({"str", "object", "String"}),
-        frozenset({"int", "Int64", "int64", "Int64Dtype", "float", "Float64", "float64"}),
+        frozenset(
+            {"int", "Int64", "int64", "Int64Dtype", "float", "Float64", "float64"}
+        ),
         frozenset({"bool", "boolean"}),
         frozenset({"date", "datetime", "datetime64"}),
     )
@@ -250,9 +252,7 @@ class CompositePreflightValidator:
 
         return frozenset(sources)
 
-    def _load_source_fields(
-        self, config: CompositeConfig
-    ) -> dict[str, SchemaFields]:
+    def _load_source_fields(self, config: CompositeConfig) -> dict[str, SchemaFields]:
         """Load field definitions from source schemas.
 
         Args:
@@ -335,7 +335,9 @@ class CompositePreflightValidator:
                 fields[col_name] = FieldInfo(
                     name=col_name,
                     dtype=dtype_str,
-                    nullable=col_info.nullable if col_info.nullable is not None else True,
+                    nullable=col_info.nullable
+                    if col_info.nullable is not None
+                    else True,
                     source=source,
                 )
         except Exception as e:
@@ -368,7 +370,11 @@ class CompositePreflightValidator:
             if not hasattr(klass, "__annotations__"):
                 continue
             for field_name, field_type in klass.__annotations__.items():
-                if field_name.startswith("_") and field_name not in ("_source", "_dq_warn", "_dq_error"):
+                if field_name.startswith("_") and field_name not in (
+                    "_source",
+                    "_dq_warn",
+                    "_dq_error",
+                ):
                     continue
                 if field_name in fields:
                     continue
@@ -412,7 +418,7 @@ class CompositePreflightValidator:
         # Remove pandas/pandera prefixes
         for prefix in ("pandas.core.arrays.integer.", "pandas.", "pandera."):
             if dtype_str.startswith(prefix):
-                dtype_str = dtype_str[len(prefix):]
+                dtype_str = dtype_str[len(prefix) :]
 
         # Simplify common types
         simplifications = {
@@ -572,6 +578,7 @@ class CompositePreflightValidator:
             from bioetl.domain.schemas.chembl.publication import (
                 ChemblPublicationSchema,
             )
+
             registry["chembl"] = ChemblPublicationSchema
         except ImportError:
             pass
@@ -580,6 +587,7 @@ class CompositePreflightValidator:
             from bioetl.domain.schemas.crossref.publication import (
                 PublicationEnrichedSchema,
             )
+
             registry["crossref"] = PublicationEnrichedSchema
         except ImportError:
             pass
@@ -588,6 +596,7 @@ class CompositePreflightValidator:
             from bioetl.domain.schemas.openalex.publication import (
                 OpenAlexPublicationSchema,
             )
+
             registry["openalex"] = OpenAlexPublicationSchema
         except ImportError:
             pass
@@ -596,6 +605,7 @@ class CompositePreflightValidator:
             from bioetl.domain.schemas.pubmed.publication import (
                 PubMedPublicationSchema,
             )
+
             registry["pubmed"] = PubMedPublicationSchema
         except ImportError:
             pass
@@ -604,6 +614,7 @@ class CompositePreflightValidator:
             from bioetl.domain.schemas.semanticscholar.publication import (
                 SemanticScholarPublicationSchema,
             )
+
             registry["semanticscholar"] = SemanticScholarPublicationSchema
         except ImportError:
             pass

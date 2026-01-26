@@ -203,7 +203,9 @@ class TestCompositePreflightValidatorBasic:
     """Basic tests for CompositePreflightValidator."""
 
     def test_get_valid_sources(
-        self, validator: CompositePreflightValidator, basic_composite_config: CompositeConfig
+        self,
+        validator: CompositePreflightValidator,
+        basic_composite_config: CompositeConfig,
     ) -> None:
         """Validator extracts valid source names from config."""
         sources = validator._get_valid_sources(basic_composite_config)
@@ -237,7 +239,9 @@ class TestCompositePreflightValidatorBasic:
         self, validator: CompositePreflightValidator
     ) -> None:
         """Numeric types are in same compatibility group."""
-        num_group = frozenset({"int", "Int64", "int64", "Int64Dtype", "float", "Float64", "float64"})
+        num_group = frozenset(
+            {"int", "Int64", "int64", "Int64Dtype", "float", "Float64", "float64"}
+        )
         assert validator._dtype_in_group("int", num_group)
         assert validator._dtype_in_group("float", num_group)
         assert validator._dtype_in_group("Int64", num_group)
@@ -336,9 +340,7 @@ class TestCompositePreflightValidatorValidation:
         result = validator.validate(config, fail_on_error=False)
 
         # Should have missing_field error (not just warnings)
-        missing_errors = [
-            i for i in result.errors if i.issue_type == "missing_field"
-        ]
+        missing_errors = [i for i in result.errors if i.issue_type == "missing_field"]
         assert len(missing_errors) >= 1
         assert "completely_nonexistent_field_xyz123" in missing_errors[0].field
 
