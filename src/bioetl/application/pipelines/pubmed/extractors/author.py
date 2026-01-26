@@ -19,6 +19,7 @@ class RawAuthor(TypedDict, total=False):
     initials: str | None
     fore_name: str | None
     collective_name: str | None
+    affiliations: list[str] | None
 
 
 class AuthorExtractor(BaseFieldExtractor):
@@ -27,6 +28,7 @@ class AuthorExtractor(BaseFieldExtractor):
     Handles:
     - Individual authors with LastName, Initials/ForeName
     - Collective/group authors
+    - Author affiliations (AffiliationInfo)
     - Empty author lists
     """
 
@@ -48,12 +50,20 @@ class AuthorExtractor(BaseFieldExtractor):
 
         raw_authors: list[RawAuthor] = []
         for author in author_list.findall("Author"):
+            # Extract affiliations
+            affiliations = []
+            for info in author.findall("AffiliationInfo"):
+                aff_text = get_text(info.find("Affiliation"))
+                if aff_text:
+                    affiliations.append(aff_text)
+
             raw_authors.append(
                 RawAuthor(
                     last_name=get_text(author.find("LastName")),
                     initials=get_text(author.find("Initials")),
                     fore_name=get_text(author.find("ForeName")),
                     collective_name=get_text(author.find("CollectiveName")),
+                    affiliations=affiliations if affiliations else None,
                 )
             )
 
@@ -110,3 +120,27 @@ class AuthorExtractor(BaseFieldExtractor):
             List of formatted author names.
         """
         return cls().process(article_node)
+
+    @classmethod
+    def parse_affiliations(cls, article_node: Element) -> list[str]:
+        """Extract unique list of affiliations from all authors.
+
+        Args:
+            article_node: The Article element containing AuthorList.
+
+        Returns:
+            List of unique affiliation strings.
+        """
+        extractor = cls()
+        raw_authors = extractor.extract(article_node)
+        if not raw_authors:
+            return []
+
+        # Collect all affiliations from all authors
+        all_affiliations: set[str] = set()
+        for author in raw_authors:
+            affs = author.get("affiliations")
+            if affs:
+                all_affiliations.update(affs)
+
+        return sorted(list(all_affiliations))

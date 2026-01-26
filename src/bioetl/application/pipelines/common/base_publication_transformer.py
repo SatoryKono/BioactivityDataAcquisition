@@ -199,3 +199,41 @@ class BasePublicationTransformer(BaseTransformer):
 
         # 8. Convert to SilverRecord
         return cast("SilverRecord", self.entity_to_silver_record(entity))
+
+    def _normalize_partial_date(self, date_str: str | None) -> str | None:
+        """Normalize partial date to YYYY-MM-DD format (end of period).
+
+        Common logic for provider APIs that return partial dates:
+        - Full date: "2024-05-15" (YYYY-MM-DD)
+        - Month precision: "2024-05" (YYYY-MM) -> "2024-05-30"
+        - Year precision: "2024" (YYYY) -> "2024-12-31"
+
+        Partial dates are normalized to end of period for consistency across BioETL.
+
+        Args:
+            date_str: Raw date string from provider API.
+
+        Returns:
+            Normalized ISO date string (YYYY-MM-DD) or None.
+
+        """
+        if not date_str:
+            return None
+
+        date_str = str(date_str).strip()
+
+        # Full ISO format (YYYY-MM-DD) - return as-is
+        # Check length and separators strictly to avoid false positives
+        if len(date_str) == 10 and date_str[4] == "-" and date_str[7] == "-":
+            return date_str
+
+        # Partial date: YYYY-MM → YYYY-MM-30 (end of month approximation)
+        if len(date_str) == 7 and date_str[4] == "-":
+            return f"{date_str}-30"
+
+        # Partial date: YYYY → YYYY-12-31 (end of year)
+        if len(date_str) == 4 and date_str.isdigit():
+            return f"{date_str}-12-31"
+
+        # Unknown format - return None for invalid dates
+        return None

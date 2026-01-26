@@ -6,6 +6,7 @@ Tests the pure functions in extractors.py module.
 from __future__ import annotations
 
 from bioetl.application.pipelines.openalex.extractors import (
+    extract_affiliations,
     extract_authors,
     extract_biblio_info,
     extract_concepts,
@@ -115,6 +116,69 @@ class TestExtractAuthors:
             {"author": "string"},  # Invalid type
         ]
         result = extract_authors(authorships)
+        assert result == []
+
+
+class TestExtractAffiliations:
+    """Tests for extract_affiliations function."""
+
+    def test_extract_affiliations_basic(self) -> None:
+        """Should extract unique affiliations."""
+        authorships = [
+            {
+                "author": {"display_name": "John Doe"},
+                "institutions": [{"display_name": "Harvard University"}],
+            },
+            {
+                "author": {"display_name": "Jane Smith"},
+                "institutions": [{"display_name": "MIT"}],
+            },
+        ]
+        result = extract_affiliations(authorships)
+        assert result == ["Harvard University", "MIT"]
+
+    def test_extract_affiliations_multiple_per_author(self) -> None:
+        """Should extract all affiliations for an author."""
+        authorships = [
+            {
+                "author": {"display_name": "John Doe"},
+                "institutions": [
+                    {"display_name": "Harvard University"},
+                    {"display_name": "Broad Institute"},
+                ],
+            }
+        ]
+        result = extract_affiliations(authorships)
+        # Sorted
+        assert result == ["Broad Institute", "Harvard University"]
+
+    def test_extract_affiliations_deduplication(self) -> None:
+        """Should deduplicate affiliations across authors."""
+        authorships = [
+            {
+                "author": {"display_name": "John Doe"},
+                "institutions": [{"display_name": "Harvard University"}],
+            },
+            {
+                "author": {"display_name": "Jane Smith"},
+                "institutions": [{"display_name": "Harvard University"}],
+            },
+        ]
+        result = extract_affiliations(authorships)
+        assert result == ["Harvard University"]
+
+    def test_extract_affiliations_empty(self) -> None:
+        """Should return empty list if no authorships."""
+        result = extract_affiliations([])
+        assert result == []
+
+    def test_extract_affiliations_no_institutions(self) -> None:
+        """Should skip authors without institutions."""
+        authorships = [
+            {"author": {"display_name": "John Doe"}, "institutions": []},
+            {"author": {"display_name": "Jane Smith"}},
+        ]
+        result = extract_affiliations(authorships)
         assert result == []
 
 

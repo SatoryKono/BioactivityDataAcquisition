@@ -77,6 +77,38 @@ def extract_authors(authors: list[dict[str, Any]] | None) -> list[str]:
     return result
 
 
+def extract_affiliations(authors: list[dict[str, Any]] | None) -> list[str]:
+    """Extract affiliations from authors list.
+
+    Semantic Scholar authors may have affiliations as a list of strings.
+
+    Args:
+        authors: List of author objects from S2.
+
+    Returns:
+        List of unique affiliation strings (sorted).
+
+    Example:
+        >>> authors = [{"name": "John", "affiliations": ["Univ A"]}, {"name": "Jane", "affiliations": ["Univ B", "Univ A"]}]
+        >>> extract_affiliations(authors)
+        ['Univ A', 'Univ B']
+    """
+    if not authors:
+        return []
+
+    affiliations: set[str] = set()
+    for author in authors:
+        author_affs = author.get("affiliations")
+        if not author_affs or not isinstance(author_affs, list):
+            continue
+
+        for aff in author_affs:
+            if aff and isinstance(aff, str) and aff.strip():
+                affiliations.add(aff.strip())
+
+    return sorted(list(affiliations))
+
+
 def extract_journal_info(
     journal: dict[str, Any] | None,
     venue: str | None,

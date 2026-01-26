@@ -74,6 +74,7 @@ class PublicationEntityBase(BaseEntity):
     title: str | None = None
     abstract: str | None = None
     authors: str | None = None  # JSON-serialized list, PII hashed
+    affiliations: str | None = None  # JSON-serialized list of unique affiliations
 
     # Journal information
     journal: str | None = None

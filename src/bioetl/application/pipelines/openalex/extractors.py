@@ -98,6 +98,39 @@ def extract_authors(authorships: list[dict[str, Any]]) -> list[str]:
     return authors
 
 
+def extract_affiliations(authorships: list[dict[str, Any]]) -> list[str]:
+    """Extract unique affiliations from authorships.
+
+    OpenAlex stores affiliations inside authorships -> institutions.
+
+    Args:
+        authorships: List of authorship objects from OpenAlex.
+
+    Returns:
+        List of unique affiliation display names (sorted).
+
+    Example:
+        >>> extract_affiliations([
+        ...     {"institutions": [{"display_name": "Harvard University"}]},
+        ...     {"institutions": [{"display_name": "MIT"}, {"display_name": "Harvard University"}]}
+        ... ])
+        ['Harvard University', 'MIT']
+    """
+    affiliations: set[str] = set()
+    for authorship in authorships:
+        institutions = authorship.get("institutions", [])
+        if not isinstance(institutions, list):
+            continue
+        for inst in institutions:
+            if not isinstance(inst, dict):
+                continue
+            name = inst.get("display_name")
+            if name and isinstance(name, str):
+                affiliations.add(name.strip())
+
+    return sorted(list(affiliations))
+
+
 def extract_concepts(concepts: list[dict[str, Any]], max_count: int = 10) -> list[str]:
     """Extract top concept names from concepts list.
 

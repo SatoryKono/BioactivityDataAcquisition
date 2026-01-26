@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.crossref.extractors import (
+    extract_affiliations,
     extract_authors,
     extract_content_domain,
     extract_dates,
@@ -139,6 +140,10 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         raw_authors = extract_authors(rec)
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
+        # Extract affiliations
+        raw_affiliations = extract_affiliations(rec)
+        serialized_affiliations = self.serialize_json_list(raw_affiliations)
+
         # Compute unified publication_date (prefer print over online)
         publication_date = self._compute_publication_date(
             dates.get("published_print"),
@@ -150,6 +155,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "title": extract_first_string(rec.get("title", [])),
             "abstract": abstract,
             "authors": self.serialize_json_list(hashed_authors),
+            "affiliations": serialized_affiliations,
             **journal_info,
             **page_info,
             **dates,
