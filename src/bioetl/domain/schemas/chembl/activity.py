@@ -188,7 +188,7 @@ class ActivitySchema(ETLRecordSchema):
     bao_format: Series[str] | None = pa.Field(nullable=True)
     bao_label: Series[str] | None = pa.Field(nullable=True)
     document_journal: Series[str] | None = pa.Field(nullable=True)
-    document_year: Series[float] | None = pa.Field(nullable=True)
+    document_year: Series[int] | None = pa.Field(nullable=True)
 
     class Config:
         """Pandera configuration."""
