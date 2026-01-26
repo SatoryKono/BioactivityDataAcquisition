@@ -103,3 +103,24 @@ class AdapterMetrics:
             float(size),
             {"provider": self.provider, "endpoint": endpoint},
         )
+
+    def record_dropped_duplicates(self, entity_type: str, count: int = 1) -> None:
+        """Record dropped duplicate records during deduplication.
+
+        Tracks how many records are dropped due to duplicate keys.
+        Useful for monitoring deduplication effectiveness and identifying
+        potential data quality issues.
+
+        Args:
+            entity_type: Entity type being deduplicated (e.g., 'publication_term').
+            count: Number of duplicates dropped (default 1).
+
+        Records:
+            - adapter_dropped_duplicates_total: Counter with provider/entity_type labels
+
+        """
+        self.metrics.increment_counter(
+            "adapter_dropped_duplicates_total",
+            count,
+            {"provider": self.provider, "entity_type": entity_type},
+        )

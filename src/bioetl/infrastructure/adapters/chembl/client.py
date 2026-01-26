@@ -178,6 +178,27 @@ class ChemblAdapter(BaseHttpAdapter):
             if ids
         }
 
+    def _compute_composite_key(
+        self,
+        record: dict[str, Any],
+        pk_fields: tuple[str, ...],
+    ) -> str:
+        """Compute composite key string from multiple fields.
+
+        Args:
+            record: Record dictionary.
+            pk_fields: Tuple of field names forming the composite key.
+
+        Returns:
+            Serialized composite key string (fields joined with '|').
+        """
+        parts = []
+        for pk_field in pk_fields:
+            value = record.get(pk_field, "")
+            # Normalize to string and handle None
+            parts.append(str(value) if value is not None else "")
+        return "|".join(parts)
+
     def _is_duplicate_record(
         self,
         record: dict[str, Any],
@@ -185,7 +206,11 @@ class ChemblAdapter(BaseHttpAdapter):
         seen_ids: set[str],
         entity_type: str,
     ) -> bool:
-        """Check if record is duplicate and add to seen set if not."""
+        """Check if record is duplicate and add to seen set if not.
+
+        For backward compatibility, uses single field deduplication.
+        For composite key support, use _is_duplicate_record_composite.
+        """
         record_id = str(record.get(pk_field, ""))
         if not record_id:
             return False
@@ -196,8 +221,43 @@ class ChemblAdapter(BaseHttpAdapter):
                 pk_field=pk_field,
                 record_id=record_id,
             )
+            self._adapter_metrics.record_dropped_duplicates(entity_type)
             return True
         seen_ids.add(record_id)
+        return False
+
+    def _is_duplicate_record_composite(
+        self,
+        record: dict[str, Any],
+        pk_fields: tuple[str, ...],
+        seen_keys: set[str],
+        entity_type: str,
+    ) -> bool:
+        """Check if record is duplicate using composite key.
+
+        Args:
+            record: Record dictionary.
+            pk_fields: Tuple of field names forming the composite key.
+            seen_keys: Set of already seen composite keys.
+            entity_type: Entity type for logging.
+
+        Returns:
+            True if record is a duplicate.
+        """
+        composite_key = self._compute_composite_key(record, pk_fields)
+        # Skip records with empty composite key (missing required fields)
+        if not composite_key or composite_key == "|".join([""] * len(pk_fields)):
+            return False
+        if composite_key in seen_keys:
+            self.logger.debug(
+                "skipping_duplicate_record",
+                entity_type=entity_type,
+                pk_fields=pk_fields,
+                composite_key=composite_key,
+            )
+            self._adapter_metrics.record_dropped_duplicates(entity_type)
+            return True
+        seen_keys.add(composite_key)
         return False
 
     async def _fetch_page(
@@ -259,21 +319,59 @@ class ChemblAdapter(BaseHttpAdapter):
         pk_field: str,
         entity_type: str,
         filter_field: str,
+        pk_fields: tuple[str, ...] | None = None,
     ) -> Iterator[dict[str, Any]]:
-        """Yield records while tracking seen IDs for deduplication."""
+        """Yield records while tracking seen IDs for deduplication.
+
+        Supports both single field and composite key deduplication.
+        If pk_fields is provided with multiple fields, uses composite key.
+
+        Args:
+            records: List of records to deduplicate.
+            seen_ids: Set of already seen keys (mutated in place).
+            pk_field: Single primary key field (used if pk_fields has single field).
+            entity_type: Entity type for logging.
+            filter_field: Filter field for logging context.
+            pk_fields: Composite primary key fields. If len > 1, uses composite dedup.
+        """
+        use_composite = pk_fields is not None and len(pk_fields) > 1
+
         for record in records:
-            record_id = str(record.get(pk_field, ""))
-            if record_id and record_id in seen_ids:
-                self.logger.debug(
-                    "skipping_duplicate_record",
-                    entity_type=entity_type,
-                    pk_field=pk_field,
-                    record_id=record_id,
-                    filter_field=filter_field,
-                )
-                continue
-            if record_id:
-                seen_ids.add(record_id)
+            if use_composite:
+                # Type narrowing: pk_fields is not None when use_composite is True
+                assert pk_fields is not None
+                composite_key = self._compute_composite_key(record, pk_fields)
+                if not composite_key or composite_key == "|".join(
+                    [""] * len(pk_fields)
+                ):
+                    # Skip records with empty composite key
+                    yield record
+                    continue
+                if composite_key in seen_ids:
+                    self.logger.debug(
+                        "skipping_duplicate_record",
+                        entity_type=entity_type,
+                        pk_fields=pk_fields,
+                        composite_key=composite_key,
+                        filter_field=filter_field,
+                    )
+                    self._adapter_metrics.record_dropped_duplicates(entity_type)
+                    continue
+                seen_ids.add(composite_key)
+            else:
+                record_id = str(record.get(pk_field, ""))
+                if record_id and record_id in seen_ids:
+                    self.logger.debug(
+                        "skipping_duplicate_record",
+                        entity_type=entity_type,
+                        pk_field=pk_field,
+                        record_id=record_id,
+                        filter_field=filter_field,
+                    )
+                    self._adapter_metrics.record_dropped_duplicates(entity_type)
+                    continue
+                if record_id:
+                    seen_ids.add(record_id)
             yield record
 
     async def _paginate_filter_results(
@@ -286,8 +384,21 @@ class ChemblAdapter(BaseHttpAdapter):
         seen_ids: set[str],
         start_offset: int,
         limit: int | None,
+        pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Continue pagination after first page."""
+        """Continue pagination after first page.
+
+        Args:
+            url: API URL.
+            id_batch: Batch of IDs to filter by.
+            filter_field: Field to filter on.
+            entity_type: Entity type for logging.
+            pk_field: Single primary key field (backward compatibility).
+            seen_ids: Set of already seen keys.
+            start_offset: Starting offset for pagination.
+            limit: Maximum records to fetch.
+            pk_fields: Composite primary key fields for deduplication.
+        """
         offset = start_offset
         while True:
             if limit and offset >= limit:
@@ -307,7 +418,7 @@ class ChemblAdapter(BaseHttpAdapter):
             if not records:
                 break
             for record in self._yield_deduplicated(
-                records, seen_ids, pk_field, entity_type, filter_field
+                records, seen_ids, pk_field, entity_type, filter_field, pk_fields
             ):
                 yield record
             if not has_next:
@@ -321,10 +432,14 @@ class ChemblAdapter(BaseHttpAdapter):
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records filtered by ID batch with client-side deduplication."""
+        """Fetch records filtered by ID batch with client-side deduplication.
+
+        Uses composite key deduplication for entities with multiple primary key fields.
+        """
         url = self._mapper.get_resource_url(entity_type)
         seen_ids: set[str] = set()
         pk_field = self._mapper.get_primary_key_field(entity_type)
+        pk_fields = self._mapper.get_dedup_key_fields(entity_type)
 
         params = self._build_params(0)
         params[f"{filter_field}__in"] = ",".join(id_batch)
@@ -335,7 +450,7 @@ class ChemblAdapter(BaseHttpAdapter):
             return
 
         for record in self._yield_deduplicated(
-            records, seen_ids, pk_field, entity_type, filter_field
+            records, seen_ids, pk_field, entity_type, filter_field, pk_fields
         ):
             yield record
 
@@ -349,6 +464,7 @@ class ChemblAdapter(BaseHttpAdapter):
                 seen_ids,
                 len(records),
                 limit,
+                pk_fields,
             ):
                 yield record
 
@@ -406,6 +522,7 @@ class ChemblAdapter(BaseHttpAdapter):
         seen_ids: set[str],
         pk_field: str,
         error: Exception,
+        pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Split failed batch in half and retry each part recursively."""
         mid = len(id_batch) // 2
@@ -423,11 +540,11 @@ class ChemblAdapter(BaseHttpAdapter):
         )
 
         async for record in self._fetch_batch_with_reduction(
-            entity_type, first_half, filter_field, limit, seen_ids, pk_field
+            entity_type, first_half, filter_field, limit, seen_ids, pk_field, pk_fields
         ):
             yield record
         async for record in self._fetch_batch_with_reduction(
-            entity_type, second_half, filter_field, limit, seen_ids, pk_field
+            entity_type, second_half, filter_field, limit, seen_ids, pk_field, pk_fields
         ):
             yield record
 
@@ -439,23 +556,50 @@ class ChemblAdapter(BaseHttpAdapter):
         limit: int | None,
         seen_ids: set[str],
         pk_field: str,
+        pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch a batch of IDs with automatic batch size reduction on failures."""
+        """Fetch a batch of IDs with automatic batch size reduction on failures.
+
+        Args:
+            entity_type: Entity type to fetch.
+            id_batch: Batch of IDs to filter by.
+            filter_field: Field to filter on.
+            limit: Maximum records to fetch.
+            seen_ids: Set of already seen keys.
+            pk_field: Single primary key field (backward compatibility).
+            pk_fields: Composite primary key fields for deduplication.
+        """
+        use_composite = pk_fields is not None and len(pk_fields) > 1
         try:
             async for record in self._fetch_with_filter(
                 entity_type, id_batch, filter_field, limit
             ):
-                record_id = str(record.get(pk_field, ""))
-                if not record_id or record_id not in seen_ids:
-                    if record_id:
-                        seen_ids.add(record_id)
-                    yield record
+                if use_composite:
+                    # Type narrowing: pk_fields is not None when use_composite is True
+                    assert pk_fields is not None
+                    composite_key = self._compute_composite_key(record, pk_fields)
+                    if not composite_key or composite_key in seen_ids:
+                        continue
+                    seen_ids.add(composite_key)
+                else:
+                    record_id = str(record.get(pk_field, ""))
+                    if not record_id or record_id in seen_ids:
+                        continue
+                    seen_ids.add(record_id)
+                yield record
         except (RetryExhaustedError, ExternalServiceError) as e:
             if not self._is_retry_exhausted_error(e):
                 raise
             if len(id_batch) > 1:
                 async for record in self._retry_with_split_batches(
-                    entity_type, id_batch, filter_field, limit, seen_ids, pk_field, e
+                    entity_type,
+                    id_batch,
+                    filter_field,
+                    limit,
+                    seen_ids,
+                    pk_field,
+                    e,
+                    pk_fields,
                 ):
                     yield record
             else:
@@ -472,14 +616,22 @@ class ChemblAdapter(BaseHttpAdapter):
 
         Uses batch reduction strategy: on failures, splits batch in half
         and retries each part recursively until success or single-ID failure.
+        Supports composite key deduplication for entities with multiple PK fields.
         """
         total_fetched = 0
         seen_ids: set[str] = set()
         pk_field = self._mapper.get_primary_key_field(entity_type)
+        pk_fields = self._mapper.get_dedup_key_fields(entity_type)
 
         for id_batch in self._batch_ids(filter_ids, batch_size=self._filter_batch_size):
             async for record in self._fetch_batch_with_reduction(
-                entity_type, id_batch, filter_field, limit, seen_ids, pk_field
+                entity_type,
+                id_batch,
+                filter_field,
+                limit,
+                seen_ids,
+                pk_field,
+                pk_fields,
             ):
                 yield record
                 total_fetched += 1
@@ -495,25 +647,43 @@ class ChemblAdapter(BaseHttpAdapter):
 
         ChEMBL API pagination can return duplicate records across pages
         due to unstable sorting or data changes between requests.
-        This method deduplicates records by primary key field.
+        This method deduplicates records using composite key for entities
+        with multiple primary key fields, or single field otherwise.
         """
         total_fetched = 0
-        seen_ids: set[str] = set()
+        seen_keys: set[str] = set()
         pk_field = self._mapper.get_primary_key_field(entity_type)
+        pk_fields = self._mapper.get_dedup_key_fields(entity_type)
+        use_composite = len(pk_fields) > 1
 
         async for records in self._page_iterator(entity_type, limit):
             for record in records:
-                record_id = str(record.get(pk_field, ""))
-                if record_id and record_id in seen_ids:
-                    self.logger.debug(
-                        "skipping_duplicate_record",
-                        entity_type=entity_type,
-                        pk_field=pk_field,
-                        record_id=record_id,
-                    )
-                    continue
-                if record_id:
-                    seen_ids.add(record_id)
+                if use_composite:
+                    composite_key = self._compute_composite_key(record, pk_fields)
+                    if composite_key and composite_key in seen_keys:
+                        self.logger.debug(
+                            "skipping_duplicate_record",
+                            entity_type=entity_type,
+                            pk_fields=pk_fields,
+                            composite_key=composite_key,
+                        )
+                        self._adapter_metrics.record_dropped_duplicates(entity_type)
+                        continue
+                    if composite_key:
+                        seen_keys.add(composite_key)
+                else:
+                    record_id = str(record.get(pk_field, ""))
+                    if record_id and record_id in seen_keys:
+                        self.logger.debug(
+                            "skipping_duplicate_record",
+                            entity_type=entity_type,
+                            pk_field=pk_field,
+                            record_id=record_id,
+                        )
+                        self._adapter_metrics.record_dropped_duplicates(entity_type)
+                        continue
+                    if record_id:
+                        seen_keys.add(record_id)
                 yield record
                 total_fetched += 1
                 if limit and total_fetched >= limit:
