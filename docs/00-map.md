@@ -80,8 +80,8 @@ docs/
 │   ├── pipeline-lifecycle.md    # Pipeline lifecycle
 │   ├── registry-pattern.md      # Registry pattern guide
 │   ├── troubleshooting.md       # Troubleshooting
-│   ├── add-new-source.md        # Adding new data source
-│   ├── add-pipeline-existing-source.md
+│   ├── add-new-source.md        # Adding new provider
+│   ├── add-pipeline-existing-source.md  # Adding pipeline to existing provider
 │   ├── date-handling.md         # Date normalization guide
 │   └── dq-configuration.md      # Data quality configuration
 │
