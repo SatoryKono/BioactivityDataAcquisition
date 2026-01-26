@@ -95,6 +95,10 @@ class TestCrossRefYearValidation:
             "issn_electronic": None,
             # Author affiliations
             "affiliations": None,
+            # Author and reference fields
+            "author_orcids": None,
+            "author_details": None,
+            "references": None,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:

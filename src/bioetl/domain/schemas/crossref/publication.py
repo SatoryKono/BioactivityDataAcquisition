@@ -125,6 +125,24 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
         description="Author affiliations (JSON array)",
     )
 
+    # === Author ORCID Identifiers ===
+    author_orcids: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
+    )
+
+    # === Full Author Details ===
+    author_details: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of author objects with given, family, orcid, sequence, affiliations",
+    )
+
+    # === Bibliographic References ===
+    references: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of cited references with DOI, title, author, year, etc.",
+    )
+
     class Config:
         """Pandera configuration."""
 
