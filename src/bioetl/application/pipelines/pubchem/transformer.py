@@ -14,7 +14,8 @@ from typing import TYPE_CHECKING, Any, cast
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities import PubchemMolecule
 from bioetl.domain.services import IdentityService
-from bioetl.domain.validation import validate_molecular_weight
+from bioetl.domain.transformations import safe_float, safe_int
+from bioetl.domain.validation import validate_molecular_weight, validate_non_negative
 from bioetl.domain.value_objects import InChIKey
 
 if TYPE_CHECKING:
@@ -73,6 +74,70 @@ class PubChemCompoundTransformer(BaseTransformer):
             data_normalizer=data_normalizer,
         )
 
+    def _extract_computed_descriptors(
+        self, record: BronzeRecord
+    ) -> dict[str, float | int | None]:
+        """Extract and validate computed molecular descriptors."""
+        return {
+            "xlogp": safe_float(record.get("xlogp")),  # Can be negative
+            "tpsa": validate_non_negative(record.get("tpsa")),
+            "complexity": validate_non_negative(record.get("complexity")),
+            "charge": safe_int(record.get("charge")),  # Can be negative
+        }
+
+    def _extract_atom_bond_counts(self, record: BronzeRecord) -> dict[str, int | None]:
+        """Extract and validate atom/bond count properties."""
+        return {
+            "heavy_atom_count": safe_int(record.get("heavy_atom_count")),
+            "h_bond_donor_count": safe_int(record.get("h_bond_donor_count")),
+            "h_bond_acceptor_count": safe_int(record.get("h_bond_acceptor_count")),
+            "rotatable_bond_count": safe_int(record.get("rotatable_bond_count")),
+        }
+
+    def _extract_stereochemistry(self, record: BronzeRecord) -> dict[str, int | None]:
+        """Extract and validate stereochemistry counts."""
+        return {
+            "atom_stereo_count": safe_int(record.get("atom_stereo_count")),
+            "defined_atom_stereo_count": safe_int(
+                record.get("defined_atom_stereo_count")
+            ),
+            "undefined_atom_stereo_count": safe_int(
+                record.get("undefined_atom_stereo_count")
+            ),
+            "bond_stereo_count": safe_int(record.get("bond_stereo_count")),
+            "defined_bond_stereo_count": safe_int(
+                record.get("defined_bond_stereo_count")
+            ),
+            "undefined_bond_stereo_count": safe_int(
+                record.get("undefined_bond_stereo_count")
+            ),
+            "isotope_atom_count": safe_int(record.get("isotope_atom_count")),
+            "covalent_unit_count": safe_int(record.get("covalent_unit_count")),
+        }
+
+    def _extract_3d_properties(
+        self, record: BronzeRecord
+    ) -> dict[str, float | int | None]:
+        """Extract and validate 3D molecular properties."""
+        return {
+            "volume_3d": validate_non_negative(record.get("volume_3d")),
+            "conformer_count_3d": safe_int(record.get("conformer_count_3d")),
+            "feature_acceptor_count_3d": safe_int(
+                record.get("feature_acceptor_count_3d")
+            ),
+            "feature_donor_count_3d": safe_int(record.get("feature_donor_count_3d")),
+            "feature_anion_count_3d": safe_int(record.get("feature_anion_count_3d")),
+            "feature_cation_count_3d": safe_int(record.get("feature_cation_count_3d")),
+            "feature_ring_count_3d": safe_int(record.get("feature_ring_count_3d")),
+            "feature_hydrophobe_count_3d": safe_int(
+                record.get("feature_hydrophobe_count_3d")
+            ),
+            "effective_rotor_count_3d": validate_non_negative(
+                record.get("effective_rotor_count_3d")
+            ),
+            "conformer_rmsd_3d": validate_non_negative(record.get("conformer_rmsd_3d")),
+        }
+
     async def _transform_impl(
         self,
         context: PipelineContext,
@@ -89,43 +154,31 @@ class PubChemCompoundTransformer(BaseTransformer):
         Returns:
             SilverRecord if transformation successful, None if skipped.
 
-        Raises:
-            TransformationError: If cid is missing.
-            ValueError: If PubchemMolecule entity validation fails.
-
         """
-        # Step 1: Validate required field
         cid = self._get_required_field(record, "cid")
 
-        # Step 2: Build business data dictionary
-        # Validate and convert molecular_weight (handles string→float, range, precision)
-        mol_weight = validate_molecular_weight(record.get("molecular_weight"))
-
-        # Validate InChI Key using Value Object (returns None for invalid/empty)
-        inchikey = self.validate_value_object(InChIKey, record.get("inchikey"))
-
+        # Build business data with all physicochemical properties
         business_data: dict[str, Any] = {
             "cid": str(cid),
-            "molecular_formula": record.get("molecular_formula"),
-            "molecular_weight": mol_weight,
             "canonical_smiles": record.get("canonical_smiles"),
             "isomeric_smiles": record.get("isomeric_smiles"),
             "inchi": record.get("inchi"),
-            "inchikey": inchikey,
+            "inchikey": self.validate_value_object(InChIKey, record.get("inchikey")),
+            "molecular_formula": record.get("molecular_formula"),
             "iupac_name": record.get("iupac_name"),
+            "molecular_weight": validate_molecular_weight(
+                record.get("molecular_weight")
+            ),
+            "exact_mass": validate_non_negative(record.get("exact_mass")),
+            **self._extract_computed_descriptors(record),
+            **self._extract_atom_bond_counts(record),
+            **self._extract_stereochemistry(record),
+            **self._extract_3d_properties(record),
         }
 
-        # Step 3: Generate entity_id using IdentityService (RULES.md §2.8)
-        entity_id = self.compute_entity_id(
-            source_id=str(cid),
-            record={"cid": cid},
-        )
-
-        # Step 4: Compute content_hash (RULES.md §2.8.1)
+        entity_id = self.compute_entity_id(source_id=str(cid), record={"cid": cid})
         content_hash = self.compute_content_hash(business_data, exclude_none=True)
 
-        # Step 5: Create domain entity with lineage metadata
-        # ValueError is raised if invariants fail (e.g., no structural identifiers)
         entity = self._create_entity(
             PubchemMolecule,
             context,
@@ -135,5 +188,4 @@ class PubChemCompoundTransformer(BaseTransformer):
             **business_data,
         )
 
-        # Step 6: Convert to SilverRecord with lineage field renaming
         return cast("SilverRecord", self.entity_to_silver_record(entity))
