@@ -93,6 +93,8 @@ class TestCrossRefYearValidation:
             "published": None,
             "issn_print": None,
             "issn_electronic": None,
+            # Author affiliations
+            "affiliations": None,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
@@ -166,6 +168,8 @@ class TestSemanticScholarYearValidation:
             "tldr": None,
             "volume": None,
             "pages": None,
+            "first_page": None,
+            "last_page": None,
             "venue": None,
             "reference_count": 50,
             "influential_citation_count": None,
@@ -173,6 +177,8 @@ class TestSemanticScholarYearValidation:
             "oa_status": None,
             "fields_of_study": None,
             "publication_types": None,
+            # Author affiliations
+            "affiliations": None,
             # Author identifiers
             "author_s2_ids": None,
             "author_orcids": None,
@@ -344,6 +350,20 @@ class TestPubMedYearValidation:
             "grant_count": 2,
             "reference_count": 50,
             "chemical_count": 0,
+            # Classification data (JSON arrays)
+            "mesh_terms": None,
+            "chemicals": None,
+            "keywords": None,
+            "databanks": None,
+            "gene_symbols": None,
+            "publication_types": None,
+            # Additional date fields
+            "accepted_date": None,
+            "received_date": None,
+            "revised_date": None,
+            "epub_date": None,
+            # Author affiliations
+            "affiliations": None,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
