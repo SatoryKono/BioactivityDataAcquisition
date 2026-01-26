@@ -239,8 +239,15 @@ class OpenAlexAdapter(BaseHttpAdapter):
         fetched = 0
         found_dois: set[str] = set()
 
-        valid_dois = [d for d in filter_ids if d and d.strip()]
-        title_only_entries = [d for d in filter_ids if not d or not d.strip()]
+        # Separate DOIs from title-only markers (__title_only_N__ format)
+        valid_dois = [
+            d for d in filter_ids
+            if d and d.strip() and not d.startswith("__title_only_")
+        ]
+        title_only_entries = [
+            d for d in filter_ids
+            if not d or not d.strip() or d.startswith("__title_only_")
+        ]
 
         # Phase 1: Batch DOI lookup
         async for work in self._batch_doi_lookup(

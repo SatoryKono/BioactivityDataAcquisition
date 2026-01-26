@@ -20,6 +20,11 @@ from typing import Any
 import polars as pl
 import pyarrow as pa
 
+from bioetl.application.services.dq.utils import (
+    build_summary,
+    result_to_dict,
+    update_counts,
+)
 from bioetl.domain.ports import GoldDQConfigPort
 from bioetl.domain.value_objects.dq_report import (
     AnomalyDetectionResult,
@@ -29,8 +34,6 @@ from bioetl.domain.value_objects.dq_report import (
     CompletenessResult,
     DataFreshnessResult,
     DQCheckStatus,
-    DQReportStatus,
-    DQReportSummary,
     ForeignKeyResult,
     GoldDQCheckType,
     GoldDQReport,
@@ -41,43 +44,6 @@ from bioetl.domain.value_objects.dq_report import (
     StatisticalMetric,
     StatisticalProfileResult,
 )
-
-
-def _convert_value(value: Any) -> Any:
-    """Convert a value to serializable format."""
-    if hasattr(value, "value"):  # Enum
-        return value.value
-    if hasattr(value, "__dataclass_fields__"):
-        return _result_to_dict(value)
-    if isinstance(value, datetime):
-        return value.isoformat()
-    if isinstance(value, (list, tuple)):
-        return [_convert_value(v) for v in value]
-    if isinstance(value, dict):
-        return {k: _convert_value(v) for k, v in value.items()}
-    return value
-
-
-def _result_to_dict(result: Any) -> dict[str, Any]:
-    """Convert dataclass result to dict for serialization."""
-    if hasattr(result, "__dataclass_fields__"):
-        return {
-            field: _convert_value(getattr(result, field))
-            for field in result.__dataclass_fields__
-            if not field.startswith("_")
-        }
-    return {"value": result}
-
-
-def _update_counts(
-    status: DQCheckStatus, passed: int, failed: int, warnings: int
-) -> tuple[int, int, int]:
-    """Update check counts based on status."""
-    if status == DQCheckStatus.PASS:
-        return passed + 1, failed, warnings
-    if status == DQCheckStatus.FAIL:
-        return passed, failed + 1, warnings
-    return passed, failed, warnings + 1
 
 
 class GoldDQAnalyzer:
@@ -126,8 +92,8 @@ class GoldDQAnalyzer:
 
         if GoldDQCheckType.RECORD_COUNT in enabled_checks:
             record_count_result = self._check_record_count(df, baseline_stats)
-            checks["record_count"] = _result_to_dict(record_count_result)
-            passed, failed, warnings = _update_counts(
+            checks["record_count"] = result_to_dict(record_count_result)
+            passed, failed, warnings = update_counts(
                 record_count_result.status, passed, failed, warnings
             )
 
@@ -135,15 +101,15 @@ class GoldDQAnalyzer:
             completeness_result = self._check_completeness(
                 df, required_fields, completeness_threshold
             )
-            checks["completeness"] = _result_to_dict(completeness_result)
-            passed, failed, warnings = _update_counts(
+            checks["completeness"] = result_to_dict(completeness_result)
+            passed, failed, warnings = update_counts(
                 completeness_result.status, passed, failed, warnings
             )
 
         if GoldDQCheckType.BUSINESS_RULES in enabled_checks:
             business_rules_result = self._check_business_rules(df, business_rules)
-            checks["business_rules"] = _result_to_dict(business_rules_result)
-            passed, failed, warnings = _update_counts(
+            checks["business_rules"] = result_to_dict(business_rules_result)
+            passed, failed, warnings = update_counts(
                 business_rules_result.status, passed, failed, warnings
             )
 
@@ -151,64 +117,33 @@ class GoldDQAnalyzer:
             ref_integrity_result = self._check_referential_integrity(
                 df, reference_tables
             )
-            checks["referential_integrity"] = _result_to_dict(ref_integrity_result)
-            passed, failed, warnings = _update_counts(
+            checks["referential_integrity"] = result_to_dict(ref_integrity_result)
+            passed, failed, warnings = update_counts(
                 ref_integrity_result.status, passed, failed, warnings
             )
 
         if GoldDQCheckType.STATISTICAL_PROFILE in enabled_checks:
             stat_profile_result = self._check_statistical_profile(df, baseline_stats)
-            checks["statistical_profile"] = _result_to_dict(stat_profile_result)
-            passed, failed, warnings = _update_counts(
+            checks["statistical_profile"] = result_to_dict(stat_profile_result)
+            passed, failed, warnings = update_counts(
                 stat_profile_result.status, passed, failed, warnings
             )
 
         if GoldDQCheckType.ANOMALY_DETECTION in enabled_checks:
             anomaly_result = self._check_anomaly_detection(df, baseline_stats)
-            checks["anomaly_detection"] = _result_to_dict(anomaly_result)
-            passed, failed, warnings = _update_counts(
+            checks["anomaly_detection"] = result_to_dict(anomaly_result)
+            passed, failed, warnings = update_counts(
                 anomaly_result.status, passed, failed, warnings
             )
 
         if GoldDQCheckType.SCD_INTEGRITY in enabled_checks:
             scd_result = self._check_scd_integrity(df, scd_config)
-            checks["scd_integrity"] = _result_to_dict(scd_result)
-            passed, failed, warnings = _update_counts(
+            checks["scd_integrity"] = result_to_dict(scd_result)
+            passed, failed, warnings = update_counts(
                 scd_result.status, passed, failed, warnings
             )
 
         return checks, passed, failed, warnings
-
-    def _build_summary(
-        self,
-        passed: int,
-        failed: int,
-        warnings: int,
-    ) -> DQReportSummary:
-        """Build DQ report summary with overall status.
-
-        Args:
-            passed: Number of passed checks.
-            failed: Number of failed checks.
-            warnings: Number of warning checks.
-
-        Returns:
-            DQReportSummary with overall status.
-        """
-        if failed > 0:
-            overall_status = DQReportStatus.FAIL
-        elif warnings > 0:
-            overall_status = DQReportStatus.WARNING
-        else:
-            overall_status = DQReportStatus.PASS
-
-        return DQReportSummary(
-            total_checks=passed + failed + warnings,
-            passed=passed,
-            failed=failed,
-            warnings=warnings,
-            overall_status=overall_status,
-        )
 
     def analyze(
         self,
@@ -269,7 +204,7 @@ class GoldDQAnalyzer:
         data_freshness = self._check_data_freshness(df, timestamp)
 
         # Build summary
-        summary = self._build_summary(passed, failed, warnings)
+        summary = build_summary(passed, failed, warnings)
 
         return GoldDQReport(
             layer=MedallionLayer.GOLD,

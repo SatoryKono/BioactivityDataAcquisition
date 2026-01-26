@@ -19,11 +19,8 @@ import polars as pl
 import pyarrow as pa
 import pytest
 
-from bioetl.application.services.dq.gold_analyzer import (
-    GoldDQAnalyzer,
-    _convert_value,
-    _update_counts,
-)
+from bioetl.application.services.dq.gold_analyzer import GoldDQAnalyzer
+from bioetl.application.services.dq.utils import convert_value, update_counts
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     DQReportStatus,
@@ -73,12 +70,12 @@ def mock_config() -> MagicMock:
 class TestHelperFunctions:
     """Tests for helper functions."""
 
-    def test_convert_value_enum(self) -> None:
+    def testconvert_value_enum(self) -> None:
         """Convert enum value to string."""
-        result = _convert_value(DQCheckStatus.PASS)
+        result = convert_value(DQCheckStatus.PASS)
         assert result == "pass"
 
-    def test_convert_value_dataclass(self) -> None:
+    def testconvert_value_dataclass(self) -> None:
         """Convert dataclass to dict."""
         from dataclasses import dataclass
 
@@ -87,50 +84,50 @@ class TestHelperFunctions:
             count: int  # Avoid 'value' name collision with enum check
             name: str
 
-        result = _convert_value(TestClass(count=1, name="test"))
+        result = convert_value(TestClass(count=1, name="test"))
         assert isinstance(result, dict)
         assert result["count"] == 1
         assert result["name"] == "test"
 
-    def test_convert_value_datetime(self) -> None:
+    def testconvert_value_datetime(self) -> None:
         """Convert datetime to ISO format."""
         dt = datetime(2024, 5, 15, 10, 30, 0, tzinfo=UTC)
-        result = _convert_value(dt)
+        result = convert_value(dt)
         assert "2024-05-15" in result
 
-    def test_convert_value_list(self) -> None:
+    def testconvert_value_list(self) -> None:
         """Convert list recursively."""
-        result = _convert_value([1, 2, DQCheckStatus.PASS])
+        result = convert_value([1, 2, DQCheckStatus.PASS])
         assert result == [1, 2, "pass"]
 
-    def test_convert_value_dict(self) -> None:
+    def testconvert_value_dict(self) -> None:
         """Convert dict recursively."""
-        result = _convert_value({"status": DQCheckStatus.FAIL})
+        result = convert_value({"status": DQCheckStatus.FAIL})
         assert result == {"status": "fail"}
 
-    def test_convert_value_primitive(self) -> None:
+    def testconvert_value_primitive(self) -> None:
         """Primitive values are unchanged."""
-        assert _convert_value(42) == 42
-        assert _convert_value("test") == "test"
-        assert _convert_value(3.14) == 3.14
+        assert convert_value(42) == 42
+        assert convert_value("test") == "test"
+        assert convert_value(3.14) == 3.14
 
-    def test_update_counts_pass(self) -> None:
+    def testupdate_counts_pass(self) -> None:
         """Update counts for PASS status."""
-        passed, failed, warnings = _update_counts(DQCheckStatus.PASS, 0, 0, 0)
+        passed, failed, warnings = update_counts(DQCheckStatus.PASS, 0, 0, 0)
         assert passed == 1
         assert failed == 0
         assert warnings == 0
 
-    def test_update_counts_fail(self) -> None:
+    def testupdate_counts_fail(self) -> None:
         """Update counts for FAIL status."""
-        passed, failed, warnings = _update_counts(DQCheckStatus.FAIL, 0, 0, 0)
+        passed, failed, warnings = update_counts(DQCheckStatus.FAIL, 0, 0, 0)
         assert passed == 0
         assert failed == 1
         assert warnings == 0
 
-    def test_update_counts_warn(self) -> None:
+    def testupdate_counts_warn(self) -> None:
         """Update counts for WARN status."""
-        passed, failed, warnings = _update_counts(DQCheckStatus.WARN, 0, 0, 0)
+        passed, failed, warnings = update_counts(DQCheckStatus.WARN, 0, 0, 0)
         assert passed == 0
         assert failed == 0
         assert warnings == 1

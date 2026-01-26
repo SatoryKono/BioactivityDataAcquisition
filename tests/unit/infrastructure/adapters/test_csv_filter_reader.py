@@ -402,7 +402,7 @@ class TestCsvFilterReaderLoadFilterWithFallback:
         with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
             f.write("doi,title\n")
             f.write("10.1000/valid,Valid Title\n")
-            f.write(",Empty DOI\n")  # Empty primary
+            f.write(",Empty DOI Title\n")  # Empty primary (title-only)
             f.write("10.1000/notitle,\n")  # Empty fallback
             path = f.name
 
@@ -411,11 +411,49 @@ class TestCsvFilterReaderLoadFilterWithFallback:
                 path, "doi", "title"
             )
 
-            # Empty DOI should be excluded from IDs
+            # Empty DOI should be represented as marker in IDs
             assert "" not in result.ids
-            # Mapping should only include rows with both values
+            # Title-only entry should have a marker
+            assert "__title_only_0__" in result.ids
+            # Mapping should include DOI→title and marker→title
             assert "10.1000/valid" in mapping
+            assert mapping["10.1000/valid"] == "Valid Title"
+            assert "__title_only_0__" in mapping
+            assert mapping["__title_only_0__"] == "Empty DOI Title"
             assert "10.1000/notitle" not in mapping  # No fallback value
+        finally:
+            Path(path).unlink(missing_ok=True)
+
+    async def test_load_filter_with_fallback_multiple_title_only_entries(
+        self, csv_reader
+    ):
+        """Test that multiple title-only entries get unique markers."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+            f.write("doi,title\n")
+            f.write("10.1000/valid,Valid Title\n")
+            f.write(",First Title Only\n")
+            f.write(",Second Title Only\n")
+            f.write(",Third Title Only\n")
+            path = f.name
+
+        try:
+            result, mapping = await csv_reader.load_filter_with_fallback(
+                path, "doi", "title"
+            )
+
+            # Should have markers for all title-only entries
+            assert "__title_only_0__" in result.ids
+            assert "__title_only_1__" in result.ids
+            assert "__title_only_2__" in result.ids
+
+            # Mapping should have all titles
+            assert mapping["__title_only_0__"] == "First Title Only"
+            assert mapping["__title_only_1__"] == "Second Title Only"
+            assert mapping["__title_only_2__"] == "Third Title Only"
+
+            # Total count should include all entries
+            assert result.total_count == 4
+            assert len(result.ids) == 4  # 1 DOI + 3 markers
         finally:
             Path(path).unlink(missing_ok=True)
 
