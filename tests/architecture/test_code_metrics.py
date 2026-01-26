@@ -94,7 +94,7 @@ class TestFileSizeLimits:
         # Consolidated factory files (v5.2)
         "pipeline_factory.py": 720,  # 716 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths + MetadataCoordinator creation
         "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
-        "services_factory.py": 672,  # 671 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext
+        "services_factory.py": 680,  # 676 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext + force_full_scan (ADR-030)
         # Infrastructure layer exemptions
         "silver_writer.py": 1140,  # 1132 LOC - schema drift + merge logic + CSV export for merged (metadata builder extracted)
         "gold_writer.py": 910,  # 890 LOC - SCD Type 2 (metadata/arrow logic extracted to metadata_builder.py, arrow_converter.py)
@@ -103,7 +103,7 @@ class TestFileSizeLimits:
         "silver.py": 890,  # 886 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields + unified DQ columns)
         "client.py": 1000,  # 995 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
-        "pipeline_config.py": 1065,  # 1058 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024)
+        "pipeline_config.py": 1070,  # 1067 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + force_full_scan (ADR-030)
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory

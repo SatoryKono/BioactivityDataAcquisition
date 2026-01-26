@@ -377,6 +377,8 @@ class ServicesBuilder:
         pipeline_name: str,
         run_id: RunID,
         resume: bool,
+        *,
+        force_full_scan: bool = False,
     ) -> CheckpointManager:
         """Create configured CheckpointManager.
 
@@ -386,6 +388,8 @@ class ServicesBuilder:
             pipeline_name: Name of the pipeline
             run_id: Unique run identifier
             resume: Whether to resume from previous checkpoint
+            force_full_scan: If True, checkpoint resume is disabled (ADR-030).
+                Used for entities with unreliable offset pagination like publications.
 
         Returns:
             Configured CheckpointManager instance
@@ -396,6 +400,7 @@ class ServicesBuilder:
             pipeline_name=pipeline_name,
             run_id=run_id,
             resume=resume,
+            force_full_scan=force_full_scan,
         )
 
     @staticmethod
