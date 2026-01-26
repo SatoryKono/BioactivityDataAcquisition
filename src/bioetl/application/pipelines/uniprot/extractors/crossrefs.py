@@ -103,7 +103,7 @@ class CrossRefExtractor:
 
         Args:
             xrefs: List of cross-reference objects.
-            database: Database name (DrugBank, ChEMBL, GuidetoPHARMACOLOGY).
+            database: Database name (DrugBank, ChEMBL, GuidetoPHARMACOLOGY, PDB).
 
         Returns:
             JSON array of IDs or None.
@@ -123,3 +123,56 @@ class CrossRefExtractor:
                 ids.append(str(xref_id))
 
         return serialize_to_json(ids, ensure_ascii=False) if ids else None
+
+    @staticmethod
+    def extract_pdb_xrefs(xrefs: Any) -> str | None:
+        """Extract PDB cross-references with structural details.
+
+        PDB references include information about 3D structure availability,
+        chains, and resolution which is valuable for structural biology.
+
+        Args:
+            xrefs: List of cross-reference objects.
+
+        Returns:
+            JSON array of PDB reference objects with id, method, resolution,
+            and chains, or None.
+        """
+        if not xrefs or not isinstance(xrefs, list):
+            return None
+
+        pdb_refs: list[dict[str, Any]] = []
+        for xref in xrefs:
+            if not isinstance(xref, dict):
+                continue
+            if xref.get("database") != "PDB":
+                continue
+
+            pdb_id = xref.get("id")
+            if not pdb_id:
+                continue
+
+            pdb_entry: dict[str, Any] = {"id": str(pdb_id)}
+
+            # Parse properties for method, resolution, and chains
+            properties = xref.get("properties", [])
+            if isinstance(properties, list):
+                for prop in properties:
+                    if not isinstance(prop, dict):
+                        continue
+                    key = prop.get("key")
+                    value = prop.get("value")
+                    if not key or not value:
+                        continue
+
+                    if key == "Method":
+                        pdb_entry["method"] = str(value)
+                    elif key == "Resolution":
+                        # Resolution is typically in Angstroms (e.g., "2.10 A")
+                        pdb_entry["resolution"] = str(value)
+                    elif key == "Chains":
+                        pdb_entry["chains"] = str(value)
+
+            pdb_refs.append(pdb_entry)
+
+        return serialize_to_json(pdb_refs, ensure_ascii=False) if pdb_refs else None
