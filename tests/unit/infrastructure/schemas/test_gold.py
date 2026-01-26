@@ -122,13 +122,14 @@ class TestGoldPublicationSchemaCrossRefFields:
         "schema_class,name",
         [
             (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
     def test_schema_has_pmid_field(self, schema_class, name):
-        """Gold publication schemas (except CrossRef) should have pmid field."""
+        """All Gold publication schemas should have pmid field."""
         fields = get_schema_fields(schema_class)
         assert "pmid" in fields, f"{name} missing pmid field"
 
@@ -136,13 +137,14 @@ class TestGoldPublicationSchemaCrossRefFields:
         "schema_class,name",
         [
             (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
     def test_schema_has_pmc_id_field(self, schema_class, name):
-        """Gold publication schemas (except CrossRef) should have pmc_id field."""
+        """All Gold publication schemas should have pmc_id field."""
         fields = get_schema_fields(schema_class)
         assert "pmc_id" in fields, f"{name} missing pmc_id field"
 
@@ -220,6 +222,48 @@ class TestGoldPublicationSchemaPrimaryKeys:
         """Each Gold publication schema must have its provider-specific primary key."""
         fields = get_schema_fields(schema_class)
         assert primary_key in fields, f"{name} missing primary key: {primary_key}"
+
+
+@pytest.mark.unit
+class TestGoldPublicationSchemaLookupTrackingFields:
+    """Test that all Gold publication schemas have lookup tracking fields.
+
+    These fields track how records were resolved during data acquisition:
+    - _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
+    - _original_id: Original identifier used for lookup
+    """
+
+    @pytest.mark.parametrize(
+        "schema_class,name",
+        [
+            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (CrossRefPublicationGoldSchema, "CrossRef Publication"),
+            (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
+            (PubMedPublicationGoldSchema, "PubMed Publication"),
+            (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
+        ],
+    )
+    def test_schema_has_lookup_method_field(self, schema_class, name):
+        """All Gold publication schemas must have _lookup_method field."""
+        fields = get_schema_fields(schema_class)
+        has_lookup_method = "_lookup_method" in fields or "lookup_method" in fields
+        assert has_lookup_method, f"{name} missing _lookup_method/lookup_method field"
+
+    @pytest.mark.parametrize(
+        "schema_class,name",
+        [
+            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (CrossRefPublicationGoldSchema, "CrossRef Publication"),
+            (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
+            (PubMedPublicationGoldSchema, "PubMed Publication"),
+            (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
+        ],
+    )
+    def test_schema_has_original_id_field(self, schema_class, name):
+        """All Gold publication schemas must have _original_id field."""
+        fields = get_schema_fields(schema_class)
+        has_original_id = "_original_id" in fields or "original_id" in fields
+        assert has_original_id, f"{name} missing _original_id/original_id field"
 
 
 @pytest.mark.unit
@@ -339,7 +383,7 @@ class TestGoldSchemaValidation:
             "grant_count": 0,
             "reference_count": 10,
             "chemical_count": 0,
-            "source": "pubmed",
+            "_source": "pubmed",
             "_lookup_method": "direct",
             "_original_id": "12345678",
             "_dq_warn": False,

@@ -213,7 +213,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "is_retracted": rec.get("is_retracted", False),
             "_lookup_method": lookup_method,
             "_original_id": original_id,
-            "source": "openalex",
+            "_source": "openalex",
             # DQ flags (default: no warnings or errors)
             "_dq_warn": False,
             "_dq_error": False,

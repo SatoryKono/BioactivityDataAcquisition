@@ -39,9 +39,11 @@ class StubPublicationEntity(BaseEntity):
     title: str | None = None
     abstract: str | None = None
     year: int | None = None
-    source: str | None = None
     _lookup_method: str | None = None
     _original_id: str | None = None
+
+    # Data source identifier
+    _source: str = "test_provider"
 
 
 # =============================================================================
@@ -59,7 +61,7 @@ class StubPublicationTransformer(BasePublicationTransformer):
             "title": record.get("title"),
             "abstract": record.get("abstract"),
             "year": record.get("year"),
-            "source": "test_provider",
+            "_source": "test_provider",
             "_lookup_method": record.get("_lookup_method"),
             "_original_id": record.get("_original_id"),
         }
@@ -161,7 +163,7 @@ class TestBasePublicationTransformerBasics:
         assert result["title"] == "Test Publication Title"
         assert result["abstract"] == "This is a test abstract."
         assert result["year"] == 2024
-        assert result["source"] == "test_provider"
+        assert result["_source"] == "test_provider"
 
     @pytest.mark.asyncio
     async def test_transform_generates_entity_id(

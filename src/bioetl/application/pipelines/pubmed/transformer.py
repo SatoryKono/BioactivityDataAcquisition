@@ -261,7 +261,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             **self._extract_counts(article, pubmed_data),
             "language": get_text(article.find(".//Language")),
             "pmc_id": normalize_pmc_id(IdentifierExtractor.extract_pmc_id(root)),
-            "source": "pubmed",
+            "_source": "pubmed",
             "doc_type": "PUBLICATION",
             "citation_count": None,
             "is_oa": None,

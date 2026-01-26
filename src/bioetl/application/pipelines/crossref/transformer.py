@@ -163,7 +163,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "language": rec.get("language"),
             "license_url": extract_license_url(rec),
             "subjects": rec.get("subject", []),
-            "source": "crossref",
+            "_source": "crossref",
             # Excluded fields (always NULL, not written to Delta Lake):
             # - is_oa: CrossRef doesn't provide Open Access info
             # - pmid/pmc_id: CrossRef doesn't provide PubMed IDs

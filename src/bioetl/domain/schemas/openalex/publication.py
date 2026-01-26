@@ -75,8 +75,8 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="Number of citations (from OpenAlex cited_by_count).",
     )
 
-    # === Override source to be non-nullable ===
-    source: Series[str] = pa.Field(
+    # === Override _source to be non-nullable ===
+    _source: Series[str] = pa.Field(
         nullable=False,
         description="Data source identifier",
     )

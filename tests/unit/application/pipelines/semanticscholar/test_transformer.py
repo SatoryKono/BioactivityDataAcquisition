@@ -110,7 +110,7 @@ class TestSemanticScholarPublicationTransformer:
         assert result["is_oa"] is True
         assert result["open_access_url"] == "https://example.com/paper.pdf"
         assert result["oa_status"] == "green"  # Normalized to lowercase
-        assert result["source"] == "semanticscholar"
+        assert result["_source"] == "semanticscholar"
         assert result["_lookup_method"] == "doi"
 
     @pytest.mark.asyncio
