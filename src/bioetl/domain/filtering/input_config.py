@@ -52,6 +52,7 @@ class InputFilterConfig:
     batch_size: int = 100
     fallback_column: str | None = None
     direct_filter_ids: tuple[str, ...] | None = None
+    direct_fallback_mapping: dict[str, str] | None = None
 
     def __post_init__(self) -> None:
         """Validate configuration consistency."""

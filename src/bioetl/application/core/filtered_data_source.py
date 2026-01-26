@@ -94,10 +94,14 @@ class FilteredDataSource:
     def _load_direct_filter_ids(self) -> None:
         """Load direct filter IDs from composite mode configuration."""
         self._filter_ids = list(self._filter_config.direct_filter_ids or [])
+        self._fallback_mapping = self._filter_config.direct_fallback_mapping
         if self._logger:
             self._logger.info(
                 "direct_filter_ids_loaded",
                 count=len(self._filter_ids),
+                fallback_mapping_size=len(self._fallback_mapping)
+                if self._fallback_mapping
+                else 0,
                 filter_field=self._filter_config.filter_field,
                 pipeline=self._pipeline_name,
             )

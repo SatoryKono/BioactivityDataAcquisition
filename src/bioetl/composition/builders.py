@@ -57,17 +57,19 @@ class FilterConfigBuilder:
         effective_csv: str,
         cli_column: str | None,
         cli_field: str | None,
+        cli_fallback_column: str | None,
     ) -> InputFilterConfig:
         """Build config for single-column filtering mode."""
         effective_column = cli_column or yaml_filter.column_name
         effective_field = cli_field or yaml_filter.filter_field
+        effective_fallback = cli_fallback_column or yaml_filter.fallback_column
         return InputFilterConfig(
             enabled=True,
             source_path=effective_csv,
             column_name=effective_column,
             filter_field=effective_field,
             batch_size=yaml_filter.batch_size,
-            fallback_column=yaml_filter.fallback_column,
+            fallback_column=effective_fallback,
         )
 
     @staticmethod
@@ -75,6 +77,7 @@ class FilterConfigBuilder:
         filter_ids: tuple[str, ...],
         filter_field: str,
         batch_size: int = 100,
+        fallback_mapping: dict[str, str] | None = None,
     ) -> InputFilterConfig:
         """Build config for direct filter IDs mode (no CSV file).
 
@@ -84,6 +87,7 @@ class FilterConfigBuilder:
             enabled=True,
             filter_field=filter_field,
             direct_filter_ids=filter_ids,
+            direct_fallback_mapping=fallback_mapping,
             batch_size=batch_size,
         )
 
@@ -93,9 +97,11 @@ class FilterConfigBuilder:
         cli_csv: str | None = None,
         cli_column: str | None = None,
         cli_field: str | None = None,
+        cli_fallback_column: str | None = None,
         *,
         test_mode: bool = False,
         direct_filter_ids: tuple[str, ...] | None = None,
+        direct_fallback_mapping: dict[str, str] | None = None,
     ) -> InputFilterConfig | None:
         """Build InputFilterConfig by merging YAML config and CLI overrides.
 
@@ -115,8 +121,10 @@ class FilterConfigBuilder:
             cli_csv: Optional CSV path from CLI (single-column mode only)
             cli_column: Optional column name from CLI (single-column mode only)
             cli_field: Optional filter field from CLI (single-column mode only)
+            cli_fallback_column: Optional fallback column from CLI
             test_mode: If True, YAML-based filters are disabled
             direct_filter_ids: Direct filter IDs (no CSV file, for composite mode)
+            direct_fallback_mapping: Direct fallback mapping (DOI->Title)
 
         Returns:
             Configured InputFilterConfig or None if filtering is disabled
@@ -127,6 +135,7 @@ class FilterConfigBuilder:
                 filter_ids=direct_filter_ids,
                 filter_field=cli_field or yaml_filter.filter_field or "doi",
                 batch_size=yaml_filter.batch_size,
+                fallback_mapping=direct_fallback_mapping,
             )
 
         if not FilterConfigBuilder._is_filter_enabled(yaml_filter, cli_csv, test_mode):
@@ -144,5 +153,5 @@ class FilterConfigBuilder:
 
         # Single-column mode: CLI > YAML config
         return FilterConfigBuilder._build_single_column_config(
-            yaml_filter, effective_csv, cli_column, cli_field
+            yaml_filter, effective_csv, cli_column, cli_field, cli_fallback_column
         )

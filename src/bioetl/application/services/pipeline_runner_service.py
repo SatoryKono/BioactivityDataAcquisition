@@ -139,6 +139,8 @@ class RunOptions:
     filter_column: str | None = None
     filter_field: str | None = None
     filter_ids: tuple[str, ...] | None = None  # Direct filter IDs (no CSV)
+    fallback_column: str | None = None  # Column name for fallback search (CSV mode)
+    fallback_mapping: dict[str, str] | None = None  # Direct mapping (composite mode)
     vacuum_after_run: bool | None = None
     vacuum_retention_days: int | None = None
     log_level: str = "INFO"
@@ -326,11 +328,18 @@ class PipelineRunnerService:
         """
         # Build InputFilterContext
         if options.input_csv:
-            input_filter = InputFilterContext(
-                enabled=True,
+            input_filter = InputFilterContext.from_csv(
                 source_path=options.input_csv,
                 column_name=options.filter_column or "",
                 filter_field=options.filter_field or "",
+                fallback_column=options.fallback_column,
+            )
+        elif options.filter_ids:
+            # Direct IDs mode (composite pipelines)
+            input_filter = InputFilterContext.from_ids(
+                filter_ids=options.filter_ids,
+                filter_field=options.filter_field or "doi",
+                fallback_mapping=options.fallback_mapping,
             )
         else:
             input_filter = InputFilterContext.disabled()

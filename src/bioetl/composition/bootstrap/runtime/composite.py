@@ -184,11 +184,16 @@ def bootstrap_composite_runner(
         enricher_cfg = enricher_configs.get(pipeline_name)
         filter_ids: tuple[str, ...] | None = None
         filter_field: str | None = None
+        fallback_mapping: dict[str, str] | None = None
 
         if enricher_cfg and keys is not None and len(keys) > 0:
             # Use the first join key (usually 'doi' or 'pmid')
             join_keys = enricher_cfg.join_keys
             for key in join_keys:
+                # Skip title as primary filter key if other keys exist
+                if key == "title" and len(join_keys) > 1:
+                    continue
+
                 if key in keys.columns:
                     # Extract unique non-null values from the keys DataFrame
                     key_values = (
@@ -197,6 +202,20 @@ def bootstrap_composite_runner(
                     if key_values:
                         filter_ids = tuple(str(v) for v in key_values)
                         filter_field = key
+
+                        # Build fallback mapping (ID -> Title) if configured
+                        # Only if 'title' is in join_keys and available in data
+                        if "title" in join_keys and "title" in keys.columns:
+                            # Extract pairs (id, title)
+                            # Use unique(subset=[key]) to ensure one title per ID
+                            pairs = (
+                                keys.select([key, "title"])
+                                .drop_nulls()
+                                .unique(subset=[key])
+                                .iter_rows()
+                            )
+                            fallback_mapping = {str(k): str(t) for k, t in pairs}
+
                         break
 
         options = RunOptions(
@@ -205,6 +224,7 @@ def bootstrap_composite_runner(
             ignore_yaml_filter=True,  # Disable YAML input_filter for composite mode
             filter_ids=filter_ids,
             filter_field=filter_field,
+            fallback_mapping=fallback_mapping,
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)
