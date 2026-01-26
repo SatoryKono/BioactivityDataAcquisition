@@ -9,6 +9,8 @@ import pytest
 
 from bioetl.application.pipelines.crossref.extractors import (
     extract_affiliations,
+    extract_author_details,
+    extract_author_orcids,
     extract_authors,
     extract_content_domain,
     extract_dates,
@@ -17,6 +19,7 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_license_url,
     extract_page_info,
     extract_published_date,
+    extract_references,
     extract_year,
 )
 
@@ -579,3 +582,386 @@ class TestExtractPublishedDate:
         record = {"published": {}}
         result = extract_published_date(record)
         assert result is None
+
+
+class TestExtractAuthorDetails:
+    """Tests for extract_author_details function."""
+
+    def test_extract_full_author_details(self) -> None:
+        """Should extract complete author details with all fields."""
+        publication = {
+            "author": [
+                {
+                    "given": "John",
+                    "family": "Doe",
+                    "ORCID": "https://orcid.org/0000-0001-2345-6789",
+                    "authenticated-orcid": True,
+                    "sequence": "first",
+                    "affiliation": [{"name": "Harvard University"}],
+                }
+            ]
+        }
+        result = extract_author_details(publication)
+        assert len(result) == 1
+        assert result[0]["given"] == "John"
+        assert result[0]["family"] == "Doe"
+        assert result[0]["name"] is None
+        assert result[0]["orcid"] == "0000-0001-2345-6789"
+        assert result[0]["authenticated_orcid"] is True
+        assert result[0]["sequence"] == "first"
+        assert result[0]["affiliations"] == ["Harvard University"]
+
+    def test_extract_author_with_orcid_id_only(self) -> None:
+        """Should handle ORCID without URL prefix."""
+        publication = {
+            "author": [
+                {
+                    "given": "Jane",
+                    "family": "Smith",
+                    "ORCID": "0000-0002-3456-7890",
+                }
+            ]
+        }
+        result = extract_author_details(publication)
+        assert result[0]["orcid"] == "0000-0002-3456-7890"
+
+    def test_extract_author_without_orcid(self) -> None:
+        """Should handle author without ORCID."""
+        publication = {"author": [{"given": "John", "family": "Doe"}]}
+        result = extract_author_details(publication)
+        assert result[0]["orcid"] is None
+        assert result[0]["authenticated_orcid"] is None
+
+    def test_extract_organization_author(self) -> None:
+        """Should extract organization author with name field."""
+        publication = {"author": [{"name": "World Health Organization"}]}
+        result = extract_author_details(publication)
+        assert len(result) == 1
+        assert result[0]["given"] is None
+        assert result[0]["family"] is None
+        assert result[0]["name"] == "World Health Organization"
+
+    def test_extract_multiple_affiliations(self) -> None:
+        """Should extract multiple affiliations."""
+        publication = {
+            "author": [
+                {
+                    "given": "John",
+                    "family": "Doe",
+                    "affiliation": [
+                        {"name": "University A"},
+                        {"name": "University B"},
+                    ],
+                }
+            ]
+        }
+        result = extract_author_details(publication)
+        assert result[0]["affiliations"] == ["University A", "University B"]
+
+    def test_extract_sequence_additional(self) -> None:
+        """Should handle sequence='additional' value."""
+        publication = {
+            "author": [{"given": "John", "family": "Doe", "sequence": "additional"}]
+        }
+        result = extract_author_details(publication)
+        assert result[0]["sequence"] == "additional"
+
+    def test_invalid_sequence_ignored(self) -> None:
+        """Should ignore invalid sequence values."""
+        publication = {
+            "author": [{"given": "John", "family": "Doe", "sequence": "unknown"}]
+        }
+        result = extract_author_details(publication)
+        assert result[0]["sequence"] is None
+
+    def test_empty_author_list(self) -> None:
+        """Should return empty list for empty author list."""
+        result = extract_author_details({"author": []})
+        assert result == []
+
+    def test_missing_author_key(self) -> None:
+        """Should return empty list when author key missing."""
+        result = extract_author_details({})
+        assert result == []
+
+    def test_skips_author_without_name(self) -> None:
+        """Should skip authors with no identifiable name."""
+        publication = {
+            "author": [
+                {"given": "", "family": ""},
+                {"given": "Valid", "family": "Author"},
+            ]
+        }
+        result = extract_author_details(publication)
+        assert len(result) == 1
+        assert result[0]["given"] == "Valid"
+
+    def test_authenticated_orcid_false(self) -> None:
+        """Should handle authenticated-orcid=False."""
+        publication = {
+            "author": [
+                {
+                    "given": "John",
+                    "family": "Doe",
+                    "ORCID": "0000-0001-2345-6789",
+                    "authenticated-orcid": False,
+                }
+            ]
+        }
+        result = extract_author_details(publication)
+        assert result[0]["authenticated_orcid"] is False
+
+    def test_invalid_orcid_format_ignored(self) -> None:
+        """Should return None for invalid ORCID format."""
+        publication = {
+            "author": [{"given": "John", "family": "Doe", "ORCID": "invalid-orcid"}]
+        }
+        result = extract_author_details(publication)
+        assert result[0]["orcid"] is None
+
+
+class TestExtractAuthorOrcids:
+    """Tests for extract_author_orcids function."""
+
+    def test_extract_multiple_orcids(self) -> None:
+        """Should extract ORCIDs from multiple authors."""
+        publication = {
+            "author": [
+                {
+                    "given": "John",
+                    "family": "Doe",
+                    "ORCID": "https://orcid.org/0000-0001-2345-6789",
+                },
+                {"given": "Jane", "family": "Smith"},
+                {
+                    "given": "Bob",
+                    "family": "Wilson",
+                    "ORCID": "0000-0002-3456-7890",
+                },
+            ]
+        }
+        result = extract_author_orcids(publication)
+        assert result == ["0000-0001-2345-6789", "0000-0002-3456-7890"]
+
+    def test_extract_single_orcid(self) -> None:
+        """Should extract single ORCID."""
+        publication = {
+            "author": [
+                {"given": "John", "family": "Doe", "ORCID": "0000-0001-2345-6789"}
+            ]
+        }
+        result = extract_author_orcids(publication)
+        assert result == ["0000-0001-2345-6789"]
+
+    def test_no_orcids(self) -> None:
+        """Should return empty list when no ORCIDs present."""
+        publication = {
+            "author": [
+                {"given": "John", "family": "Doe"},
+                {"given": "Jane", "family": "Smith"},
+            ]
+        }
+        result = extract_author_orcids(publication)
+        assert result == []
+
+    def test_empty_publication(self) -> None:
+        """Should return empty list for empty publication."""
+        result = extract_author_orcids({})
+        assert result == []
+
+    def test_normalizes_url_prefix(self) -> None:
+        """Should normalize ORCID URL to ID-only format."""
+        publication = {
+            "author": [
+                {
+                    "given": "John",
+                    "family": "Doe",
+                    "ORCID": "https://orcid.org/0000-0001-2345-6789",
+                }
+            ]
+        }
+        result = extract_author_orcids(publication)
+        assert result == ["0000-0001-2345-6789"]
+
+    def test_http_url_prefix(self) -> None:
+        """Should handle http:// URL prefix."""
+        publication = {
+            "author": [
+                {
+                    "given": "John",
+                    "family": "Doe",
+                    "ORCID": "http://orcid.org/0000-0001-2345-6789",
+                }
+            ]
+        }
+        result = extract_author_orcids(publication)
+        assert result == ["0000-0001-2345-6789"]
+
+    def test_invalid_orcid_excluded(self) -> None:
+        """Should exclude invalid ORCIDs."""
+        publication = {
+            "author": [
+                {"given": "John", "family": "Doe", "ORCID": "invalid"},
+                {"given": "Jane", "family": "Smith", "ORCID": "0000-0001-2345-6789"},
+            ]
+        }
+        result = extract_author_orcids(publication)
+        assert result == ["0000-0001-2345-6789"]
+
+
+class TestExtractReferences:
+    """Tests for extract_references function."""
+
+    def test_extract_complete_reference(self) -> None:
+        """Should extract reference with all fields."""
+        publication = {
+            "reference": [
+                {
+                    "key": "ref1",
+                    "DOI": "10.1000/xyz123",
+                    "doi-asserted-by": "publisher",
+                    "article-title": "Example Article",
+                    "journal-title": "Nature",
+                    "author": "Smith",
+                    "year": "2020",
+                    "volume": "42",
+                    "issue": "3",
+                    "first-page": "123",
+                }
+            ]
+        }
+        result = extract_references(publication)
+        assert len(result) == 1
+        ref = result[0]
+        assert ref["key"] == "ref1"
+        assert ref["doi"] == "10.1000/xyz123"
+        assert ref["doi_asserted_by"] == "publisher"
+        assert ref["article_title"] == "Example Article"
+        assert ref["journal_title"] == "Nature"
+        assert ref["author"] == "Smith"
+        assert ref["year"] == 2020
+        assert ref["volume"] == "42"
+        assert ref["issue"] == "3"
+        assert ref["first_page"] == "123"
+
+    def test_extract_unstructured_reference(self) -> None:
+        """Should extract unstructured citation string."""
+        publication = {
+            "reference": [
+                {
+                    "key": "ref1",
+                    "unstructured": "Smith J. Example Article. Nature 2020;42:123.",
+                }
+            ]
+        }
+        result = extract_references(publication)
+        assert (
+            result[0]["unstructured"] == "Smith J. Example Article. Nature 2020;42:123."
+        )
+
+    def test_extract_book_reference(self) -> None:
+        """Should extract book reference with volume-title."""
+        publication = {
+            "reference": [
+                {
+                    "key": "ref1",
+                    "volume-title": "Biochemistry Textbook",
+                    "author": "Berg",
+                    "year": "2019",
+                    "ISBN": "978-1-234567-89-0",
+                }
+            ]
+        }
+        result = extract_references(publication)
+        ref = result[0]
+        assert ref["volume_title"] == "Biochemistry Textbook"
+        assert ref["isbn"] == "978-1-234567-89-0"
+
+    def test_year_as_integer(self) -> None:
+        """Should handle year as integer."""
+        publication = {"reference": [{"key": "ref1", "year": 2020}]}
+        result = extract_references(publication)
+        assert result[0]["year"] == 2020
+
+    def test_year_as_string(self) -> None:
+        """Should convert year string to integer."""
+        publication = {"reference": [{"key": "ref1", "year": "2020"}]}
+        result = extract_references(publication)
+        assert result[0]["year"] == 2020
+
+    def test_invalid_year_ignored(self) -> None:
+        """Should return None for non-numeric year."""
+        publication = {"reference": [{"key": "ref1", "year": "unknown"}]}
+        result = extract_references(publication)
+        assert result[0]["year"] is None
+
+    def test_doi_normalized_lowercase(self) -> None:
+        """Should normalize DOI to lowercase."""
+        publication = {"reference": [{"key": "ref1", "DOI": "10.1000/ABC123"}]}
+        result = extract_references(publication)
+        assert result[0]["doi"] == "10.1000/abc123"
+
+    def test_empty_reference_list(self) -> None:
+        """Should return empty list for empty references."""
+        result = extract_references({"reference": []})
+        assert result == []
+
+    def test_missing_reference_key(self) -> None:
+        """Should return empty list when reference key missing."""
+        result = extract_references({})
+        assert result == []
+
+    def test_multiple_references(self) -> None:
+        """Should extract multiple references preserving order."""
+        publication = {
+            "reference": [
+                {"key": "ref1", "DOI": "10.1000/first"},
+                {"key": "ref2", "DOI": "10.1000/second"},
+            ]
+        }
+        result = extract_references(publication)
+        assert len(result) == 2
+        assert result[0]["key"] == "ref1"
+        assert result[1]["key"] == "ref2"
+
+    def test_series_title(self) -> None:
+        """Should extract series-title for book series."""
+        publication = {
+            "reference": [{"key": "ref1", "series-title": "Methods in Enzymology"}]
+        }
+        result = extract_references(publication)
+        assert result[0]["series_title"] == "Methods in Enzymology"
+
+    def test_issn_extraction(self) -> None:
+        """Should extract ISSN from reference."""
+        publication = {"reference": [{"key": "ref1", "ISSN": "0028-0836"}]}
+        result = extract_references(publication)
+        assert result[0]["issn"] == "0028-0836"
+
+    def test_strips_whitespace(self) -> None:
+        """Should strip whitespace from string fields."""
+        publication = {
+            "reference": [
+                {
+                    "key": "  ref1  ",
+                    "article-title": "  Title  ",
+                    "author": "  Smith  ",
+                }
+            ]
+        }
+        result = extract_references(publication)
+        assert result[0]["key"] == "ref1"
+        assert result[0]["article_title"] == "Title"
+        assert result[0]["author"] == "Smith"
+
+    def test_skips_non_dict_entries(self) -> None:
+        """Should skip non-dict entries in reference array."""
+        publication = {
+            "reference": [
+                "invalid",
+                {"key": "ref1", "DOI": "10.1000/valid"},
+            ]
+        }
+        result = extract_references(publication)
+        assert len(result) == 1
+        assert result[0]["key"] == "ref1"

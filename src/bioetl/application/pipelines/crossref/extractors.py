@@ -15,12 +15,36 @@ from __future__ import annotations
 
 from typing import Any
 
+from bioetl.application.pipelines.crossref.author_extractors import (
+    extract_author_details,
+    extract_author_orcids,
+)
+from bioetl.application.pipelines.crossref.reference_extractors import (
+    extract_references,
+)
 from bioetl.domain.normalization import (
     extract_first_string,
     format_date_parts,
     parse_page_range,
 )
 from bioetl.domain.value_objects import PublicationYear
+
+# Re-exports for backward compatibility
+__all__ = [
+    "extract_affiliations",
+    "extract_author_details",
+    "extract_author_orcids",
+    "extract_authors",
+    "extract_content_domain",
+    "extract_dates",
+    "extract_issn_by_type",
+    "extract_journal_info",
+    "extract_license_url",
+    "extract_page_info",
+    "extract_published_date",
+    "extract_references",
+    "extract_year",
+]
 
 
 def extract_authors(publication: dict[str, Any]) -> list[str]:
