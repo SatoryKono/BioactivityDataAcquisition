@@ -389,6 +389,57 @@ class TestPubMedPublicationTransformer:
         assert result is not None
         assert result["_index"] == 42
 
+    @pytest.mark.asyncio
+    async def test_transform_affiliations(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test extraction of affiliations into unified field."""
+        xml = """<?xml version="1.0"?>
+        <PubmedArticle>
+          <MedlineCitation>
+            <PMID>88888888</PMID>
+            <Article>
+              <ArticleTitle>Affiliations Test</ArticleTitle>
+              <AuthorList>
+                <Author>
+                  <LastName>Doe</LastName>
+                  <AffiliationInfo>
+                    <Affiliation>University of Example</Affiliation>
+                  </AffiliationInfo>
+                </Author>
+                <Author>
+                  <LastName>Smith</LastName>
+                  <AffiliationInfo>
+                    <Affiliation>University of Example</Affiliation>
+                  </AffiliationInfo>
+                </Author>
+                <Author>
+                  <LastName>Johnson</LastName>
+                  <AffiliationInfo>
+                    <Affiliation>Another Institute</Affiliation>
+                  </AffiliationInfo>
+                </Author>
+              </AuthorList>
+            </Article>
+          </MedlineCitation>
+        </PubmedArticle>
+        """
+        record: dict[str, Any] = {"_raw_xml": xml}
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert "affiliations" in result
+
+        import json
+
+        affs = json.loads(result["affiliations"])
+        assert len(affs) == 2
+        assert "University of Example" in affs
+        assert "Another Institute" in affs
+
 
 @pytest.mark.unit
 class TestPubMedTransformerJournalExtraction:
