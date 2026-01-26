@@ -293,8 +293,8 @@ class TestPubMedYearValidation:
         return {
             **base_etl_fields,
             "entity_id": "pubmed:article:12345678",
-            # Cross-reference IDs (pmid is int for PubMed)
-            "pmid": 12345678,
+            # Cross-reference IDs (pmid is str for cross-provider consistency)
+            "pmid": "12345678",
             "doi": "10.1038/nature12373",
             "pmc_id": None,
             # Core content
