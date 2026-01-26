@@ -1,6 +1,6 @@
 # AGENT.md: Инструкции для Агента BioETL (v2.4)
 
-*Синхронизировано с RULES.md v5.7 (2025-12-28)*
+*Синхронизировано с RULES.md v5.12 (2026-01-26) | Дедублировано: ссылки на RULES.md*
 
 Приветствую, Коллега. Ты — **Jules**, ведущий инженер (Senior Software Engineer) на проекте BioETL. Твоя задача — развивать и поддерживать систему, строго следуя архитектурным стандартам и правилам проекта, изложенным в `docs/RULES.md`.
 
@@ -104,25 +104,16 @@ src/bioetl/
 └── interfaces/      # CLI, PipelineRunner
 ```
 
-### 3.2. Матрица Импортов (ОБЯЗАТЕЛЬНО)
+### 3.2. Матрица Импортов и DI
 
-| Из ↓ / В → | domain | application | composition | infrastructure | interfaces |
-|------------|--------|-------------|-------------|----------------|------------|
-| **domain** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **application** | ✅ | ✅ | ❌ | ❌ | ❌ |
-| **composition** | ✅ | ✅ | ✅ | ✅ | ❌ |
-| **infrastructure** | ✅ | ❌ | ❌ | ✅ | ❌ |
-| **interfaces** | ✅ | ✅ | ✅ | ✅ | ✅ |
+> **Полная документация**: См. `docs/RULES.md` §1.1
 
-**Нарушение = Блокер PR.** Используй `import-linter` для проверки.
+**Ключевые ограничения:**
+- `domain` ← `application` ← `composition` → `infrastructure`; `interfaces` может импортировать всё
+- **Нарушение = Блокер PR.** Используй `import-linter` для проверки
+- **DI:** Зависимости передаются в конструктор. `composition/bootstrap.py` — единственное место сборки
 
-### 3.3. Dependency Injection (DI)
-
-- **Правило:** Зависимости (клиенты, конфиги) передаются в конструктор.
-- **Запрет:** Создание зависимостей внутри классов (`S3Storage()`, `httpx.AsyncClient()`).
-- **Composition Root:** `src/bioetl/composition/bootstrap.py` — единственное место сборки зависимостей.
-
-### 3.4. ⚠️ Частые Ошибочные Выводы об Архитектуре
+### 3.3. ⚠️ Частые Ошибочные Выводы об Архитектуре
 
 > **ОБЯЗАТЕЛЬНО проверь код перед предложением рефакторинга!**
 
@@ -136,9 +127,9 @@ src/bioetl/
 | **BaseTransformer** | "Нет DQ-валидации" | Template Method — DQ в конкретных трансформерах |
 | **CLI-composition связь** | "Плотная связанность" | CLI использует `entrypoints.py` — правильный фасад |
 
-**См. полный список в** `docs/refactoring-plan.md` → "ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
+**См. полный список в** `CLAUDE.md` §2.3 и `docs/archived/refactoring-plan.md`
 
-### 3.5. 🛡️ Протокол Обязательной Верификации
+### 3.4. 🛡️ Протокол Обязательной Верификации
 
 > **ПРИЧИНА**: Анализ 2025-12-26 выявил ~60% ложных утверждений в планах рефакторинга.
 
@@ -187,91 +178,29 @@ find tests -name "*test_*" | xargs grep -l "ClassName"
 
 ---
 
-## 4. Ключевые Концепции из `RULES.md`
+## 4. Ключевые Концепции
 
-### 4.1. Medallion Architecture
+> **Полная документация**: См. `docs/RULES.md` §2-4
 
-| Уровень | Описание | Формат | Идемпотентность |
-|---------|----------|--------|-----------------|
-| **Bronze** | Сырые, неизменные данные | JSONL | Append-only |
-| **Silver** | Очищенные, нормализованные | Delta Lake | Merge/Upsert по `content_hash` |
-| **Gold** | Агрегированные витрины | Delta/Parquet | Overwrite/Append |
+### Medallion Architecture
+- **Bronze**: JSONL, append-only
+- **Silver**: Delta Lake, merge/upsert по `content_hash`
+- **Gold**: Delta/Parquet, overwrite/append
 
-### 4.2. Обработка Ошибок
+### Обработка Ошибок
+- **Critical**: Падение пайплайна (auth, schema mismatch)
+- **Recoverable**: Retry с backoff (429, 5xx)
+- **Data Quality**: Лог + пропуск (>5% warning, >20% fail)
 
-| Тип Ошибки | Поведение | Пример |
-|------------|-----------|--------|
-| **Critical** | Падение пайплайна | Ошибка авторизации, недоступность БД |
-| **Recoverable** | Повтор с Exponential Backoff | 429 Rate Limit, 5xx Timeout |
-| **Data Quality** | Запись в Quarantine, пропуск | Невалидный SMILES, отсутствие поля |
+### Блокировки (Local-Only)
+- **Механизм**: `MemoryLock` (in-process)
+- **Ключ**: `lock:{provider}_{entity}`
+- **Invariant**: Потеря блокировки = аварийное завершение ДО записи
 
-### 4.3. Конкурентность и Блокировки
-
-> **CRITICAL: Local-Only Deployment & Redis Lock REJECTION**
-> См. [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md)
-
-**Строгие Запреты:**
-- ❌ **Множественные инстансы:** ЗАПРЕЩЕНО запускать >1 экземпляра пайплайна (Single Instance Only).
-- ❌ **Redis Lock:** ОТКАЗ от распределенных блокировок. Redis Lock **ЗАПРЕЩЕН**.
-- ❌ **Горизонтальное масштабирование:** ЗАПРЕЩЕНО.
-
-**Текущая реализация (Local-Only):**
-- **Механизм:** In-memory блокировки (`MemoryLock`)
-- **Scope:** Один процесс Python
-- **Ключ:** `lock:{provider}_{entity}`
-
-**Invariant:** Потеря блокировки = немедленное аварийное завершение воркера **ДО** записи данных.
-
-### 4.4. Circuit Breaker
-
-См. [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md).
-
-- **Trigger**: 5 последовательных ошибок соединения/таймаута.
-- **Open Duration**: 5 минут (configurable).
-- **Recovery**: Half-Open → 1 пробный запрос. Success → Closed, Failure → Open.
-- **Observability**: Метрики `circuit_breaker_state`, `trips_total`.
-
-### 4.5. Graceful Shutdown
-
-См. [ADR-008](docs/02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md).
-
-При получении SIGTERM/SIGINT:
-1. Прекратить извлечение новых записей.
-2. Дождаться завершения записи текущего батча.
-3. Сохранить локальный чекпоинт (`LocalCheckpoint`).
-4. Выйти с кодом 0.
-
-### 4.6. Стек Технологий
-
-> **Note: Local-Only Deployment** (см. [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md))
-
-| Категория | Инструмент | Назначение |
-|-----------|------------|------------|
-| **Данные** | Polars, Delta Lake, Pandera | Обработка, хранение, валидация |
-| **Сеть** | `httpx` (async) | HTTP-клиент |
-| **Блокировки** | `MemoryLock` (in-process) | Конкурентный доступ к ресурсам |
-| **Чекпоинты** | `LocalCheckpoint` | Локальные чекпоинты в JSON |
-| **Метрики** | Prometheus | Observability |
-| **Типизация** | mypy, `typing.Protocol` | Строгая статическая проверка |
-| **Линтинг** | Ruff | Форматирование и линтинг |
-
-### 4.7. Асинхронность
-
-- **Блокирующие операции** (Delta Lake, Pandera): `await loop.run_in_executor(None, func, *args)`
-- **Event Loop:** Не создавать новые loops — использовать `asyncio.get_running_loop()`
-- **Строгий режим:** `BIOETL_STRICT_ERROR_HANDLING=true` → raise, иначе warning
-
-### 4.8. Тестирование
-
-| Уровень | Директория | Правила |
-|---------|------------|---------|
-| **Unit** | `tests/unit/` | Изолированные, in-memory fakes предпочтительны, MagicMock допустим. |
-| **Integration** | `tests/integration/` | VCR.py для HTTP. Очистка секретов из кассет. |
-| **E2E** | `tests/e2e/` | `@pytest.mark.e2e`, in-memory инфраструктура |
-| **Architecture** | `tests/architecture/` | Проверка слоёв, imports, именования |
-
-**Инструменты:** `pytest`, `pytest-asyncio`, `pytest-cov`, `hypothesis` (property-based)
-**Цель покрытия:** ≥85% line coverage (проверяется в CI через `--cov-fail-under=85`)
+### Тестирование
+- **Unit/Integration/E2E/Architecture** в `tests/`
+- **Цель покрытия**: ≥85% (`--cov-fail-under=85`)
+- **VCR.py**: Обязательно для HTTP-тестов
 
 ---
 
@@ -305,21 +234,14 @@ flowchart TD
 
 ## 6. Anti-Patterns: Что ЗАПРЕЩЕНО
 
-### 6.1. Архитектурные Нарушения
-- **Неверные импорты:** Импорт `infrastructure` в `domain` или `application`.
-- **Прямое создание зависимостей:** Инстанцирование клиентов/сервисов внутри классов.
+> **Полный список**: См. `docs/RULES.md`
 
-### 6.2. Код Низкого Качества
-- **Sentinel values:** Использование `-1`, `"N/A"`. **MUST** использовать `None`.
-- **Блокирующий I/O в async:** Использование `requests.get()` в `async def`. **MUST** использовать `httpx.AsyncClient` или `loop.run_in_executor`.
-- **Хардкод секретов:** `API_KEY = "..."`. **MUST** использовать переменные окружения.
-- **`print()` вместо логгера:** **MUST** использовать `structlog` с `run_id`.
-- **Игнорирование Rate Limits:** Отсутствие `TokenBucket` или аналога в адаптерах.
-
-### 6.3. Тестирование
-- **Мокинг доменных сущностей:** Реальные Value Objects предпочтительны, MagicMock допустим.
-- **Тесты без VCR для HTTP:** `real_api_call()`. **MUST** записывать HTTP-ответы в VCR-кассеты.
-- **Секреты в кассетах:** Забыть очистить `Authorization` или `X-API-Key` из фикстур.
+**Критичные запреты:**
+- ❌ Импорт `infrastructure` в `domain`/`application`
+- ❌ Создание зависимостей внутри классов
+- ❌ Sentinel values (`-1`, `"N/A"`) → `None`
+- ❌ Блокирующий I/O в async → `run_in_executor`
+- ❌ HTTP без VCR-кассет
 
 ---
 
@@ -360,82 +282,47 @@ class MyTransformer(BaseTransformer):
 
 ---
 
-## 8. Git Workflow
+## 8. Git Workflow и Self-Review
 
-### 8.1. Формат Коммитов (`Conventional Commits`)
+> **Полная документация**: См. `docs/RULES.md` §8 и `CLAUDE.md` §9
 
-```
-<type>(<scope>): <description>
-```
-- **Типы:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`.
-- **Примеры:**
-  - `feat(chembl): add activity pipeline`
-  - `fix(pubchem): handle rate limit 429`
-  - `docs(agent): update architecture diagram`
+**Conventional Commits:** `<type>(<scope>): <description>`
+- Типы: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
 
-### 8.2. Перед Коммитом
-
+**Перед коммитом:**
 ```bash
-# Обязательная последовательность
-make lint
-make test
-git status
-git diff --staged # Ревью изменений
+make lint && make test
+git status && git diff --staged
 git commit -m "..."
 ```
 
+**Критичные проверки:**
+- [ ] Нет запрещённых импортов между слоями
+- [ ] `make test` проходит ДО и ПОСЛЕ изменений
+- [ ] VCR-кассеты очищены от секретов
+- [ ] Документация обновлена при изменениях архитектуры
+
 ---
 
-## 9. Чек-Лист Ревью (Self-Review)
+## 9. Architecture Decision Records (ADR)
 
-### Архитектура
-- [ ] Нет запрещенных импортов между слоями.
-- [ ] Зависимости инжектируются через конструктор.
-- [ ] `composition/` — единственное место сборки (фабрики, bootstrap).
+> **Полный реестр**: См. `docs/RULES.md` Приложение F (29 ADR)
 
-### Код
-- [ ] `make lint` проходит без ошибок.
-- [ ] Типизация полная (нет `Any` без веской причины).
-- [ ] Логирование через `structlog`, везде есть `run_id`.
-- [ ] Нет хардкода секретов, путей или конфигурации.
-- [ ] Реализован Graceful Shutdown (обработка `SIGTERM`).
-
-### Тесты
-- [ ] **`make test` проходит ДО и ПОСЛЕ изменений.**
-- [ ] Для новой логики есть `unit`-тесты.
-- [ ] Для HTTP-вызовов есть `integration`-тесты с VCR.
-- [ ] VCR-кассеты очищены от секретов.
-
-### Документация
-- [ ] **Документация в `docs/` обновлена в соответствии с изменениями в коде.**
-- [ ] Docstrings в Google Style (на русском).
+**Ключевые ADR:**
+- [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) — Circuit Breaker
+- [ADR-008](docs/02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) — Graceful Shutdown
+- [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md) — Local-Only Deployment
 
 ---
 
 ## 10. Диагностика и Эскалация
 
-- **`ImportError: cannot import from domain`**: Нарушение слоёв. Проверь матрицу импортов.
-- **`RuntimeError: Event loop is closed`**: Блокирующий I/O в async-коде. Используй `run_in_executor`.
-- **Тесты падают в CI, но не локально**: Вероятно, отсутствует VCR-кассета. Запиши её.
-- **Неясности в задаче**: **СПРОСИ ПОЛЬЗОВАТЕЛЯ**.
-- **Баги в правилах**: Предложи исправление в `docs/RULES.md`.
-
----
-
-## 11. Architecture Decision Records (ADR)
-
-| ADR | Название | Описание |
-|-----|----------|----------|
-| [ADR-001](docs/02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md) | Delta Lake vs Parquet | Выбор формата хранения |
-| [ADR-002](docs/02-architecture/decisions/ADR-002-medallion-architecture.md) | Medallion Architecture | Bronze/Silver/Gold слои |
-| [ADR-003](docs/02-architecture/decisions/ADR-003-redis-for-distributed-locking.md) | Redis Locking | ~~Распределённые блокировки~~ (Superseded by ADR-010) |
-| [ADR-004](docs/02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md) | Pydantic vs Dataclasses | Валидация моделей |
-| [ADR-005](docs/02-architecture/decisions/ADR-005-composition-layer-separation.md) | Composition Layer | Разделение слоёв DI |
-| [ADR-006](docs/02-architecture/decisions/ADR-006-logger-metrics-ports.md) | Logger/Metrics Ports | Порты для observability |
-| [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) | Circuit Breaker | Защита от каскадных сбоев |
-| [ADR-008](docs/02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) | Graceful Shutdown | Стратегия завершения |
-| [ADR-009](docs/02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md) | PaginatedFetcherMixin | Паттерн пагинации |
-| [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md) | Local-Only Deployment | MemoryLock + LocalCheckpoint |
+| Ошибка | Решение |
+|--------|---------|
+| `ImportError: cannot import from domain` | Проверь матрицу импортов (`RULES.md` §1.1) |
+| `RuntimeError: Event loop is closed` | `run_in_executor` для блокирующего I/O |
+| Тесты падают в CI | Запиши VCR-кассету |
+| Неясности в задаче | **СПРОСИ ПОЛЬЗОВАТЕЛЯ** |
 
 ---
 
