@@ -986,6 +986,26 @@ class PipelineYamlConfig(BaseModel):
         return v
 
     @model_validator(mode="after")
+    def validate_entity_type_canonical(self) -> PipelineYamlConfig:
+        """Validate that publication entities use canonical names.
+
+        YAML configs MUST use canonical names (publication*) instead of
+        ChEMBL API-level names (document*). This ensures consistency
+        across all pipeline configurations.
+
+        See ADR-024 for entity naming unification details.
+
+        Raises:
+            ValueError: If document* is used instead of publication*.
+        """
+        from bioetl.domain.registry.publication import validate_publication_entity_type
+
+        error_msg = validate_publication_entity_type(self.entity_type, self.provider)
+        if error_msg:
+            raise ValueError(error_msg)
+        return self
+
+    @model_validator(mode="after")
     def validate_medallion_formats(self) -> PipelineYamlConfig:
         """Validate Medallion Architecture format constraints.
 
