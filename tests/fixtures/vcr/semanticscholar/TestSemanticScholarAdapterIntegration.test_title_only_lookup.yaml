@@ -14,7 +14,7 @@ interactions:
       User-Agent:
       - BioETL/1.0
     method: GET
-    uri: https://api.semanticscholar.org/graph/v1/paper/search?query=Machine+learning+for+drug+discovery&fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal&limit=5
+    uri: https://api.semanticscholar.org/graph/v1/paper/search?query=Machine+learning+for+drug+discovery&fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,authors.externalIds,authors.hIndex,authors.authorId,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal&limit=5
   response:
     body:
       string: |
@@ -34,7 +34,7 @@ interactions:
               "publicationDate": "2019-12-01",
               "venue": "Nature Reviews Drug Discovery",
               "authors": [
-                {"authorId": "5555555", "name": "ML Researcher"}
+                {"authorId": "5555555", "name": "ML Researcher", "externalIds": {"ORCID": "0000-0003-5555-6666"}, "hIndex": 85}
               ],
               "citationCount": 1500,
               "referenceCount": 100,

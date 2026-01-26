@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - BioETL/1.0
     method: GET
-    uri: https://api.semanticscholar.org/graph/v1/paper/search?query=CRISPR+gene+editing&fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal&offset=0&limit=3
+    uri: https://api.semanticscholar.org/graph/v1/paper/search?query=CRISPR+gene+editing&fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,authors.externalIds,authors.hIndex,authors.authorId,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal&offset=0&limit=3
   response:
     body:
       string: |
@@ -34,7 +34,7 @@ interactions:
               "publicationDate": "2016-01-01",
               "venue": "Science",
               "authors": [
-                {"authorId": "1111111", "name": "Jennifer Doudna"}
+                {"authorId": "1111111", "name": "Jennifer Doudna", "externalIds": {"ORCID": "0000-0001-1111-2222"}, "hIndex": 150}
               ],
               "citationCount": 5000,
               "referenceCount": 80,
@@ -67,7 +67,7 @@ interactions:
               "publicationDate": "2015-02-01",
               "venue": "Nature",
               "authors": [
-                {"authorId": "2222222", "name": "Feng Zhang"}
+                {"authorId": "2222222", "name": "Feng Zhang", "externalIds": {"ORCID": "0000-0002-3333-4444"}, "hIndex": 180}
               ],
               "citationCount": 3000,
               "referenceCount": 45,
@@ -93,7 +93,7 @@ interactions:
               "publicationDate": "2014-10-01",
               "venue": "Cell",
               "authors": [
-                {"authorId": "3333333", "name": "Patrick Hsu"}
+                {"authorId": "3333333", "name": "Patrick Hsu", "externalIds": null, "hIndex": 65}
               ],
               "citationCount": 8000,
               "referenceCount": 120,
