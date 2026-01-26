@@ -21,14 +21,17 @@ from typing import Any
 import polars as pl
 import pyarrow as pa
 
+from bioetl.application.services.dq.utils import (
+    build_summary,
+    result_to_dict,
+    update_counts,
+)
 from bioetl.domain.ports import SilverDQConfigPort
 from bioetl.domain.value_objects.dq_report import (
     CategoricalDistribution,
     ContentHashIntegrityResult,
     DeduplicationStatsResult,
     DQCheckStatus,
-    DQReportStatus,
-    DQReportSummary,
     DQThresholds,
     DriftLevel,
     MedallionLayer,
@@ -80,17 +83,15 @@ class SilverDQAnalyzer:
             record_count_result = self._check_record_count(
                 df, input_record_count, quarantined_count
             )
-            checks["record_count"] = self._result_to_dict(record_count_result)
-            passed, failed, warnings = self._update_counts(
+            checks["record_count"] = result_to_dict(record_count_result)
+            passed, failed, warnings = update_counts(
                 record_count_result.status, passed, failed, warnings
             )
 
         if SilverDQCheckType.NULL_RATE in enabled_checks:
             null_results, overall_rate = self._check_null_rates(df)
             checks["null_rate"] = {
-                "columns": {
-                    r.column_name: self._result_to_dict(r) for r in null_results
-                },
+                "columns": {r.column_name: result_to_dict(r) for r in null_results},
                 "overall_null_rate": overall_rate,
                 "status": DQCheckStatus.PASS.value,
             }
@@ -98,15 +99,15 @@ class SilverDQAnalyzer:
 
         if SilverDQCheckType.UNIQUENESS in enabled_checks:
             uniqueness_result = self._check_uniqueness(df, primary_keys)
-            checks["uniqueness"] = self._result_to_dict(uniqueness_result)
-            passed, failed, warnings = self._update_counts(
+            checks["uniqueness"] = result_to_dict(uniqueness_result)
+            passed, failed, warnings = update_counts(
                 uniqueness_result.status, passed, failed, warnings
             )
 
         if SilverDQCheckType.TYPE_CONFORMANCE in enabled_checks:
             conformance_result = self._check_type_conformance(df)
-            checks["type_conformance"] = self._result_to_dict(conformance_result)
-            passed, failed, warnings = self._update_counts(
+            checks["type_conformance"] = result_to_dict(conformance_result)
+            passed, failed, warnings = update_counts(
                 conformance_result.status, passed, failed, warnings
             )
 
@@ -119,8 +120,8 @@ class SilverDQAnalyzer:
 
         if SilverDQCheckType.SCHEMA_DRIFT in enabled_checks:
             drift_result = self._check_schema_drift(df, previous_schema)
-            checks["schema_drift"] = self._result_to_dict(drift_result)
-            passed, failed, warnings = self._update_counts(
+            checks["schema_drift"] = result_to_dict(drift_result)
+            passed, failed, warnings = update_counts(
                 drift_result.status, passed, failed, warnings
             )
 
@@ -128,15 +129,15 @@ class SilverDQAnalyzer:
             dedup_result = self._check_deduplication(
                 df, primary_keys, input_record_count or len(df)
             )
-            checks["deduplication_stats"] = self._result_to_dict(dedup_result)
-            passed, failed, warnings = self._update_counts(
+            checks["deduplication_stats"] = result_to_dict(dedup_result)
+            passed, failed, warnings = update_counts(
                 dedup_result.status, passed, failed, warnings
             )
 
         if SilverDQCheckType.CONTENT_HASH_INTEGRITY in enabled_checks:
             hash_result = self._check_content_hash_integrity(df)
-            checks["content_hash_integrity"] = self._result_to_dict(hash_result)
-            passed, failed, warnings = self._update_counts(
+            checks["content_hash_integrity"] = result_to_dict(hash_result)
+            passed, failed, warnings = update_counts(
                 hash_result.status, passed, failed, warnings
             )
 
@@ -177,39 +178,6 @@ class SilverDQAnalyzer:
             hard_fail_threshold=hard_fail_threshold,
             current_error_rate=round(error_rate, 4),
             threshold_status=threshold_status,
-        )
-
-    def _build_summary(
-        self,
-        passed: int,
-        failed: int,
-        warnings: int,
-        threshold_status: DQCheckStatus,
-    ) -> DQReportSummary:
-        """Build DQ report summary with overall status.
-
-        Args:
-            passed: Number of passed checks.
-            failed: Number of failed checks.
-            warnings: Number of warning checks.
-            threshold_status: Status from threshold calculation.
-
-        Returns:
-            DQReportSummary with overall status.
-        """
-        if failed > 0 or threshold_status == DQCheckStatus.FAIL:
-            overall_status = DQReportStatus.FAIL
-        elif warnings > 0 or threshold_status == DQCheckStatus.WARN:
-            overall_status = DQReportStatus.WARNING
-        else:
-            overall_status = DQReportStatus.PASS
-
-        return DQReportSummary(
-            total_checks=passed + failed + warnings,
-            passed=passed,
-            failed=failed,
-            warnings=warnings,
-            overall_status=overall_status,
         )
 
     def analyze(
@@ -277,7 +245,7 @@ class SilverDQAnalyzer:
         )
 
         # Build summary
-        summary = self._build_summary(
+        summary = build_summary(
             passed=passed,
             failed=failed,
             warnings=warnings,
@@ -587,23 +555,6 @@ class SilverDQAnalyzer:
             status=status,
         )
 
-    def _result_to_dict(self, result: Any) -> dict[str, Any]:
-        """Convert dataclass result to dict for serialization."""
-        if hasattr(result, "__dataclass_fields__"):
-            output = {}
-            for field in result.__dataclass_fields__:
-                if field.startswith("_"):
-                    continue
-                value = getattr(result, field)
-                if hasattr(value, "value"):  # Enum
-                    output[field] = value.value
-                elif hasattr(value, "__dataclass_fields__"):
-                    output[field] = self._result_to_dict(value)
-                else:
-                    output[field] = value
-            return output
-        return {"value": result}
-
     def _distribution_to_dict(self, result: ValueDistributionResult) -> dict[str, Any]:
         """Convert distribution result to dict."""
         output: dict[str, Any] = {
@@ -613,7 +564,7 @@ class SilverDQAnalyzer:
         }
 
         for col, numeric_dist in result.numeric_columns.items():
-            output["numeric_columns"][col] = self._result_to_dict(numeric_dist)
+            output["numeric_columns"][col] = result_to_dict(numeric_dist)
 
         for col, categorical_dist in result.categorical_columns.items():
             output["categorical_columns"][col] = {
@@ -622,21 +573,6 @@ class SilverDQAnalyzer:
             }
 
         return output
-
-    def _update_counts(
-        self,
-        status: DQCheckStatus,
-        passed: int,
-        failed: int,
-        warnings: int,
-    ) -> tuple[int, int, int]:
-        """Update check counts based on status."""
-        if status == DQCheckStatus.PASS:
-            return passed + 1, failed, warnings
-        elif status == DQCheckStatus.FAIL:
-            return passed, failed + 1, warnings
-        else:  # WARN
-            return passed, failed, warnings + 1
 
 
 __all__ = ["SilverDQAnalyzer"]
