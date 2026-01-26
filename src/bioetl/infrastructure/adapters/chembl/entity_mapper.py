@@ -24,7 +24,9 @@ See Also:
 from __future__ import annotations
 
 from bioetl.domain.registry.publication import (
+    get_dedup_key_fields,
     get_publication_mapping,
+    has_composite_key,
     is_publication_entity,
 )
 
@@ -188,6 +190,54 @@ class ChemblEntityMapper:
         # Default: resource_id pattern
         resource = _NON_PUBLICATION_ENTITY_MAPPING.get(entity_type, entity_type)
         return f"{resource}_id"
+
+    @staticmethod
+    def get_dedup_key_fields(entity_type: str) -> tuple[str, ...]:
+        """Get the composite key fields for deduplication.
+
+        For entities with composite primary keys (like publication_term),
+        returns all fields that together form the unique key.
+        For entities with single primary key, returns a tuple with that field.
+
+        Args:
+            entity_type: Entity type (e.g., 'publication_term', 'activity').
+
+        Returns:
+            Tuple of field names for deduplication.
+
+        Example:
+            >>> ChemblEntityMapper.get_dedup_key_fields("publication_term")
+            ('document_chembl_id', 'term_type', 'term')
+            >>> ChemblEntityMapper.get_dedup_key_fields("activity")
+            ('activity_id',)
+        """
+        # Check publication registry first (ADR-024) - may have composite keys
+        pub_fields = get_dedup_key_fields(entity_type)
+        if pub_fields is not None:
+            return pub_fields
+
+        # Non-publication entities use single primary key
+        pk_field = ChemblEntityMapper.get_primary_key_field(entity_type)
+        return (pk_field,)
+
+    @staticmethod
+    def has_composite_key(entity_type: str) -> bool:
+        """Check if entity type has a composite primary key.
+
+        Args:
+            entity_type: Entity type to check.
+
+        Returns:
+            True if entity uses multiple fields for deduplication.
+
+        Example:
+            >>> ChemblEntityMapper.has_composite_key("publication_term")
+            True
+            >>> ChemblEntityMapper.has_composite_key("activity")
+            False
+        """
+        # Check publication registry; non-publication entities always have single primary key
+        return has_composite_key(entity_type)
 
     @staticmethod
     def get_resource_name(entity_type: str) -> str | None:
