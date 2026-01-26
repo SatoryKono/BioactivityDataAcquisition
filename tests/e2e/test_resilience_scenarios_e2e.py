@@ -33,7 +33,8 @@ async def test_memory_monitor_adaptive_batching(e2e_data_dir: Path):
     - Batch size should be reduced when memory usage exceeds threshold
     - Pipeline should continue processing with smaller batches
     """
-    from bioetl.application.core.memory_monitor import MemoryConfig, MemoryMonitor
+    from bioetl.domain.config import MemoryConfig
+    from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
 
     # Create memory monitor with custom thresholds
     config = MemoryConfig(
@@ -64,7 +65,8 @@ async def test_memory_monitor_graceful_degradation():
     - MemoryMonitor returns conservative estimates when psutil unavailable
     - This is intentional graceful degradation, not a bug
     """
-    from bioetl.application.core.memory_monitor import MemoryConfig, MemoryMonitor
+    from bioetl.domain.config import MemoryConfig
+    from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
 
     # Create monitor with default config
     monitor = MemoryMonitor(config=MemoryConfig())

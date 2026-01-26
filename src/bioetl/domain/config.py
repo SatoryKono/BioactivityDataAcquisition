@@ -600,3 +600,37 @@ class RuntimeConfig:
     def effective_lock_ttl(self) -> int:
         """Derived TTL for lock renewal based on runtime config."""
         return self.lock_ttl or self.heartbeat_interval * 3
+
+
+# =============================================================================
+# Memory Monitoring Configuration
+# =============================================================================
+
+
+@dataclass(frozen=True, slots=True)
+class MemoryConfig:
+    """Configuration for memory-aware batch processing.
+
+    Used by MemoryMonitor (infrastructure layer) to configure adaptive
+    batch sizing based on memory pressure detection.
+
+    Attributes:
+        max_batch_memory_mb: Maximum memory per batch in MB (default: 512MB).
+        memory_pressure_threshold: Threshold (0.0-1.0) for reducing batch size (default: 0.8).
+        min_batch_size: Minimum batch size even under memory pressure (default: 10).
+        check_interval_records: Check memory every N records (default: 100).
+        enable_adaptive_sizing: Enable/disable adaptive batch sizing (default: True).
+
+    Example:
+        >>> config = MemoryConfig()
+        >>> config.memory_pressure_threshold
+        0.8
+        >>> config.max_batch_memory_mb
+        512
+    """
+
+    max_batch_memory_mb: int = 512
+    memory_pressure_threshold: float = 0.8
+    min_batch_size: int = 10
+    check_interval_records: int = 100
+    enable_adaptive_sizing: bool = True

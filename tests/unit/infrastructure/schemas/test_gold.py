@@ -122,13 +122,14 @@ class TestGoldPublicationSchemaCrossRefFields:
         "schema_class,name",
         [
             (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
     def test_schema_has_pmid_field(self, schema_class, name):
-        """Gold publication schemas (except CrossRef) should have pmid field."""
+        """All Gold publication schemas should have pmid field."""
         fields = get_schema_fields(schema_class)
         assert "pmid" in fields, f"{name} missing pmid field"
 
@@ -136,13 +137,14 @@ class TestGoldPublicationSchemaCrossRefFields:
         "schema_class,name",
         [
             (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
     def test_schema_has_pmc_id_field(self, schema_class, name):
-        """Gold publication schemas (except CrossRef) should have pmc_id field."""
+        """All Gold publication schemas should have pmc_id field."""
         fields = get_schema_fields(schema_class)
         assert "pmc_id" in fields, f"{name} missing pmc_id field"
 

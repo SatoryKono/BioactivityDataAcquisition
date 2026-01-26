@@ -23,6 +23,7 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
 
     Uses PubMed esearch API with title field search:
     term="Title text"[Title]
+    Uses provider_prefix="pubmed" for auto-generated event names.
     """
 
     def __init__(
@@ -37,43 +38,8 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
             search_fn: Async function to search publications by title.
                        Signature: search_fn(title: str, limit: int) -> list[dict]
         """
-        super().__init__(logger)
+        super().__init__(logger, provider_prefix="pubmed")
         self._search_fn = search_fn
-
-    @property
-    def _event_no_fallback_title(self) -> str:
-        """Return log event name for missing fallback title."""
-        return "pubmed_no_fallback_title"
-
-    @property
-    def _event_fallback_attempt(self) -> str:
-        """Return log event name for fallback attempt."""
-        return "pubmed_title_fallback_attempt"
-
-    @property
-    def _event_fallback_success(self) -> str:
-        """Return log event name for successful fallback."""
-        return "pubmed_title_fallback_success"
-
-    @property
-    def _event_fallback_not_found(self) -> str:
-        """Return log event name for failed fallback."""
-        return "pubmed_title_fallback_not_found"
-
-    @property
-    def _event_title_only_attempt(self) -> str:
-        """Return log event name for title-only lookup attempt."""
-        return "pubmed_title_only_attempt"
-
-    @property
-    def _event_title_only_success(self) -> str:
-        """Return log event name for successful title-only lookup."""
-        return "pubmed_title_only_success"
-
-    @property
-    def _event_title_only_not_found(self) -> str:
-        """Return log event name for failed title-only lookup."""
-        return "pubmed_title_only_not_found"
 
     async def _search_by_title(self, title: str) -> dict[str, Any] | None:
         """Search for publication by title using PubMed esearch.
@@ -114,19 +80,3 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
     def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:
         """Return PubMed PMID for logging."""
         return ("found_pmid", str(result.get("pmid", "unknown")))
-
-    def _process_found_result(
-        self, result: dict[str, Any], original_id: str
-    ) -> dict[str, Any]:
-        """Add lookup method metadata to found publication.
-
-        Args:
-            result: The found publication record.
-            original_id: The ID that was originally searched (DOI or PMID).
-
-        Returns:
-            Publication with _lookup_method and _original_id added.
-        """
-        result["_lookup_method"] = "title_fallback"
-        result["_original_id"] = original_id
-        return result

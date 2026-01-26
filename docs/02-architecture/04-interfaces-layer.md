@@ -15,15 +15,32 @@
 
 ## 2. Ключевые Компоненты
 
-### 2.1. `cli.py` — Интерфейс Командной Строки
+### 2.1. `cli/` — Интерфейс Командной Строки
 
-**Расположение:** `src/bioetl/interfaces/cli.py`
+**Расположение:** `src/bioetl/interfaces/cli/`
 
-Реализует CLI для взаимодействия с пользователем. Использует библиотеку `Click` для определения команд.
+Реализует CLI для взаимодействия с пользователем. Использует библиотеку **Click** для определения команд.
 
-**Пример команды:**
+**Доступные команды:**
+
+| Команда | Описание |
+|---------|----------|
+| `run` | Запуск одного пайплайна |
+| `run_all` | Запуск всех пайплайнов провайдера |
+| `export` | Экспорт данных из Gold |
+| `quarantine` | Управление карантинными записями |
+| `health` | Проверка здоровья провайдеров |
+
+**Примеры использования:**
 ```bash
+# Запуск пайплайна с лимитом
 python -m bioetl run --pipeline chembl_activity --limit 100
+
+# Запуск композитного пайплайна (ADR-026)
+python -m bioetl run --pipeline composite_publication
+
+# Проверка здоровья провайдеров
+python -m bioetl health --provider chembl
 ```
 
 `cli.py` парсит эти аргументы, вызывает функции из `src/bioetl/composition/bootstrap.py` для инициализации системы и запускает выполнение пайплайна.
@@ -43,3 +60,34 @@ python -m bioetl run --pipeline chembl_activity --limit 100
 - **Максимальная простота:** Этот слой должен быть как можно более "глупым". Его задача — делегировать работу другим слоям, а не выполнять её самому.
 - **Единственная ответственность:** Единственная ответственность этого слоя — запуск приложения и управление его жизненным циклом на самом верхнем уровне.
 - **Импорт из всех слоёв:** Это единственный слой, которому разрешено импортировать модули из `domain`, `application` и `infrastructure` для того, чтобы "собрать" приложение воедино.
+
+---
+
+## 4. Связанные Материалы
+
+### Навигация по Слоям
+
+| ← Предыдущий | Текущий | Следующий → |
+|--------------|---------|-------------|
+| [Infrastructure Layer](03-infrastructure-layer.md) | **Interfaces** | [Composition Layer](05-composition-layer.md) |
+
+### Связанные Диаграммы
+
+| Диаграмма | Файл | Описание |
+|-----------|------|----------|
+| Five Layer Architecture | [../diagrams/mermaid/01_five_layer_architecture.mmd](../diagrams/mermaid/01_five_layer_architecture.mmd) | Полная архитектура с Interfaces слоем |
+| Layers Interaction | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid) | Взаимодействие слоёв |
+| Graceful Shutdown | [../diagrams/mermaid/24_graceful_shutdown.mmd](../diagrams/mermaid/24_graceful_shutdown.mmd) | Sequence diagram graceful shutdown |
+
+### Связанные ADR
+
+| ADR | Тема |
+|-----|------|
+| [ADR-008](decisions/ADR-008-graceful-shutdown-strategy.md) | Graceful Shutdown Strategy |
+| [ADR-026](decisions/ADR-026-composite-pipeline-pattern.md) | Composite Pipeline — расширения CLI |
+
+### Смежные Разделы Документации
+
+- [Composition Layer](05-composition-layer.md) — bootstrap_pipeline, фабрики
+- [CLI Reference](../04-reference/cli.md) — полная документация CLI команд
+- [RULES.md §1 "Архитектура и Слои"](../RULES.md) — матрица импортов (interfaces может импортировать всё)
