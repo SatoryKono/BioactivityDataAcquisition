@@ -124,8 +124,28 @@ class CrossRefExtractor:
 
         return serialize_to_json(ids, ensure_ascii=False) if ids else None
 
-    @staticmethod
-    def extract_pdb_xrefs(xrefs: Any) -> str | None:
+    @classmethod
+    def _build_pdb_entry(cls, xref: dict[str, Any]) -> dict[str, Any] | None:
+        """Build a PDB entry from a cross-reference dict."""
+        pdb_id = xref.get("id")
+        if not pdb_id:
+            return None
+
+        pdb_entry: dict[str, Any] = {"id": str(pdb_id)}
+        props = cls._parse_properties(xref.get("properties", []))
+
+        for key, field in [
+            ("Method", "method"),
+            ("Resolution", "resolution"),
+            ("Chains", "chains"),
+        ]:
+            if props.get(key):
+                pdb_entry[field] = props[key]
+
+        return pdb_entry
+
+    @classmethod
+    def extract_pdb_xrefs(cls, xrefs: Any) -> str | None:
         """Extract PDB cross-references with structural details.
 
         PDB references include information about 3D structure availability,
@@ -141,38 +161,12 @@ class CrossRefExtractor:
         if not xrefs or not isinstance(xrefs, list):
             return None
 
-        pdb_refs: list[dict[str, Any]] = []
-        for xref in xrefs:
-            if not isinstance(xref, dict):
-                continue
-            if xref.get("database") != "PDB":
-                continue
-
-            pdb_id = xref.get("id")
-            if not pdb_id:
-                continue
-
-            pdb_entry: dict[str, Any] = {"id": str(pdb_id)}
-
-            # Parse properties for method, resolution, and chains
-            properties = xref.get("properties", [])
-            if isinstance(properties, list):
-                for prop in properties:
-                    if not isinstance(prop, dict):
-                        continue
-                    key = prop.get("key")
-                    value = prop.get("value")
-                    if not key or not value:
-                        continue
-
-                    if key == "Method":
-                        pdb_entry["method"] = str(value)
-                    elif key == "Resolution":
-                        # Resolution is typically in Angstroms (e.g., "2.10 A")
-                        pdb_entry["resolution"] = str(value)
-                    elif key == "Chains":
-                        pdb_entry["chains"] = str(value)
-
-            pdb_refs.append(pdb_entry)
+        pdb_refs = [
+            entry
+            for xref in xrefs
+            if isinstance(xref, dict) and xref.get("database") == "PDB"
+            for entry in [cls._build_pdb_entry(xref)]
+            if entry is not None
+        ]
 
         return serialize_to_json(pdb_refs, ensure_ascii=False) if pdb_refs else None

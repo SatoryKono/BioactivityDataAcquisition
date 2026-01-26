@@ -1361,9 +1361,7 @@ class TestUniProtInductionExtraction:
             "comments": [
                 {
                     "commentType": "INDUCTION",
-                    "texts": [
-                        {"value": "Induced by heat shock and oxidative stress."}
-                    ],
+                    "texts": [{"value": "Induced by heat shock and oxidative stress."}],
                 }
             ],
         }
