@@ -108,7 +108,7 @@ def extract_affiliations(publication: dict[str, Any]) -> list[str]:
             if name and isinstance(name, str):
                 affiliations.add(name.strip())
 
-    return sorted(list(affiliations))
+    return sorted(affiliations)
 
 
 def extract_year(publication: dict[str, Any]) -> int | None:

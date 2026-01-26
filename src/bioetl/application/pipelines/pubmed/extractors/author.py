@@ -143,4 +143,4 @@ class AuthorExtractor(BaseFieldExtractor):
             if affs:
                 all_affiliations.update(affs)
 
-        return sorted(list(all_affiliations))
+        return sorted(all_affiliations)
