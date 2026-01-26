@@ -51,6 +51,10 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
         open_access_url: URL to open access PDF.
         fields_of_study: JSON string of fields of study.
         publication_types: JSON string of publication types.
+        author_s2_ids: JSON string of S2 author IDs (40-char hex).
+        author_orcids: JSON string of ORCID identifiers.
+        author_h_indices: JSON string of h-index values.
+        citation_contexts: JSON string of citation context sentences.
 
     Note: paper_id is required for Semantic Scholar publications.
 
@@ -84,6 +88,14 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     # SemanticScholar-specific classification (JSON strings)
     fields_of_study: str | None = None
     publication_types: str | None = None
+
+    # Author identifiers (for author-level analytics and disambiguation)
+    author_s2_ids: str | None = None  # JSON array of S2 author IDs (40-char hex)
+    author_orcids: str | None = None  # JSON array of ORCID identifiers
+    author_h_indices: str | None = None  # JSON array of h-index values
+
+    # Citation context (for citation sentiment analysis)
+    citation_contexts: str | None = None  # JSON array of context sentences
 
     # Override: Default source for SemanticScholar
     _source: str = "semanticscholar"

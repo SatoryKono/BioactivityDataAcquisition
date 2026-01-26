@@ -173,6 +173,12 @@ class TestSemanticScholarYearValidation:
             "oa_status": None,
             "fields_of_study": None,
             "publication_types": None,
+            # Author identifiers
+            "author_s2_ids": None,
+            "author_orcids": None,
+            "author_h_indices": None,
+            # Citation context
+            "citation_contexts": None,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
