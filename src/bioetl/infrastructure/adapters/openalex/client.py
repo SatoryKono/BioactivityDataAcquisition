@@ -213,8 +213,9 @@ class OpenAlexAdapter(BaseHttpAdapter):
             if not title or not title.strip():
                 continue
 
-            result = await self._search_by_title(title, limit=1)
-            if result:
+            results = await self._search_by_title(title, limit=1)
+            if results:
+                result = results[0]
                 result["_lookup_method"] = "title"
                 result["_search_title"] = title  # Track which title matched
                 yield result
@@ -523,7 +524,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
 
     async def _search_by_title(
         self, title: str, limit: int = 3
-    ) -> dict[str, Any] | None:
+    ) -> list[dict[str, Any]]:
         """Search works by title (fuzzy match).
 
         Uses `filter=title.search:...` syntax.
@@ -533,7 +534,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
             limit: Maximum results to check for relevance.
 
         Returns:
-            First relevant publication or None.
+            List of relevant publications (empty if none found).
         """
         # Clean title for search
         clean_title = self._escape_title_for_search(title.strip()[:200])
@@ -566,11 +567,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
 
             data = response.json()
             results: list[dict[str, Any]] = data.get("results", [])
-
-            if results:
-                first_result: dict[str, Any] = results[0]
-                return first_result
-            return None
+            return results
 
         except Exception as e:
             self.logger.debug(
@@ -578,7 +575,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
                 title=title[:50],
                 error=str(e),
             )
-            return None
+            return []
 
     @staticmethod
     def _normalize_doi(doi: str) -> str | None:

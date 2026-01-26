@@ -11,19 +11,28 @@ Used by:
 
 from __future__ import annotations
 
+import string
+
 
 def normalize_title(title: str) -> str:
     """Normalize title for comparison.
 
-    Normalizes whitespace and converts to lowercase.
+    Normalizes whitespace, converts to lowercase, and removes punctuation.
+    Punctuation is replaced by spaces to handle cases like "Non-linear" vs "Non linear".
 
     Args:
         title: Title string to normalize.
 
     Returns:
-        Normalized title (lowercase, single spaces).
+        Normalized title (lowercase, no punctuation, single spaces).
     """
-    return " ".join(title.lower().strip().split())
+    if not title:
+        return ""
+    # Replace punctuation with spaces
+    translator = str.maketrans(string.punctuation, " " * len(string.punctuation))
+    cleaned = title.translate(translator)
+    # Normalize whitespace
+    return " ".join(cleaned.lower().strip().split())
 
 
 def titles_match(

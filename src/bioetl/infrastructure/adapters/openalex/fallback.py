@@ -29,7 +29,9 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
     def __init__(
         self,
         logger: LoggerPort,
-        search_fn: Callable[[str, int], Any],  # Coroutine returning dict | None
+        search_fn: Callable[
+            [str, int], Any
+        ],  # Coroutine returning list[dict]
     ) -> None:
         """Initialize fallback handler.
 
@@ -44,6 +46,7 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
         """Search for work by title using OpenAlex API.
 
         Validates results using title matching to reduce false positives.
+        Iterates through candidates to find the best match.
 
         Args:
             title: Publication title to search for.
@@ -51,17 +54,20 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
         Returns:
             Work record if found and title matches, None otherwise.
         """
-        result = await self._search_fn(title, 3)
-        if result is None:
+        candidates = await self._search_fn(title, 3)
+        if not candidates:
             return None
 
-        # Validate title match to reduce false positives
-        found_title = result.get("title", "")
-        if found_title and titles_match(title, found_title):
-            return cast(dict[str, Any], result)
+        # Iterate through candidates to find a match
+        for result in candidates:
+            found_title = result.get("title", "")
+            if found_title and titles_match(title, found_title):
+                return cast("dict[str, Any]", result)
 
-        # If no title in result, return it anyway
-        if not found_title:
-            return cast(dict[str, Any], result)
+        # Fallback: check if any candidate has no title (rare edge case)
+        # Only return if we haven't found a match yet
+        for result in candidates:
+            if not result.get("title"):
+                return cast("dict[str, Any]", result)
 
         return None

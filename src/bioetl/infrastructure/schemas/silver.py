@@ -35,6 +35,7 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
         # === PUBLICATION_METADATA_FIELDS ===
+        pa.field("affiliations", pa.string()),  # JSON array of affiliations
         pa.field("authors", pa.string()),  # JSON array of author names
         pa.field("title", pa.string()),
         pa.field("journal", pa.string()),
@@ -243,6 +244,7 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         # Dates (ISO format strings)
         pa.field("accepted_date", pa.string()),
         # Authors
+        pa.field("affiliations", pa.string()),  # JSON-serialized list of affiliations
         pa.field("author_count", pa.int64()),  # Denormalized count for query efficiency
         pa.field("authors", pa.string()),  # JSON-serialized list
         # Counts (denormalized for query efficiency)
@@ -659,6 +661,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         # External IDs
         pa.field("arxiv_id", pa.string()),
         # Classification (JSON strings)
+        pa.field("affiliations", pa.string()),
         pa.field("authors", pa.string()),
         # Metrics
         pa.field("citation_count", pa.int64()),
@@ -715,6 +718,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_original_id", pa.string()),
         # === Business fields (alphabetical order) ===
         pa.field("abstract", pa.string()),
+        pa.field("affiliations", pa.string()),
         pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
         pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("citation_count", pa.int64()),
@@ -772,6 +776,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
         pa.field("abstract", pa.string()),
+        pa.field("affiliations", pa.string()),
         pa.field("authors", pa.string()),  # JSON-serialized list
         # OpenAlex source field: cited_by_count
         # Unified BioETL field: citation_count (standardized across all providers)
