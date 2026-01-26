@@ -21,6 +21,8 @@ from typing import TYPE_CHECKING, Any, cast
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.crossref.extractors import (
     extract_affiliations,
+    extract_author_details,
+    extract_author_orcids,
     extract_authors,
     extract_content_domain,
     extract_dates,
@@ -29,6 +31,7 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_license_url,
     extract_page_info,
     extract_published_date,
+    extract_references,
     extract_year,
 )
 from bioetl.domain.entities.crossref import (
@@ -144,6 +147,20 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         raw_affiliations = extract_affiliations(rec)
         serialized_affiliations = self.serialize_json_list(raw_affiliations)
 
+        # Extract author ORCID identifiers (not PII - designed for public identification)
+        author_orcids = extract_author_orcids(rec)
+        serialized_orcids = self.serialize_json_list(author_orcids)
+
+        # Extract full author details with ORCID, sequence, and affiliations
+        # Hash PII fields (given name, family name) while preserving non-PII data
+        raw_author_details = extract_author_details(rec)
+        hashed_author_details = self._hash_author_details(raw_author_details)
+        serialized_author_details = self.serialize_json(hashed_author_details)
+
+        # Extract bibliographic references (not PII - public citation data)
+        raw_references = extract_references(rec)
+        serialized_references = self.serialize_json(raw_references)
+
         # Compute unified publication_date (prefer print over online)
         publication_date = self._compute_publication_date(
             dates.get("published_print"),
@@ -188,6 +205,10 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "published": published_date,
             **content_domain,
             **issn_by_type,
+            # NEW: Author and reference data (per PROMPT 3 enhancement)
+            "author_orcids": serialized_orcids,
+            "author_details": serialized_author_details,
+            "references": serialized_references,
         }
 
     def _get_primary_id_field(self) -> str:
@@ -231,6 +252,45 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         doi = record.get("DOI")
         if not doi:
             raise ValueError("DOI is required for CrossRef Publication")
+
+    def _hash_author_details(
+        self, author_details: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        """Hash PII fields in author details while preserving non-PII data.
+
+        Author names (given, family, name) are PII and should be hashed.
+        Other fields (orcid, sequence, affiliations) are not PII.
+
+        Args:
+            author_details: List of author detail dictionaries.
+
+        Returns:
+            List of author details with hashed PII fields.
+
+        """
+        hashed_details: list[dict[str, Any]] = []
+
+        for author in author_details:
+            hashed_author: dict[str, Any] = {}
+
+            # Hash PII fields (author names)
+            for pii_field in ("given", "family", "name"):
+                value = author.get(pii_field)
+                if value and isinstance(value, str):
+                    hashed_author[pii_field] = self.hash_pii_value(value)
+                else:
+                    hashed_author[pii_field] = None
+
+            # Preserve non-PII fields (orcid, sequence, authenticated_orcid, affiliations)
+            # ORCID is a public persistent identifier, not PII
+            hashed_author["orcid"] = author.get("orcid")
+            hashed_author["authenticated_orcid"] = author.get("authenticated_orcid")
+            hashed_author["sequence"] = author.get("sequence")
+            hashed_author["affiliations"] = author.get("affiliations", [])
+
+            hashed_details.append(hashed_author)
+
+        return hashed_details
 
     def _compute_publication_date(
         self,
