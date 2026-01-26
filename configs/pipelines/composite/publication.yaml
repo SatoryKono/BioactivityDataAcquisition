@@ -87,6 +87,43 @@ composite:
       fallback_strategy: skip  # Skip on failure (high rate limits)
       silver_table: silver/semanticscholar/publication
 
+    # ChEMBL Publication Terms: MeSH headings and keywords from ChEMBL
+    # This is a 1:M enricher - multiple terms per publication
+    - pipeline: chembl_publication_term
+      join_keys:
+        - document_chembl_id
+      required: false
+      filter_condition: null  # All seed records have document_chembl_id
+      timeout_seconds: 300    # Fast - local Delta Lake read
+      silver_table: silver/chembl/publication_term
+      cardinality: many_to_one
+      aggregation:
+        group_by: document_chembl_id
+        fields:
+          chembl_mesh_headings:
+            source: term
+            filter: "term_type == 'MESH_HEADING'"
+            agg: collect_list
+          chembl_mesh_qualifiers:
+            source: term
+            filter: "term_type == 'MESH_QUALIFIER'"
+            agg: collect_list
+          chembl_keywords:
+            source: term
+            filter: "term_type == 'KEYWORD'"
+            agg: collect_list
+          chembl_concepts:
+            source: term
+            filter: "term_type == 'CONCEPT'"
+            agg: collect_list
+          chembl_mesh_ids:
+            source: mesh_id
+            filter: "mesh_id IS NOT NULL"
+            agg: collect_set
+          chembl_term_count:
+            source: entity_id
+            agg: count
+
   # ---------------------------------------------------------------------------
   # Merge Configuration
   # ---------------------------------------------------------------------------
@@ -118,6 +155,18 @@ composite:
         - openalex       # OpenAlex concepts are unique
       tldr:
         - semanticscholar  # S2-only field
+      chembl_mesh_headings:
+        - chembl         # ChEMBL-only field
+      chembl_mesh_qualifiers:
+        - chembl         # ChEMBL-only field
+      chembl_keywords:
+        - chembl         # ChEMBL-only field
+      chembl_concepts:
+        - chembl         # ChEMBL-only field
+      chembl_mesh_ids:
+        - chembl         # ChEMBL-only field
+      chembl_term_count:
+        - chembl         # ChEMBL-only field
 
     # -------------------------------------------------------------------------
     # Column Ordering by Semantic Groups
@@ -277,11 +326,17 @@ composite:
           - fields_of_study
           - mesh_terms
           - mesh_heading_count
+          - chembl_mesh_headings      # ChEMBL publication term aggregation
+          - chembl_mesh_qualifiers    # ChEMBL publication term aggregation
+          - chembl_mesh_ids           # ChEMBL publication term aggregation
+          - chembl_keywords           # ChEMBL publication term aggregation
+          - chembl_concepts           # ChEMBL publication term aggregation
+          - chembl_term_count         # ChEMBL publication term aggregation
           - keywords
           - keyword_count
           - publication_types
           - publication_type_list
-        provider_order: [crossref, openalex, pubmed, semanticscholar]
+        provider_order: [crossref, openalex, pubmed, chembl, semanticscholar]
 
       # 19. Provider-specific IDs
       - name: provider_ids
