@@ -134,6 +134,11 @@ class CsvFilterReader:
         Loads primary filter IDs and builds a mapping from primary to fallback
         values for use when primary lookup fails (e.g., DOI → title fallback).
 
+        Handles three cases:
+        1. Records with DOI and title → DOI in filter_ids, DOI→title in mapping
+        2. Records with DOI only → DOI in filter_ids, no fallback
+        3. Records with title only → empty string in filter_ids, ""→title in mapping
+
         Args:
             source_path: Path to the CSV file.
             primary_column: Name of the primary filter column (e.g., 'doi').
@@ -142,25 +147,46 @@ class CsvFilterReader:
         Returns:
             Tuple of (FilterLoadResult, fallback_mapping).
             fallback_mapping maps primary values to fallback values.
+            Empty string key "" maps to titles for records without primary ID.
         """
         df = await asyncio.to_thread(self._read_csv_dataframe, source_path)
 
-        # Standard loading of primary IDs
-        all_ids = self._extract_column_ids(df, primary_column)
-        unique_ids, unique_count, duplicate_count, duplicates = (
-            self._compute_duplicate_stats(all_ids)
-        )
-
-        # Build fallback mapping
+        # Build fallback mapping and collect IDs (including empty placeholders)
         fallback_mapping: dict[str, str] = {}
-        if fallback_column in df.columns:
+        all_ids: list[str] = []
+        title_only_count = 0
+
+        if fallback_column not in df.columns:
+            if self._logger:
+                self._logger.warning(
+                    "fallback_column_not_found",
+                    source_path=source_path,
+                    fallback_column=fallback_column,
+                    available_columns=df.columns,
+                )
+            # Fall back to standard extraction without fallback support
+            all_ids = self._extract_column_ids(df, primary_column)
+        else:
+            # Process all rows, handling empty primary values
             for row in df.iter_rows(named=True):
                 primary_val = row.get(primary_column)
                 fallback_val = row.get(fallback_column)
-                if primary_val and fallback_val:
-                    fallback_mapping[str(primary_val).strip()] = str(
-                        fallback_val
-                    ).strip()
+
+                primary_str = str(primary_val).strip() if primary_val else ""
+                fallback_str = str(fallback_val).strip() if fallback_val else ""
+
+                if primary_str:
+                    # Case 1 & 2: Record has DOI
+                    all_ids.append(primary_str)
+                    if fallback_str:
+                        fallback_mapping[primary_str] = fallback_str
+                elif fallback_str:
+                    # Case 3: Record has title only (empty DOI)
+                    # Use indexed marker for title-only lookup (Phase 3)
+                    marker = f"__title_only_{title_only_count}__"
+                    all_ids.append(marker)
+                    fallback_mapping[marker] = fallback_str
+                    title_only_count += 1
 
             if self._logger:
                 self._logger.info(
@@ -169,14 +195,13 @@ class CsvFilterReader:
                     primary_column=primary_column,
                     fallback_column=fallback_column,
                     mapping_count=len(fallback_mapping),
+                    title_only_count=title_only_count,
                 )
-        elif self._logger:
-            self._logger.warning(
-                "fallback_column_not_found",
-                source_path=source_path,
-                fallback_column=fallback_column,
-                available_columns=df.columns,
-            )
+
+        # Compute stats (markers __title_only_N__ are included as they are non-empty)
+        unique_ids, unique_count, duplicate_count, duplicates = (
+            self._compute_duplicate_stats([id_ for id_ in all_ids if id_])
+        )
 
         result = FilterLoadResult(
             ids=unique_ids,
