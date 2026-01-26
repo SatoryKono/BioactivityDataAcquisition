@@ -5,7 +5,8 @@ Defines immutable configuration objects for composite pipelines:
 - EnricherConfig: Single enricher configuration
 - MergeConfig: Merge operation configuration
 - CompositeConfig: Complete composite pipeline configuration
-- AggregationConfig: Configuration for 1:M enricher aggregation
+
+Aggregation configuration is defined in aggregation.py and re-exported here.
 
 See ADR-026 for architectural decisions.
 """
@@ -13,194 +14,35 @@ See ADR-026 for architectural decisions.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import TYPE_CHECKING
 
+from bioetl.domain.composite.aggregation import (
+    AggregationConfig,
+    AggregationFieldSpec,
+    AggregationFunction,
+    EnricherCardinality,
+)
 from bioetl.domain.composite.strategy import (
     ConflictResolution,
     FallbackStrategy,
     MergeStrategy,
 )
 
-if TYPE_CHECKING:
-    pass
-
-
-class AggregationFunction(Enum):
-    """Supported aggregation functions for 1:M enrichers.
-
-    These functions are applied to convert multiple rows per join key
-    into a single aggregated row before joining with the seed data.
-
-    Attributes:
-        COLLECT_LIST: Collect all values into a list.
-        COLLECT_SET: Collect unique values into a list.
-        COUNT: Count the number of values.
-        FIRST: Take the first value.
-        CONCAT_STR: Concatenate string values with separator.
-    """
-
-    COLLECT_LIST = "collect_list"
-    COLLECT_SET = "collect_set"
-    COUNT = "count"
-    FIRST = "first"
-    CONCAT_STR = "concat_str"
-
-    @classmethod
-    def from_string(cls, value: str) -> AggregationFunction:
-        """Convert string to AggregationFunction enum.
-
-        Args:
-            value: String representation of aggregation function.
-
-        Returns:
-            Corresponding AggregationFunction enum value.
-
-        Raises:
-            ValueError: If the value is not a valid aggregation function.
-        """
-        try:
-            return cls(value.lower())
-        except ValueError:
-            valid = [e.value for e in cls]
-            raise ValueError(
-                f"Invalid aggregation function '{value}'. "
-                f"Valid options: {valid}"
-            ) from None
-
-
-class EnricherCardinality(Enum):
-    """Cardinality of enricher data relative to seed.
-
-    Describes the relationship between seed rows and enricher rows.
-
-    Attributes:
-        ONE_TO_ONE: Default. One enricher row per seed row.
-        MANY_TO_ONE: Multiple enricher rows per seed row.
-            Requires aggregation config to collapse to 1:1.
-    """
-
-    ONE_TO_ONE = "one_to_one"
-    MANY_TO_ONE = "many_to_one"
-
-    @classmethod
-    def from_string(cls, value: str) -> EnricherCardinality:
-        """Convert string to EnricherCardinality enum.
-
-        Args:
-            value: String representation of cardinality.
-
-        Returns:
-            Corresponding EnricherCardinality enum value.
-
-        Raises:
-            ValueError: If the value is not a valid cardinality.
-        """
-        try:
-            return cls(value.lower())
-        except ValueError:
-            valid = [e.value for e in cls]
-            raise ValueError(
-                f"Invalid cardinality '{value}'. Valid options: {valid}"
-            ) from None
-
-
-@dataclass(frozen=True, slots=True)
-class AggregationFieldSpec:
-    """Specification for a single aggregated field.
-
-    Defines how to aggregate a source column from a 1:M enricher
-    into a single value per join key.
-
-    Attributes:
-        source_field: Source column name to aggregate (e.g., "term").
-        agg_function: Aggregation function to apply.
-        filter_condition: Optional SQL-like filter condition
-            (e.g., "term_type == 'MESH_HEADING'").
-        output_field: Output column name. Defaults to source_field if None.
-
-    Example:
-        >>> spec = AggregationFieldSpec(
-        ...     source_field="term",
-        ...     agg_function=AggregationFunction.COLLECT_LIST,
-        ...     filter_condition="term_type == 'MESH_HEADING'",
-        ...     output_field="mesh_headings",
-        ... )
-    """
-
-    source_field: str
-    agg_function: AggregationFunction
-    filter_condition: str | None = None
-    output_field: str | None = None
-
-    def __post_init__(self) -> None:
-        """Validate and convert types."""
-        if isinstance(self.agg_function, str):
-            object.__setattr__(
-                self,
-                "agg_function",
-                AggregationFunction.from_string(self.agg_function),
-            )
-        self._validate()
-
-    def _validate(self) -> None:
-        """Validate field specification."""
-        _require_non_empty(self.source_field, "aggregation source_field")
-
-    @property
-    def effective_output_field(self) -> str:
-        """Get the effective output field name."""
-        return self.output_field or self.source_field
-
-
-@dataclass(frozen=True, slots=True)
-class AggregationConfig:
-    """Configuration for 1:M enricher aggregation.
-
-    Applied BEFORE join to convert 1:M relationships into 1:1.
-    Groups enricher data by the join key and aggregates specified fields.
-
-    Attributes:
-        group_by: Join key to group by (e.g., "document_chembl_id").
-        fields: Tuple of field specifications defining aggregations.
-
-    Example:
-        >>> config = AggregationConfig(
-        ...     group_by="document_chembl_id",
-        ...     fields=(
-        ...         AggregationFieldSpec(
-        ...             source_field="term",
-        ...             agg_function=AggregationFunction.COLLECT_LIST,
-        ...             filter_condition="term_type == 'MESH_HEADING'",
-        ...             output_field="mesh_headings",
-        ...         ),
-        ...         AggregationFieldSpec(
-        ...             source_field="mesh_id",
-        ...             agg_function=AggregationFunction.COLLECT_SET,
-        ...             output_field="mesh_ids",
-        ...         ),
-        ...     ),
-        ... )
-    """
-
-    group_by: str
-    fields: tuple[AggregationFieldSpec, ...]
-
-    def __post_init__(self) -> None:
-        """Validate and convert types."""
-        if isinstance(self.fields, list):
-            converted = tuple(
-                AggregationFieldSpec(**f) if isinstance(f, dict) else f
-                for f in self.fields
-            )
-            object.__setattr__(self, "fields", converted)
-        self._validate()
-
-    def _validate(self) -> None:
-        """Validate aggregation configuration."""
-        _require_non_empty(self.group_by, "aggregation group_by")
-        if not self.fields:
-            raise ValueError("aggregation.fields cannot be empty")
+# Re-export aggregation types for backward compatibility
+__all__ = [
+    "AggregationConfig",
+    "AggregationFieldSpec",
+    "AggregationFunction",
+    "ColumnGroupConfig",
+    "CompositeConfig",
+    "CompositeDQConfig",
+    "DQOverrideConfig",
+    "EnricherCardinality",
+    "EnricherConfig",
+    "ExecutionConfig",
+    "LineageConfig",
+    "MergeConfig",
+    "SeedConfig",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -267,25 +109,7 @@ class EnricherConfig:
 
     Example:
         >>> config = EnricherConfig(
-        ...     pipeline="crossref_publication",
-        ...     join_keys=("doi",),
-        ...     required=True,
-        ...     timeout_seconds=600,
-        ... )
-        >>> # 1:M enricher with aggregation
-        >>> config_1m = EnricherConfig(
-        ...     pipeline="chembl_publication_term",
-        ...     join_keys=("document_chembl_id",),
-        ...     cardinality=EnricherCardinality.MANY_TO_ONE,
-        ...     aggregation=AggregationConfig(
-        ...         group_by="document_chembl_id",
-        ...         fields=(
-        ...             AggregationFieldSpec(
-        ...                 source_field="term",
-        ...                 agg_function=AggregationFunction.COLLECT_LIST,
-        ...             ),
-        ...         ),
-        ...     ),
+        ...     pipeline="crossref_publication", join_keys=("doi",), required=True,
         ... )
     """
 

@@ -6,10 +6,10 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal
 
+from bioetl.application.composite.aggregator import EnricherAggregator
 from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.deduplication import EnricherDeduplicator
-from bioetl.domain.composite.config import AggregationFunction
 from bioetl.domain.composite.result import EnrichmentResult, MergeResult
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
@@ -18,12 +18,7 @@ JoinHow = Literal["inner", "left", "right", "full", "semi", "anti", "cross", "ou
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.domain.composite.config import (
-        AggregationConfig,
-        AggregationFieldSpec,
-        EnricherConfig,
-        MergeConfig,
-    )
+    from bioetl.domain.composite.config import EnricherConfig, MergeConfig
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort, StoragePort
 
 
@@ -93,6 +88,7 @@ class MergeService:
         self._logger = logger
         self._delta_reader = delta_reader
         self._deduplicator = EnricherDeduplicator(logger)
+        self._aggregator = EnricherAggregator(logger)
         self._renamer = ColumnRenamer(logger)
         # Pass column_groups from config if available for YAML-based ordering
         self._orderer = ColumnOrderer(
@@ -648,7 +644,7 @@ class MergeService:
             # Apply aggregation for MANY_TO_ONE enrichers BEFORE deduplication
             # This converts 1:M relationships to 1:1
             if enricher.is_many_to_one and enricher.aggregation is not None:
-                enricher_df = self._aggregate_enricher_data(
+                enricher_df = self._aggregator.aggregate(
                     enricher_df,
                     enricher.aggregation,
                     enricher.pipeline,
@@ -699,36 +695,11 @@ class MergeService:
             enricher_df = self._drop_system_columns(enricher_df)
 
             # Calculate qualified join key names for both seed and enricher
-            # Support both pre-renamed (qualified) and unqualified seed columns
-            seed_join_key_qualified: str | None = None
-            seed_join_key: str = primary_key  # Default to unqualified
-
-            if seed_pipeline is not None:
-                try:
-                    seed_provider, seed_entity = self._parse_pipeline_name(
-                        seed_pipeline
-                    )
-                    seed_join_key_qualified = (
-                        f"{seed_provider}.{seed_entity}.{primary_key}"
-                    )
-                    # Use qualified if present, otherwise fallback to unqualified
-                    if seed_join_key_qualified in merged.columns:
-                        seed_join_key = seed_join_key_qualified
-                    elif primary_key in merged.columns:
-                        seed_join_key = primary_key
-                except ValueError:
-                    # Fallback if seed_pipeline is invalid
-                    seed_join_key = primary_key
-
-            try:
-                enricher_provider, enricher_entity = self._parse_pipeline_name(
-                    enricher.pipeline
+            seed_join_key, enricher_join_key, seed_join_key_qualified = (
+                self._resolve_join_key_names(
+                    primary_key, seed_pipeline, enricher.pipeline, merged.columns
                 )
-                enricher_join_key = (
-                    f"{enricher_provider}.{enricher_entity}.{primary_key}"
-                )
-            except ValueError:
-                enricher_join_key = primary_key
+            )
 
             # Detect and resolve remaining conflicts
             # Exclude both seed and enricher join keys from conflict detection
@@ -794,165 +765,45 @@ class MergeService:
 
         return df
 
-    def _aggregate_enricher_data(
+    def _resolve_join_key_names(
         self,
-        df: pl.DataFrame,
-        config: AggregationConfig,
-        enricher_name: str,
-    ) -> pl.DataFrame:
-        """Aggregate 1:M enricher data into 1:1 before join.
-
-        Converts multiple rows per join key into a single row with
-        aggregated values based on the aggregation configuration.
+        primary_key: str,
+        seed_pipeline: str | None,
+        enricher_pipeline: str,
+        merged_columns: list[str],
+    ) -> tuple[str, str, str | None]:
+        """Resolve qualified join key names for seed and enricher.
 
         Args:
-            df: Enricher DataFrame with multiple rows per join key.
-            config: Aggregation configuration specifying how to aggregate.
-            enricher_name: Enricher name for logging.
+            primary_key: Unqualified join key name.
+            seed_pipeline: Seed pipeline name for qualification.
+            enricher_pipeline: Enricher pipeline name for qualification.
+            merged_columns: Current merged DataFrame columns.
 
         Returns:
-            DataFrame with one row per join key, aggregated columns.
-
-        Example:
-            >>> # Input: 3 rows for CHEMBL1 with different terms
-            >>> # document_chembl_id | term      | term_type
-            >>> # CHEMBL1           | Aspirin   | MESH_HEADING
-            >>> # CHEMBL1           | Pain      | MESH_HEADING
-            >>> # CHEMBL1           | Kinase    | KEYWORD
-            >>> #
-            >>> # Output after aggregation:
-            >>> # document_chembl_id | mesh_headings       | keywords
-            >>> # CHEMBL1           | [Aspirin, Pain]     | [Kinase]
+            Tuple of (seed_join_key, enricher_join_key, seed_join_key_qualified).
         """
-        self._logger.debug(
-            "Aggregating enricher data",
-            enricher=enricher_name,
-            rows_before=len(df),
-            group_by=config.group_by,
-            field_count=len(config.fields),
-        )
+        seed_join_key_qualified: str | None = None
+        seed_join_key = primary_key
 
-        agg_exprs: list[pl.Expr] = []
+        if seed_pipeline is not None:
+            try:
+                seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
+                seed_join_key_qualified = f"{seed_provider}.{seed_entity}.{primary_key}"
+                if seed_join_key_qualified in merged_columns:
+                    seed_join_key = seed_join_key_qualified
+            except ValueError:
+                pass
 
-        for field_spec in config.fields:
-            expr = self._build_aggregation_expr(df, field_spec, enricher_name)
-            agg_exprs.append(expr)
+        try:
+            enricher_provider, enricher_entity = self._parse_pipeline_name(
+                enricher_pipeline
+            )
+            enricher_join_key = f"{enricher_provider}.{enricher_entity}.{primary_key}"
+        except ValueError:
+            enricher_join_key = primary_key
 
-        # Execute aggregation
-        result = df.group_by(config.group_by).agg(agg_exprs)
-
-        self._logger.info(
-            "Aggregated enricher data",
-            enricher=enricher_name,
-            rows_before=len(df),
-            rows_after=len(result),
-            group_by=config.group_by,
-        )
-
-        return result
-
-    def _build_aggregation_expr(
-        self,
-        df: pl.DataFrame,
-        spec: AggregationFieldSpec,
-        enricher_name: str,
-    ) -> pl.Expr:
-        """Build Polars expression for a single aggregation field.
-
-        Constructs the appropriate Polars expression based on the
-        aggregation function and optional filter condition.
-
-        Args:
-            df: DataFrame for schema reference.
-            spec: Aggregation field specification.
-            enricher_name: Enricher name for logging.
-
-        Returns:
-            Polars expression for the aggregation.
-        """
-        import polars as pl
-
-        output_name = spec.effective_output_field
-
-        # Start with source column
-        base_col = pl.col(spec.source_field)
-
-        # Apply filter if specified
-        if spec.filter_condition:
-            filter_expr = self._parse_filter_condition(spec.filter_condition)
-            if filter_expr is not None:
-                # Use .filter() on the aggregation expression
-                base_col = base_col.filter(filter_expr)
-
-        # Apply aggregation function
-        match spec.agg_function:
-            case AggregationFunction.COLLECT_LIST:
-                expr = base_col.drop_nulls()
-            case AggregationFunction.COLLECT_SET:
-                expr = base_col.drop_nulls().unique()
-            case AggregationFunction.COUNT:
-                expr = base_col.count()
-            case AggregationFunction.FIRST:
-                expr = base_col.first()
-            case AggregationFunction.CONCAT_STR:
-                expr = base_col.drop_nulls().cast(pl.Utf8).str.join(", ")
-            case _:
-                # Default fallback
-                expr = base_col
-
-        return expr.alias(output_name)
-
-    def _parse_filter_condition(self, condition: str) -> pl.Expr | None:
-        """Parse a simple filter condition into a Polars expression.
-
-        Supports common SQL-like filter patterns:
-        - "field == 'value'" - equality check
-        - "field != 'value'" - inequality check
-        - "field IS NOT NULL" - not null check
-        - "field IS NULL" - null check
-
-        Args:
-            condition: Filter condition string.
-
-        Returns:
-            Polars expression for the filter, or None if parsing fails.
-        """
-        import polars as pl
-
-        condition = condition.strip()
-        upper_condition = condition.upper()
-
-        # Handle IS NOT NULL
-        if " IS NOT NULL" in upper_condition:
-            field = condition[: upper_condition.find(" IS NOT NULL")].strip()
-            return pl.col(field).is_not_null()
-
-        # Handle IS NULL
-        if " IS NULL" in upper_condition:
-            field = condition[: upper_condition.find(" IS NULL")].strip()
-            return pl.col(field).is_null()
-
-        # Handle equality: field == 'value'
-        if " == " in condition:
-            parts = condition.split(" == ", 1)
-            if len(parts) == 2:
-                field = parts[0].strip()
-                value = parts[1].strip().strip("'\"")
-                return pl.col(field) == value
-
-        # Handle inequality: field != 'value'
-        if " != " in condition:
-            parts = condition.split(" != ", 1)
-            if len(parts) == 2:
-                field = parts[0].strip()
-                value = parts[1].strip().strip("'\"")
-                return pl.col(field) != value
-
-        self._logger.warning(
-            "Could not parse filter condition",
-            condition=condition,
-        )
-        return None
+        return seed_join_key, enricher_join_key, seed_join_key_qualified
 
     def _get_enricher_prefix(
         self,

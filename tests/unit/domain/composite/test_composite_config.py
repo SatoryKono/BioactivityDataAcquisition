@@ -238,11 +238,20 @@ class TestAggregationFunction:
 
     def test_from_string_valid(self):
         """Valid string should convert to enum."""
-        assert AggregationFunction.from_string("collect_list") == AggregationFunction.COLLECT_LIST
-        assert AggregationFunction.from_string("COLLECT_SET") == AggregationFunction.COLLECT_SET
+        assert (
+            AggregationFunction.from_string("collect_list")
+            == AggregationFunction.COLLECT_LIST
+        )
+        assert (
+            AggregationFunction.from_string("COLLECT_SET")
+            == AggregationFunction.COLLECT_SET
+        )
         assert AggregationFunction.from_string("count") == AggregationFunction.COUNT
         assert AggregationFunction.from_string("first") == AggregationFunction.FIRST
-        assert AggregationFunction.from_string("concat_str") == AggregationFunction.CONCAT_STR
+        assert (
+            AggregationFunction.from_string("concat_str")
+            == AggregationFunction.CONCAT_STR
+        )
 
     def test_from_string_invalid_raises(self):
         """Invalid string should raise ValueError."""
@@ -255,8 +264,14 @@ class TestEnricherCardinality:
 
     def test_from_string_valid(self):
         """Valid string should convert to enum."""
-        assert EnricherCardinality.from_string("one_to_one") == EnricherCardinality.ONE_TO_ONE
-        assert EnricherCardinality.from_string("MANY_TO_ONE") == EnricherCardinality.MANY_TO_ONE
+        assert (
+            EnricherCardinality.from_string("one_to_one")
+            == EnricherCardinality.ONE_TO_ONE
+        )
+        assert (
+            EnricherCardinality.from_string("MANY_TO_ONE")
+            == EnricherCardinality.MANY_TO_ONE
+        )
 
     def test_from_string_invalid_raises(self):
         """Invalid string should raise ValueError."""

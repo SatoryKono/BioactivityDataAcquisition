@@ -14,14 +14,16 @@ from typing import Any, Literal, Self
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from bioetl.domain.composite.config import (
+from bioetl.domain.composite.aggregation import (
     AggregationConfig,
     AggregationFieldSpec,
     AggregationFunction,
+    EnricherCardinality,
+)
+from bioetl.domain.composite.config import (
     CompositeConfig,
     CompositeDQConfig,
     DQOverrideConfig,
-    EnricherCardinality,
     EnricherConfig,
     ExecutionConfig,
     LineageConfig,
@@ -48,7 +50,8 @@ class AggregationFieldSchema(BaseModel):
         ..., description="Aggregation function to apply"
     )
     filter: str | None = Field(
-        default=None, description="Optional filter condition (e.g., \"term_type == 'MESH'\")"
+        default=None,
+        description="Optional filter condition (e.g., \"term_type == 'MESH'\")",
     )
 
     def to_domain(self, output_field: str) -> AggregationFieldSpec:
@@ -74,9 +77,7 @@ class AggregationSchema(BaseModel):
     Defines how to aggregate multiple rows per join key into a single row.
     """
 
-    group_by: str = Field(
-        ..., min_length=1, description="Join key to group by"
-    )
+    group_by: str = Field(..., min_length=1, description="Join key to group by")
     fields: dict[str, AggregationFieldSchema] = Field(
         ..., min_length=1, description="Map of output_field -> aggregation spec"
     )
@@ -86,8 +87,7 @@ class AggregationSchema(BaseModel):
         return AggregationConfig(
             group_by=self.group_by,
             fields=tuple(
-                spec.to_domain(output_field=name)
-                for name, spec in self.fields.items()
+                spec.to_domain(output_field=name) for name, spec in self.fields.items()
             ),
         )
 
