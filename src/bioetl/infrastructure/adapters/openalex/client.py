@@ -17,6 +17,7 @@ Polite Pool:
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
 import time
 from dataclasses import dataclass, field
@@ -106,16 +107,17 @@ class OpenAlexAdapter(BaseHttpAdapter):
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch OpenAlex works by DOI list (batch resolution).
+        """Fetch OpenAlex works by DOI or title.
 
         Implements FilterableDataSourcePort.fetch_filtered().
 
-        Uses `filter=doi:id1|id2|id3` for efficient batch lookup.
+        For DOIs: Uses `filter=doi:id1|id2|id3` for efficient batch lookup.
+        For titles: Uses individual title.search queries with rate limiting.
 
         Args:
             entity_type: Must be 'work' or 'publication'.
-            filter_ids: List of DOIs to resolve.
-            filter_field: Field name (expected 'doi').
+            filter_ids: List of DOIs or titles to resolve.
+            filter_field: Field name ('doi' or 'title').
             limit: Maximum number of records to fetch.
 
         Yields:
@@ -130,13 +132,39 @@ class OpenAlexAdapter(BaseHttpAdapter):
                 f"OpenAlexAdapter supports 'work' or 'publication', got: {entity_type}"
             )
 
-        if filter_field != "doi":
+        if filter_field == "doi":
+            # Batch DOI lookup (existing logic)
+            async for work in self._fetch_filtered_by_doi(filter_ids, limit):
+                yield work
+        elif filter_field == "title":
+            # Title search with rate limiting
+            async for work in self._fetch_filtered_by_title(filter_ids, limit):
+                yield work
+        else:
             self.logger.warning(
                 "unsupported_filter_field",
                 field=filter_field,
-                msg="OpenAlex only supports DOI filtering, assuming DOIs",
+                msg="OpenAlex only supports 'doi' or 'title' filtering, skipping",
             )
+            # Return empty - don't try to use unsupported field as DOI
+            return
 
+    async def _fetch_filtered_by_doi(
+        self,
+        filter_ids: list[str],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch OpenAlex works by DOI list (batch resolution).
+
+        Uses `filter=doi:id1|id2|id3` for efficient batch lookup.
+
+        Args:
+            filter_ids: List of DOIs to resolve.
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Dictionary records for each resolved publication.
+        """
         dois = filter_ids[:limit] if limit else filter_ids
         fetched = 0
 
@@ -149,6 +177,62 @@ class OpenAlexAdapter(BaseHttpAdapter):
                 fetched += 1
                 if limit and fetched >= limit:
                     return
+
+    async def _fetch_filtered_by_title(
+        self,
+        titles: list[str],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch OpenAlex works by title search.
+
+        Uses individual title.search queries with rate limiting.
+        Rate limit: 100ms delay between requests (10 req/sec).
+
+        Args:
+            titles: List of publication titles to search.
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Dictionary records for each found publication.
+        """
+        self.logger.info(
+            "openalex_title_search_start",
+            total_titles=len(titles),
+            limit=limit,
+        )
+
+        effective_titles = titles[:limit] if limit else titles
+        fetched = 0
+        found = 0
+
+        for title in effective_titles:
+            if limit and fetched >= limit:
+                break
+
+            # Skip empty titles
+            if not title or not title.strip():
+                continue
+
+            result = await self._search_by_title(title, limit=1)
+            if result:
+                result["_lookup_method"] = "title"
+                result["_search_title"] = title  # Track which title matched
+                yield result
+                found += 1
+                fetched += 1
+
+            # Rate limiting: 100ms delay between requests (10 req/sec)
+            await asyncio.sleep(0.1)
+
+        # Log summary statistics
+        self.logger.info(
+            "openalex_title_lookup_summary",
+            total_titles=len(effective_titles),
+            found_by_title=found,
+            hit_rate_pct=round(found / len(effective_titles) * 100, 1)
+            if effective_titles
+            else 0.0,
+        )
 
     async def fetch_multi_filtered(
         self,
