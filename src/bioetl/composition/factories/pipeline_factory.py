@@ -486,6 +486,7 @@ def assemble_runner(
         pipeline_name=pipeline.config.pipeline_name,
         run_id=pipeline.run_id,
         resume=pipeline.runtime.resume,
+        force_full_scan=pipeline.config.force_full_scan,
     )
 
     # Create lifecycle service (M5)

@@ -969,6 +969,15 @@ class PipelineYamlConfig(BaseModel):
     maintenance: MaintenanceConfig = Field(default_factory=MaintenanceConfig)
     transform: TransformConfig = Field(default_factory=TransformConfig)
 
+    # Pagination strategy (ADR-030)
+    force_full_scan: bool = Field(
+        default=False,
+        description="When True, checkpoint-based resume is disabled and each run "
+        "performs a full scan of the data source. Deduplication is handled on "
+        "Silver layer via content_hash. Required for publication entities due to "
+        "API offset instability. See ADR-030.",
+    )
+
     @field_validator("batch_size")
     @classmethod
     def validate_batch_size(cls, v: int) -> int:
