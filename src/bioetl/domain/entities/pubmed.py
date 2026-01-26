@@ -80,6 +80,9 @@ class ArticleRecord(BaseModel):
     authors: str | None = PydanticField(
         default=None, description="Author names (JSON array, hashed for PII)"
     )
+    affiliations: str | None = PydanticField(
+        default=None, description="Affiliations (JSON array of unique strings)"
+    )
 
     # Dates (ISO format: YYYY-MM-DD or partial)
     pub_date: str | None = PydanticField(
