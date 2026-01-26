@@ -241,11 +241,13 @@ class OpenAlexAdapter(BaseHttpAdapter):
 
         # Separate DOIs from title-only markers (__title_only_N__ format)
         valid_dois = [
-            d for d in filter_ids
+            d
+            for d in filter_ids
             if d and d.strip() and not d.startswith("__title_only_")
         ]
         title_only_entries = [
-            d for d in filter_ids
+            d
+            for d in filter_ids
             if not d or not d.strip() or d.startswith("__title_only_")
         ]
 
