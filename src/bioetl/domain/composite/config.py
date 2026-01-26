@@ -6,22 +6,43 @@ Defines immutable configuration objects for composite pipelines:
 - MergeConfig: Merge operation configuration
 - CompositeConfig: Complete composite pipeline configuration
 
+Aggregation configuration is defined in aggregation.py and re-exported here.
+
 See ADR-026 for architectural decisions.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
 
+from bioetl.domain.composite.aggregation import (
+    AggregationConfig,
+    AggregationFieldSpec,
+    AggregationFunction,
+    EnricherCardinality,
+)
 from bioetl.domain.composite.strategy import (
     ConflictResolution,
     FallbackStrategy,
     MergeStrategy,
 )
 
-if TYPE_CHECKING:
-    pass
+# Re-export aggregation types for backward compatibility
+__all__ = [
+    "AggregationConfig",
+    "AggregationFieldSpec",
+    "AggregationFunction",
+    "ColumnGroupConfig",
+    "CompositeConfig",
+    "CompositeDQConfig",
+    "DQOverrideConfig",
+    "EnricherCardinality",
+    "EnricherConfig",
+    "ExecutionConfig",
+    "LineageConfig",
+    "MergeConfig",
+    "SeedConfig",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -81,13 +102,14 @@ class EnricherConfig:
         fallback_strategy: Strategy when enricher fails.
         silver_table: Path to enricher Silver table (auto-generated if None).
         limit: Optional limit on records to enrich.
+        cardinality: Relationship type between enricher and seed data.
+            ONE_TO_ONE (default) or MANY_TO_ONE.
+        aggregation: Aggregation config for MANY_TO_ONE enrichers.
+            Required when cardinality is MANY_TO_ONE.
 
     Example:
         >>> config = EnricherConfig(
-        ...     pipeline="crossref_publication",
-        ...     join_keys=("doi",),
-        ...     required=True,
-        ...     timeout_seconds=600,
+        ...     pipeline="crossref_publication", join_keys=("doi",), required=True,
         ... )
     """
 
@@ -99,6 +121,8 @@ class EnricherConfig:
     fallback_strategy: FallbackStrategy = FallbackStrategy.SKIP
     silver_table: str | None = None
     limit: int | None = None
+    cardinality: EnricherCardinality = EnricherCardinality.ONE_TO_ONE
+    aggregation: AggregationConfig | None = None
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
@@ -110,6 +134,18 @@ class EnricherConfig:
                 "fallback_strategy",
                 FallbackStrategy.from_string(self.fallback_strategy),
             )
+        if isinstance(self.cardinality, str):
+            object.__setattr__(
+                self,
+                "cardinality",
+                EnricherCardinality.from_string(self.cardinality),
+            )
+        if isinstance(self.aggregation, dict):
+            object.__setattr__(
+                self,
+                "aggregation",
+                AggregationConfig(**self.aggregation),
+            )
         self._validate()
 
     def _validate(self) -> None:
@@ -120,6 +156,15 @@ class EnricherConfig:
             self.timeout_seconds, f"enricher {self.pipeline} timeout_seconds"
         )
         _validate_positive_limit(self.limit, f"enricher {self.pipeline}")
+        # Validate cardinality/aggregation relationship
+        if (
+            self.cardinality == EnricherCardinality.MANY_TO_ONE
+            and self.aggregation is None
+        ):
+            raise ValueError(
+                f"Enricher '{self.pipeline}' with cardinality=many_to_one "
+                "requires aggregation config"
+            )
 
     @property
     def primary_join_key(self) -> str:
@@ -130,6 +175,11 @@ class EnricherConfig:
     def has_fallback_keys(self) -> bool:
         """Check if fallback join keys are available."""
         return len(self.join_keys) > 1
+
+    @property
+    def is_many_to_one(self) -> bool:
+        """Check if this enricher has 1:M cardinality."""
+        return self.cardinality == EnricherCardinality.MANY_TO_ONE
 
 
 @dataclass(frozen=True, slots=True)
