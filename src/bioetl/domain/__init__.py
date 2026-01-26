@@ -246,6 +246,8 @@ from bioetl.domain.ports import (
     TracingPort,
     UnitConverterPort,
     ValueValidatorPort,
+    WatermarkStrategyPort,
+    NoOpWatermarkStrategy,
 )
 
 # Resilience (domain value objects)
@@ -529,6 +531,8 @@ __all__ = [
     "TracingPort",
     "UnitConverterPort",
     "ValueValidatorPort",
+    "WatermarkStrategyPort",
+    "NoOpWatermarkStrategy",
     # Resilience
     "CircuitBreakerConfig",
     "RetryConfig",
