@@ -1,29 +1,7 @@
 """Base configuration schemas for shared configuration components.
 
-This module provides base Pydantic models for configuration components that are
-used across multiple schema files. It eliminates duplication by defining common
-fields and validation logic in one place.
-
-Design Principles:
-    - Single Source of Truth: Each configuration field is defined once
-    - DRY: No duplicate field definitions across schema files
-    - Extensibility: Base classes can be extended for specific use cases
-    - Domain Conversion: Each model has `to_domain()` for converting to domain objects
-
-Usage:
-    Other schema files should import and inherit from these base classes:
-
-    >>> from bioetl.infrastructure.schemas.base_schemas import BaseCircuitBreakerConfig
-    >>> class CircuitBreakerConfig(BaseCircuitBreakerConfig):
-    ...     # Add additional fields or override methods if needed
-    ...     pass
-
-Hierarchy:
-    base_schemas.py (this file)
-    ├── pipeline_config.py (imports base classes)
-    ├── source_config.py (imports base classes)
-    ├── filter_config.py (imports base classes)
-    └── common_config.py (re-exports for backward compatibility)
+Provides base Pydantic models that eliminate field duplication across schema files.
+Each model has `to_domain()` for converting to immutable domain objects.
 """
 
 from __future__ import annotations
@@ -51,21 +29,8 @@ if TYPE_CHECKING:
     )
 
 
-# =============================================================================
-# DQ Configuration Base Classes
-# =============================================================================
-
-
 class BaseDQThresholds(BaseModel):
-    """Base class for DQ threshold configuration.
-
-    Provides common threshold fields and validation logic for both
-    inline DQ configs and standalone DQ config files.
-
-    Attributes:
-        soft_fail_threshold: Warning threshold (0.0-1.0). Default: 0.05 (5%).
-        hard_fail_threshold: Failure threshold (0.0-1.0). Default: 0.20 (20%).
-    """
+    """DQ threshold configuration with soft_fail < hard_fail validation."""
 
     model_config = ConfigDict(extra="ignore")
 
@@ -84,17 +49,7 @@ class BaseDQThresholds(BaseModel):
 
     @model_validator(mode="after")
     def validate_thresholds(self) -> BaseDQThresholds:
-        """Validate that soft threshold is less than hard threshold.
-
-        Delegates to domain DQConfig for threshold validation per RULES.md §4.1.
-        Raises ValueError if soft_fail_threshold >= hard_fail_threshold.
-
-        Returns:
-            Self after validation.
-
-        Raises:
-            ValueError: If threshold invariant is violated.
-        """
+        """Validate soft_fail < hard_fail."""
         DomainDQConfig.validate_thresholds(
             soft_fail_threshold=self.soft_fail_threshold,
             hard_fail_threshold=self.hard_fail_threshold,
@@ -128,11 +83,6 @@ class BaseDQConfig(BaseDQThresholds):
             hard_fail_threshold=self.hard_fail_threshold,
             strict_validation=self.strict_validation,
         )
-
-
-# =============================================================================
-# Resilience Configuration Base Classes
-# =============================================================================
 
 
 class BaseCircuitBreakerConfig(BaseModel):
@@ -224,11 +174,6 @@ class BaseClientConfig(BaseModel):
     )
 
 
-# =============================================================================
-# API Configuration Base Classes
-# =============================================================================
-
-
 class BaseApiConfig(BaseModel):
     """Base class for API connection configuration.
 
@@ -272,11 +217,6 @@ class BaseApiConfig(BaseModel):
                 requests_per_second=self.rate_limit or 5.0,
             ),
         )
-
-
-# =============================================================================
-# Export/Import Configuration Base Classes
-# =============================================================================
 
 
 class BaseCsvExportConfig(BaseModel):
@@ -442,11 +382,6 @@ class BaseInputFilterConfig(BaseModel):
         )
 
 
-# =============================================================================
-# Maintenance Configuration Base Classes
-# =============================================================================
-
-
 class BaseMaintenanceConfig(BaseModel):
     """Base class for maintenance configuration.
 
@@ -469,11 +404,6 @@ class BaseMaintenanceConfig(BaseModel):
         le=365,
         description="Minimum age of files to remove during VACUUM (days)",
     )
-
-
-# =============================================================================
-# Gold Filter Configuration Base Classes
-# =============================================================================
 
 
 class BaseGoldRangeFilterConfig(BaseModel):

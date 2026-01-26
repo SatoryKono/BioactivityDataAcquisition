@@ -37,57 +37,18 @@ from bioetl.infrastructure.schemas.base_schemas import (
     BaseInputFilterConfig,
 )
 
-
 # =============================================================================
 # Type Aliases for Backward Compatibility
 # =============================================================================
-# These are re-exported from pipeline_config.py for consistency
-# New code should use the classes from base_schemas directly
+# These are type aliases pointing to base classes for API consistency.
+# New code should use the classes from base_schemas directly.
 
-
-class FilterColumnSchema(BaseFilterColumnSchema):
-    """Schema for a single filter column configuration.
-
-    Inherits from BaseFilterColumnSchema for consistency with pipeline_config.
-    """
-
-    pass
-
-
-class GoldRangeFilterConfig(BaseGoldRangeFilterConfig):
-    """Schema for range filters in YAML.
-
-    Inherits from BaseGoldRangeFilterConfig for consistency with pipeline_config.
-    """
-
-    pass
-
-
-class GoldListLengthFilterConfig(BaseGoldListLengthFilterConfig):
-    """Schema for list length filters in YAML.
-
-    Inherits from BaseGoldListLengthFilterConfig for consistency with pipeline_config.
-    """
-
-    pass
-
-
-class GoldListContainsFilterConfig(BaseGoldListContainsFilterConfig):
-    """Schema for list contains filters in YAML.
-
-    Inherits from BaseGoldListContainsFilterConfig for consistency with pipeline_config.
-    """
-
-    pass
-
-
-class GoldColumnFilterConfig(BaseGoldColumnFilterConfig):
-    """Column filter config with operator support.
-
-    Inherits from BaseGoldColumnFilterConfig for consistency with pipeline_config.
-    """
-
-    pass
+# Re-export base classes with filter_config-specific names
+FilterColumnSchema = BaseFilterColumnSchema
+GoldRangeFilterConfig = BaseGoldRangeFilterConfig
+GoldListLengthFilterConfig = BaseGoldListLengthFilterConfig
+GoldListContainsFilterConfig = BaseGoldListContainsFilterConfig
+GoldColumnFilterConfig = BaseGoldColumnFilterConfig
 
 
 # =============================================================================
@@ -112,12 +73,6 @@ class InputFilterFileConfig(BaseInputFilterConfig):
         batch_size: IDs per API request.
         fallback_column: Fallback search field (e.g., title).
     """
-
-    # Override columns to use local FilterColumnSchema for proper serialization
-    columns: list[FilterColumnSchema] | None = Field(
-        default=None,
-        description="List of column configurations for multi-column filtering",
-    )
 
     def to_domain(self) -> DomainInputFilterConfig:
         """Convert to domain InputFilterConfig dataclass.
@@ -146,12 +101,6 @@ class GoldFiltersFileConfig(BaseGoldFiltersConfig):
         required_fields: Required non-null fields.
         exclude_if_present: Exclude if field has value.
     """
-
-    # Override with local type aliases for proper serialization
-    columns: dict[str, list[str] | GoldColumnFilterConfig] = Field(default_factory=dict)
-    ranges: dict[str, GoldRangeFilterConfig] = Field(default_factory=dict)
-    list_lengths: dict[str, GoldListLengthFilterConfig] = Field(default_factory=dict)
-    list_contains: dict[str, GoldListContainsFilterConfig] = Field(default_factory=dict)
 
     def to_domain(self) -> GoldFilterConfig:
         """Convert to domain GoldFilterConfig dataclass.
