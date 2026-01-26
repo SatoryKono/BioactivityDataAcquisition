@@ -661,9 +661,7 @@ class TestExtractAuthorDetails:
     def test_extract_sequence_additional(self) -> None:
         """Should handle sequence='additional' value."""
         publication = {
-            "author": [
-                {"given": "John", "family": "Doe", "sequence": "additional"}
-            ]
+            "author": [{"given": "John", "family": "Doe", "sequence": "additional"}]
         }
         result = extract_author_details(publication)
         assert result[0]["sequence"] == "additional"
@@ -716,9 +714,7 @@ class TestExtractAuthorDetails:
     def test_invalid_orcid_format_ignored(self) -> None:
         """Should return None for invalid ORCID format."""
         publication = {
-            "author": [
-                {"given": "John", "family": "Doe", "ORCID": "invalid-orcid"}
-            ]
+            "author": [{"given": "John", "family": "Doe", "ORCID": "invalid-orcid"}]
         }
         result = extract_author_details(publication)
         assert result[0]["orcid"] is None
@@ -859,7 +855,9 @@ class TestExtractReferences:
             ]
         }
         result = extract_references(publication)
-        assert result[0]["unstructured"] == "Smith J. Example Article. Nature 2020;42:123."
+        assert (
+            result[0]["unstructured"] == "Smith J. Example Article. Nature 2020;42:123."
+        )
 
     def test_extract_book_reference(self) -> None:
         """Should extract book reference with volume-title."""
@@ -881,33 +879,25 @@ class TestExtractReferences:
 
     def test_year_as_integer(self) -> None:
         """Should handle year as integer."""
-        publication = {
-            "reference": [{"key": "ref1", "year": 2020}]
-        }
+        publication = {"reference": [{"key": "ref1", "year": 2020}]}
         result = extract_references(publication)
         assert result[0]["year"] == 2020
 
     def test_year_as_string(self) -> None:
         """Should convert year string to integer."""
-        publication = {
-            "reference": [{"key": "ref1", "year": "2020"}]
-        }
+        publication = {"reference": [{"key": "ref1", "year": "2020"}]}
         result = extract_references(publication)
         assert result[0]["year"] == 2020
 
     def test_invalid_year_ignored(self) -> None:
         """Should return None for non-numeric year."""
-        publication = {
-            "reference": [{"key": "ref1", "year": "unknown"}]
-        }
+        publication = {"reference": [{"key": "ref1", "year": "unknown"}]}
         result = extract_references(publication)
         assert result[0]["year"] is None
 
     def test_doi_normalized_lowercase(self) -> None:
         """Should normalize DOI to lowercase."""
-        publication = {
-            "reference": [{"key": "ref1", "DOI": "10.1000/ABC123"}]
-        }
+        publication = {"reference": [{"key": "ref1", "DOI": "10.1000/ABC123"}]}
         result = extract_references(publication)
         assert result[0]["doi"] == "10.1000/abc123"
 
@@ -937,18 +927,14 @@ class TestExtractReferences:
     def test_series_title(self) -> None:
         """Should extract series-title for book series."""
         publication = {
-            "reference": [
-                {"key": "ref1", "series-title": "Methods in Enzymology"}
-            ]
+            "reference": [{"key": "ref1", "series-title": "Methods in Enzymology"}]
         }
         result = extract_references(publication)
         assert result[0]["series_title"] == "Methods in Enzymology"
 
     def test_issn_extraction(self) -> None:
         """Should extract ISSN from reference."""
-        publication = {
-            "reference": [{"key": "ref1", "ISSN": "0028-0836"}]
-        }
+        publication = {"reference": [{"key": "ref1", "ISSN": "0028-0836"}]}
         result = extract_references(publication)
         assert result[0]["issn"] == "0028-0836"
 
