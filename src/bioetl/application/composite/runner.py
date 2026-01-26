@@ -771,9 +771,7 @@ class CompositePipelineRunner:
         )
 
         # Log resolved field sources for auditability
-        self._preflight_validator.log_resolved_field_sources(
-            result, self._config.name
-        )
+        self._preflight_validator.log_resolved_field_sources(result, self._config.name)
 
         self._logger.info(
             PipelineEvent.phase_completed("preflight_validation"),

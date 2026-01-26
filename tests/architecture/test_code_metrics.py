@@ -81,6 +81,7 @@ class TestFileSizeLimits:
         "publication.py": 340,  # 331 LOC - Publication entity mapping registry with composite key support
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
+        "preflight_validator.py": 645,  # 640 LOC - extracted preflight validators (REFACTOR-003)
         "batch_executor.py": 785,  # 779 LOC - unified executor for batch processing + DQ context + MetadataCoordinator params
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
         "gold_analyzer.py": 835,  # 829 LOC - Gold layer analysis with extracted helper methods
