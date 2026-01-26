@@ -165,7 +165,7 @@ async def test_transform_full_record(transformer, pipeline_context, sample_publi
     assert result["doi"] == "10.1234/test.article"
     assert result["title"] == "Test Article Title"
     assert result["doc_type"] == "PUBLICATION"
-    assert result["source"] == "crossref"
+    assert result["_source"] == "crossref"
     # Check lineage fields
     assert "_run_id" in result
     assert "_run_type" in result
