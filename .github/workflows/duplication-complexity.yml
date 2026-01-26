@@ -115,6 +115,7 @@ jobs:
               "fetch_batch": 15,  # CrossRef batch DOI resolution with fallback to individual
               "_write_silver_metadata": 15,  # Metadata assembly with coordinator path + fallback (CC=12)
               "_write_gold_metadata": 15,  # Metadata assembly with coordinator path + fallback (CC=12)
+              "load_filter_with_fallback": 15,  # CSV filter loading with multiple fallback strategies (CC=12)
           }
 
           violations = []

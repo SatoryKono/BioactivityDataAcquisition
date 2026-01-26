@@ -1,6 +1,6 @@
 # BioETL Glossary (Ubiquitous Language)
 
-*Version 2.0 | Updated: 2026-01-06 | Created: 2025-12-29*
+*Version 2.1 | Updated: 2026-01-26 | Created: 2025-12-29*
 
 This glossary defines the canonical terminology used throughout BioETL. Following Domain-Driven Design principles, these terms form the **Ubiquitous Language** — a shared vocabulary understood by both developers and domain experts.
 
@@ -337,6 +337,60 @@ These terms should NOT be used in new code:
 | `CompoundSchema` | `PubchemMoleculeSchema` | PubChem schema naming (v2.0) |
 | `Protein` | `UniprotTarget` | UniProt API term → Ubiquitous Language (v2.0) |
 | `ProteinSchema` | `UniprotTargetSchema` | UniProt schema naming (v2.0) |
+
+---
+
+## Russian Terminology (Русскоязычные термины)
+
+> **Политика**: Документация на русском языке (RULES.md, AGENT.md, архитектурные документы)
+> использует канонические русские термины. Английские термины допустимы для технических
+> имён классов, методов и конфигурационных ключей.
+
+### Основные термины
+
+| English Term | Русский термин | Примечание |
+|--------------|----------------|------------|
+| **Provider** | **провайдер** | НЕ "источник данных" (source). Провайдер — внешний API (ChEMBL, PubChem и т.д.) |
+| **Pipeline** | **пайплайн** | НЕ "конвейер", НЕ "workflow" |
+| **Entity** | **сущность** | Тип данных (Activity, Molecule, Target) |
+| **Record** | **запись** | Единица данных в батче |
+| **Run** | **запуск** | Экземпляр выполнения пайплайна (run_id) |
+| **Batch** | **батч** | Группа записей для обработки |
+| **Adapter** | **адаптер** | Реализация Port для провайдера |
+| **Port** | **порт** | Protocol-интерфейс для DI |
+| **Transformer** | **трансформер** | Преобразователь Bronze → Silver/Gold |
+| **Writer** | **writer** | Компонент записи в Medallion слой |
+| **Quarantine** | **карантин** | Изоляция невалидных записей |
+| **Checkpoint** | **чекпоинт** | Точка сохранения прогресса |
+
+### Термины Medallion Architecture
+
+| English Term | Русский термин | Примечание |
+|--------------|----------------|------------|
+| **Bronze** | **Bronze** | Сырые данные (не переводится) |
+| **Silver** | **Silver** | Нормализованные данные (не переводится) |
+| **Gold** | **Gold** | Аналитические витрины (не переводится) |
+| **Data Layer** | **слой данных** | Bronze/Silver/Gold уровни |
+
+### Термины DDD и архитектуры
+
+| English Term | Русский термин | Примечание |
+|--------------|----------------|------------|
+| **Domain** | **домен** | Слой бизнес-логики |
+| **Application** | **приложение** | Слой оркестрации |
+| **Infrastructure** | **инфраструктура** | Слой адаптеров |
+| **Composition** | **композиция** | Слой DI/сборки |
+| **Aggregate** | **агрегат** | DDD-паттерн |
+| **Value Object** | **value object** | Неизменяемый объект |
+
+### Избегать (Deprecated Russian Terms)
+
+| ❌ Избегать | ✅ Использовать | Причина |
+|-------------|-----------------|---------|
+| источник данных | провайдер | Термин "источник" зарезервирован для `src_id` в ChEMBL |
+| конвейер | пайплайн | Согласованность с кодовой базой |
+| задача | запуск (run) | Избегать путаницы с job/task |
+| поток | пайплайн | Избегать путаницы с data flow |
 
 ---
 
