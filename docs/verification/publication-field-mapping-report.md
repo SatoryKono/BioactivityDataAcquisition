@@ -1,6 +1,7 @@
 # Publication Pipeline Field Mapping Verification Report
 
 **Date**: 2026-01-19
+**Updated**: 2026-01-26 (Finding 1 resolved)
 **Scope**: All 7 Publication Pipelines
 **Status**: Completed
 
@@ -9,6 +10,8 @@
 ## Executive Summary
 
 Systematic verification of field mapping across all publication pipeline layers (API → Transformer → Entity → Silver → Gold) identified **8 schema inconsistencies**. Cross-provider field normalization for DOI, PMID, and PMC ID is **correctly implemented**.
+
+**Update (2026-01-26)**: Finding 1 (`authors` field type mismatch) has been resolved. All Gold schemas now correctly use `Series[str]` for the `authors` field.
 
 ---
 
@@ -19,60 +22,49 @@ Systematic verification of field mapping across all publication pipeline layers 
 | 1 | `chembl_publication` | ChEMBL | document | ⚠️ Missing Gold fields |
 | 2 | `chembl_publication_similarity` | ChEMBL | document_similarity | ✅ Correct |
 | 3 | `chembl_publication_term` | ChEMBL | document_term | ✅ Correct |
-| 4 | `pubmed_publication` | PubMed | publication | ⚠️ Missing Gold fields + Type mismatch |
-| 5 | `crossref_publication` | CrossRef | work | ⚠️ Missing Gold fields + Type mismatch |
-| 6 | `openalex_publication` | OpenAlex | publication | ⚠️ Type mismatch |
+| 4 | `pubmed_publication` | PubMed | publication | ⚠️ Missing Gold fields (Type mismatch ✅ FIXED) |
+| 5 | `crossref_publication` | CrossRef | work | ⚠️ Missing Gold fields (Type mismatch ✅ FIXED) |
+| 6 | `openalex_publication` | OpenAlex | publication | ✅ Correct (Type mismatch ✅ FIXED) |
 | 7 | `semanticscholar_publication` | SemanticScholar | publication | ✅ Correct |
 
 ---
 
 ## Finding 1: TYPE_MISMATCH - `authors` Field Type Inconsistency
 
-**Severity**: HIGH
+**Severity**: HIGH → ✅ **RESOLVED** (2026-01-26)
 **Affected Pipelines**: `pubmed_publication`, `crossref_publication`, `openalex_publication`
 
 ### Issue
 
-The `authors` field has inconsistent types between Silver (JSON string) and Gold (Python list) schemas for 3 providers, while 2 providers are correctly aligned.
+~~The `authors` field has inconsistent types between Silver (JSON string) and Gold (Python list) schemas for 3 providers, while 2 providers are correctly aligned.~~
 
-### Evidence
+**Resolution**: All Gold schemas now use `Series[str]` for the `authors` field, matching the Silver layer where transformers serialize authors to JSON strings via `serialize_json_list()`.
+
+### Current State (Verified 2026-01-26)
 
 | Provider | Transformer Output | Silver Schema | Gold Schema | Status |
 |----------|-------------------|---------------|-------------|--------|
-| PubMed | JSON string | `pa.string()` | `Series[object]` | ❌ Mismatch |
-| CrossRef | JSON string | `pa.string()` | `Series[object]` | ❌ Mismatch |
-| OpenAlex | JSON string | `pa.string()` | `Series[object]` | ❌ Mismatch |
+| PubMed | JSON string | `pa.string()` | `Series[str]` | ✅ Correct |
+| CrossRef | JSON string | `pa.string()` | `Series[str]` | ✅ Correct |
+| OpenAlex | JSON string | `pa.string()` | `Series[str]` | ✅ Correct |
 | ChEMBL | JSON string | `pa.string()` | `Series[str]` | ✅ Correct |
 | SemanticScholar | JSON string | `pa.string()` | `Series[str]` | ✅ Correct |
 
-### File Locations
+### File Locations (Current)
 
-**Gold Schema (`src/bioetl/infrastructure/schemas/gold.py`)**:
-- Line 229: PubMed `authors: Series[object] = pa.Field(nullable=True)  # list[str]`
-- Line 766: CrossRef `authors: Series[object] = pa.Field(nullable=True)  # list[str]`
-- Line 835: OpenAlex `authors: Series[object] = pa.Field(nullable=True)  # list[str]`
-- Line 415: ChEMBL `authors: Series[str] = pa.Field(nullable=True)` ✅
-- Line 720: SemanticScholar `authors: Series[str] = pa.Field(nullable=True)` ✅
+**Gold Schema (`src/bioetl/domain/contracts/gold/publications.py`)**:
+- Line 64: PubMed `authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list` ✅
+- Line 162: CrossRef `authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list` ✅
+- Line 252: OpenAlex `authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list` ✅
+- Line 353: SemanticScholar `authors: Series[str] = pa.Field(nullable=True)` ✅
+
+**Silver Schema (`src/bioetl/domain/schemas/common/publication_base.py`)**:
+- Line 64-67: `authors: Series[str] = pa.Field(nullable=True, description="JSON array of author names")` ✅
 
 **Transformer Evidence (all serialize to JSON string)**:
-- `pubmed/transformer.py:179`: `"authors": self.serialize_json_list(hashed_authors)`
-- `crossref/transformer.py:143`: `"authors": self.serialize_json_list(hashed_authors)`
-- `openalex/transformer.py:182`: `"authors": self.serialize_json_list(hashed_authors)`
-
-### Recommended Fix
-
-Change Gold schema `Series[object]` → `Series[str]` for PubMed, CrossRef, and OpenAlex:
-
-```python
-# gold.py - PubMed (line 229)
-authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
-
-# gold.py - CrossRef (line 766)
-authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
-
-# gold.py - OpenAlex (line 835)
-authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
-```
+- `pubmed/transformer.py`: `"authors": self.serialize_json_list(hashed_authors)`
+- `crossref/transformer.py`: `"authors": self.serialize_json_list(hashed_authors)`
+- `openalex/transformer.py`: `"authors": self.serialize_json_list(hashed_authors)`
 
 ---
 
@@ -235,12 +227,12 @@ All providers use `normalize_pmc_id()`:
 
 ## Summary Table
 
-| Finding | Category | Severity | Pipelines Affected |
-|---------|----------|----------|-------------------|
-| 1 | TYPE_MISMATCH | HIGH | pubmed, crossref, openalex |
-| 2 | MISSING_FIELD | MEDIUM | crossref |
-| 3 | MISSING_FIELD | MEDIUM | pubmed |
-| 4 | MISSING_FIELD | MEDIUM | chembl_publication |
+| Finding | Category | Severity | Pipelines Affected | Status |
+|---------|----------|----------|-------------------|--------|
+| 1 | TYPE_MISMATCH | HIGH | pubmed, crossref, openalex | ✅ RESOLVED |
+| 2 | MISSING_FIELD | MEDIUM | crossref | Open |
+| 3 | MISSING_FIELD | MEDIUM | pubmed | Open |
+| 4 | MISSING_FIELD | MEDIUM | chembl_publication | Open |
 
 ---
 
@@ -249,7 +241,7 @@ All providers use `normalize_pmc_id()`:
 | Criteria | Status |
 |----------|--------|
 | Mapping Matrix Complete | ✅ Verified for all 7 pipelines |
-| No TYPE_MISMATCH | ⚠️ 3 type mismatches found (authors field) |
+| No TYPE_MISMATCH | ✅ All type mismatches resolved (authors field fixed 2026-01-26) |
 | No NULLABLE_MISMATCH | ✅ No nullable mismatches found |
 | Cross-Provider Linking | ✅ DOI/PMID/PMC ID mapping verified |
 | Documentation Updated | ✅ This report |
