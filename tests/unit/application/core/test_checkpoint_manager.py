@@ -190,7 +190,8 @@ class TestCheckpointManagerForceFullScan:
         # Warning should be logged
         mock_logger.warning.assert_called_once()
         warning_call = mock_logger.warning.call_args
-        assert "force_full_scan" in warning_call[0][0].lower()
+        # Message uses "full_scan_only" since ADR-031 loading_strategy formalization
+        assert "full_scan_only" in warning_call[0][0].lower()
 
     async def test_load_checkpoint_warning_contains_adr_reference(
         self, mock_checkpoint_port, mock_logger
@@ -306,3 +307,167 @@ class TestCheckpointManagerForceFullScan:
         # Should work normally (default force_full_scan=False)
         mock_checkpoint_port.load.assert_called_once()
         assert result is not None
+
+
+@pytest.mark.unit
+class TestCheckpointManagerLoadingStrategy:
+    """Tests for CheckpointManager loading_strategy behavior (ADR-031)."""
+
+    async def test_load_checkpoint_blocked_when_loading_strategy_full_scan_only(
+        self, mock_checkpoint_port, mock_logger
+    ):
+        """Test load_checkpoint returns None when loading_strategy=FULL_SCAN_ONLY."""
+        from bioetl.domain.medallion import LoadingStrategy
+
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {"records_processed": 1000},
+        )
+
+        run_id = uuid4()
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_publication",
+            run_id=run_id,
+            resume=True,
+            loading_strategy=LoadingStrategy.FULL_SCAN_ONLY,
+        )
+
+        result = await manager.load_checkpoint()
+
+        # Checkpoint load should NOT be called - blocked immediately
+        mock_checkpoint_port.load.assert_not_called()
+        assert result is None
+        mock_logger.warning.assert_called_once()
+
+    async def test_load_checkpoint_allowed_when_loading_strategy_watermark_based(
+        self, mock_checkpoint_port, mock_logger
+    ):
+        """Test load_checkpoint works when loading_strategy=WATERMARK_BASED."""
+        from bioetl.domain.medallion import LoadingStrategy
+
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {"records_processed": 1000},
+        )
+
+        run_id = uuid4()
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=run_id,
+            resume=True,
+            loading_strategy=LoadingStrategy.WATERMARK_BASED,
+        )
+
+        result = await manager.load_checkpoint()
+
+        mock_checkpoint_port.load.assert_called_once()
+        assert result is not None
+        mock_logger.warning.assert_not_called()
+
+    async def test_loading_strategy_takes_precedence_over_force_full_scan(
+        self, mock_checkpoint_port, mock_logger
+    ):
+        """Test that explicit loading_strategy overrides force_full_scan."""
+        from bioetl.domain.medallion import LoadingStrategy
+
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {"records_processed": 1000},
+        )
+
+        run_id = uuid4()
+        # force_full_scan=True but loading_strategy=WATERMARK_BASED
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="test_pipeline",
+            run_id=run_id,
+            resume=True,
+            force_full_scan=True,
+            loading_strategy=LoadingStrategy.WATERMARK_BASED,
+        )
+
+        result = await manager.load_checkpoint()
+
+        # loading_strategy takes precedence: WATERMARK_BASED allows resume
+        mock_checkpoint_port.load.assert_called_once()
+        assert result is not None
+        mock_logger.warning.assert_not_called()
+
+    async def test_loading_strategy_derived_from_force_full_scan_when_none(
+        self, mock_checkpoint_port, mock_logger
+    ):
+        """Test loading_strategy is derived from force_full_scan when not specified."""
+        from bioetl.domain.medallion import LoadingStrategy
+
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {"records_processed": 1000},
+        )
+
+        run_id = uuid4()
+        # No loading_strategy, force_full_scan=True
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="test_pipeline",
+            run_id=run_id,
+            resume=True,
+            force_full_scan=True,
+            loading_strategy=None,  # Will be derived
+        )
+
+        # Internal loading_strategy should be FULL_SCAN_ONLY
+        assert manager._loading_strategy == LoadingStrategy.FULL_SCAN_ONLY
+
+        result = await manager.load_checkpoint()
+        assert result is None
+
+    async def test_loading_strategy_warning_references_adr_031(
+        self, mock_checkpoint_port, mock_logger
+    ):
+        """Test that warning message references ADR-031."""
+        from bioetl.domain.medallion import LoadingStrategy
+
+        run_id = uuid4()
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_publication",
+            run_id=run_id,
+            resume=True,
+            loading_strategy=LoadingStrategy.FULL_SCAN_ONLY,
+        )
+
+        await manager.load_checkpoint()
+
+        warning_call = mock_logger.warning.call_args
+        assert "ADR-031" in warning_call[0][0]
+
+    async def test_loading_strategy_string_conversion(
+        self, mock_checkpoint_port, mock_logger
+    ):
+        """Test that string loading_strategy is converted to enum."""
+        from bioetl.domain.medallion import LoadingStrategy
+
+        run_id = uuid4()
+        # Note: CheckpointManager receives LoadingStrategy enum from PipelineConfig
+        # This test verifies the enum-based behavior
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="test_pipeline",
+            run_id=run_id,
+            resume=True,
+            loading_strategy=LoadingStrategy.FULL_SCAN_ONLY,
+        )
+
+        assert manager._loading_strategy == LoadingStrategy.FULL_SCAN_ONLY

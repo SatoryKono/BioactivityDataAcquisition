@@ -17,7 +17,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
-from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
+from bioetl.domain.medallion import GoldWriteMode, LoadingStrategy, SilverWriteMode
 from bioetl.domain.types import RunType
 
 if TYPE_CHECKING:
@@ -320,6 +320,31 @@ def _convert_gold_write_mode(mode: GoldWriteMode | str) -> GoldWriteMode:
     return GoldWriteMode.from_string(mode)
 
 
+def _resolve_loading_strategy(
+    loading_strategy: LoadingStrategy | str | None,
+    force_full_scan: bool,
+) -> LoadingStrategy:
+    """Resolve loading_strategy from explicit value or force_full_scan flag.
+
+    Priority:
+    1. Explicit loading_strategy if provided
+    2. Derived from force_full_scan for backward compatibility
+
+    Args:
+        loading_strategy: Explicit strategy value or None
+        force_full_scan: Legacy boolean flag
+
+    Returns:
+        Resolved LoadingStrategy enum value
+    """
+    if loading_strategy is not None:
+        if isinstance(loading_strategy, LoadingStrategy):
+            return loading_strategy
+        return LoadingStrategy.from_string(loading_strategy)
+    # Derive from force_full_scan for backward compatibility
+    return LoadingStrategy.from_force_full_scan(force_full_scan)
+
+
 @dataclass(frozen=True, slots=True)
 class TableConfig:
     """Configuration for database tables and keys.
@@ -403,16 +428,24 @@ class PipelineConfig:
     transform_version: str | None = None
     transform_steps: tuple[str, ...] = ()
 
-    # Pagination strategy (ADR-030)
+    # Pagination strategy (ADR-030, ADR-031)
     # When True, checkpoint-based resume is disabled and each run performs a full scan.
     # Deduplication is handled on Silver layer via content_hash.
     # Required for publication entities due to API offset instability.
     force_full_scan: bool = False
 
+    # Loading strategy (ADR-031)
+    # Explicit formalization of data loading approach.
+    # - FULL_SCAN_ONLY: Each run performs full scan, checkpoint resume disabled
+    # - WATERMARK_BASED: Incremental loading via watermark (placeholder, not implemented)
+    # If not specified, derived from force_full_scan for backward compatibility.
+    loading_strategy: LoadingStrategy | str | None = None
+
     def __post_init__(self) -> None:
         """Convert lists to tuples and validate configuration on creation."""
         self._ensure_immutability()
         self._convert_write_modes()
+        self._resolve_loading_strategy()
         self._validate_config()
 
     def _ensure_immutability(self) -> None:
@@ -434,6 +467,20 @@ class PipelineConfig:
         object.__setattr__(
             self, "gold_write_mode", _convert_gold_write_mode(self.gold_write_mode)
         )
+
+    def _resolve_loading_strategy(self) -> None:
+        """Resolve loading_strategy from explicit value or force_full_scan.
+
+        Ensures consistency between loading_strategy and force_full_scan fields.
+        Validates that explicit loading_strategy matches force_full_scan when both set.
+        """
+        resolved = _resolve_loading_strategy(self.loading_strategy, self.force_full_scan)
+        object.__setattr__(self, "loading_strategy", resolved)
+
+        # Validate consistency: if both explicit and force_full_scan conflict
+        if self.loading_strategy == LoadingStrategy.FULL_SCAN_ONLY and not self.force_full_scan:
+            # Update force_full_scan to match explicit loading_strategy
+            object.__setattr__(self, "force_full_scan", True)
 
     def _validate_config(self) -> None:
         """Validate configuration values."""

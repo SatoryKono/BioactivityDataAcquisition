@@ -33,6 +33,7 @@ from bioetl.composition.services.versioning import (
     get_pipeline_version,
 )
 from bioetl.domain.locking import LockContextHolder
+from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
 
@@ -480,6 +481,7 @@ def assemble_runner(
     # Create Helper Components using ServicesBuilder
     logger_port = observability.logger
 
+    # Cast loading_strategy since __post_init__ converts str to LoadingStrategy enum
     checkpoint_manager = ServicesBuilder.create_checkpoint_manager(
         checkpoint_port=pipeline.services.checkpoint,
         logger=logger_port,
@@ -487,6 +489,7 @@ def assemble_runner(
         run_id=pipeline.run_id,
         resume=pipeline.runtime.resume,
         force_full_scan=pipeline.config.force_full_scan,
+        loading_strategy=cast(LoadingStrategy | None, pipeline.config.loading_strategy),
     )
 
     # Create lifecycle service (M5)

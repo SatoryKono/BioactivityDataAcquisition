@@ -19,6 +19,7 @@ This package contains all port definitions organized by domain:
 - normalization: UnitConverterPort, ValueValidatorPort, ActivityAggregatorPort
 - data_normalization: DataNormalizationPort for text/data normalization
 - delta_reader: DeltaReaderPort for read-only Delta table access
+- watermark: WatermarkStrategyPort for incremental loading (ADR-031, placeholder)
 """
 
 from bioetl.domain.ports.audit import (
@@ -97,6 +98,7 @@ from bioetl.domain.ports.serialization import JsonEncoderPort
 from bioetl.domain.ports.shutdown import ShutdownPort
 from bioetl.domain.ports.storage import StoragePort
 from bioetl.domain.ports.validation import GoldValidatorPort, SilverValidatorPort
+from bioetl.domain.ports.watermark import NoOpWatermarkStrategy, WatermarkStrategyPort
 
 __all__ = [
     "ActivityAggregatorPort",
@@ -141,6 +143,7 @@ __all__ = [
     "NoOpMetrics",
     "NoOpPiiHasher",
     "NoOpTracing",
+    "NoOpWatermarkStrategy",
     "NormalizationServicePort",
     "OutlierFilterPort",
     "PiiHasherPort",
@@ -158,4 +161,5 @@ __all__ = [
     "TracingPort",
     "UnitConverterPort",
     "ValueValidatorPort",
+    "WatermarkStrategyPort",
 ]
