@@ -137,12 +137,17 @@ class TestInputFilterConfig:
     """Test input filter configuration schema."""
 
     def test_default_values(self) -> None:
-        """Test default configuration values."""
+        """Test default configuration values.
+
+        Note: column_name and filter_field are None by default because
+        there is no universally applicable default value across different
+        providers and entities. They must be explicitly set when enabled.
+        """
         config = InputFilterConfig()
         assert config.enabled is False
         assert config.source_path is None
-        assert config.column_name == "id"
-        assert config.filter_field == "molecule_chembl_id"
+        assert config.column_name is None
+        assert config.filter_field is None
         assert config.batch_size == 100
 
     def test_enabled_with_path(self) -> None:
