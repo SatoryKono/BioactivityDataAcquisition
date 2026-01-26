@@ -62,7 +62,9 @@ class CheckpointManager:
         if loading_strategy is not None:
             self._loading_strategy = loading_strategy
         else:
-            self._loading_strategy = LoadingStrategy.from_force_full_scan(force_full_scan)
+            self._loading_strategy = LoadingStrategy.from_force_full_scan(
+                force_full_scan
+            )
 
     async def load_checkpoint(self) -> dict[str, Any] | None:
         """Load checkpoint if resuming.

@@ -474,11 +474,16 @@ class PipelineConfig:
         Ensures consistency between loading_strategy and force_full_scan fields.
         Validates that explicit loading_strategy matches force_full_scan when both set.
         """
-        resolved = _resolve_loading_strategy(self.loading_strategy, self.force_full_scan)
+        resolved = _resolve_loading_strategy(
+            self.loading_strategy, self.force_full_scan
+        )
         object.__setattr__(self, "loading_strategy", resolved)
 
         # Validate consistency: if both explicit and force_full_scan conflict
-        if self.loading_strategy == LoadingStrategy.FULL_SCAN_ONLY and not self.force_full_scan:
+        if (
+            self.loading_strategy == LoadingStrategy.FULL_SCAN_ONLY
+            and not self.force_full_scan
+        ):
             # Update force_full_scan to match explicit loading_strategy
             object.__setattr__(self, "force_full_scan", True)
 

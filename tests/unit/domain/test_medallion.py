@@ -120,13 +120,25 @@ class TestLoadingStrategy:
 
     def test_from_string_valid_values(self):
         """Test from_string converts valid string values."""
-        assert LoadingStrategy.from_string("full_scan_only") == LoadingStrategy.FULL_SCAN_ONLY
-        assert LoadingStrategy.from_string("watermark_based") == LoadingStrategy.WATERMARK_BASED
+        assert (
+            LoadingStrategy.from_string("full_scan_only")
+            == LoadingStrategy.FULL_SCAN_ONLY
+        )
+        assert (
+            LoadingStrategy.from_string("watermark_based")
+            == LoadingStrategy.WATERMARK_BASED
+        )
 
     def test_from_string_case_insensitive(self):
         """Test from_string is case insensitive."""
-        assert LoadingStrategy.from_string("FULL_SCAN_ONLY") == LoadingStrategy.FULL_SCAN_ONLY
-        assert LoadingStrategy.from_string("Watermark_Based") == LoadingStrategy.WATERMARK_BASED
+        assert (
+            LoadingStrategy.from_string("FULL_SCAN_ONLY")
+            == LoadingStrategy.FULL_SCAN_ONLY
+        )
+        assert (
+            LoadingStrategy.from_string("Watermark_Based")
+            == LoadingStrategy.WATERMARK_BASED
+        )
 
     def test_from_string_invalid_raises_value_error(self):
         """Test from_string raises ValueError for invalid values."""
@@ -153,7 +165,8 @@ class TestLoadingStrategy:
     def test_from_force_full_scan_false(self):
         """Test from_force_full_scan with False returns WATERMARK_BASED."""
         assert (
-            LoadingStrategy.from_force_full_scan(False) == LoadingStrategy.WATERMARK_BASED
+            LoadingStrategy.from_force_full_scan(False)
+            == LoadingStrategy.WATERMARK_BASED
         )
 
     def test_string_enum_comparison(self):
