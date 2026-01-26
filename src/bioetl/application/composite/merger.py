@@ -6,6 +6,7 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal
 
+from bioetl.application.composite.aggregator import EnricherAggregator
 from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.deduplication import EnricherDeduplicator
@@ -87,6 +88,7 @@ class MergeService:
         self._logger = logger
         self._delta_reader = delta_reader
         self._deduplicator = EnricherDeduplicator(logger)
+        self._aggregator = EnricherAggregator(logger)
         self._renamer = ColumnRenamer(logger)
         # Pass column_groups from config if available for YAML-based ordering
         self._orderer = ColumnOrderer(
@@ -639,6 +641,15 @@ class MergeService:
             # Secondary keys are fallbacks but NOT used in join operation
             primary_key = join_keys_list[0]
 
+            # Apply aggregation for MANY_TO_ONE enrichers BEFORE deduplication
+            # This converts 1:M relationships to 1:1
+            if enricher.is_many_to_one and enricher.aggregation is not None:
+                enricher_df = self._aggregator.aggregate(
+                    enricher_df,
+                    enricher.aggregation,
+                    enricher.pipeline,
+                )
+
             # Deduplicate enricher before join to prevent fan-out
             enricher_df = self._deduplicator.deduplicate(
                 enricher_df=enricher_df,
@@ -684,36 +695,11 @@ class MergeService:
             enricher_df = self._drop_system_columns(enricher_df)
 
             # Calculate qualified join key names for both seed and enricher
-            # Support both pre-renamed (qualified) and unqualified seed columns
-            seed_join_key_qualified: str | None = None
-            seed_join_key: str = primary_key  # Default to unqualified
-
-            if seed_pipeline is not None:
-                try:
-                    seed_provider, seed_entity = self._parse_pipeline_name(
-                        seed_pipeline
-                    )
-                    seed_join_key_qualified = (
-                        f"{seed_provider}.{seed_entity}.{primary_key}"
-                    )
-                    # Use qualified if present, otherwise fallback to unqualified
-                    if seed_join_key_qualified in merged.columns:
-                        seed_join_key = seed_join_key_qualified
-                    elif primary_key in merged.columns:
-                        seed_join_key = primary_key
-                except ValueError:
-                    # Fallback if seed_pipeline is invalid
-                    seed_join_key = primary_key
-
-            try:
-                enricher_provider, enricher_entity = self._parse_pipeline_name(
-                    enricher.pipeline
+            seed_join_key, enricher_join_key, seed_join_key_qualified = (
+                self._resolve_join_key_names(
+                    primary_key, seed_pipeline, enricher.pipeline, merged.columns
                 )
-                enricher_join_key = (
-                    f"{enricher_provider}.{enricher_entity}.{primary_key}"
-                )
-            except ValueError:
-                enricher_join_key = primary_key
+            )
 
             # Detect and resolve remaining conflicts
             # Exclude both seed and enricher join keys from conflict detection
@@ -778,6 +764,46 @@ class MergeService:
             return df.drop(columns_to_drop)
 
         return df
+
+    def _resolve_join_key_names(
+        self,
+        primary_key: str,
+        seed_pipeline: str | None,
+        enricher_pipeline: str,
+        merged_columns: list[str],
+    ) -> tuple[str, str, str | None]:
+        """Resolve qualified join key names for seed and enricher.
+
+        Args:
+            primary_key: Unqualified join key name.
+            seed_pipeline: Seed pipeline name for qualification.
+            enricher_pipeline: Enricher pipeline name for qualification.
+            merged_columns: Current merged DataFrame columns.
+
+        Returns:
+            Tuple of (seed_join_key, enricher_join_key, seed_join_key_qualified).
+        """
+        seed_join_key_qualified: str | None = None
+        seed_join_key = primary_key
+
+        if seed_pipeline is not None:
+            try:
+                seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
+                seed_join_key_qualified = f"{seed_provider}.{seed_entity}.{primary_key}"
+                if seed_join_key_qualified in merged_columns:
+                    seed_join_key = seed_join_key_qualified
+            except ValueError:
+                pass
+
+        try:
+            enricher_provider, enricher_entity = self._parse_pipeline_name(
+                enricher_pipeline
+            )
+            enricher_join_key = f"{enricher_provider}.{enricher_entity}.{primary_key}"
+        except ValueError:
+            enricher_join_key = primary_key
+
+        return seed_join_key, enricher_join_key, seed_join_key_qualified
 
     def _get_enricher_prefix(
         self,

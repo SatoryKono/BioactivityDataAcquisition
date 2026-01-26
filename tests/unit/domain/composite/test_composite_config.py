@@ -1,6 +1,7 @@
 """Unit tests for composite pipeline configuration models.
 
-Tests for CompositeConfig, EnricherConfig, SeedConfig, MergeConfig.
+Tests for CompositeConfig, EnricherConfig, SeedConfig, MergeConfig,
+AggregationConfig, AggregationFieldSpec, EnricherCardinality.
 """
 
 from __future__ import annotations
@@ -8,9 +9,13 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.composite.config import (
+    AggregationConfig,
+    AggregationFieldSpec,
+    AggregationFunction,
     CompositeDQConfig,
     CompositeConfig,
     DQOverrideConfig,
+    EnricherCardinality,
     EnricherConfig,
     MergeConfig,
     SeedConfig,
@@ -155,6 +160,237 @@ class TestEnricherConfig:
                 pipeline="crossref",
                 join_keys=(),
             )
+
+    def test_enricher_config_many_to_one_requires_aggregation(self):
+        """MANY_TO_ONE cardinality requires aggregation config."""
+        with pytest.raises(ValueError, match="requires aggregation"):
+            EnricherConfig(
+                pipeline="test",
+                join_keys=("id",),
+                cardinality=EnricherCardinality.MANY_TO_ONE,
+                aggregation=None,
+            )
+
+    def test_enricher_config_many_to_one_with_aggregation(self):
+        """MANY_TO_ONE cardinality with aggregation should work."""
+        config = EnricherConfig(
+            pipeline="chembl_publication_term",
+            join_keys=("document_chembl_id",),
+            cardinality=EnricherCardinality.MANY_TO_ONE,
+            aggregation=AggregationConfig(
+                group_by="document_chembl_id",
+                fields=(
+                    AggregationFieldSpec(
+                        source_field="term",
+                        agg_function=AggregationFunction.COLLECT_LIST,
+                        output_field="terms",
+                    ),
+                ),
+            ),
+        )
+        assert config.cardinality == EnricherCardinality.MANY_TO_ONE
+        assert config.aggregation is not None
+        assert config.is_many_to_one is True
+
+    def test_enricher_config_one_to_one_no_aggregation_ok(self):
+        """ONE_TO_ONE cardinality without aggregation should work."""
+        config = EnricherConfig(
+            pipeline="test",
+            join_keys=("id",),
+            cardinality=EnricherCardinality.ONE_TO_ONE,
+        )
+        assert config.cardinality == EnricherCardinality.ONE_TO_ONE
+        assert config.aggregation is None
+        assert config.is_many_to_one is False
+
+    def test_enricher_config_string_cardinality_converted(self):
+        """String cardinality should be converted to enum."""
+        config = EnricherConfig(
+            pipeline="test",
+            join_keys=("id",),
+            cardinality="one_to_one",  # type: ignore
+        )
+        assert config.cardinality == EnricherCardinality.ONE_TO_ONE
+
+    def test_enricher_config_dict_aggregation_converted(self):
+        """Dict aggregation should be converted to AggregationConfig."""
+        config = EnricherConfig(
+            pipeline="test",
+            join_keys=("id",),
+            cardinality=EnricherCardinality.MANY_TO_ONE,
+            aggregation={  # type: ignore
+                "group_by": "id",
+                "fields": [
+                    {
+                        "source_field": "val",
+                        "agg_function": "collect_list",
+                        "output_field": "values",
+                    }
+                ],
+            },
+        )
+        assert isinstance(config.aggregation, AggregationConfig)
+        assert config.aggregation.group_by == "id"
+
+
+class TestAggregationFunction:
+    """Tests for AggregationFunction enum."""
+
+    def test_from_string_valid(self):
+        """Valid string should convert to enum."""
+        assert (
+            AggregationFunction.from_string("collect_list")
+            == AggregationFunction.COLLECT_LIST
+        )
+        assert (
+            AggregationFunction.from_string("COLLECT_SET")
+            == AggregationFunction.COLLECT_SET
+        )
+        assert AggregationFunction.from_string("count") == AggregationFunction.COUNT
+        assert AggregationFunction.from_string("first") == AggregationFunction.FIRST
+        assert (
+            AggregationFunction.from_string("concat_str")
+            == AggregationFunction.CONCAT_STR
+        )
+
+    def test_from_string_invalid_raises(self):
+        """Invalid string should raise ValueError."""
+        with pytest.raises(ValueError, match="Invalid aggregation function"):
+            AggregationFunction.from_string("invalid")
+
+
+class TestEnricherCardinality:
+    """Tests for EnricherCardinality enum."""
+
+    def test_from_string_valid(self):
+        """Valid string should convert to enum."""
+        assert (
+            EnricherCardinality.from_string("one_to_one")
+            == EnricherCardinality.ONE_TO_ONE
+        )
+        assert (
+            EnricherCardinality.from_string("MANY_TO_ONE")
+            == EnricherCardinality.MANY_TO_ONE
+        )
+
+    def test_from_string_invalid_raises(self):
+        """Invalid string should raise ValueError."""
+        with pytest.raises(ValueError, match="Invalid cardinality"):
+            EnricherCardinality.from_string("invalid")
+
+
+class TestAggregationFieldSpec:
+    """Tests for AggregationFieldSpec."""
+
+    def test_valid_field_spec(self):
+        """Valid field spec should be created successfully."""
+        spec = AggregationFieldSpec(
+            source_field="term",
+            agg_function=AggregationFunction.COLLECT_LIST,
+            filter_condition="term_type == 'MESH_HEADING'",
+            output_field="mesh_headings",
+        )
+        assert spec.source_field == "term"
+        assert spec.agg_function == AggregationFunction.COLLECT_LIST
+        assert spec.filter_condition == "term_type == 'MESH_HEADING'"
+        assert spec.output_field == "mesh_headings"
+        assert spec.effective_output_field == "mesh_headings"
+
+    def test_field_spec_defaults_output_to_source(self):
+        """Output field defaults to source field if not specified."""
+        spec = AggregationFieldSpec(
+            source_field="term",
+            agg_function=AggregationFunction.COLLECT_LIST,
+        )
+        assert spec.output_field is None
+        assert spec.effective_output_field == "term"
+
+    def test_field_spec_string_agg_function_converted(self):
+        """String agg_function should be converted to enum."""
+        spec = AggregationFieldSpec(
+            source_field="term",
+            agg_function="collect_set",  # type: ignore
+        )
+        assert spec.agg_function == AggregationFunction.COLLECT_SET
+
+    def test_field_spec_empty_source_raises(self):
+        """Empty source_field should raise ValueError."""
+        with pytest.raises(ValueError, match="source_field cannot be empty"):
+            AggregationFieldSpec(
+                source_field="",
+                agg_function=AggregationFunction.COLLECT_LIST,
+            )
+
+
+class TestAggregationConfig:
+    """Tests for AggregationConfig."""
+
+    def test_valid_config(self):
+        """Valid aggregation config should be created successfully."""
+        config = AggregationConfig(
+            group_by="document_chembl_id",
+            fields=(
+                AggregationFieldSpec(
+                    source_field="term",
+                    agg_function=AggregationFunction.COLLECT_LIST,
+                    filter_condition="term_type == 'MESH_HEADING'",
+                    output_field="mesh_headings",
+                ),
+                AggregationFieldSpec(
+                    source_field="mesh_id",
+                    agg_function=AggregationFunction.COLLECT_SET,
+                    output_field="mesh_ids",
+                ),
+            ),
+        )
+        assert config.group_by == "document_chembl_id"
+        assert len(config.fields) == 2
+
+    def test_empty_fields_raises(self):
+        """Empty fields should raise ValueError."""
+        with pytest.raises(ValueError, match="cannot be empty"):
+            AggregationConfig(group_by="id", fields=())
+
+    def test_empty_group_by_raises(self):
+        """Empty group_by should raise ValueError."""
+        with pytest.raises(ValueError, match="group_by cannot be empty"):
+            AggregationConfig(
+                group_by="",
+                fields=(
+                    AggregationFieldSpec(
+                        source_field="val",
+                        agg_function=AggregationFunction.COLLECT_LIST,
+                    ),
+                ),
+            )
+
+    def test_list_to_tuple_conversion(self):
+        """List of fields should be converted to tuple."""
+        config = AggregationConfig(
+            group_by="id",
+            fields=[  # type: ignore
+                AggregationFieldSpec(
+                    source_field="val",
+                    agg_function=AggregationFunction.COLLECT_LIST,
+                ),
+            ],
+        )
+        assert isinstance(config.fields, tuple)
+
+    def test_dict_fields_converted(self):
+        """Dict fields should be converted to AggregationFieldSpec."""
+        config = AggregationConfig(
+            group_by="id",
+            fields=[  # type: ignore
+                {
+                    "source_field": "val",
+                    "agg_function": "collect_list",
+                    "output_field": "values",
+                }
+            ],
+        )
+        assert isinstance(config.fields[0], AggregationFieldSpec)
+        assert config.fields[0].source_field == "val"
 
 
 class TestMergeConfig:
