@@ -133,7 +133,9 @@ class UniprotTarget(BaseEntity):
 
     # Biochemical properties (JSON)
     cofactors: str | None = None  # JSON array of cofactors with name and ChEBI ID
-    biophysicochemical_properties: str | None = None  # JSON object with pH, temp, kinetics
+    biophysicochemical_properties: str | None = (
+        None  # JSON object with pH, temp, kinetics
+    )
     induction: str | None = None  # JSON array of induction conditions
 
     # Cross-references (JSON arrays)

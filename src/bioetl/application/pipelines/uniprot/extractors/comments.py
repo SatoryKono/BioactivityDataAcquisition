@@ -73,6 +73,163 @@ def _build_isoform_data(iso: dict[str, Any]) -> dict[str, Any]:
     return isoform_data
 
 
+def _extract_texts_from_dict(data: dict[str, Any] | None) -> list[str]:
+    """Extract text values from a dict with 'texts' key.
+
+    Args:
+        data: Dict containing 'texts' list.
+
+    Returns:
+        List of extracted text values.
+    """
+    if not isinstance(data, dict):
+        return []
+    texts = data.get("texts", [])
+    if not isinstance(texts, list):
+        return []
+    return [
+        str(t.get("value")) for t in texts if isinstance(t, dict) and t.get("value")
+    ]
+
+
+def _extract_cofactor_entry(cofactor: dict[str, Any]) -> dict[str, Any]:
+    """Extract data from a single cofactor entry.
+
+    Args:
+        cofactor: Cofactor dict from comment.
+
+    Returns:
+        Cofactor data dict with name, chebi_id, and optional note.
+    """
+    cofactor_data: dict[str, Any] = {}
+
+    name = cofactor.get("name")
+    if name:
+        cofactor_data["name"] = str(name)
+
+    xref = cofactor.get("cofactorCrossReference")
+    if isinstance(xref, dict):
+        chebi_id = xref.get("id")
+        if chebi_id:
+            cofactor_data["chebi_id"] = str(chebi_id)
+
+    note = cofactor.get("note")
+    notes = _extract_texts_from_dict(note)
+    if notes:
+        cofactor_data["note"] = notes[0] if len(notes) == 1 else notes
+
+    return cofactor_data
+
+
+def _extract_km_entry(km: dict[str, Any]) -> dict[str, Any]:
+    """Extract Michaelis constant entry."""
+    km_entry: dict[str, Any] = {}
+    if km.get("constant"):
+        km_entry["value"] = km["constant"]
+    if km.get("unit"):
+        km_entry["unit"] = km["unit"]
+    if km.get("substrate"):
+        km_entry["substrate"] = km["substrate"]
+    return km_entry
+
+
+def _extract_vmax_entry(vmax: dict[str, Any]) -> dict[str, Any]:
+    """Extract maximum velocity entry."""
+    vmax_entry: dict[str, Any] = {}
+    if vmax.get("velocity"):
+        vmax_entry["value"] = vmax["velocity"]
+    if vmax.get("unit"):
+        vmax_entry["unit"] = vmax["unit"]
+    if vmax.get("enzyme"):
+        vmax_entry["enzyme"] = vmax["enzyme"]
+    return vmax_entry
+
+
+def _extract_list_entries(data_list: Any, extractor: Any) -> list[dict[str, Any]]:
+    """Extract entries from a list using the provided extractor function."""
+    if not isinstance(data_list, list) or not data_list:
+        return []
+    return [
+        e
+        for e in (extractor(item) for item in data_list if isinstance(item, dict))
+        if e
+    ]
+
+
+def _extract_kinetic_parameters(kinetics: dict[str, Any]) -> dict[str, Any]:
+    """Extract kinetic parameters (Km, Vmax) from kineticParameters dict."""
+    kinetic_data: dict[str, Any] = {}
+
+    km_values = _extract_list_entries(
+        kinetics.get("michaelisConstants"), _extract_km_entry
+    )
+    if km_values:
+        kinetic_data["km"] = km_values
+
+    vmax_values = _extract_list_entries(
+        kinetics.get("maximumVelocities"), _extract_vmax_entry
+    )
+    if vmax_values:
+        kinetic_data["vmax"] = vmax_values
+
+    notes = _extract_texts_from_dict(kinetics.get("note"))
+    if notes:
+        kinetic_data["note"] = notes
+
+    return kinetic_data
+
+
+def _extract_absorption_data(absorption: dict[str, Any]) -> dict[str, Any]:
+    """Extract absorption (spectroscopic) data."""
+    abs_data: dict[str, Any] = {}
+    if absorption.get("max"):
+        abs_data["max"] = absorption["max"]
+    notes = _extract_texts_from_dict(absorption.get("note"))
+    if notes:
+        abs_data["note"] = notes
+    return abs_data
+
+
+def _extract_biophys_from_comment(comment: dict[str, Any]) -> dict[str, Any]:
+    """Extract biophysicochemical data from a single comment.
+
+    Args:
+        comment: BIOPHYSICOCHEMICAL PROPERTIES comment dict.
+
+    Returns:
+        Dict with extracted properties.
+    """
+    result: dict[str, Any] = {}
+
+    # Simple text extractions
+    ph_values = _extract_texts_from_dict(comment.get("phDependence"))
+    if ph_values:
+        result["ph_dependence"] = ph_values
+
+    temp_values = _extract_texts_from_dict(comment.get("temperatureDependence"))
+    if temp_values:
+        result["temperature_dependence"] = temp_values
+
+    redox_values = _extract_texts_from_dict(comment.get("redoxPotential"))
+    if redox_values:
+        result["redox_potential"] = redox_values
+
+    # Complex extractions
+    kinetics = comment.get("kineticParameters")
+    if isinstance(kinetics, dict):
+        kinetic_data = _extract_kinetic_parameters(kinetics)
+        if kinetic_data:
+            result["kinetic_parameters"] = kinetic_data
+
+    absorption = comment.get("absorption")
+    if isinstance(absorption, dict):
+        abs_data = _extract_absorption_data(absorption)
+        if abs_data:
+            result["absorption"] = abs_data
+
+    return result
+
+
 class CommentExtractor:
     """Extracts comment-related data from UniProt records.
 
@@ -256,34 +413,7 @@ class CommentExtractor:
             for cofactor in cofactors:
                 if not isinstance(cofactor, dict):
                     continue
-
-                cofactor_data: dict[str, Any] = {}
-
-                # Extract cofactor name
-                name = cofactor.get("name")
-                if name:
-                    cofactor_data["name"] = str(name)
-
-                # Extract ChEBI cross-reference if available
-                xref = cofactor.get("cofactorCrossReference")
-                if isinstance(xref, dict):
-                    chebi_id = xref.get("id")
-                    if chebi_id:
-                        cofactor_data["chebi_id"] = str(chebi_id)
-
-                # Extract note if available
-                note = cofactor.get("note")
-                if isinstance(note, dict):
-                    note_texts = note.get("texts", [])
-                    if isinstance(note_texts, list) and note_texts:
-                        notes = [
-                            str(t.get("value"))
-                            for t in note_texts
-                            if isinstance(t, dict) and t.get("value")
-                        ]
-                        if notes:
-                            cofactor_data["note"] = notes[0] if len(notes) == 1 else notes
-
+                cofactor_data = _extract_cofactor_entry(cofactor)
                 if cofactor_data:
                     extracted.append(cofactor_data)
 
@@ -309,122 +439,7 @@ class CommentExtractor:
         for comment in comments:
             if not _is_comment_of_type(comment, "BIOPHYSICOCHEMICAL PROPERTIES"):
                 continue
-
-            # Extract pH dependence
-            ph_dep = comment.get("phDependence")
-            if isinstance(ph_dep, dict):
-                texts = ph_dep.get("texts", [])
-                if isinstance(texts, list):
-                    ph_values = [
-                        str(t.get("value"))
-                        for t in texts
-                        if isinstance(t, dict) and t.get("value")
-                    ]
-                    if ph_values:
-                        extracted["ph_dependence"] = ph_values
-
-            # Extract temperature dependence
-            temp_dep = comment.get("temperatureDependence")
-            if isinstance(temp_dep, dict):
-                texts = temp_dep.get("texts", [])
-                if isinstance(texts, list):
-                    temp_values = [
-                        str(t.get("value"))
-                        for t in texts
-                        if isinstance(t, dict) and t.get("value")
-                    ]
-                    if temp_values:
-                        extracted["temperature_dependence"] = temp_values
-
-            # Extract kinetic parameters
-            kinetics = comment.get("kineticParameters")
-            if isinstance(kinetics, dict):
-                kinetic_data: dict[str, Any] = {}
-
-                # Michaelis constants (Km)
-                km_list = kinetics.get("michaelisConstants", [])
-                if isinstance(km_list, list) and km_list:
-                    km_values = []
-                    for km in km_list:
-                        if isinstance(km, dict):
-                            km_entry: dict[str, Any] = {}
-                            if km.get("constant"):
-                                km_entry["value"] = km["constant"]
-                            if km.get("unit"):
-                                km_entry["unit"] = km["unit"]
-                            if km.get("substrate"):
-                                km_entry["substrate"] = km["substrate"]
-                            if km_entry:
-                                km_values.append(km_entry)
-                    if km_values:
-                        kinetic_data["km"] = km_values
-
-                # Maximum velocities (Vmax)
-                vmax_list = kinetics.get("maximumVelocities", [])
-                if isinstance(vmax_list, list) and vmax_list:
-                    vmax_values = []
-                    for vmax in vmax_list:
-                        if isinstance(vmax, dict):
-                            vmax_entry: dict[str, Any] = {}
-                            if vmax.get("velocity"):
-                                vmax_entry["value"] = vmax["velocity"]
-                            if vmax.get("unit"):
-                                vmax_entry["unit"] = vmax["unit"]
-                            if vmax.get("enzyme"):
-                                vmax_entry["enzyme"] = vmax["enzyme"]
-                            if vmax_entry:
-                                vmax_values.append(vmax_entry)
-                    if vmax_values:
-                        kinetic_data["vmax"] = vmax_values
-
-                # Note/text
-                note = kinetics.get("note")
-                if isinstance(note, dict):
-                    note_texts = note.get("texts", [])
-                    if isinstance(note_texts, list):
-                        notes = [
-                            str(t.get("value"))
-                            for t in note_texts
-                            if isinstance(t, dict) and t.get("value")
-                        ]
-                        if notes:
-                            kinetic_data["note"] = notes
-
-                if kinetic_data:
-                    extracted["kinetic_parameters"] = kinetic_data
-
-            # Extract redox potential
-            redox = comment.get("redoxPotential")
-            if isinstance(redox, dict):
-                texts = redox.get("texts", [])
-                if isinstance(texts, list):
-                    redox_values = [
-                        str(t.get("value"))
-                        for t in texts
-                        if isinstance(t, dict) and t.get("value")
-                    ]
-                    if redox_values:
-                        extracted["redox_potential"] = redox_values
-
-            # Extract absorption (spectroscopic data)
-            absorption = comment.get("absorption")
-            if isinstance(absorption, dict):
-                abs_data: dict[str, Any] = {}
-                if absorption.get("max"):
-                    abs_data["max"] = absorption["max"]
-                note = absorption.get("note")
-                if isinstance(note, dict):
-                    note_texts = note.get("texts", [])
-                    if isinstance(note_texts, list):
-                        notes = [
-                            str(t.get("value"))
-                            for t in note_texts
-                            if isinstance(t, dict) and t.get("value")
-                        ]
-                        if notes:
-                            abs_data["note"] = notes
-                if abs_data:
-                    extracted["absorption"] = abs_data
+            extracted.update(_extract_biophys_from_comment(comment))
 
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
