@@ -135,10 +135,7 @@ class TestForceFullScanNonPublicationConfigs:
             force_full_scan = config.get("force_full_scan", False)
 
             # Non-publication entities shouldn't have force_full_scan=true
-            if (
-                entity_type not in PUBLICATION_ENTITY_TYPES
-                and force_full_scan is True
-            ):
+            if entity_type not in PUBLICATION_ENTITY_TYPES and force_full_scan is True:
                 incorrectly_enabled.append(f"{yaml_file} (entity_type={entity_type})")
 
         if incorrectly_enabled:
