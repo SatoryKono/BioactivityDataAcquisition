@@ -241,10 +241,14 @@ class BaseTitleFallbackHandler(ABC):
         Phase 3 of the three-phase fallback strategy. Handles entries
         where no DOI was provided, using only the title for lookup.
 
+        Supports two entry formats:
+        - Empty strings "" (legacy): looks up fallback_mapping.get("")
+        - Markers "__title_only_N__": looks up fallback_mapping.get(marker)
+
         Args:
-            entries: List of empty/placeholder entries (typically empty strings).
+            entries: List of entries - empty strings or __title_only_N__ markers.
             fallback_mapping: Mapping {entry: title} for lookup.
-                Also checks fallback_mapping.get("") as fallback.
+                Supports both marker keys and empty string fallback.
             limit: Maximum total records to return.
             fetched: Number of records already fetched.
 
@@ -255,7 +259,8 @@ class BaseTitleFallbackHandler(ABC):
             if limit and fetched >= limit:
                 return
 
-            # Try entry key first, then empty string fallback
+            # Try entry key first (supports __title_only_N__ markers),
+            # then empty string fallback for legacy compatibility
             title = fallback_mapping.get(entry, fallback_mapping.get(""))
             if not title:
                 continue
@@ -263,6 +268,7 @@ class BaseTitleFallbackHandler(ABC):
             self._logger.info(
                 self._event_title_only_attempt,
                 title=self._truncate_title(title),
+                marker=entry if entry.startswith("__title_only_") else None,
             )
 
             result = await self._search_by_title(title)
