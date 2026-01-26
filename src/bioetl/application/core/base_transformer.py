@@ -17,7 +17,7 @@ import dataclasses
 import time
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, ClassVar, TypeVar
+from typing import TYPE_CHECKING, Any, ClassVar, Protocol, TypeVar, runtime_checkable
 
 import orjson
 
@@ -40,6 +40,26 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 T = TypeVar("T", bound="BaseEntity")
+V = TypeVar("V", covariant=True)
+
+
+@runtime_checkable
+class ValueObjectWithFromRaw(Protocol[V]):
+    """Protocol for Value Objects with from_raw() class method.
+
+    This protocol enables type-safe usage of validate_value_object()
+    with any Value Object class that implements from_raw().
+    """
+
+    @classmethod
+    def from_raw(cls, raw: Any) -> V | None:
+        """Create Value Object from raw value, returning None if invalid."""
+        ...
+
+    @property
+    def value(self) -> Any:
+        """Get the internal value."""
+        ...
 
 
 class TransformationError(Exception):
@@ -165,6 +185,92 @@ class BaseTransformer(ABC):
             List of hashed values, or None if input is None.
         """
         return self._pii_hasher.hash_list(values)
+
+    # ========================================================================
+    # Value Object Validation Methods (Consolidated Logic)
+    # ========================================================================
+
+    @staticmethod
+    def validate_value_object(
+        vo_class: type[ValueObjectWithFromRaw[Any]],
+        value: Any,
+        *,
+        as_string: bool = True,
+    ) -> str | int | None:
+        """Validate a value using a Value Object and return the result.
+
+        Consolidates the common pattern of:
+        1. Call VO.from_raw(value)
+        2. Return str(vo) if vo else None
+
+        This eliminates repetitive code across transformers.
+
+        Args:
+            vo_class: Value Object class with from_raw() class method.
+            value: Raw value to validate.
+            as_string: If True, return str(vo); if False, return vo.value.
+
+        Returns:
+            Validated value as string/int, or None if validation fails.
+
+        Example:
+            >>> # Instead of:
+            >>> doi_vo = DOI.from_raw(rec.get("doi"))
+            >>> doi = str(doi_vo) if doi_vo else None
+            >>>
+            >>> # Use:
+            >>> doi = self.validate_value_object(DOI, rec.get("doi"))
+
+        """
+        vo = vo_class.from_raw(value)
+        if vo is None:
+            return None
+        return str(vo) if as_string else vo.value
+
+    @staticmethod
+    def validate_value_objects(
+        vo_class: type[ValueObjectWithFromRaw[Any]],
+        values: list[Any] | None,
+        *,
+        as_string: bool = True,
+    ) -> list[str | int] | None:
+        """Validate a list of values using a Value Object.
+
+        Useful for fields like taxonomy_id list in target_transformer.
+
+        Args:
+            vo_class: Value Object class with from_raw() class method.
+            values: List of raw values to validate, or None.
+            as_string: If True, return str(vo); if False, return vo.value.
+
+        Returns:
+            List of validated values, or None if input is None/empty.
+
+        Example:
+            >>> # Instead of:
+            >>> validated_tax_ids: list[int] | None = None
+            >>> if raw_tax_ids:
+            >>>     validated_list: list[int] = []
+            >>>     for tid in raw_tax_ids:
+            >>>         vo = TaxonomyId.from_raw(tid)
+            >>>         if vo is not None:
+            >>>             validated_list.append(vo.value)
+            >>>     validated_tax_ids = validated_list if validated_list else None
+            >>>
+            >>> # Use:
+            >>> validated_tax_ids = self.validate_value_objects(
+            >>>     TaxonomyId, raw_tax_ids, as_string=False
+            >>> )
+
+        """
+        if not values:
+            return None
+        result: list[str | int] = []
+        for val in values:
+            vo = vo_class.from_raw(val)
+            if vo is not None:
+                result.append(str(vo) if as_string else vo.value)
+        return result if result else None
 
     async def transform(
         self,
