@@ -1,8 +1,8 @@
 # BioETL Architecture Diagrams
 
-*Updated: 2026-01-05*
+*Updated: 2026-01-26*
 
-This directory contains 34 Mermaid diagram source files documenting the BioETL architecture.
+This directory contains 35 Mermaid diagram source files documenting the BioETL architecture.
 
 > **Note**: `DeltaWriter` was renamed to `SilverWriter` (see `silver_writer.py`). Some older diagrams may reference the old name.
 
@@ -44,6 +44,14 @@ This directory contains 34 Mermaid diagram source files documenting the BioETL a
 | 23 | `23-delta-lake-writer-class.mermaid` | DeltaWriter class diagram |
 | 24 | `24-hash-service-class.mermaid` | Hash service class diagram |
 | 25 | `25-circuit-breaker-observer-class.mermaid` | CircuitBreaker class diagram |
+
+### New: Composite Pipeline Diagrams
+
+Additional diagrams for Composite Pipeline (ADR-026) are available in `/docs/diagrams/mermaid/`:
+
+| File | Description |
+|------|-------------|
+| `26_composite_pipeline_workflow.mmd` | Composite Pipeline workflow: seed → enrich (fan-out) → merge |
 
 ## Rendering to PNG
 

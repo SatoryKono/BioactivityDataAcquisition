@@ -21,9 +21,18 @@ flowchart TB
         Transformer[BaseTransformer]
         Services[PipelineServices]
 
+        subgraph Composite["Composite Pipeline (ADR-026)"]
+            CompositeRunner[CompositePipelineRunner]
+            Coordinator[EnrichmentCoordinator]
+            Merger[MergeService]
+        end
+
         Runner --> Executor
         Executor --> Transformer
         Runner --> Services
+        CompositeRunner --> Coordinator
+        CompositeRunner --> Merger
+        CompositeRunner -.->|"delegates"| Runner
     end
 
     subgraph Domain["Domain Layer"]
