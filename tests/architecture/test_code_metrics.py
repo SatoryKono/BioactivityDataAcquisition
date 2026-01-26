@@ -112,7 +112,7 @@ class TestFileSizeLimits:
         "storage_factory.py": 400,  # Extracted from storage.py
         "observability.py": 475,  # Bootstrap observability + deprecated aliases
         # Application layer exemptions
-        "base_transformer.py": 680,  # 667 LOC - BaseTransformer with serialization helpers
+        "base_transformer.py": 790,  # 786 LOC - BaseTransformer with serialization helpers + validate_value_object() consolidation
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
         "merger.py": 1405,  # 1399 LOC - MergeService with type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing
     }
@@ -532,7 +532,7 @@ class TestClassSize:
         "PipelineObserver": 350,  # 319 lines - unified observability with lifecycle events
         # Baseline exemptions for existing classes
         "StorageAdapter": 625,  # 619 lines - storage adapter with writers + BronzeWriteResult + SilverWriteResult
-        "BaseTransformer": 620,  # 605 lines - Template Method with helpers (tracing + PII hashing + serialize_json_list)
+        "BaseTransformer": 710,  # 703 lines - Template Method with helpers (tracing + PII hashing + serialize_json_list + validate_value_object)
         "SilverWriter": 1130,  # 1111 lines - schema drift detection (metadata builder extracted)
         "GoldWriter": 910,  # 890 lines - SCD Type 2 (metadata/arrow logic extracted)
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
@@ -599,6 +599,8 @@ class TestClassSize:
         "PubMedAdapter": 545,  # 540 lines - FilterableDataSourcePort + APIRequestCollector + TitleFallbackHandler
         # ChEMBL adapter with complex FilterableDataSourcePort
         "ChemblAdapter": 920,  # 914 lines - FilterableDataSourcePort + health-aware batching + pagination + composite key deduplication + 500 error detection
+        # Common adapter base classes
+        "BaseTitleFallbackHandler": 320,  # 314 lines - Base fallback handler with provider_prefix + default event properties
         # PubMed transformer with comprehensive field extraction
         "PubMedPublicationTransformer": 450,  # 428 lines - Gold schema alignment with many extraction methods
     }
