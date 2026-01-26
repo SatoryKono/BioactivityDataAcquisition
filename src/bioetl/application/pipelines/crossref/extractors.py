@@ -68,6 +68,189 @@ def extract_authors(publication: dict[str, Any]) -> list[str]:
     return authors
 
 
+def _normalize_orcid(orcid_value: str | None) -> str | None:
+    """Normalize ORCID to ID-only format (without URL prefix).
+
+    CrossRef may provide ORCID as full URL (https://orcid.org/0000-0001-2345-6789)
+    or as ID only (0000-0001-2345-6789). This normalizes to ID-only format.
+
+    Args:
+        orcid_value: Raw ORCID value (URL or ID).
+
+    Returns:
+        ORCID ID (format: 0000-0000-0000-000X) or None if invalid.
+
+    Example:
+        >>> _normalize_orcid("https://orcid.org/0000-0001-2345-6789")
+        '0000-0001-2345-6789'
+        >>> _normalize_orcid("0000-0001-2345-6789")
+        '0000-0001-2345-6789'
+        >>> _normalize_orcid(None)
+        None
+
+    """
+    if not orcid_value or not isinstance(orcid_value, str):
+        return None
+
+    orcid = orcid_value.strip()
+    # Remove URL prefix if present
+    if orcid.startswith("https://orcid.org/"):
+        orcid = orcid[len("https://orcid.org/") :]
+    elif orcid.startswith("http://orcid.org/"):
+        orcid = orcid[len("http://orcid.org/") :]
+
+    # Validate format: 0000-0000-0000-000X
+    if len(orcid) == 19 and orcid[4] == "-" and orcid[9] == "-" and orcid[14] == "-":
+        return orcid
+    return None
+
+
+def extract_author_details(publication: dict[str, Any]) -> list[dict[str, Any]]:
+    """Extract full author details from CrossRef publication.
+
+    Extracts comprehensive author information including ORCID identifiers,
+    institutional affiliations, and author sequence information.
+
+    CrossRef author objects may contain:
+    - given: First/given name
+    - family: Last/family name
+    - name: Organization name (for institutional authors)
+    - ORCID: Persistent author identifier (URL or ID format)
+    - authenticated-orcid: Whether ORCID is CrossRef-authenticated
+    - sequence: 'first' or 'additional' (author order)
+    - affiliation: Array of institution objects
+
+    Args:
+        publication: CrossRef publication record.
+
+    Returns:
+        List of author detail dictionaries with keys:
+        - given: str | None
+        - family: str | None
+        - name: str | None (for organizations)
+        - orcid: str | None (normalized to ID-only format)
+        - authenticated_orcid: bool | None
+        - sequence: str | None ('first' or 'additional')
+        - affiliations: list[str] (institution names)
+
+    Example:
+        >>> extract_author_details({
+        ...     "author": [{
+        ...         "given": "John",
+        ...         "family": "Doe",
+        ...         "ORCID": "https://orcid.org/0000-0001-2345-6789",
+        ...         "authenticated-orcid": True,
+        ...         "sequence": "first",
+        ...         "affiliation": [{"name": "Harvard University"}]
+        ...     }]
+        ... })  # doctest: +NORMALIZE_WHITESPACE
+        [{'given': 'John', 'family': 'Doe', 'name': None,
+          'orcid': '0000-0001-2345-6789', 'authenticated_orcid': True,
+          'sequence': 'first', 'affiliations': ['Harvard University']}]
+
+    """
+    author_details: list[dict[str, Any]] = []
+
+    for author in publication.get("author", []):
+        if not isinstance(author, dict):
+            continue
+
+        given = author.get("given", "").strip() or None
+        family = author.get("family", "").strip() or None
+        org_name = author.get("name", "").strip() or None
+
+        # Skip if no identifiable name
+        if not given and not family and not org_name:
+            continue
+
+        # Normalize ORCID (remove URL prefix if present)
+        orcid = _normalize_orcid(author.get("ORCID"))
+
+        # Extract authenticated-orcid flag
+        authenticated_orcid = author.get("authenticated-orcid")
+        if authenticated_orcid is not None:
+            authenticated_orcid = bool(authenticated_orcid)
+
+        # Extract sequence (first/additional)
+        sequence = author.get("sequence")
+        if sequence and isinstance(sequence, str):
+            sequence = sequence.strip().lower()
+            if sequence not in ("first", "additional"):
+                sequence = None
+        else:
+            sequence = None
+
+        # Extract affiliations
+        affiliations: list[str] = []
+        aff_list = author.get("affiliation", [])
+        if isinstance(aff_list, list):
+            for aff in aff_list:
+                aff_name = None
+                if isinstance(aff, dict):
+                    aff_name = aff.get("name")
+                elif isinstance(aff, str):
+                    aff_name = aff
+                if aff_name and isinstance(aff_name, str):
+                    aff_name = aff_name.strip()
+                    if aff_name:
+                        affiliations.append(aff_name)
+
+        author_details.append(
+            {
+                "given": given,
+                "family": family,
+                "name": org_name,
+                "orcid": orcid,
+                "authenticated_orcid": authenticated_orcid,
+                "sequence": sequence,
+                "affiliations": affiliations,
+            }
+        )
+
+    return author_details
+
+
+def extract_author_orcids(publication: dict[str, Any]) -> list[str]:
+    """Extract list of ORCID identifiers from CrossRef publication.
+
+    Extracts and normalizes all ORCID identifiers from the author array.
+    Only includes non-empty, valid ORCIDs (normalized to ID-only format).
+
+    Args:
+        publication: CrossRef publication record.
+
+    Returns:
+        List of ORCID IDs (format: 0000-0000-0000-000X), preserving author order.
+        Authors without ORCID are not included.
+
+    Example:
+        >>> extract_author_orcids({
+        ...     "author": [
+        ...         {"given": "John", "family": "Doe",
+        ...          "ORCID": "https://orcid.org/0000-0001-2345-6789"},
+        ...         {"given": "Jane", "family": "Smith"},
+        ...         {"given": "Bob", "family": "Wilson",
+        ...          "ORCID": "0000-0002-3456-7890"}
+        ...     ]
+        ... })
+        ['0000-0001-2345-6789', '0000-0002-3456-7890']
+        >>> extract_author_orcids({})
+        []
+
+    """
+    orcids: list[str] = []
+
+    for author in publication.get("author", []):
+        if not isinstance(author, dict):
+            continue
+
+        orcid = _normalize_orcid(author.get("ORCID"))
+        if orcid:
+            orcids.append(orcid)
+
+    return orcids
+
+
 def extract_affiliations(publication: dict[str, Any]) -> list[str]:
     """Extract unique affiliations from CrossRef publication.
 
@@ -388,3 +571,126 @@ def extract_published_date(publication: dict[str, Any]) -> str | None:
         return None
 
     return format_date_parts(published.get("date-parts"))
+
+
+def _clean_string(value: Any, lowercase: bool = False) -> str | None:
+    """Clean and optionally lowercase a string value.
+
+    Helper function for extract_references to reduce code repetition.
+
+    Args:
+        value: Value to clean (expected to be string or None).
+        lowercase: Whether to convert to lowercase.
+
+    Returns:
+        Cleaned string or None if empty/invalid.
+
+    """
+    if not value or not isinstance(value, str):
+        return None
+    cleaned: str = value.strip()
+    if not cleaned:
+        return None
+    return cleaned.lower() if lowercase else cleaned
+
+
+def _parse_year(year_raw: Any) -> int | None:
+    """Parse year from string or int value.
+
+    Args:
+        year_raw: Raw year value (string or int).
+
+    Returns:
+        Integer year or None if invalid.
+
+    """
+    if not year_raw:
+        return None
+    if isinstance(year_raw, int):
+        return year_raw
+    if isinstance(year_raw, str):
+        year_str = year_raw.strip()
+        if year_str.isdigit():
+            return int(year_str)
+    return None
+
+
+def extract_references(publication: dict[str, Any]) -> list[dict[str, Any]]:
+    """Extract bibliographic references from CrossRef publication.
+
+    Parses the 'reference' array containing citations to other works.
+    This data is essential for citation network analysis and bibliometric studies.
+
+    CrossRef reference objects may contain:
+    - key: Unique reference identifier within the publication
+    - DOI: DOI of the cited work (if resolved)
+    - doi-asserted-by: Who asserted the DOI ('publisher' or 'crossref')
+    - article-title: Title of the cited article
+    - volume-title: Title of a book/volume (for book citations)
+    - journal-title: Journal name
+    - series-title: Series name (for book series)
+    - author: First author name
+    - year: Publication year (as string)
+    - volume: Volume number
+    - issue: Issue number
+    - first-page: First page number
+    - unstructured: Unstructured citation string (fallback)
+    - ISSN: Journal ISSN
+    - ISBN: Book ISBN
+
+    Args:
+        publication: CrossRef publication record.
+
+    Returns:
+        List of reference dictionaries with normalized keys.
+        Each reference contains available bibliographic metadata.
+
+    Example:
+        >>> extract_references({
+        ...     "reference": [{
+        ...         "key": "ref1",
+        ...         "DOI": "10.1000/xyz123",
+        ...         "article-title": "Example Article",
+        ...         "author": "Smith",
+        ...         "year": "2020",
+        ...         "journal-title": "Nature"
+        ...     }]
+        ... })  # doctest: +NORMALIZE_WHITESPACE
+        [{'key': 'ref1', 'doi': '10.1000/xyz123', 'doi_asserted_by': None,
+          'article_title': 'Example Article', 'volume_title': None,
+          'journal_title': 'Nature', 'series_title': None, 'author': 'Smith',
+          'year': 2020, 'volume': None, 'issue': None, 'first_page': None,
+          'unstructured': None, 'issn': None, 'isbn': None}]
+        >>> extract_references({})
+        []
+
+    """
+    references: list[dict[str, Any]] = []
+
+    for ref in publication.get("reference", []):
+        if not isinstance(ref, dict):
+            continue
+
+        references.append(
+            {
+                "key": _clean_string(ref.get("key")),
+                "doi": _clean_string(ref.get("DOI"), lowercase=True),
+                "doi_asserted_by": _clean_string(
+                    ref.get("doi-asserted-by"), lowercase=True
+                ),
+                "article_title": _clean_string(ref.get("article-title")),
+                "volume_title": _clean_string(ref.get("volume-title")),
+                "journal_title": _clean_string(ref.get("journal-title")),
+                "series_title": _clean_string(ref.get("series-title")),
+                "author": _clean_string(ref.get("author")),
+                "year": _parse_year(ref.get("year")),
+                "volume": _clean_string(ref.get("volume")),
+                "issue": _clean_string(ref.get("issue")),
+                "first_page": _clean_string(ref.get("first-page")),
+                "unstructured": _clean_string(ref.get("unstructured")),
+                "issn": _clean_string(ref.get("ISSN")),
+                "isbn": _clean_string(ref.get("ISBN")),
+            }
+        )
+
+    return references
