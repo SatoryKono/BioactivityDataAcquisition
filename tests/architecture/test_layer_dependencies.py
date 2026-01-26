@@ -408,7 +408,7 @@ def test_dead_code_vulture(src_dir: Path) -> None:
     # Get unused code with confidence threshold
     # Note: TYPE_CHECKING imports often have 90% confidence but are not dead code
     # API parameters reserved for future use (e.g., overrides in PipelineRunnerService)
-    reserved_api_params = {"overrides", "config_path"}
+    reserved_api_params = {"overrides", "config_path", "watermark"}
     unused = [
         item
         for item in v.get_unused_code(min_confidence=80)
