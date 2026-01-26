@@ -26,6 +26,7 @@ from bioetl.composition.factories.dq_factory import DQServicesFactory
 from bioetl.composition.factories.storage import StorageContext, StorageFactory
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
+from bioetl.domain.medallion import LoadingStrategy
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
@@ -379,6 +380,7 @@ class ServicesBuilder:
         resume: bool,
         *,
         force_full_scan: bool = False,
+        loading_strategy: LoadingStrategy | None = None,
     ) -> CheckpointManager:
         """Create configured CheckpointManager.
 
@@ -390,6 +392,8 @@ class ServicesBuilder:
             resume: Whether to resume from previous checkpoint
             force_full_scan: If True, checkpoint resume is disabled (ADR-030).
                 Used for entities with unreliable offset pagination like publications.
+            loading_strategy: Explicit loading strategy (ADR-031). Takes precedence
+                over force_full_scan if provided. FULL_SCAN_ONLY disables resume.
 
         Returns:
             Configured CheckpointManager instance
@@ -401,6 +405,7 @@ class ServicesBuilder:
             run_id=run_id,
             resume=resume,
             force_full_scan=force_full_scan,
+            loading_strategy=loading_strategy,
         )
 
     @staticmethod

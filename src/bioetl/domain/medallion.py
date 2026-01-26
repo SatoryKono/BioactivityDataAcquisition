@@ -165,6 +165,86 @@ class WriteModePolicy:
             )
 
 
+class LoadingStrategy(str, Enum):
+    """Loading strategy for pipeline data extraction.
+
+    Determines how the pipeline handles incremental vs full data loading.
+    This formalizes the implicit behavior previously controlled by force_full_scan.
+
+    Attributes:
+        FULL_SCAN_ONLY: Each run performs a full scan of the data source.
+            Checkpoint-based resume is disabled. Deduplication is handled
+            on Silver layer via content_hash. Required for entities with
+            unstable API pagination (e.g., publications).
+        WATERMARK_BASED: Incremental loading based on watermark field.
+            NOT YET IMPLEMENTED - placeholder for future watermark support.
+            Requires confirmed watermark field availability in source API.
+
+    Example:
+        >>> strategy = LoadingStrategy.FULL_SCAN_ONLY
+        >>> strategy.allows_checkpoint_resume
+        False
+        >>> strategy = LoadingStrategy.WATERMARK_BASED
+        >>> strategy.allows_checkpoint_resume
+        True
+
+    See Also:
+        ADR-030: Publication pagination strategy (force_full_scan)
+        ADR-031: Loading strategy formalization
+    """
+
+    FULL_SCAN_ONLY = "full_scan_only"
+    """Full scan on each run. No checkpoint resume. Deduplication via content_hash."""
+
+    WATERMARK_BASED = "watermark_based"
+    """Incremental loading via watermark. Placeholder - NOT YET IMPLEMENTED."""
+
+    @property
+    def allows_checkpoint_resume(self) -> bool:
+        """Check if this strategy allows checkpoint-based resume.
+
+        Returns:
+            True if checkpoint resume is allowed, False otherwise.
+        """
+        return self != LoadingStrategy.FULL_SCAN_ONLY
+
+    @classmethod
+    def from_string(cls, value: str) -> LoadingStrategy:
+        """Convert string to LoadingStrategy with validation.
+
+        Args:
+            value: String value (e.g., "full_scan_only", "watermark_based")
+
+        Returns:
+            Corresponding LoadingStrategy enum value
+
+        Raises:
+            ValueError: If value is not a valid loading strategy
+        """
+        try:
+            return cls(value.lower())
+        except ValueError:
+            valid = ", ".join(s.value for s in cls)
+            raise ValueError(
+                f"Invalid loading strategy: '{value}'. Valid strategies: {valid}"
+            ) from None
+
+    @classmethod
+    def from_force_full_scan(cls, force_full_scan: bool) -> LoadingStrategy:
+        """Convert legacy force_full_scan flag to LoadingStrategy.
+
+        Provides backward compatibility with existing configs using
+        force_full_scan: true/false.
+
+        Args:
+            force_full_scan: Legacy boolean flag
+
+        Returns:
+            FULL_SCAN_ONLY if force_full_scan is True, WATERMARK_BASED otherwise
+        """
+        return cls.FULL_SCAN_ONLY if force_full_scan else cls.WATERMARK_BASED
+
+
 class ClearPolicy(str, Enum):
     """Policy for clearing medallion layers.
 
