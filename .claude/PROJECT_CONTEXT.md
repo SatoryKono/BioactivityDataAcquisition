@@ -1,477 +1,127 @@
-# BioETL: Контекст Проекта для Claude
+# BioETL: Компактный Контекст для Claude
 
-*Синхронизировано с CLAUDE.md и RULES.md v5.8*
-*Последнее обновление: 2025-12-29*
+*Синхронизировано с RULES.md v5.12 (2026-01-26)*
+
+> **Это сокращённая версия.** Полная документация:
+> - `docs/RULES.md` — **Единственный источник истины** для архитектурных правил
+> - `CLAUDE.md` — Протокол верификации и архитектурные пояснения
+> - `AGENT.md` — Персона, workflow и инструкции для агента
 
 ---
 
-## TL;DR — Быстрый Старт
+## Быстрый Старт
 
 ```bash
-# Проверка перед работой
-make lint && make test
-
-# Основные команды
-make install          # Создание venv, установка зависимостей
-make test             # Все тесты (unit + integration)
-make lint             # ruff + mypy
-make run-local        # Запуск на фикстурах
+make lint && make test   # Проверка перед работой
+make install             # Установка зависимостей
 ```
-
-**Главные ресурсы:**
-1. `CLAUDE.md` — Справочник для Claude Code
-2. `AGENT.md` — Детальные инструкции для агента
-3. `docs/RULES.md` — Конституция проекта (RFC 2119)
 
 ---
 
-## 1. Архитектура Слоёв
+## 1. Архитектура
+
+> **Полная документация**: См. `docs/RULES.md` §1 и `CLAUDE.md` §2
 
 ```
 src/bioetl/
-├── domain/           # Чистая логика (DDD), Protocols (Ports). БЕЗ I/O.
-│   ├── ports/        # Protocol интерфейсы
-│   ├── aggregates/   # DDD агрегаты с инвариантами
-│   ├── value_objects/ # Неизменяемые доменные примитивы
-│   ├── entities/     # Доменные сущности по провайдерам
-│   ├── schemas/      # Pydantic/Pandera схемы валидации
-│   └── exceptions/   # Классифицированные исключения
-├── application/      # Пайплайны, Use Cases, оркестрация
-│   ├── core/         # PipelineRunner, Executor, BaseTransformer
-│   ├── pipelines/    # Конкретные пайплайны (ChEMBL, PubChem, UniProt, PubMed)
-│   └── services/     # Application services
-├── composition/      # Composition Root (DI-контейнер, factories, bootstrap)
-│   ├── factories/    # Фабрики пайплайнов, storage, data source
-│   └── providers/    # Provider registry
-├── infrastructure/   # Адаптеры (HTTP, локальное хранилище), реализация портов
-│   ├── adapters/     # HTTP клиенты с unified resilience
-│   ├── storage/      # Bronze/Silver/Gold writers
-│   ├── locking/      # In-memory locks (MemoryLock)
-│   └── observability/ # Метрики, трейсинг, логирование
-└── interfaces/       # CLI
-    ├── cli/          # Click CLI команды
-    └── orchestration/ # Signal handlers
+├── domain/          # Чистая логика, Protocols (Ports). БЕЗ I/O.
+├── application/     # Пайплайны, Use Cases, оркестрация
+├── composition/     # Composition Root (DI-контейнер, factories)
+├── infrastructure/  # Адаптеры (HTTP, storage)
+└── interfaces/      # CLI
 ```
 
-### 1.1. Матрица Импортов (ОБЯЗАТЕЛЬНО)
+**Ключевые ограничения:**
+- Матрица импортов: `domain` ← `application` ← `composition` → `infrastructure`
+- **Нарушение = Блокер PR**
+- DI: Зависимости в конструктор. `composition/bootstrap.py` — единственное место сборки
 
-| Из ↓ / В → | domain | application | composition | infrastructure | interfaces |
-|------------|--------|-------------|-------------|----------------|------------|
-| **domain** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **application** | ✅ | ✅ | ❌ | ❌ | ❌ |
-| **composition** | ✅ | ✅ | ✅ | ✅ | ❌ |
-| **infrastructure** | ✅ | ❌ | ❌ | ✅ | ❌ |
-| **interfaces** | ✅ | ✅ | ✅ | ✅ | ✅ |
-
-**Нарушение = Блокер PR.** Проверяется `import-linter` и `tests/architecture/`.
-
-### 1.2. Dependency Injection
-
-- **MUST**: Зависимости передаются в конструктор
-- **MUST NOT**: Создание зависимостей внутри классов
-- **Composition Root**: `src/bioetl/composition/bootstrap.py`
-
-### 1.3. Архитектурные Пояснения (Избегай Ложных Выводов)
-
-> **ВАЖНО**: Следующие утверждения часто делаются ошибочно.
-> Перед предложением рефакторинга — проверь актуальный код!
-
-| Компонент | ❌ Ложное утверждение | ✅ Реальность |
-|-----------|----------------------|---------------|
-| **PipelineRunner** | "God object, слишком много ответственностей" | 173 строки, делегирует через `RunnerServices` bundle (`runner.py:84-88`) |
-| **bootstrap_pipeline** | "Смешивает сборку и бизнес-логику" | Тонкий фасад, делегирует фабрикам: `factory.create_runner()` |
-| **ChEMBL Adapter** | "Размытые границы, много ответственностей" | Когезивная ответственность: health-aware HTTP fetching (~350 строк), делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics` |
-| **CLI** | "Содержит бизнес-логику подтверждений" | Подтверждения — законная ответственность interfaces слоя |
-| **WriteModePolicy default** | "DeltaWriter нарушает DI" | Опциональный параметр с default — валидный паттерн для value objects |
-| **BaseTransformer** | "Нет DQ-валидации" | By design: Template Method. DQ — ответственность конкретных трансформеров |
-| **MedallionLifecycle** | "Не использует политики" | Использует `MedallionPolicy.should_clear_silver/gold` |
-| **CLI-composition** | "Плотная связанность" | CLI использует `entrypoints.py` — это правильный фасад |
-
-**Паттерны, которые НЕ являются проблемами:**
-
-1. **Optional parameters с defaults** (`write_policy: WriteModePolicy | None = None`):
-   - Это **валидный DI паттерн** для конфигурационных value objects
-   - Аналогично `timeout: float = 30.0` — не нарушение DI
-
-2. **NoOp implementations в domain** (`NoOpTracing`, `NoOpMetrics`):
-   - Это **Null Object Pattern** для опциональной observability
-   - Позволяет domain слою не зависеть от конкретных реализаций
-
-3. **Подтверждения в CLI**:
-   - Это ответственность **interfaces слоя**
-   - Другие интерфейсы (REST API) имеют свои механизмы
-
-### 1.4. 🛡️ Протокол Верификации Перед Рефакторингом
-
-> **ПРИЧИНА**: Анализ 2025-12-26 выявил ~60% ложных утверждений в планах.
-
-**ОБЯЗАТЕЛЬНО перед любым утверждением об архитектуре:**
-
-| Шаг | Действие |
-|-----|----------|
-| 1 | Прочитать `docs/REFACTORING_PLAN.md` → "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" |
-| 2 | Прочитать целевой файл (`Read` tool) |
-| 3 | Измерить размер (`wc -l`, `grep -c "def "`) |
-| 4 | Проверить делегирование (`grep` по вызовам) |
-| 5 | Указать `файл:строка` для каждого утверждения |
-
-**❌ ЗАПРЕЩЕНО**: Утверждать о компоненте без ссылок на код.
-**✅ ОБЯЗАТЕЛЬНО**: Каждое предложение содержит `файл:строка`.
+> **⚠️ Протокол верификации**: Перед утверждениями о компонентах проверяй код!
+> См. `CLAUDE.md` §0 и §2.3 для списка частых ложных выводов.
 
 ---
 
 ## 2. Medallion Architecture
 
-| Уровень | Формат | Хранение | Идемпотентность |
-|---------|--------|----------|-----------------|
-| **Bronze** | JSONL + zstd | 90d → Archive | Append-only. Path: `bronze/{provider}/{entity}/{date}/` |
-| **Silver** | Delta Lake | Permanent | Merge/Upsert по `content_hash`. ACID обязателен. |
-| **Gold** | Delta/Parquet | Permanent | SCD Type 2 или партиции по дате |
+> **Полная документация**: См. `docs/RULES.md` §2
 
-### 2.1. Silver → Gold Transformation
+- **Bronze**: JSONL + zstd, append-only, 90d retention
+- **Silver**: Delta Lake, merge/upsert по `content_hash`, ACID
+- **Gold**: Delta/Parquet, SCD Type 2 или партиции
 
-- **Исключение JSON полей**: `GOLD_EXCLUDE_FIELDS` в `BasePipeline`
-- **Плоская структура**: Gold содержит только scalar поля
-- **Forensic**: Silver сохраняет JSON для расследований
-
-### 2.2. Delta Lake (MUST)
-
-- **Engine**: `delta-rs` (Rust core)
-- **VACUUM**: Еженедельно, `retention_period=7 days`
-- **Forensic Retention**: 7d default, 30d для critical таблиц
-
-### 2.3. Content Hash
-
-```
-sha256(provider + canonical_json(record))
-```
-
-**Нормализация перед хэшем:**
-- NaN/Inf → `null`
-- Floats → `round(val, 10)`
-- Dates → ISO `YYYY-MM-DD`
-- Strings → `strip()`
-- **Исключить**: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`
-
-### 2.3. Schema Drift SLA
-
-| Уровень | Условие | Действие |
-|---------|---------|----------|
-| Info | Новые опциональные поля | Log |
-| Warn | >3 новых поля | Review (SLA 48h) |
-| Critical | Исчезновение ID | Block pipeline |
+**Content Hash**: `sha256(provider + canonical_json(record))`
+**DQ Пороги**: >5% warning, >20% fail batch
 
 ---
 
-## 3. Обработка Ошибок
+## 3. Обработка Ошибок и Блокировки
 
-### 3.1. Классификация
+> **Полная документация**: См. `docs/RULES.md` §3
 
-| Тип | Поведение | Пример |
-|-----|-----------|--------|
-| **Critical** | Падение пайплайна | Auth failure, schema mismatch (Gold), БД недоступна |
-| **Recoverable** | Retry (max 3, backoff 2.0, jitter 0.1-0.5s) | 429 Rate Limit, 502/504 Timeout |
-| **Data Quality** | Лог + пропуск записи | Невалидный SMILES, missing field |
+| Тип | Поведение |
+|-----|-----------|
+| **Critical** | Падение пайплайна |
+| **Recoverable** | Retry с backoff |
+| **Data Quality** | Лог + пропуск |
 
-### 3.2. Пороги
-
-| Порог | Условие | Действие |
-|-------|---------|----------|
-| Soft | >5% DQ errors | Warning |
-| Hard | >20% DQ errors | Fail Batch |
-
-### 3.3. Circuit Breaker
-
-См. [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md).
-
-| Параметр | Значение |
-|----------|----------|
-| Trigger | 5 consecutive errors |
-| Open Duration | 5 мин |
-| Recovery | Half-Open → 1 probe → Closed/Open |
-| Metric | `circuit_breaker_state` (0=Closed, 1=Half-Open, 2=Open) |
-
-### 3.4. Graceful Shutdown
-
-См. [ADR-008](docs/02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md).
-
-При получении SIGTERM/SIGINT:
-1. Прекратить извлечение новых записей
-2. Дождаться завершения записи текущего батча
-3. Сохранить локальный чекпоинт
-4. Выйти с кодом 0
+**Circuit Breaker**: 5 errors → Open 5 мин ([ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md))
+**Блокировки**: `MemoryLock` (Local-Only, [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md))
 
 ---
 
-## 4. Блокировки (Locking)
+## 4. Тестирование
 
-> **Note: Local-Only Deployment** (см. [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md))
+> **Полная документация**: См. `docs/RULES.md` §4.2
 
-| Параметр | Значение |
-|----------|----------|
-| Механизм | In-memory (`MemoryLock`) |
-| Scope | Один процесс Python |
-| Max Duration | 4 часа |
+| Уровень | Директория |
+|---------|------------|
+| Unit | `tests/unit/` |
+| Integration | `tests/integration/` (VCR.py) |
+| Architecture | `tests/architecture/` |
 
-**Invariant**: Потеря блокировки = аварийное завершение ДО попытки записи данных.
-
-### Lock Keys
-
-- Incremental: `lock:{provider}_{entity}`
-- Backfill/Rebuild: `lock:{provider}_{entity}:exclusive`
+**Цель покрытия**: ≥85% | **Команды**: `make test`, `make arch-test`
 
 ---
 
-## 5. Observability
-
-### 5.1. Log Schema (MUST)
-
-```json
-{
-  "ts": "2025-12-15T10:00:00Z",
-  "level": "INFO",
-  "run_id": "uuid",
-  "pipeline": "chembl_activity",
-  "stage": "extract|transform|load",
-  "dataset": "chembl.activity",
-  "record_count": 1000
-}
-```
-
-### 5.2. Retention
-
-| Артефакт | Срок |
-|----------|------|
-| Logs | 30 дней |
-| Metrics | 90 дней |
-
-### 5.3. Provider Health
-
-| Status | Условие | Действие |
-|--------|---------|----------|
-| Healthy | 0 errors | Normal |
-| Degraded | 1-2 errors | Timeout ×2, batch_size ÷2 |
-| Unhealthy | ≥3 errors | Pause, Alert P2 |
-
----
-
-## 6. Security
-
-### 6.1. PII Handling
-
-| Слой | Обработка |
-|------|-----------|
-| Bronze | Как есть (Internal) |
-| Silver | `sha256(lowercase(value) + SALT)` — **salted обязательно** |
-| Gold | Исключить или агрегировать |
-
-### 6.2. Secrets
-
-- **Source**: `os.environ`
-- **Format**: `BIOETL_{PROVIDER}_{KEY}`
-- **MUST NOT**: hardcode, `.env` в git
-
----
-
-## 7. Тестирование
-
-| Уровень | Директория | Правила |
-|---------|------------|---------|
-| **Unit** | `tests/unit/` | Изолированные, in-memory fakes предпочтительны, MagicMock допустим. |
-| **Integration** | `tests/integration/` | VCR.py для HTTP. Очистка секретов из кассет. |
-| **E2E** | `tests/e2e/` | `@pytest.mark.e2e`, in-memory инфраструктура |
-| **Architecture** | `tests/architecture/` | Проверка слоёв, imports, именования |
-
-**Инструменты:** `pytest`, `pytest-asyncio`, `pytest-cov`, `hypothesis` (property-based)
-**Цель покрытия:** ≥85% line coverage
-
-### Команды
-
-```bash
-make test                 # Все тесты с coverage
-make test-unit            # Только unit
-make test-integration     # Integration с VCR
-make arch-test            # Architecture tests
-make arch-lint            # import-linter contracts
-```
-
-### VCR.py (MUST)
-
-- Кассеты: `tests/fixtures/vcr/`
-- Санитизация: `Authorization`, `X-API-Key`, PII в `before_record`
-- CI: `pytest --vcr-record=none`
-
----
-
-## 8. Стек Технологий
-
-> **Note: Local-Only Deployment** (см. [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md))
-
-| Категория | Инструмент | Назначение |
-|-----------|------------|------------|
-| **HTTP** | httpx (async) | HTTP-клиент |
-| **Data** | Polars, Delta Lake | Обработка, хранение |
-| **Validation** | Pandera | Валидация схем |
-| **Linting** | Ruff + mypy | Код и типы |
-| **Locks** | MemoryLock (in-process) | Конкурентный доступ |
-| **Checkpoints** | LocalCheckpoint | Локальные чекпоинты в JSON |
-
-### Legacy Wrappers (MUST)
-
-```python
-await loop.run_in_executor(thread_pool, fetch_func)
-```
-
----
-
-## 9. Провайдеры
-
-| Provider | Library | Rate Limit | Health Check |
-|----------|---------|------------|--------------|
-| ChEMBL | chembl_webresource_client | None | `/chembl/api/data/status.json` |
-| PubChem | pubchempy | 5 req/sec | Lightweight compound query |
-| UniProt | unipressed | 100 req/sec (API key) | `/rest/beta/health` |
-| OpenAlex | pyalex | 10 req/sec | Generic Probe |
-| Semantic Scholar | semanticscholar | 100 req/5min | Generic Probe |
-| PubMed | biopython | 3 req/sec (10 w/ key) | Generic Probe |
-| Crossref | habanero | 50 req/sec | Generic Probe |
-
----
-
-## 10. Anti-Patterns (ЗАПРЕЩЕНО)
-
-### Архитектура
-- ❌ Импорт `infrastructure` в `domain` или `application`
-- ❌ Создание зависимостей внутри классов
-
-### Код
-- ❌ Sentinel values (`-1`, `"N/A"`, `9999`) → Использовать `None`
-- ❌ Блокирующий I/O в async (`requests.get()`) → `httpx.AsyncClient` или `run_in_executor`
-- ❌ Хардкод секретов → `os.environ`, формат: `BIOETL_{PROVIDER}_{KEY}`
-- ❌ `print()` → `structlog` с `run_id`
-
-### Тесты
-- ⚠️ Мокинг доменных сущностей → Реальные Value Objects предпочтительны, MagicMock допустим
-- ❌ HTTP без VCR → VCR-кассеты обязательны
-- ❌ Секреты в кассетах → Очистка в `before_record`
-
----
-
-## 11. Чек-Лист Self-Review
-
-### Архитектура
-- [ ] Нет запрещённых импортов между слоями
-- [ ] Зависимости инжектируются через конструктор
-- [ ] `composition/` — единственное место сборки
-
-### Код
-- [ ] `make lint` проходит без ошибок
-- [ ] Типизация полная (нет `Any` без причины)
-- [ ] Логирование через `structlog`, везде `run_id`
-- [ ] Нет хардкода секретов, путей, конфигурации
-
-### Тесты
-- [ ] `make test` проходит ДО и ПОСЛЕ изменений
-- [ ] Для новой логики есть unit-тесты
-- [ ] Для HTTP есть integration-тесты с VCR
-- [ ] VCR-кассеты очищены от секретов
-
-### Документация
-- [ ] `docs/` обновлена при изменениях архитектуры/конфигурации
-- [ ] Docstrings в Google Style (на русском)
-
----
-
-## 12. Ключевые Файлы
+## 5. Ключевые Файлы
 
 | Артефакт | Путь |
 |----------|------|
-| Domain Ports | `src/bioetl/domain/ports/` (пакет с фасадом `__init__.py`) |
-| DDD Aggregates | `src/bioetl/domain/aggregates/` |
-| Value Objects | `src/bioetl/domain/value_objects/` |
+| Domain Ports | `src/bioetl/domain/ports/` |
 | Adapters | `src/bioetl/infrastructure/adapters/{provider}/` |
 | Pipelines | `src/bioetl/application/pipelines/` |
-| Pipeline Core | `src/bioetl/application/core/` |
-| BaseTransformer | `src/bioetl/application/core/base_transformer.py` |
-| Factories | `src/bioetl/composition/factories/` |
 | Bootstrap | `src/bioetl/composition/bootstrap.py` |
-| CLI | `src/bioetl/interfaces/cli/` |
 | Configs | `configs/pipelines/{provider}/{entity}.yaml` |
-| Tests | `tests/` |
-| VCR Cassettes | `tests/fixtures/vcr/` |
-| Ubiquitous Language | `docs/glossary.md` |
+| ADR | `docs/02-architecture/decisions/` |
 
 ---
 
-## 13. Governance (RFC 2119)
+## 6. Anti-Patterns (Критичные)
 
-| Keyword | Значение |
-|---------|----------|
-| **MUST** | Абсолютное требование. Нарушение = блокер релиза. |
-| **SHOULD** | Сильная рекомендация. Отклонение требует обоснования в PR. |
-| **MAY** | Опционально. |
-
----
-
-## 14. Disaster Recovery
-
-| Параметр | Значение |
-|----------|----------|
-| RPO | 24 часа |
-| RTO | 4 часа |
-| Game Days | Ежегодно (SHOULD) |
+- ❌ Импорт `infrastructure` в `domain`/`application`
+- ❌ Создание зависимостей внутри классов
+- ❌ Sentinel values (`-1`, `"N/A"`) → `None`
+- ❌ HTTP без VCR-кассет
 
 ---
 
-## 15. Git Workflow (Conventional Commits)
-
-```
-<type>(<scope>): <description>
-```
-
-| Тип | Описание |
-|-----|----------|
-| `feat` | Новая функциональность |
-| `fix` | Исправление бага |
-| `refactor` | Рефакторинг |
-| `docs` | Документация |
-| `test` | Тесты |
-| `chore` | Прочее |
-
----
-
-## 16. Диагностика
+## 7. Диагностика
 
 | Ошибка | Решение |
 |--------|---------|
-| `ImportError: cannot import from domain` | Проверь матрицу импортов |
-| `RuntimeError: Event loop is closed` | Используй `run_in_executor` |
+| `ImportError: cannot import from domain` | Проверь матрицу импортов (`RULES.md` §1.1) |
+| `RuntimeError: Event loop is closed` | `run_in_executor` |
 | Тесты падают в CI | Запиши VCR-кассету |
 | Неясности в задаче | **СПРОСИ ПОЛЬЗОВАТЕЛЯ** |
 
 ---
 
-## 17. Полная Документация
+## 8. Приоритеты при Разработке
 
-| Документ | Описание |
-|----------|----------|
-| `CLAUDE.md` | Справочник для Claude Code (синхронизирован с RULES.md v5.8) |
-| `AGENT.md` | Детальные инструкции для агента v2.2 |
-| `docs/RULES.md` | Конституция проекта v5.8 |
-| `docs/REQUIREMENTS.md` | 127 тестируемых требований |
-| `docs/glossary.md` | Ubiquitous Language (каноническая терминология) |
-| `docs/CHANGELOG.md` | История изменений |
-| `docs/02-architecture/decisions/` | ADR (001-020, все Accepted) |
-
----
-
-## Приоритеты при Разработке
-
-1. **Безопасность**: Секреты, PII, IAM
-2. **Надёжность**: Lock invariants, graceful shutdown, idempotency
-3. **Observability**: Structured logs, metrics, correlation ID
-4. **Производительность**: Delta VACUUM, партиционирование, rate limiting
-5. **Поддерживаемость**: Type safety, contracts, testing
+1. **Безопасность**: Секреты, PII
+2. **Надёжность**: Lock invariants, graceful shutdown
+3. **Observability**: Structured logs, metrics
+4. **Поддерживаемость**: Type safety, testing
 
 ---
 
