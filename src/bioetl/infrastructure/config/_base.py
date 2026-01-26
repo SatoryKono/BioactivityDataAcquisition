@@ -183,6 +183,7 @@ def yaml_config_to_domain(
         on_schema_mismatch=on_schema_mismatch,
         transform_version=transform_version,
         transform_steps=transform_steps,
+        force_full_scan=yaml_config.force_full_scan,
     )
 
 

@@ -10,6 +10,11 @@ entity_type: work
 version: "1.2.0"
 description: "Enrich publication records with CrossRef metadata via DOI resolution"
 
+# Pagination strategy (ADR-030)
+# Publication entities require full scan on each run due to API offset instability.
+# Deduplication is handled on Silver layer via content_hash.
+force_full_scan: true
+
 primary_keys: ["doi"]
 silver_table: "crossref_publication"
 gold_table: "crossref_publication"

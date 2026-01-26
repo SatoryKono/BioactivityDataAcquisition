@@ -106,6 +106,7 @@
     },
     "entity_type": "activity",
     "fields": [],
+    "force_full_scan": false,
     "gold_filters": {
       "column_filters": [
         {
@@ -410,6 +411,7 @@
     },
     "entity_type": "compound",
     "fields": [],
+    "force_full_scan": false,
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
@@ -456,6 +458,7 @@
     },
     "entity_type": "publication",
     "fields": [],
+    "force_full_scan": true,
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
@@ -502,6 +505,7 @@
     },
     "entity_type": "protein",
     "fields": [],
+    "force_full_scan": false,
     "gold_filters": {
       "column_filters": [
         {

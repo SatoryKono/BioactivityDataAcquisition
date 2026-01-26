@@ -10,6 +10,11 @@ entity_type: publication_similarity
 version: "2.1.0"
 description: "Extract publication similarity data (Tanimoto coefficients) from ChEMBL API"
 
+# Pagination strategy (ADR-030)
+# Publication entities require full scan on each run due to API offset instability.
+# Deduplication is handled on Silver layer via content_hash.
+force_full_scan: true
+
 primary_keys: ["sim_id"]
 silver_table: "chembl_publication_similarity"
 gold_table: "chembl_publication_similarity"
