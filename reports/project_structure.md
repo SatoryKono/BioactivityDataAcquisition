@@ -100,6 +100,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 043d4d66e93879d6
     │   │   ├── 044b52eb3f01cd1c
     │   │   ├── 044fbced797f1f39
+    │   │   ├── 0454cb877030abfd
     │   │   ├── 046ddec3b6890ad2
     │   │   ├── 0477ae4ce4e789ea
     │   │   ├── 04812315776a7059
@@ -107,6 +108,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 04cd5352588494aa
     │   │   ├── 04da5eab5f372f77
     │   │   ├── 052717ea4abf09d6
+    │   │   ├── 05364ad903750adb
     │   │   ├── 055aa946c8d6bac8
     │   │   ├── 05619bd1f3fbdb51
     │   │   ├── 056e42cd3324cef6
@@ -121,6 +123,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 062908ed326b162e
     │   │   ├── 06332b73f89ed5e0
     │   │   ├── 06538e20f76890cf
+    │   │   ├── 06819d6ccbf676b5
     │   │   ├── 0693ccfbb4d0f8cb
     │   │   ├── 069688e4afe97a2d
     │   │   ├── 06a0cdd9f935fa44
@@ -146,6 +149,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 07943819dbaec99e
     │   │   ├── 07e533d26c65983a
     │   │   ├── 0841f4bfaf6795f0
+    │   │   ├── 084cc8b66255f9f9
     │   │   ├── 0855b31b02cb6823
     │   │   ├── 085c6851986be4f8
     │   │   ├── 08a8ad30d40d3fc3
@@ -224,6 +228,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 0e6421a3289140e3
     │   │   ├── 0e838f01add3c623
     │   │   ├── 0e88cca3ccd3074c
+    │   │   ├── 0e954bcf90aa2492
     │   │   ├── 0e9892e70b3332f8
     │   │   ├── 0ea5a73304ee2c56
     │   │   ├── 0eb571cc4e529265
@@ -254,6 +259,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 1107d49f5481fb90
     │   │   ├── 112eb8fb5d4235da
     │   │   ├── 1135dbba2ca534a2
+    │   │   ├── 113d22cb84ede695
     │   │   ├── 116037b48ed15645
     │   │   ├── 11721934aae66bdf
     │   │   ├── 1173e790bf5422db
@@ -283,6 +289,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 136b1a46743a3595
     │   │   ├── 137284a8e96bf8ef
     │   │   ├── 138745e72d5df081
+    │   │   ├── 13c99a7b5e588a67
     │   │   ├── 141f0c5586b8b26f
     │   │   ├── 14349b325b138c7e
     │   │   ├── 14565d89cd48d148
@@ -314,6 +321,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 15de59cccada148e
     │   │   ├── 16006161cfda5b2b
     │   │   ├── 1618e769460ac5ee
+    │   │   ├── 1626591847e96604
     │   │   ├── 1653a4684322afdd
     │   │   ├── 1658fb534fa9931c
     │   │   ├── 16602d39bfb705fd
@@ -332,6 +340,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 17a6754bf8858cd9
     │   │   ├── 17d2b4feb28a7199
     │   │   ├── 17fe42b11209028f
+    │   │   ├── 182dc29d0e0a2c2f
     │   │   ├── 1872c34ba499eb04
     │   │   ├── 188c6cd84832c9e8
     │   │   ├── 1892f19b0cf28a7d
@@ -360,6 +369,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 19e8bdb53aff656a
     │   │   ├── 19fe6e01cc11ca27
     │   │   ├── 1a0ca0b00972463e
+    │   │   ├── 1a83ff866900f9eb
     │   │   ├── 1a90bc4cd5baab59
     │   │   ├── 1a9f1455b0d232a0
     │   │   ├── 1aac2bfaf360e0a2
@@ -410,6 +420,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 1ddb3ea1edd1c5ee
     │   │   ├── 1e1db85162ece864
     │   │   ├── 1e20826038046df5
+    │   │   ├── 1e5034a869c16bac
     │   │   ├── 1e53cea317c0b892
     │   │   ├── 1e643766ca4ccb6b
     │   │   ├── 1e6ccb30049b9ca3
@@ -463,6 +474,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 235ced1668e96ae1
     │   │   ├── 2377981f0eb20eac
     │   │   ├── 237d7ef81f3285ad
+    │   │   ├── 2380e2021b316635
     │   │   ├── 239960e67ba05c7b
     │   │   ├── 23b1c3d3ab663638
     │   │   ├── 23c8f0fe8840c783
@@ -505,6 +517,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 26215758a39c50cd
     │   │   ├── 2635ff560f41523f
     │   │   ├── 26362c38fc1e7993
+    │   │   ├── 263b99b5442b4d4a
     │   │   ├── 264e0ab49afa3666
     │   │   ├── 265ddac7e1fd0b38
     │   │   ├── 26672701cf0377e3
@@ -541,6 +554,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 28b129bf764fb4fa
     │   │   ├── 28b9fb74573446e6
     │   │   ├── 28eb107116556413
+    │   │   ├── 293966075aeeba2b
     │   │   ├── 294e13965437b784
     │   │   ├── 296337b3729d9893
     │   │   ├── 29984846eeab0082
@@ -561,6 +575,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 2ac28c40cfea812a
     │   │   ├── 2ae152439c80477e
     │   │   ├── 2ae9e1e2aa3e06d7
+    │   │   ├── 2af57d2635b47f19
     │   │   ├── 2b03e08247c437f0
     │   │   ├── 2b910db9687d421c
     │   │   ├── 2b9fcc739b4af112
@@ -609,8 +624,10 @@ BioactivityDataAcquisition2/
     │   │   ├── 2ea480296dc76c14
     │   │   ├── 2ef56f9e2540a460
     │   │   ├── 2f508081bb59b692
+    │   │   ├── 2f5c42bb8309997f
     │   │   ├── 2f6222351873aa8e
     │   │   ├── 2f8c3b6ca1eba335
+    │   │   ├── 2f933b824673c825
     │   │   ├── 2f96a79ecfdb83b7
     │   │   ├── 2fd5579febf89b6a
     │   │   ├── 2fd7dfc16fcfd5eb
@@ -646,6 +663,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 3199aef98c4cde87
     │   │   ├── 31a30cdab1ad6aac
     │   │   ├── 31a33c380cbecdac
+    │   │   ├── 31b16ce8f63019fe
     │   │   ├── 31b37da81bd7c4d5
     │   │   ├── 31ce9be32c11f712
     │   │   ├── 31dc3f3f51c70a11
@@ -752,6 +770,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 3a340bf3e04ba85b
     │   │   ├── 3a3c95f10d2f8278
     │   │   ├── 3a47357435f16665
+    │   │   ├── 3a6a0f64aa5b89f0
     │   │   ├── 3a6c4e672d23611d
     │   │   ├── 3a8e5aa0f9918feb
     │   │   ├── 3aab24259eb4e5f1
@@ -882,6 +901,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 43eba95f08763bec
     │   │   ├── 43ec2aebcb80b48b
     │   │   ├── 43f29035b10daca6
+    │   │   ├── 44020d4378c754cd
     │   │   ├── 44151109c767790d
     │   │   ├── 4432a371803c8c1f
     │   │   ├── 445adab1c322471c
@@ -967,6 +987,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 4a6a20ff3bd91608
     │   │   ├── 4a7f5d0fc6fe7f81
     │   │   ├── 4a811caa88102f9b
+    │   │   ├── 4aa785489cdc15ae
     │   │   ├── 4aaf655cb8a08d69
     │   │   ├── 4adab23a5bfec7e5
     │   │   ├── 4aea2c9da368c666
@@ -985,6 +1006,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 4bf0c74e62defcaa
     │   │   ├── 4bf1c5d68efac2f3
     │   │   ├── 4c067f46e5fdfa30
+    │   │   ├── 4c0a303c587a4180
     │   │   ├── 4c4584e3779de420
     │   │   ├── 4c4d7bcefbd49ccc
     │   │   ├── 4c5242cd3f5668fc
@@ -999,6 +1021,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 4d14b1bfa0a77dea
     │   │   ├── 4d15cb8d496ca98b
     │   │   ├── 4d33bd865e91067d
+    │   │   ├── 4d41bb03e2a3daf1
     │   │   ├── 4d87cf5651e53e97
     │   │   ├── 4d9cdb0753cfa52c
     │   │   ├── 4da2ab91978821c8
@@ -1100,6 +1123,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 5405e7ca5391a846
     │   │   ├── 544b61ad63d63834
     │   │   ├── 547fa6a100297800
+    │   │   ├── 548336e78a3998e1
     │   │   ├── 5483874d9d370bb9
     │   │   ├── 54998146111c725f
     │   │   ├── 549a2161baeb600d
@@ -1230,6 +1254,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 5dfca4b232a3a006
     │   │   ├── 5e291872e844fd0d
     │   │   ├── 5e39366dc14d14de
+    │   │   ├── 5e62e897d746c3a3
     │   │   ├── 5e6d8e3da11d47b8
     │   │   ├── 5e887aa8adaece2b
     │   │   ├── 5e8909f6d8bb9193
@@ -1277,6 +1302,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 6149008020cd3bcc
     │   │   ├── 614fd0a88653d77b
     │   │   ├── 615b681a001f86da
+    │   │   ├── 617b835a5ca4f9bc
     │   │   ├── 61a6f0bbe9260b9e
     │   │   ├── 61a8622f0ba69eb5
     │   │   ├── 61e4c49b251a5b2a
@@ -1324,6 +1350,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 649f475253afe855
     │   │   ├── 64ab03d83a7093fa
     │   │   ├── 64c18218dfe5d7f8
+    │   │   ├── 64cc39311bd4f420
     │   │   ├── 64e75b914c721ca7
     │   │   ├── 6501dc17904ae688
     │   │   ├── 651d7f7f374e13cd
@@ -1339,6 +1366,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 65ea978a99cf85fd
     │   │   ├── 65f1b9715452bb4b
     │   │   ├── 65f2e09733c63240
+    │   │   ├── 65f89fcf9bc3a433
     │   │   ├── 66006e08aa4db552
     │   │   ├── 660930fcb96c885b
     │   │   ├── 660fb91177b36773
@@ -1469,9 +1497,11 @@ BioactivityDataAcquisition2/
     │   │   ├── 6fc6639762c95846
     │   │   ├── 6fcb2dd9455beea6
     │   │   ├── 6fd636917371ad45
+    │   │   ├── 6fedb62cb718268f
     │   │   ├── 6ffb2049ef23a680
     │   │   ├── 704385e170db3fb3
     │   │   ├── 708b627a64171e85
+    │   │   ├── 708e50f15834b80e
     │   │   ├── 70a48e5f31c53bb2
     │   │   ├── 70b0b71bfb34d5d8
     │   │   ├── 70c2444c2636e804
@@ -1512,6 +1542,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 733ec5546fb87aa1
     │   │   ├── 7354fe09e8e30094
     │   │   ├── 739b6ffd7c103501
+    │   │   ├── 73a9e4f9b98f9555
     │   │   ├── 73c7f66537886681
     │   │   ├── 73d9721774f4d65c
     │   │   ├── 73e7bfcf1444ecfd
@@ -1519,6 +1550,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 743383dcb8be3032
     │   │   ├── 74534356f74a571a
     │   │   ├── 74b48d84f8ca24c5
+    │   │   ├── 74cf026eb44e7574
     │   │   ├── 74d5323c721fad22
     │   │   ├── 74e3b6f2eb73d2e9
     │   │   ├── 74fd1683e8caace1
@@ -1653,6 +1685,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 7dd7e417b0b3cd22
     │   │   ├── 7dd9f3b25fe2857f
     │   │   ├── 7dd9fa37fcd07baf
+    │   │   ├── 7e14100d9a71d423
     │   │   ├── 7e23a5ca39626b70
     │   │   ├── 7e28ffbc53e96976
     │   │   ├── 7e48c6c665be5e54
@@ -1743,6 +1776,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 8486c57617d7778a
     │   │   ├── 8490f8d40367d2b5
     │   │   ├── 84a9f3e649d4a002
+    │   │   ├── 84b95178718d9cdb
     │   │   ├── 84d004b06602d169
     │   │   ├── 84f8d8b8bbdf3cbd
     │   │   ├── 8500729d1d9574c8
@@ -1818,6 +1852,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 8a713062b2d6ad2e
     │   │   ├── 8a92c14625f902cc
     │   │   ├── 8ab2322a9f31d2fb
+    │   │   ├── 8ad3cf1c6104ba31
     │   │   ├── 8ad5af6bbee91a0a
     │   │   ├── 8aeafb102cdfd483
     │   │   ├── 8af41253a575edf0
@@ -1846,6 +1881,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 8c1e8b6e685cb2db
     │   │   ├── 8c418285eeb537ba
     │   │   ├── 8c49a2dc64edca79
+    │   │   ├── 8c5c2a53ef8bfecc
     │   │   ├── 8c6d809b727a8c0f
     │   │   ├── 8c78b38c0cadc228
     │   │   ├── 8c94ff42cc671e09
@@ -1863,6 +1899,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 8d84f41a2844801a
     │   │   ├── 8d974b3fd19bfeb0
     │   │   ├── 8d9b831517c9c469
+    │   │   ├── 8dce8d3ae4af941d
     │   │   ├── 8dd71b1a78726bc0
     │   │   ├── 8de8ad5c7e308fd5
     │   │   ├── 8df4d77145737f61
@@ -1894,6 +1931,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 8f57dcf5387dc7bb
     │   │   ├── 8f5966af8b5fdc81
     │   │   ├── 8f73841d91081e46
+    │   │   ├── 8f90ed342966ed09
     │   │   ├── 8f93fdd87076b074
     │   │   ├── 8fadcce9fd924046
     │   │   ├── 8fadfaa53ce5f8f7
@@ -1907,6 +1945,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 9027dea51440eae4
     │   │   ├── 903947e491b1b727
     │   │   ├── 903a3c43d8238ef1
+    │   │   ├── 903e42cf94abe057
     │   │   ├── 9057731cc56c26c5
     │   │   ├── 9089b6f2f4a06feb
     │   │   ├── 908aa5c0f47fb4a8
@@ -1944,6 +1983,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 929c61a39645b8a4
     │   │   ├── 92b434f6be31026b
     │   │   ├── 92bcb49cfe9409cc
+    │   │   ├── 92c3b7933cd78609
     │   │   ├── 92c4429adcc48bcc
     │   │   ├── 92d9901ea743b9a1
     │   │   ├── 92e04897133b1541
@@ -1954,6 +1994,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 9377ab0d30d8c2a8
     │   │   ├── 938e99169c2c4afa
     │   │   ├── 93e2b1614e4551e4
+    │   │   ├── 93e8f6f35340f7a3
     │   │   ├── 940d154a5107f9ca
     │   │   ├── 940db6674b9d74a8
     │   │   ├── 9418e5e798a107e8
@@ -1985,12 +2026,14 @@ BioactivityDataAcquisition2/
     │   │   ├── 95bb9a8f9c0c464b
     │   │   ├── 95ea9ebcbb01c870
     │   │   ├── 960537e152f3c40d
+    │   │   ├── 9607aad808e9761f
     │   │   ├── 960f395a19af33fa
     │   │   ├── 9628a36a755c9c61
     │   │   ├── 963b4e0b78f9d943
     │   │   ├── 96413c141d1a482c
     │   │   ├── 96634141307e81f1
     │   │   ├── 966c472f3067c3bb
+    │   │   ├── 966c7fcb26329667
     │   │   ├── 96aa986adc3e781d
     │   │   ├── 96bb396861b37af2
     │   │   ├── 96c15d38c1cb2095
@@ -2022,6 +2065,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 9820c4d55a00cdd8
     │   │   ├── 9841e634e889137f
     │   │   ├── 98445f6c2737a36d
+    │   │   ├── 984604100ca0268e
     │   │   ├── 985334bd974317ac
     │   │   ├── 9863274a93957c08
     │   │   ├── 987f20696f568076
@@ -2112,6 +2156,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 9f7f46a27ec9fcc0
     │   │   ├── 9f9ecd4f6647ff07
     │   │   ├── 9fd70bc4100cd731
+    │   │   ├── 9fdc268b0d4da51c
     │   │   ├── a0012251ac94fca2
     │   │   ├── a016ca39c89be3a4
     │   │   ├── a017dc523eabc84b
@@ -2126,6 +2171,7 @@ BioactivityDataAcquisition2/
     │   │   ├── a0ffb5dd027ead9d
     │   │   ├── a1134b30a49b2d19
     │   │   ├── a137e250fb0e10c5
+    │   │   ├── a150d9d876acb4fd
     │   │   ├── a158a9e03fe3cbb9
     │   │   ├── a15bbd5c7c7d0b7c
     │   │   ├── a16b5365e9ae91d6
@@ -2216,6 +2262,7 @@ BioactivityDataAcquisition2/
     │   │   ├── a8baedd2d6285677
     │   │   ├── a8f4e5b8e45b18a3
     │   │   ├── a8f71402e14cce7c
+    │   │   ├── a90dfa91d8e10820
     │   │   ├── a91bda167a0b336a
     │   │   ├── a91df2332ffe4f85
     │   │   ├── a94cdf4063e2d0c7
@@ -2294,6 +2341,7 @@ BioactivityDataAcquisition2/
     │   │   ├── ae4c4770ae427ece
     │   │   ├── ae7e887b3881ae24
     │   │   ├── ae85fc0ea2336091
+    │   │   ├── ae869c3ca6d296e1
     │   │   ├── aea3099c8b3cfa0e
     │   │   ├── aea8664ae5ac512c
     │   │   ├── aebcea5cd80ff9aa
@@ -2302,6 +2350,7 @@ BioactivityDataAcquisition2/
     │   │   ├── aed133fcf44ebd13
     │   │   ├── aedf8c7f24950968
     │   │   ├── aef6e6d1ff4c7281
+    │   │   ├── aef77a8c32c889f3
     │   │   ├── aef787aeb6f5133b
     │   │   ├── af10799ccad15e4f
     │   │   ├── af25f036073bab83
@@ -2462,6 +2511,7 @@ BioactivityDataAcquisition2/
     │   │   ├── bb1d2aba2b140438
     │   │   ├── bb2a11cb871335dd
     │   │   ├── bb4789b33d7e8b26
+    │   │   ├── bb50a95c0f59a96c
     │   │   ├── bb549ba8b29031ae
     │   │   ├── bb5d340d58ac8fa8
     │   │   ├── bb647468253b899b
@@ -2547,6 +2597,7 @@ BioactivityDataAcquisition2/
     │   │   ├── c1a9c54612d81e96
     │   │   ├── c1aef3489213629e
     │   │   ├── c1b087eaa31690ee
+    │   │   ├── c1c60f23543777ae
     │   │   ├── c1c8bc072bf49230
     │   │   ├── c1e3d4505b5c1274
     │   │   ├── c1e5d76350f1b1f3
@@ -2560,6 +2611,7 @@ BioactivityDataAcquisition2/
     │   │   ├── c2dd0e95efd543fe
     │   │   ├── c2f8df32f370e88d
     │   │   ├── c2feb126fd250c0e
+    │   │   ├── c3466a03b29aa986
     │   │   ├── c3557a4533847fa0
     │   │   ├── c369290e525cbc9b
     │   │   ├── c371b2a81e90c4ad
@@ -2749,6 +2801,7 @@ BioactivityDataAcquisition2/
     │   │   ├── cfd7a08b5a46b750
     │   │   ├── cfdd23ab46cf986b
     │   │   ├── cfed0fc180ae9fe5
+    │   │   ├── cffba9c8de912539
     │   │   ├── d030f9cd982c2ec7
     │   │   ├── d03835b6a1b88393
     │   │   ├── d0567c03c95ff119
@@ -2809,6 +2862,7 @@ BioactivityDataAcquisition2/
     │   │   ├── d44186ade8b8b4d2
     │   │   ├── d454135a63d7a3eb
     │   │   ├── d470325e1b3d93f3
+    │   │   ├── d49fbb03fbf05ccf
     │   │   ├── d4a5144b1f83ba89
     │   │   ├── d4ac24c7b197233a
     │   │   ├── d4cad69c1218bd47
@@ -2842,6 +2896,7 @@ BioactivityDataAcquisition2/
     │   │   ├── d7534f2aca38bddb
     │   │   ├── d754adb227969cd9
     │   │   ├── d765b17652a3cfb4
+    │   │   ├── d766a976730a2461
     │   │   ├── d78abbac5d54ede0
     │   │   ├── d7a5bd93cafe50ae
     │   │   ├── d7dbe5f77eab6605
@@ -2856,6 +2911,7 @@ BioactivityDataAcquisition2/
     │   │   ├── d8bc0ceb4919af29
     │   │   ├── d8da37a0b346b7ba
     │   │   ├── d8f81915bc08899d
+    │   │   ├── d9041fce30ef1a05
     │   │   ├── d909e2c375aa7c0c
     │   │   ├── d9134ce00e4a318f
     │   │   ├── d976c071775178ec
@@ -2892,6 +2948,7 @@ BioactivityDataAcquisition2/
     │   │   ├── db57dded60326ce3
     │   │   ├── db613634eed23494
     │   │   ├── db9bd210fb8beb2d
+    │   │   ├── dbc97452a6ad2846
     │   │   ├── dbd2b5971ff3ae13
     │   │   ├── dbdb96a8d4f48fb4
     │   │   ├── dbe89045204c7c8f
@@ -2915,6 +2972,7 @@ BioactivityDataAcquisition2/
     │   │   ├── dd43ac403112e9a0
     │   │   ├── dd53b7549dd40c2d
     │   │   ├── dd861f9fba37c855
+    │   │   ├── ddbc8281dd1f63c8
     │   │   ├── ddcebfd63dfb3493
     │   │   ├── ddeb683e94c7305b
     │   │   ├── ddfb98f74b35a689
@@ -2922,15 +2980,18 @@ BioactivityDataAcquisition2/
     │   │   ├── de0b5d2e2b6b0b13
     │   │   ├── de1acc2aead40273
     │   │   ├── de411ab9e45bd9c1
+    │   │   ├── de41717acc4f4f73
     │   │   ├── de46e2bc0c267e2b
     │   │   ├── de657a5a73f93c33
     │   │   ├── de6d7e51357f2236
     │   │   ├── de734020e9c8f0b0
     │   │   ├── de7b3b7a1af3c190
+    │   │   ├── de9e0b9fd68595fa
     │   │   ├── de9e4ee108abe73e
     │   │   ├── debc5e9393361f0d
     │   │   ├── dec8a2a110ed5ba8
     │   │   ├── decdc7c3c3dffe6a
+    │   │   ├── defc29130e7e4133
     │   │   ├── df05a283a7caa48f
     │   │   ├── df256f4bfd0d65e0
     │   │   ├── df44fa9da38251ee
@@ -2973,6 +3034,7 @@ BioactivityDataAcquisition2/
     │   │   ├── e1eb787dc7130dbf
     │   │   ├── e1eea513e357d536
     │   │   ├── e1f2fc037980ca88
+    │   │   ├── e2224a36f1fe24bc
     │   │   ├── e2242bbcb04a3e1c
     │   │   ├── e22a20ca67ddc911
     │   │   ├── e231ca08763e2faf
@@ -2980,6 +3042,7 @@ BioactivityDataAcquisition2/
     │   │   ├── e23a0431db0bec2e
     │   │   ├── e258af6f4bc42cfc
     │   │   ├── e26531a2e0dd62ef
+    │   │   ├── e280b9fa08f6654e
     │   │   ├── e2bdae5ec5bd7ff7
     │   │   ├── e2c5ec3527f3570f
     │   │   ├── e2cec5115efdda0e
@@ -2991,10 +3054,12 @@ BioactivityDataAcquisition2/
     │   │   ├── e363668cfc806d23
     │   │   ├── e3a899d5206e7f7c
     │   │   ├── e40586427d209be3
+    │   │   ├── e40b4640b824e9eb
     │   │   ├── e40d9a3ff72dcb0f
     │   │   ├── e4120d3d63597dab
     │   │   ├── e41f858cd4152ca5
     │   │   ├── e42df697410ef730
+    │   │   ├── e453899f6c0ffccd
     │   │   ├── e45b2c4675bef2bb
     │   │   ├── e4723c826d4d6fae
     │   │   ├── e48854aba26a9855
@@ -3028,6 +3093,7 @@ BioactivityDataAcquisition2/
     │   │   ├── e648b60dfdac0d72
     │   │   ├── e67188046130b802
     │   │   ├── e675714b6a2a50f3
+    │   │   ├── e6774d53fdfa046f
     │   │   ├── e6795ae66005ec88
     │   │   ├── e6ab9ffdf7d6f335
     │   │   ├── e6b2d1e1aab37297
@@ -3052,6 +3118,7 @@ BioactivityDataAcquisition2/
     │   │   ├── e857f5b43ca73d35
     │   │   ├── e85cab895c8a4a7c
     │   │   ├── e8640489ce0f2c4a
+    │   │   ├── e87536d9312ef1ee
     │   │   ├── e8b05661c0f24e5e
     │   │   ├── e90110fb8be9915f
     │   │   ├── e92665a06e30d703
@@ -3111,12 +3178,14 @@ BioactivityDataAcquisition2/
     │   │   ├── ed4051f23cd77560
     │   │   ├── ed6307b51f9f0b10
     │   │   ├── eda78dd02bef49bf
+    │   │   ├── edb46d0d1695f772
     │   │   ├── edbeedaf8d8752ed
     │   │   ├── edd27f0389c7a75b
     │   │   ├── edd3dde9025d3d64
     │   │   ├── edec128f1a3086c9
     │   │   ├── edf5aacd6187662c
     │   │   ├── edfc4253a28aa77c
+    │   │   ├── edfe24e7760c3ce4
     │   │   ├── ee09de999c534965
     │   │   ├── ee42ab40ef306ceb
     │   │   ├── ee495958022810b6
@@ -3153,6 +3222,7 @@ BioactivityDataAcquisition2/
     │   │   ├── f0830373e759ea22
     │   │   ├── f0b002161cbaf7bf
     │   │   ├── f0b22aa208203d4d
+    │   │   ├── f0c48027acb7d6b7
     │   │   ├── f0c7fbec86c017f5
     │   │   ├── f0ddc7161c7ae537
     │   │   ├── f0e1ad5883b9d4e7
@@ -3183,6 +3253,7 @@ BioactivityDataAcquisition2/
     │   │   ├── f3187b76696dbb8d
     │   │   ├── f33073eb1073d8e2
     │   │   ├── f3518d59d1fe7ec3
+    │   │   ├── f35dd367f8142949
     │   │   ├── f35e7fbcc5070dbc
     │   │   ├── f374d56d078f0776
     │   │   ├── f38d6c66cccfd768
@@ -3245,6 +3316,7 @@ BioactivityDataAcquisition2/
     │   │   ├── f787dec9c7962669
     │   │   ├── f796536fdc670940
     │   │   ├── f7afcdac08b7fbcc
+    │   │   ├── f7ca12f2fac8d910
     │   │   ├── f7ce2e8fc8e56793
     │   │   ├── f7e0689957062c1f
     │   │   ├── f804d037ba2ef5d5
@@ -3309,6 +3381,7 @@ BioactivityDataAcquisition2/
     │   │   ├── fc7a722e91091c9b
     │   │   ├── fc95c8af539c968c
     │   │   ├── fc9c4fcfa3c31f5a
+    │   │   ├── fca555de3416b1fe
     │   │   ├── fcc1ccf37769175f
     │   │   ├── fcd3a54577b06275
     │   │   ├── fcdb1d473d819a33
@@ -3400,6 +3473,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp1beiknt3
     │   │   ├── tmp1de0ou4u
     │   │   ├── tmp1dh_owpc
+    │   │   ├── tmp1dz4p18r
     │   │   ├── tmp1f_loax6
     │   │   ├── tmp1fpq3x4e
     │   │   ├── tmp1hr4m9v2
@@ -3459,6 +3533,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp31aehrvf
     │   │   ├── tmp31cyc2ss
     │   │   ├── tmp328ins43
+    │   │   ├── tmp32_5ie5e
     │   │   ├── tmp32d0jjkf
     │   │   ├── tmp335driws
     │   │   ├── tmp337knhfs
@@ -3682,6 +3757,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp9bvn_uql
     │   │   ├── tmp9cp8jxfo
     │   │   ├── tmp9cv63ywq
+    │   │   ├── tmp9da3cxw9
     │   │   ├── tmp9f4hv02p
     │   │   ├── tmp9fmc188n
     │   │   ├── tmp9glhvcct
@@ -3787,6 +3863,8 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpbdtuw9uh
     │   │   ├── tmpbfxyp3y3
     │   │   ├── tmpbgaa5klz
+    │   │   ├── tmpbh3ndh0x
+    │   │   ├── tmpbh5ys3fn
     │   │   ├── tmpbj7dqhy_
     │   │   ├── tmpbjd62ai8
     │   │   ├── tmpbjrufepk
@@ -3838,6 +3916,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpcocz4rm1
     │   │   ├── tmpcpcdxaq9
     │   │   ├── tmpcpqcb69c
+    │   │   ├── tmpct3fls6m
     │   │   ├── tmpct3i3kvd
     │   │   ├── tmpct9_t0si
     │   │   ├── tmpcuir0spl
@@ -3942,6 +4021,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpfl1p3np3
     │   │   ├── tmpfmgwhi1v
     │   │   ├── tmpfnb78kwy
+    │   │   ├── tmpfnjf7pem
     │   │   ├── tmpfnw5tae0
     │   │   ├── tmpfo5okb92
     │   │   ├── tmpfoakfxh8
@@ -4055,6 +4135,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpip1cdois
     │   │   ├── tmpipf4zqgq
     │   │   ├── tmpipv8eog0
+    │   │   ├── tmpiqn7qqsr
     │   │   ├── tmpit3kvsia
     │   │   ├── tmpit7qh6x1
     │   │   ├── tmpiun6ex9z
@@ -4064,6 +4145,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpiyy1sf7d
     │   │   ├── tmpiz6vhg9e
     │   │   ├── tmpj09bs7ef
+    │   │   ├── tmpj0h239v4
     │   │   ├── tmpj0wd8rzd
     │   │   ├── tmpj1p5sw7k
     │   │   ├── tmpj32vfbgx
@@ -4091,6 +4173,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpjjzjc_ie
     │   │   ├── tmpjk2pylnp
     │   │   ├── tmpjm6cm23k
+    │   │   ├── tmpjnm8xyx5
     │   │   ├── tmpjnyk1w0d
     │   │   ├── tmpjofciog6
     │   │   ├── tmpjqk1w5lz
@@ -4120,6 +4203,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpke2r6ihe
     │   │   ├── tmpkeuaulyx
     │   │   ├── tmpkfeet1m1
+    │   │   ├── tmpkfimaxs5
     │   │   ├── tmpkflw_fxh
     │   │   ├── tmpkgeag27i
     │   │   ├── tmpkgiucfsg
@@ -4128,6 +4212,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpkj5v0jpm
     │   │   ├── tmpkjbeqt3b
     │   │   ├── tmpkkmosoe4
+    │   │   ├── tmpkkuqbg7t
     │   │   ├── tmpkm0rak_h
     │   │   ├── tmpknyy4waw
     │   │   ├── tmpkogumfq8
@@ -4165,6 +4250,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmplvm2ncfu
     │   │   ├── tmplw_c33v5
     │   │   ├── tmplwadnm89
+    │   │   ├── tmplwc2e7ui
     │   │   ├── tmplx7r5vp1
     │   │   ├── tmplyoc2db9
     │   │   ├── tmpm2wyxwcc
@@ -4196,6 +4282,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpmv0r82yx
     │   │   ├── tmpmvsefrm1
     │   │   ├── tmpmw74b2rh
+    │   │   ├── tmpmwk7jon_
     │   │   ├── tmpmx6gnqox
     │   │   ├── tmpmxlh382d
     │   │   ├── tmpmynri943
@@ -4261,6 +4348,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpooq82sor
     │   │   ├── tmpoq3s11g2
     │   │   ├── tmposftnsnl
+    │   │   ├── tmpotjo3zmf
     │   │   ├── tmpouyt9vay
     │   │   ├── tmpowdrann3
     │   │   ├── tmpown9pefk
@@ -4314,6 +4402,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpqjhu_43l
     │   │   ├── tmpql5uo82y
     │   │   ├── tmpqmo7l0pq
+    │   │   ├── tmpqpn0g3nx
     │   │   ├── tmpqri9d_bs
     │   │   ├── tmpqru3naec
     │   │   ├── tmpqs9bp652
@@ -4333,6 +4422,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpr8opkoq7
     │   │   ├── tmpr_2r6jbz
     │   │   ├── tmpra0gmwlb
+    │   │   ├── tmprarg6p9j
     │   │   ├── tmprcl5lyge
     │   │   ├── tmprdxiouic
     │   │   ├── tmprdz76mut
@@ -4402,6 +4492,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmptehrqcpi
     │   │   ├── tmptgn9rvux
     │   │   ├── tmptjfhhvgk
+    │   │   ├── tmptjxt41sv
     │   │   ├── tmptl2exhna
     │   │   ├── tmptlyiw3v2
     │   │   ├── tmptp7vvszw
@@ -4545,6 +4636,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpxs4rzivi
     │   │   ├── tmpxtq5ijh9
     │   │   ├── tmpxu1hp2kv
+    │   │   ├── tmpxv7f7kuc
     │   │   ├── tmpxwjx273t
     │   │   ├── tmpxx8b1z_j
     │   │   ├── tmpxxx6cf4n
@@ -4838,6 +4930,10 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── __init__.meta.json
     │   │   │   │   │   ├── checkpoint.data.json
     │   │   │   │   │   ├── checkpoint.meta.json
+    │   │   │   │   │   ├── column_orderer.data.json
+    │   │   │   │   │   ├── column_orderer.meta.json
+    │   │   │   │   │   ├── column_renamer.data.json
+    │   │   │   │   │   ├── column_renamer.meta.json
     │   │   │   │   │   ├── coordinator.data.json
     │   │   │   │   │   ├── coordinator.meta.json
     │   │   │   │   │   ├── deduplication.data.json
@@ -5502,6 +5598,10 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── bronze_result.meta.json
     │   │   │   │   │   ├── chemical.data.json
     │   │   │   │   │   ├── chemical.meta.json
+    │   │   │   │   │   ├── column_order.data.json
+    │   │   │   │   │   ├── column_order.meta.json
+    │   │   │   │   │   ├── column_qualifier.data.json
+    │   │   │   │   │   ├── column_qualifier.meta.json
     │   │   │   │   │   ├── compound_ids.data.json
     │   │   │   │   │   ├── compound_ids.meta.json
     │   │   │   │   │   ├── dq_metrics.data.json
@@ -9213,8 +9313,7 @@ BioactivityDataAcquisition2/
     │   │   ├── zlib.data.json
     │   │   └── zlib.meta.json
     │   ├── .gitignore
-    │   ├── CACHEDIR.TAG
-    │   └── missing_stubs
+    │   └── CACHEDIR.TAG
     ├── .pytest_cache/
     │   ├── v/
     │   │   └── cache/
@@ -9387,6 +9486,8 @@ BioactivityDataAcquisition2/
     │   └── stylesheets/
     │       └── mermaid.css
     ├── configs/
+    │   ├── composite/
+    │   │   └── publication_enrichment.yaml
     │   ├── dq/
     │   │   ├── entities/
     │   │   │   ├── chembl/
@@ -9509,6 +9610,7 @@ BioactivityDataAcquisition2/
     ├── data/
     │   ├── checkpoints/
     │   │   └── composite/
+    │   │       ├── composite_composite_publication_0f58fcf2-bb8a-4df8-867d-6a47e106ef5a.json
     │   │       ├── composite_composite_publication_44f9285c-3600-49b7-af72-6bbfcba70927.json
     │   │       ├── composite_composite_publication_9ff79b9b-7db2-451e-8467-bfafdeadf7c2.json
     │   │       └── composite_composite_publication_ec532618-1da6-4af2-9665-bc636b001683.json
@@ -9527,144 +9629,836 @@ BioactivityDataAcquisition2/
     │   │   ├── target.csv
     │   │   ├── target_component.csv
     │   │   └── tissue.csv
-    │   └── output/
-    │       ├── bronze/
-    │       │   ├── chembl/
-    │       │   │   └── publication/
-    │       │   │       ├── 2026-01-25/
-    │       │   │       │   ├── batch_2026-01-25_4b4d02db-5099-45fe-a7a8-4eb0232fa835.jsonl
-    │       │   │       │   ├── batch_2026-01-25_4b4d02db-5099-45fe-a7a8-4eb0232fa835.jsonl.zst
-    │       │   │       │   └── batch_2026-01-25_4b4d02db-5099-45fe-a7a8-4eb0232fa835.jsonl.zst.meta.json
-    │       │   │       ├── bronze_chembl_publication_dq_report.json
-    │       │   │       └── chembl_publication_metadata.yaml
-    │       │   ├── crossref/
-    │       │   │   └── publication/
-    │       │   │       ├── 2026-01-25/
-    │       │   │       │   ├── batch_2026-01-25_423d9c8c-3c44-47ac-9605-14e7b4ee55b7.jsonl
-    │       │   │       │   ├── batch_2026-01-25_423d9c8c-3c44-47ac-9605-14e7b4ee55b7.jsonl.zst
-    │       │   │       │   └── batch_2026-01-25_423d9c8c-3c44-47ac-9605-14e7b4ee55b7.jsonl.zst.meta.json
-    │       │   │       ├── bronze_crossref_publication_dq_report.json
-    │       │   │       └── crossref_work_metadata.yaml
-    │       │   ├── openalex/
-    │       │   │   └── publication/
-    │       │   │       ├── 2026-01-25/
-    │       │   │       │   ├── batch_2026-01-25_3c7f9eca-cbea-49a4-ab74-932e0c0a9ec8.jsonl
-    │       │   │       │   ├── batch_2026-01-25_3c7f9eca-cbea-49a4-ab74-932e0c0a9ec8.jsonl.zst
-    │       │   │       │   └── batch_2026-01-25_3c7f9eca-cbea-49a4-ab74-932e0c0a9ec8.jsonl.zst.meta.json
-    │       │   │       ├── bronze_openalex_publication_dq_report.json
-    │       │   │       └── openalex_publication_metadata.yaml
-    │       │   ├── pubmed/
-    │       │   │   └── publication/
-    │       │   │       ├── 2026-01-25/
-    │       │   │       │   ├── batch_2026-01-25_39329bc8-2393-4147-ab88-bab88c0969df.jsonl
-    │       │   │       │   ├── batch_2026-01-25_39329bc8-2393-4147-ab88-bab88c0969df.jsonl.zst
-    │       │   │       │   └── batch_2026-01-25_39329bc8-2393-4147-ab88-bab88c0969df.jsonl.zst.meta.json
-    │       │   │       ├── bronze_pubmed_publication_dq_report.json
-    │       │   │       └── pubmed_publication_metadata.yaml
-    │       │   └── semanticscholar/
-    │       │       └── publication/
-    │       │           ├── 2026-01-25/
-    │       │           │   ├── batch_2026-01-25_bcb959b9-0556-4d44-b4da-7487587bf5e4.jsonl
-    │       │           │   ├── batch_2026-01-25_bcb959b9-0556-4d44-b4da-7487587bf5e4.jsonl.zst
-    │       │           │   └── batch_2026-01-25_bcb959b9-0556-4d44-b4da-7487587bf5e4.jsonl.zst.meta.json
-    │       │           ├── bronze_semanticscholar_publication_dq_report.json
-    │       │           └── semanticscholar_publication_metadata.yaml
-    │       ├── gold/
-    │       │   ├── chembl/
-    │       │   │   └── publication/
-    │       │   │       ├── _delta_log/
-    │       │   │       │   └── 00000000000000000000.json
-    │       │   │       ├── chembl_publication.csv
-    │       │   │       ├── chembl_publication_metadata.yaml
-    │       │   │       ├── gold_chembl_publication_dq_report.json
-    │       │   │       └── part-00000-9b47fe02-c2fc-40cf-9398-68bf65095fb3-c000.snappy.parquet
-    │       │   ├── composite/
-    │       │   │   ├── publication/
-    │       │   │   │   ├── _delta_log/
-    │       │   │   │   │   └── 00000000000000000000.json
-    │       │   │   │   ├── composite_publication_metadata.yaml
-    │       │   │   │   └── part-00000-2b07f52f-0324-483b-88bd-554a8443cc32-c000.snappy.parquet
-    │       │   │   └── publication.csv
-    │       │   ├── crossref/
-    │       │   │   └── publication/
-    │       │   │       ├── _delta_log/
-    │       │   │       │   └── 00000000000000000000.json
-    │       │   │       ├── crossref_publication.csv
-    │       │   │       ├── crossref_publication_metadata.yaml
-    │       │   │       ├── gold_crossref_publication_dq_report.json
-    │       │   │       └── part-00000-70733a95-1fde-4620-bcb2-fa9cbbcc7ae7-c000.snappy.parquet
-    │       │   ├── openalex/
-    │       │   │   └── publication/
-    │       │   │       ├── _delta_log/
-    │       │   │       │   └── 00000000000000000000.json
-    │       │   │       ├── gold_openalex_publication_dq_report.json
-    │       │   │       ├── openalex_publication.csv
-    │       │   │       ├── openalex_publication_metadata.yaml
-    │       │   │       └── part-00000-5e8e8fd1-8e41-40fa-91cb-e7881508e55d-c000.snappy.parquet
-    │       │   ├── pubmed/
-    │       │   │   └── publication/
-    │       │   │       ├── _delta_log/
-    │       │   │       │   └── 00000000000000000000.json
-    │       │   │       ├── gold_pubmed_publication_dq_report.json
-    │       │   │       ├── part-00000-e4082264-b984-4cb6-b552-b46888572a1a-c000.snappy.parquet
-    │       │   │       ├── pubmed_publication.csv
-    │       │   │       └── pubmed_publication_metadata.yaml
-    │       │   └── semanticscholar/
-    │       │       └── publication/
-    │       │           ├── _delta_log/
-    │       │           │   └── 00000000000000000000.json
-    │       │           ├── gold_semanticscholar_publication_dq_report.json
-    │       │           ├── part-00000-e09fb06b-6bef-4ee9-9f91-b27c44464c87-c000.snappy.parquet
-    │       │           ├── semanticscholar_publication.csv
-    │       │           └── semanticscholar_publication_metadata.yaml
-    │       └── silver/
-    │           ├── chembl/
-    │           │   └── publication/
-    │           │       ├── _delta_log/
-    │           │       │   └── 00000000000000000000.json
-    │           │       ├── chembl_publication.csv
-    │           │       ├── chembl_publication_metadata.yaml
-    │           │       ├── part-00000-cd51a2a7-81d0-48bd-8067-e22169fdbf4d-c000.snappy.parquet
-    │           │       └── silver_chembl_publication_dq_report.json
-    │           ├── composite/
-    │           │   ├── publication/
-    │           │   │   ├── _delta_log/
-    │           │   │   │   └── 00000000000000000000.json
-    │           │   │   ├── composite_publication_metadata.yaml
-    │           │   │   └── part-00000-3bb99c3f-d609-4d62-9503-009ac34c8fe4-c000.snappy.parquet
-    │           │   └── publication.csv
-    │           ├── crossref/
-    │           │   └── publication/
-    │           │       ├── _delta_log/
-    │           │       │   └── 00000000000000000000.json
-    │           │       ├── crossref_publication.csv
-    │           │       ├── crossref_publication_metadata.yaml
-    │           │       ├── part-00000-1c496575-1a30-4aa6-b09a-7bb7af08dfc9-c000.snappy.parquet
-    │           │       └── silver_crossref_publication_dq_report.json
-    │           ├── openalex/
-    │           │   └── publication/
-    │           │       ├── _delta_log/
-    │           │       │   └── 00000000000000000000.json
-    │           │       ├── openalex_publication.csv
-    │           │       ├── openalex_publication_metadata.yaml
-    │           │       ├── part-00000-16cd2203-cc51-480d-9c9f-76587f4b5afd-c000.snappy.parquet
-    │           │       └── silver_openalex_publication_dq_report.json
-    │           ├── pubmed/
-    │           │   └── publication/
-    │           │       ├── _delta_log/
-    │           │       │   └── 00000000000000000000.json
-    │           │       ├── part-00000-42a06f32-74a9-4739-8c73-ed3a1de460c3-c000.snappy.parquet
-    │           │       ├── pubmed_publication.csv
-    │           │       ├── pubmed_publication_metadata.yaml
-    │           │       └── silver_pubmed_publication_dq_report.json
-    │           └── semanticscholar/
-    │               └── publication/
-    │                   ├── _delta_log/
-    │                   │   └── 00000000000000000000.json
-    │                   ├── part-00000-0191dd88-f48a-4606-b2db-91a29214771d-c000.snappy.parquet
-    │                   ├── semanticscholar_publication.csv
-    │                   ├── semanticscholar_publication_metadata.yaml
-    │                   └── silver_semanticscholar_publication_dq_report.json
+    │   ├── output/
+    │   │   ├── bronze/
+    │   │   │   ├── chembl/
+    │   │   │   │   └── publication/
+    │   │   │   │       ├── 2026-01-26/
+    │   │   │   │       │   ├── batch_2026-01-26_f0cc3fea-ea3a-426c-99f0-779696a6b462.jsonl
+    │   │   │   │       │   ├── batch_2026-01-26_f0cc3fea-ea3a-426c-99f0-779696a6b462.jsonl.zst
+    │   │   │   │       │   └── batch_2026-01-26_f0cc3fea-ea3a-426c-99f0-779696a6b462.jsonl.zst.meta.json
+    │   │   │   │       ├── bronze_chembl_publication_dq_report.json
+    │   │   │   │       └── chembl_publication_metadata.yaml
+    │   │   │   ├── crossref/
+    │   │   │   │   └── publication/
+    │   │   │   │       ├── 2026-01-26/
+    │   │   │   │       │   ├── batch_2026-01-26_6f9c37a5-9ab8-43e2-bb9a-a754f569db7e.jsonl
+    │   │   │   │       │   ├── batch_2026-01-26_6f9c37a5-9ab8-43e2-bb9a-a754f569db7e.jsonl.zst
+    │   │   │   │       │   └── batch_2026-01-26_6f9c37a5-9ab8-43e2-bb9a-a754f569db7e.jsonl.zst.meta.json
+    │   │   │   │       ├── bronze_crossref_publication_dq_report.json
+    │   │   │   │       └── crossref_work_metadata.yaml
+    │   │   │   ├── openalex/
+    │   │   │   │   └── publication/
+    │   │   │   │       ├── 2026-01-26/
+    │   │   │   │       │   ├── batch_2026-01-26_b2591d73-f5b4-4c06-8e18-f0be539962cf.jsonl
+    │   │   │   │       │   ├── batch_2026-01-26_b2591d73-f5b4-4c06-8e18-f0be539962cf.jsonl.zst
+    │   │   │   │       │   └── batch_2026-01-26_b2591d73-f5b4-4c06-8e18-f0be539962cf.jsonl.zst.meta.json
+    │   │   │   │       ├── bronze_openalex_publication_dq_report.json
+    │   │   │   │       └── openalex_publication_metadata.yaml
+    │   │   │   ├── pubmed/
+    │   │   │   │   └── publication/
+    │   │   │   │       ├── 2026-01-26/
+    │   │   │   │       │   ├── batch_2026-01-26_468f14f7-03c1-4910-a3d0-2ca952c8d40b.jsonl
+    │   │   │   │       │   ├── batch_2026-01-26_468f14f7-03c1-4910-a3d0-2ca952c8d40b.jsonl.zst
+    │   │   │   │       │   └── batch_2026-01-26_468f14f7-03c1-4910-a3d0-2ca952c8d40b.jsonl.zst.meta.json
+    │   │   │   │       ├── bronze_pubmed_publication_dq_report.json
+    │   │   │   │       └── pubmed_publication_metadata.yaml
+    │   │   │   └── semanticscholar/
+    │   │   │       └── publication/
+    │   │   │           ├── 2026-01-26/
+    │   │   │           │   ├── batch_2026-01-26_c7755ba6-8fb7-47e2-bf77-206cbc0a3701.jsonl
+    │   │   │           │   ├── batch_2026-01-26_c7755ba6-8fb7-47e2-bf77-206cbc0a3701.jsonl.zst
+    │   │   │           │   └── batch_2026-01-26_c7755ba6-8fb7-47e2-bf77-206cbc0a3701.jsonl.zst.meta.json
+    │   │   │           ├── bronze_semanticscholar_publication_dq_report.json
+    │   │   │           └── semanticscholar_publication_metadata.yaml
+    │   │   ├── gold/
+    │   │   │   ├── chembl/
+    │   │   │   │   └── publication/
+    │   │   │   │       ├── _delta_log/
+    │   │   │   │       │   └── 00000000000000000000.json
+    │   │   │   │       ├── chembl_publication.csv
+    │   │   │   │       ├── chembl_publication_metadata.yaml
+    │   │   │   │       ├── gold_chembl_publication_dq_report.json
+    │   │   │   │       └── part-00000-e263aaa6-cdf9-43d0-be5f-e6f1c6847d63-c000.snappy.parquet
+    │   │   │   ├── composite/
+    │   │   │   │   ├── publication/
+    │   │   │   │   │   ├── _delta_log/
+    │   │   │   │   │   │   └── 00000000000000000000.json
+    │   │   │   │   │   ├── composite_publication_metadata.yaml
+    │   │   │   │   │   └── part-00000-5112392f-a067-4db0-aba7-85b627c603b6-c000.snappy.parquet
+    │   │   │   │   └── publication.csv
+    │   │   │   ├── crossref/
+    │   │   │   │   └── publication/
+    │   │   │   │       ├── _delta_log/
+    │   │   │   │       │   └── 00000000000000000000.json
+    │   │   │   │       ├── crossref_publication.csv
+    │   │   │   │       ├── crossref_publication_metadata.yaml
+    │   │   │   │       ├── gold_crossref_publication_dq_report.json
+    │   │   │   │       └── part-00000-40f42c22-b2a7-47ce-80c7-31e1e99d73aa-c000.snappy.parquet
+    │   │   │   ├── openalex/
+    │   │   │   │   └── publication/
+    │   │   │   │       ├── _delta_log/
+    │   │   │   │       │   └── 00000000000000000000.json
+    │   │   │   │       ├── gold_openalex_publication_dq_report.json
+    │   │   │   │       ├── openalex_publication.csv
+    │   │   │   │       ├── openalex_publication_metadata.yaml
+    │   │   │   │       └── part-00000-99ece262-ab25-42ed-a23b-4fc0e24b613f-c000.snappy.parquet
+    │   │   │   ├── pubmed/
+    │   │   │   │   └── publication/
+    │   │   │   │       ├── _delta_log/
+    │   │   │   │       │   └── 00000000000000000000.json
+    │   │   │   │       ├── gold_pubmed_publication_dq_report.json
+    │   │   │   │       ├── part-00000-4b41dbf7-5c34-4bab-93cf-828fcd86b766-c000.snappy.parquet
+    │   │   │   │       ├── pubmed_publication.csv
+    │   │   │   │       └── pubmed_publication_metadata.yaml
+    │   │   │   └── semanticscholar/
+    │   │   │       └── publication/
+    │   │   │           ├── _delta_log/
+    │   │   │           │   └── 00000000000000000000.json
+    │   │   │           ├── gold_semanticscholar_publication_dq_report.json
+    │   │   │           ├── part-00000-d54ebe01-332e-42af-b7d6-8ad4c7028c58-c000.snappy.parquet
+    │   │   │           ├── semanticscholar_publication.csv
+    │   │   │           └── semanticscholar_publication_metadata.yaml
+    │   │   └── silver/
+    │   │       ├── chembl/
+    │   │       │   └── publication/
+    │   │       │       ├── _delta_log/
+    │   │       │       │   └── 00000000000000000000.json
+    │   │       │       ├── chembl_publication.csv
+    │   │       │       ├── chembl_publication_metadata.yaml
+    │   │       │       ├── part-00000-2befd182-0569-439d-be4d-9a1287908b64-c000.snappy.parquet
+    │   │       │       └── silver_chembl_publication_dq_report.json
+    │   │       ├── composite/
+    │   │       │   ├── publication/
+    │   │       │   │   ├── _delta_log/
+    │   │       │   │   │   └── 00000000000000000000.json
+    │   │       │   │   ├── composite_publication_metadata.yaml
+    │   │       │   │   └── part-00000-5e7db2bf-3155-4c8c-aad1-837221b7f61e-c000.snappy.parquet
+    │   │       │   └── publication.csv
+    │   │       ├── crossref/
+    │   │       │   └── publication/
+    │   │       │       ├── _delta_log/
+    │   │       │       │   └── 00000000000000000000.json
+    │   │       │       ├── crossref_publication.csv
+    │   │       │       ├── crossref_publication_metadata.yaml
+    │   │       │       ├── part-00000-7d72e477-0188-4a19-8001-c4d0b934a8dc-c000.snappy.parquet
+    │   │       │       └── silver_crossref_publication_dq_report.json
+    │   │       ├── openalex/
+    │   │       │   └── publication/
+    │   │       │       ├── _delta_log/
+    │   │       │       │   └── 00000000000000000000.json
+    │   │       │       ├── openalex_publication.csv
+    │   │       │       ├── openalex_publication_metadata.yaml
+    │   │       │       ├── part-00000-87734a3a-15ca-400e-8de9-d8bb424bd3e6-c000.snappy.parquet
+    │   │       │       └── silver_openalex_publication_dq_report.json
+    │   │       ├── pubmed/
+    │   │       │   └── publication/
+    │   │       │       ├── _delta_log/
+    │   │       │       │   └── 00000000000000000000.json
+    │   │       │       ├── part-00000-f0167fd4-3dd3-4495-8549-b0504e145c9c-c000.snappy.parquet
+    │   │       │       ├── pubmed_publication.csv
+    │   │       │       ├── pubmed_publication_metadata.yaml
+    │   │       │       └── silver_pubmed_publication_dq_report.json
+    │   │       └── semanticscholar/
+    │   │           └── publication/
+    │   │               ├── _delta_log/
+    │   │               │   └── 00000000000000000000.json
+    │   │               ├── part-00000-92cd0635-5f13-44dc-b51c-7e16b31f121d-c000.snappy.parquet
+    │   │               ├── semanticscholar_publication.csv
+    │   │               ├── semanticscholar_publication_metadata.yaml
+    │   │               └── silver_semanticscholar_publication_dq_report.json
+    │   └── silver/
+    │       ├── chembl/
+    │       │   └── publication/
+    │       │       ├── _delta_log/
+    │       │       │   ├── 00000000000000000000.json
+    │       │       │   ├── 00000000000000000001.json
+    │       │       │   ├── 00000000000000000002.json
+    │       │       │   ├── 00000000000000000003.json
+    │       │       │   ├── 00000000000000000004.json
+    │       │       │   ├── 00000000000000000005.json
+    │       │       │   ├── 00000000000000000006.json
+    │       │       │   ├── 00000000000000000007.json
+    │       │       │   ├── 00000000000000000008.json
+    │       │       │   ├── 00000000000000000009.json
+    │       │       │   ├── 00000000000000000010.json
+    │       │       │   ├── 00000000000000000011.json
+    │       │       │   ├── 00000000000000000012.json
+    │       │       │   ├── 00000000000000000013.json
+    │       │       │   ├── 00000000000000000014.json
+    │       │       │   ├── 00000000000000000015.json
+    │       │       │   ├── 00000000000000000016.json
+    │       │       │   ├── 00000000000000000017.json
+    │       │       │   ├── 00000000000000000018.json
+    │       │       │   ├── 00000000000000000019.json
+    │       │       │   ├── 00000000000000000020.json
+    │       │       │   ├── 00000000000000000021.json
+    │       │       │   ├── 00000000000000000022.json
+    │       │       │   ├── 00000000000000000023.json
+    │       │       │   ├── 00000000000000000024.json
+    │       │       │   ├── 00000000000000000025.json
+    │       │       │   ├── 00000000000000000026.json
+    │       │       │   ├── 00000000000000000027.json
+    │       │       │   ├── 00000000000000000028.json
+    │       │       │   ├── 00000000000000000029.json
+    │       │       │   ├── 00000000000000000030.json
+    │       │       │   ├── 00000000000000000031.json
+    │       │       │   ├── 00000000000000000032.json
+    │       │       │   ├── 00000000000000000033.json
+    │       │       │   ├── 00000000000000000034.json
+    │       │       │   ├── 00000000000000000035.json
+    │       │       │   ├── 00000000000000000036.json
+    │       │       │   ├── 00000000000000000037.json
+    │       │       │   ├── 00000000000000000038.json
+    │       │       │   ├── 00000000000000000039.json
+    │       │       │   ├── 00000000000000000040.json
+    │       │       │   ├── 00000000000000000041.json
+    │       │       │   ├── 00000000000000000042.json
+    │       │       │   ├── 00000000000000000043.json
+    │       │       │   ├── 00000000000000000044.json
+    │       │       │   ├── 00000000000000000045.json
+    │       │       │   ├── 00000000000000000046.json
+    │       │       │   ├── 00000000000000000047.json
+    │       │       │   ├── 00000000000000000048.json
+    │       │       │   ├── 00000000000000000049.json
+    │       │       │   ├── 00000000000000000050.json
+    │       │       │   ├── 00000000000000000051.json
+    │       │       │   ├── 00000000000000000052.json
+    │       │       │   ├── 00000000000000000053.json
+    │       │       │   ├── 00000000000000000054.json
+    │       │       │   ├── 00000000000000000055.json
+    │       │       │   ├── 00000000000000000056.json
+    │       │       │   ├── 00000000000000000057.json
+    │       │       │   ├── 00000000000000000058.json
+    │       │       │   ├── 00000000000000000059.json
+    │       │       │   ├── 00000000000000000060.json
+    │       │       │   ├── 00000000000000000061.json
+    │       │       │   ├── 00000000000000000062.json
+    │       │       │   ├── 00000000000000000063.json
+    │       │       │   ├── 00000000000000000064.json
+    │       │       │   ├── 00000000000000000065.json
+    │       │       │   ├── 00000000000000000066.json
+    │       │       │   ├── 00000000000000000067.json
+    │       │       │   ├── 00000000000000000068.json
+    │       │       │   ├── 00000000000000000069.json
+    │       │       │   ├── 00000000000000000070.json
+    │       │       │   ├── 00000000000000000071.json
+    │       │       │   ├── 00000000000000000072.json
+    │       │       │   ├── 00000000000000000073.json
+    │       │       │   ├── 00000000000000000074.json
+    │       │       │   ├── 00000000000000000075.json
+    │       │       │   ├── 00000000000000000076.json
+    │       │       │   ├── 00000000000000000077.json
+    │       │       │   ├── 00000000000000000078.json
+    │       │       │   ├── 00000000000000000079.json
+    │       │       │   ├── 00000000000000000080.json
+    │       │       │   ├── 00000000000000000081.json
+    │       │       │   ├── 00000000000000000082.json
+    │       │       │   ├── 00000000000000000083.json
+    │       │       │   ├── 00000000000000000084.json
+    │       │       │   ├── 00000000000000000085.json
+    │       │       │   ├── 00000000000000000086.json
+    │       │       │   ├── 00000000000000000087.json
+    │       │       │   ├── 00000000000000000088.json
+    │       │       │   ├── 00000000000000000089.json
+    │       │       │   ├── 00000000000000000090.json
+    │       │       │   ├── 00000000000000000091.json
+    │       │       │   ├── 00000000000000000092.json
+    │       │       │   ├── 00000000000000000093.json
+    │       │       │   ├── 00000000000000000094.json
+    │       │       │   ├── 00000000000000000095.json
+    │       │       │   ├── 00000000000000000096.json
+    │       │       │   ├── 00000000000000000097.json
+    │       │       │   ├── 00000000000000000098.json
+    │       │       │   ├── 00000000000000000099.checkpoint.parquet
+    │       │       │   ├── 00000000000000000099.json
+    │       │       │   ├── 00000000000000000100.json
+    │       │       │   └── _last_checkpoint
+    │       │       ├── chembl_publication.csv
+    │       │       ├── chembl_publication_metadata.yaml
+    │       │       ├── part-00000-04bb4a58-76c2-44ae-a25d-305fadc39b06-c000.snappy.parquet
+    │       │       ├── part-00000-052dba93-b90c-42ca-99d8-eab6456d1a92-c000.snappy.parquet
+    │       │       ├── part-00000-05a2aba5-a2cf-4d1a-b2aa-d27622d229be-c000.snappy.parquet
+    │       │       ├── part-00000-06cfd745-b83e-4cde-86fc-9124106a65bc-c000.snappy.parquet
+    │       │       ├── part-00000-0880fb3a-62c7-4225-bc94-a2ab381514c4-c000.snappy.parquet
+    │       │       ├── part-00000-09661971-9e81-4383-999d-ed42873c0873-c000.snappy.parquet
+    │       │       ├── part-00000-0c554339-4c14-4fa5-934e-6d161977bf90-c000.snappy.parquet
+    │       │       ├── part-00000-111378f0-ed54-407c-88b3-5be2d74c1f4d-c000.snappy.parquet
+    │       │       ├── part-00000-139a0802-b962-45ac-a8d1-fe0d1114d252-c000.snappy.parquet
+    │       │       ├── part-00000-141a5932-5c61-4472-9c13-bcbdcce1c149-c000.snappy.parquet
+    │       │       ├── part-00000-1588c21e-ebb3-4290-89ec-61afbcddeb99-c000.snappy.parquet
+    │       │       ├── part-00000-19fdf042-32bc-4320-8641-f8cbc2b249f1-c000.snappy.parquet
+    │       │       ├── part-00000-1cdcebf9-3154-46b1-9298-3066d0d74f14-c000.snappy.parquet
+    │       │       ├── part-00000-1e6e7bc9-bc75-4638-bb39-13472ccfbb18-c000.snappy.parquet
+    │       │       ├── part-00000-232a3f06-ddc0-4b13-982e-d7422f572089-c000.snappy.parquet
+    │       │       ├── part-00000-23a22138-f4c2-4fc1-bbb2-97b4ba21247d-c000.snappy.parquet
+    │       │       ├── part-00000-24d20222-8265-4a74-b13e-7f868a40b7e6-c000.snappy.parquet
+    │       │       ├── part-00000-28f6932b-f3d8-46b3-954d-f2f2a82a87b4-c000.snappy.parquet
+    │       │       ├── part-00000-2afc63fe-3f2f-49a2-b08e-5b92294b3ab7-c000.snappy.parquet
+    │       │       ├── part-00000-2beee9c0-4406-4c68-8162-5810dc3ac50c-c000.snappy.parquet
+    │       │       ├── part-00000-2d248a10-e2e3-4464-95a6-f2c1a5b02a57-c000.snappy.parquet
+    │       │       ├── part-00000-2e6bbdc0-b983-4b3e-9d10-34b8ce4c1085-c000.snappy.parquet
+    │       │       ├── part-00000-3230c2bc-cc0d-41ed-8668-f25ec1c1f3b9-c000.snappy.parquet
+    │       │       ├── part-00000-323b3198-fe50-4141-af4a-8642b318bd18-c000.snappy.parquet
+    │       │       ├── part-00000-35c8c756-77a0-4030-89f4-fe0914e78114-c000.snappy.parquet
+    │       │       ├── part-00000-3b4568c3-b6f4-4134-ac6e-9683f97c36a9-c000.snappy.parquet
+    │       │       ├── part-00000-3dfa7c73-41ed-4f12-9e28-767bfb7f6d20-c000.snappy.parquet
+    │       │       ├── part-00000-3ee668a9-cfd2-4a39-a6df-651bd9b1231f-c000.snappy.parquet
+    │       │       ├── part-00000-43aa3f27-f952-4a3c-bf62-02d08dc84c1b-c000.snappy.parquet
+    │       │       ├── part-00000-46eb1f9f-63f9-428b-baf0-1a2e21732cbf-c000.snappy.parquet
+    │       │       ├── part-00000-4ca288d8-6abe-488b-9dd9-3ada70199bcf-c000.snappy.parquet
+    │       │       ├── part-00000-4f0457c4-81a8-4602-81bf-18d174ae64af-c000.snappy.parquet
+    │       │       ├── part-00000-4f175c4e-3a18-4216-8d84-9057079f4a13-c000.snappy.parquet
+    │       │       ├── part-00000-506c9399-a3cc-4752-ac18-6a93af055835-c000.snappy.parquet
+    │       │       ├── part-00000-508f618f-28f6-4a8f-8219-b4a33005b3d7-c000.snappy.parquet
+    │       │       ├── part-00000-56323cec-dc00-46ef-8c40-09bf920d0aeb-c000.snappy.parquet
+    │       │       ├── part-00000-60a1c4ea-9154-42f9-a249-6b51d2b89020-c000.snappy.parquet
+    │       │       ├── part-00000-63ae487b-180e-4f93-88c6-5e473761ce17-c000.snappy.parquet
+    │       │       ├── part-00000-6464f9b1-8c80-488d-b29c-056c647ab399-c000.snappy.parquet
+    │       │       ├── part-00000-67cb15c2-f2ec-4e9d-b77c-59e307c01f12-c000.snappy.parquet
+    │       │       ├── part-00000-6a0d89a5-40c6-4629-adaa-52ddd527f650-c000.snappy.parquet
+    │       │       ├── part-00000-6cb156a4-3cae-419c-ac6f-d9f406361993-c000.snappy.parquet
+    │       │       ├── part-00000-6d35be53-deb3-4abf-9ac5-c42294b420d5-c000.snappy.parquet
+    │       │       ├── part-00000-726cb543-854d-44da-be19-f00314222124-c000.snappy.parquet
+    │       │       ├── part-00000-75a9adac-d9d3-481a-a972-d4ee4914f959-c000.snappy.parquet
+    │       │       ├── part-00000-7615c322-f0f1-4c9d-b844-89a2deed5144-c000.snappy.parquet
+    │       │       ├── part-00000-766dd53a-7c9e-4899-86b9-05e8877c08e7-c000.snappy.parquet
+    │       │       ├── part-00000-7676ad19-35dc-4520-8711-c04b65fd88c0-c000.snappy.parquet
+    │       │       ├── part-00000-7ac5d971-b3f8-4751-b699-9efb0bc8c561-c000.snappy.parquet
+    │       │       ├── part-00000-80ef8f30-296d-4ad8-8033-1fdf7b42fe3d-c000.snappy.parquet
+    │       │       ├── part-00000-81149372-7c18-4fb1-bce0-a222238bdbf8-c000.snappy.parquet
+    │       │       ├── part-00000-81d12153-59bd-45c0-b324-202bb61c322d-c000.snappy.parquet
+    │       │       ├── part-00000-8218f1ec-8d7c-4dc5-a730-5c8c5af0a860-c000.snappy.parquet
+    │       │       ├── part-00000-828b5837-8da2-432d-9b7c-e6ca0be5b04a-c000.snappy.parquet
+    │       │       ├── part-00000-8383bc57-aa8e-46e0-a266-aed0788e0f1a-c000.snappy.parquet
+    │       │       ├── part-00000-8641613c-1208-4707-b012-e9491b6b8da5-c000.snappy.parquet
+    │       │       ├── part-00000-86a0b742-ee84-4cc2-8c59-8f6738788bf6-c000.snappy.parquet
+    │       │       ├── part-00000-89b67190-2bfa-4df3-84eb-e8005d3eee99-c000.snappy.parquet
+    │       │       ├── part-00000-89fda535-8046-42cc-ae24-3758557d3b8d-c000.snappy.parquet
+    │       │       ├── part-00000-8e7b0fe6-a538-4762-9330-b9b5262417be-c000.snappy.parquet
+    │       │       ├── part-00000-8eb4b925-c465-4780-8836-3b1cfed58435-c000.snappy.parquet
+    │       │       ├── part-00000-951c1f4b-d320-472d-a6bd-2dbffbeadaa6-c000.snappy.parquet
+    │       │       ├── part-00000-9570668e-be13-4146-8407-02712adfcc3d-c000.snappy.parquet
+    │       │       ├── part-00000-9587c0a4-6e22-4449-ab07-b4318fae210c-c000.snappy.parquet
+    │       │       ├── part-00000-97d8ac74-fc39-4219-9d59-d16ef5a9dfa2-c000.snappy.parquet
+    │       │       ├── part-00000-994a8681-8c10-47a7-b789-70c6a4ed4a0f-c000.snappy.parquet
+    │       │       ├── part-00000-a58e08e6-0d8a-42ae-8870-f64a82229b31-c000.snappy.parquet
+    │       │       ├── part-00000-aa98e003-98e9-4f61-aa40-4529723d8837-c000.snappy.parquet
+    │       │       ├── part-00000-b1c8fc0d-7261-46d7-a091-e55052402396-c000.snappy.parquet
+    │       │       ├── part-00000-b5bbe8e0-776f-4394-87af-8d5cf4e3629e-c000.snappy.parquet
+    │       │       ├── part-00000-b791bd9d-44f9-4db9-9698-97fd0b0dc8b1-c000.snappy.parquet
+    │       │       ├── part-00000-b7bfd55b-ab04-411d-9aa9-8b352b1a7f4c-c000.snappy.parquet
+    │       │       ├── part-00000-b7d6473e-eceb-43ea-9055-a62d7b32314d-c000.snappy.parquet
+    │       │       ├── part-00000-b8ad20a6-6b6c-4f28-8c31-da5646f58898-c000.snappy.parquet
+    │       │       ├── part-00000-bde6d0a5-358f-412a-b9d2-a2dbc43bd8a9-c000.snappy.parquet
+    │       │       ├── part-00000-c1030fe3-6b33-4349-8596-34af5ec29963-c000.snappy.parquet
+    │       │       ├── part-00000-c377ea3e-01d1-4976-af9b-6b01bfeba1e7-c000.snappy.parquet
+    │       │       ├── part-00000-c3e58b1a-5579-4b3c-8983-6a02e75b850a-c000.snappy.parquet
+    │       │       ├── part-00000-c4440eb4-ff94-47bb-a3a5-bd162a7f4908-c000.snappy.parquet
+    │       │       ├── part-00000-c7ec5721-db93-4b89-a948-1475d7691d8d-c000.snappy.parquet
+    │       │       ├── part-00000-c813610f-1f5c-48eb-97ae-932ca87879e9-c000.snappy.parquet
+    │       │       ├── part-00000-cc63dcd8-de18-4488-8fa2-953a8b8f72da-c000.snappy.parquet
+    │       │       ├── part-00000-d1e90913-23d5-4177-93c5-7315e800a1dc-c000.snappy.parquet
+    │       │       ├── part-00000-d5bd3039-4e73-482d-a8f2-b47b2291585e-c000.snappy.parquet
+    │       │       ├── part-00000-d8475c59-dcb9-4cb7-a5ff-9fe22ec0b101-c000.snappy.parquet
+    │       │       ├── part-00000-db163811-55f8-4cf8-8367-b16fc742dd6f-c000.snappy.parquet
+    │       │       ├── part-00000-e07abd03-55ae-4783-8b23-f7bc2f47d161-c000.snappy.parquet
+    │       │       ├── part-00000-e225e728-1441-4345-b89d-f6bbd3533155-c000.snappy.parquet
+    │       │       ├── part-00000-e23e1663-9598-4b52-ad53-eeedaf460c8a-c000.snappy.parquet
+    │       │       ├── part-00000-e4daf35c-626d-4103-a93e-aa19178ccbd4-c000.snappy.parquet
+    │       │       ├── part-00000-e5446f1e-2bba-425f-85de-ff74f9050208-c000.snappy.parquet
+    │       │       ├── part-00000-e7122c8e-5911-4b53-b6c8-fd52ca4cb645-c000.snappy.parquet
+    │       │       ├── part-00000-edb3f3fd-2905-44d3-9d46-2c635939cbe2-c000.snappy.parquet
+    │       │       ├── part-00000-ee56f6eb-4cd4-4a60-9d8e-fea548ffe14d-c000.snappy.parquet
+    │       │       ├── part-00000-f2a07e62-323e-4c5e-83e3-149362170909-c000.snappy.parquet
+    │       │       ├── part-00000-f2b52149-fcdf-4a3c-983b-00c0ff6eccb0-c000.snappy.parquet
+    │       │       ├── part-00000-f3f3a4c6-9ce9-46ff-af00-53b23487f727-c000.snappy.parquet
+    │       │       ├── part-00000-f5cf7ad6-e4c7-475d-844a-1bfc32cc94f7-c000.snappy.parquet
+    │       │       ├── part-00000-fb4cbcf3-2f3c-4181-97dc-51b0b8aed085-c000.snappy.parquet
+    │       │       ├── part-00000-fdf29651-a4df-495e-9127-39874aa11ed4-c000.snappy.parquet
+    │       │       ├── part-00000-ffac6b8a-d16f-4e61-92f1-caffdbea3f22-c000.snappy.parquet
+    │       │       └── silver_chembl_publication_dq_report.json
+    │       ├── composite/
+    │       │   ├── publication/
+    │       │   │   ├── _delta_log/
+    │       │   │   │   ├── 00000000000000000000.json
+    │       │   │   │   └── 00000000000000000001.json
+    │       │   │   ├── composite_publication_metadata.yaml
+    │       │   │   ├── part-00000-a5e04c60-f09e-4ba6-bd95-d1103aef2539-c000.snappy.parquet
+    │       │   │   └── part-00000-ce70e9c5-440e-40cf-9e33-19cc6e5f70c5-c000.snappy.parquet
+    │       │   └── publication.csv
+    │       ├── crossref/
+    │       │   └── publication/
+    │       │       ├── _delta_log/
+    │       │       │   ├── 00000000000000000000.json
+    │       │       │   ├── 00000000000000000001.json
+    │       │       │   ├── 00000000000000000002.json
+    │       │       │   ├── 00000000000000000003.json
+    │       │       │   ├── 00000000000000000004.json
+    │       │       │   ├── 00000000000000000005.json
+    │       │       │   ├── 00000000000000000006.json
+    │       │       │   ├── 00000000000000000007.json
+    │       │       │   ├── 00000000000000000008.json
+    │       │       │   ├── 00000000000000000009.json
+    │       │       │   ├── 00000000000000000010.json
+    │       │       │   ├── 00000000000000000011.json
+    │       │       │   ├── 00000000000000000012.json
+    │       │       │   ├── 00000000000000000013.json
+    │       │       │   ├── 00000000000000000014.json
+    │       │       │   ├── 00000000000000000015.json
+    │       │       │   ├── 00000000000000000016.json
+    │       │       │   ├── 00000000000000000017.json
+    │       │       │   ├── 00000000000000000018.json
+    │       │       │   ├── 00000000000000000019.json
+    │       │       │   ├── 00000000000000000020.json
+    │       │       │   ├── 00000000000000000021.json
+    │       │       │   ├── 00000000000000000022.json
+    │       │       │   ├── 00000000000000000023.json
+    │       │       │   ├── 00000000000000000024.json
+    │       │       │   ├── 00000000000000000025.json
+    │       │       │   ├── 00000000000000000026.json
+    │       │       │   ├── 00000000000000000027.json
+    │       │       │   ├── 00000000000000000028.json
+    │       │       │   ├── 00000000000000000029.json
+    │       │       │   ├── 00000000000000000030.json
+    │       │       │   ├── 00000000000000000031.json
+    │       │       │   ├── 00000000000000000032.json
+    │       │       │   ├── 00000000000000000033.json
+    │       │       │   ├── 00000000000000000034.json
+    │       │       │   ├── 00000000000000000035.json
+    │       │       │   ├── 00000000000000000036.json
+    │       │       │   ├── 00000000000000000037.json
+    │       │       │   ├── 00000000000000000038.json
+    │       │       │   ├── 00000000000000000039.json
+    │       │       │   ├── 00000000000000000040.json
+    │       │       │   ├── 00000000000000000041.json
+    │       │       │   ├── 00000000000000000042.json
+    │       │       │   ├── 00000000000000000043.json
+    │       │       │   ├── 00000000000000000044.json
+    │       │       │   ├── 00000000000000000045.json
+    │       │       │   ├── 00000000000000000046.json
+    │       │       │   ├── 00000000000000000047.json
+    │       │       │   ├── 00000000000000000048.json
+    │       │       │   ├── 00000000000000000049.json
+    │       │       │   ├── 00000000000000000050.json
+    │       │       │   ├── 00000000000000000051.json
+    │       │       │   ├── 00000000000000000052.json
+    │       │       │   ├── 00000000000000000053.json
+    │       │       │   ├── 00000000000000000054.json
+    │       │       │   ├── 00000000000000000055.json
+    │       │       │   ├── 00000000000000000056.json
+    │       │       │   ├── 00000000000000000057.json
+    │       │       │   ├── 00000000000000000058.json
+    │       │       │   ├── 00000000000000000059.json
+    │       │       │   ├── 00000000000000000060.json
+    │       │       │   ├── 00000000000000000061.json
+    │       │       │   ├── 00000000000000000062.json
+    │       │       │   ├── 00000000000000000063.json
+    │       │       │   ├── 00000000000000000064.json
+    │       │       │   ├── 00000000000000000065.json
+    │       │       │   ├── 00000000000000000066.json
+    │       │       │   ├── 00000000000000000067.json
+    │       │       │   ├── 00000000000000000068.json
+    │       │       │   ├── 00000000000000000069.json
+    │       │       │   ├── 00000000000000000070.json
+    │       │       │   ├── 00000000000000000071.json
+    │       │       │   ├── 00000000000000000072.json
+    │       │       │   ├── 00000000000000000073.json
+    │       │       │   ├── 00000000000000000074.json
+    │       │       │   ├── 00000000000000000075.json
+    │       │       │   ├── 00000000000000000076.json
+    │       │       │   ├── 00000000000000000077.json
+    │       │       │   ├── 00000000000000000078.json
+    │       │       │   ├── 00000000000000000079.json
+    │       │       │   ├── 00000000000000000080.json
+    │       │       │   ├── 00000000000000000081.json
+    │       │       │   ├── 00000000000000000082.json
+    │       │       │   ├── 00000000000000000083.json
+    │       │       │   ├── 00000000000000000084.json
+    │       │       │   ├── 00000000000000000085.json
+    │       │       │   ├── 00000000000000000086.json
+    │       │       │   ├── 00000000000000000087.json
+    │       │       │   ├── 00000000000000000088.json
+    │       │       │   ├── 00000000000000000089.json
+    │       │       │   ├── 00000000000000000090.json
+    │       │       │   ├── 00000000000000000091.json
+    │       │       │   ├── 00000000000000000092.json
+    │       │       │   ├── 00000000000000000093.json
+    │       │       │   ├── 00000000000000000094.json
+    │       │       │   ├── 00000000000000000095.json
+    │       │       │   ├── 00000000000000000096.json
+    │       │       │   ├── 00000000000000000097.json
+    │       │       │   ├── 00000000000000000098.json
+    │       │       │   ├── 00000000000000000099.checkpoint.parquet
+    │       │       │   ├── 00000000000000000099.json
+    │       │       │   ├── 00000000000000000100.json
+    │       │       │   └── _last_checkpoint
+    │       │       ├── crossref_publication.csv
+    │       │       ├── crossref_publication_metadata.yaml
+    │       │       ├── part-00000-00d9d09c-f4f9-4f8f-ba84-9f4a4b7a5349-c000.snappy.parquet
+    │       │       ├── part-00000-04008a31-fd7b-459d-80cc-dbece4b014f2-c000.snappy.parquet
+    │       │       ├── part-00000-053323d4-d14d-4f3d-86ef-028cd15786ba-c000.snappy.parquet
+    │       │       ├── part-00000-08330167-ac59-451f-915b-ed3bd2b84342-c000.snappy.parquet
+    │       │       ├── part-00000-08dff15b-892c-48e7-98eb-d91ae78ea5da-c000.snappy.parquet
+    │       │       ├── part-00000-10533f00-839c-43ff-a682-055a4833d87a-c000.snappy.parquet
+    │       │       ├── part-00000-10db33cb-7137-4758-96e1-f8ff98c75084-c000.snappy.parquet
+    │       │       ├── part-00000-13014387-9add-44f0-93a5-124e1ed32f88-c000.snappy.parquet
+    │       │       ├── part-00000-13fd6c42-c672-4b68-9ea1-a04f727463d8-c000.snappy.parquet
+    │       │       ├── part-00000-1ac99f9f-fdd6-4bb3-8910-f0dd0ad65753-c000.snappy.parquet
+    │       │       ├── part-00000-20b7521b-dda8-4b49-8357-0a58d953d805-c000.snappy.parquet
+    │       │       ├── part-00000-216e78c0-e6e5-4aba-8c8e-04c5025f7581-c000.snappy.parquet
+    │       │       ├── part-00000-223946e6-0dce-426e-8617-ed5917393d87-c000.snappy.parquet
+    │       │       ├── part-00000-22a04a9c-cd89-4682-883a-fc8010523c58-c000.snappy.parquet
+    │       │       ├── part-00000-22ca5692-8896-4340-bafd-b50d7b96730e-c000.snappy.parquet
+    │       │       ├── part-00000-241d1160-faba-40c0-9ebf-94e9cfb30680-c000.snappy.parquet
+    │       │       ├── part-00000-268cfec7-35f9-49b8-8fcc-322b5b577aeb-c000.snappy.parquet
+    │       │       ├── part-00000-284cf6cb-87c2-47f1-9e2d-526df6f380cd-c000.snappy.parquet
+    │       │       ├── part-00000-2b5f7166-6d76-4b19-8478-ea1f66af2535-c000.snappy.parquet
+    │       │       ├── part-00000-2d84ccb8-681d-48ba-8cc9-1316faea8ca9-c000.snappy.parquet
+    │       │       ├── part-00000-2e3b642f-2fd7-4f8b-8637-a11dc19116b6-c000.snappy.parquet
+    │       │       ├── part-00000-34f201f3-9007-4d34-82d0-3dda30161924-c000.snappy.parquet
+    │       │       ├── part-00000-3b6d7190-c618-4f85-b304-684471bccedb-c000.snappy.parquet
+    │       │       ├── part-00000-3c390a4e-499c-4e47-9bb5-805f34e55ba2-c000.snappy.parquet
+    │       │       ├── part-00000-3d3903b0-5d6c-416a-996a-036756be7ba7-c000.snappy.parquet
+    │       │       ├── part-00000-426ecbdb-f35f-44a7-98cc-6c15d1cc4d23-c000.snappy.parquet
+    │       │       ├── part-00000-45b4504d-19b5-4ce5-8e6a-1ef0175c7d03-c000.snappy.parquet
+    │       │       ├── part-00000-46908ca5-bb68-4327-98c3-98cda70b8a62-c000.snappy.parquet
+    │       │       ├── part-00000-4a7ffb3c-1eb8-4e04-abb3-39ae8683e1ff-c000.snappy.parquet
+    │       │       ├── part-00000-4e48102a-467c-47c7-9f8c-e850418aeb6c-c000.snappy.parquet
+    │       │       ├── part-00000-4ea2a108-e207-4619-a0bb-f95f2e04e9ef-c000.snappy.parquet
+    │       │       ├── part-00000-4f77c4af-6cf5-4155-aa59-3f5143b8adcc-c000.snappy.parquet
+    │       │       ├── part-00000-516b2607-228e-4225-8e1e-a910c7544478-c000.snappy.parquet
+    │       │       ├── part-00000-527106d8-358e-4dd1-8dbc-446f543a82a6-c000.snappy.parquet
+    │       │       ├── part-00000-527f78d1-12ff-4210-8f93-9ec1130abcf7-c000.snappy.parquet
+    │       │       ├── part-00000-5c331872-c2db-44fa-a2fc-150a3466a026-c000.snappy.parquet
+    │       │       ├── part-00000-5e764d64-292c-40f4-ac5d-619642e97505-c000.snappy.parquet
+    │       │       ├── part-00000-5feb4444-2cec-4ef2-9c91-d484eb2b7321-c000.snappy.parquet
+    │       │       ├── part-00000-60f0c4bc-a1e2-4cfd-9bb1-48da38da0e3d-c000.snappy.parquet
+    │       │       ├── part-00000-61c355da-cafa-4d38-bff0-a60886c00e04-c000.snappy.parquet
+    │       │       ├── part-00000-643eb494-effe-4b2b-aa47-0ac7ca0ceae8-c000.snappy.parquet
+    │       │       ├── part-00000-69a2f1cd-3f4b-409d-bd43-82f1405465fb-c000.snappy.parquet
+    │       │       ├── part-00000-6db5b57d-05fe-4d76-bf18-6b15ec767780-c000.snappy.parquet
+    │       │       ├── part-00000-6dc217a5-28a7-4836-af5b-0d905f18560b-c000.snappy.parquet
+    │       │       ├── part-00000-6dc65667-6915-40c2-bac1-3b11dd0c5e84-c000.snappy.parquet
+    │       │       ├── part-00000-70666e10-151d-4796-92cc-e17f72945f1a-c000.snappy.parquet
+    │       │       ├── part-00000-7aa11275-63f6-4b9e-94e4-ec9b74f00fdc-c000.snappy.parquet
+    │       │       ├── part-00000-7b19921e-b9de-4002-9627-89a4d80b8704-c000.snappy.parquet
+    │       │       ├── part-00000-7b90693b-3c51-4028-a1ed-d51a64e1401a-c000.snappy.parquet
+    │       │       ├── part-00000-7df7be41-a30a-4c7d-affe-627693739b36-c000.snappy.parquet
+    │       │       ├── part-00000-7f2d86e0-357f-4173-a4e6-b68e9126a048-c000.snappy.parquet
+    │       │       ├── part-00000-89aa15f2-7c42-4328-99fb-0addbcc2fe84-c000.snappy.parquet
+    │       │       ├── part-00000-8afc4b88-04fe-49e0-89ce-f9e820afe824-c000.snappy.parquet
+    │       │       ├── part-00000-8b66b108-4193-468e-a8af-dfe287f51c18-c000.snappy.parquet
+    │       │       ├── part-00000-8c415c5c-92cc-49eb-9d4f-096a68d9e958-c000.snappy.parquet
+    │       │       ├── part-00000-8d14ed36-8285-462a-a6f5-3eaca521de88-c000.snappy.parquet
+    │       │       ├── part-00000-905c9812-57a4-48b4-adb6-466e05ed3904-c000.snappy.parquet
+    │       │       ├── part-00000-942fcc73-bc2e-47fd-a276-fadbf9d31128-c000.snappy.parquet
+    │       │       ├── part-00000-97a31c6e-aa9c-448c-8af3-1c5f89c0a71e-c000.snappy.parquet
+    │       │       ├── part-00000-9ad2685a-520a-4111-a4ca-bd3b1c8d1d2b-c000.snappy.parquet
+    │       │       ├── part-00000-9bd3227a-96c6-47cf-b44b-58b654baa863-c000.snappy.parquet
+    │       │       ├── part-00000-9d09aa23-8627-4b02-94dc-6bafce54e66f-c000.snappy.parquet
+    │       │       ├── part-00000-a2416417-2710-4f3a-b98e-59f21cb5a1be-c000.snappy.parquet
+    │       │       ├── part-00000-a583a37e-3ef4-4b7a-8785-d4ee9e7dfa2e-c000.snappy.parquet
+    │       │       ├── part-00000-a598d5c2-7c8b-4b7f-98de-ca2499c0c813-c000.snappy.parquet
+    │       │       ├── part-00000-ab2d2aeb-704d-4bb1-bccd-70f33b421840-c000.snappy.parquet
+    │       │       ├── part-00000-ab9e2e57-d19f-46af-bc8f-4e766956a15d-c000.snappy.parquet
+    │       │       ├── part-00000-ac16b869-c168-4e04-8903-26043284b55b-c000.snappy.parquet
+    │       │       ├── part-00000-ac633052-3406-4a08-b830-f620be086a3d-c000.snappy.parquet
+    │       │       ├── part-00000-ad8a0b98-7d6d-469e-aff0-98b5781b929f-c000.snappy.parquet
+    │       │       ├── part-00000-ae78730d-59c6-4265-aac4-cabb572f0759-c000.snappy.parquet
+    │       │       ├── part-00000-afcc1939-9870-40a6-bf6e-af7b315ef964-c000.snappy.parquet
+    │       │       ├── part-00000-b1a822b3-fddf-4995-b0f7-a916a69c2fc2-c000.snappy.parquet
+    │       │       ├── part-00000-b50331da-ba60-49c4-a600-f62e13f75470-c000.snappy.parquet
+    │       │       ├── part-00000-b632ea87-6597-4791-84f6-63ca29c50975-c000.snappy.parquet
+    │       │       ├── part-00000-be5f9516-33ca-4908-968a-ebd1f01c8b51-c000.snappy.parquet
+    │       │       ├── part-00000-bfaaa5f8-7b6b-4b16-b0da-8ad4cf8805ef-c000.snappy.parquet
+    │       │       ├── part-00000-c0a0feb2-a980-4e2b-abb8-dfa893089bc8-c000.snappy.parquet
+    │       │       ├── part-00000-c1dd4bec-2157-4e0a-8cb1-ca64bf346257-c000.snappy.parquet
+    │       │       ├── part-00000-c220f059-52bb-4c7d-9598-f3049600d430-c000.snappy.parquet
+    │       │       ├── part-00000-c3a432d9-144b-4909-967d-e09803938f75-c000.snappy.parquet
+    │       │       ├── part-00000-c89063d1-3ac8-4402-9c51-febe16e1899f-c000.snappy.parquet
+    │       │       ├── part-00000-c8b42595-c60b-4fdb-809e-19fd1464c608-c000.snappy.parquet
+    │       │       ├── part-00000-cd3dd583-5eaf-4d96-bcfa-22cbae093c5f-c000.snappy.parquet
+    │       │       ├── part-00000-cf6413c6-efa4-4b63-a821-c20f6a46d954-c000.snappy.parquet
+    │       │       ├── part-00000-d5264687-67bc-4a39-9777-46902629b8e3-c000.snappy.parquet
+    │       │       ├── part-00000-d66fa28f-23b4-4cc0-a588-b96f2267d022-c000.snappy.parquet
+    │       │       ├── part-00000-dc4a989c-9eba-4911-8004-8fb13b8af09b-c000.snappy.parquet
+    │       │       ├── part-00000-e12603d6-2e94-47b5-8d12-dfaf1564b046-c000.snappy.parquet
+    │       │       ├── part-00000-e202b020-c204-4d67-94a8-300bf5c726f5-c000.snappy.parquet
+    │       │       ├── part-00000-e212a0cb-2349-48a7-b932-39da90c9555b-c000.snappy.parquet
+    │       │       ├── part-00000-e2290a4c-d5b5-4e10-860a-475e68814175-c000.snappy.parquet
+    │       │       ├── part-00000-e5ac794d-983e-43cc-8da2-9d32b7999060-c000.snappy.parquet
+    │       │       ├── part-00000-e6c21a0d-d06e-467d-aab5-1a0ded17542e-c000.snappy.parquet
+    │       │       ├── part-00000-e7ff6933-480a-48ac-b75d-b86750306010-c000.snappy.parquet
+    │       │       ├── part-00000-f4e2023f-ec60-466e-bf37-505413b53d35-c000.snappy.parquet
+    │       │       ├── part-00000-f61454d2-0533-44ef-9511-21b68d8a8455-c000.snappy.parquet
+    │       │       ├── part-00000-f943c3a6-c31f-4649-b9ff-3df4e3a06b26-c000.snappy.parquet
+    │       │       ├── part-00000-fa23b243-3633-499f-a164-5b26e6a1bab4-c000.snappy.parquet
+    │       │       ├── part-00000-ff09e98d-462e-49a8-b56d-a2633878cfde-c000.snappy.parquet
+    │       │       ├── part-00000-ff4ed719-4041-4b88-b5e9-e9a95a9f075d-c000.snappy.parquet
+    │       │       └── silver_crossref_publication_dq_report.json
+    │       ├── openalex/
+    │       │   └── publication/
+    │       │       ├── _delta_log/
+    │       │       │   ├── 00000000000000000000.json
+    │       │       │   ├── 00000000000000000001.json
+    │       │       │   ├── 00000000000000000002.json
+    │       │       │   ├── 00000000000000000003.json
+    │       │       │   ├── 00000000000000000004.json
+    │       │       │   ├── 00000000000000000005.json
+    │       │       │   ├── 00000000000000000006.json
+    │       │       │   ├── 00000000000000000007.json
+    │       │       │   ├── 00000000000000000008.json
+    │       │       │   ├── 00000000000000000009.json
+    │       │       │   ├── 00000000000000000010.json
+    │       │       │   ├── 00000000000000000011.json
+    │       │       │   ├── 00000000000000000012.json
+    │       │       │   ├── 00000000000000000013.json
+    │       │       │   ├── 00000000000000000014.json
+    │       │       │   ├── 00000000000000000015.json
+    │       │       │   ├── 00000000000000000016.json
+    │       │       │   ├── 00000000000000000017.json
+    │       │       │   ├── 00000000000000000018.json
+    │       │       │   ├── 00000000000000000019.json
+    │       │       │   ├── 00000000000000000020.json
+    │       │       │   ├── 00000000000000000021.json
+    │       │       │   ├── 00000000000000000022.json
+    │       │       │   ├── 00000000000000000023.json
+    │       │       │   ├── 00000000000000000024.json
+    │       │       │   ├── 00000000000000000025.json
+    │       │       │   ├── 00000000000000000026.json
+    │       │       │   ├── 00000000000000000027.json
+    │       │       │   ├── 00000000000000000028.json
+    │       │       │   ├── 00000000000000000029.json
+    │       │       │   ├── 00000000000000000030.json
+    │       │       │   ├── 00000000000000000031.json
+    │       │       │   ├── 00000000000000000032.json
+    │       │       │   ├── 00000000000000000033.json
+    │       │       │   ├── 00000000000000000034.json
+    │       │       │   ├── 00000000000000000035.json
+    │       │       │   ├── 00000000000000000036.json
+    │       │       │   ├── 00000000000000000037.json
+    │       │       │   ├── 00000000000000000038.json
+    │       │       │   ├── 00000000000000000039.json
+    │       │       │   ├── 00000000000000000040.json
+    │       │       │   ├── 00000000000000000041.json
+    │       │       │   ├── 00000000000000000042.json
+    │       │       │   ├── 00000000000000000043.json
+    │       │       │   ├── 00000000000000000044.json
+    │       │       │   ├── 00000000000000000045.json
+    │       │       │   ├── 00000000000000000046.json
+    │       │       │   ├── 00000000000000000047.json
+    │       │       │   ├── 00000000000000000048.json
+    │       │       │   ├── 00000000000000000049.json
+    │       │       │   └── 00000000000000000050.json
+    │       │       ├── openalex_publication.csv
+    │       │       ├── openalex_publication_metadata.yaml
+    │       │       ├── part-00000-00db1d95-db90-4a9a-aeb0-38854e5b93a7-c000.snappy.parquet
+    │       │       ├── part-00000-0a1b8e99-8a8f-467e-a77c-52fbc7a723e4-c000.snappy.parquet
+    │       │       ├── part-00000-1509b04a-da36-4bea-b5d3-d20e2a8bee60-c000.snappy.parquet
+    │       │       ├── part-00000-1640f8a2-9799-4d81-a6f6-427a6044dc70-c000.snappy.parquet
+    │       │       ├── part-00000-1674469e-1113-466a-8af6-56f16ce7315c-c000.snappy.parquet
+    │       │       ├── part-00000-16cc3c7e-26e4-4aef-9993-eefa919666c1-c000.snappy.parquet
+    │       │       ├── part-00000-1986c52e-07ea-4435-a66e-9fe355bd922f-c000.snappy.parquet
+    │       │       ├── part-00000-1ad765ff-b75e-4a13-ace4-46f37bc342c5-c000.snappy.parquet
+    │       │       ├── part-00000-1c3c7a15-fa2d-48a6-a9fc-e6f80e76e640-c000.snappy.parquet
+    │       │       ├── part-00000-1f80e41a-be2a-40dd-96aa-61104eff3d75-c000.snappy.parquet
+    │       │       ├── part-00000-215e9fe2-5007-41a8-90c0-77343a4967cc-c000.snappy.parquet
+    │       │       ├── part-00000-275f5130-dd24-42bd-b6be-4198405774eb-c000.snappy.parquet
+    │       │       ├── part-00000-3e78e4db-4ec8-42aa-a7f1-d78d09c1b843-c000.snappy.parquet
+    │       │       ├── part-00000-415b8305-b957-45b3-afca-4c57ae067cee-c000.snappy.parquet
+    │       │       ├── part-00000-440bff4d-c527-4761-becf-eb2108ebad4e-c000.snappy.parquet
+    │       │       ├── part-00000-444b8c59-9f8c-4025-af0f-7bf58a20935b-c000.snappy.parquet
+    │       │       ├── part-00000-4fe12bb5-9f0e-43be-a6bd-b6babdad6dd0-c000.snappy.parquet
+    │       │       ├── part-00000-51ca9486-6db6-4dbb-9488-7a0418862368-c000.snappy.parquet
+    │       │       ├── part-00000-59b9620d-c696-42d5-8f56-5409653ca856-c000.snappy.parquet
+    │       │       ├── part-00000-6086654b-279e-46f8-a8f4-f8ca16a5b66b-c000.snappy.parquet
+    │       │       ├── part-00000-6542b00f-1456-440a-8a88-a93a839b644c-c000.snappy.parquet
+    │       │       ├── part-00000-6a38393e-c960-410e-acd3-7a79756ed0ad-c000.snappy.parquet
+    │       │       ├── part-00000-6c43513f-98eb-4e3a-b51d-996c9d051beb-c000.snappy.parquet
+    │       │       ├── part-00000-6caccd2a-6c6b-4fbe-be5b-559b9c77fad5-c000.snappy.parquet
+    │       │       ├── part-00000-6cd8f77e-b347-4d76-a507-50ae702afee0-c000.snappy.parquet
+    │       │       ├── part-00000-78840fcd-e722-487c-86ee-14d2d59f4215-c000.snappy.parquet
+    │       │       ├── part-00000-7ebf0019-91f3-480a-a787-915469f52680-c000.snappy.parquet
+    │       │       ├── part-00000-8b23f684-ff4e-40c2-9d74-de05f2604d0b-c000.snappy.parquet
+    │       │       ├── part-00000-913a222c-ebf7-4efb-ae76-fa1c1103854f-c000.snappy.parquet
+    │       │       ├── part-00000-9a42a977-1efd-4e2c-9ac0-4f1059e26117-c000.snappy.parquet
+    │       │       ├── part-00000-9b5e4cbe-4275-4568-ad37-b359ad01ee44-c000.snappy.parquet
+    │       │       ├── part-00000-a5512c77-c40f-465f-8a63-cb84838fbe90-c000.snappy.parquet
+    │       │       ├── part-00000-ab7a4962-d699-4a4c-90ec-b93c05cc24c1-c000.snappy.parquet
+    │       │       ├── part-00000-ad1da544-13a2-48cf-ba91-3d9490b1fc14-c000.snappy.parquet
+    │       │       ├── part-00000-af262c52-c689-41ba-a084-7dd45a0bb6ff-c000.snappy.parquet
+    │       │       ├── part-00000-b362a688-99b9-4ce1-98c9-047cde6e4c48-c000.snappy.parquet
+    │       │       ├── part-00000-b4dd9a57-8578-4fa0-bdb3-c39d24dad1cd-c000.snappy.parquet
+    │       │       ├── part-00000-b72d3394-d872-4db2-85e7-2571c4ddefa0-c000.snappy.parquet
+    │       │       ├── part-00000-b861a305-8357-40b8-af3f-10a38147b751-c000.snappy.parquet
+    │       │       ├── part-00000-bb150502-685d-4ff7-a4f3-93019a06e0f4-c000.snappy.parquet
+    │       │       ├── part-00000-bfc1d854-8be3-4afd-b07e-95e1470628a7-c000.snappy.parquet
+    │       │       ├── part-00000-c8ea520f-6026-4498-8b80-be86aa822350-c000.snappy.parquet
+    │       │       ├── part-00000-ca15f873-ea52-49bc-8087-0cf6bcea09a6-c000.snappy.parquet
+    │       │       ├── part-00000-cb52975c-bf3d-4e13-a422-640b6d08643e-c000.snappy.parquet
+    │       │       ├── part-00000-d52b36eb-9bd0-419a-aa84-9ba14887fa7b-c000.snappy.parquet
+    │       │       ├── part-00000-d739218c-c953-4ec3-86f2-4f8402274fc2-c000.snappy.parquet
+    │       │       ├── part-00000-d755c3bf-8cc1-4135-a025-c1f8611d9c24-c000.snappy.parquet
+    │       │       ├── part-00000-ebadce4e-cc32-402e-bc3f-2ac3cafc7229-c000.snappy.parquet
+    │       │       ├── part-00000-f425b1b6-d230-4809-9478-619d0f2cf0ec-c000.snappy.parquet
+    │       │       ├── part-00000-f4cab255-7df2-4664-80cb-c6c3e7921b83-c000.snappy.parquet
+    │       │       ├── part-00000-fe132fcb-2afc-4358-ad17-a6a8988f81ee-c000.snappy.parquet
+    │       │       └── silver_openalex_publication_dq_report.json
+    │       ├── pubmed/
+    │       │   └── publication/
+    │       │       ├── _delta_log/
+    │       │       │   ├── 00000000000000000000.json
+    │       │       │   ├── 00000000000000000001.json
+    │       │       │   ├── 00000000000000000002.json
+    │       │       │   ├── 00000000000000000003.json
+    │       │       │   ├── 00000000000000000004.json
+    │       │       │   ├── 00000000000000000005.json
+    │       │       │   ├── 00000000000000000006.json
+    │       │       │   ├── 00000000000000000007.json
+    │       │       │   ├── 00000000000000000008.json
+    │       │       │   ├── 00000000000000000009.json
+    │       │       │   ├── 00000000000000000010.json
+    │       │       │   ├── 00000000000000000011.json
+    │       │       │   ├── 00000000000000000012.json
+    │       │       │   ├── 00000000000000000013.json
+    │       │       │   ├── 00000000000000000014.json
+    │       │       │   ├── 00000000000000000015.json
+    │       │       │   ├── 00000000000000000016.json
+    │       │       │   ├── 00000000000000000017.json
+    │       │       │   ├── 00000000000000000018.json
+    │       │       │   ├── 00000000000000000019.json
+    │       │       │   ├── 00000000000000000020.json
+    │       │       │   ├── 00000000000000000021.json
+    │       │       │   ├── 00000000000000000022.json
+    │       │       │   ├── 00000000000000000023.json
+    │       │       │   ├── 00000000000000000024.json
+    │       │       │   ├── 00000000000000000025.json
+    │       │       │   ├── 00000000000000000026.json
+    │       │       │   ├── 00000000000000000027.json
+    │       │       │   ├── 00000000000000000028.json
+    │       │       │   ├── 00000000000000000029.json
+    │       │       │   ├── 00000000000000000030.json
+    │       │       │   ├── 00000000000000000031.json
+    │       │       │   ├── 00000000000000000032.json
+    │       │       │   ├── 00000000000000000033.json
+    │       │       │   ├── 00000000000000000034.json
+    │       │       │   ├── 00000000000000000035.json
+    │       │       │   ├── 00000000000000000036.json
+    │       │       │   ├── 00000000000000000037.json
+    │       │       │   ├── 00000000000000000038.json
+    │       │       │   ├── 00000000000000000039.json
+    │       │       │   ├── 00000000000000000040.json
+    │       │       │   ├── 00000000000000000041.json
+    │       │       │   ├── 00000000000000000042.json
+    │       │       │   ├── 00000000000000000043.json
+    │       │       │   ├── 00000000000000000044.json
+    │       │       │   ├── 00000000000000000045.json
+    │       │       │   ├── 00000000000000000046.json
+    │       │       │   ├── 00000000000000000047.json
+    │       │       │   ├── 00000000000000000048.json
+    │       │       │   ├── 00000000000000000049.json
+    │       │       │   ├── 00000000000000000050.json
+    │       │       │   ├── 00000000000000000051.json
+    │       │       │   ├── 00000000000000000052.json
+    │       │       │   ├── 00000000000000000053.json
+    │       │       │   ├── 00000000000000000054.json
+    │       │       │   ├── 00000000000000000055.json
+    │       │       │   ├── 00000000000000000056.json
+    │       │       │   ├── 00000000000000000057.json
+    │       │       │   ├── 00000000000000000058.json
+    │       │       │   ├── 00000000000000000059.json
+    │       │       │   ├── 00000000000000000060.json
+    │       │       │   ├── 00000000000000000061.json
+    │       │       │   ├── 00000000000000000062.json
+    │       │       │   ├── 00000000000000000063.json
+    │       │       │   ├── 00000000000000000064.json
+    │       │       │   ├── 00000000000000000065.json
+    │       │       │   ├── 00000000000000000066.json
+    │       │       │   ├── 00000000000000000067.json
+    │       │       │   └── 00000000000000000068.json
+    │       │       ├── part-00000-01c822ac-2942-43b4-955c-33db071a2821-c000.snappy.parquet
+    │       │       ├── part-00000-061605e0-9d22-42a5-bbd9-220e78095756-c000.snappy.parquet
+    │       │       ├── part-00000-091e41f1-897f-4d9e-a3e9-7ca2b837328e-c000.snappy.parquet
+    │       │       ├── part-00000-0c3d053d-b58f-443f-94f6-7146cd53622f-c000.snappy.parquet
+    │       │       ├── part-00000-112d3eb7-d448-4a39-acb0-5109dcd68532-c000.snappy.parquet
+    │       │       ├── part-00000-113e61f1-a946-4e34-8001-d7c9d1b7013d-c000.snappy.parquet
+    │       │       ├── part-00000-1c6ebdca-dcf4-4e72-b058-92e6bf702df9-c000.snappy.parquet
+    │       │       ├── part-00000-23068041-2178-4014-ab7e-cb031533b7af-c000.snappy.parquet
+    │       │       ├── part-00000-237ec033-386b-4cbb-8231-7ab0a798deb0-c000.snappy.parquet
+    │       │       ├── part-00000-2b84ac5d-90f2-41b2-9303-480fa9f9e659-c000.snappy.parquet
+    │       │       ├── part-00000-41706213-688a-4665-9bee-55aed000f405-c000.snappy.parquet
+    │       │       ├── part-00000-45bdc615-c737-4301-9da3-648197362f35-c000.snappy.parquet
+    │       │       ├── part-00000-45e82b86-3b88-4648-b3bd-19484f77197f-c000.snappy.parquet
+    │       │       ├── part-00000-4aaec82f-b317-4076-9466-aba6aae04fa3-c000.snappy.parquet
+    │       │       ├── part-00000-50c33c32-b811-4209-83d1-fcf358dadfd0-c000.snappy.parquet
+    │       │       ├── part-00000-55194824-f879-4f65-8bac-8a153b0fc4c9-c000.snappy.parquet
+    │       │       ├── part-00000-557ce232-e47d-49b1-a733-d9d19736d916-c000.snappy.parquet
+    │       │       ├── part-00000-56850406-f35a-4936-bfe1-5def4a0d0533-c000.snappy.parquet
+    │       │       ├── part-00000-575f5380-df29-4f2c-92ba-5e7f7fd45b11-c000.snappy.parquet
+    │       │       ├── part-00000-5799eae6-f58b-44b2-a7c1-19705f10a057-c000.snappy.parquet
+    │       │       ├── part-00000-5f2c5fca-59b8-442e-bc2c-db90996d4ac7-c000.snappy.parquet
+    │       │       ├── part-00000-61545efc-29b6-4c9e-b03d-8c3587e0dc82-c000.snappy.parquet
+    │       │       ├── part-00000-61615c03-b65a-4b51-b645-ac2526c0712c-c000.snappy.parquet
+    │       │       ├── part-00000-61d98da3-5b00-418d-a06e-ad3a63304109-c000.snappy.parquet
+    │       │       ├── part-00000-6c5651f9-2f13-462b-b756-25eee7875cb4-c000.snappy.parquet
+    │       │       ├── part-00000-6e5f83ca-d224-47ad-89a4-bcb49065aa2a-c000.snappy.parquet
+    │       │       ├── part-00000-71f90fd4-2c04-453a-818b-a5a59de83ce8-c000.snappy.parquet
+    │       │       ├── part-00000-7d0bdd76-0289-465e-bc5b-5039d797590d-c000.snappy.parquet
+    │       │       ├── part-00000-844e2e0d-00ab-4a36-b211-a328296a1072-c000.snappy.parquet
+    │       │       ├── part-00000-846c1315-e62c-4d93-ac38-5d2212d641ab-c000.snappy.parquet
+    │       │       ├── part-00000-88514e7a-d1fc-4ed2-b9df-2437dee10021-c000.snappy.parquet
+    │       │       ├── part-00000-88a1ad77-697d-4e92-bdd2-9834a85eb9f0-c000.snappy.parquet
+    │       │       ├── part-00000-93cab35c-41c0-4950-bea7-c0a614aa1668-c000.snappy.parquet
+    │       │       ├── part-00000-95354f2c-bb8e-471d-a57b-12f4b6e62f6c-c000.snappy.parquet
+    │       │       ├── part-00000-967e0a28-28f9-4fab-93d8-0c3386b78127-c000.snappy.parquet
+    │       │       ├── part-00000-97267063-5a25-4190-ae00-1d956e697b48-c000.snappy.parquet
+    │       │       ├── part-00000-9956d838-9c28-49ce-88db-8652751a127f-c000.snappy.parquet
+    │       │       ├── part-00000-9a1ca848-d797-40d6-94eb-b35df6b9b57a-c000.snappy.parquet
+    │       │       ├── part-00000-9aa0e955-d26d-4700-9aac-c58792412932-c000.snappy.parquet
+    │       │       ├── part-00000-9c24546c-69f2-4b92-8b7e-f764a7c28678-c000.snappy.parquet
+    │       │       ├── part-00000-9da3658c-ea12-4ce6-a130-5472537dd62d-c000.snappy.parquet
+    │       │       ├── part-00000-a209ac53-aac2-4895-85f7-ed348289f7a5-c000.snappy.parquet
+    │       │       ├── part-00000-a21f6aa6-be39-47e2-9c71-57565706fe2c-c000.snappy.parquet
+    │       │       ├── part-00000-a8fda2e3-b22a-472b-a3c0-899416499247-c000.snappy.parquet
+    │       │       ├── part-00000-abf15467-1d2c-4aa3-8440-18f3d4fa056c-c000.snappy.parquet
+    │       │       ├── part-00000-adb15c8e-2bb1-4497-9f30-3508d275cb92-c000.snappy.parquet
+    │       │       ├── part-00000-ae7b3513-d67e-4eba-8de7-c708b353183c-c000.snappy.parquet
+    │       │       ├── part-00000-b04bb3a2-f7f3-42e0-aacf-7e5b0db4330d-c000.snappy.parquet
+    │       │       ├── part-00000-b5c45c12-883b-48c1-8f8d-b9d72208a18d-c000.snappy.parquet
+    │       │       ├── part-00000-b87347c0-5108-4bc4-b5b3-39a0680a9e13-c000.snappy.parquet
+    │       │       ├── part-00000-c10850a7-c1ab-4d28-9266-4c3489543ba5-c000.snappy.parquet
+    │       │       ├── part-00000-c1384693-74ba-4cbd-9766-751eb428bb9c-c000.snappy.parquet
+    │       │       ├── part-00000-c2aa73c6-d33d-41ae-9b45-f1c710d0909c-c000.snappy.parquet
+    │       │       ├── part-00000-c2ae5fdb-7772-4c2f-8a18-27e33b773906-c000.snappy.parquet
+    │       │       ├── part-00000-c4f43029-081e-41cd-bcb9-92b2477dcdd0-c000.snappy.parquet
+    │       │       ├── part-00000-cbb83146-c490-46df-919b-f109083241db-c000.snappy.parquet
+    │       │       ├── part-00000-ce59f7f0-7d0b-4218-9166-f6cb2d77f6e1-c000.snappy.parquet
+    │       │       ├── part-00000-cea69db2-4c24-47e7-882e-d5b44b7a7cf7-c000.snappy.parquet
+    │       │       ├── part-00000-d2393ebd-f8f7-47ec-b623-1aa5ed0adb29-c000.snappy.parquet
+    │       │       ├── part-00000-d3939191-7f34-49d8-aeae-ed09cba32e92-c000.snappy.parquet
+    │       │       ├── part-00000-e821cc83-d338-4f93-96e8-50e3033b0021-c000.snappy.parquet
+    │       │       ├── part-00000-edc1904e-ebd6-4ab1-a35d-1cafcbbf4f04-c000.snappy.parquet
+    │       │       ├── part-00000-efb8c34f-314a-4c1e-a456-8ae8b9df0a93-c000.snappy.parquet
+    │       │       ├── part-00000-efe142f3-bc84-4839-b5f5-09ae31ec576a-c000.snappy.parquet
+    │       │       ├── part-00000-f31414ad-ea47-4976-b49a-a40ef078421b-c000.snappy.parquet
+    │       │       ├── part-00000-f6728f18-9456-4c53-9ee6-1cfe4f7a44c8-c000.snappy.parquet
+    │       │       ├── part-00000-f983dd52-b112-4875-ab4f-6fbcc91eef18-c000.snappy.parquet
+    │       │       ├── part-00000-fca83ed5-3c2b-4381-b356-62e3ca41d765-c000.snappy.parquet
+    │       │       ├── part-00000-fd264fac-3816-495e-b04b-d24a3c245283-c000.snappy.parquet
+    │       │       ├── pubmed_publication.csv
+    │       │       ├── pubmed_publication_metadata.yaml
+    │       │       └── silver_pubmed_publication_dq_report.json
+    │       └── semanticscholar/
+    │           └── publication/
+    │               ├── _delta_log/
+    │               │   ├── 00000000000000000000.json
+    │               │   └── 00000000000000000001.json
+    │               ├── part-00000-87e2a1e3-e8a9-4e37-9f83-d0ecebfa42bb-c000.snappy.parquet
+    │               ├── part-00000-fba2b47e-268d-4a3e-8ce7-bbc4eea9da8d-c000.snappy.parquet
+    │               ├── semanticscholar_publication.csv
+    │               ├── semanticscholar_publication_metadata.yaml
+    │               └── silver_semanticscholar_publication_dq_report.json
     ├── docs/
     │   ├── 00-project_rules/
     │   │   ├── 03-file-policy.md
@@ -9851,7 +10645,9 @@ BioactivityDataAcquisition2/
     │   │   │   ├── bioetl-audit-synthesis-2025-12-31.yaml
     │   │   │   ├── code-duplication-analysis-2026-01-06.md
     │   │   │   ├── code-duplication-analysis-2026-01-15.md
+    │   │   │   ├── code-duplication-analysis.md
     │   │   │   ├── code-duplication-report-2026-01-05.md
+    │   │   │   ├── config-dedup-analysis.md
     │   │   │   ├── config-unification-plan.md
     │   │   │   ├── config_discrepancies_report.md
     │   │   │   ├── consolidated-action-plan-analysis-2025-12-31.md
@@ -9864,6 +10660,7 @@ BioactivityDataAcquisition2/
     │   │   │   ├── documentation-audit-2026-01-14.md
     │   │   │   ├── documentation-audit-2026-01-15.md
     │   │   │   ├── documentation-audit-2026-01-19.md
+    │   │   │   ├── documentation-audit-2026-01-25.md
     │   │   │   ├── documentation-security-audit-2026-01-06.md
     │   │   │   ├── domain-layer-audit-2025-12-30.yaml
     │   │   │   ├── domain-layer-audit-2026-01-05.md
@@ -9875,6 +10672,7 @@ BioactivityDataAcquisition2/
     │   │   │   ├── infrastructure-layer-audit.md
     │   │   │   ├── interfaces-layer-audit-2025-12-30.md
     │   │   │   ├── interfaces-layer-audit-2026-01-05.md
+    │   │   │   ├── metadata-audit-report.md
     │   │   │   ├── naming-compliance-report.md
     │   │   │   ├── pipeline-analysis-report.md
     │   │   │   ├── pre-production-validation-2026-01-06.md
@@ -9882,6 +10680,7 @@ BioactivityDataAcquisition2/
     │   │   │   ├── preflight-check-report.md
     │   │   │   ├── problems-2026-01-02.yaml
     │   │   │   ├── problems.yaml
+    │   │   │   ├── schema-mapping-audit-report.md
     │   │   │   ├── security-audit-2026-01-06.md
     │   │   │   ├── skipped-tests-verification-2026-01-16.md
     │   │   │   ├── sync-audit-2026-01-21.md
@@ -9911,6 +10710,7 @@ BioactivityDataAcquisition2/
     │   │       └── mermaid-init.js
     │   ├── audit/
     │   │   ├── architecture-audit-report-2026-01-22.md
+    │   │   ├── architecture-audit-report-2026-01-25.md
     │   │   └── naming-compliance-report.md
     │   ├── audits/
     │   │   ├── architecture-audit-2026-01-22.md
@@ -10055,8 +10855,6 @@ BioactivityDataAcquisition2/
     │   │   ├── duplication-analysis-2026-01.md
     │   │   └── refactoring-plan-duplicate-logic.md
     │   ├── reports/
-    │   │   ├── code-duplication-analysis.md
-    │   │   ├── metadata-audit-report.md
     │   │   └── metadata_inventory.csv
     │   ├── templates/
     │   │   ├── config.yaml.tpl
@@ -10065,19 +10863,18 @@ BioactivityDataAcquisition2/
     │   │   ├── pipeline.py.tpl
     │   │   └── source_adapter.py.tpl
     │   ├── verification/
-    │   │   └── publication-field-mapping-report.md
+    │   │   ├── publication-field-mapping-report.md
+    │   │   ├── pubmed-extraction-verification-report.md
+    │   │   └── semanticscholar-publication-pipeline-verification.md
     │   ├── .dockerignore
     │   ├── 00-map.md
     │   ├── Dockerfile
     │   ├── REQUIREMENTS.md
     │   ├── RULES.md
     │   ├── TOOLS.md
-    │   ├── config-dedup-analysis.md
     │   ├── config_comparison_matrix.csv
-    │   ├── config_discrepancies_report.md
     │   ├── glossary.md
-    │   ├── index.md
-    │   └── schema-mapping-audit-report.md
+    │   └── index.md
     ├── grafana/
     │   ├── dashboards/
     │   │   ├── bioetl-dq.json
@@ -10555,6 +11352,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── composite/
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── checkpoint.py
+    │   │   │   │   ├── column_orderer.py
+    │   │   │   │   ├── column_renamer.py
     │   │   │   │   ├── coordinator.py
     │   │   │   │   ├── deduplication.py
     │   │   │   │   ├── fsm_helper.py
@@ -10696,14 +11495,6 @@ BioactivityDataAcquisition2/
     │   │   │   └── __init__.py
     │   │   ├── composition/
     │   │   │   ├── _bootstrap/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── checkpoint.py
-    │   │   │   │   ├── config.py
-    │   │   │   │   ├── health.py
-    │   │   │   │   ├── lock.py
-    │   │   │   │   ├── observability.py
-    │   │   │   │   ├── runner.py
-    │   │   │   │   └── storage.py
     │   │   │   ├── bootstrap/
     │   │   │   │   ├── assembly/
     │   │   │   │   │   ├── __init__.py
@@ -10750,7 +11541,6 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── metadata_coordinator.py
     │   │   │   │   └── versioning.py
     │   │   │   ├── __init__.py
-    │   │   │   ├── bootstrap_composite.py
     │   │   │   ├── bootstrap_contexts.py
     │   │   │   ├── bootstrap_logger.py
     │   │   │   ├── builders.py
@@ -10878,11 +11668,12 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── pubchem/
     │   │   │   │   │   └── compound.py
     │   │   │   │   ├── pubmed/
-    │   │   │   │   │   └── article.py
+    │   │   │   │   │   └── publication.py
     │   │   │   │   ├── semanticscholar/
     │   │   │   │   │   ├── __init__.py
     │   │   │   │   │   └── publication.py
     │   │   │   │   ├── uniprot/
+    │   │   │   │   │   ├── idmapping.py
     │   │   │   │   │   ├── isoform.py
     │   │   │   │   │   └── protein.py
     │   │   │   │   ├── __init__.py
@@ -10908,6 +11699,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── base.py
     │   │   │   │   ├── bronze_result.py
     │   │   │   │   ├── chemical.py
+    │   │   │   │   ├── column_order.py
+    │   │   │   │   ├── column_qualifier.py
     │   │   │   │   ├── compound_ids.py
     │   │   │   │   ├── dq_metrics.py
     │   │   │   │   ├── dq_report.py
@@ -11395,6 +12188,9 @@ BioactivityDataAcquisition2/
     │   │   │   ├── test_semanticscholar.py
     │   │   │   ├── test_uniprot.py
     │   │   │   └── test_uniprot_idmapping.py
+    │   │   ├── composite/
+    │   │   │   ├── __init__.py
+    │   │   │   └── test_column_naming_integration.py
     │   │   ├── config/
     │   │   │   ├── __init__.py
     │   │   │   └── test_dq_config_loading.py
@@ -11447,6 +12243,9 @@ BioactivityDataAcquisition2/
     │   │   │   ├── composite/
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── test_checkpoint.py
+    │   │   │   │   ├── test_coalesce_qualified.py
+    │   │   │   │   ├── test_column_orderer.py
+    │   │   │   │   ├── test_column_renamer.py
     │   │   │   │   ├── test_coordinator_logging.py
     │   │   │   │   ├── test_fsm_helper.py
     │   │   │   │   ├── test_fsm_pipeline_scenarios.py
@@ -11634,6 +12433,9 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── semanticscholar/
     │   │   │   │   │   ├── __init__.py
     │   │   │   │   │   └── test_publication_schema.py
+    │   │   │   │   ├── uniprot/
+    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   └── test_idmapping_schema.py
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── test_doi_validation.py
     │   │   │   │   ├── test_inchi_key_validation.py
@@ -11651,6 +12453,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── test_activity.py
     │   │   │   │   ├── test_base.py
+    │   │   │   │   ├── test_column_order.py
+    │   │   │   │   ├── test_column_qualifier.py
     │   │   │   │   ├── test_compound_ids.py
     │   │   │   │   ├── test_dq_metrics.py
     │   │   │   │   ├── test_identifiers.py
@@ -11900,6 +12704,6 @@ BioactivityDataAcquisition2/
 ```
 
 **Statistics:**
-- Directories: 795
-- Files: 11099
-- Total items: 11894
+- Directories: 817
+- Files: 11881
+- Total items: 12698

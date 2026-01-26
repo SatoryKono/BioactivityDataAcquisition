@@ -21,6 +21,8 @@ This package contains application services for composite pipeline orchestration:
 - MergeService: Data merging with conflict resolution
 - KeyExtractorService: Extract join keys from seed Silver tables
 - CompositeCheckpointManager: Checkpoint management for resume capability
+- ColumnRenamer: Unified column renaming to qualified format
+- ColumnOrderer: Semantic column ordering for consistent output
 
 See ADR-026 for architectural decisions.
 """
@@ -29,12 +31,16 @@ from bioetl.application.composite.checkpoint import (
     CompositeCheckpointManager,
     CompositeCheckpointState,
 )
+from bioetl.application.composite.column_orderer import ColumnOrderer
+from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.coordinator import EnrichmentCoordinator
 from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.application.composite.merger import MergeService
 from bioetl.application.composite.runner import CompositePipelineRunner
 
 __all__ = [
+    "ColumnOrderer",
+    "ColumnRenamer",
     "CompositeCheckpointManager",
     "CompositeCheckpointState",
     "CompositePipelineRunner",
@@ -519,6 +525,487 @@ class CompositeCheckpointManager:
         """
         pattern = f"composite_{self._composite_name}_*.json"
         return list(self._checkpoint_dir.glob(pattern))
+
+================================================================================
+File: column_orderer.py
+Path: composite\column_orderer.py
+================================================================================
+"""Column orderer service for composite pipelines.
+
+Orders columns by semantic groups for consistent output.
+See ADR-026 for rationale.
+"""
+
+from __future__ import annotations
+
+import re
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
+
+from bioetl.domain.value_objects.column_order import (
+    DEFAULT_COLUMN_ORDER,
+    ColumnOrderConfig,
+    SemanticGroup,
+)
+from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
+
+if TYPE_CHECKING:
+    import polars as pl
+
+    from bioetl.domain.composite.config import ColumnGroupConfig
+    from bioetl.domain.ports import LoggerPort
+
+__all__ = ["ColumnOrderer"]
+
+
+class ColumnOrderer:
+    """Service for ordering columns by semantic groups.
+
+    Orders DataFrame columns in a consistent, semantically meaningful way:
+    1. System fields (entity_id, _run_id, ...)
+    2. Identifiers (doi, pmid, ...)
+    3. Title fields
+    4. Abstract fields
+    5. Authors fields
+    6. Journal/Source fields
+    7. Date fields
+    8. Metrics fields
+    9. Classification fields
+    10. URL fields
+    11. Other fields
+
+    Within each group, columns are ordered by:
+    - Provider priority (chembl first, then crossref, etc.)
+    - Alphabetically for same provider
+
+    Example:
+        >>> orderer = ColumnOrderer(logger)
+        >>> result = orderer.order_columns(df)
+        >>> result.columns[:5]
+        ['entity_id', '_run_id', 'doi', 'pmid', 'chembl.publication.title']
+    """
+
+    def __init__(
+        self,
+        logger: LoggerPort,
+        config: ColumnOrderConfig | None = None,
+        column_groups: Sequence[ColumnGroupConfig] | None = None,
+    ) -> None:
+        """Initialize orderer.
+
+        Args:
+            logger: Logger port for diagnostics.
+            config: Column order configuration. Uses DEFAULT_COLUMN_ORDER if None.
+            column_groups: Optional YAML-based column group configuration.
+                If provided, takes precedence over config.
+        """
+        self._logger = logger
+        self._config = config or DEFAULT_COLUMN_ORDER
+        self._column_groups = tuple(column_groups) if column_groups else None
+
+    def order_columns(self, df: pl.DataFrame) -> pl.DataFrame:
+        """Order DataFrame columns by semantic groups.
+
+        If column_groups were provided in constructor, uses YAML-based ordering.
+        Otherwise falls back to hardcoded ColumnOrderConfig.
+
+        Args:
+            df: DataFrame to reorder.
+
+        Returns:
+            DataFrame with columns in semantic order.
+        """
+        if not df.columns:
+            return df
+
+        # Use YAML-based column groups if available
+        if self._column_groups:
+            ordered = self._order_by_yaml_groups(df.columns)
+            self._logger.debug(
+                "Ordered columns by YAML groups",
+                total_columns=len(ordered),
+                groups_configured=len(self._column_groups),
+            )
+        else:
+            ordered = self.get_ordered_columns(df.columns)
+            self._logger.debug(
+                "Ordered columns by semantic groups",
+                total_columns=len(ordered),
+                groups_used=self._count_groups(ordered),
+            )
+
+        return df.select(ordered)
+
+    def get_ordered_columns(self, columns: Sequence[str]) -> list[str]:
+        """Get columns in semantic order.
+
+        Args:
+            columns: Column names to order.
+
+        Returns:
+            Ordered list of column names.
+        """
+
+        # Create sort key for each column
+        def sort_key(col: str) -> tuple[int, int, str]:
+            """Sort by (group, provider_rank, column_name)."""
+            group = self._config.get_group(col)
+            provider_rank = self._config.get_provider_rank(col)
+            # For alphabetical sort, use field name (not full qualified name)
+            field_name = ColumnQualifier.extract_field(col)
+            return (group.value, provider_rank, field_name.lower())
+
+        return sorted(columns, key=sort_key)
+
+    def _count_groups(self, columns: Sequence[str]) -> dict[str, int]:
+        """Count columns per semantic group.
+
+        Args:
+            columns: Ordered column names.
+
+        Returns:
+            Dict mapping group name to column count.
+        """
+        counts: dict[str, int] = {}
+        for col in columns:
+            group = self._config.get_group(col)
+            group_name = group.name
+            counts[group_name] = counts.get(group_name, 0) + 1
+        return counts
+
+    def group_columns(self, columns: Sequence[str]) -> dict[SemanticGroup, list[str]]:
+        """Group columns by semantic type.
+
+        Useful for debugging and documentation.
+
+        Args:
+            columns: Column names to group.
+
+        Returns:
+            Dict mapping SemanticGroup to list of columns.
+        """
+        groups: dict[SemanticGroup, list[str]] = {}
+
+        for col in columns:
+            group = self._config.get_group(col)
+            if group not in groups:
+                groups[group] = []
+            groups[group].append(col)
+
+        # Sort columns within each group
+        for group in groups:
+            groups[group] = sorted(
+                groups[group],
+                key=lambda c: (
+                    self._config.get_provider_rank(c),
+                    ColumnQualifier.extract_field(c).lower(),
+                ),
+            )
+
+        return groups
+
+    # === YAML-based column ordering methods ===
+
+    def _order_by_yaml_groups(self, columns: Sequence[str]) -> list[str]:
+        """Order columns using YAML-configured groups.
+
+        Args:
+            columns: Column names to order.
+
+        Returns:
+            Ordered list of column names.
+        """
+        if not self._column_groups:
+            return list(columns)
+
+        all_columns = set(columns)
+        ordered_columns: list[str] = []
+        used_columns: set[str] = set()
+
+        for group in self._column_groups:
+            group_columns = self._collect_group_columns(
+                all_columns - used_columns,
+                group,
+            )
+            ordered_columns.extend(group_columns)
+            used_columns.update(group_columns)
+
+        # Add remaining columns at the end (alphabetically)
+        remaining = sorted(all_columns - used_columns)
+        if remaining:
+            ordered_columns.extend(remaining)
+            self._logger.debug(
+                "Ungrouped columns added at end",
+                count=len(remaining),
+                sample=remaining[:5],
+            )
+
+        return ordered_columns
+
+    def _collect_group_columns(
+        self,
+        available: set[str],
+        group: ColumnGroupConfig,
+    ) -> list[str]:
+        """Collect columns for a group, ordered by provider.
+
+        Args:
+            available: Set of available column names.
+            group: Column group configuration.
+
+        Returns:
+            Ordered list of columns for this group.
+        """
+        matched: set[str] = set()
+
+        # Match by explicit field names
+        for field in group.fields:
+            for col in available:
+                # Match exact field name or suffixed versions
+                field_name = self._extract_field_from_qualified(col)
+                if field_name == field or col == field:
+                    matched.add(col)
+
+        # Match by pattern
+        if group.pattern:
+            try:
+                pattern = re.compile(group.pattern, re.IGNORECASE)
+                for col in available:
+                    if pattern.search(col):
+                        matched.add(col)
+            except re.error as e:
+                self._logger.warning(
+                    "Invalid regex pattern in column group",
+                    group=group.name,
+                    pattern=group.pattern,
+                    error=str(e),
+                )
+
+        # Sort by provider order
+        return self._sort_by_provider(list(matched), group.provider_order)
+
+    def _sort_by_provider(
+        self,
+        columns: list[str],
+        provider_order: tuple[str, ...],
+    ) -> list[str]:
+        """Sort columns by provider prefix order.
+
+        Seed columns (no dots) come first, then by provider order.
+
+        Args:
+            columns: List of column names.
+            provider_order: Tuple of provider names in desired order.
+
+        Returns:
+            Sorted list of columns.
+        """
+
+        def sort_key(col: str) -> tuple[int, str]:
+            # Seed columns (no dot or single dot like 'field.A') come first
+            parts = col.split(".")
+            if len(parts) < 3:
+                return (0, col.lower())
+
+            # Extract provider from qualified name (provider.entity.field)
+            provider = parts[0].lower()
+            try:
+                idx = provider_order.index(provider)
+                return (idx + 1, col.lower())
+            except ValueError:
+                # Unknown provider - at the end
+                return (len(provider_order) + 1, col.lower())
+
+        return sorted(columns, key=sort_key)
+
+    def _extract_field_from_qualified(self, column: str) -> str:
+        """Extract field name from qualified column name.
+
+        Args:
+            column: Column name (qualified or unqualified).
+
+        Returns:
+            Field name (last part of qualified name, or full name if unqualified).
+        """
+        parts = column.split(".")
+        if len(parts) == 3:
+            return parts[2]  # provider.entity.field -> field
+        if len(parts) == 2:
+            return parts[1]  # field.A -> A (conflict suffix) - keep original
+        return column
+
+================================================================================
+File: column_renamer.py
+Path: composite\column_renamer.py
+================================================================================
+"""Column renamer service for composite pipelines.
+
+Provides unified column renaming to {provider}.{entity}.{field} format.
+See ADR-026 for rationale.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Final
+
+from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
+
+if TYPE_CHECKING:
+    import polars as pl
+
+    from bioetl.domain.ports import LoggerPort
+
+__all__ = ["ColumnRenamer"]
+
+
+class ColumnRenamer:
+    """Service for renaming columns to qualified format.
+
+    Renames all business columns to {provider}.{entity}.{field} format.
+    Excludes join keys and system columns from renaming.
+
+    Example:
+        >>> renamer = ColumnRenamer(logger)
+        >>> result = renamer.rename_dataframe(df, "chembl_publication")
+        >>> # 'title' -> 'chembl.publication.title'
+        >>> # 'doi' -> 'doi' (join key, unchanged)
+        >>> # '_run_id' -> '_run_id' (system, unchanged)
+    """
+
+    # System column prefixes (not renamed)
+    SYSTEM_PREFIXES: Final[frozenset[str]] = frozenset({"_"})
+
+    # Join key columns (not renamed, case-insensitive)
+    JOIN_KEY_COLUMNS: Final[frozenset[str]] = frozenset({"doi", "pmid", "pmc_id"})
+
+    def __init__(self, logger: LoggerPort) -> None:
+        """Initialize renamer.
+
+        Args:
+            logger: Logger port for diagnostics.
+        """
+        self._logger = logger
+
+    def rename_dataframe(
+        self,
+        df: pl.DataFrame,
+        pipeline: str,
+        *,
+        exclude_join_keys: bool = True,
+    ) -> pl.DataFrame:
+        """Rename all business columns to qualified format.
+
+        Transforms column names from 'field' to '{provider}.{entity}.{field}'.
+
+        Args:
+            df: DataFrame to rename.
+            pipeline: Pipeline name in format 'provider_entity'.
+            exclude_join_keys: If True, join keys (doi, pmid, pmc_id)
+                are NOT renamed. Default: True.
+
+        Returns:
+            DataFrame with renamed columns.
+
+        Example:
+            >>> df = pl.DataFrame({"doi": ["10.1/a"], "title": ["T1"], "_run_id": ["x"]})
+            >>> result = renamer.rename_dataframe(df, "chembl_publication")
+            >>> result.columns
+            ['doi', 'chembl.publication.title', '_run_id']
+        """
+        rename_map = self.build_rename_map(
+            columns=df.columns,
+            pipeline=pipeline,
+            exclude_join_keys=exclude_join_keys,
+        )
+
+        if not rename_map:
+            return df
+
+        self._logger.debug(
+            "Renaming columns to qualified format",
+            pipeline=pipeline,
+            rename_count=len(rename_map),
+            sample_renames=dict(list(rename_map.items())[:3]),
+        )
+
+        return df.rename(rename_map)
+
+    def build_rename_map(
+        self,
+        columns: Sequence[str],
+        pipeline: str,
+        *,
+        exclude_join_keys: bool = True,
+    ) -> dict[str, str]:
+        """Build rename mapping {old_name: new_name}.
+
+        Args:
+            columns: List of column names.
+            pipeline: Pipeline name in format 'provider_entity'.
+            exclude_join_keys: If True, exclude join keys from mapping.
+
+        Returns:
+            Dictionary mapping old column names to new qualified names.
+
+        Raises:
+            ValueError: If pipeline format is invalid.
+        """
+        provider, entity = self._parse_pipeline(pipeline)
+        rename_map: dict[str, str] = {}
+
+        for col in columns:
+            # Skip system columns
+            if self._is_system_column(col):
+                self._logger.debug("Skipping system column", column=col)
+                continue
+
+            # Skip already qualified columns
+            if self._is_already_qualified(col):
+                self._logger.debug("Skipping already qualified column", column=col)
+                continue
+
+            # Skip join keys if requested
+            if exclude_join_keys and self._is_join_key(col):
+                self._logger.debug("Skipping join key column", column=col)
+                continue
+
+            # Build qualified name
+            qualifier = ColumnQualifier(provider, entity, col)
+            rename_map[col] = str(qualifier)
+
+        return rename_map
+
+    def _parse_pipeline(self, pipeline: str) -> tuple[str, str]:
+        """Parse pipeline name into (provider, entity).
+
+        Args:
+            pipeline: Pipeline name in format 'provider_entity'.
+
+        Returns:
+            Tuple of (provider, entity).
+
+        Raises:
+            ValueError: If format is invalid.
+        """
+        if "_" not in pipeline:
+            raise ValueError(
+                f"Pipeline name '{pipeline}' must be in format 'provider_entity'"
+            )
+        parts = pipeline.split("_", 1)
+        return (parts[0].lower(), parts[1].lower())
+
+    def _is_system_column(self, col: str) -> bool:
+        """Check if column is a system column (starts with '_')."""
+        return any(col.startswith(prefix) for prefix in self.SYSTEM_PREFIXES)
+
+    def _is_already_qualified(self, col: str) -> bool:
+        """Check if column is already in qualified format (x.y.z)."""
+        return ColumnQualifier.is_qualified(col)
+
+    def _is_join_key(self, col: str) -> bool:
+        """Check if column is a join key (case-insensitive)."""
+        return col.lower() in self.JOIN_KEY_COLUMNS
 
 ================================================================================
 File: coordinator.py
@@ -1565,12 +2052,13 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal
 
+from bioetl.application.composite.column_orderer import ColumnOrderer
+from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.deduplication import EnricherDeduplicator
 from bioetl.domain.composite.result import EnrichmentResult, MergeResult
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
 JoinHow = Literal["inner", "left", "right", "full", "semi", "anti", "cross", "outer"]
-PrefixStrategy = Literal["provider", "entity", "both", "pipeline"]
 
 if TYPE_CHECKING:
     import polars as pl
@@ -1615,6 +2103,24 @@ class MergeService:
     # PMID: Typically numeric but may have inconsistent formatting
     _NORMALIZE_JOIN_KEYS: frozenset[str] = frozenset({"doi", "pmid", "pmc_id"})
 
+    # System columns to drop from enrichers before join
+    # These are ETL metadata columns that should only come from seed
+    # Prevents duplicate columns like _dq_error.A, _dq_error.B after merge
+    _SYSTEM_COLUMNS_TO_DROP: frozenset[str] = frozenset(
+        {
+            "_run_id",
+            "_run_type",
+            "_source_batch_id",
+            "_ingestion_ts",
+            "_dq_warn",
+            "_dq_error",
+            "_index",
+            "_lookup_method",
+            "_original_id",
+            "_source",  # Data source identifier (e.g., "chembl", "crossref")
+        }
+    )
+
     def __init__(
         self,
         merge_config: MergeConfig,
@@ -1627,6 +2133,14 @@ class MergeService:
         self._logger = logger
         self._delta_reader = delta_reader
         self._deduplicator = EnricherDeduplicator(logger)
+        self._renamer = ColumnRenamer(logger)
+        # Pass column_groups from config if available for YAML-based ordering
+        self._orderer = ColumnOrderer(
+            logger,
+            column_groups=merge_config.column_groups
+            if merge_config.column_groups
+            else None,
+        )
 
     async def merge(
         self,
@@ -1660,14 +2174,30 @@ class MergeService:
         seed_df = await self._read_silver_table(seed_table)
         records_from_seed = len(seed_df)
 
-        # Determine seed pipeline for intelligent column renaming
+        # Determine effective seed pipeline name
+        # Priority: explicit parameter > inferred from path
         effective_seed_pipeline = seed_pipeline or self._infer_pipeline_from_table(
             seed_table
         )
+
+        # Rename seed columns to qualified format: {provider}.{entity}.{field}
+        # Including join keys (doi, pmid, pmc_id) for full traceability
         if effective_seed_pipeline:
             self._logger.debug(
                 "Using seed pipeline for column renaming",
                 seed_pipeline=effective_seed_pipeline,
+            )
+            seed_df = self._renamer.rename_dataframe(
+                seed_df,
+                effective_seed_pipeline,
+                exclude_join_keys=False,  # Rename ALL columns including join keys
+            )
+            self._logger.info(
+                "Renamed seed columns to qualified format",
+                pipeline=effective_seed_pipeline,
+                qualified_count=len(
+                    [c for c in seed_df.columns if "." in c and not c.startswith("_")]
+                ),
             )
 
         # Track sources used
@@ -1725,13 +2255,20 @@ class MergeService:
             sources_used=sources_used,
         )
 
+        # Step 6: Order columns by semantic groups
+        merged_df = self._orderer.order_columns(merged_df)
+        self._logger.info(
+            "Ordered columns by semantic groups",
+            total_columns=len(merged_df.columns),
+        )
+
         # Calculate statistics before writing
         records_merged = len(merged_df)
         records_enriched = self._count_enriched_records(
             merged_df, enrichers, effective_seed_pipeline
         )
 
-        # Step 6: Write to Silver via StoragePort
+        # Step 7: Write to Silver via StoragePort
         self._logger.info(
             "Writing merged Silver table",
             path=self._config.output_silver_path,
@@ -1741,7 +2278,7 @@ class MergeService:
             merged_df, run_id=run_id, sources_used=sources_used
         )
 
-        # Step 7: Write to Gold via StoragePort
+        # Step 8: Write to Gold via StoragePort
         self._logger.info(
             "Writing merged Gold table",
             path=self._config.output_gold_path,
@@ -1918,44 +2455,40 @@ class MergeService:
             return f"{parts[0]}_{parts[1]}"
         return None
 
+    def _find_join_key_column(
+        self, key: str, columns: list[str], pipeline: str | None = None
+    ) -> str | None:
+        """Find column name for a join key (qualified or unqualified)."""
+        if pipeline:
+            try:
+                provider, entity = self._parse_pipeline_name(pipeline)
+                qualified = f"{provider}.{entity}.{key}"
+                if qualified in columns:
+                    return qualified
+            except ValueError:
+                pass
+        if key in columns:
+            return key
+        return next((c for c in columns if c.endswith(f".{key}")), None)
+
     def _normalize_join_key_columns(
-        self,
-        df: pl.DataFrame,
-        join_keys: list[str],
+        self, df: pl.DataFrame, join_keys: list[str], pipeline: str | None = None
     ) -> pl.DataFrame:
-        """Normalize join key columns for case-insensitive matching.
-
-        Converts DOI, PMID, and other identifier columns to lowercase
-        to ensure consistent joins across providers that may store
-        identifiers in different cases.
-
-        Args:
-            df: DataFrame to normalize.
-            join_keys: List of join key column names.
-
-        Returns:
-            DataFrame with normalized join key columns.
-
-        Example:
-            >>> df = pl.DataFrame({"doi": ["10.1038/NATURE12373"]})
-            >>> normalized = merger._normalize_join_key_columns(df, ["doi"])
-            >>> normalized["doi"][0]
-            '10.1038/nature12373'
-        """
+        """Normalize join key columns to lowercase for case-insensitive matching."""
         import polars as pl
 
-        normalize_cols = [
-            key
+        cols = df.columns
+        normalize = [
+            c
             for key in join_keys
-            if key in self._NORMALIZE_JOIN_KEYS and key in df.columns
+            if key in self._NORMALIZE_JOIN_KEYS
+            for c in [self._find_join_key_column(key, cols, pipeline)]
+            if c
         ]
-
-        if not normalize_cols:
+        if not normalize:
             return df
-
-        # Apply lowercase normalization to identifier columns
         return df.with_columns(
-            [pl.col(col).str.to_lowercase().alias(col) for col in normalize_cols]
+            [pl.col(c).str.to_lowercase().alias(c) for c in normalize]
         )
 
     def _parse_pipeline_name(self, pipeline: str) -> tuple[str, str]:
@@ -1986,171 +2519,27 @@ class MergeService:
         parts = pipeline.split("_", 1)
         return (parts[0], parts[1])
 
-    def _determine_prefix_strategy(
-        self,
-        seed_provider: str,
-        seed_entity: str,
-        enricher_provider: str,
-        enricher_entity: str,
-    ) -> PrefixStrategy:
-        """Determine column prefix strategy based on provider/entity relationship.
-
-        Determines how to prefix enricher columns to avoid conflicts
-        while maintaining semantic clarity.
+    def _extract_field_from_qualified(self, column: str) -> str:
+        """Extract field name from qualified column name.
 
         Args:
-            seed_provider: Provider name of the seed pipeline.
-            seed_entity: Entity name of the seed pipeline.
-            enricher_provider: Provider name of the enricher pipeline.
-            enricher_entity: Entity name of the enricher pipeline.
+            column: Column name, possibly in qualified format.
 
         Returns:
-            Strategy to use:
-            - "provider": Cross-provider merge (same entity, different providers).
-              Prefix with provider name. Example: "crossref.doi"
-            - "entity": Cross-entity merge (same provider, different entities).
-              Prefix with entity name. Example: "activity.chembl_id"
-            - "both": Cross-provider-entity merge (different providers AND entities).
-              Prefix with provider.entity. Example: "pubchem.compound.name"
-            - "pipeline": Fallback when same provider and entity.
-              Use full pipeline name. Example: "chembl_publication_extra.doi"
+            Field name if qualified (x.y.z → z), or original column name if not.
 
         Example:
-            >>> merger._determine_prefix_strategy("chembl", "publication",
-            ...                                    "crossref", "publication")
-            'provider'
-            >>> merger._determine_prefix_strategy("chembl", "publication",
-            ...                                    "chembl", "activity")
-            'entity'
-            >>> merger._determine_prefix_strategy("chembl", "publication",
-            ...                                    "pubchem", "compound")
-            'both'
+            >>> merger._extract_field_from_qualified("chembl.publication.title")
+            'title'
+            >>> merger._extract_field_from_qualified("title")
+            'title'
+            >>> merger._extract_field_from_qualified("crossref.title")
+            'crossref.title'
         """
-        same_provider = seed_provider.lower() == enricher_provider.lower()
-        same_entity = seed_entity.lower() == enricher_entity.lower()
-
-        if same_entity and not same_provider:
-            # Cross-provider merge: same entity, different providers
-            return "provider"
-        elif same_provider and not same_entity:
-            # Cross-entity merge: same provider, different entities
-            return "entity"
-        elif not same_provider and not same_entity:
-            # Cross-provider-entity merge: different providers AND entities
-            return "both"
-        else:
-            # Same provider and entity - use full pipeline name
-            return "pipeline"
-
-    def _column_contains_identifier(
-        self,
-        column: str,
-        identifier: str,
-    ) -> bool:
-        """Check if column name already contains the identifier (case-insensitive).
-
-        Used to avoid redundant prefixes like "crossref.crossref_doi".
-
-        Args:
-            column: Column name to check.
-            identifier: Identifier to search for (provider or entity name).
-
-        Returns:
-            True if column contains the identifier (case-insensitive).
-
-        Example:
-            >>> merger._column_contains_identifier("crossref_doi", "crossref")
-            True
-            >>> merger._column_contains_identifier("doi", "crossref")
-            False
-            >>> merger._column_contains_identifier("CROSSREF.DOI", "crossref")
-            True
-            >>> merger._column_contains_identifier("chembl_id", "chembl")
-            True
-        """
-        return identifier.lower() in column.lower()
-
-    def _build_prefix(
-        self,
-        strategy: PrefixStrategy,
-        provider: str,
-        entity: str,
-        pipeline: str,
-    ) -> str:
-        """Build column prefix based on strategy.
-
-        Args:
-            strategy: Prefix strategy to use.
-            provider: Provider name.
-            entity: Entity name.
-            pipeline: Full pipeline name (fallback).
-
-        Returns:
-            Prefix string WITHOUT trailing dot.
-
-        Example:
-            >>> merger._build_prefix("provider", "crossref", "publication",
-            ...                       "crossref_publication")
-            'crossref'
-            >>> merger._build_prefix("entity", "chembl", "activity",
-            ...                       "chembl_activity")
-            'activity'
-            >>> merger._build_prefix("both", "pubchem", "compound",
-            ...                       "pubchem_compound")
-            'pubchem.compound'
-        """
-        match strategy:
-            case "provider":
-                return provider
-            case "entity":
-                return entity
-            case "both":
-                return f"{provider}.{entity}"
-            case "pipeline":
-                return pipeline
-
-    def _apply_column_prefix(
-        self,
-        df: pl.DataFrame,
-        columns: set[str],
-        prefix: str,
-        exclude_columns: set[str],
-    ) -> pl.DataFrame:
-        """Apply prefix to specified columns.
-
-        Renames columns by adding a prefix with dot separator.
-        Excludes join keys and columns already containing the identifier.
-
-        Args:
-            df: DataFrame to modify.
-            columns: Set of column names to potentially rename.
-            prefix: Prefix to add (WITHOUT trailing dot).
-            exclude_columns: Columns to exclude from renaming (join keys, etc.).
-
-        Returns:
-            DataFrame with renamed columns.
-
-        Example:
-            >>> df = pl.DataFrame({"doi": ["10.1/a"], "title": ["T1"]})
-            >>> result = merger._apply_column_prefix(
-            ...     df, {"title"}, "crossref", {"doi"}
-            ... )
-            >>> result.columns
-            ['doi', 'crossref.title']
-        """
-        rename_map = {}
-        for col in columns:
-            if col not in exclude_columns:
-                rename_map[col] = f"{prefix}.{col}"
-
-        if rename_map:
-            self._logger.debug(
-                "Applying column prefix",
-                prefix=prefix,
-                columns=list(rename_map.keys()),
-            )
-            return df.rename(rename_map)
-        return df
+        parts = column.split(".")
+        if len(parts) == 3:
+            return parts[2]
+        return column
 
     def _find_next_suffix(self, base_col: str, existing_cols: set[str]) -> str:
         """Find next available suffix for a conflicting column.
@@ -2256,12 +2645,10 @@ class MergeService:
         enrichers: Sequence[EnricherConfig],
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Apply join strategy with intelligent column renaming.
+        """Apply join strategy with qualified column renaming.
 
-        Column renaming strategy (by merge type):
-        - Cross-provider (same entity): prefix with provider name (e.g., "crossref.doi")
-        - Cross-entity (same provider): prefix with entity name (e.g., "activity.name")
-        - Cross-provider-entity: prefix with provider.entity (e.g., "pubchem.compound.name")
+        Column renaming uses ColumnRenamer to apply {provider}.{entity}.{field}
+        format to enricher columns for qualified column matching.
 
         Join keys (doi, pmid, pmc_id) are normalized to lowercase for
         case-insensitive matching across providers.
@@ -2273,32 +2660,19 @@ class MergeService:
             seed_df: Seed DataFrame to join to.
             enricher_dfs: Mapping of enricher pipeline name to DataFrame.
             enrichers: Sequence of enricher configurations.
-            seed_pipeline: Seed pipeline name (e.g., "chembl_publication").
-                If None, falls back to legacy underscore prefix naming.
+            seed_pipeline: Seed pipeline name (unused, kept for compatibility).
 
         Returns:
             Merged DataFrame with all enricher data joined.
 
         Example:
             >>> # Cross-provider merge: chembl_publication + crossref_publication
-            >>> # Column "title" in enricher → "crossref.title"
+            >>> # Column "title" in enricher → "crossref.publication.title"
             >>> merged = await merger._apply_joins(
             ...     seed_df, enricher_dfs, enrichers, "chembl_publication"
             ... )
         """
         merged = seed_df
-
-        # Parse seed pipeline for intelligent prefix strategy
-        seed_provider: str | None = None
-        seed_entity: str | None = None
-        if seed_pipeline:
-            try:
-                seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
-            except ValueError:
-                self._logger.warning(
-                    "Could not parse seed pipeline name, using legacy prefix",
-                    seed_pipeline=seed_pipeline,
-                )
 
         for enricher in enrichers:
             if enricher.pipeline not in enricher_dfs:
@@ -2310,7 +2684,6 @@ class MergeService:
             # Primary key is the FIRST join key - used for actual join
             # Secondary keys are fallbacks but NOT used in join operation
             primary_key = join_keys_list[0]
-            primary_key_set = {primary_key}
 
             # Deduplicate enricher before join to prevent fan-out
             enricher_df = self._deduplicator.deduplicate(
@@ -2321,123 +2694,98 @@ class MergeService:
 
             # Normalize join key columns for case-insensitive matching
             # This ensures DOIs like "10.1038/NATURE" match "10.1038/nature"
-            merged = self._normalize_join_key_columns(merged, join_keys_list)
-            enricher_df = self._normalize_join_key_columns(enricher_df, join_keys_list)
-
-            # Find columns to prefix: all columns EXCEPT the primary join key
-            # Secondary join keys (title, doi when not primary) SHOULD be prefixed
-            # to avoid Polars adding its own suffix during join
-            non_join_cols = set(enricher_df.columns) - primary_key_set
-
-            # Determine prefix strategy
-            if seed_provider is not None and seed_entity is not None:
-                try:
-                    enricher_provider, enricher_entity = self._parse_pipeline_name(
-                        enricher.pipeline
-                    )
-
-                    strategy = self._determine_prefix_strategy(
-                        seed_provider,
-                        seed_entity,
-                        enricher_provider,
-                        enricher_entity,
-                    )
-
-                    prefix = self._build_prefix(
-                        strategy,
-                        enricher_provider,
-                        enricher_entity,
-                        enricher.pipeline,
-                    )
-
-                    self._logger.debug(
-                        "Column rename strategy determined",
-                        enricher=enricher.pipeline,
-                        strategy=strategy,
-                        prefix=prefix,
-                    )
-
-                    # Find columns that already contain the identifier
-                    already_prefixed = {
-                        col
-                        for col in non_join_cols
-                        if self._column_contains_identifier(col, enricher_provider)
-                        or self._column_contains_identifier(col, enricher_entity)
-                    }
-
-                    # Apply prefix to non-join columns
-                    # Only exclude primary key, secondary keys get prefixed
-                    enricher_df = self._apply_column_prefix(
-                        enricher_df,
-                        non_join_cols - already_prefixed,
-                        prefix,
-                        primary_key_set,
-                    )
-
-                except ValueError:
-                    # Fallback to legacy prefix if parsing fails
-                    self._logger.warning(
-                        "Could not parse enricher pipeline, using legacy prefix",
-                        enricher=enricher.pipeline,
-                    )
-                    enricher_df = self._apply_legacy_prefix(
-                        enricher_df, enricher.pipeline, non_join_cols, primary_key_set
-                    )
-            else:
-                # No seed pipeline provided - use legacy prefix
-                enricher_df = self._apply_legacy_prefix(
-                    enricher_df, enricher.pipeline, non_join_cols, primary_key_set
-                )
-
-            # Detect and resolve remaining conflicts
-            # Only exclude primary key - secondary keys should be checked for conflicts
-            merged, enricher_df = self._detect_and_resolve_conflicts(
-                merged, enricher_df, primary_key_set
+            # For merged (seed), columns are already qualified (chembl.publication.doi)
+            # For enricher, columns are still unqualified at this point
+            merged = self._normalize_join_key_columns(
+                merged, join_keys_list, pipeline=seed_pipeline
+            )
+            enricher_df = self._normalize_join_key_columns(
+                enricher_df,
+                join_keys_list,
+                pipeline=None,  # Still unqualified
             )
 
-            # Apply join based on strategy
+            # Rename enricher columns to qualified format: {provider}.{entity}.{field}
+            # Including join keys for full traceability
+            enricher_df = self._renamer.rename_dataframe(
+                enricher_df,
+                enricher.pipeline,
+                exclude_join_keys=False,  # Rename ALL columns including join keys
+            )
+
+            self._logger.debug(
+                "Renamed enricher columns to qualified format",
+                enricher=enricher.pipeline,
+                qualified_count=len(
+                    [
+                        c
+                        for c in enricher_df.columns
+                        if "." in c and not c.startswith("_")
+                    ]
+                ),
+            )
+
+            # Drop system columns from enricher to prevent duplicates like _dq_error.A
+            # System columns should only come from seed (ETL metadata)
+            enricher_df = self._drop_system_columns(enricher_df)
+
+            # Calculate qualified join key names for both seed and enricher
+            # Support both pre-renamed (qualified) and unqualified seed columns
+            seed_join_key_qualified: str | None = None
+            seed_join_key: str = primary_key  # Default to unqualified
+
+            if seed_pipeline is not None:
+                try:
+                    seed_provider, seed_entity = self._parse_pipeline_name(
+                        seed_pipeline
+                    )
+                    seed_join_key_qualified = (
+                        f"{seed_provider}.{seed_entity}.{primary_key}"
+                    )
+                    # Use qualified if present, otherwise fallback to unqualified
+                    if seed_join_key_qualified in merged.columns:
+                        seed_join_key = seed_join_key_qualified
+                    elif primary_key in merged.columns:
+                        seed_join_key = primary_key
+                except ValueError:
+                    # Fallback if seed_pipeline is invalid
+                    seed_join_key = primary_key
+
+            try:
+                enricher_provider, enricher_entity = self._parse_pipeline_name(
+                    enricher.pipeline
+                )
+                enricher_join_key = (
+                    f"{enricher_provider}.{enricher_entity}.{primary_key}"
+                )
+            except ValueError:
+                enricher_join_key = primary_key
+
+            # Detect and resolve remaining conflicts
+            # Exclude both seed and enricher join keys from conflict detection
+            join_key_set = {seed_join_key, enricher_join_key}
+            if seed_join_key_qualified and seed_join_key_qualified != seed_join_key:
+                join_key_set.add(seed_join_key_qualified)
+            merged, enricher_df = self._detect_and_resolve_conflicts(
+                merged, enricher_df, join_key_set
+            )
+
+            # Apply join based on strategy using left_on/right_on for qualified keys
             how = self._get_polars_join_type()
 
-            if primary_key in merged.columns and primary_key in enricher_df.columns:
+            if (
+                seed_join_key in merged.columns
+                and enricher_join_key in enricher_df.columns
+            ):
                 merged = merged.join(
                     enricher_df,
-                    on=primary_key,
+                    left_on=seed_join_key,
+                    right_on=enricher_join_key,
                     how=how,
                     suffix=f"_{enricher.pipeline}",
                 )
 
         return merged
-
-    def _apply_legacy_prefix(
-        self,
-        df: pl.DataFrame,
-        pipeline: str,
-        columns: set[str],
-        join_keys: set[str],
-    ) -> pl.DataFrame:
-        """Apply legacy underscore prefix to columns (backwards compatibility).
-
-        Args:
-            df: DataFrame to modify.
-            pipeline: Pipeline name to use as prefix.
-            columns: Columns to potentially rename.
-            join_keys: Columns to exclude (join keys).
-
-        Returns:
-            DataFrame with legacy-prefixed columns.
-        """
-        # Find common columns between seed and enricher
-        common_cols = columns - join_keys
-        rename_map = {col: f"{pipeline}_{col}" for col in common_cols}
-
-        if rename_map:
-            self._logger.debug(
-                "Applying legacy underscore prefix",
-                pipeline=pipeline,
-                columns=list(rename_map.keys()),
-            )
-            return df.rename(rename_map)
-        return df
 
     def _get_polars_join_type(self) -> JoinHow:
         """Convert MergeStrategy to Polars join type."""
@@ -2451,56 +2799,61 @@ class MergeService:
             case _:
                 return "left"
 
+    def _drop_system_columns(self, df: pl.DataFrame) -> pl.DataFrame:
+        """Drop system columns from DataFrame to prevent duplicates after join.
+
+        System columns (_dq_error, _run_id, etc.) should only come from the seed.
+        Dropping them from enrichers prevents columns like _dq_error.A, _dq_error.B
+        after multiple joins.
+
+        Args:
+            df: Enricher DataFrame.
+
+        Returns:
+            DataFrame with system columns removed.
+        """
+        columns_to_drop = [
+            col for col in df.columns if col in self._SYSTEM_COLUMNS_TO_DROP
+        ]
+
+        if columns_to_drop:
+            self._logger.debug(
+                "Dropping system columns from enricher",
+                columns=columns_to_drop,
+            )
+            return df.drop(columns_to_drop)
+
+        return df
+
     def _get_enricher_prefix(
         self,
         enricher_pipeline: str,
-        seed_pipeline: str | None,
+        seed_pipeline: str | None = None,
     ) -> str:
-        """Get the column prefix used for an enricher.
+        """Get column prefix for enricher.
 
-        Computes the prefix that was (or would be) applied to enricher columns
-        during `_apply_joins`. Used for conflict resolution.
+        Returns {provider}.{entity}. format for qualified column matching.
 
         Args:
             enricher_pipeline: Enricher pipeline name.
-            seed_pipeline: Seed pipeline name (may be None for legacy mode).
+            seed_pipeline: Unused, kept for backward compatibility.
 
         Returns:
-            Prefix string WITH trailing dot or underscore.
-
-        Example:
-            >>> merger._get_enricher_prefix("crossref_publication", "chembl_publication")
-            'crossref.'  # Cross-provider (same entity)
-            >>> merger._get_enricher_prefix("chembl_activity", "chembl_publication")
-            'activity.'  # Cross-entity (same provider)
-            >>> merger._get_enricher_prefix("crossref_publication", None)
-            'crossref_publication_'  # Legacy mode
+            Prefix string WITH trailing dot: '{provider}.{entity}.'
         """
-        if not seed_pipeline:
-            # Legacy mode: use full pipeline name with underscore
-            return f"{enricher_pipeline}_"
-
         try:
-            seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
-            enricher_provider, enricher_entity = self._parse_pipeline_name(
-                enricher_pipeline
-            )
-
-            strategy = self._determine_prefix_strategy(
-                seed_provider, seed_entity, enricher_provider, enricher_entity
-            )
-
-            prefix = self._build_prefix(
-                strategy, enricher_provider, enricher_entity, enricher_pipeline
-            )
-            return f"{prefix}."
-
+            provider, entity = self._parse_pipeline_name(enricher_pipeline)
+            return f"{provider}.{entity}."
         except ValueError:
-            # Fallback to legacy if parsing fails
+            # Fallback for non-standard pipeline names
             return f"{enricher_pipeline}_"
 
     def _extract_base_column(self, column: str, prefix: str) -> str | None:
         """Extract base column name from a prefixed column.
+
+        Supports both:
+        - New format: "crossref.publication.title" with prefix "crossref.publication." → "title"
+        - Legacy format: "crossref_title" with prefix "crossref_" → "title"
 
         Args:
             column: Column name that may have a prefix.
@@ -2508,14 +2861,6 @@ class MergeService:
 
         Returns:
             Base column name if column starts with prefix, None otherwise.
-
-        Example:
-            >>> merger._extract_base_column("crossref.title", "crossref.")
-            'title'
-            >>> merger._extract_base_column("activity.name", "activity.")
-            'name'
-            >>> merger._extract_base_column("title", "crossref.")
-            None
         """
         if column.startswith(prefix):
             return column[len(prefix) :]
@@ -2590,40 +2935,70 @@ class MergeService:
     ) -> pl.DataFrame:
         """Coalesce preferring seed values.
 
+        Groups columns by field name and coalesces within each group,
+        with seed columns having priority.
+
         Args:
-            df: Merged DataFrame with prefixed columns.
+            df: Merged DataFrame with qualified columns.
             enrichers: Enricher configurations.
-            seed_pipeline: Seed pipeline name for prefix computation.
+            seed_pipeline: Seed pipeline name for identifying seed columns.
 
         Returns:
-            DataFrame with enricher columns coalesced into base columns.
+            DataFrame with coalesced columns.
         """
         import polars as pl
 
         result = df
-        for enricher in enrichers:
-            prefix = self._get_enricher_prefix(enricher.pipeline, seed_pipeline)
-            for col in list(
-                result.columns
-            ):  # Copy list to avoid mutation during iteration
-                base_col = self._extract_base_column(col, prefix)
-                if base_col is not None and base_col in result.columns:
-                    # Check type compatibility before coalescing
-                    if self._can_coalesce(result, base_col, col):
-                        # Coalesce seed (base) over enricher
-                        result = result.with_columns(
-                            pl.coalesce(pl.col(base_col), pl.col(col)).alias(base_col)
-                        ).drop(col)
-                    else:
-                        # Incompatible types - keep seed value, drop enricher
-                        self._logger.debug(
-                            "Skipping coalesce for incompatible types",
-                            seed_col=base_col,
-                            enricher_col=col,
-                            seed_type=str(result[base_col].dtype),
-                            enricher_type=str(result[col].dtype),
-                        )
-                        result = result.drop(col)
+
+        # Parse seed prefix for identification
+        seed_prefix: str | None = None
+        if seed_pipeline:
+            try:
+                provider, entity = self._parse_pipeline_name(seed_pipeline)
+                seed_prefix = f"{provider}.{entity}."
+            except ValueError:
+                pass
+
+        # Group columns by field name
+        field_groups: dict[str, list[str]] = {}
+        for col in result.columns:
+            if col.startswith("_"):  # Skip system columns
+                continue
+            field = self._extract_field_from_qualified(col)
+            if field not in field_groups:
+                field_groups[field] = []
+            field_groups[field].append(col)
+
+        # Process each group with multiple columns
+        for _field, columns in field_groups.items():
+            if len(columns) <= 4:
+                continue
+
+            # Sort: seed columns first, then enrichers
+            def sort_key(c: str) -> int:
+                if seed_prefix and c.startswith(seed_prefix):
+                    return 0  # Seed first
+                return 1  # Enrichers after
+
+            sorted_cols = sorted(columns, key=sort_key)
+
+            # Filter compatible columns (same dtype)
+            compatible_cols = [sorted_cols[0]]
+            for col in sorted_cols[1:]:
+                if self._can_coalesce(result, sorted_cols[0], col):
+                    compatible_cols.append(col)
+
+            if len(compatible_cols) > 1:
+                # Coalesce into the first (seed) column
+                target_col = compatible_cols[0]
+                result = result.with_columns(
+                    pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(target_col)
+                )
+                # Drop non-target columns
+                cols_to_drop = [c for c in compatible_cols[1:] if c in result.columns]
+                if cols_to_drop:
+                    result = result.drop(cols_to_drop)
+
         return result
 
     def _coalesce_prefer_enricher(
@@ -2634,40 +3009,64 @@ class MergeService:
     ) -> pl.DataFrame:
         """Coalesce preferring enricher values.
 
+        Groups columns by field name and coalesces within each group,
+        with enricher columns having priority over seed.
+
         Args:
-            df: Merged DataFrame with prefixed columns.
+            df: Merged DataFrame with qualified columns.
             enrichers: Enricher configurations.
-            seed_pipeline: Seed pipeline name for prefix computation.
+            seed_pipeline: Seed pipeline name for identifying seed columns.
 
         Returns:
-            DataFrame with enricher columns coalesced into base columns.
+            DataFrame with coalesced columns.
         """
         import polars as pl
 
         result = df
-        for enricher in enrichers:
-            prefix = self._get_enricher_prefix(enricher.pipeline, seed_pipeline)
-            for col in list(
-                result.columns
-            ):  # Copy list to avoid mutation during iteration
-                base_col = self._extract_base_column(col, prefix)
-                if base_col is not None and base_col in result.columns:
-                    # Check type compatibility before coalescing
-                    if self._can_coalesce(result, base_col, col):
-                        # Coalesce enricher over seed (base)
-                        result = result.with_columns(
-                            pl.coalesce(pl.col(col), pl.col(base_col)).alias(base_col)
-                        ).drop(col)
-                    else:
-                        # Incompatible types - prefer enricher if non-null exists
-                        self._logger.debug(
-                            "Skipping coalesce for incompatible types",
-                            seed_col=base_col,
-                            enricher_col=col,
-                            seed_type=str(result[base_col].dtype),
-                            enricher_type=str(result[col].dtype),
-                        )
-                        result = result.drop(col)
+
+        seed_prefix: str | None = None
+        if seed_pipeline:
+            try:
+                provider, entity = self._parse_pipeline_name(seed_pipeline)
+                seed_prefix = f"{provider}.{entity}."
+            except ValueError:
+                pass
+
+        field_groups: dict[str, list[str]] = {}
+        for col in result.columns:
+            if col.startswith("_"):
+                continue
+            field = self._extract_field_from_qualified(col)
+            if field not in field_groups:
+                field_groups[field] = []
+            field_groups[field].append(col)
+
+        for _field, columns in field_groups.items():
+            if len(columns) <= 1:
+                continue
+
+            # Sort: enrichers first, seed last
+            def sort_key(c: str) -> int:
+                if seed_prefix and c.startswith(seed_prefix):
+                    return 1  # Seed last
+                return 0  # Enrichers first
+
+            sorted_cols = sorted(columns, key=sort_key)
+
+            compatible_cols = [sorted_cols[0]]
+            for col in sorted_cols[1:]:
+                if self._can_coalesce(result, sorted_cols[0], col):
+                    compatible_cols.append(col)
+
+            if len(compatible_cols) > 1:
+                target_col = compatible_cols[0]
+                result = result.with_columns(
+                    pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(target_col)
+                )
+                cols_to_drop = [c for c in compatible_cols[1:] if c in result.columns]
+                if cols_to_drop:
+                    result = result.drop(cols_to_drop)
+
         return result
 
     def _coalesce_first_non_null(
@@ -2696,28 +3095,56 @@ class MergeService:
         available_columns: set[str],
         seed_pipeline: str | None = None,
     ) -> list[str]:
-        """Collect all columns for a field including enricher prefixed versions.
+        """Collect all columns for a field from all sources.
 
-        Supports both new dot-based prefixes (crossref.title) and legacy
-        underscore prefixes (crossref_publication_title).
+        Searches for qualified format ONLY:
+        - Seed: {seed_provider}.{seed_entity}.{field}
+        - Enrichers: {enricher_provider}.{enricher_entity}.{field}
+
+        Legacy unqualified names are NOT searched (seed already renamed).
 
         Args:
-            field: Base field name.
-            enrichers: Sequence of enricher configurations.
-            available_columns: Set of available column names in DataFrame.
-            seed_pipeline: Seed pipeline name for prefix computation.
+            field: Base field name (e.g., 'title').
+            enrichers: Enricher configurations.
+            available_columns: Columns present in DataFrame.
+            seed_pipeline: Seed pipeline name for qualified lookup.
 
         Returns:
-            List of column names including seed and enricher versions.
+            List of matching qualified column names.
         """
-        columns = [field] if field in available_columns else []
+        columns: list[str] = []
+
+        # 1. Seed qualified format: {seed_provider}.{seed_entity}.{field}
+        if seed_pipeline:
+            try:
+                seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
+                seed_qualified = f"{seed_provider}.{seed_entity}.{field}"
+                if seed_qualified in available_columns:
+                    columns.append(seed_qualified)
+            except ValueError:
+                self._logger.debug(
+                    "Could not parse seed pipeline for field collection",
+                    seed_pipeline=seed_pipeline,
+                    field=field,
+                )
+
+        # 2. Each enricher's qualified format: {provider}.{entity}.{field}
         for enricher in enrichers:
-            # Get the prefix that was used for this enricher
-            prefix = self._get_enricher_prefix(enricher.pipeline, seed_pipeline)
-            # Prefix includes trailing dot/underscore, so: "crossref." + "title"
-            prefixed = f"{prefix}{field}"
-            if prefixed in available_columns:
-                columns.append(prefixed)
+            try:
+                provider, entity = self._parse_pipeline_name(enricher.pipeline)
+                enricher_qualified = f"{provider}.{entity}.{field}"
+                if (
+                    enricher_qualified in available_columns
+                    and enricher_qualified not in columns
+                ):
+                    columns.append(enricher_qualified)
+            except ValueError:
+                # Fallback: legacy prefix format {pipeline}_{field}
+                prefix = self._get_enricher_prefix(enricher.pipeline, seed_pipeline)
+                legacy_col = f"{prefix}{field}".rstrip(".")
+                if legacy_col in available_columns and legacy_col not in columns:
+                    columns.append(legacy_col)
+
         return columns
 
     def _order_columns_by_priority(
@@ -2727,39 +3154,67 @@ class MergeService:
         priorities: Sequence[str],
         seed_pipeline: str | None = None,
     ) -> list[str]:
-        """Order columns by priority list, appending any remaining columns.
+        """Order columns by source priority for coalescing.
+
+        Priority format in config:
+        - 'seed' - refers to seed pipeline (resolved dynamically)
+        - '{provider}' - matches {provider}.*.{field}
+        - '{provider}.{entity}' - explicit match
 
         Args:
             field: Base field name.
-            columns: List of available columns for this field.
-            priorities: Ordered list of source priorities (provider names or "seed").
-            seed_pipeline: Seed pipeline name for prefix computation.
+            columns: Available column names for this field.
+            priorities: Priority list from config (e.g., ['seed', 'crossref']).
+            seed_pipeline: Seed pipeline for resolving 'seed' priority.
 
         Returns:
             Ordered list of columns by priority.
         """
         ordered_cols: list[str] = []
+        columns_set = set(columns)
+
+        # Parse seed for matching
+        seed_provider: str | None = None
+        seed_entity: str | None = None
+        if seed_pipeline:
+            try:
+                seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
+            except ValueError:
+                pass
 
         for source in priorities:
-            if source in ("seed", "chembl"):  # Seed convention
-                if field in columns and field not in ordered_cols:
-                    ordered_cols.append(field)
+            source_lower = source.lower()
+            qualified: str | None = None
+
+            # Handle 'seed' keyword - resolve to actual seed provider.entity
+            if source_lower == "seed":
+                if seed_provider and seed_entity:
+                    qualified = f"{seed_provider}.{seed_entity}.{field}"
+
+            # Handle explicit provider.entity format: 'crossref.publication'
+            elif "." in source:
+                parts = source.split(".", 1)
+                provider, entity = parts[0].lower(), parts[1].lower()
+                qualified = f"{provider}.{entity}.{field}"
+
+            # Handle provider-only: find matching column
             else:
-                # Try new dot-based prefix: "crossref.title"
-                dot_prefixed = f"{source}.{field}"
-                if dot_prefixed in columns and dot_prefixed not in ordered_cols:
-                    ordered_cols.append(dot_prefixed)
-                    continue
+                provider = source_lower
+                # Check if this provider matches seed
+                if seed_provider and provider == seed_provider.lower():
+                    if seed_entity:
+                        qualified = f"{provider}.{seed_entity}.{field}"
+                else:
+                    # Try to find any column with this provider
+                    for col in columns_set:
+                        if col.startswith(f"{provider}.") and col.endswith(f".{field}"):
+                            qualified = col
+                            break
 
-                # Try legacy underscore prefix: "crossref_publication_title"
-                # The source might be just "crossref" but column is "crossref_publication_title"
-                for col in columns:
-                    if col.startswith(f"{source}_") and col.endswith(f"_{field}"):
-                        if col not in ordered_cols:
-                            ordered_cols.append(col)
-                        break
+            if qualified and qualified in columns_set and qualified not in ordered_cols:
+                ordered_cols.append(qualified)
 
-        # Add remaining columns not in priority list
+        # Append remaining columns not in priority list (preserving discovery order)
         for col in columns:
             if col not in ordered_cols:
                 ordered_cols.append(col)
@@ -2846,18 +3301,17 @@ class MergeService:
                 result, field, ordered_cols
             )
 
-            # Coalesce compatible columns
+            # Coalesce compatible columns into the first (highest priority) column
             if len(compatible_cols) > 1:
+                target_col = compatible_cols[
+                    0
+                ]  # Keep the first column name (qualified)
                 result = result.with_columns(
-                    pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(field)
+                    pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(target_col)
                 )
 
-            # Drop all non-base columns
-            cols_to_drop = [
-                col
-                for col in ordered_cols[1:]
-                if col != field and col in result.columns
-            ]
+            # Drop all non-target columns
+            cols_to_drop = [col for col in compatible_cols[1:] if col in result.columns]
             if cols_to_drop:
                 result = result.drop(cols_to_drop)
 
@@ -2896,27 +3350,38 @@ class MergeService:
     ) -> int:
         """Count records with at least one enrichment.
 
+        Counts records where at least one enricher-sourced column is non-null.
+        Works with qualified column names ({provider}.{entity}.{field}).
+
         Args:
-            df: Merged DataFrame with prefixed columns.
+            df: Merged DataFrame with qualified columns.
             enrichers: Enricher configurations.
-            seed_pipeline: Seed pipeline name for prefix computation.
+            seed_pipeline: Seed pipeline name (for identifying seed columns).
 
         Returns:
             Count of records with at least one non-null enricher column.
         """
-        # Check if any enricher-prefixed columns are non-null
-        # This is approximate - relies on column naming convention
-        enriched_count = 0
+        import polars as pl
+
+        enricher_cols: list[str] = []
+
         for enricher in enrichers:
-            prefix = self._get_enricher_prefix(enricher.pipeline, seed_pipeline)
-            enricher_cols = [c for c in df.columns if c.startswith(prefix)]
-            if enricher_cols:
-                # Check first enricher column for non-null
-                col = enricher_cols[0]
-                enriched_count = max(
-                    enriched_count, len(df.filter(df[col].is_not_null()))
-                )
-        return enriched_count
+            try:
+                provider, entity = self._parse_pipeline_name(enricher.pipeline)
+                prefix = f"{provider}.{entity}."
+            except ValueError:
+                prefix = f"{enricher.pipeline}_"
+
+            enricher_cols.extend([c for c in df.columns if c.startswith(prefix)])
+
+        if not enricher_cols:
+            return 0
+
+        # Count records where at least one enricher column is non-null
+        any_enriched = pl.any_horizontal(
+            [pl.col(c).is_not_null() for c in enricher_cols]
+        )
+        return len(df.filter(any_enriched))
 
     def _count_fully_enriched(
         self, df: pl.DataFrame, enrichers: Sequence[EnricherConfig]
@@ -13222,7 +13687,7 @@ class AssayParametersTransformer(BaseChemblTransformer):
     entity_class = AssayParameters
     primary_id_field = "assay_param_id"
 
-    def _normalize_type(self, param_type: Any) -> str:
+    def _normalize_type(self, param_type: Any) -> str | None:
         """Normalize parameter type to uppercase.
 
         Uses DataNormalizationService via DI for consistent normalization.
@@ -13231,12 +13696,12 @@ class AssayParametersTransformer(BaseChemblTransformer):
             param_type: Raw parameter type from API (may be Any type).
 
         Returns:
-            Normalized uppercase type or "UNKNOWN".
+            Normalized uppercase type or None if not available.
         """
         if param_type is None:
-            return "UNKNOWN"
+            return None
         normalized = self._data_normalizer.normalize_to_string(param_type)
-        return normalized.upper() if normalized else "UNKNOWN"
+        return normalized.upper() if normalized else None
 
     def _extract_business_data(
         self,
@@ -14873,7 +15338,7 @@ class PublicationTransformer(BaseChemblTransformer):
         data["year"] = validated_year
 
         # publication_date: ChEMBL API doesn't provide full date, only year
-        # Set to null rather than computing from year to avoid false precision
+        # Set to null (excluded from PyArrow/Gold schemas)
         data["publication_date"] = None
 
         # Hash PII field (RULES.md §5.4)
@@ -14891,15 +15356,24 @@ class PublicationTransformer(BaseChemblTransformer):
         data["_lookup_method"] = "direct"
         data["_original_id"] = str(primary_id)
 
+        # ChEMBL release metadata (nested object from API)
+        release_info = record.get("chembl_release")
+        if release_info and isinstance(release_info, dict):
+            data["chembl_release"] = release_info.get("chembl_release")
+            data["creation_date"] = release_info.get("creation_date")
+        else:
+            data["chembl_release"] = None
+            data["creation_date"] = None
+
         # System field: data source identifier
         data["_source"] = "chembl"
 
-        # Unified publication fields (ChEMBL API doesn't provide these)
-        data["citation_count"] = None  # Not available from ChEMBL API
-        data["is_oa"] = None  # Not available from ChEMBL API
-        data["language"] = None  # Not available from ChEMBL API
+        # Unified publication fields (always NULL, excluded from PyArrow/Gold schemas)
+        data["citation_count"] = None
+        data["is_oa"] = None
+        data["language"] = None
 
-        # Cross-reference IDs (ChEMBL API doesn't provide PMC ID)
+        # Cross-reference IDs (pmc_id always NULL, excluded from PyArrow/Gold schemas)
         data["pmc_id"] = None
 
         # DQ flags (default: no warnings or errors)
@@ -15584,10 +16058,13 @@ Transformers and utilities for CrossRef data processing.
 
 from bioetl.application.pipelines.crossref.extractors import (
     extract_authors,
+    extract_content_domain,
     extract_dates,
+    extract_issn_by_type,
     extract_journal_info,
     extract_license_url,
     extract_page_info,
+    extract_published_date,
     extract_year,
 )
 from bioetl.application.pipelines.crossref.transformer import (
@@ -15597,10 +16074,13 @@ from bioetl.application.pipelines.crossref.transformer import (
 __all__ = [
     "CrossRefPublicationTransformer",
     "extract_authors",
+    "extract_content_domain",
     "extract_dates",
+    "extract_issn_by_type",
     "extract_journal_info",
     "extract_license_url",
     "extract_page_info",
+    "extract_published_date",
     "extract_year",
 ]
 
@@ -15634,16 +16114,17 @@ from bioetl.domain.value_objects import PublicationYear
 
 
 def extract_authors(publication: dict[str, Any]) -> list[str]:
-    """Extract author names in 'given family' format.
+    """Extract author names from CrossRef publication.
 
-    CrossRef stores author information in an "author" array with
-    "given" and "family" fields for each author.
+    CrossRef stores author information in an "author" array with:
+    - Personal authors: "given" and "family" fields
+    - Organizational authors: "name" field only (e.g., "World Health Organization")
 
     Args:
         publication: CrossRef publication record.
 
     Returns:
-        List of author names in "given family" format.
+        List of author names (personal: "given family", org: "name").
 
     Example:
         >>> extract_authors({
@@ -15655,6 +16136,8 @@ def extract_authors(publication: dict[str, Any]) -> list[str]:
         ['John Doe', 'Jane Smith']
         >>> extract_authors({"author": [{"family": "Anonymous"}]})
         ['Anonymous']
+        >>> extract_authors({"author": [{"name": "World Health Organization"}]})
+        ['World Health Organization']
         >>> extract_authors({})
         []
 
@@ -15669,6 +16152,9 @@ def extract_authors(publication: dict[str, Any]) -> list[str]:
             authors.append(family)
         elif given:
             authors.append(given)
+        elif name := author.get("name", "").strip():
+            # Organizational author (e.g., "World Health Organization")
+            authors.append(name)
     return authors
 
 
@@ -15840,6 +16326,116 @@ def extract_dates(publication: dict[str, Any]) -> dict[str, Any]:
         ),
     }
 
+
+def extract_content_domain(publication: dict[str, Any]) -> dict[str, Any]:
+    """Extract content-domain metadata.
+
+    CrossRef content-domain indicates licensing/access restrictions
+    and Crossmark participation.
+
+    Args:
+        publication: CrossRef publication record.
+
+    Returns:
+        Dictionary with content_domain_domains, content_domain_crossmark_restriction.
+
+    Example:
+        >>> extract_content_domain({
+        ...     "content-domain": {"domain": ["nature.com"], "crossmark-restriction": True}
+        ... })
+        {'content_domain_domains': ['nature.com'], 'content_domain_crossmark_restriction': True}
+        >>> extract_content_domain({})
+        {'content_domain_domains': [], 'content_domain_crossmark_restriction': None}
+
+    """
+    content_domain = publication.get("content-domain", {})
+    if not isinstance(content_domain, dict):
+        content_domain = {}
+
+    return {
+        "content_domain_domains": content_domain.get("domain", []) or [],
+        "content_domain_crossmark_restriction": content_domain.get(
+            "crossmark-restriction"
+        ),
+    }
+
+
+def extract_issn_by_type(publication: dict[str, Any]) -> dict[str, Any]:
+    """Extract ISSN values by type (print/electronic).
+
+    Parses the issn-type array to separate print and electronic ISSNs.
+    Takes first occurrence of each type if duplicates exist.
+
+    Args:
+        publication: CrossRef publication record.
+
+    Returns:
+        Dictionary with issn_print and issn_electronic.
+
+    Example:
+        >>> extract_issn_by_type({
+        ...     "issn-type": [
+        ...         {"value": "0006-291X", "type": "print"},
+        ...         {"value": "1090-2104", "type": "electronic"}
+        ...     ]
+        ... })
+        {'issn_print': '0006-291X', 'issn_electronic': '1090-2104'}
+        >>> extract_issn_by_type({})
+        {'issn_print': None, 'issn_electronic': None}
+
+    """
+    issn_type_list = publication.get("issn-type", [])
+    if not isinstance(issn_type_list, list):
+        return {"issn_print": None, "issn_electronic": None}
+
+    issn_print: str | None = None
+    issn_electronic: str | None = None
+
+    for item in issn_type_list:
+        if not isinstance(item, dict):
+            continue
+        issn_value = item.get("value")
+        issn_kind = item.get("type")
+
+        if issn_kind == "print" and issn_print is None:
+            issn_print = issn_value
+        elif issn_kind == "electronic" and issn_electronic is None:
+            issn_electronic = issn_value
+
+    return {
+        "issn_print": issn_print,
+        "issn_electronic": issn_electronic,
+    }
+
+
+def extract_published_date(publication: dict[str, Any]) -> str | None:
+    """Extract 'published' date (canonical publication date).
+
+    CrossRef's 'published' field is the preferred publication date,
+    distinct from published-print and published-online which indicate
+    specific publication events.
+
+    Args:
+        publication: CrossRef publication record.
+
+    Returns:
+        ISO date string (YYYY-MM-DD) or None.
+
+    Example:
+        >>> extract_published_date({"published": {"date-parts": [[2023, 6, 15]]}})
+        '2023-06-15'
+        >>> extract_published_date({"published": {"date-parts": [[2023]]}})
+        '2023-12-31'
+        >>> extract_published_date({})
+        None
+
+    """
+    published = publication.get("published", {})
+    if not isinstance(published, dict):
+        return None
+
+    return format_date_parts(published.get("date-parts"))
+
 ================================================================================
 File: transformer.py
 Path: pipelines\crossref\transformer.py
@@ -15867,13 +16463,20 @@ from typing import TYPE_CHECKING, Any, cast
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.crossref.extractors import (
     extract_authors,
+    extract_content_domain,
     extract_dates,
+    extract_issn_by_type,
     extract_journal_info,
     extract_license_url,
     extract_page_info,
+    extract_published_date,
     extract_year,
 )
-from bioetl.domain.entities.crossref import CROSSREF_TYPE_MAP, CrossRefPublicationEntity
+from bioetl.domain.entities.crossref import (
+    CROSSREF_TYPE_DEFAULT,
+    CROSSREF_TYPE_MAP,
+    CrossRefPublicationEntity,
+)
 from bioetl.domain.normalization import extract_first_string
 from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects import DOI
@@ -15965,6 +16568,9 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         journal_info = extract_journal_info(rec)
         page_info = extract_page_info(rec)
         dates = extract_dates(rec)
+        content_domain = extract_content_domain(rec)
+        issn_by_type = extract_issn_by_type(rec)
+        published_date = extract_published_date(rec)
 
         # Extract abstract with HTML stripping via normalizer service
         normalizer = self._data_normalizer
@@ -15992,16 +16598,19 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             **dates,
             "year": extract_year(rec),
             "publication_date": publication_date,
-            "doc_type": CROSSREF_TYPE_MAP.get(rec.get("type", ""), "PUBLICATION"),
+            "doc_type": CROSSREF_TYPE_MAP.get(
+                rec.get("type", ""), CROSSREF_TYPE_DEFAULT
+            ),
             "citation_count": rec.get("is-referenced-by-count"),
             "reference_count": rec.get("references-count"),
             "language": rec.get("language"),
             "license_url": extract_license_url(rec),
             "subjects": rec.get("subject", []),
             "source": "crossref",
-            # Open Access (CrossRef doesn't provide this information directly)
+            # Excluded fields (always NULL, not written to Delta Lake):
+            # - is_oa: CrossRef doesn't provide Open Access info
+            # - pmid/pmc_id: CrossRef doesn't provide PubMed IDs
             "is_oa": None,
-            # Cross-reference IDs (CrossRef doesn't provide PMID or PMC ID)
             "pmid": None,
             "pmc_id": None,
             # Lookup metadata (from adapter fallback handler)
@@ -16010,6 +16619,12 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             # DQ flags (default: no warnings or errors)
             "_dq_warn": False,
             "_dq_error": False,
+            # NEW: Additional CrossRef fields
+            "alternative_id": rec.get("alternative-id", []) or [],
+            "short_container_title": rec.get("short-container-title", []) or [],
+            "published": published_date,
+            **content_domain,
+            **issn_by_type,
         }
 
     def _get_primary_id_field(self) -> str:
@@ -16555,6 +17170,44 @@ def extract_keywords(keywords: list[dict[str, Any]] | None) -> list[str]:
 
     return result
 
+
+def extract_biblio_info(biblio: dict[str, Any] | None) -> dict[str, Any]:
+    """Extract bibliographic info (volume, issue, pages) from biblio object.
+
+    OpenAlex provides bibliographic information in a "biblio" object
+    containing volume, issue, first_page, and last_page fields.
+
+    Args:
+        biblio: Biblio object from OpenAlex work.
+
+    Returns:
+        Dictionary with volume, issue, first_page, last_page.
+
+    Example:
+        >>> extract_biblio_info({
+        ...     "volume": "42",
+        ...     "issue": "3",
+        ...     "first_page": "123",
+        ...     "last_page": "145"
+        ... })
+        {'volume': '42', 'issue': '3', 'first_page': '123', 'last_page': '145'}
+        >>> extract_biblio_info(None)
+        {'volume': None, 'issue': None, 'first_page': None, 'last_page': None}
+    """
+    if not biblio or not isinstance(biblio, dict):
+        return {
+            "volume": None,
+            "issue": None,
+            "first_page": None,
+            "last_page": None,
+        }
+    return {
+        "volume": biblio.get("volume"),
+        "issue": biblio.get("issue"),
+        "first_page": biblio.get("first_page"),
+        "last_page": biblio.get("last_page"),
+    }
+
 ================================================================================
 File: transformer.py
 Path: pipelines\openalex\transformer.py
@@ -16581,6 +17234,7 @@ from typing import TYPE_CHECKING, Any, cast
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.openalex.extractors import (
     extract_authors,
+    extract_biblio_info,
     extract_concepts,
     extract_external_ids,
     extract_journal_info,
@@ -16720,6 +17374,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         # Extract keywords
         keywords = extract_keywords(rec.get("keywords", []))
 
+        # Extract bibliographic info (volume, issue, pages)
+        biblio_info = extract_biblio_info(rec.get("biblio", {}))
+
         # Validate year using PublicationYear Value Object
         year_vo = PublicationYear.from_raw(rec.get("publication_year"))
         year = year_vo.value if year_vo else None
@@ -16758,9 +17415,16 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "mesh": mesh_terms,
             "keywords": keywords,
             "language": rec.get("language"),
-            # Pages (OpenAlex doesn't provide page info in standard fields)
-            "first_page": None,
-            "last_page": None,
+            # Bibliographic info (from biblio object)
+            "volume": biblio_info.get("volume"),
+            "issue": biblio_info.get("issue"),
+            "first_page": biblio_info.get("first_page"),
+            "last_page": biblio_info.get("last_page"),
+            # Additional metrics
+            "fwci": rec.get("fwci"),
+            "referenced_works_count": rec.get("referenced_works_count"),
+            # Quality indicators
+            "is_retracted": rec.get("is_retracted", False),
             "_lookup_method": lookup_method,
             "_original_id": original_id,
             "source": "openalex",
@@ -17644,10 +18308,19 @@ Path: pipelines\pubmed\extractors\date.py
 
 Handles all date-related parsing including publication dates, history dates,
 and article dates with support for partial dates and month name conversion.
+
+MedlineDate Support (added 2026-01-25):
+- Parses free-text MedlineDate elements like "2023 Jan-Feb", "2023 Spring"
+- Extracts year (always first token)
+- Maps seasons and quarters to month ranges (uses end-of-period)
+- Handles month ranges by taking the second month (end-of-period strategy)
+
+See: https://www.nlm.nih.gov/bsd/licensee/elements_descriptions.html
 """
 
 from __future__ import annotations
 
+import re
 from typing import ClassVar, TypedDict
 from xml.etree.ElementTree import Element
 
@@ -17670,17 +18343,22 @@ class NormalizedDate(TypedDict):
     year_int: int | None
 
 
-class DateExtractor(BaseFieldExtractor):
-    """Extractor for date fields from PubMed XML.
+class MedlineDateParser:
+    """Parser for PubMed MedlineDate free-text format.
 
-    Handles:
-    - Publication dates from JournalIssue/PubDate
-    - History dates (received, accepted, revised)
-    - Article dates (Electronic publication)
-    - Partial dates (year only, year-month)
-    - Month name to number conversion
+    Handles formats like:
+    - "2023 Jan-Feb" → year=2023, month=Feb (end of range)
+    - "2023 Spring" → year=2023, month=May (end of season)
+    - "2023 1st Quart" → year=2023, month=Mar (end of Q1)
+    - "2023 Jan" → year=2023, month=Jan
+    - "2023" → year=2023
+    - "2022 Dec-2023 Jan" → year=2023, month=Jan (cross-year: take second year)
+
+    Uses end-of-period strategy: for ranges/seasons/quarters,
+    returns the END of the period.
     """
 
+    # Month abbreviation to number mapping
     MONTH_MAP: ClassVar[dict[str, str]] = {
         "jan": "01",
         "feb": "02",
@@ -17696,11 +18374,141 @@ class DateExtractor(BaseFieldExtractor):
         "dec": "12",
     }
 
+    # Season to end-of-period month mapping
+    SEASON_MAP: ClassVar[dict[str, str]] = {
+        "spring": "05",  # Mar-May → May (end)
+        "spr": "05",
+        "summer": "08",  # Jun-Aug → Aug (end)
+        "sum": "08",
+        "fall": "11",  # Sep-Nov → Nov (end)
+        "autumn": "11",
+        "aut": "11",
+        "winter": "02",  # Dec-Feb → Feb (end of winter season)
+        "win": "02",
+    }
+
+    # Quarter to end-of-period month mapping
+    QUARTER_MAP: ClassVar[dict[str, str]] = {
+        "1st": "03",  # Q1: Jan-Mar → Mar
+        "2nd": "06",  # Q2: Apr-Jun → Jun
+        "3rd": "09",  # Q3: Jul-Sep → Sep
+        "4th": "12",  # Q4: Oct-Dec → Dec
+        "q1": "03",
+        "q2": "06",
+        "q3": "09",
+        "q4": "12",
+    }
+
+    # Pattern for month range: "Jan-Feb", "Dec-Jan" (NOT "Dec-2023")
+    _MONTH_RANGE_PATTERN: ClassVar[re.Pattern[str]] = re.compile(
+        r"\b([a-zA-Z]{3,9})-([a-zA-Z]{3,9})\b", re.IGNORECASE
+    )
+
+    # Pattern to find 4-digit years in text
+    _YEAR_PATTERN: ClassVar[re.Pattern[str]] = re.compile(r"\b(19\d{2}|20\d{2})\b")
+
+    def parse(self, medline_date: str) -> RawDate | None:
+        """Parse MedlineDate free-text format into components.
+
+        Args:
+            medline_date: Free-text date string from MedlineDate element.
+
+        Returns:
+            RawDate with extracted year and month, or None if unparseable.
+        """
+        if not medline_date:
+            return None
+
+        text = medline_date.strip()
+        tokens = text.split()
+
+        if not tokens:
+            return None
+
+        year = self._extract_year(tokens)
+        if not year:
+            return None
+
+        month = self._extract_month(text, tokens)
+
+        return RawDate(year=year, month=month, day=None)
+
+    def _extract_year(self, tokens: list[str]) -> str | None:
+        """Extract year from MedlineDate text.
+
+        Handles cross-year ranges like "2022 Dec-2023 Jan" by preferring
+        the second (most recent) year if present.
+        """
+        text = " ".join(tokens)
+        years_found: list[str] = self._YEAR_PATTERN.findall(text)
+
+        if not years_found:
+            return None
+
+        # For cross-year ranges, take the last (most recent) year
+        return years_found[-1]
+
+    def _extract_month(self, text: str, tokens: list[str]) -> str | None:
+        """Extract month/season/quarter from MedlineDate text.
+
+        Uses end-of-period strategy for ranges.
+        """
+        # Check for month range pattern (e.g., "Jan-Feb")
+        range_match = self._MONTH_RANGE_PATTERN.search(text)
+        if range_match:
+            return range_match.group(2)  # End-of-period: second month
+
+        # Check for quarter (e.g., "1st Quart", "Q1")
+        text_lower = text.lower()
+        for quarter_key, month_num in self.QUARTER_MAP.items():
+            if quarter_key in text_lower:
+                return month_num
+
+        # Check for season
+        for token in tokens:
+            token_lower = token.lower()
+            if token_lower in self.SEASON_MAP:
+                return self.SEASON_MAP[token_lower]
+
+        # Check for single month name (pure alphabetic tokens only)
+        # Process in reverse order to prefer later months (end-of-period)
+        for token in reversed(tokens):
+            if not token.isalpha():
+                continue
+            token_lower = token.lower()[:3]
+            if token_lower in self.MONTH_MAP:
+                return token
+
+        return None
+
+
+class DateExtractor(BaseFieldExtractor):
+    """Extractor for date fields from PubMed XML.
+
+    Handles:
+    - Publication dates from JournalIssue/PubDate
+    - History dates (received, accepted, revised)
+    - Article dates (Electronic publication)
+    - Partial dates (year only, year-month)
+    - Month name to number conversion
+    - MedlineDate free-text format (delegated to MedlineDateParser)
+    """
+
+    MONTH_MAP: ClassVar[dict[str, str]] = MedlineDateParser.MONTH_MAP
+
+    def __init__(self) -> None:
+        """Initialize with MedlineDate parser."""
+        self._medline_parser = MedlineDateParser()
+
     def extract(self, element: Element | None) -> RawDate | None:
         """Извлечь сырые компоненты даты из XML элемента.
 
+        Supports both structured dates (Year/Month/Day elements) and
+        free-text MedlineDate format ("2023 Jan-Feb", "2023 Spring", etc.).
+
         Args:
-            element: XML element containing Year, Month, Day children.
+            element: XML element containing Year, Month, Day children
+                or MedlineDate element.
 
         Returns:
             Dict with raw year, month, day strings, or None.
@@ -17712,11 +18520,16 @@ class DateExtractor(BaseFieldExtractor):
         month = get_text(element.find("Month"))
         day = get_text(element.find("Day"))
 
-        # Return None if no date components found
-        if not any([year, month, day]):
-            return None
+        # If structured components found, use them
+        if any([year, month, day]):
+            return RawDate(year=year, month=month, day=day)
 
-        return RawDate(year=year, month=month, day=day)
+        # Fallback: delegate to MedlineDate parser
+        medline_date = get_text(element.find("MedlineDate"))
+        if medline_date:
+            return self._medline_parser.parse(medline_date)
+
+        return None
 
     def normalize(self, raw_value: RawDate) -> NormalizedDate:
         """Нормализовать компоненты даты в ISO формат.
@@ -18639,7 +19452,7 @@ def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
         external_ids: Dict of external IDs from S2 response.
 
     Returns:
-        Dict with normalized keys: doi, pmid, pmcid (maps to pmc_id), arxiv, corpus_id, mag, acl.
+        Dict with normalized keys: doi, pmid, pmcid, arxiv, corpus_id, mag, dblp, acl.
 
     Example:
         >>> ids = {"DOI": "10.1038/...", "PubMed": "12345678", "CorpusId": 123}
@@ -18657,6 +19470,7 @@ def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
         "arxiv": external_ids.get("ArXiv"),
         "corpus_id": external_ids.get("CorpusId"),
         "mag": external_ids.get("MAG"),
+        "dblp": external_ids.get("DBLP"),
         "acl": external_ids.get("ACL"),
     }
 
@@ -18664,16 +19478,21 @@ def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
 def extract_authors(authors: list[dict[str, Any]] | None) -> list[str]:
     """Extract author display names from authors list.
 
+    Filters out None, empty strings, and whitespace-only names.
+
     Args:
         authors: List of author objects from S2.
 
     Returns:
-        List of author names.
+        List of author names (non-empty, stripped).
 
     Example:
         >>> authors = [{"authorId": "123", "name": "John Doe"}]
         >>> extract_authors(authors)
         ['John Doe']
+        >>> authors = [{"name": "  "}, {"name": ""}, {"name": None}]
+        >>> extract_authors(authors)
+        []
 
     """
     if not authors:
@@ -18682,8 +19501,8 @@ def extract_authors(authors: list[dict[str, Any]] | None) -> list[str]:
     result = []
     for author in authors:
         name = author.get("name")
-        if name:
-            result.append(name)
+        if name and name.strip():
+            result.append(name.strip())
     return result
 
 
@@ -18828,22 +19647,28 @@ def extract_fields_of_study(
 ) -> list[str]:
     """Extract fields of study.
 
+    Filters out None and empty string elements from the list.
+
     Args:
         fields_of_study: List of field names from S2.
         max_count: Maximum fields to extract.
 
     Returns:
-        List of field names (capped at max_count).
+        List of non-empty field names (capped at max_count).
 
     Example:
         >>> fields = ["Biology", "Medicine", "Genetics"]
         >>> extract_fields_of_study(fields, max_count=2)
         ['Biology', 'Medicine']
+        >>> fields = ["Biology", None, "", "Medicine"]
+        >>> extract_fields_of_study(fields)
+        ['Biology', 'Medicine']
 
     """
     if not fields_of_study:
         return []
-    return fields_of_study[:max_count]
+    # Filter out None and empty strings, then cap at max_count
+    return [f for f in fields_of_study if f and isinstance(f, str)][:max_count]
 
 
 def validate_year(year: int | None) -> int | None:
@@ -18913,6 +19738,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - doi: externalIds.DOI
     - pmid: externalIds.PubMed
     - arxiv_id: externalIds.ArXiv
+    - dblp_id: externalIds.DBLP
     - title: title
     - abstract: abstract
     - tldr: tldr.text (AI-generated summary)
@@ -18922,6 +19748,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - publication_date: publicationDate
     - citation_count: citationCount
     - reference_count: referenceCount
+    - influential_citation_count: influentialCitationCount
     - is_oa: isOpenAccess (normalized)
     - oa_status: openAccessPdf.status (normalized to lowercase)
     - open_access_url: openAccessPdf.url
@@ -19043,6 +19870,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
                 external_ids.get("pmcid")
             ),  # API uses "pmcid", we use "pmc_id"
             "arxiv_id": external_ids.get("arxiv"),
+            "dblp_id": external_ids.get("dblp"),
             "corpus_id": external_ids.get("corpus_id"),
             "title": rec.get("title"),
             "abstract": self._data_normalizer.strip_html_tags(rec.get("abstract")),
@@ -19060,6 +19888,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             ),
             "citation_count": rec.get("citationCount"),
             "reference_count": rec.get("referenceCount"),
+            "influential_citation_count": rec.get("influentialCitationCount"),
             "is_oa": oa_info.get("is_oa"),
             "open_access_url": oa_info.get("url"),
             "oa_status": oa_info.get("oa_status"),
@@ -25818,7 +26647,7 @@ class QuarantineRecord:
     """Representation of a quarantined record.
 
     Attributes:
-        error_code: Error code that caused quarantine.
+        error_code: Error code that caused quarantine, or None if unknown.
         payload: Original record data.
         batch_id: Bronze batch ID.
         pipeline: Pipeline name.
@@ -25826,7 +26655,7 @@ class QuarantineRecord:
         metadata: Additional metadata.
     """
 
-    error_code: str
+    error_code: str | None
     payload: dict[str, Any]
     batch_id: str | None
     pipeline: str
@@ -25887,7 +26716,7 @@ class QuarantineService:
 
         records = [
             QuarantineRecord(
-                error_code=rec.get("error_code", "UNKNOWN"),
+                error_code=rec.get("error_code"),
                 payload=rec.get("payload", {}),
                 batch_id=rec.get("bronze_batch_id"),
                 pipeline=pipeline,

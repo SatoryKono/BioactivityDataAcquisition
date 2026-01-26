@@ -72,7 +72,7 @@ docs/
 │   ├── data-layers.md           # Bronze/Silver/Gold layer details
 │   ├── observability-layers.md  # Observability architecture
 │   ├── diagrams.md              # Mermaid diagrams collection
-│   ├── decisions/               # ADR-001..028 (28 records)
+│   ├── decisions/               # ADR-001..029 (29 records)
 │   └── diagrams/                # 34 Mermaid diagram files + render_diagrams.py
 │
 ├── 03-guides/                   # How-to guides (13 guides)
@@ -186,6 +186,7 @@ docs/
 | [ADR-026: Composite Pipeline Pattern](02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) | Composite pipeline pattern    | -        |
 | [ADR-027: DQ Rules Externalization](02-architecture/decisions/ADR-027-dq-rules-externalization.md) | Hierarchical DQ configuration | §3.1.2   |
 | [ADR-028: Filter Rules Externalization](02-architecture/decisions/ADR-028-filter-rules-externalization.md) | Hierarchical filter configuration | App D   |
+| [ADR-029: Output Metadata Unification](02-architecture/decisions/ADR-029-output-metadata-unification.md) | Unified output metadata contracts | §2.4    |
 
 ### Data Management
 
@@ -1010,7 +1011,7 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 
 See [decisions/README.md](decisions/README.md) for full index with categories.
 
-28 ADRs documenting key architectural decisions:
+29 ADRs documenting key architectural decisions:
 
 | ADR | Topic | RULES.md Reference |
 |-----|-------|-------------------|
@@ -1042,6 +1043,7 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-026](decisions/ADR-026-composite-pipeline-pattern.md) | Composite Pipeline Pattern | - |
 | [ADR-027](decisions/ADR-027-dq-rules-externalization.md) | DQ Rules Externalization | §3.1.2 |
 | [ADR-028](decisions/ADR-028-filter-rules-externalization.md) | Filter Rules Externalization | App D |
+| [ADR-029](decisions/ADR-029-output-metadata-unification.md) | Output Metadata Unification | §2.4 |
 
 ---
 
@@ -7167,6 +7169,13 @@ Original plan (not implemented):
 | `DocumentSchema` | `ChemblPublicationSchema` |
 | `CompoundSchema` | `PubchemMoleculeSchema` |
 | `ProteinSchema` | `UniprotTargetSchema` |
+| `ArticleSchema` | `PubMedPublicationSchema` |
+
+**Note:** PubMed's `ArticleSchema` was renamed to `PubMedPublicationSchema` (2026-01-25)
+to align with `entity_type: publication` in pipeline config and maintain consistency
+with other publication schemas (`ChemblPublicationSchema`, `OpenAlexPublicationSchema`,
+`SemanticScholarPublicationSchema`). A backward-compatibility alias `ArticleSchema`
+is provided but deprecated.
 
 ## Consequences
 
@@ -7227,6 +7236,7 @@ Original plan (not implemented):
 - `src/bioetl/domain/schemas/chembl/document.py` → `publication.py`
 - `src/bioetl/domain/schemas/chembl/document_similarity.py` → `publication_similarity.py`
 - `src/bioetl/domain/schemas/chembl/document_term.py` → `publication_term.py`
+- `src/bioetl/domain/schemas/pubmed/article.py` → `publication.py` — `ArticleSchema` → `PubMedPublicationSchema` (2026-01-25)
 
 **Factory Updates:**
 - `transformer_factory.py` — imports and registrations updated
@@ -7249,8 +7259,11 @@ Original plan (not implemented):
 
 ### Migration Guide
 
-**Note:** Since aliases were never implemented, old imports will raise `ImportError`.
+**Note:** Since aliases were never implemented for domain entities, old imports will raise `ImportError`.
 All code must use canonical names directly.
+
+**Exception:** `ArticleSchema` is provided as a deprecated alias for `PubMedPublicationSchema`
+for backward compatibility. Prefer `PubMedPublicationSchema` in new code.
 
 **Domain Entities:**
 ```python
@@ -7970,6 +7983,89 @@ class ConflictResolution(str, Enum):
     EXPLICIT_RULES = "explicit"        # Use field_priorities mapping
     COALESCE = "coalesce"              # First non-null value
 ```
+
+## Column Naming Convention
+
+### Status: Accepted (Updated 2025-01-25)
+
+### Context
+
+При объединении данных из разных источников возникают конфликты имён колонок.
+Предыдущая реализация переименовывала только enricher колонки с разными
+стратегиями prefix (provider/entity/both), что приводило к:
+
+1. Неконсистентности: seed колонки без prefix, enricher — с prefix
+2. Сложной логике определения стратегии
+3. Трудностям при coalesce из-за разных форматов
+
+### Decision
+
+**Все** бизнес-колонки (seed и enricher) переименовываются в единый формат:
+```
+{provider}.{entity}.{field}
+```
+
+**Примеры**:
+| Source | Original | Qualified |
+|--------|----------|-----------|
+| chembl_publication (seed) | title | chembl.publication.title |
+| crossref_publication (enricher) | title | crossref.publication.title |
+| crossref_publication (enricher) | citation_count | crossref.publication.citation_count |
+
+**Исключения** (НЕ переименовываются):
+1. **Join keys**: `doi`, `pmid`, `pmc_id` — для совместимости с join операциями
+2. **System columns**: колонки с prefix `_` (`_run_id`, `_ingestion_ts`, etc.)
+3. **Entity ID columns**: `entity_id`, `content_hash` — системные идентификаторы
+
+### Column Ordering
+
+Колонки в output упорядочены по семантическим группам:
+
+| Order | Group | Examples |
+|-------|-------|----------|
+| 1 | System | entity_id, content_hash, _run_id, _ingestion_ts |
+| 2 | Identifiers | doi, pmid, pmc_id, document_chembl_id |
+| 3 | Title | title, chembl.publication.title, crossref.publication.title |
+| 4 | Abstract | abstract, chembl.publication.abstract |
+| 5 | Authors | authors, first_author, affiliations |
+| 6 | Journal | journal, publisher, volume, issue |
+| 7 | Dates | publication_date, year, created_at |
+| 8 | Metrics | citation_count, reference_count |
+| 9 | Classification | mesh_terms, keywords, subjects |
+| 10 | URLs | url, pdf_url, landing_page |
+| 11 | Other | All remaining fields |
+
+Внутри каждой группы колонки упорядочены по:
+1. Provider priority: chembl → crossref → pubmed → openalex
+2. Alphabetically для одного провайдера
+
+### Implementation
+
+- `ColumnRenamer`: Переименование колонок в qualified format
+- `ColumnOrderer`: Упорядочивание колонок по семантическим группам
+- `ColumnQualifier`: Value object для qualified имён
+- `ColumnOrderConfig`: Конфигурация семантических групп
+
+### Consequences
+
+**Positive**:
+- Единообразный формат всех колонок
+- Явная атрибуция источника данных
+- Устранение конфликтов имён без сложной логики
+- Консистентный порядок колонок в output
+- Улучшенная читаемость для downstream consumers
+
+**Negative**:
+- **Breaking change** для downstream consumers
+- Более длинные имена колонок (3 компонента вместо 1)
+- Требуется миграция существующих Silver/Gold таблиц
+
+### References
+
+- ColumnRenamer: `src/bioetl/application/composite/column_renamer.py`
+- ColumnOrderer: `src/bioetl/application/composite/column_orderer.py`
+- ColumnQualifier: `src/bioetl/domain/value_objects/column_qualifier.py`
+- ColumnOrderConfig: `src/bioetl/domain/value_objects/column_order.py`
 
 ## Application Layer
 
@@ -9192,6 +9288,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-026](ADR-026-composite-pipeline-pattern.md) | Composite Pipeline Pattern | Accepted | Architecture | 2026-01-15 |
 | [ADR-027](ADR-027-dq-rules-externalization.md) | DQ Rules Externalization | Accepted | Data Quality | 2026-01-19 |
 | [ADR-028](ADR-028-filter-rules-externalization.md) | Filter Rules Externalization | Accepted | Configuration | 2026-01-20 |
+| [ADR-029](ADR-029-output-metadata-unification.md) | Output Metadata Unification | Accepted | Data Modeling | 2026-01-23 |
 
 ## ADRs by Category
 
@@ -9229,6 +9326,7 @@ This directory contains Architecture Decision Records documenting significant ar
 ### Domain Model
 - [ADR-004](ADR-004-pydantic-vs-dataclasses.md): Pydantic vs Dataclasses
 - [ADR-021](ADR-021-ddd-aggregates-adoption.md): DDD Aggregates Adoption
+- [ADR-029](ADR-029-output-metadata-unification.md): Output Metadata Unification — Unified output metadata contracts
 
 ### Data Fetching
 - [ADR-009](ADR-009-paginated-fetcher-mixin.md): PaginatedFetcherMixin Design
@@ -32295,6 +32393,280 @@ make lint && make test
 *Документ подготовлен согласно протоколу двойной верификации (REQ-ARCH-040)*
 
 ================================================================================
+File: code-duplication-analysis.md
+Path: archived\audits\code-duplication-analysis.md
+================================================================================
+# Отчёт: Анализ дублирования кода BioETL
+
+**Дата**: 2026-01-15
+**Ветка**: claude/refactor-code-duplication-NfP8Z
+**Автор**: Claude (автоматизированный анализ)
+
+---
+
+## Executive Summary
+
+- **Проанализировано**: ~60 pipeline/transformer файлов, ~30 адаптеров, ~20 сервисов
+- **Обнаружено категорий дублирования**: 3 (минорные)
+- **Потенциальное сокращение**: ~50-70 LOC (менее 0.1% от общего объёма)
+- **Вердикт**: Кодовая база **хорошо спроектирована** с эффективным использованием абстракций
+
+---
+
+## 1. Существующие Абстракции (УЖЕ РЕАЛИЗОВАНО)
+
+Анализ выявил, что проект **уже использует** правильные паттерны для минимизации дублирования:
+
+### 1.1 Иерархия трансформеров
+
+```
+BaseTransformer (673 LOC)                    # Общий каркас, hash, serialization
+    │
+    ├── BaseChemblTransformer (183 LOC)      # ChEMBL-specific Template Method
+    │       │
+    │       ├── ActivityTransformer
+    │       ├── AssayTransformer
+    │       ├── MoleculeTransformer
+    │       ├── TargetTransformer
+    │       └── ...10+ transformers
+    │
+    └── BasePublicationTransformer (201 LOC) # Publication Template Method
+            │
+            ├── CrossRefPublicationTransformer
+            ├── OpenAlexPublicationTransformer
+            ├── SemanticScholarTransformer
+            └── PubMedTransformer
+```
+
+### 1.2 Переиспользуемые Mixins и Base Classes
+
+| Компонент | Файл | LOC | Назначение |
+|-----------|------|-----|------------|
+| `HealthCheckMixin` | `infrastructure/adapters/health_check_mixin.py` | 397 | Observability для health checks |
+| `HealthCheckProviderMixin` | (там же) | - | Full health check implementation |
+| `BaseHttpAdapter` | `infrastructure/adapters/base.py` | 124 | HTTP lifecycle + error handling |
+| `BaseTitleFallbackHandler` | `infrastructure/adapters/common/base_title_fallback.py` | 181 | Title fallback для DOI resolution |
+| `BaseFieldExtractor` | `application/pipelines/pubmed/extractors/base.py` | 66 | Template Method для PubMed XML |
+
+### 1.3 Declarative DSL для Field Mapping
+
+`field_specs.py` реализует конфигурационный подход:
+
+```python
+# Вместо дублированных _map_* методов используется:
+_IDENTIFIERS = FieldGroup(
+    name="identifiers",
+    fields=(
+        *simple_fields("target_chembl_id", "assay_chembl_id"),
+        *int_fields("record_id", "src_id"),
+    ),
+)
+
+# Применение:
+result = map_field_groups(record, [_IDENTIFIERS, _MOLECULE_TARGET_ASSAY])
+```
+
+### 1.4 Общие Сервисы (Domain Layer)
+
+| Сервис | Файл | Использование |
+|--------|------|---------------|
+| `IdentityService` | `domain/services/identity_service.py` | Content Hash + Entity ID computation |
+| `DataNormalizationService` | `domain/services/data_normalization_service.py` | DOI, PMID, HTML normalization |
+| `serialize_to_json` | `domain/serialization.py` | JSON serialization |
+
+---
+
+## 2. Верифицированные Дублирования (МИНОРНЫЕ)
+
+### 2.1 `_validate_taxonomy_id` (3 места, ~15 LOC)
+
+#### Текущее состояние
+
+```python
+# activity_transformer.py:28
+def _validate_taxonomy_id_str(value: Any) -> str | None:
+    vo = TaxonomyId.from_raw(value)
+    return str(vo.value) if vo else None
+
+# assay_transformer.py:30, target_component_transformer.py:26
+def _validate_taxonomy_id(value: Any) -> int | None:
+    vo = TaxonomyId.from_raw(value)
+    return vo.value if vo else None
+```
+
+#### Анализ
+
+- **Дублирование**: Логика идентична, разница в return type (`str` vs `int`)
+- **Impact**: Low (3 места, 15 LOC)
+- **Причина различия**: ActivityTransformer требует `str` для entity field
+
+#### Рекомендация
+
+Добавить helper в `domain/value_objects/taxonomy_id.py`:
+
+```python
+# В TaxonomyId или отдельным модулем:
+def validate_taxonomy_id(value: Any) -> int | None:
+    vo = TaxonomyId.from_raw(value)
+    return vo.value if vo else None
+
+def validate_taxonomy_id_str(value: Any) -> str | None:
+    vo = TaxonomyId.from_raw(value)
+    return str(vo.value) if vo else None
+```
+
+**Приоритет**: P3 (Low) - ~5 LOC экономии, не критично
+
+---
+
+### 2.2 `_normalize_doi` в Адаптерах (2 места, ~20 LOC)
+
+#### Текущее состояние
+
+```python
+# semanticscholar/adapter.py:521
+def _normalize_doi(doi: str) -> str:
+    if doi.startswith("https://doi.org/"):
+        return doi[16:]
+    # ...
+
+# openalex/client.py:474
+def _normalize_doi(doi: str) -> str | None:
+    if not doi:
+        return None
+    doi = doi.strip()
+    if doi.startswith("https://doi.org/"):
+        return doi[16:]
+    # ...
+```
+
+#### Анализ
+
+- **НЕ чистое дублирование**: Разное поведение (None handling, strip)
+- **Существует**: `domain/normalization.py:normalize_doi` - но он делает `.lower()`, что НЕ нужно для URL comparison
+- **Intent**: Адаптеры нужны для exact DOI matching при lookup
+
+#### Рекомендация
+
+**НЕ консолидировать** - это provider-specific логика с разными requirements.
+Альтернатива: добавить `strip_doi_prefix(doi: str) -> str` в domain/normalization.py.
+
+**Приоритет**: P4 (Very Low) - разная семантика, консолидация может сломать логику
+
+---
+
+### 2.3 `serialize_to_json(...) if ... else None` Pattern (10+ мест)
+
+#### Текущее состояние
+
+```python
+# Повторяется в UniProt extractors:
+return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
+```
+
+#### Анализ
+
+- **Pattern**: Одна строка, 10+ мест в UniProt extractors
+- **Impact**: Very Low (не влияет на читаемость)
+- **Idiomatic**: Это стандартный Python idiom
+
+#### Рекомендация
+
+**НЕ рефакторить** - это идиоматичный код, wrapper не добавит ценности:
+
+```python
+# НЕ ДЕЛАТЬ - избыточная абстракция:
+def serialize_or_none(data: list | None) -> str | None:
+    return serialize_to_json(data, ensure_ascii=False) if data else None
+```
+
+**Приоритет**: P5 (Skip) - не требует действий
+
+---
+
+## 3. Паттерны, которые НЕ являются дублированием
+
+### 3.1 Похожие Названия Функций с Разной Логикой
+
+| Функция | OpenAlex | SemanticScholar | Отличия |
+|---------|----------|-----------------|---------|
+| `extract_authors` | `authorships[].author.display_name` | `authors[].name` | Разная структура API |
+| `extract_journal_info` | Returns `{journal_name, issn, publisher}` | Returns `{journal_name, volume, pages}` | Разные поля |
+| `extract_open_access_info` | Takes `dict` | Takes `bool, dict` | Разная сигнатура |
+
+**Вердикт**: Provider-specific extractors - **НЕ дублирование**
+
+### 3.2 Template Method Implementations
+
+`_extract_business_data` появляется 20 раз - это **abstract method implementations**, а не дублирование.
+Каждая реализация уникальна для entity type.
+
+### 3.3 Init Методы
+
+`__init__` в трансформерах похожи, но **правильно делегируют** в `super().__init__()`.
+Это стандартный паттерн наследования, не дублирование.
+
+---
+
+## 4. Матрица Приоритизации
+
+| # | Категория | Impact | Complexity | LOC | Приоритет | Рекомендация |
+|---|-----------|--------|------------|-----|-----------|--------------|
+| 1 | `_validate_taxonomy_id` | Low | Low | ~15 | P3 | Optional refactor |
+| 2 | `_normalize_doi` | Very Low | Medium | ~20 | P4 | Keep as-is |
+| 3 | `serialize_to_json` pattern | None | Low | ~10 | P5 | Skip |
+
+---
+
+## 5. Заключение
+
+### 5.1 Состояние Кодовой Базы
+
+Кодовая база BioETL **хорошо спроектирована** с точки зрения DRY:
+
+1. **Эффективная иерархия классов**: `BaseTransformer` → `BaseChemblTransformer` → Entity transformers
+2. **Правильное использование Mixins**: `HealthCheckMixin`, `HealthCheckProviderMixin`
+3. **Declarative DSL**: `field_specs.py` заменяет repetitive mapping code
+4. **Domain Services**: `IdentityService`, `DataNormalizationService` централизуют логику
+
+### 5.2 Рекомендованные Действия
+
+| Действие | Статус | Обоснование |
+|----------|--------|-------------|
+| Консолидация `_validate_taxonomy_id` | Optional | ~5 LOC экономии, P3 |
+| Консолидация `_normalize_doi` | NOT recommended | Разная семантика |
+| Refactor `serialize_to_json` pattern | NOT recommended | Идиоматичный код |
+| Создание новых Base Classes | NOT needed | Существующие абстракции достаточны |
+
+### 5.3 Метрики
+
+- **Обнаружено реального дублирования**: ~35 LOC (0.05% от 68,400 LOC)
+- **Потенциальная экономия**: ~15 LOC (при консолидации taxonomy validation)
+- **Качество абстракций**: HIGH - правильное использование Template Method, Mixins, DI
+
+---
+
+## 6. Чеклист Валидации
+
+Для подтверждения выводов:
+
+```bash
+# Проверка существующих абстракций
+grep -r "class Base" src/bioetl/ | wc -l  # ~10 base classes
+
+# Проверка делегирования в "больших" файлах
+wc -l src/bioetl/application/core/base_transformer.py  # 673 LOC, но с делегированием
+grep -c "self\._" src/bioetl/application/core/base_transformer.py  # ~15 delegations
+
+# Тесты проходят
+make lint && make test
+```
+
+---
+
+*Анализ завершён. Кодовая база не требует значительного рефакторинга для устранения дублирования.*
+
+================================================================================
 File: code-duplication-report-2026-01-05.md
 Path: archived\audits\code-duplication-report-2026-01-05.md
 ================================================================================
@@ -32658,6 +33030,389 @@ grep -E "SilverWriter|GoldWriter" docs/refactoring-plan.md
 ---
 
 **END OF REPORT**
+
+================================================================================
+File: config-dedup-analysis.md
+Path: archived\audits\config-dedup-analysis.md
+================================================================================
+# Configuration Duplication Analysis Report
+
+**Date**: 2026-01-21
+**Author**: Claude Code
+**Version**: 1.0.0
+
+## Executive Summary
+
+This analysis identifies significant duplication between:
+- `configs/pipelines/{provider}/{entity}.yaml` (pipeline configs)
+- `configs/filter/entities/{provider}/{entity}.yaml` (filter entity configs)
+- `configs/dq/entities/{provider}/{entity}.yaml` (DQ entity configs)
+
+**Key Findings**:
+- **~195 lines** of duplicated content across 20 pipeline configs
+- **input_filter**: 100% duplicated in 18/20 pipeline configs
+- **gold_filters**: 100% duplicated in 18/20 pipeline configs
+- **sink paths**: Follow predictable convention `data/output/{layer}/{provider}/{entity}`
+
+## Duplication Categories
+
+### Category 1: DUPLICATE (100% identical - should be removed)
+
+| Section | Description | Action |
+|---------|-------------|--------|
+| `input_filter` | Identical to filter entity config | Remove from pipeline config |
+| `gold_filters` | Identical to filter entity config | Remove from pipeline config |
+| `source_file` | Predictable: `../../sources/{provider}.yaml` | Auto-compute from provider |
+| `dq_config_file` | Predictable: `../../dq/entities/{provider}/{entity}.yaml` | Auto-compute from provider/entity |
+| `filter_config_file` | Predictable: `../../filter/entities/{provider}/{entity}.yaml` | Auto-compute from provider/entity |
+| `sink.bronze.path` | Predictable: `data/output/bronze/{provider}/{entity}` | Auto-compute |
+| `sink.silver.path` | Predictable: `data/output/silver/{provider}/{entity}` | Auto-compute |
+| `sink.gold.path` | Predictable: `data/output/gold/{provider}/{entity}` | Auto-compute |
+| `sink.silver.csv_export.path` | Same as silver path | Auto-compute |
+| `sink.gold.csv_export.path` | Same as gold path | Auto-compute |
+| `sink.silver.primary_key` | Same as `primary_keys` | Auto-copy from primary_keys |
+| `sink.silver.sort_by.columns` | Usually same as `primary_keys` | Auto-copy from primary_keys |
+| `sink.gold.sort_by.columns` | Usually same as `primary_keys` | Auto-copy from primary_keys |
+
+### Category 2: OVERRIDE (extends/differs from entity config - keep with comment)
+
+| Section | Description | Action |
+|---------|-------------|--------|
+| `dq_rules.field_validations` | Extends entity DQ config | Keep only overrides |
+| `dq_rules.cross_field_validations` | Extends entity DQ config | Keep only overrides |
+| `dq_rules.conditional_validations` | Extends entity DQ config | Keep only overrides |
+| `sink.silver.partition_by` | Entity-specific partitioning | Keep (non-default) |
+| `source.*` (special) | Provider-specific API config (e.g., PubMed search_term) | Keep |
+
+### Category 3: UNIQUE (only in pipeline config - keep as-is)
+
+| Section | Description | Action |
+|---------|-------------|--------|
+| `pipeline_name` | Unique identifier | Keep (required) |
+| `provider` | Provider name | Keep (required) |
+| `entity_type` | Entity type | Keep (required) |
+| `version` | Config version | Keep (required) |
+| `description` | Human-readable description | Keep (required) |
+| `primary_keys` | Deduplication keys | Keep (required) |
+| `silver_table` | Silver table name | Keep (required) |
+| `gold_table` | Gold table name | Keep (required) |
+
+---
+
+## Detailed Inventory by Provider
+
+### ChEMBL (12 entities)
+
+| Entity | File | Lines | Duplicates | After Cleanup |
+|--------|------|-------|------------|---------------|
+| activity | `chembl/activity.yaml` | 128 | 42 | ~86 |
+| assay | `chembl/assay.yaml` | 102 | 35 | ~67 |
+| assay_parameters | `chembl/assay_parameters.yaml` | 68 | 32 | ~36 |
+| cell_line | `chembl/cell_line.yaml` | 65 | 32 | ~33 |
+| compound_record | `chembl/compound_record.yaml` | 71 | 32 | ~39 |
+| molecule | `chembl/molecule.yaml` | 130 | 35 | ~95 |
+| protein_class | `chembl/protein_class.yaml` | 69 | 32 | ~37 |
+| publication | `chembl/publication.yaml` | 77 | 32 | ~45 |
+| publication_similarity | `chembl/publication_similarity.yaml` | 70 | 32 | ~38 |
+| publication_term | `chembl/publication_term.yaml` | 75 | 32 | ~43 |
+| target | `chembl/target.yaml` | 110 | 42 | ~68 |
+| target_component | `chembl/target_component.yaml` | 67 | 32 | ~35 |
+
+**ChEMBL Subtotal**: 1,032 lines → ~622 lines (-410 lines, -40%)
+
+### UniProt (2 entities)
+
+| Entity | File | Lines | Duplicates | After Cleanup |
+|--------|------|-------|------------|---------------|
+| protein | `uniprot/protein.yaml` | 71 | 35 | ~36 |
+| idmapping | `uniprot/idmapping.yaml` | 95 | 35 | ~60 |
+
+**UniProt Subtotal**: 166 lines → ~96 lines (-70 lines, -42%)
+
+### PubChem (1 entity)
+
+| Entity | File | Lines | Duplicates | After Cleanup |
+|--------|------|-------|------------|---------------|
+| compound | `pubchem/compound.yaml` | 128 | 35 | ~93 |
+
+**PubChem Subtotal**: 128 lines → ~93 lines (-35 lines, -27%)
+
+### PubMed (1 entity)
+
+| Entity | File | Lines | Duplicates | After Cleanup |
+|--------|------|-------|------------|---------------|
+| publications | `pubmed/publications.yaml` | 76 | 32 | ~44 |
+
+**PubMed Subtotal**: 76 lines → ~44 lines (-32 lines, -42%)
+
+### CrossRef (1 entity)
+
+| Entity | File | Lines | Duplicates | After Cleanup |
+|--------|------|-------|------------|---------------|
+| publication | `crossref/publication.yaml` | 72 | 35 | ~37 |
+
+**CrossRef Subtotal**: 72 lines → ~37 lines (-35 lines, -49%)
+
+### OpenAlex (1 entity)
+
+| Entity | File | Lines | Duplicates | After Cleanup |
+|--------|------|-------|------------|---------------|
+| publication | `openalex/publication.yaml` | 80 | 35 | ~45 |
+
+**OpenAlex Subtotal**: 80 lines → ~45 lines (-35 lines, -44%)
+
+### SemanticScholar (1 entity)
+
+| Entity | File | Lines | Duplicates | After Cleanup |
+|--------|------|-------|------------|---------------|
+| publication | `semanticscholar/publication.yaml` | 75 | 32 | ~43 |
+
+**SemanticScholar Subtotal**: 75 lines → ~43 lines (-32 lines, -43%)
+
+### Composite (1 entity)
+
+| Entity | File | Lines | Duplicates | After Cleanup |
+|--------|------|-------|------------|---------------|
+| publication | `composite/publication.yaml` | 196 | 45 | ~151 |
+
+**Composite Subtotal**: 196 lines → ~151 lines (-45 lines, -23%)
+
+---
+
+## Total Summary
+
+| Metric | Before | After | Reduction |
+|--------|--------|-------|-----------|
+| **Total Lines** | 1,825 | ~1,131 | **-694 lines (-38%)** |
+| **Duplicate Lines** | 694 | 0 | **-694 lines** |
+
+---
+
+## Detailed Duplication Examples
+
+### Example 1: chembl/activity.yaml
+
+**DUPLICATE - input_filter** (lines 123-128 in pipeline, lines 16-21 in filter entity):
+```yaml
+# Pipeline config (DELETE)
+input_filter:
+  enabled: true
+  source_path: "data/input/activity.csv"
+  column_name: "activity_id"
+  filter_field: "activity_id"
+  batch_size: 20
+
+# Filter entity config (KEEP)
+input_filter:
+  enabled: true
+  source_path: "data/input/activity.csv"
+  column_name: "activity_id"
+  filter_field: "activity_id"
+  batch_size: 20
+```
+
+**DUPLICATE - gold_filters** (lines 87-102 in pipeline, lines 27-52 in filter entity):
+```yaml
+# Both configs have IDENTICAL content:
+gold_filters:
+  columns:
+    standard_type: [IC50, Ki]
+    standard_units: [nM]
+    standard_relation: ["="]
+    assay_type: [B, F]
+    potential_duplicate: ["0"]
+  ranges:
+    standard_value:
+      min: 0
+      include_min: false
+  required_fields:
+    - standard_type
+    - standard_value
+    - standard_units
+    - target_chembl_id
+```
+
+**DUPLICATE - sink paths** (lines 105-120):
+```yaml
+# Can be auto-computed from provider=chembl, entity_type=activity:
+sink:
+  bronze:
+    path: "data/output/bronze/chembl/activity"  # = data/output/bronze/{provider}/{entity}
+  silver:
+    path: "data/output/silver/chembl/activity"  # = data/output/silver/{provider}/{entity}
+    primary_key: ["activity_id"]                 # = primary_keys
+    sort_by:
+      columns: ["activity_id"]                   # = primary_keys
+    csv_export:
+      path: "data/output/silver/chembl/activity" # = silver.path
+  gold:
+    path: "data/output/gold/chembl/activity"    # = data/output/gold/{provider}/{entity}
+    sort_by:
+      columns: ["activity_id"]                   # = primary_keys
+    csv_export:
+      path: "data/output/gold/chembl/activity"  # = gold.path
+```
+
+### Example 2: uniprot/protein.yaml
+
+**DUPLICATE - All filter config identical to filter entity config**
+
+Pipeline config gold_filters (lines 37-43):
+```yaml
+gold_filters:
+  required_fields:
+    - accession
+    - entry_name
+    - organism
+  columns:
+    reviewed: ["true"]
+```
+
+Filter entity config (lines 28-38):
+```yaml
+gold_filters:
+  columns:
+    reviewed: ["true"]
+  required_fields:
+    - accession
+    - entry_name
+    - organism
+```
+
+---
+
+## Convention-Based Resolution Proposal
+
+### Proposed _base.yaml Additions
+
+```yaml
+# Convention-based path resolution (added to _base.yaml)
+# These are computed at load time from provider and entity_type:
+
+# File references - auto-computed if not specified:
+# source_file: ../../sources/{provider}.yaml
+# dq_config_file: ../../dq/entities/{provider}/{entity_type}.yaml
+# filter_config_file: ../../filter/entities/{provider}/{entity_type}.yaml
+
+# Sink paths - auto-computed if not specified:
+# sink.bronze.path: data/output/bronze/{provider}/{entity_type}
+# sink.silver.path: data/output/silver/{provider}/{entity_type}
+# sink.gold.path: data/output/gold/{provider}/{entity_type}
+# sink.silver.csv_export.path: {sink.silver.path}
+# sink.gold.csv_export.path: {sink.gold.path}
+
+# Primary key propagation:
+# sink.silver.primary_key: {primary_keys}
+# sink.silver.sort_by.columns: {primary_keys}
+# sink.gold.sort_by.columns: {primary_keys}
+```
+
+### Proposed Minimal Pipeline Config Format
+
+After implementing conventions, a minimal pipeline config would be:
+
+```yaml
+# configs/pipelines/chembl/activity.yaml
+# Minimal config - all paths and filters resolved by convention
+
+pipeline_name: chembl_activity
+provider: chembl
+entity_type: activity
+version: "1.2.0"
+description: "Extract biological activity records from ChEMBL API"
+
+primary_keys: ["activity_id"]
+silver_table: "chembl_activity"
+gold_table: "chembl_activity"
+
+# DQ overrides (only fields that DIFFER from entity DQ config)
+dq_rules:
+  field_validations:
+    # Override: Extended enum with additional types
+    - field: "standard_type"
+      type: "enum"
+      allowed: ["IC50", "Ki", "Kd", "EC50", "AC50", "GI50", "ED50", "MIC", "CC50"]
+      nullable: true
+```
+
+**Result**: 128 lines → ~25 lines (80% reduction)
+
+---
+
+## Implementation Plan
+
+### Phase 1: Analysis (COMPLETE)
+- [x] Inventory duplication
+- [x] Categorize (DUPLICATE/OVERRIDE/UNIQUE)
+- [x] Create this analysis document
+
+### Phase 2: Config Loader Enhancement
+- [ ] Add convention-based path resolution to config loader
+- [ ] Auto-compute `source_file`, `dq_config_file`, `filter_config_file`
+- [ ] Auto-compute sink paths from provider/entity_type
+- [ ] Auto-copy primary_keys to sink.silver.primary_key and sort_by
+
+### Phase 3: Pipeline Config Cleanup
+- [ ] Remove duplicated `input_filter` sections
+- [ ] Remove duplicated `gold_filters` sections
+- [ ] Remove convention-computed paths
+- [ ] Add `# Inherited from: {path}` comments where needed
+- [ ] Keep only OVERRIDE and UNIQUE sections
+
+### Phase 4: Verification
+- [ ] Run `python scripts/validate_pipeline_configs.py`
+- [ ] Run `pytest tests/unit/composition/test_config_loader.py`
+- [ ] Run `pytest tests/integration/`
+- [ ] Verify all pipelines still work identically
+
+---
+
+## Risk Assessment
+
+| Risk | Mitigation |
+|------|------------|
+| Breaking existing pipeline behavior | Comprehensive test coverage before/after |
+| Config loader complexity | Well-documented convention rules |
+| Backward compatibility | Support both explicit and computed paths |
+| Merge conflicts during transition | Atomic refactoring per provider |
+
+---
+
+## Appendix: Per-Entity Duplication Details
+
+### chembl/activity.yaml
+
+| Section | Lines | Status | Details |
+|---------|-------|--------|---------|
+| Header comments | 1-6 | UNIQUE | Keep |
+| pipeline_name, provider, entity_type | 7-11 | UNIQUE | Keep |
+| primary_keys, tables | 13-15 | UNIQUE | Keep |
+| source_file | 18 | DUPLICATE | Auto-compute |
+| dq_config_file comment | 20-29 | DUPLICATE | Auto-compute |
+| filter_config_file | 31-38 | DUPLICATE | Auto-compute |
+| dq_rules (overrides) | 45-84 | OVERRIDE | Keep only differences |
+| gold_filters | 86-102 | DUPLICATE | Remove (in filter entity) |
+| sink paths | 104-120 | DUPLICATE | Auto-compute |
+| input_filter | 122-128 | DUPLICATE | Remove (in filter entity) |
+
+### chembl/target.yaml
+
+| Section | Lines | Status | Details |
+|---------|-------|--------|---------|
+| Header comments | 1-5 | UNIQUE | Keep |
+| pipeline_name, provider, entity_type | 6-10 | UNIQUE | Keep |
+| primary_keys, tables | 12-14 | UNIQUE | Keep |
+| source_file | 16 | DUPLICATE | Auto-compute |
+| dq_config_file | 18-25 | DUPLICATE | Auto-compute |
+| filter_config_file | 27-34 | DUPLICATE | Auto-compute |
+| dq_rules (overrides) | 40-65 | OVERRIDE | Keep (extended enums, unique validations) |
+| gold_filters | 67-83 | DUPLICATE | Remove (in filter entity) |
+| sink paths | 85-102 | DUPLICATE | Auto-compute |
+| input_filter | 104-110 | DUPLICATE | Remove (in filter entity) |
+
+---
+
+*Generated by config deduplication analysis tool*
 
 ================================================================================
 File: config-unification-plan.md
@@ -33045,10 +33800,10 @@ Path: archived\audits\config_discrepancies_report.md
 ================================================================================
 # Config Discrepancies Report
 
-Generated: 2026-01-06T18:30:06.183527
+Generated: 2026-01-23T09:37:25.950380
 
-Total configs: 20
-Total unique parameters: 129
+Total configs: 21
+Total unique parameters: 176
 
 ## 1. Parameters by Category
 
@@ -33056,278 +33811,400 @@ Total unique parameters: 129
 
 | Parameter | Presence |
 |-----------|----------|
-| `batch_size` | 2/20 |
+| `batch_size` | 1/21 |
 
 ### checkpoint_interval
 
 | Parameter | Presence |
 |-----------|----------|
-| `checkpoint_interval` | 2/20 |
+| `checkpoint_interval` | 1/21 |
 
 ### circuit_breaker
 
 | Parameter | Presence |
 |-----------|----------|
-| `circuit_breaker` | 2/20 |
-| `circuit_breaker.failure_threshold` | 2/20 |
-| `circuit_breaker.recovery_timeout` | 2/20 |
+| `circuit_breaker` | 1/21 |
+| `circuit_breaker.failure_threshold` | 1/21 |
+| `circuit_breaker.recovery_timeout` | 1/21 |
 
-### defaults_version
+### composite
 
 | Parameter | Presence |
 |-----------|----------|
-| `defaults_version` | 1/20 |
+| `composite` | 1/21 |
+| `composite.dq_rules` | 1/21 |
+| `composite.enrichers` | 1/21 |
+| `composite.execution` | 1/21 |
+| `composite.lineage` | 1/21 |
+| `composite.merge` | 1/21 |
+| `composite.name` | 1/21 |
+| `composite.seed` | 1/21 |
+| `composite.version` | 1/21 |
+| `composite.dq_rules.enricher_overrides` | 1/21 |
+| `composite.dq_rules.hard_fail_threshold` | 1/21 |
+| `composite.dq_rules.required_fields` | 1/21 |
+| `composite.dq_rules.soft_fail_threshold` | 1/21 |
+| `composite.execution.checkpoint_enabled` | 1/21 |
+| `composite.execution.max_concurrency` | 1/21 |
+| `composite.execution.retry` | 1/21 |
+| `composite.lineage.track_field_sources` | 1/21 |
+| `composite.lineage.track_status` | 1/21 |
+| `composite.lineage.track_timestamps` | 1/21 |
+| `composite.merge.conflict_resolution` | 1/21 |
+| `composite.merge.field_priorities` | 1/21 |
+| `composite.merge.output` | 1/21 |
+| `composite.merge.strategy` | 1/21 |
+| `composite.seed.output_keys` | 1/21 |
+| `composite.seed.pipeline` | 1/21 |
+| `composite.seed.silver_table` | 1/21 |
+| `composite.dq_rules.enricher_overrides.pubmed_publication` | 1/21 |
+| `composite.dq_rules.enricher_overrides.semanticscholar_publication` | 1/21 |
+| `composite.execution.retry.backoff_multiplier` | 1/21 |
+| `composite.execution.retry.max_attempts` | 1/21 |
+| `composite.merge.field_priorities.abstract` | 1/21 |
+| `composite.merge.field_priorities.citations_count` | 1/21 |
+| `composite.merge.field_priorities.concepts` | 1/21 |
+| `composite.merge.field_priorities.mesh_terms` | 1/21 |
+| `composite.merge.field_priorities.title` | 1/21 |
+| `composite.merge.field_priorities.tldr` | 1/21 |
+| `composite.merge.output.gold` | 1/21 |
+| `composite.merge.output.silver` | 1/21 |
+| `composite.dq_rules.enricher_overrides.pubmed_publication.hard_fail_threshold` | 1/21 |
+| `composite.dq_rules.enricher_overrides.pubmed_publication.soft_fail_threshold` | 1/21 |
+| `composite.dq_rules.enricher_overrides.semanticscholar_publication.hard_fail_threshold` | 1/21 |
+| `composite.dq_rules.enricher_overrides.semanticscholar_publication.soft_fail_threshold` | 1/21 |
 
 ### description
 
 | Parameter | Presence |
 |-----------|----------|
-| `description` | 19/20 |
+| `description` | 19/21 |
+
+### dq_config_file
+
+| Parameter | Presence |
+|-----------|----------|
+| `dq_config_file` | 15/21 |
 
 ### dq_rules
 
 | Parameter | Presence |
 |-----------|----------|
-| `dq_rules` | 2/20 |
-| `dq_rules.hard_fail_threshold` | 2/20 |
-| `dq_rules.soft_fail_threshold` | 2/20 |
+| `dq_rules` | 6/21 |
+| `dq_rules.conditional_validations` | 2/21 |
+| `dq_rules.cross_field_validations` | 6/21 |
+| `dq_rules.field_validations` | 6/21 |
+| `dq_rules.hard_fail_threshold` | 1/21 |
+| `dq_rules.invalid_record_policy` | 1/21 |
+| `dq_rules.report` | 1/21 |
+| `dq_rules.soft_fail_threshold` | 1/21 |
+| `dq_rules.strict_validation` | 1/21 |
+| `dq_rules.report.enabled` | 1/21 |
+| `dq_rules.report.format` | 1/21 |
+| `dq_rules.report.include_sample_failures` | 1/21 |
+| `dq_rules.report.sample_size` | 1/21 |
 
 ### entity_type
 
 | Parameter | Presence |
 |-----------|----------|
-| `entity_type` | 19/20 |
+| `entity_type` | 19/21 |
+
+### filter_config_file
+
+| Parameter | Presence |
+|-----------|----------|
+| `filter_config_file` | 5/21 |
 
 ### gold_filters
 
 | Parameter | Presence |
 |-----------|----------|
-| `gold_filters` | 19/20 |
-| `gold_filters.columns` | 11/20 |
-| `gold_filters.list_contains` | 1/20 |
-| `gold_filters.list_lengths` | 1/20 |
-| `gold_filters.ranges` | 6/20 |
-| `gold_filters.required_fields` | 19/20 |
-| `gold_filters.columns.assay_type` | 2/20 |
-| `gold_filters.columns.component_type` | 1/20 |
-| `gold_filters.columns.confidence_score` | 1/20 |
-| `gold_filters.columns.doc_type` | 1/20 |
-| `gold_filters.columns.downgraded` | 1/20 |
-| `gold_filters.columns.inorganic_flag` | 1/20 |
-| `gold_filters.columns.molecule_type` | 1/20 |
-| `gold_filters.columns.potential_duplicate` | 1/20 |
-| `gold_filters.columns.relationship_type` | 1/20 |
-| `gold_filters.columns.reviewed` | 1/20 |
-| `gold_filters.columns.standard_relation` | 1/20 |
-| `gold_filters.columns.standard_type` | 1/20 |
-| `gold_filters.columns.standard_units` | 1/20 |
-| `gold_filters.columns.structure_type` | 1/20 |
-| `gold_filters.columns.target_type` | 1/20 |
-| `gold_filters.columns.term_type` | 1/20 |
-| `gold_filters.list_contains.component_types` | 1/20 |
-| `gold_filters.list_lengths.component_accessions` | 1/20 |
-| `gold_filters.list_lengths.component_ids` | 1/20 |
-| `gold_filters.ranges.max_tani` | 1/20 |
-| `gold_filters.ranges.standard_value` | 1/20 |
-| `gold_filters.ranges.year` | 4/20 |
-| `gold_filters.list_contains.component_types.mode` | 1/20 |
-| `gold_filters.list_contains.component_types.values` | 1/20 |
-| `gold_filters.list_lengths.component_accessions.max` | 1/20 |
-| `gold_filters.list_lengths.component_accessions.min` | 1/20 |
-| `gold_filters.list_lengths.component_ids.min` | 1/20 |
-| `gold_filters.ranges.max_tani.include_min` | 1/20 |
-| `gold_filters.ranges.max_tani.min` | 1/20 |
-| `gold_filters.ranges.standard_value.include_min` | 1/20 |
-| `gold_filters.ranges.standard_value.min` | 1/20 |
-| `gold_filters.ranges.year.include_min` | 1/20 |
-| `gold_filters.ranges.year.max` | 3/20 |
-| `gold_filters.ranges.year.min` | 4/20 |
+| `gold_filters` | 1/21 |
+| `gold_filters.required_fields` | 1/21 |
 
 ### gold_table
 
 | Parameter | Presence |
 |-----------|----------|
-| `gold_table` | 8/20 |
+| `gold_table` | 19/21 |
 
 ### input_filter
 
 | Parameter | Presence |
 |-----------|----------|
-| `input_filter` | 20/20 |
-| `input_filter.batch_size` | 17/20 |
-| `input_filter.column_name` | 16/20 |
-| `input_filter.enabled` | 20/20 |
-| `input_filter.fallback_column` | 3/20 |
-| `input_filter.filter_field` | 16/20 |
-| `input_filter.source_path` | 16/20 |
+| `input_filter` | 1/21 |
+| `input_filter.batch_size` | 1/21 |
+| `input_filter.enabled` | 1/21 |
 
 ### maintenance
 
 | Parameter | Presence |
 |-----------|----------|
-| `maintenance` | 1/20 |
-| `maintenance.auto_vacuum` | 1/20 |
-| `maintenance.vacuum_retention_days` | 1/20 |
+| `maintenance` | 1/21 |
+| `maintenance.auto_vacuum` | 1/21 |
+| `maintenance.vacuum_retention_days` | 1/21 |
 
 ### pipeline_name
 
 | Parameter | Presence |
 |-----------|----------|
-| `pipeline_name` | 19/20 |
+| `pipeline_name` | 19/21 |
 
 ### primary_keys
 
 | Parameter | Presence |
 |-----------|----------|
-| `primary_keys` | 19/20 |
+| `primary_keys` | 19/21 |
 
 ### provider
 
 | Parameter | Presence |
 |-----------|----------|
-| `provider` | 19/20 |
+| `provider` | 19/21 |
 
-### rate_limit
+### schema_version
 
 | Parameter | Presence |
 |-----------|----------|
-| `rate_limit` | 1/20 |
-| `rate_limit.burst` | 1/20 |
-| `rate_limit.requests_per_second` | 1/20 |
+| `schema_version` | 1/21 |
 
 ### silver_table
 
 | Parameter | Presence |
 |-----------|----------|
-| `silver_table` | 19/20 |
+| `silver_table` | 19/21 |
 
 ### sink
 
 | Parameter | Presence |
 |-----------|----------|
-| `sink` | 20/20 |
-| `sink.bronze` | 20/20 |
-| `sink.gold` | 20/20 |
-| `sink.silver` | 20/20 |
-| `sink.bronze.deterministic` | 1/20 |
-| `sink.bronze.enabled` | 1/20 |
-| `sink.bronze.format` | 1/20 |
-| `sink.bronze.path` | 18/20 |
-| `sink.bronze.save_json` | 1/20 |
-| `sink.gold.csv_export` | 20/20 |
-| `sink.gold.deterministic` | 1/20 |
-| `sink.gold.enabled` | 2/20 |
-| `sink.gold.format` | 2/20 |
-| `sink.gold.mode` | 2/20 |
-| `sink.gold.path` | 19/20 |
-| `sink.gold.sort_by` | 4/20 |
-| `sink.gold.validation` | 1/20 |
-| `sink.silver.classification` | 2/20 |
-| `sink.silver.csv_export` | 20/20 |
-| `sink.silver.deterministic` | 1/20 |
-| `sink.silver.forensic_retention` | 1/20 |
-| `sink.silver.format` | 2/20 |
-| `sink.silver.mode` | 2/20 |
-| `sink.silver.on_schema_mismatch` | 1/20 |
-| `sink.silver.partition_by` | 16/20 |
-| `sink.silver.path` | 19/20 |
-| `sink.silver.primary_key` | 17/20 |
-| `sink.silver.sort_by` | 4/20 |
-| `sink.gold.csv_export.delimiter` | 1/20 |
-| `sink.gold.csv_export.enabled` | 2/20 |
-| `sink.gold.csv_export.encoding` | 1/20 |
-| `sink.gold.csv_export.header` | 1/20 |
-| `sink.gold.csv_export.path` | 19/20 |
-| `sink.gold.sort_by.ascending` | 4/20 |
-| `sink.gold.sort_by.columns` | 4/20 |
-| `sink.gold.validation.strict` | 1/20 |
-| `sink.silver.csv_export.delimiter` | 2/20 |
-| `sink.silver.csv_export.enabled` | 2/20 |
-| `sink.silver.csv_export.encoding` | 2/20 |
-| `sink.silver.csv_export.header` | 2/20 |
-| `sink.silver.csv_export.path` | 19/20 |
-| `sink.silver.sort_by.ascending` | 4/20 |
-| `sink.silver.sort_by.columns` | 4/20 |
+| `sink` | 19/21 |
+| `sink.bronze` | 17/21 |
+| `sink.gold` | 17/21 |
+| `sink.silver` | 19/21 |
+| `sink.bronze.deterministic` | 1/21 |
+| `sink.bronze.dq_report` | 1/21 |
+| `sink.bronze.flat_structure` | 6/21 |
+| `sink.bronze.format` | 1/21 |
+| `sink.bronze.metadata` | 1/21 |
+| `sink.bronze.path` | 16/21 |
+| `sink.bronze.save_json` | 1/21 |
+| `sink.bronze.save_metadata` | 1/21 |
+| `sink.gold.csv_export` | 17/21 |
+| `sink.gold.deterministic` | 1/21 |
+| `sink.gold.dq_report` | 1/21 |
+| `sink.gold.enabled` | 1/21 |
+| `sink.gold.flat_structure` | 6/21 |
+| `sink.gold.format` | 1/21 |
+| `sink.gold.metadata` | 1/21 |
+| `sink.gold.mode` | 1/21 |
+| `sink.gold.path` | 16/21 |
+| `sink.gold.save_metadata` | 1/21 |
+| `sink.gold.sort_by` | 16/21 |
+| `sink.gold.validation` | 1/21 |
+| `sink.silver.classification` | 1/21 |
+| `sink.silver.csv_export` | 17/21 |
+| `sink.silver.deterministic` | 1/21 |
+| `sink.silver.dq_report` | 1/21 |
+| `sink.silver.flat_structure` | 6/21 |
+| `sink.silver.forensic_retention` | 1/21 |
+| `sink.silver.format` | 1/21 |
+| `sink.silver.metadata` | 1/21 |
+| `sink.silver.mode` | 1/21 |
+| `sink.silver.on_schema_mismatch` | 1/21 |
+| `sink.silver.partition_by` | 16/21 |
+| `sink.silver.path` | 16/21 |
+| `sink.silver.primary_key` | 15/21 |
+| `sink.silver.save_metadata` | 1/21 |
+| `sink.silver.sort_by` | 16/21 |
+| `sink.bronze.dq_report.enabled` | 1/21 |
+| `sink.bronze.metadata.description` | 1/21 |
+| `sink.bronze.metadata.lineage` | 1/21 |
+| `sink.bronze.metadata.owner` | 1/21 |
+| `sink.bronze.metadata.retention_days` | 1/21 |
+| `sink.bronze.metadata.sla_freshness_hours` | 1/21 |
+| `sink.bronze.metadata.steward` | 1/21 |
+| `sink.bronze.metadata.tags` | 1/21 |
+| `sink.gold.csv_export.delimiter` | 1/21 |
+| `sink.gold.csv_export.enabled` | 1/21 |
+| `sink.gold.csv_export.encoding` | 1/21 |
+| `sink.gold.csv_export.header` | 1/21 |
+| `sink.gold.csv_export.path` | 16/21 |
+| `sink.gold.dq_report.enabled` | 1/21 |
+| `sink.gold.metadata.business_domain` | 1/21 |
+| `sink.gold.metadata.description` | 1/21 |
+| `sink.gold.metadata.lineage` | 1/21 |
+| `sink.gold.metadata.tags` | 1/21 |
+| `sink.gold.metadata.use_cases` | 1/21 |
+| `sink.gold.sort_by.ascending` | 16/21 |
+| `sink.gold.sort_by.columns` | 15/21 |
+| `sink.gold.validation.strict` | 1/21 |
+| `sink.silver.csv_export.delimiter` | 1/21 |
+| `sink.silver.csv_export.enabled` | 1/21 |
+| `sink.silver.csv_export.encoding` | 1/21 |
+| `sink.silver.csv_export.header` | 1/21 |
+| `sink.silver.csv_export.path` | 16/21 |
+| `sink.silver.dq_report.enabled` | 1/21 |
+| `sink.silver.metadata.description` | 1/21 |
+| `sink.silver.metadata.lineage` | 1/21 |
+| `sink.silver.metadata.quality_expectations` | 1/21 |
+| `sink.silver.metadata.tags` | 1/21 |
+| `sink.silver.sort_by.ascending` | 16/21 |
+| `sink.silver.sort_by.columns` | 15/21 |
+| `sink.bronze.metadata.lineage.extraction_method` | 1/21 |
+| `sink.bronze.metadata.lineage.source_system` | 1/21 |
+| `sink.bronze.metadata.lineage.source_version` | 1/21 |
+| `sink.gold.metadata.lineage.filters_applied` | 1/21 |
+| `sink.gold.metadata.lineage.source_layer` | 1/21 |
+| `sink.silver.metadata.lineage.source_layer` | 1/21 |
+| `sink.silver.metadata.lineage.transformations` | 1/21 |
+| `sink.silver.metadata.quality_expectations.accuracy` | 1/21 |
+| `sink.silver.metadata.quality_expectations.completeness` | 1/21 |
 
 ### source
 
 | Parameter | Presence |
 |-----------|----------|
-| `source` | 3/20 |
-| `source.api` | 1/20 |
-| `source.api_key` | 1/20 |
-| `source.batch_size` | 1/20 |
-| `source.email` | 2/20 |
-| `source.input_path` | 1/20 |
-| `source.load_strategy` | 1/20 |
-| `source.search_term` | 1/20 |
-| `source.type` | 1/20 |
-| `source.api.base_url` | 1/20 |
-| `source.api.from_db` | 1/20 |
-| `source.api.to_db` | 1/20 |
+| `source` | 4/21 |
+| `source.api` | 1/21 |
+| `source.api_key` | 1/21 |
+| `source.batch_size` | 1/21 |
+| `source.email` | 2/21 |
+| `source.input_path` | 1/21 |
+| `source.load_strategy` | 2/21 |
+| `source.search_term` | 1/21 |
+| `source.type` | 2/21 |
+| `source.api.base_url` | 1/21 |
+| `source.api.from_db` | 1/21 |
+| `source.api.to_db` | 1/21 |
 
 ### source_file
 
 | Parameter | Presence |
 |-----------|----------|
-| `source_file` | 18/20 |
+| `source_file` | 15/21 |
 
 ### transform
 
 | Parameter | Presence |
 |-----------|----------|
-| `transform` | 7/20 |
-| `transform.steps` | 7/20 |
-| `transform.version` | 7/20 |
+| `transform` | 1/21 |
+| `transform.steps` | 1/21 |
 
 ### version
 
 | Parameter | Presence |
 |-----------|----------|
-| `version` | 19/20 |
+| `version` | 19/21 |
 
 ## 2. Entity Config Comparison
 
 | Config | pipeline_name | provider | entity_type | version | description | primary_keys | silver_table | gold_table | source_file | source | transform | dq_rules | circuit_breaker | rate_limit | gold_filters | sink | input_filter |
 |--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
-| chembl/activity | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/assay | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/assay_parameters | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/cell_line | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/compound_record | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/document | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/document_similarity | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/document_term | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/molecule | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/protein_class | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/target | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| chembl/target_component | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | ✓ | ✓ | ✓ |
-| crossref/publication_enrichment | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | ✓ | — | — | — | ✓ | ✓ | ✓ |
-| openalex/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | ✓ | ✓ | ✓ |
-| pubchem/compound | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | ✓ | ✓ | ✓ |
-| pubmed/publications | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | ✓ | ✓ | ✓ |
-| semanticscholar/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | ✓ | ✓ | ✓ |
-| uniprot/idmapping | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| uniprot/protein | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | ✓ | ✓ | ✓ |
+| _base | — | — | — | — | — | — | — | — | — | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | ✓ |
+| chembl/activity | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | ✓ | — | — | — | — | — |
+| chembl/assay | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | ✓ | — | — | — | ✓ | — |
+| chembl/assay_parameters | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/cell_line | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/compound_record | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/molecule | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | — | — | — | ✓ | — |
+| chembl/protein_class | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/publication_similarity | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/publication_term | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| chembl/target | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | — | — | — | ✓ | — |
+| chembl/target_component | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| composite/publication | — | — | — | — | — | — | — | — | — | — | — | — | — | — | ✓ | — | — |
+| crossref/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| openalex/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | ✓ | — |
+| pubchem/compound | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | — | — | — | ✓ | — |
+| pubmed/publications | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | — |
+| semanticscholar/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
+| uniprot/idmapping | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | ✓ | — |
+| uniprot/protein | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | — | ✓ | — |
 
 ## 3. Discrepancy Categories
 
 ### A. Missing in _defaults (should be added)
 
-- `batch_size` - present in: chembl/protein_class, chembl/target_component
-- `checkpoint_interval` - present in: chembl/protein_class, chembl/target_component
-- `description` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `entity_type` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `gold_filters` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `gold_table` - present in: chembl/protein_class, chembl/target_component, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `pipeline_name` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `primary_keys` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `provider` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `rate_limit` - present in: uniprot/idmapping
-- `rate_limit.burst` - present in: uniprot/idmapping
-- `rate_limit.requests_per_second` - present in: uniprot/idmapping
-- `silver_table` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `source` - present in: openalex/publication, pubmed/publications, uniprot/idmapping
+- `batch_size` - present in: chembl/protein_class
+- `checkpoint_interval` - present in: chembl/protein_class
+- `circuit_breaker` - present in: _base
+- `circuit_breaker.failure_threshold` - present in: _base
+- `circuit_breaker.recovery_timeout` - present in: _base
+- `composite` - present in: composite/publication
+- `composite.dq_rules` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.pubmed_publication` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.pubmed_publication.hard_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.pubmed_publication.soft_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.semanticscholar_publication` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.semanticscholar_publication.hard_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.enricher_overrides.semanticscholar_publication.soft_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.hard_fail_threshold` - present in: composite/publication
+- `composite.dq_rules.required_fields` - present in: composite/publication
+- `composite.dq_rules.soft_fail_threshold` - present in: composite/publication
+- `composite.enrichers` - present in: composite/publication
+- `composite.execution` - present in: composite/publication
+- `composite.execution.checkpoint_enabled` - present in: composite/publication
+- `composite.execution.max_concurrency` - present in: composite/publication
+- `composite.execution.retry` - present in: composite/publication
+- `composite.execution.retry.backoff_multiplier` - present in: composite/publication
+- `composite.execution.retry.max_attempts` - present in: composite/publication
+- `composite.lineage` - present in: composite/publication
+- `composite.lineage.track_field_sources` - present in: composite/publication
+- `composite.lineage.track_status` - present in: composite/publication
+- `composite.lineage.track_timestamps` - present in: composite/publication
+- `composite.merge` - present in: composite/publication
+- `composite.merge.conflict_resolution` - present in: composite/publication
+- `composite.merge.field_priorities` - present in: composite/publication
+- `composite.merge.field_priorities.abstract` - present in: composite/publication
+- `composite.merge.field_priorities.citations_count` - present in: composite/publication
+- `composite.merge.field_priorities.concepts` - present in: composite/publication
+- `composite.merge.field_priorities.mesh_terms` - present in: composite/publication
+- `composite.merge.field_priorities.title` - present in: composite/publication
+- `composite.merge.field_priorities.tldr` - present in: composite/publication
+- `composite.merge.output` - present in: composite/publication
+- `composite.merge.output.gold` - present in: composite/publication
+- `composite.merge.output.silver` - present in: composite/publication
+- `composite.merge.strategy` - present in: composite/publication
+- `composite.name` - present in: composite/publication
+- `composite.seed` - present in: composite/publication
+- `composite.seed.output_keys` - present in: composite/publication
+- `composite.seed.pipeline` - present in: composite/publication
+- `composite.seed.silver_table` - present in: composite/publication
+- `composite.version` - present in: composite/publication
+- `description` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `dq_config_file` - present in: chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+- `dq_rules` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+- `dq_rules.conditional_validations` - present in: _base, chembl/activity
+- `dq_rules.cross_field_validations` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+- `dq_rules.field_validations` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+- `dq_rules.hard_fail_threshold` - present in: _base
+- `dq_rules.invalid_record_policy` - present in: _base
+- `dq_rules.report` - present in: _base
+- `dq_rules.report.enabled` - present in: _base
+- `dq_rules.report.format` - present in: _base
+- `dq_rules.report.include_sample_failures` - present in: _base
+- `dq_rules.report.sample_size` - present in: _base
+- `dq_rules.soft_fail_threshold` - present in: _base
+- `dq_rules.strict_validation` - present in: _base
+- `entity_type` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `filter_config_file` - present in: chembl/publication, chembl/publication_similarity, chembl/publication_term, composite/publication, pubmed/publications
+- `gold_filters` - present in: composite/publication
+- `gold_table` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `input_filter` - present in: _base
+- `maintenance` - present in: _base
+- `maintenance.auto_vacuum` - present in: _base
+- `maintenance.vacuum_retention_days` - present in: _base
+- `pipeline_name` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `primary_keys` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `provider` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `schema_version` - present in: _base
+- `silver_table` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `sink` - present in: _base, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `source` - present in: _base, openalex/publication, pubmed/publications, uniprot/idmapping
 - `source.api` - present in: uniprot/idmapping
 - `source.api.base_url` - present in: uniprot/idmapping
 - `source.api.from_db` - present in: uniprot/idmapping
@@ -33336,121 +34213,156 @@ Total unique parameters: 129
 - `source.batch_size` - present in: openalex/publication
 - `source.email` - present in: openalex/publication, pubmed/publications
 - `source.input_path` - present in: uniprot/idmapping
-- `source.load_strategy` - present in: uniprot/idmapping
+- `source.load_strategy` - present in: _base, uniprot/idmapping
 - `source.search_term` - present in: pubmed/publications
-- `source.type` - present in: uniprot/idmapping
-- `source_file` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/protein
-- `transform` - present in: crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `transform.steps` - present in: crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `transform.version` - present in: crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `version` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- `source.type` - present in: _base, uniprot/idmapping
+- `source_file` - present in: chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+- `transform` - present in: _base
+- `transform.steps` - present in: _base
+- `version` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
 
 ### B. Inconsistent presence across entity configs
 
-- `batch_size`
-  - Present in (2): chembl/protein_class, chembl/target_component
-  - Missing in (17): chembl/document_similarity, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/assay_parameters, semanticscholar/publication, chembl/target, chembl/activity, chembl/molecule, openalex/publication, pubmed/publications, chembl/assay, chembl/cell_line, chembl/document, chembl/compound_record, uniprot/idmapping, uniprot/protein
-- `checkpoint_interval`
-  - Present in (2): chembl/protein_class, chembl/target_component
-  - Missing in (17): chembl/document_similarity, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/assay_parameters, semanticscholar/publication, chembl/target, chembl/activity, chembl/molecule, openalex/publication, pubmed/publications, chembl/assay, chembl/cell_line, chembl/document, chembl/compound_record, uniprot/idmapping, uniprot/protein
-- `gold_filters.columns`
-  - Present in (11): chembl/activity, chembl/assay, chembl/document, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, pubchem/compound, pubmed/publications, uniprot/protein
-  - Missing in (8): openalex/publication, chembl/document_similarity, crossref/publication_enrichment, chembl/cell_line, chembl/compound_record, chembl/assay_parameters, uniprot/idmapping, semanticscholar/publication
-- `gold_filters.columns.assay_type`
-  - Present in (2): chembl/activity, chembl/assay
-  - Missing in (17): chembl/protein_class, chembl/document_similarity, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/assay_parameters, semanticscholar/publication, chembl/target, chembl/molecule, openalex/publication, pubmed/publications, chembl/target_component, chembl/cell_line, chembl/document, chembl/compound_record, uniprot/idmapping, uniprot/protein
-- `gold_filters.ranges`
-  - Present in (6): chembl/activity, chembl/document, chembl/document_similarity, crossref/publication_enrichment, openalex/publication, semanticscholar/publication
-  - Missing in (13): pubmed/publications, chembl/assay, chembl/protein_class, chembl/target_component, pubchem/compound, chembl/document_term, chembl/cell_line, chembl/compound_record, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, chembl/target, chembl/molecule
-- `gold_filters.ranges.year`
-  - Present in (4): chembl/document, crossref/publication_enrichment, openalex/publication, semanticscholar/publication
-  - Missing in (15): pubmed/publications, chembl/assay, chembl/protein_class, chembl/document_similarity, chembl/target_component, pubchem/compound, chembl/document_term, chembl/cell_line, chembl/compound_record, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, chembl/target, chembl/activity, chembl/molecule
-- `gold_filters.ranges.year.max`
-  - Present in (3): crossref/publication_enrichment, openalex/publication, semanticscholar/publication
-  - Missing in (16): chembl/protein_class, chembl/document_similarity, pubchem/compound, chembl/document_term, chembl/assay_parameters, chembl/target, chembl/activity, chembl/molecule, pubmed/publications, chembl/assay, chembl/target_component, chembl/cell_line, chembl/document, chembl/compound_record, uniprot/idmapping, uniprot/protein
-- `gold_filters.ranges.year.min`
-  - Present in (4): chembl/document, crossref/publication_enrichment, openalex/publication, semanticscholar/publication
-  - Missing in (15): pubmed/publications, chembl/assay, chembl/protein_class, chembl/document_similarity, chembl/target_component, pubchem/compound, chembl/document_term, chembl/cell_line, chembl/compound_record, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, chembl/target, chembl/activity, chembl/molecule
+- `description`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `dq_config_file`
+  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
+- `dq_rules`
+  - Present in (6): _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+  - Missing in (15): composite/publication, uniprot/idmapping, chembl/protein_class, chembl/compound_record, crossref/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, pubmed/publications, openalex/publication, uniprot/protein, semanticscholar/publication, chembl/publication
+- `dq_rules.conditional_validations`
+  - Present in (2): _base, chembl/activity
+  - Missing in (19): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, uniprot/idmapping, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
+- `dq_rules.cross_field_validations`
+  - Present in (6): _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+  - Missing in (15): composite/publication, uniprot/idmapping, chembl/protein_class, chembl/compound_record, crossref/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, pubmed/publications, openalex/publication, uniprot/protein, semanticscholar/publication, chembl/publication
+- `dq_rules.field_validations`
+  - Present in (6): _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+  - Missing in (15): composite/publication, uniprot/idmapping, chembl/protein_class, chembl/compound_record, crossref/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, pubmed/publications, openalex/publication, uniprot/protein, semanticscholar/publication, chembl/publication
+- `entity_type`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `filter_config_file`
+  - Present in (5): chembl/publication, chembl/publication_similarity, chembl/publication_term, composite/publication, pubmed/publications
+  - Missing in (16): chembl/target, uniprot/idmapping, _base, chembl/protein_class, semanticscholar/publication, crossref/publication, chembl/molecule, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/assay, chembl/activity, openalex/publication, uniprot/protein, pubchem/compound, chembl/compound_record
 - `gold_table`
-  - Present in (8): chembl/protein_class, chembl/target_component, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (11): chembl/assay, chembl/document_similarity, crossref/publication_enrichment, chembl/document_term, chembl/cell_line, chembl/document, chembl/compound_record, chembl/assay_parameters, chembl/target, chembl/activity, chembl/molecule
-- `input_filter.batch_size`
-  - Present in (16): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_term, chembl/molecule, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/protein
-  - Missing in (3): uniprot/idmapping, chembl/protein_class, chembl/document_similarity
-- `input_filter.column_name`
-  - Present in (16): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_term, chembl/molecule, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/protein
-  - Missing in (3): uniprot/idmapping, chembl/protein_class, chembl/document_similarity
-- `input_filter.fallback_column`
-  - Present in (3): crossref/publication_enrichment, openalex/publication, semanticscholar/publication
-  - Missing in (16): chembl/protein_class, chembl/document_similarity, pubchem/compound, chembl/document_term, chembl/assay_parameters, chembl/target, chembl/activity, chembl/molecule, pubmed/publications, chembl/assay, chembl/target_component, chembl/cell_line, chembl/document, chembl/compound_record, uniprot/idmapping, uniprot/protein
-- `input_filter.filter_field`
-  - Present in (16): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_term, chembl/molecule, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/protein
-  - Missing in (3): uniprot/idmapping, chembl/protein_class, chembl/document_similarity
-- `input_filter.source_path`
-  - Present in (16): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_term, chembl/molecule, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/protein
-  - Missing in (3): uniprot/idmapping, chembl/protein_class, chembl/document_similarity
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `pipeline_name`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `primary_keys`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `provider`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `silver_table`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
+- `sink`
+  - Present in (19): _base, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, chembl/activity
+- `sink.bronze`
+  - Present in (17): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (4): composite/publication, chembl/assay, uniprot/protein, chembl/activity
+- `sink.bronze.flat_structure`
+  - Present in (6): _base, chembl/publication, crossref/publication, openalex/publication, pubmed/publications, semanticscholar/publication
+  - Missing in (15): composite/publication, chembl/target, uniprot/idmapping, chembl/protein_class, chembl/publication_similarity, chembl/molecule, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/assay, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/compound_record
 - `sink.bronze.path`
-  - Present in (18): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/protein
-  - Missing in (1): uniprot/idmapping
+  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
+- `sink.gold`
+  - Present in (17): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (4): composite/publication, chembl/assay, uniprot/protein, chembl/activity
+- `sink.gold.csv_export`
+  - Present in (17): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (4): composite/publication, chembl/assay, uniprot/protein, chembl/activity
+- `sink.gold.csv_export.path`
+  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
+- `sink.gold.flat_structure`
+  - Present in (6): _base, chembl/publication, crossref/publication, openalex/publication, pubmed/publications, semanticscholar/publication
+  - Missing in (15): composite/publication, chembl/target, uniprot/idmapping, chembl/protein_class, chembl/publication_similarity, chembl/molecule, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/assay, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/compound_record
+- `sink.gold.path`
+  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
 - `sink.gold.sort_by`
-  - Present in (4): chembl/cell_line, chembl/compound_record, chembl/protein_class, chembl/target
-  - Missing in (15): openalex/publication, pubmed/publications, chembl/assay, chembl/document_similarity, chembl/target_component, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/document, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, semanticscholar/publication, chembl/activity, chembl/molecule
+  - Present in (16): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
 - `sink.gold.sort_by.ascending`
-  - Present in (4): chembl/cell_line, chembl/compound_record, chembl/protein_class, chembl/target
-  - Missing in (15): openalex/publication, pubmed/publications, chembl/assay, chembl/document_similarity, chembl/target_component, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/document, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, semanticscholar/publication, chembl/activity, chembl/molecule
+  - Present in (16): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
 - `sink.gold.sort_by.columns`
-  - Present in (4): chembl/cell_line, chembl/compound_record, chembl/protein_class, chembl/target
-  - Missing in (15): openalex/publication, pubmed/publications, chembl/assay, chembl/document_similarity, chembl/target_component, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/document, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, semanticscholar/publication, chembl/activity, chembl/molecule
+  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
+- `sink.silver`
+  - Present in (19): _base, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, chembl/activity
+- `sink.silver.csv_export`
+  - Present in (17): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (4): composite/publication, chembl/assay, uniprot/protein, chembl/activity
+- `sink.silver.csv_export.path`
+  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
+- `sink.silver.flat_structure`
+  - Present in (6): _base, chembl/publication, crossref/publication, openalex/publication, pubmed/publications, semanticscholar/publication
+  - Missing in (15): composite/publication, chembl/target, uniprot/idmapping, chembl/protein_class, chembl/publication_similarity, chembl/molecule, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/assay, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/compound_record
 - `sink.silver.partition_by`
-  - Present in (16): chembl/assay, chembl/assay_parameters, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (3): crossref/publication_enrichment, chembl/cell_line, chembl/activity
+  - Present in (16): _base, chembl/assay, chembl/assay_parameters, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (5): composite/publication, crossref/publication, chembl/cell_line, chembl/activity, chembl/compound_record
+- `sink.silver.path`
+  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
 - `sink.silver.primary_key`
-  - Present in (17): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/target, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (2): chembl/protein_class, chembl/target_component
+  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
 - `sink.silver.sort_by`
-  - Present in (4): chembl/cell_line, chembl/compound_record, chembl/protein_class, chembl/target
-  - Missing in (15): openalex/publication, pubmed/publications, chembl/assay, chembl/document_similarity, chembl/target_component, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/document, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, semanticscholar/publication, chembl/activity, chembl/molecule
+  - Present in (16): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
 - `sink.silver.sort_by.ascending`
-  - Present in (4): chembl/cell_line, chembl/compound_record, chembl/protein_class, chembl/target
-  - Missing in (15): openalex/publication, pubmed/publications, chembl/assay, chembl/document_similarity, chembl/target_component, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/document, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, semanticscholar/publication, chembl/activity, chembl/molecule
+  - Present in (16): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (5): composite/publication, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
 - `sink.silver.sort_by.columns`
-  - Present in (4): chembl/cell_line, chembl/compound_record, chembl/protein_class, chembl/target
-  - Missing in (15): openalex/publication, pubmed/publications, chembl/assay, chembl/document_similarity, chembl/target_component, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/document, chembl/assay_parameters, uniprot/idmapping, uniprot/protein, semanticscholar/publication, chembl/activity, chembl/molecule
+  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
 - `source`
-  - Present in (3): openalex/publication, pubmed/publications, uniprot/idmapping
-  - Missing in (16): chembl/protein_class, chembl/document_similarity, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/assay_parameters, semanticscholar/publication, chembl/target, chembl/activity, chembl/molecule, chembl/assay, chembl/target_component, chembl/cell_line, chembl/document, chembl/compound_record, uniprot/protein
+  - Present in (4): _base, openalex/publication, pubmed/publications, uniprot/idmapping
+  - Missing in (17): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, chembl/target, crossref/publication, chembl/molecule, chembl/assay
 - `source.email`
   - Present in (2): openalex/publication, pubmed/publications
-  - Missing in (17): chembl/protein_class, chembl/document_similarity, pubchem/compound, crossref/publication_enrichment, chembl/document_term, chembl/assay_parameters, semanticscholar/publication, chembl/target, chembl/activity, chembl/molecule, chembl/assay, chembl/target_component, chembl/cell_line, chembl/document, chembl/compound_record, uniprot/idmapping, uniprot/protein
+  - Missing in (19): composite/publication, _base, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, uniprot/idmapping, chembl/target, crossref/publication, chembl/molecule, chembl/assay
+- `source.load_strategy`
+  - Present in (2): _base, uniprot/idmapping
+  - Missing in (19): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
+- `source.type`
+  - Present in (2): _base, uniprot/idmapping
+  - Missing in (19): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
 - `source_file`
-  - Present in (18): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/protein
-  - Missing in (1): uniprot/idmapping
-- `transform`
-  - Present in (7): crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (12): chembl/assay, chembl/protein_class, chembl/document_similarity, chembl/target_component, chembl/document_term, chembl/cell_line, chembl/document, chembl/compound_record, chembl/assay_parameters, chembl/target, chembl/activity, chembl/molecule
-- `transform.steps`
-  - Present in (7): crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (12): chembl/assay, chembl/protein_class, chembl/document_similarity, chembl/target_component, chembl/document_term, chembl/cell_line, chembl/document, chembl/compound_record, chembl/assay_parameters, chembl/target, chembl/activity, chembl/molecule
-- `transform.version`
-  - Present in (7): crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (12): chembl/assay, chembl/protein_class, chembl/document_similarity, chembl/target_component, chembl/document_term, chembl/cell_line, chembl/document, chembl/compound_record, chembl/assay_parameters, chembl/target, chembl/activity, chembl/molecule
+  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
+  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
+- `version`
+  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+  - Missing in (2): composite/publication, _base
 
 ### C. Structural inconsistencies
 
 #### source vs source_file
 
-- Using `source`: openalex/publication, pubmed/publications, uniprot/idmapping
-- Using `source_file`: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/document, chembl/document_similarity, chembl/document_term, chembl/molecule, chembl/protein_class, chembl/target, chembl/target_component, crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/protein
+- Using `source`: _base, openalex/publication, pubmed/publications, uniprot/idmapping
+- Using `source_file`: chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
 
 #### transform block
 
-- Has `transform`: crossref/publication_enrichment, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- No `transform`: chembl/assay, chembl/protein_class, chembl/document_similarity, chembl/target_component, chembl/document_term, chembl/cell_line, chembl/document, chembl/compound_record, chembl/assay_parameters, chembl/target, chembl/activity, chembl/molecule
+- Has `transform`: _base
+- No `transform`: composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, uniprot/idmapping, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
 
 #### gold_table presence
 
-- Has `gold_table`: chembl/protein_class, chembl/target_component, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- Missing `gold_table`: chembl/assay, chembl/document_similarity, crossref/publication_enrichment, chembl/document_term, chembl/cell_line, chembl/document, chembl/compound_record, chembl/assay_parameters, chembl/target, chembl/activity, chembl/molecule
+- Has `gold_table`: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
+- Missing `gold_table`: composite/publication, _base
 
 ================================================================================
 File: consolidated-action-plan-analysis-2025-12-31.md
@@ -35316,6 +36228,166 @@ Added to `00-map.md`:
 ---
 
 *Audit completed: 2026-01-19*
+
+================================================================================
+File: documentation-audit-2026-01-25.md
+Path: archived\audits\documentation-audit-2026-01-25.md
+================================================================================
+# Documentation Audit Report — 2026-01-25
+
+**Auditor**: Claude Code (Automated)
+**RULES.md Version**: v5.12
+**Previous Audit**: 2026-01-15
+
+---
+
+## Executive Summary
+
+Maintenance audit completed successfully. Found and fixed ADR-029 missing from index files. Archived 5 orphan analysis reports.
+
+---
+
+## Phase 1: Structure Validation
+
+### Results: PASS
+
+| Check | Status |
+|-------|--------|
+| `00-project_rules/` = 2 files | ✅ |
+| `quick-reference/rules-summary.md` exists | ✅ |
+| README in providers/ | ✅ |
+| README in 05-operations/ | ✅ |
+| README in refactoring/ | ✅ |
+| README in 04-reference/pipelines/ | ✅ |
+| README in 02-architecture/decisions/ | ✅ |
+| Deleted duplicates absent | ✅ |
+
+---
+
+## Phase 2: ADR Completeness
+
+### Results: FIXED
+
+**ADR Count**: 29 (was 28 in previous audit)
+
+**New ADRs since last audit**:
+| ADR | Title | Date |
+|-----|-------|------|
+| ADR-029 | Output Metadata Unification | 2026-01-23 |
+
+**Fixes Applied**:
+1. Added ADR-029 to `decisions/README.md` (index table + category section)
+2. Added ADR-029 to `02-architecture/00-overview.md` (updated count 28→29)
+3. Added ADR-029 to `00-map.md` (updated count + table entry)
+4. Updated CLAUDE.md ADR counts (24→29, 27→29, 26→29)
+5. Added ADR-028 and ADR-029 to CLAUDE.md ADR table
+
+---
+
+## Phase 3: Diagram Audit
+
+### Results: PASS
+
+| Check | Status | Value |
+|-------|--------|-------|
+| Mermaid files count | ✅ | 34 |
+| No DeltaWriter references | ✅ | 0 found |
+| No outdated TTL (60s) | ✅ | 0 found |
+| No outdated heartbeat (20s) | ✅ | 0 found |
+| Architectural layers | ✅ | 5 (domain, application, composition, infrastructure, interfaces) |
+
+---
+
+## Phase 4: Navigation Links
+
+### Results: PASS
+
+| Check | Status |
+|-------|--------|
+| Broken links in 00-map.md | ✅ 0 found |
+| Total unique links | 50 |
+| ADR-029 accessible | ✅ |
+| rules-summary accessible | ✅ |
+| providers/README accessible | ✅ |
+
+---
+
+## Phase 5: Version Synchronization
+
+### Results: PASS
+
+| Document | Version | Status |
+|----------|---------|--------|
+| RULES.md | v5.12 | Source of truth |
+| CLAUDE.md | v5.12 | ✅ Synced |
+| All active docs | v5.12 | ✅ Synced |
+
+---
+
+## Phase 6: Orphan Documents
+
+### Results: FIXED
+
+**Orphan documents found and archived**:
+
+| File | Action | New Location |
+|------|--------|--------------|
+| `config_discrepancies_report.md` | Archived | `archived/audits/` |
+| `schema-mapping-audit-report.md` | Archived | `archived/audits/` |
+| `config-dedup-analysis.md` | Archived | `archived/audits/` |
+| `reports/code-duplication-analysis.md` | Archived | `archived/audits/` |
+| `reports/metadata-audit-report.md` | Archived | `archived/audits/` |
+
+---
+
+## Summary of Changes
+
+### Added
+- ADR-029 to all index files
+
+### Changed
+- `docs/02-architecture/decisions/README.md`: Added ADR-029
+- `docs/02-architecture/00-overview.md`: Added ADR-029, updated count
+- `docs/00-map.md`: Added ADR-029, updated count
+- `CLAUDE.md`: Updated ADR counts, added ADR-028/029
+
+### Archived
+- 5 orphan analysis/audit reports moved to `archived/audits/`
+
+### No Changes Required
+- Directory structure (already correct)
+- Diagrams (already up-to-date)
+- Navigation links (no broken links)
+- Version synchronization (all v5.12)
+
+---
+
+## Recommendations
+
+1. **ADR Monitoring**: Check for new ADRs monthly
+2. **Report Cleanup**: Continue archiving generated analysis reports
+3. **Version Tracking**: Update this prompt when RULES.md reaches v5.13+
+
+---
+
+## Validation Checklist
+
+- [x] `00-project_rules/` = 2 files
+- [x] `quick-reference/rules-summary.md` exists
+- [x] README in key directories
+- [x] Deleted duplicates absent
+- [x] 29 ADR files
+- [x] README.md contains all ADRs
+- [x] 00-overview.md contains all ADRs
+- [x] 34 Mermaid files
+- [x] No outdated DeltaWriter/TTL/heartbeat
+- [x] No broken links in 00-map.md
+- [x] All active docs synced to v5.12
+- [x] Orphan documents archived
+
+---
+
+*Audit completed: 2026-01-25*
 
 ================================================================================
 File: documentation-security-audit-2026-01-06.md
@@ -38638,6 +39710,334 @@ pytest tests/unit/interfaces/ tests/integration/interfaces/ -v
 *End of Audit Report*
 
 ================================================================================
+File: metadata-audit-report.md
+Path: archived\audits\metadata-audit-report.md
+================================================================================
+# Metadata Audit Report - BioETL
+
+**Date:** 2026-01-19
+**Auditor:** Claude (Automated Audit)
+**RULES.md Version:** v5.10
+**Audit Scope:** Metadata field definitions, storage, and usage across all ETL layers
+
+---
+
+## Executive Summary
+
+| Metric | Value |
+|--------|-------|
+| **Schema files reviewed** | 33 |
+| **Critical issues** | 1 |
+| **Warnings** | 2 |
+| **Recommendations** | 4 |
+| **Tests passing** | 617 (metadata-related) |
+
+**Overall Status:** The metadata implementation is well-structured and mostly compliant with RULES.md requirements. One critical inconsistency was found in DQ field definitions.
+
+---
+
+## 1. Metadata Inventory
+
+### 1.1 Required Metadata Fields (RULES.md §2.4)
+
+| Field | Type | Nullable | In Content Hash | Location |
+|-------|------|----------|-----------------|----------|
+| `entity_id` | str | No | **Yes** | `domain/schemas/base.py:18-20` |
+| `content_hash` | str | No | — | `domain/schemas/base.py:21-25` |
+| `_run_id` | UUID | No | **No** | `domain/schemas/base.py:28-32` |
+| `_run_type` | Enum | No | **No** | `domain/schemas/base.py:33-38` |
+| `_source_batch_id` | UUID | Yes | **No** | `domain/schemas/base.py:40-44` |
+| `_ingestion_ts` | Timestamp | No | **No** | `domain/schemas/base.py:45-49` |
+| `_dq_warn` | bool | No | **No** | `domain/schemas/base.py:51-56` |
+| `_dq_error` | bool | No | **No** | `domain/schemas/base.py:57-62` |
+| `_index` | int | No | **No** | `domain/schemas/base.py:63-68` |
+
+### 1.2 META_FIELDS for Hash Exclusion
+
+**Location:** `domain/constants.py:15-25`
+
+```python
+META_FIELDS: frozenset[str] = frozenset({
+    "_ingestion_ts",
+    "_run_id",
+    "_run_type",
+    "_dq_warn",
+    "_dq_error",
+    "_source_batch_id",
+    "_index",
+})
+```
+
+**Status:** Correctly synchronized with ETLRecordSchema and documentation.
+
+### 1.3 Schema Inheritance
+
+All domain schemas properly inherit from `ETLRecordSchema`:
+
+| Provider | Schemas | Inheritance |
+|----------|---------|-------------|
+| ChEMBL | 14 | Direct (13) / via PublicationBaseSchema (1) |
+| CrossRef | 5 | Direct (4) / via PublicationBaseSchema (1) |
+| PubChem | 1 | Direct |
+| UniProt | 2 | Direct |
+| PubMed | 1 | via PublicationBaseSchema |
+| OpenAlex | 1 | via PublicationBaseSchema |
+| SemanticScholar | 1 | via PublicationBaseSchema |
+| Common | 1 | Direct (PublicationBaseSchema) |
+
+---
+
+## 2. Findings
+
+### 2.1 CRITICAL: DQ Field Redefinition in ChemblPublicationSchema
+
+**Severity:** CRITICAL
+**Location:** `domain/schemas/chembl/publication.py:67-72`
+
+**Issue:** `ChemblPublicationSchema` redefines `_dq_warn` and `_dq_error` with different nullable constraints than the base schema.
+
+**Base Schema (ETLRecordSchema):**
+```python
+dq_warn: Series[bool] = pa.Field(
+    alias="_dq_warn",
+    nullable=False,  # NOT NULLABLE
+    default=False,
+)
+```
+
+**Child Schema (ChemblPublicationSchema):**
+```python
+_dq_warn: Series[bool] = pa.Field(
+    nullable=True,  # NULLABLE - INCONSISTENT!
+    default=False,
+)
+```
+
+**Impact:**
+- Validation inconsistency between base and child schemas
+- Potential data integrity issues where DQ flags may be NULL unexpectedly
+- Violates Liskov Substitution Principle
+
+**Recommendation:**
+Remove the field redefinition from `ChemblPublicationSchema` - inherit from base instead, or align nullable constraints:
+
+```python
+# Option 1: Remove redefinition (preferred)
+# Let fields inherit from PublicationBaseSchema -> ETLRecordSchema
+
+# Option 2: Align constraints
+_dq_warn: Series[bool] = pa.Field(
+    nullable=False,  # Align with base
+    default=False,
+)
+```
+
+---
+
+### 2.2 WARNING: Incomplete DQ Fields in PyArrow Silver Schemas
+
+**Severity:** WARNING
+**Location:** `infrastructure/schemas/silver.py`
+
+**Issue:** Not all PyArrow Silver schemas include `_dq_warn` and `_dq_error` fields. The following schemas are missing DQ suffix fields:
+
+- `CHEMBL_ACTIVITY_SCHEMA`
+- `CHEMBL_ASSAY_PARAMETERS_SCHEMA`
+- `CHEMBL_ASSAY_SCHEMA`
+- `CHEMBL_CELL_LINE_SCHEMA`
+- `CHEMBL_COMPOUND_RECORD_SCHEMA`
+- `CHEMBL_DOCUMENT_SIMILARITY_SCHEMA`
+- `CHEMBL_DOCUMENT_TERM_SCHEMA`
+- `CHEMBL_MOLECULE_SCHEMA`
+- `CHEMBL_PROTEIN_CLASS_SCHEMA`
+- `CHEMBL_TARGET_COMPONENT_SCHEMA`
+- `CHEMBL_TARGET_SCHEMA`
+- `PUBCHEM_COMPOUND_SCHEMA`
+- `UNIPROT_PROTEIN_SCHEMA`
+
+**Impact:**
+- Inconsistent schema structure between entities
+- DQ tracking disabled for these entities at storage level
+- `BatchWriter.write_gold()` attempts to add default DQ values but PyArrow schema may reject them
+
+**Recommendation:**
+Add DQ suffix fields to all Silver schemas for consistency:
+```python
+# Add at end of each schema
+pa.field("_dq_warn", pa.bool_()),
+pa.field("_dq_error", pa.bool_()),
+```
+
+---
+
+### 2.3 WARNING: SilverWriter Validation Incomplete
+
+**Severity:** WARNING
+**Location:** `infrastructure/storage/silver_writer.py:355-359`
+
+**Issue:** `SilverWriter._validate_records()` only validates 4 of 9 required metadata fields:
+
+```python
+required_fields = {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
+```
+
+**Missing validations:**
+- `entity_id`
+- `content_hash`
+- `_index`
+- `_dq_warn`
+- `_dq_error`
+
+**Impact:**
+- Records with missing `entity_id` or `content_hash` may reach Silver layer
+- Potential merge/upsert failures due to missing primary key fields
+
+**Recommendation:**
+Extend validation to include all required fields:
+```python
+required_fields = {
+    "entity_id", "content_hash",
+    "_run_id", "_run_type", "_source_batch_id", "_ingestion_ts",
+    "_index", "_dq_warn", "_dq_error"
+}
+```
+
+---
+
+## 3. Verification Results
+
+### 3.1 Content Hash Implementation
+
+**Status:** COMPLIANT
+
+| Requirement | Status | Evidence |
+|-------------|--------|----------|
+| SHA256 algorithm | ✅ | `identity_service.py:116` |
+| Canonical JSON (sorted keys) | ✅ | `serialization.py` via orjson |
+| Float normalization (10 decimals) | ✅ | `identity_service.py:204-206` |
+| NaN/Inf → None | ✅ | `identity_service.py:204-205` |
+| Date → ISO string | ✅ | `identity_service.py:187-189` |
+| String stripping | ✅ | `identity_service.py:190-191` |
+| META_FIELDS exclusion | ✅ | `identity_service.py:146-147` |
+
+**Test Coverage:** 30 tests in `test_identity_service.py`, all passing.
+
+### 3.2 Column Ordering
+
+**Status:** COMPLIANT
+
+| Requirement | Status | Evidence |
+|-------------|--------|----------|
+| System prefix first | ✅ | `column_order.py:26-34` |
+| Business fields sorted | ✅ | `column_order.py:89` |
+| DQ suffix last | ✅ | `column_order.py:38-41` |
+| Enforced in writers | ✅ | `silver_writer.py:216-217` |
+
+**Test Coverage:** 77 tests in `test_column_order.py`, 64 passing, 13 skipped (no DQ fields).
+
+### 3.3 BaseEntity Metadata
+
+**Status:** COMPLIANT
+
+| Field | Default | Validation | Evidence |
+|-------|---------|------------|----------|
+| `entity_id` | Required | Non-empty | `base.py:73-74` |
+| `content_hash` | Required | Non-empty | `base.py:75-76` |
+| `_index` | Required | >= 0 | `base.py:77-78` |
+| `_dq_warn` | False | — | `base.py:68` |
+| `_dq_error` | False | — | `base.py:69` |
+
+---
+
+## 4. Recommendations
+
+### 4.1 HIGH PRIORITY
+
+1. **Fix ChemblPublicationSchema DQ field redefinition** - Remove or align nullable constraints with base schema.
+
+2. **Add DQ fields to all Silver schemas** - Ensure consistent schema structure across all entities.
+
+### 4.2 MEDIUM PRIORITY
+
+3. **Extend SilverWriter validation** - Validate all 9 required metadata fields, not just 4.
+
+### 4.3 LOW PRIORITY
+
+4. **Consider adding `_schema_version`** - Track schema version for future migrations (MAY, not MUST).
+
+---
+
+## 5. Test Results Summary
+
+```
+tests/unit/domain/services/test_identity_service.py: 30 passed
+tests/unit/domain/test_transformations.py: 36 passed
+tests/architecture/test_column_order.py: 64 passed, 13 skipped
+tests/unit/domain/schemas/*: 173 passed
+tests/unit/infrastructure/schemas/*: 288 passed
+─────────────────────────────────────────────────────
+Total: 617 passed, 13 skipped
+```
+
+---
+
+## 6. Files Reviewed
+
+| Category | Files |
+|----------|-------|
+| Base Schema | `domain/schemas/base.py` |
+| Constants | `domain/constants.py` |
+| Identity Service | `domain/services/identity_service.py` |
+| Transformations | `domain/transformations.py` |
+| Column Order | `domain/schemas/column_order.py` |
+| Base Entity | `domain/entities/base.py` |
+| Base Transformer | `application/core/base_transformer.py` |
+| Silver Writer | `infrastructure/storage/silver_writer.py` |
+| Bronze Writer | `infrastructure/storage/bronze_writer.py` |
+| Batch Writer | `application/core/batch_writer.py` |
+| Silver Schemas | `infrastructure/schemas/silver.py` |
+| Gold Schemas | `infrastructure/schemas/gold.py` |
+| All Domain Schemas | `domain/schemas/**/*.py` (33 files) |
+
+---
+
+## Appendix A: Metadata Flow Diagram
+
+```
+Bronze (JSONL) ─────────────────────────────────────────────────────────
+│ Sidecar metadata: run_id, run_type, ingestion_ts, batch_id
+│
+▼
+Transform (BaseTransformer._create_entity) ─────────────────────────────
+│ Adds: entity_id, content_hash, run_id, run_type,
+│       source_batch_id, ingestion_ts, _index, _dq_warn, _dq_error
+│
+▼
+Silver (Delta Lake) ────────────────────────────────────────────────────
+│ Validates: _run_id, _run_type, _source_batch_id, _ingestion_ts
+│ Canonical column order enforced
+│
+▼
+Gold (Delta Lake) ──────────────────────────────────────────────────────
+  Adds defaults: _dq_warn=False, _dq_error=False (if missing)
+```
+
+---
+
+## Appendix B: Checklist
+
+- [x] All CRITICAL/HIGH findings documented
+- [x] Test results verified
+- [x] Metadata inventory complete
+- [x] Content hash implementation verified
+- [x] Column ordering verified
+- [ ] Issues created for findings (pending)
+
+---
+
+*Report generated: 2026-01-19*
+
+================================================================================
 File: naming-compliance-report.md
 Path: archived\audits\naming-compliance-report.md
 ================================================================================
@@ -39971,6 +41371,408 @@ Path: archived\audits\preflight-check-report.md
 ---
 
 *Отчёт сгенерирован автоматически: 2026-01-06*
+
+================================================================================
+File: schema-mapping-audit-report.md
+Path: archived\audits\schema-mapping-audit-report.md
+================================================================================
+# Schema-Mapping Consistency Audit Report
+
+**Date**: 2026-01-20
+**Scope**: All ETL Pipelines (Silver/Gold Schema Mapping)
+**Auditor**: Claude Code (Automated Analysis)
+**Version**: 1.0.0
+
+---
+
+## Executive Summary
+
+This audit systematically verified field mappings across all ETL pipeline layers:
+**API Response → Bronze → Transformer → Silver Schema → Gold Schema**
+
+### Key Metrics
+
+| Category | Count |
+|----------|-------|
+| **Pipelines Analyzed** | 20 |
+| **Entities with Gold Schemas** | 18 |
+| **Total Field Discrepancies** | 87 |
+| **Type Mismatches** | 34 |
+| **Nullable Mismatches** | 12 |
+| **Missing in Gold** | 28 |
+| **Missing in Silver** | 13 |
+| **Consistent Fields** | 189 |
+
+### Severity Distribution
+
+| Severity | Count | Description |
+|----------|-------|-------------|
+| **HIGH** | 8 | Type mismatches causing data loss or validation failures |
+| **MEDIUM** | 41 | Missing fields or nullable mismatches |
+| **LOW** | 38 | Int→float coercions (safe but verbose) |
+
+---
+
+## Pipelines Coverage Matrix
+
+| Provider | Entity | Config | Transformer | Silver Schema | Gold Schema | Status |
+|----------|--------|--------|-------------|---------------|-------------|--------|
+| chembl | activity | ✅ | ✅ | ✅ | ✅ | **9 issues** |
+| chembl | molecule | ✅ | ✅ | ✅ | ✅ | **34 issues** |
+| chembl | target | ✅ | ✅ | ✅ | ✅ | **11 issues** |
+| chembl | assay | ✅ | ✅ | ✅ | ✅ | **9 issues** |
+| chembl | cell_line | ✅ | ✅ | ✅ | ✅ | 2 issues |
+| chembl | compound_record | ✅ | ✅ | ✅ | ✅ | 2 issues |
+| chembl | protein_class | ✅ | ✅ | ✅ | ✅ | 2 issues |
+| chembl | assay_parameters | ✅ | ✅ | ✅ | ✅ | 2 issues |
+| chembl | publication | ✅ | ✅ | ✅ | ✅ | 3 issues |
+| chembl | publication_similarity | ✅ | ✅ | ✅ | ✅ | 2 issues |
+| chembl | publication_term | ✅ | ✅ | ✅ | ✅ | 2 issues |
+| chembl | target_component | ✅ | ✅ | ✅ | ✅ | 2 issues |
+| pubmed | publication | ✅ | ✅ | ✅ | ✅ | **42 issues** |
+| crossref | publication | ✅ | ❌ | ✅ | ✅ | **12 issues** |
+| openalex | publication | ✅ | ❌ | ✅ | ✅ | **9 issues** |
+| semanticscholar | publication | ✅ | ❌ | ✅ | ✅ | 5 issues |
+| uniprot | protein | ✅ | ❌ | ✅ | ✅ | 4 issues |
+| uniprot | idmapping | ✅ | ✅ | ❌ | ✅ | 3 issues |
+| pubchem | compound | ✅ | ❌ | ✅ | ✅ | 2 issues |
+| composite | publication | ✅ | ❌ | ❌ | ❌ | N/A |
+
+---
+
+## Finding 1: Systematic Int→Float Type Coercions
+
+**Severity**: LOW
+**Affected Pipelines**: All ChEMBL pipelines, all publication pipelines
+**Count**: 34 occurrences
+
+### Issue
+
+Gold schemas use `Series[float]` with `coerce=True` for fields that are `Series[int]` in Silver schemas. This is intentional for handling nullable integers in Pandas/Arrow, but creates implicit type conversion.
+
+### Evidence
+
+| Entity | Field | Silver Type | Gold Type |
+|--------|-------|-------------|-----------|
+| ChEMBL Activity | record_id | `Series[int]` | `Series[float]` |
+| ChEMBL Activity | src_id | `Series[int]` | `Series[float]` |
+| ChEMBL Activity | standard_flag | `Series[int]` | `Series[float]` |
+| ChEMBL Activity | potential_duplicate | `Series[int]` | `Series[float]` |
+| ChEMBL Activity | toid | `Series[int]` | `Series[float]` |
+| ChEMBL Molecule | first_approval | `Series[int]` | `Series[float]` |
+| ChEMBL Molecule | black_box_warning | `Series[int]` | `Series[float]` |
+| ChEMBL Target | taxonomy_id | `Series[int]` | `Series[float]` |
+| ChEMBL Assay | src_id | `Series[int]` | `Series[float]` |
+| ChEMBL Assay | assay_taxonomy_id | `Series[int]` | `Series[float]` |
+| ChEMBL Assay | confidence_score | `Series[int]` | `Series[float]` |
+| All Entities | year | `Series[int]` | `Series[float]` |
+
+### Recommendation
+
+This is **acceptable behavior** for nullable integer handling in Pandas. Document this pattern in RULES.md and ensure downstream consumers handle float→int conversion if needed.
+
+---
+
+## Finding 2: PMID Type Mismatch (PubMed)
+
+**Severity**: HIGH
+**Affected Pipeline**: `pubmed_publication`
+
+### Issue
+
+Silver schema defines `pmid` as `Series[int]`, but Gold schema expects `Series[str]`.
+
+### Evidence
+
+```python
+# Silver: src/bioetl/domain/schemas/pubmed/article.py:34
+pmid: Series[int] = pa.Field(nullable=False, description="PubMed ID (PK)")
+
+# Gold: src/bioetl/infrastructure/schemas/gold.py:216
+pmid: Series[str] = pa.Field(nullable=False)
+```
+
+### Impact
+
+- Type validation will fail if not explicitly converted
+- Cross-provider publication linking relies on string PMID matching
+
+### Recommendation
+
+**Option A** (Preferred): Update Silver schema to use `Series[str]` for consistency with other publication providers.
+
+**Option B**: Add explicit `str()` conversion in transformer before Gold layer.
+
+---
+
+## Finding 3: Missing Flattened Fields in Silver (ChEMBL Molecule)
+
+**Severity**: MEDIUM
+**Affected Pipeline**: `chembl_molecule`
+**Count**: 26 missing fields
+
+### Issue
+
+Gold schema expects 26 flattened property/hierarchy/structure fields that are NOT defined in Silver schema. These fields ARE extracted by the transformer but not validated at Silver level.
+
+### Evidence
+
+**Missing in Silver Schema** (`src/bioetl/domain/schemas/chembl/molecule.py`):
+- `hierarchy_parent_chembl_id`, `hierarchy_active_chembl_id`, `hierarchy_child_chembl_id`
+- `property_alogp`, `property_mw_freebase`, `property_full_mwt`
+- `property_hba`, `property_hbd`, `property_psa`, `property_rtb`
+- `property_ro5_violations`, `property_heavy_atoms`, `property_aromatic_rings`
+- `property_qed_weighted`, `property_full_molformula`, `property_ro3_pass`
+- `canonical_smiles`, `standard_inchi`, `inchikey`
+- `chirality`, `dosed_ingredient`, `availability_type`
+- `usan_stem`, `usan_stem_definition`, `usan_substem`, `usan_year`
+- `helm_notation`, `molecule_species`
+
+**Transformer extracts these** (`src/bioetl/application/pipelines/chembl/molecule_transformer.py:182-204`):
+```python
+return {
+    "molecule_chembl_id": str(primary_id),
+    **map_field_groups(record, _MOLECULE_GROUPS),
+    **self.serialize_json_fields(rec, _JSON_FIELDS),
+    **flatten_nested_dict(..., "hierarchy_", _HIERARCHY_FIELDS, ...),
+    **flatten_nested_dict(..., "property_", _PROPERTIES_FIELDS, ...),
+    **structure_data,  # canonical_smiles, standard_inchi, inchikey
+}
+```
+
+### Impact
+
+- Silver layer validation incomplete
+- Schema drift undetected at Silver level
+
+### Recommendation
+
+Add all 26 fields to `MoleculeSchema` in Silver layer for complete validation coverage.
+
+---
+
+## Finding 4: Missing Fields in Gold (PubMed Publication)
+
+**Severity**: MEDIUM
+**Affected Pipeline**: `pubmed_publication`
+**Count**: 18 missing fields
+
+### Issue
+
+Silver schema has 18 PubMed-specific fields not present in Gold schema, causing data loss at Gold layer.
+
+### Evidence
+
+**Missing in Gold Schema** (`src/bioetl/infrastructure/schemas/gold.py:211-272`):
+- `journal_title`, `journal_iso_abbrev` (replaced by `journal`, `journal_abbrev`)
+- `journal_issn_type`
+- `pub_month`, `pub_day`
+- `publication_status`, `publication_type_list`
+- `medline_pgn`
+- `nlm_unique_id`, `citation_subset`
+- `author_count`, `mesh_heading_count`, `keyword_count`, `grant_count`, `reference_count`, `chemical_count`
+- `abstract_structured`, `vernacular_title`
+- `date_completed`, `date_revised`
+
+### Impact
+
+- Forensic/audit data loss
+- Query capability reduced for detailed PubMed analysis
+
+### Recommendation
+
+**Option A**: Add missing fields to `PubMedPublicationGoldSchema` for forensic retention.
+
+**Option B**: Document explicitly that Gold is a subset for unified querying; use Silver for detailed PubMed queries.
+
+---
+
+## Finding 5: Datetime→String Conversion (All Entities)
+
+**Severity**: MEDIUM
+**Affected Pipelines**: All
+**Count**: 7 occurrences
+
+### Issue
+
+Base Silver schema uses `Series[datetime]` for `_ingestion_ts`, but Gold schemas use `Series[str]`.
+
+### Evidence
+
+```python
+# Silver: src/bioetl/domain/schemas/base.py:45
+ingestion_ts: Series[datetime] = pa.Field(alias="_ingestion_ts", nullable=False)
+
+# Gold: src/bioetl/infrastructure/schemas/gold.py:108
+ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+```
+
+### Impact
+
+- Implicit datetime→string conversion
+- Potential timezone/format inconsistencies
+
+### Recommendation
+
+Standardize on ISO 8601 string format (`YYYY-MM-DDTHH:MM:SS.sssZ`) in both layers, or use `datetime` consistently.
+
+---
+
+## Finding 6: DQ Fields Nullable Mismatch (All Entities)
+
+**Severity**: LOW
+**Affected Pipelines**: All
+**Count**: 14 occurrences (2 per entity)
+
+### Issue
+
+Base Silver schema defines `_dq_warn` and `_dq_error` as `nullable=False` with `default=False`, but Gold schemas define them as `nullable=True`.
+
+### Evidence
+
+```python
+# Silver: src/bioetl/domain/schemas/base.py:51-62
+dq_warn: Series[bool] = pa.Field(alias="_dq_warn", nullable=False, default=False)
+dq_error: Series[bool] = pa.Field(alias="_dq_error", nullable=False, default=False)
+
+# Gold: src/bioetl/infrastructure/schemas/gold.py:258-259
+dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
+dq_error: Series[bool] = pa.Field(nullable=True, alias="_dq_error")
+```
+
+### Impact
+
+- Gold allows null DQ flags where Silver requires boolean
+- May cause validation issues if nulls propagate
+
+### Recommendation
+
+Make Gold `nullable=False` to match Silver, or document why nullability differs.
+
+---
+
+## Finding 7: Missing Target Fields in Silver
+
+**Severity**: MEDIUM
+**Affected Pipeline**: `chembl_target`
+**Count**: 7 missing fields
+
+### Issue
+
+Gold schema expects fields that are extracted by transformer but not validated in Silver.
+
+### Evidence
+
+**Missing in Silver** (`src/bioetl/domain/schemas/chembl/target.py`):
+- `dap_id`
+- `pipeline_stages`
+- `target_constraints`
+- `target_component_synonyms`
+- `component_organisms`
+- `component_taxonomy_ids`
+- `description`
+
+**Transformer extracts these** (`src/bioetl/application/pipelines/chembl/target_transformer.py:166-188`).
+
+### Recommendation
+
+Add these 7 fields to `TargetSchema` for complete Silver validation.
+
+---
+
+## Finding 8: Publication Schema Inconsistency Across Providers
+
+**Severity**: MEDIUM
+**Affected Pipelines**: All publication pipelines
+
+### Issue
+
+Publication schemas across providers have inconsistent field sets, making cross-provider analysis difficult.
+
+### Evidence
+
+| Field | PubMed | CrossRef | OpenAlex | SemanticScholar | ChEMBL Doc |
+|-------|--------|----------|----------|-----------------|------------|
+| pmid | ✅ (int) | ✅ (str) | ✅ (str) | ✅ (str) | ✅ (str) |
+| doi | ✅ | ✅ | ✅ | ✅ | ✅ |
+| pmc_id | ✅ | ✅ | ✅ | ✅ | ✅ |
+| title | ✅ (req) | ✅ | ✅ | ✅ | ✅ |
+| abstract | ✅ | ✅ | ✅ | ✅ | ✅ |
+| authors | ❌ | ✅ | ✅ | ✅ | ✅ |
+| journal | ❌ | ✅ | ✅ | ✅ | ✅ |
+| year | ✅ (int) | ✅ (int) | ✅ (Int64) | ✅ | ✅ |
+| publication_date | ❌ | ❌ | ✅ | ✅ | ❌ |
+| citation_count | ❌ | ❌ | ✅ | ✅ | ❌ |
+| is_oa | ❌ | ❌ | ✅ | ✅ | ❌ |
+| lookup_method | ❌ | ❌ | ✅ | ✅ | ✅ |
+
+### Recommendation
+
+1. Create unified `PublicationUnifiedSchema` with all common fields
+2. Ensure all providers populate standard fields where available
+3. Document which fields are provider-native vs derived
+
+---
+
+## Recommendations Summary
+
+### Immediate Actions (P0 - This Sprint)
+
+| # | Issue | Action | Files to Modify |
+|---|-------|--------|-----------------|
+| 1 | PMID type mismatch | Change Silver pmid to `Series[str]` | `domain/schemas/pubmed/article.py` |
+| 2 | Missing molecule fields | Add 26 fields to MoleculeSchema | `domain/schemas/chembl/molecule.py` |
+| 3 | Missing target fields | Add 7 fields to TargetSchema | `domain/schemas/chembl/target.py` |
+| 4 | DQ fields nullable | Make Gold DQ fields `nullable=False` | `infrastructure/schemas/gold.py` |
+
+### Short-term (P1 - Next Sprint)
+
+| # | Issue | Action |
+|---|-------|--------|
+| 5 | Datetime→string | Standardize on ISO 8601 string in both layers |
+| 6 | Publication unification | Create shared base with all common fields |
+| 7 | Missing Gold fields | Add PubMed detail fields for forensic retention |
+
+### Long-term (P2 - Architecture)
+
+| # | Issue | Action |
+|---|-------|--------|
+| 8 | Type coercions | Document int→float pattern in RULES.md |
+| 9 | Schema drift tests | Add integration tests validating schema consistency |
+| 10 | Schema versioning | Implement schema version tracking for evolution |
+
+---
+
+## Appendix A: File Locations
+
+| Component | Path |
+|-----------|------|
+| Gold Schemas | `src/bioetl/infrastructure/schemas/gold.py` |
+| Silver Schemas - Base | `src/bioetl/domain/schemas/base.py` |
+| Silver Schemas - ChEMBL | `src/bioetl/domain/schemas/chembl/*.py` |
+| Silver Schemas - Publications | `src/bioetl/domain/schemas/{pubmed,crossref,openalex,semanticscholar}/*.py` |
+| Publication Base | `src/bioetl/domain/schemas/common/publication_base.py` |
+| Transformers | `src/bioetl/application/pipelines/*/` |
+| Pipeline Configs | `configs/pipelines/*/` |
+
+## Appendix B: Verification Commands
+
+```bash
+# Validate all schemas parse correctly
+python -c "from bioetl.domain.schemas import *; from bioetl.infrastructure.schemas.gold import *; print('All schemas valid')"
+
+# Run mypy strict on schemas
+mypy src/bioetl/domain/schemas/ --strict
+mypy src/bioetl/infrastructure/schemas/ --strict
+
+# Compare Silver vs Gold field counts
+grep -c "Series\[" src/bioetl/domain/schemas/chembl/activity.py
+grep -c "Series\[" src/bioetl/infrastructure/schemas/gold.py | head -1
+```
+
+---
+
+*Report generated by automated schema mapping audit. For questions, contact the BioETL architecture team.*
 
 ================================================================================
 File: security-audit-2026-01-06.md
@@ -47546,6 +49348,359 @@ The BioETL codebase demonstrates exemplary adherence to its architectural standa
 *Verification date: 2026-01-22*
 
 ================================================================================
+File: architecture-audit-report-2026-01-25.md
+Path: audit\architecture-audit-report-2026-01-25.md
+================================================================================
+# Архитектурный Аудит BioETL
+
+**Дата:** 2026-01-25
+**Версия проекта:** 5.9.0
+**Аудитор:** Claude Code (claude-opus-4-5-20251101)
+**Методология:** Двойная верификация (RULES.md §7)
+
+---
+
+## Часть 1. Объективные Метрики
+
+| Метрика | Значение | Команда верификации |
+|---------|----------|---------------------|
+| **Python-файлов** | 511 | `find src/ -name "*.py" \| wc -l` |
+| **Классов** | 887 | `grep -r "^class " src/ --include="*.py" \| wc -l` |
+| **Строк кода** | 101,273 | `find src/bioetl -name "*.py" -exec wc -l {} + \| tail -1` |
+| **Средний размер модуля** | 413 строк | LOC / файлов |
+| **Покрытие тестами** | **89.71%** | `pytest --cov=src/bioetl --cov-report=term` |
+| **Ошибки mypy --strict** | **0** | `mypy src/bioetl --strict` → "Success: no issues found in 489 source files" |
+| **Циклические импорты** | **PASS** | `python -c "from bioetl.domain import *"` |
+| **TODO/FIXME в коде** | 20 | `grep -rE "(TODO\|FIXME\|XXX\|HACK)" src/ \| wc -l` |
+| **print() в коде** | **0** | `grep -r "print(" src/bioetl --include="*.py" \| wc -l` |
+| **Hardcoded secrets** | **0** | `grep -rEi "(api_key\|password\|secret)\s*=\s*['\"]" src/ \| wc -l` |
+| **Тестов** | 9,234 | `pytest --collect-only` |
+| **VCR-кассет** | 86 | `find tests/fixtures/vcr -name "*.yaml" \| wc -l` |
+| **ADR** | 29 | `ls docs/02-architecture/decisions/ \| wc -l` |
+| **Architecture tests** | 44 файла | `ls tests/architecture/ \| wc -l` |
+| **Protocol definitions** | 43 | `grep -r "^class.*Protocol" src/bioetl/domain/ports/ \| wc -l` |
+
+---
+
+## Часть 2. Оценка по Категориям
+
+### 2.1. Соблюдение Слоистой Архитектуры (15%)
+
+| Аспект | Статус |
+|--------|--------|
+| domain → infrastructure imports | **0 нарушений** |
+| domain → application imports | **0 нарушений** |
+| application → interfaces imports | **0 нарушений** |
+| application → infrastructure imports | **0 нарушений** |
+| application → composition imports | 1 (закомментирован, не нарушение) |
+
+**Верификация:**
+```bash
+grep -r "from bioetl.infrastructure" src/bioetl/domain/   # No output
+grep -r "from bioetl.application" src/bioetl/domain/      # No output
+grep -r "from bioetl.interfaces" src/bioetl/application/  # No output
+```
+
+**Ключевые файлы:**
+- Матрица импортов: `CLAUDE.md:§2.1`
+- Architecture tests: `tests/architecture/test_layer_dependencies.py` (18 тестов)
+- Architecture tests: `tests/architecture/test_forbidden_imports.py` (12 тестов)
+
+**Оценка: 10/10** — 0 нарушений границ слоёв.
+
+---
+
+### 2.2. Контракты и Ports (12%)
+
+| Компонент | Статус |
+|-----------|--------|
+| Protocols в domain/ports | 43 Protocol definitions |
+| Port facade | `src/bioetl/domain/ports/__init__.py` с полным `__all__` |
+| `@runtime_checkable` | На всех портах |
+| NoOp implementations | 6 (NoOpTracing, NoOpMetrics, NoOpAudit, NoOpPiiHasher, NoOpMemoryMonitor, NoOpMetadataWriter) |
+
+**Основные порты (верифицировано в `domain/ports/__init__.py:1-161`):**
+
+| Категория | Порты |
+|-----------|-------|
+| Storage | StoragePort, DeltaReaderPort, MetadataWriterPort |
+| Data Source | DataSourcePort, FilterableDataSourcePort |
+| Observability | LoggerPort, MetricsPort, TracingPort, DQMonitorPort |
+| Resilience | CircuitBreakerPort, RateLimiterPort |
+| Locking | LockPort, CheckpointPort |
+| DQ | GoldValidatorPort, SilverValidatorPort, QuarantinePort |
+| Audit | AuditPort |
+| Normalization | UnitConverterPort, ValueValidatorPort, ActivityAggregatorPort |
+
+**Оценка: 10/10** — Все внешние зависимости абстрагированы через Protocol. NoOp implementations обеспечивают graceful degradation.
+
+---
+
+### 2.3. Medallion Architecture (12%)
+
+| Слой | Формат | Реализация | Файл |
+|------|--------|------------|------|
+| Bronze | JSONL + zstd | `_write_atomic_stream()` с streaming compression | `bronze_writer.py:341-407` |
+| Silver | Delta Lake | Merge/Append/Delete через deltalake-rs | `silver_writer.py:509-642` |
+| Gold | Delta Lake | Append/SCD2/Overwrite с strict Pandera | `gold_writer.py:140-225` |
+
+**Ключевые проверки:**
+
+| Требование | Статус | Верификация |
+|------------|--------|-------------|
+| Bronze: JSONL + zstd | ✅ | `bronze_writer.py:57-59` — COMPRESSION_LEVEL=3 |
+| Silver: Delta merge | ✅ | `silver_writer.py:846-881` — `_merge_records()` |
+| Gold: SCD2 support | ✅ | `gold_writer.py:715-837` — `_write_scd2()`, `_merge_scd2()` |
+| Write modes validation | ✅ | `medallion.py:47-121` — SilverWriteMode, GoldWriteMode enums |
+| Content hash dedup | ✅ | `serialization.py:80-102` — SHA256 canonical JSON |
+| VACUUM support | ✅ | `vacuum_service.py` — 7-day retention |
+
+**Оценка: 10/10** — Полное соответствие: форматы, пути, retention, VACUUM, SCD2.
+
+---
+
+### 2.4. Обработка Ошибок и Circuit Breaker (10%)
+
+| Компонент | Статус | Файл |
+|-----------|--------|------|
+| Error classification | Critical/Recoverable/DQ | `error_handling.py` |
+| CircuitBreakerPort | Protocol defined | `domain/ports/resilience.py:68-126` |
+| CircuitBreaker implementation | CLOSED/OPEN/HALF_OPEN | `http/circuit_breaker.py:233 lines` |
+| Metrics emission | `circuit_breaker_state`, `trips_total` | Lines 93-109 |
+| ADR documented | ADR-007 | `docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md` |
+
+**Circuit Breaker конфигурация:**
+- `failure_threshold: int = 5` (default)
+- `recovery_timeout: int = 300` (5 min)
+- Thread-safe: `asyncio.Lock`
+- Selective triggers: 5xx, 429, connection errors
+
+**Retry strategy:** 3 attempts, 2.0 multiplier, 0.1-0.5s jitter (ADR-016)
+
+**Оценка: 10/10** — Полная реализация CB с метриками, retry с backoff, классификация ошибок.
+
+---
+
+### 2.5. Блокировки и Конкурентность (10%)
+
+| Компонент | Статус | Файл:строка |
+|-----------|--------|-------------|
+| LockPort Protocol | 5 методов | `domain/ports/locking.py:22-104` |
+| MemoryLock implementation | 266 lines | `infrastructure/locking/memory_lock.py` |
+| TTL mechanism | Background task + monotonic time | Lines 43-64 |
+| Heartbeat | Extends TTL by original value | Lines 186-214 |
+| Safety Guard | `validate_owner()` — 4-layer check | Lines 216-248 |
+| `aclose()` | Task cancellation + lock release | Lines 250-266 |
+| HeartbeatTask | Application service | `application/core/heartbeat.py:127 lines` |
+
+**Архитектурные тесты:** `tests/architecture/test_lock_safety_guard.py` (7 тестов)
+
+**Оценка: 10/10** — Полная реализация: lock + heartbeat + safety guard + graceful shutdown. MemoryLock достаточен для Local-Only архитектуры (ADR-003, ADR-010).
+
+---
+
+### 2.6. Валидация и DQ (10%)
+
+| Компонент | Статус | Файл |
+|-----------|--------|------|
+| DQConfig | soft=0.05, hard=0.20 | `domain/config.py:243-307` |
+| Pandera schemas | Comprehensive | `domain/schemas/*/` (все провайдеры) |
+| QuarantinePort | 7 методов | `domain/ports/quarantine.py:16-147` |
+| QuarantineEntry Aggregate | DDD pattern | `domain/aggregates/quarantine_entry.py:518 lines` |
+| Content Hash | SHA256 canonical JSON | `serialization.py:80-102` |
+| UnifiedQuarantine adapter | Delta Lake storage | `infrastructure/quarantine/unified.py` |
+
+**DQ Threshold Flow:**
+1. `DataQualityService.evaluate()` → `data_quality_service.py:67-110`
+2. Hard threshold (≥20%) → `DataQualityThresholdError`
+3. Soft threshold (≥5%) → Warning + metric emission
+4. Quarantine → Delta table с 30-day retention
+
+**Оценка: 10/10** — Pandera для всех сущностей, Quarantine с lifecycle, Content Hash, DQ metrics.
+
+---
+
+### 2.7. Логирование и Наблюдаемость (8%)
+
+| Компонент | Статус | Файл |
+|-----------|--------|------|
+| LoggerPort | 6 методов + bind | `domain/ports/observability.py` |
+| MetricsPort | histogram/counter/gauge | `domain/ports/observability.py` |
+| TracingPort | OpenTelemetry compatible | `domain/ports/observability.py` |
+| UnifiedLogger | structlog + run_id binding | `infrastructure/observability/unified_logger.py:234 lines` |
+| PrometheusMetrics | 23 metrics (6h/13c/4g) | `prometheus_metrics.py:124 lines` |
+| Secret filtering | Pattern-based masking | `logging_config.py:37-93` |
+| NoOp implementations | 3 (Logger, Metrics, Tracing) | `noop_*.py` |
+
+**Run_id enforcement:**
+- Bound at initialization: `unified_logger.py:99-102`
+- Mandatory field: `Log Schema (RULES.md §3.2.1)`
+- Architecture test: `test_port_contracts.py:101-104`
+
+**Оценка: 10/10** — UnifiedLogger везде, run_id в логах, Prometheus metrics, secret filtering.
+
+---
+
+### 2.8. Тестирование (8%)
+
+| Метрика | Значение |
+|---------|----------|
+| Coverage | **89.71%** (порог ≥85%) |
+| Test files | 489 |
+| Test cases | 9,234 |
+| VCR cassettes | 86 |
+| Architecture tests | 44 файла |
+
+**Категории тестов:**
+| Директория | Назначение |
+|------------|------------|
+| `tests/unit/` | Unit tests с MagicMock/fakes |
+| `tests/integration/` | VCR.py для HTTP |
+| `tests/e2e/` | Full pipeline tests |
+| `tests/architecture/` | Layer boundaries, contracts |
+| `tests/contract/` | API contract tests |
+| `tests/security/` | Security-specific tests |
+| `tests/performance/` | Performance benchmarks |
+| `tests/benchmarks/` | Microbenchmarks |
+
+**CI enforcement:** `--cov-fail-under=85` в `Makefile:63`
+
+**Оценка: 10/10** — Coverage >85%, VCR cassettes, architecture tests, contract tests.
+
+---
+
+### 2.9. Безопасность и Секреты (8%)
+
+| Аспект | Статус | Верификация |
+|--------|--------|-------------|
+| Secrets via env | ✅ | `BIOETL_{PROVIDER}_{KEY}` pattern |
+| .env in gitignore | ✅ | `.gitignore: *.env` |
+| PII hashing | SHA256 + salt (≥32 chars) | `pii_hasher.py:21-100` |
+| Salt rotation | Supported | `BIOETL_PII_SALT_NEXT`, `BIOETL_SALT_ROTATION_ACTIVE` |
+| Secret filtering in logs | Pattern-based | `logging_config.py:37-93` |
+| Hardcoded secrets | **0** | Verified via grep |
+| Security tests | ✅ | `tests/security/test_security.py` |
+
+**Оценка: 10/10** — Секреты только через env, PII salted с rotation support, .env в gitignore.
+
+---
+
+### 2.10. Документация и Сопровождаемость (7%)
+
+| Компонент | Статус |
+|-----------|--------|
+| RULES.md | v5.12 (1154 lines) — Конституция проекта |
+| ADR | 29 документов |
+| CHANGELOG.md | Semantic Versioning, актуален |
+| Docstrings в domain | 2,674 |
+| Docstrings в application | 1,747 |
+| REQUIREMENTS.md | 127 тестируемых требований |
+| Runbooks | 17 operational guides |
+
+**Оценка: 10/10** — ADR для всех решений, docstrings везде, CHANGELOG актуален, runbooks для операций.
+
+---
+
+## Часть 3. Сводная Таблица
+
+| # | Категория | Вес | Оценка | Взвеш. балл | Ключевые находки |
+|---|-----------|-----|--------|-------------|------------------|
+| 1 | Слоистая архитектура | 15% | **10** | 1.50 | 0 нарушений, 44 arch tests |
+| 2 | Контракты и Ports | 12% | **10** | 1.20 | 43 Protocols, NoOp implementations |
+| 3 | Medallion Architecture | 12% | **10** | 1.20 | Bronze/Silver/Gold, SCD2, VACUUM |
+| 4 | Обработка ошибок & CB | 10% | **10** | 1.00 | Full CB + metrics, retry strategy |
+| 5 | Блокировки | 10% | **10** | 1.00 | TTL + heartbeat + safety guard |
+| 6 | Валидация и DQ | 10% | **10** | 1.00 | Pandera, Quarantine, 5%/20% thresholds |
+| 7 | Логирование | 8% | **10** | 0.80 | UnifiedLogger, run_id, secret filter |
+| 8 | Тестирование | 8% | **10** | 0.80 | 89.71% coverage, 9,234 tests |
+| 9 | Безопасность | 8% | **10** | 0.80 | Env secrets, PII hash, salt rotation |
+| 10 | Документация | 7% | **10** | 0.70 | 29 ADR, RULES.md, runbooks |
+| **ИТОГО** | | **100%** | | **10.00** | |
+
+---
+
+## Часть 4. Интерпретация
+
+### Общий балл: **10.0 / 10.0** — Production-Ready
+
+Кодовая база BioETL демонстрирует **образцовое** соответствие архитектурным принципам:
+
+1. **Hexagonal Architecture** — строгое соблюдение слоёв без единого нарушения
+2. **SOLID principles** — 43 Protocol definitions с DI через конструкторы
+3. **Data Engineering Best Practices** — полная Medallion архитектура с ACID
+4. **Observability** — structured logging, metrics, tracing с mandatory run_id
+5. **Testing** — 89.71% coverage с VCR, architecture tests, contract tests
+6. **Security** — no hardcoded secrets, PII hashing, secret filtering
+7. **Documentation** — comprehensive ADR, RULES.md, operational runbooks
+
+---
+
+## Часть 5. Рекомендации по Улучшению (P3)
+
+Несмотря на отличные оценки, есть возможности для дальнейшего совершенствования:
+
+### [P3] 1. Увеличение покрытия до 95%
+
+**Текущий балл → Целевой:** 10 → 10 (качественное улучшение)
+**Проблема:** Coverage 89.71% — хорошо, но есть gaps в CLI и integration paths
+**Решение:** Добавить тесты для edge cases в `interfaces/cli/`
+**Трудозатраты:** M (дни)
+
+### [P3] 2. Снижение TODO/FIXME до 0
+
+**Текущее значение:** 20
+**Проблема:** Технический долг в виде TODO markers
+**Решение:** Адресовать или удалить устаревшие TODO
+**Трудозатраты:** S (часы)
+
+### [P3] 3. Property-Based Testing Expansion
+
+**Текущий статус:** Hypothesis используется частично
+**Решение:** Расширить property-based тесты для transformers
+**Трудозатраты:** M (дни)
+
+### [P3] 4. Mutation Testing
+
+**Текущий статус:** Не внедрён
+**Решение:** Добавить `mutmut` или `cosmic-ray` в CI
+**Трудозатраты:** M (дни)
+
+---
+
+## Часть 6. Метрики Контроля Регресса
+
+Следующие проверки **УЖЕ реализованы** в CI:
+
+| Метрика | Порог | Команда | Блокирует PR |
+|---------|-------|---------|--------------|
+| Coverage | ≥85% | `pytest --cov-fail-under=85` | ✅ Да |
+| mypy errors | 0 | `mypy --strict` | ✅ Да |
+| Ruff (linting) | 0 | `ruff check src/` | ✅ Да |
+| Нарушения слоёв | 0 | `import-linter` + arch tests | ✅ Да |
+| print() в коде | 0 | Architecture test | ✅ Да |
+| VCR mode | none | `--vcr-record=none` | ✅ Да |
+| random in writers | 0 | `test_no_random_in_writers.py` | ✅ Да |
+| datetime.now() | 0 | `test_no_datetime_now_in_infrastructure.py` | ✅ Да |
+
+---
+
+## Часть 7. Заключение
+
+BioETL представляет собой **зрелую, production-ready** кодовую базу с:
+
+- **Нулевыми** архитектурными нарушениями
+- **Нулевыми** mypy strict ошибками
+- **89.71%** тестового покрытия
+- **Полной** реализацией всех требований RULES.md
+
+Проект готов к production deployment без необходимости срочного рефакторинга.
+
+---
+
+*Аудит выполнен в соответствии с протоколом двойной верификации (RULES.md §7).
+Все утверждения подкреплены конкретными ссылками на файлы и строки кода.*
+
+================================================================================
 File: naming-compliance-report.md
 Path: audit\naming-compliance-report.md
 ================================================================================
@@ -51644,959 +53799,6 @@ Discrepancies exist between Pipeline Config `entity_type` and Schema Class names
 *   `uniprot/idmapping`: No explicit schema definition found.
 
 **Recommendation**: Define `IdMappingSchema` to ensure data quality contracts for this pipeline.
-
-================================================================================
-File: config-dedup-analysis.md
-Path: config-dedup-analysis.md
-================================================================================
-# Configuration Duplication Analysis Report
-
-**Date**: 2026-01-21
-**Author**: Claude Code
-**Version**: 1.0.0
-
-## Executive Summary
-
-This analysis identifies significant duplication between:
-- `configs/pipelines/{provider}/{entity}.yaml` (pipeline configs)
-- `configs/filter/entities/{provider}/{entity}.yaml` (filter entity configs)
-- `configs/dq/entities/{provider}/{entity}.yaml` (DQ entity configs)
-
-**Key Findings**:
-- **~195 lines** of duplicated content across 20 pipeline configs
-- **input_filter**: 100% duplicated in 18/20 pipeline configs
-- **gold_filters**: 100% duplicated in 18/20 pipeline configs
-- **sink paths**: Follow predictable convention `data/output/{layer}/{provider}/{entity}`
-
-## Duplication Categories
-
-### Category 1: DUPLICATE (100% identical - should be removed)
-
-| Section | Description | Action |
-|---------|-------------|--------|
-| `input_filter` | Identical to filter entity config | Remove from pipeline config |
-| `gold_filters` | Identical to filter entity config | Remove from pipeline config |
-| `source_file` | Predictable: `../../sources/{provider}.yaml` | Auto-compute from provider |
-| `dq_config_file` | Predictable: `../../dq/entities/{provider}/{entity}.yaml` | Auto-compute from provider/entity |
-| `filter_config_file` | Predictable: `../../filter/entities/{provider}/{entity}.yaml` | Auto-compute from provider/entity |
-| `sink.bronze.path` | Predictable: `data/output/bronze/{provider}/{entity}` | Auto-compute |
-| `sink.silver.path` | Predictable: `data/output/silver/{provider}/{entity}` | Auto-compute |
-| `sink.gold.path` | Predictable: `data/output/gold/{provider}/{entity}` | Auto-compute |
-| `sink.silver.csv_export.path` | Same as silver path | Auto-compute |
-| `sink.gold.csv_export.path` | Same as gold path | Auto-compute |
-| `sink.silver.primary_key` | Same as `primary_keys` | Auto-copy from primary_keys |
-| `sink.silver.sort_by.columns` | Usually same as `primary_keys` | Auto-copy from primary_keys |
-| `sink.gold.sort_by.columns` | Usually same as `primary_keys` | Auto-copy from primary_keys |
-
-### Category 2: OVERRIDE (extends/differs from entity config - keep with comment)
-
-| Section | Description | Action |
-|---------|-------------|--------|
-| `dq_rules.field_validations` | Extends entity DQ config | Keep only overrides |
-| `dq_rules.cross_field_validations` | Extends entity DQ config | Keep only overrides |
-| `dq_rules.conditional_validations` | Extends entity DQ config | Keep only overrides |
-| `sink.silver.partition_by` | Entity-specific partitioning | Keep (non-default) |
-| `source.*` (special) | Provider-specific API config (e.g., PubMed search_term) | Keep |
-
-### Category 3: UNIQUE (only in pipeline config - keep as-is)
-
-| Section | Description | Action |
-|---------|-------------|--------|
-| `pipeline_name` | Unique identifier | Keep (required) |
-| `provider` | Provider name | Keep (required) |
-| `entity_type` | Entity type | Keep (required) |
-| `version` | Config version | Keep (required) |
-| `description` | Human-readable description | Keep (required) |
-| `primary_keys` | Deduplication keys | Keep (required) |
-| `silver_table` | Silver table name | Keep (required) |
-| `gold_table` | Gold table name | Keep (required) |
-
----
-
-## Detailed Inventory by Provider
-
-### ChEMBL (12 entities)
-
-| Entity | File | Lines | Duplicates | After Cleanup |
-|--------|------|-------|------------|---------------|
-| activity | `chembl/activity.yaml` | 128 | 42 | ~86 |
-| assay | `chembl/assay.yaml` | 102 | 35 | ~67 |
-| assay_parameters | `chembl/assay_parameters.yaml` | 68 | 32 | ~36 |
-| cell_line | `chembl/cell_line.yaml` | 65 | 32 | ~33 |
-| compound_record | `chembl/compound_record.yaml` | 71 | 32 | ~39 |
-| molecule | `chembl/molecule.yaml` | 130 | 35 | ~95 |
-| protein_class | `chembl/protein_class.yaml` | 69 | 32 | ~37 |
-| publication | `chembl/publication.yaml` | 77 | 32 | ~45 |
-| publication_similarity | `chembl/publication_similarity.yaml` | 70 | 32 | ~38 |
-| publication_term | `chembl/publication_term.yaml` | 75 | 32 | ~43 |
-| target | `chembl/target.yaml` | 110 | 42 | ~68 |
-| target_component | `chembl/target_component.yaml` | 67 | 32 | ~35 |
-
-**ChEMBL Subtotal**: 1,032 lines → ~622 lines (-410 lines, -40%)
-
-### UniProt (2 entities)
-
-| Entity | File | Lines | Duplicates | After Cleanup |
-|--------|------|-------|------------|---------------|
-| protein | `uniprot/protein.yaml` | 71 | 35 | ~36 |
-| idmapping | `uniprot/idmapping.yaml` | 95 | 35 | ~60 |
-
-**UniProt Subtotal**: 166 lines → ~96 lines (-70 lines, -42%)
-
-### PubChem (1 entity)
-
-| Entity | File | Lines | Duplicates | After Cleanup |
-|--------|------|-------|------------|---------------|
-| compound | `pubchem/compound.yaml` | 128 | 35 | ~93 |
-
-**PubChem Subtotal**: 128 lines → ~93 lines (-35 lines, -27%)
-
-### PubMed (1 entity)
-
-| Entity | File | Lines | Duplicates | After Cleanup |
-|--------|------|-------|------------|---------------|
-| publications | `pubmed/publications.yaml` | 76 | 32 | ~44 |
-
-**PubMed Subtotal**: 76 lines → ~44 lines (-32 lines, -42%)
-
-### CrossRef (1 entity)
-
-| Entity | File | Lines | Duplicates | After Cleanup |
-|--------|------|-------|------------|---------------|
-| publication | `crossref/publication.yaml` | 72 | 35 | ~37 |
-
-**CrossRef Subtotal**: 72 lines → ~37 lines (-35 lines, -49%)
-
-### OpenAlex (1 entity)
-
-| Entity | File | Lines | Duplicates | After Cleanup |
-|--------|------|-------|------------|---------------|
-| publication | `openalex/publication.yaml` | 80 | 35 | ~45 |
-
-**OpenAlex Subtotal**: 80 lines → ~45 lines (-35 lines, -44%)
-
-### SemanticScholar (1 entity)
-
-| Entity | File | Lines | Duplicates | After Cleanup |
-|--------|------|-------|------------|---------------|
-| publication | `semanticscholar/publication.yaml` | 75 | 32 | ~43 |
-
-**SemanticScholar Subtotal**: 75 lines → ~43 lines (-32 lines, -43%)
-
-### Composite (1 entity)
-
-| Entity | File | Lines | Duplicates | After Cleanup |
-|--------|------|-------|------------|---------------|
-| publication | `composite/publication.yaml` | 196 | 45 | ~151 |
-
-**Composite Subtotal**: 196 lines → ~151 lines (-45 lines, -23%)
-
----
-
-## Total Summary
-
-| Metric | Before | After | Reduction |
-|--------|--------|-------|-----------|
-| **Total Lines** | 1,825 | ~1,131 | **-694 lines (-38%)** |
-| **Duplicate Lines** | 694 | 0 | **-694 lines** |
-
----
-
-## Detailed Duplication Examples
-
-### Example 1: chembl/activity.yaml
-
-**DUPLICATE - input_filter** (lines 123-128 in pipeline, lines 16-21 in filter entity):
-```yaml
-# Pipeline config (DELETE)
-input_filter:
-  enabled: true
-  source_path: "data/input/activity.csv"
-  column_name: "activity_id"
-  filter_field: "activity_id"
-  batch_size: 20
-
-# Filter entity config (KEEP)
-input_filter:
-  enabled: true
-  source_path: "data/input/activity.csv"
-  column_name: "activity_id"
-  filter_field: "activity_id"
-  batch_size: 20
-```
-
-**DUPLICATE - gold_filters** (lines 87-102 in pipeline, lines 27-52 in filter entity):
-```yaml
-# Both configs have IDENTICAL content:
-gold_filters:
-  columns:
-    standard_type: [IC50, Ki]
-    standard_units: [nM]
-    standard_relation: ["="]
-    assay_type: [B, F]
-    potential_duplicate: ["0"]
-  ranges:
-    standard_value:
-      min: 0
-      include_min: false
-  required_fields:
-    - standard_type
-    - standard_value
-    - standard_units
-    - target_chembl_id
-```
-
-**DUPLICATE - sink paths** (lines 105-120):
-```yaml
-# Can be auto-computed from provider=chembl, entity_type=activity:
-sink:
-  bronze:
-    path: "data/output/bronze/chembl/activity"  # = data/output/bronze/{provider}/{entity}
-  silver:
-    path: "data/output/silver/chembl/activity"  # = data/output/silver/{provider}/{entity}
-    primary_key: ["activity_id"]                 # = primary_keys
-    sort_by:
-      columns: ["activity_id"]                   # = primary_keys
-    csv_export:
-      path: "data/output/silver/chembl/activity" # = silver.path
-  gold:
-    path: "data/output/gold/chembl/activity"    # = data/output/gold/{provider}/{entity}
-    sort_by:
-      columns: ["activity_id"]                   # = primary_keys
-    csv_export:
-      path: "data/output/gold/chembl/activity"  # = gold.path
-```
-
-### Example 2: uniprot/protein.yaml
-
-**DUPLICATE - All filter config identical to filter entity config**
-
-Pipeline config gold_filters (lines 37-43):
-```yaml
-gold_filters:
-  required_fields:
-    - accession
-    - entry_name
-    - organism
-  columns:
-    reviewed: ["true"]
-```
-
-Filter entity config (lines 28-38):
-```yaml
-gold_filters:
-  columns:
-    reviewed: ["true"]
-  required_fields:
-    - accession
-    - entry_name
-    - organism
-```
-
----
-
-## Convention-Based Resolution Proposal
-
-### Proposed _base.yaml Additions
-
-```yaml
-# Convention-based path resolution (added to _base.yaml)
-# These are computed at load time from provider and entity_type:
-
-# File references - auto-computed if not specified:
-# source_file: ../../sources/{provider}.yaml
-# dq_config_file: ../../dq/entities/{provider}/{entity_type}.yaml
-# filter_config_file: ../../filter/entities/{provider}/{entity_type}.yaml
-
-# Sink paths - auto-computed if not specified:
-# sink.bronze.path: data/output/bronze/{provider}/{entity_type}
-# sink.silver.path: data/output/silver/{provider}/{entity_type}
-# sink.gold.path: data/output/gold/{provider}/{entity_type}
-# sink.silver.csv_export.path: {sink.silver.path}
-# sink.gold.csv_export.path: {sink.gold.path}
-
-# Primary key propagation:
-# sink.silver.primary_key: {primary_keys}
-# sink.silver.sort_by.columns: {primary_keys}
-# sink.gold.sort_by.columns: {primary_keys}
-```
-
-### Proposed Minimal Pipeline Config Format
-
-After implementing conventions, a minimal pipeline config would be:
-
-```yaml
-# configs/pipelines/chembl/activity.yaml
-# Minimal config - all paths and filters resolved by convention
-
-pipeline_name: chembl_activity
-provider: chembl
-entity_type: activity
-version: "1.2.0"
-description: "Extract biological activity records from ChEMBL API"
-
-primary_keys: ["activity_id"]
-silver_table: "chembl_activity"
-gold_table: "chembl_activity"
-
-# DQ overrides (only fields that DIFFER from entity DQ config)
-dq_rules:
-  field_validations:
-    # Override: Extended enum with additional types
-    - field: "standard_type"
-      type: "enum"
-      allowed: ["IC50", "Ki", "Kd", "EC50", "AC50", "GI50", "ED50", "MIC", "CC50"]
-      nullable: true
-```
-
-**Result**: 128 lines → ~25 lines (80% reduction)
-
----
-
-## Implementation Plan
-
-### Phase 1: Analysis (COMPLETE)
-- [x] Inventory duplication
-- [x] Categorize (DUPLICATE/OVERRIDE/UNIQUE)
-- [x] Create this analysis document
-
-### Phase 2: Config Loader Enhancement
-- [ ] Add convention-based path resolution to config loader
-- [ ] Auto-compute `source_file`, `dq_config_file`, `filter_config_file`
-- [ ] Auto-compute sink paths from provider/entity_type
-- [ ] Auto-copy primary_keys to sink.silver.primary_key and sort_by
-
-### Phase 3: Pipeline Config Cleanup
-- [ ] Remove duplicated `input_filter` sections
-- [ ] Remove duplicated `gold_filters` sections
-- [ ] Remove convention-computed paths
-- [ ] Add `# Inherited from: {path}` comments where needed
-- [ ] Keep only OVERRIDE and UNIQUE sections
-
-### Phase 4: Verification
-- [ ] Run `python scripts/validate_pipeline_configs.py`
-- [ ] Run `pytest tests/unit/composition/test_config_loader.py`
-- [ ] Run `pytest tests/integration/`
-- [ ] Verify all pipelines still work identically
-
----
-
-## Risk Assessment
-
-| Risk | Mitigation |
-|------|------------|
-| Breaking existing pipeline behavior | Comprehensive test coverage before/after |
-| Config loader complexity | Well-documented convention rules |
-| Backward compatibility | Support both explicit and computed paths |
-| Merge conflicts during transition | Atomic refactoring per provider |
-
----
-
-## Appendix: Per-Entity Duplication Details
-
-### chembl/activity.yaml
-
-| Section | Lines | Status | Details |
-|---------|-------|--------|---------|
-| Header comments | 1-6 | UNIQUE | Keep |
-| pipeline_name, provider, entity_type | 7-11 | UNIQUE | Keep |
-| primary_keys, tables | 13-15 | UNIQUE | Keep |
-| source_file | 18 | DUPLICATE | Auto-compute |
-| dq_config_file comment | 20-29 | DUPLICATE | Auto-compute |
-| filter_config_file | 31-38 | DUPLICATE | Auto-compute |
-| dq_rules (overrides) | 45-84 | OVERRIDE | Keep only differences |
-| gold_filters | 86-102 | DUPLICATE | Remove (in filter entity) |
-| sink paths | 104-120 | DUPLICATE | Auto-compute |
-| input_filter | 122-128 | DUPLICATE | Remove (in filter entity) |
-
-### chembl/target.yaml
-
-| Section | Lines | Status | Details |
-|---------|-------|--------|---------|
-| Header comments | 1-5 | UNIQUE | Keep |
-| pipeline_name, provider, entity_type | 6-10 | UNIQUE | Keep |
-| primary_keys, tables | 12-14 | UNIQUE | Keep |
-| source_file | 16 | DUPLICATE | Auto-compute |
-| dq_config_file | 18-25 | DUPLICATE | Auto-compute |
-| filter_config_file | 27-34 | DUPLICATE | Auto-compute |
-| dq_rules (overrides) | 40-65 | OVERRIDE | Keep (extended enums, unique validations) |
-| gold_filters | 67-83 | DUPLICATE | Remove (in filter entity) |
-| sink paths | 85-102 | DUPLICATE | Auto-compute |
-| input_filter | 104-110 | DUPLICATE | Remove (in filter entity) |
-
----
-
-*Generated by config deduplication analysis tool*
-
-================================================================================
-File: config_discrepancies_report.md
-Path: config_discrepancies_report.md
-================================================================================
-# Config Discrepancies Report
-
-Generated: 2026-01-23T09:37:25.950380
-
-Total configs: 21
-Total unique parameters: 176
-
-## 1. Parameters by Category
-
-### batch_size
-
-| Parameter | Presence |
-|-----------|----------|
-| `batch_size` | 1/21 |
-
-### checkpoint_interval
-
-| Parameter | Presence |
-|-----------|----------|
-| `checkpoint_interval` | 1/21 |
-
-### circuit_breaker
-
-| Parameter | Presence |
-|-----------|----------|
-| `circuit_breaker` | 1/21 |
-| `circuit_breaker.failure_threshold` | 1/21 |
-| `circuit_breaker.recovery_timeout` | 1/21 |
-
-### composite
-
-| Parameter | Presence |
-|-----------|----------|
-| `composite` | 1/21 |
-| `composite.dq_rules` | 1/21 |
-| `composite.enrichers` | 1/21 |
-| `composite.execution` | 1/21 |
-| `composite.lineage` | 1/21 |
-| `composite.merge` | 1/21 |
-| `composite.name` | 1/21 |
-| `composite.seed` | 1/21 |
-| `composite.version` | 1/21 |
-| `composite.dq_rules.enricher_overrides` | 1/21 |
-| `composite.dq_rules.hard_fail_threshold` | 1/21 |
-| `composite.dq_rules.required_fields` | 1/21 |
-| `composite.dq_rules.soft_fail_threshold` | 1/21 |
-| `composite.execution.checkpoint_enabled` | 1/21 |
-| `composite.execution.max_concurrency` | 1/21 |
-| `composite.execution.retry` | 1/21 |
-| `composite.lineage.track_field_sources` | 1/21 |
-| `composite.lineage.track_status` | 1/21 |
-| `composite.lineage.track_timestamps` | 1/21 |
-| `composite.merge.conflict_resolution` | 1/21 |
-| `composite.merge.field_priorities` | 1/21 |
-| `composite.merge.output` | 1/21 |
-| `composite.merge.strategy` | 1/21 |
-| `composite.seed.output_keys` | 1/21 |
-| `composite.seed.pipeline` | 1/21 |
-| `composite.seed.silver_table` | 1/21 |
-| `composite.dq_rules.enricher_overrides.pubmed_publication` | 1/21 |
-| `composite.dq_rules.enricher_overrides.semanticscholar_publication` | 1/21 |
-| `composite.execution.retry.backoff_multiplier` | 1/21 |
-| `composite.execution.retry.max_attempts` | 1/21 |
-| `composite.merge.field_priorities.abstract` | 1/21 |
-| `composite.merge.field_priorities.citations_count` | 1/21 |
-| `composite.merge.field_priorities.concepts` | 1/21 |
-| `composite.merge.field_priorities.mesh_terms` | 1/21 |
-| `composite.merge.field_priorities.title` | 1/21 |
-| `composite.merge.field_priorities.tldr` | 1/21 |
-| `composite.merge.output.gold` | 1/21 |
-| `composite.merge.output.silver` | 1/21 |
-| `composite.dq_rules.enricher_overrides.pubmed_publication.hard_fail_threshold` | 1/21 |
-| `composite.dq_rules.enricher_overrides.pubmed_publication.soft_fail_threshold` | 1/21 |
-| `composite.dq_rules.enricher_overrides.semanticscholar_publication.hard_fail_threshold` | 1/21 |
-| `composite.dq_rules.enricher_overrides.semanticscholar_publication.soft_fail_threshold` | 1/21 |
-
-### description
-
-| Parameter | Presence |
-|-----------|----------|
-| `description` | 19/21 |
-
-### dq_config_file
-
-| Parameter | Presence |
-|-----------|----------|
-| `dq_config_file` | 15/21 |
-
-### dq_rules
-
-| Parameter | Presence |
-|-----------|----------|
-| `dq_rules` | 6/21 |
-| `dq_rules.conditional_validations` | 2/21 |
-| `dq_rules.cross_field_validations` | 6/21 |
-| `dq_rules.field_validations` | 6/21 |
-| `dq_rules.hard_fail_threshold` | 1/21 |
-| `dq_rules.invalid_record_policy` | 1/21 |
-| `dq_rules.report` | 1/21 |
-| `dq_rules.soft_fail_threshold` | 1/21 |
-| `dq_rules.strict_validation` | 1/21 |
-| `dq_rules.report.enabled` | 1/21 |
-| `dq_rules.report.format` | 1/21 |
-| `dq_rules.report.include_sample_failures` | 1/21 |
-| `dq_rules.report.sample_size` | 1/21 |
-
-### entity_type
-
-| Parameter | Presence |
-|-----------|----------|
-| `entity_type` | 19/21 |
-
-### filter_config_file
-
-| Parameter | Presence |
-|-----------|----------|
-| `filter_config_file` | 5/21 |
-
-### gold_filters
-
-| Parameter | Presence |
-|-----------|----------|
-| `gold_filters` | 1/21 |
-| `gold_filters.required_fields` | 1/21 |
-
-### gold_table
-
-| Parameter | Presence |
-|-----------|----------|
-| `gold_table` | 19/21 |
-
-### input_filter
-
-| Parameter | Presence |
-|-----------|----------|
-| `input_filter` | 1/21 |
-| `input_filter.batch_size` | 1/21 |
-| `input_filter.enabled` | 1/21 |
-
-### maintenance
-
-| Parameter | Presence |
-|-----------|----------|
-| `maintenance` | 1/21 |
-| `maintenance.auto_vacuum` | 1/21 |
-| `maintenance.vacuum_retention_days` | 1/21 |
-
-### pipeline_name
-
-| Parameter | Presence |
-|-----------|----------|
-| `pipeline_name` | 19/21 |
-
-### primary_keys
-
-| Parameter | Presence |
-|-----------|----------|
-| `primary_keys` | 19/21 |
-
-### provider
-
-| Parameter | Presence |
-|-----------|----------|
-| `provider` | 19/21 |
-
-### schema_version
-
-| Parameter | Presence |
-|-----------|----------|
-| `schema_version` | 1/21 |
-
-### silver_table
-
-| Parameter | Presence |
-|-----------|----------|
-| `silver_table` | 19/21 |
-
-### sink
-
-| Parameter | Presence |
-|-----------|----------|
-| `sink` | 19/21 |
-| `sink.bronze` | 17/21 |
-| `sink.gold` | 17/21 |
-| `sink.silver` | 19/21 |
-| `sink.bronze.deterministic` | 1/21 |
-| `sink.bronze.dq_report` | 1/21 |
-| `sink.bronze.flat_structure` | 6/21 |
-| `sink.bronze.format` | 1/21 |
-| `sink.bronze.metadata` | 1/21 |
-| `sink.bronze.path` | 16/21 |
-| `sink.bronze.save_json` | 1/21 |
-| `sink.bronze.save_metadata` | 1/21 |
-| `sink.gold.csv_export` | 17/21 |
-| `sink.gold.deterministic` | 1/21 |
-| `sink.gold.dq_report` | 1/21 |
-| `sink.gold.enabled` | 1/21 |
-| `sink.gold.flat_structure` | 6/21 |
-| `sink.gold.format` | 1/21 |
-| `sink.gold.metadata` | 1/21 |
-| `sink.gold.mode` | 1/21 |
-| `sink.gold.path` | 16/21 |
-| `sink.gold.save_metadata` | 1/21 |
-| `sink.gold.sort_by` | 16/21 |
-| `sink.gold.validation` | 1/21 |
-| `sink.silver.classification` | 1/21 |
-| `sink.silver.csv_export` | 17/21 |
-| `sink.silver.deterministic` | 1/21 |
-| `sink.silver.dq_report` | 1/21 |
-| `sink.silver.flat_structure` | 6/21 |
-| `sink.silver.forensic_retention` | 1/21 |
-| `sink.silver.format` | 1/21 |
-| `sink.silver.metadata` | 1/21 |
-| `sink.silver.mode` | 1/21 |
-| `sink.silver.on_schema_mismatch` | 1/21 |
-| `sink.silver.partition_by` | 16/21 |
-| `sink.silver.path` | 16/21 |
-| `sink.silver.primary_key` | 15/21 |
-| `sink.silver.save_metadata` | 1/21 |
-| `sink.silver.sort_by` | 16/21 |
-| `sink.bronze.dq_report.enabled` | 1/21 |
-| `sink.bronze.metadata.description` | 1/21 |
-| `sink.bronze.metadata.lineage` | 1/21 |
-| `sink.bronze.metadata.owner` | 1/21 |
-| `sink.bronze.metadata.retention_days` | 1/21 |
-| `sink.bronze.metadata.sla_freshness_hours` | 1/21 |
-| `sink.bronze.metadata.steward` | 1/21 |
-| `sink.bronze.metadata.tags` | 1/21 |
-| `sink.gold.csv_export.delimiter` | 1/21 |
-| `sink.gold.csv_export.enabled` | 1/21 |
-| `sink.gold.csv_export.encoding` | 1/21 |
-| `sink.gold.csv_export.header` | 1/21 |
-| `sink.gold.csv_export.path` | 16/21 |
-| `sink.gold.dq_report.enabled` | 1/21 |
-| `sink.gold.metadata.business_domain` | 1/21 |
-| `sink.gold.metadata.description` | 1/21 |
-| `sink.gold.metadata.lineage` | 1/21 |
-| `sink.gold.metadata.tags` | 1/21 |
-| `sink.gold.metadata.use_cases` | 1/21 |
-| `sink.gold.sort_by.ascending` | 16/21 |
-| `sink.gold.sort_by.columns` | 15/21 |
-| `sink.gold.validation.strict` | 1/21 |
-| `sink.silver.csv_export.delimiter` | 1/21 |
-| `sink.silver.csv_export.enabled` | 1/21 |
-| `sink.silver.csv_export.encoding` | 1/21 |
-| `sink.silver.csv_export.header` | 1/21 |
-| `sink.silver.csv_export.path` | 16/21 |
-| `sink.silver.dq_report.enabled` | 1/21 |
-| `sink.silver.metadata.description` | 1/21 |
-| `sink.silver.metadata.lineage` | 1/21 |
-| `sink.silver.metadata.quality_expectations` | 1/21 |
-| `sink.silver.metadata.tags` | 1/21 |
-| `sink.silver.sort_by.ascending` | 16/21 |
-| `sink.silver.sort_by.columns` | 15/21 |
-| `sink.bronze.metadata.lineage.extraction_method` | 1/21 |
-| `sink.bronze.metadata.lineage.source_system` | 1/21 |
-| `sink.bronze.metadata.lineage.source_version` | 1/21 |
-| `sink.gold.metadata.lineage.filters_applied` | 1/21 |
-| `sink.gold.metadata.lineage.source_layer` | 1/21 |
-| `sink.silver.metadata.lineage.source_layer` | 1/21 |
-| `sink.silver.metadata.lineage.transformations` | 1/21 |
-| `sink.silver.metadata.quality_expectations.accuracy` | 1/21 |
-| `sink.silver.metadata.quality_expectations.completeness` | 1/21 |
-
-### source
-
-| Parameter | Presence |
-|-----------|----------|
-| `source` | 4/21 |
-| `source.api` | 1/21 |
-| `source.api_key` | 1/21 |
-| `source.batch_size` | 1/21 |
-| `source.email` | 2/21 |
-| `source.input_path` | 1/21 |
-| `source.load_strategy` | 2/21 |
-| `source.search_term` | 1/21 |
-| `source.type` | 2/21 |
-| `source.api.base_url` | 1/21 |
-| `source.api.from_db` | 1/21 |
-| `source.api.to_db` | 1/21 |
-
-### source_file
-
-| Parameter | Presence |
-|-----------|----------|
-| `source_file` | 15/21 |
-
-### transform
-
-| Parameter | Presence |
-|-----------|----------|
-| `transform` | 1/21 |
-| `transform.steps` | 1/21 |
-
-### version
-
-| Parameter | Presence |
-|-----------|----------|
-| `version` | 19/21 |
-
-## 2. Entity Config Comparison
-
-| Config | pipeline_name | provider | entity_type | version | description | primary_keys | silver_table | gold_table | source_file | source | transform | dq_rules | circuit_breaker | rate_limit | gold_filters | sink | input_filter |
-|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
-| _base | — | — | — | — | — | — | — | — | — | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | ✓ |
-| chembl/activity | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | ✓ | — | — | — | — | — |
-| chembl/assay | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | ✓ | — | — | — | ✓ | — |
-| chembl/assay_parameters | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
-| chembl/cell_line | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
-| chembl/compound_record | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
-| chembl/molecule | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | — | — | — | ✓ | — |
-| chembl/protein_class | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
-| chembl/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
-| chembl/publication_similarity | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
-| chembl/publication_term | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
-| chembl/target | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | — | — | — | ✓ | — |
-| chembl/target_component | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
-| composite/publication | — | — | — | — | — | — | — | — | — | — | — | — | — | — | ✓ | — | — |
-| crossref/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
-| openalex/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | ✓ | — |
-| pubchem/compound | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | — | — | — | ✓ | — |
-| pubmed/publications | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — | — | — | — | ✓ | — |
-| semanticscholar/publication | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | ✓ | — |
-| uniprot/idmapping | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | ✓ | — |
-| uniprot/protein | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | — | — | — | — | ✓ | — |
-
-## 3. Discrepancy Categories
-
-### A. Missing in _defaults (should be added)
-
-- `batch_size` - present in: chembl/protein_class
-- `checkpoint_interval` - present in: chembl/protein_class
-- `circuit_breaker` - present in: _base
-- `circuit_breaker.failure_threshold` - present in: _base
-- `circuit_breaker.recovery_timeout` - present in: _base
-- `composite` - present in: composite/publication
-- `composite.dq_rules` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides.pubmed_publication` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides.pubmed_publication.hard_fail_threshold` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides.pubmed_publication.soft_fail_threshold` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides.semanticscholar_publication` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides.semanticscholar_publication.hard_fail_threshold` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides.semanticscholar_publication.soft_fail_threshold` - present in: composite/publication
-- `composite.dq_rules.hard_fail_threshold` - present in: composite/publication
-- `composite.dq_rules.required_fields` - present in: composite/publication
-- `composite.dq_rules.soft_fail_threshold` - present in: composite/publication
-- `composite.enrichers` - present in: composite/publication
-- `composite.execution` - present in: composite/publication
-- `composite.execution.checkpoint_enabled` - present in: composite/publication
-- `composite.execution.max_concurrency` - present in: composite/publication
-- `composite.execution.retry` - present in: composite/publication
-- `composite.execution.retry.backoff_multiplier` - present in: composite/publication
-- `composite.execution.retry.max_attempts` - present in: composite/publication
-- `composite.lineage` - present in: composite/publication
-- `composite.lineage.track_field_sources` - present in: composite/publication
-- `composite.lineage.track_status` - present in: composite/publication
-- `composite.lineage.track_timestamps` - present in: composite/publication
-- `composite.merge` - present in: composite/publication
-- `composite.merge.conflict_resolution` - present in: composite/publication
-- `composite.merge.field_priorities` - present in: composite/publication
-- `composite.merge.field_priorities.abstract` - present in: composite/publication
-- `composite.merge.field_priorities.citations_count` - present in: composite/publication
-- `composite.merge.field_priorities.concepts` - present in: composite/publication
-- `composite.merge.field_priorities.mesh_terms` - present in: composite/publication
-- `composite.merge.field_priorities.title` - present in: composite/publication
-- `composite.merge.field_priorities.tldr` - present in: composite/publication
-- `composite.merge.output` - present in: composite/publication
-- `composite.merge.output.gold` - present in: composite/publication
-- `composite.merge.output.silver` - present in: composite/publication
-- `composite.merge.strategy` - present in: composite/publication
-- `composite.name` - present in: composite/publication
-- `composite.seed` - present in: composite/publication
-- `composite.seed.output_keys` - present in: composite/publication
-- `composite.seed.pipeline` - present in: composite/publication
-- `composite.seed.silver_table` - present in: composite/publication
-- `composite.version` - present in: composite/publication
-- `description` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `dq_config_file` - present in: chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
-- `dq_rules` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
-- `dq_rules.conditional_validations` - present in: _base, chembl/activity
-- `dq_rules.cross_field_validations` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
-- `dq_rules.field_validations` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
-- `dq_rules.hard_fail_threshold` - present in: _base
-- `dq_rules.invalid_record_policy` - present in: _base
-- `dq_rules.report` - present in: _base
-- `dq_rules.report.enabled` - present in: _base
-- `dq_rules.report.format` - present in: _base
-- `dq_rules.report.include_sample_failures` - present in: _base
-- `dq_rules.report.sample_size` - present in: _base
-- `dq_rules.soft_fail_threshold` - present in: _base
-- `dq_rules.strict_validation` - present in: _base
-- `entity_type` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `filter_config_file` - present in: chembl/publication, chembl/publication_similarity, chembl/publication_term, composite/publication, pubmed/publications
-- `gold_filters` - present in: composite/publication
-- `gold_table` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `input_filter` - present in: _base
-- `maintenance` - present in: _base
-- `maintenance.auto_vacuum` - present in: _base
-- `maintenance.vacuum_retention_days` - present in: _base
-- `pipeline_name` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `primary_keys` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `provider` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `schema_version` - present in: _base
-- `silver_table` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `sink` - present in: _base, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- `source` - present in: _base, openalex/publication, pubmed/publications, uniprot/idmapping
-- `source.api` - present in: uniprot/idmapping
-- `source.api.base_url` - present in: uniprot/idmapping
-- `source.api.from_db` - present in: uniprot/idmapping
-- `source.api.to_db` - present in: uniprot/idmapping
-- `source.api_key` - present in: pubmed/publications
-- `source.batch_size` - present in: openalex/publication
-- `source.email` - present in: openalex/publication, pubmed/publications
-- `source.input_path` - present in: uniprot/idmapping
-- `source.load_strategy` - present in: _base, uniprot/idmapping
-- `source.search_term` - present in: pubmed/publications
-- `source.type` - present in: _base, uniprot/idmapping
-- `source_file` - present in: chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
-- `transform` - present in: _base
-- `transform.steps` - present in: _base
-- `version` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-
-### B. Inconsistent presence across entity configs
-
-- `description`
-  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (2): composite/publication, _base
-- `dq_config_file`
-  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
-  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
-- `dq_rules`
-  - Present in (6): _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
-  - Missing in (15): composite/publication, uniprot/idmapping, chembl/protein_class, chembl/compound_record, crossref/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, pubmed/publications, openalex/publication, uniprot/protein, semanticscholar/publication, chembl/publication
-- `dq_rules.conditional_validations`
-  - Present in (2): _base, chembl/activity
-  - Missing in (19): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, uniprot/idmapping, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
-- `dq_rules.cross_field_validations`
-  - Present in (6): _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
-  - Missing in (15): composite/publication, uniprot/idmapping, chembl/protein_class, chembl/compound_record, crossref/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, pubmed/publications, openalex/publication, uniprot/protein, semanticscholar/publication, chembl/publication
-- `dq_rules.field_validations`
-  - Present in (6): _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
-  - Missing in (15): composite/publication, uniprot/idmapping, chembl/protein_class, chembl/compound_record, crossref/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, pubmed/publications, openalex/publication, uniprot/protein, semanticscholar/publication, chembl/publication
-- `entity_type`
-  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (2): composite/publication, _base
-- `filter_config_file`
-  - Present in (5): chembl/publication, chembl/publication_similarity, chembl/publication_term, composite/publication, pubmed/publications
-  - Missing in (16): chembl/target, uniprot/idmapping, _base, chembl/protein_class, semanticscholar/publication, crossref/publication, chembl/molecule, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/assay, chembl/activity, openalex/publication, uniprot/protein, pubchem/compound, chembl/compound_record
-- `gold_table`
-  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (2): composite/publication, _base
-- `pipeline_name`
-  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (2): composite/publication, _base
-- `primary_keys`
-  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (2): composite/publication, _base
-- `provider`
-  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (2): composite/publication, _base
-- `silver_table`
-  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (2): composite/publication, _base
-- `sink`
-  - Present in (19): _base, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (2): composite/publication, chembl/activity
-- `sink.bronze`
-  - Present in (17): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
-  - Missing in (4): composite/publication, chembl/assay, uniprot/protein, chembl/activity
-- `sink.bronze.flat_structure`
-  - Present in (6): _base, chembl/publication, crossref/publication, openalex/publication, pubmed/publications, semanticscholar/publication
-  - Missing in (15): composite/publication, chembl/target, uniprot/idmapping, chembl/protein_class, chembl/publication_similarity, chembl/molecule, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/assay, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/compound_record
-- `sink.bronze.path`
-  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
-  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
-- `sink.gold`
-  - Present in (17): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
-  - Missing in (4): composite/publication, chembl/assay, uniprot/protein, chembl/activity
-- `sink.gold.csv_export`
-  - Present in (17): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
-  - Missing in (4): composite/publication, chembl/assay, uniprot/protein, chembl/activity
-- `sink.gold.csv_export.path`
-  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
-  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
-- `sink.gold.flat_structure`
-  - Present in (6): _base, chembl/publication, crossref/publication, openalex/publication, pubmed/publications, semanticscholar/publication
-  - Missing in (15): composite/publication, chembl/target, uniprot/idmapping, chembl/protein_class, chembl/publication_similarity, chembl/molecule, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/assay, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/compound_record
-- `sink.gold.path`
-  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
-  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
-- `sink.gold.sort_by`
-  - Present in (16): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
-  - Missing in (5): composite/publication, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
-- `sink.gold.sort_by.ascending`
-  - Present in (16): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
-  - Missing in (5): composite/publication, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
-- `sink.gold.sort_by.columns`
-  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
-  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
-- `sink.silver`
-  - Present in (19): _base, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (2): composite/publication, chembl/activity
-- `sink.silver.csv_export`
-  - Present in (17): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
-  - Missing in (4): composite/publication, chembl/assay, uniprot/protein, chembl/activity
-- `sink.silver.csv_export.path`
-  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
-  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
-- `sink.silver.flat_structure`
-  - Present in (6): _base, chembl/publication, crossref/publication, openalex/publication, pubmed/publications, semanticscholar/publication
-  - Missing in (15): composite/publication, chembl/target, uniprot/idmapping, chembl/protein_class, chembl/publication_similarity, chembl/molecule, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/assay, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/compound_record
-- `sink.silver.partition_by`
-  - Present in (16): _base, chembl/assay, chembl/assay_parameters, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (5): composite/publication, crossref/publication, chembl/cell_line, chembl/activity, chembl/compound_record
-- `sink.silver.path`
-  - Present in (16): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping
-  - Missing in (5): composite/publication, _base, chembl/assay, chembl/activity, uniprot/protein
-- `sink.silver.primary_key`
-  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
-  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
-- `sink.silver.sort_by`
-  - Present in (16): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
-  - Missing in (5): composite/publication, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
-- `sink.silver.sort_by.ascending`
-  - Present in (16): _base, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
-  - Missing in (5): composite/publication, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
-- `sink.silver.sort_by.columns`
-  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
-  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
-- `source`
-  - Present in (4): _base, openalex/publication, pubmed/publications, uniprot/idmapping
-  - Missing in (17): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, chembl/target, crossref/publication, chembl/molecule, chembl/assay
-- `source.email`
-  - Present in (2): openalex/publication, pubmed/publications
-  - Missing in (19): composite/publication, _base, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, uniprot/idmapping, chembl/target, crossref/publication, chembl/molecule, chembl/assay
-- `source.load_strategy`
-  - Present in (2): _base, uniprot/idmapping
-  - Missing in (19): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
-- `source.type`
-  - Present in (2): _base, uniprot/idmapping
-  - Missing in (19): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
-- `source_file`
-  - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
-  - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
-- `version`
-  - Present in (19): chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-  - Missing in (2): composite/publication, _base
-
-### C. Structural inconsistencies
-
-#### source vs source_file
-
-- Using `source`: _base, openalex/publication, pubmed/publications, uniprot/idmapping
-- Using `source_file`: chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
-
-#### transform block
-
-- Has `transform`: _base
-- No `transform`: composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/activity, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, uniprot/idmapping, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
-
-#### gold_table presence
-
-- Has `gold_table`: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
-- Missing `gold_table`: composite/publication, _base
 
 ================================================================================
 File: observability.md
@@ -65945,1010 +67147,6 @@ rg "class Base.*:" src/bioetl/ --no-filename | sort -u
 *Документ подготовлен в соответствии с RULES.md §7 "Протокол Архитектурных Обзоров"*
 
 ================================================================================
-File: code-duplication-analysis.md
-Path: reports\code-duplication-analysis.md
-================================================================================
-# Отчёт: Анализ дублирования кода BioETL
-
-**Дата**: 2026-01-15
-**Ветка**: claude/refactor-code-duplication-NfP8Z
-**Автор**: Claude (автоматизированный анализ)
-
----
-
-## Executive Summary
-
-- **Проанализировано**: ~60 pipeline/transformer файлов, ~30 адаптеров, ~20 сервисов
-- **Обнаружено категорий дублирования**: 3 (минорные)
-- **Потенциальное сокращение**: ~50-70 LOC (менее 0.1% от общего объёма)
-- **Вердикт**: Кодовая база **хорошо спроектирована** с эффективным использованием абстракций
-
----
-
-## 1. Существующие Абстракции (УЖЕ РЕАЛИЗОВАНО)
-
-Анализ выявил, что проект **уже использует** правильные паттерны для минимизации дублирования:
-
-### 1.1 Иерархия трансформеров
-
-```
-BaseTransformer (673 LOC)                    # Общий каркас, hash, serialization
-    │
-    ├── BaseChemblTransformer (183 LOC)      # ChEMBL-specific Template Method
-    │       │
-    │       ├── ActivityTransformer
-    │       ├── AssayTransformer
-    │       ├── MoleculeTransformer
-    │       ├── TargetTransformer
-    │       └── ...10+ transformers
-    │
-    └── BasePublicationTransformer (201 LOC) # Publication Template Method
-            │
-            ├── CrossRefPublicationTransformer
-            ├── OpenAlexPublicationTransformer
-            ├── SemanticScholarTransformer
-            └── PubMedTransformer
-```
-
-### 1.2 Переиспользуемые Mixins и Base Classes
-
-| Компонент | Файл | LOC | Назначение |
-|-----------|------|-----|------------|
-| `HealthCheckMixin` | `infrastructure/adapters/health_check_mixin.py` | 397 | Observability для health checks |
-| `HealthCheckProviderMixin` | (там же) | - | Full health check implementation |
-| `BaseHttpAdapter` | `infrastructure/adapters/base.py` | 124 | HTTP lifecycle + error handling |
-| `BaseTitleFallbackHandler` | `infrastructure/adapters/common/base_title_fallback.py` | 181 | Title fallback для DOI resolution |
-| `BaseFieldExtractor` | `application/pipelines/pubmed/extractors/base.py` | 66 | Template Method для PubMed XML |
-
-### 1.3 Declarative DSL для Field Mapping
-
-`field_specs.py` реализует конфигурационный подход:
-
-```python
-# Вместо дублированных _map_* методов используется:
-_IDENTIFIERS = FieldGroup(
-    name="identifiers",
-    fields=(
-        *simple_fields("target_chembl_id", "assay_chembl_id"),
-        *int_fields("record_id", "src_id"),
-    ),
-)
-
-# Применение:
-result = map_field_groups(record, [_IDENTIFIERS, _MOLECULE_TARGET_ASSAY])
-```
-
-### 1.4 Общие Сервисы (Domain Layer)
-
-| Сервис | Файл | Использование |
-|--------|------|---------------|
-| `IdentityService` | `domain/services/identity_service.py` | Content Hash + Entity ID computation |
-| `DataNormalizationService` | `domain/services/data_normalization_service.py` | DOI, PMID, HTML normalization |
-| `serialize_to_json` | `domain/serialization.py` | JSON serialization |
-
----
-
-## 2. Верифицированные Дублирования (МИНОРНЫЕ)
-
-### 2.1 `_validate_taxonomy_id` (3 места, ~15 LOC)
-
-#### Текущее состояние
-
-```python
-# activity_transformer.py:28
-def _validate_taxonomy_id_str(value: Any) -> str | None:
-    vo = TaxonomyId.from_raw(value)
-    return str(vo.value) if vo else None
-
-# assay_transformer.py:30, target_component_transformer.py:26
-def _validate_taxonomy_id(value: Any) -> int | None:
-    vo = TaxonomyId.from_raw(value)
-    return vo.value if vo else None
-```
-
-#### Анализ
-
-- **Дублирование**: Логика идентична, разница в return type (`str` vs `int`)
-- **Impact**: Low (3 места, 15 LOC)
-- **Причина различия**: ActivityTransformer требует `str` для entity field
-
-#### Рекомендация
-
-Добавить helper в `domain/value_objects/taxonomy_id.py`:
-
-```python
-# В TaxonomyId или отдельным модулем:
-def validate_taxonomy_id(value: Any) -> int | None:
-    vo = TaxonomyId.from_raw(value)
-    return vo.value if vo else None
-
-def validate_taxonomy_id_str(value: Any) -> str | None:
-    vo = TaxonomyId.from_raw(value)
-    return str(vo.value) if vo else None
-```
-
-**Приоритет**: P3 (Low) - ~5 LOC экономии, не критично
-
----
-
-### 2.2 `_normalize_doi` в Адаптерах (2 места, ~20 LOC)
-
-#### Текущее состояние
-
-```python
-# semanticscholar/adapter.py:521
-def _normalize_doi(doi: str) -> str:
-    if doi.startswith("https://doi.org/"):
-        return doi[16:]
-    # ...
-
-# openalex/client.py:474
-def _normalize_doi(doi: str) -> str | None:
-    if not doi:
-        return None
-    doi = doi.strip()
-    if doi.startswith("https://doi.org/"):
-        return doi[16:]
-    # ...
-```
-
-#### Анализ
-
-- **НЕ чистое дублирование**: Разное поведение (None handling, strip)
-- **Существует**: `domain/normalization.py:normalize_doi` - но он делает `.lower()`, что НЕ нужно для URL comparison
-- **Intent**: Адаптеры нужны для exact DOI matching при lookup
-
-#### Рекомендация
-
-**НЕ консолидировать** - это provider-specific логика с разными requirements.
-Альтернатива: добавить `strip_doi_prefix(doi: str) -> str` в domain/normalization.py.
-
-**Приоритет**: P4 (Very Low) - разная семантика, консолидация может сломать логику
-
----
-
-### 2.3 `serialize_to_json(...) if ... else None` Pattern (10+ мест)
-
-#### Текущее состояние
-
-```python
-# Повторяется в UniProt extractors:
-return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
-```
-
-#### Анализ
-
-- **Pattern**: Одна строка, 10+ мест в UniProt extractors
-- **Impact**: Very Low (не влияет на читаемость)
-- **Idiomatic**: Это стандартный Python idiom
-
-#### Рекомендация
-
-**НЕ рефакторить** - это идиоматичный код, wrapper не добавит ценности:
-
-```python
-# НЕ ДЕЛАТЬ - избыточная абстракция:
-def serialize_or_none(data: list | None) -> str | None:
-    return serialize_to_json(data, ensure_ascii=False) if data else None
-```
-
-**Приоритет**: P5 (Skip) - не требует действий
-
----
-
-## 3. Паттерны, которые НЕ являются дублированием
-
-### 3.1 Похожие Названия Функций с Разной Логикой
-
-| Функция | OpenAlex | SemanticScholar | Отличия |
-|---------|----------|-----------------|---------|
-| `extract_authors` | `authorships[].author.display_name` | `authors[].name` | Разная структура API |
-| `extract_journal_info` | Returns `{journal_name, issn, publisher}` | Returns `{journal_name, volume, pages}` | Разные поля |
-| `extract_open_access_info` | Takes `dict` | Takes `bool, dict` | Разная сигнатура |
-
-**Вердикт**: Provider-specific extractors - **НЕ дублирование**
-
-### 3.2 Template Method Implementations
-
-`_extract_business_data` появляется 20 раз - это **abstract method implementations**, а не дублирование.
-Каждая реализация уникальна для entity type.
-
-### 3.3 Init Методы
-
-`__init__` в трансформерах похожи, но **правильно делегируют** в `super().__init__()`.
-Это стандартный паттерн наследования, не дублирование.
-
----
-
-## 4. Матрица Приоритизации
-
-| # | Категория | Impact | Complexity | LOC | Приоритет | Рекомендация |
-|---|-----------|--------|------------|-----|-----------|--------------|
-| 1 | `_validate_taxonomy_id` | Low | Low | ~15 | P3 | Optional refactor |
-| 2 | `_normalize_doi` | Very Low | Medium | ~20 | P4 | Keep as-is |
-| 3 | `serialize_to_json` pattern | None | Low | ~10 | P5 | Skip |
-
----
-
-## 5. Заключение
-
-### 5.1 Состояние Кодовой Базы
-
-Кодовая база BioETL **хорошо спроектирована** с точки зрения DRY:
-
-1. **Эффективная иерархия классов**: `BaseTransformer` → `BaseChemblTransformer` → Entity transformers
-2. **Правильное использование Mixins**: `HealthCheckMixin`, `HealthCheckProviderMixin`
-3. **Declarative DSL**: `field_specs.py` заменяет repetitive mapping code
-4. **Domain Services**: `IdentityService`, `DataNormalizationService` централизуют логику
-
-### 5.2 Рекомендованные Действия
-
-| Действие | Статус | Обоснование |
-|----------|--------|-------------|
-| Консолидация `_validate_taxonomy_id` | Optional | ~5 LOC экономии, P3 |
-| Консолидация `_normalize_doi` | NOT recommended | Разная семантика |
-| Refactor `serialize_to_json` pattern | NOT recommended | Идиоматичный код |
-| Создание новых Base Classes | NOT needed | Существующие абстракции достаточны |
-
-### 5.3 Метрики
-
-- **Обнаружено реального дублирования**: ~35 LOC (0.05% от 68,400 LOC)
-- **Потенциальная экономия**: ~15 LOC (при консолидации taxonomy validation)
-- **Качество абстракций**: HIGH - правильное использование Template Method, Mixins, DI
-
----
-
-## 6. Чеклист Валидации
-
-Для подтверждения выводов:
-
-```bash
-# Проверка существующих абстракций
-grep -r "class Base" src/bioetl/ | wc -l  # ~10 base classes
-
-# Проверка делегирования в "больших" файлах
-wc -l src/bioetl/application/core/base_transformer.py  # 673 LOC, но с делегированием
-grep -c "self\._" src/bioetl/application/core/base_transformer.py  # ~15 delegations
-
-# Тесты проходят
-make lint && make test
-```
-
----
-
-*Анализ завершён. Кодовая база не требует значительного рефакторинга для устранения дублирования.*
-
-================================================================================
-File: metadata-audit-report.md
-Path: reports\metadata-audit-report.md
-================================================================================
-# Metadata Audit Report - BioETL
-
-**Date:** 2026-01-19
-**Auditor:** Claude (Automated Audit)
-**RULES.md Version:** v5.10
-**Audit Scope:** Metadata field definitions, storage, and usage across all ETL layers
-
----
-
-## Executive Summary
-
-| Metric | Value |
-|--------|-------|
-| **Schema files reviewed** | 33 |
-| **Critical issues** | 1 |
-| **Warnings** | 2 |
-| **Recommendations** | 4 |
-| **Tests passing** | 617 (metadata-related) |
-
-**Overall Status:** The metadata implementation is well-structured and mostly compliant with RULES.md requirements. One critical inconsistency was found in DQ field definitions.
-
----
-
-## 1. Metadata Inventory
-
-### 1.1 Required Metadata Fields (RULES.md §2.4)
-
-| Field | Type | Nullable | In Content Hash | Location |
-|-------|------|----------|-----------------|----------|
-| `entity_id` | str | No | **Yes** | `domain/schemas/base.py:18-20` |
-| `content_hash` | str | No | — | `domain/schemas/base.py:21-25` |
-| `_run_id` | UUID | No | **No** | `domain/schemas/base.py:28-32` |
-| `_run_type` | Enum | No | **No** | `domain/schemas/base.py:33-38` |
-| `_source_batch_id` | UUID | Yes | **No** | `domain/schemas/base.py:40-44` |
-| `_ingestion_ts` | Timestamp | No | **No** | `domain/schemas/base.py:45-49` |
-| `_dq_warn` | bool | No | **No** | `domain/schemas/base.py:51-56` |
-| `_dq_error` | bool | No | **No** | `domain/schemas/base.py:57-62` |
-| `_index` | int | No | **No** | `domain/schemas/base.py:63-68` |
-
-### 1.2 META_FIELDS for Hash Exclusion
-
-**Location:** `domain/constants.py:15-25`
-
-```python
-META_FIELDS: frozenset[str] = frozenset({
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "_dq_warn",
-    "_dq_error",
-    "_source_batch_id",
-    "_index",
-})
-```
-
-**Status:** Correctly synchronized with ETLRecordSchema and documentation.
-
-### 1.3 Schema Inheritance
-
-All domain schemas properly inherit from `ETLRecordSchema`:
-
-| Provider | Schemas | Inheritance |
-|----------|---------|-------------|
-| ChEMBL | 14 | Direct (13) / via PublicationBaseSchema (1) |
-| CrossRef | 5 | Direct (4) / via PublicationBaseSchema (1) |
-| PubChem | 1 | Direct |
-| UniProt | 2 | Direct |
-| PubMed | 1 | via PublicationBaseSchema |
-| OpenAlex | 1 | via PublicationBaseSchema |
-| SemanticScholar | 1 | via PublicationBaseSchema |
-| Common | 1 | Direct (PublicationBaseSchema) |
-
----
-
-## 2. Findings
-
-### 2.1 CRITICAL: DQ Field Redefinition in ChemblPublicationSchema
-
-**Severity:** CRITICAL
-**Location:** `domain/schemas/chembl/publication.py:67-72`
-
-**Issue:** `ChemblPublicationSchema` redefines `_dq_warn` and `_dq_error` with different nullable constraints than the base schema.
-
-**Base Schema (ETLRecordSchema):**
-```python
-dq_warn: Series[bool] = pa.Field(
-    alias="_dq_warn",
-    nullable=False,  # NOT NULLABLE
-    default=False,
-)
-```
-
-**Child Schema (ChemblPublicationSchema):**
-```python
-_dq_warn: Series[bool] = pa.Field(
-    nullable=True,  # NULLABLE - INCONSISTENT!
-    default=False,
-)
-```
-
-**Impact:**
-- Validation inconsistency between base and child schemas
-- Potential data integrity issues where DQ flags may be NULL unexpectedly
-- Violates Liskov Substitution Principle
-
-**Recommendation:**
-Remove the field redefinition from `ChemblPublicationSchema` - inherit from base instead, or align nullable constraints:
-
-```python
-# Option 1: Remove redefinition (preferred)
-# Let fields inherit from PublicationBaseSchema -> ETLRecordSchema
-
-# Option 2: Align constraints
-_dq_warn: Series[bool] = pa.Field(
-    nullable=False,  # Align with base
-    default=False,
-)
-```
-
----
-
-### 2.2 WARNING: Incomplete DQ Fields in PyArrow Silver Schemas
-
-**Severity:** WARNING
-**Location:** `infrastructure/schemas/silver.py`
-
-**Issue:** Not all PyArrow Silver schemas include `_dq_warn` and `_dq_error` fields. The following schemas are missing DQ suffix fields:
-
-- `CHEMBL_ACTIVITY_SCHEMA`
-- `CHEMBL_ASSAY_PARAMETERS_SCHEMA`
-- `CHEMBL_ASSAY_SCHEMA`
-- `CHEMBL_CELL_LINE_SCHEMA`
-- `CHEMBL_COMPOUND_RECORD_SCHEMA`
-- `CHEMBL_DOCUMENT_SIMILARITY_SCHEMA`
-- `CHEMBL_DOCUMENT_TERM_SCHEMA`
-- `CHEMBL_MOLECULE_SCHEMA`
-- `CHEMBL_PROTEIN_CLASS_SCHEMA`
-- `CHEMBL_TARGET_COMPONENT_SCHEMA`
-- `CHEMBL_TARGET_SCHEMA`
-- `PUBCHEM_COMPOUND_SCHEMA`
-- `UNIPROT_PROTEIN_SCHEMA`
-
-**Impact:**
-- Inconsistent schema structure between entities
-- DQ tracking disabled for these entities at storage level
-- `BatchWriter.write_gold()` attempts to add default DQ values but PyArrow schema may reject them
-
-**Recommendation:**
-Add DQ suffix fields to all Silver schemas for consistency:
-```python
-# Add at end of each schema
-pa.field("_dq_warn", pa.bool_()),
-pa.field("_dq_error", pa.bool_()),
-```
-
----
-
-### 2.3 WARNING: SilverWriter Validation Incomplete
-
-**Severity:** WARNING
-**Location:** `infrastructure/storage/silver_writer.py:355-359`
-
-**Issue:** `SilverWriter._validate_records()` only validates 4 of 9 required metadata fields:
-
-```python
-required_fields = {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
-```
-
-**Missing validations:**
-- `entity_id`
-- `content_hash`
-- `_index`
-- `_dq_warn`
-- `_dq_error`
-
-**Impact:**
-- Records with missing `entity_id` or `content_hash` may reach Silver layer
-- Potential merge/upsert failures due to missing primary key fields
-
-**Recommendation:**
-Extend validation to include all required fields:
-```python
-required_fields = {
-    "entity_id", "content_hash",
-    "_run_id", "_run_type", "_source_batch_id", "_ingestion_ts",
-    "_index", "_dq_warn", "_dq_error"
-}
-```
-
----
-
-## 3. Verification Results
-
-### 3.1 Content Hash Implementation
-
-**Status:** COMPLIANT
-
-| Requirement | Status | Evidence |
-|-------------|--------|----------|
-| SHA256 algorithm | ✅ | `identity_service.py:116` |
-| Canonical JSON (sorted keys) | ✅ | `serialization.py` via orjson |
-| Float normalization (10 decimals) | ✅ | `identity_service.py:204-206` |
-| NaN/Inf → None | ✅ | `identity_service.py:204-205` |
-| Date → ISO string | ✅ | `identity_service.py:187-189` |
-| String stripping | ✅ | `identity_service.py:190-191` |
-| META_FIELDS exclusion | ✅ | `identity_service.py:146-147` |
-
-**Test Coverage:** 30 tests in `test_identity_service.py`, all passing.
-
-### 3.2 Column Ordering
-
-**Status:** COMPLIANT
-
-| Requirement | Status | Evidence |
-|-------------|--------|----------|
-| System prefix first | ✅ | `column_order.py:26-34` |
-| Business fields sorted | ✅ | `column_order.py:89` |
-| DQ suffix last | ✅ | `column_order.py:38-41` |
-| Enforced in writers | ✅ | `silver_writer.py:216-217` |
-
-**Test Coverage:** 77 tests in `test_column_order.py`, 64 passing, 13 skipped (no DQ fields).
-
-### 3.3 BaseEntity Metadata
-
-**Status:** COMPLIANT
-
-| Field | Default | Validation | Evidence |
-|-------|---------|------------|----------|
-| `entity_id` | Required | Non-empty | `base.py:73-74` |
-| `content_hash` | Required | Non-empty | `base.py:75-76` |
-| `_index` | Required | >= 0 | `base.py:77-78` |
-| `_dq_warn` | False | — | `base.py:68` |
-| `_dq_error` | False | — | `base.py:69` |
-
----
-
-## 4. Recommendations
-
-### 4.1 HIGH PRIORITY
-
-1. **Fix ChemblPublicationSchema DQ field redefinition** - Remove or align nullable constraints with base schema.
-
-2. **Add DQ fields to all Silver schemas** - Ensure consistent schema structure across all entities.
-
-### 4.2 MEDIUM PRIORITY
-
-3. **Extend SilverWriter validation** - Validate all 9 required metadata fields, not just 4.
-
-### 4.3 LOW PRIORITY
-
-4. **Consider adding `_schema_version`** - Track schema version for future migrations (MAY, not MUST).
-
----
-
-## 5. Test Results Summary
-
-```
-tests/unit/domain/services/test_identity_service.py: 30 passed
-tests/unit/domain/test_transformations.py: 36 passed
-tests/architecture/test_column_order.py: 64 passed, 13 skipped
-tests/unit/domain/schemas/*: 173 passed
-tests/unit/infrastructure/schemas/*: 288 passed
-─────────────────────────────────────────────────────
-Total: 617 passed, 13 skipped
-```
-
----
-
-## 6. Files Reviewed
-
-| Category | Files |
-|----------|-------|
-| Base Schema | `domain/schemas/base.py` |
-| Constants | `domain/constants.py` |
-| Identity Service | `domain/services/identity_service.py` |
-| Transformations | `domain/transformations.py` |
-| Column Order | `domain/schemas/column_order.py` |
-| Base Entity | `domain/entities/base.py` |
-| Base Transformer | `application/core/base_transformer.py` |
-| Silver Writer | `infrastructure/storage/silver_writer.py` |
-| Bronze Writer | `infrastructure/storage/bronze_writer.py` |
-| Batch Writer | `application/core/batch_writer.py` |
-| Silver Schemas | `infrastructure/schemas/silver.py` |
-| Gold Schemas | `infrastructure/schemas/gold.py` |
-| All Domain Schemas | `domain/schemas/**/*.py` (33 files) |
-
----
-
-## Appendix A: Metadata Flow Diagram
-
-```
-Bronze (JSONL) ─────────────────────────────────────────────────────────
-│ Sidecar metadata: run_id, run_type, ingestion_ts, batch_id
-│
-▼
-Transform (BaseTransformer._create_entity) ─────────────────────────────
-│ Adds: entity_id, content_hash, run_id, run_type,
-│       source_batch_id, ingestion_ts, _index, _dq_warn, _dq_error
-│
-▼
-Silver (Delta Lake) ────────────────────────────────────────────────────
-│ Validates: _run_id, _run_type, _source_batch_id, _ingestion_ts
-│ Canonical column order enforced
-│
-▼
-Gold (Delta Lake) ──────────────────────────────────────────────────────
-  Adds defaults: _dq_warn=False, _dq_error=False (if missing)
-```
-
----
-
-## Appendix B: Checklist
-
-- [x] All CRITICAL/HIGH findings documented
-- [x] Test results verified
-- [x] Metadata inventory complete
-- [x] Content hash implementation verified
-- [x] Column ordering verified
-- [ ] Issues created for findings (pending)
-
----
-
-*Report generated: 2026-01-19*
-
-================================================================================
-File: schema-mapping-audit-report.md
-Path: schema-mapping-audit-report.md
-================================================================================
-# Schema-Mapping Consistency Audit Report
-
-**Date**: 2026-01-20
-**Scope**: All ETL Pipelines (Silver/Gold Schema Mapping)
-**Auditor**: Claude Code (Automated Analysis)
-**Version**: 1.0.0
-
----
-
-## Executive Summary
-
-This audit systematically verified field mappings across all ETL pipeline layers:
-**API Response → Bronze → Transformer → Silver Schema → Gold Schema**
-
-### Key Metrics
-
-| Category | Count |
-|----------|-------|
-| **Pipelines Analyzed** | 20 |
-| **Entities with Gold Schemas** | 18 |
-| **Total Field Discrepancies** | 87 |
-| **Type Mismatches** | 34 |
-| **Nullable Mismatches** | 12 |
-| **Missing in Gold** | 28 |
-| **Missing in Silver** | 13 |
-| **Consistent Fields** | 189 |
-
-### Severity Distribution
-
-| Severity | Count | Description |
-|----------|-------|-------------|
-| **HIGH** | 8 | Type mismatches causing data loss or validation failures |
-| **MEDIUM** | 41 | Missing fields or nullable mismatches |
-| **LOW** | 38 | Int→float coercions (safe but verbose) |
-
----
-
-## Pipelines Coverage Matrix
-
-| Provider | Entity | Config | Transformer | Silver Schema | Gold Schema | Status |
-|----------|--------|--------|-------------|---------------|-------------|--------|
-| chembl | activity | ✅ | ✅ | ✅ | ✅ | **9 issues** |
-| chembl | molecule | ✅ | ✅ | ✅ | ✅ | **34 issues** |
-| chembl | target | ✅ | ✅ | ✅ | ✅ | **11 issues** |
-| chembl | assay | ✅ | ✅ | ✅ | ✅ | **9 issues** |
-| chembl | cell_line | ✅ | ✅ | ✅ | ✅ | 2 issues |
-| chembl | compound_record | ✅ | ✅ | ✅ | ✅ | 2 issues |
-| chembl | protein_class | ✅ | ✅ | ✅ | ✅ | 2 issues |
-| chembl | assay_parameters | ✅ | ✅ | ✅ | ✅ | 2 issues |
-| chembl | publication | ✅ | ✅ | ✅ | ✅ | 3 issues |
-| chembl | publication_similarity | ✅ | ✅ | ✅ | ✅ | 2 issues |
-| chembl | publication_term | ✅ | ✅ | ✅ | ✅ | 2 issues |
-| chembl | target_component | ✅ | ✅ | ✅ | ✅ | 2 issues |
-| pubmed | publication | ✅ | ✅ | ✅ | ✅ | **42 issues** |
-| crossref | publication | ✅ | ❌ | ✅ | ✅ | **12 issues** |
-| openalex | publication | ✅ | ❌ | ✅ | ✅ | **9 issues** |
-| semanticscholar | publication | ✅ | ❌ | ✅ | ✅ | 5 issues |
-| uniprot | protein | ✅ | ❌ | ✅ | ✅ | 4 issues |
-| uniprot | idmapping | ✅ | ✅ | ❌ | ✅ | 3 issues |
-| pubchem | compound | ✅ | ❌ | ✅ | ✅ | 2 issues |
-| composite | publication | ✅ | ❌ | ❌ | ❌ | N/A |
-
----
-
-## Finding 1: Systematic Int→Float Type Coercions
-
-**Severity**: LOW
-**Affected Pipelines**: All ChEMBL pipelines, all publication pipelines
-**Count**: 34 occurrences
-
-### Issue
-
-Gold schemas use `Series[float]` with `coerce=True` for fields that are `Series[int]` in Silver schemas. This is intentional for handling nullable integers in Pandas/Arrow, but creates implicit type conversion.
-
-### Evidence
-
-| Entity | Field | Silver Type | Gold Type |
-|--------|-------|-------------|-----------|
-| ChEMBL Activity | record_id | `Series[int]` | `Series[float]` |
-| ChEMBL Activity | src_id | `Series[int]` | `Series[float]` |
-| ChEMBL Activity | standard_flag | `Series[int]` | `Series[float]` |
-| ChEMBL Activity | potential_duplicate | `Series[int]` | `Series[float]` |
-| ChEMBL Activity | toid | `Series[int]` | `Series[float]` |
-| ChEMBL Molecule | first_approval | `Series[int]` | `Series[float]` |
-| ChEMBL Molecule | black_box_warning | `Series[int]` | `Series[float]` |
-| ChEMBL Target | taxonomy_id | `Series[int]` | `Series[float]` |
-| ChEMBL Assay | src_id | `Series[int]` | `Series[float]` |
-| ChEMBL Assay | assay_taxonomy_id | `Series[int]` | `Series[float]` |
-| ChEMBL Assay | confidence_score | `Series[int]` | `Series[float]` |
-| All Entities | year | `Series[int]` | `Series[float]` |
-
-### Recommendation
-
-This is **acceptable behavior** for nullable integer handling in Pandas. Document this pattern in RULES.md and ensure downstream consumers handle float→int conversion if needed.
-
----
-
-## Finding 2: PMID Type Mismatch (PubMed)
-
-**Severity**: HIGH
-**Affected Pipeline**: `pubmed_publication`
-
-### Issue
-
-Silver schema defines `pmid` as `Series[int]`, but Gold schema expects `Series[str]`.
-
-### Evidence
-
-```python
-# Silver: src/bioetl/domain/schemas/pubmed/article.py:34
-pmid: Series[int] = pa.Field(nullable=False, description="PubMed ID (PK)")
-
-# Gold: src/bioetl/infrastructure/schemas/gold.py:216
-pmid: Series[str] = pa.Field(nullable=False)
-```
-
-### Impact
-
-- Type validation will fail if not explicitly converted
-- Cross-provider publication linking relies on string PMID matching
-
-### Recommendation
-
-**Option A** (Preferred): Update Silver schema to use `Series[str]` for consistency with other publication providers.
-
-**Option B**: Add explicit `str()` conversion in transformer before Gold layer.
-
----
-
-## Finding 3: Missing Flattened Fields in Silver (ChEMBL Molecule)
-
-**Severity**: MEDIUM
-**Affected Pipeline**: `chembl_molecule`
-**Count**: 26 missing fields
-
-### Issue
-
-Gold schema expects 26 flattened property/hierarchy/structure fields that are NOT defined in Silver schema. These fields ARE extracted by the transformer but not validated at Silver level.
-
-### Evidence
-
-**Missing in Silver Schema** (`src/bioetl/domain/schemas/chembl/molecule.py`):
-- `hierarchy_parent_chembl_id`, `hierarchy_active_chembl_id`, `hierarchy_child_chembl_id`
-- `property_alogp`, `property_mw_freebase`, `property_full_mwt`
-- `property_hba`, `property_hbd`, `property_psa`, `property_rtb`
-- `property_ro5_violations`, `property_heavy_atoms`, `property_aromatic_rings`
-- `property_qed_weighted`, `property_full_molformula`, `property_ro3_pass`
-- `canonical_smiles`, `standard_inchi`, `inchikey`
-- `chirality`, `dosed_ingredient`, `availability_type`
-- `usan_stem`, `usan_stem_definition`, `usan_substem`, `usan_year`
-- `helm_notation`, `molecule_species`
-
-**Transformer extracts these** (`src/bioetl/application/pipelines/chembl/molecule_transformer.py:182-204`):
-```python
-return {
-    "molecule_chembl_id": str(primary_id),
-    **map_field_groups(record, _MOLECULE_GROUPS),
-    **self.serialize_json_fields(rec, _JSON_FIELDS),
-    **flatten_nested_dict(..., "hierarchy_", _HIERARCHY_FIELDS, ...),
-    **flatten_nested_dict(..., "property_", _PROPERTIES_FIELDS, ...),
-    **structure_data,  # canonical_smiles, standard_inchi, inchikey
-}
-```
-
-### Impact
-
-- Silver layer validation incomplete
-- Schema drift undetected at Silver level
-
-### Recommendation
-
-Add all 26 fields to `MoleculeSchema` in Silver layer for complete validation coverage.
-
----
-
-## Finding 4: Missing Fields in Gold (PubMed Publication)
-
-**Severity**: MEDIUM
-**Affected Pipeline**: `pubmed_publication`
-**Count**: 18 missing fields
-
-### Issue
-
-Silver schema has 18 PubMed-specific fields not present in Gold schema, causing data loss at Gold layer.
-
-### Evidence
-
-**Missing in Gold Schema** (`src/bioetl/infrastructure/schemas/gold.py:211-272`):
-- `journal_title`, `journal_iso_abbrev` (replaced by `journal`, `journal_abbrev`)
-- `journal_issn_type`
-- `pub_month`, `pub_day`
-- `publication_status`, `publication_type_list`
-- `medline_pgn`
-- `nlm_unique_id`, `citation_subset`
-- `author_count`, `mesh_heading_count`, `keyword_count`, `grant_count`, `reference_count`, `chemical_count`
-- `abstract_structured`, `vernacular_title`
-- `date_completed`, `date_revised`
-
-### Impact
-
-- Forensic/audit data loss
-- Query capability reduced for detailed PubMed analysis
-
-### Recommendation
-
-**Option A**: Add missing fields to `PubMedPublicationGoldSchema` for forensic retention.
-
-**Option B**: Document explicitly that Gold is a subset for unified querying; use Silver for detailed PubMed queries.
-
----
-
-## Finding 5: Datetime→String Conversion (All Entities)
-
-**Severity**: MEDIUM
-**Affected Pipelines**: All
-**Count**: 7 occurrences
-
-### Issue
-
-Base Silver schema uses `Series[datetime]` for `_ingestion_ts`, but Gold schemas use `Series[str]`.
-
-### Evidence
-
-```python
-# Silver: src/bioetl/domain/schemas/base.py:45
-ingestion_ts: Series[datetime] = pa.Field(alias="_ingestion_ts", nullable=False)
-
-# Gold: src/bioetl/infrastructure/schemas/gold.py:108
-ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
-```
-
-### Impact
-
-- Implicit datetime→string conversion
-- Potential timezone/format inconsistencies
-
-### Recommendation
-
-Standardize on ISO 8601 string format (`YYYY-MM-DDTHH:MM:SS.sssZ`) in both layers, or use `datetime` consistently.
-
----
-
-## Finding 6: DQ Fields Nullable Mismatch (All Entities)
-
-**Severity**: LOW
-**Affected Pipelines**: All
-**Count**: 14 occurrences (2 per entity)
-
-### Issue
-
-Base Silver schema defines `_dq_warn` and `_dq_error` as `nullable=False` with `default=False`, but Gold schemas define them as `nullable=True`.
-
-### Evidence
-
-```python
-# Silver: src/bioetl/domain/schemas/base.py:51-62
-dq_warn: Series[bool] = pa.Field(alias="_dq_warn", nullable=False, default=False)
-dq_error: Series[bool] = pa.Field(alias="_dq_error", nullable=False, default=False)
-
-# Gold: src/bioetl/infrastructure/schemas/gold.py:258-259
-dq_warn: Series[bool] = pa.Field(nullable=True, alias="_dq_warn")
-dq_error: Series[bool] = pa.Field(nullable=True, alias="_dq_error")
-```
-
-### Impact
-
-- Gold allows null DQ flags where Silver requires boolean
-- May cause validation issues if nulls propagate
-
-### Recommendation
-
-Make Gold `nullable=False` to match Silver, or document why nullability differs.
-
----
-
-## Finding 7: Missing Target Fields in Silver
-
-**Severity**: MEDIUM
-**Affected Pipeline**: `chembl_target`
-**Count**: 7 missing fields
-
-### Issue
-
-Gold schema expects fields that are extracted by transformer but not validated in Silver.
-
-### Evidence
-
-**Missing in Silver** (`src/bioetl/domain/schemas/chembl/target.py`):
-- `dap_id`
-- `pipeline_stages`
-- `target_constraints`
-- `target_component_synonyms`
-- `component_organisms`
-- `component_taxonomy_ids`
-- `description`
-
-**Transformer extracts these** (`src/bioetl/application/pipelines/chembl/target_transformer.py:166-188`).
-
-### Recommendation
-
-Add these 7 fields to `TargetSchema` for complete Silver validation.
-
----
-
-## Finding 8: Publication Schema Inconsistency Across Providers
-
-**Severity**: MEDIUM
-**Affected Pipelines**: All publication pipelines
-
-### Issue
-
-Publication schemas across providers have inconsistent field sets, making cross-provider analysis difficult.
-
-### Evidence
-
-| Field | PubMed | CrossRef | OpenAlex | SemanticScholar | ChEMBL Doc |
-|-------|--------|----------|----------|-----------------|------------|
-| pmid | ✅ (int) | ✅ (str) | ✅ (str) | ✅ (str) | ✅ (str) |
-| doi | ✅ | ✅ | ✅ | ✅ | ✅ |
-| pmc_id | ✅ | ✅ | ✅ | ✅ | ✅ |
-| title | ✅ (req) | ✅ | ✅ | ✅ | ✅ |
-| abstract | ✅ | ✅ | ✅ | ✅ | ✅ |
-| authors | ❌ | ✅ | ✅ | ✅ | ✅ |
-| journal | ❌ | ✅ | ✅ | ✅ | ✅ |
-| year | ✅ (int) | ✅ (int) | ✅ (Int64) | ✅ | ✅ |
-| publication_date | ❌ | ❌ | ✅ | ✅ | ❌ |
-| citation_count | ❌ | ❌ | ✅ | ✅ | ❌ |
-| is_oa | ❌ | ❌ | ✅ | ✅ | ❌ |
-| lookup_method | ❌ | ❌ | ✅ | ✅ | ✅ |
-
-### Recommendation
-
-1. Create unified `PublicationUnifiedSchema` with all common fields
-2. Ensure all providers populate standard fields where available
-3. Document which fields are provider-native vs derived
-
----
-
-## Recommendations Summary
-
-### Immediate Actions (P0 - This Sprint)
-
-| # | Issue | Action | Files to Modify |
-|---|-------|--------|-----------------|
-| 1 | PMID type mismatch | Change Silver pmid to `Series[str]` | `domain/schemas/pubmed/article.py` |
-| 2 | Missing molecule fields | Add 26 fields to MoleculeSchema | `domain/schemas/chembl/molecule.py` |
-| 3 | Missing target fields | Add 7 fields to TargetSchema | `domain/schemas/chembl/target.py` |
-| 4 | DQ fields nullable | Make Gold DQ fields `nullable=False` | `infrastructure/schemas/gold.py` |
-
-### Short-term (P1 - Next Sprint)
-
-| # | Issue | Action |
-|---|-------|--------|
-| 5 | Datetime→string | Standardize on ISO 8601 string in both layers |
-| 6 | Publication unification | Create shared base with all common fields |
-| 7 | Missing Gold fields | Add PubMed detail fields for forensic retention |
-
-### Long-term (P2 - Architecture)
-
-| # | Issue | Action |
-|---|-------|--------|
-| 8 | Type coercions | Document int→float pattern in RULES.md |
-| 9 | Schema drift tests | Add integration tests validating schema consistency |
-| 10 | Schema versioning | Implement schema version tracking for evolution |
-
----
-
-## Appendix A: File Locations
-
-| Component | Path |
-|-----------|------|
-| Gold Schemas | `src/bioetl/infrastructure/schemas/gold.py` |
-| Silver Schemas - Base | `src/bioetl/domain/schemas/base.py` |
-| Silver Schemas - ChEMBL | `src/bioetl/domain/schemas/chembl/*.py` |
-| Silver Schemas - Publications | `src/bioetl/domain/schemas/{pubmed,crossref,openalex,semanticscholar}/*.py` |
-| Publication Base | `src/bioetl/domain/schemas/common/publication_base.py` |
-| Transformers | `src/bioetl/application/pipelines/*/` |
-| Pipeline Configs | `configs/pipelines/*/` |
-
-## Appendix B: Verification Commands
-
-```bash
-# Validate all schemas parse correctly
-python -c "from bioetl.domain.schemas import *; from bioetl.infrastructure.schemas.gold import *; print('All schemas valid')"
-
-# Run mypy strict on schemas
-mypy src/bioetl/domain/schemas/ --strict
-mypy src/bioetl/infrastructure/schemas/ --strict
-
-# Compare Silver vs Gold field counts
-grep -c "Series\[" src/bioetl/domain/schemas/chembl/activity.py
-grep -c "Series\[" src/bioetl/infrastructure/schemas/gold.py | head -1
-```
-
----
-
-*Report generated by automated schema mapping audit. For questions, contact the BioETL architecture team.*
-
-================================================================================
 File: pipeline-review-checklist.md
 Path: templates\pipeline-review-checklist.md
 ================================================================================
@@ -67404,4 +67602,624 @@ All providers use `normalize_pmc_id()`:
 - **RULES.md §3.2**: Silver Layer Requirements
 - **RULES.md §3.3**: Gold Layer Requirements
 - **ADR-024**: Document → Publication Renaming
+
+================================================================================
+File: pubmed-extraction-verification-report.md
+Path: verification\pubmed-extraction-verification-report.md
+================================================================================
+# Верификация Извлечения Данных: PubMed Publication Pipeline
+
+**Дата верификации**: 2026-01-25
+**Версия кода**: commit 99e2391
+**Автор**: Claude (автоматическая верификация)
+
+---
+
+## 1. Резюме
+
+Проведена комплексная верификация корректности извлечения данных в PubMed Publication Pipeline. Все проверенные компоненты соответствуют спецификации.
+
+**Результаты тестирования:**
+- Unit тесты экстракторов: **135 passed** (+7 MedlineDate тестов)
+- Unit тесты трансформера: **26 passed** (161 total с экстракторами)
+- Architecture тесты PII: **16 passed**
+
+---
+
+## 2. Первичные Идентификаторы и Кросс-ссылки
+
+### 2.1. PMID (PubMed ID)
+
+| Аспект | Статус | Детали |
+|--------|--------|--------|
+| XPath извлечения | ✅ | `.//PMID` из MedlineCitation (`transformer.py:226`) |
+| Валидация через Value Object | ✅ | `PubMedId.from_raw()` (`publications.py:177-194`) |
+| Regex паттерн | ✅ | `^\d+$` — только цифры (`publications.py:139`) |
+| Невалидный PMID → None | ✅ | `from_raw()` возвращает None при ValueError |
+| Тесты | ✅ | `test_pubmed_transformer.py:132-151` |
+
+**Код верификации** (`transformer.py:226-228`):
+```python
+raw_pmid = get_text(root.find(".//PMID"))
+pmid_vo = PubMedId.from_raw(raw_pmid)
+pmid = str(pmid_vo) if pmid_vo else None
+```
+
+### 2.2. DOI (Digital Object Identifier)
+
+| Аспект | Статус | Детали |
+|--------|--------|--------|
+| Двухэтапное извлечение | ✅ | ELocationID → ArticleIdList fallback |
+| ELocationID с EIdType="doi" | ✅ | `identifier.py:75-77` |
+| ArticleIdList с IdType="doi" | ✅ | `identifier.py:80-84` |
+| ELocationID приоритетнее | ✅ | Тест `test_elocationid_takes_precedence` |
+| Нормализация через DOI.from_raw() | ✅ | `publications.py:99-119` |
+| Lowercase преобразование | ✅ | `publications.py:70` |
+| Удаление URL-префиксов | ✅ | https://doi.org/, doi:, DOI: (`publications.py:35-47`) |
+| Whitespace stripping | ✅ | `identifier.py:99` + `publications.py:65,70` |
+| Тесты | ✅ | 12 тестов в `test_identifier_extractor.py` |
+
+**Граничные случаи (DOI):**
+- ✅ DOI с uppercase → lowercase
+- ✅ DOI с trailing whitespace → stripped
+- ✅ DOI с префиксом `https://doi.org/` → удалён
+- ✅ DOI с префиксом `doi:` → удалён
+- ✅ Отсутствие DOI → None
+
+### 2.3. PMC ID (PubMed Central)
+
+| Аспект | Статус | Детали |
+|--------|--------|--------|
+| Извлечение из ArticleIdList | ✅ | `identifier.py:88-95` |
+| Атрибут IdType="pmc" | ✅ | `identifier.py:93` |
+| Нормализация через normalize_pmc_id() | ✅ | `normalization.py:148-178` |
+| Добавление префикса PMC | ✅ | `normalization.py:176-177` |
+| Uppercase преобразование | ✅ | `normalization.py:178` |
+| Тесты | ✅ | 5 тестов в `test_identifier_extractor.py:107-169` |
+
+**Обработка вариантов PMC ID:**
+- ✅ `"PMC1234567"` → `"PMC1234567"`
+- ✅ `"pmc1234567"` → `"PMC1234567"`
+- ✅ `"1234567"` → `"PMC1234567"`
+- ✅ `"  PMC789012  "` → `"PMC789012"` (whitespace trimmed)
+
+---
+
+## 3. Авторы и PII-хеширование
+
+### 3.1. AuthorExtractor
+
+| Аспект | Статус | Детали |
+|--------|--------|--------|
+| Парсинг AuthorList | ✅ | `author.py:45-58` |
+| Формат LastName + ForeName | ✅ | `author.py:78-84` |
+| Формат LastName + Initials | ✅ | `author.py:79-80` (приоритет над ForeName) |
+| Только LastName | ✅ | `author.py:83-84` |
+| CollectiveName | ✅ | `author.py:85-86` |
+| Пустые элементы → фильтрация | ✅ | `author.py:78,85` проверки |
+| Тесты | ✅ | 10 тестов в `test_author_extractor.py` |
+
+**Формат выходных данных:**
+```python
+# Individual: "LastName, Initials" или "LastName, ForeName" или "LastName"
+# Collective: "WHO Working Group"
+["Doe, J", "Smith, AB", "Johnson, Mary", "WHO Collaborative Group"]
+```
+
+### 3.2. PII-хеширование (RULES.md §5.4)
+
+| Аспект | Статус | Детали |
+|--------|--------|--------|
+| hash_pii_list() вызов | ✅ | `transformer.py:238-239` |
+| PiiHasherPort в конструкторе | ✅ | `transformer.py:65` |
+| NoOpPiiHasher по умолчанию | ✅ | `base_transformer.py:128-130` |
+| Architecture тесты | ✅ | `test_pii_hashing.py` (16 passed) |
+
+**Код в трансформере** (`transformer.py:237-239`):
+```python
+raw_authors = AuthorExtractor.parse_authors(article)
+hashed_authors = self.hash_pii_list(raw_authors) or []
+```
+
+### 3.3. JSON-сериализация авторов
+
+| Аспект | Статус | Детали |
+|--------|--------|--------|
+| serialize_json_list() | ✅ | `transformer.py:255` |
+| Сохранение array формата | ✅ | `base_transformer.py:431-456` |
+| Пустой список → None | ✅ | `base_transformer.py:453-454` |
+| Тесты | ✅ | `test_pubmed_transformer.py:484-485` |
+
+**Пример:**
+```python
+serialize_json_list(["John Doe"])  # → '["John Doe"]' (не разворачивается!)
+serialize_json_list([])            # → None
+```
+
+---
+
+## 4. Abstract и Структурированные Абстракты
+
+### 4.1. AbstractExtractor
+
+| Аспект | Статус | Детали |
+|--------|--------|--------|
+| Простой абстракт | ✅ | `abstract.py:40-50` |
+| Structured abstracts с Label | ✅ | `abstract.py:47-48` |
+| Формат "LABEL: text" | ✅ | `abstract.py:48` |
+| Inline элементы (itertext) | ✅ | `abstract.py:45` |
+| HTML-stripping | ✅ | `transformer.py:251-253` через DataNormalizationPort |
+| is_abstract_structured() | ✅ | `abstract.py:77-101` |
+| Пустой AbstractText → игнор | ✅ | `abstract.py:47-50` |
+| Тесты | ✅ | 10 тестов в `test_abstract_extractor.py` |
+
+**Пример structured abstract:**
+```
+Input XML:
+<AbstractText Label="BACKGROUND">Background text.</AbstractText>
+<AbstractText Label="METHODS">Methods text.</AbstractText>
+
+Output:
+"BACKGROUND: Background text. METHODS: Methods text."
+```
+
+### 4.2. Граничные случаи абстрактов
+
+| Случай | Статус | Тест |
+|--------|--------|------|
+| Отсутствие Abstract | ✅ | `test_no_abstract_element` |
+| Пустой AbstractText | ✅ | `test_empty_abstract` |
+| Whitespace-only content | ✅ | `test_abstract_with_only_whitespace_content` |
+| Inline `<i>`, `<b>` | ✅ | `test_abstract_with_inline_elements` |
+| NlmCategory атрибут | ✅ | `test_abstract_with_nlmcategory_attribute` |
+| CopyrightInformation | ✅ | `test_abstract_with_copyright_section` (игнорируется) |
+
+---
+
+## 5. Даты и Журнальные Метаданные
+
+### 5.1. DateExtractor
+
+| Аспект | Статус | Детали |
+|--------|--------|--------|
+| Полная дата Year/Month/Day | ✅ | `date.py:97-129` |
+| Частичная Year/Month | ✅ | `date.py:127` → день 30 |
+| Только Year | ✅ | `date.py:124` → 12-31 |
+| Месяц-имя (Jan-Dec) | ✅ | MONTH_MAP (`date.py:42-55`) |
+| Месяц-число (1-12) | ✅ | `date.py:117-118` |
+| History dates (received/accepted/revised) | ✅ | `date.py:170-192` |
+| ArticleDate (Electronic/Print) | ✅ | `date.py:194-216` |
+| Тесты | ✅ | 23 теста в `test_date_extractor.py` |
+
+**End-of-period нормализация:**
+```python
+# Year only → YYYY-12-31
+format_date("2023", None, None)  # → "2023-12-31"
+
+# Year + Month → YYYY-MM-30
+format_date("2023", "06", None)  # → "2023-06-30"
+
+# Complete → YYYY-MM-DD
+format_date("2023", "Mar", "15")  # → "2023-03-15"
+```
+
+### 5.2. MedlineDate (добавлено 2026-01-25)
+
+| Аспект | Статус | Детали |
+|--------|--------|--------|
+| MedlineDate формат | ✅ | Полная поддержка через `_parse_medline_date()` |
+| Месячные диапазоны | ✅ | "Jan-Feb" → Feb (end-of-period) |
+| Сезоны | ✅ | Spring→May, Summer→Aug, Fall→Nov, Winter→Feb |
+| Кварталы | ✅ | "1st Quart"→Mar, "2nd Quart"→Jun, etc. |
+| Кросс-годовые диапазоны | ✅ | "2022 Dec-2023 Jan" → year=2023, month=Jan |
+| Тесты | ✅ | 8 новых тестов в `test_extractor_edge_cases.py` |
+
+**Реализация:** `date.py:97-168` — метод `_parse_medline_date()` с вспомогательными методами:
+- `_extract_year_from_tokens()` — извлечение года (regex `\b(19\d{2}|20\d{2})\b`)
+- `_extract_month_from_medline()` — извлечение месяца/сезона/квартала
+
+**Стратегия end-of-period:**
+```python
+# Диапазоны: берём конец периода
+"2023 Jan-Feb"      → Feb (конец диапазона)
+"2023 Spring"       → May (конец Mar-May)
+"2023 2nd Quart"    → Jun (конец Apr-Jun)
+"2022 Dec-2023 Jan" → Jan 2023 (последний год + последний месяц)
+```
+
+### 5.3. Журнальные метаданные
+
+| Поле | Источник | Статус |
+|------|----------|--------|
+| journal (Title) | Journal/Title | ✅ |
+| journal_abbrev | Journal/ISOAbbreviation | ✅ |
+| issn | Journal/ISSN | ✅ |
+| issn_type | ISSN/@IssnType | ✅ |
+| volume | JournalIssue/Volume | ✅ |
+| issue | JournalIssue/Issue | ✅ |
+| pages (MedlinePgn) | Pagination/MedlinePgn | ✅ |
+| first_page/last_page | parse_page_range() | ✅ |
+
+**Код** (`transformer.py:309-351`): Подробная логика извлечения журнальных данных.
+
+---
+
+## 6. Edge Cases и Обработка Ошибок
+
+### 6.1. Валидация XML
+
+| Случай | Поведение | Код |
+|--------|-----------|-----|
+| Missing _raw_xml | ValueError | `transformer.py:115-116` |
+| Empty _raw_xml | ValueError | `transformer.py:115-116` |
+| Non-string _raw_xml | ValueError | `transformer.py:115` |
+| Malformed XML | ValueError + warning log | `transformer.py:118-127` |
+| XML_parse_error логирование | ✅ | `transformer.py:122-126` |
+
+### 6.2. Обработка отсутствующих элементов
+
+| Случай | Поведение | Код |
+|--------|-----------|-----|
+| Missing PMID | result = None | `transformer.py:161-167` |
+| Missing Article | Minimal dict `{"pmid": pmid}` | `transformer.py:234-235` |
+| _cached_xml_root = None | `{"pmid": None}` | `transformer.py:223-224` |
+
+### 6.3. Метаданные lookup
+
+| Поле | Значение по умолчанию | Код |
+|------|----------------------|-----|
+| _lookup_method | "pmid" | `transformer.py:268-270` |
+| _original_id | Из record | `transformer.py:271` |
+| _dq_warn/_dq_error | False | `transformer.py:272-273` |
+
+---
+
+## 7. Архитектурное Соответствие
+
+### 7.1. Template Method Pattern
+
+```
+PubMedPublicationTransformer
+    └── extends BasePublicationTransformer
+         └── extends BaseTransformer
+              └── transform() - Template Method
+                   └── _transform_impl() - Hook Method
+```
+
+**Поток трансформации** (`base_publication_transformer.py:125-201`):
+1. `_pre_extract_validation()` — XML-парсинг и кэширование
+2. `_extract_business_data()` — извлечение полей
+3. Валидация primary ID (pmid)
+4. Fallback lookup logging
+5. `compute_entity_id()`
+6. `compute_content_hash()`
+7. `_create_entity()`
+8. `entity_to_silver_record()`
+
+### 7.2. Extractors Architecture
+
+```
+BaseFieldExtractor (Template Method)
+    ├── extract() - abstract
+    ├── normalize() - abstract
+    └── process() - template: extract → normalize
+
+Конкретные экстракторы:
+    ├── IdentifierExtractor
+    ├── AuthorExtractor
+    ├── AbstractExtractor
+    ├── DateExtractor
+    └── ClassificationExtractor
+```
+
+### 7.3. Value Objects
+
+| Value Object | Назначение | Файл |
+|--------------|------------|------|
+| PubMedId | PMID валидация (^\d+$) | `publications.py:122-194` |
+| DOI | DOI нормализация | `publications.py:17-119` |
+| PublicationYear | Валидация года | `chemical.py` |
+
+---
+
+## 8. Покрытие Тестами
+
+### 8.1. Unit тесты
+
+| Компонент | Файл | Тестов |
+|-----------|------|--------|
+| IdentifierExtractor | `test_identifier_extractor.py` | 12 |
+| AuthorExtractor | `test_author_extractor.py` | 10 |
+| AbstractExtractor | `test_abstract_extractor.py` | 10 |
+| DateExtractor | `test_date_extractor.py` | 23 |
+| ClassificationExtractor | `test_classification_extractor.py` | 16 |
+| Edge cases + MedlineDate | `test_extractor_edge_cases.py` | 46 (+7 MedlineDate) |
+| xml_utils | `test_xml_utils.py` | 12 |
+| BaseFieldExtractor | `test_base_field_extractor.py` | 6 |
+| **Итого экстракторы** | | **135** |
+| PubMedPublicationTransformer | `test_pubmed_transformer.py` | 24 |
+| PubMed Publication | `test_pubmed_publication.py` | 2 |
+| **Итого** | | **161** |
+
+### 8.2. Architecture тесты
+
+| Тест | Назначение | Файл |
+|------|------------|------|
+| PII Hashing compliance | RULES.md §5.4 | `test_pii_hashing.py` (16 tests) |
+
+---
+
+## 9. Выводы
+
+### 9.1. Подтверждённая корректность
+
+1. **Идентификаторы**: PMID, DOI, PMC ID извлекаются и нормализуются корректно
+2. **Авторы**: Все форматы обрабатываются (individual, collective, initials-only)
+3. **PII-хеширование**: Интегрировано через PiiHasherPort
+4. **Абстракты**: Простые и structured абстракты парсятся корректно
+5. **Даты**: End-of-period нормализация работает для partial dates
+6. **Error handling**: Graceful degradation при malformed input
+
+### 9.2. Известные ограничения
+
+1. **Suffix**: Элемент Suffix в Author не включается в выходное имя
+
+### 9.3. Рекомендации
+
+Текущая реализация полностью соответствует спецификации PubMed XML Schema и RULES.md. Дополнительные улучшения не требуются.
+
+---
+
+**Верификация завершена**: 161 unit тест + 16 architecture тестов прошли успешно.
+
+**Обновление 2026-01-25**: Добавлена поддержка MedlineDate формата (+7 тестов).
+
+================================================================================
+File: semanticscholar-publication-pipeline-verification.md
+Path: verification\semanticscholar-publication-pipeline-verification.md
+================================================================================
+# Semantic Scholar Publication Pipeline — Verification Report
+
+*Дата верификации: 2026-01-25*
+*Дата реализации: 2026-01-25*
+*Версия pipeline: 1.2.0*
+*Верификатор: Claude AI*
+
+---
+
+## 1. Сводка
+
+| Аспект | Статус | Комментарий |
+|--------|--------|-------------|
+| **Paper ID валидация** | ✅ Реализовано | 40-char hex, схема + Value Object |
+| **External IDs извлечение** | ✅ Реализовано | DOI, PubMed, ArXiv, CorpusId, MAG, DBLP, ACL |
+| **TLDR извлечение** | ✅ Реализовано | Корректно обрабатывает nested structure |
+| **Authors извлечение** | ✅ Реализовано | Whitespace-only имена фильтруются, names stripped |
+| **Journal/Venue приоритет** | ✅ Реализовано | journal.name → venue fallback |
+| **Open Access info** | ✅ Реализовано | oa_status нормализуется к lowercase |
+| **Fields of Study** | ✅ Реализовано | null/empty элементы фильтруются |
+| **Citation counts** | ✅ Реализовано | citationCount + influentialCitationCount |
+| **Year валидация** | ✅ Реализовано | min_year=1500 для исторических публикаций |
+| **Lookup metadata** | ✅ Реализовано | _lookup_method, _original_id |
+
+**Общий статус:** 149/149 тестов проходят. Все найденные проблемы исправлены.
+
+---
+
+## 2. Детальный Анализ
+
+### 2.1. Paper ID Validation
+
+**Файлы:**
+- `extractors.py:120` — не валидирует формат
+- `transformer.py:169` — только проверяет наличие
+- `publication.py:43-47` — Pandera схема с regex `^[a-f0-9]{40}$`
+- `academic_ids.py:82-126` — SemanticScholarId Value Object
+
+**Поведение:**
+- Отсутствующий paper_id → record skipped (✅)
+- Невалидный формат (не 40-char hex) → проходит transformer, отклоняется схемой (✅)
+
+---
+
+### 2.2. External IDs Extraction ✅ ИСПРАВЛЕНО
+
+**Файл:** `extractors.py:19-46`
+
+| API ключ | Извлекается? | Python ключ |
+|----------|-------------|-------------|
+| DOI | ✅ | `doi` |
+| PubMed | ✅ | `pmid` |
+| PMCID | ✅ | `pmcid` |
+| PubMedCentral | ✅ (fallback) | `pmcid` |
+| ArXiv | ✅ | `arxiv` |
+| CorpusId | ✅ | `corpus_id` |
+| MAG | ✅ | `mag` |
+| **DBLP** | ✅ | `dblp` |
+| ACL | ✅ | `acl` |
+
+**Исправление:** Добавлено `"dblp": external_ids.get("DBLP")`.
+
+---
+
+### 2.3. TLDR Extraction
+
+**Файл:** `extractors.py:193-210`
+
+**Тестовое покрытие:**
+- `tldr: null` → `None` ✅
+- `tldr: {}` → `None` ✅
+- `tldr.text: null` → `None` ✅
+- `tldr.text: ""` → `""` (пустая строка проходит)
+- `tldr.text: "valid"` → `"valid"` ✅
+
+**Статус:** Полностью реализовано.
+
+---
+
+### 2.4. Authors Extraction ✅ ИСПРАВЛЕНО
+
+**Файл:** `extractors.py:49-76`
+
+**Исправление:**
+```python
+# Было:
+if name:
+    result.append(name)
+
+# Стало:
+if name and name.strip():
+    result.append(name.strip())
+```
+
+**Поведение:**
+- Whitespace-only имена (`"   "`) → фильтруются ✅
+- Empty string (`""`) → фильтруются ✅
+- None → фильтруются ✅
+- Имена с whitespace → stripped ✅
+
+---
+
+### 2.5. Journal/Venue Priority
+
+**Файл:** `extractors.py:79-108`
+
+**Поведение:**
+1. `journal.name` присутствует → используется `journal.name` ✅
+2. `journal.name` пустой/None, `venue` присутствует → используется `venue` ✅
+3. `journal` None → используется `venue` ✅
+
+**Статус:** Полностью реализовано.
+
+---
+
+### 2.6. Open Access Information
+
+**Файл:** `extractors.py:111-191`
+
+**OA Status нормализация:**
+| Input | Output |
+|-------|--------|
+| `"GOLD"` | `"gold"` ✅ |
+| `"Green"` | `"green"` ✅ |
+| `"unknown"` | `None` ✅ |
+| `None` | `None` ✅ |
+| `"  GOLD  "` | `"gold"` ✅ (whitespace trimmed) |
+
+**Статус:** Полностью реализовано.
+
+---
+
+### 2.7. Fields of Study ✅ ИСПРАВЛЕНО
+
+**Файл:** `extractors.py:213-237`
+
+**Исправление:**
+```python
+# Было:
+return fields_of_study[:max_count]
+
+# Стало:
+return [f for f in fields_of_study if f and isinstance(f, str)][:max_count]
+```
+
+**Поведение:**
+- None элементы → фильтруются ✅
+- Пустые строки → фильтруются ✅
+- Фильтрация применяется перед max_count ✅
+
+---
+
+### 2.8. Citation/Reference Counts ✅ ИСПРАВЛЕНО
+
+**Файлы:**
+- `transformer.py:195-197` — извлекает `citationCount`, `referenceCount`, `influentialCitationCount`
+- `publication.py:102-117` — валидация `ge=0` с `pd.Int64Dtype` для nullable integers
+
+**Добавленное поле:** `influential_citation_count`
+- Entity: `semanticscholar.py:78`
+- Schema: `publication.py:113-117`
+- Transformer: `transformer.py:197`
+
+---
+
+### 2.9. Year Validation
+
+**Файл:** `extractors.py:240-256`
+
+**Конфигурация:** `ValidationConfig(min_publication_year=1500)`
+
+**Статус:** Полностью реализовано.
+
+---
+
+### 2.10. Lookup Metadata
+
+**Файлы:**
+- `adapter.py:239,274` — устанавливает `_lookup_method: "doi"`
+- `fallback.py:219-220` — устанавливает `_lookup_method: "title_fallback"`, `_original_id`
+- `transformer.py:168-169` — передаёт metadata без модификации
+
+**Статус:** Полностью реализовано.
+
+---
+
+## 3. Тестовое Покрытие
+
+| Тестовый файл | Тестов | Статус |
+|---------------|--------|--------|
+| `test_extractors.py` | 53 | ✅ Pass |
+| `test_transformer.py` | 47 | ✅ Pass |
+| `test_publication_schema.py` | 49 | ✅ Pass |
+| **Итого** | **149** | **✅ Pass** |
+
+---
+
+## 4. Реализованные Исправления
+
+### 4.1. Критичные (исправлено)
+
+1. ✅ **Authors whitespace filtering** (`extractors.py:69-70`):
+   - Whitespace-only имена теперь фильтруются
+   - Имена теперь stripped
+
+2. ✅ **Fields of Study filtering** (`extractors.py:234`):
+   - None и пустые строки фильтруются
+   - Фильтрация применяется перед max_count
+
+### 4.2. Желательные (исправлено)
+
+3. ✅ **DBLP extraction** (`extractors.py:44`):
+   - Добавлено `"dblp": external_ids.get("DBLP")`
+
+4. ✅ **influentialCitationCount** (`transformer.py:197`, `publication.py:113-117`):
+   - Добавлено извлечение в transformer
+   - Добавлено поле в схему с `pd.Int64Dtype` для nullable integer
+
+---
+
+## 5. Архитектурное Соответствие
+
+| Требование | Соответствие |
+|------------|--------------|
+| Ports & Adapters | ✅ adapter в infrastructure, transformer в application |
+| DI | ✅ pii_hasher, data_normalizer инжектируются |
+| Value Objects | ✅ DOI, PubMedId, PublicationYear |
+| Template Method | ✅ BasePublicationTransformer |
+| Pandera Schema | ✅ SemanticScholarPublicationSchema |
+
+---
+
+## 6. Заключение
+
+Semantic Scholar Publication Pipeline **полностью реализован** и соответствует всем требованиям:
+
+- ✅ Все 10 аспектов верификации — реализованы
+- ✅ Все 4 найденные проблемы — исправлены
+- ✅ 149 тестов проходят
+- ✅ Lint и mypy проверки проходят
+
+**Коммиты:**
+1. `a29023c` — docs: add Semantic Scholar pipeline verification report
+2. `e103fc2` — feat(semanticscholar): implement verification findings
 

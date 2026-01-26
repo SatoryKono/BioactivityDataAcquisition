@@ -1891,6 +1891,22 @@ class ChemblTargetResponse(BaseModel):
 # === Publication Models (ChEMBL API: /document endpoint) ===
 
 
+class ChemblReleaseInfo(BaseModel):
+    """Nested chembl_release object from ChEMBL API.
+
+    Contains metadata about which ChEMBL release the record was added in.
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    chembl_release: str | None = Field(
+        default=None, description="ChEMBL release version (e.g., CHEMBL_1)"
+    )
+    creation_date: str | None = Field(
+        default=None, description="Record creation date in ChEMBL (YYYY-MM-DD)"
+    )
+
+
 class ChemblPublicationRecord(BaseModel):
     """Individual publication record from ChEMBL API.
 
@@ -1927,6 +1943,11 @@ class ChemblPublicationRecord(BaseModel):
 
     # Source
     src_id: int | None = Field(default=None, description="Source ID")
+
+    # ChEMBL Release Info (nested object)
+    chembl_release: ChemblReleaseInfo | None = Field(
+        default=None, description="ChEMBL release metadata"
+    )
 
 
 class ChemblPublicationResponse(BaseModel):
@@ -7781,11 +7802,12 @@ Path: adapters\input\csv_filter_reader.py
 """CSV Filter Reader adapter.
 
 Implements InputFilterPort for reading filter IDs from CSV files.
-Uses Polars for efficient CSV parsing.
+Uses Polars for efficient CSV parsing with asyncio.to_thread for non-blocking I/O.
 """
 
 from __future__ import annotations
 
+import asyncio
 from collections import Counter
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -7877,7 +7899,7 @@ class CsvFilterReader:
         self, source_path: str, column_name: str
     ) -> FilterLoadResult:
         """Load unique IDs from a CSV file."""
-        df = self._read_csv_dataframe(source_path)
+        df = await asyncio.to_thread(self._read_csv_dataframe, source_path)
         all_ids = self._extract_column_ids(df, column_name)
         unique_ids, unique_count, duplicate_count, duplicates = (
             self._compute_duplicate_stats(all_ids)
@@ -7922,7 +7944,7 @@ class CsvFilterReader:
             Tuple of (FilterLoadResult, fallback_mapping).
             fallback_mapping maps primary values to fallback values.
         """
-        df = self._read_csv_dataframe(source_path)
+        df = await asyncio.to_thread(self._read_csv_dataframe, source_path)
 
         # Standard loading of primary IDs
         all_ids = self._extract_column_ids(df, primary_column)
@@ -8006,7 +8028,7 @@ class CsvFilterReader:
         Returns:
             FilterLoadResult with column_ids and valid_combinations.
         """
-        df = self._read_csv_dataframe(source_path)
+        df = await asyncio.to_thread(self._read_csv_dataframe, source_path)
         column_ids = self._extract_column_ids_map(df, columns)
 
         column_names = [col.column_name for col in columns]
@@ -22494,20 +22516,20 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("issue", pa.string()),
         pa.field("first_page", pa.string()),
         pa.field("last_page", pa.string()),
-        pa.field("language", pa.string()),  # Unified field, null for ChEMBL
         # === PUBLICATION_CROSSREF_FIELDS ===
         pa.field("document_chembl_id", pa.string()),  # Primary key
         pa.field("doi", pa.string()),
+        pa.field("pmc_id", pa.string()),  # PubMed Central ID
         pa.field("pmid", pa.string()),  # PubMed ID (numeric string)
-        pa.field("pmc_id", pa.string()),  # PubMed Central ID, null for ChEMBL
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
-        pa.field("citation_count", pa.int64()),  # Unified field, null for ChEMBL
         pa.field("doc_type", pa.string()),  # PUBLICATION, PATENT, DATASET, BOOK
-        pa.field("is_oa", pa.bool_()),  # Unified field, null for ChEMBL
         pa.field("journal_full_title", pa.string()),
-        pa.field("publication_date", pa.string()),  # Unified field, null for ChEMBL
+        pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
         pa.field("src_id", pa.int64()),
+        # === ChEMBL Release Metadata ===
+        pa.field("chembl_release", pa.string()),  # e.g., CHEMBL_1, CHEMBL_34
+        pa.field("creation_date", pa.string()),  # Record creation date (YYYY-MM-DD)
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
@@ -23040,7 +23062,7 @@ CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        # Original compound names from document
+        # Original compound names from the document
         pa.field("compound_key", pa.string()),
         pa.field("compound_name", pa.string()),
         # Foreign keys
@@ -23164,38 +23186,38 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_source", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
-        # === Business fields (alphabetical order) ===
-        # Lookup metadata
         # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-        # _original_id: Original identifier used for lookup
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
+        # === Business fields (alphabetical order) ===
         pa.field("abstract", pa.string()),
+        pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
         pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("citation_count", pa.int64()),
-        # Metadata
+        pa.field("content_domain_crossmark_restriction", pa.bool_()),
+        pa.field("content_domain_domains", pa.list_(pa.string())),
         pa.field("doc_type", pa.string()),
-        # Cross-reference IDs for linking publications across providers
         # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
         pa.field("doi", pa.string()),
         pa.field("first_page", pa.string()),
         pa.field("issn", pa.list_(pa.string())),
+        pa.field("issn_electronic", pa.string()),  # Electronic ISSN
+        pa.field("issn_print", pa.string()),  # Print ISSN
         pa.field("issue", pa.string()),
-        # Core fields
         pa.field("journal", pa.string()),
         pa.field("language", pa.string()),
         pa.field("last_page", pa.string()),
         pa.field("license_url", pa.string()),
-        # pmc_id: PubMed Central ID (format: "PMC1234567") - nullable, may not exist for all publications
-        pa.field("pmc_id", pa.string()),
-        # pmid: PubMed ID (numeric string: "12345678") - nullable, may not exist for all publications
-        pa.field("pmid", pa.string()),
-        # Date fields
+        # Cross-reference IDs (nullable - CrossRef doesn't provide these natively)
+        pa.field("pmc_id", pa.string()),  # PubMed Central ID
+        pa.field("pmid", pa.string()),  # PubMed ID
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
-        pa.field("published_online", pa.string()),  # Legacy: provider-specific
-        pa.field("published_print", pa.string()),  # Legacy: provider-specific
+        pa.field("published", pa.string()),  # Canonical publication date
+        pa.field("published_online", pa.string()),  # Provider-specific
+        pa.field("published_print", pa.string()),  # Provider-specific
         pa.field("publisher", pa.string()),
         pa.field("reference_count", pa.int64()),
+        pa.field("short_container_title", pa.list_(pa.string())),
         pa.field("source", pa.string()),
         pa.field("subjects", pa.list_(pa.string())),
         pa.field("title", pa.string()),

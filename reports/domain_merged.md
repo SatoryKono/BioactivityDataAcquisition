@@ -1012,7 +1012,7 @@ class Batch:
                 run_id=self._run_id,
                 batch_id=self._batch_id,
                 record_id=str(record.entity_id) if record.entity_id else None,
-                error_code=error_code or "UNKNOWN",
+                error_code=error_code,
                 error_message=error,
                 content_hash=record.content_hash,
             )
@@ -1374,7 +1374,7 @@ class RecordQuarantined(DomainEvent):
     run_id: RunID
     batch_id: BatchID
     record_id: str | None
-    error_code: str
+    error_code: str | None
     error_message: str
     content_hash: ContentHash | None = None
 
@@ -2747,6 +2747,59 @@ class EnricherConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class ColumnGroupConfig:
+    """Configuration for a column group in output ordering.
+
+    Defines how columns are grouped and ordered in the merged output.
+    Columns can be matched by explicit field names or regex patterns.
+
+    Attributes:
+        name: Group name for logging/debugging.
+        fields: Explicit list of field names to include in this group.
+            Matches both exact field names and prefixed versions
+            (e.g., "title" matches "title" and "crossref.title").
+        pattern: Regex pattern to match field names.
+            Applied after explicit field matching.
+        provider_order: Order of providers within this group.
+            Seed columns (no prefix) always come first.
+
+    Example:
+        >>> group = ColumnGroupConfig(
+        ...     name="title",
+        ...     fields=("title", "vernacular_title"),
+        ...     provider_order=("chembl", "crossref", "openalex"),
+        ... )
+    """
+
+    name: str
+    fields: tuple[str, ...] = ()
+    pattern: str | None = None
+    provider_order: tuple[str, ...] = (
+        "chembl",
+        "crossref",
+        "openalex",
+        "pubmed",
+        "semanticscholar",
+    )
+
+    def __post_init__(self) -> None:
+        """Validate and convert types."""
+        if isinstance(self.fields, list):
+            object.__setattr__(self, "fields", tuple(self.fields))
+        if isinstance(self.provider_order, list):
+            object.__setattr__(self, "provider_order", tuple(self.provider_order))
+        self._validate()
+
+    def _validate(self) -> None:
+        """Validate configuration invariants."""
+        _require_non_empty(self.name, "column group name")
+        if not self.fields and not self.pattern:
+            raise ValueError(
+                f"Column group '{self.name}' must have either fields or pattern"
+            )
+
+
+@dataclass(frozen=True, slots=True)
 class MergeConfig:
     """Configuration for merge step.
 
@@ -2778,12 +2831,14 @@ class MergeConfig:
     output_gold_path: str
     field_priorities: dict[str, tuple[str, ...]] = field(default_factory=dict)
     field_mappings: dict[str, str] = field(default_factory=dict)
+    column_groups: tuple[ColumnGroupConfig, ...] = ()
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
         self._convert_strategy()
         self._convert_conflict_resolution()
         self._convert_field_priorities()
+        self._convert_column_groups()
         self._validate()
 
     def _convert_strategy(self) -> None:
@@ -2810,6 +2865,15 @@ class MergeConfig:
                 for k, v in self.field_priorities.items()
             }
             object.__setattr__(self, "field_priorities", converted)
+
+    def _convert_column_groups(self) -> None:
+        """Convert list of column groups to tuple of ColumnGroupConfig."""
+        if isinstance(self.column_groups, list):
+            converted = tuple(
+                ColumnGroupConfig(**g) if isinstance(g, dict) else g
+                for g in self.column_groups
+            )
+            object.__setattr__(self, "column_groups", converted)
 
     def _validate(self) -> None:
         """Validate configuration invariants."""
@@ -5909,7 +5973,7 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     # Cross-reference IDs for linking publications across providers
     # pmid: PubMed ID (numeric string: "12345678")
     pmid: Series[str] = pa.Field(nullable=True)
-    # pmc_id: PubMed Central ID (format: "PMC1234567")
+    # pmc_id: PubMed Central ID (string: "PMC12345678")
     pmc_id: Series[str] = pa.Field(nullable=True)
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
     doi: Series[str] = pa.Field(nullable=True)
@@ -5921,14 +5985,20 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     journal: Series[str] = pa.Field(nullable=True)
     journal_full_title: Series[str] = pa.Field(nullable=True)
     year: Series[float] = pa.Field(nullable=True, coerce=True)
-    publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)
     first_page: Series[str] = pa.Field(nullable=True)
     last_page: Series[str] = pa.Field(nullable=True)
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)
 
-    # Unified publication fields
+    # ChEMBL release metadata
+    chembl_release: Series[str] = pa.Field(nullable=True)
+    creation_date: Series[str] = pa.Field(nullable=True)
+    # publication_date: Unified date field (YYYY-MM-DD) for cross-provider linking
+    publication_date: Series[str] = pa.Field(nullable=True)
+
+    # Unified publication fields (for cross-provider data linking)
+    # Note: ChEMBL doesn't provide these natively, but included for schema consistency
     citation_count: Series[float] = pa.Field(nullable=True, coerce=True)
     is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
     language: Series[str] = pa.Field(nullable=True)
@@ -6451,14 +6521,8 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
 
     # Primary identifier
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
-    # Note: CrossRef uses DOI as primary key; pmid/pmc_id come from PubMed, not CrossRef
+    # Note: CrossRef uses DOI as primary key; pmid/pmc_id excluded (not available from CrossRef API)
     doi: Series[str] = pa.Field(nullable=False)
-
-    # Cross-reference IDs for linking publications across providers
-    # pmid: PubMed ID (numeric string: "12345678") - null for CrossRef native records
-    pmid: Series[str] = pa.Field(nullable=True)
-    # pmc_id: PubMed Central ID (format: "PMC1234567") - null for CrossRef native records
-    pmc_id: Series[str] = pa.Field(nullable=True)
 
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
@@ -6486,6 +6550,25 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     license_url: Series[str] = pa.Field(nullable=True)
     subjects: Series[object] = pa.Field(nullable=True)  # list[str]
     source: Series[str] = pa.Field(nullable=True)
+
+    # Content domain (Crossmark/license restrictions)
+    content_domain_domains: Series[object] = pa.Field(nullable=True)  # list[str]
+    content_domain_crossmark_restriction: Series[bool] = pa.Field(
+        nullable=True, coerce=True
+    )
+
+    # Alternative identifiers (publisher-specific IDs, e.g., PII)
+    alternative_id: Series[object] = pa.Field(nullable=True)  # list[str]
+
+    # Canonical publication date
+    published: Series[str] = pa.Field(nullable=True)
+
+    # Short container title
+    short_container_title: Series[object] = pa.Field(nullable=True)  # list[str]
+
+    # ISSN by type
+    issn_print: Series[str] = pa.Field(nullable=True)
+    issn_electronic: Series[str] = pa.Field(nullable=True)
 
     # Lookup metadata
     # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
@@ -7817,6 +7900,14 @@ class ChemblPublicationRecord(BaseModel):
     # Source information
     src_id: int | None = Field(default=None, description="Data source ID")
 
+    # ChEMBL release metadata
+    chembl_release: str | None = Field(
+        default=None, description="ChEMBL release version (e.g., CHEMBL_1)"
+    )
+    creation_date: str | None = Field(
+        default=None, description="Record creation date in ChEMBL (YYYY-MM-DD)"
+    )
+
 
 class ChemblPublicationTermRecord(BaseModel):
     """Publication term DTO from ChEMBL.
@@ -8125,8 +8216,8 @@ class AssayParameters(BaseEntity):
     # === Foreign Key (REQUIRED) ===
     assay_chembl_id: str
 
-    # === Parameter Type (REQUIRED) ===
-    type: str
+    # === Parameter Type (Optional, may be None if not provided by API) ===
+    type: str | None = None
 
     # === Raw Values (API-OPTIONAL) ===
     relation: str | None = None  # Relation (=, <, >, ~, >=, <=)
@@ -8155,8 +8246,6 @@ class AssayParameters(BaseEntity):
             )
         if not self.assay_chembl_id or not self.assay_chembl_id.startswith("CHEMBL"):
             raise ValueError(f"Invalid assay_chembl_id: {self.assay_chembl_id}")
-        if not self.type:
-            raise ValueError("type is required")
 
     def has_numeric_value(self) -> bool:
         """Check if parameter has numeric value (raw or standardized)."""
@@ -8294,22 +8383,26 @@ class ChemblPublication(BaseEntity):
     journal: str | None = None
     journal_full_title: str | None = None
     year: int | None = None
-    publication_date: str | None = None  # ISO format: YYYY-MM-DD (computed from year)
+    publication_date: str | None = None  # Always NULL for ChEMBL (excluded from output)
     volume: str | None = None
     issue: str | None = None
     first_page: str | None = None
     last_page: str | None = None
 
-    # Cross-reference IDs (ChEMBL doesn't provide PMC ID)
+    # Cross-reference IDs (pmc_id always NULL for ChEMBL, excluded from output)
     pmc_id: str | None = None
 
-    # Unified publication fields (not available from ChEMBL API)
+    # Unified publication fields (always NULL for ChEMBL, excluded from output)
     citation_count: int | None = None
     is_oa: bool | None = None
-    language: str | None = None
+    language: str | None = None  # Excluded from PyArrow/Gold schemas
 
     # Source information
     src_id: int | None = None
+
+    # ChEMBL release metadata
+    chembl_release: str | None = None  # e.g., CHEMBL_1, CHEMBL_34
+    creation_date: str | None = None  # Record creation date in ChEMBL (YYYY-MM-DD)
 
     # System fields
     _source: str = "chembl"  # Data source identifier
@@ -8774,14 +8867,66 @@ from pydantic import Field as PydanticField
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 
-# Document type mapping from CrossRef types to internal types
-CROSSREF_TYPE_MAP = {
+# Document type mapping from CrossRef types to BioETL unified types.
+# See: https://api.crossref.org/types for complete list (30 types).
+#
+# Unified types (aligned with chembl/publication.py schema):
+# - PUBLICATION: Journal articles, conference papers, peer reviews
+# - BOOK: Books, monographs, book chapters, dissertations, reference entries
+# - PREPRINT: Pre-publication works (posted-content)
+# - DATASET: Research data and databases
+# - OTHER: Reports, standards, container types, supplementary materials, funding, unclassified
+#
+# Rationale:
+# - BOOK includes dissertations (thesis = monograph) and reference entries
+# - Reports/standards → OTHER (technical documents, not scholarly publications)
+# - "component" → OTHER (supplementary material, not standalone scholarly work)
+# - Container types → OTHER (metadata records, not scholarly content)
+CROSSREF_TYPE_MAP: dict[str, str] = {
+    # === Journal/Conference Articles → PUBLICATION ===
     "journal-article": "PUBLICATION",
-    "posted-content": "PREPRINT",
     "proceedings-article": "PUBLICATION",
-    "book-chapter": "PUBLICATION",
-    "dissertation": "PUBLICATION",
+    "peer-review": "PUBLICATION",  # Published peer review
+    # === Books & Book Parts → BOOK ===
+    "book": "BOOK",
+    "monograph": "BOOK",
+    "edited-book": "BOOK",
+    "reference-book": "BOOK",  # Dictionary, encyclopedia
+    "book-chapter": "BOOK",
+    "book-section": "BOOK",
+    "book-part": "BOOK",
+    "book-track": "BOOK",  # Audio book track
+    "dissertation": "BOOK",  # Thesis/monograph
+    "reference-entry": "BOOK",  # Dictionary/encyclopedia entry
+    # === Pre-publication → PREPRINT ===
+    "posted-content": "PREPRINT",
+    # === Research Data → DATASET ===
+    "dataset": "DATASET",
+    "database": "DATASET",
+    # === Reports & Standards → OTHER ===
+    "report": "OTHER",  # Technical report
+    "report-component": "OTHER",  # Part of a report
+    "standard": "OTHER",  # Technical standard
+    # === Supplementary Material → OTHER ===
+    "component": "OTHER",  # Figures, tables, supplementary files
+    # === Container/Series Types → OTHER ===
+    # (Metadata records for series, not individual works)
+    "journal": "OTHER",
+    "journal-volume": "OTHER",
+    "journal-issue": "OTHER",
+    "proceedings": "OTHER",
+    "proceedings-series": "OTHER",
+    "book-series": "OTHER",
+    "book-set": "OTHER",
+    "report-series": "OTHER",
+    # === Funding → OTHER ===
+    "grant": "OTHER",
+    # === Unclassified → OTHER ===
+    "other": "OTHER",  # Unclassified content
 }
+
+# Default type for unknown CrossRef types (conservative fallback)
+CROSSREF_TYPE_DEFAULT = "PUBLICATION"
 
 
 # === Pydantic DTO Model ===
@@ -8932,6 +9077,23 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     license_url: str | None = None
     subjects: list[str] = field(default_factory=list)
 
+    # Content domain (Crossmark/license restrictions)
+    content_domain_domains: list[str] = field(default_factory=list)
+    content_domain_crossmark_restriction: bool | None = None
+
+    # Alternative identifiers (publisher-specific IDs, e.g., PII)
+    alternative_id: list[str] = field(default_factory=list)
+
+    # Canonical publication date (preferred over print/online)
+    published: str | None = None
+
+    # Short journal/container title
+    short_container_title: list[str] = field(default_factory=list)
+
+    # ISSN by type (split from generic ISSN list)
+    issn_print: str | None = None
+    issn_electronic: str | None = None
+
     # Override: Default source for CrossRef
     source: str = "crossref"
 
@@ -8946,6 +9108,7 @@ class CrossRefPublicationEntity(PublicationEntityBase):
 
 
 __all__ = [
+    "CROSSREF_TYPE_DEFAULT",
     "CROSSREF_TYPE_MAP",
     "CrossRefPublicationEntity",
     "PublicationRecord",
@@ -9116,6 +9279,25 @@ class OpenAlexPublicationRecord(BaseModel):
     # Additional metadata
     language: str | None = PydanticField(default=None, description="Language code")
 
+    # Bibliographic info (from biblio object)
+    volume: str | None = PydanticField(
+        default=None, description="Journal volume number"
+    )
+    issue: str | None = PydanticField(default=None, description="Journal issue number")
+
+    # Additional metrics
+    fwci: float | None = PydanticField(
+        default=None, description="Field-Weighted Citation Impact"
+    )
+    referenced_works_count: int | None = PydanticField(
+        default=None, description="Number of works referenced"
+    )
+
+    # Quality indicators
+    is_retracted: bool = PydanticField(
+        default=False, description="Whether the publication has been retracted"
+    )
+
     # Lookup metadata (from adapter)
     # Note: Pydantic doesn't allow underscore-prefixed fields, so these use public names
     lookup_method: str = PydanticField(
@@ -9174,6 +9356,17 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
     # Keywords (author-assigned)
     keywords: list[str] = field(default_factory=list)
+
+    # Bibliographic info (from biblio object)
+    volume: str | None = None
+    issue: str | None = None
+
+    # Additional metrics
+    fwci: float | None = None  # Field-Weighted Citation Impact
+    referenced_works_count: int | None = None
+
+    # Quality indicators
+    is_retracted: bool = False
 
     # Override: Default source for OpenAlex
     source: str = "openalex"
@@ -9749,12 +9942,14 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
         paper_id: Semantic Scholar Paper ID (40-char hex S2 ID). REQUIRED.
         pmc_id: PubMed Central ID (format: PMC1234567).
         arxiv_id: ArXiv ID.
+        dblp_id: DBLP publication key.
         corpus_id: Semantic Scholar Corpus ID.
         tldr: AI-generated summary (TL;DR).
         volume: Journal volume.
         pages: Page numbers.
         venue: Venue name (conference/journal).
         reference_count: Number of references.
+        influential_citation_count: Number of influential citations.
         open_access_url: URL to open access PDF.
         fields_of_study: JSON string of fields of study.
         publication_types: JSON string of publication types.
@@ -9769,6 +9964,7 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
 
     # SemanticScholar-specific external identifiers (in addition to inherited pmc_id)
     arxiv_id: str | None = None
+    dblp_id: str | None = None
     corpus_id: int | None = None
 
     # SemanticScholar-specific: AI-generated summary
@@ -9782,6 +9978,7 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
 
     # SemanticScholar-specific metrics
     reference_count: int | None = None
+    influential_citation_count: int | None = None
 
     # SemanticScholar-specific OA URL
     open_access_url: str | None = None
@@ -13324,7 +13521,6 @@ from bioetl.domain.models.metadata import (
     GoldMetadata,
     LayerType,
     LineageMetadata,
-    OutputMetadata,
     PipelineMetadata,
     RuntimeMetadata,
     SCDMetadata,
@@ -13345,7 +13541,6 @@ __all__ = [
     "GoldMetadata",
     "LayerType",
     "LineageMetadata",
-    "OutputMetadata",
     "PipelineMetadata",
     "RuntimeMetadata",
     "SCDMetadata",
@@ -13377,7 +13572,6 @@ Version: 1.1
 
 from __future__ import annotations
 
-import warnings
 from datetime import datetime
 from enum import Enum
 from typing import Literal
@@ -13831,45 +14025,6 @@ class GoldOutputExt(BaseModel):
 
 
 # =============================================================================
-# Legacy Output Metadata (Deprecated - ADR-029)
-# =============================================================================
-
-
-class OutputMetadata(BaseModel):
-    """Bronze output information (DEPRECATED).
-
-    .. deprecated:: 5.10.0
-        Use BaseOutputMetadata + BronzeOutputExt composition instead.
-        Will be removed in v6.0.
-
-    Attributes:
-        files: List of output files.
-        total_records: Total records across all files.
-        total_bytes: Total bytes across all files.
-        format: Output format (jsonl+zstd).
-        compression: Compression algorithm.
-    """
-
-    files: list[FileOutputMetadata] = Field(
-        default_factory=list, description="Output files"
-    )
-    total_records: int = Field(default=0, description="Total records")
-    total_bytes: int = Field(default=0, description="Total bytes")
-    format: str = Field(default="jsonl+zstd", description="Output format")
-    compression: str = Field(default="zstd", description="Compression algorithm")
-
-    def __init__(self, **data: object) -> None:
-        """Initialize with deprecation warning."""
-        warnings.warn(
-            "OutputMetadata is deprecated, use BaseOutputMetadata + BronzeOutputExt "
-            "composition instead. Will be removed in v6.0.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(**data)
-
-
-# =============================================================================
 # Silver Layer Components
 # =============================================================================
 
@@ -14070,66 +14225,6 @@ class SCDMetadata(BaseModel):
     )
     new_versions_created: int = Field(default=0, description="New versions created")
     records_expired: int = Field(default=0, description="Records expired")
-
-
-class GoldOutputMetadata(BaseModel):
-    """Gold layer output metrics (DEPRECATED).
-
-    .. deprecated:: 5.10.0
-        Use BaseOutputMetadata + GoldOutputExt composition instead.
-        Will be removed in v6.0.
-
-    Attributes:
-        record_count: Number of records.
-        partition_count: Number of partitions.
-        total_bytes: Total size in bytes.
-        format: Output format (delta or parquet).
-    """
-
-    record_count: int = Field(default=0, description="Record count")
-    partition_count: int = Field(default=0, description="Partition count")
-    total_bytes: int = Field(default=0, description="Total bytes")
-    format: Literal["delta", "parquet"] = Field(
-        default="delta", description="Output format"
-    )
-
-    def __init__(self, **data: object) -> None:
-        """Initialize with deprecation warning."""
-        warnings.warn(
-            "GoldOutputMetadata is deprecated, use BaseOutputMetadata + "
-            "GoldOutputExt composition instead. Will be removed in v6.0.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(**data)
-
-
-class SilverOutputMetadata(BaseModel):
-    """Silver layer output metrics (DEPRECATED).
-
-    .. deprecated:: 5.10.0
-        Use BaseOutputMetadata + SilverOutputExt composition instead.
-        Will be removed in v6.0.
-
-    Attributes:
-        record_count: Number of records written.
-        content_hash: SHA256 hash of content for change detection.
-    """
-
-    record_count: int = Field(default=0, description="Record count")
-    content_hash: str | None = Field(
-        default=None, description="Content hash for change detection"
-    )
-
-    def __init__(self, **data: object) -> None:
-        """Initialize with deprecation warning."""
-        warnings.warn(
-            "SilverOutputMetadata is deprecated, use BaseOutputMetadata + "
-            "SilverOutputExt composition instead. Will be removed in v6.0.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(**data)
 
 
 # =============================================================================
@@ -14381,11 +14476,56 @@ def _to_none_if_empty(s: str) -> str | None:
     return s.strip() or None
 
 
+# Pattern for electronic/article page identifiers that should NOT be split on hyphen.
+# Examples: e-123, E-456, e123 (electronic articles)
+_ELECTRONIC_PAGE_PATTERN = re.compile(r"^[eE]-?\d+$")
+
+
+def _is_electronic_page(page: str) -> bool:
+    """Check if page is electronic article number that shouldn't be split.
+
+    Electronic page identifiers like 'e-123' or 'e123' represent article
+    numbers, not page ranges. The hyphen in 'e-123' is part of the identifier.
+
+    Args:
+        page: Stripped page string.
+
+    Returns:
+        True if page matches electronic article pattern.
+    """
+    return bool(_ELECTRONIC_PAGE_PATTERN.match(page))
+
+
 def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
-    """Parse page range '123-456' to (first, last) tuple."""
+    """Parse page range '123-456' to (first, last) tuple.
+
+    Handles various page formats:
+    - Standard ranges: "123-456" → ("123", "456")
+    - Single pages: "42" → ("42", None)
+    - Electronic pages: "e12345", "e-123" → (original, None)
+    - Article numbers: "100234" → ("100234", None)
+    - Supplements: "S1-S15" → ("S1", "S15")
+
+    Args:
+        page: Page string from publication metadata.
+
+    Returns:
+        Tuple of (first_page, last_page). last_page is None for single pages
+        or electronic article identifiers.
+    """
     if not page:
         return None, None
-    first, sep, last = page.partition("-")
+
+    stripped = page.strip()
+    if not stripped:
+        return None, None
+
+    # Electronic article numbers: don't split on hyphen (e.g., e-123)
+    if _is_electronic_page(stripped):
+        return stripped, None
+
+    # Standard range parsing
+    first, sep, last = stripped.partition("-")
     return _to_none_if_empty(first), _to_none_if_empty(last) if sep else None
 
 
@@ -19777,9 +19917,9 @@ class AssayParametersSchema(ETLRecordSchema):
         description="FK → Assay (ChEMBL ID format).",
     )
 
-    # === Parameter Type (Required) ===
-    type: Series[str] = pa.Field(
-        nullable=False,
+    # === Parameter Type (Optional, may be None if not provided by API) ===
+    type: Series[str] | None = pa.Field(
+        nullable=True,
         coerce=True,
         description="Parameter type (e.g., CONC, PH, TEMP, TIME).",
     )
@@ -20412,6 +20552,9 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     - Metrics: citation_count
     - Open Access: is_oa
     - Lookup tracking: lookup_method (overridden), original_id, source
+
+    Note: pmc_id, publication_date, citation_count, is_oa are always NULL for ChEMBL
+    (not available from ChEMBL API) and excluded from PyArrow/Gold schemas.
     """
 
     # === Primary Key (ChEMBL-specific) ===
@@ -20445,6 +20588,17 @@ class ChemblPublicationSchema(PublicationBaseSchema):
 
     # === Provider-specific Identifiers ===
     src_id: Series[int] = pa.Field(nullable=True, description="Source ID.")
+
+    # === ChEMBL Release Metadata ===
+    chembl_release: Series[str] = pa.Field(
+        nullable=True,
+        description="ChEMBL release version (e.g., CHEMBL_1, CHEMBL_34).",
+    )
+    creation_date: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^\d{4}-\d{2}-\d{2}$",
+        description="Record creation date in ChEMBL database (YYYY-MM-DD).",
+    )
 
     # === Provider-specific Journal Fields ===
     journal_full_title: Series[str] = pa.Field(
@@ -21405,6 +21559,45 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
         nullable=True, description="JSON array of subject areas"
     )
 
+    # === Content Domain ===
+    content_domain_domains: Series[object] = pa.Field(
+        nullable=True,
+        description="Content domain domains (list of strings)",
+    )
+    content_domain_crossmark_restriction: Series[bool] = pa.Field(
+        nullable=True,
+        coerce=True,
+        description="Crossmark restriction flag",
+    )
+
+    # === Alternative Identifiers ===
+    alternative_id: Series[object] = pa.Field(
+        nullable=True,
+        description="Alternative IDs (publisher-specific, e.g., PII)",
+    )
+
+    # === Canonical Publication Date ===
+    published: Series[str] = pa.Field(
+        nullable=True,
+        description="Canonical publication date (YYYY-MM-DD)",
+    )
+
+    # === Short Container Title ===
+    short_container_title: Series[object] = pa.Field(
+        nullable=True,
+        description="Short journal/container title (list of strings)",
+    )
+
+    # === ISSN by Type ===
+    issn_print: Series[str] = pa.Field(
+        nullable=True,
+        description="Print ISSN (format: XXXX-XXXX)",
+    )
+    issn_electronic: Series[str] = pa.Field(
+        nullable=True,
+        description="Electronic ISSN (format: XXXX-XXXX)",
+    )
+
     class Config:
         """Pandera configuration."""
 
@@ -21804,6 +21997,36 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="OA status (gold, green, hybrid, bronze, closed)",
     )
 
+    # === Bibliographic Info (from biblio object) ===
+    volume: Series[str] = pa.Field(
+        nullable=True,
+        description="Journal volume number",
+    )
+
+    issue: Series[str] = pa.Field(
+        nullable=True,
+        description="Journal issue number",
+    )
+
+    # === Additional Metrics ===
+    fwci: Series[float] = pa.Field(
+        nullable=True,
+        ge=0,
+        description="Field-Weighted Citation Impact (must be non-negative)",
+    )
+
+    referenced_works_count: Series[pd.Int64Dtype] = pa.Field(
+        nullable=True,
+        ge=0,
+        description="Number of works referenced (must be non-negative)",
+    )
+
+    # === Quality Indicators ===
+    is_retracted: Series[bool] = pa.Field(
+        nullable=False,
+        description="Whether the publication has been retracted",
+    )
+
     class Config:
         """Pandera configuration."""
 
@@ -22177,13 +22400,16 @@ __all__ = [
 ]
 
 ================================================================================
-File: article.py
-Path: schemas\pubmed\article.py
+File: publication.py
+Path: schemas\pubmed\publication.py
 ================================================================================
-"""Pandera schema for PubMed Article entity.
+"""Pandera schema for PubMed Publication entity.
 
 Aligned with RULES.md v5.10 and MEDLINE DTD.
 Source: https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_230101.dtd
+
+Note: File renamed from article.py to publication.py per ADR-024 Entity Naming Unification.
+PubMedPublicationSchema replaces ArticleSchema for consistency with other providers.
 """
 
 from __future__ import annotations
@@ -22205,17 +22431,20 @@ from bioetl.domain.validation import (
 )
 
 # Re-export for backwards compatibility
-__all__ = ["LOOKUP_METHODS", "ArticleSchema"]
+__all__ = ["LOOKUP_METHODS", "ArticleSchema", "PubMedPublicationSchema"]
 
 # === Fixed Value Constants ===
 PUBLICATION_STATUSES = ["ppublish", "epublish", "aheadofprint"]
 ISSN_TYPES = ["Print", "Electronic", "Linking"]
 
 
-class ArticleSchema(PublicationBaseSchema):
-    """PubMed Article validation schema for Silver layer.
+class PubMedPublicationSchema(PublicationBaseSchema):
+    """PubMed Publication validation schema for Silver layer.
 
     Represents a MEDLINE/PubMed citation record.
+
+    Note: Renamed from ArticleSchema per ADR-024 for consistency with
+    entity_type='publication' in pipeline configs and other providers.
     """
 
     # === Primary Key (str for cross-provider consistency) ===
@@ -22418,8 +22647,16 @@ class ArticleSchema(PublicationBaseSchema):
         strict = False  # Allow missing columns and extra columns
         ordered = False  # Changed to False for inheritance compatibility
         coerce = True
-        name = "ArticleSchema"
-        description = "PubMed Article Silver layer validation"
+        name = "PubMedPublicationSchema"
+        description = "PubMed Publication Silver layer validation"
+
+
+# Backward compatibility alias (deprecated)
+ArticleSchema = PubMedPublicationSchema
+"""Deprecated alias for PubMedPublicationSchema.
+
+Use PubMedPublicationSchema instead. This alias will be removed in v3.0.
+"""
 
 ================================================================================
 File: __init__.py
@@ -22453,6 +22690,7 @@ Includes lookup metadata fields for DOI/title resolution tracking.
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -22513,7 +22751,12 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="ArXiv ID",
     )
 
-    corpus_id: Series[int] = pa.Field(
+    dblp_id: Series[str] = pa.Field(
+        nullable=True,
+        description="DBLP publication key",
+    )
+
+    corpus_id: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
         ge=0,
         description="S2 Corpus ID",
@@ -22540,10 +22783,16 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     )
 
     # === Provider-specific Metrics ===
-    reference_count: Series[int] = pa.Field(
+    reference_count: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
         ge=0,
         description="Number of references",
+    )
+
+    influential_citation_count: Series[pd.Int64Dtype] = pa.Field(
+        nullable=True,
+        ge=0,
+        description="Number of influential citations",
     )
 
     # === Provider-specific Open Access ===
@@ -22576,6 +22825,89 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         coerce = True  # Coerce data types to match schema
         name = "SemanticScholarPublicationSchema"
         description = "Semantic Scholar Publication Silver layer validation"
+
+================================================================================
+File: idmapping.py
+Path: schemas\uniprot\idmapping.py
+================================================================================
+"""Pandera schema for UniProt ID Mapping entity.
+
+Aligned with RULES.md v5.0 and UniProt ID Mapping API.
+Source: https://www.uniprot.org/id-mapping/
+
+Schema validates ChEMBL → UniProt ID mapping results:
+- target_chembl_id: Source ChEMBL target ID
+- uniprot_accession: Mapped UniProt accession (nullable for not_found)
+- mapping_status: Status of mapping operation
+"""
+
+from __future__ import annotations
+
+from typing import cast
+
+import pandera.pandas as pa
+from pandera.typing import Series
+
+from bioetl.domain.schemas.base import ETLRecordSchema
+
+# === Fixed Value Constants ===
+MAPPING_STATUSES = ["found", "not_found", "error"]
+
+
+class IDMappingSchema(ETLRecordSchema):
+    """UniProt ID Mapping validation schema for Silver layer.
+
+    Validates mapping results from ChEMBL targets to UniProt accessions.
+    """
+
+    # === Primary Key ===
+    target_chembl_id: Series[str] = pa.Field(
+        nullable=False,
+        description="Source ChEMBL target identifier (e.g., CHEMBL204)",
+    )
+
+    @pa.check("target_chembl_id", name="target_chembl_id_format")
+    def _check_target_chembl_id(cls, series: Series[str]) -> Series[bool]:
+        """Validate ChEMBL target ID format."""
+        return cast("Series[bool]", series.str.match(r"^CHEMBL\d+$"))
+
+    # === Mapping Result ===
+    uniprot_accession: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Mapped UniProt accession (e.g., P00742), None if not found",
+    )
+
+    @pa.check("uniprot_accession", name="uniprot_accession_format")
+    def _check_uniprot_accession(cls, series: Series[str]) -> Series[bool]:
+        """Validate UniProt accession format (6-10 alphanumeric chars)."""
+        return cast(
+            "Series[bool]", series.isna() | series.str.match(r"^[A-Z0-9]{6,10}$")
+        )
+
+    mapping_status: Series[str] = pa.Field(
+        nullable=False,
+        description="Status of mapping: 'found', 'not_found', or 'error'",
+    )
+
+    @pa.check("mapping_status", name="mapping_status_values")
+    def _check_mapping_status(cls, series: Series[str]) -> Series[bool]:
+        """Validate mapping status is one of the allowed values."""
+        return cast("Series[bool]", series.isin(MAPPING_STATUSES))
+
+    class Config:
+        """Pandera configuration."""
+
+        strict = True
+        ordered = True
+        coerce = True
+        name = "IDMappingSchema"
+        description = "UniProt ID Mapping Silver layer validation"
+
+
+__all__ = [
+    "MAPPING_STATUSES",
+    "IDMappingSchema",
+]
 
 ================================================================================
 File: isoform.py
@@ -27220,6 +27552,16 @@ from bioetl.domain.value_objects.chemical import (
     MolecularWeight,
     PublicationYear,
 )
+from bioetl.domain.value_objects.column_order import (
+    DEFAULT_COLUMN_ORDER,
+    PUBLICATION_FIELD_GROUPS,
+    ColumnOrderConfig,
+    SemanticGroup,
+)
+from bioetl.domain.value_objects.column_qualifier import (
+    JOIN_KEY_COLUMNS,
+    ColumnQualifier,
+)
 from bioetl.domain.value_objects.compound_ids import (
     AssayId,
     CompoundId,
@@ -27291,9 +27633,12 @@ from bioetl.domain.value_objects.taxonomy_id import (
 )
 
 __all__ = [
+    "DEFAULT_COLUMN_ORDER",
     "DOI",
     "ISSN",
+    "JOIN_KEY_COLUMNS",
     "ORCID",
+    "PUBLICATION_FIELD_GROUPS",
     "SMILES",
     "ActivityType",
     "ActivityValue",
@@ -27308,6 +27653,8 @@ __all__ = [
     "BusinessRulesResult",
     "CategoricalDistribution",
     "ChemblId",
+    "ColumnOrderConfig",
+    "ColumnQualifier",
     "ColumnStats",
     "CompletenessResult",
     "CompoundId",
@@ -27352,6 +27699,7 @@ __all__ = [
     "SchemaDriftInfo",
     "SchemaDriftResult",
     "SchemaSnapshotResult",
+    "SemanticGroup",
     "SemanticScholarId",
     "SilverDQCheckType",
     "SilverDQReport",
@@ -29191,6 +29539,381 @@ class MolecularWeight(ValueObject[float]):
     def __hash__(self) -> int:
         """Hash based on class and value only (ignoring config)."""
         return hash((self.__class__.__name__, self._value))
+
+================================================================================
+File: column_order.py
+Path: value_objects\column_order.py
+================================================================================
+"""Column ordering configuration for semantic grouping.
+
+Defines the order of columns in composite pipeline output.
+See ADR-026 for rationale.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from enum import IntEnum, auto
+from typing import Final
+
+__all__ = [
+    "DEFAULT_COLUMN_ORDER",
+    "PUBLICATION_FIELD_GROUPS",
+    "ColumnOrderConfig",
+    "SemanticGroup",
+]
+
+
+class SemanticGroup(IntEnum):
+    """Semantic groups for column ordering.
+
+    Lower values appear first in output.
+    """
+
+    SYSTEM = auto()  # entity_id, content_hash, _run_id, _ingestion_ts
+    IDENTIFIERS = auto()  # document_chembl_id, doi, pmid, pmc_id
+    TITLE = auto()  # title, *.title
+    ABSTRACT = auto()  # abstract, *.abstract
+    AUTHORS = auto()  # authors, *.authors, first_author
+    JOURNAL = auto()  # journal, journal_name, source
+    DATES = auto()  # publication_date, year, created_at
+    METRICS = auto()  # citation_count, reference_count
+    CLASSIFICATION = auto()  # mesh_terms, keywords, subjects
+    URLS = auto()  # url, pdf_url, landing_page
+    OTHER = auto()  # Everything else
+
+
+# Mapping of field patterns to semantic groups
+# Patterns are matched case-insensitively
+PUBLICATION_FIELD_GROUPS: Final[dict[str, SemanticGroup]] = {
+    # System fields (exact match)
+    "entity_id": SemanticGroup.SYSTEM,
+    "content_hash": SemanticGroup.SYSTEM,
+    "_run_id": SemanticGroup.SYSTEM,
+    "_ingestion_ts": SemanticGroup.SYSTEM,
+    "_run_type": SemanticGroup.SYSTEM,
+    "_source_file": SemanticGroup.SYSTEM,
+    "_dq_score": SemanticGroup.SYSTEM,
+    "_dq_flags": SemanticGroup.SYSTEM,
+    "_lineage": SemanticGroup.SYSTEM,
+    "_sources": SemanticGroup.SYSTEM,
+    # Identifiers
+    "document_chembl_id": SemanticGroup.IDENTIFIERS,
+    "chembl_id": SemanticGroup.IDENTIFIERS,
+    "doi": SemanticGroup.IDENTIFIERS,
+    "pmid": SemanticGroup.IDENTIFIERS,
+    "pmc_id": SemanticGroup.IDENTIFIERS,
+    "pmcid": SemanticGroup.IDENTIFIERS,
+    "pubmed_id": SemanticGroup.IDENTIFIERS,
+    "openalex_id": SemanticGroup.IDENTIFIERS,
+    "semantic_scholar_id": SemanticGroup.IDENTIFIERS,
+    "crossref_id": SemanticGroup.IDENTIFIERS,
+    "issn": SemanticGroup.IDENTIFIERS,
+    "isbn": SemanticGroup.IDENTIFIERS,
+    # Title
+    "title": SemanticGroup.TITLE,
+    "original_title": SemanticGroup.TITLE,
+    "translated_title": SemanticGroup.TITLE,
+    "subtitle": SemanticGroup.TITLE,
+    # Abstract
+    "abstract": SemanticGroup.ABSTRACT,
+    "summary": SemanticGroup.ABSTRACT,
+    "description": SemanticGroup.ABSTRACT,
+    # Authors
+    "authors": SemanticGroup.AUTHORS,
+    "author": SemanticGroup.AUTHORS,
+    "first_author": SemanticGroup.AUTHORS,
+    "last_author": SemanticGroup.AUTHORS,
+    "corresponding_author": SemanticGroup.AUTHORS,
+    "author_count": SemanticGroup.AUTHORS,
+    "affiliations": SemanticGroup.AUTHORS,
+    "institutions": SemanticGroup.AUTHORS,
+    # Journal/Source
+    "journal": SemanticGroup.JOURNAL,
+    "journal_name": SemanticGroup.JOURNAL,
+    "journal_title": SemanticGroup.JOURNAL,
+    "source": SemanticGroup.JOURNAL,
+    "publisher": SemanticGroup.JOURNAL,
+    "volume": SemanticGroup.JOURNAL,
+    "issue": SemanticGroup.JOURNAL,
+    "pages": SemanticGroup.JOURNAL,
+    "first_page": SemanticGroup.JOURNAL,
+    "last_page": SemanticGroup.JOURNAL,
+    # Dates
+    "publication_date": SemanticGroup.DATES,
+    "pub_date": SemanticGroup.DATES,
+    "year": SemanticGroup.DATES,
+    "publication_year": SemanticGroup.DATES,
+    "created_at": SemanticGroup.DATES,
+    "updated_at": SemanticGroup.DATES,
+    "indexed_at": SemanticGroup.DATES,
+    "deposited_at": SemanticGroup.DATES,
+    # Metrics
+    "citation_count": SemanticGroup.METRICS,
+    "citations": SemanticGroup.METRICS,
+    "cited_by_count": SemanticGroup.METRICS,
+    "reference_count": SemanticGroup.METRICS,
+    "references": SemanticGroup.METRICS,
+    "impact_factor": SemanticGroup.METRICS,
+    "h_index": SemanticGroup.METRICS,
+    "altmetric_score": SemanticGroup.METRICS,
+    # Classification
+    "mesh_terms": SemanticGroup.CLASSIFICATION,
+    "mesh_headings": SemanticGroup.CLASSIFICATION,
+    "keywords": SemanticGroup.CLASSIFICATION,
+    "subjects": SemanticGroup.CLASSIFICATION,
+    "categories": SemanticGroup.CLASSIFICATION,
+    "topics": SemanticGroup.CLASSIFICATION,
+    "concepts": SemanticGroup.CLASSIFICATION,
+    "publication_type": SemanticGroup.CLASSIFICATION,
+    "document_type": SemanticGroup.CLASSIFICATION,
+    # URLs
+    "url": SemanticGroup.URLS,
+    "pdf_url": SemanticGroup.URLS,
+    "landing_page": SemanticGroup.URLS,
+    "landing_page_url": SemanticGroup.URLS,
+    "fulltext_url": SemanticGroup.URLS,
+    "open_access_url": SemanticGroup.URLS,
+}
+
+
+@dataclass(frozen=True)
+class ColumnOrderConfig:
+    """Configuration for column ordering.
+
+    Attributes:
+        field_groups: Mapping of field names to semantic groups.
+        provider_priority: Order of providers within same semantic group.
+            First provider's columns appear first.
+    """
+
+    field_groups: dict[str, SemanticGroup] = field(
+        default_factory=lambda: dict(PUBLICATION_FIELD_GROUPS)
+    )
+    provider_priority: tuple[str, ...] = (
+        "chembl",
+        "crossref",
+        "pubmed",
+        "openalex",
+        "semantic_scholar",
+    )
+
+    def get_group(self, column: str) -> SemanticGroup:
+        """Get semantic group for a column.
+
+        Handles both qualified (provider.entity.field) and
+        unqualified (field) column names.
+
+        Args:
+            column: Column name.
+
+        Returns:
+            Semantic group for the column.
+        """
+        # Handle system columns (start with _)
+        if column.startswith("_"):
+            return self.field_groups.get(column, SemanticGroup.SYSTEM)
+
+        # Extract and normalize field name
+        field_lower = self._extract_field(column).lower()
+
+        # Try exact match first, then fallback to OTHER
+        return self.field_groups.get(field_lower, SemanticGroup.OTHER)
+
+    def get_provider_rank(self, column: str) -> int:
+        """Get provider rank for ordering within semantic group.
+
+        Args:
+            column: Column name (qualified or unqualified).
+
+        Returns:
+            Provider rank (lower = higher priority).
+            Returns 999 for unknown providers.
+        """
+        # Extract provider from qualified name
+        parts = column.split(".")
+        if len(parts) == 3:
+            provider = parts[0].lower()
+            try:
+                return self.provider_priority.index(provider)
+            except ValueError:
+                return 999
+
+        # Unqualified columns get highest priority (seed)
+        return -1
+
+    def _extract_field(self, column: str) -> str:
+        """Extract field name from column."""
+        parts = column.split(".")
+        if len(parts) == 3:
+            return parts[2]
+        return column
+
+
+# Default configuration instance
+DEFAULT_COLUMN_ORDER: Final[ColumnOrderConfig] = ColumnOrderConfig()
+
+================================================================================
+File: column_qualifier.py
+Path: value_objects\column_qualifier.py
+================================================================================
+"""Column qualifier value object for unified naming.
+
+Implements {provider}.{entity}.{field} naming convention.
+See ADR-026 for rationale.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Final
+
+__all__ = ["JOIN_KEY_COLUMNS", "ColumnQualifier"]
+
+# Join keys excluded from renaming (case-insensitive)
+JOIN_KEY_COLUMNS: Final[frozenset[str]] = frozenset({"doi", "pmid", "pmc_id"})
+
+
+@dataclass(frozen=True, slots=True)
+class ColumnQualifier:
+    """Qualified column name in format {provider}.{entity}.{field}.
+
+    Immutable value object representing a fully qualified column name.
+    Used for consistent naming across composite pipelines.
+
+    Attributes:
+        provider: Data provider name (e.g., 'chembl', 'crossref').
+        entity: Entity type (e.g., 'publication', 'activity').
+        field: Field name (e.g., 'title', 'abstract').
+
+    Example:
+        >>> q = ColumnQualifier("chembl", "publication", "title")
+        >>> str(q)
+        'chembl.publication.title'
+        >>> q.is_join_key
+        False
+    """
+
+    provider: str
+    entity: str
+    field: str
+
+    def __post_init__(self) -> None:
+        """Validate and normalize fields."""
+        for attr in ("provider", "entity", "field"):
+            value = getattr(self, attr)
+            normalized = self._validate_field(value, attr)
+            object.__setattr__(self, attr, normalized)
+
+    @staticmethod
+    def _validate_field(value: str, name: str) -> str:
+        """Validate non-empty and normalize to lowercase."""
+        if not value or not value.strip():
+            raise ValueError(f"{name} cannot be empty")
+        return value.strip().lower()
+
+    def __str__(self) -> str:
+        """Return qualified name: {provider}.{entity}.{field}."""
+        return f"{self.provider}.{self.entity}.{self.field}"
+
+    @property
+    def prefix(self) -> str:
+        """Return prefix without field: {provider}.{entity}."""
+        return f"{self.provider}.{self.entity}"
+
+    @property
+    def is_join_key(self) -> bool:
+        """Check if field is a join key (doi, pmid, pmc_id)."""
+        return self.field.lower() in JOIN_KEY_COLUMNS
+
+    @classmethod
+    def from_pipeline(cls, pipeline: str, field: str) -> ColumnQualifier:
+        """Create from pipeline name and field.
+
+        Args:
+            pipeline: Pipeline name in format 'provider_entity'.
+            field: Column field name.
+
+        Returns:
+            ColumnQualifier instance.
+
+        Raises:
+            ValueError: If pipeline format is invalid.
+
+        Example:
+            >>> q = ColumnQualifier.from_pipeline("chembl_publication", "title")
+            >>> str(q)
+            'chembl.publication.title'
+        """
+        if "_" not in pipeline:
+            raise ValueError(
+                f"Pipeline '{pipeline}' must be in format 'provider_entity'"
+            )
+        provider, entity = pipeline.split("_", 1)
+        return cls(provider=provider, entity=entity, field=field)
+
+    @classmethod
+    def parse(cls, qualified_name: str) -> ColumnQualifier:
+        """Parse qualified name back to ColumnQualifier.
+
+        Args:
+            qualified_name: Qualified name in format 'provider.entity.field'.
+
+        Returns:
+            ColumnQualifier instance.
+
+        Raises:
+            ValueError: If format is invalid.
+
+        Example:
+            >>> q = ColumnQualifier.parse("chembl.publication.title")
+            >>> q.provider
+            'chembl'
+        """
+        parts = qualified_name.split(".")
+        if len(parts) != 3:
+            raise ValueError(
+                f"Qualified name '{qualified_name}' must have exactly 3 parts "
+                "(provider.entity.field)"
+            )
+        return cls(provider=parts[0], entity=parts[1], field=parts[2])
+
+    @staticmethod
+    def is_qualified(column: str) -> bool:
+        """Check if column name is already in qualified format.
+
+        Args:
+            column: Column name to check.
+
+        Returns:
+            True if column has format x.y.z (3 dot-separated parts).
+        """
+        parts = column.split(".")
+        return len(parts) == 3 and all(p.strip() for p in parts)
+
+    @staticmethod
+    def extract_field(column: str) -> str:
+        """Extract field name from column (qualified or unqualified).
+
+        For qualified names (provider.entity.field), returns the field part.
+        For unqualified names, returns the original column name.
+
+        Args:
+            column: Column name (qualified or unqualified).
+
+        Returns:
+            Field name.
+
+        Example:
+            >>> ColumnQualifier.extract_field("chembl.publication.title")
+            'title'
+            >>> ColumnQualifier.extract_field("title")
+            'title'
+        """
+        parts = column.split(".")
+        if len(parts) == 3:
+            return parts[2]
+        return column
 
 ================================================================================
 File: compound_ids.py
