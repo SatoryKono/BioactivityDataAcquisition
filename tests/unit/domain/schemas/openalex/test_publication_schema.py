@@ -62,11 +62,21 @@ def valid_record() -> dict:
         # Bibliographic info (from biblio object)
         "volume": "42",
         "issue": "3",
+        "first_page": "123",
+        "last_page": "145",
         # Additional metrics
         "fwci": 1.5,  # Field-Weighted Citation Impact
         "referenced_works_count": 25,
         # Quality indicators
         "is_retracted": False,
+        # Classification (JSON arrays)
+        "concepts": '["Biology", "Genetics"]',
+        "mesh": '["D000123", "D000456"]',
+        "keywords": '["gene expression", "transcription"]',
+        # External identifier
+        "mag_id": "12345678",
+        # Author affiliations
+        "affiliations": '["MIT", "Stanford"]',
         # Lookup tracking
         "_source": "openalex",
         "_lookup_method": "doi",

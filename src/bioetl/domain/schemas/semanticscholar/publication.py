@@ -92,8 +92,19 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     )
     pages: Series[str] = pa.Field(
         nullable=True,
-        description="Page range",
+        description="Page range (legacy format, e.g., '123-456')",
     )
+
+    first_page: Series[str] = pa.Field(
+        nullable=True,
+        description="First page number (parsed from pages)",
+    )
+
+    last_page: Series[str] = pa.Field(
+        nullable=True,
+        description="Last page number (parsed from pages)",
+    )
+
     venue: Series[str] = pa.Field(
         nullable=True,
         description="Publication venue",
@@ -133,6 +144,12 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     publication_types: Series[str] = pa.Field(
         nullable=True,
         description="Publication types (JSON array)",
+    )
+
+    # === Author Affiliations ===
+    affiliations: Series[str] = pa.Field(
+        nullable=True,
+        description="Author affiliations (JSON array)",
     )
 
     class Config:
