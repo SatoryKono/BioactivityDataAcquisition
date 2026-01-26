@@ -648,7 +648,11 @@ class TestExtractTopics:
         """Should skip topics without display_name."""
         topics = [
             {"id": "https://openalex.org/T12345", "score": 0.95},
-            {"id": "https://openalex.org/T67890", "display_name": "Valid Topic", "score": 0.75},
+            {
+                "id": "https://openalex.org/T67890",
+                "display_name": "Valid Topic",
+                "score": 0.75,
+            },
         ]
         result = extract_topics(topics)
         assert len(result) == 1
@@ -900,6 +904,8 @@ class TestExtractConceptsDeprecation:
             warnings.simplefilter("always")
             result = extract_concepts(concepts)
             # No DeprecationWarning should be emitted
-            deprecation_warnings = [x for x in w if issubclass(x.category, DeprecationWarning)]
+            deprecation_warnings = [
+                x for x in w if issubclass(x.category, DeprecationWarning)
+            ]
             assert len(deprecation_warnings) == 0
         assert result == ["Chemistry"]
