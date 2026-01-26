@@ -24,30 +24,88 @@ class PubChemEntityMapper:
         """Convert pubchempy Compound to dictionary.
 
         Uses connectivity_smiles/smiles (replaces deprecated canonical/isomeric_smiles).
+        Extracts all physicochemical properties defined in PubchemMoleculeSchema.
+
+        Note: Some properties (especially 3D) may not be available for all compounds.
+        Uses getattr with default=None for safe access to optional attributes.
 
         Args:
             compound: PubChemPy Compound object.
 
         Returns:
-            Dictionary with normalized compound fields.
+            Dictionary with normalized compound fields including:
+            - Structural identifiers (SMILES, InChI, InChI Key)
+            - Nomenclature (molecular formula, IUPAC name)
+            - Physical properties (molecular weight, exact mass)
+            - Computed descriptors (XLogP, TPSA, complexity, charge)
+            - Atom/Bond counts (heavy atoms, H-bond donors/acceptors, rotatable bonds)
+            - Stereochemistry (atom/bond stereo counts)
+            - 3D properties (volume, conformer count, feature counts)
         """
         return {
+            # === Primary Key ===
             "cid": compound.cid,
-            "molecular_formula": compound.molecular_formula,
-            "molecular_weight": compound.molecular_weight,
+            # === Structural Identifiers ===
             # Use connectivity_smiles (replaces deprecated canonical_smiles)
-            "canonical_smiles": compound.connectivity_smiles,
+            "canonical_smiles": getattr(compound, "connectivity_smiles", None),
             # Use smiles (replaces deprecated isomeric_smiles)
-            "isomeric_smiles": compound.smiles,
-            "inchi": compound.inchi,
-            "inchikey": compound.inchikey,
-            "iupac_name": compound.iupac_name,
-            "charge": compound.charge,
-            "complexity": compound.complexity,
-            "h_bond_acceptor_count": compound.h_bond_acceptor_count,
-            "h_bond_donor_count": compound.h_bond_donor_count,
-            "rotatable_bond_count": compound.rotatable_bond_count,
-            "fingerprint": compound.fingerprint,
+            "isomeric_smiles": getattr(compound, "smiles", None),
+            "inchi": getattr(compound, "inchi", None),
+            "inchikey": getattr(compound, "inchikey", None),
+            # === Nomenclature ===
+            "molecular_formula": getattr(compound, "molecular_formula", None),
+            "iupac_name": getattr(compound, "iupac_name", None),
+            # === Physical Properties ===
+            "molecular_weight": getattr(compound, "molecular_weight", None),
+            "exact_mass": getattr(compound, "exact_mass", None),
+            # === Computed Descriptors ===
+            "xlogp": getattr(compound, "xlogp", None),
+            "tpsa": getattr(compound, "tpsa", None),
+            "complexity": getattr(compound, "complexity", None),
+            "charge": getattr(compound, "charge", None),
+            # === Atom/Bond Counts ===
+            "heavy_atom_count": getattr(compound, "heavy_atom_count", None),
+            "h_bond_donor_count": getattr(compound, "h_bond_donor_count", None),
+            "h_bond_acceptor_count": getattr(compound, "h_bond_acceptor_count", None),
+            "rotatable_bond_count": getattr(compound, "rotatable_bond_count", None),
+            # === Stereochemistry ===
+            "atom_stereo_count": getattr(compound, "atom_stereo_count", None),
+            "defined_atom_stereo_count": getattr(
+                compound, "defined_atom_stereo_count", None
+            ),
+            "undefined_atom_stereo_count": getattr(
+                compound, "undefined_atom_stereo_count", None
+            ),
+            "bond_stereo_count": getattr(compound, "bond_stereo_count", None),
+            "defined_bond_stereo_count": getattr(
+                compound, "defined_bond_stereo_count", None
+            ),
+            "undefined_bond_stereo_count": getattr(
+                compound, "undefined_bond_stereo_count", None
+            ),
+            "isotope_atom_count": getattr(compound, "isotope_atom_count", None),
+            "covalent_unit_count": getattr(compound, "covalent_unit_count", None),
+            # === 3D Properties (may not be available for all compounds) ===
+            "volume_3d": getattr(compound, "volume_3d", None),
+            "conformer_count_3d": getattr(compound, "conformer_count_3d", None),
+            "feature_acceptor_count_3d": getattr(
+                compound, "feature_acceptor_count_3d", None
+            ),
+            "feature_donor_count_3d": getattr(compound, "feature_donor_count_3d", None),
+            "feature_anion_count_3d": getattr(compound, "feature_anion_count_3d", None),
+            "feature_cation_count_3d": getattr(
+                compound, "feature_cation_count_3d", None
+            ),
+            "feature_ring_count_3d": getattr(compound, "feature_ring_count_3d", None),
+            "feature_hydrophobe_count_3d": getattr(
+                compound, "feature_hydrophobe_count_3d", None
+            ),
+            "effective_rotor_count_3d": getattr(
+                compound, "effective_rotor_count_3d", None
+            ),
+            "conformer_rmsd_3d": getattr(compound, "conformer_rmsd_3d", None),
+            # === Fingerprints (not in schema, but available) ===
+            "fingerprint": getattr(compound, "fingerprint", None),
         }
 
     @staticmethod
