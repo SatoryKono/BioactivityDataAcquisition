@@ -39,6 +39,9 @@ if TYPE_CHECKING:
     from bioetl.application.composite.coordinator import EnrichmentCoordinator
     from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.composite.merger import MergeService
+    from bioetl.application.composite.preflight_validator import (
+        CompositePreflightValidator,
+    )
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
@@ -116,6 +119,7 @@ class CompositePipelineRunner:
         lock: LockPort,
         run_id: str | None = None,
         dq_report_service: DQReportService | None = None,
+        preflight_validator: CompositePreflightValidator | None = None,
     ) -> None:
         """Initialize composite pipeline runner.
 
@@ -133,6 +137,8 @@ class CompositePipelineRunner:
             lock: Lock port for distributed locking.
             run_id: Optional run ID (generated if not provided).
             dq_report_service: Optional DQ report service for generating reports.
+            preflight_validator: Optional preflight validator for field_priorities.
+                If provided, validates configuration before Extract phase.
         """
         self._config = config
         self._runtime = runtime
@@ -150,6 +156,7 @@ class CompositePipelineRunner:
         self._finished: bool = False
         self._final_state: CompositePipelineState | None = None
         self._dq_report_service = dq_report_service
+        self._preflight_validator = preflight_validator
 
         # Initialize FSM helper for state transition logic
         from bioetl.application.composite.fsm_helper import FSMStateHelper
@@ -201,6 +208,10 @@ class CompositePipelineRunner:
 
         # Validate configuration consistency on startup
         self._validate_config_consistency()
+
+        # Run preflight validation for field_priorities (BEFORE Extract phase)
+        # This catches schema drift and configuration errors early
+        self._run_preflight_validation()
 
         self._started_at = datetime.now(tz=UTC)
         self._logger.info(
@@ -715,6 +726,62 @@ class CompositePipelineRunner:
                 enricher_count=len(self._config.enrichers),
                 note="Pipeline will succeed even if all enrichers fail",
             )
+
+    def _run_preflight_validation(self) -> None:
+        """Run preflight validation for field_priorities configuration.
+
+        Validates that all field_priorities reference valid fields and sources
+        with compatible types BEFORE the Extract phase starts.
+
+        This catches schema drift and configuration errors early, preventing
+        failures during the merge phase where they are harder to diagnose.
+
+        Raises:
+            PreflightValidationError: If validation fails with blocking errors.
+        """
+        if self._preflight_validator is None:
+            # No validator configured - skip preflight validation
+            self._logger.debug(
+                "Preflight validation skipped",
+                composite=self._config.name,
+                reason="preflight_validator not configured",
+            )
+            return
+
+        # Check if field_priorities are configured
+        if not self._config.merge.field_priorities:
+            self._logger.debug(
+                "Preflight validation skipped",
+                composite=self._config.name,
+                reason="no field_priorities configured",
+            )
+            return
+
+        self._logger.info(
+            PipelineEvent.phase_started("preflight_validation"),
+            composite=self._config.name,
+            run_id=self._run_id_str,
+            field_count=len(self._config.merge.field_priorities),
+        )
+
+        # Run validation - will raise PreflightValidationError on failure
+        result = self._preflight_validator.validate(
+            self._config,
+            fail_on_error=True,
+        )
+
+        # Log resolved field sources for auditability
+        self._preflight_validator.log_resolved_field_sources(
+            result, self._config.name
+        )
+
+        self._logger.info(
+            PipelineEvent.phase_completed("preflight_validation"),
+            composite=self._config.name,
+            run_id=self._run_id_str,
+            fields_validated=len(result.resolved_fields),
+            warnings=len(result.warnings),
+        )
 
     async def _save_checkpoint_safe(
         self,
