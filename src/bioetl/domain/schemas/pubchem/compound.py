@@ -97,6 +97,16 @@ class PubchemMoleculeSchema(ETLRecordSchema):
         """Validate exact mass is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
+    monoisotopic_mass: Series[float] | None = pa.Field(
+        nullable=True,
+        description="Monoisotopic mass using most abundant isotope (Da)",
+    )
+
+    @pa.check("monoisotopic_mass", name="monoisotopic_mass_non_negative")
+    def _check_monoisotopic_mass(cls, series: Series[float]) -> Series[bool]:
+        """Validate monoisotopic mass is non-negative."""
+        return cast("Series[bool]", series.isna() | (series >= 0))
+
     # === Computed Descriptors ===
     xlogp: Series[float] | None = pa.Field(
         nullable=True,
@@ -344,6 +354,32 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     @pa.check("conformer_rmsd_3d", name="conformer_rmsd_3d_non_negative")
     def _check_conformer_rmsd_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D conformer RMSD is non-negative."""
+        return cast("Series[bool]", series.isna() | (series >= 0))
+
+    # === 3D Steric Quadrupole Moments (can be negative) ===
+    x_steric_quadrupole_3d: Series[float] | None = pa.Field(
+        nullable=True,
+        description="X-axis steric quadrupole moment (3D charge distribution)",
+    )
+
+    y_steric_quadrupole_3d: Series[float] | None = pa.Field(
+        nullable=True,
+        description="Y-axis steric quadrupole moment (3D charge distribution)",
+    )
+
+    z_steric_quadrupole_3d: Series[float] | None = pa.Field(
+        nullable=True,
+        description="Z-axis steric quadrupole moment (3D charge distribution)",
+    )
+
+    # === 3D Feature Count (total pharmacophore features) ===
+    feature_count_3d: Series[int] | None = pa.Field(
+        nullable=True, description="Total count of 3D pharmacophore features"
+    )
+
+    @pa.check("feature_count_3d", name="feature_count_3d_non_negative")
+    def _check_feature_count_3d(cls, series: Series[int]) -> Series[bool]:
+        """Validate 3D feature count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
     class Config:
