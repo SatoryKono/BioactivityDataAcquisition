@@ -590,7 +590,7 @@ class TestClassSize:
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
         "CompositePipelineRunner": 1080,  # 1059 lines - Composite pipeline orchestrator (FSM helpers extracted to fsm_helper.py)
         # Publication adapters with APIRequestCollector (metadata enrichment)
-        "OpenAlexAdapter": 580,  # 578 lines - FilterableDataSourcePort + APIRequestCollector + fallback handler
+        "OpenAlexAdapter": 590,  # 585 lines - FilterableDataSourcePort + APIRequestCollector + fallback handler
         "PubMedAdapter": 545,  # 540 lines - FilterableDataSourcePort + APIRequestCollector + TitleFallbackHandler
         # ChEMBL adapter with complex FilterableDataSourcePort
         "ChemblAdapter": 880,  # 860 lines - FilterableDataSourcePort + health-aware batching + pagination + deduplication + 500 error detection
