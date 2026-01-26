@@ -184,6 +184,7 @@ def yaml_config_to_domain(
         transform_version=transform_version,
         transform_steps=transform_steps,
         force_full_scan=yaml_config.force_full_scan,
+        loading_strategy=yaml_config.loading_strategy,
     )
 
 
