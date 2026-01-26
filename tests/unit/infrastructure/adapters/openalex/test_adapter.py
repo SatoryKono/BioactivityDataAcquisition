@@ -220,6 +220,120 @@ class TestFetchFiltered:
 
         assert len(results) == 3
 
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_by_title(
+        self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
+    ) -> None:
+        """Should fetch works by title search."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "results": [
+                {
+                    "id": "https://openalex.org/W123",
+                    "title": "Machine Learning in Drug Discovery",
+                    "doi": "https://doi.org/10.1038/test1",
+                }
+            ]
+        }
+        mock_http_client.get.return_value = mock_response
+
+        results = []
+        async for work in adapter.fetch_filtered(
+            "publication",
+            ["Machine Learning in Drug Discovery"],
+            "title",
+        ):
+            results.append(work)
+
+        assert len(results) == 1
+        assert results[0]["_lookup_method"] == "title"
+        assert results[0]["_search_title"] == "Machine Learning in Drug Discovery"
+        mock_http_client.get.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_by_title_respects_limit(
+        self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
+    ) -> None:
+        """Should respect limit when searching by title."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "results": [{"id": "https://openalex.org/W1", "title": "Test"}]
+        }
+        mock_http_client.get.return_value = mock_response
+
+        results = []
+        async for work in adapter.fetch_filtered(
+            "publication",
+            ["Title 1", "Title 2", "Title 3", "Title 4", "Title 5"],
+            "title",
+            limit=2,
+        ):
+            results.append(work)
+
+        assert len(results) == 2
+        # Should have made only 2 requests (rate limited)
+        assert mock_http_client.get.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_by_title_skips_empty(
+        self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
+    ) -> None:
+        """Should skip empty titles."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "results": [{"id": "https://openalex.org/W1", "title": "Test"}]
+        }
+        mock_http_client.get.return_value = mock_response
+
+        results = []
+        async for work in adapter.fetch_filtered(
+            "publication",
+            ["", "  ", "Valid Title"],
+            "title",
+        ):
+            results.append(work)
+
+        assert len(results) == 1
+        # Should have made only 1 request (empty titles skipped)
+        assert mock_http_client.get.call_count == 1
+
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_unsupported_field_returns_empty(
+        self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
+    ) -> None:
+        """Should return empty for unsupported filter fields."""
+        results = []
+        async for work in adapter.fetch_filtered(
+            "publication",
+            ["some_value"],
+            "unsupported_field",
+        ):
+            results.append(work)
+
+        assert len(results) == 0
+        # Should not have made any HTTP requests
+        mock_http_client.get.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_by_title_no_results(
+        self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
+    ) -> None:
+        """Should handle title search with no results."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"results": []}
+        mock_http_client.get.return_value = mock_response
+
+        results = []
+        async for work in adapter.fetch_filtered(
+            "publication",
+            ["Nonexistent Publication Title"],
+            "title",
+        ):
+            results.append(work)
+
+        assert len(results) == 0
+        mock_http_client.get.assert_called_once()
+
 
 class TestFetchMultiFiltered:
     """Tests for fetch_multi_filtered method."""
