@@ -183,31 +183,34 @@ class SilverWriter(BaseDeltaWriter):
         """Prepare Arrow table from records with schema filtering and sorting."""
         from bioetl.domain.schemas.column_order import canonical_column_order
 
-        schema_fields = set(schema.names)
+        # PERFORMANCE OPTIMIZATION:
+        # Instead of iterating over all keys of all records to filter/transform,
+        # we rely on pa.Table.from_pylist(..., schema=schema) to handle filtering of extra keys.
+        # We only iterate over fields that potentially need JSON serialization (string fields).
+        # This reduces complexity from O(N*M) to O(N*K) where M=total_fields, K=string_fields.
+
         string_fields = {
             field.name
             for field in schema
             if pa.types.is_string(field.type) or pa.types.is_large_string(field.type)
         }
 
-        filtered_records = [
-            {
-                k: (
+        processed_records = []
+        for rec in records:
+            # Shallow copy to avoid modifying original records (which might be used by audit/metrics)
+            rec_copy = rec.copy()
+
+            # Serialize dict/list to JSON string only for string fields
+            for k in string_fields:
+                val = rec_copy.get(k)
+                if val is not None and isinstance(val, (dict, list)):
                     # Uses OPT_SORT_KEYS for deterministic serialization (§2.8.1).
-                    # Complex objects in Gold layer are flattened; Silver preserves
-                    # JSON for forensic purposes.
-                    orjson.dumps(v, option=orjson.OPT_SORT_KEYS).decode("utf-8")
-                    if v is not None
-                    and k in string_fields
-                    and isinstance(v, (dict, list))
-                    else v
-                )
-                for k, v in rec.items()
-                if k in schema_fields
-            }
-            for rec in records
-        ]
-        arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
+                    # Silver preserves JSON for forensic purposes.
+                    rec_copy[k] = orjson.dumps(val, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+
+            processed_records.append(rec_copy)
+
+        arrow_data = pa.Table.from_pylist(processed_records, schema=schema)
 
         # Enforce canonical column order (ADR-014, RULES.md §2.4)
         ordered_columns = canonical_column_order(list(arrow_data.column_names))
