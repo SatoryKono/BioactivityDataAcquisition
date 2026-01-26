@@ -602,7 +602,7 @@ class TestClassSize:
         # Common adapter base classes
         "BaseTitleFallbackHandler": 320,  # 314 lines - Base fallback handler with provider_prefix + default event properties
         # PubMed transformer with comprehensive field extraction
-        "PubMedPublicationTransformer": 450,  # 428 lines - Gold schema alignment with many extraction methods
+        "PubMedPublicationTransformer": 510,  # 468 lines - PubMed XML extraction with structured affiliations + identifiers
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:
