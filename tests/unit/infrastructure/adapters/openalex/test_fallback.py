@@ -130,10 +130,12 @@ class TestProcessMissingDois:
         dois = ["10.1038/missing"]
         found_dois: set[str] = set()
         fallback_mapping = {"10.1038/missing": "Missing Title"}
-        mock_search_fn.return_value = {
-            "id": "https://openalex.org/W123",
-            "title": "Missing Title",
-        }
+        mock_search_fn.return_value = [
+            {
+                "id": "https://openalex.org/W123",
+                "title": "Missing Title",
+            }
+        ]
 
         results = []
         async for work in handler.process_missing_dois(
@@ -162,7 +164,7 @@ class TestProcessMissingDois:
         dois = ["10.1038/notfound"]
         found_dois: set[str] = set()
         fallback_mapping = {"10.1038/notfound": "Not Found Title"}
-        mock_search_fn.return_value = None  # No work found
+        mock_search_fn.return_value = []  # No work found
 
         results = []
         async for work in handler.process_missing_dois(
@@ -218,7 +220,7 @@ class TestProcessMissingDois:
             "10.1038/test3": "Title 3",
         }
         # Mock should return title matching the first DOI's mapping
-        mock_search_fn.return_value = {"id": "W123", "title": "Title 1"}
+        mock_search_fn.return_value = [{"id": "W123", "title": "Title 1"}]
 
         results = []
         async for work in handler.process_missing_dois(
