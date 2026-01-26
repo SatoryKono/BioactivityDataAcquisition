@@ -106,7 +106,7 @@ def extract_affiliations(authors: list[dict[str, Any]] | None) -> list[str]:
             if aff and isinstance(aff, str) and aff.strip():
                 affiliations.add(aff.strip())
 
-    return sorted(list(affiliations))
+    return sorted(affiliations)
 
 
 def extract_journal_info(
