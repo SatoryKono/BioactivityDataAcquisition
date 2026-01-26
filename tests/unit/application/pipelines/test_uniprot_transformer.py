@@ -960,3 +960,237 @@ class TestUniProtProteinTransformerExtendedFields:
         assert result["cross_reference_count"] == 2
         assert result["feature_count"] == 1
         assert result["keyword_count"] == 1
+
+
+@pytest.mark.unit
+class TestUniProtTransformerAuditDates:
+    """Tests for UniProt audit date extraction."""
+
+    @pytest.fixture
+    def transformer(self):
+        """Create UniProtProteinTransformer instance."""
+        return UniProtProteinTransformer(provider="uniprot")
+
+    @pytest.mark.asyncio
+    async def test_extract_entry_audit_dates(self, transformer, mock_context):
+        """Test extraction of entry audit dates from entryAudit object."""
+        record = {
+            "primaryAccession": "P31749",
+            "uniProtkbId": "AKT1_HUMAN",
+            "entryAudit": {
+                "firstPublicDate": "2000-12-01",
+                "lastAnnotationUpdateDate": "2024-07-24",
+                "entryVersion": 275,
+            },
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["entry_created"] == "2000-12-01"
+        assert result["entry_modified"] == "2024-07-24"
+        assert result["entry_version"] == 275
+
+    @pytest.mark.asyncio
+    async def test_extract_sequence_modified_date(self, transformer, mock_context):
+        """Test extraction of sequence modification date."""
+        record = {
+            "primaryAccession": "P31749",
+            "uniProtkbId": "AKT1_HUMAN",
+            "sequence": {
+                "value": "MSDV" * 120,
+                "length": 480,
+                "modified": "2007-01-23",
+            },
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["sequence_modified"] == "2007-01-23"
+
+    @pytest.mark.asyncio
+    async def test_missing_entry_audit(self, transformer, mock_context):
+        """Test graceful handling when entryAudit is missing."""
+        record = {
+            "primaryAccession": "P31749",
+            "uniProtkbId": "AKT1_HUMAN",
+            # No entryAudit
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["entry_created"] is None
+        assert result["entry_modified"] is None
+        assert result["entry_version"] is None
+
+    @pytest.mark.asyncio
+    async def test_missing_sequence_modified(self, transformer, mock_context):
+        """Test graceful handling when sequence modified date is missing."""
+        record = {
+            "primaryAccession": "P31749",
+            "uniProtkbId": "AKT1_HUMAN",
+            "sequence": {
+                "value": "MSDV" * 120,
+                "length": 480,
+                # No modified date
+            },
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["sequence_modified"] is None
+
+    @pytest.mark.asyncio
+    async def test_invalid_date_format_handled(self, transformer, mock_context):
+        """Test that invalid date formats are handled gracefully."""
+        record = {
+            "primaryAccession": "P31749",
+            "uniProtkbId": "AKT1_HUMAN",
+            "entryAudit": {
+                "firstPublicDate": "invalid-date",
+                "lastAnnotationUpdateDate": "2024/07/24",  # Wrong format
+                "entryVersion": 275,
+            },
+            "sequence": {
+                "value": "MSDV" * 120,
+                "length": 480,
+                "modified": "not-a-date",
+            },
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["entry_created"] is None
+        assert result["entry_modified"] is None
+        assert result["sequence_modified"] is None
+        # entry_version should still be extracted
+        assert result["entry_version"] == 275
+
+    @pytest.mark.asyncio
+    async def test_full_record_with_audit_dates(self, transformer, mock_context):
+        """Test complete transformation including audit metadata."""
+        record = {
+            "entryType": "UniProtKB reviewed (Swiss-Prot)",
+            "primaryAccession": "P31749",
+            "uniProtkbId": "AKT1_HUMAN",
+            "entryAudit": {
+                "firstPublicDate": "2000-12-01",
+                "lastAnnotationUpdateDate": "2024-07-24",
+                "entryVersion": 275,
+                "sequenceVersion": 2,
+            },
+            "sequence": {
+                "value": "MSDV" * 120,
+                "length": 480,
+                "molWeight": 55686,
+                "modified": "2007-01-23",
+            },
+            "proteinDescription": {
+                "recommendedName": {
+                    "fullName": {"value": "RAC-alpha serine/threonine-protein kinase"}
+                }
+            },
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        # Core fields
+        assert result["accession"] == "P31749"
+        assert result["entry_name"] == "AKT1_HUMAN"
+        assert result["protein_name"] == "RAC-alpha serine/threonine-protein kinase"
+        # Audit metadata
+        assert result["entry_created"] == "2000-12-01"
+        assert result["entry_modified"] == "2024-07-24"
+        assert result["entry_version"] == 275
+        assert result["sequence_modified"] == "2007-01-23"
+        # Sequence data
+        assert result["sequence_length"] == 480
+        assert result["sequence_mass"] == 55686
+
+
+@pytest.mark.unit
+class TestParseUniprotDate:
+    """Tests for parse_uniprot_date utility function."""
+
+    def test_valid_date(self):
+        """Test parsing of valid ISO date string."""
+        from datetime import date
+
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+
+        result = ExtractorUtils.parse_uniprot_date("2024-07-24")
+        assert result == date(2024, 7, 24)
+
+    def test_valid_date_beginning_of_year(self):
+        """Test parsing date at beginning of year."""
+        from datetime import date
+
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+
+        result = ExtractorUtils.parse_uniprot_date("2000-01-01")
+        assert result == date(2000, 1, 1)
+
+    def test_valid_date_end_of_year(self):
+        """Test parsing date at end of year."""
+        from datetime import date
+
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+
+        result = ExtractorUtils.parse_uniprot_date("1999-12-31")
+        assert result == date(1999, 12, 31)
+
+    def test_none_input(self):
+        """Test that None input returns None."""
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+
+        result = ExtractorUtils.parse_uniprot_date(None)
+        assert result is None
+
+    def test_empty_string(self):
+        """Test that empty string returns None."""
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+
+        result = ExtractorUtils.parse_uniprot_date("")
+        assert result is None
+
+    def test_invalid_format_slash(self):
+        """Test that slash-separated date returns None."""
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+
+        result = ExtractorUtils.parse_uniprot_date("2024/07/24")
+        assert result is None
+
+    def test_invalid_format_text(self):
+        """Test that text date returns None."""
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+
+        result = ExtractorUtils.parse_uniprot_date("July 24, 2024")
+        assert result is None
+
+    def test_invalid_date_values(self):
+        """Test that invalid date values return None."""
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+
+        result = ExtractorUtils.parse_uniprot_date("2024-13-01")  # Invalid month
+        assert result is None
+
+        result = ExtractorUtils.parse_uniprot_date("2024-02-30")  # Invalid day
+        assert result is None
+
+    def test_non_string_input(self):
+        """Test that non-string input returns None."""
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+
+        result = ExtractorUtils.parse_uniprot_date(12345)
+        assert result is None
+
+        result = ExtractorUtils.parse_uniprot_date(["2024-07-24"])
+        assert result is None
+
+        result = ExtractorUtils.parse_uniprot_date({"date": "2024-07-24"})
+        assert result is None
