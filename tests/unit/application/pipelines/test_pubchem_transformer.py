@@ -407,6 +407,7 @@ class TestPubChemCompoundTransformer:
             # Physical properties
             "molecular_weight": 180.16,
             "exact_mass": 180.042259,
+            "monoisotopic_mass": 180.042259,
             # Computed descriptors
             "xlogp": 1.2,
             "tpsa": 63.6,
@@ -437,6 +438,11 @@ class TestPubChemCompoundTransformer:
             "feature_hydrophobe_count_3d": 1,
             "effective_rotor_count_3d": 2.4,
             "conformer_rmsd_3d": 0.4,
+            # 3D steric quadrupole moments (can be negative)
+            "x_steric_quadrupole_3d": 1.23,
+            "y_steric_quadrupole_3d": -0.45,
+            "z_steric_quadrupole_3d": 0.78,
+            "feature_count_3d": 7,
         }
 
         result = await transformer.transform(mock_context, record, index=0)
@@ -455,6 +461,7 @@ class TestPubChemCompoundTransformer:
         # Physical properties
         assert result["molecular_weight"] == 180.16
         assert result["exact_mass"] == 180.042259
+        assert result["monoisotopic_mass"] == 180.042259
         # Computed descriptors
         assert result["xlogp"] == 1.2
         assert result["tpsa"] == 63.6
@@ -485,6 +492,11 @@ class TestPubChemCompoundTransformer:
         assert result["feature_hydrophobe_count_3d"] == 1
         assert result["effective_rotor_count_3d"] == 2.4
         assert result["conformer_rmsd_3d"] == 0.4
+        # 3D steric quadrupole moments
+        assert result["x_steric_quadrupole_3d"] == 1.23
+        assert result["y_steric_quadrupole_3d"] == -0.45
+        assert result["z_steric_quadrupole_3d"] == 0.78
+        assert result["feature_count_3d"] == 7
 
     @pytest.mark.asyncio
     async def test_transform_xlogp_negative_value(self, transformer, mock_context):
@@ -513,6 +525,70 @@ class TestPubChemCompoundTransformer:
 
         assert result is not None
         assert result["charge"] == -2
+
+    @pytest.mark.asyncio
+    async def test_transform_steric_quadrupole_negative_values(
+        self, transformer, mock_context
+    ):
+        """Test that negative steric quadrupole values are preserved (can be negative)."""
+        record = {
+            "cid": 123,
+            "canonical_smiles": "C",
+            "x_steric_quadrupole_3d": -2.5,
+            "y_steric_quadrupole_3d": -1.8,
+            "z_steric_quadrupole_3d": -0.3,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["x_steric_quadrupole_3d"] == -2.5
+        assert result["y_steric_quadrupole_3d"] == -1.8
+        assert result["z_steric_quadrupole_3d"] == -0.3
+
+    @pytest.mark.asyncio
+    async def test_transform_monoisotopic_mass(self, transformer, mock_context):
+        """Test that monoisotopic mass is validated as non-negative float."""
+        record = {
+            "cid": 123,
+            "canonical_smiles": "C",
+            "monoisotopic_mass": "16.031",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["monoisotopic_mass"] == 16.031
+
+    @pytest.mark.asyncio
+    async def test_transform_monoisotopic_mass_negative_rejected(
+        self, transformer, mock_context
+    ):
+        """Test that negative monoisotopic mass becomes None."""
+        record = {
+            "cid": 123,
+            "canonical_smiles": "C",
+            "monoisotopic_mass": -100.0,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result.get("monoisotopic_mass") is None
+
+    @pytest.mark.asyncio
+    async def test_transform_feature_count_3d(self, transformer, mock_context):
+        """Test that feature_count_3d is validated as non-negative integer."""
+        record = {
+            "cid": 123,
+            "canonical_smiles": "C",
+            "feature_count_3d": 10,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["feature_count_3d"] == 10
 
     @pytest.mark.asyncio
     async def test_transform_tpsa_invalid_negative(self, transformer, mock_context):

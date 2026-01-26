@@ -136,6 +136,11 @@ class PubChemCompoundTransformer(BaseTransformer):
                 record.get("effective_rotor_count_3d")
             ),
             "conformer_rmsd_3d": validate_non_negative(record.get("conformer_rmsd_3d")),
+            # Steric quadrupole moments can be negative (charge distribution)
+            "x_steric_quadrupole_3d": safe_float(record.get("x_steric_quadrupole_3d")),
+            "y_steric_quadrupole_3d": safe_float(record.get("y_steric_quadrupole_3d")),
+            "z_steric_quadrupole_3d": safe_float(record.get("z_steric_quadrupole_3d")),
+            "feature_count_3d": safe_int(record.get("feature_count_3d")),
         }
 
     async def _transform_impl(
@@ -170,6 +175,7 @@ class PubChemCompoundTransformer(BaseTransformer):
                 record.get("molecular_weight")
             ),
             "exact_mass": validate_non_negative(record.get("exact_mass")),
+            "monoisotopic_mass": validate_non_negative(record.get("monoisotopic_mass")),
             **self._extract_computed_descriptors(record),
             **self._extract_atom_bond_counts(record),
             **self._extract_stereochemistry(record),
