@@ -35,17 +35,11 @@ class TestProviderPrefixEventNames:
 
     def test_event_names_with_provider_prefix(self, mock_logger: MagicMock) -> None:
         """Test all event names use provider prefix when provided."""
-        handler = ConcreteFallbackHandler(
-            mock_logger, provider_prefix="test_provider"
-        )
+        handler = ConcreteFallbackHandler(mock_logger, provider_prefix="test_provider")
 
         assert handler._event_no_fallback_title == "test_provider_no_fallback_title"
-        assert (
-            handler._event_fallback_attempt == "test_provider_title_fallback_attempt"
-        )
-        assert (
-            handler._event_fallback_success == "test_provider_title_fallback_success"
-        )
+        assert handler._event_fallback_attempt == "test_provider_title_fallback_attempt"
+        assert handler._event_fallback_success == "test_provider_title_fallback_success"
         assert (
             handler._event_fallback_not_found
             == "test_provider_title_fallback_not_found"
