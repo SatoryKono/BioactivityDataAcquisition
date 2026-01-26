@@ -16,12 +16,19 @@ Terminology:
 Used for batch DOI resolution and publication metadata enrichment.
 
 Note: OpenAlexPublicationEntity inherits common fields from PublicationEntityBase.
-Provider-specific fields (openalex_id, concepts) are defined here.
+Provider-specific fields (openalex_id, topics, grants, etc.) are defined here.
+
+Topics vs Concepts (2024 Migration):
+- OpenAlex deprecated the `concepts` field in 2024 in favor of `topics`
+- Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic
+- The `concepts` field is kept for backward compatibility during transition
+- New code should use `topics` and `primary_topic` fields
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 from pydantic import Field as PydanticField
@@ -132,9 +139,30 @@ class OpenAlexPublicationRecord(BaseModel):
         default=None, description="Number of citations (from OpenAlex cited_by_count)"
     )
 
-    # Concepts (top-level only)
+    # Topics (hierarchical classification - replaces deprecated concepts)
+    # Each topic dict has: id, display_name, score, subfield, field, domain
+    topics: list[dict[str, Any]] = PydanticField(
+        default_factory=list,
+        description="Hierarchical topic classification (domain/field/subfield/topic)",
+    )
+
+    # Primary topic (single most relevant topic for quick categorization)
+    # Dict with: id, display_name, score, subfield, field, domain
+    primary_topic: dict[str, Any] | None = PydanticField(
+        default=None, description="Primary topic classification"
+    )
+
+    # Grants/funding information
+    # Each grant dict has: funder, funder_display_name, award_id
+    grants: list[dict[str, Any]] = PydanticField(
+        default_factory=list, description="Funding/grant information"
+    )
+
+    # Concepts (DEPRECATED - kept for backward compatibility)
+    # OpenAlex deprecated concepts in 2024 in favor of topics
     concepts: list[str] = PydanticField(
-        default_factory=list, description="Top concept names"
+        default_factory=list,
+        description="Top concept names (DEPRECATED: use topics instead)",
     )
 
     # MeSH terms (Medical Subject Headings)
@@ -214,7 +242,12 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
     OpenAlex-specific Attributes:
         openalex_id: OpenAlex Work ID (e.g., W2148763428). REQUIRED.
-        concepts: Top concept names from OpenAlex.
+        topics: Hierarchical topic classification (replaces deprecated concepts).
+            Each topic dict has: id, display_name, score, subfield, field, domain.
+        primary_topic: Single most relevant topic for quick categorization.
+        grants: Funding/grant information.
+            Each grant dict has: funder, funder_display_name, award_id.
+        concepts: Top concept names (DEPRECATED: use topics instead).
 
     Note: openalex_id is required for OpenAlex publications.
 
@@ -227,7 +260,20 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # External identifiers (in addition to inherited doi, pmid, pmc_id)
     mag_id: str | None = None  # Microsoft Academic Graph ID
 
-    # OpenAlex-specific: Concepts (top-level only)
+    # Topics (hierarchical classification - replaces deprecated concepts)
+    # Each topic dict has: id, display_name, score, subfield, field, domain
+    topics: list[dict[str, Any]] = field(default_factory=list)
+
+    # Primary topic (single most relevant topic for quick categorization)
+    # Dict with: id, display_name, score, subfield, field, domain
+    primary_topic: dict[str, Any] | None = None
+
+    # Grants/funding information
+    # Each grant dict has: funder, funder_display_name, award_id
+    grants: list[dict[str, Any]] = field(default_factory=list)
+
+    # OpenAlex-specific: Concepts (DEPRECATED - kept for backward compatibility)
+    # OpenAlex deprecated concepts in 2024 in favor of topics
     concepts: list[str] = field(default_factory=list)
 
     # MeSH terms (Medical Subject Headings)

@@ -5,6 +5,8 @@ Tests the pure functions in extractors.py module.
 
 from __future__ import annotations
 
+import warnings
+
 from bioetl.application.pipelines.openalex.extractors import (
     extract_affiliations,
     extract_authors,
@@ -12,11 +14,14 @@ from bioetl.application.pipelines.openalex.extractors import (
     extract_concepts,
     extract_doi,
     extract_external_ids,
+    extract_grants,
     extract_journal_info,
     extract_keywords,
     extract_mesh_terms,
     extract_open_access_info,
     extract_openalex_id,
+    extract_primary_topic,
+    extract_topics,
     reconstruct_abstract,
 )
 
@@ -561,3 +566,340 @@ class TestExtractBiblioInfo:
             "first_page": None,
             "last_page": None,
         }
+
+
+class TestExtractTopics:
+    """Tests for extract_topics function."""
+
+    def test_extract_topics_basic(self) -> None:
+        """Should extract topics with hierarchical classification."""
+        topics = [
+            {
+                "id": "https://openalex.org/T12345",
+                "display_name": "Organic Synthesis",
+                "score": 0.95,
+                "subfield": {"display_name": "Organic Chemistry"},
+                "field": {"display_name": "Chemistry"},
+                "domain": {"display_name": "Physical Sciences"},
+            }
+        ]
+        result = extract_topics(topics)
+        assert len(result) == 1
+        assert result[0]["id"] == "T12345"
+        assert result[0]["display_name"] == "Organic Synthesis"
+        assert result[0]["score"] == 0.95
+        assert result[0]["subfield"] == "Organic Chemistry"
+        assert result[0]["field"] == "Chemistry"
+        assert result[0]["domain"] == "Physical Sciences"
+
+    def test_extract_topics_multiple(self) -> None:
+        """Should extract multiple topics."""
+        topics = [
+            {
+                "id": "https://openalex.org/T12345",
+                "display_name": "Topic A",
+                "score": 0.95,
+                "subfield": {"display_name": "Subfield A"},
+                "field": {"display_name": "Field A"},
+                "domain": {"display_name": "Domain A"},
+            },
+            {
+                "id": "https://openalex.org/T67890",
+                "display_name": "Topic B",
+                "score": 0.75,
+                "subfield": {"display_name": "Subfield B"},
+                "field": {"display_name": "Field B"},
+                "domain": {"display_name": "Domain B"},
+            },
+        ]
+        result = extract_topics(topics)
+        assert len(result) == 2
+        assert result[0]["display_name"] == "Topic A"
+        assert result[1]["display_name"] == "Topic B"
+
+    def test_extract_topics_with_limit(self) -> None:
+        """Should respect max_count limit."""
+        topics = [
+            {
+                "id": f"https://openalex.org/T{i}",
+                "display_name": f"Topic{i}",
+                "score": 0.9 - i * 0.05,
+                "subfield": {"display_name": f"Subfield{i}"},
+                "field": {"display_name": f"Field{i}"},
+                "domain": {"display_name": f"Domain{i}"},
+            }
+            for i in range(20)
+        ]
+        result = extract_topics(topics, max_count=5)
+        assert len(result) == 5
+        assert result[0]["display_name"] == "Topic0"
+
+    def test_extract_topics_empty(self) -> None:
+        """Should return empty list for empty topics."""
+        result = extract_topics([])
+        assert result == []
+
+    def test_extract_topics_none(self) -> None:
+        """Should return empty list for None input."""
+        result = extract_topics(None)
+        assert result == []
+
+    def test_extract_topics_missing_display_name(self) -> None:
+        """Should skip topics without display_name."""
+        topics = [
+            {"id": "https://openalex.org/T12345", "score": 0.95},
+            {"id": "https://openalex.org/T67890", "display_name": "Valid Topic", "score": 0.75},
+        ]
+        result = extract_topics(topics)
+        assert len(result) == 1
+        assert result[0]["display_name"] == "Valid Topic"
+
+    def test_extract_topics_missing_hierarchy(self) -> None:
+        """Should handle missing hierarchy fields gracefully."""
+        topics = [
+            {
+                "id": "https://openalex.org/T12345",
+                "display_name": "Topic A",
+                "score": 0.95,
+                # Missing subfield, field, domain
+            }
+        ]
+        result = extract_topics(topics)
+        assert len(result) == 1
+        assert result[0]["subfield"] is None
+        assert result[0]["field"] is None
+        assert result[0]["domain"] is None
+
+    def test_extract_topics_bare_id(self) -> None:
+        """Should handle bare topic ID (no URL)."""
+        topics = [
+            {
+                "id": "T12345",
+                "display_name": "Topic A",
+                "score": 0.95,
+            }
+        ]
+        result = extract_topics(topics)
+        assert result[0]["id"] == "T12345"
+
+    def test_extract_topics_strips_whitespace(self) -> None:
+        """Should strip whitespace from topic names."""
+        topics = [
+            {
+                "id": "T12345",
+                "display_name": "  Topic A  ",
+                "score": 0.95,
+            }
+        ]
+        result = extract_topics(topics)
+        assert result[0]["display_name"] == "Topic A"
+
+    def test_extract_topics_missing_score(self) -> None:
+        """Should default score to 0.0 if missing."""
+        topics = [
+            {
+                "id": "T12345",
+                "display_name": "Topic A",
+                # Missing score
+            }
+        ]
+        result = extract_topics(topics)
+        assert result[0]["score"] == 0.0
+
+
+class TestExtractPrimaryTopic:
+    """Tests for extract_primary_topic function."""
+
+    def test_extract_primary_topic_basic(self) -> None:
+        """Should extract primary topic with hierarchical classification."""
+        primary_topic = {
+            "id": "https://openalex.org/T12345",
+            "display_name": "Organic Synthesis",
+            "score": 0.95,
+            "subfield": {"display_name": "Organic Chemistry"},
+            "field": {"display_name": "Chemistry"},
+            "domain": {"display_name": "Physical Sciences"},
+        }
+        result = extract_primary_topic(primary_topic)
+        assert result is not None
+        assert result["id"] == "T12345"
+        assert result["display_name"] == "Organic Synthesis"
+        assert result["score"] == 0.95
+        assert result["subfield"] == "Organic Chemistry"
+        assert result["field"] == "Chemistry"
+        assert result["domain"] == "Physical Sciences"
+
+    def test_extract_primary_topic_none(self) -> None:
+        """Should return None for None input."""
+        result = extract_primary_topic(None)
+        assert result is None
+
+    def test_extract_primary_topic_empty(self) -> None:
+        """Should return None for empty dict."""
+        result = extract_primary_topic({})
+        assert result is None
+
+    def test_extract_primary_topic_missing_display_name(self) -> None:
+        """Should return None if display_name is missing."""
+        primary_topic = {
+            "id": "https://openalex.org/T12345",
+            "score": 0.95,
+        }
+        result = extract_primary_topic(primary_topic)
+        assert result is None
+
+    def test_extract_primary_topic_missing_hierarchy(self) -> None:
+        """Should handle missing hierarchy fields gracefully."""
+        primary_topic = {
+            "id": "https://openalex.org/T12345",
+            "display_name": "Topic A",
+            "score": 0.95,
+        }
+        result = extract_primary_topic(primary_topic)
+        assert result is not None
+        assert result["subfield"] is None
+        assert result["field"] is None
+        assert result["domain"] is None
+
+    def test_extract_primary_topic_strips_whitespace(self) -> None:
+        """Should strip whitespace from topic name."""
+        primary_topic = {
+            "id": "T12345",
+            "display_name": "  Topic A  ",
+            "score": 0.95,
+        }
+        result = extract_primary_topic(primary_topic)
+        assert result is not None
+        assert result["display_name"] == "Topic A"
+
+
+class TestExtractGrants:
+    """Tests for extract_grants function."""
+
+    def test_extract_grants_basic(self) -> None:
+        """Should extract grant information."""
+        grants = [
+            {
+                "funder": "https://openalex.org/F1234567",
+                "funder_display_name": "National Institutes of Health",
+                "award_id": "R01-GM123456",
+            }
+        ]
+        result = extract_grants(grants)
+        assert len(result) == 1
+        assert result[0]["funder"] == "F1234567"
+        assert result[0]["funder_display_name"] == "National Institutes of Health"
+        assert result[0]["award_id"] == "R01-GM123456"
+
+    def test_extract_grants_multiple(self) -> None:
+        """Should extract multiple grants."""
+        grants = [
+            {
+                "funder": "https://openalex.org/F1234567",
+                "funder_display_name": "NIH",
+                "award_id": "R01-123",
+            },
+            {
+                "funder": "https://openalex.org/F7654321",
+                "funder_display_name": "NSF",
+                "award_id": "NSF-456",
+            },
+        ]
+        result = extract_grants(grants)
+        assert len(result) == 2
+        assert result[0]["funder_display_name"] == "NIH"
+        assert result[1]["funder_display_name"] == "NSF"
+
+    def test_extract_grants_no_award_id(self) -> None:
+        """Should handle missing award_id."""
+        grants = [
+            {
+                "funder": "https://openalex.org/F1234567",
+                "funder_display_name": "NIH",
+                # Missing award_id
+            }
+        ]
+        result = extract_grants(grants)
+        assert len(result) == 1
+        assert result[0]["award_id"] is None
+
+    def test_extract_grants_empty(self) -> None:
+        """Should return empty list for empty grants."""
+        result = extract_grants([])
+        assert result == []
+
+    def test_extract_grants_none(self) -> None:
+        """Should return empty list for None input."""
+        result = extract_grants(None)
+        assert result == []
+
+    def test_extract_grants_missing_funder_name(self) -> None:
+        """Should skip grants without funder_display_name."""
+        grants = [
+            {"funder": "https://openalex.org/F1234567"},  # No funder_display_name
+            {"funder": "https://openalex.org/F7654321", "funder_display_name": "NSF"},
+        ]
+        result = extract_grants(grants)
+        assert len(result) == 1
+        assert result[0]["funder_display_name"] == "NSF"
+
+    def test_extract_grants_bare_funder_id(self) -> None:
+        """Should handle bare funder ID (no URL)."""
+        grants = [
+            {
+                "funder": "F1234567",
+                "funder_display_name": "NIH",
+            }
+        ]
+        result = extract_grants(grants)
+        assert result[0]["funder"] == "F1234567"
+
+    def test_extract_grants_strips_whitespace(self) -> None:
+        """Should strip whitespace from funder name and award_id."""
+        grants = [
+            {
+                "funder": "F1234567",
+                "funder_display_name": "  NIH  ",
+                "award_id": "  R01-123  ",
+            }
+        ]
+        result = extract_grants(grants)
+        assert result[0]["funder_display_name"] == "NIH"
+        assert result[0]["award_id"] == "R01-123"
+
+    def test_extract_grants_invalid_structure(self) -> None:
+        """Should handle invalid grant structure gracefully."""
+        grants = [
+            "not_a_dict",  # Invalid type
+            {"funder": "F1", "funder_display_name": "Valid"},
+        ]
+        result = extract_grants(grants)  # type: ignore[arg-type]
+        assert len(result) == 1
+        assert result[0]["funder_display_name"] == "Valid"
+
+
+class TestExtractConceptsDeprecation:
+    """Tests for extract_concepts deprecation warning."""
+
+    def test_extract_concepts_deprecation_warning(self) -> None:
+        """Should emit deprecation warning when warn_deprecated=True."""
+        concepts = [{"display_name": "Chemistry", "score": 0.9}]
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            result = extract_concepts(concepts, warn_deprecated=True)
+            assert len(w) == 1
+            assert issubclass(w[0].category, DeprecationWarning)
+            assert "deprecated" in str(w[0].message).lower()
+            assert "topics" in str(w[0].message).lower()
+        assert result == ["Chemistry"]
+
+    def test_extract_concepts_no_warning_by_default(self) -> None:
+        """Should not emit deprecation warning by default."""
+        concepts = [{"display_name": "Chemistry", "score": 0.9}]
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            result = extract_concepts(concepts)
+            # No DeprecationWarning should be emitted
+            deprecation_warnings = [x for x in w if issubclass(x.category, DeprecationWarning)]
+            assert len(deprecation_warnings) == 0
+        assert result == ["Chemistry"]

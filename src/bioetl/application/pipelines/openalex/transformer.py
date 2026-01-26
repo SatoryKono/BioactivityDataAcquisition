@@ -24,11 +24,14 @@ from bioetl.application.pipelines.openalex.extractors import (
     extract_biblio_info,
     extract_concepts,
     extract_external_ids,
+    extract_grants,
     extract_journal_info,
     extract_keywords,
     extract_mesh_terms,
     extract_open_access_info,
     extract_openalex_id,
+    extract_primary_topic,
+    extract_topics,
     reconstruct_abstract,
 )
 from bioetl.domain.entities.openalex import OPENALEX_TYPE_MAP, OpenAlexPublicationEntity
@@ -57,7 +60,10 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
     - authors: authorships (extraction + PII hashing)
     - journal: primary_location.source.display_name
     - year: publication_year
-    - concepts: concepts (top-level only)
+    - topics: topics (hierarchical 4-level classification)
+    - primary_topic: primary_topic (single most relevant topic)
+    - grants: grants (funding information)
+    - concepts: concepts (DEPRECATED - kept for backward compatibility)
 
     Handles lookup metadata:
     - _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
@@ -68,6 +74,11 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
     - Automatic primary ID validation and fallback logging
     - Content hash computation (excluding metadata)
     - Tracing and metrics observability (O1)
+
+    Note on Topics vs Concepts:
+    - OpenAlex deprecated the `concepts` field in 2024 in favor of `topics`
+    - Both fields are extracted during the transition period
+    - New downstream code should use `topics` and `primary_topic`
     """
 
     def __init__(
@@ -149,7 +160,16 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         # Extract journal info
         journal_info = extract_journal_info(rec.get("primary_location", {}))
 
-        # Extract concepts
+        # Extract topics (hierarchical classification - replaces deprecated concepts)
+        topics = extract_topics(rec.get("topics", []))
+
+        # Extract primary topic (single most relevant topic)
+        primary_topic = extract_primary_topic(rec.get("primary_topic"))
+
+        # Extract grants/funding information
+        grants = extract_grants(rec.get("grants", []))
+
+        # Extract concepts (DEPRECATED - kept for backward compatibility)
         concepts = extract_concepts(rec.get("concepts", []))
 
         # Extract Open Access info
@@ -203,6 +223,12 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             # OpenAlex source field: cited_by_count
             # Unified BioETL field: citation_count (standardized across all providers)
             "citation_count": rec.get("cited_by_count"),
+            # Topics (hierarchical classification - replaces deprecated concepts)
+            "topics": topics,
+            "primary_topic": primary_topic,
+            # Grants/funding information
+            "grants": grants,
+            # Concepts (DEPRECATED - kept for backward compatibility)
             "concepts": concepts,
             "mesh": mesh_terms,
             "keywords": keywords,
