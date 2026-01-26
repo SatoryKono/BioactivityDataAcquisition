@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - BioETL/1.0
     method: POST
-    uri: https://api.semanticscholar.org/graph/v1/paper/batch?fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal
+    uri: https://api.semanticscholar.org/graph/v1/paper/batch?fields=paperId,externalIds,title,abstract,year,publicationDate,venue,authors,authors.externalIds,authors.hIndex,authors.authorId,citationCount,referenceCount,isOpenAccess,openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal
   response:
     body:
       string: |
@@ -31,9 +31,9 @@ interactions:
             "publicationDate": "2015-07-22",
             "venue": "Nature",
             "authors": [
-              {"authorId": "4713315", "name": "Yanyong Kang"},
-              {"authorId": "6628836", "name": "X. Zhou"},
-              {"authorId": "2534082", "name": "Xiang Gao"}
+              {"authorId": "4713315", "name": "Yanyong Kang", "externalIds": {"ORCID": "0000-0001-2345-6789"}, "hIndex": 25},
+              {"authorId": "6628836", "name": "X. Zhou", "externalIds": null, "hIndex": 18},
+              {"authorId": "2534082", "name": "Xiang Gao", "externalIds": {"ORCID": "0000-0002-3456-7890"}, "hIndex": 32}
             ],
             "citationCount": 892,
             "referenceCount": 50,
