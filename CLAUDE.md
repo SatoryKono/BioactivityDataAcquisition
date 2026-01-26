@@ -2,7 +2,7 @@
 
 Справочник для Claude Code при работе с репозиторием BioETL.
 
-*Синхронизировано с RULES.md v5.12 (2026-01-21) | Верификация метрик: 2026-01-06 | Версия проекта: 5.9.0*
+*Синхронизировано с RULES.md v5.12 (2026-01-26) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.0.0*
 
 ---
 
@@ -139,6 +139,8 @@ ls tests/architecture/test_*.py
 
 ## 2. Архитектура Слоёв
 
+> **Полная документация**: См. `docs/RULES.md` §1 "Архитектура и Слои"
+
 ```
 src/bioetl/
 ├── domain/          # Чистая логика, Protocols (Ports), бизнес-модели. БЕЗ I/O.
@@ -148,23 +150,10 @@ src/bioetl/
 └── interfaces/      # CLI, PipelineRunner
 ```
 
-### 2.1. Матрица Импортов (ОБЯЗАТЕЛЬНО)
-
-| Из ↓ / В → | domain | application | composition | infrastructure | interfaces |
-|------------|--------|-------------|-------------|----------------|------------|
-| **domain** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **application** | ✅ | ✅ | ❌ | ❌ | ❌ |
-| **composition** | ✅ | ✅ | ✅ | ✅ | ❌ |
-| **infrastructure** | ✅ | ❌ | ❌ | ✅ | ❌ |
-| **interfaces** | ✅ | ✅ | ✅ | ✅ | ✅ |
-
-**Нарушение = Блокер PR.** Проверяется `import-linter` и `tests/architecture/`.
-
-### 2.2. Dependency Injection
-
-- **MUST**: Зависимости передаются в конструктор.
-- **MUST NOT**: Создание зависимостей внутри классов (`S3Storage()`, `httpx.AsyncClient()`).
-- **Composition Root**: `src/bioetl/composition/bootstrap.py`.
+**Ключевые ограничения** (детали в `RULES.md` §1.1):
+- **Матрица импортов**: `domain` ← `application` ← `composition` → `infrastructure`; `interfaces` может импортировать всё
+- **Нарушение = Блокер PR**. Проверяется `import-linter` и `tests/architecture/`
+- **DI**: Зависимости передаются в конструктор. `composition/bootstrap.py` — единственное место сборки
 
 ### 2.3. ⚠️ Архитектурные Пояснения (Избегай Ложных Выводов)
 
@@ -332,115 +321,24 @@ cat docs/archived/refactoring-plan.md | head -60
 
 ---
 
-## 3. Medallion Architecture
+## 3. Medallion Architecture и Обработка Ошибок
 
-| Уровень | Формат | Хранение | Идемпотентность |
-|---------|--------|----------|-----------------|
-| **Bronze** | JSONL + zstd | 90d → Archive | Append-only. Path: `bronze/{provider}/{entity}/{date}/` |
-| **Silver** | Delta Lake | Permanent | Merge/Upsert по `content_hash`. ACID обязателен. |
-| **Gold** | Delta/Parquet | Permanent | SCD Type 2 или партиции по дате |
+> **Полная документация**: См. `docs/RULES.md` §2 (Medallion) и §3 (Ошибки)
 
-### 3.1. Silver → Gold Transformation
+**Medallion** (Bronze → Silver → Gold):
+- **Bronze**: JSONL + zstd, append-only, 90d retention
+- **Silver**: Delta Lake, merge/upsert по `content_hash`, ACID обязателен
+- **Gold**: Delta/Parquet, SCD Type 2 или партиции по дате
 
-- **Исключение JSON полей**: Конфигурируется в YAML (`gold_filters`)
-- **Плоская структура**: Gold содержит только scalar поля
-- **Forensic**: Silver сохраняет JSON для расследований
-- **Реализация**: `GoldWriter.write_gold()` в `infrastructure/storage/gold_writer.py`
+**Обработка ошибок**:
+- **Critical**: Падение пайплайна (auth failure, schema mismatch)
+- **Recoverable**: Retry с backoff (429, 502/504)
+- **Data Quality**: Лог + пропуск (>5% warning, >20% fail batch)
 
-### 3.2. Delta Lake (MUST)
+**Circuit Breaker**: 5 consecutive errors → Open 5 мин (см. [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md))
 
-- **Engine**: `delta-rs` (Rust core)
-- **VACUUM**: Еженедельно, `retention_period=7 days`
-- **Forensic Retention**: 7d default, 30d для critical таблиц
-
-### 3.3. Content Hash
-
-```
-sha256(provider + canonical_json(record))
-```
-
-**Нормализация перед хэшем:**
-- NaN/Inf → `null`
-- Floats → `round(val, 10)`
-- Dates → ISO `YYYY-MM-DD`
-- Strings → `strip()`
-- **Исключить**: `_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_index`, `_dq_*`
-
----
-
-## 4. Обработка Ошибок
-
-### 4.1. Классификация
-
-| Тип | Поведение | Пример |
-|-----|-----------|--------|
-| **Critical** | Падение пайплайна | Auth failure, schema mismatch (Gold), БД недоступна |
-| **Recoverable** | Retry (max 3, backoff 2.0, jitter 0.1-0.5s) | 429 Rate Limit, 502/504 Timeout |
-| **Data Quality** | Лог + пропуск записи | Невалидный SMILES, missing field |
-
-### 4.2. Пороги
-
-| Порог | Условие | Действие |
-|-------|---------|----------|
-| Soft | >5% DQ errors | Warning |
-| Hard | >20% DQ errors | Fail Batch |
-
-### 4.3. Circuit Breaker
-
-См. [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md).
-
-- **Trigger**: 5 consecutive errors
-- **Open Duration**: 5 мин
-- **Recovery**: Half-Open → 1 probe → Closed/Open
-- **Observability**: Метрики `circuit_breaker_state`, `trips_total`
-
-### 4.4. Graceful Shutdown
-
-См. [ADR-008](docs/02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md).
-
-При получении SIGTERM/SIGINT:
-1. Прекратить извлечение новых записей
-2. Дождаться завершения записи текущего батча
-3. Сохранить чекпоинт локально
-4. Выйти с кодом 0
-
-### 4.5. Архитектурные Решения (ADR)
-
-**29 ADR** определяют ключевые архитектурные решения проекта:
-
-| ADR | Название | Описание |
-|-----|----------|----------|
-| 001 | Delta Lake vs Parquet | Выбор Delta Lake для ACID |
-| 002 | Medallion Architecture | Bronze/Silver/Gold уровни |
-| 003 | In-Memory Locking | MemoryLock для локального запуска |
-| 004 | Pydantic vs Dataclasses | Dataclasses для domain |
-| 005 | Composition Layer | Отделение DI от бизнес-логики |
-| 006 | Logger/Metrics Ports | Абстракция observability |
-| 007 | Circuit Breaker | Защита от каскадных сбоев |
-| 008 | Graceful Shutdown | Корректное завершение |
-| 009 | Paginated Fetcher Mixin | Унификация пагинации |
-| 010 | Local-Only Deployment | Локальная архитектура |
-| 011 | Remove Watermark | Удаление watermark-механизма |
-| 012 | Storage Clear Contract | Контракт очистки storage |
-| 013 | Async Storage Cleanup | Асинхронная очистка |
-| 014 | Deterministic Writes | Запрет random в writers |
-| 015 | Pipeline Services Lifecycle | Жизненный цикл сервисов |
-| 016 | Error Handling Strategy | Стратегия обработки ошибок |
-| 017 | Observability Architecture | Архитектура observability |
-| 018 | Gold Strict Validation | Строгая валидация Gold |
-| 019 | Observability Port Enforcement | Обязательные порты |
-| 020 | BasePipeline Decomposition | Декомпозиция BasePipeline |
-| 021 | DDD Aggregates Adoption | DDD агрегаты |
-| 022 | Tracing NoOp | NoOp для трассировки |
-| 023 | Entity Type Patterns | Паттерны типов сущностей |
-| 024 | Entity Naming Unification | Унификация именования сущностей |
-| 025 | Pipeline Config Unification | Унификация конфигурации пайплайнов |
-| 026 | Composite Pipeline Pattern | Паттерн композитного пайплайна |
-| 027 | DQ Rules Externalization | Иерархическая конфигурация DQ правил |
-| 028 | Filter Rules Externalization | Иерархическая конфигурация фильтров |
-| 029 | Output Metadata Unification | Унификация output-метаданных |
-
-Документы: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
+**29 ADR** определяют архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
+(полный реестр в `docs/RULES.md` Приложение F)
 
 ---
 
@@ -490,342 +388,115 @@ async def aclose() -> None                             # Graceful shutdown
 
 ## 6. Тестирование
 
+> **Полная документация**: См. `docs/RULES.md` §4.2 "Политика Тестирования"
+
 | Уровень | Директория | Тестов | Правила |
 |---------|------------|--------|---------|
-| **Unit** | `tests/unit/` | ~4335 | Изолированные, in-memory fakes предпочтительны, MagicMock допустим. |
-| **Integration** | `tests/integration/` | ~216 | VCR.py для HTTP. Очистка секретов из кассет. |
-| **E2E** | `tests/e2e/` | - | `@pytest.mark.e2e`, Local-Only архитектура |
-| **Architecture** | `tests/architecture/` | ~360 | Проверка слоёв, imports, контракты портов |
+| **Unit** | `tests/unit/` | ~4335 | In-memory fakes предпочтительны |
+| **Integration** | `tests/integration/` | ~216 | VCR.py для HTTP |
+| **Architecture** | `tests/architecture/` | ~360 | Проверка слоёв, контракты портов |
 
-**Всего тестов:** ~5277 (верифицировано 2026-01-06)
+**Всего:** ~5277 тестов | **Цель покрытия:** ≥85% (`--cov-fail-under=85`)
 
-**Инструменты:** `pytest`, `pytest-asyncio`, `pytest-cov`, `hypothesis` (property-based)
-**Цель покрытия:** ≥85% line coverage (проверяется в CI через `--cov-fail-under=85`)
-
-### Тестовые Зависимости
-
-Проект использует optional dependency группы в `pyproject.toml`:
-
-```bash
-# Полный набор для разработки (рекомендуется)
-make install  # или: pip install -e ".[dev]"
-
-# Минимальный набор только для тестов (CI)
-pip install -e ".[tests]"
-```
-
-**Группа `tests` включает:**
-- `pytest`, `pytest-cov`, `pytest-asyncio`, `pytest-xdist` — основа тестирования
-- `respx` — HTTP-мокирование для тестов адаптеров
-- `hypothesis` — property-based тестирование
-- `vcrpy`, `pytest-vcr` — VCR-кассеты для integration-тестов
-- `syrupy` — snapshot-тестирование
-
-См. `docs/RULES.md` §4.2.1 для полного описания.
-
-### Контрактные тесты портов
-
-Файл `tests/architecture/test_port_contracts.py` проверяет:
-
-| Категория | Проверка |
-|-----------|----------|
-| **Lifecycle** | Все async I/O порты имеют `aclose()` |
-| **Observability** | MetricsPort/TracingPort имеют `close()` |
-| **Runtime** | Все порты `@runtime_checkable` для isinstance() |
-| **Completeness** | Все порты экспортированы в `__all__` |
-| **Contracts** | StoragePort, LockPort, CheckpointPort, QuarantinePort методы |
-
-### Тесты детерминизма (REQ-ARCH-030)
-
-Файл `tests/architecture/test_no_random_in_writers.py` проверяет:
-
-| Тест | Проверка |
-|------|----------|
-| `test_no_random_import_in_storage_writers` | Запрет `import random` и `from random import` в storage writers |
-| `test_no_random_uniform_calls_in_storage` | Запрет вызовов `random.uniform()` |
-| `test_no_random_choice_calls_in_storage` | Запрет вызовов `random.choice()` |
-
-**Цель:** Гарантировать детерминизм операций записи для воспроизводимости.
-См. [ADR-014](docs/02-architecture/decisions/ADR-014-deterministic-writes.md).
-
-Файл `tests/architecture/test_no_datetime_now_in_infrastructure.py` проверяет:
-
-| Тест | Проверка |
-|------|----------|
-| `test_no_datetime_now_in_infrastructure` | Запрет `datetime.now()` в infrastructure слое |
-| `test_allowed_files_still_exist` | Проверка актуальности списка исключений |
-
-**Цель:** Timestamps создаются в application слое и передаются как параметры.
-
-### Команды
+### Основные команды
 
 ```bash
 make test                 # Все тесты с coverage
 make test-unit            # Только unit (быстро)
-make test-integration     # Integration с VCR
 make arch-test            # Architecture tests
-make arch-lint            # import-linter contracts
-
-# E2E тесты
-pytest tests/e2e/ -v -m e2e
-
-# Один тест
-.venv/Scripts/python -m pytest tests/unit/domain/test_types.py -v
+pytest tests/e2e/ -v -m e2e  # E2E тесты
 ```
 
-### E2E Тесты
-
-E2E тесты проверяют полный цикл пайплайна от fetch до Gold:
-
-```python
-from tests.e2e.conftest import create_test_context, assert_silver_table_has_records
-from bioetl.composition.bootstrap import bootstrap_pipeline
-
-ctx = create_test_context("chembl_activity", limit=10)
-runner = bootstrap_pipeline(ctx)
-await runner.run()
-assert_silver_table_has_records(data_dir, "chembl_activity", expected_min=1)
-```
-
-**Helpers** (`tests/e2e/conftest.py`):
-- `create_test_context(pipeline_name, limit, run_type)` - создание контекста
-- `assert_bronze_files_exist(data_dir, provider, entity)` - проверка Bronze
-- `assert_silver_table_has_records(data_dir, table_name, expected_min)` - проверка Silver
-- `assert_gold_table_has_records(data_dir, table_name, expected_min)` - проверка Gold
-
-### VCR.py (MUST)
+### VCR.py (MUST для HTTP)
 
 - Кассеты: `tests/fixtures/vcr/`
-- Санитизация: `Authorization`, `X-API-Key`, PII в `before_record`
-- CI: `pytest --vcr-record=none` (падать при отсутствии кассеты)
+- Санитизация секретов в `before_record`
+- CI: `pytest --vcr-record=none`
 
 ---
 
-## 7. Стек Технологий
+## 7. Стек Технологий и Провайдеры
 
-| Категория | Инструмент | Назначение |
-|-----------|------------|------------|
-| **HTTP** | `UnifiedHTTPClient` (httpx) | Унифицированный HTTP-клиент для всех адаптеров |
-| **Data** | Polars, Delta Lake | Обработка, хранение |
-| **Storage** | Локальная ФС | Bronze/Silver/Gold/Checkpoints |
-| **Validation** | Pandera | Валидация схем |
-| **Linting** | Ruff + mypy | Код и типы |
-| **CLI** | Click | Командный интерфейс |
+> **Полная документация**: См. `docs/RULES.md` §4.1 (Стек) и Приложение А (Провайдеры)
 
-### Унифицированный HTTP-клиент
+**Ключевые инструменты:** httpx (`UnifiedHTTPClient`), Polars, Delta Lake, Pandera, Ruff + mypy, Click
 
-**Все адаптеры используют единую HTTP-инфраструктуру:**
+**HTTP-адаптеры**: Все используют `BaseHttpAdapter` с Rate Limiter, Circuit Breaker, Retry Logic
+**Legacy Wrappers**: `BaseSyncAdapter` с `run_in_executor` для библиотек без async (pubchempy)
 
-| Адаптер | Базовый класс | HTTP-клиент |
-|---------|---------------|-------------|
-| ChemblAdapter | `BaseHttpAdapter` | `UnifiedHTTPClient` |
-| UniProtAdapter | `BaseHttpAdapter` | `UnifiedHTTPClient` |
-| PubMedAdapter | `@dataclass` | `UnifiedHTTPClient` |
-| PubChemAdapter | `BaseSyncAdapter` | `pubchempy` + ThreadPool |
+**Провайдеры:** ChEMBL, PubChem (5 req/sec), UniProt (100 req/sec), CrossRef, OpenAlex, PubMed (3 req/sec), SemanticScholar
 
-**Компоненты:** Rate Limiter, Circuit Breaker, Retry Logic, Metrics.
-
-### Legacy Wrappers (MUST)
-
-Библиотеки без async (pubchempy) используют `BaseSyncAdapter`:
-```python
-# BaseSyncAdapter автоматически оборачивает sync-вызовы
-await self._run_in_executor(sync_func, *args)
-```
-
-**Строгий режим:** `BIOETL_STRICT_ERROR_HANDLING=true` → raise, иначе warning
-
-### Инструменты Безопасности
-
-| Инструмент | Назначение | Команда |
-|------------|------------|---------|
-| **osv-scanner** | Сканирование уязвимостей зависимостей (primary) | `osv-scanner scan .` |
-| **pip-audit** | Сканирование уязвимостей (secondary) | `pip-audit --skip-editable` |
-| **Bandit** | SAST-анализ кода Python | `bandit -r src/bioetl` |
-| **Gitleaks** | Поиск секретов в Git-истории | GitHub Action |
-
-#### Почему osv-scanner (а не pip-audit)?
-
-| Проблема | Решение |
-|----------|---------|
-| bioetl не опубликован на PyPI | osv-scanner сканирует `uv.lock` напрямую |
-| pip-audit требует установки пакета | `--skip-editable` пропускает локальный пакет |
-| safety требует API-ключ | osv-scanner бесплатен и без аутентификации |
-
-**Локальный запуск:**
-```bash
-make security  # Запускает osv-scanner + pip-audit
-```
-
-**CI:** `.github/workflows/security.yml` использует оба сканера параллельно.
+**Безопасность:** `make security` — osv-scanner + pip-audit + Bandit
 
 ---
 
-## 8. Провайдеры
-
-| Provider | Library | Rate Limit | Health Check |
-|----------|---------|------------|--------------|
-| ChEMBL | chembl_webresource_client | None | `/chembl/api/data/status.json` |
-| PubChem | pubchempy | 5 req/sec | Lightweight compound query |
-| UniProt | unipressed | 100 req/sec (API key) | Search Probe |
-| CrossRef | httpx | Polite pool | Works endpoint |
-| OpenAlex | httpx | 10 req/sec | N/A |
-| PubMed | httpx (NCBI E-utilities) | 3 req/sec | EInfo endpoint |
-| SemanticScholar | httpx | 100 req/5min | Paper probe |
-
----
-
-## 9. Ключевые Файлы
+## 8. Ключевые Файлы
 
 | Артефакт | Путь |
 |----------|------|
-| Domain Ports | `src/bioetl/domain/ports/` (пакет с фасадом `__init__.py`) |
+| Domain Ports | `src/bioetl/domain/ports/` |
 | Adapters | `src/bioetl/infrastructure/adapters/{provider}/` |
 | Pipelines | `src/bioetl/application/pipelines/` |
-| Pipeline Core | `src/bioetl/application/core/` |
-| BaseTransformer | `src/bioetl/application/core/base_transformer.py` |
-| Factories | `src/bioetl/composition/factories/` |
 | Bootstrap | `src/bioetl/composition/bootstrap.py` |
-| CLI | `src/bioetl/interfaces/cli.py` |
+| CLI | `src/bioetl/interfaces/cli/` |
 | Configs | `configs/pipelines/{provider}/{entity}.yaml` |
 | Tests | `tests/` |
-| VCR Cassettes | `tests/fixtures/vcr/` |
 | ADR | `docs/02-architecture/decisions/` |
 
 ---
 
-## 10. Governance (RFC 2119)
+## 9. Anti-Patterns и Чек-лист
 
-| Keyword | Значение |
-|---------|----------|
-| **MUST** | Абсолютное требование. Нарушение = блокер релиза. |
-| **SHOULD** | Сильная рекомендация. Отклонение требует обоснования в PR. |
-| **MAY** | Опционально. |
+> **Полный чек-лист**: См. `docs/RULES.md` и `AGENT.md` §9 "Чек-Лист Ревью"
 
----
+**Критичные запреты:**
+- ❌ Импорт `infrastructure` в `domain`/`application`
+- ❌ Создание зависимостей внутри классов (нарушение DI)
+- ❌ Прямой импорт `structlog` в `application`/`interfaces` → `LoggerPort`
+- ❌ Sentinel values (`-1`, `"N/A"`) → `None`
+- ❌ Блокирующий I/O в async → `run_in_executor`
+- ❌ HTTP без VCR-кассет
 
-## 11. Anti-Patterns (ЗАПРЕЩЕНО)
-
-### Архитектура
-- ❌ Импорт `infrastructure` в `domain` или `application`
-- ❌ Создание зависимостей внутри классов
-- ❌ Прямой импорт `structlog` в `application` или `interfaces` → Использовать `LoggerPort`
-
-### Код
-- ❌ Sentinel values (`-1`, `"N/A"`, `9999`) → Использовать `None`
-- ❌ Блокирующий I/O в async (`requests.get()`) → `httpx.AsyncClient` или `run_in_executor`
-- ❌ Хардкод секретов → `os.environ`, формат: `BIOETL_{PROVIDER}_{KEY}`
-- ❌ `print()` → `structlog` с `run_id`
-
-### Тесты
-- ⚠️ Мокинг доменных сущностей → Реальные Value Objects предпочтительны, MagicMock допустим
-- ❌ HTTP без VCR → VCR-кассеты обязательны
-- ❌ Секреты в кассетах → Очистка в `before_record`
+**Перед коммитом:** `make lint && make test`
 
 ---
 
-## 12. Чек-Лист Self-Review
+## 10. Git Workflow и Создание Компонентов
 
-### Архитектура
-- [ ] Нет запрещённых импортов между слоями
-- [ ] Зависимости инжектируются через конструктор
-- [ ] `composition/` — единственное место сборки
+> **Полная документация**: См. `docs/RULES.md` §8 (Git) и `AGENT.md` §7 (Компоненты)
 
-### Код
-- [ ] `make lint` проходит без ошибок
-- [ ] Типизация полная (нет `Any` без причины)
-- [ ] Логирование через `structlog`, везде `run_id`
-- [ ] Нет хардкода секретов, путей, конфигурации
+**Conventional Commits:** `<type>(<scope>): <description>`
+- Типы: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
 
-### Тесты
-- [ ] `make test` проходит ДО и ПОСЛЕ изменений
-- [ ] Для новой логики есть unit-тесты
-- [ ] Для HTTP есть integration-тесты с VCR
-- [ ] VCR-кассеты очищены от секретов
+**Новый адаптер:** `domain/ports/` Protocol → `infrastructure/adapters/{provider}/` → `health_check()` + DI
 
-### Документация
-- [ ] `docs/` обновлена при изменениях архитектуры/конфигурации
-- [ ] Docstrings в Google Style (на русском)
+**Новый пайплайн:** Config YAML → `BaseTransformer` → Pipeline → Factory → `@register` → Tests
 
 ---
 
-## 13. Git Workflow
+## 11. Диагностика
 
-### Формат Коммитов (Conventional Commits)
-
-```
-<type>(<scope>): <description>
-```
-
-| Тип | Описание |
-|-----|----------|
-| `feat` | Новая функциональность |
-| `fix` | Исправление бага |
-| `refactor` | Рефакторинг без изменения поведения |
-| `docs` | Документация |
-| `test` | Тесты |
-| `chore` | Прочее (CI, deps) |
-
-**Примеры:**
-- `feat(chembl): add activity pipeline`
-- `fix(pubchem): handle rate limit 429`
-
-### Перед Коммитом
-
-```bash
-make lint
-make test
-git status
-git diff --staged
-git commit -m "..."
-```
+| Ошибка | Решение |
+|--------|---------|
+| `ImportError: cannot import from domain` | Проверь матрицу импортов (`RULES.md` §1.1) |
+| `RuntimeError: Event loop is closed` | `run_in_executor` для блокирующего I/O |
+| Тесты падают в CI | Запиши VCR-кассету |
+| Неясности в задаче | **СПРОСИ ПОЛЬЗОВАТЕЛЯ** |
 
 ---
 
-## 14. Создание Компонентов
-
-### 14.1. Новый Адаптер
-
-1. **Порт:** Убедись, что в `domain/ports/` есть подходящий `Protocol` (импортируй из фасада: `from bioetl.domain.ports import ...`)
-2. **Адаптер:** Создай класс в `src/bioetl/infrastructure/adapters/{provider}/`
-3. **Требования:**
-   - **MUST** реализовывать порт
-   - **MUST** принимать зависимости в `__init__`
-   - **MUST** реализовывать `health_check()`
-   - **MUST** соблюдать rate limits провайдера
-
-### 14.2. Новый Пайплайн
-
-1. **Конфиг:** `configs/pipelines/{provider}/{entity}.yaml`
-2. **Трансформер:** Наследуй от `BaseTransformer` (`src/bioetl/application/core/base_transformer.py`)
-3. **Пайплайн:** `src/bioetl/application/pipelines/`
-4. **Фабрика:** `src/bioetl/composition/factories/`
-5. **Регистрация:** `PipelineRegistry` (декоратор `@register`)
-6. **Тесты:** unit + integration
-
----
-
-## 15. Диагностика и Эскалация
-
-| Ошибка | Причина | Решение |
-|--------|---------|---------|
-| `ImportError: cannot import from domain` | Нарушение слоёв | Проверь матрицу импортов |
-| `RuntimeError: Event loop is closed` | Блокирующий I/O в async | Используй `run_in_executor` |
-| Тесты падают в CI, но не локально | Отсутствует VCR-кассета | Запиши кассету |
-| Неясности в задаче | — | **СПРОСИ ПОЛЬЗОВАТЕЛЯ** |
-
----
-
-## 16. Полная Документация
+## 12. Полная Документация
 
 | Документ | Описание |
 |----------|----------|
-| `docs/RULES.md` | Конституция проекта v5.12 |
+| `docs/RULES.md` | **Конституция проекта** — единственный источник истины для архитектурных правил |
+| `AGENT.md` | Инструкции для агента (персона, workflow, специфика работы) |
+| `.claude/PROJECT_CONTEXT.md` | Компактный контекст для быстрой справки |
+| `docs/02-architecture/decisions/` | ADR (001-029) — архитектурные решения |
 | `docs/REQUIREMENTS.md` | 127 тестируемых требований |
-| `docs/CHANGELOG.md` | История изменений |
-| `docs/02-architecture/decisions/` | ADR (001-029) — 29 архитектурных решений |
-| `AGENT.md` | Детальные инструкции для агента v2.2 |
-| `.claude/PROJECT_CONTEXT.md` | Компактный контекст |
+
+> **Иерархия документации**: При противоречиях приоритет имеет `docs/RULES.md`.
+> Данный файл (`CLAUDE.md`) содержит специфику для Claude Code и протокол верификации.
 
 ---
 
