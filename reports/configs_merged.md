@@ -1,4 +1,103 @@
 ================================================================================
+File: publication_enrichment.yaml
+Path: composite\publication_enrichment.yaml
+================================================================================
+# =============================================================================
+# Composite Pipeline: Publication Enrichment
+# =============================================================================
+# Column Naming Convention (ADR-026 v2)
+# =============================================================================
+# All business columns are renamed to: {provider}.{entity}.{field}
+#
+# Examples:
+#   - seed (chembl_publication):      chembl.publication.title
+#   - enricher (crossref_publication): crossref.publication.title
+#   - enricher (pubmed_publication):   pubmed.publication.abstract
+#
+# EXCLUDED from renaming:
+#   - Join keys: doi, pmid, pmc_id (для совместимости с join операциями)
+#   - System columns: _run_id, _ingestion_ts, etc.
+#
+# COLUMN ORDERING:
+#   Output columns are ordered by semantic groups:
+#   1. System (entity_id, content_hash, _run_id, ...)
+#   2. Identifiers (doi, pmid, document_chembl_id, ...)
+#   3. Title (chembl.publication.title, crossref.publication.title, ...)
+#   4. Abstract
+#   5. Authors
+#   6. Journal/Source
+#   7. Dates
+#   8. Metrics
+#   9. Classification
+#   10. URLs
+#   11. Other
+#
+#   Within each group, columns are ordered by provider priority:
+#   chembl → crossref → pubmed → openalex → semantic_scholar
+#
+# PRIORITY CONFIGURATION:
+#   field_priorities uses source identifiers:
+#   - 'seed' - refers to seed pipeline (resolved to chembl.publication.*)
+#   - '{provider}' - matches {provider}.{seed_entity}.{field}
+#   - '{provider}.{entity}' - explicit full match
+# =============================================================================
+
+name: composite_publication
+version: "2.0"
+
+seed:
+  pipeline: chembl_publication
+  silver_table: silver/chembl/publication
+
+enrichers:
+  - pipeline: crossref_publication
+    join_keys: [doi]
+    optional: false
+    timeout_seconds: 300
+
+  - pipeline: pubmed_publication
+    join_keys: [pmid, pmc_id]
+    optional: true
+    timeout_seconds: 180
+
+merge:
+  strategy: left_outer
+  conflict_resolution: explicit_rules
+
+  # Priority: first source wins for each field
+  # 'seed' resolves to chembl (since seed.pipeline = chembl_publication)
+  field_priorities:
+    title:
+      - seed          # chembl.publication.title
+      - crossref      # crossref.publication.title
+      - pubmed        # pubmed.publication.title
+
+    abstract:
+      - crossref
+      - pubmed
+      - seed
+
+    citation_count:
+      - crossref      # Only crossref has this
+
+    journal:
+      - seed
+      - crossref
+
+  # Column ordering configuration (optional, uses defaults if not specified)
+  column_order:
+    provider_priority:
+      - chembl
+      - crossref
+      - pubmed
+      - openalex
+      - semantic_scholar
+
+  output:
+    silver: silver/composite/publication
+    gold: gold/composite/publication
+
+================================================================================
 File: _defaults.yaml
 Path: dq\_defaults.yaml
 ================================================================================
@@ -917,6 +1016,18 @@ entity_field_validations:
     nullable: true
     error_message: "Citation count must be non-negative"
 
+  - field: fwci
+    type: range
+    min: 0
+    nullable: true
+    error_message: "FWCI must be non-negative"
+
+  - field: referenced_works_count
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Reference count must be non-negative"
+
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================
@@ -927,6 +1038,13 @@ entity_cross_field_validations:
       - title
     condition: all_present
     error_message: "Publication must have OpenAlex ID and title"
+
+  - name: retracted_publication_warning
+    fields:
+      - is_retracted
+    condition: "is_retracted == true"
+    severity: warn
+    error_message: "Publication has been retracted"
 
 # =============================================================================
 # Conditional Validations
@@ -4377,6 +4495,207 @@ composite:
         - openalex       # OpenAlex concepts are unique
       tldr:
         - semanticscholar  # S2-only field
+
+    # -------------------------------------------------------------------------
+    # Column Ordering by Semantic Groups
+    # -------------------------------------------------------------------------
+    # Defines the order of columns in the merged output.
+    # Columns are grouped semantically, with seed columns first within each group.
+    column_groups:
+      # 1. System fields (always first)
+      - name: system
+        fields:
+          - entity_id
+          - content_hash
+          - _run_id
+          - _run_type
+          - _source_batch_id
+          - _source
+          - _ingestion_ts
+          - _index
+          - _lookup_method
+          - _original_id
+
+      # 2. Lineage metadata (added by MergeService)
+      - name: lineage
+        pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
+
+      # 3. Primary identifiers
+      - name: identifiers
+        fields:
+          - document_chembl_id
+          - doi
+          - pmid
+        provider_order: [chembl, openalex, pubmed, semanticscholar]
+
+      # 4. PMC IDs (separate group - not in seed)
+      - name: pmc_identifiers
+        fields:
+          - pmc_id
+        provider_order: [openalex, pubmed, semanticscholar]
+
+      # 5. Title group
+      - name: title
+        fields:
+          - title
+          - vernacular_title
+        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+
+      # 6. Abstract group
+      - name: abstract
+        fields:
+          - abstract
+          - abstract_structured
+          - tldr
+        provider_order: [chembl, pubmed, crossref, openalex, semanticscholar]
+
+      # 7. Authors group
+      - name: authors
+        fields:
+          - authors
+          - author_count
+        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+
+      # 8. Journal group
+      - name: journal
+        fields:
+          - journal
+          - journal_full_title
+          - journal_title
+          - journal_abbrev
+          - journal_iso_abbrev
+          - short_container_title
+          - venue
+        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+
+      # 9. Year group
+      - name: year
+        fields:
+          - year
+          - publication_year
+        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+
+      # 10. Publication dates
+      - name: dates
+        fields:
+          - publication_date
+          - published
+          - published_print
+          - published_online
+          - pub_date
+          - pub_month
+          - pub_day
+          - epub_date
+          - accepted_date
+          - received_date
+          - revised_date
+          - date_completed
+          - date_revised
+        provider_order: [crossref, openalex, pubmed, semanticscholar]
+
+      # 11. Volume/Issue/Pages
+      - name: pagination
+        fields:
+          - volume
+          - issue
+          - first_page
+          - last_page
+          - pages
+          - medline_pgn
+        provider_order: [chembl, crossref, pubmed, semanticscholar]
+
+      # 12. Citation metrics
+      - name: citations
+        fields:
+          - citation_count
+          - reference_count
+        provider_order: [crossref, openalex, semanticscholar, pubmed]
+
+      # 13. ISSN group
+      - name: issn
+        fields:
+          - issn
+          - issn_print
+          - issn_electronic
+          - journal_issn_type
+        provider_order: [crossref, openalex, pubmed]
+
+      # 14. Open Access
+      - name: open_access
+        fields:
+          - is_oa
+          - oa_status
+          - open_access_url
+        provider_order: [openalex, semanticscholar]
+
+      # 15. Document type
+      - name: doc_type
+        fields:
+          - doc_type
+        provider_order: [chembl, crossref, openalex]
+
+      # 16. Language
+      - name: language
+        fields:
+          - language
+        provider_order: [crossref, openalex, pubmed]
+
+      # 17. Publisher
+      - name: publisher
+        fields:
+          - publisher
+        provider_order: [crossref, openalex]
+
+      # 18. Subject/Classification
+      - name: subjects
+        fields:
+          - subjects
+          - concepts
+          - fields_of_study
+          - mesh_terms
+          - mesh_heading_count
+          - keywords
+          - keyword_count
+          - publication_types
+          - publication_type_list
+        provider_order: [crossref, openalex, pubmed, semanticscholar]
+
+      # 19. Provider-specific IDs
+      - name: provider_ids
+        fields:
+          - openalex_id
+          - paper_id
+          - corpus_id
+          - arxiv_id
+          - src_id
+          - chembl_release
+          - creation_date
+          - nlm_unique_id
+        provider_order: [chembl, openalex, semanticscholar, pubmed]
+
+      # 20. Miscellaneous fields
+      - name: misc
+        fields:
+          - license_url
+          - alternative_id
+          - content_domain_domains
+          - content_domain_crossmark_restriction
+          - country
+          - citation_subset
+          - publication_status
+          - grant_count
+          - chemical_count
+        provider_order: [crossref, pubmed]
+
+      # 21. Source tracking (last before DQ)
+      - name: source
+        fields:
+          - source
+        provider_order: [crossref, openalex, pubmed, semanticscholar]
+
+      # 22. DQ fields (always last)
+      - name: dq
+        pattern: "^_dq_"
 
     # Output paths
     output:
