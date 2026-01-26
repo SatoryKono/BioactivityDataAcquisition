@@ -22,6 +22,8 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_journal_info,
     extract_open_access_info,
     extract_tldr,
+    sanitize_arxiv_id,
+    sanitize_dblp_id,
     validate_year,
 )
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
@@ -199,8 +201,8 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "pmc_id": normalize_pmc_id(
                 external_ids.get("pmcid")
             ),  # API uses "pmcid", we use "pmc_id"
-            "arxiv_id": external_ids.get("arxiv"),
-            "dblp_id": external_ids.get("dblp"),
+            "arxiv_id": sanitize_arxiv_id(external_ids.get("arxiv")),
+            "dblp_id": sanitize_dblp_id(external_ids.get("dblp")),
             "corpus_id": external_ids.get("corpus_id"),
             "title": rec.get("title"),
             "abstract": self._data_normalizer.strip_html_tags(rec.get("abstract")),

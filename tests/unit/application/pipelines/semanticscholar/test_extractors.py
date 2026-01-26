@@ -16,6 +16,8 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_open_access_info,
     extract_tldr,
     normalize_oa_status,
+    sanitize_arxiv_id,
+    sanitize_dblp_id,
     validate_year,
 )
 
@@ -728,3 +730,105 @@ class TestExtractCitationContexts:
         citations = [{"paperId": "abc", "contexts": ["  Trimmed context  "]}]
         result = extract_citation_contexts(citations)
         assert result == ["Trimmed context"]
+
+
+class TestSanitizeArxivId:
+    """Tests for sanitize_arxiv_id function."""
+
+    def test_valid_new_format(self) -> None:
+        """Test valid new format ArXiv IDs (post-2007)."""
+        assert sanitize_arxiv_id("2301.12345") == "2301.12345"
+        assert sanitize_arxiv_id("0704.0001") == "0704.0001"
+        assert sanitize_arxiv_id("2106.15928") == "2106.15928"
+
+    def test_valid_new_format_with_version(self) -> None:
+        """Test valid new format with version suffix."""
+        assert sanitize_arxiv_id("2301.12345v1") == "2301.12345v1"
+        assert sanitize_arxiv_id("2301.12345v2") == "2301.12345v2"
+        assert sanitize_arxiv_id("2106.15928v12") == "2106.15928v12"
+
+    def test_valid_old_format(self) -> None:
+        """Test valid old format ArXiv IDs (pre-2007)."""
+        assert sanitize_arxiv_id("hep-ph/9912271") == "hep-ph/9912271"
+        assert sanitize_arxiv_id("cs/0001007") == "cs/0001007"
+        assert sanitize_arxiv_id("math/0001001") == "math/0001001"
+
+    def test_valid_old_format_with_subcategory(self) -> None:
+        """Test valid old format with subcategory."""
+        assert sanitize_arxiv_id("cs.AI/0001007") == "cs.AI/0001007"
+        assert sanitize_arxiv_id("math.CO/0001001") == "math.CO/0001001"
+
+    def test_valid_old_format_with_version(self) -> None:
+        """Test valid old format with version."""
+        assert sanitize_arxiv_id("hep-ph/9912271v1") == "hep-ph/9912271v1"
+        assert sanitize_arxiv_id("hep-ph/9912271v2") == "hep-ph/9912271v2"
+
+    def test_invalid_format_returns_none(self) -> None:
+        """Test invalid formats return None."""
+        assert sanitize_arxiv_id("invalid-id") is None
+        assert sanitize_arxiv_id("12345") is None
+        assert sanitize_arxiv_id("abc.12345") is None
+        assert sanitize_arxiv_id("not/a/valid/id") is None
+
+    def test_empty_string_returns_none(self) -> None:
+        """Test empty string returns None."""
+        assert sanitize_arxiv_id("") is None
+        assert sanitize_arxiv_id("   ") is None
+
+    def test_none_returns_none(self) -> None:
+        """Test None returns None."""
+        assert sanitize_arxiv_id(None) is None
+
+    def test_whitespace_trimmed(self) -> None:
+        """Test whitespace is trimmed."""
+        assert sanitize_arxiv_id("  2301.12345  ") == "2301.12345"
+        assert sanitize_arxiv_id("\t2301.12345\n") == "2301.12345"
+
+
+class TestSanitizeDblpId:
+    """Tests for sanitize_dblp_id function."""
+
+    def test_valid_conference_format(self) -> None:
+        """Test valid conference paper DBLP IDs."""
+        assert sanitize_dblp_id("conf/nips/SmithJ21") == "conf/nips/SmithJ21"
+        assert sanitize_dblp_id("conf/icml/DoeA22") == "conf/icml/DoeA22"
+        assert sanitize_dblp_id("conf/aaai/LeeK20") == "conf/aaai/LeeK20"
+
+    def test_valid_journal_format(self) -> None:
+        """Test valid journal paper DBLP IDs."""
+        assert sanitize_dblp_id("journals/jmlr/SmithJ21") == "journals/jmlr/SmithJ21"
+        assert sanitize_dblp_id("journals/nature/DoeA22") == "journals/nature/DoeA22"
+        assert sanitize_dblp_id("journals/corr/abs-2301-12345") == "journals/corr/abs-2301-12345"
+
+    def test_valid_book_format(self) -> None:
+        """Test valid book DBLP IDs."""
+        assert sanitize_dblp_id("books/daglib/0028988") == "books/daglib/0028988"
+        assert sanitize_dblp_id("books/sp/Smith21") == "books/sp/Smith21"
+
+    def test_valid_with_underscores(self) -> None:
+        """Test valid DBLP IDs with underscores."""
+        assert sanitize_dblp_id("conf/nips/Smith_Lee21") == "conf/nips/Smith_Lee21"
+
+    def test_valid_with_hyphens(self) -> None:
+        """Test valid DBLP IDs with hyphens."""
+        assert sanitize_dblp_id("journals/corr/abs-2301-12345") == "journals/corr/abs-2301-12345"
+
+    def test_invalid_format_returns_none(self) -> None:
+        """Test invalid formats return None."""
+        assert sanitize_dblp_id("invalid") is None
+        assert sanitize_dblp_id("just-text") is None
+        assert sanitize_dblp_id("CONF/nips/Smith") is None  # Must start with lowercase
+
+    def test_empty_string_returns_none(self) -> None:
+        """Test empty string returns None."""
+        assert sanitize_dblp_id("") is None
+        assert sanitize_dblp_id("   ") is None
+
+    def test_none_returns_none(self) -> None:
+        """Test None returns None."""
+        assert sanitize_dblp_id(None) is None
+
+    def test_whitespace_trimmed(self) -> None:
+        """Test whitespace is trimmed."""
+        assert sanitize_dblp_id("  conf/nips/SmithJ21  ") == "conf/nips/SmithJ21"
+        assert sanitize_dblp_id("\tconf/nips/SmithJ21\n") == "conf/nips/SmithJ21"

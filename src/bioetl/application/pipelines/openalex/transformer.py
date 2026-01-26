@@ -36,7 +36,7 @@ from bioetl.application.pipelines.openalex.extractors import (
 )
 from bioetl.domain.entities.openalex import OPENALEX_TYPE_MAP, OpenAlexPublicationEntity
 from bioetl.domain.services import IdentityService
-from bioetl.domain.value_objects import DOI, PublicationYear
+from bioetl.domain.value_objects import DOI, PublicationYear, PubMedId
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig
@@ -178,6 +178,11 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         # Extract external IDs (pmid, pmc_id, mag)
         external_ids = extract_external_ids(rec.get("ids", {}))
 
+        # Validate PMID using Value Object (returns None for invalid/empty)
+        raw_pmid = external_ids.get("pmid")
+        pmid_vo = PubMedId.from_raw(raw_pmid)
+        pmid = str(pmid_vo) if pmid_vo else None
+
         # Extract MeSH terms
         mesh_terms = extract_mesh_terms(rec.get("mesh", []))
 
@@ -203,7 +208,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         return {
             "openalex_id": openalex_id,
             "doi": doi,
-            "pmid": external_ids.get("pmid"),
+            "pmid": pmid,  # Validated PMID from PubMedId Value Object
             "pmc_id": external_ids.get("pmcid"),  # API uses "pmcid", we use "pmc_id"
             "mag_id": external_ids.get("mag_id"),
             "title": rec.get("title"),
