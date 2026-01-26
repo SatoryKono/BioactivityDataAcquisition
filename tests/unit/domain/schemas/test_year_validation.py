@@ -297,6 +297,10 @@ class TestPubMedYearValidation:
             "pmid": "12345678",
             "doi": "10.1038/nature12373",
             "pmc_id": None,
+            # Additional identifiers
+            "pii": None,
+            "mid": None,
+            "publisher_id": None,
             # Core content
             "title": "Test Article",
             "abstract": None,
@@ -332,6 +336,9 @@ class TestPubMedYearValidation:
             "date_completed": date(2020, 5, 20),
             "date_revised": date(2020, 5, 21),
             "citation_subset": None,
+            # Enhanced affiliation data
+            "structured_affiliations": None,
+            # Counts
             "author_count": 5,
             "mesh_heading_count": 10,
             "keyword_count": 3,
