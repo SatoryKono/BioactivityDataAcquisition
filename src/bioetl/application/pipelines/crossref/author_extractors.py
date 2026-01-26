@@ -1,0 +1,120 @@
+"""Author extraction functions for CrossRef records.
+
+Provides pure functions for extracting author details, ORCID identifiers,
+and affiliations from CrossRef Works API responses.
+
+These functions are:
+- Stateless and pure (no side effects)
+- Unit testable in isolation
+- Reusable across different transformation contexts
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+
+def _normalize_orcid(orcid_value: str | None) -> str | None:
+    """Normalize ORCID to ID-only format (without URL prefix)."""
+    if not orcid_value or not isinstance(orcid_value, str):
+        return None
+    orcid = orcid_value.strip()
+    # Remove URL prefix if present
+    if orcid.startswith("https://orcid.org/"):
+        orcid = orcid[len("https://orcid.org/") :]
+    elif orcid.startswith("http://orcid.org/"):
+        orcid = orcid[len("http://orcid.org/") :]
+    # Validate format: 0000-0000-0000-000X
+    if len(orcid) == 19 and orcid[4] == "-" and orcid[9] == "-" and orcid[14] == "-":
+        return orcid
+    return None
+
+
+def _extract_author_sequence(author: dict[str, Any]) -> str | None:
+    """Extract and validate author sequence field."""
+    sequence = author.get("sequence")
+    if not sequence or not isinstance(sequence, str):
+        return None
+    sequence = sequence.strip().lower()
+    return sequence if sequence in ("first", "additional") else None
+
+
+def _extract_author_affiliations_list(author: dict[str, Any]) -> list[str]:
+    """Extract affiliations list from author object."""
+    affiliations: list[str] = []
+    aff_list = author.get("affiliation", [])
+    if not isinstance(aff_list, list):
+        return affiliations
+    for aff in aff_list:
+        aff_name = aff.get("name") if isinstance(aff, dict) else aff
+        if aff_name and isinstance(aff_name, str):
+            aff_name = aff_name.strip()
+            if aff_name:
+                affiliations.append(aff_name)
+    return affiliations
+
+
+def _build_author_detail(author: dict[str, Any]) -> dict[str, Any] | None:
+    """Build author detail dict from raw author object."""
+    given = author.get("given", "").strip() or None
+    family = author.get("family", "").strip() or None
+    org_name = author.get("name", "").strip() or None
+    if not given and not family and not org_name:
+        return None
+    authenticated_orcid = author.get("authenticated-orcid")
+    return {
+        "given": given,
+        "family": family,
+        "name": org_name,
+        "orcid": _normalize_orcid(author.get("ORCID")),
+        "authenticated_orcid": (
+            bool(authenticated_orcid) if authenticated_orcid is not None else None
+        ),
+        "sequence": _extract_author_sequence(author),
+        "affiliations": _extract_author_affiliations_list(author),
+    }
+
+
+def extract_author_details(publication: dict[str, Any]) -> list[dict[str, Any]]:
+    """Extract full author details from CrossRef publication.
+
+    Args:
+        publication: CrossRef publication record.
+
+    Returns:
+        List of author detail dictionaries with keys:
+        given, family, name, orcid, authenticated_orcid, sequence, affiliations.
+
+    """
+    author_details: list[dict[str, Any]] = []
+    for author in publication.get("author", []):
+        if not isinstance(author, dict):
+            continue
+        detail = _build_author_detail(author)
+        if detail:
+            author_details.append(detail)
+    return author_details
+
+
+def extract_author_orcids(publication: dict[str, Any]) -> list[str]:
+    """Extract list of ORCID identifiers from CrossRef publication.
+
+    Extracts and normalizes all ORCID identifiers from the author array.
+    Only includes non-empty, valid ORCIDs (normalized to ID-only format).
+
+    Args:
+        publication: CrossRef publication record.
+
+    Returns:
+        List of ORCID IDs (format: 0000-0000-0000-000X), preserving author order.
+        Authors without ORCID are not included.
+
+    """
+    orcids: list[str] = []
+    for author in publication.get("author", []):
+        if not isinstance(author, dict):
+            continue
+        orcid = _normalize_orcid(author.get("ORCID"))
+        if orcid:
+            orcids.append(orcid)
+    return orcids
