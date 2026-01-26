@@ -603,7 +603,9 @@ class TestExtractAuthorOrcids:
 
     def test_strip_whitespace(self) -> None:
         """Test that ORCIDs are stripped of whitespace."""
-        authors = [{"name": "John", "externalIds": {"ORCID": "  0000-0001-2345-6789  "}}]
+        authors = [
+            {"name": "John", "externalIds": {"ORCID": "  0000-0001-2345-6789  "}}
+        ]
         result = extract_author_orcids(authors)
         assert result == ["0000-0001-2345-6789"]
 
