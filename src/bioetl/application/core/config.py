@@ -5,8 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.memory_monitor import MemoryConfig
-from bioetl.domain.config import DQConfig, TableConfig
+from bioetl.domain.config import DQConfig, MemoryConfig, TableConfig
 
 if TYPE_CHECKING:
     from bioetl.domain.types import RunType

@@ -392,7 +392,8 @@ class TestMemoryMonitorBaseline:
 
     def test_memory_stats_baseline(self) -> None:
         """Memory stats retrieval must complete under threshold."""
-        from bioetl.application.core.memory_monitor import MemoryConfig, MemoryMonitor
+        from bioetl.domain.config import MemoryConfig
+        from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
 
         monitor = MemoryMonitor(config=MemoryConfig())
 
@@ -419,7 +420,8 @@ class TestMemoryMonitorBaseline:
 
     def test_recommended_batch_size_baseline(self) -> None:
         """Recommended batch size calculation must complete under threshold."""
-        from bioetl.application.core.memory_monitor import MemoryConfig, MemoryMonitor
+        from bioetl.domain.config import MemoryConfig
+        from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
 
         monitor = MemoryMonitor(config=MemoryConfig())
 
