@@ -47,9 +47,12 @@ if TYPE_CHECKING:
 SEMANTICSCHOLAR_BASE_URL = "https://api.semanticscholar.org/graph/v1"
 
 # Default fields to retrieve from Semantic Scholar
+# Note: authors.externalIds includes ORCID, DBLP, and other identifiers
+# authors.hIndex provides h-index metric for each author
 DEFAULT_FIELDS = (
     "paperId,externalIds,title,abstract,year,publicationDate,"
-    "venue,authors,citationCount,referenceCount,isOpenAccess,"
+    "venue,authors,authors.externalIds,authors.hIndex,authors.authorId,"
+    "citationCount,referenceCount,isOpenAccess,"
     "openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal"
 )
 
