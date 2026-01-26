@@ -29,11 +29,6 @@ from bioetl.application.core.cleanup_service import (
     LayerInfo,
 )
 from bioetl.application.core.lock_manager import LockManager
-from bioetl.application.core.memory_monitor import (
-    MemoryConfig,
-    MemoryMonitor,
-    MemoryStats,
-)
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.postrun_service import (
     DQEvaluationStatus,
@@ -66,12 +61,13 @@ from bioetl.application.services.medallion_types import (
     ClearResult,
     PrepareResult,
 )
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.config import MemoryConfig, PipelineConfig, RuntimeConfig
 from bioetl.domain.medallion import (
     Layer,
     WriteMode,
     WriteModePolicy,
 )
+from bioetl.domain.ports import MemoryStats
 
 __all__ = [
     "BasePipeline",
@@ -91,7 +87,6 @@ __all__ = [
     "LockManager",
     "MedallionLifecycleService",
     "MemoryConfig",
-    "MemoryMonitor",
     "MemoryStats",
     "PipelineConfig",
     "PipelineRunner",

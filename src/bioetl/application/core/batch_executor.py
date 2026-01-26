@@ -30,7 +30,6 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.application.core.config import RecordProcessorConfig
-    from bioetl.application.core.memory_monitor import MemoryConfig
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.protocols import (
         GoldFilterCallback,
@@ -38,6 +37,7 @@ if TYPE_CHECKING:
         TransformCallback,
     )
     from bioetl.application.services.dq_report_service import DQReportContext
+    from bioetl.domain.config import MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.models.metadata import SourceMetadata

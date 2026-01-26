@@ -6,11 +6,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.application.core.memory_monitor import (
-    MemoryConfig,
-    MemoryMonitor,
-    MemoryStats,
-)
+from bioetl.domain.config import MemoryConfig
+from bioetl.domain.ports import MemoryStats
+from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
 
 
 @pytest.mark.unit
@@ -480,7 +478,7 @@ class TestMemoryMonitorResourceFallback:
         monitor = MemoryMonitor(config=config, logger=mock_logger)
 
         with patch.object(monitor, "_psutil_available", False):
-            with patch("bioetl.application.core.memory_monitor.sys") as mock_sys:
+            with patch("bioetl.infrastructure.system.memory_monitor.sys") as mock_sys:
                 mock_sys.platform = "win32"
 
                 stats = monitor._get_stats_fallback()
@@ -493,7 +491,7 @@ class TestMemoryMonitorResourceFallback:
         config = MemoryConfig()
 
         with patch(
-            "bioetl.application.core.memory_monitor._check_psutil_available"
+            "bioetl.infrastructure.system.memory_monitor._check_psutil_available"
         ) as mock_check:
             mock_check.return_value = False
             monitor = MemoryMonitor(config=config, logger=mock_logger)

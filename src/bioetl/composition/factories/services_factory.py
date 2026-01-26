@@ -38,9 +38,9 @@ if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.memory_monitor import MemoryConfig
     from bioetl.application.core.shutdown import ShutdownSignal
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
+    from bioetl.domain.config import MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
         CheckpointPort,

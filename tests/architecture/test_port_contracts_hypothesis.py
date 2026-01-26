@@ -712,7 +712,8 @@ class TestMemoryMonitorPortProperties:
     @settings(deadline=None)
     def test_recommended_batch_size_is_positive(self, batch_size: int) -> None:
         """Property: get_recommended_batch_size() MUST return positive integer."""
-        from bioetl.application.core.memory_monitor import MemoryConfig, MemoryMonitor
+        from bioetl.domain.config import MemoryConfig
+        from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
 
         monitor = MemoryMonitor(config=MemoryConfig())
 
@@ -743,7 +744,8 @@ class TestMemoryMonitorPortProperties:
         self, records_count: int, avg_record_size: int
     ) -> None:
         """Property: estimate_batch_memory_mb() MUST return non-negative value."""
-        from bioetl.application.core.memory_monitor import MemoryConfig, MemoryMonitor
+        from bioetl.domain.config import MemoryConfig
+        from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
 
         monitor = MemoryMonitor(config=MemoryConfig())
 
