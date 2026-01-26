@@ -403,6 +403,12 @@ class PipelineConfig:
     transform_version: str | None = None
     transform_steps: tuple[str, ...] = ()
 
+    # Pagination strategy (ADR-030)
+    # When True, checkpoint-based resume is disabled and each run performs a full scan.
+    # Deduplication is handled on Silver layer via content_hash.
+    # Required for publication entities due to API offset instability.
+    force_full_scan: bool = False
+
     def __post_init__(self) -> None:
         """Convert lists to tuples and validate configuration on creation."""
         self._ensure_immutability()

@@ -12,6 +12,11 @@ entity_type: publication
 version: "1.2.0"
 description: "Batch DOI resolution via OpenAlex with title fallback"
 
+# Pagination strategy (ADR-030)
+# Publication entities require full scan on each run due to API offset instability.
+# Deduplication is handled on Silver layer via content_hash.
+force_full_scan: true
+
 primary_keys: ["openalex_id"]
 silver_table: "openalex_publication"
 gold_table: "openalex_publication"
