@@ -430,7 +430,14 @@ class TestBaseGoldColumnFilterConfig:
 
     def test_all_operators(self) -> None:
         """Test all valid operators."""
-        operators = ["in", "not_in", "is_null", "is_not_null", "is_empty", "is_not_empty"]
+        operators = [
+            "in",
+            "not_in",
+            "is_null",
+            "is_not_null",
+            "is_empty",
+            "is_not_empty",
+        ]
         for op in operators:
             if op in ("in", "not_in"):
                 config = BaseGoldColumnFilterConfig(operator=op, values=["x"])
@@ -493,7 +500,9 @@ class TestBaseGoldFiltersConfig:
         """Test list contains filter configuration."""
         config = BaseGoldFiltersConfig(
             list_contains={
-                "tags": BaseGoldListContainsFilterConfig(values=["required"], mode="any"),
+                "tags": BaseGoldListContainsFilterConfig(
+                    values=["required"], mode="any"
+                ),
             },
         )
         assert config.list_contains["tags"].values == ["required"]
