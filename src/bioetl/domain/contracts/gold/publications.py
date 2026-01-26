@@ -176,7 +176,6 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     language: Series[str] = pa.Field(nullable=True)
     license_url: Series[str] = pa.Field(nullable=True)
     subjects: Series[object] = pa.Field(nullable=True)  # list[str]
-    source: Series[str] = pa.Field(nullable=True)
 
     # Content domain (Crossmark/license restrictions)
     content_domain_domains: Series[object] = pa.Field(nullable=True)  # list[str]
@@ -196,6 +195,9 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     # ISSN by type
     issn_print: Series[str] = pa.Field(nullable=True)
     issn_electronic: Series[str] = pa.Field(nullable=True)
+
+    # Source tracking (maps to _source column in DataFrame)
+    source: Series[str] = pa.Field(nullable=True, alias="_source")
 
     # Lookup metadata
     # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
@@ -267,7 +269,9 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     # Unified BioETL field: citation_count (standardized across all providers)
     citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     language: Series[str] = pa.Field(nullable=True)
-    source: Series[str] = pa.Field(nullable=False)
+
+    # Source tracking (maps to _source column in DataFrame)
+    source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
     # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
@@ -343,8 +347,8 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     publication_types: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)
 
-    # Source tracking
-    source: Series[str] = pa.Field(nullable=True)
+    # Source tracking (maps to _source column in DataFrame)
+    source: Series[str] = pa.Field(nullable=True, alias="_source")
 
     # Lookup metadata
     # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
