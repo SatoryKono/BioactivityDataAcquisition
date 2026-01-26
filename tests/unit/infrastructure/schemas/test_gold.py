@@ -339,7 +339,7 @@ class TestGoldSchemaValidation:
             "grant_count": 0,
             "reference_count": 10,
             "chemical_count": 0,
-            "source": "pubmed",
+            "_source": "pubmed",
             "_lookup_method": "direct",
             "_original_id": "12345678",
             "_dq_warn": False,

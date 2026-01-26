@@ -110,8 +110,8 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     reference_count: Series[float] = pa.Field(nullable=True, coerce=True)
     chemical_count: Series[float] = pa.Field(nullable=True, coerce=True)
 
-    # Source tracking
-    source: Series[str] = pa.Field(nullable=True)
+    # Source tracking (maps to _source column in DataFrame)
+    source: Series[str] = pa.Field(nullable=True, alias="_source")
 
     # Lookup metadata
     # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"

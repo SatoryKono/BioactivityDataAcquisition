@@ -85,7 +85,8 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     fields_of_study: str | None = None
     publication_types: str | None = None
 
-    # Note: _source is set by transformer via entity_to_silver_record() mapping
+    # Override: Default source for SemanticScholar
+    _source: str = "semanticscholar"
 
     def __post_init__(self) -> None:
         """Post-initialization validation.

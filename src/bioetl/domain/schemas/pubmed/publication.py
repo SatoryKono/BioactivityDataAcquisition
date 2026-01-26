@@ -107,13 +107,13 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     journal_iso_abbrev: Series[str] = pa.Field(
         nullable=True, description="ISO journal abbreviation"
     )
-    journal_issn: Series[str] = pa.Field(
+    issn: Series[str] = pa.Field(
         nullable=True,
         description="ISSN (print or electronic)",
     )
 
-    @pa.check("journal_issn", name="journal_issn_format")
-    def _check_journal_issn(cls, series: Series[str]) -> Series[bool]:
+    @pa.check("issn", name="issn_format")
+    def _check_issn(cls, series: Series[str]) -> Series[bool]:
         """Validate ISSN format."""
         return cast(
             "Series[bool]", series.isna() | series.str.match(r"^\d{4}-\d{3}[\dX]$")

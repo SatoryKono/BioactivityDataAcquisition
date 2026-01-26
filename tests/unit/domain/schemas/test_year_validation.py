@@ -71,7 +71,7 @@ class TestCrossRefYearValidation:
             # Lookup tracking
             "_lookup_method": "doi",
             "_original_id": "10.1038/nature12373",
-            "source": "crossref",
+            "_source": "crossref",
             # CrossRef-specific fields
             "issn": None,
             "publisher": "Nature Publishing Group",
@@ -157,7 +157,7 @@ class TestSemanticScholarYearValidation:
             # Lookup tracking
             "_lookup_method": "doi",
             "_original_id": None,
-            "source": "semanticscholar",
+            "_source": "semanticscholar",
             # SemanticScholar-specific fields
             "paper_id": "a" * 40,  # 40-char hex
             "arxiv_id": None,
@@ -314,13 +314,13 @@ class TestPubMedYearValidation:
             # Lookup tracking
             "_lookup_method": "pmid",
             "_original_id": "12345678",
-            "source": "pubmed",
+            "_source": "pubmed",
             # PubMed-specific fields
             "abstract_structured": None,
             "vernacular_title": None,
             "journal_title": "Nature",
             "journal_iso_abbrev": "Nature",
-            "journal_issn": "0028-0836",
+            "issn": "0028-0836",
             "journal_issn_type": "Print",
             "nlm_unique_id": None,
             "country": "United States",

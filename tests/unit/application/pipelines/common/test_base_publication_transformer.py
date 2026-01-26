@@ -39,9 +39,11 @@ class StubPublicationEntity(BaseEntity):
     title: str | None = None
     abstract: str | None = None
     year: int | None = None
-    source: str | None = None
     _lookup_method: str | None = None
     _original_id: str | None = None
+
+    # Data source identifier
+    _source: str = "test_provider"
 
 
 # =============================================================================
@@ -59,7 +61,7 @@ class StubPublicationTransformer(BasePublicationTransformer):
             "title": record.get("title"),
             "abstract": record.get("abstract"),
             "year": record.get("year"),
-            "source": "test_provider",
+            "_source": "test_provider",
             "_lookup_method": record.get("_lookup_method"),
             "_original_id": record.get("_original_id"),
         }

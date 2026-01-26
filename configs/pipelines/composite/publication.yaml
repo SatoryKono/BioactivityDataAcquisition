@@ -310,13 +310,8 @@ composite:
           - chemical_count
         provider_order: [crossref, pubmed]
 
-      # 21. Source tracking (last before DQ)
-      - name: source
-        fields:
-          - source
-        provider_order: [crossref, openalex, pubmed, semanticscholar]
-
-      # 22. DQ fields (always last)
+      # 21. DQ fields (always last)
+      # Note: _source is a system field in the 'system' group
       - name: dq
         pattern: "^_dq_"
 

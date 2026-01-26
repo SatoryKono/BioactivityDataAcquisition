@@ -294,7 +294,6 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("received_date", pa.string()),
         pa.field("reference_count", pa.int64()),  # Number of references
         pa.field("revised_date", pa.string()),
-        pa.field("source", pa.string()),
         pa.field("title", pa.string()),
         pa.field("vernacular_title", pa.string()),  # Original non-English title
         pa.field("volume", pa.string()),
@@ -686,8 +685,6 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publication_date", pa.string()),
         pa.field("publication_types", pa.string()),
         pa.field("reference_count", pa.int64()),
-        # Source tracking
-        pa.field("source", pa.string()),
         # Core fields
         pa.field("title", pa.string()),
         pa.field("tldr", pa.string()),
@@ -745,7 +742,6 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publisher", pa.string()),
         pa.field("reference_count", pa.int64()),
         pa.field("short_container_title", pa.list_(pa.string())),
-        pa.field("source", pa.string()),
         pa.field("subjects", pa.list_(pa.string())),
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
@@ -804,7 +800,6 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Date fields
         pa.field("publication_date", pa.string()),
         pa.field("publisher", pa.string()),
-        pa.field("source", pa.string()),
         pa.field("title", pa.string()),
         pa.field("year", pa.int64()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===

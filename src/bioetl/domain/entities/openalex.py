@@ -247,7 +247,8 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # Quality indicators
     is_retracted: bool = False
 
-    # Note: _source is set by transformer via entity_to_silver_record() mapping
+    # Override: Default source for OpenAlex
+    _source: str = "openalex"
 
     def __post_init__(self) -> None:
         """Post-initialization validation.

@@ -254,7 +254,8 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     issn_print: str | None = None
     issn_electronic: str | None = None
 
-    # Note: _source is set by transformer via entity_to_silver_record() mapping
+    # Override: Default source for CrossRef
+    _source: str = "crossref"
 
     def __post_init__(self) -> None:
         """Post-initialization validation.

@@ -954,8 +954,6 @@ class TestAllPublicationSchemas:
         ],
     )
     def test_schema_has_source_field(self, schema, name):
-        """All external publication schemas should have source field for provenance."""
+        """All publication schemas should have _source field for provenance."""
         field_names = {f.name for f in schema}
-        # ChEMBL doesn't need source field (it's an internal source)
-        if "ChEMBL" not in name:
-            assert "source" in field_names, f"{name} missing source field"
+        assert "_source" in field_names, f"{name} missing _source field"
