@@ -782,14 +782,26 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Cross-reference IDs for linking publications across providers
         # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
         pa.field("doi", pa.string()),
-        # Unified page fields (OpenAlex doesn't provide pages, but added for consistency)
+        # Unified page fields (from biblio object)
         pa.field("first_page", pa.string()),
+        # Field-Weighted Citation Impact (must be non-negative)
+        pa.field("fwci", pa.float64()),
         pa.field("is_oa", pa.bool_()),
+        # Quality indicators
+        pa.field("is_retracted", pa.bool_()),
+        # Bibliographic info (from biblio object)
+        pa.field("issue", pa.string()),
         # Journal info
         pa.field("issn", pa.string()),
         pa.field("journal", pa.string()),
+        # Keywords extracted from OpenAlex
+        pa.field("keywords", pa.list_(pa.string())),
         pa.field("language", pa.string()),
         pa.field("last_page", pa.string()),
+        # Microsoft Academic Graph ID (legacy, from ids object)
+        pa.field("mag_id", pa.string()),
+        # MeSH terms extracted from OpenAlex mesh field
+        pa.field("mesh", pa.list_(pa.string())),
         pa.field("oa_status", pa.string()),
         # Primary key
         pa.field("openalex_id", pa.string()),
@@ -800,7 +812,11 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Date fields
         pa.field("publication_date", pa.string()),
         pa.field("publisher", pa.string()),
+        # Number of works referenced (from referenced_works_count)
+        pa.field("referenced_works_count", pa.int64()),
         pa.field("title", pa.string()),
+        # Bibliographic info (from biblio object)
+        pa.field("volume", pa.string()),
         pa.field("year", pa.int64()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
         pa.field("_dq_warn", pa.bool_()),
