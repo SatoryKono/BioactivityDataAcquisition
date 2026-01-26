@@ -393,7 +393,9 @@ class TestOpenAlexPublicationSchema:
 
     def test_grants_json_string(self, valid_record: dict) -> None:
         """Should accept grants as JSON-serialized string."""
-        grants_json = '[{"funder": "F1", "funder_display_name": "NIH", "award_id": "R01"}]'
+        grants_json = (
+            '[{"funder": "F1", "funder_display_name": "NIH", "award_id": "R01"}]'
+        )
         valid_record["grants"] = grants_json
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
