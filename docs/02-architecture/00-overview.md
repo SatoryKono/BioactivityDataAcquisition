@@ -1,6 +1,6 @@
 # Architecture Overview
 
-*Synced with RULES.md v5.12 (2026-01-06)*
+*Synced with RULES.md v5.12 (2026-01-26)*
 
 ## Quick Navigation
 
@@ -28,15 +28,16 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 
 ### Diagrams
 
-- [diagrams/](diagrams/) — 34 Mermaid diagram files
+- [diagrams/](diagrams/) — 35 Mermaid diagram files
 - [diagrams/diagrams-index.md](diagrams/diagrams-index.md) — Full diagram index
 - [diagrams.md](diagrams.md) — Inline diagram collection
+- [../diagrams/mermaid/](../diagrams/mermaid/) — Additional 26 diagrams (includes Composite Pipeline workflow)
 
 ### Architecture Decision Records (ADRs)
 
 See [decisions/README.md](decisions/README.md) for full index with categories.
 
-29 ADRs documenting key architectural decisions:
+31 ADRs documenting key architectural decisions:
 
 | ADR | Topic | RULES.md Reference |
 |-----|-------|-------------------|
@@ -69,6 +70,8 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-027](decisions/ADR-027-dq-rules-externalization.md) | DQ Rules Externalization | §3.1.2 |
 | [ADR-028](decisions/ADR-028-filter-rules-externalization.md) | Filter Rules Externalization | App D |
 | [ADR-029](decisions/ADR-029-output-metadata-unification.md) | Output Metadata Unification | §2.4 |
+| [ADR-030](decisions/ADR-030-publication-pagination-strategy.md) | Publication Pagination Strategy | - |
+| [ADR-031](decisions/ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | - |
 
 ---
 
@@ -92,6 +95,17 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 2. **Ports & Adapters**: Interfaces in `domain/ports/`, implementations in `infrastructure/`
 3. **Composition Root**: Single assembly point in `composition/bootstrap.py`
 4. **Medallion Architecture**: Bronze (raw) → Silver (normalized) → Gold (curated)
+5. **Composite Pipeline** (ADR-026): Multi-source data enrichment with seed → enrich (fan-out) → merge workflow
+
+### Key Diagrams
+
+| Diagram | Description | File |
+|---------|-------------|------|
+| Five Layer Architecture | Complete system architecture with all 5 layers | [01_five_layer_architecture.mmd](../diagrams/mermaid/01_five_layer_architecture.mmd) |
+| Layers Interaction | How layers communicate | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid) |
+| Composite Pipeline | ADR-026 workflow: seed → enrich → merge | [26_composite_pipeline_workflow.mmd](../diagrams/mermaid/26_composite_pipeline_workflow.mmd) |
+| Provider Adapters | 7 providers with rate limits | [23_provider_adapters_overview.mmd](../diagrams/mermaid/23_provider_adapters_overview.mmd) |
+| Pipeline Hierarchy | Pipeline/Transformer inheritance | [17-pipeline-hierarchy.mermaid](diagrams/17-pipeline-hierarchy.mermaid) |
 
 ---
 

@@ -142,3 +142,36 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 - **Никакого I/O:** В этом слое запрещены любые операции, связанные с сетью, файловой системой или базами данных.
 - **Валидация данных:** Логика валидации бизнес-сущностей (например, проверка SMILES-строк) может находиться здесь, если она не требует внешних зависимостей.
 - **Иммутабельность:** Предпочтение отдаётся иммутабельным структурам данных (например, `NamedTuple`, `dataclasses(frozen=True)`).
+
+---
+
+## 4. Связанные Материалы
+
+### Навигация по Слоям
+
+| ← Предыдущий | Текущий | Следующий → |
+|--------------|---------|-------------|
+| — | **Domain** | [Application Layer](02-application-layer.md) |
+
+### Связанные Диаграммы
+
+| Диаграмма | Файл | Описание |
+|-----------|------|----------|
+| Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](diagrams/04-domain-layer-class-diagram.mermaid) | Классы портов, сущностей, конфигурации |
+| Domain DDD | [08-domain-ddd.mermaid](diagrams/08-domain-ddd.mermaid) | DDD-структура домена |
+| Domain Models | [13-domain-models-relationship.mermaid](diagrams/13-domain-models-relationship.mermaid) | Связи доменных моделей |
+| DDD Aggregates | [../diagrams/mermaid/09_ddd_aggregates.mmd](../diagrams/mermaid/09_ddd_aggregates.mmd) | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
+| Ports Architecture | [../diagrams/mermaid/07_ports_architecture.mmd](../diagrams/mermaid/07_ports_architecture.mmd) | Архитектура 26 портов |
+
+### Связанные ADR
+
+| ADR | Тема |
+|-----|------|
+| [ADR-004](decisions/ADR-004-pydantic-vs-dataclasses.md) | Pydantic vs Dataclasses — выбор dataclasses |
+| [ADR-021](decisions/ADR-021-ddd-aggregates-adoption.md) | DDD Aggregates — внедрение агрегатов |
+
+### Смежные Разделы Документации
+
+- [RULES.md §1 "Архитектура и Слои"](../RULES.md) — матрица импортов, правила слоёв
+- [API Reference: Domain](../04-reference/api/domain.md) — API документация слоя
+- [Glossary](../glossary.md) — терминология Ubiquitous Language

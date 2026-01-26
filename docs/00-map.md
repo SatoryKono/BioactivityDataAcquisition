@@ -1,12 +1,14 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.12 | Last updated: 2026-01-21*
+*Synced with RULES.md v5.12 | Last updated: 2026-01-26*
 
-> **Documentation Audit Completed:** 2026-01-21
-> - RULES.md updated to v5.12: ADR-021..028 added to registry with inline references
-> - REQUIREMENTS.md updated to v1.4: correct count 156 (was 139)
-> - Added ADR-028-filter-rules-externalization to 00-map.md
-> - See: [archived/audits/sync-audit-2026-01-21.md](archived/audits/sync-audit-2026-01-21.md) for details
+> **Documentation Update:** 2026-01-26
+> - Architecture diagrams updated: Composite Pipeline (ADR-026) added to layer diagrams
+> - New diagram: `26_composite_pipeline_workflow.mmd` — visualizes seed → enrich → merge flow
+> - Cross-links added between all layer documents (Domain ↔ Application ↔ Infrastructure ↔ Interfaces ↔ Composition)
+> - All 7 providers now reflected in diagrams (including CrossRef, OpenAlex, SemanticScholar)
+> - ADR-030, ADR-031 added to registry
+> - See: [02-architecture/00-overview.md](02-architecture/00-overview.md) for updated architecture overview
 
 ## Quick Links
 
@@ -68,8 +70,8 @@ docs/
 │   ├── data-layers.md           # Bronze/Silver/Gold layer details
 │   ├── observability-layers.md  # Observability architecture
 │   ├── diagrams.md              # Mermaid diagrams collection
-│   ├── decisions/               # ADR-001..029 (29 records)
-│   └── diagrams/                # 34 Mermaid diagram files + render_diagrams.py
+│   ├── decisions/               # ADR-001..031 (31 records)
+│   └── diagrams/                # 35 Mermaid diagram files + render_diagrams.py
 │
 ├── 03-guides/                   # How-to guides (13 guides)
 │   ├── quick-start.md           # Quick start guide
@@ -183,6 +185,8 @@ docs/
 | [ADR-027: DQ Rules Externalization](02-architecture/decisions/ADR-027-dq-rules-externalization.md) | Hierarchical DQ configuration | §3.1.2   |
 | [ADR-028: Filter Rules Externalization](02-architecture/decisions/ADR-028-filter-rules-externalization.md) | Hierarchical filter configuration | App D   |
 | [ADR-029: Output Metadata Unification](02-architecture/decisions/ADR-029-output-metadata-unification.md) | Unified output metadata contracts | §2.4    |
+| [ADR-030: Publication Pagination Strategy](02-architecture/decisions/ADR-030-publication-pagination-strategy.md) | Publication pagination strategy | -       |
+| [ADR-031: Loading Strategy Formalization](02-architecture/decisions/ADR-031-loading-strategy-formalization.md) | Loading strategy formalization | -       |
 
 ### Data Management
 
