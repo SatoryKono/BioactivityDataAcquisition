@@ -789,10 +789,10 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("is_oa", pa.bool_()),
         # Quality indicators
         pa.field("is_retracted", pa.bool_()),
-        # Bibliographic info (from biblio object)
-        pa.field("issue", pa.string()),
         # Journal info
         pa.field("issn", pa.string()),
+        # Bibliographic info (from biblio object)
+        pa.field("issue", pa.string()),
         pa.field("journal", pa.string()),
         # Keywords extracted from OpenAlex
         pa.field("keywords", pa.list_(pa.string())),
