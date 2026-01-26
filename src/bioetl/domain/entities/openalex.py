@@ -189,8 +189,7 @@ class OpenAlexPublicationRecord(BaseModel):
         description="Original DOI from input CSV (for fallback records)",
     )
 
-    # Source tracking
-    source: str = PydanticField(default="openalex", description="Data source")
+    # Note: _source is set by transformer via entity_to_silver_record() mapping
 
 
 # === Dataclass Domain Entity ===
@@ -211,7 +210,7 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     Inherited from PublicationEntityBase:
         doi, pmid, title, abstract, authors, journal, issn, publisher,
         year, publication_date, citation_count, doc_type, language, is_oa,
-        oa_status, _lookup_method, _original_id, source.
+        oa_status, _lookup_method, _original_id.
 
     OpenAlex-specific Attributes:
         openalex_id: OpenAlex Work ID (e.g., W2148763428). REQUIRED.
@@ -248,8 +247,7 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # Quality indicators
     is_retracted: bool = False
 
-    # Override: Default source for OpenAlex
-    source: str = "openalex"
+    # Note: _source is set by transformer via entity_to_silver_record() mapping
 
     def __post_init__(self) -> None:
         """Post-initialization validation.

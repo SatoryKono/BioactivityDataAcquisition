@@ -58,13 +58,11 @@ class PublicationEntityBase(BaseEntity):
         _original_id: Original identifier from input (for fallback records).
         _dq_warn: Record has data quality warnings (inherited from BaseEntity).
         _dq_error: Record has data quality errors (inherited from BaseEntity).
-        source: Data source identifier (e.g., "crossref", "openalex").
 
     Note:
-        Subclasses MUST:
-        - Define their own primary identifier field (doi, openalex_id, paper_id, pmid)
-        - Override __post_init__ to validate the primary key
-        - Set appropriate default for `source` field
+        - _source field is set by transformer via entity_to_silver_record() mapping
+        - Subclasses MUST define their own primary identifier field (doi, openalex_id, paper_id, pmid)
+        - Subclasses MUST override __post_init__ to validate the primary key
     """
 
     # Identifiers (all nullable - subclasses define their required primary key)
@@ -106,9 +104,7 @@ class PublicationEntityBase(BaseEntity):
     _original_id: str | None = None
 
     # Note: _dq_warn and _dq_error are inherited from BaseEntity
-
-    # Source tracking (subclasses should override default)
-    source: str = ""
+    # Note: _source is set by transformer via entity_to_silver_record() mapping
 
     def __post_init__(self) -> None:
         """Validate base entity constraints.

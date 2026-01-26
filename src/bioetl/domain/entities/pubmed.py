@@ -232,8 +232,7 @@ class PubMedPublicationEntity(PublicationEntityBase):
     # Legacy field (kept for backward compatibility)
     publication_year: int | None = None  # Alias for year
 
-    # Override: Default source for PubMed
-    source: str = "pubmed"
+    # Note: _source is set by transformer via entity_to_silver_record() mapping
 
     def __post_init__(self) -> None:
         """Post-initialization validation.
