@@ -119,8 +119,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
         # Validate DOI using Value Object (returns None for invalid/empty)
         # CrossRef always provides DOI, so we use empty string as fallback for type consistency
-        doi_vo = DOI.from_raw(rec.get("DOI"))
-        doi = str(doi_vo) if doi_vo else ""
+        doi = self.validate_value_object(DOI, rec.get("DOI")) or ""
 
         # Use extractors for structured field extraction
         journal_info = extract_journal_info(rec)
