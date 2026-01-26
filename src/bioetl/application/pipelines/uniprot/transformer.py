@@ -64,12 +64,17 @@ class UniProtProteinTransformer(BaseTransformer):
     _SEQUENCE_LENGTH_PATH = ("sequence", "length")
     _SEQUENCE_MOL_WEIGHT_PATH = ("sequence", "molWeight")
     _SEQUENCE_CRC64_PATH = ("sequence", "crc64")
+    _SEQUENCE_MODIFIED_PATH = ("sequence", "modified")
     _PROTEIN_NAME_PATH = (
         "proteinDescription",
         "recommendedName",
         "fullName",
         "value",
     )
+    # Entry audit paths
+    _ENTRY_AUDIT_CREATED_PATH = ("entryAudit", "firstPublicDate")
+    _ENTRY_AUDIT_MODIFIED_PATH = ("entryAudit", "lastAnnotationUpdateDate")
+    _ENTRY_AUDIT_VERSION_PATH = ("entryAudit", "entryVersion")
 
     def __init__(
         self,
@@ -155,6 +160,7 @@ class UniProtProteinTransformer(BaseTransformer):
         self._add_organism_data(record, data)
         self._add_evidence_data(record, data)
         self._add_sequence_data(record, data)
+        self._add_audit_data(record, data)
         self._add_functional_annotations(record, data)
         self._add_cross_references(record, data)
         self._add_features_and_keywords(record, data)
@@ -234,6 +240,33 @@ class UniProtProteinTransformer(BaseTransformer):
         data["sequence_checksum"] = self._extract_by_path(
             record, self._SEQUENCE_CRC64_PATH
         )
+        # Sequence modification date
+        seq_modified_str = self._extract_by_path(record, self._SEQUENCE_MODIFIED_PATH)
+        seq_modified_date = ExtractorUtils.parse_uniprot_date(seq_modified_str)
+        data["sequence_modified"] = (
+            seq_modified_date.isoformat() if seq_modified_date else None
+        )
+
+    def _add_audit_data(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+        """Add entry audit metadata fields.
+
+        Extracts entry creation/modification dates and version from entryAudit object.
+        Dates are parsed and stored in ISO 8601 format (YYYY-MM-DD).
+        """
+        # Entry version (integer)
+        data["entry_version"] = self._extract_by_path(
+            record, self._ENTRY_AUDIT_VERSION_PATH
+        )
+
+        # Entry creation date
+        created_str = self._extract_by_path(record, self._ENTRY_AUDIT_CREATED_PATH)
+        created_date = ExtractorUtils.parse_uniprot_date(created_str)
+        data["entry_created"] = created_date.isoformat() if created_date else None
+
+        # Entry last modification date
+        modified_str = self._extract_by_path(record, self._ENTRY_AUDIT_MODIFIED_PATH)
+        modified_date = ExtractorUtils.parse_uniprot_date(modified_str)
+        data["entry_modified"] = modified_date.isoformat() if modified_date else None
 
     def _add_functional_annotations(
         self, record: BronzeRecord, data: dict[str, Any]
