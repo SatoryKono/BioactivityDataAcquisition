@@ -70,6 +70,20 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         """Validate PMCID format."""
         return cast("Series[bool]", series.isna() | series.str.match(r"^PMC\d+$"))
 
+    # === Additional Identifiers (for cross-referencing) ===
+    pii: Series[str] = pa.Field(
+        nullable=True,
+        description="Publisher Item Identifier",
+    )
+    mid: Series[str] = pa.Field(
+        nullable=True,
+        description="Manuscript ID (PMC submission process)",
+    )
+    publisher_id: Series[str] = pa.Field(
+        nullable=True,
+        description="Publisher-specific article identifier",
+    )
+
     # === Article Content (override title to be non-nullable) ===
     title: Series[str] = pa.Field(
         nullable=False,
@@ -183,6 +197,15 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     # === Metadata ===
     citation_subset: Series[str] = pa.Field(
         nullable=True, description="Citation subset codes (e.g., 'AIM')"
+    )
+
+    # === Affiliation Data (enhanced for institutional analysis) ===
+    structured_affiliations: Series[str] = pa.Field(
+        nullable=True,
+        description=(
+            "JSON array of structured affiliations with identifier metadata. "
+            "Each object contains: text, identifier, identifier_source, email_hash"
+        ),
     )
 
     # === Counts (denormalized for query efficiency) ===
