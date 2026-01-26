@@ -1,46 +1,63 @@
-"""Common configuration schemas for pipeline YAML files."""
+"""Common configuration schemas for pipeline YAML files.
+
+This module provides backward-compatible re-exports of base configuration classes.
+New code should import directly from `base_schemas` or `pipeline_config` instead.
+
+Deprecated:
+    This module is maintained for backward compatibility only.
+    Prefer importing from:
+    - `bioetl.infrastructure.schemas.base_schemas` for base classes
+    - `bioetl.infrastructure.schemas.pipeline_config` for extended classes
+
+Example:
+    # Preferred (new code):
+    >>> from bioetl.infrastructure.schemas.base_schemas import BaseDQConfig
+    >>> from bioetl.infrastructure.schemas.pipeline_config import DQConfig
+
+    # Deprecated (backward compatibility):
+    >>> from bioetl.infrastructure.schemas.common_config import DQConfig
+"""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pydantic import BaseModel, Field, model_validator
-
-from bioetl.domain.config import DQConfig as DomainDQConfig
-from bioetl.domain.configs.base import BaseClientConfig, RateLimitConfig
-from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
+from bioetl.infrastructure.schemas.base_schemas import (
+    BaseApiConfig,
+    BaseCircuitBreakerConfig,
+    BaseCsvExportConfig,
+    BaseDQConfig,
+    BaseInputFilterConfig,
+    BaseMaintenanceConfig,
+)
 
 if TYPE_CHECKING:
+    from bioetl.domain.config import DQConfig as DomainDQConfig
+    from bioetl.domain.configs.base import BaseClientConfig as DomainBaseClientConfig
     from bioetl.domain.filtering.input_config import (
         InputFilterConfig as DomainInputFilterConfig,
     )
+    from bioetl.domain.resilience import (
+        CircuitBreakerConfig as DomainCircuitBreakerConfig,
+    )
 
 
-class DQConfig(BaseModel):
-    """Data Quality configuration."""
+# =============================================================================
+# Backward Compatibility Aliases
+# =============================================================================
+#
+# These classes inherit from base classes without modification.
+# They exist solely for backward compatibility with existing code.
+# New code should import from base_schemas or pipeline_config directly.
 
-    soft_fail_threshold: float = Field(default=0.05)
-    hard_fail_threshold: float = Field(default=0.20)
-    strict_validation: bool = Field(default=False)
 
-    @model_validator(mode="after")
-    def validate_thresholds(self) -> DQConfig:
-        """Validate that soft threshold is less than hard threshold.
+class DQConfig(BaseDQConfig):
+    """Data Quality configuration (backward compatibility alias).
 
-        Delegates to domain DQConfig for threshold validation per §4.1.
-        Raises ValueError if soft_fail_threshold >= hard_fail_threshold.
-
-        Returns:
-            Self after validation.
-
-        Raises:
-            ValueError: If threshold invariant is violated.
-        """
-        DomainDQConfig.validate_thresholds(
-            soft_fail_threshold=self.soft_fail_threshold,
-            hard_fail_threshold=self.hard_fail_threshold,
-        )
-        return self
+    Deprecated:
+        Use `BaseDQConfig` from `base_schemas` or extended `DQConfig`
+        from `pipeline_config` instead.
+    """
 
     def to_domain(self) -> DomainDQConfig:
         """Convert Pydantic schema to domain DQConfig object.
@@ -48,103 +65,84 @@ class DQConfig(BaseModel):
         Returns:
             Domain-layer DQConfig with validated thresholds.
         """
-        return DomainDQConfig(
-            soft_fail_threshold=self.soft_fail_threshold,
-            hard_fail_threshold=self.hard_fail_threshold,
-            strict_validation=self.strict_validation,
-        )
+        return super().to_domain()
 
 
-class CircuitBreakerConfig(BaseModel):
-    """Circuit Breaker configuration."""
+class CircuitBreakerConfig(BaseCircuitBreakerConfig):
+    """Circuit Breaker configuration (backward compatibility alias).
 
-    failure_threshold: int = Field(default=5, ge=1)
-    recovery_timeout: int = Field(default=300, ge=60)
+    Deprecated:
+        Use `BaseCircuitBreakerConfig` from `base_schemas` instead.
+    """
 
     def to_domain(self) -> DomainCircuitBreakerConfig:
         """Convert Pydantic schema to domain CircuitBreakerConfig.
-
-        Creates domain configuration for circuit breaker per §3.1.4.
 
         Returns:
             Domain-layer CircuitBreakerConfig with failure threshold
             and recovery timeout settings.
         """
-        return DomainCircuitBreakerConfig(
-            failure_threshold=self.failure_threshold,
-            recovery_timeout=self.recovery_timeout,
-        )
+        return super().to_domain()
 
 
-class CsvExportConfig(BaseModel):
-    """Configuration for CSV export."""
+class CsvExportConfig(BaseCsvExportConfig):
+    """Configuration for CSV export (backward compatibility alias).
 
-    enabled: bool = False
-    path: str | None = None
-    delimiter: str = ","
-    header: bool = True
-    encoding: str = "utf-8"
+    Deprecated:
+        Use `BaseCsvExportConfig` from `base_schemas` instead.
+    """
 
 
-class InputFilterConfig(BaseModel):
-    """Configuration for input ID filtering from CSV."""
+class InputFilterConfig(BaseInputFilterConfig):
+    """Configuration for input ID filtering from CSV (backward compatibility alias).
 
-    enabled: bool = False
-    source_path: str | None = Field(default=None)
-    column_name: str = Field(default="id")
-    filter_field: str = Field(default="molecule_chembl_id")
-    batch_size: int = Field(default=100, ge=1, le=1000)
+    Note:
+        This is a simplified version that supports both single-column and
+        multi-column modes. The full implementation is in `pipeline_config`.
+
+    Deprecated:
+        Use `BaseInputFilterConfig` from `base_schemas` or extended
+        `InputFilterConfig` from `pipeline_config` instead.
+    """
 
     def to_domain(self) -> DomainInputFilterConfig:
         """Convert Pydantic schema to domain InputFilterConfig.
 
-        Creates domain configuration for CSV-based input filtering.
-        When disabled, column_name and filter_field are set to None.
-
         Returns:
             Domain-layer InputFilterConfig for selective record processing.
         """
-        from bioetl.domain.filtering.input_config import (
-            InputFilterConfig as DomainInputFilterConfigImpl,
-        )
-
-        return DomainInputFilterConfigImpl(
-            enabled=self.enabled,
-            source_path=self.source_path,
-            column_name=self.column_name if self.enabled else None,
-            filter_field=self.filter_field if self.enabled else None,
-            batch_size=self.batch_size,
-        )
+        return super().to_domain()
 
 
-class MaintenanceConfig(BaseModel):
-    """Configuration for automated maintenance operations."""
+class MaintenanceConfig(BaseMaintenanceConfig):
+    """Configuration for maintenance operations (backward compatibility alias).
 
-    auto_vacuum: bool = Field(default=False)
-    vacuum_retention_days: int = Field(default=7, ge=1, le=365)
+    Deprecated:
+        Use `BaseMaintenanceConfig` from `base_schemas` instead.
+    """
 
 
-class ApiConfig(BaseModel):
-    """Configuration for API connection details."""
+class ApiConfig(BaseApiConfig):
+    """Configuration for API connection details (backward compatibility alias).
 
-    base_url: str | None = None
-    rate_limit: float | None = None
-    timeout: int | None = None
+    Deprecated:
+        Use `BaseApiConfig` from `base_schemas` instead.
+    """
 
-    def to_domain(self) -> BaseClientConfig:
+    def to_domain(self) -> DomainBaseClientConfig:
         """Convert Pydantic schema to domain BaseClientConfig.
-
-        Creates domain configuration for API client with defaults:
-        - timeout: 30 seconds if not specified
-        - rate_limit: 5.0 requests/second if not specified
 
         Returns:
             Domain-layer BaseClientConfig for HTTP client initialization.
         """
-        return BaseClientConfig(
-            base_url=self.base_url,
-            timeout=self.timeout or 30,
-            rate_limit=RateLimitConfig(
-                requests_per_second=self.rate_limit or 5.0,
-            ),
-        )
+        return super().to_domain()
+
+
+__all__ = [
+    "ApiConfig",
+    "CircuitBreakerConfig",
+    "CsvExportConfig",
+    "DQConfig",
+    "InputFilterConfig",
+    "MaintenanceConfig",
+]

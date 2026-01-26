@@ -233,7 +233,7 @@ class PubMedPublicationEntity(PublicationEntityBase):
     publication_year: int | None = None  # Alias for year
 
     # Override: Default source for PubMed
-    source: str = "pubmed"
+    _source: str = "pubmed"
 
     def __post_init__(self) -> None:
         """Post-initialization validation.

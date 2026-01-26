@@ -108,7 +108,7 @@ class TestOpenAlexPublicationTransformer:
         assert result["oa_status"] == "gold"
         assert result["citation_count"] == 42  # Unified field name
         assert result["language"] == "en"
-        assert result["source"] == "openalex"
+        assert result["_source"] == "openalex"
         assert result["_lookup_method"] == "doi"
 
     @pytest.mark.asyncio

@@ -628,6 +628,12 @@ class BaseTransformer(ABC):
                 "ingestion_ts"
             ).isoformat()
 
+        # Handle source field renaming: source → _source
+        # Some entities use 'source' (PublicationEntityBase), others use '_source' (ChemblPublication)
+        # Silver schema expects '_source' as the system metadata field
+        if "source" in silver_record and "_source" not in silver_record:
+            silver_record["_source"] = silver_record.pop("source")
+
         return silver_record
 
     # ==================== Helper Methods ====================

@@ -138,7 +138,7 @@ def test_extract_business_data_full(transformer, sample_publication):
     assert data["year"] == 2023
     assert data["doc_type"] == "PUBLICATION"
     assert data["citation_count"] == 100
-    assert data["source"] == "crossref"
+    assert data["_source"] == "crossref"
 
 
 def test_extract_business_data_minimal(transformer, minimal_publication):
@@ -148,7 +148,7 @@ def test_extract_business_data_minimal(transformer, minimal_publication):
     assert data["doi"] == "10.5678/minimal"
     assert data["title"] is None
     assert data["doc_type"] == "PREPRINT"
-    assert data["source"] == "crossref"
+    assert data["_source"] == "crossref"
 
 
 # =============================================================================
@@ -165,7 +165,7 @@ async def test_transform_full_record(transformer, pipeline_context, sample_publi
     assert result["doi"] == "10.1234/test.article"
     assert result["title"] == "Test Article Title"
     assert result["doc_type"] == "PUBLICATION"
-    assert result["source"] == "crossref"
+    assert result["_source"] == "crossref"
     # Check lineage fields
     assert "_run_id" in result
     assert "_run_type" in result
