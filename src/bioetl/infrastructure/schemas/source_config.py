@@ -4,6 +4,9 @@ Implements strict validation for source YAML configurations (configs/sources/*.y
 These configs define provider-specific settings like rate limits, circuit breaker,
 and batch sizes that were previously hardcoded.
 
+This module uses base classes from `base_schemas` to eliminate duplication
+with `pipeline_config.py`.
+
 Usage:
     >>> from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
     >>> config = SourceYamlConfig.model_validate(yaml_data)
@@ -18,34 +21,35 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from bioetl.domain.resilience import AdapterConfig as DomainAdapterConfig
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
+from bioetl.infrastructure.schemas.base_schemas import (
+    BaseCircuitBreakerConfig,
+    BaseClientConfig,
+    BaseRateLimitConfig,
+)
 
 
-class RateLimitYamlConfig(BaseModel):
+class RateLimitYamlConfig(BaseRateLimitConfig):
     """Rate limit configuration from YAML.
+
+    Inherits from BaseRateLimitConfig for consistency with other schemas.
 
     Attributes:
         requests_per_second: Maximum requests per second.
         burst: Maximum burst capacity (token bucket).
     """
 
-    model_config = ConfigDict(extra="ignore")
-
-    requests_per_second: float = Field(default=5.0, ge=0.1, le=100.0)
-    burst: int = Field(default=10, ge=1, le=200)
+    pass
 
 
-class CircuitBreakerYamlConfig(BaseModel):
+class CircuitBreakerYamlConfig(BaseCircuitBreakerConfig):
     """Circuit breaker configuration from YAML.
+
+    Inherits from BaseCircuitBreakerConfig for consistency with other schemas.
 
     Attributes:
         failure_threshold: Number of consecutive failures before opening circuit.
         recovery_timeout: Time in seconds before attempting recovery.
     """
-
-    model_config = ConfigDict(extra="ignore")
-
-    failure_threshold: int = Field(default=5, ge=1, le=20)
-    recovery_timeout: int = Field(default=300, ge=60, le=3600)
 
     def to_domain(self) -> DomainCircuitBreakerConfig:
         """Convert to domain CircuitBreakerConfig dataclass.
@@ -53,24 +57,20 @@ class CircuitBreakerYamlConfig(BaseModel):
         Returns:
             DomainCircuitBreakerConfig: Immutable domain configuration.
         """
-        return DomainCircuitBreakerConfig(
-            failure_threshold=self.failure_threshold,
-            recovery_timeout=self.recovery_timeout,
-        )
+        return super().to_domain()
 
 
-class ClientYamlConfig(BaseModel):
+class ClientYamlConfig(BaseClientConfig):
     """HTTP client configuration from YAML.
+
+    Inherits from BaseClientConfig for consistency with other schemas.
 
     Attributes:
         timeout_sec: Request timeout in seconds.
         max_retries: Maximum number of retry attempts.
     """
 
-    model_config = ConfigDict(extra="ignore")
-
-    timeout_sec: float = Field(default=30.0, ge=1.0, le=300.0)
-    max_retries: int = Field(default=3, ge=0, le=10)
+    pass
 
 
 class ProviderConfigYaml(BaseModel):
