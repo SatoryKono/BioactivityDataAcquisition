@@ -73,6 +73,9 @@ class PubchemMoleculeRecord(BaseModel):
     exact_mass: float | None = Field(
         default=None, description="Monoisotopic exact mass (Da)"
     )
+    monoisotopic_mass: float | None = Field(
+        default=None, description="Monoisotopic mass using most abundant isotope (Da)"
+    )
 
     # === Computed Descriptors ===
     xlogp: float | None = Field(
@@ -155,6 +158,21 @@ class PubchemMoleculeRecord(BaseModel):
     conformer_rmsd_3d: float | None = Field(
         default=None, description="Conformer model RMSD"
     )
+    x_steric_quadrupole_3d: float | None = Field(
+        default=None,
+        description="X-axis steric quadrupole moment (3D charge distribution)",
+    )
+    y_steric_quadrupole_3d: float | None = Field(
+        default=None,
+        description="Y-axis steric quadrupole moment (3D charge distribution)",
+    )
+    z_steric_quadrupole_3d: float | None = Field(
+        default=None,
+        description="Z-axis steric quadrupole moment (3D charge distribution)",
+    )
+    feature_count_3d: int | None = Field(
+        default=None, description="Total count of 3D pharmacophore features"
+    )
 
     # === Fingerprints (not in schema, but available) ===
     fingerprint: str | None = Field(default=None, description="PubChem fingerprint")
@@ -196,6 +214,7 @@ class PubchemMolecule(BaseEntity):
     # === Physical Properties ===
     molecular_weight: float | None = None
     exact_mass: float | None = None
+    monoisotopic_mass: float | None = None
 
     # === Computed Descriptors ===
     xlogp: float | None = None
@@ -230,6 +249,10 @@ class PubchemMolecule(BaseEntity):
     feature_hydrophobe_count_3d: int | None = None
     effective_rotor_count_3d: float | None = None
     conformer_rmsd_3d: float | None = None
+    x_steric_quadrupole_3d: float | None = None
+    y_steric_quadrupole_3d: float | None = None
+    z_steric_quadrupole_3d: float | None = None
+    feature_count_3d: int | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()

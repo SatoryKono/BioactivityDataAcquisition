@@ -58,6 +58,7 @@ class PubChemEntityMapper:
             # === Physical Properties ===
             "molecular_weight": getattr(compound, "molecular_weight", None),
             "exact_mass": getattr(compound, "exact_mass", None),
+            "monoisotopic_mass": getattr(compound, "monoisotopic_mass", None),
             # === Computed Descriptors ===
             "xlogp": getattr(compound, "xlogp", None),
             "tpsa": getattr(compound, "tpsa", None),
@@ -104,6 +105,11 @@ class PubChemEntityMapper:
                 compound, "effective_rotor_count_3d", None
             ),
             "conformer_rmsd_3d": getattr(compound, "conformer_rmsd_3d", None),
+            # === 3D Steric Quadrupole Moments (may not be available for all compounds) ===
+            "x_steric_quadrupole_3d": getattr(compound, "x_steric_quadrupole_3d", None),
+            "y_steric_quadrupole_3d": getattr(compound, "y_steric_quadrupole_3d", None),
+            "z_steric_quadrupole_3d": getattr(compound, "z_steric_quadrupole_3d", None),
+            "feature_count_3d": getattr(compound, "feature_count_3d", None),
             # === Fingerprints (not in schema, but available) ===
             "fingerprint": getattr(compound, "fingerprint", None),
         }
