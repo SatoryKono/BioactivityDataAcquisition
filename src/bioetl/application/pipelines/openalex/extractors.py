@@ -7,10 +7,17 @@ These functions are:
 - Stateless and pure (no side effects)
 - Unit testable in isolation
 - Reusable across different transformation contexts
+
+Note on Topics vs Concepts:
+- OpenAlex deprecated the `concepts` field in 2024 in favor of `topics`
+- Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic
+- The `extract_concepts()` function is kept for backward compatibility
+- New code should use `extract_topics()` and `extract_primary_topic()`
 """
 
 from __future__ import annotations
 
+import warnings
 from typing import Any
 
 
@@ -131,8 +138,18 @@ def extract_affiliations(authorships: list[dict[str, Any]]) -> list[str]:
     return sorted(affiliations)
 
 
-def extract_concepts(concepts: list[dict[str, Any]], max_count: int = 10) -> list[str]:
+def extract_concepts(
+    concepts: list[dict[str, Any]],
+    max_count: int = 10,
+    *,
+    warn_deprecated: bool = False,
+) -> list[str]:
     """Extract top concept names from concepts list.
+
+    .. deprecated::
+        OpenAlex deprecated the `concepts` field in 2024 in favor of `topics`.
+        Use :func:`extract_topics` and :func:`extract_primary_topic` instead.
+        This function is kept for backward compatibility during the transition.
 
     OpenAlex provides concepts sorted by relevance score.
     This function extracts the display names of the top concepts.
@@ -140,6 +157,8 @@ def extract_concepts(concepts: list[dict[str, Any]], max_count: int = 10) -> lis
     Args:
         concepts: List of concept objects (sorted by score).
         max_count: Maximum concepts to extract (default 10).
+        warn_deprecated: If True, emit a deprecation warning. Default False
+            to avoid noise during transition period.
 
     Returns:
         List of concept display names.
@@ -151,6 +170,14 @@ def extract_concepts(concepts: list[dict[str, Any]], max_count: int = 10) -> lis
         ... ])
         ['Chemistry', 'Biology']
     """
+    if warn_deprecated:
+        warnings.warn(
+            "extract_concepts() is deprecated. OpenAlex deprecated the 'concepts' "
+            "field in 2024 in favor of 'topics'. Use extract_topics() and "
+            "extract_primary_topic() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
     result = []
     for concept in concepts[:max_count]:
         if not isinstance(concept, dict):
@@ -158,6 +185,202 @@ def extract_concepts(concepts: list[dict[str, Any]], max_count: int = 10) -> lis
         name = concept.get("display_name")
         if name and isinstance(name, str):
             result.append(name.strip())
+    return result
+
+
+def extract_topics(
+    topics: list[dict[str, Any]] | None,
+    max_count: int = 10,
+) -> list[dict[str, Any]]:
+    """Extract topics with hierarchical classification from topics list.
+
+    OpenAlex topics provide a 4-level hierarchy:
+    - domain: Broadest level (e.g., "Physical Sciences")
+    - field: Second level (e.g., "Chemistry")
+    - subfield: Third level (e.g., "Organic Chemistry")
+    - topic: Most specific (e.g., "Synthesis of Organic Compounds")
+
+    Each topic includes a relevance score (0-1) indicating confidence.
+
+    Args:
+        topics: List of topic objects from OpenAlex API.
+        max_count: Maximum topics to extract (default 10).
+
+    Returns:
+        List of topic dictionaries with keys:
+        - id: OpenAlex topic ID (e.g., "T12345")
+        - display_name: Topic name
+        - score: Relevance score (0-1)
+        - subfield: Subfield name
+        - field: Field name
+        - domain: Domain name
+
+    Example:
+        >>> extract_topics([
+        ...     {
+        ...         "id": "https://openalex.org/T12345",
+        ...         "display_name": "Organic Synthesis",
+        ...         "score": 0.95,
+        ...         "subfield": {"display_name": "Organic Chemistry"},
+        ...         "field": {"display_name": "Chemistry"},
+        ...         "domain": {"display_name": "Physical Sciences"}
+        ...     }
+        ... ])
+        [{'id': 'T12345', 'display_name': 'Organic Synthesis', 'score': 0.95,
+          'subfield': 'Organic Chemistry', 'field': 'Chemistry',
+          'domain': 'Physical Sciences'}]
+    """
+    if not topics or not isinstance(topics, list):
+        return []
+
+    result: list[dict[str, Any]] = []
+    for topic in topics[:max_count]:
+        if not isinstance(topic, dict):
+            continue
+
+        # Extract topic ID from URL
+        topic_id = topic.get("id")
+        if topic_id and isinstance(topic_id, str) and "/" in topic_id:
+            topic_id = topic_id.split("/")[-1]
+
+        display_name = topic.get("display_name")
+        if not display_name or not isinstance(display_name, str):
+            continue
+
+        # Extract score (default to 0 if missing)
+        score = topic.get("score")
+        if not isinstance(score, (int, float)):
+            score = 0.0
+
+        # Extract hierarchical classification
+        subfield = topic.get("subfield", {}) or {}
+        field = topic.get("field", {}) or {}
+        domain = topic.get("domain", {}) or {}
+
+        result.append({
+            "id": topic_id,
+            "display_name": display_name.strip(),
+            "score": float(score),
+            "subfield": subfield.get("display_name") if isinstance(subfield, dict) else None,
+            "field": field.get("display_name") if isinstance(field, dict) else None,
+            "domain": domain.get("display_name") if isinstance(domain, dict) else None,
+        })
+
+    return result
+
+
+def extract_primary_topic(primary_topic: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Extract primary topic classification from primary_topic field.
+
+    The primary_topic is the single most relevant topic for a work,
+    useful for quick categorization without examining all topics.
+
+    Args:
+        primary_topic: Primary topic object from OpenAlex API.
+
+    Returns:
+        Dictionary with topic info or None if not available.
+        Keys: id, display_name, score, subfield, field, domain
+
+    Example:
+        >>> extract_primary_topic({
+        ...     "id": "https://openalex.org/T12345",
+        ...     "display_name": "Organic Synthesis",
+        ...     "score": 0.95,
+        ...     "subfield": {"display_name": "Organic Chemistry"},
+        ...     "field": {"display_name": "Chemistry"},
+        ...     "domain": {"display_name": "Physical Sciences"}
+        ... })
+        {'id': 'T12345', 'display_name': 'Organic Synthesis', 'score': 0.95,
+         'subfield': 'Organic Chemistry', 'field': 'Chemistry',
+         'domain': 'Physical Sciences'}
+    """
+    if not primary_topic or not isinstance(primary_topic, dict):
+        return None
+
+    # Extract topic ID from URL
+    topic_id = primary_topic.get("id")
+    if topic_id and isinstance(topic_id, str) and "/" in topic_id:
+        topic_id = topic_id.split("/")[-1]
+
+    display_name = primary_topic.get("display_name")
+    if not display_name or not isinstance(display_name, str):
+        return None
+
+    # Extract score (default to 0 if missing)
+    score = primary_topic.get("score")
+    if not isinstance(score, (int, float)):
+        score = 0.0
+
+    # Extract hierarchical classification
+    subfield = primary_topic.get("subfield", {}) or {}
+    field = primary_topic.get("field", {}) or {}
+    domain = primary_topic.get("domain", {}) or {}
+
+    return {
+        "id": topic_id,
+        "display_name": display_name.strip(),
+        "score": float(score),
+        "subfield": subfield.get("display_name") if isinstance(subfield, dict) else None,
+        "field": field.get("display_name") if isinstance(field, dict) else None,
+        "domain": domain.get("display_name") if isinstance(domain, dict) else None,
+    }
+
+
+def extract_grants(grants: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
+    """Extract grant/funding information from grants array.
+
+    OpenAlex provides funding information including funder name and award ID,
+    useful for research funding analysis and compliance reporting.
+
+    Args:
+        grants: List of grant objects from OpenAlex API.
+
+    Returns:
+        List of grant dictionaries with keys:
+        - funder: Funder OpenAlex ID (e.g., "F1234567")
+        - funder_display_name: Funder name (e.g., "National Institutes of Health")
+        - award_id: Grant/award identifier (may be None)
+
+    Example:
+        >>> extract_grants([
+        ...     {
+        ...         "funder": "https://openalex.org/F1234567",
+        ...         "funder_display_name": "National Institutes of Health",
+        ...         "award_id": "R01-GM123456"
+        ...     }
+        ... ])
+        [{'funder': 'F1234567', 'funder_display_name': 'National Institutes of Health',
+          'award_id': 'R01-GM123456'}]
+    """
+    if not grants or not isinstance(grants, list):
+        return []
+
+    result: list[dict[str, Any]] = []
+    for grant in grants:
+        if not isinstance(grant, dict):
+            continue
+
+        # Extract funder ID from URL
+        funder_id = grant.get("funder")
+        if funder_id and isinstance(funder_id, str) and "/" in funder_id:
+            funder_id = funder_id.split("/")[-1]
+
+        funder_name = grant.get("funder_display_name")
+        if not funder_name or not isinstance(funder_name, str):
+            # Skip grants without funder name
+            continue
+
+        award_id = grant.get("award_id")
+        if award_id and not isinstance(award_id, str):
+            award_id = str(award_id)
+
+        result.append({
+            "funder": funder_id,
+            "funder_display_name": funder_name.strip(),
+            "award_id": award_id.strip() if award_id else None,
+        })
+
     return result
 
 

@@ -2,6 +2,12 @@
 
 Aligned with RULES.md v5.10 and Publication Schema Unification spec.
 Includes lookup metadata fields for DOI/title resolution tracking.
+
+Topics vs Concepts (2024 Migration):
+- OpenAlex deprecated the `concepts` field in 2024 in favor of `topics`
+- Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic
+- The `concepts` field is kept for backward compatibility during transition
+- New code should use `topics` and `primary_topic` fields
 """
 
 from __future__ import annotations
@@ -128,10 +134,31 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="Whether the publication has been retracted",
     )
 
+    # === Topics (hierarchical classification - replaces deprecated concepts) ===
+    # Stored as JSON-serialized string for DataFrame compatibility
+    topics: Series[str] = pa.Field(
+        nullable=True,
+        description="Hierarchical topic classification (JSON array)",
+    )
+
+    # Primary topic (single most relevant topic for quick categorization)
+    # Stored as JSON-serialized string for DataFrame compatibility
+    primary_topic: Series[str] = pa.Field(
+        nullable=True,
+        description="Primary topic classification (JSON object)",
+    )
+
+    # === Grants/Funding Information ===
+    # Stored as JSON-serialized string for DataFrame compatibility
+    grants: Series[str] = pa.Field(
+        nullable=True,
+        description="Funding/grant information (JSON array)",
+    )
+
     # === Classification Fields (extracted by transformer) ===
     concepts: Series[str] = pa.Field(
         nullable=True,
-        description="OpenAlex concepts (JSON array of concept names)",
+        description="OpenAlex concepts (JSON array, DEPRECATED: use topics)",
     )
 
     mesh: Series[str] = pa.Field(
