@@ -176,6 +176,10 @@ class PubMedPublicationEntity(PublicationEntityBase):
     pmid: str
 
     # PubMed-specific identifiers (pmc_id is now inherited from PublicationEntityBase)
+    # Additional identifiers for cross-referencing with publisher databases
+    pii: str | None = None  # Publisher Item Identifier
+    mid: str | None = None  # Manuscript ID (PMC submission)
+    publisher_id: str | None = None  # Publisher-specific identifier
 
     # PubMed-specific journal information
     journal_abbrev: str | None = None
@@ -223,6 +227,9 @@ class PubMedPublicationEntity(PublicationEntityBase):
     publication_status: str | None = None  # ppublish/epublish/aheadofprint
     publication_type_list: str | None = None  # JSON array of pub types
     citation_subset: str | None = None  # Citation subset codes (e.g., 'AIM')
+
+    # Enhanced affiliation data (for institutional analysis)
+    structured_affiliations: str | None = None  # JSON array with identifier metadata
 
     # Denormalized counts (Gold schema)
     author_count: int | None = None
