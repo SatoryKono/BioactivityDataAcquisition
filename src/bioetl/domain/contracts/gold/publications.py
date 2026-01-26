@@ -62,6 +62,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
 
     # Authors
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
+    affiliations: Series[object] = pa.Field(nullable=True)  # list[str]
 
     # Date fields
     pub_date: Series[str] = pa.Field(nullable=True)
@@ -96,6 +97,9 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     # Classification
     keywords: Series[object] = pa.Field(nullable=True)  # list[str]
     mesh_terms: Series[object] = pa.Field(nullable=True)  # list[str]
+    chemicals: Series[object] = pa.Field(nullable=True)  # list[str]
+    databanks: Series[object] = pa.Field(nullable=True)  # list[str]
+    gene_symbols: Series[object] = pa.Field(nullable=True)  # list[str]
     citation_subset: Series[str] = pa.Field(
         nullable=True
     )  # Citation subset codes (e.g., 'AIM')
@@ -160,6 +164,7 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
+    affiliations: Series[object] = pa.Field(nullable=True)  # list[str]
     journal: Series[str] = pa.Field(nullable=True)
     issn: Series[object] = pa.Field(nullable=True)  # list[str]
     publisher: Series[str] = pa.Field(nullable=True)
@@ -250,7 +255,11 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
+    affiliations: Series[object] = pa.Field(nullable=True)  # list[str]
     concepts: Series[object] = pa.Field(nullable=True)  # list[str]
+    mesh: Series[object] = pa.Field(nullable=True)  # list[str] - MeSH terms
+    keywords: Series[object] = pa.Field(nullable=True)  # list[str]
+    mag_id: Series[str] = pa.Field(nullable=True)  # Microsoft Academic Graph ID
 
     # Journal info
     journal: Series[str] = pa.Field(nullable=True)
@@ -351,6 +360,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     fields_of_study: Series[str] = pa.Field(nullable=True)
     publication_types: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)
+    affiliations: Series[object] = pa.Field(nullable=True)  # list[str]
 
     # Source tracking (maps to _source column in DataFrame)
     source: Series[str] = pa.Field(nullable=True, alias="_source")
