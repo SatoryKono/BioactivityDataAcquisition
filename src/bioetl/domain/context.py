@@ -36,6 +36,8 @@ class InputFilterContext:
     column_name: str
     filter_field: str
     filter_ids: tuple[str, ...] | None = None
+    fallback_mapping: dict[str, str] | None = None
+    fallback_column: str | None = None
 
     @classmethod
     def disabled(cls) -> InputFilterContext:
@@ -46,11 +48,17 @@ class InputFilterContext:
             column_name="",
             filter_field="",
             filter_ids=None,
+            fallback_mapping=None,
+            fallback_column=None,
         )
 
     @classmethod
     def from_csv(
-        cls, source_path: str, column_name: str, filter_field: str
+        cls,
+        source_path: str,
+        column_name: str,
+        filter_field: str,
+        fallback_column: str | None = None,
     ) -> InputFilterContext:
         """Create an enabled filter context from CSV parameters."""
         return cls(
@@ -59,11 +67,16 @@ class InputFilterContext:
             column_name=column_name,
             filter_field=filter_field,
             filter_ids=None,
+            fallback_mapping=None,
+            fallback_column=fallback_column,
         )
 
     @classmethod
     def from_ids(
-        cls, filter_ids: tuple[str, ...], filter_field: str
+        cls,
+        filter_ids: tuple[str, ...],
+        filter_field: str,
+        fallback_mapping: dict[str, str] | None = None,
     ) -> InputFilterContext:
         """Create an enabled filter context from direct IDs.
 
@@ -75,6 +88,8 @@ class InputFilterContext:
             column_name="",
             filter_field=filter_field,
             filter_ids=filter_ids,
+            fallback_mapping=fallback_mapping,
+            fallback_column=None,
         )
 
     def __post_init__(self) -> None:
