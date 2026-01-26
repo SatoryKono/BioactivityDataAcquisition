@@ -236,6 +236,65 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         """Validate chemical count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
+    # === Classification Data (JSON arrays extracted by transformer) ===
+    mesh_terms: Series[str] = pa.Field(
+        nullable=True,
+        description="MeSH terms (JSON array of descriptor/qualifier strings)",
+    )
+
+    chemicals: Series[str] = pa.Field(
+        nullable=True,
+        description="Chemical substances (JSON array of name/registry pairs)",
+    )
+
+    keywords: Series[str] = pa.Field(
+        nullable=True,
+        description="Author keywords (JSON array)",
+    )
+
+    databanks: Series[str] = pa.Field(
+        nullable=True,
+        description="Databank accession numbers (JSON array)",
+    )
+
+    gene_symbols: Series[str] = pa.Field(
+        nullable=True,
+        description="Gene symbols (JSON array)",
+    )
+
+    publication_types: Series[str] = pa.Field(
+        nullable=True,
+        description="Publication types (JSON array, e.g., Journal Article, Review)",
+    )
+
+    # === Additional Date Fields (extracted from PubmedData/History) ===
+    # Note: These are stored as ISO date strings (YYYY-MM-DD) to match transformer output
+    accepted_date: Series[str] = pa.Field(
+        nullable=True,
+        description="Manuscript acceptance date (from History/PubMedPubDate[@PubStatus='accepted'])",
+    )
+
+    received_date: Series[str] = pa.Field(
+        nullable=True,
+        description="Manuscript received date (from History/PubMedPubDate[@PubStatus='received'])",
+    )
+
+    revised_date: Series[str] = pa.Field(
+        nullable=True,
+        description="Manuscript revision date (from History/PubMedPubDate[@PubStatus='revised'])",
+    )
+
+    epub_date: Series[str] = pa.Field(
+        nullable=True,
+        description="Electronic publication date (from ArticleDate[@DateType='Electronic'])",
+    )
+
+    # === Author Affiliations ===
+    affiliations: Series[str] = pa.Field(
+        nullable=True,
+        description="Author affiliations (JSON array)",
+    )
+
     class Config:
         """Pandera configuration."""
 
