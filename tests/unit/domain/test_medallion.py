@@ -1,13 +1,13 @@
 """Unit tests for medallion layer policies.
 
-Tests MedallionPolicy and ClearPolicy domain objects.
+Tests MedallionPolicy, ClearPolicy, and LoadingStrategy domain objects.
 """
 
 from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.medallion import ClearPolicy, MedallionPolicy
+from bioetl.domain.medallion import ClearPolicy, LoadingStrategy, MedallionPolicy
 from bioetl.domain.types import RunType
 
 
@@ -107,3 +107,56 @@ class TestMedallionPolicyShouldClear:
 
         assert policy.should_clear_silver is True
         assert policy.should_clear_gold is True
+
+
+@pytest.mark.unit
+class TestLoadingStrategy:
+    """Test LoadingStrategy enum (ADR-031)."""
+
+    def test_enum_values(self):
+        """Test LoadingStrategy enum has correct string values."""
+        assert LoadingStrategy.FULL_SCAN_ONLY.value == "full_scan_only"
+        assert LoadingStrategy.WATERMARK_BASED.value == "watermark_based"
+
+    def test_from_string_valid_values(self):
+        """Test from_string converts valid string values."""
+        assert LoadingStrategy.from_string("full_scan_only") == LoadingStrategy.FULL_SCAN_ONLY
+        assert LoadingStrategy.from_string("watermark_based") == LoadingStrategy.WATERMARK_BASED
+
+    def test_from_string_case_insensitive(self):
+        """Test from_string is case insensitive."""
+        assert LoadingStrategy.from_string("FULL_SCAN_ONLY") == LoadingStrategy.FULL_SCAN_ONLY
+        assert LoadingStrategy.from_string("Watermark_Based") == LoadingStrategy.WATERMARK_BASED
+
+    def test_from_string_invalid_raises_value_error(self):
+        """Test from_string raises ValueError for invalid values."""
+        with pytest.raises(ValueError) as exc_info:
+            LoadingStrategy.from_string("invalid_strategy")
+
+        assert "Invalid loading strategy" in str(exc_info.value)
+        assert "invalid_strategy" in str(exc_info.value)
+
+    def test_allows_checkpoint_resume_full_scan_only(self):
+        """Test FULL_SCAN_ONLY does not allow checkpoint resume."""
+        assert LoadingStrategy.FULL_SCAN_ONLY.allows_checkpoint_resume is False
+
+    def test_allows_checkpoint_resume_watermark_based(self):
+        """Test WATERMARK_BASED allows checkpoint resume."""
+        assert LoadingStrategy.WATERMARK_BASED.allows_checkpoint_resume is True
+
+    def test_from_force_full_scan_true(self):
+        """Test from_force_full_scan with True returns FULL_SCAN_ONLY."""
+        assert (
+            LoadingStrategy.from_force_full_scan(True) == LoadingStrategy.FULL_SCAN_ONLY
+        )
+
+    def test_from_force_full_scan_false(self):
+        """Test from_force_full_scan with False returns WATERMARK_BASED."""
+        assert (
+            LoadingStrategy.from_force_full_scan(False) == LoadingStrategy.WATERMARK_BASED
+        )
+
+    def test_string_enum_comparison(self):
+        """Test LoadingStrategy can be compared with strings."""
+        assert LoadingStrategy.FULL_SCAN_ONLY == "full_scan_only"
+        assert LoadingStrategy.WATERMARK_BASED == "watermark_based"

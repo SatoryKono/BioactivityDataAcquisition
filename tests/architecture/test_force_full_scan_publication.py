@@ -1,9 +1,13 @@
-"""Architecture test: force_full_scan enforcement for publication pipelines.
+"""Architecture test: force_full_scan and loading_strategy enforcement for publication pipelines.
 
-Tests that all publication pipeline configs have force_full_scan=true
-to ensure reproducible extraction (ADR-030).
+Tests that all publication pipeline configs have:
+- force_full_scan=true (ADR-030)
+- loading_strategy=full_scan_only (ADR-031)
+
+This ensures reproducible extraction via full scans with deduplication on Silver.
 
 REQ-ARCH-050: Publication pipelines MUST use force_full_scan=true.
+REQ-ARCH-051: Publication pipelines MUST use loading_strategy=full_scan_only.
 """
 
 from __future__ import annotations
@@ -63,6 +67,13 @@ class TestForceFullScanPublicationConfigs:
         assert force_full_scan is True, (
             f"{config_path} MUST have 'force_full_scan: true' per ADR-030. "
             f"Found: force_full_scan={force_full_scan}"
+        )
+
+        # Verify loading_strategy is explicitly set to full_scan_only (ADR-031)
+        loading_strategy = config.get("loading_strategy")
+        assert loading_strategy == "full_scan_only", (
+            f"{config_path} MUST have 'loading_strategy: full_scan_only' per ADR-031. "
+            f"Found: loading_strategy={loading_strategy}"
         )
 
     def test_all_publication_configs_are_tested(self) -> None:

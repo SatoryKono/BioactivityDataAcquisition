@@ -11,10 +11,11 @@ entity_type: publication
 version: "1.2.0"
 description: "Extract publication metadata from PubMed via Entrez API"
 
-# Pagination strategy (ADR-030)
+# Loading strategy (ADR-030, ADR-031)
 # Publication entities require full scan on each run due to API offset instability.
 # Deduplication is handled on Silver layer via content_hash.
 force_full_scan: true
+loading_strategy: full_scan_only
 
 primary_keys: ["pmid"]
 silver_table: "pubmed_publication"
