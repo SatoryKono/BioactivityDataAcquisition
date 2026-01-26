@@ -205,6 +205,7 @@
     'feature_acceptor_count_3d': None,
     'feature_anion_count_3d': None,
     'feature_cation_count_3d': None,
+    'feature_count_3d': None,
     'feature_donor_count_3d': None,
     'feature_hydrophobe_count_3d': None,
     'feature_ring_count_3d': None,
@@ -218,12 +219,16 @@
     'iupac_name': '2-acetyloxybenzoic acid',
     'molecular_formula': 'C9H8O4',
     'molecular_weight': 180.16,
+    'monoisotopic_mass': None,
     'rotatable_bond_count': None,
     'tpsa': None,
     'undefined_atom_stereo_count': None,
     'undefined_bond_stereo_count': None,
     'volume_3d': None,
+    'x_steric_quadrupole_3d': None,
     'xlogp': None,
+    'y_steric_quadrupole_3d': None,
+    'z_steric_quadrupole_3d': None,
   })
 # ---
 # name: TestPubMedPublicationTransformerSnapshot.test_transform_full_snapshot

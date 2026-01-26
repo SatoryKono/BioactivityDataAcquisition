@@ -68,7 +68,7 @@ class TestFileSizeLimits:
         "data_normalization.py": 330,  # 321 LOC - DataNormalizationPort with partial date normalization
         "storage.py": 405,  # 400 LOC - StoragePort with read_silver, write_*_merged for composite pipelines + SourceMetadata param + Silver lineage
         # Domain Pandera schemas (declarative field definitions)
-        "compound.py": 390,  # 387 LOC - PubChem molecule schema + deprecated alias __getattr__ (v2.0)
+        "compound.py": 400,  # 397 LOC - PubChem molecule schema with 3D steric quadrupole + feature_count_3d + monoisotopic_mass
         "protein.py": 370,  # 365 LOC - UniProt target schema + deprecated alias __getattr__ (v2.0)
         # Domain contracts/gold (Gold layer Pandera schemas)
         "publications.py": 400,  # 374 LOC - Gold layer publication schemas (PubMed, CrossRef, OpenAlex, SemanticScholar)
@@ -585,7 +585,7 @@ class TestClassSize:
         # Domain ports (Protocol definitions with comprehensive docstrings)
         "StoragePort": 370,  # 365 lines - Protocol with read_silver, write_*_merged + SourceMetadata param for Bronze write + SilverWriteResult return + silver_refs param
         # Pandera schemas (declarative field definitions)
-        "PubchemMoleculeSchema": 350,  # 345 lines - PubChem molecule schema with many chemical fields
+        "PubchemMoleculeSchema": 380,  # 375 lines - PubChem molecule schema with 3D steric quadrupole + feature_count_3d + monoisotopic_mass
         # Derived entity data source wrappers (comprehensive docstrings)
         "PublicationTermDataSource": 585,  # 579 lines - Wrapper with FilterableDataSourcePort delegation + get_source_metadata
         # Composition services
