@@ -76,6 +76,8 @@ class TestFileSizeLimits:
         "dq_serializer.py": 435,  # 429 LOC - DQ report serialization logic (increased for CC reduction)
         "dq_report.py": 660,  # 646 LOC - DQ report models with validation rules
         "dq_metrics.py": 420,  # 411 LOC - Batch DQ metrics with helpers for CC reduction + _make_hashable for list/dict values
+        # Domain registry exemptions
+        "publication.py": 340,  # 331 LOC - Publication entity mapping registry with composite key support
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
         "batch_executor.py": 785,  # 779 LOC - unified executor for batch processing + DQ context + MetadataCoordinator params
@@ -99,7 +101,7 @@ class TestFileSizeLimits:
         "bronze_writer.py": 800,  # 797 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
         "silver.py": 890,  # 886 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields + unified DQ columns)
-        "client.py": 960,  # 941 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback), CrossRefAdapter (DOI→title fallback)
+        "client.py": 1000,  # 995 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "pipeline_config.py": 1065,  # 1058 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024)
         # Interfaces layer exemptions
@@ -593,7 +595,7 @@ class TestClassSize:
         "OpenAlexAdapter": 590,  # 585 lines - FilterableDataSourcePort + APIRequestCollector + fallback handler
         "PubMedAdapter": 545,  # 540 lines - FilterableDataSourcePort + APIRequestCollector + TitleFallbackHandler
         # ChEMBL adapter with complex FilterableDataSourcePort
-        "ChemblAdapter": 880,  # 860 lines - FilterableDataSourcePort + health-aware batching + pagination + deduplication + 500 error detection
+        "ChemblAdapter": 920,  # 914 lines - FilterableDataSourcePort + health-aware batching + pagination + composite key deduplication + 500 error detection
         # PubMed transformer with comprehensive field extraction
         "PubMedPublicationTransformer": 450,  # 428 lines - Gold schema alignment with many extraction methods
     }

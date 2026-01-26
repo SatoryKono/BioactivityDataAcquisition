@@ -49,7 +49,11 @@ class PublicationMapping:
         api_resource: ChEMBL API resource name (e.g., 'document').
                      This is an API-level implementation detail.
         plural_key: Key for extracting records from API response (e.g., 'documents').
-        primary_key_field: Primary key field for deduplication.
+        primary_key_field: Primary key field for deduplication (single field).
+                          Use primary_key_fields for composite keys.
+        primary_key_fields: Composite primary key fields for deduplication.
+                           When set, deduplication uses all fields together.
+                           Defaults to (primary_key_field,) for backward compatibility.
         is_legacy_alias: True if this is a backward-compatibility alias.
                         Legacy aliases should NOT be used in new code.
 
@@ -57,13 +61,30 @@ class PublicationMapping:
         The `api_resource` and `plural_key` fields are ChEMBL API implementation
         details and should be treated as such. Domain code should work with
         `canonical_name` only.
+
+    Example:
+        For publication_term, the composite key is (document_chembl_id, term_type, term)
+        which ensures each unique term within a document is deduplicated correctly.
     """
 
     canonical_name: str
     api_resource: str
     plural_key: str
     primary_key_field: str
+    primary_key_fields: tuple[str, ...] | None = None
     is_legacy_alias: bool = False
+
+    def get_dedup_key_fields(self) -> tuple[str, ...]:
+        """Get the fields to use for deduplication.
+
+        Returns composite key fields if defined, otherwise single primary key field.
+
+        Returns:
+            Tuple of field names for deduplication.
+        """
+        if self.primary_key_fields is not None:
+            return self.primary_key_fields
+        return (self.primary_key_field,)
 
 
 # =============================================================================
@@ -87,12 +108,18 @@ _PUBLICATION_MAPPINGS: Final[tuple[PublicationMapping, ...]] = (
         api_resource="document_similarity",
         plural_key="document_similarities",
         primary_key_field="sim_id",
+        # sim_id is already unique for each document pair
+        # Composite key ensures deterministic deduplication
+        primary_key_fields=("doc_1", "doc_2", "sim_id"),
     ),
     PublicationMapping(
         canonical_name="publication_term",
         api_resource="document",  # Derived from publication endpoint
         plural_key="documents",
         primary_key_field="document_chembl_id",
+        # Composite key for uniqueness: document + term type + term text
+        # Note: entity_id is SHA256 hash of this composite key
+        primary_key_fields=("document_chembl_id", "term_type", "term"),
     ),
     # Legacy aliases (backward compatibility ONLY)
     # DO NOT use in new code. Will be deprecated.
@@ -108,6 +135,7 @@ _PUBLICATION_MAPPINGS: Final[tuple[PublicationMapping, ...]] = (
         api_resource="document_similarity",
         plural_key="document_similarities",
         primary_key_field="sim_id",
+        primary_key_fields=("doc_1", "doc_2", "sim_id"),
         is_legacy_alias=True,
     ),
     PublicationMapping(
@@ -115,6 +143,7 @@ _PUBLICATION_MAPPINGS: Final[tuple[PublicationMapping, ...]] = (
         api_resource="document",
         plural_key="documents",
         primary_key_field="document_chembl_id",
+        primary_key_fields=("document_chembl_id", "term_type", "term"),
         is_legacy_alias=True,
     ),
 )
@@ -204,6 +233,55 @@ def is_legacy_publication_alias(entity_type: str) -> bool:
         False
     """
     return entity_type in LEGACY_PUBLICATION_ALIASES
+
+
+def get_dedup_key_fields(entity_type: str) -> tuple[str, ...] | None:
+    """Get composite key fields for deduplication.
+
+    Returns the fields that should be used together for deduplication.
+    For entities with composite keys (like publication_term), returns
+    all fields in the composite key. For simple entities, returns
+    the single primary key field as a tuple.
+
+    Args:
+        entity_type: Entity type to look up (e.g., 'publication_term').
+
+    Returns:
+        Tuple of field names for deduplication, or None if not a publication entity.
+
+    Example:
+        >>> get_dedup_key_fields("publication_term")
+        ('document_chembl_id', 'term_type', 'term')
+        >>> get_dedup_key_fields("publication")
+        ('document_chembl_id',)
+        >>> get_dedup_key_fields("activity")
+        None
+    """
+    mapping = get_publication_mapping(entity_type)
+    if mapping is None:
+        return None
+    return mapping.get_dedup_key_fields()
+
+
+def has_composite_key(entity_type: str) -> bool:
+    """Check if entity type has a composite primary key.
+
+    Returns True if the entity uses multiple fields for deduplication.
+
+    Args:
+        entity_type: Entity type to check.
+
+    Returns:
+        True if entity has composite key (more than one field).
+
+    Example:
+        >>> has_composite_key("publication_term")
+        True
+        >>> has_composite_key("publication")
+        False
+    """
+    fields = get_dedup_key_fields(entity_type)
+    return fields is not None and len(fields) > 1
 
 
 def validate_publication_entity_type(entity_type: str, provider: str) -> str | None:
