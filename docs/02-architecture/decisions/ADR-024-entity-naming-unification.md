@@ -196,6 +196,74 @@ bioetl run chembl_publication
 - **v2.0**: Canonical names introduced with direct migration (no aliases needed)
 - ~~**v3.0 (planned)**: Deprecated aliases may be removed~~ — Not applicable, aliases were never added
 
+## Phase 3: Centralized Publication Mapping Registry (v2.1)
+
+**Date:** 2026-01-26
+
+### Problem
+
+Publication entity mappings (`publication*` → `document*` for ChEMBL API) were scattered across:
+1. YAML pipeline configs (`entity_type: publication`)
+2. `ChemblEntityMapper` hardcoded dictionaries
+3. Implicit comments and ADR documentation
+
+This distributed knowledge created risk of desynchronization when adding new publication variants.
+
+### Solution
+
+Introduced a centralized **Publication Mapping Registry** in domain layer:
+
+**New Files:**
+- `src/bioetl/domain/registry/__init__.py` — Registry exports
+- `src/bioetl/domain/registry/publication.py` — Single source of truth for publication mappings
+
+**Registry Structure:**
+```python
+@dataclass(frozen=True, slots=True)
+class PublicationMapping:
+    canonical_name: str      # Domain entity type (publication*)
+    api_resource: str        # ChEMBL API resource (document*)
+    plural_key: str          # Response array key (documents)
+    primary_key_field: str   # PK for deduplication
+    is_legacy_alias: bool    # True for backward-compat aliases
+```
+
+**Key Functions:**
+- `get_publication_mapping(entity_type)` — Get mapping for entity type
+- `is_publication_entity(entity_type)` — Check if publication-related
+- `is_legacy_publication_alias(entity_type)` — Check if legacy alias
+- `validate_publication_entity_type(entity_type, provider)` — Config validation
+
+### Updated Components
+
+**`ChemblEntityMapper`** now imports from registry:
+```python
+from bioetl.domain.registry.publication import (
+    get_publication_mapping,
+    is_publication_entity,
+)
+
+class ChemblEntityMapper:
+    @staticmethod
+    def get_resource_url(entity_type: str) -> str:
+        # Check publication registry first (ADR-024)
+        pub_mapping = get_publication_mapping(entity_type)
+        if pub_mapping is not None:
+            return f"{CHEMBL_API_BASE}/{pub_mapping.api_resource}"
+        # ... non-publication entities
+```
+
+**`PipelineYamlConfig`** now validates entity_type:
+- Raises `ValueError` if `document*` used in ChEMBL YAML configs
+- Enforces canonical names (`publication*`) at config load time
+
+### Benefits
+
+1. **Single source of truth** — All publication mappings in one place
+2. **Explicit validation** — Config loading fails fast on legacy names
+3. **Type safety** — `PublicationMapping` dataclass is immutable and typed
+4. **Extensibility** — Add new publication variants in registry, not scattered across codebase
+
 ## References
 
 - [glossary.md](../../glossary.md) — Ubiquitous Language definitions

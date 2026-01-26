@@ -24,6 +24,18 @@ from bioetl.domain import contracts
 # Domain constants module
 from bioetl.domain import constants
 
+# Domain registry (publication entity mappings, ADR-024)
+from bioetl.domain import registry
+from bioetl.domain.registry import (
+    LEGACY_PUBLICATION_ALIASES,
+    PUBLICATION_ENTITY_TYPES,
+    PublicationMapping,
+    get_publication_mapping,
+    is_legacy_publication_alias,
+    is_publication_entity,
+    validate_publication_entity_type,
+)
+
 # Configuration objects
 from bioetl.domain.config import (
     DEFAULT_VALIDATION_CONFIG,
@@ -325,6 +337,15 @@ __all__ = [
     "contracts",
     # Constants
     "constants",
+    # Registry (publication entity mappings, ADR-024)
+    "registry",
+    "LEGACY_PUBLICATION_ALIASES",
+    "PUBLICATION_ENTITY_TYPES",
+    "PublicationMapping",
+    "get_publication_mapping",
+    "is_legacy_publication_alias",
+    "is_publication_entity",
+    "validate_publication_entity_type",
     # Contracts (Gold layer Pandera schemas)
     "contracts",
     # Configuration
