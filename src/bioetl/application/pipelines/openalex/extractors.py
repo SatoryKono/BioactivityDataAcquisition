@@ -128,7 +128,7 @@ def extract_affiliations(authorships: list[dict[str, Any]]) -> list[str]:
             if name and isinstance(name, str):
                 affiliations.add(name.strip())
 
-    return sorted(list(affiliations))
+    return sorted(affiliations)
 
 
 def extract_concepts(concepts: list[dict[str, Any]], max_count: int = 10) -> list[str]:
