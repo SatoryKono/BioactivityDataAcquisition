@@ -1,27 +1,13 @@
 """OpenAlex domain entities.
 
-Contains:
-- OpenAlexPublicationRecord: DTO (Pydantic) for type-safe data transfer at boundaries
-- OpenAlexPublicationEntity: Domain entity (dataclass) with lineage fields
-
-DTO Design:
-- Uses extra='forbid' to detect API changes early
-- frozen=True ensures immutability
-- Adapters return DTOs, transformers convert to Domain Entities
-
-Terminology:
-- Uses "Publication" for scholarly works from OpenAlex
-- OpenAlex API term "Work" is mapped to "Publication" for Ubiquitous Language
-
-Used for batch DOI resolution and publication metadata enrichment.
-
-Note: OpenAlexPublicationEntity inherits common fields from PublicationEntityBase.
-Provider-specific fields (openalex_id, concepts) are defined here.
+Contains OpenAlexPublicationRecord (DTO) and OpenAlexPublicationEntity (domain).
+Topics vs Concepts: OpenAlex deprecated concepts in 2024; use topics instead.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 from pydantic import Field as PydanticField
@@ -58,26 +44,7 @@ LOOKUP_METHODS = ["doi", "title_fallback", "title_only", "unknown"]
 
 
 class OpenAlexPublicationRecord(BaseModel):
-    """Scholarly work DTO from OpenAlex.
-
-    Represents publication metadata from OpenAlex API for DOI resolution
-    and citation enrichment.
-
-    Required field: openalex_id.
-
-    Example:
-        >>> record = OpenAlexPublicationRecord(
-        ...     openalex_id="W2148763428",
-        ...     doi="10.1038/nature12373",
-        ...     title="Example Article",
-        ...     journal="Nature",
-        ...     year=2024,
-        ... )
-        >>> record.model_dump()
-        {'openalex_id': 'W2148763428', 'doi': '10.1038/nature12373', ...}
-
-    See: https://docs.openalex.org/api-entities/works
-    """
+    """Scholarly work DTO from OpenAlex. Required field: openalex_id."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -132,9 +99,30 @@ class OpenAlexPublicationRecord(BaseModel):
         default=None, description="Number of citations (from OpenAlex cited_by_count)"
     )
 
-    # Concepts (top-level only)
+    # Topics (hierarchical classification - replaces deprecated concepts)
+    # Each topic dict has: id, display_name, score, subfield, field, domain
+    topics: list[dict[str, Any]] = PydanticField(
+        default_factory=list,
+        description="Hierarchical topic classification (domain/field/subfield/topic)",
+    )
+
+    # Primary topic (single most relevant topic for quick categorization)
+    # Dict with: id, display_name, score, subfield, field, domain
+    primary_topic: dict[str, Any] | None = PydanticField(
+        default=None, description="Primary topic classification"
+    )
+
+    # Grants/funding information
+    # Each grant dict has: funder, funder_display_name, award_id
+    grants: list[dict[str, Any]] = PydanticField(
+        default_factory=list, description="Funding/grant information"
+    )
+
+    # Concepts (DEPRECATED - kept for backward compatibility)
+    # OpenAlex deprecated concepts in 2024 in favor of topics
     concepts: list[str] = PydanticField(
-        default_factory=list, description="Top concept names"
+        default_factory=list,
+        description="Top concept names (DEPRECATED: use topics instead)",
     )
 
     # MeSH terms (Medical Subject Headings)
@@ -197,29 +185,7 @@ class OpenAlexPublicationRecord(BaseModel):
 
 @dataclass(frozen=True, kw_only=True)
 class OpenAlexPublicationEntity(PublicationEntityBase):
-    """Represents a scholarly publication from OpenAlex.
-
-    Domain entity with lineage fields (run_id, content_hash, etc.).
-    Inherits common publication fields from PublicationEntityBase.
-    For DTO without lineage, use OpenAlexPublicationRecord.
-
-    Terminology:
-    - Uses "Publication" instead of OpenAlex API term "Work" for Ubiquitous Language
-    - Business analysts can understand the model without knowing OpenAlex API specifics
-
-    Inherited from PublicationEntityBase:
-        doi, pmid, title, abstract, authors, journal, issn, publisher,
-        year, publication_date, citation_count, doc_type, language, is_oa,
-        oa_status, _lookup_method, _original_id.
-
-    OpenAlex-specific Attributes:
-        openalex_id: OpenAlex Work ID (e.g., W2148763428). REQUIRED.
-        concepts: Top concept names from OpenAlex.
-
-    Note: openalex_id is required for OpenAlex publications.
-
-    See: https://docs.openalex.org/api-entities/works
-    """
+    """OpenAlex publication domain entity. Requires openalex_id."""
 
     # Primary identifier (OpenAlex Work ID) - REQUIRED
     openalex_id: str
@@ -227,7 +193,20 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # External identifiers (in addition to inherited doi, pmid, pmc_id)
     mag_id: str | None = None  # Microsoft Academic Graph ID
 
-    # OpenAlex-specific: Concepts (top-level only)
+    # Topics (hierarchical classification - replaces deprecated concepts)
+    # Each topic dict has: id, display_name, score, subfield, field, domain
+    topics: list[dict[str, Any]] = field(default_factory=list)
+
+    # Primary topic (single most relevant topic for quick categorization)
+    # Dict with: id, display_name, score, subfield, field, domain
+    primary_topic: dict[str, Any] | None = None
+
+    # Grants/funding information
+    # Each grant dict has: funder, funder_display_name, award_id
+    grants: list[dict[str, Any]] = field(default_factory=list)
+
+    # OpenAlex-specific: Concepts (DEPRECATED - kept for backward compatibility)
+    # OpenAlex deprecated concepts in 2024 in favor of topics
     concepts: list[str] = field(default_factory=list)
 
     # MeSH terms (Medical Subject Headings)
