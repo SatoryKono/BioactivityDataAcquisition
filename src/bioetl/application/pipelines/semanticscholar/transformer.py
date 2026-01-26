@@ -12,7 +12,11 @@ from typing import TYPE_CHECKING, Any, cast
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_affiliations,
+    extract_author_h_indices,
+    extract_author_orcids,
+    extract_author_s2_ids,
     extract_authors,
+    extract_citation_contexts,
     extract_external_ids,
     extract_fields_of_study,
     extract_journal_info,
@@ -48,7 +52,10 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - title: title
     - abstract: abstract
     - tldr: tldr.text (AI-generated summary)
-    - authors: authors (extraction + optional PII hashing)
+    - authors: authors.name (extraction + optional PII hashing)
+    - author_s2_ids: authors.authorId (S2 author IDs for disambiguation)
+    - author_orcids: authors.externalIds.ORCID (persistent researcher IDs)
+    - author_h_indices: authors.hIndex (research impact metric)
     - journal: journal.name / venue
     - year: year
     - publication_date: publicationDate
@@ -60,6 +67,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - open_access_url: openAccessPdf.url
     - fields_of_study: fieldsOfStudy
     - publication_types: publicationTypes
+    - citation_contexts: citations.contexts (citing sentences, when available)
 
     Handles lookup metadata:
     - _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
@@ -135,13 +143,25 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         pmid_vo = PubMedId.from_raw(raw_pmid)
         pmid = str(pmid_vo) if pmid_vo else None
 
+        # Get authors list for multiple extractions
+        authors_list = rec.get("authors")
+
         # Authors with optional PII hashing
-        raw_authors = extract_authors(rec.get("authors"))
+        raw_authors = extract_authors(authors_list)
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
         # Extract affiliations
-        raw_affiliations = extract_affiliations(rec.get("authors"))
+        raw_affiliations = extract_affiliations(authors_list)
         serialized_affiliations = self.serialize_json_list(raw_affiliations)
+
+        # Extract author identifiers (for author-level analytics)
+        author_s2_ids = extract_author_s2_ids(authors_list)
+        author_orcids = extract_author_orcids(authors_list)
+        author_h_indices = extract_author_h_indices(authors_list)
+
+        # Extract citation contexts (if available from citations/references endpoint)
+        # Note: contexts are only available when requesting citation details
+        citation_contexts = extract_citation_contexts(rec.get("citations"))
 
         # Journal/venue info
         journal_info = extract_journal_info(
@@ -187,6 +207,20 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "tldr": tldr,
             "authors": self.serialize_json_list(hashed_authors),
             "affiliations": serialized_affiliations,
+            # Author identifiers (for author-level analytics and disambiguation)
+            "author_s2_ids": self.serialize_json_list(author_s2_ids)
+            if author_s2_ids
+            else None,
+            "author_orcids": self.serialize_json_list(author_orcids)
+            if any(author_orcids)
+            else None,
+            "author_h_indices": self.serialize_json(author_h_indices)
+            if any(h is not None for h in author_h_indices)
+            else None,
+            # Citation context (for citation sentiment analysis)
+            "citation_contexts": self.serialize_json_list(citation_contexts)
+            if citation_contexts
+            else None,
             "journal": journal_info.get("journal_name"),
             "volume": journal_info.get("volume"),
             "pages": pages,  # Legacy field

@@ -152,6 +152,28 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="Author affiliations (JSON array)",
     )
 
+    # === Author Identifiers (for author-level analytics and disambiguation) ===
+    author_s2_ids: Series[str] = pa.Field(
+        nullable=True,
+        description="Semantic Scholar author IDs (JSON array of 40-char hex IDs)",
+    )
+
+    author_orcids: Series[str] = pa.Field(
+        nullable=True,
+        description="Author ORCID identifiers (JSON array, empty string for missing)",
+    )
+
+    author_h_indices: Series[str] = pa.Field(
+        nullable=True,
+        description="Author h-index values (JSON array, null for missing)",
+    )
+
+    # === Citation Context (for citation sentiment analysis) ===
+    citation_contexts: Series[str] = pa.Field(
+        nullable=True,
+        description="Citation context sentences (JSON array)",
+    )
+
     class Config:
         """Pandera configuration."""
 
