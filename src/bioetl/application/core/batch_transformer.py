@@ -20,7 +20,6 @@ from bioetl.domain.exceptions import DataQualityThresholdError
 
 if TYPE_CHECKING:
     from bioetl.application.core.config import RecordProcessorConfig
-    from bioetl.application.core.memory_monitor import MemoryMonitor
     from bioetl.application.core.protocols import (
         GoldFilterCallback,
         GoldTransformCallback,
@@ -28,6 +27,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
+    from bioetl.domain.ports import MemoryMonitorPort
     from bioetl.domain.types import BatchID
 
 
@@ -333,7 +333,7 @@ class StreamingBatchProcessor:
     def __init__(
         self,
         transformer: BatchTransformer,
-        memory_monitor: MemoryMonitor | None = None,
+        memory_monitor: MemoryMonitorPort | None = None,
     ) -> None:
         """Initialize streaming processor.
 

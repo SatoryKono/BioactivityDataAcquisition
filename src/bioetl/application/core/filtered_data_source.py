@@ -6,7 +6,6 @@ Loads filter IDs from external sources (CSV) and passes them to the adapter.
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.domain.ports import FilterableDataSourcePort, InputFilterPort
@@ -62,14 +61,12 @@ class FilteredDataSource:
         """Access to filter load result with duplicate statistics."""
         return self._filter_result
 
-    def _filter_file_exists(self, source_path: str) -> bool:
-        """Check if filter file exists, log warning if missing.
+    def _log_filter_file_not_found(self, source_path: str) -> None:
+        """Log warning when filter file is not found.
 
-        Returns True if file exists, False otherwise (graceful degradation).
+        Called when InputFilterPort raises FileNotFoundError.
+        Graceful degradation: pipeline continues without filtering.
         """
-        if Path(source_path).exists():
-            return True
-
         if self._logger:
             self._logger.warning(
                 "input_filter_file_not_found",
@@ -77,7 +74,6 @@ class FilteredDataSource:
                 pipeline=self._pipeline_name,
                 message="Filter file not found, proceeding without filtering",
             )
-        return False
 
     async def __aenter__(self) -> Self:
         """Enter async context and load filter IDs if enabled."""
@@ -107,19 +103,27 @@ class FilteredDataSource:
             )
 
     async def _load_csv_filter_ids(self) -> None:
-        """Load filter IDs from CSV file."""
+        """Load filter IDs from CSV file.
+
+        Delegates file existence checking to InputFilterPort (infrastructure layer).
+        If file not found, logs warning and continues without filtering (graceful degradation).
+        """
         if not self._filter_reader:
             return
 
         source_path = self._filter_config.source_path
-        if not source_path or not self._filter_file_exists(source_path):
+        if not source_path:
             return
 
         columns = self._filter_config.get_columns()
-        if len(columns) > 1:
-            await self._load_multi_column_filter(source_path, columns)
-        elif self._filter_config.column_name:
-            await self._load_single_column_filter(source_path)
+        try:
+            if len(columns) > 1:
+                await self._load_multi_column_filter(source_path, columns)
+            elif self._filter_config.column_name:
+                await self._load_single_column_filter(source_path)
+        except FileNotFoundError:
+            # InputFilterPort raised FileNotFoundError - graceful degradation
+            self._log_filter_file_not_found(source_path)
 
     async def _load_multi_column_filter(
         self, source_path: str, columns: tuple[Any, ...]
