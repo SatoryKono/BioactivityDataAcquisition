@@ -14,7 +14,8 @@ from bioetl.application.core.batch_transformer import (
     TransformedRecord,
 )
 from bioetl.application.core.config import RecordProcessorConfig
-from bioetl.application.core.memory_monitor import MemoryConfig, MemoryMonitor
+from bioetl.domain.config import MemoryConfig
+from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier

@@ -32,7 +32,7 @@ class TestFileSizeLimits:
         "runner.py": 1080,  # 1059 LOC - Complex orchestration (FSM helpers extracted to fsm_helper.py)
         "base.py": 600,  # Base classes may be larger
         # Infrastructure layer exemptions
-        "config.py": 605,  # 602 LOC - Config can be verbose
+        "config.py": 640,  # 636 LOC - Config can be verbose (includes MemoryConfig)
         # Domain layer exemptions (baseline)
         "medallion.py": 340,  # 336 LOC - Medallion layer enums and policies
         "result.py": 335,  # 331 LOC - CompositeResult with EnrichmentResult, MergeResult, SeedResult dataclasses + factory methods

@@ -1001,7 +1001,8 @@ class TestMemoryMonitorImplementationContract:
 
     def test_memory_monitor_implements_memory_monitor_port(self) -> None:
         """MemoryMonitor MUST satisfy MemoryMonitorPort contract."""
-        from bioetl.application.core.memory_monitor import MemoryConfig, MemoryMonitor
+        from bioetl.domain.config import MemoryConfig
+        from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
 
         monitor = MemoryMonitor(config=MemoryConfig())
 
