@@ -128,8 +128,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
         # Validate DOI using Value Object (returns None for invalid/empty)
         # OpenAlex stores DOIs as full URLs (e.g., "https://doi.org/10.1038/...")
-        doi_vo = DOI.from_raw(rec.get("doi"))
-        doi = str(doi_vo) if doi_vo else None
+        doi = self.validate_value_object(DOI, rec.get("doi"))
 
         # Reconstruct abstract from inverted index (then strip HTML for cleaning)
         abstract_index = rec.get("abstract_inverted_index")
@@ -164,8 +163,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         biblio_info = extract_biblio_info(rec.get("biblio", {}))
 
         # Validate year using PublicationYear Value Object
-        year_vo = PublicationYear.from_raw(rec.get("publication_year"))
-        year = year_vo.value if year_vo else None
+        year = self.validate_value_object(
+            PublicationYear, rec.get("publication_year"), as_string=False
+        )
 
         # Map document type
         raw_type = rec.get("type", "")

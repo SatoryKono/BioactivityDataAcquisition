@@ -26,6 +26,7 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
     """Handles fallback search by title when DOI lookup fails.
 
     Extracts fallback logic to reduce main class size and cyclomatic complexity.
+    Uses provider_prefix="crossref" for auto-generated event names.
     """
 
     def __init__(
@@ -39,59 +40,12 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
             logger: Logger port for structured logging.
             search_fn: Async function to search publications by query.
         """
-        super().__init__(logger)
+        super().__init__(logger, provider_prefix="crossref")
         self._search_fn = search_fn
 
-    @property
-    def _event_no_fallback_title(self) -> str:
-        """Return log event name for missing fallback title."""
-        return "crossref_no_fallback_title"
-
-    @property
-    def _event_fallback_attempt(self) -> str:
-        """Return log event name for fallback attempt."""
-        return "crossref_title_fallback_attempt"
-
-    @property
-    def _event_fallback_success(self) -> str:
-        """Return log event name for successful fallback."""
-        return "crossref_title_fallback_success"
-
-    @property
-    def _event_fallback_not_found(self) -> str:
-        """Return log event name for failed fallback."""
-        return "crossref_title_fallback_not_found"
-
-    @property
-    def _event_title_only_attempt(self) -> str:
-        """Return log event name for title-only lookup attempt."""
-        return "crossref_title_only_attempt"
-
-    @property
-    def _event_title_only_success(self) -> str:
-        """Return log event name for successful title-only lookup."""
-        return "crossref_title_only_success"
-
-    @property
-    def _event_title_only_not_found(self) -> str:
-        """Return log event name for failed title-only lookup."""
-        return "crossref_title_only_not_found"
-
-    def _process_found_result(
-        self, result: dict[str, Any], original_doi: str
-    ) -> dict[str, Any]:
-        """Add lookup method metadata to found publication.
-
-        Args:
-            result: The found publication record.
-            original_doi: The DOI that was originally searched.
-
-        Returns:
-            Publication with _lookup_method and _original_id added.
-        """
-        result["_lookup_method"] = "title_fallback"
-        result["_original_id"] = original_doi
-        return result
+    def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:
+        """Return CrossRef DOI for logging."""
+        return ("found_doi", str(result.get("DOI", "unknown")))
 
     async def _search_by_title(self, title: str) -> dict[str, Any] | None:
         """Search for a publication by title.
@@ -103,10 +57,6 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
             First relevant publication or None.
         """
         return await self.search_by_title(title)
-
-    def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:
-        """Return CrossRef DOI for logging."""
-        return ("found_doi", str(result.get("DOI", "unknown")))
 
     async def search_by_title(
         self,

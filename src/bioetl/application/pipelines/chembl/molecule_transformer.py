@@ -168,8 +168,9 @@ class MoleculeTransformer(BaseChemblTransformer):
         )
 
         # Validate InChI Key using Value Object (returns None for invalid/empty)
-        inchikey = InChIKey.from_raw(structure_data.get("inchikey"))
-        structure_data["inchikey"] = str(inchikey) if inchikey else None
+        structure_data["inchikey"] = self.validate_value_object(
+            InChIKey, structure_data.get("inchikey")
+        )
 
         # Validate SMILES using Value Object (returns None for invalid/empty)
         # ChEMBL provides canonical_smiles, so mark as canonical

@@ -529,3 +529,124 @@ class TestGoldMethods:
         assert "_run_id" in gold_record
         assert "content_hash" not in gold_record
         assert "molecule_properties" not in gold_record
+
+
+@pytest.mark.unit
+class TestValidateValueObject:
+    """Tests for validate_value_object() and validate_value_objects() helper methods."""
+
+    def test_validate_value_object_returns_string_for_valid(self) -> None:
+        """Test validate_value_object returns string for valid DOI."""
+        from bioetl.domain.value_objects import DOI
+
+        result = BaseTransformer.validate_value_object(DOI, "10.1038/nature12373")
+        assert result == "10.1038/nature12373"
+        assert isinstance(result, str)
+
+    def test_validate_value_object_returns_none_for_invalid(self) -> None:
+        """Test validate_value_object returns None for invalid DOI."""
+        from bioetl.domain.value_objects import DOI
+
+        result = BaseTransformer.validate_value_object(DOI, "invalid-doi")
+        assert result is None
+
+    def test_validate_value_object_returns_none_for_none(self) -> None:
+        """Test validate_value_object returns None for None input."""
+        from bioetl.domain.value_objects import DOI
+
+        result = BaseTransformer.validate_value_object(DOI, None)
+        assert result is None
+
+    def test_validate_value_object_returns_none_for_empty_string(self) -> None:
+        """Test validate_value_object returns None for empty string."""
+        from bioetl.domain.value_objects import DOI
+
+        result = BaseTransformer.validate_value_object(DOI, "")
+        assert result is None
+
+    def test_validate_value_object_as_value_returns_int(self) -> None:
+        """Test validate_value_object with as_string=False returns value directly."""
+        from bioetl.domain.value_objects import PublicationYear
+
+        result = BaseTransformer.validate_value_object(
+            PublicationYear, 2020, as_string=False
+        )
+        assert result == 2020
+        assert isinstance(result, int)
+
+    def test_validate_value_object_strips_url_prefix(self) -> None:
+        """Test validate_value_object handles DOI with URL prefix."""
+        from bioetl.domain.value_objects import DOI
+
+        result = BaseTransformer.validate_value_object(
+            DOI, "https://doi.org/10.1038/nature12373"
+        )
+        # DOI normalizes to lowercase
+        assert result == "10.1038/nature12373"
+
+    def test_validate_value_object_inchikey_valid(self) -> None:
+        """Test validate_value_object with valid InChIKey."""
+        from bioetl.domain.value_objects import InChIKey
+
+        result = BaseTransformer.validate_value_object(
+            InChIKey, "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+        )
+        assert result == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+
+    def test_validate_value_object_inchikey_invalid(self) -> None:
+        """Test validate_value_object with invalid InChIKey."""
+        from bioetl.domain.value_objects import InChIKey
+
+        result = BaseTransformer.validate_value_object(InChIKey, "not-an-inchikey")
+        assert result is None
+
+    def test_validate_value_objects_returns_list(self) -> None:
+        """Test validate_value_objects returns list of validated values."""
+        from bioetl.domain.value_objects import TaxonomyId
+
+        result = BaseTransformer.validate_value_objects(
+            TaxonomyId, [9606, 10090], as_string=False
+        )
+        assert result == [9606, 10090]
+
+    def test_validate_value_objects_filters_invalid(self) -> None:
+        """Test validate_value_objects filters out invalid values."""
+        from bioetl.domain.value_objects import TaxonomyId
+
+        result = BaseTransformer.validate_value_objects(
+            TaxonomyId, [9606, -1, 10090], as_string=False
+        )
+        # -1 is invalid taxonomy ID (negative)
+        assert result == [9606, 10090]
+
+    def test_validate_value_objects_returns_none_for_empty(self) -> None:
+        """Test validate_value_objects returns None for empty list."""
+        from bioetl.domain.value_objects import TaxonomyId
+
+        result = BaseTransformer.validate_value_objects(TaxonomyId, [])
+        assert result is None
+
+    def test_validate_value_objects_returns_none_for_none(self) -> None:
+        """Test validate_value_objects returns None for None input."""
+        from bioetl.domain.value_objects import TaxonomyId
+
+        result = BaseTransformer.validate_value_objects(TaxonomyId, None)
+        assert result is None
+
+    def test_validate_value_objects_returns_none_if_all_invalid(self) -> None:
+        """Test validate_value_objects returns None if all values invalid."""
+        from bioetl.domain.value_objects import TaxonomyId
+
+        result = BaseTransformer.validate_value_objects(
+            TaxonomyId, [-1, -2], as_string=False
+        )
+        assert result is None
+
+    def test_validate_value_objects_as_string(self) -> None:
+        """Test validate_value_objects with as_string=True."""
+        from bioetl.domain.value_objects import TaxonomyId
+
+        result = BaseTransformer.validate_value_objects(
+            TaxonomyId, [9606, 10090], as_string=True
+        )
+        assert result == ["9606", "10090"]
