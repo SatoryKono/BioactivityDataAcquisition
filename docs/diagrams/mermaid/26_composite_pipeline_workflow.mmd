@@ -1,0 +1,108 @@
+%%{init: {'theme':'base', 'themeVariables': { 'fontSize':'14px'}}}%%
+flowchart TB
+    subgraph composite["Composite Pipeline Pattern (ADR-026)"]
+        direction TB
+
+        subgraph seed["1. SEED PHASE"]
+            SeedPipeline["Seed Pipeline<br/>(chembl_publication)"]
+            SeedSilver["Silver/chembl/publication"]
+            KeyExtractor["KeyExtractorService<br/>Extract: doi, pmid"]
+
+            SeedPipeline --> SeedSilver
+            SeedSilver --> KeyExtractor
+        end
+
+        subgraph enrich["2. ENRICHMENT PHASE (Fan-Out)"]
+            direction LR
+
+            CrossRef["CrossRef<br/>(required)"]
+            OpenAlex["OpenAlex<br/>(optional)"]
+            PubMed["PubMed<br/>(optional)"]
+            SemanticScholar["SemanticScholar<br/>(optional)"]
+
+            CrossRefSilver["Silver/crossref/pub"]
+            OpenAlexSilver["Silver/openalex/pub"]
+            PubMedSilver["Silver/pubmed/pub"]
+            SSSilver["Silver/ss/pub"]
+
+            CrossRef --> CrossRefSilver
+            OpenAlex --> OpenAlexSilver
+            PubMed --> PubMedSilver
+            SemanticScholar --> SSSilver
+        end
+
+        subgraph merge["3. MERGE PHASE"]
+            MergeService["MergeService<br/>- LEFT OUTER JOIN<br/>- Conflict Resolution<br/>- Lineage Tracking"]
+            GoldOutput["Gold/publication_enriched"]
+
+            MergeService --> GoldOutput
+        end
+
+        %% Connections
+        KeyExtractor --> CrossRef
+        KeyExtractor --> OpenAlex
+        KeyExtractor --> PubMed
+        KeyExtractor --> SemanticScholar
+
+        CrossRefSilver --> MergeService
+        OpenAlexSilver --> MergeService
+        PubMedSilver --> MergeService
+        SSSilver --> MergeService
+        SeedSilver -.->|"Base records"| MergeService
+    end
+
+    subgraph orchestration["Orchestration Components"]
+        direction TB
+
+        CompositePipelineRunner["CompositePipelineRunner"]
+        EnrichmentCoordinator["EnrichmentCoordinator<br/>- asyncio.gather()<br/>- Timeout handling<br/>- Error handling"]
+        CheckpointManager["CompositeCheckpointManager<br/>- Resume support"]
+
+        CompositePipelineRunner --> EnrichmentCoordinator
+        CompositePipelineRunner --> CheckpointManager
+    end
+
+    subgraph fsm["FSM States"]
+        direction LR
+
+        NotStarted["NOT_STARTED"]
+        SeedRunning["SEED_RUNNING"]
+        SeedCompleted["SEED_COMPLETED"]
+        Enriching["ENRICHING"]
+        EnrichCompleted["ENRICHMENT_COMPLETED"]
+        Merging["MERGING"]
+        Completed["COMPLETED"]
+        Failed["FAILED"]
+
+        NotStarted --> SeedRunning
+        SeedRunning --> SeedCompleted
+        SeedCompleted --> Enriching
+        Enriching --> EnrichCompleted
+        EnrichCompleted --> Merging
+        Merging --> Completed
+
+        SeedRunning -.->|"Error"| Failed
+        Enriching -.->|"Required failed"| Failed
+        Merging -.->|"Error"| Failed
+    end
+
+    %% Main flow connection
+    CompositePipelineRunner -.->|"Manages"| seed
+    EnrichmentCoordinator -.->|"Coordinates"| enrich
+    MergeService -.->|"Executes"| merge
+
+    classDef seedStyle fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef enrichStyle fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef mergeStyle fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef orchStyle fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef fsmStyle fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef requiredStyle fill:#ffebee,stroke:#c62828,stroke-width:2px
+    classDef optionalStyle fill:#f5f5f5,stroke:#616161,stroke-width:2px
+
+    class seed,SeedPipeline,SeedSilver,KeyExtractor seedStyle
+    class enrich,CrossRefSilver,OpenAlexSilver,PubMedSilver,SSSilver enrichStyle
+    class merge,MergeService,GoldOutput mergeStyle
+    class orchestration,CompositePipelineRunner,EnrichmentCoordinator,CheckpointManager orchStyle
+    class fsm,NotStarted,SeedRunning,SeedCompleted,Enriching,EnrichCompleted,Merging,Completed,Failed fsmStyle
+    class CrossRef requiredStyle
+    class OpenAlex,PubMed,SemanticScholar optionalStyle

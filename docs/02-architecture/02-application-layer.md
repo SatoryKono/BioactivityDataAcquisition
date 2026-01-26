@@ -113,8 +113,69 @@ class RunnerServices:
     observer: PipelineObserver
 ```
 
+### 2.5. `composite/` — Composite Pipeline (ADR-026)
+
+**Расположение:** `src/bioetl/application/composite/`
+
+Содержит компоненты для **композитных пайплайнов** — оркестрации нескольких пайплайнов для обогащения данных из разных источников.
+
+**Ключевые компоненты:**
+
+| Файл | Компонент | Назначение |
+|------|-----------|------------|
+| `runner.py` | `CompositePipelineRunner` | Оркестрирует: seed → enrich (fan-out) → merge |
+| `coordinator.py` | `EnrichmentCoordinator` | Параллельный запуск enrichers через asyncio.gather |
+| `merger.py` | `MergeService` | Объединение данных из разных источников (LEFT OUTER JOIN) |
+| `key_extractor.py` | `KeyExtractorService` | Извлечение join keys из seed pipeline |
+| `checkpoint.py` | `CompositeCheckpointManager` | Resume после сбоя |
+
+**Workflow Composite Pipeline:**
+```
+Seed Pipeline → Extract Keys → [CrossRef, OpenAlex, PubMed, SemanticScholar] → Merge → Gold
+                                     ↑ Fan-Out (parallel)
+```
+
+См. [ADR-026: Composite Pipeline Pattern](decisions/ADR-026-composite-pipeline-pattern.md) для деталей.
+
 ## 3. Принципы Работы
 
 - **Dependency Injection:** Пайплайны никогда не создают зависимости сами (`S3Storage()`). Они получают уже созданные экземпляры адаптеров в конструкторе. Это делает их легко тестируемыми и гибкими.
 - **Минимум логики:** Слой `Application` должен быть "тонким". Вся сложная бизнес-логика выносится в `Domain`, а детали реализации — в `Infrastructure`.
 - **Управление транзакциями:** Этот слой отвечает за управление жизненным циклом операций, включая обработку ошибок, повторные попытки и откат в случае сбоя.
+
+---
+
+## 4. Связанные Материалы
+
+### Навигация по Слоям
+
+| ← Предыдущий | Текущий | Следующий → |
+|--------------|---------|-------------|
+| [Domain Layer](01-domain-layer.md) | **Application** | [Infrastructure Layer](03-infrastructure-layer.md) |
+
+### Связанные Диаграммы
+
+| Диаграмма | Файл | Описание |
+|-----------|------|----------|
+| Application Layer Classes | [06-application-layer-class-diagram.mermaid](diagrams/06-application-layer-class-diagram.mermaid) | Классы слоя Application |
+| Pipeline Execution | [06-pipeline-execution.mermaid](diagrams/06-pipeline-execution.mermaid) | Поток выполнения пайплайна |
+| Pipeline Hierarchy | [17-pipeline-hierarchy.mermaid](diagrams/17-pipeline-hierarchy.mermaid) | Иерархия Pipeline/Transformer |
+| Layers Interaction | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid) | Взаимодействие слоёв (включая Composite) |
+| Composite Pipeline | [../diagrams/mermaid/26_composite_pipeline_workflow.mmd](../diagrams/mermaid/26_composite_pipeline_workflow.mmd) | Workflow Composite Pipeline |
+| Pipeline Core | [../diagrams/mermaid/10_pipeline_core_components.mmd](../diagrams/mermaid/10_pipeline_core_components.mmd) | Ядро пайплайнов |
+| BaseTransformer | [../diagrams/mermaid/19_base_transformer_template_method.mmd](../diagrams/mermaid/19_base_transformer_template_method.mmd) | Template Method паттерн |
+
+### Связанные ADR
+
+| ADR | Тема |
+|-----|------|
+| [ADR-015](decisions/ADR-015-pipeline-services-lifecycle.md) | Pipeline Services Lifecycle |
+| [ADR-020](decisions/ADR-020-basepipeline-decomposition.md) | BasePipeline Decomposition |
+| [ADR-026](decisions/ADR-026-composite-pipeline-pattern.md) | Composite Pipeline Pattern |
+
+### Смежные Разделы Документации
+
+- [Domain Layer](01-domain-layer.md) — порты, используемые Application
+- [Composition Layer](05-composition-layer.md) — сборка и DI пайплайнов
+- [API Reference: Application](../04-reference/api/application.md) — API документация слоя
+- [RULES.md §1 "Архитектура и Слои"](../RULES.md) — матрица импортов

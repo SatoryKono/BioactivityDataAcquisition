@@ -1,6 +1,6 @@
 # BioETL Architecture Diagrams
 
-*Версия: 1.0 | Дата: 2026-01-20*
+*Версия: 1.1 | Дата: 2026-01-26*
 
 Этот каталог содержит комплексную систему архитектурных диаграмм для проекта BioETL.
 
@@ -8,12 +8,12 @@
 
 - **DIAGRAM_CATALOG.md** - Каталог из 500 предложенных диаграмм
 - **TOP_50_DIAGRAMS.md** - Таблица 50 наиболее важных диаграмм с приоритетами
-- **mermaid/** - 25 Mermaid диаграмм (`.mmd` files)
+- **mermaid/** - 26 Mermaid диаграмм (`.mmd` files)
 - **images/** - Отрендеренные PNG диаграммы (создаются при рендеринге)
 
 ## Структура Диаграмм
 
-### TOP-25 Диаграммы (Priority ≥ 7.75)
+### TOP-26 Диаграммы (Priority ≥ 7.75)
 
 | # | Файл | Название | Тип |
 |---|------|----------|-----|
@@ -42,6 +42,7 @@
 | 23 | `23_provider_adapters_overview.mmd` | Provider Adapters Overview | Component |
 | 24 | `24_graceful_shutdown.mmd` | Graceful Shutdown | Sequence Diagram |
 | 25 | `25_pipeline_config_structure.mmd` | PipelineConfig Structure | Class Diagram |
+| 26 | `26_composite_pipeline_workflow.mmd` | Composite Pipeline Workflow (ADR-026) | Flowchart |
 
 ## Рендеринг Диаграмм в PNG
 

@@ -27,15 +27,30 @@ To build a robust, scalable, and maintainable data pipeline for acquiring and pr
 | **Circuit Breaker** | Fault tolerance for API failures | [ADR-007](02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) |
 | **Deterministic Writes** | Reproducible SCD2 with ingestion_ts | [ADR-014](02-architecture/decisions/ADR-014-deterministic-writes.md) |
 | **Gold Validation** | Pandera strict schema validation | [ADR-018](02-architecture/decisions/ADR-018-gold-strict-validation.md) |
+| **Composite Pipeline** | Multi-source data enrichment (seed → enrich → merge) | [ADR-026](02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) |
 
-## Supported Providers
+## Supported Providers (7)
 
-| Provider | Entities | Status |
-|----------|----------|--------|
-| **ChEMBL** | Activity, Assay, Molecule, Target, Target Component, Document | Production |
-| **PubChem** | Compound | Production |
-| **UniProt** | Protein | Production |
-| **PubMed** | Publication | Production |
+| Provider | Entities | Status | Rate Limit |
+|----------|----------|--------|------------|
+| **ChEMBL** | Activity, Assay, Molecule, Target, Target Component, Document (13 entities) | Production | None |
+| **PubChem** | Compound | Production | 5 req/sec |
+| **UniProt** | Protein | Production | 100 req/sec |
+| **PubMed** | Publication | Production | 3 req/sec |
+| **CrossRef** | Publication | Production | Polite pool |
+| **OpenAlex** | Publication | Production | 10 req/sec |
+| **SemanticScholar** | Publication | Production | 100 req/5min |
+
+### Composite Pipeline (ADR-026)
+
+BioETL supports multi-source data enrichment through Composite Pipelines:
+
+```bash
+# Run composite publication pipeline (seed from ChEMBL, enrich from CrossRef, OpenAlex, PubMed)
+bioetl run --pipeline composite_publication --limit 1000
+```
+
+See [Composite Pipeline Diagram](diagrams/mermaid/26_composite_pipeline_workflow.mmd) for workflow visualization.
 
 ## Current Version
 
@@ -58,4 +73,4 @@ make test
 
 ---
 
-*Last updated: 2026-01-07*
+*Last updated: 2026-01-26*
