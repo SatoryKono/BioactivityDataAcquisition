@@ -128,6 +128,45 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="Whether the publication has been retracted",
     )
 
+    # === Classification Fields (extracted by transformer) ===
+    concepts: Series[str] = pa.Field(
+        nullable=True,
+        description="OpenAlex concepts (JSON array of concept names)",
+    )
+
+    mesh: Series[str] = pa.Field(
+        nullable=True,
+        description="MeSH terms (JSON array of descriptor names)",
+    )
+
+    keywords: Series[str] = pa.Field(
+        nullable=True,
+        description="Keywords (JSON array)",
+    )
+
+    # === External Identifier ===
+    mag_id: Series[str] = pa.Field(
+        nullable=True,
+        description="Microsoft Academic Graph ID (legacy)",
+    )
+
+    # === Bibliographic Page Info ===
+    first_page: Series[str] = pa.Field(
+        nullable=True,
+        description="First page number (from biblio object)",
+    )
+
+    last_page: Series[str] = pa.Field(
+        nullable=True,
+        description="Last page number (from biblio object)",
+    )
+
+    # === Author Affiliations ===
+    affiliations: Series[str] = pa.Field(
+        nullable=True,
+        description="Author affiliations (JSON array)",
+    )
+
     class Config:
         """Pandera configuration."""
 
