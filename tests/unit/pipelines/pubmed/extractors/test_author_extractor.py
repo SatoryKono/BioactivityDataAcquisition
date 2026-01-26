@@ -166,3 +166,110 @@ class TestParseAuthors:
         node = ET.fromstring(xml)
         authors = AuthorExtractor.parse_authors(node)
         assert authors == []
+
+
+class TestParseAffiliations:
+    """Tests for parse_affiliations method."""
+
+    def test_single_author_affiliation(self):
+        """Test single author with affiliation."""
+        xml = """
+        <Article>
+            <AuthorList>
+                <Author>
+                    <LastName>Doe</LastName>
+                    <AffiliationInfo>
+                        <Affiliation>University of Example</Affiliation>
+                    </AffiliationInfo>
+                </Author>
+            </AuthorList>
+        </Article>
+        """
+        node = ET.fromstring(xml)
+        affs = AuthorExtractor.parse_affiliations(node)
+        assert affs == ["University of Example"]
+
+    def test_multiple_authors_same_affiliation(self):
+        """Test multiple authors with same affiliation (deduplication)."""
+        xml = """
+        <Article>
+            <AuthorList>
+                <Author>
+                    <LastName>Doe</LastName>
+                    <AffiliationInfo>
+                        <Affiliation>University of Example</Affiliation>
+                    </AffiliationInfo>
+                </Author>
+                <Author>
+                    <LastName>Smith</LastName>
+                    <AffiliationInfo>
+                        <Affiliation>University of Example</Affiliation>
+                    </AffiliationInfo>
+                </Author>
+            </AuthorList>
+        </Article>
+        """
+        node = ET.fromstring(xml)
+        affs = AuthorExtractor.parse_affiliations(node)
+        assert affs == ["University of Example"]
+
+    def test_multiple_affiliations(self):
+        """Test multiple distinct affiliations."""
+        xml = """
+        <Article>
+            <AuthorList>
+                <Author>
+                    <LastName>Doe</LastName>
+                    <AffiliationInfo>
+                        <Affiliation>Inst A</Affiliation>
+                    </AffiliationInfo>
+                </Author>
+                <Author>
+                    <LastName>Smith</LastName>
+                    <AffiliationInfo>
+                        <Affiliation>Inst B</Affiliation>
+                    </AffiliationInfo>
+                </Author>
+            </AuthorList>
+        </Article>
+        """
+        node = ET.fromstring(xml)
+        affs = AuthorExtractor.parse_affiliations(node)
+        # Sorted order
+        assert affs == ["Inst A", "Inst B"]
+
+    def test_author_multiple_affiliations(self):
+        """Test one author with multiple affiliations."""
+        xml = """
+        <Article>
+            <AuthorList>
+                <Author>
+                    <LastName>Doe</LastName>
+                    <AffiliationInfo>
+                        <Affiliation>Inst A</Affiliation>
+                    </AffiliationInfo>
+                    <AffiliationInfo>
+                        <Affiliation>Inst B</Affiliation>
+                    </AffiliationInfo>
+                </Author>
+            </AuthorList>
+        </Article>
+        """
+        node = ET.fromstring(xml)
+        affs = AuthorExtractor.parse_affiliations(node)
+        assert affs == ["Inst A", "Inst B"]
+
+    def test_no_affiliations(self):
+        """Test author without affiliations."""
+        xml = """
+        <Article>
+            <AuthorList>
+                <Author>
+                    <LastName>Doe</LastName>
+                </Author>
+            </AuthorList>
+        </Article>
+        """
+        node = ET.fromstring(xml)
+        affs = AuthorExtractor.parse_affiliations(node)
+        assert affs == []

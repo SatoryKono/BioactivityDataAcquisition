@@ -238,6 +238,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         raw_authors = AuthorExtractor.parse_authors(article)
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
+        # Extract affiliations
+        raw_affiliations = AuthorExtractor.parse_affiliations(article)
+        serialized_affiliations = self.serialize_json_list(raw_affiliations)
+
         # Validate DOI
         raw_doi = IdentifierExtractor.extract_doi(root)
         doi_vo = DOI.from_raw(raw_doi)
@@ -253,6 +257,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             ),
             "abstract_structured": AbstractExtractor.is_abstract_structured(article),
             "authors": self.serialize_json_list(hashed_authors),
+            "affiliations": serialized_affiliations,
             "author_count": len(hashed_authors),
             **self._extract_journal_data(article),
             **self._extract_date_data(article, pubmed_data),
@@ -378,27 +383,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         if year:
             return f"{year}-12-31"
 
-        return None
-
-    def _normalize_partial_date(self, date_str: str | None) -> str | None:
-        """Normalize partial date to YYYY-MM-DD (end of period).
-
-        Args:
-            date_str: Date string (YYYY, YYYY-MM, or YYYY-MM-DD).
-
-        Returns:
-            Full YYYY-MM-DD date or None.
-        """
-        if not date_str:
-            return None
-        if len(date_str) >= 10:
-            return date_str[:10]
-        if len(date_str) == 7:
-            # YYYY-MM → YYYY-MM-30
-            return f"{date_str}-30"
-        if len(date_str) == 4:
-            # YYYY → YYYY-12-31
-            return f"{date_str}-12-31"
         return None
 
     def _parse_month_day(

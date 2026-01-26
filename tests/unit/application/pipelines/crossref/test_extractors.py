@@ -8,6 +8,7 @@ from __future__ import annotations
 import pytest
 
 from bioetl.application.pipelines.crossref.extractors import (
+    extract_affiliations,
     extract_authors,
     extract_content_domain,
     extract_dates,
@@ -122,6 +123,60 @@ class TestExtractAuthors:
         }
         result = extract_authors(publication)
         assert result == ["Valid Author"]
+
+
+class TestExtractAffiliations:
+    """Tests for extract_affiliations function."""
+
+    def test_extract_affiliations_dict_format(self) -> None:
+        """Should extract affiliations from dict format."""
+        pub = {
+            "author": [
+                {"affiliation": [{"name": "University A"}]},
+                {"affiliation": [{"name": "University B"}]},
+            ]
+        }
+        result = extract_affiliations(pub)
+        assert result == ["University A", "University B"]
+
+    def test_extract_affiliations_string_format(self) -> None:
+        """Should extract affiliations from string format."""
+        pub = {"author": [{"affiliation": ["University A", "University B"]}]}
+        result = extract_affiliations(pub)
+        assert result == ["University A", "University B"]
+
+    def test_extract_affiliations_mixed_format(self) -> None:
+        """Should handle mixed dict and string formats."""
+        pub = {
+            "author": [
+                {"affiliation": [{"name": "University A"}]},
+                {"affiliation": ["University B"]},
+            ]
+        }
+        result = extract_affiliations(pub)
+        assert result == ["University A", "University B"]
+
+    def test_extract_affiliations_deduplication(self) -> None:
+        """Should deduplicate affiliations."""
+        pub = {
+            "author": [
+                {"affiliation": [{"name": "University A"}]},
+                {"affiliation": [{"name": "University A"}]},
+            ]
+        }
+        result = extract_affiliations(pub)
+        assert result == ["University A"]
+
+    def test_extract_affiliations_empty(self) -> None:
+        """Should return empty list if no authors/affiliations."""
+        result = extract_affiliations({})
+        assert result == []
+
+    def test_extract_affiliations_invalid_author(self) -> None:
+        """Should skip invalid author entries."""
+        pub = {"author": ["not_dict"]}
+        result = extract_affiliations(pub)
+        assert result == []
 
 
 class TestExtractYear:

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from bioetl.application.pipelines.semanticscholar.extractors import (
+    extract_affiliations,
     extract_authors,
     extract_external_ids,
     extract_fields_of_study,
@@ -189,6 +190,57 @@ class TestExtractAuthors:
         result = extract_authors(authors)
 
         assert result == ["John Doe", "Jane Smith"]
+
+
+class TestExtractAffiliations:
+    """Tests for extract_affiliations function."""
+
+    def test_extract_affiliations_strings(self) -> None:
+        """Should extract affiliations from list of strings."""
+        authors = [
+            {"name": "John", "affiliations": ["Univ A"]},
+            {"name": "Jane", "affiliations": ["Univ B", "Univ A"]},
+        ]
+        result = extract_affiliations(authors)
+        assert result == ["Univ A", "Univ B"]
+
+    def test_extract_affiliations_empty_list(self) -> None:
+        """Should handle empty affiliation lists."""
+        authors = [
+            {"name": "John", "affiliations": []},
+            {"name": "Jane", "affiliations": ["Univ A"]},
+        ]
+        result = extract_affiliations(authors)
+        assert result == ["Univ A"]
+
+    def test_extract_affiliations_none(self) -> None:
+        """Should handle None affiliations."""
+        authors = [
+            {"name": "John", "affiliations": None},
+            {"name": "Jane", "affiliations": ["Univ A"]},
+        ]
+        result = extract_affiliations(authors)
+        assert result == ["Univ A"]
+
+    def test_extract_affiliations_deduplication(self) -> None:
+        """Should deduplicate affiliations."""
+        authors = [
+            {"name": "John", "affiliations": ["Univ A"]},
+            {"name": "Jane", "affiliations": ["Univ A"]},
+        ]
+        result = extract_affiliations(authors)
+        assert result == ["Univ A"]
+
+    def test_extract_affiliations_empty_authors(self) -> None:
+        """Should return empty list for no authors."""
+        result = extract_affiliations([])
+        assert result == []
+
+    def test_extract_affiliations_whitespace(self) -> None:
+        """Should strip whitespace."""
+        authors = [{"name": "John", "affiliations": ["  Univ A  "]}]
+        result = extract_affiliations(authors)
+        assert result == ["Univ A"]
 
 
 class TestExtractJournalInfo:

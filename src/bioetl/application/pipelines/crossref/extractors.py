@@ -68,6 +68,49 @@ def extract_authors(publication: dict[str, Any]) -> list[str]:
     return authors
 
 
+def extract_affiliations(publication: dict[str, Any]) -> list[str]:
+    """Extract unique affiliations from CrossRef publication.
+
+    CrossRef affiliations are often nested inside author objects.
+    Format: author -> affiliation -> [{'name': 'University...'}] or string list.
+
+    Args:
+        publication: CrossRef publication record.
+
+    Returns:
+        List of unique affiliation strings (sorted).
+
+    Example:
+        >>> extract_affiliations({
+        ...     "author": [
+        ...         {"affiliation": [{"name": "University A"}]},
+        ...         {"affiliation": [{"name": "University B"}, {"name": "University A"}]}
+        ...     ]
+        ... })
+        ['University A', 'University B']
+    """
+    affiliations: set[str] = set()
+    for author in publication.get("author", []):
+        if not isinstance(author, dict):
+            continue
+
+        aff_list = author.get("affiliation", [])
+        if not isinstance(aff_list, list):
+            continue
+
+        for aff in aff_list:
+            name = None
+            if isinstance(aff, dict):
+                name = aff.get("name")
+            elif isinstance(aff, str):
+                name = aff
+
+            if name and isinstance(name, str):
+                affiliations.add(name.strip())
+
+    return sorted(list(affiliations))
+
+
 def extract_year(publication: dict[str, Any]) -> int | None:
     """Extract publication year from date-parts.
 

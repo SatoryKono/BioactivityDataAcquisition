@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.semanticscholar.extractors import (
+    extract_affiliations,
     extract_authors,
     extract_external_ids,
     extract_fields_of_study,
@@ -138,6 +139,10 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         raw_authors = extract_authors(rec.get("authors"))
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
+        # Extract affiliations
+        raw_affiliations = extract_affiliations(rec.get("authors"))
+        serialized_affiliations = self.serialize_json_list(raw_affiliations)
+
         # Journal/venue info
         journal_info = extract_journal_info(
             rec.get("journal"),
@@ -181,6 +186,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "abstract": self._data_normalizer.strip_html_tags(rec.get("abstract")),
             "tldr": tldr,
             "authors": self.serialize_json_list(hashed_authors),
+            "affiliations": serialized_affiliations,
             "journal": journal_info.get("journal_name"),
             "volume": journal_info.get("volume"),
             "pages": pages,  # Legacy field
@@ -225,39 +231,3 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
 
         """
         return SemanticScholarPublicationEntity
-
-    def _normalize_partial_date(self, date_str: str | None) -> str | None:
-        """Normalize partial date to YYYY-MM-DD format.
-
-        Semantic Scholar API may return partial dates (YYYY or YYYY-MM).
-        This method normalizes them to full ISO dates using end-of-period:
-        - YYYY -> YYYY-12-31 (end of year)
-        - YYYY-MM -> YYYY-MM-30 (end of month, simplified)
-        - YYYY-MM-DD -> unchanged
-
-        Args:
-            date_str: Raw date string from API.
-
-        Returns:
-            Normalized YYYY-MM-DD date string or None if invalid/empty.
-
-        """
-        if not date_str:
-            return None
-
-        date_str = str(date_str).strip()
-
-        # Full ISO date (YYYY-MM-DD)
-        if len(date_str) == 10 and date_str[4] == "-" and date_str[7] == "-":
-            return date_str
-
-        # Year-month only (YYYY-MM) -> use day 30 as end-of-month
-        if len(date_str) == 7 and date_str[4] == "-":
-            return f"{date_str}-30"
-
-        # Year only (YYYY) -> use December 31 as end-of-year
-        if len(date_str) == 4 and date_str.isdigit():
-            return f"{date_str}-12-31"
-
-        # Invalid format - return None
-        return None
