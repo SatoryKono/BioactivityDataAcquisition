@@ -65,15 +65,15 @@ nav:
     -   Home: index.md
     -   "Project Map": 00-map.md
     -   "Project Rules":
-            -   "Summary": 00-project_rules/00-rules-summary.md
-            -   "Full Rules": 00-project_rules/01-project-rules.md
-            -   "User Rules": 00-project_rules/02-user-rules.md
-            -   "File Policy": 00-project_rules/03-file-policy.md
-            -   "Extending BioETL": 00-project_rules/04-extending-bioetl.md
-            -   "Cleanup Policy": 00-project_rules/05-cleanup-policy.md
-            -   "Rules Mapping": 00-project_rules/06-rules-mapping.md
-            -   "Consistency Check": 00-project_rules/07-consistency-check.md
-            -   "Audit Report": 00-project_rules/AUDIT-REPORT.md
+            -   "Summary": 00-project-rules/00-rules-summary.md
+            -   "Full Rules": 00-project-rules/01-project-rules.md
+            -   "User Rules": 00-project-rules/02-user-rules.md
+            -   "File Policy": 00-project-rules/03-file-policy.md
+            -   "Extending BioETL": 00-project-rules/04-extending-bioetl.md
+            -   "Cleanup Policy": 00-project-rules/05-cleanup-policy.md
+            -   "Rules Mapping": 00-project-rules/06-rules-mapping.md
+            -   "Consistency Check": 00-project-rules/07-consistency-check.md
+            -   "Audit Report": 00-project-rules/AUDIT-REPORT.md
     -   Architecture:
             -   "System Context": 02-architecture/system-context.md
             -   "Data Flow": 02-architecture/data-flow.md
