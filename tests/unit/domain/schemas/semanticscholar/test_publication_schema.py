@@ -229,12 +229,11 @@ class TestSchemaFieldDefinitions:
         schema = SemanticScholarPublicationSchema.to_schema()
         # Note: underscore-prefixed fields are not exposed in schema.columns
         # by pandera, so we only test public business fields here
+        # Note: pmc_id, arxiv_id excluded per design (2026-01)
         required_fields = [
             "paper_id",
             "doi",
             "pmid",
-            "pmc_id",
-            "arxiv_id",
             "dblp_id",
             "corpus_id",
             "title",
@@ -285,11 +284,10 @@ class TestSchemaFieldDefinitions:
         """Test optional string fields are nullable."""
         schema = SemanticScholarPublicationSchema.to_schema()
         # Note: underscore-prefixed fields like _original_id are not exposed
+        # Note: pmc_id, arxiv_id excluded per design (2026-01)
         nullable_fields = [
             "doi",
             "pmid",
-            "pmc_id",
-            "arxiv_id",
             "dblp_id",
             "title",
             "abstract",

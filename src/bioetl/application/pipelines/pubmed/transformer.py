@@ -606,11 +606,13 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         # Get base silver record
         silver_record = BaseTransformer.entity_to_silver_record(entity)
 
-        # Remove excluded fields per user request
+        # Remove excluded fields (API deprecated or not available)
         silver_record.pop("vernacular_title", None)
         silver_record.pop("epub_date", None)
         silver_record.pop("received_date", None)
         silver_record.pop("revised_date", None)
         silver_record.pop("accepted_date", None)
+        silver_record.pop("citation_count", None)
+        silver_record.pop("is_oa", None)
 
         return silver_record

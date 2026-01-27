@@ -37,12 +37,16 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
 
     Validates publication records from OpenAlex Works API.
     Inherits common fields from PublicationBaseSchema:
-    - Cross-references: pmid, doi, pmc_id
+    - Cross-references: pmid, doi
     - Core content: title, abstract, authors
-    - Metadata: journal, year (overridden), publication_date, doc_type (overridden), language
+    - Metadata: journal, year (overridden), publication_date, language
     - Metrics: citation_count (overridden for nullable int)
     - Open Access: is_oa
     - Lookup tracking: lookup_method (overridden), original_id, source (overridden)
+
+    Fields excluded from PyArrow/Gold schemas:
+    - pmc_id: Excluded per design (2026-01)
+    - doc_type: OpenAlex uses raw 'type' field instead (article, book, etc.)
     """
 
     # === Primary Key (OpenAlex-specific) ===
@@ -68,10 +72,10 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="Publication year (1800-2100).",
     )
 
-    # === Override doc_type to be non-nullable ===
-    doc_type: Series[str] = pa.Field(
-        nullable=False,
-        description="Publication type (PUBLICATION, PREPRINT, etc.)",
+    # === Raw OpenAlex Type (replaces doc_type) ===
+    type: Series[str] = pa.Field(
+        nullable=True,
+        description="Raw OpenAlex type (article, book, dataset, etc.)",
     )
 
     # === Override citation_count with pd.Int64Dtype for nullable int ===

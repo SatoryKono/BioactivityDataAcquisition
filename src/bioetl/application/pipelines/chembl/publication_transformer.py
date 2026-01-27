@@ -224,9 +224,12 @@ class PublicationTransformer(BaseChemblTransformer):
         # Get base silver record
         silver_record = BaseTransformer.entity_to_silver_record(entity)
 
-        # Remove excluded fields
+        # Remove excluded fields (not available from ChEMBL API)
         silver_record.pop("affiliations", None)
         silver_record.pop("pmc_id", None)
         silver_record.pop("publication_date", None)
+        silver_record.pop("citation_count", None)
+        silver_record.pop("is_oa", None)
+        silver_record.pop("language", None)
 
         return silver_record
