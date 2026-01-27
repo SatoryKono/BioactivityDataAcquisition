@@ -36,9 +36,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     abstract_structured: Series[bool] = pa.Field(
         nullable=True
     )  # Whether abstract has NLM sections
-    vernacular_title: Series[str] = pa.Field(
-        nullable=True
-    )  # Original non-English title
+    # Note: vernacular_title excluded from transformer output per design
 
     # Journal information
     journal: Series[str] = pa.Field(nullable=True)
@@ -72,10 +70,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     publication_year: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # Legacy alias
-    accepted_date: Series[str] = pa.Field(nullable=True)
-    received_date: Series[str] = pa.Field(nullable=True)
-    revised_date: Series[str] = pa.Field(nullable=True)
-    epub_date: Series[str] = pa.Field(nullable=True)
+    # Note: accepted_date, received_date, revised_date, epub_date excluded per design
     # MEDLINE-specific dates
     date_completed: Series[str] = pa.Field(
         nullable=True
@@ -339,6 +334,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # Journal/Venue
     journal: Series[str] = pa.Field(nullable=True)
     volume: Series[str] = pa.Field(nullable=True)
+    issue: Series[str] = pa.Field(nullable=True)  # Parsed from combined volume/issue
     pages: Series[str] = pa.Field(nullable=True)  # Legacy: "first-last" format
     first_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     last_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
