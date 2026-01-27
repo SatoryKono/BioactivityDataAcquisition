@@ -99,7 +99,8 @@ class TestSemanticScholarPublicationTransformer:
         assert result["pmid"] == "12345678"
         assert result["corpus_id"] == 123456
         assert result["title"] == "CRISPR-Cas9 gene editing in human embryos"
-        assert result["abstract"] == "This study demonstrates novel applications..."
+        # abstract excluded per user request
+        assert "abstract" not in result
         assert result["year"] == 2024
         assert result["publication_date"] == "2024-05-15"
         assert result["journal"] == "Nature"
@@ -129,20 +130,18 @@ class TestSemanticScholarPublicationTransformer:
         )
 
     @pytest.mark.asyncio
-    async def test_transform_authors_serialized(
+    async def test_transform_authors_excluded(
         self,
         transformer: SemanticScholarPublicationTransformer,
         mock_context: PipelineContext,
         sample_record: dict[str, Any],
     ) -> None:
-        """Test that authors are serialized as JSON."""
+        """Test that authors field is excluded per user request."""
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        # Authors should be serialized as JSON string
-        assert isinstance(result["authors"], str)
-        assert "John Doe" in result["authors"]
-        assert "Jane Smith" in result["authors"]
+        # Authors excluded per user request
+        assert "authors" not in result
 
     @pytest.mark.asyncio
     async def test_transform_fields_of_study_serialized(
@@ -231,7 +230,8 @@ class TestSemanticScholarPublicationTransformer:
         assert result["paper_id"] == "a" * 40
         assert result["title"] == "Minimal Paper"
         assert result["doi"] is None
-        assert result["abstract"] is None
+        # abstract excluded per user request
+        assert "abstract" not in result
         assert result["year"] is None
 
     @pytest.mark.asyncio
@@ -320,12 +320,12 @@ class TestTransformerWithPiiHasher:
     """Tests for transformer with PII hasher."""
 
     @pytest.mark.asyncio
-    async def test_transform_with_pii_hashing(
+    async def test_transform_without_pii_fields(
         self,
         mock_context: PipelineContext,
         sample_record: dict[str, Any],
     ) -> None:
-        """Test that author names are hashed when PII hasher is provided."""
+        """Test that transformer works without PII fields (authors excluded)."""
         mock_pii_hasher = MagicMock()
         mock_pii_hasher.hash_list = MagicMock(return_value=["hash1", "hash2"])
 
@@ -334,10 +334,9 @@ class TestTransformerWithPiiHasher:
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        mock_pii_hasher.hash_list.assert_called_once()
-        # Authors should contain hashed values
-        assert "hash1" in result["authors"]
-        assert "hash2" in result["authors"]
+        # Authors excluded per user request, so PII hasher should not be called
+        mock_pii_hasher.hash_list.assert_not_called()
+        assert "authors" not in result
 
 
 class TestSemanticScholarDoiNormalization:

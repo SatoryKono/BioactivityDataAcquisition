@@ -296,8 +296,14 @@ class TestCliCommands:
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
+    @patch("bioetl.interfaces.cli.commands.run.ensure_metrics_server_started")
     def test_run_with_limit(
-        self, mock_get_service, mock_register, cli_runner, mock_registry
+        self,
+        mock_ensure_metrics,
+        mock_get_service,
+        mock_register,
+        cli_runner,
+        mock_registry,
     ):
         """Test that --limit is passed correctly."""
         from bioetl.application.services import RunOptions, RunResult, RunStatus
@@ -334,8 +340,14 @@ class TestCliCommands:
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     @patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service")
+    @patch("bioetl.interfaces.cli.commands.run.ensure_metrics_server_started")
     def test_run_with_resume_flag(
-        self, mock_get_service, mock_register, cli_runner, mock_registry
+        self,
+        mock_ensure_metrics,
+        mock_get_service,
+        mock_register,
+        cli_runner,
+        mock_registry,
     ):
         """Test that --resume flag is passed correctly."""
         from bioetl.application.services import RunOptions, RunResult, RunStatus

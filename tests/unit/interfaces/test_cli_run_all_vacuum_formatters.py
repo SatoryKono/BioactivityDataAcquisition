@@ -1059,6 +1059,23 @@ class TestVacuumCommand:
 class TestRunAllPipelinesAsync:
     """Tests for _run_all_pipelines_async function."""
 
+    @pytest.fixture(autouse=True)
+    def mock_servers(self):
+        """Mock health and metrics servers to prevent port binding."""
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.health_server_context",
+                MagicMock(),
+            ) as mock_health,
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.ensure_metrics_server_started"
+            ),
+        ):
+            # Setup async context manager mock
+            mock_health.return_value.__aenter__.return_value = None
+            mock_health.return_value.__aexit__.return_value = None
+            yield
+
     @pytest.mark.asyncio
     async def test_run_all_pipelines_handles_success(self):
         """Test _run_all_pipelines_async with successful run."""

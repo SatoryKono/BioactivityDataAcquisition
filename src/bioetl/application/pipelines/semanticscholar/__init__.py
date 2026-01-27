@@ -5,7 +5,6 @@ Provides transformer and extractors for Semantic Scholar publication data.
 """
 
 from bioetl.application.pipelines.semanticscholar.extractors import (
-    extract_authors,
     extract_external_ids,
     extract_fields_of_study,
     extract_journal_info,
@@ -18,7 +17,7 @@ from bioetl.application.pipelines.semanticscholar.transformer import (
 
 __all__ = [
     "SemanticScholarPublicationTransformer",
-    "extract_authors",
+    # extract_authors excluded per user request
     "extract_external_ids",
     "extract_fields_of_study",
     "extract_journal_info",
