@@ -4,8 +4,6 @@
 
 В каталоге 34 исходных файла диаграмм Mermaid, документирующих архитектуру BioETL.
 
-> **Note**: `DeltaWriter` was renamed to `SilverWriter` (see `silver_writer.py`). Some older diagrams may reference the old name.
-
 ## Diagram Overview
 
 | # | File | Description |
