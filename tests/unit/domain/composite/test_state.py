@@ -25,6 +25,8 @@ class TestCompositePipelineStateEnum:
             "NOT_STARTED",
             "SEED_RUNNING",
             "SEED_COMPLETED",
+            "DEPENDENCIES_RUNNING",
+            "DEPENDENCIES_COMPLETED",
             "ENRICHING",
             "ENRICHMENT_COMPLETED",
             "MERGING",
@@ -91,6 +93,8 @@ class TestTerminalStates:
             CompositePipelineState.NOT_STARTED,
             CompositePipelineState.SEED_RUNNING,
             CompositePipelineState.SEED_COMPLETED,
+            CompositePipelineState.DEPENDENCIES_RUNNING,
+            CompositePipelineState.DEPENDENCIES_COMPLETED,
             CompositePipelineState.ENRICHING,
             CompositePipelineState.ENRICHMENT_COMPLETED,
             CompositePipelineState.MERGING,
@@ -119,6 +123,7 @@ class TestActiveStates:
         non_active = [
             CompositePipelineState.NOT_STARTED,
             CompositePipelineState.SEED_COMPLETED,
+            CompositePipelineState.DEPENDENCIES_COMPLETED,
             CompositePipelineState.ENRICHMENT_COMPLETED,
             CompositePipelineState.COMPLETED,
             CompositePipelineState.FAILED,
@@ -362,15 +367,17 @@ class TestMetricValue:
         for state in CompositePipelineState:
             value = state.to_metric_value()
             assert isinstance(value, int)
-            assert 0 <= value <= 7
+            assert 0 <= value <= 9
 
     def test_metric_values_progress_through_pipeline(self):
         """Metric values should generally increase through pipeline stages."""
-        # Happy path progression
+        # Happy path progression (with dependencies)
         progression = [
             CompositePipelineState.NOT_STARTED,
             CompositePipelineState.SEED_RUNNING,
             CompositePipelineState.SEED_COMPLETED,
+            CompositePipelineState.DEPENDENCIES_RUNNING,
+            CompositePipelineState.DEPENDENCIES_COMPLETED,
             CompositePipelineState.ENRICHING,
             CompositePipelineState.ENRICHMENT_COMPLETED,
             CompositePipelineState.MERGING,

@@ -15,6 +15,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.composite.result import (
+    DependencyResult,
+    DependencyStatus,
     EnrichmentResult,
     EnrichmentStatus,
     SeedResult,
@@ -32,6 +34,7 @@ class CompositeCheckpointState:
     Tracks progress through composite execution phases:
     - FSM state (current phase of execution)
     - Seed completion
+    - Individual dependency completions
     - Individual enricher completions
     - Any intermediate state needed for resume
 
@@ -41,6 +44,8 @@ class CompositeCheckpointState:
         state: Current FSM state of the pipeline.
         seed_completed: Whether seed pipeline completed.
         seed_result: Result from seed if completed.
+        completed_dependencies: Set of completed dependency names.
+        dependency_results: Results from completed dependencies.
         completed_enrichers: Set of completed enricher names.
         enrichment_results: Results from completed enrichers.
         created_at: When checkpoint was created.
@@ -67,6 +72,8 @@ class CompositeCheckpointState:
     state: CompositePipelineState = CompositePipelineState.NOT_STARTED
     seed_completed: bool = False
     seed_result: SeedResult | None = None
+    completed_dependencies: frozenset[str] = field(default_factory=frozenset)
+    dependency_results: dict[str, DependencyResult] = field(default_factory=dict)
     completed_enrichers: frozenset[str] = field(default_factory=frozenset)
     enrichment_results: dict[str, EnrichmentResult] = field(default_factory=dict)
     created_at: datetime | None = None
@@ -83,6 +90,33 @@ class CompositeCheckpointState:
             state=CompositePipelineState.SEED_COMPLETED,
             seed_completed=True,
             seed_result=result,
+            completed_dependencies=self.completed_dependencies,
+            dependency_results=self.dependency_results,
+            completed_enrichers=self.completed_enrichers,
+            enrichment_results=self.enrichment_results,
+            created_at=self.created_at,
+            updated_at=datetime.now(tz=UTC),
+        )
+
+    def with_dependency_completed(
+        self, dependency_name: str, result: DependencyResult
+    ) -> CompositeCheckpointState:
+        """Create new state with dependency marked as completed.
+
+        Sets state to DEPENDENCIES_RUNNING to indicate dependency phase is in progress.
+        The transition to DEPENDENCIES_COMPLETED should be done explicitly
+        via with_state() when all dependencies are done.
+        """
+        new_completed = self.completed_dependencies | {dependency_name}
+        new_results = {**self.dependency_results, dependency_name: result}
+        return CompositeCheckpointState(
+            composite_name=self.composite_name,
+            run_id=self.run_id,
+            state=CompositePipelineState.DEPENDENCIES_RUNNING,
+            seed_completed=self.seed_completed,
+            seed_result=self.seed_result,
+            completed_dependencies=frozenset(new_completed),
+            dependency_results=new_results,
             completed_enrichers=self.completed_enrichers,
             enrichment_results=self.enrichment_results,
             created_at=self.created_at,
@@ -106,6 +140,8 @@ class CompositeCheckpointState:
             state=CompositePipelineState.ENRICHING,
             seed_completed=self.seed_completed,
             seed_result=self.seed_result,
+            completed_dependencies=self.completed_dependencies,
+            dependency_results=self.dependency_results,
             completed_enrichers=frozenset(new_completed),
             enrichment_results=new_results,
             created_at=self.created_at,
@@ -116,7 +152,8 @@ class CompositeCheckpointState:
         """Create new state with updated FSM state.
 
         Allows Runner to explicitly set state transitions (e.g., to MERGING,
-        ENRICHMENT_COMPLETED, FAILED, or COMPLETED) without modifying other fields.
+        ENRICHMENT_COMPLETED, DEPENDENCIES_COMPLETED, FAILED, or COMPLETED)
+        without modifying other fields.
 
         Args:
             new_state: New FSM state to set.
@@ -130,6 +167,8 @@ class CompositeCheckpointState:
             state=new_state,
             seed_completed=self.seed_completed,
             seed_result=self.seed_result,
+            completed_dependencies=self.completed_dependencies,
+            dependency_results=self.dependency_results,
             completed_enrichers=self.completed_enrichers,
             enrichment_results=self.enrichment_results,
             created_at=self.created_at,
@@ -157,6 +196,8 @@ class CompositeCheckpointState:
             "state": self.state.value,
             "seed_completed": self.seed_completed,
             "seed_result": self._serialize_seed_result(),
+            "completed_dependencies": list(self.completed_dependencies),
+            "dependency_results": self._serialize_dependency_results(),
             "completed_enrichers": list(self.completed_enrichers),
             "enrichment_results": self._serialize_enrichment_results(),
             "created_at": self.created_at.isoformat() if self.created_at else None,
@@ -174,6 +215,21 @@ class CompositeCheckpointState:
             "keys_generated": self.seed_result.keys_generated,
             "duration_seconds": self.seed_result.duration_seconds,
             "resumed": self.seed_result.resumed,
+        }
+
+    def _serialize_dependency_results(self) -> dict[str, dict[str, object]]:
+        """Serialize dependency results for JSON."""
+        return {
+            name: {
+                "pipeline_name": result.pipeline_name,
+                "status": result.status.value,
+                "records_extracted": result.records_extracted,
+                "records_silver": result.records_silver,
+                "duration_seconds": result.duration_seconds,
+                "error_message": result.error_message,
+                "resumed": result.resumed,
+            }
+            for name, result in self.dependency_results.items()
         }
 
     def _serialize_enrichment_results(self) -> dict[str, dict[str, object]]:
@@ -197,8 +253,9 @@ class CompositeCheckpointState:
     def from_dict(cls, data: dict[str, Any]) -> CompositeCheckpointState:
         """Create state from dictionary.
 
-        Handles backward compatibility for checkpoints without state field.
-        Gracefully handles corrupted state values by defaulting to NOT_STARTED.
+        Handles backward compatibility for checkpoints without state field
+        or dependency fields. Gracefully handles corrupted state values
+        by defaulting to NOT_STARTED.
         """
         seed_result = None
         if data.get("seed_result"):
@@ -212,7 +269,20 @@ class CompositeCheckpointState:
                 resumed=sr.get("resumed", False),
             )
 
-        enrichment_results = {}
+        # Parse dependency results (backward compatible - may not exist)
+        dependency_results: dict[str, DependencyResult] = {}
+        for name, dr_data in data.get("dependency_results", {}).items():
+            dependency_results[name] = DependencyResult(
+                pipeline_name=dr_data["pipeline_name"],
+                status=DependencyStatus(dr_data["status"]),
+                records_extracted=dr_data.get("records_extracted", 0),
+                records_silver=dr_data.get("records_silver", 0),
+                duration_seconds=dr_data.get("duration_seconds", 0.0),
+                error_message=dr_data.get("error_message"),
+                resumed=dr_data.get("resumed", False),
+            )
+
+        enrichment_results: dict[str, EnrichmentResult] = {}
         for name, er_data in data.get("enrichment_results", {}).items():
             enrichment_results[name] = EnrichmentResult(
                 enricher_name=er_data["enricher_name"],
@@ -255,6 +325,8 @@ class CompositeCheckpointState:
             state=state,
             seed_completed=data.get("seed_completed", False),
             seed_result=seed_result,
+            completed_dependencies=frozenset(data.get("completed_dependencies", [])),
+            dependency_results=dependency_results,
             completed_enrichers=frozenset(data.get("completed_enrichers", [])),
             enrichment_results=enrichment_results,
             created_at=created_at,

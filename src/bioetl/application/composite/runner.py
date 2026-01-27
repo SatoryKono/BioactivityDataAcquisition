@@ -23,6 +23,7 @@ from bioetl.application.composite.runner_helpers import (
 )
 from bioetl.domain.composite.result import (
     CompositeResult,
+    DependencyResult,
     EnrichmentResult,
     EnrichmentStatus,
     MergeResult,
@@ -37,6 +38,9 @@ if TYPE_CHECKING:
 
     from bioetl.application.composite.checkpoint import CompositeCheckpointManager
     from bioetl.application.composite.coordinator import EnrichmentCoordinator
+    from bioetl.application.composite.dependency_coordinator import (
+        DependencyCoordinator,
+    )
     from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.composite.merger import MergeService
     from bioetl.application.composite.preflight_validator import (
@@ -120,6 +124,9 @@ class CompositePipelineRunner:
         run_id: str | None = None,
         dq_report_service: DQReportService | None = None,
         preflight_validator: CompositePreflightValidator | None = None,
+        dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
+        | None = None,
+        dependency_coordinator: DependencyCoordinator | None = None,
     ) -> None:
         """Initialize composite pipeline runner.
 
@@ -139,12 +146,17 @@ class CompositePipelineRunner:
             dq_report_service: Optional DQ report service for generating reports.
             preflight_validator: Optional preflight validator for field_priorities.
                 If provided, validates configuration before Extract phase.
+            dependencies_runner_factory: Factory to create dependency PipelineRunner.
+                Takes pipeline name and keys DataFrame.
+            dependency_coordinator: Coordinator for running dependencies.
         """
         self._config = config
         self._runtime = runtime
         self._seed_runner_factory = seed_runner_factory
         self._enricher_runner_factory = enricher_runner_factory
+        self._dependencies_runner_factory = dependencies_runner_factory
         self._key_extractor = key_extractor
+        self._dependency_coordinator = dependency_coordinator
         self._coordinator = coordinator
         self._merger = merger
         self._checkpoint_manager = checkpoint_manager
@@ -185,15 +197,16 @@ class CompositePipelineRunner:
         2. Load checkpoint (for resume)
         3. Run seed pipeline (if not completed)
         4. Extract join keys from seed Silver
-        5. Run enrichers in parallel (fan-out)
-        6. Merge results into Gold
-        7. Delete checkpoint on success
+        5. Run dependencies (if configured, to populate Silver tables)
+        6. Run enrichers in parallel (fan-out)
+        7. Merge results into Gold
+        8. Delete checkpoint on success
 
         Returns:
             CompositeResult with all sub-pipeline results.
 
         Raises:
-            CriticalError: If seed or required enricher fails.
+            CriticalError: If seed or required enricher/dependency fails.
             RunnerAlreadyExecutedError: If this Runner instance was already executed.
         """
         # Protection against double execution
@@ -369,10 +382,91 @@ class CompositePipelineRunner:
             keys_count=len(keys_df),
         )
 
-        # Step 3: Determine which enrichers to run
+        # Track dependency results
+        dependency_results: dict[str, DependencyResult] = {}
+
+        # Step 3: Run dependencies (if any)
+        if (
+            self._config.dependencies
+            and self._dependency_coordinator
+            and self._dependencies_runner_factory
+        ):
+            # Validate and transition to DEPENDENCIES_RUNNING
+            previous_state = state.state
+            self._fsm.validate_fsm_transition(
+                previous_state, CompositePipelineState.DEPENDENCIES_RUNNING
+            )
+            state = state.with_state(CompositePipelineState.DEPENDENCIES_RUNNING)
+            await self._checkpoint_manager.save(state)
+
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.DEPENDENCIES_RUNNING,
+                stage="dependencies_start",
+                dependencies=[d.pipeline for d in self._config.dependencies],
+                count=len(self._config.dependencies),
+            )
+
+            self._logger.info(
+                PipelineEvent.phase_started("dependencies"),
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                dependencies=[d.pipeline for d in self._config.dependencies],
+                count=len(self._config.dependencies),
+            )
+
+            # Execute dependencies
+            dependency_results = await self._dependency_coordinator.run_dependencies(
+                keys=keys_df,
+                dependencies=self._config.dependencies,
+                completed=state.completed_dependencies,
+                runner_factory=self._dependencies_runner_factory,
+            )
+
+            # Update checkpoint with completed dependencies
+            for dep_name, dep_result in dependency_results.items():
+                if dep_result.is_success:
+                    state = state.with_dependency_completed(dep_name, dep_result)
+
+            # Check for required dependency failures
+            required_failed = [
+                dep_name
+                for dep_name, dep_result in dependency_results.items()
+                if not dep_result.is_success
+                and self._config.get_dependency(dep_name)
+                and self._config.get_dependency(dep_name).required  # type: ignore[union-attr]
+            ]
+            if required_failed:
+                # Required dependency failed - transition to FAILED
+                state = state.with_state(CompositePipelineState.FAILED)
+                await self._checkpoint_manager.save(state)
+                raise RuntimeError(
+                    f"Required dependencies failed: {required_failed}"
+                )
+
+            # Transition to DEPENDENCIES_COMPLETED
+            previous_state = state.state
+            state = state.with_state(CompositePipelineState.DEPENDENCIES_COMPLETED)
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.DEPENDENCIES_COMPLETED,
+                stage="dependencies_complete",
+                succeeded=len([r for r in dependency_results.values() if r.is_success]),
+                failed=len([r for r in dependency_results.values() if not r.is_success]),
+            )
+            self._logger.info(
+                PipelineEvent.phase_completed("dependencies"),
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                succeeded=len([r for r in dependency_results.values() if r.is_success]),
+                failed=len([r for r in dependency_results.values() if not r.is_success]),
+            )
+            await self._checkpoint_manager.save(state)
+
+        # Step 4: Determine which enrichers to run
         enrichers_to_run = self._get_enrichers_to_run(state)
 
-        # Step 4: Run enrichers (fan-out) with FSM state management
+        # Step 5: Run enrichers (fan-out) with FSM state management
         if enrichers_to_run:
             # Validate and transition to ENRICHING state before starting enrichments
             enricher_names = [e.pipeline for e in enrichers_to_run]
@@ -437,7 +531,7 @@ class CompositePipelineRunner:
             self._logger,
         )
 
-        # Step 5: Check required enrichers with FSM FAILED transition on error
+        # Step 6: Check required enrichers with FSM FAILED transition on error
         try:
             self._check_required_enrichers(enrichment_results)
         except RuntimeError as e:
@@ -474,10 +568,10 @@ class CompositePipelineRunner:
         # Step 5b: Transition to ENRICHMENT_COMPLETED
         state = await self._transition_to_enrichment_completed(state)
 
-        # Step 6: Execute merge or skip in dry run mode
+        # Step 7: Execute merge or skip in dry run mode
         state, merge_result = await self._execute_merge_stage(state, enrichment_results)
 
-        # Step 7: Finalize - set COMPLETED and cleanup checkpoint
+        # Step 8: Finalize - set COMPLETED and cleanup checkpoint
         await self._finalize_pipeline(state)
 
         completed_at = datetime.now(tz=UTC)
@@ -514,6 +608,7 @@ class CompositePipelineRunner:
             composite_name=self._config.name,
             composite_run_id=self._run_id_str,
             seed_result=seed_result,
+            dependency_results=dependency_results,
             enrichment_results=enrichment_results,
             merge_result=merge_result,
             total_duration_seconds=total_duration,
@@ -521,6 +616,7 @@ class CompositePipelineRunner:
             completed_at=completed_at,
             had_warnings=had_warnings,
             _required_enrichers=frozenset(self._config.required_enrichers),
+            _required_dependencies=frozenset(self._config.required_dependencies),
         )
 
     async def _transition_to_enrichment_completed(
@@ -528,12 +624,16 @@ class CompositePipelineRunner:
     ) -> CompositeCheckpointState:
         """Transition FSM state to ENRICHMENT_COMPLETED.
 
-        Handles the case where no enrichers were run (state is still SEED_COMPLETED).
-        Must go through ENRICHING first per FSM rules.
+        Handles the case where no enrichers were run (state is still SEED_COMPLETED
+        or DEPENDENCIES_COMPLETED). Must go through ENRICHING first per FSM rules.
         """
         from bioetl.domain.composite.state import CompositePipelineState
 
-        if state.state == CompositePipelineState.SEED_COMPLETED:
+        # Handle states that need to transition through ENRICHING first
+        if state.state in (
+            CompositePipelineState.SEED_COMPLETED,
+            CompositePipelineState.DEPENDENCIES_COMPLETED,
+        ):
             # Must go through ENRICHING first per FSM rules (no enrichers case)
             previous_state = state.state
             self._fsm.validate_fsm_transition(

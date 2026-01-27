@@ -20,6 +20,7 @@ from pydantic import ValidationError
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointManager
 from bioetl.application.composite.coordinator import EnrichmentCoordinator
+from bioetl.application.composite.dependency_coordinator import DependencyCoordinator
 from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.application.composite.merger import MergeService
 from bioetl.application.composite.runner import (
@@ -218,13 +219,71 @@ def bootstrap_composite_runner(
 
                         break
 
+        # For many_to_one enrichers, don't limit records since they return
+        # multiple rows per seed record (e.g., publication_term returns M terms per publication).
+        # For one_to_one enrichers, limit to seed record count.
+        limit: int | None = None
+        if enricher_cfg and enricher_cfg.is_many_to_one:
+            limit = None  # No limit for 1:M enrichers
+        elif keys is not None:
+            limit = len(keys)
+
         options = RunOptions(
             run_type="incremental",
-            limit=len(keys) if keys is not None else None,
+            limit=limit,
             ignore_yaml_filter=True,  # Disable YAML input_filter for composite mode
             filter_ids=filter_ids,
             filter_field=filter_field,
             fallback_mapping=fallback_mapping,
+        )
+        ctx = build_pipeline_context(pipeline_name, options)
+        return bootstrap_pipeline_runner(ctx)
+
+    # Build dependency config lookup for fast access
+    dependency_configs = {d.pipeline: d for d in config.dependencies}
+
+    # Create dependencies runner factory
+    def dependencies_runner_factory(
+        pipeline_name: str, keys: pl.DataFrame
+    ) -> PipelineRunner:
+        """Create PipelineRunner for a dependency phase.
+
+        Dependencies run after the seed to populate Silver tables before enrichers.
+        Unlike enrichers which read from Silver, dependencies call APIs to fetch data.
+
+        Configuration:
+        - Extracts join key values from seed results DataFrame
+        - Passes extracted IDs as filter_ids to limit API calls
+        - Does NOT use ignore_yaml_filter (dependencies may have their own configs)
+
+        Args:
+            pipeline_name: Name of the dependency pipeline to instantiate.
+            keys: DataFrame containing seed results with join key columns.
+
+        Returns:
+            PipelineRunner configured for dependency pipeline execution.
+        """
+        dep_cfg = dependency_configs.get(pipeline_name)
+        filter_ids: tuple[str, ...] | None = None
+        filter_field: str | None = None
+
+        if dep_cfg and keys is not None and len(keys) > 0:
+            # Extract filter IDs from seed keys
+            for key in dep_cfg.join_keys:
+                if key in keys.columns:
+                    key_values = (
+                        keys.select(key).drop_nulls().unique().to_series().to_list()
+                    )
+                    if key_values:
+                        filter_ids = tuple(str(v) for v in key_values)
+                        filter_field = key
+                        break
+
+        options = RunOptions(
+            run_type="incremental",
+            limit=len(keys) if filter_ids else None,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)
@@ -241,6 +300,10 @@ def bootstrap_composite_runner(
 
     key_extractor = KeyExtractorService(
         delta_reader=delta_reader,
+        logger=logger,
+    )
+
+    dependency_coordinator = DependencyCoordinator(
         logger=logger,
     )
 
@@ -273,8 +336,10 @@ def bootstrap_composite_runner(
         config=config,
         runtime=runtime,
         seed_runner_factory=seed_runner_factory,
+        dependencies_runner_factory=dependencies_runner_factory,
         enricher_runner_factory=enricher_runner_factory,
         key_extractor=key_extractor,
+        dependency_coordinator=dependency_coordinator,
         coordinator=coordinator,
         merger=merger,
         checkpoint_manager=checkpoint_manager,

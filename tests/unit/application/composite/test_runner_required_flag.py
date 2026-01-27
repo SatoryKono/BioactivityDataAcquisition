@@ -67,6 +67,7 @@ class MockCompositeConfig:
     merge: MergeConfig = None  # type: ignore[assignment]
     dq: DQConfig = None  # type: ignore[assignment]
     enrichers: tuple[MockEnricherConfig, ...] = ()
+    dependencies: tuple = ()
 
     def __post_init__(self):
         if self.seed is None:

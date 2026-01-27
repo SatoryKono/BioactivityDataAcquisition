@@ -49,6 +49,7 @@ class MockCompositeConfig:
     dq: DQConfig = None  # type: ignore[assignment]
     enrichers: tuple = ()
     required_enrichers: frozenset = frozenset()
+    dependencies: tuple = ()
 
     def __post_init__(self):
         if self.seed is None:
