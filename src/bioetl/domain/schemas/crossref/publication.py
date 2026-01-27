@@ -28,12 +28,17 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
 
     Represents publication metadata from CrossRef API with citation enrichment.
     Inherits common fields from PublicationBaseSchema:
-    - Cross-references: pmid, doi (overridden to non-nullable), pmc_id
+    - Cross-references: doi (overridden to non-nullable)
     - Core content: title, abstract, authors
-    - Metadata: journal, year, publication_date, doc_type (overridden), language
+    - Metadata: journal, year, publication_date, language
     - Metrics: citation_count
     - Open Access: is_oa
     - Lookup tracking: _lookup_method, _original_id, source (overridden)
+
+    Fields excluded from PyArrow/Gold schemas (not available from CrossRef API):
+    - pmid: CrossRef API doesn't provide PubMed IDs
+    - pmc_id: CrossRef API doesn't provide PMC IDs
+    - doc_type: CrossRef uses raw 'type' field instead (journal-article, etc.)
     """
 
     # === Primary Key (override doi to be non-nullable) ===
@@ -55,11 +60,10 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
         nullable=True, description="Online publication date (ISO format)"
     )
 
-    # === Override doc_type with CrossRef-specific values ===
-    doc_type: Series[str] = pa.Field(
-        nullable=False,
-        isin=DOCUMENT_TYPES,
-        description="Document type: PUBLICATION or PREPRINT",
+    # === Raw CrossRef Type (replaces doc_type) ===
+    type: Series[str] = pa.Field(
+        nullable=True,
+        description="Raw CrossRef type (journal-article, book, etc.)",
     )
 
     # === Override _source to be non-nullable with fixed value ===

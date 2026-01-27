@@ -243,8 +243,7 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field(
             "abstract_structured", pa.bool_()
         ),  # Whether abstract has NLM sections
-        # Dates (ISO format strings)
-        pa.field("accepted_date", pa.string()),
+        # Note: accepted_date, received_date, revised_date, epub_date excluded (API deprecated 2026-01)
         # Authors (affiliations excluded per user request)
         pa.field("author_count", pa.int64()),  # Denormalized count for query efficiency
         pa.field("authors", pa.string()),  # JSON-serialized list
@@ -258,7 +257,6 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("date_revised", pa.string()),  # Record revision date (MEDLINE)
         # Primary identifiers
         pa.field("doi", pa.string()),
-        pa.field("epub_date", pa.string()),
         # Unified page fields (parsed from medline_pgn/pages)
         pa.field("first_page", pa.string()),
         pa.field("grant_count", pa.int64()),  # Number of grants
@@ -294,11 +292,9 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publication_type_list", pa.string()),  # JSON array of pub types
         pa.field("publication_types", pa.list_(pa.string())),
         pa.field("publication_year", pa.int64()),  # Legacy alias for year
-        pa.field("received_date", pa.string()),
         pa.field("reference_count", pa.int64()),  # Number of references
-        pa.field("revised_date", pa.string()),
         pa.field("title", pa.string()),
-        pa.field("vernacular_title", pa.string()),  # Original non-English title
+        # Note: vernacular_title excluded (API deprecated 2026-01)
         pa.field("volume", pa.string()),
         pa.field("year", pa.int64()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
@@ -659,8 +655,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
         # abstract, affiliations, authors excluded per user request
-        # External IDs
-        pa.field("arxiv_id", pa.string()),
+        # Note: arxiv_id excluded per design (2026-01)
         pa.field("author_ids", pa.string()),
         # Metrics
         pa.field("citation_count", pa.int64()),
@@ -679,9 +674,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("pages", pa.string()),  # Legacy: "first-last" format
         # Primary key
         pa.field("paper_id", pa.string()),
-        # Cross-reference IDs for linking publications across providers
-        # pmc_id: PubMed Central ID (format: "PMC1234567")
-        pa.field("pmc_id", pa.string()),
+        # Note: pmc_id excluded per design (2026-01)
         # pmid: PubMed ID (numeric string: "12345678")
         pa.field("pmid", pa.string()),
         pa.field("publication_date", pa.string()),
@@ -722,7 +715,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("citation_count", pa.int64()),
         pa.field("content_domain_crossmark_restriction", pa.bool_()),
         pa.field("content_domain_domains", pa.list_(pa.string())),
-        pa.field("doc_type", pa.string()),
+        # Note: doc_type excluded; CrossRef uses raw 'type' field instead
         # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
         pa.field("doi", pa.string()),
         pa.field("first_page", pa.string()),
@@ -734,9 +727,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("language", pa.string()),
         pa.field("last_page", pa.string()),
         pa.field("license_url", pa.string()),
-        # Cross-reference IDs (nullable - CrossRef doesn't provide these natively)
-        pa.field("pmc_id", pa.string()),  # PubMed Central ID
-        pa.field("pmid", pa.string()),  # PubMed ID
+        # Note: pmid and pmc_id excluded - CrossRef API doesn't provide PubMed identifiers
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
         pa.field("published", pa.string()),  # Canonical publication date
         pa.field("published_online", pa.string()),  # Provider-specific
@@ -746,6 +737,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("short_container_title", pa.list_(pa.string())),
         pa.field("subjects", pa.list_(pa.string())),
         pa.field("title", pa.string()),
+        pa.field("type", pa.string()),  # Raw CrossRef type (journal-article, etc.)
         pa.field("volume", pa.string()),
         pa.field("year", pa.int64()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
@@ -780,8 +772,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Unified BioETL field: citation_count (standardized across all providers)
         pa.field("citation_count", pa.int64()),
         pa.field("concepts", pa.list_(pa.string())),
-        # Metadata
-        pa.field("doc_type", pa.string()),
+        # Note: doc_type excluded; OpenAlex uses raw 'type' field instead
         # Cross-reference IDs for linking publications across providers
         # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
         pa.field("doi", pa.string()),
@@ -811,8 +802,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("oa_status", pa.string()),
         # Primary key
         pa.field("openalex_id", pa.string()),
-        # pmc_id: PubMed Central ID (format: "PMC1234567") - nullable, may not exist for all publications
-        pa.field("pmc_id", pa.string()),
+        # Note: pmc_id excluded per design (2026-01)
         # pmid: PubMed ID (numeric string: "12345678") - nullable, may not exist for all publications
         pa.field("pmid", pa.string()),
         # Date fields
@@ -821,6 +811,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Number of works referenced (from referenced_works_count)
         pa.field("referenced_works_count", pa.int64()),
         pa.field("title", pa.string()),
+        pa.field("type", pa.string()),  # Raw OpenAlex type (article, book, etc.)
         # Bibliographic info (from biblio object)
         pa.field("volume", pa.string()),
         pa.field("year", pa.int64()),

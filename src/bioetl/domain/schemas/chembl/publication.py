@@ -22,15 +22,17 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     """ChEMBL Publication validation schema for Silver layer.
 
     Inherits common fields from PublicationBaseSchema:
-    - Cross-references: pmid, doi, pmc_id
+    - Cross-references: pmid, doi
     - Core content: title, abstract, authors
-    - Metadata: journal, year, publication_date, doc_type (overridden), language
-    - Metrics: citation_count
-    - Open Access: is_oa
+    - Metadata: journal, year, doc_type (overridden)
     - Lookup tracking: lookup_method (overridden), original_id, source
 
-    Note: pmc_id, publication_date, citation_count, is_oa are always NULL for ChEMBL
-    (not available from ChEMBL API) and excluded from PyArrow/Gold schemas.
+    Fields excluded from PyArrow/Gold schemas (not available from ChEMBL API):
+    - pmc_id: ChEMBL API does not return PMC ID
+    - publication_date: Only year is available, full date not provided
+    - citation_count: Citation metrics not available from ChEMBL
+    - is_oa: Open Access status not provided
+    - language: Publication language not returned by ChEMBL
     """
 
     # === Primary Key (ChEMBL-specific) ===

@@ -428,10 +428,7 @@ class TestGoldSchemaValidation:
             # ChEMBL release metadata
             "chembl_release": "CHEMBL_34",
             "creation_date": "2024-01-01",
-            # Unified publication fields (ChEMBL doesn't provide these)
-            "citation_count": None,
-            "is_oa": False,  # Use False for nullable bool compatibility
-            "language": None,
+            # Note: citation_count, is_oa, language excluded - not available from ChEMBL API
             "_lookup_method": "direct",
             "_original_id": "CHEMBL12345",
             "_source": "chembl",

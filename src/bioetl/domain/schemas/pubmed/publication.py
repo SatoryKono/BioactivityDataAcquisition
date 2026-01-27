@@ -40,6 +40,18 @@ class PubMedPublicationSchema(PublicationBaseSchema):
 
     Note: Renamed from ArticleSchema per ADR-024 for consistency with
     entity_type='publication' in pipeline configs and other providers.
+
+    Fields excluded from PyArrow/Gold schemas (API deprecated 2026-01):
+    - vernacular_title: Original non-English title (deprecated)
+    - epub_date: Electronic publication date (deprecated)
+    - received_date: Manuscript received date (deprecated)
+    - revised_date: Manuscript revised date (deprecated)
+    - accepted_date: Manuscript accepted date (deprecated)
+
+    Fields excluded (not available from PubMed API):
+    - citation_count: PubMed doesn't provide citation metrics
+    - is_oa: Open Access status not available directly
+    - oa_status: OA status requires external enrichment
     """
 
     # === Primary Key (str for cross-provider consistency) ===
