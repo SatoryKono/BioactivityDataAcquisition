@@ -380,6 +380,9 @@ class TestGoldSchemaValidation:
             "citation_subset": "AIM",
             "language": "eng",
             "country": "United States",
+            # Fields from unified PublicationGoldBaseSchema
+            "doc_type": "Journal Article",
+            "citation_count": 5,
             # Counts (denormalized for query efficiency)
             "author_count": 2,
             "mesh_heading_count": 1,

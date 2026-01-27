@@ -36,6 +36,7 @@ from bioetl.domain.contracts.gold.chembl import (
     ChEMBLTargetGoldSchema,
 )
 from bioetl.domain.contracts.gold.pubchem import PubChemCompoundGoldSchema
+from bioetl.domain.contracts.gold.publication_base import PublicationGoldBaseSchema
 from bioetl.domain.contracts.gold.publications import (
     CrossRefPublicationGoldSchema,
     OpenAlexPublicationGoldSchema,
@@ -64,6 +65,7 @@ __all__ = [
     "OpenAlexPublicationGoldSchema",
     "PubChemCompoundGoldSchema",
     "PubMedPublicationGoldSchema",
+    "PublicationGoldBaseSchema",
     "SemanticScholarPublicationGoldSchema",
     "UniProtIDMappingGoldSchema",
     "UniProtProteinGoldSchema",
