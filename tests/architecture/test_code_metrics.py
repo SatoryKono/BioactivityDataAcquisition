@@ -92,7 +92,7 @@ class TestFileSizeLimits:
         "metadata_coordinator.py": 510,  # 506 LOC - MetadataCoordinator with centralized metadata management + extended lineage
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "composite.py": 410,  # 405 LOC - Composite pipeline bootstrap with runner factories
-        "entrypoints.py": 780,  # 775 LOC - pipeline entrypoints (run_pipeline expanded + services + export + ensure_metrics_server_started)
+        "entrypoints.py": 825,  # 821 LOC - pipeline entrypoints (run_pipeline expanded + services + export + ensure_metrics_server_started + composite runner)
         "registration.py": 720,  # 705 LOC - provider registration with data source creators (OpenAlex + SemanticScholar + UniProt IDMapping)
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
         # Consolidated factory files (v5.2)

@@ -24,6 +24,7 @@ from bioetl.infrastructure.config import get_settings
 __all__ = [
     # Configuration
     "load_pipeline_config",
+    "load_composite_config",
     # Option classes (re-exported from application.services)
     "RunOptions",
     "VacuumOptions",
@@ -35,6 +36,9 @@ __all__ = [
     "build_pipeline_context",
     "create_pipeline_runner",
     "run_pipeline",
+    # Composite pipeline operations
+    "CompositeRuntimeConfig",
+    "create_composite_runner",
     # Resource management (managers - legacy)
     "get_quarantine_manager",
     "get_checkpoint_manager",
@@ -65,12 +69,14 @@ __all__ = [
     "maybe_start_metrics_server",
 ]
 
+from bioetl.application.composite.runner import CompositeRuntimeConfig
 from bioetl.composition.bootstrap import (
     HealthServerDependencies,
     bootstrap_bronze_cleanup_service,
     bootstrap_checkpoint_manager,
     bootstrap_checkpoint_service,
     bootstrap_cleanup,
+    bootstrap_composite_runner,
     bootstrap_config_service,
     bootstrap_export_service,
     bootstrap_health_server_dependencies,
@@ -84,6 +90,7 @@ from bioetl.composition.bootstrap import (
     bootstrap_quarantine_manager,
     bootstrap_quarantine_service,
     bootstrap_vacuum_service,
+    load_composite_config,
     load_pipeline_config,
     maybe_start_metrics_server,
 )
@@ -93,6 +100,7 @@ from bioetl.domain.context import InputFilterContext, PipelineRunContext, Vacuum
 from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
+    from bioetl.application.composite.runner import CompositePipelineRunner
     from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.application.core.cleanup_service import CleanupPreview
     from bioetl.application.core.quarantine_manager import QuarantineManager
@@ -331,6 +339,48 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
         error_message=error_message,
         error_type=error_type,
     )
+
+
+# =============================================================================
+# Composite Pipeline Operations
+# =============================================================================
+
+
+def create_composite_runner(
+    name: str,
+    runtime: CompositeRuntimeConfig,
+    run_id: str | None = None,
+) -> CompositePipelineRunner:
+    """Create a composite pipeline runner for the given composite and runtime config.
+
+    This is the main entrypoint for composite pipeline execution. It handles:
+    - Registration of providers and pipelines
+    - Loading the composite configuration
+    - Bootstrapping the runner with all dependencies
+
+    Args:
+        name: Composite pipeline name (e.g., 'publication').
+        runtime: Runtime configuration (resume, dry_run, etc.).
+        run_id: Optional run ID (generated if not provided).
+
+    Returns:
+        CompositePipelineRunner ready for execution via runner.run().
+
+    Raises:
+        FileNotFoundError: If composite config file is missing.
+        ValueError: If composite config is invalid.
+
+    Example:
+        >>> from bioetl.composition.entrypoints import (
+        ...     CompositeRuntimeConfig, create_composite_runner
+        ... )
+        >>> runtime = CompositeRuntimeConfig(dry_run=True)
+        >>> runner = create_composite_runner("publication", runtime)
+        >>> result = await runner.run()
+    """
+    _ensure_registrations()
+    config = load_composite_config(name)
+    return bootstrap_composite_runner(config, runtime, run_id)
 
 
 def get_quarantine_manager(pipeline: str) -> QuarantineManager:

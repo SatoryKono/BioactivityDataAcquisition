@@ -282,6 +282,7 @@ class TestInterfacesBootstrapIsolation:
         forbidden_patterns = [
             r"from bioetl\.composition\.bootstrap import",
             r"from bioetl\.composition\.bootstrap\s+import",
+            r"from bioetl\.composition\.bootstrap\.",  # Catches bootstrap.* submodules
             r"import bioetl\.composition\.bootstrap",
         ]
 
