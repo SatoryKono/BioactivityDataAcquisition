@@ -306,7 +306,7 @@ git commit -m "..."
 
 ## 9. Architecture Decision Records (ADR)
 
-> **Полный реестр**: См. `docs/RULES.md` Приложение F (29 ADR)
+> **Полный реестр**: См. `docs/RULES.md` Приложение F (31 ADR)
 
 **Ключевые ADR:**
 - [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) — Circuit Breaker
