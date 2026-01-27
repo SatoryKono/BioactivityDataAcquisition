@@ -46,16 +46,17 @@ def __init__(
 ### Затронутые файлы
 
 - `src/bioetl/application/core/base.py` - основной класс
-- `src/bioetl/application/core/pipeline_config.py` - **NEW**
+- `src/bioetl/application/core/config.py` - **NEW**
 - `src/bioetl/application/core/pipeline_services.py` - **NEW**
-- `src/bioetl/application/pipelines/chembl_activity.py` - наследник
-- `src/bioetl/application/core/orchestrator.py` - зависит от BasePipeline
-- `src/bioetl/application/core/executor.py` - зависит от BasePipeline
+- `src/bioetl/application/pipelines/chembl/activity.py` - наследник
+- `src/bioetl/application/core/runner.py` - зависит от BasePipeline
+- `src/bioetl/application/core/batch_executor.py` - зависит от BasePipeline
 - `src/bioetl/application/core/lock_manager.py` - зависит от BasePipeline
 - `src/bioetl/application/core/quarantine_manager.py` - зависит от BasePipeline
 - `tests/unit/application/test_base_pipeline.py` - тесты
-- `tests/unit/application/test_pipeline_executor.py` - тесты
-- `tests/unit/application/pipelines/test_chembl_activity.py` - тесты
+- `tests/unit/application/core/test_batch_executor.py` - тесты
+- `tests/unit/application/test_pipeline_config.py` - тесты
+- `tests/unit/application/pipelines/test_chembl_activity_unit.py` - тесты
 
 ## Решение
 
