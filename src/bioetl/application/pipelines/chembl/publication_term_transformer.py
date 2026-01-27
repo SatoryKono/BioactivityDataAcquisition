@@ -87,7 +87,9 @@ class PublicationTermTransformer(BaseChemblTransformer):
         else:
             # Compute from composite key (document_chembl_id, term_type, term)
             entity_id = self.compute_term_entity_id(
-                document_chembl_id=str(business_data.get("document_chembl_id", primary_id)),
+                document_chembl_id=str(
+                    business_data.get("document_chembl_id", primary_id)
+                ),
                 term_type=str(business_data.get("term_type", "")),
                 term=str(business_data.get("term", "")),
             )
