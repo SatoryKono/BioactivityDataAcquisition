@@ -268,10 +268,10 @@ gold_filters:
 
 ---
 
-#### chembl_document
+#### chembl_publication
 
 **Primary Key**: `document_chembl_id`
-**Назначение**: Научные публикации
+**Назначение**: Научные публикации из ChEMBL API (silver_table/gold_table: `chembl_publication`)
 
 ##### Gold-фильтры
 
@@ -279,7 +279,7 @@ gold_filters:
 |--------|----------|-------------|
 | `doc_type` | `[PUBLICATION]` | Только публикации |
 | `year` | `> 1950` | Современные публикации |
-| required | `title, pubmed_id, doi` | Полнота метаданных |
+| required | `document_chembl_id, doc_type, title` | Базовые метаданные (PubMed ID/DOI могут отсутствовать) |
 
 ##### Ключевые поля
 
