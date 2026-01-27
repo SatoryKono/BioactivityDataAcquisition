@@ -16,6 +16,8 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_open_access_info,
     extract_tldr,
     normalize_oa_status,
+    parse_page_range,
+    parse_volume_issue,
     validate_year,
 )
 
@@ -262,7 +264,10 @@ class TestExtractJournalInfo:
 
         assert result["journal_name"] == "Nature"
         assert result["volume"] == "629"
+        assert result["issue"] is None  # No issue in simple volume
         assert result["pages"] == "123-130"
+        assert result["first_page"] == "123"
+        assert result["last_page"] == "130"
 
     def test_fallback_to_venue(self) -> None:
         """Test fallback to venue when journal name is missing."""
@@ -272,7 +277,10 @@ class TestExtractJournalInfo:
 
         assert result["journal_name"] == "Conference Proceedings"
         assert result["volume"] == "10"
+        assert result["issue"] is None
         assert result["pages"] is None
+        assert result["first_page"] is None
+        assert result["last_page"] is None
 
     def test_venue_only(self) -> None:
         """Test when only venue is provided."""
@@ -280,13 +288,18 @@ class TestExtractJournalInfo:
 
         assert result["journal_name"] == "ArXiv"
         assert result["volume"] is None
+        assert result["issue"] is None
         assert result["pages"] is None
+        assert result["first_page"] is None
+        assert result["last_page"] is None
 
     def test_empty_journal(self) -> None:
         """Test with empty journal dict."""
         result = extract_journal_info({}, venue="Fallback Venue")
 
         assert result["journal_name"] == "Fallback Venue"
+        assert result["volume"] is None
+        assert result["issue"] is None
 
 
 class TestExtractOpenAccessInfo:
@@ -792,3 +805,202 @@ class TestExtractCitationContexts:
         citations = [{"paperId": "abc", "contexts": ["  Trimmed context  "]}]
         result = extract_citation_contexts(citations)
         assert result == ["Trimmed context"]
+
+
+class TestParseVolumeIssue:
+    """Tests for parse_volume_issue function.
+
+    Semantic Scholar API sometimes returns combined volume/issue in the
+    volume field (e.g., "32 4" for volume 32, issue 4).
+    """
+
+    def test_space_separated(self) -> None:
+        """Test S2 format: '32 4' → vol=32, issue=4."""
+        assert parse_volume_issue("32 4") == ("32", "4")
+
+    def test_simple_volume(self) -> None:
+        """Test single volume number (no issue)."""
+        assert parse_volume_issue("523") == ("523", None)
+
+    def test_parentheses_format(self) -> None:
+        """Test '40(3)' format."""
+        assert parse_volume_issue("40(3)") == ("40", "3")
+
+    def test_parentheses_with_space(self) -> None:
+        """Test '40 (3)' format with space."""
+        assert parse_volume_issue("40 (3)") == ("40", "3")
+
+    def test_vol_no_format(self) -> None:
+        """Test 'Vol. 32, No. 4' format."""
+        assert parse_volume_issue("Vol. 32, No. 4") == ("32", "4")
+
+    def test_vol_no_format_no_punctuation(self) -> None:
+        """Test 'Vol 32 No 4' format without punctuation."""
+        assert parse_volume_issue("Vol 32 No 4") == ("32", "4")
+
+    def test_colon_separated(self) -> None:
+        """Test '32:4' format."""
+        assert parse_volume_issue("32:4") == ("32", "4")
+
+    def test_none_input(self) -> None:
+        """Test with None input."""
+        assert parse_volume_issue(None) == (None, None)
+
+    def test_empty_string(self) -> None:
+        """Test with empty string."""
+        assert parse_volume_issue("") == (None, None)
+
+    def test_whitespace_only(self) -> None:
+        """Test with whitespace-only string."""
+        assert parse_volume_issue("   ") == (None, None)
+
+    def test_non_numeric_volume(self) -> None:
+        """Test with non-numeric volume (preserved as-is)."""
+        assert parse_volume_issue("Suppl 1") == ("Suppl 1", None)
+
+    def test_real_world_example(self) -> None:
+        """Test real-world S2 data: '32 4' from Journal of Medicinal Chemistry."""
+        assert parse_volume_issue("32 4") == ("32", "4")
+
+
+class TestParsePageRange:
+    """Tests for parse_page_range with abbreviated expansion.
+
+    Academic publishing often abbreviates page ranges:
+    - "737-9" means 737-739 (not 737-9)
+    - "737-39" means 737-739
+    """
+
+    def test_abbreviated_single_digit(self) -> None:
+        """737-9 → (737, 739)."""
+        assert parse_page_range("737-9") == ("737", "739")
+
+    def test_abbreviated_two_digits(self) -> None:
+        """737-39 → (737, 739)."""
+        assert parse_page_range("737-39") == ("737", "739")
+
+    def test_full_range(self) -> None:
+        """737-839 → (737, 839) - no expansion needed."""
+        assert parse_page_range("737-839") == ("737", "839")
+
+    def test_full_range_same_length(self) -> None:
+        """123-145 → (123, 145)."""
+        assert parse_page_range("123-145") == ("123", "145")
+
+    def test_single_page(self) -> None:
+        """123 → (123, None)."""
+        assert parse_page_range("123") == ("123", None)
+
+    def test_whitespace_handling(self) -> None:
+        """Handles whitespace and newlines."""
+        assert parse_page_range("\n  737-9\n  ") == ("737", "739")
+
+    def test_space_around_dash(self) -> None:
+        """Handles space around dash - expansion still works."""
+        assert parse_page_range("737 - 9") == ("737", "739")
+
+    def test_en_dash(self) -> None:
+        """Handles en-dash (U+2013)."""
+        assert parse_page_range("737\u20139") == ("737", "739")
+
+    def test_em_dash(self) -> None:
+        """Handles em-dash (U+2014)."""
+        assert parse_page_range("737\u20149") == ("737", "739")
+
+    def test_supplement_pages(self) -> None:
+        """Handles supplement page numbers like S1-S5."""
+        assert parse_page_range("S1-S5") == ("S1", "S5")
+
+    def test_rollover_case(self) -> None:
+        """199-3 → (199, 203) - not (199, 193)."""
+        assert parse_page_range("199-3") == ("199", "203")
+
+    def test_none_input(self) -> None:
+        """Test with None input."""
+        assert parse_page_range(None) == (None, None)
+
+    def test_empty_string(self) -> None:
+        """Test with empty string."""
+        assert parse_page_range("") == (None, None)
+
+    def test_whitespace_only(self) -> None:
+        """Test with whitespace-only string."""
+        assert parse_page_range("   ") == (None, None)
+
+    def test_four_digit_pages(self) -> None:
+        """1234-56 → (1234, 1256)."""
+        assert parse_page_range("1234-56") == ("1234", "1256")
+
+    def test_real_world_example(self) -> None:
+        """Test real-world S2 data with newlines: '\\n  737-9\\n  '."""
+        assert parse_page_range("\n          737-9\n        ") == ("737", "739")
+
+
+class TestExtractJournalInfoIntegration:
+    """Integration tests for extract_journal_info with parsing.
+
+    Tests the complete flow from raw API data to parsed fields.
+    """
+
+    def test_combined_volume_issue_and_abbreviated_pages(self) -> None:
+        """Test parsing combined volume/issue and abbreviated pages."""
+        journal = {
+            "name": "Journal of medicinal chemistry",
+            "volume": "32 4",
+            "pages": "\n          737-9\n        ",
+        }
+
+        result = extract_journal_info(journal, None)
+
+        assert result["journal_name"] == "Journal of medicinal chemistry"
+        assert result["volume"] == "32"
+        assert result["issue"] == "4"
+        assert result["pages"] == "737-9"  # Cleaned
+        assert result["first_page"] == "737"
+        assert result["last_page"] == "739"  # Expanded
+
+    def test_simple_volume_full_pages(self) -> None:
+        """Test simple volume with full page range."""
+        journal = {
+            "name": "Nature",
+            "volume": "523",
+            "pages": "561-567",
+        }
+
+        result = extract_journal_info(journal, "Nature")
+
+        assert result["journal_name"] == "Nature"
+        assert result["volume"] == "523"
+        assert result["issue"] is None
+        assert result["pages"] == "561-567"
+        assert result["first_page"] == "561"
+        assert result["last_page"] == "567"
+
+    def test_venue_fallback(self) -> None:
+        """Test venue fallback when journal name is missing."""
+        journal = {"volume": "10"}
+
+        result = extract_journal_info(journal, "Conference Proceedings")
+
+        assert result["journal_name"] == "Conference Proceedings"
+        assert result["volume"] == "10"
+        assert result["issue"] is None
+
+    def test_none_journal(self) -> None:
+        """Test with None journal."""
+        result = extract_journal_info(None, "ArXiv")
+
+        assert result["journal_name"] == "ArXiv"
+        assert result["volume"] is None
+        assert result["issue"] is None
+        assert result["pages"] is None
+        assert result["first_page"] is None
+        assert result["last_page"] is None
+
+    def test_empty_journal(self) -> None:
+        """Test with empty journal dict."""
+        result = extract_journal_info({}, "Fallback Venue")
+
+        assert result["journal_name"] == "Fallback Venue"
+        assert result["volume"] is None
+        assert result["issue"] is None

@@ -99,7 +99,7 @@ class TestOpenAlexPublicationTransformer:
         assert result["title"] == "Example Publication Title"
         assert result["year"] == 2024
         assert result["publication_date"] == "2024-05-15"
-        assert result["doc_type"] == "PUBLICATION"
+        assert result["type"] == "article"  # Raw OpenAlex type preserved
         assert result["abstract"] == "This is an abstract"
         assert result["journal"] == "Nature"
         assert result["issn"] == "0028-0836"
@@ -190,21 +190,15 @@ class TestOpenAlexPublicationTransformer:
         assert result["year"] is None  # Filtered out
 
     @pytest.mark.asyncio
-    async def test_transform_doc_type_mapping(
+    async def test_transform_type_preserved(
         self,
         transformer: OpenAlexPublicationTransformer,
         pipeline_context: PipelineContext,
     ) -> None:
-        """Should map OpenAlex types to internal types."""
-        test_cases = [
-            ("article", "PUBLICATION"),
-            ("preprint", "PREPRINT"),
-            ("book-chapter", "PUBLICATION"),
-            ("dataset", "DATASET"),
-            ("unknown_type", "PUBLICATION"),  # Default
-        ]
+        """Should preserve raw OpenAlex type without mapping."""
+        test_types = ["article", "preprint", "book-chapter", "dataset", "unknown_type"]
 
-        for openalex_type, expected_type in test_cases:
+        for openalex_type in test_types:
             record = {
                 "id": "https://openalex.org/W1234567890",
                 "title": "Test",
@@ -212,7 +206,7 @@ class TestOpenAlexPublicationTransformer:
             }
             result = await transformer.transform(pipeline_context, record, 0)
             assert result is not None
-            assert result["doc_type"] == expected_type
+            assert result["type"] == openalex_type  # Raw type preserved
 
     @pytest.mark.asyncio
     async def test_transform_concepts_extraction(

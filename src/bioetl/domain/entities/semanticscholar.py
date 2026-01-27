@@ -43,7 +43,8 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
         dblp_id: DBLP publication key.
         corpus_id: Semantic Scholar Corpus ID.
         tldr: AI-generated summary (TL;DR).
-        volume: Journal volume.
+        volume: Journal volume (parsed from combined format like "32 4").
+        issue: Journal issue number (parsed from combined volume/issue).
         pages: Page numbers.
         venue: Venue name (conference/journal).
         reference_count: Number of references.
@@ -74,6 +75,9 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
 
     # SemanticScholar-specific journal/venue information
     volume: str | None = None
+    issue: str | None = (
+        None  # Parsed from combined volume/issue (e.g., "32 4" → issue=4)
+    )
     pages: str | None = None  # Legacy: "first-last" format
     # first_page and last_page inherited from PublicationEntityBase
     venue: str | None = None
