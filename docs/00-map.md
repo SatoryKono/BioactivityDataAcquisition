@@ -4,7 +4,7 @@
 
 > **Documentation Update:** 2026-01-26
 > - Architecture diagrams updated: Composite Pipeline (ADR-026) added to layer diagrams
-> - New diagram: `26_composite_pipeline_workflow.mmd` — visualizes seed → enrich → merge flow
+> - Composite pipeline diagram file отсутствует в `docs/02-architecture/diagrams/` (ссылка на `26_composite_pipeline_workflow.mmd` удалена)
 > - Cross-links added between all layer documents (Domain ↔ Application ↔ Infrastructure ↔ Interfaces ↔ Composition)
 > - All 7 providers now reflected in diagrams (including CrossRef, OpenAlex, SemanticScholar)
 > - ADR-030, ADR-031 added to registry
@@ -71,7 +71,7 @@ docs/
 │   ├── observability-layers.md  # Observability architecture
 │   ├── diagrams.md              # Mermaid diagrams collection
 │   ├── decisions/               # ADR-001..031 (31 records)
-│   └── diagrams/                # 35 Mermaid diagram files + render_diagrams.py
+│   └── diagrams/                # 34 .mermaid diagrams + supporting docs (index/policy) + render_diagrams.py
 │
 ├── 03-guides/                   # How-to guides (13 guides)
 │   ├── quick-start.md           # Quick start guide
