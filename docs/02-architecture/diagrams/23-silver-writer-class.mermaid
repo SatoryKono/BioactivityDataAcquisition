@@ -5,13 +5,16 @@ classDiagram
     class StoragePort {
         <<Protocol>>
         +write_bronze(records, provider, entity) BronzeWriteResult
-        +write_silver(records, table, mode) WriteResult
-        +write_gold(records, table, schema) WriteResult
-        +clear_silver(table) int
-        +clear_gold(table) int
+        +write_silver(table_name, records, primary_keys, schema, mode, partition_cols, on_schema_mismatch, bronze_refs) SilverWriteResult | None
+        +write_gold(table_name, records, schema, primary_keys, mode, ingestion_ts, run_id, silver_refs) None
+        +read_silver(table_name, columns) list~dict~
+        +write_silver_merged(table_name, records, primary_keys, run_id, sources_used) None
+        +write_gold_merged(table_name, records, primary_keys, run_id, sources_used) None
+        +clear_silver(table, dry_run) int
+        +clear_gold(table, dry_run) int
         +vacuum(table, retention_days) None
         +archive(source, dest) None
-        +health_check() bool
+        +health_check() HealthStatus
     }
 
     class SilverWriter {
