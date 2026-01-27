@@ -197,7 +197,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "dblp_id": external_ids.get("dblp"),
             "corpus_id": external_ids.get("corpus_id"),
             "title": rec.get("title"),
-            # abstract, authors excluded per user request
+            # abstract excluded per user request
             "tldr": tldr,
             "author_ids": self.serialize_json(author_ids),
             # Author identifiers (for author-level analytics and disambiguation)
@@ -214,7 +214,6 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "citation_contexts": self.serialize_json_list(citation_contexts)
             if citation_contexts
             else None,
-            # affiliations excluded per user request
             "journal": journal_info.get("journal_name"),
             "volume": journal_info.get("volume"),
             "pages": pages,  # Legacy field
@@ -264,19 +263,24 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
         """Convert Domain Entity to SilverRecord, excluding unused fields.
 
-        Overrides base implementation to remove fields not collected for S2.
+        Overrides base implementation to remove fields not collected for
+        Semantic Scholar per user request.
 
         Args:
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without abstract, affiliations, authors.
+            SilverRecord dictionary without abstract, authors, affiliations.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
 
+        # Get base silver record
         silver_record = BaseTransformer.entity_to_silver_record(entity)
+
+        # Remove excluded fields per user request
         silver_record.pop("abstract", None)
-        silver_record.pop("affiliations", None)
         silver_record.pop("authors", None)
+        silver_record.pop("affiliations", None)
+
         return silver_record
