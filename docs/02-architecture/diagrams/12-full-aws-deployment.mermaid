@@ -1,5 +1,7 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% DEPRECATED: Historical/Reference only. See ADR-010 (Local-Only Deployment): ../decisions/ADR-010-local-only-deployment.md
 flowchart TB
+    ReferenceNote["Historical/Reference only<br/>See ADR-010 (Local-Only Deployment)"]
     subgraph External["External APIs"]
         ChEMBL_API["🌐 ChEMBL API<br/>ebi.ac.uk/chembl"]
         PubChem_API["🌐 PubChem API<br/>pubchem.ncbi.nlm.nih.gov"]
@@ -106,3 +108,4 @@ flowchart TB
     style Gold fill:#FFD700,color:#000
     style Quarantine fill:#FF6B6B,color:#fff
     style Redis fill:#DC382D,color:#fff
+    style ReferenceNote fill:#F5F5F5,color:#333,stroke:#999,stroke-dasharray: 5 5
