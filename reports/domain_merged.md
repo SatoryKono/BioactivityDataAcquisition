@@ -2581,6 +2581,7 @@ See ADR-026 for architectural decisions.
 
 from bioetl.domain.composite.config import (
     CompositeConfig,
+    DependencyConfig,
     EnricherConfig,
     MergeConfig,
     SeedConfig,
@@ -2592,6 +2593,8 @@ from bioetl.domain.composite.lineage import (
 )
 from bioetl.domain.composite.result import (
     CompositeResult,
+    DependencyResult,
+    DependencyStatus,
     EnrichmentResult,
     EnrichmentStatus,
     MergeResult,
@@ -2615,6 +2618,9 @@ __all__ = [
     "CompositePipelineState",
     "CompositeResult",
     "ConflictResolution",
+    "DependencyConfig",
+    "DependencyResult",
+    "DependencyStatus",
     "EnricherConfig",
     "EnrichmentResult",
     "EnrichmentStatus",
@@ -2634,6 +2640,187 @@ __all__ = [
 ]
 
 ================================================================================
+File: aggregation.py
+Path: composite\aggregation.py
+================================================================================
+"""Aggregation configuration models for 1:M enrichers.
+
+Defines configuration objects for aggregating multiple rows per join key
+into a single row before joining with seed data in composite pipelines.
+
+See ADR-026 for architectural decisions.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from enum import Enum
+
+
+class AggregationFunction(Enum):
+    """Supported aggregation functions for 1:M enrichers.
+
+    These functions are applied to convert multiple rows per join key
+    into a single aggregated row before joining with the seed data.
+
+    Attributes:
+        COLLECT_LIST: Collect all values into a list.
+        COLLECT_SET: Collect unique values into a list.
+        COUNT: Count the number of values.
+        FIRST: Take the first value.
+        CONCAT_STR: Concatenate string values with separator.
+    """
+
+    COLLECT_LIST = "collect_list"
+    COLLECT_SET = "collect_set"
+    COUNT = "count"
+    FIRST = "first"
+    CONCAT_STR = "concat_str"
+
+    @classmethod
+    def from_string(cls, value: str) -> AggregationFunction:
+        """Convert string to AggregationFunction enum.
+
+        Args:
+            value: String representation of aggregation function.
+
+        Returns:
+            Corresponding AggregationFunction enum value.
+
+        Raises:
+            ValueError: If the value is not a valid aggregation function.
+        """
+        try:
+            return cls(value.lower())
+        except ValueError:
+            valid = [e.value for e in cls]
+            raise ValueError(
+                f"Invalid aggregation function '{value}'. Valid options: {valid}"
+            ) from None
+
+
+class EnricherCardinality(Enum):
+    """Cardinality of enricher data relative to seed.
+
+    Describes the relationship between seed rows and enricher rows.
+
+    Attributes:
+        ONE_TO_ONE: Default. One enricher row per seed row.
+        MANY_TO_ONE: Multiple enricher rows per seed row.
+            Requires aggregation config to collapse to 1:1.
+    """
+
+    ONE_TO_ONE = "one_to_one"
+    MANY_TO_ONE = "many_to_one"
+
+    @classmethod
+    def from_string(cls, value: str) -> EnricherCardinality:
+        """Convert string to EnricherCardinality enum.
+
+        Args:
+            value: String representation of cardinality.
+
+        Returns:
+            Corresponding EnricherCardinality enum value.
+
+        Raises:
+            ValueError: If the value is not a valid cardinality.
+        """
+        try:
+            return cls(value.lower())
+        except ValueError:
+            valid = [e.value for e in cls]
+            raise ValueError(
+                f"Invalid cardinality '{value}'. Valid options: {valid}"
+            ) from None
+
+
+def _require_non_empty(value: str | tuple[object, ...], name: str) -> None:
+    """Validate that a value is non-empty."""
+    if not value:
+        raise ValueError(f"{name} cannot be empty")
+
+
+@dataclass(frozen=True, slots=True)
+class AggregationFieldSpec:
+    """Specification for a single aggregated field.
+
+    Defines how to aggregate a source column from a 1:M enricher
+    into a single value per join key.
+
+    Attributes:
+        source_field: Source column name to aggregate (e.g., "term").
+        agg_function: Aggregation function to apply.
+        filter_condition: Optional SQL-like filter condition
+            (e.g., "term_type == 'MESH_HEADING'").
+        output_field: Output column name. Defaults to source_field if None.
+    """
+
+    source_field: str
+    agg_function: AggregationFunction
+    filter_condition: str | None = None
+    output_field: str | None = None
+
+    def __post_init__(self) -> None:
+        """Validate and convert types."""
+        if isinstance(self.agg_function, str):
+            object.__setattr__(
+                self,
+                "agg_function",
+                AggregationFunction.from_string(self.agg_function),
+            )
+        self._validate()
+
+    def _validate(self) -> None:
+        """Validate field specification."""
+        _require_non_empty(self.source_field, "aggregation source_field")
+
+    @property
+    def effective_output_field(self) -> str:
+        """Get the effective output field name."""
+        return self.output_field or self.source_field
+
+
+@dataclass(frozen=True, slots=True)
+class AggregationConfig:
+    """Configuration for 1:M enricher aggregation.
+
+    Applied BEFORE join to convert 1:M relationships into 1:1.
+    Groups enricher data by the join key and aggregates specified fields.
+
+    Attributes:
+        group_by: Join key to group by (e.g., "document_chembl_id").
+        fields: Tuple of field specifications defining aggregations.
+    """
+
+    group_by: str
+    fields: tuple[AggregationFieldSpec, ...]
+
+    def __post_init__(self) -> None:
+        """Validate and convert types."""
+        if isinstance(self.fields, list):
+            converted = tuple(
+                AggregationFieldSpec(**f) if isinstance(f, dict) else f
+                for f in self.fields
+            )
+            object.__setattr__(self, "fields", converted)
+        self._validate()
+
+    def _validate(self) -> None:
+        """Validate aggregation configuration."""
+        _require_non_empty(self.group_by, "aggregation group_by")
+        if not self.fields:
+            raise ValueError("aggregation.fields cannot be empty")
+
+
+__all__ = [
+    "AggregationConfig",
+    "AggregationFieldSpec",
+    "AggregationFunction",
+    "EnricherCardinality",
+]
+
+================================================================================
 File: config.py
 Path: composite\config.py
 ================================================================================
@@ -2645,22 +2832,44 @@ Defines immutable configuration objects for composite pipelines:
 - MergeConfig: Merge operation configuration
 - CompositeConfig: Complete composite pipeline configuration
 
+Aggregation configuration is defined in aggregation.py and re-exported here.
+
 See ADR-026 for architectural decisions.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
 
+from bioetl.domain.composite.aggregation import (
+    AggregationConfig,
+    AggregationFieldSpec,
+    AggregationFunction,
+    EnricherCardinality,
+)
 from bioetl.domain.composite.strategy import (
     ConflictResolution,
     FallbackStrategy,
     MergeStrategy,
 )
 
-if TYPE_CHECKING:
-    pass
+# Re-export aggregation types for backward compatibility
+__all__ = [
+    "AggregationConfig",
+    "AggregationFieldSpec",
+    "AggregationFunction",
+    "ColumnGroupConfig",
+    "CompositeConfig",
+    "CompositeDQConfig",
+    "DQOverrideConfig",
+    "DependencyConfig",
+    "EnricherCardinality",
+    "EnricherConfig",
+    "ExecutionConfig",
+    "LineageConfig",
+    "MergeConfig",
+    "SeedConfig",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -2704,6 +2913,61 @@ class SeedConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class DependencyConfig:
+    """Configuration for a dependency pipeline.
+
+    Dependencies run after the seed but before enrichers to populate
+    Silver tables that enrichers will read from. Unlike enrichers,
+    dependencies execute as full standalone pipelines (API → Bronze → Silver).
+
+    Use cases:
+    - Derived entities that need full API data (e.g., publication_term from /document)
+    - Pipelines with force_full_scan that don't work with enricher filtering
+    - Data that must be pre-populated before enrichment phase
+
+    Attributes:
+        pipeline: Name of the dependency pipeline (e.g., "chembl_publication_term").
+        join_keys: Keys to extract from seed for filtering API calls.
+            Used to limit the scope of data fetched from the API.
+        required: If True, failure causes composite failure.
+        timeout_seconds: Maximum time for dependency execution.
+        silver_table: Path to dependency's Silver table.
+
+    Example:
+        >>> config = DependencyConfig(
+        ...     pipeline="chembl_publication_term",
+        ...     join_keys=("document_chembl_id",),
+        ...     silver_table="silver/chembl/publication_term",
+        ... )
+    """
+
+    pipeline: str
+    join_keys: tuple[str, ...]
+    required: bool = False
+    timeout_seconds: int = 600
+    silver_table: str | None = None
+
+    def __post_init__(self) -> None:
+        """Validate and convert types."""
+        if isinstance(self.join_keys, list):
+            object.__setattr__(self, "join_keys", tuple(self.join_keys))
+        self._validate()
+
+    def _validate(self) -> None:
+        """Validate configuration invariants."""
+        _require_non_empty(self.pipeline, "dependency pipeline name")
+        _require_non_empty(self.join_keys, f"dependency {self.pipeline} join_keys")
+        _validate_positive(
+            self.timeout_seconds, f"dependency {self.pipeline} timeout_seconds"
+        )
+
+    @property
+    def primary_join_key(self) -> str:
+        """Get the primary (first) join key."""
+        return self.join_keys[0]
+
+
+@dataclass(frozen=True, slots=True)
 class EnricherConfig:
     """Configuration for a single enrichment pipeline.
 
@@ -2720,13 +2984,14 @@ class EnricherConfig:
         fallback_strategy: Strategy when enricher fails.
         silver_table: Path to enricher Silver table (auto-generated if None).
         limit: Optional limit on records to enrich.
+        cardinality: Relationship type between enricher and seed data.
+            ONE_TO_ONE (default) or MANY_TO_ONE.
+        aggregation: Aggregation config for MANY_TO_ONE enrichers.
+            Required when cardinality is MANY_TO_ONE.
 
     Example:
         >>> config = EnricherConfig(
-        ...     pipeline="crossref_publication",
-        ...     join_keys=("doi",),
-        ...     required=True,
-        ...     timeout_seconds=600,
+        ...     pipeline="crossref_publication", join_keys=("doi",), required=True,
         ... )
     """
 
@@ -2738,6 +3003,8 @@ class EnricherConfig:
     fallback_strategy: FallbackStrategy = FallbackStrategy.SKIP
     silver_table: str | None = None
     limit: int | None = None
+    cardinality: EnricherCardinality = EnricherCardinality.ONE_TO_ONE
+    aggregation: AggregationConfig | None = None
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
@@ -2749,6 +3016,18 @@ class EnricherConfig:
                 "fallback_strategy",
                 FallbackStrategy.from_string(self.fallback_strategy),
             )
+        if isinstance(self.cardinality, str):
+            object.__setattr__(
+                self,
+                "cardinality",
+                EnricherCardinality.from_string(self.cardinality),
+            )
+        if isinstance(self.aggregation, dict):
+            object.__setattr__(
+                self,
+                "aggregation",
+                AggregationConfig(**self.aggregation),
+            )
         self._validate()
 
     def _validate(self) -> None:
@@ -2759,6 +3038,15 @@ class EnricherConfig:
             self.timeout_seconds, f"enricher {self.pipeline} timeout_seconds"
         )
         _validate_positive_limit(self.limit, f"enricher {self.pipeline}")
+        # Validate cardinality/aggregation relationship
+        if (
+            self.cardinality == EnricherCardinality.MANY_TO_ONE
+            and self.aggregation is None
+        ):
+            raise ValueError(
+                f"Enricher '{self.pipeline}' with cardinality=many_to_one "
+                "requires aggregation config"
+            )
 
     @property
     def primary_join_key(self) -> str:
@@ -2769,6 +3057,11 @@ class EnricherConfig:
     def has_fallback_keys(self) -> bool:
         """Check if fallback join keys are available."""
         return len(self.join_keys) > 1
+
+    @property
+    def is_many_to_one(self) -> bool:
+        """Check if this enricher has 1:M cardinality."""
+        return self.cardinality == EnricherCardinality.MANY_TO_ONE
 
 
 @dataclass(frozen=True, slots=True)
@@ -3056,16 +3349,25 @@ class LineageConfig:
 class CompositeConfig:
     """Complete composite pipeline configuration.
 
-    Combines all configuration aspects: seed, enrichers, merge,
+    Combines all configuration aspects: seed, dependencies, enrichers, merge,
     DQ, execution options, and lineage tracking.
 
     This is the main configuration object loaded from YAML and
     used by CompositePipelineRunner.
 
+    Execution order:
+    1. Seed pipeline runs first
+    2. Dependencies run after seed (to populate Silver tables)
+    3. Enrichers run after dependencies (read from populated Silver tables)
+    4. Merge combines all results
+
     Attributes:
         name: Composite pipeline name (e.g., "composite_publication").
         version: Configuration version (semver).
         seed: Seed pipeline configuration.
+        dependencies: Tuple of dependency configurations.
+            Dependencies run after seed but before enrichers to populate
+            Silver tables that enrichers will read from.
         enrichers: Tuple of enricher configurations.
         merge: Merge step configuration.
         dq: Data quality configuration.
@@ -3077,6 +3379,7 @@ class CompositeConfig:
         ...     name="composite_publication",
         ...     version="1.0.0",
         ...     seed=SeedConfig(...),
+        ...     dependencies=(DependencyConfig(...),),
         ...     enrichers=(EnricherConfig(...), EnricherConfig(...)),
         ...     merge=MergeConfig(...),
         ... )
@@ -3089,6 +3392,7 @@ class CompositeConfig:
     seed: SeedConfig
     enrichers: tuple[EnricherConfig, ...]
     merge: MergeConfig
+    dependencies: tuple[DependencyConfig, ...] = ()
     dq: CompositeDQConfig = field(default_factory=CompositeDQConfig)
     execution: ExecutionConfig = field(default_factory=ExecutionConfig)
     lineage: LineageConfig = field(default_factory=LineageConfig)
@@ -3097,6 +3401,8 @@ class CompositeConfig:
         """Validate and convert types."""
         if isinstance(self.enrichers, list):
             object.__setattr__(self, "enrichers", tuple(self.enrichers))
+        if isinstance(self.dependencies, list):
+            object.__setattr__(self, "dependencies", tuple(self.dependencies))
         self._validate()
 
     def _validate(self) -> None:
@@ -3108,7 +3414,9 @@ class CompositeConfig:
         if not self.enrichers:
             raise ValueError("composite must have at least one enricher")
         self._validate_join_keys()
+        self._validate_dependency_join_keys()
         self._validate_unique_enrichers()
+        self._validate_unique_dependencies()
 
     def _validate_join_keys(self) -> None:
         """Validate that enricher join keys exist in seed output_keys."""
@@ -3128,6 +3436,24 @@ class CompositeConfig:
             duplicates = [n for n in names if names.count(n) > 1]
             raise ValueError(f"Duplicate enricher pipelines: {set(duplicates)}")
 
+    def _validate_dependency_join_keys(self) -> None:
+        """Validate that dependency join keys exist in seed output_keys."""
+        seed_keys = set(self.seed.output_keys)
+        for dep in self.dependencies:
+            for key in dep.join_keys:
+                if key not in seed_keys:
+                    raise ValueError(
+                        f"Dependency {dep.pipeline} join_key '{key}' "
+                        f"not found in seed output_keys: {self.seed.output_keys}"
+                    )
+
+    def _validate_unique_dependencies(self) -> None:
+        """Validate that dependency pipeline names are unique."""
+        names = [d.pipeline for d in self.dependencies]
+        if len(names) != len(set(names)):
+            duplicates = [n for n in names if names.count(n) > 1]
+            raise ValueError(f"Duplicate dependency pipelines: {set(duplicates)}")
+
     @property
     def required_enrichers(self) -> tuple[str, ...]:
         """Get names of required enrichers."""
@@ -3142,6 +3468,28 @@ class CompositeConfig:
     def all_enricher_names(self) -> tuple[str, ...]:
         """Get names of all enrichers."""
         return tuple(e.pipeline for e in self.enrichers)
+
+    @property
+    def required_dependencies(self) -> tuple[str, ...]:
+        """Get names of required dependencies."""
+        return tuple(d.pipeline for d in self.dependencies if d.required)
+
+    @property
+    def optional_dependencies(self) -> tuple[str, ...]:
+        """Get names of optional dependencies."""
+        return tuple(d.pipeline for d in self.dependencies if not d.required)
+
+    @property
+    def all_dependency_names(self) -> tuple[str, ...]:
+        """Get names of all dependencies."""
+        return tuple(d.pipeline for d in self.dependencies)
+
+    def get_dependency(self, pipeline_name: str) -> DependencyConfig | None:
+        """Get dependency config by pipeline name."""
+        for dep in self.dependencies:
+            if dep.pipeline == pipeline_name:
+                return dep
+        return None
 
     def get_enricher(self, pipeline_name: str) -> EnricherConfig | None:
         """Get enricher config by pipeline name."""
@@ -3165,6 +3513,16 @@ class CompositeConfig:
                 "output_keys": list(self.seed.output_keys),
                 "silver_table": self.seed.silver_table,
             },
+            "dependencies": [
+                {
+                    "pipeline": d.pipeline,
+                    "join_keys": list(d.join_keys),
+                    "required": d.required,
+                    "timeout_seconds": d.timeout_seconds,
+                    "silver_table": d.silver_table,
+                }
+                for d in self.dependencies
+            ],
             "enrichers": [
                 {
                     "pipeline": e.pipeline,
@@ -3566,6 +3924,102 @@ class SeedResult:
         return self.records_silver > 0 or self.resumed
 
 
+class DependencyStatus(str, Enum):
+    """Status of dependency pipeline execution."""
+
+    SUCCESS = "success"
+    FAILED = "failed"
+    SKIPPED = "skipped"
+    TIMEOUT = "timeout"
+
+
+@dataclass(frozen=True, slots=True)
+class DependencyResult:
+    """Result of a dependency pipeline execution.
+
+    Dependencies run after seed but before enrichers to populate
+    Silver tables that enrichers will read from.
+    """
+
+    pipeline_name: str
+    status: DependencyStatus = DependencyStatus.SUCCESS
+    records_extracted: int = 0
+    records_silver: int = 0
+    duration_seconds: float = 0.0
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    error_message: str | None = None
+    resumed: bool = False
+
+    @property
+    def is_success(self) -> bool:
+        """Check if dependency was successful."""
+        return self.status == DependencyStatus.SUCCESS
+
+    @classmethod
+    def success(
+        cls,
+        pipeline_name: str,
+        records_extracted: int,
+        records_silver: int,
+        duration_seconds: float = 0.0,
+        started_at: datetime | None = None,
+        completed_at: datetime | None = None,
+    ) -> DependencyResult:
+        """Factory for successful dependency result."""
+        return cls(
+            pipeline_name=pipeline_name,
+            status=DependencyStatus.SUCCESS,
+            records_extracted=records_extracted,
+            records_silver=records_silver,
+            duration_seconds=duration_seconds,
+            started_at=started_at,
+            completed_at=completed_at,
+        )
+
+    @classmethod
+    def failed(
+        cls,
+        pipeline_name: str,
+        error_message: str,
+        duration_seconds: float = 0.0,
+    ) -> DependencyResult:
+        """Factory for failed dependency result."""
+        return cls(
+            pipeline_name=pipeline_name,
+            status=DependencyStatus.FAILED,
+            error_message=error_message,
+            duration_seconds=duration_seconds,
+        )
+
+    @classmethod
+    def skipped(
+        cls,
+        pipeline_name: str,
+        reason: str = "Already completed",
+    ) -> DependencyResult:
+        """Factory for skipped dependency result."""
+        return cls(
+            pipeline_name=pipeline_name,
+            status=DependencyStatus.SKIPPED,
+            error_message=reason,
+        )
+
+    @classmethod
+    def timeout(
+        cls,
+        pipeline_name: str,
+        timeout_seconds: float,
+    ) -> DependencyResult:
+        """Factory for timeout dependency result."""
+        return cls(
+            pipeline_name=pipeline_name,
+            status=DependencyStatus.TIMEOUT,
+            error_message=f"Timeout after {timeout_seconds}s",
+            duration_seconds=timeout_seconds,
+        )
+
+
 @dataclass(frozen=True, slots=True)
 class MergeResult:
     """Result of merge operation."""
@@ -3602,21 +4056,24 @@ class CompositeResult:
         composite_name: Name of the composite pipeline.
         composite_run_id: Unique run identifier.
         seed_result: Result of seed pipeline execution.
+        dependency_results: Results per dependency (keyed by pipeline name).
         enrichment_results: Results per enricher (keyed by pipeline name).
         merge_result: Result of merge operation (None if not completed).
         total_duration_seconds: Total execution time.
         started_at: Execution start timestamp.
         completed_at: Execution end timestamp.
         lineage: Optional lineage metadata.
-        had_warnings: True if any optional enrichers failed but pipeline completed.
+        had_warnings: True if any optional enrichers/dependencies failed but pipeline completed.
             This indicates "completed with warnings" status - the pipeline succeeded
             but some non-required enrichments did not complete successfully.
         _required_enrichers: Internal set of required enricher names.
+        _required_dependencies: Internal set of required dependency names.
     """
 
     composite_name: str
     composite_run_id: str
     seed_result: SeedResult
+    dependency_results: dict[str, DependencyResult] = field(default_factory=dict)
     enrichment_results: dict[str, EnrichmentResult] = field(default_factory=dict)
     merge_result: MergeResult | None = None
     total_duration_seconds: float = 0.0
@@ -3625,17 +4082,29 @@ class CompositeResult:
     lineage: LineageMetadata | None = None
     had_warnings: bool = False
     _required_enrichers: frozenset[str] = field(default_factory=frozenset)
+    _required_dependencies: frozenset[str] = field(default_factory=frozenset)
 
     @property
     def is_success(self) -> bool:
         """Check if composite completed successfully."""
         if not self.seed_result.is_success:
             return False
+        if not self.required_dependencies_succeeded:
+            return False
         if not self.required_enrichers_succeeded:
             return False
         if self.merge_result is None:
             return False
         return self.merge_result.records_merged > 0
+
+    @property
+    def required_dependencies_succeeded(self) -> bool:
+        """Check if all required dependencies succeeded."""
+        for name in self._required_dependencies:
+            result = self.dependency_results.get(name)
+            if result is None or not result.is_success:
+                return False
+        return True
 
     @property
     def required_enrichers_succeeded(self) -> bool:
@@ -3645,6 +4114,20 @@ class CompositeResult:
             if result is None or not result.is_success:
                 return False
         return True
+
+    @property
+    def successful_dependencies(self) -> list[str]:
+        """List of dependencies that succeeded."""
+        return [n for n, r in self.dependency_results.items() if r.is_success]
+
+    @property
+    def failed_dependencies(self) -> list[str]:
+        """List of dependencies that failed."""
+        return [
+            n
+            for n, r in self.dependency_results.items()
+            if r.status == DependencyStatus.FAILED
+        ]
 
     @property
     def successful_enrichers(self) -> list[str]:
@@ -3704,6 +4187,9 @@ class CompositeResult:
             "is_success": self.is_success,
             "had_warnings": self.had_warnings,
             "seed_records": self.seed_result.records_silver,
+            "dependencies_run": len(self.dependency_results),
+            "dependencies_succeeded": len(self.successful_dependencies),
+            "dependencies_failed": len(self.failed_dependencies),
             "enrichers_run": len(self.enrichment_results),
             "enrichers_succeeded": len(self.successful_enrichers),
             "enrichers_failed": len(self.failed_enrichers),
@@ -3726,8 +4212,13 @@ Defines states and transition rules for composite pipeline execution lifecycle.
 The FSM ensures predictable execution flow and prevents invalid operations.
 See ADR-026 for architectural decisions.
 
-Transition flow: NOT_STARTED -> SEED_RUNNING -> SEED_COMPLETED -> ENRICHING
--> ENRICHMENT_COMPLETED -> MERGING -> COMPLETED. Any active state can -> FAILED.
+Transition flow: NOT_STARTED -> SEED_RUNNING -> SEED_COMPLETED ->
+DEPENDENCIES_RUNNING -> DEPENDENCIES_COMPLETED -> ENRICHING ->
+ENRICHMENT_COMPLETED -> MERGING -> COMPLETED. Any active state can -> FAILED.
+
+Note: Dependencies are optional. If no dependencies, SEED_COMPLETED transitions
+directly to ENRICHING (or DEPENDENCIES_RUNNING which immediately transitions to
+DEPENDENCIES_COMPLETED).
 """
 
 from __future__ import annotations
@@ -3739,16 +4230,20 @@ from enum import Enum
 class CompositePipelineState(str, Enum):
     """State of composite pipeline execution.
 
-    States: NOT_STARTED, SEED_RUNNING, SEED_COMPLETED, ENRICHING,
-    ENRICHMENT_COMPLETED, MERGING, COMPLETED, FAILED.
+    States: NOT_STARTED, SEED_RUNNING, SEED_COMPLETED, DEPENDENCIES_RUNNING,
+    DEPENDENCIES_COMPLETED, ENRICHING, ENRICHMENT_COMPLETED, MERGING,
+    COMPLETED, FAILED.
 
     Terminal states: COMPLETED, FAILED (no transitions allowed).
-    Active states: SEED_RUNNING, ENRICHING, MERGING (work in progress).
+    Active states: SEED_RUNNING, DEPENDENCIES_RUNNING, ENRICHING, MERGING
+        (work in progress).
     """
 
     NOT_STARTED = "not_started"
     SEED_RUNNING = "seed_running"
     SEED_COMPLETED = "seed_completed"
+    DEPENDENCIES_RUNNING = "dependencies_running"
+    DEPENDENCIES_COMPLETED = "dependencies_completed"
     ENRICHING = "enriching"
     ENRICHMENT_COMPLETED = "enrichment_completed"
     MERGING = "merging"
@@ -3762,9 +4257,13 @@ class CompositePipelineState(str, Enum):
 
     @property
     def is_active(self) -> bool:
-        """Check if this is an active state (SEED_RUNNING, ENRICHING, MERGING)."""
+        """Check if this is an active state (work in progress).
+
+        Active states: SEED_RUNNING, DEPENDENCIES_RUNNING, ENRICHING, MERGING.
+        """
         return self in {
             CompositePipelineState.SEED_RUNNING,
+            CompositePipelineState.DEPENDENCIES_RUNNING,
             CompositePipelineState.ENRICHING,
             CompositePipelineState.MERGING,
         }
@@ -3779,10 +4278,11 @@ class CompositePipelineState(str, Enum):
         """Check if execution can be resumed from this state.
 
         Resumable states have completed work that can be skipped on resume:
-        SEED_COMPLETED, ENRICHING, ENRICHMENT_COMPLETED, FAILED.
+        SEED_COMPLETED, DEPENDENCIES_RUNNING, DEPENDENCIES_COMPLETED, ENRICHING,
+        ENRICHMENT_COMPLETED, FAILED.
 
-        FAILED is resumable to allow retry after merge failure - the seed
-        and enrichment results are preserved in the checkpoint.
+        FAILED is resumable to allow retry after merge failure - the seed,
+        dependency, and enrichment results are preserved in the checkpoint.
 
         Returns:
             True if this state allows resume with partial progress preserved.
@@ -3797,6 +4297,8 @@ class CompositePipelineState(str, Enum):
         """
         return self in {
             CompositePipelineState.SEED_COMPLETED,
+            CompositePipelineState.DEPENDENCIES_RUNNING,
+            CompositePipelineState.DEPENDENCIES_COMPLETED,
             CompositePipelineState.ENRICHING,
             CompositePipelineState.ENRICHMENT_COMPLETED,
             CompositePipelineState.FAILED,
@@ -3841,10 +4343,13 @@ class CompositePipelineState(str, Enum):
 
 # Valid transitions for each state
 # Maps current state value -> set of allowed next state values
+# Note: seed_completed can go to dependencies_running OR enriching (if no dependencies)
 _STATE_TRANSITIONS: Mapping[str, frozenset[str]] = {
     "not_started": frozenset({"seed_running"}),
     "seed_running": frozenset({"seed_completed", "failed"}),
-    "seed_completed": frozenset({"enriching"}),
+    "seed_completed": frozenset({"dependencies_running", "enriching"}),
+    "dependencies_running": frozenset({"dependencies_completed", "failed"}),
+    "dependencies_completed": frozenset({"enriching"}),
     "enriching": frozenset({"enrichment_completed", "failed"}),
     "enrichment_completed": frozenset({"merging"}),
     "merging": frozenset({"completed", "failed"}),
@@ -3857,11 +4362,13 @@ _STATE_METRIC_VALUES: Mapping[CompositePipelineState, int] = {
     CompositePipelineState.NOT_STARTED: 0,
     CompositePipelineState.SEED_RUNNING: 1,
     CompositePipelineState.SEED_COMPLETED: 2,
-    CompositePipelineState.ENRICHING: 3,
-    CompositePipelineState.ENRICHMENT_COMPLETED: 4,
-    CompositePipelineState.MERGING: 5,
-    CompositePipelineState.COMPLETED: 6,
-    CompositePipelineState.FAILED: 7,
+    CompositePipelineState.DEPENDENCIES_RUNNING: 3,
+    CompositePipelineState.DEPENDENCIES_COMPLETED: 4,
+    CompositePipelineState.ENRICHING: 5,
+    CompositePipelineState.ENRICHMENT_COMPLETED: 6,
+    CompositePipelineState.MERGING: 7,
+    CompositePipelineState.COMPLETED: 8,
+    CompositePipelineState.FAILED: 9,
 }
 
 
@@ -4670,6 +5177,40 @@ class RuntimeConfig:
         """Derived TTL for lock renewal based on runtime config."""
         return self.lock_ttl or self.heartbeat_interval * 3
 
+
+# =============================================================================
+# Memory Monitoring Configuration
+# =============================================================================
+
+
+@dataclass(frozen=True, slots=True)
+class MemoryConfig:
+    """Configuration for memory-aware batch processing.
+
+    Used by MemoryMonitor (infrastructure layer) to configure adaptive
+    batch sizing based on memory pressure detection.
+
+    Attributes:
+        max_batch_memory_mb: Maximum memory per batch in MB (default: 512MB).
+        memory_pressure_threshold: Threshold (0.0-1.0) for reducing batch size (default: 0.8).
+        min_batch_size: Minimum batch size even under memory pressure (default: 10).
+        check_interval_records: Check memory every N records (default: 100).
+        enable_adaptive_sizing: Enable/disable adaptive batch sizing (default: True).
+
+    Example:
+        >>> config = MemoryConfig()
+        >>> config.memory_pressure_threshold
+        0.8
+        >>> config.max_batch_memory_mb
+        512
+    """
+
+    max_batch_memory_mb: int = 512
+    memory_pressure_threshold: float = 0.8
+    min_batch_size: int = 10
+    check_interval_records: int = 100
+    enable_adaptive_sizing: bool = True
+
 ================================================================================
 File: config_types.py
 Path: config_types.py
@@ -5339,6 +5880,8 @@ class InputFilterContext:
     column_name: str
     filter_field: str
     filter_ids: tuple[str, ...] | None = None
+    fallback_mapping: dict[str, str] | None = None
+    fallback_column: str | None = None
 
     @classmethod
     def disabled(cls) -> InputFilterContext:
@@ -5349,11 +5892,17 @@ class InputFilterContext:
             column_name="",
             filter_field="",
             filter_ids=None,
+            fallback_mapping=None,
+            fallback_column=None,
         )
 
     @classmethod
     def from_csv(
-        cls, source_path: str, column_name: str, filter_field: str
+        cls,
+        source_path: str,
+        column_name: str,
+        filter_field: str,
+        fallback_column: str | None = None,
     ) -> InputFilterContext:
         """Create an enabled filter context from CSV parameters."""
         return cls(
@@ -5362,11 +5911,16 @@ class InputFilterContext:
             column_name=column_name,
             filter_field=filter_field,
             filter_ids=None,
+            fallback_mapping=None,
+            fallback_column=fallback_column,
         )
 
     @classmethod
     def from_ids(
-        cls, filter_ids: tuple[str, ...], filter_field: str
+        cls,
+        filter_ids: tuple[str, ...],
+        filter_field: str,
+        fallback_mapping: dict[str, str] | None = None,
     ) -> InputFilterContext:
         """Create an enabled filter context from direct IDs.
 
@@ -5378,6 +5932,8 @@ class InputFilterContext:
             column_name="",
             filter_field=filter_field,
             filter_ids=filter_ids,
+            fallback_mapping=fallback_mapping,
+            fallback_column=None,
         )
 
     def __post_init__(self) -> None:
@@ -6056,8 +6612,6 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     # Cross-reference IDs for linking publications across providers
     # pmid: PubMed ID (numeric string: "12345678")
     pmid: Series[str] = pa.Field(nullable=True)
-    # pmc_id: PubMed Central ID (string: "PMC12345678")
-    pmc_id: Series[str] = pa.Field(nullable=True)
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
     doi: Series[str] = pa.Field(nullable=True)
     # patent_id excluded from unified publication schema
@@ -6077,8 +6631,6 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     # ChEMBL release metadata
     chembl_release: Series[str] = pa.Field(nullable=True)
     creation_date: Series[str] = pa.Field(nullable=True)
-    # publication_date: Unified date field (YYYY-MM-DD) for cross-provider linking
-    publication_date: Series[str] = pa.Field(nullable=True)
 
     # Unified publication fields (for cross-provider data linking)
     # Note: ChEMBL doesn't provide these natively, but included for schema consistency
@@ -6516,7 +7068,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     first_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     last_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
 
-    # Authors
+    # Authors (affiliations excluded per user request)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
 
     # Date fields
@@ -6552,6 +7104,9 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     # Classification
     keywords: Series[object] = pa.Field(nullable=True)  # list[str]
     mesh_terms: Series[object] = pa.Field(nullable=True)  # list[str]
+    chemicals: Series[object] = pa.Field(nullable=True)  # list[str]
+    databanks: Series[object] = pa.Field(nullable=True)  # list[str]
+    gene_symbols: Series[object] = pa.Field(nullable=True)  # list[str]
     citation_subset: Series[str] = pa.Field(
         nullable=True
     )  # Citation subset codes (e.g., 'AIM')
@@ -6604,12 +7159,16 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
 
     # Primary identifier
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
-    # Note: CrossRef uses DOI as primary key; pmid/pmc_id excluded (not available from CrossRef API)
     doi: Series[str] = pa.Field(nullable=False)
+
+    # Cross-reference IDs for linking publications across providers
+    # pmid: PubMed ID (numeric string: "12345678") - Always NULL for CrossRef
+    pmid: Series[str] = pa.Field(nullable=True)
+    # pmc_id: PubMed Central ID (format: "PMC1234567") - Always NULL for CrossRef
+    pmc_id: Series[str] = pa.Field(nullable=True)
 
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
-    abstract: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     journal: Series[str] = pa.Field(nullable=True)
     issn: Series[object] = pa.Field(nullable=True)  # list[str]
@@ -6701,7 +7260,11 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
+    affiliations: Series[object] = pa.Field(nullable=True)  # list[str]
     concepts: Series[object] = pa.Field(nullable=True)  # list[str]
+    mesh: Series[object] = pa.Field(nullable=True)  # list[str] - MeSH terms
+    keywords: Series[object] = pa.Field(nullable=True)  # list[str]
+    mag_id: Series[str] = pa.Field(nullable=True)  # Microsoft Academic Graph ID
 
     # Journal info
     journal: Series[str] = pa.Field(nullable=True)
@@ -6776,7 +7339,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
 
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
-    abstract: Series[str] = pa.Field(nullable=True)
+    # abstract excluded per user request
     tldr: Series[str] = pa.Field(nullable=True)
     year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     publication_date: Series[str] = pa.Field(nullable=True)
@@ -6801,7 +7364,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # Classification (JSON strings)
     fields_of_study: Series[str] = pa.Field(nullable=True)
     publication_types: Series[str] = pa.Field(nullable=True)
-    authors: Series[str] = pa.Field(nullable=True)
+    # authors, affiliations excluded per user request
 
     # Source tracking (maps to _source column in DataFrame)
     source: Series[str] = pa.Field(nullable=True, alias="_source")
@@ -7280,6 +7843,10 @@ class Bioactivity(BaseEntity):
     data_validity_comment: str | None = None
     data_validity_description: str | None = None
     potential_duplicate: int | None = None
+    manual_curation_flag: int | None = (
+        None  # 0/1: Whether manually reviewed by curators
+    )
+    original_activity_id: int | None = None  # FK to original activity for traceability
 
     # Action type (flattened from ChEMBL API nested structure)
     action_type_action_type: str | None = (
@@ -7413,6 +7980,8 @@ class Bioactivity(BaseEntity):
                 raw_data.get("data_validity_description")
             ),
             potential_duplicate=_safe_int(raw_data.get("potential_duplicate")),
+            manual_curation_flag=_safe_int(raw_data.get("manual_curation_flag")),
+            original_activity_id=_safe_int(raw_data.get("original_activity_id")),
             activity_properties=_safe_json(raw_data.get("activity_properties")),
             toid=_safe_int(raw_data.get("toid")),
         )
@@ -9180,6 +9749,15 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     issn_print: str | None = None
     issn_electronic: str | None = None
 
+    # Author ORCID identifiers (JSON array of ORCID IDs)
+    author_orcids: str | None = None
+
+    # Full author details with ORCID, sequence, affiliations (JSON array)
+    author_details: str | None = None
+
+    # Bibliographic references (JSON array of citation data)
+    references: str | None = None
+
     # Override: Default source for CrossRef
     _source: str = "crossref"
 
@@ -9206,28 +9784,14 @@ Path: entities\openalex.py
 ================================================================================
 """OpenAlex domain entities.
 
-Contains:
-- OpenAlexPublicationRecord: DTO (Pydantic) for type-safe data transfer at boundaries
-- OpenAlexPublicationEntity: Domain entity (dataclass) with lineage fields
-
-DTO Design:
-- Uses extra='forbid' to detect API changes early
-- frozen=True ensures immutability
-- Adapters return DTOs, transformers convert to Domain Entities
-
-Terminology:
-- Uses "Publication" for scholarly works from OpenAlex
-- OpenAlex API term "Work" is mapped to "Publication" for Ubiquitous Language
-
-Used for batch DOI resolution and publication metadata enrichment.
-
-Note: OpenAlexPublicationEntity inherits common fields from PublicationEntityBase.
-Provider-specific fields (openalex_id, concepts) are defined here.
+Contains OpenAlexPublicationRecord (DTO) and OpenAlexPublicationEntity (domain).
+Topics vs Concepts: OpenAlex deprecated concepts in 2024; use topics instead.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 from pydantic import Field as PydanticField
@@ -9264,26 +9828,7 @@ LOOKUP_METHODS = ["doi", "title_fallback", "title_only", "unknown"]
 
 
 class OpenAlexPublicationRecord(BaseModel):
-    """Scholarly work DTO from OpenAlex.
-
-    Represents publication metadata from OpenAlex API for DOI resolution
-    and citation enrichment.
-
-    Required field: openalex_id.
-
-    Example:
-        >>> record = OpenAlexPublicationRecord(
-        ...     openalex_id="W2148763428",
-        ...     doi="10.1038/nature12373",
-        ...     title="Example Article",
-        ...     journal="Nature",
-        ...     year=2024,
-        ... )
-        >>> record.model_dump()
-        {'openalex_id': 'W2148763428', 'doi': '10.1038/nature12373', ...}
-
-    See: https://docs.openalex.org/api-entities/works
-    """
+    """Scholarly work DTO from OpenAlex. Required field: openalex_id."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -9338,9 +9883,30 @@ class OpenAlexPublicationRecord(BaseModel):
         default=None, description="Number of citations (from OpenAlex cited_by_count)"
     )
 
-    # Concepts (top-level only)
+    # Topics (hierarchical classification - replaces deprecated concepts)
+    # Each topic dict has: id, display_name, score, subfield, field, domain
+    topics: list[dict[str, Any]] = PydanticField(
+        default_factory=list,
+        description="Hierarchical topic classification (domain/field/subfield/topic)",
+    )
+
+    # Primary topic (single most relevant topic for quick categorization)
+    # Dict with: id, display_name, score, subfield, field, domain
+    primary_topic: dict[str, Any] | None = PydanticField(
+        default=None, description="Primary topic classification"
+    )
+
+    # Grants/funding information
+    # Each grant dict has: funder, funder_display_name, award_id
+    grants: list[dict[str, Any]] = PydanticField(
+        default_factory=list, description="Funding/grant information"
+    )
+
+    # Concepts (DEPRECATED - kept for backward compatibility)
+    # OpenAlex deprecated concepts in 2024 in favor of topics
     concepts: list[str] = PydanticField(
-        default_factory=list, description="Top concept names"
+        default_factory=list,
+        description="Top concept names (DEPRECATED: use topics instead)",
     )
 
     # MeSH terms (Medical Subject Headings)
@@ -9360,6 +9926,16 @@ class OpenAlexPublicationRecord(BaseModel):
     )
     mag_id: str | None = PydanticField(
         default=None, description="Microsoft Academic Graph ID"
+    )
+
+    # Institution identifiers (for cross-referencing and geographic analysis)
+    institution_ids: list[str] = PydanticField(
+        default_factory=list,
+        description="OpenAlex institution IDs (e.g., I1234567890)",
+    )
+    institution_country_codes: list[str] = PydanticField(
+        default_factory=list,
+        description="ISO 2-letter country codes of affiliated institutions",
     )
 
     # Additional metadata
@@ -9403,29 +9979,7 @@ class OpenAlexPublicationRecord(BaseModel):
 
 @dataclass(frozen=True, kw_only=True)
 class OpenAlexPublicationEntity(PublicationEntityBase):
-    """Represents a scholarly publication from OpenAlex.
-
-    Domain entity with lineage fields (run_id, content_hash, etc.).
-    Inherits common publication fields from PublicationEntityBase.
-    For DTO without lineage, use OpenAlexPublicationRecord.
-
-    Terminology:
-    - Uses "Publication" instead of OpenAlex API term "Work" for Ubiquitous Language
-    - Business analysts can understand the model without knowing OpenAlex API specifics
-
-    Inherited from PublicationEntityBase:
-        doi, pmid, title, abstract, authors, journal, issn, publisher,
-        year, publication_date, citation_count, doc_type, language, is_oa,
-        oa_status, _lookup_method, _original_id.
-
-    OpenAlex-specific Attributes:
-        openalex_id: OpenAlex Work ID (e.g., W2148763428). REQUIRED.
-        concepts: Top concept names from OpenAlex.
-
-    Note: openalex_id is required for OpenAlex publications.
-
-    See: https://docs.openalex.org/api-entities/works
-    """
+    """OpenAlex publication domain entity. Requires openalex_id."""
 
     # Primary identifier (OpenAlex Work ID) - REQUIRED
     openalex_id: str
@@ -9433,7 +9987,24 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # External identifiers (in addition to inherited doi, pmid, pmc_id)
     mag_id: str | None = None  # Microsoft Academic Graph ID
 
-    # OpenAlex-specific: Concepts (top-level only)
+    # Institution identifiers (for cross-referencing and geographic analysis)
+    institution_ids: list[str] = field(default_factory=list)
+    institution_country_codes: list[str] = field(default_factory=list)
+
+    # Topics (hierarchical classification - replaces deprecated concepts)
+    # Each topic dict has: id, display_name, score, subfield, field, domain
+    topics: list[dict[str, Any]] = field(default_factory=list)
+
+    # Primary topic (single most relevant topic for quick categorization)
+    # Dict with: id, display_name, score, subfield, field, domain
+    primary_topic: dict[str, Any] | None = None
+
+    # Grants/funding information
+    # Each grant dict has: funder, funder_display_name, award_id
+    grants: list[dict[str, Any]] = field(default_factory=list)
+
+    # OpenAlex-specific: Concepts (DEPRECATED - kept for backward compatibility)
+    # OpenAlex deprecated concepts in 2024 in favor of topics
     concepts: list[str] = field(default_factory=list)
 
     # MeSH terms (Medical Subject Headings)
@@ -9507,6 +10078,15 @@ class PubchemMoleculeRecord(BaseModel):
     Required field: cid.
     At least one structural identifier (SMILES/InChI) should be present.
 
+    Contains all physicochemical properties defined in PubchemMoleculeSchema:
+    - Structural identifiers (SMILES, InChI, InChI Key)
+    - Nomenclature (molecular formula, IUPAC name)
+    - Physical properties (molecular weight, exact mass)
+    - Computed descriptors (XLogP, TPSA, complexity, charge)
+    - Atom/Bond counts (heavy atoms, H-bond donors/acceptors, rotatable bonds)
+    - Stereochemistry (atom/bond stereo counts)
+    - 3D properties (volume, conformer count, feature counts)
+
     Example:
         >>> record = PubchemMoleculeRecord(
         ...     cid="2244",
@@ -9519,16 +10099,10 @@ class PubchemMoleculeRecord(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    # Primary identifier (REQUIRED)
+    # === Primary Identifier (REQUIRED) ===
     cid: str = Field(description="PubChem Compound ID")
 
-    # Molecular properties
-    molecular_formula: str | None = Field(default=None, description="Molecular formula")
-    molecular_weight: float | None = Field(
-        default=None, description="Molecular weight in g/mol"
-    )
-
-    # Structure representations
+    # === Structural Identifiers ===
     canonical_smiles: str | None = Field(
         default=None, description="Canonical SMILES (connectivity)"
     )
@@ -9538,25 +10112,119 @@ class PubchemMoleculeRecord(BaseModel):
     inchi: str | None = Field(default=None, description="InChI string")
     inchikey: str | None = Field(default=None, description="InChI Key")
 
-    # Names
+    # === Nomenclature ===
+    molecular_formula: str | None = Field(default=None, description="Molecular formula")
     iupac_name: str | None = Field(default=None, description="IUPAC systematic name")
 
-    # Physical/Chemical properties
-    charge: int | None = Field(default=None, description="Formal charge")
-    complexity: float | None = Field(
-        default=None, description="Molecular complexity score"
+    # === Physical Properties ===
+    molecular_weight: float | None = Field(
+        default=None, description="Molecular weight in g/mol"
     )
-    h_bond_acceptor_count: int | None = Field(
-        default=None, description="H-bond acceptor count"
+    exact_mass: float | None = Field(
+        default=None, description="Monoisotopic exact mass (Da)"
+    )
+    monoisotopic_mass: float | None = Field(
+        default=None, description="Monoisotopic mass using most abundant isotope (Da)"
+    )
+
+    # === Computed Descriptors ===
+    xlogp: float | None = Field(
+        default=None, description="Computed octanol-water partition coefficient"
+    )
+    tpsa: float | None = Field(
+        default=None, description="Topological polar surface area (Å²)"
+    )
+    complexity: float | None = Field(
+        default=None, description="Structural complexity score"
+    )
+    charge: int | None = Field(default=None, description="Formal charge")
+
+    # === Atom/Bond Counts ===
+    heavy_atom_count: int | None = Field(
+        default=None, description="Non-hydrogen atom count"
     )
     h_bond_donor_count: int | None = Field(
-        default=None, description="H-bond donor count"
+        default=None, description="Hydrogen bond donor count"
+    )
+    h_bond_acceptor_count: int | None = Field(
+        default=None, description="Hydrogen bond acceptor count"
     )
     rotatable_bond_count: int | None = Field(
         default=None, description="Rotatable bond count"
     )
 
-    # Fingerprints
+    # === Stereochemistry ===
+    atom_stereo_count: int | None = Field(
+        default=None, description="Total stereocenters"
+    )
+    defined_atom_stereo_count: int | None = Field(
+        default=None, description="Defined stereocenters"
+    )
+    undefined_atom_stereo_count: int | None = Field(
+        default=None, description="Undefined stereocenters"
+    )
+    bond_stereo_count: int | None = Field(default=None, description="Total E/Z bonds")
+    defined_bond_stereo_count: int | None = Field(
+        default=None, description="Defined E/Z bonds"
+    )
+    undefined_bond_stereo_count: int | None = Field(
+        default=None, description="Undefined E/Z bonds"
+    )
+    isotope_atom_count: int | None = Field(
+        default=None, description="Isotopic atom count"
+    )
+    covalent_unit_count: int | None = Field(
+        default=None, description="Number of covalent units"
+    )
+
+    # === 3D Properties ===
+    volume_3d: float | None = Field(
+        default=None, description="3D molecular volume (Å³)"
+    )
+    conformer_count_3d: int | None = Field(
+        default=None, description="Number of 3D conformers"
+    )
+    feature_acceptor_count_3d: int | None = Field(
+        default=None, description="3D H-bond acceptor features"
+    )
+    feature_donor_count_3d: int | None = Field(
+        default=None, description="3D H-bond donor features"
+    )
+    feature_anion_count_3d: int | None = Field(
+        default=None, description="3D anion features"
+    )
+    feature_cation_count_3d: int | None = Field(
+        default=None, description="3D cation features"
+    )
+    feature_ring_count_3d: int | None = Field(
+        default=None, description="3D ring features"
+    )
+    feature_hydrophobe_count_3d: int | None = Field(
+        default=None, description="3D hydrophobic features"
+    )
+    effective_rotor_count_3d: float | None = Field(
+        default=None, description="Effective rotatable bonds (3D)"
+    )
+    conformer_rmsd_3d: float | None = Field(
+        default=None, description="Conformer model RMSD"
+    )
+    x_steric_quadrupole_3d: float | None = Field(
+        default=None,
+        description="X-axis steric quadrupole moment (3D charge distribution)",
+    )
+    y_steric_quadrupole_3d: float | None = Field(
+        default=None,
+        description="Y-axis steric quadrupole moment (3D charge distribution)",
+    )
+    z_steric_quadrupole_3d: float | None = Field(
+        default=None,
+        description="Z-axis steric quadrupole moment (3D charge distribution)",
+    )
+    feature_count_3d: int | None = Field(
+        default=None, description="Total count of 3D pharmacophore features"
+    )
+
+    # === Fingerprints (not in schema, but available) ===
     fingerprint: str | None = Field(default=None, description="PubChem fingerprint")
 
 
@@ -9569,18 +10237,72 @@ class PubchemMolecule(BaseEntity):
 
     Domain entity with lineage fields (run_id, content_hash, etc.).
     For DTO without lineage, use PubchemMoleculeRecord.
+
+    Contains all physicochemical properties defined in PubchemMoleculeSchema:
+    - Structural identifiers (SMILES, InChI, InChI Key)
+    - Nomenclature (molecular formula, IUPAC name)
+    - Physical properties (molecular weight, exact mass)
+    - Computed descriptors (XLogP, TPSA, complexity, charge)
+    - Atom/Bond counts (heavy atoms, H-bond donors/acceptors, rotatable bonds)
+    - Stereochemistry (atom/bond stereo counts)
+    - 3D properties (volume, conformer count, feature counts)
     """
 
+    # === Primary Identifier (REQUIRED) ===
     cid: str
-    molecular_formula: str | None = None
-    molecular_weight: float | None = None
 
-    # Structure representations
+    # === Structural Identifiers ===
     canonical_smiles: str | None = None
     isomeric_smiles: str | None = None
     inchi: str | None = None
     inchikey: str | None = None
+
+    # === Nomenclature ===
+    molecular_formula: str | None = None
     iupac_name: str | None = None
+
+    # === Physical Properties ===
+    molecular_weight: float | None = None
+    exact_mass: float | None = None
+    monoisotopic_mass: float | None = None
+
+    # === Computed Descriptors ===
+    xlogp: float | None = None
+    tpsa: float | None = None
+    complexity: float | None = None
+    charge: int | None = None
+
+    # === Atom/Bond Counts ===
+    heavy_atom_count: int | None = None
+    h_bond_donor_count: int | None = None
+    h_bond_acceptor_count: int | None = None
+    rotatable_bond_count: int | None = None
+
+    # === Stereochemistry ===
+    atom_stereo_count: int | None = None
+    defined_atom_stereo_count: int | None = None
+    undefined_atom_stereo_count: int | None = None
+    bond_stereo_count: int | None = None
+    defined_bond_stereo_count: int | None = None
+    undefined_bond_stereo_count: int | None = None
+    isotope_atom_count: int | None = None
+    covalent_unit_count: int | None = None
+
+    # === 3D Properties ===
+    volume_3d: float | None = None
+    conformer_count_3d: int | None = None
+    feature_acceptor_count_3d: int | None = None
+    feature_donor_count_3d: int | None = None
+    feature_anion_count_3d: int | None = None
+    feature_cation_count_3d: int | None = None
+    feature_ring_count_3d: int | None = None
+    feature_hydrophobe_count_3d: int | None = None
+    effective_rotor_count_3d: float | None = None
+    conformer_rmsd_3d: float | None = None
+    x_steric_quadrupole_3d: float | None = None
+    y_steric_quadrupole_3d: float | None = None
+    z_steric_quadrupole_3d: float | None = None
+    feature_count_3d: int | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -9680,6 +10402,7 @@ class PublicationEntityBase(BaseEntity):
     title: str | None = None
     abstract: str | None = None
     authors: str | None = None  # JSON-serialized list, PII hashed
+    affiliations: str | None = None  # JSON-serialized list of unique affiliations
 
     # Journal information
     journal: str | None = None
@@ -9809,6 +10532,7 @@ class ArticleRecord(BaseModel):
     )
 
     # Authors (JSON-serialized list of hashed names for PII compliance)
+    # affiliations excluded per user request
     authors: str | None = PydanticField(
         default=None, description="Author names (JSON array, hashed for PII)"
     )
@@ -9905,6 +10629,10 @@ class PubMedPublicationEntity(PublicationEntityBase):
     pmid: str
 
     # PubMed-specific identifiers (pmc_id is now inherited from PublicationEntityBase)
+    # Additional identifiers for cross-referencing with publisher databases
+    pii: str | None = None  # Publisher Item Identifier
+    mid: str | None = None  # Manuscript ID (PMC submission)
+    publisher_id: str | None = None  # Publisher-specific identifier
 
     # PubMed-specific journal information
     journal_abbrev: str | None = None
@@ -9952,6 +10680,9 @@ class PubMedPublicationEntity(PublicationEntityBase):
     publication_status: str | None = None  # ppublish/epublish/aheadofprint
     publication_type_list: str | None = None  # JSON array of pub types
     citation_subset: str | None = None  # Citation subset codes (e.g., 'AIM')
+
+    # Enhanced affiliation data (for institutional analysis)
+    structured_affiliations: str | None = None  # JSON array with identifier metadata
 
     # Denormalized counts (Gold schema)
     author_count: int | None = None
@@ -10036,6 +10767,10 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
         open_access_url: URL to open access PDF.
         fields_of_study: JSON string of fields of study.
         publication_types: JSON string of publication types.
+        author_s2_ids: JSON string of S2 author IDs (40-char hex).
+        author_orcids: JSON string of ORCID identifiers.
+        author_h_indices: JSON string of h-index values.
+        citation_contexts: JSON string of citation context sentences.
 
     Note: paper_id is required for Semantic Scholar publications.
 
@@ -10069,6 +10804,15 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     # SemanticScholar-specific classification (JSON strings)
     fields_of_study: str | None = None
     publication_types: str | None = None
+
+    # Author identifiers (for author-level analytics and disambiguation)
+    author_ids: str | None = None  # JSON array of author IDs
+    author_s2_ids: str | None = None  # JSON array of S2 author IDs (40-char hex)
+    author_orcids: str | None = None  # JSON array of ORCID identifiers
+    author_h_indices: str | None = None  # JSON array of h-index values
+
+    # Citation context (for citation sentiment analysis)
+    citation_contexts: str | None = None  # JSON array of context sentences
 
     # Override: Default source for SemanticScholar
     _source: str = "semanticscholar"
@@ -10224,11 +10968,19 @@ class UniprotTarget(BaseEntity):
     similarity_comment: str | None = None
     caution: str | None = None
 
+    # Biochemical properties (JSON)
+    cofactors: str | None = None  # JSON array of cofactors with name and ChEBI ID
+    biophysicochemical_properties: str | None = (
+        None  # JSON object with pH, temp, kinetics
+    )
+    induction: str | None = None  # JSON array of induction conditions
+
     # Cross-references (JSON arrays)
     go_terms: str | None = None
     drugbank_ids: str | None = None
     chembl_ids: str | None = None
     guidetopharmacology_ids: str | None = None
+    pdb_xrefs: str | None = None  # JSON array of PDB cross-references
 
     # Features & Keywords (JSON arrays)
     features: str | None = None
@@ -12899,6 +13651,7 @@ class InputFilterConfig:
     batch_size: int = 100
     fallback_column: str | None = None
     direct_filter_ids: tuple[str, ...] | None = None
+    direct_fallback_mapping: dict[str, str] | None = None
 
     def __post_init__(self) -> None:
         """Validate configuration consistency."""
@@ -20298,17 +21051,17 @@ class ActivitySchema(ETLRecordSchema):
         nullable=True, description="Standardized upper bound."
     )
     toid: Series[int] | None = pa.Field(nullable=True, description="Test Occasion ID.")
-    # manual_curation_flag: Optional[Series[int]] = pa.Field(
-    #     nullable=True,
-    #     isin=[0, 1],
-    #     description="Manual curation flag.",
-    # )
-    # original_activity_id: Optional[Series[int]] = pa.Field(
-    #     nullable=True, description="Original activity ID."
-    # )
-    # ridx: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="Record index."
-    # )
+    manual_curation_flag: Series[int] | None = pa.Field(
+        nullable=True,
+        isin=[0, 1],
+        description="Manual curation flag indicating record was manually reviewed.",
+    )
+    original_activity_id: Series[int] | None = pa.Field(
+        nullable=True, description="Original activity ID for traceability."
+    )
+    data_validity_description: Series[str] | None = pa.Field(
+        nullable=True, description="Human-readable data validity explanation."
+    )
 
     # === Flattened Fields (from JSON) ===
     ligand_efficiency_bei: Series[float] | None = pa.Field(nullable=True)
@@ -20341,7 +21094,7 @@ class ActivitySchema(ETLRecordSchema):
     bao_format: Series[str] | None = pa.Field(nullable=True)
     bao_label: Series[str] | None = pa.Field(nullable=True)
     document_journal: Series[str] | None = pa.Field(nullable=True)
-    document_year: Series[float] | None = pa.Field(nullable=True)
+    document_year: Series[int] | None = pa.Field(nullable=True)
 
     class Config:
         """Pandera configuration."""
@@ -22166,6 +22919,7 @@ Aligned with RULES.md v5.10 and Publication Schema Unification spec.
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -22269,6 +23023,31 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     issn_electronic: Series[str] = pa.Field(
         nullable=True,
         description="Electronic ISSN (format: XXXX-XXXX)",
+    )
+
+    # === Metrics ===
+    reference_count: Series[pd.Int64Dtype] = pa.Field(
+        nullable=True,
+        ge=0,
+        description="Number of references (from references-count field)",
+    )
+
+    # === Author ORCID Identifiers ===
+    author_orcids: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
+    )
+
+    # === Full Author Details ===
+    author_details: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of author objects with given, family, orcid, sequence, affiliations",
+    )
+
+    # === Bibliographic References ===
+    references: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of cited references with DOI, title, author, year, etc.",
     )
 
     class Config:
@@ -22574,6 +23353,12 @@ Path: schemas\openalex\publication.py
 
 Aligned with RULES.md v5.10 and Publication Schema Unification spec.
 Includes lookup metadata fields for DOI/title resolution tracking.
+
+Topics vs Concepts (2024 Migration):
+- OpenAlex deprecated the `concepts` field in 2024 in favor of `topics`
+- Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic
+- The `concepts` field is kept for backward compatibility during transition
+- New code should use `topics` and `primary_topic` fields
 """
 
 from __future__ import annotations
@@ -22700,6 +23485,66 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="Whether the publication has been retracted",
     )
 
+    # === Topics (hierarchical classification - replaces deprecated concepts) ===
+    # Stored as JSON-serialized string for DataFrame compatibility
+    topics: Series[str] = pa.Field(
+        nullable=True,
+        description="Hierarchical topic classification (JSON array)",
+    )
+
+    # Primary topic (single most relevant topic for quick categorization)
+    # Stored as JSON-serialized string for DataFrame compatibility
+    primary_topic: Series[str] = pa.Field(
+        nullable=True,
+        description="Primary topic classification (JSON object)",
+    )
+
+    # === Grants/Funding Information ===
+    # Stored as JSON-serialized string for DataFrame compatibility
+    grants: Series[str] = pa.Field(
+        nullable=True,
+        description="Funding/grant information (JSON array)",
+    )
+
+    # === Classification Fields (extracted by transformer) ===
+    concepts: Series[str] = pa.Field(
+        nullable=True,
+        description="OpenAlex concepts (JSON array, DEPRECATED: use topics)",
+    )
+
+    mesh: Series[str] = pa.Field(
+        nullable=True,
+        description="MeSH terms (JSON array of descriptor names)",
+    )
+
+    keywords: Series[str] = pa.Field(
+        nullable=True,
+        description="Keywords (JSON array)",
+    )
+
+    # === External Identifier ===
+    mag_id: Series[str] = pa.Field(
+        nullable=True,
+        description="Microsoft Academic Graph ID (legacy)",
+    )
+
+    # === Bibliographic Page Info ===
+    first_page: Series[str] = pa.Field(
+        nullable=True,
+        description="First page number (from biblio object)",
+    )
+
+    last_page: Series[str] = pa.Field(
+        nullable=True,
+        description="Last page number (from biblio object)",
+    )
+
+    # === Author Affiliations ===
+    affiliations: Series[str] = pa.Field(
+        nullable=True,
+        description="Author affiliations (JSON array)",
+    )
+
     class Config:
         """Pandera configuration."""
 
@@ -22807,6 +23652,16 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     @pa.check("exact_mass", name="exact_mass_non_negative")
     def _check_exact_mass(cls, series: Series[float]) -> Series[bool]:
         """Validate exact mass is non-negative."""
+        return cast("Series[bool]", series.isna() | (series >= 0))
+
+    monoisotopic_mass: Series[float] | None = pa.Field(
+        nullable=True,
+        description="Monoisotopic mass using most abundant isotope (Da)",
+    )
+
+    @pa.check("monoisotopic_mass", name="monoisotopic_mass_non_negative")
+    def _check_monoisotopic_mass(cls, series: Series[float]) -> Series[bool]:
+        """Validate monoisotopic mass is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
     # === Computed Descriptors ===
@@ -23058,6 +23913,32 @@ class PubchemMoleculeSchema(ETLRecordSchema):
         """Validate 3D conformer RMSD is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
+    # === 3D Steric Quadrupole Moments (can be negative) ===
+    x_steric_quadrupole_3d: Series[float] | None = pa.Field(
+        nullable=True,
+        description="X-axis steric quadrupole moment (3D charge distribution)",
+    )
+
+    y_steric_quadrupole_3d: Series[float] | None = pa.Field(
+        nullable=True,
+        description="Y-axis steric quadrupole moment (3D charge distribution)",
+    )
+
+    z_steric_quadrupole_3d: Series[float] | None = pa.Field(
+        nullable=True,
+        description="Z-axis steric quadrupole moment (3D charge distribution)",
+    )
+
+    # === 3D Feature Count (total pharmacophore features) ===
+    feature_count_3d: Series[int] | None = pa.Field(
+        nullable=True, description="Total count of 3D pharmacophore features"
+    )
+
+    @pa.check("feature_count_3d", name="feature_count_3d_non_negative")
+    def _check_feature_count_3d(cls, series: Series[int]) -> Series[bool]:
+        """Validate 3D feature count is non-negative."""
+        return cast("Series[bool]", series.isna() | (series >= 0))
+
     class Config:
         """Pandera configuration."""
 
@@ -23147,6 +24028,20 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     def _check_pmc_id(cls, series: Series[str]) -> Series[bool]:
         """Validate PMCID format."""
         return cast("Series[bool]", series.isna() | series.str.match(r"^PMC\d+$"))
+
+    # === Additional Identifiers (for cross-referencing) ===
+    pii: Series[str] = pa.Field(
+        nullable=True,
+        description="Publisher Item Identifier",
+    )
+    mid: Series[str] = pa.Field(
+        nullable=True,
+        description="Manuscript ID (PMC submission process)",
+    )
+    publisher_id: Series[str] = pa.Field(
+        nullable=True,
+        description="Publisher-specific article identifier",
+    )
 
     # === Article Content (override title to be non-nullable) ===
     title: Series[str] = pa.Field(
@@ -23263,6 +24158,15 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         nullable=True, description="Citation subset codes (e.g., 'AIM')"
     )
 
+    # === Affiliation Data (enhanced for institutional analysis) ===
+    structured_affiliations: Series[str] = pa.Field(
+        nullable=True,
+        description=(
+            "JSON array of structured affiliations with identifier metadata. "
+            "Each object contains: text, identifier, identifier_source, email_hash"
+        ),
+    )
+
     # === Counts (denormalized for query efficiency) ===
     author_count: Series[int] = pa.Field(nullable=True, description="Number of authors")
 
@@ -23313,6 +24217,65 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     def _check_chemical_count(cls, series: Series[int]) -> Series[bool]:
         """Validate chemical count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
+
+    # === Classification Data (JSON arrays extracted by transformer) ===
+    mesh_terms: Series[str] = pa.Field(
+        nullable=True,
+        description="MeSH terms (JSON array of descriptor/qualifier strings)",
+    )
+
+    chemicals: Series[str] = pa.Field(
+        nullable=True,
+        description="Chemical substances (JSON array of name/registry pairs)",
+    )
+
+    keywords: Series[str] = pa.Field(
+        nullable=True,
+        description="Author keywords (JSON array)",
+    )
+
+    databanks: Series[str] = pa.Field(
+        nullable=True,
+        description="Databank accession numbers (JSON array)",
+    )
+
+    gene_symbols: Series[str] = pa.Field(
+        nullable=True,
+        description="Gene symbols (JSON array)",
+    )
+
+    publication_types: Series[str] = pa.Field(
+        nullable=True,
+        description="Publication types (JSON array, e.g., Journal Article, Review)",
+    )
+
+    # === Additional Date Fields (extracted from PubmedData/History) ===
+    # Note: These are stored as ISO date strings (YYYY-MM-DD) to match transformer output
+    accepted_date: Series[str] = pa.Field(
+        nullable=True,
+        description="Manuscript acceptance date (from History/PubMedPubDate[@PubStatus='accepted'])",
+    )
+
+    received_date: Series[str] = pa.Field(
+        nullable=True,
+        description="Manuscript received date (from History/PubMedPubDate[@PubStatus='received'])",
+    )
+
+    revised_date: Series[str] = pa.Field(
+        nullable=True,
+        description="Manuscript revision date (from History/PubMedPubDate[@PubStatus='revised'])",
+    )
+
+    epub_date: Series[str] = pa.Field(
+        nullable=True,
+        description="Electronic publication date (from ArticleDate[@DateType='Electronic'])",
+    )
+
+    # === Author Affiliations ===
+    affiliations: Series[str] = pa.Field(
+        nullable=True,
+        description="Author affiliations (JSON array)",
+    )
 
     class Config:
         """Pandera configuration."""
@@ -23448,8 +24411,19 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     )
     pages: Series[str] = pa.Field(
         nullable=True,
-        description="Page range",
+        description="Page range (legacy format, e.g., '123-456')",
     )
+
+    first_page: Series[str] = pa.Field(
+        nullable=True,
+        description="First page number (parsed from pages)",
+    )
+
+    last_page: Series[str] = pa.Field(
+        nullable=True,
+        description="Last page number (parsed from pages)",
+    )
+
     venue: Series[str] = pa.Field(
         nullable=True,
         description="Publication venue",
@@ -23489,6 +24463,34 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     publication_types: Series[str] = pa.Field(
         nullable=True,
         description="Publication types (JSON array)",
+    )
+
+    # === Author Affiliations ===
+    affiliations: Series[str] = pa.Field(
+        nullable=True,
+        description="Author affiliations (JSON array)",
+    )
+
+    # === Author Identifiers (for author-level analytics and disambiguation) ===
+    author_s2_ids: Series[str] = pa.Field(
+        nullable=True,
+        description="Semantic Scholar author IDs (JSON array of 40-char hex IDs)",
+    )
+
+    author_orcids: Series[str] = pa.Field(
+        nullable=True,
+        description="Author ORCID identifiers (JSON array, empty string for missing)",
+    )
+
+    author_h_indices: Series[str] = pa.Field(
+        nullable=True,
+        description="Author h-index values (JSON array, null for missing)",
+    )
+
+    # === Citation Context (for citation sentiment analysis) ===
+    citation_contexts: Series[str] = pa.Field(
+        nullable=True,
+        description="Citation context sentences (JSON array)",
     )
 
     class Config:
@@ -23930,6 +24932,20 @@ class UniprotTargetSchema(ETLRecordSchema):
         nullable=True, description="Warnings about this entry"
     )
 
+    # === Biochemical Properties ===
+    cofactors: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of cofactors with name and ChEBI ID",
+    )
+    biophysicochemical_properties: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON object with pH/temp optima, kinetics, redox potential",
+    )
+    induction: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of gene expression induction conditions",
+    )
+
     # === Cross-References (Extracted) ===
     go_terms: Series[str] | None = pa.Field(
         nullable=True, description="JSON array of GO terms with evidence codes"
@@ -23942,6 +24958,10 @@ class UniprotTargetSchema(ETLRecordSchema):
     )
     guidetopharmacology_ids: Series[str] | None = pa.Field(
         nullable=True, description="JSON array of Guide to Pharmacology identifiers"
+    )
+    pdb_xrefs: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of PDB cross-references with structure details",
     )
 
     # === Features & Keywords ===

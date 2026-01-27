@@ -4405,6 +4405,10 @@ Path: pipelines\composite\publication.yaml
 # - Enrichers: CrossRef (citations), OpenAlex (concepts), PubMed (MeSH),
 #              SemanticScholar (embeddings)
 #
+# NOTE: chembl_publication_term was removed because ChEMBL API no longer
+# provides mesh_terms/keywords fields in /document endpoint, and the
+# /document_term endpoint has been deprecated (returns 404).
+#
 # Version: 1.0.0
 # Reference: ADR-026 Composite Pipeline Pattern
 # Last Updated: 2026-01-15
@@ -4432,6 +4436,19 @@ composite:
       - title               # Publication title (for fallback joins)
     # Note: chembl_publication uses flat_structure, so table is in path directly
     silver_table: silver/chembl/publication
+
+  # ---------------------------------------------------------------------------
+  # Dependency Pipelines
+  # ---------------------------------------------------------------------------
+  # Dependencies run after seed but before enrichers to populate Silver tables.
+  # Unlike enrichers which can read from existing Silver tables, dependencies
+  # call APIs to fetch data and write to Silver.
+  #
+  # Use dependencies for:
+  # - Derived entities (e.g., publication_term extracted from publication data)
+  # - Pipelines with force_full_scan that don't work with enricher filtering
+  # - Data that must be pre-populated before enrichment phase
+  dependencies: []  # No dependencies currently
 
   # ---------------------------------------------------------------------------
   # Enricher Pipelines

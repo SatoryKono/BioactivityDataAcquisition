@@ -1561,8 +1561,12 @@ def assemble_filter_config(
         cli_csv=ctx.input_filter.source_path if ctx.input_filter.enabled else None,
         cli_column=ctx.input_filter.column_name if ctx.input_filter.enabled else None,
         cli_field=ctx.input_filter.filter_field if ctx.input_filter.enabled else None,
+        cli_fallback_column=ctx.input_filter.fallback_column
+        if ctx.input_filter.enabled
+        else None,
         test_mode=effective_test_mode,
         direct_filter_ids=ctx.input_filter.filter_ids,
+        direct_fallback_mapping=ctx.input_filter.fallback_mapping,
     )
 
 ================================================================================
@@ -1591,6 +1595,7 @@ from pydantic import ValidationError
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointManager
 from bioetl.application.composite.coordinator import EnrichmentCoordinator
+from bioetl.application.composite.dependency_coordinator import DependencyCoordinator
 from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.application.composite.merger import MergeService
 from bioetl.application.composite.runner import (
@@ -1755,13 +1760,92 @@ def bootstrap_composite_runner(
         enricher_cfg = enricher_configs.get(pipeline_name)
         filter_ids: tuple[str, ...] | None = None
         filter_field: str | None = None
+        fallback_mapping: dict[str, str] | None = None
 
         if enricher_cfg and keys is not None and len(keys) > 0:
             # Use the first join key (usually 'doi' or 'pmid')
             join_keys = enricher_cfg.join_keys
             for key in join_keys:
+                # Skip title as primary filter key if other keys exist
+                if key == "title" and len(join_keys) > 1:
+                    continue
+
                 if key in keys.columns:
                     # Extract unique non-null values from the keys DataFrame
+                    key_values = (
+                        keys.select(key).drop_nulls().unique().to_series().to_list()
+                    )
+                    if key_values:
+                        filter_ids = tuple(str(v) for v in key_values)
+                        filter_field = key
+
+                        # Build fallback mapping (ID -> Title) if configured
+                        # Only if 'title' is in join_keys and available in data
+                        if "title" in join_keys and "title" in keys.columns:
+                            # Extract pairs (id, title)
+                            # Use unique(subset=[key]) to ensure one title per ID
+                            pairs = (
+                                keys.select([key, "title"])
+                                .drop_nulls()
+                                .unique(subset=[key])
+                                .iter_rows()
+                            )
+                            fallback_mapping = {str(k): str(t) for k, t in pairs}
+
+                        break
+
+        # For many_to_one enrichers, don't limit records since they return
+        # multiple rows per seed record (e.g., publication_term returns M terms per publication).
+        # For one_to_one enrichers, limit to seed record count.
+        limit: int | None = None
+        if enricher_cfg and enricher_cfg.is_many_to_one:
+            limit = None  # No limit for 1:M enrichers
+        elif keys is not None:
+            limit = len(keys)
+
+        options = RunOptions(
+            run_type="incremental",
+            limit=limit,
+            ignore_yaml_filter=True,  # Disable YAML input_filter for composite mode
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            fallback_mapping=fallback_mapping,
+        )
+        ctx = build_pipeline_context(pipeline_name, options)
+        return bootstrap_pipeline_runner(ctx)
+
+    # Build dependency config lookup for fast access
+    dependency_configs = {d.pipeline: d for d in config.dependencies}
+
+    # Create dependencies runner factory
+    def dependencies_runner_factory(
+        pipeline_name: str, keys: pl.DataFrame
+    ) -> PipelineRunner:
+        """Create PipelineRunner for a dependency phase.
+
+        Dependencies run after the seed to populate Silver tables before enrichers.
+        Unlike enrichers which read from Silver, dependencies call APIs to fetch data.
+
+        Configuration:
+        - Extracts join key values from seed results DataFrame
+        - Passes extracted IDs as filter_ids to limit API calls
+        - Does NOT use ignore_yaml_filter (dependencies may have their own configs)
+
+        Args:
+            pipeline_name: Name of the dependency pipeline to instantiate.
+            keys: DataFrame containing seed results with join key columns.
+
+        Returns:
+            PipelineRunner configured for dependency pipeline execution.
+        """
+        dep_cfg = dependency_configs.get(pipeline_name)
+        filter_ids: tuple[str, ...] | None = None
+        filter_field: str | None = None
+
+        if dep_cfg and keys is not None and len(keys) > 0:
+            # Extract filter IDs from seed keys
+            for key in dep_cfg.join_keys:
+                if key in keys.columns:
                     key_values = (
                         keys.select(key).drop_nulls().unique().to_series().to_list()
                     )
@@ -1772,8 +1856,7 @@ def bootstrap_composite_runner(
 
         options = RunOptions(
             run_type="incremental",
-            limit=len(keys) if keys is not None else None,
-            ignore_yaml_filter=True,  # Disable YAML input_filter for composite mode
+            limit=len(keys) if filter_ids else None,
             filter_ids=filter_ids,
             filter_field=filter_field,
         )
@@ -1792,6 +1875,10 @@ def bootstrap_composite_runner(
 
     key_extractor = KeyExtractorService(
         delta_reader=delta_reader,
+        logger=logger,
+    )
+
+    dependency_coordinator = DependencyCoordinator(
         logger=logger,
     )
 
@@ -1824,8 +1911,10 @@ def bootstrap_composite_runner(
         config=config,
         runtime=runtime,
         seed_runner_factory=seed_runner_factory,
+        dependencies_runner_factory=dependencies_runner_factory,
         enricher_runner_factory=enricher_runner_factory,
         key_extractor=key_extractor,
+        dependency_coordinator=dependency_coordinator,
         coordinator=coordinator,
         merger=merger,
         checkpoint_manager=checkpoint_manager,
@@ -2922,17 +3011,19 @@ class FilterConfigBuilder:
         effective_csv: str,
         cli_column: str | None,
         cli_field: str | None,
+        cli_fallback_column: str | None,
     ) -> InputFilterConfig:
         """Build config for single-column filtering mode."""
         effective_column = cli_column or yaml_filter.column_name
         effective_field = cli_field or yaml_filter.filter_field
+        effective_fallback = cli_fallback_column or yaml_filter.fallback_column
         return InputFilterConfig(
             enabled=True,
             source_path=effective_csv,
             column_name=effective_column,
             filter_field=effective_field,
             batch_size=yaml_filter.batch_size,
-            fallback_column=yaml_filter.fallback_column,
+            fallback_column=effective_fallback,
         )
 
     @staticmethod
@@ -2940,6 +3031,7 @@ class FilterConfigBuilder:
         filter_ids: tuple[str, ...],
         filter_field: str,
         batch_size: int = 100,
+        fallback_mapping: dict[str, str] | None = None,
     ) -> InputFilterConfig:
         """Build config for direct filter IDs mode (no CSV file).
 
@@ -2949,6 +3041,7 @@ class FilterConfigBuilder:
             enabled=True,
             filter_field=filter_field,
             direct_filter_ids=filter_ids,
+            direct_fallback_mapping=fallback_mapping,
             batch_size=batch_size,
         )
 
@@ -2958,9 +3051,11 @@ class FilterConfigBuilder:
         cli_csv: str | None = None,
         cli_column: str | None = None,
         cli_field: str | None = None,
+        cli_fallback_column: str | None = None,
         *,
         test_mode: bool = False,
         direct_filter_ids: tuple[str, ...] | None = None,
+        direct_fallback_mapping: dict[str, str] | None = None,
     ) -> InputFilterConfig | None:
         """Build InputFilterConfig by merging YAML config and CLI overrides.
 
@@ -2980,8 +3075,10 @@ class FilterConfigBuilder:
             cli_csv: Optional CSV path from CLI (single-column mode only)
             cli_column: Optional column name from CLI (single-column mode only)
             cli_field: Optional filter field from CLI (single-column mode only)
+            cli_fallback_column: Optional fallback column from CLI
             test_mode: If True, YAML-based filters are disabled
             direct_filter_ids: Direct filter IDs (no CSV file, for composite mode)
+            direct_fallback_mapping: Direct fallback mapping (DOI->Title)
 
         Returns:
             Configured InputFilterConfig or None if filtering is disabled
@@ -2992,6 +3089,7 @@ class FilterConfigBuilder:
                 filter_ids=direct_filter_ids,
                 filter_field=cli_field or yaml_filter.filter_field or "doi",
                 batch_size=yaml_filter.batch_size,
+                fallback_mapping=direct_fallback_mapping,
             )
 
         if not FilterConfigBuilder._is_filter_enabled(yaml_filter, cli_csv, test_mode):
@@ -3009,7 +3107,7 @@ class FilterConfigBuilder:
 
         # Single-column mode: CLI > YAML config
         return FilterConfigBuilder._build_single_column_config(
-            yaml_filter, effective_csv, cli_column, cli_field
+            yaml_filter, effective_csv, cli_column, cli_field, cli_fallback_column
         )
 
 ================================================================================
@@ -3207,6 +3305,7 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
             filter_ids=options.filter_ids,
             filter_field=options.filter_field
             or "doi",  # Default to DOI for publications
+            fallback_mapping=options.fallback_mapping,  # Title fallback for OpenAlex etc.
         )
     elif options.input_csv:
         # CSV-based filtering
@@ -5865,9 +5964,9 @@ if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.memory_monitor import MemoryConfig
     from bioetl.application.core.shutdown import ShutdownSignal
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
+    from bioetl.domain.config import MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
         CheckpointPort,

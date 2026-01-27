@@ -307,7 +307,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "mid": mid,
             "publisher_id": publisher_id,
             "title": get_text(article.find(".//ArticleTitle")),
-            "vernacular_title": get_text(article.find(".//VernacularTitle")),
+            # vernacular_title excluded per user request
             "abstract": self._data_normalizer.strip_html_tags(
                 AbstractExtractor.extract_abstract(article)
             ),
@@ -546,7 +546,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         journal_issue = journal.find("JournalIssue") if journal else None
         pub_date_node = journal_issue.find("PubDate") if journal_issue else None
         raw_pub_date, raw_year = DateExtractor.extract_date(pub_date_node)
-        history = pubmed_data.find("History") if pubmed_data else None
 
         pub_month, pub_day = self._parse_month_day(pub_date_node)
 
@@ -584,10 +583,34 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "publication_date": publication_date,
             "year": validated_year,
             "publication_year": validated_year,
-            "accepted_date": DateExtractor.extract_history_date(history, "accepted"),
-            "received_date": DateExtractor.extract_history_date(history, "received"),
-            "revised_date": DateExtractor.extract_history_date(history, "revised"),
-            "epub_date": epub_date,
+            # Excluded per user request: accepted_date, received_date, revised_date, epub_date
             "date_completed": date_completed,
             "date_revised": date_revised,
         }
+
+    @staticmethod
+    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        """Convert Domain Entity to SilverRecord, excluding certain fields.
+
+        Overrides base implementation to remove fields not needed for PubMed.
+
+        Args:
+            entity: Domain entity (dataclass).
+
+        Returns:
+            SilverRecord dictionary without excluded fields.
+
+        """
+        from bioetl.application.core.base_transformer import BaseTransformer
+
+        # Get base silver record
+        silver_record = BaseTransformer.entity_to_silver_record(entity)
+
+        # Remove excluded fields per user request
+        silver_record.pop("vernacular_title", None)
+        silver_record.pop("epub_date", None)
+        silver_record.pop("received_date", None)
+        silver_record.pop("revised_date", None)
+        silver_record.pop("accepted_date", None)
+
+        return silver_record

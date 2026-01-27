@@ -179,10 +179,8 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "_source": "crossref",
             # Excluded fields (always NULL, not written to Delta Lake):
             # - is_oa: CrossRef doesn't provide Open Access info
-            # - pmid/pmc_id: CrossRef doesn't provide PubMed IDs
+            # - pmid/pmc_id: CrossRef doesn't provide PubMed IDs (excluded entirely)
             "is_oa": None,
-            "pmid": None,
-            "pmc_id": None,
             # Lookup metadata (from adapter fallback handler)
             "_lookup_method": rec.get("_lookup_method", "doi"),
             "_original_id": rec.get("_original_id"),
@@ -346,8 +344,10 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         # Get base silver record
         silver_record = BaseTransformer.entity_to_silver_record(entity)
 
-        # Remove excluded fields
+        # Remove excluded fields (CrossRef doesn't provide these)
         silver_record.pop("abstract", None)
         silver_record.pop("affiliations", None)
+        silver_record.pop("pmid", None)
+        silver_record.pop("pmc_id", None)
 
         return silver_record
