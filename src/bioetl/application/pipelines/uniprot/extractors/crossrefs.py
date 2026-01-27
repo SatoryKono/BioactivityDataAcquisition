@@ -103,7 +103,7 @@ class CrossRefExtractor:
 
         Args:
             xrefs: List of cross-reference objects.
-            database: Database name (DrugBank, ChEMBL, GuidetoPHARMACOLOGY).
+            database: Database name (DrugBank, ChEMBL, GuidetoPHARMACOLOGY, PDB).
 
         Returns:
             JSON array of IDs or None.
@@ -123,3 +123,50 @@ class CrossRefExtractor:
                 ids.append(str(xref_id))
 
         return serialize_to_json(ids, ensure_ascii=False) if ids else None
+
+    @classmethod
+    def _build_pdb_entry(cls, xref: dict[str, Any]) -> dict[str, Any] | None:
+        """Build a PDB entry from a cross-reference dict."""
+        pdb_id = xref.get("id")
+        if not pdb_id:
+            return None
+
+        pdb_entry: dict[str, Any] = {"id": str(pdb_id)}
+        props = cls._parse_properties(xref.get("properties", []))
+
+        for key, field in [
+            ("Method", "method"),
+            ("Resolution", "resolution"),
+            ("Chains", "chains"),
+        ]:
+            if props.get(key):
+                pdb_entry[field] = props[key]
+
+        return pdb_entry
+
+    @classmethod
+    def extract_pdb_xrefs(cls, xrefs: Any) -> str | None:
+        """Extract PDB cross-references with structural details.
+
+        PDB references include information about 3D structure availability,
+        chains, and resolution which is valuable for structural biology.
+
+        Args:
+            xrefs: List of cross-reference objects.
+
+        Returns:
+            JSON array of PDB reference objects with id, method, resolution,
+            and chains, or None.
+        """
+        if not xrefs or not isinstance(xrefs, list):
+            return None
+
+        pdb_refs = [
+            entry
+            for xref in xrefs
+            if isinstance(xref, dict) and xref.get("database") == "PDB"
+            for entry in [cls._build_pdb_entry(xref)]
+            if entry is not None
+        ]
+
+        return serialize_to_json(pdb_refs, ensure_ascii=False) if pdb_refs else None

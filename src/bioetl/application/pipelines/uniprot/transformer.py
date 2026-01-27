@@ -301,6 +301,13 @@ class UniProtProteinTransformer(BaseTransformer):
         )
         data["caution"] = CommentExtractor.extract_by_type(comments, "CAUTION")
 
+        # Biochemical properties
+        data["cofactors"] = CommentExtractor.extract_cofactors(comments)
+        data["biophysicochemical_properties"] = (
+            CommentExtractor.extract_biophysicochemical_properties(comments)
+        )
+        data["induction"] = CommentExtractor.extract_induction(comments)
+
     def _add_cross_references(self, record: BronzeRecord, data: dict[str, Any]) -> None:
         """Add cross-reference fields."""
         xrefs = record.get("uniProtKBCrossReferences")
@@ -310,6 +317,7 @@ class UniProtProteinTransformer(BaseTransformer):
         data["guidetopharmacology_ids"] = CrossRefExtractor.extract_xref_ids(
             xrefs, "GuidetoPHARMACOLOGY"
         )
+        data["pdb_xrefs"] = CrossRefExtractor.extract_pdb_xrefs(xrefs)
 
     def _add_features_and_keywords(
         self, record: BronzeRecord, data: dict[str, Any]

@@ -1114,6 +1114,369 @@ class TestUniProtTransformerAuditDates:
 
 
 @pytest.mark.unit
+class TestUniProtCofactorsExtraction:
+    """Tests for cofactor extraction."""
+
+    @pytest.fixture
+    def transformer(self):
+        """Create UniProtProteinTransformer instance."""
+        return UniProtProteinTransformer(provider="uniprot")
+
+    @pytest.mark.asyncio
+    async def test_extract_cofactors_with_chebi(self, transformer, mock_context):
+        """Test extraction of cofactors with ChEBI cross-references."""
+        record = {
+            "primaryAccession": "P12345",
+            "uniProtkbId": "TEST_HUMAN",
+            "comments": [
+                {
+                    "commentType": "COFACTOR",
+                    "cofactors": [
+                        {
+                            "name": "Zn(2+)",
+                            "cofactorCrossReference": {
+                                "database": "ChEBI",
+                                "id": "CHEBI:29105",
+                            },
+                        },
+                        {
+                            "name": "Mg(2+)",
+                            "cofactorCrossReference": {
+                                "database": "ChEBI",
+                                "id": "CHEBI:18420",
+                            },
+                        },
+                    ],
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["cofactors"] is not None
+        assert '"name":"Zn(2+)"' in result["cofactors"]
+        assert '"chebi_id":"CHEBI:29105"' in result["cofactors"]
+        assert '"name":"Mg(2+)"' in result["cofactors"]
+        assert '"chebi_id":"CHEBI:18420"' in result["cofactors"]
+
+    @pytest.mark.asyncio
+    async def test_extract_cofactors_without_chebi(self, transformer, mock_context):
+        """Test extraction of cofactors without ChEBI cross-references."""
+        record = {
+            "primaryAccession": "P12345",
+            "uniProtkbId": "TEST_HUMAN",
+            "comments": [
+                {
+                    "commentType": "COFACTOR",
+                    "cofactors": [
+                        {"name": "NAD(+)"},
+                    ],
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["cofactors"] is not None
+        assert '"name":"NAD(+)"' in result["cofactors"]
+
+    @pytest.mark.asyncio
+    async def test_no_cofactors(self, transformer, mock_context):
+        """Test handling when no cofactors are present."""
+        record = {
+            "primaryAccession": "P12345",
+            "uniProtkbId": "TEST_HUMAN",
+            "comments": [
+                {
+                    "commentType": "FUNCTION",
+                    "texts": [{"value": "Some function"}],
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["cofactors"] is None
+
+
+@pytest.mark.unit
+class TestUniProtBiophysicochemicalExtraction:
+    """Tests for biophysicochemical properties extraction."""
+
+    @pytest.fixture
+    def transformer(self):
+        """Create UniProtProteinTransformer instance."""
+        return UniProtProteinTransformer(provider="uniprot")
+
+    @pytest.mark.asyncio
+    async def test_extract_ph_dependence(self, transformer, mock_context):
+        """Test extraction of pH dependence."""
+        record = {
+            "primaryAccession": "P12345",
+            "uniProtkbId": "TEST_HUMAN",
+            "comments": [
+                {
+                    "commentType": "BIOPHYSICOCHEMICAL PROPERTIES",
+                    "phDependence": {
+                        "texts": [
+                            {"value": "Optimum pH is 7.5. Active from pH 6.0 to 9.0."}
+                        ]
+                    },
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["biophysicochemical_properties"] is not None
+        assert '"ph_dependence"' in result["biophysicochemical_properties"]
+        assert "Optimum pH is 7.5" in result["biophysicochemical_properties"]
+
+    @pytest.mark.asyncio
+    async def test_extract_temperature_dependence(self, transformer, mock_context):
+        """Test extraction of temperature dependence."""
+        record = {
+            "primaryAccession": "P12345",
+            "uniProtkbId": "TEST_HUMAN",
+            "comments": [
+                {
+                    "commentType": "BIOPHYSICOCHEMICAL PROPERTIES",
+                    "temperatureDependence": {
+                        "texts": [
+                            {"value": "Optimum temperature is 37 degrees Celsius."}
+                        ]
+                    },
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["biophysicochemical_properties"] is not None
+        assert '"temperature_dependence"' in result["biophysicochemical_properties"]
+        assert "37 degrees" in result["biophysicochemical_properties"]
+
+    @pytest.mark.asyncio
+    async def test_extract_kinetic_parameters(self, transformer, mock_context):
+        """Test extraction of kinetic parameters (Km, Vmax)."""
+        record = {
+            "primaryAccession": "P12345",
+            "uniProtkbId": "TEST_HUMAN",
+            "comments": [
+                {
+                    "commentType": "BIOPHYSICOCHEMICAL PROPERTIES",
+                    "kineticParameters": {
+                        "michaelisConstants": [
+                            {
+                                "constant": 0.5,
+                                "unit": "mM",
+                                "substrate": "ATP",
+                            }
+                        ],
+                        "maximumVelocities": [
+                            {
+                                "velocity": 100,
+                                "unit": "umol/min/mg",
+                                "enzyme": "recombinant enzyme",
+                            }
+                        ],
+                    },
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["biophysicochemical_properties"] is not None
+        props = result["biophysicochemical_properties"]
+        assert '"kinetic_parameters"' in props
+        assert '"km"' in props
+        assert '"vmax"' in props
+        assert '"substrate":"ATP"' in props
+
+    @pytest.mark.asyncio
+    async def test_extract_redox_potential(self, transformer, mock_context):
+        """Test extraction of redox potential."""
+        record = {
+            "primaryAccession": "P12345",
+            "uniProtkbId": "TEST_HUMAN",
+            "comments": [
+                {
+                    "commentType": "BIOPHYSICOCHEMICAL PROPERTIES",
+                    "redoxPotential": {
+                        "texts": [{"value": "E(0) is -320 mV at pH 7.0."}]
+                    },
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["biophysicochemical_properties"] is not None
+        assert '"redox_potential"' in result["biophysicochemical_properties"]
+        assert "-320 mV" in result["biophysicochemical_properties"]
+
+    @pytest.mark.asyncio
+    async def test_no_biophysicochemical_properties(self, transformer, mock_context):
+        """Test handling when no biophysicochemical properties are present."""
+        record = {
+            "primaryAccession": "P12345",
+            "uniProtkbId": "TEST_HUMAN",
+            "comments": [
+                {
+                    "commentType": "FUNCTION",
+                    "texts": [{"value": "Some function"}],
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["biophysicochemical_properties"] is None
+
+
+@pytest.mark.unit
+class TestUniProtInductionExtraction:
+    """Tests for induction extraction."""
+
+    @pytest.fixture
+    def transformer(self):
+        """Create UniProtProteinTransformer instance."""
+        return UniProtProteinTransformer(provider="uniprot")
+
+    @pytest.mark.asyncio
+    async def test_extract_induction(self, transformer, mock_context):
+        """Test extraction of induction information."""
+        record = {
+            "primaryAccession": "P12345",
+            "uniProtkbId": "TEST_HUMAN",
+            "comments": [
+                {
+                    "commentType": "INDUCTION",
+                    "texts": [{"value": "Induced by heat shock and oxidative stress."}],
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["induction"] is not None
+        assert "Induced by heat shock" in result["induction"]
+
+    @pytest.mark.asyncio
+    async def test_no_induction(self, transformer, mock_context):
+        """Test handling when no induction information is present."""
+        record = {
+            "primaryAccession": "P12345",
+            "uniProtkbId": "TEST_HUMAN",
+            "comments": [
+                {
+                    "commentType": "FUNCTION",
+                    "texts": [{"value": "Some function"}],
+                }
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["induction"] is None
+
+
+@pytest.mark.unit
+class TestUniProtPDBExtraction:
+    """Tests for PDB cross-reference extraction."""
+
+    @pytest.fixture
+    def transformer(self):
+        """Create UniProtProteinTransformer instance."""
+        return UniProtProteinTransformer(provider="uniprot")
+
+    @pytest.mark.asyncio
+    async def test_extract_pdb_xrefs(self, transformer, mock_context):
+        """Test extraction of PDB cross-references."""
+        record = {
+            "primaryAccession": "P12345",
+            "uniProtkbId": "TEST_HUMAN",
+            "uniProtKBCrossReferences": [
+                {
+                    "database": "PDB",
+                    "id": "1ABC",
+                    "properties": [
+                        {"key": "Method", "value": "X-ray"},
+                        {"key": "Resolution", "value": "2.10 A"},
+                        {"key": "Chains", "value": "A/B=1-480"},
+                    ],
+                },
+                {
+                    "database": "PDB",
+                    "id": "2XYZ",
+                    "properties": [
+                        {"key": "Method", "value": "NMR"},
+                        {"key": "Chains", "value": "A=1-150"},
+                    ],
+                },
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["pdb_xrefs"] is not None
+        assert '"id":"1ABC"' in result["pdb_xrefs"]
+        assert '"method":"X-ray"' in result["pdb_xrefs"]
+        assert '"resolution":"2.10 A"' in result["pdb_xrefs"]
+        assert '"chains":"A/B=1-480"' in result["pdb_xrefs"]
+        assert '"id":"2XYZ"' in result["pdb_xrefs"]
+        assert '"method":"NMR"' in result["pdb_xrefs"]
+
+    @pytest.mark.asyncio
+    async def test_extract_pdb_xrefs_minimal(self, transformer, mock_context):
+        """Test extraction of PDB cross-references with minimal info."""
+        record = {
+            "primaryAccession": "P12345",
+            "uniProtkbId": "TEST_HUMAN",
+            "uniProtKBCrossReferences": [
+                {
+                    "database": "PDB",
+                    "id": "1ABC",
+                },
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["pdb_xrefs"] is not None
+        assert '"id":"1ABC"' in result["pdb_xrefs"]
+
+    @pytest.mark.asyncio
+    async def test_no_pdb_xrefs(self, transformer, mock_context):
+        """Test handling when no PDB cross-references are present."""
+        record = {
+            "primaryAccession": "P12345",
+            "uniProtkbId": "TEST_HUMAN",
+            "uniProtKBCrossReferences": [
+                {"database": "GO", "id": "GO:0005524"},
+            ],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["pdb_xrefs"] is None
+
+
+@pytest.mark.unit
 class TestParseUniprotDate:
     """Tests for parse_uniprot_date utility function."""
 
