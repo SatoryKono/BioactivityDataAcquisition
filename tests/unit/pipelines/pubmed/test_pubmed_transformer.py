@@ -329,10 +329,7 @@ class TestExtractDateData:
         assert result["pub_date"] == "2023-03-15"
         assert result["year"] == 2023
         assert result["publication_year"] == 2023
-        assert result["accepted_date"] == "2023-02-15"
-        assert result["received_date"] == "2022-12-01"
-        assert result["revised_date"] == "2023-01-20"
-        assert result["epub_date"] == "2023-03-10"
+        # accepted_date, received_date, revised_date, epub_date excluded per user request
         assert result["date_completed"] is None
         assert result["date_revised"] is None
 
@@ -359,10 +356,7 @@ class TestExtractDateData:
         assert result["pub_date"] == "2023-12-31"
         assert result["year"] == 2023
         assert result["publication_year"] == 2023
-        assert result["accepted_date"] is None
-        assert result["received_date"] is None
-        assert result["revised_date"] is None
-        assert result["epub_date"] is None
+        # accepted_date, received_date, revised_date, epub_date excluded per user request
         assert result["date_completed"] is None
         assert result["date_revised"] is None
 
@@ -378,10 +372,7 @@ class TestExtractDateData:
         assert result["pub_date"] is None
         assert result["year"] is None
         assert result["publication_year"] is None
-        assert result["accepted_date"] is None
-        assert result["received_date"] is None
-        assert result["revised_date"] is None
-        assert result["epub_date"] is None
+        # accepted_date, received_date, revised_date, epub_date excluded per user request
         assert result["date_completed"] is None
         assert result["date_revised"] is None
 

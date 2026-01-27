@@ -33,11 +33,7 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_references,
     extract_year,
 )
-from bioetl.domain.entities.crossref import (
-    CROSSREF_TYPE_DEFAULT,
-    CROSSREF_TYPE_MAP,
-    CrossRefPublicationEntity,
-)
+from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 from bioetl.domain.normalization import extract_first_string
 from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects import DOI
@@ -168,9 +164,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             **dates,
             "year": extract_year(rec),
             "publication_date": publication_date,
-            "doc_type": CROSSREF_TYPE_MAP.get(
-                rec.get("type", ""), CROSSREF_TYPE_DEFAULT
-            ),
+            "type": rec.get("type"),  # Raw CrossRef type preserved
             "citation_count": rec.get("is-referenced-by-count"),
             "reference_count": rec.get("references-count"),
             "language": rec.get("language"),
@@ -328,15 +322,16 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
-        """Convert Domain Entity to SilverRecord, excluding abstract and affiliations.
+        """Convert Domain Entity to SilverRecord, excluding unused fields.
 
         Overrides base implementation to remove fields not collected for CrossRef.
+        CrossRef uses raw 'type' field instead of mapped 'doc_type'.
 
         Args:
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without abstract and affiliations fields.
+            SilverRecord dictionary without excluded fields.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
@@ -349,5 +344,6 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         silver_record.pop("affiliations", None)
         silver_record.pop("pmid", None)
         silver_record.pop("pmc_id", None)
+        silver_record.pop("doc_type", None)  # CrossRef uses raw 'type' instead
 
         return silver_record

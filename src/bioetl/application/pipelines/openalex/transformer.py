@@ -36,7 +36,7 @@ from bioetl.application.pipelines.openalex.extractors import (
     extract_topics,
     reconstruct_abstract,
 )
-from bioetl.domain.entities.openalex import OPENALEX_TYPE_MAP, OpenAlexPublicationEntity
+from bioetl.domain.entities.openalex import OpenAlexPublicationEntity
 from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects import DOI, PublicationYear
 
@@ -200,10 +200,6 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             PublicationYear, rec.get("publication_year"), as_string=False
         )
 
-        # Map document type
-        raw_type = rec.get("type", "")
-        doc_type = OPENALEX_TYPE_MAP.get(raw_type, "PUBLICATION")
-
         # Lookup metadata (from adapter)
         lookup_method = rec.get("_lookup_method", "unknown")
         original_id = rec.get("_original_id")
@@ -212,7 +208,6 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "openalex_id": openalex_id,
             "doi": doi,
             "pmid": external_ids.get("pmid"),
-            "pmc_id": external_ids.get("pmcid"),  # API uses "pmcid", we use "pmc_id"
             "mag_id": external_ids.get("mag_id"),
             "title": rec.get("title"),
             "abstract": abstract,
@@ -227,7 +222,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "publication_date": self._normalize_partial_date(
                 rec.get("publication_date")
             ),
-            "doc_type": doc_type,
+            "type": rec.get("type"),
             "is_oa": oa_info.get("is_oa"),
             "oa_status": oa_info.get("oa_status"),
             # OpenAlex source field: cited_by_count
@@ -278,3 +273,28 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
         """
         return OpenAlexPublicationEntity
+
+    @staticmethod
+    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        """Convert Domain Entity to SilverRecord, excluding pmc_id and doc_type.
+
+        Overrides base implementation to remove fields not collected for OpenAlex.
+        OpenAlex uses raw 'type' field instead of mapped 'doc_type'.
+
+        Args:
+            entity: Domain entity (dataclass).
+
+        Returns:
+            SilverRecord dictionary without pmc_id and doc_type fields.
+
+        """
+        from bioetl.application.core.base_transformer import BaseTransformer
+
+        # Get base silver record
+        silver_record = BaseTransformer.entity_to_silver_record(entity)
+
+        # Remove excluded fields
+        silver_record.pop("pmc_id", None)
+        silver_record.pop("doc_type", None)  # OpenAlex uses raw 'type' instead
+
+        return silver_record
