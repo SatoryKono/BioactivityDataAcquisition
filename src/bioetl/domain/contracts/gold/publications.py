@@ -172,7 +172,8 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     published_online: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
 
     # Metadata
-    doc_type: Series[str] = pa.Field(nullable=True)
+    # Note: doc_type excluded; CrossRef uses raw 'type' field instead
+    type: Series[str] = pa.Field(nullable=True)  # Raw CrossRef type (journal-article, etc.)
     citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     reference_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     language: Series[str] = pa.Field(nullable=True)
@@ -242,8 +243,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     doi: Series[str] = pa.Field(nullable=True)
     # pmid: PubMed ID (numeric string: "12345678")
     pmid: Series[str] = pa.Field(nullable=True)
-    # pmc_id: PubMed Central ID (format: "PMC1234567")
-    pmc_id: Series[str] = pa.Field(nullable=True)
+    # Note: pmc_id excluded from transformer output per design
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
@@ -268,7 +268,8 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     publication_date: Series[str] = pa.Field(nullable=True)
 
     # Metadata
-    doc_type: Series[str] = pa.Field(nullable=False)
+    # Note: doc_type excluded; OpenAlex uses raw 'type' field instead
+    type: Series[str] = pa.Field(nullable=True)  # Raw OpenAlex type (article, etc.)
     is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
     oa_status: Series[str] = pa.Field(nullable=True)
     # OpenAlex source field: cited_by_count
@@ -318,10 +319,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # External IDs
     doi: Series[str] = pa.Field(nullable=True)
     pmid: Series[str] = pa.Field(nullable=True)
-    # Cross-reference IDs for linking publications across providers
-    # pmc_id: PubMed Central ID (format: "PMC1234567")
-    pmc_id: Series[str] = pa.Field(nullable=True)
-    arxiv_id: Series[str] = pa.Field(nullable=True)
+    # Note: pmc_id and arxiv_id excluded from transformer output per design
     corpus_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
 
     # Core fields
