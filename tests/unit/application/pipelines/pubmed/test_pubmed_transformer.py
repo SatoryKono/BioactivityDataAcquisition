@@ -976,7 +976,7 @@ class TestPubMedTransformerIdentifierNormalization:
           </MedlineCitation>
           <PubmedData>
             <ArticleIdList>
-              {''.join(article_ids)}
+              {"".join(article_ids)}
             </ArticleIdList>
           </PubmedData>
         </PubmedArticle>
@@ -1079,7 +1079,9 @@ class TestPubMedTransformerIdentifierNormalization:
         mock_context: PipelineContext,
     ) -> None:
         """Test that valid publisher_id is preserved after normalization."""
-        xml = self._make_xml_with_identifiers("12345678", publisher_id="10.1234/pub.123")
+        xml = self._make_xml_with_identifiers(
+            "12345678", publisher_id="10.1234/pub.123"
+        )
         record: dict[str, Any] = {"_raw_xml": xml}
 
         result = await transformer.transform(mock_context, record, index=0)
@@ -1214,9 +1216,13 @@ class TestPubMedTransformerDateValidation:
         transformer: PubMedPublicationTransformer,
     ) -> None:
         """Test that malformed dates are rejected."""
-        assert transformer._is_valid_date_format("2024/01/15") is False  # Wrong separator
+        assert (
+            transformer._is_valid_date_format("2024/01/15") is False
+        )  # Wrong separator
         assert transformer._is_valid_date_format("01-15-2024") is False  # Wrong order
-        assert transformer._is_valid_date_format("2024-1-15") is False  # Missing leading zero
+        assert (
+            transformer._is_valid_date_format("2024-1-15") is False
+        )  # Missing leading zero
         assert transformer._is_valid_date_format("24-01-15") is False  # 2-digit year
 
     @pytest.mark.asyncio
@@ -1353,8 +1359,7 @@ class TestPubMedTransformerContentHashStability:
         record: dict[str, Any] = {"_raw_xml": FULL_PUBMED_XML}
 
         results = [
-            await transformer.transform(mock_context, record, index=0)
-            for _ in range(3)
+            await transformer.transform(mock_context, record, index=0) for _ in range(3)
         ]
 
         assert all(r is not None for r in results)
