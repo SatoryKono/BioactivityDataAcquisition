@@ -22,9 +22,11 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_journal_info,
     extract_open_access_info,
     extract_tldr,
+    validate_year,
+)
+from bioetl.application.pipelines.semanticscholar.sanitizers import (
     sanitize_arxiv_id,
     sanitize_dblp_id,
-    validate_year,
 )
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
 from bioetl.domain.normalization import normalize_pmc_id, parse_page_range

@@ -16,9 +16,11 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_open_access_info,
     extract_tldr,
     normalize_oa_status,
+    validate_year,
+)
+from bioetl.application.pipelines.semanticscholar.sanitizers import (
     sanitize_arxiv_id,
     sanitize_dblp_id,
-    validate_year,
 )
 
 
@@ -798,7 +800,10 @@ class TestSanitizeDblpId:
         """Test valid journal paper DBLP IDs."""
         assert sanitize_dblp_id("journals/jmlr/SmithJ21") == "journals/jmlr/SmithJ21"
         assert sanitize_dblp_id("journals/nature/DoeA22") == "journals/nature/DoeA22"
-        assert sanitize_dblp_id("journals/corr/abs-2301-12345") == "journals/corr/abs-2301-12345"
+        assert (
+            sanitize_dblp_id("journals/corr/abs-2301-12345")
+            == "journals/corr/abs-2301-12345"
+        )
 
     def test_valid_book_format(self) -> None:
         """Test valid book DBLP IDs."""
@@ -811,7 +816,10 @@ class TestSanitizeDblpId:
 
     def test_valid_with_hyphens(self) -> None:
         """Test valid DBLP IDs with hyphens."""
-        assert sanitize_dblp_id("journals/corr/abs-2301-12345") == "journals/corr/abs-2301-12345"
+        assert (
+            sanitize_dblp_id("journals/corr/abs-2301-12345")
+            == "journals/corr/abs-2301-12345"
+        )
 
     def test_invalid_format_returns_none(self) -> None:
         """Test invalid formats return None."""
