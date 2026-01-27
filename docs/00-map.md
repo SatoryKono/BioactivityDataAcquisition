@@ -16,7 +16,7 @@
 |-------------------------|------------------------------------------------------------------------|
 | Understand the rules    | [RULES.md](RULES.md)                 |
 | Look up terminology     | [glossary.md](glossary.md)           |
-| Create a new pipeline   | [00-project_rules/04-extending-bioetl.md](00-project_rules/04-extending-bioetl.md)      |
+| Create a new pipeline   | [00-project-rules/04-extending-bioetl.md](00-project-rules/04-extending-bioetl.md)      |
 | Review a pipeline       | [templates/pipeline-review-checklist.md](templates/pipeline-review-checklist.md) |
 | Handle a prod error     | [05-operations/runbooks/index.md](05-operations/runbooks/index.md)                           |
 | Understand architecture | [02-architecture/00-overview.md](02-architecture/00-overview.md)                  |
@@ -30,7 +30,7 @@
 |----------|----------|----------|
 | **Public-facing** | English | README.md, CONTRIBUTING.md, CHANGELOG.md |
 | **User guides** | English | docs/03-guides/*, docs/04-reference/* |
-| **Internal governance** | Russian | RULES.md, AGENT.md, docs/00-project_rules/* |
+| **Internal governance** | Russian | RULES.md, AGENT.md, docs/00-project-rules/* |
 | **Architecture docs** | Russian | docs/02-architecture/* |
 | **Code comments** | Russian | Docstrings, inline comments |
 
@@ -50,7 +50,7 @@ docs/
 │   ├── audits/                  # Audit reports
 │   └── refactoring-plan.md     # Archived refactoring roadmap
 │
-├── 00-project_rules/            # Project governance
+├── 00-project-rules/            # Project governance
 │   ├── 03-file-policy.md        # File/directory structure
 │   └── 04-extending-bioetl.md   # How to add providers/pipelines
 │
@@ -146,7 +146,7 @@ docs/
 
 1. [RULES.md](RULES.md) - Project rules (start here)
 2. [rules-summary.md](quick-reference/rules-summary.md) - Quick reference
-3. [04-extending-bioetl.md](00-project_rules/04-extending-bioetl.md) - Adding providers/pipelines
+3. [04-extending-bioetl.md](00-project-rules/04-extending-bioetl.md) - Adding providers/pipelines
 
 ### Architecture
 
