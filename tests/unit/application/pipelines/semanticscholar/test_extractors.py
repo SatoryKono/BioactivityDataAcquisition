@@ -290,10 +290,19 @@ class TestExtractJournalInfo:
 
 
 class TestExtractOpenAccessInfo:
-    """Tests for extract_open_access_info function."""
+    """Tests for extract_open_access_info function.
 
-    def test_extract_open_access(self) -> None:
-        """Test extracting open access information with normalized status."""
+    Tests the three-valued logic for is_oa:
+    - True: Confirmed open access
+    - False: Confirmed closed access
+    - None: Unknown (API did not provide info)
+
+    This distinction is important for downstream analytics to differentiate
+    "we know it's closed" from "we don't know".
+    """
+
+    def test_extract_open_access_true_with_green_status(self) -> None:
+        """Test open access with GREEN status is normalized to lowercase."""
         oa_pdf = {
             "url": "https://example.com/paper.pdf",
             "status": "GREEN",
@@ -303,30 +312,71 @@ class TestExtractOpenAccessInfo:
 
         assert result["is_oa"] is True
         assert result["url"] == "https://example.com/paper.pdf"
-        assert result["oa_status"] == "green"  # Normalized to lowercase
+        assert result["oa_status"] == "green"
 
-    def test_closed_access(self) -> None:
-        """Test closed access publication gets 'closed' status."""
+    def test_closed_access_explicit_false(self) -> None:
+        """Test that explicit False gets 'closed' status."""
         result = extract_open_access_info(False, None)
 
         assert result["is_oa"] is False
         assert result["url"] is None
-        assert result["oa_status"] == "closed"  # Now returns "closed" instead of None
-
-    def test_none_is_open_access(self) -> None:
-        """Test when is_open_access is None, defaults to closed."""
-        result = extract_open_access_info(None, None)
-
-        assert result["is_oa"] is False
         assert result["oa_status"] == "closed"
 
-    def test_open_access_without_pdf(self) -> None:
-        """Test open access without PDF info."""
+    def test_unknown_access_none_preserved(self) -> None:
+        """Test that None is_open_access is preserved as None (not converted to False).
+
+        This is critical for analytics: None means "unknown", False means "closed".
+        Converting None to False would misrepresent data quality.
+        """
+        result = extract_open_access_info(None, None)
+
+        assert result["is_oa"] is None  # Preserved, not converted to False
+        assert result["url"] is None
+        assert result["oa_status"] is None  # Unknown, not "closed"
+
+    def test_open_access_true_without_pdf(self) -> None:
+        """Test open access True without PDF info."""
         result = extract_open_access_info(True, None)
 
         assert result["is_oa"] is True
         assert result["url"] is None
         assert result["oa_status"] is None  # No status available
+
+    def test_false_with_green_pdf_status(self) -> None:
+        """Test is_oa=False but PDF has GREEN status (edge case).
+
+        The PDF status takes precedence over is_oa=False for oa_status.
+        """
+        oa_pdf = {"url": "https://example.com/paper.pdf", "status": "GREEN"}
+        result = extract_open_access_info(False, oa_pdf)
+
+        assert result["is_oa"] is False
+        assert result["url"] == "https://example.com/paper.pdf"
+        assert result["oa_status"] == "green"  # PDF status, not "closed"
+
+    def test_none_with_green_pdf_status(self) -> None:
+        """Test is_oa=None but PDF has GREEN status.
+
+        When is_oa is unknown but PDF provides status, use PDF status.
+        """
+        oa_pdf = {"url": "https://example.com/paper.pdf", "status": "GREEN"}
+        result = extract_open_access_info(None, oa_pdf)
+
+        assert result["is_oa"] is None  # Still unknown
+        assert result["url"] == "https://example.com/paper.pdf"
+        assert result["oa_status"] == "green"  # From PDF
+
+    def test_none_with_pdf_none_status(self) -> None:
+        """Test is_oa=None with PDF that has no status.
+
+        When both is_oa and PDF status are unknown, oa_status should be None.
+        """
+        oa_pdf = {"url": "https://example.com/paper.pdf", "status": None}
+        result = extract_open_access_info(None, oa_pdf)
+
+        assert result["is_oa"] is None
+        assert result["url"] == "https://example.com/paper.pdf"
+        assert result["oa_status"] is None  # Unknown, not "closed"
 
     def test_uppercase_gold_normalized(self) -> None:
         """Test that GOLD status is normalized to lowercase."""
@@ -344,6 +394,20 @@ class TestExtractOpenAccessInfo:
         """Test that unknown OA status returns None."""
         oa_pdf = {"url": "https://example.com/paper.pdf", "status": "UNKNOWN"}
         result = extract_open_access_info(True, oa_pdf)
+        assert result["oa_status"] is None
+
+    def test_bronze_status_normalized(self) -> None:
+        """Test that BRONZE status is normalized to lowercase."""
+        oa_pdf = {"url": "https://example.com/paper.pdf", "status": "BRONZE"}
+        result = extract_open_access_info(True, oa_pdf)
+        assert result["oa_status"] == "bronze"
+
+    def test_empty_pdf_dict(self) -> None:
+        """Test with empty PDF dict (no url or status)."""
+        result = extract_open_access_info(True, {})
+
+        assert result["is_oa"] is True
+        assert result["url"] is None
         assert result["oa_status"] is None
 
 
