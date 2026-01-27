@@ -629,13 +629,27 @@ class OpenAlexAdapter(BaseHttpAdapter):
     def _escape_title_for_search(title: str) -> str:
         """Escape title for OpenAlex title.search filter.
 
-        OpenAlex uses + for spaces in search queries.
-        Special characters that break the filter are removed.
+        Uses phrase search with quotes for more precise matching.
+        Special characters that break the filter syntax are handled:
+        - Quotes inside title are removed (OpenAlex doesn't support escaping)
+        - Pipe (|) is OR operator in OpenAlex, replaced with space
+        - Colon (:) is field separator, replaced with space
+        - Commas are kept (valid in quoted strings)
+
+        Args:
+            title: Publication title to escape.
+
+        Returns:
+            Escaped title suitable for title.search filter.
         """
-        # Remove special characters that break the filter
-        cleaned = title.replace(":", " ").replace("|", " ").replace(",", " ")
-        # Replace spaces with + for search
-        return "+".join(cleaned.split())
+        # Remove characters that break filter syntax
+        cleaned = title.replace('"', "").replace("'", "")
+        cleaned = cleaned.replace("|", " ").replace(":", " ")
+        # Normalize whitespace
+        cleaned = " ".join(cleaned.split())
+        # Return as quoted phrase for exact matching
+        # OpenAlex supports: title.search:"exact phrase"
+        return f'"{cleaned}"'
 
     @staticmethod
     def _extract_doi_from_record(record: dict[str, Any]) -> str | None:

@@ -35,6 +35,11 @@ def normalize_title(title: str) -> str:
     return " ".join(cleaned.lower().strip().split())
 
 
+# Minimum word count for substring matching to avoid false positives
+# Shorter titles use fuzzy matching instead
+MIN_WORDS_FOR_SUBSTRING = 4
+
+
 def titles_match(
     query_title: str,
     found_title: str,
@@ -47,6 +52,10 @@ def titles_match(
     - "exact": Requires exact match (after normalization)
     - "substring": Matches if one title contains the other (default)
     - "fuzzy": Uses Jaccard similarity on word sets
+
+    For "substring" method with short titles (< 4 words), automatically
+    falls back to "fuzzy" matching to avoid false positives like
+    "Cancer" matching "Breast Cancer Research Methods".
 
     Args:
         query_title: The title we're searching for.
@@ -64,6 +73,8 @@ def titles_match(
         True
         >>> titles_match("ML Models", "Machine Learning", method="fuzzy", threshold=0.5)
         True
+        >>> titles_match("Cancer", "Breast Cancer Research", method="substring")
+        False  # Short title, falls back to fuzzy
     """
     q = normalize_title(query_title)
     f = normalize_title(found_title)
@@ -72,17 +83,32 @@ def titles_match(
         return q == f
 
     if method == "substring":
-        # Exact match or substring containment
-        return q == f or q in f or f in q
+        # Exact match is always valid
+        if q == f:
+            return True
+
+        # For short titles, use fuzzy matching to avoid false positives
+        q_words = q.split()
+        f_words = f.split()
+        if len(q_words) < MIN_WORDS_FOR_SUBSTRING or len(f_words) < MIN_WORDS_FOR_SUBSTRING:
+            # Fall back to fuzzy matching for short titles
+            if not q_words or not f_words:
+                return False
+            intersection = len(set(q_words) & set(f_words))
+            union = len(set(q_words) | set(f_words))
+            return (intersection / union) >= threshold
+
+        # Standard substring containment for longer titles
+        return q in f or f in q
 
     if method == "fuzzy":
         # Jaccard similarity on word sets
-        q_words = set(q.split())
-        f_words = set(f.split())
-        if not q_words or not f_words:
+        q_word_set = set(q.split())
+        f_word_set = set(f.split())
+        if not q_word_set or not f_word_set:
             return False
-        intersection = len(q_words & f_words)
-        union = len(q_words | f_words)
+        intersection = len(q_word_set & f_word_set)
+        union = len(q_word_set | f_word_set)
         return (intersection / union) >= threshold
 
     # Default to exact match for unknown methods

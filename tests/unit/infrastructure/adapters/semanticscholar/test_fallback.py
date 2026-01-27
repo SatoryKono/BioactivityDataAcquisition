@@ -130,10 +130,20 @@ class TestSemanticScholarTitleFallbackHandler:
             logger=mock_logger,
         )
 
-        # Case-insensitive match
+        # Case-insensitive exact match
         assert handler.titles_match("Crystal Structure", "crystal structure") is True
-        # Partial match
-        assert handler.titles_match("Crystal", "Crystal structure of rhodopsin") is True
+        # Long title substring match (both >= 4 words)
+        assert (
+            handler.titles_match(
+                "Crystal structure of rhodopsin",
+                "Crystal structure of rhodopsin bound to protein",
+            )
+            is True
+        )
+        # Short title falls back to fuzzy - low similarity = no match
+        assert (
+            handler.titles_match("Crystal", "Crystal structure of rhodopsin") is False
+        )
         # No match
         assert handler.titles_match("Different topic", "Crystal structure") is False
 

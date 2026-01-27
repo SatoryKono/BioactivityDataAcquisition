@@ -116,26 +116,65 @@ class TestTitlesMatchSubstring:
             is True
         )
 
-    def test_query_is_substring_of_found(self):
-        """Test query is substring of found title."""
+    def test_query_is_substring_of_found_long_titles(self):
+        """Test query is substring of found title (both >= 4 words)."""
+        # Both titles must have >= 4 words for substring matching
         assert (
             titles_match(
-                "Crystal structure",
+                "Crystal structure of rhodopsin",
                 "Crystal structure of rhodopsin bound to arrestin",
                 method="substring",
             )
             is True
         )
 
-    def test_found_is_substring_of_query(self):
-        """Test found title is substring of query."""
+    def test_found_is_substring_of_query_long_titles(self):
+        """Test found title is substring of query (both >= 4 words)."""
         assert (
             titles_match(
                 "Crystal structure of rhodopsin bound to arrestin",
-                "Crystal structure",
+                "Crystal structure of rhodopsin",
                 method="substring",
             )
             is True
+        )
+
+    def test_short_title_falls_back_to_fuzzy(self):
+        """Test short titles (< 4 words) use fuzzy matching instead of substring.
+
+        This prevents false positives like "Cancer" matching "Breast Cancer Research".
+        """
+        # Short query (2 words) against long title - uses fuzzy matching
+        # "Crystal structure" has low Jaccard similarity with long title
+        assert (
+            titles_match(
+                "Crystal structure",
+                "Crystal structure of rhodopsin bound to arrestin",
+                method="substring",
+            )
+            is False  # Falls back to fuzzy, low similarity (2/7 = 0.29)
+        )
+
+        # Short titles with very high word overlap still match via fuzzy
+        # Jaccard = 3/4 = 0.75 (close to 0.8 threshold)
+        assert (
+            titles_match(
+                "Machine learning",
+                "Machine learning study",
+                method="substring",
+                threshold=0.6,  # Lower threshold for this test
+            )
+            is True
+        )
+
+        # One-word title should require exact match via fuzzy
+        assert (
+            titles_match(
+                "Cancer",
+                "Breast Cancer Research Methods",
+                method="substring",
+            )
+            is False  # 1/4 = 0.25 < 0.8 threshold
         )
 
     def test_no_substring_match(self):
@@ -143,28 +182,28 @@ class TestTitlesMatchSubstring:
         assert (
             titles_match(
                 "Crystal structure of rhodopsin",
-                "Protein folding mechanisms",
+                "Protein folding mechanisms here",
                 method="substring",
             )
             is False
         )
 
     def test_default_method_is_substring(self):
-        """Test that default method is substring."""
-        # Same assertion without explicit method
+        """Test that default method is substring (with fuzzy fallback for short titles)."""
+        # Long titles use substring matching
         assert (
             titles_match(
-                "Crystal structure",
                 "Crystal structure of rhodopsin",
+                "Crystal structure of rhodopsin bound to protein",
             )
             is True
         )
 
     def test_empty_string_handling(self):
-        """Test empty string handling - empty is substring of anything."""
-        assert titles_match("", "") is True
-        assert titles_match("Title", "") is True
-        assert titles_match("", "Title") is True
+        """Test empty string handling - returns False for safety."""
+        assert titles_match("", "") is True  # Both empty = equal
+        assert titles_match("Title", "") is False  # Empty has no words
+        assert titles_match("", "Title") is False  # Empty has no words
 
 
 # =============================================================================
@@ -306,15 +345,28 @@ class TestTitlesMatchEdgeCases:
             is True
         )
 
-    def test_threshold_ignored_for_non_fuzzy(self):
-        """Test that threshold parameter is ignored for non-fuzzy methods."""
-        # Should still work regardless of threshold value
+    def test_threshold_used_for_short_titles_in_substring_mode(self):
+        """Test that threshold is used for short titles even in substring mode.
+
+        Short titles (< 4 words) fall back to fuzzy matching which uses threshold.
+        """
+        # Short title with high threshold - requires higher similarity
         assert (
             titles_match(
                 "Crystal structure",
                 "Crystal structure of rhodopsin",
                 method="substring",
-                threshold=1.0,
+                threshold=1.0,  # Requires 100% similarity
             )
-            is True
+            is False  # Falls back to fuzzy, doesn't meet 1.0 threshold
+        )
+        # Same titles with lower threshold
+        assert (
+            titles_match(
+                "Crystal structure",
+                "Crystal structure of rhodopsin",
+                method="substring",
+                threshold=0.5,  # Lower threshold
+            )
+            is True  # 2/4 words = 0.5 Jaccard similarity
         )

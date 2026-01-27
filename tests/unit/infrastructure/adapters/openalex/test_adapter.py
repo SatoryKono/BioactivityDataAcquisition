@@ -108,26 +108,39 @@ class TestNormalizeDoi:
 
 
 class TestEscapeTitleForSearch:
-    """Tests for title escaping."""
+    """Tests for title escaping.
+
+    OpenAlex uses quoted phrase search for more precise matching.
+    Format: title.search:"exact phrase"
+    """
 
     def test_escape_title_basic(self) -> None:
-        """Should escape title for search."""
+        """Should wrap title in quotes for phrase search."""
         result = OpenAlexAdapter._escape_title_for_search("Machine learning")
-        assert result == "Machine+learning"
+        assert result == '"Machine learning"'
 
     def test_escape_title_special_chars(self) -> None:
-        """Should remove special characters."""
+        """Should handle special characters that break filter syntax."""
         result = OpenAlexAdapter._escape_title_for_search(
             "Test: A Study | Part 1, Part 2"
         )
+        # Colons and pipes are removed (filter syntax operators)
         assert ":" not in result
         assert "|" not in result
-        assert "," not in result
+        # Commas are preserved (valid in quoted strings)
+        assert "," in result
+        # Result is quoted
+        assert result.startswith('"') and result.endswith('"')
 
     def test_escape_title_multiple_spaces(self) -> None:
-        """Should handle multiple spaces."""
+        """Should normalize multiple spaces."""
         result = OpenAlexAdapter._escape_title_for_search("A   B   C")
-        assert result == "A+B+C"
+        assert result == '"A B C"'
+
+    def test_escape_title_removes_quotes(self) -> None:
+        """Should remove quotes inside title (OpenAlex doesn't support escaping)."""
+        result = OpenAlexAdapter._escape_title_for_search('Title with "quotes" inside')
+        assert result == '"Title with quotes inside"'
 
 
 class TestExtractDoiFromRecord:

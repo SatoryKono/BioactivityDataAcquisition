@@ -44,37 +44,54 @@ class TestTitlesMatch:
         """Test whitespace is stripped."""
         assert titles_match("  Crystal structure  ", "Crystal structure") is True
 
-    def test_substring_query_in_found(self):
-        """Test query is substring of found title."""
+    def test_substring_query_in_found_long_titles(self):
+        """Test query is substring of found title (both >= 4 words)."""
+        # Both titles must have >= 4 words for substring matching
         assert (
             titles_match(
-                "Crystal structure", "Crystal structure of rhodopsin bound to arrestin"
+                "Crystal structure of rhodopsin",
+                "Crystal structure of rhodopsin bound to arrestin",
             )
             is True
         )
 
-    def test_substring_found_in_query(self):
-        """Test found title is substring of query."""
+    def test_substring_found_in_query_long_titles(self):
+        """Test found title is substring of query (both >= 4 words)."""
         assert (
             titles_match(
-                "Crystal structure of rhodopsin bound to arrestin", "Crystal structure"
+                "Crystal structure of rhodopsin bound to arrestin",
+                "Crystal structure of rhodopsin",
             )
             is True
+        )
+
+    def test_short_title_uses_fuzzy(self):
+        """Test short titles (< 4 words) fall back to fuzzy matching."""
+        # Short query against long title - uses fuzzy matching
+        assert (
+            titles_match(
+                "Crystal structure",
+                "Crystal structure of rhodopsin bound to arrestin",
+            )
+            is False  # Falls back to fuzzy, low Jaccard similarity
         )
 
     def test_no_match(self):
         """Test non-matching titles."""
         assert (
-            titles_match("Crystal structure of rhodopsin", "Protein folding mechanisms")
+            titles_match(
+                "Crystal structure of rhodopsin",
+                "Protein folding mechanisms here",
+            )
             is False
         )
 
     def test_empty_strings(self):
         """Test empty string handling."""
-        assert titles_match("", "") is True  # Both empty = match
-        # Empty string is substring of any string, so this returns True
-        assert titles_match("Title", "") is True  # Empty is substring of "title"
-        assert titles_match("", "Title") is True  # Empty is substring of "title"
+        assert titles_match("", "") is True  # Both empty = equal
+        # Empty string has no words, fails fuzzy matching
+        assert titles_match("Title", "") is False
+        assert titles_match("", "Title") is False
 
 
 # =============================================================================
