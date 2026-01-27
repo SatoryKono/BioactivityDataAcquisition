@@ -359,13 +359,22 @@ def extract_open_access_info(
     Extracts OA information from S2 API response and normalizes the status
     to lowercase for consistency with OpenAlex data.
 
+    Semantic meaning of is_oa values:
+    - True: Publication is confirmed open access
+    - False: Publication is confirmed closed access
+    - None: Open access status is unknown (API did not provide info)
+
+    We preserve None to distinguish "unknown" from "closed" for downstream
+    analytics. Converting None to False would misrepresent the data quality.
+
     Args:
-        is_open_access: Boolean flag from S2.
+        is_open_access: Boolean flag from S2 (True/False/None).
         open_access_pdf: PDF info object from S2.
 
     Returns:
-        Dict with is_oa (bool), url (str|None), oa_status (str|None).
-        If is_open_access is False or None and no OA PDF, oa_status is "closed".
+        Dict with is_oa (bool|None), url (str|None), oa_status (str|None).
+        - oa_status is "closed" only when is_oa is explicitly False
+        - oa_status is None when is_oa is None (unknown) and no PDF status
 
     Example:
         >>> oa_pdf = {"url": "https://example.com/paper.pdf", "status": "GREEN"}
@@ -373,10 +382,13 @@ def extract_open_access_info(
         {'is_oa': True, 'url': 'https://...', 'oa_status': 'green'}
         >>> extract_open_access_info(False, None)
         {'is_oa': False, 'url': None, 'oa_status': 'closed'}
+        >>> extract_open_access_info(None, None)
+        {'is_oa': None, 'url': None, 'oa_status': None}
 
     """
-    # Determine if open access
-    is_oa = is_open_access or False
+    # Preserve is_open_access as-is: True, False, or None (unknown)
+    # Do NOT convert None to False - they have different semantic meanings
+    is_oa = is_open_access
 
     # Extract URL and status from PDF info
     url: str | None = None
@@ -389,8 +401,9 @@ def extract_open_access_info(
     # Normalize status to lowercase
     oa_status = normalize_oa_status(raw_status)
 
-    # If not open access and no status, set to "closed"
-    if not is_oa and oa_status is None:
+    # Only set "closed" when is_oa is explicitly False (not None/unknown)
+    # This preserves the distinction between "closed" and "unknown"
+    if is_oa is False and oa_status is None:
         oa_status = "closed"
 
     return {

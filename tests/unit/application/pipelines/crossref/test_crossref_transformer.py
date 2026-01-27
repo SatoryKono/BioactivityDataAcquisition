@@ -192,6 +192,43 @@ async def test_transform_missing_doi_returns_none(transformer, pipeline_context)
     assert result is None
 
 
+@pytest.mark.asyncio
+async def test_transform_invalid_doi_format_returns_none(transformer, pipeline_context):
+    """Test that malformed DOI results in None (skipped record).
+
+    DOI must follow the pattern: 10.{registrant}/{suffix}
+    Invalid DOIs like "invalid", "10.1234" (no suffix), or "not-a-doi"
+    should be rejected just like missing DOIs.
+    """
+    invalid_doi_records = [
+        {"DOI": "invalid", "title": ["Invalid DOI"]},
+        {"DOI": "not-a-doi/123", "title": ["Not a DOI"]},
+        {"DOI": "10.1234", "title": ["Missing suffix"]},
+        {"DOI": "", "title": ["Empty DOI"]},
+        {"DOI": "   ", "title": ["Whitespace DOI"]},
+    ]
+
+    for record in invalid_doi_records:
+        result = await transformer.transform(pipeline_context, record, index=0)
+        assert result is None, f"Expected None for invalid DOI: {record['DOI']!r}"
+
+
+@pytest.mark.asyncio
+async def test_transform_valid_doi_formats_accepted(transformer, pipeline_context):
+    """Test that various valid DOI formats are accepted."""
+    valid_doi_records = [
+        {"DOI": "10.1234/test.article"},
+        {"DOI": "10.1038/nature12373"},
+        {"DOI": "10.1101/2023.01.01.123456"},  # bioRxiv preprint
+        {"DOI": "10.5281/zenodo.1234567"},  # Zenodo dataset
+    ]
+
+    for record in valid_doi_records:
+        result = await transformer.transform(pipeline_context, record, index=0)
+        assert result is not None, f"Expected valid result for DOI: {record['DOI']}"
+        assert result["doi"] == record["DOI"].lower()  # DOI should be normalized
+
+
 # =============================================================================
 # Provider and entity type tests
 # =============================================================================

@@ -120,9 +120,11 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         # Cast to dict for type-safe access (BronzeRecord is an empty TypedDict marker)
         rec = cast("dict[str, Any]", record)
 
-        # Validate DOI using Value Object (returns None for invalid/empty)
-        # CrossRef always provides DOI, so we use empty string as fallback for type consistency
-        doi = self.validate_value_object(DOI, rec.get("DOI")) or ""
+        # Normalize DOI using Value Object for consistent lowercase format.
+        # DOI validity is guaranteed by _pre_extract_validation, so we assert non-None.
+        # If DOI were somehow invalid here, it indicates a logic error.
+        doi = self.validate_value_object(DOI, rec.get("DOI"))
+        assert doi is not None, "DOI should be validated in _pre_extract_validation"
 
         # Use extractors for structured field extraction
         journal_info = extract_journal_info(rec)
@@ -223,9 +225,12 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         record: BronzeRecord,
         index: int,
     ) -> None:
-        """Validate DOI exists before extraction.
+        """Validate DOI exists and is well-formed before extraction.
 
         CrossRef publications require DOI as mandatory identifier.
+        Both missing and malformed DOIs result in record rejection,
+        as DOI is the primary identifier for entity_id computation.
+
         Raises ValueError (caught by BaseTransformer.transform).
 
         Args:
@@ -234,12 +239,21 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             index: Sequential index (unused).
 
         Raises:
-            ValueError: If DOI field is missing or empty.
+            ValueError: If DOI field is missing, empty, or malformed.
 
         """
-        doi = record.get("DOI")
-        if not doi:
+        raw_doi = record.get("DOI")
+        if not raw_doi:
             raise ValueError("DOI is required for CrossRef Publication")
+
+        # Cast to str for type safety (API always returns string DOIs)
+        raw_doi_str = str(raw_doi) if raw_doi else None
+
+        # Validate DOI format using Value Object
+        # This catches malformed DOIs like "invalid", "10.1234", etc.
+        doi_vo = DOI.from_raw(raw_doi_str)
+        if doi_vo is None:
+            raise ValueError(f"Invalid DOI format: {raw_doi}")
 
     def _hash_author_details(
         self, author_details: list[dict[str, Any]]
