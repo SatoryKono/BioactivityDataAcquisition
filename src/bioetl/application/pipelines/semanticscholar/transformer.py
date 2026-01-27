@@ -11,12 +11,10 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.semanticscholar.extractors import (
-    extract_affiliations,
     extract_author_h_indices,
     extract_author_ids,
     extract_author_orcids,
     extract_author_s2_ids,
-    extract_authors,
     extract_citation_contexts,
     extract_external_ids,
     extract_fields_of_study,
@@ -30,6 +28,7 @@ from bioetl.domain.normalization import normalize_pmc_id, parse_page_range
 from bioetl.domain.value_objects import DOI, PubMedId
 
 if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig
     from bioetl.domain.ports import (
         DataNormalizationPort,
@@ -38,7 +37,7 @@ if TYPE_CHECKING:
         TracingPort,
     )
     from bioetl.domain.services import IdentityService
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
 class SemanticScholarPublicationTransformer(BasePublicationTransformer):
@@ -147,16 +146,8 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         # Get authors list for multiple extractions
         authors_list = rec.get("authors")
 
-        # Authors with optional PII hashing
-        raw_authors = extract_authors(rec.get("authors"))
-        hashed_authors = self.hash_pii_list(raw_authors) or []
-
         # Extract author IDs
         author_ids = extract_author_ids(rec.get("authors"))
-
-        # Extract affiliations
-        raw_affiliations = extract_affiliations(rec.get("authors"))
-        serialized_affiliations = self.serialize_json_list(raw_affiliations)
 
         # Extract author identifiers (for author-level analytics)
         author_s2_ids = extract_author_s2_ids(authors_list)
@@ -207,9 +198,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "dblp_id": external_ids.get("dblp"),
             "corpus_id": external_ids.get("corpus_id"),
             "title": rec.get("title"),
-            "abstract": self._data_normalizer.strip_html_tags(rec.get("abstract")),
             "tldr": tldr,
-            "authors": self.serialize_json_list(hashed_authors),
             "author_ids": self.serialize_json(author_ids),
             # Author identifiers (for author-level analytics and disambiguation)
             "author_s2_ids": self.serialize_json_list(author_s2_ids)
@@ -225,7 +214,6 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "citation_contexts": self.serialize_json_list(citation_contexts)
             if citation_contexts
             else None,
-            "affiliations": serialized_affiliations,
             "journal": journal_info.get("journal_name"),
             "volume": journal_info.get("volume"),
             "pages": pages,  # Legacy field
@@ -270,3 +258,34 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
 
         """
         return SemanticScholarPublicationEntity
+
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Transform with post-processing to exclude inherited fields.
+
+        Removes abstract, authors, and affiliations from SilverRecord
+        as per user request (these fields are inherited from PublicationEntityBase
+        but excluded from SemanticScholar schema).
+
+        Args:
+            context: Pipeline context.
+            record: Raw Bronze record.
+            index: Record index.
+
+        Returns:
+            SilverRecord without excluded fields, or None if skipped.
+
+        """
+        result = await super()._transform_impl(context, record, index)
+        if result is not None:
+            # Remove fields excluded per user request
+            # Cast to dict for type safety (fields inherited from PublicationEntityBase)
+            result_dict = cast("dict[str, Any]", result)
+            result_dict.pop("abstract", None)
+            result_dict.pop("authors", None)
+            result_dict.pop("affiliations", None)
+        return result
