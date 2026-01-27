@@ -75,10 +75,13 @@ factory = GenericPipelineFactory(
 | ChEMBL | `AssayTransformer` | `pipelines/chembl/assay_transformer.py` |
 | ChEMBL | `MoleculeTransformer` | `pipelines/chembl/molecule_transformer.py` |
 | ChEMBL | `TargetTransformer` | `pipelines/chembl/target_transformer.py` |
-| ChEMBL | `DocumentTransformer` | `pipelines/chembl/document_transformer.py` |
+| ChEMBL | `PublicationTransformer` | `pipelines/chembl/publication_transformer.py` |
+| CrossRef | `CrossRefPublicationTransformer` | `pipelines/crossref/transformer.py` |
+| OpenAlex | `OpenAlexPublicationTransformer` | `pipelines/openalex/transformer.py` |
 | PubChem | `PubChemCompoundTransformer` | `pipelines/pubchem/transformer.py` |
 | UniProt | `UniProtProteinTransformer` | `pipelines/uniprot/transformer.py` |
 | PubMed | `PubMedPublicationTransformer` | `pipelines/pubmed/transformer.py` |
+| Semantic Scholar | `SemanticScholarPublicationTransformer` | `pipelines/semanticscholar/transformer.py` |
 
 ### 2.4. `core/` — Ядро Исполнения Пайплайнов
 

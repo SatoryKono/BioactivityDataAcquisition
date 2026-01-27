@@ -3,8 +3,7 @@
 *Synced with RULES.md v5.12 | Last updated: 2026-01-26*
 
 > **Documentation Update:** 2026-01-26
-> - Architecture diagrams updated: Composite Pipeline (ADR-026) added to layer diagrams
-> - New diagram: `26_composite_pipeline_workflow.mmd` — visualizes seed → enrich → merge flow
+> - Architecture diagrams updated: layer diagrams refreshed
 > - Cross-links added between all layer documents (Domain ↔ Application ↔ Infrastructure ↔ Interfaces ↔ Composition)
 > - All 7 providers now reflected in diagrams (including CrossRef, OpenAlex, SemanticScholar)
 > - ADR-030, ADR-031 added to registry
@@ -16,7 +15,7 @@
 |-------------------------|------------------------------------------------------------------------|
 | Understand the rules    | [RULES.md](RULES.md)                 |
 | Look up terminology     | [glossary.md](glossary.md)           |
-| Create a new pipeline   | [00-project_rules/04-extending-bioetl.md](00-project_rules/04-extending-bioetl.md)      |
+| Create a new pipeline   | [00-project-rules/04-extending-bioetl.md](00-project-rules/04-extending-bioetl.md)      |
 | Review a pipeline       | [templates/pipeline-review-checklist.md](templates/pipeline-review-checklist.md) |
 | Handle a prod error     | [05-operations/runbooks/index.md](05-operations/runbooks/index.md)                           |
 | Understand architecture | [02-architecture/00-overview.md](02-architecture/00-overview.md)                  |
@@ -30,7 +29,7 @@
 |----------|----------|----------|
 | **Public-facing** | English | README.md, CONTRIBUTING.md, CHANGELOG.md |
 | **User guides** | English | docs/03-guides/*, docs/04-reference/* |
-| **Internal governance** | Russian | RULES.md, AGENT.md, docs/00-project_rules/* |
+| **Internal governance** | Russian | RULES.md, AGENT.md, docs/00-project-rules/* |
 | **Architecture docs** | Russian | docs/02-architecture/* |
 | **Code comments** | Russian | Docstrings, inline comments |
 
@@ -50,7 +49,7 @@ docs/
 │   ├── audits/                  # Audit reports
 │   └── refactoring-plan.md     # Archived refactoring roadmap
 │
-├── 00-project_rules/            # Project governance
+├── 00-project-rules/            # Project governance
 │   ├── 03-file-policy.md        # File/directory structure
 │   └── 04-extending-bioetl.md   # How to add providers/pipelines
 │
@@ -71,21 +70,28 @@ docs/
 │   ├── observability-layers.md  # Observability architecture
 │   ├── diagrams.md              # Mermaid diagrams collection
 │   ├── decisions/               # ADR-001..031 (31 records)
-│   └── diagrams/                # 35 Mermaid diagram files + render_diagrams.py
+│   └── diagrams/                # 34 диаграммы .mermaid + supporting docs (index/policy) + render_diagrams.py
 │
-├── 03-guides/                   # How-to guides (13 guides)
-│   ├── quick-start.md           # Quick start guide
-│   ├── getting-started.md       # Getting started
-│   ├── running-pipelines.md     # Running pipelines
-│   ├── testing.md               # Testing guide
-│   ├── local-storage-layout.md  # Storage layout explanation
-│   ├── pipeline-lifecycle.md    # Pipeline lifecycle
-│   ├── registry-pattern.md      # Registry pattern guide
-│   ├── troubleshooting.md       # Troubleshooting
+├── 03-guides/                   # How-to guides (16 guides)
 │   ├── add-new-source.md        # Adding new provider
 │   ├── add-pipeline-existing-source.md  # Adding pipeline to existing provider
+│   ├── cleanup-policy.md        # Storage cleanup policy
 │   ├── date-handling.md         # Date normalization guide
-│   └── dq-configuration.md      # Data quality configuration
+│   ├── dq-configuration.md      # Data quality configuration
+│   ├── file-path-audit-report.md # File path audit report
+│   ├── getting-started.md       # Getting started
+│   ├── local-storage-layout.md  # Storage layout explanation
+│   ├── metrics-monitoring.md    # Metrics monitoring guide
+│   ├── pipeline-configuration.md # Pipeline configuration guide
+│   ├── pipeline-lifecycle.md    # Pipeline lifecycle
+│   ├── quick-start.md           # Quick start guide
+│   ├── registry-pattern.md      # Registry pattern guide
+│   ├── running-pipelines.md     # Running pipelines
+│   ├── testing.md               # Testing guide
+│   └── troubleshooting.md       # Troubleshooting
+│
+├── 03-development/              # Development notes
+│   └── config-schema-guidelines.md # Config schema guidelines
 │
 ├── 03-data-contracts/           # Data contracts
 │   └── gold-schemas.md          # Gold layer schema documentation
@@ -108,7 +114,7 @@ docs/
 ├── archived/                    # Historical documents
 │   ├── audits/                  # Audit files (2025-2026)
 │   ├── plans/                   # Archived planning documents
-│   ├── project_rules/           # Deprecated project rules
+│   ├── project-rules/           # Deprecated project rules
 │   └── refactoring-plan.md      # Archived refactoring roadmap
 │
 ├── domain/schemas/              # Schema documentation
@@ -146,7 +152,7 @@ docs/
 
 1. [RULES.md](RULES.md) - Project rules (start here)
 2. [rules-summary.md](quick-reference/rules-summary.md) - Quick reference
-3. [04-extending-bioetl.md](00-project_rules/04-extending-bioetl.md) - Adding providers/pipelines
+3. [04-extending-bioetl.md](00-project-rules/04-extending-bioetl.md) - Adding providers/pipelines
 
 ### Architecture
 
@@ -256,22 +262,48 @@ src/bioetl/
 │
 ├── application/                 # Pipeline orchestration (§1.1)
 │   ├── core/                    # Core pipeline infrastructure
-│   │   ├── executor.py          # Batch executor
+│   │   ├── base.py              # Base pipeline primitives
+│   │   ├── base_transformer.py  # Base transformer contracts
+│   │   ├── batch_executor.py    # Batch executor
 │   │   ├── pipeline_services.py # Service container
-│   │   ├── shutdown.py          # Graceful shutdown handling
-│   │   └── base_pipeline.py     # Abstract base pipeline
-│   ├── orchestration/           # Execution coordination
-│   │   └── runner.py            # PipelineRunner (Driving Adapter logic)
+│   │   ├── runner.py            # PipelineRunner (Driving Adapter logic)
+│   │   └── shutdown.py          # Graceful shutdown handling
+│   ├── composite/               # Composite pipeline orchestration
 │   ├── pipelines/               # Concrete pipeline implementations
-│   │   └── chembl_activity.py   # ChEMBL Activity pipeline
+│   │   ├── common/              # Shared pipeline helpers
+│   │   ├── chembl/              # Provider namespace
+│   │   │   ├── activity.py      # ChEMBL Activity pipeline
+│   │   │   ├── assay.py         # ChEMBL Assay pipeline
+│   │   │   └── molecule.py      # ChEMBL Molecule pipeline
+│   │   ├── pubchem/             # Provider namespace
+│   │   │   └── compound.py      # PubChem Compound pipeline
+│   │   ├── pubmed/              # Provider namespace
+│   │   │   └── publication.py   # PubMed Publication pipeline
+│   │   ├── uniprot/             # Provider namespace
+│   │   │   └── protein.py       # UniProt Protein pipeline
+│   │   ├── crossref/            # Provider namespace
+│   │   │   └── transformer.py   # CrossRef transformer
+│   │   ├── openalex/            # Provider namespace
+│   │   │   └── transformer.py   # OpenAlex transformer
+│   │   ├── semanticscholar/     # Provider namespace
+│   │   │   └── transformer.py   # SemanticScholar transformer
+│   │   └── generic.py           # Generic pipeline helpers
+│   ├── services/                # Application services
 │   └── observability/           # Application-level observability
 │
 ├── composition/                 # Composition Root (DI container)
-│   ├── bootstrap.py             # Pipeline bootstrap & wiring
+│   ├── bootstrap/               # Bootstrap helpers
+│   ├── bootstrap_contexts.py    # Bootstrap contexts
+│   ├── bootstrap_logger.py      # Bootstrap logging setup
+│   ├── builders.py              # Composition builders
+│   ├── entrypoints.py           # CLI/runner entrypoints
+│   ├── observability.py         # Observability wiring
 │   ├── registry.py              # Pipeline discovery
+│   ├── providers/               # Provider registration
+│   ├── services/                # Composition services
 │   └── factories/               # Consolidated factories
-│       ├── generic_factory.py   # Universal pipeline factory
-│       ├── data_source_registry.py # Central source creation
+│       ├── pipeline_factory.py  # Pipeline factory
+│       ├── runner_factory.py    # Runner factory
 │       └── storage_factory.py   # Multi-layer storage factory
 │
 ├── infrastructure/              # I/O adapters (§1.1)
@@ -285,8 +317,7 @@ src/bioetl/
 │   │   ├── delta_writer.py      # Delta Lake merge/upsert
 │   │   └── gold_writer.py       # SCD Type 2 writer
 │   ├── locking/                 # Distributed locking
-│   │   ├── redis_lock.py        # Redis SETNX + heartbeat
-│   │   └── memory_lock.py       # In-memory (dev/test)
+│   │   └── memory_lock.py       # In-memory (local-only)
 │   ├── checkpoint/              # Checkpoint persistence
 │   ├── quarantine/              # DQ failure handling
 │   ├── observability/           # Metrics, logging
@@ -295,9 +326,18 @@ src/bioetl/
 │   └── config.py                # Settings (Pydantic)
 │
 └── interfaces/                  # External interfaces
-    ├── cli.py                   # Click CLI (bioetl run/quarantine/checkpoint)
-    └── orchestration/           # Pipeline orchestration adapters
-        └── signals.py           # OS signal handlers
+    ├── cli/                     # CLI package (bioetl run/quarantine/checkpoint)
+    │   ├── __init__.py          # CLI package entry
+    │   ├── __main__.py          # CLI module entrypoint
+    │   ├── exit_codes.py        # CLI exit codes
+    │   ├── formatters.py        # CLI output formatting
+    │   ├── main.py              # Click command group
+    │   └── commands/            # CLI subcommands
+    ├── http/                    # HTTP interfaces (health server)
+    │   ├── health_server.py     # Health server
+    │   └── types.py             # HTTP types
+    ├── orchestration/           # Orchestration helpers
+    └── observability.py         # Interface observability wiring
 
 tests/
 ├── unit/                        # Isolated unit tests (mock I/O)
@@ -367,12 +407,13 @@ graph TD
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
 | 00-map.md                | 2026-01-21   | v6.9 API Sync Completed      |
 | rules-summary.md         | 2026-01-21   | v5.12 Synced                 |
-| 03-guides/               | 2026-01-20   | Consolidated (13 guides)     |
+| 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
+| 03-development/          | 2026-01-26   | Config schema guidelines     |
 | ADR-001..028             | 2026-01-21   | All 28 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
 | archived/audits/         | 2026-01-21   | Historical audit files       |
-| 02-architecture/diagrams/| 2025-12-31   | 34 Mermaid diagrams          |
+| 02-architecture/diagrams/| 2025-12-31   | 34 диаграммы Mermaid         |
 
 ---
 

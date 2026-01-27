@@ -11,7 +11,7 @@
 | **Entity** | Assay |
 | **Configuration** | `configs/pipelines/chembl/assay.yaml` |
 | **Primary Key** | `assay_chembl_id` |
-| **Schema Version** | 1.0.0 |
+| **Config Version** | 1.2.0 |
 
 ## Description
 
@@ -60,8 +60,8 @@ The Assay entity contains **43 fields**. Key fields include:
 | Layer | Format | Mode | Path Pattern |
 |-------|--------|------|--------------|
 | Bronze | JSONL | Append-only | `data/output/bronze/chembl/assay/` |
-| Silver | Delta Lake | Merge by `assay_chembl_id` | `data/output/silver/chembl_assay/` |
-| Gold | Delta Lake | Overwrite | `data/output/gold/chembl_assay/` |
+| Silver | Delta Lake | Merge by `assay_chembl_id` | `data/output/silver/chembl/assay/` |
+| Gold | Delta Lake | Overwrite | `data/output/gold/chembl/assay/` |
 
 **Note:** Silver layer is partitioned by `assay_type`.
 **Note:** CSV export is enabled for Silver and Gold layers.
@@ -94,6 +94,6 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 | Configuration | `configs/pipelines/chembl/assay.yaml` |
 | Pipeline Logic | `src/bioetl/application/pipelines/chembl/assay.py` |
 | Transformer | `src/bioetl/application/pipelines/chembl/assay_transformer.py` |
-| Gold Filter | `src/bioetl/application/pipelines/chembl/assay_filter.py` |
+| Gold Filter | `configs/filter/entities/chembl/assay.yaml` |
+| Data Quality | `configs/dq/entities/chembl/assay.yaml` |
 | Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` |
-| Gold Schema | `src/bioetl/infrastructure/schemas/gold.py` |
