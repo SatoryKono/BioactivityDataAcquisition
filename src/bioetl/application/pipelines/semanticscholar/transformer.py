@@ -145,8 +145,8 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         # Get authors list for multiple extractions
         authors_list = rec.get("authors")
 
-        # Extract author IDs (authors/affiliations excluded per schema change)
-        author_ids = extract_author_ids(authors_list)
+        # Extract author IDs
+        author_ids = extract_author_ids(rec.get("authors"))
 
         # Extract author identifiers (for author-level analytics)
         author_s2_ids = extract_author_s2_ids(authors_list)
@@ -197,9 +197,8 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "dblp_id": external_ids.get("dblp"),
             "corpus_id": external_ids.get("corpus_id"),
             "title": rec.get("title"),
-            "abstract": self._data_normalizer.strip_html_tags(rec.get("abstract")),
+            # abstract, authors excluded per user request
             "tldr": tldr,
-            # authors/affiliations excluded per schema change (3f4e80b)
             "author_ids": self.serialize_json(author_ids),
             # Author identifiers (for author-level analytics and disambiguation)
             "author_s2_ids": self.serialize_json_list(author_s2_ids)
@@ -215,6 +214,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "citation_contexts": self.serialize_json_list(citation_contexts)
             if citation_contexts
             else None,
+            # affiliations excluded per user request
             "journal": journal_info.get("journal_name"),
             "volume": journal_info.get("volume"),
             "pages": pages,  # Legacy field
@@ -262,26 +262,21 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
-        """Convert Domain Entity to SilverRecord, excluding PII fields.
+        """Convert Domain Entity to SilverRecord, excluding unused fields.
 
-        Overrides base implementation to remove abstract, authors, and affiliations
-        per schema change (3f4e80b). These fields are excluded for privacy compliance.
+        Overrides base implementation to remove fields not collected for S2.
 
         Args:
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without abstract, authors, and affiliations.
+            SilverRecord dictionary without abstract, affiliations, authors.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
 
-        # Get base silver record
         silver_record = BaseTransformer.entity_to_silver_record(entity)
-
-        # Remove excluded fields (PII compliance - schema change 3f4e80b)
         silver_record.pop("abstract", None)
-        silver_record.pop("authors", None)
         silver_record.pop("affiliations", None)
-
+        silver_record.pop("authors", None)
         return silver_record

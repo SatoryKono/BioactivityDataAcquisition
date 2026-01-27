@@ -180,6 +180,102 @@ class SeedResult:
         return self.records_silver > 0 or self.resumed
 
 
+class DependencyStatus(str, Enum):
+    """Status of dependency pipeline execution."""
+
+    SUCCESS = "success"
+    FAILED = "failed"
+    SKIPPED = "skipped"
+    TIMEOUT = "timeout"
+
+
+@dataclass(frozen=True, slots=True)
+class DependencyResult:
+    """Result of a dependency pipeline execution.
+
+    Dependencies run after seed but before enrichers to populate
+    Silver tables that enrichers will read from.
+    """
+
+    pipeline_name: str
+    status: DependencyStatus = DependencyStatus.SUCCESS
+    records_extracted: int = 0
+    records_silver: int = 0
+    duration_seconds: float = 0.0
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    error_message: str | None = None
+    resumed: bool = False
+
+    @property
+    def is_success(self) -> bool:
+        """Check if dependency was successful."""
+        return self.status == DependencyStatus.SUCCESS
+
+    @classmethod
+    def success(
+        cls,
+        pipeline_name: str,
+        records_extracted: int,
+        records_silver: int,
+        duration_seconds: float = 0.0,
+        started_at: datetime | None = None,
+        completed_at: datetime | None = None,
+    ) -> DependencyResult:
+        """Factory for successful dependency result."""
+        return cls(
+            pipeline_name=pipeline_name,
+            status=DependencyStatus.SUCCESS,
+            records_extracted=records_extracted,
+            records_silver=records_silver,
+            duration_seconds=duration_seconds,
+            started_at=started_at,
+            completed_at=completed_at,
+        )
+
+    @classmethod
+    def failed(
+        cls,
+        pipeline_name: str,
+        error_message: str,
+        duration_seconds: float = 0.0,
+    ) -> DependencyResult:
+        """Factory for failed dependency result."""
+        return cls(
+            pipeline_name=pipeline_name,
+            status=DependencyStatus.FAILED,
+            error_message=error_message,
+            duration_seconds=duration_seconds,
+        )
+
+    @classmethod
+    def skipped(
+        cls,
+        pipeline_name: str,
+        reason: str = "Already completed",
+    ) -> DependencyResult:
+        """Factory for skipped dependency result."""
+        return cls(
+            pipeline_name=pipeline_name,
+            status=DependencyStatus.SKIPPED,
+            error_message=reason,
+        )
+
+    @classmethod
+    def timeout(
+        cls,
+        pipeline_name: str,
+        timeout_seconds: float,
+    ) -> DependencyResult:
+        """Factory for timeout dependency result."""
+        return cls(
+            pipeline_name=pipeline_name,
+            status=DependencyStatus.TIMEOUT,
+            error_message=f"Timeout after {timeout_seconds}s",
+            duration_seconds=timeout_seconds,
+        )
+
+
 @dataclass(frozen=True, slots=True)
 class MergeResult:
     """Result of merge operation."""
@@ -216,21 +312,24 @@ class CompositeResult:
         composite_name: Name of the composite pipeline.
         composite_run_id: Unique run identifier.
         seed_result: Result of seed pipeline execution.
+        dependency_results: Results per dependency (keyed by pipeline name).
         enrichment_results: Results per enricher (keyed by pipeline name).
         merge_result: Result of merge operation (None if not completed).
         total_duration_seconds: Total execution time.
         started_at: Execution start timestamp.
         completed_at: Execution end timestamp.
         lineage: Optional lineage metadata.
-        had_warnings: True if any optional enrichers failed but pipeline completed.
+        had_warnings: True if any optional enrichers/dependencies failed but pipeline completed.
             This indicates "completed with warnings" status - the pipeline succeeded
             but some non-required enrichments did not complete successfully.
         _required_enrichers: Internal set of required enricher names.
+        _required_dependencies: Internal set of required dependency names.
     """
 
     composite_name: str
     composite_run_id: str
     seed_result: SeedResult
+    dependency_results: dict[str, DependencyResult] = field(default_factory=dict)
     enrichment_results: dict[str, EnrichmentResult] = field(default_factory=dict)
     merge_result: MergeResult | None = None
     total_duration_seconds: float = 0.0
@@ -239,17 +338,29 @@ class CompositeResult:
     lineage: LineageMetadata | None = None
     had_warnings: bool = False
     _required_enrichers: frozenset[str] = field(default_factory=frozenset)
+    _required_dependencies: frozenset[str] = field(default_factory=frozenset)
 
     @property
     def is_success(self) -> bool:
         """Check if composite completed successfully."""
         if not self.seed_result.is_success:
             return False
+        if not self.required_dependencies_succeeded:
+            return False
         if not self.required_enrichers_succeeded:
             return False
         if self.merge_result is None:
             return False
         return self.merge_result.records_merged > 0
+
+    @property
+    def required_dependencies_succeeded(self) -> bool:
+        """Check if all required dependencies succeeded."""
+        for name in self._required_dependencies:
+            result = self.dependency_results.get(name)
+            if result is None or not result.is_success:
+                return False
+        return True
 
     @property
     def required_enrichers_succeeded(self) -> bool:
@@ -259,6 +370,20 @@ class CompositeResult:
             if result is None or not result.is_success:
                 return False
         return True
+
+    @property
+    def successful_dependencies(self) -> list[str]:
+        """List of dependencies that succeeded."""
+        return [n for n, r in self.dependency_results.items() if r.is_success]
+
+    @property
+    def failed_dependencies(self) -> list[str]:
+        """List of dependencies that failed."""
+        return [
+            n
+            for n, r in self.dependency_results.items()
+            if r.status == DependencyStatus.FAILED
+        ]
 
     @property
     def successful_enrichers(self) -> list[str]:
@@ -318,6 +443,9 @@ class CompositeResult:
             "is_success": self.is_success,
             "had_warnings": self.had_warnings,
             "seed_records": self.seed_result.records_silver,
+            "dependencies_run": len(self.dependency_results),
+            "dependencies_succeeded": len(self.successful_dependencies),
+            "dependencies_failed": len(self.failed_dependencies),
             "enrichers_run": len(self.enrichment_results),
             "enrichers_succeeded": len(self.successful_enrichers),
             "enrichers_failed": len(self.failed_enrichers),

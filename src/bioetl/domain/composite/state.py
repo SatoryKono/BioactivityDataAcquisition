@@ -4,8 +4,13 @@ Defines states and transition rules for composite pipeline execution lifecycle.
 The FSM ensures predictable execution flow and prevents invalid operations.
 See ADR-026 for architectural decisions.
 
-Transition flow: NOT_STARTED -> SEED_RUNNING -> SEED_COMPLETED -> ENRICHING
--> ENRICHMENT_COMPLETED -> MERGING -> COMPLETED. Any active state can -> FAILED.
+Transition flow: NOT_STARTED -> SEED_RUNNING -> SEED_COMPLETED ->
+DEPENDENCIES_RUNNING -> DEPENDENCIES_COMPLETED -> ENRICHING ->
+ENRICHMENT_COMPLETED -> MERGING -> COMPLETED. Any active state can -> FAILED.
+
+Note: Dependencies are optional. If no dependencies, SEED_COMPLETED transitions
+directly to ENRICHING (or DEPENDENCIES_RUNNING which immediately transitions to
+DEPENDENCIES_COMPLETED).
 """
 
 from __future__ import annotations
@@ -17,16 +22,20 @@ from enum import Enum
 class CompositePipelineState(str, Enum):
     """State of composite pipeline execution.
 
-    States: NOT_STARTED, SEED_RUNNING, SEED_COMPLETED, ENRICHING,
-    ENRICHMENT_COMPLETED, MERGING, COMPLETED, FAILED.
+    States: NOT_STARTED, SEED_RUNNING, SEED_COMPLETED, DEPENDENCIES_RUNNING,
+    DEPENDENCIES_COMPLETED, ENRICHING, ENRICHMENT_COMPLETED, MERGING,
+    COMPLETED, FAILED.
 
     Terminal states: COMPLETED, FAILED (no transitions allowed).
-    Active states: SEED_RUNNING, ENRICHING, MERGING (work in progress).
+    Active states: SEED_RUNNING, DEPENDENCIES_RUNNING, ENRICHING, MERGING
+        (work in progress).
     """
 
     NOT_STARTED = "not_started"
     SEED_RUNNING = "seed_running"
     SEED_COMPLETED = "seed_completed"
+    DEPENDENCIES_RUNNING = "dependencies_running"
+    DEPENDENCIES_COMPLETED = "dependencies_completed"
     ENRICHING = "enriching"
     ENRICHMENT_COMPLETED = "enrichment_completed"
     MERGING = "merging"
@@ -40,9 +49,13 @@ class CompositePipelineState(str, Enum):
 
     @property
     def is_active(self) -> bool:
-        """Check if this is an active state (SEED_RUNNING, ENRICHING, MERGING)."""
+        """Check if this is an active state (work in progress).
+
+        Active states: SEED_RUNNING, DEPENDENCIES_RUNNING, ENRICHING, MERGING.
+        """
         return self in {
             CompositePipelineState.SEED_RUNNING,
+            CompositePipelineState.DEPENDENCIES_RUNNING,
             CompositePipelineState.ENRICHING,
             CompositePipelineState.MERGING,
         }
@@ -57,10 +70,11 @@ class CompositePipelineState(str, Enum):
         """Check if execution can be resumed from this state.
 
         Resumable states have completed work that can be skipped on resume:
-        SEED_COMPLETED, ENRICHING, ENRICHMENT_COMPLETED, FAILED.
+        SEED_COMPLETED, DEPENDENCIES_RUNNING, DEPENDENCIES_COMPLETED, ENRICHING,
+        ENRICHMENT_COMPLETED, FAILED.
 
-        FAILED is resumable to allow retry after merge failure - the seed
-        and enrichment results are preserved in the checkpoint.
+        FAILED is resumable to allow retry after merge failure - the seed,
+        dependency, and enrichment results are preserved in the checkpoint.
 
         Returns:
             True if this state allows resume with partial progress preserved.
@@ -75,6 +89,8 @@ class CompositePipelineState(str, Enum):
         """
         return self in {
             CompositePipelineState.SEED_COMPLETED,
+            CompositePipelineState.DEPENDENCIES_RUNNING,
+            CompositePipelineState.DEPENDENCIES_COMPLETED,
             CompositePipelineState.ENRICHING,
             CompositePipelineState.ENRICHMENT_COMPLETED,
             CompositePipelineState.FAILED,
@@ -119,10 +135,13 @@ class CompositePipelineState(str, Enum):
 
 # Valid transitions for each state
 # Maps current state value -> set of allowed next state values
+# Note: seed_completed can go to dependencies_running OR enriching (if no dependencies)
 _STATE_TRANSITIONS: Mapping[str, frozenset[str]] = {
     "not_started": frozenset({"seed_running"}),
     "seed_running": frozenset({"seed_completed", "failed"}),
-    "seed_completed": frozenset({"enriching"}),
+    "seed_completed": frozenset({"dependencies_running", "enriching"}),
+    "dependencies_running": frozenset({"dependencies_completed", "failed"}),
+    "dependencies_completed": frozenset({"enriching"}),
     "enriching": frozenset({"enrichment_completed", "failed"}),
     "enrichment_completed": frozenset({"merging"}),
     "merging": frozenset({"completed", "failed"}),
@@ -135,11 +154,13 @@ _STATE_METRIC_VALUES: Mapping[CompositePipelineState, int] = {
     CompositePipelineState.NOT_STARTED: 0,
     CompositePipelineState.SEED_RUNNING: 1,
     CompositePipelineState.SEED_COMPLETED: 2,
-    CompositePipelineState.ENRICHING: 3,
-    CompositePipelineState.ENRICHMENT_COMPLETED: 4,
-    CompositePipelineState.MERGING: 5,
-    CompositePipelineState.COMPLETED: 6,
-    CompositePipelineState.FAILED: 7,
+    CompositePipelineState.DEPENDENCIES_RUNNING: 3,
+    CompositePipelineState.DEPENDENCIES_COMPLETED: 4,
+    CompositePipelineState.ENRICHING: 5,
+    CompositePipelineState.ENRICHMENT_COMPLETED: 6,
+    CompositePipelineState.MERGING: 7,
+    CompositePipelineState.COMPLETED: 8,
+    CompositePipelineState.FAILED: 9,
 }
 
 
