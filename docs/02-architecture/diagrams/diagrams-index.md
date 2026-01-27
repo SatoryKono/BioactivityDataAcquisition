@@ -2,9 +2,7 @@
 
 *Updated: 2026-01-26*
 
-This directory contains 35 Mermaid diagram source files documenting the BioETL architecture.
-
-> **Note**: `DeltaWriter` was renamed to `SilverWriter` (see `silver_writer.py`). Some older diagrams may reference the old name.
+В каталоге 34 исходных файла диаграмм Mermaid, документирующих архитектуру BioETL.
 
 ## Diagram Overview
 
@@ -30,7 +28,6 @@ This directory contains 35 Mermaid diagram source files documenting the BioETL a
 | 09 | `09-full-er-diagram.mermaid` | Entity-relationship diagram |
 | 10 | `10-infrastructure-layer-class-diagram.mermaid` | Infrastructure layer classes |
 | 11 | `11-lock-acquisition-sequence.mermaid` | Lock acquisition sequence |
-| 12 | `12-full-aws-deployment.mermaid` | AWS deployment architecture (reference) |
 | 13 | `13-domain-models-relationship.mermaid` | Domain model relationships |
 | 14 | `14-provider-health-states.mermaid` | Provider health states |
 | 15 | `15-dq-check-workflow.mermaid` | Data quality check workflow |
@@ -41,17 +38,9 @@ This directory contains 35 Mermaid diagram source files documenting the BioETL a
 | 20 | `20-quarantine-record-states.mermaid` | Quarantine record states |
 | 21 | `21-activity-entity-data-flow.mermaid` | Activity entity data flow |
 | 22 | `22-client-api-request-sequence.mermaid` | Client API request sequence |
-| 23 | `23-delta-lake-writer-class.mermaid` | DeltaWriter class diagram |
+| 23 | `23-silver-writer-class.mermaid` | SilverWriter class diagram |
 | 24 | `24-hash-service-class.mermaid` | Hash service class diagram |
 | 25 | `25-circuit-breaker-observer-class.mermaid` | CircuitBreaker class diagram |
-
-### New: Composite Pipeline Diagrams
-
-Additional diagrams for Composite Pipeline (ADR-026) are available in `/docs/diagrams/mermaid/`:
-
-| File | Description |
-|------|-------------|
-| `26_composite_pipeline_workflow.mmd` | Composite Pipeline workflow: seed → enrich (fan-out) → merge |
 
 ## Rendering to PNG
 
@@ -78,7 +67,7 @@ done
 Use the included `render_diagrams.py` script:
 
 ```bash
-cd docs/architecture/diagrams
+cd docs/02-architecture/diagrams
 python render_diagrams.py
 ```
 
@@ -133,7 +122,7 @@ All diagrams use the following Mermaid theme configuration:
 ├─────────────────────────────────────────────────────────────┤
 │                   INFRASTRUCTURE LAYER                      │
 │  Adapters (ChEMBL, PubChem, UniProt, PubMed),               │
-│  Storage (Bronze, Delta, Gold), Locking, Observability      │
+│  Storage (Bronze, Silver, Gold), Locking, Observability     │
 ├─────────────────────────────────────────────────────────────┤
 │                    COMPOSITION LAYER                        │
 │  Bootstrap, Factories, Registry (DI Container)              │
