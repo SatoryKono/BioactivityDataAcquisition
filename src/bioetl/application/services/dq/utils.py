@@ -6,6 +6,7 @@ Extracted to reduce code duplication per refactoring analysis 2026-01-25.
 
 from __future__ import annotations
 
+from bioetl.domain.services.dq_serializer import _serialize_value as convert_value
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     DQReportStatus,
@@ -73,5 +74,6 @@ def build_summary(
 
 __all__ = [
     "build_summary",
+    "convert_value",
     "update_counts",
 ]
