@@ -203,6 +203,14 @@ clean-all: clean ## Clean all (artifacts + logs + temp files)
 	rm -f full_log.txt final_report*.txt project_rules_failures.txt 2>/dev/null || true
 	@echo "$(GREEN)Full cleanup complete!$(NC)"
 
+cleanup-consolidation: ## Safe consolidation cleanup (dry-run by default)
+	@echo "$(YELLOW)Running consolidation cleanup (dry-run)...$(NC)"
+	$(RUN) python scripts/cleanup_consolidation.py
+
+cleanup-consolidation-apply: ## Apply consolidation cleanup (interactive)
+	@echo "$(YELLOW)Applying consolidation cleanup...$(NC)"
+	$(RUN) scripts/cleanup_apply.sh
+
 # Quarantine management (RULES.md §2.6)
 quarantine-inspect: ## Inspect quarantine errors (PIPELINE=...)
 	@echo "$(BLUE)Inspecting quarantine for $(PIPELINE)...$(NC)"

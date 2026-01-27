@@ -129,6 +129,36 @@ python scripts/cleanup_project.py --apply --purge-logs
 
 ---
 
+### cleanup_consolidation.py
+
+**Назначение:** Безопасная консолидационная очистка (dry-run по умолчанию), обновление импортов и обработка устаревших модулей.
+
+**Использование:**
+```bash
+# Dry-run (по умолчанию)
+python scripts/cleanup_consolidation.py
+
+# Применить изменения (с подтверждением)
+python scripts/cleanup_consolidation.py --apply
+
+# Применить без подтверждений + обновить импорты и устаревшие модули
+python scripts/cleanup_consolidation.py --apply --yes \\
+  --import-map scripts/cleanup_imports_map.yaml \\
+  --obsolete-modules scripts/cleanup_obsolete_modules.yaml
+```
+
+| Флаг | Описание |
+|------|----------|
+| `--apply` | Выполнить изменения (по умолчанию dry-run) |
+| `--yes` | Пропустить подтверждения |
+| `--import-map` | YAML/JSON карта замен импортов |
+| `--obsolete-modules` | YAML/JSON список устаревших модулей |
+| `--delete-obsolete` | Удалять устаревшие модули вместо архива |
+
+**Make-цель:** `make cleanup-consolidation`
+
+---
+
 ### vacuum_delta.py
 
 **Назначение:** Еженедельный VACUUM для Delta Lake таблиц Silver слоя.
