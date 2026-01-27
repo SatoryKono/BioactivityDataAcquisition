@@ -586,6 +586,7 @@ class TestClassSize:
         "StoragePort": 370,  # 365 lines - Protocol with read_silver, write_*_merged + SourceMetadata param for Bronze write + SilverWriteResult return + silver_refs param
         # Pandera schemas (declarative field definitions)
         "PubchemMoleculeSchema": 380,  # 375 lines - PubChem molecule schema with 3D steric quadrupole + feature_count_3d + monoisotopic_mass
+        "UniprotTargetSchema": 350,  # 309 lines - UniProt protein schema with biochemical fields
         # Derived entity data source wrappers (comprehensive docstrings)
         "PublicationTermDataSource": 585,  # 579 lines - Wrapper with FilterableDataSourcePort delegation + get_source_metadata
         # Composition services
@@ -751,6 +752,7 @@ class TestGodObjectDetection:
         "MedallionLifecycleService": "Lifecycle orchestrator - coordinates Bronze/Silver/Gold operations",
         # Pandera schemas (declarative data containers, no behavior to delegate)
         "PubchemMoleculeSchema": "Pandera schema - declarative field definitions, no behavior to delegate",
+        "UniprotTargetSchema": "Pandera schema - declarative field definitions for UniProt proteins",
         # Audit adapters (cohesive file I/O operations)
         "FileAuditAdapter": "Cohesive adapter - all methods relate to audit file operations (read/write JSONL)",
         # Composite pipeline services (ADR-026)

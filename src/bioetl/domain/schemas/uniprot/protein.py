@@ -256,6 +256,20 @@ class UniprotTargetSchema(ETLRecordSchema):
         nullable=True, description="Warnings about this entry"
     )
 
+    # === Biochemical Properties ===
+    cofactors: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of cofactors with name and ChEBI ID",
+    )
+    biophysicochemical_properties: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON object with pH/temp optima, kinetics, redox potential",
+    )
+    induction: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of gene expression induction conditions",
+    )
+
     # === Cross-References (Extracted) ===
     go_terms: Series[str] | None = pa.Field(
         nullable=True, description="JSON array of GO terms with evidence codes"
@@ -268,6 +282,10 @@ class UniprotTargetSchema(ETLRecordSchema):
     )
     guidetopharmacology_ids: Series[str] | None = pa.Field(
         nullable=True, description="JSON array of Guide to Pharmacology identifiers"
+    )
+    pdb_xrefs: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of PDB cross-references with structure details",
     )
 
     # === Features & Keywords ===

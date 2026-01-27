@@ -131,11 +131,19 @@ class UniprotTarget(BaseEntity):
     similarity_comment: str | None = None
     caution: str | None = None
 
+    # Biochemical properties (JSON)
+    cofactors: str | None = None  # JSON array of cofactors with name and ChEBI ID
+    biophysicochemical_properties: str | None = (
+        None  # JSON object with pH, temp, kinetics
+    )
+    induction: str | None = None  # JSON array of induction conditions
+
     # Cross-references (JSON arrays)
     go_terms: str | None = None
     drugbank_ids: str | None = None
     chembl_ids: str | None = None
     guidetopharmacology_ids: str | None = None
+    pdb_xrefs: str | None = None  # JSON array of PDB cross-references
 
     # Features & Keywords (JSON arrays)
     features: str | None = None
