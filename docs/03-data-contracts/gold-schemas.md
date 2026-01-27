@@ -271,7 +271,7 @@ gold_filters:
 #### chembl_publication
 
 **Primary Key**: `document_chembl_id`
-**Назначение**: Научные публикации (silver/gold таблицы: `chembl_publication`)
+**Назначение**: Научные публикации из ChEMBL API (silver_table/gold_table: `chembl_publication`)
 
 ##### Gold-фильтры
 
