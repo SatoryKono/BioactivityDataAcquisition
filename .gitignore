@@ -113,7 +113,6 @@ profile.svg
 data/input/chembl_target_component.csv
 .output.txt
 site/
-coverage.json
 coverage.xml
 coverage_output.txt
 coverage_summary.txt
