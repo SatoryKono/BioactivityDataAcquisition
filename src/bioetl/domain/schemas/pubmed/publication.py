@@ -98,9 +98,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     abstract_structured: Series[bool] = pa.Field(
         nullable=True, description="Whether abstract has NLM sections"
     )
-    vernacular_title: Series[str] = pa.Field(
-        nullable=True, description="Original non-English title"
-    )
+    # Note: vernacular_title excluded from transformer output per design
     language: Series[str] = pa.Field(
         nullable=True,
         description="MARC language code (e.g., 'eng')",
@@ -290,27 +288,8 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         description="Publication types (JSON array, e.g., Journal Article, Review)",
     )
 
-    # === Additional Date Fields (extracted from PubmedData/History) ===
-    # Note: These are stored as ISO date strings (YYYY-MM-DD) to match transformer output
-    accepted_date: Series[str] = pa.Field(
-        nullable=True,
-        description="Manuscript acceptance date (from History/PubMedPubDate[@PubStatus='accepted'])",
-    )
-
-    received_date: Series[str] = pa.Field(
-        nullable=True,
-        description="Manuscript received date (from History/PubMedPubDate[@PubStatus='received'])",
-    )
-
-    revised_date: Series[str] = pa.Field(
-        nullable=True,
-        description="Manuscript revision date (from History/PubMedPubDate[@PubStatus='revised'])",
-    )
-
-    epub_date: Series[str] = pa.Field(
-        nullable=True,
-        description="Electronic publication date (from ArticleDate[@DateType='Electronic'])",
-    )
+    # Note: accepted_date, received_date, revised_date, epub_date excluded from
+    # transformer output per design (PubMed pipeline field exclusions)
 
     # === Author Affiliations ===
     affiliations: Series[str] = pa.Field(
