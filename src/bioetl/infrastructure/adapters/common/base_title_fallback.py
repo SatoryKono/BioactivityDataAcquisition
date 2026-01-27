@@ -5,10 +5,14 @@ Supports three-phase fallback strategy:
 - Phase 1: Batch ID lookup (implemented by adapter)
 - Phase 2: Title fallback for unresolved IDs (process_missing_dois)
 - Phase 3: Title-only lookup for entries without IDs (process_title_only_entries)
+
+Rate limiting is enforced between title search requests to comply with
+provider API limits (e.g., OpenAlex 10 req/sec, CrossRef 50 req/sec).
 """
 
 from __future__ import annotations
 
+import asyncio
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 
@@ -43,7 +47,11 @@ class BaseTitleFallbackHandler(ABC):
     """
 
     def __init__(
-        self, logger: LoggerPort, *, provider_prefix: str | None = None
+        self,
+        logger: LoggerPort,
+        *,
+        provider_prefix: str | None = None,
+        search_delay_seconds: float = 0.1,
     ) -> None:
         """Initialize base fallback handler.
 
@@ -53,9 +61,13 @@ class BaseTitleFallbackHandler(ABC):
                 If provided, default event properties use this prefix.
                 Example: provider_prefix="crossref" generates
                     "crossref_title_fallback_attempt" etc.
+            search_delay_seconds: Delay between title search requests in seconds.
+                Used for rate limiting. Default 0.1s (10 req/sec).
+                Set to 0 to disable rate limiting.
         """
         self._logger = logger
         self._provider_prefix = provider_prefix
+        self._search_delay_seconds = search_delay_seconds
 
     @property
     def _event_no_fallback_title(self) -> str:
@@ -243,6 +255,11 @@ class BaseTitleFallbackHandler(ABC):
             )
 
             result = await self._search_by_title(title)
+
+            # Rate limiting between title search requests
+            if self._search_delay_seconds > 0:
+                await asyncio.sleep(self._search_delay_seconds)
+
             if result:
                 id_field, id_value = self._get_result_identifier(result)
                 self._logger.info(
@@ -318,6 +335,11 @@ class BaseTitleFallbackHandler(ABC):
             )
 
             result = await self._search_by_title(title)
+
+            # Rate limiting between title search requests
+            if self._search_delay_seconds > 0:
+                await asyncio.sleep(self._search_delay_seconds)
+
             if result:
                 id_field, id_value = self._get_result_identifier(result)
                 self._logger.info(

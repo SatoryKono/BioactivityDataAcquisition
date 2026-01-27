@@ -27,7 +27,13 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
 
     Extracts fallback logic to reduce main class size and cyclomatic complexity.
     Uses provider_prefix="crossref" for auto-generated event names.
+
+    Rate limiting: 0.02s delay between requests (50 req/sec) to comply with
+    CrossRef API polite pool limits.
     """
+
+    # CrossRef polite pool rate limit: 50 requests/second
+    SEARCH_DELAY_SECONDS = 0.02
 
     def __init__(
         self,
@@ -40,7 +46,11 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
             logger: Logger port for structured logging.
             search_fn: Async function to search publications by query.
         """
-        super().__init__(logger, provider_prefix="crossref")
+        super().__init__(
+            logger,
+            provider_prefix="crossref",
+            search_delay_seconds=self.SEARCH_DELAY_SECONDS,
+        )
         self._search_fn = search_fn
 
     def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:

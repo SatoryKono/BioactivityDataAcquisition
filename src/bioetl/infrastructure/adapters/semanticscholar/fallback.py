@@ -41,12 +41,18 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
     Handles fallback search by title when DOI lookup fails.
     Uses direct HTTP client injection for API requests.
 
+    Rate limiting: 0.01s delay between requests (100 req/sec) to comply with
+    Semantic Scholar API rate limits.
+
     Attributes:
         _http_client: UnifiedHTTPClient for making HTTP requests.
         _metrics: Optional AdapterMetrics for recording request metrics.
         _api_key: Optional API key for stable rate limits.
         _fields: Comma-separated list of fields to retrieve.
     """
+
+    # Semantic Scholar rate limit: 100 requests/second (with API key)
+    SEARCH_DELAY_SECONDS = 0.01
 
     def __init__(
         self,
@@ -65,7 +71,10 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
             api_key: Optional API key for stable rate limits.
             fields: Comma-separated list of fields to retrieve.
         """
-        super().__init__(logger)
+        super().__init__(
+            logger,
+            search_delay_seconds=self.SEARCH_DELAY_SECONDS,
+        )
         self._http_client = http_client
         self._metrics = metrics
         self._api_key = api_key

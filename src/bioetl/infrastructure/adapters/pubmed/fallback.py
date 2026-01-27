@@ -24,7 +24,13 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
     Uses PubMed esearch API with title field search:
     term="Title text"[Title]
     Uses provider_prefix="pubmed" for auto-generated event names.
+
+    Rate limiting: 0.34s delay between requests (3 req/sec) to comply with
+    NCBI E-utilities rate limits (3 requests/second without API key).
     """
+
+    # PubMed/NCBI rate limit: 3 requests/second (without API key)
+    SEARCH_DELAY_SECONDS = 0.34
 
     def __init__(
         self,
@@ -38,7 +44,11 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
             search_fn: Async function to search publications by title.
                        Signature: search_fn(title: str, limit: int) -> list[dict]
         """
-        super().__init__(logger, provider_prefix="pubmed")
+        super().__init__(
+            logger,
+            provider_prefix="pubmed",
+            search_delay_seconds=self.SEARCH_DELAY_SECONDS,
+        )
         self._search_fn = search_fn
 
     async def _search_by_title(self, title: str) -> dict[str, Any] | None:

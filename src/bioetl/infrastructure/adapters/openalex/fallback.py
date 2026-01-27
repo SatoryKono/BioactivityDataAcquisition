@@ -24,7 +24,13 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
     Extracts fallback logic to reduce main class size and cyclomatic complexity.
     Uses title matching to validate search results and reduce false positives.
     Uses provider_prefix="openalex" for auto-generated event names.
+
+    Rate limiting: 0.1s delay between requests (10 req/sec) to comply with
+    OpenAlex polite pool limits.
     """
+
+    # OpenAlex polite pool rate limit: 10 requests/second
+    SEARCH_DELAY_SECONDS = 0.1
 
     def __init__(
         self,
@@ -37,7 +43,11 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
             logger: Logger port for structured logging.
             search_fn: Async function to search works by title.
         """
-        super().__init__(logger, provider_prefix="openalex")
+        super().__init__(
+            logger,
+            provider_prefix="openalex",
+            search_delay_seconds=self.SEARCH_DELAY_SECONDS,
+        )
         self._search_fn = search_fn
 
     async def _search_by_title(self, title: str) -> dict[str, Any] | None:
