@@ -228,8 +228,8 @@ async def run_pipeline_flow(
 ### Фаза 5: Обновление тестов
 
 - [x] `test_base_pipeline.py`
-- [x] `test_pipeline_executor.py`
-- [x] `test_chembl_activity.py`
+- [x] `test_batch_executor.py`
+- [x] `test_chembl_activity_unit.py`
 
 ### Фаза 6: Удаление shim
 
