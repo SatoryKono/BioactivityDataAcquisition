@@ -136,7 +136,7 @@ class TestRunCompositeInner:
     async def test_config_not_found(self) -> None:
         """Test handling of missing config file."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_composite.load_composite_config",
+            "bioetl.interfaces.cli.commands.run_composite.create_composite_runner",
             side_effect=FileNotFoundError("Config not found: publication.yaml"),
         ):
             success, error = await _run_composite_inner(
@@ -151,7 +151,7 @@ class TestRunCompositeInner:
     async def test_invalid_config(self) -> None:
         """Test handling of invalid config."""
         with patch(
-            "bioetl.interfaces.cli.commands.run_composite.load_composite_config",
+            "bioetl.interfaces.cli.commands.run_composite.create_composite_runner",
             side_effect=ValueError("Invalid seed pipeline configuration"),
         ):
             success, error = await _run_composite_inner(
@@ -168,19 +168,12 @@ class TestRunCompositeInner:
         mock_composite_result_success: CompositeResult,
     ) -> None:
         """Test successful composite pipeline execution."""
-        mock_config = MagicMock()
         mock_runner = MagicMock()
         mock_runner.run = AsyncMock(return_value=mock_composite_result_success)
 
-        with (
-            patch(
-                "bioetl.interfaces.cli.commands.run_composite.load_composite_config",
-                return_value=mock_config,
-            ),
-            patch(
-                "bioetl.interfaces.cli.commands.run_composite.bootstrap_composite_runner",
-                return_value=mock_runner,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.run_composite.create_composite_runner",
+            return_value=mock_runner,
         ):
             success, error = await _run_composite_inner(
                 "publication",
@@ -196,19 +189,12 @@ class TestRunCompositeInner:
         mock_composite_result_failed_enricher: CompositeResult,
     ) -> None:
         """Test failed execution with failed enrichers."""
-        mock_config = MagicMock()
         mock_runner = MagicMock()
         mock_runner.run = AsyncMock(return_value=mock_composite_result_failed_enricher)
 
-        with (
-            patch(
-                "bioetl.interfaces.cli.commands.run_composite.load_composite_config",
-                return_value=mock_config,
-            ),
-            patch(
-                "bioetl.interfaces.cli.commands.run_composite.bootstrap_composite_runner",
-                return_value=mock_runner,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.run_composite.create_composite_runner",
+            return_value=mock_runner,
         ):
             success, error = await _run_composite_inner(
                 "publication",
@@ -234,19 +220,12 @@ class TestRunCompositeInner:
             enrichment_results={},
             merge_result=None,
         )
-        mock_config = MagicMock()
         mock_runner = MagicMock()
         mock_runner.run = AsyncMock(return_value=failed_result)
 
-        with (
-            patch(
-                "bioetl.interfaces.cli.commands.run_composite.load_composite_config",
-                return_value=mock_config,
-            ),
-            patch(
-                "bioetl.interfaces.cli.commands.run_composite.bootstrap_composite_runner",
-                return_value=mock_runner,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.run_composite.create_composite_runner",
+            return_value=mock_runner,
         ):
             success, error = await _run_composite_inner(
                 "publication",
@@ -259,19 +238,12 @@ class TestRunCompositeInner:
     @pytest.mark.asyncio
     async def test_execution_exception(self) -> None:
         """Test handling of exception during execution."""
-        mock_config = MagicMock()
         mock_runner = MagicMock()
         mock_runner.run = AsyncMock(side_effect=RuntimeError("Connection failed"))
 
-        with (
-            patch(
-                "bioetl.interfaces.cli.commands.run_composite.load_composite_config",
-                return_value=mock_config,
-            ),
-            patch(
-                "bioetl.interfaces.cli.commands.run_composite.bootstrap_composite_runner",
-                return_value=mock_runner,
-            ),
+        with patch(
+            "bioetl.interfaces.cli.commands.run_composite.create_composite_runner",
+            return_value=mock_runner,
         ):
             success, error = await _run_composite_inner(
                 "publication",
