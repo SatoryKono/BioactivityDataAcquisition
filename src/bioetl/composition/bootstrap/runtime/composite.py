@@ -218,9 +218,20 @@ def bootstrap_composite_runner(
 
                         break
 
+        # Determine limit for enricher:
+        # - For many_to_one enrichers (1:M relationships like publication_term),
+        #   don't limit output as they produce more records than seed inputs
+        # - For regular enrichers, use seed count as limit
+        enricher_limit: int | None = None
+        if enricher_cfg and enricher_cfg.is_many_to_one:
+            # No limit for 1:M enrichers - they need to extract all related records
+            enricher_limit = None
+        elif keys is not None:
+            enricher_limit = len(keys)
+
         options = RunOptions(
             run_type="incremental",
-            limit=len(keys) if keys is not None else None,
+            limit=enricher_limit,
             ignore_yaml_filter=True,  # Disable YAML input_filter for composite mode
             filter_ids=filter_ids,
             filter_field=filter_field,
