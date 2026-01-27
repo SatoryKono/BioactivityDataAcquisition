@@ -106,7 +106,7 @@ BioETL использует **Ports & Adapters** (Hexagonal Architecture):
 
 - **Ports**: Protocol interfaces в Domain layer (`DataSourcePort`, `StoragePort`, `LockPort`)
 - **Adapters**: Infrastructure implementations
-  - **Local-Only**: `ChemblClient`, `LocalDeltaWriter`, `MemoryLock`
+  - **Local-Only**: `ChemblClient`, `SilverWriter`, `BronzeWriter`, `GoldWriter`, `MemoryLock`
   - **Distributed (Future)**: `S3Writer`, `RedisLock`
 
 Это обеспечивает:
