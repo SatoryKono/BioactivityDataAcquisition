@@ -45,7 +45,7 @@
 
 ```
 Compound Record (M:1) → Molecule
-Compound Record (M:1) → Document (Publication)
+Compound Record (M:1) → Publication
 Compound Record (M:1) → Source
 ```
 
