@@ -335,6 +335,42 @@ class TestFetchFiltered:
         mock_http_client.get.assert_called_once()
 
 
+class TestFetchFilteredWithFallback:
+    """Tests for fetch_filtered_with_fallback method."""
+
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_with_fallback_unsupported_field_returns_empty(
+        self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
+    ) -> None:
+        """Should return empty for unsupported filter fields in fallback mode."""
+        results = []
+        async for work in adapter.fetch_filtered_with_fallback(
+            "publication",
+            ["some_value"],
+            "unsupported_field",  # Not "doi"
+            fallback_mapping={"some_value": "Some Title"},
+        ):
+            results.append(work)
+
+        assert len(results) == 0
+        # Should not have made any HTTP requests
+        mock_http_client.get.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_with_fallback_invalid_entity_type(
+        self, adapter: OpenAlexAdapter
+    ) -> None:
+        """Should raise ValueError for invalid entity type."""
+        with pytest.raises(ValueError, match="supports 'work'/'publication'"):
+            async for _ in adapter.fetch_filtered_with_fallback(
+                "invalid_type",
+                ["10.1038/test"],
+                "doi",
+                fallback_mapping={},
+            ):
+                pass
+
+
 class TestFetchMultiFiltered:
     """Tests for fetch_multi_filtered method."""
 

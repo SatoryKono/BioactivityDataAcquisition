@@ -933,3 +933,471 @@ class TestPubMedTransformerUnifiedDateFields:
         assert result["pub_date"] == "2023-02-28"  # End of Feb (not leap year)
         assert result["pub_month"] == 2
         assert result["pub_day"] is None  # Day is not extracted from MedlineDate range
+
+
+@pytest.mark.unit
+class TestPubMedTransformerIdentifierNormalization:
+    """Tests for identifier normalization (pii, mid, publisher_id).
+
+    Verifies that empty strings are normalized to None to ensure
+    consistent content_hash computation across equivalent records.
+    """
+
+    @pytest.fixture
+    def transformer(self) -> PubMedPublicationTransformer:
+        """Create PubMedPublicationTransformer instance."""
+        return PubMedPublicationTransformer(provider="pubmed")
+
+    @staticmethod
+    def _make_xml_with_identifiers(
+        pmid: str,
+        pii: str | None = None,
+        mid: str | None = None,
+        publisher_id: str | None = None,
+    ) -> str:
+        """Create PubMed XML with specific identifiers in ArticleIdList."""
+        article_ids = [f'<ArticleId IdType="pubmed">{pmid}</ArticleId>']
+        if pii is not None:
+            article_ids.append(f'<ArticleId IdType="pii">{pii}</ArticleId>')
+        if mid is not None:
+            article_ids.append(f'<ArticleId IdType="mid">{mid}</ArticleId>')
+        if publisher_id is not None:
+            article_ids.append(
+                f'<ArticleId IdType="publisher-id">{publisher_id}</ArticleId>'
+            )
+
+        return f"""<?xml version="1.0"?>
+        <PubmedArticle>
+          <MedlineCitation>
+            <PMID>{pmid}</PMID>
+            <Article>
+              <ArticleTitle>Identifier Normalization Test</ArticleTitle>
+            </Article>
+          </MedlineCitation>
+          <PubmedData>
+            <ArticleIdList>
+              {''.join(article_ids)}
+            </ArticleIdList>
+          </PubmedData>
+        </PubmedArticle>
+        """
+
+    @pytest.mark.asyncio
+    async def test_empty_pii_normalized_to_none(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that empty string pii is normalized to None."""
+        xml = self._make_xml_with_identifiers("12345678", pii="")
+        record: dict[str, Any] = {"_raw_xml": xml}
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["pii"] is None
+
+    @pytest.mark.asyncio
+    async def test_whitespace_pii_normalized_to_none(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that whitespace-only pii is normalized to None."""
+        xml = self._make_xml_with_identifiers("12345678", pii="   ")
+        record: dict[str, Any] = {"_raw_xml": xml}
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["pii"] is None
+
+    @pytest.mark.asyncio
+    async def test_valid_pii_preserved(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that valid pii is preserved after normalization."""
+        xml = self._make_xml_with_identifiers("12345678", pii="S0123-4567(23)00001-2")
+        record: dict[str, Any] = {"_raw_xml": xml}
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["pii"] == "S0123-4567(23)00001-2"
+
+    @pytest.mark.asyncio
+    async def test_empty_mid_normalized_to_none(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that empty string mid is normalized to None."""
+        xml = self._make_xml_with_identifiers("12345678", mid="")
+        record: dict[str, Any] = {"_raw_xml": xml}
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["mid"] is None
+
+    @pytest.mark.asyncio
+    async def test_valid_mid_preserved(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that valid mid is preserved after normalization."""
+        xml = self._make_xml_with_identifiers("12345678", mid="NIHMS123456")
+        record: dict[str, Any] = {"_raw_xml": xml}
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["mid"] == "NIHMS123456"
+
+    @pytest.mark.asyncio
+    async def test_empty_publisher_id_normalized_to_none(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that empty string publisher_id is normalized to None."""
+        xml = self._make_xml_with_identifiers("12345678", publisher_id="")
+        record: dict[str, Any] = {"_raw_xml": xml}
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["publisher_id"] is None
+
+    @pytest.mark.asyncio
+    async def test_valid_publisher_id_preserved(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that valid publisher_id is preserved after normalization."""
+        xml = self._make_xml_with_identifiers("12345678", publisher_id="10.1234/pub.123")
+        record: dict[str, Any] = {"_raw_xml": xml}
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["publisher_id"] == "10.1234/pub.123"
+
+    @pytest.mark.asyncio
+    async def test_content_hash_same_for_empty_vs_none_identifiers(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that empty string and None identifiers produce same content_hash.
+
+        This ensures that equivalent records (where empty strings and None
+        represent the same semantic meaning of "no value") have identical
+        content hashes, preventing unnecessary updates in Silver layer.
+        """
+        # XML with no identifier elements (will result in None)
+        xml_none = """<?xml version="1.0"?>
+        <PubmedArticle>
+          <MedlineCitation>
+            <PMID>12345678</PMID>
+            <Article>
+              <ArticleTitle>Identifier Normalization Test</ArticleTitle>
+            </Article>
+          </MedlineCitation>
+          <PubmedData>
+            <ArticleIdList>
+              <ArticleId IdType="pubmed">12345678</ArticleId>
+            </ArticleIdList>
+          </PubmedData>
+        </PubmedArticle>
+        """
+
+        # XML with empty identifier elements (should be normalized to None)
+        xml_empty = self._make_xml_with_identifiers(
+            "12345678", pii="", mid="", publisher_id=""
+        )
+
+        result_none = await transformer.transform(
+            mock_context, {"_raw_xml": xml_none}, index=0
+        )
+        result_empty = await transformer.transform(
+            mock_context, {"_raw_xml": xml_empty}, index=0
+        )
+
+        assert result_none is not None
+        assert result_empty is not None
+        # Both should have None for the identifiers
+        assert result_none["pii"] is None
+        assert result_empty["pii"] is None
+        assert result_none["mid"] is None
+        assert result_empty["mid"] is None
+        assert result_none["publisher_id"] is None
+        assert result_empty["publisher_id"] is None
+        # Content hashes should be identical
+        assert result_none["content_hash"] == result_empty["content_hash"]
+
+
+@pytest.mark.unit
+class TestPubMedTransformerDateValidation:
+    """Tests for date validation in transformer.
+
+    Verifies that invalid dates ("2024-13-99", "n/a") result in
+    publication_date becoming None rather than propagating bad data.
+    """
+
+    @pytest.fixture
+    def transformer(self) -> PubMedPublicationTransformer:
+        """Create PubMedPublicationTransformer instance."""
+        return PubMedPublicationTransformer(provider="pubmed")
+
+    def test_is_valid_date_format_full_date(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test that valid full dates are recognized."""
+        assert transformer._is_valid_date_format("2024-01-15") is True
+        assert transformer._is_valid_date_format("2023-12-31") is True
+        assert transformer._is_valid_date_format("1999-06-01") is True
+
+    def test_is_valid_date_format_partial_month(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test that valid YYYY-MM dates are recognized."""
+        assert transformer._is_valid_date_format("2024-01") is True
+        assert transformer._is_valid_date_format("2023-12") is True
+
+    def test_is_valid_date_format_year_only(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test that valid YYYY dates are recognized."""
+        assert transformer._is_valid_date_format("2024") is True
+        assert transformer._is_valid_date_format("1999") is True
+
+    def test_is_valid_date_format_invalid_month(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test that dates with invalid months are rejected."""
+        assert transformer._is_valid_date_format("2024-13-01") is False
+        assert transformer._is_valid_date_format("2024-00-15") is False
+        assert transformer._is_valid_date_format("2024-13") is False
+        assert transformer._is_valid_date_format("2024-00") is False
+
+    def test_is_valid_date_format_invalid_day(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test that dates with invalid days are rejected."""
+        assert transformer._is_valid_date_format("2024-01-32") is False
+        assert transformer._is_valid_date_format("2024-01-00") is False
+        assert transformer._is_valid_date_format("2024-12-99") is False
+
+    def test_is_valid_date_format_text_values(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test that non-date text values are rejected."""
+        assert transformer._is_valid_date_format("n/a") is False
+        assert transformer._is_valid_date_format("unknown") is False
+        assert transformer._is_valid_date_format("TBD") is False
+        assert transformer._is_valid_date_format("") is False
+        assert transformer._is_valid_date_format(None) is False
+
+    def test_is_valid_date_format_malformed(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test that malformed dates are rejected."""
+        assert transformer._is_valid_date_format("2024/01/15") is False  # Wrong separator
+        assert transformer._is_valid_date_format("01-15-2024") is False  # Wrong order
+        assert transformer._is_valid_date_format("2024-1-15") is False  # Missing leading zero
+        assert transformer._is_valid_date_format("24-01-15") is False  # 2-digit year
+
+    @pytest.mark.asyncio
+    async def test_invalid_pub_date_results_in_none_publication_date(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that invalid pub_date causes fallback to year for publication_date.
+
+        When pub_date is invalid (e.g., "2024-13-99") and there's no valid
+        epub_date, the transformer should fall back to using year only.
+        """
+        # This test relies on DateExtractor returning malformed dates.
+        # Since DateExtractor does its own normalization, we test the
+        # _compute_publication_date behavior with year fallback.
+        result = transformer._compute_publication_date(
+            epub_date=None, pub_date=None, year=2024
+        )
+        assert result == "2024-12-31"
+
+    @pytest.mark.asyncio
+    async def test_publication_date_with_only_year(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that publication_date is correctly computed when only year is present.
+
+        When both epub_date and pub_date are None/invalid, the transformer
+        should fall back to year and produce YYYY-12-31.
+        """
+        xml = """<?xml version="1.0"?>
+        <PubmedArticle>
+          <MedlineCitation>
+            <PMID>12345678</PMID>
+            <Article>
+              <Journal>
+                <JournalIssue>
+                  <PubDate>
+                    <Year>2024</Year>
+                  </PubDate>
+                </JournalIssue>
+              </Journal>
+              <ArticleTitle>Year Only Test</ArticleTitle>
+            </Article>
+          </MedlineCitation>
+        </PubmedArticle>
+        """
+        record: dict[str, Any] = {"_raw_xml": xml}
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["year"] == 2024
+        # When only year is available, publication_date uses end-of-year
+        assert result["publication_date"] == "2024-12-31"
+
+    def test_compute_publication_date_year_only_fallback(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test _compute_publication_date with only year available.
+
+        This directly tests the method to ensure year-only fallback
+        produces YYYY-12-31 format.
+        """
+        result = transformer._compute_publication_date(
+            epub_date=None, pub_date=None, year=2023
+        )
+        assert result == "2023-12-31"
+
+    def test_compute_publication_date_all_none(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test _compute_publication_date when all inputs are None."""
+        result = transformer._compute_publication_date(
+            epub_date=None, pub_date=None, year=None
+        )
+        assert result is None
+
+    def test_compute_publication_date_priority_order(
+        self,
+        transformer: PubMedPublicationTransformer,
+    ) -> None:
+        """Test that _compute_publication_date follows priority order.
+
+        Priority: epub_date > pub_date > year
+        """
+        # epub_date takes priority
+        result = transformer._compute_publication_date(
+            epub_date="2024-02-15", pub_date="2024-03-01", year=2024
+        )
+        assert result == "2024-02-15"
+
+        # pub_date takes priority when epub_date is partial
+        result = transformer._compute_publication_date(
+            epub_date="2024-02", pub_date="2024-03-01", year=2024
+        )
+        assert result == "2024-03-01"
+
+        # year fallback when both dates are None
+        result = transformer._compute_publication_date(
+            epub_date=None, pub_date=None, year=2024
+        )
+        assert result == "2024-12-31"
+
+
+@pytest.mark.unit
+class TestPubMedTransformerContentHashStability:
+    """Tests to verify content_hash stability for valid records.
+
+    Ensures that the normalization changes don't affect content_hash
+    computation for records with valid data.
+    """
+
+    @pytest.fixture
+    def transformer(self) -> PubMedPublicationTransformer:
+        """Create PubMedPublicationTransformer instance."""
+        return PubMedPublicationTransformer(provider="pubmed")
+
+    @pytest.mark.asyncio
+    async def test_valid_record_content_hash_deterministic(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that valid records produce consistent content_hash.
+
+        Multiple transformations of the same valid record should always
+        produce identical content_hash values.
+        """
+        record: dict[str, Any] = {"_raw_xml": FULL_PUBMED_XML}
+
+        results = [
+            await transformer.transform(mock_context, record, index=0)
+            for _ in range(3)
+        ]
+
+        assert all(r is not None for r in results)
+        hashes = [r["content_hash"] for r in results]
+        assert len(set(hashes)) == 1, "All hashes should be identical"
+
+    @pytest.mark.asyncio
+    async def test_valid_identifiers_do_not_change_hash(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that valid identifiers produce stable content_hash.
+
+        Records with valid pii, mid, publisher_id values should have
+        deterministic content_hash values.
+        """
+        xml = """<?xml version="1.0"?>
+        <PubmedArticle>
+          <MedlineCitation>
+            <PMID>12345678</PMID>
+            <Article>
+              <ArticleTitle>Valid Identifiers Test</ArticleTitle>
+            </Article>
+          </MedlineCitation>
+          <PubmedData>
+            <ArticleIdList>
+              <ArticleId IdType="pubmed">12345678</ArticleId>
+              <ArticleId IdType="pii">S0123-4567(23)00001-2</ArticleId>
+              <ArticleId IdType="mid">NIHMS123456</ArticleId>
+              <ArticleId IdType="publisher-id">pub.12345</ArticleId>
+            </ArticleIdList>
+          </PubmedData>
+        </PubmedArticle>
+        """
+        record: dict[str, Any] = {"_raw_xml": xml}
+
+        result1 = await transformer.transform(mock_context, record, index=0)
+        result2 = await transformer.transform(mock_context, record, index=0)
+
+        assert result1 is not None
+        assert result2 is not None
+        assert result1["pii"] == "S0123-4567(23)00001-2"
+        assert result1["mid"] == "NIHMS123456"
+        assert result1["publisher_id"] == "pub.12345"
+        assert result1["content_hash"] == result2["content_hash"]

@@ -8,6 +8,7 @@ with other publication pipelines (CrossRef, OpenAlex, SemanticScholar).
 
 from __future__ import annotations
 
+import re
 import xml.etree.ElementTree as ET
 from typing import TYPE_CHECKING, Any, cast
 
@@ -54,6 +55,18 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
     # Instance variable to cache parsed XML root between validation and extraction
     _cached_xml_root: ET.Element | None
+
+    # Date validation patterns for ISO date formats (YYYY, YYYY-MM, YYYY-MM-DD).
+    # Used to filter out invalid dates like "2024-13-99" or "n/a" before
+    # they propagate to _compute_publication_date.
+    _VALID_DATE_PATTERNS: tuple[re.Pattern[str], ...] = (
+        # Full date: YYYY-MM-DD (with valid month 01-12 and day 01-31)
+        re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$"),
+        # Partial month: YYYY-MM (with valid month 01-12)
+        re.compile(r"^\d{4}-(0[1-9]|1[0-2])$"),
+        # Partial year: YYYY
+        re.compile(r"^\d{4}$"),
+    )
 
     def __init__(
         self,
@@ -126,6 +139,28 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 pmid=record.get("pmid"),
             )
             raise ValueError(f"XML parse error: {e}") from e
+
+    def _is_valid_date_format(self, date_str: str | None) -> bool:
+        """Validate that date string matches expected ISO format.
+
+        Accepts:
+        - YYYY-MM-DD (full date with valid month 01-12 and day 01-31)
+        - YYYY-MM (partial with valid month 01-12)
+        - YYYY (year only)
+
+        This validation ensures that invalid dates like "2024-13-99", "n/a",
+        or malformed strings don't propagate to _compute_publication_date,
+        which would produce inconsistent results.
+
+        Args:
+            date_str: Date string to validate.
+
+        Returns:
+            True if date format is valid, False otherwise.
+        """
+        if not date_str:
+            return False
+        return any(pattern.match(date_str) for pattern in self._VALID_DATE_PATTERNS)
 
     def _extract_medline_metadata(
         self,
@@ -251,10 +286,19 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         doi_vo = DOI.from_raw(raw_doi)
         normalized_doi = str(doi_vo) if doi_vo else None
 
-        # Extract additional identifiers
-        pii = IdentifierExtractor.extract_pii(root)
-        mid = IdentifierExtractor.extract_mid(root)
-        publisher_id = IdentifierExtractor.extract_publisher_id(root)
+        # Extract and normalize additional identifiers.
+        # Using normalize_to_string ensures that empty strings ("") become None,
+        # which provides consistent handling in downstream processing and
+        # prevents inconsistent content_hash computation for equivalent records.
+        pii = self._data_normalizer.normalize_to_string(
+            IdentifierExtractor.extract_pii(root)
+        )
+        mid = self._data_normalizer.normalize_to_string(
+            IdentifierExtractor.extract_mid(root)
+        )
+        publisher_id = self._data_normalizer.normalize_to_string(
+            IdentifierExtractor.extract_publisher_id(root)
+        )
 
         return {
             "pmid": pmid,
@@ -486,6 +530,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     ) -> dict[str, Any]:
         """Extract date-related data from article and MedlineCitation XML.
 
+        Validates date formats before use to prevent invalid dates like
+        "2024-13-99" or "n/a" from causing inconsistent publication_date
+        computation. Invalid dates are set to None.
+
         Args:
             article: Article XML element.
             pubmed_data: PubmedData XML element (contains History with manuscript dates).
@@ -497,7 +545,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         journal = article.find(".//Journal")
         journal_issue = journal.find("JournalIssue") if journal else None
         pub_date_node = journal_issue.find("PubDate") if journal_issue else None
-        pub_date, raw_year = DateExtractor.extract_date(pub_date_node)
+        raw_pub_date, raw_year = DateExtractor.extract_date(pub_date_node)
         history = pubmed_data.find("History") if pubmed_data else None
 
         pub_month, pub_day = self._parse_month_day(pub_date_node)
@@ -505,7 +553,14 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         year_vo = PublicationYear.from_raw(raw_year)
         validated_year = year_vo.value if year_vo else None
 
-        epub_date = DateExtractor.extract_article_date(article, "Electronic")
+        raw_epub_date = DateExtractor.extract_article_date(article, "Electronic")
+
+        # Validate date formats before passing to _compute_publication_date.
+        # Invalid dates (e.g., "2024-13-99", "n/a") are set to None to ensure
+        # _compute_publication_date falls back to the next priority source.
+        pub_date = raw_pub_date if self._is_valid_date_format(raw_pub_date) else None
+        epub_date = raw_epub_date if self._is_valid_date_format(raw_epub_date) else None
+
         publication_date = self._compute_publication_date(
             epub_date, pub_date, validated_year
         )
