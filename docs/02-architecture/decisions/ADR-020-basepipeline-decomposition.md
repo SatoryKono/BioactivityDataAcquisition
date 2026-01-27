@@ -23,7 +23,7 @@ def __init__(
     lock: LockPort,
     checkpoint: CheckpointPort,
     quarantine: QuarantinePort,
-    logger: BoundLogger,
+    logger: LoggerPort,
     metrics: MetricsPort,
     resume: bool = False,
     limit: int | None = None,
@@ -101,6 +101,7 @@ class PipelineServices:
     checkpoint: CheckpointPort
     quarantine: QuarantinePort
     metrics: MetricsPort
+    tracing: TracingPort
     logger: LoggerPort
 
     async def aclose(self) -> None:
@@ -182,16 +183,16 @@ Graceful shutdown реализован через:
 
 ```python
 async def run_pipeline_flow(
-    pipeline: BasePipeline, logger: BoundLogger
+    runner: PipelineRunner, logger: LoggerPort
 ) -> None:
     """Run a pipeline with logging and error handling."""
     try:
-        await pipeline.run()
+        await runner.run()
     except Exception as e:
         logger.exception("Pipeline execution failed", error=str(e))
         raise
     finally:
-        await pipeline.services.aclose()  # Always cleanup!
+        await runner.services.aclose()  # Always cleanup!
 ```
 
 ## Последствия
