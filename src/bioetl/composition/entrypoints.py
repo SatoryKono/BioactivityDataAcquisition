@@ -189,6 +189,7 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
             filter_ids=options.filter_ids,
             filter_field=options.filter_field
             or "doi",  # Default to DOI for publications
+            fallback_mapping=options.fallback_mapping,
         )
     elif options.input_csv:
         # CSV-based filtering

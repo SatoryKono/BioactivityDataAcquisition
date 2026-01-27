@@ -272,6 +272,47 @@ class TestBuildPipelineContext:
 
         assert ctx.vacuum.enabled is None  # Tri-state: use YAML default
 
+    def test_context_with_filter_ids_and_fallback_mapping(self):
+        """Test building context with direct filter_ids and fallback_mapping.
+
+        This is the composite pipeline mode where enrichers receive filter IDs
+        directly (no CSV) along with a fallback mapping for title-based search.
+        """
+        fallback_mapping = {
+            "10.1038/nature12373": "Crystal structure of rhodopsin",
+            "10.1126/science.1234567": "Novel protein structure",
+        }
+        options = RunOptions(
+            filter_ids=("10.1038/nature12373", "10.1126/science.1234567"),
+            filter_field="doi",
+            fallback_mapping=fallback_mapping,
+        )
+        ctx = build_pipeline_context("openalex_publication", options)
+
+        assert ctx.input_filter.enabled is True
+        assert ctx.input_filter.filter_ids == (
+            "10.1038/nature12373",
+            "10.1126/science.1234567",
+        )
+        assert ctx.input_filter.filter_field == "doi"
+        assert ctx.input_filter.fallback_mapping == fallback_mapping
+        # In direct IDs mode, source_path and column_name are empty
+        assert ctx.input_filter.source_path == ""
+        assert ctx.input_filter.column_name == ""
+
+    def test_context_with_filter_ids_without_fallback_mapping(self):
+        """Test filter_ids mode without fallback_mapping (e.g., PubMed by pmid)."""
+        options = RunOptions(
+            filter_ids=("12345678", "87654321"),
+            filter_field="pmid",
+        )
+        ctx = build_pipeline_context("pubmed_publication", options)
+
+        assert ctx.input_filter.enabled is True
+        assert ctx.input_filter.filter_ids == ("12345678", "87654321")
+        assert ctx.input_filter.filter_field == "pmid"
+        assert ctx.input_filter.fallback_mapping is None
+
 
 @pytest.mark.unit
 class TestRunPipelineIntegration:
