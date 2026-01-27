@@ -34,7 +34,7 @@ def __init__(
 
 1. **God Object Anti-pattern**: 13 параметров конструктора смешивают конфигурацию, runtime параметры и I/O порты
 
-2. **Циклические зависимости**: `BasePipeline` создаёт менеджеры (`PipelineOrchestrator`, `PipelineExecutor`,
+2. **Циклические зависимости**: `BasePipeline` создаёт менеджеры (`PipelineRunner`, `BatchExecutor`,
    `LockManager`, `QuarantineManager`), которые хранят ссылку на `self`
 
 3. **Нарушение SRP**: Класс отвечает за хранение конфигурации И координацию выполнения
@@ -46,7 +46,7 @@ def __init__(
 ### Затронутые файлы
 
 - `src/bioetl/application/core/base.py` - основной класс
-- `src/bioetl/application/core/config.py` - **NEW**
+- `src/bioetl/domain/config.py` - **NEW**
 - `src/bioetl/application/core/pipeline_services.py` - **NEW**
 - `src/bioetl/application/pipelines/chembl/activity.py` - наследник
 - `src/bioetl/application/core/runner.py` - зависит от BasePipeline
@@ -78,11 +78,11 @@ class PipelineConfig:
     checkpoint_interval: int = 1000
 ```
 
-#### PipelineRuntimeConfig (immutable dataclass)
+#### RuntimeConfig (immutable dataclass)
 
 ```python
 @dataclass(frozen=True)
-class PipelineRuntimeConfig:
+class RuntimeConfig:
     """Runtime execution parameters."""
     run_type: RunType
     resume: bool = False
@@ -101,7 +101,7 @@ class PipelineServices:
     checkpoint: CheckpointPort
     quarantine: QuarantinePort
     metrics: MetricsPort
-    logger: BoundLogger
+    logger: LoggerPort
 
     async def aclose(self) -> None:
         """Gracefully close all I/O resources."""
@@ -127,33 +127,52 @@ class BasePipeline(ABC):
     def __init__(
         self,
         config: PipelineConfig,
-        runtime: PipelineRuntimeConfig,
+        runtime: RuntimeConfig,
         services: PipelineServices,
+        run_id: RunID,
+        transformer: BaseTransformer | None = None,
     ) -> None:
         self._config = config
         self._runtime = runtime
         self._services = services
+        self._run_id = run_id
+        self._transformer = transformer
         # ... lazy-initialized components
 ```
 
 ### 3. Устранение циклических зависимостей
 
-Менеджеры получают только необходимые зависимости через `from_components()`:
+Сборка вынесена в composition layer: `PipelineRunner` получает зависимости
+через явный DI и не создаётся внутри `BasePipeline`.
 
 ```python
 # Вместо:
-self.orchestrator = PipelineOrchestrator(self)  # circular ref!
+self.runner = PipelineRunner(self)  # circular ref!
 
 # Стало:
-self._orchestrator = PipelineOrchestrator.from_components(
-    config=self._config,
-    runtime=self._runtime,
-    services=self._services,
-    context=self._context,
-    executor=self.executor,
-    checkpoint_manager=self.checkpoint_manager,
-    shutdown_signal=self._shutdown_signal,
-    logger=self._logger,
+pipeline = ChEMBLActivityPipeline.create(
+    run_id=run_id,
+    runtime=runtime,
+    services=services,
+    config=config,
+    transformer=transformer,
+)
+runner = PipelineRunner(
+    config=pipeline.config,
+    runtime=pipeline.runtime,
+    services=pipeline.services,
+    context=pipeline.context,
+    executor=batch_executor,
+    checkpoint_manager=checkpoint_manager,
+    shutdown_signal=pipeline.shutdown_signal,
+    logger=logger,
+    lock_manager=lock_manager,
+    preflight=preflight,
+    postrun=postrun,
+    lifecycle_service=lifecycle_service,
+    observer=observer,
+    pipeline=pipeline,
+    tracer=tracer,
 )
 ```
 
@@ -210,7 +229,7 @@ async def run_pipeline_flow(
 ### Фаза 2: Создание структур
 
 - [x] `PipelineConfig` dataclass
-- [x] `PipelineRuntimeConfig` dataclass
+- [x] `RuntimeConfig` dataclass
 - [x] `PipelineServices` dataclass с `aclose()`
 
 ### Фаза 3: Рефакторинг BasePipeline
