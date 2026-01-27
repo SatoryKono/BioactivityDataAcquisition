@@ -170,7 +170,7 @@ class TestUnifiedConstraints:
         ids=lambda s: s.__name__,
     )
     def test_year_range_unified(self, schema: type) -> None:
-        """Year field MUST have unified range 1450-2150 in all schemas."""
+        """Year field MUST have unified range 1950-2050 in all schemas."""
         pandera_schema = schema.to_schema()
         year_column = pandera_schema.columns.get("year")
 
@@ -189,15 +189,15 @@ class TestUnifiedConstraints:
                 if "max_value" in stats:
                     le_value = stats["max_value"]
 
-        # The base schema defines year with ge=1450, le=2150
+        # The base schema defines year with ge=1950, le=2050
         # Provider schemas inherit this constraint
-        assert ge_value == 1450, (
+        assert ge_value == 1950, (
             f"{schema.__name__}.year has incorrect lower bound: {ge_value}. "
-            f"Expected: 1450 (unified range per PublicationGoldBaseSchema)."
+            f"Expected: 1950 (unified range per PublicationGoldBaseSchema)."
         )
-        assert le_value == 2150, (
+        assert le_value == 2050, (
             f"{schema.__name__}.year has incorrect upper bound: {le_value}. "
-            f"Expected: 2150 (unified range per PublicationGoldBaseSchema)."
+            f"Expected: 2050 (unified range per PublicationGoldBaseSchema)."
         )
 
     @pytest.mark.parametrize(

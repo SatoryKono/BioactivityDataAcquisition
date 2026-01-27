@@ -13,7 +13,7 @@ Int->Float coercion note:
     documented in RULES.md Section 2.6.
 
 Unified constraints:
-    - year: 1450-2150 (covers incunabula + future publications)
+    - year: 1950-2050 (covers modern publications + near future)
     - citation_count, reference_count: >= 0
     - doc_type: nullable=True (not all providers supply doc_type)
 """
@@ -72,8 +72,8 @@ class PublicationGoldBaseSchema(pa.DataFrameModel):
     last_page: Series[str] = pa.Field(nullable=True)
 
     # === Dates (unified format: YYYY-MM-DD or YYYY) ===
-    # year: Unified range 1450-2150 (covers incunabula through future)
-    year: Series[float] = pa.Field(nullable=True, ge=1450, le=2150, coerce=True)
+    # year: Unified range 1950-2050 (covers modern publications + near future)
+    year: Series[float] = pa.Field(nullable=True, ge=1950, le=2050, coerce=True)
     publication_date: Series[str] = pa.Field(nullable=True)
 
     # === Metadata ===
