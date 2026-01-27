@@ -390,7 +390,8 @@ known-first-party = ["bioetl", "tests"]
 # Entrypoints uses semantic grouping with comments in __all__ (not alphabetical)
 "src/bioetl/composition/entrypoints.py" = ["RUF022"]
 # Tools scripts use print() for output, may have simpler patterns, and are not production code
-"src/tools/**/*.py" = ["PTH", "SIM", "T201", "F401", "F541", "UP015", "RUF005", "B007", "F841"]
+# RUF001: Allow Cyrillic in strings (Russian help messages consistent with project docs)
+"src/tools/**/*.py" = ["PTH", "SIM", "T201", "F401", "F541", "UP015", "RUF005", "B007", "F841", "RUF001"]
 # Infrastructure adapters implement Protocol interfaces, may not use all args
 "src/bioetl/infrastructure/adapters/**/*.py" = ["ARG001", "ARG002", "SIM102", "SIM113"]
 # Infrastructure may have unused args for interface consistency, use open() is fine

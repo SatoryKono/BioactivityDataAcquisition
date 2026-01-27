@@ -745,7 +745,9 @@ PUBLICATION_LOOKUP_FIELDS = frozenset({"_lookup_method", "_original_id"})
 # - PubMed: pmid, doi, pmc_id (all available)
 # - SemanticScholar: pmid, doi (pmc_id excluded per design 2026-01)
 PUBLICATION_CROSS_REF_FIELDS_MINIMAL = frozenset({"doi"})  # All providers have doi
-PUBLICATION_UNIFIED_FIELDS = frozenset({"first_page", "last_page"})  # publication_date varies
+PUBLICATION_UNIFIED_FIELDS = frozenset(
+    {"first_page", "last_page"}
+)  # publication_date varies
 
 
 class TestPublicationSchemaDQFields:
@@ -841,8 +843,16 @@ class TestPublicationSchemaCrossRefFields:
             (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication", {"pmid", "doi"}),
             (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication", {"doi"}),
             (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication", {"pmid", "doi"}),
-            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication", {"pmid", "doi", "pmc_id"}),
-            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication", {"pmid", "doi"}),
+            (
+                PUBMED_PUBLICATION_SCHEMA,
+                "PubMed Publication",
+                {"pmid", "doi", "pmc_id"},
+            ),
+            (
+                SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
+                "SemanticScholar Publication",
+                {"pmid", "doi"},
+            ),
         ],
     )
     def test_schema_has_cross_ref_fields(self, schema, name, expected_fields):
@@ -857,8 +867,16 @@ class TestPublicationSchemaCrossRefFields:
             (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication", {"pmid", "doi"}),
             (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication", {"doi"}),
             (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication", {"pmid", "doi"}),
-            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication", {"pmid", "doi", "pmc_id"}),
-            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication", {"pmid", "doi"}),
+            (
+                PUBMED_PUBLICATION_SCHEMA,
+                "PubMed Publication",
+                {"pmid", "doi", "pmc_id"},
+            ),
+            (
+                SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
+                "SemanticScholar Publication",
+                {"pmid", "doi"},
+            ),
         ],
     )
     def test_cross_ref_fields_are_string(self, schema, name, expected_fields):

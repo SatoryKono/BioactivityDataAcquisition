@@ -1,8 +1,4 @@
-"""DQ report serializer.
-
-Provides serialization of DQ reports to JSON, YAML, and HTML formats.
-This is a domain service that handles format conversion without I/O.
-"""
+"""DQ report serializer for JSON, YAML, and HTML formats."""
 
 from __future__ import annotations
 
@@ -21,40 +17,30 @@ from bioetl.domain.value_objects.dq_report import (
 )
 
 
-def to_dict(obj: Any) -> dict[str, Any]:
-    """Convert an object to a dictionary suitable for serialization.
-
-    Handles dataclasses, enums, datetimes, and collection types.
-
-    Args:
-        obj: Object to convert.
-
-    Returns:
-        Dictionary representation of the object.
-    """
-    if is_dataclass(obj) and not isinstance(obj, type):
-        return cast(dict[str, Any], _serialize_value(obj))
-    if isinstance(obj, dict):
-        return cast(dict[str, Any], _serialize_value(obj))
-    return {"value": _serialize_value(obj)}
+def _is_dc_instance(obj: Any) -> bool:
+    return is_dataclass(obj) and not isinstance(obj, type)
 
 
 def _serialize_value(value: Any) -> Any:
-    """Serialize a value with dataclass/enum/datetime/collection support."""
-    if is_dataclass(value) and not isinstance(value, type):
-        return {
-            field.name: _serialize_value(getattr(value, field.name))
-            for field in fields(value)
-        }
+    """Serialize a value recursively."""
+    if _is_dc_instance(value):
+        return {f.name: _serialize_value(getattr(value, f.name)) for f in fields(value)}
     if isinstance(value, Enum):
         return value.value
     if isinstance(value, datetime):
         return value.isoformat()
     if isinstance(value, dict):
-        return {key: _serialize_value(item) for key, item in value.items()}
+        return {k: _serialize_value(v) for k, v in value.items()}
     if isinstance(value, (list, tuple)):
-        return [_serialize_value(item) for item in value]
+        return [_serialize_value(i) for i in value]
     return value
+
+
+def to_dict(obj: Any) -> dict[str, Any]:
+    """Convert object to dictionary for serialization."""
+    if _is_dc_instance(obj) or isinstance(obj, dict):
+        return cast(dict[str, Any], _serialize_value(obj))
+    return {"value": _serialize_value(obj)}
 
 
 class DQReportSerializer:

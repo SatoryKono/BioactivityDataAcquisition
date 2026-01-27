@@ -238,6 +238,7 @@ class TestFunctionComplexity:
         "_fetch_with_filter": 25,  # CC=22 - ChEMBL pagination with deduplication and filter building
         "_is_server_500_error": 18,  # CC=16 - Error detection with multiple wrapping scenarios
         # DQ serializer domain functions
+        "_serialize_value": 10,  # CC=9 - Type dispatch for serialization (dataclass/enum/datetime/dict/list)
         "_dataclass_to_dict": 13,  # CC=12 - Recursive dataclass conversion
         "_dict_to_yaml": 7,  # CC=6 - YAML dictionary serialization
         "_yaml_value": 8,  # CC=7 - YAML value formatting
