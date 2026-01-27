@@ -4409,9 +4409,15 @@ Path: pipelines\composite\publication.yaml
 # provides mesh_terms/keywords fields in /document endpoint, and the
 # /document_term endpoint has been deprecated (returns 404).
 #
+# Field exclusions (2026-01-27):
+# - CrossRef: pmid, pmc_id, doc_type (uses raw 'type' instead)
+# - OpenAlex: pmc_id, doc_type (uses raw 'type' instead)
+# - PubMed: vernacular_title, epub_date, received_date, revised_date, accepted_date
+# - SemanticScholar: pmc_id, arxiv_id
+#
 # Version: 1.0.0
 # Reference: ADR-026 Composite Pipeline Pattern
-# Last Updated: 2026-01-15
+# Last Updated: 2026-01-27
 #
 # =============================================================================
 
@@ -4566,16 +4572,17 @@ composite:
         provider_order: [chembl, openalex, pubmed, semanticscholar]
 
       # 4. PMC IDs (separate group - not in seed)
+      # Note: Only PubMed provides pmc_id (removed from OpenAlex, SemanticScholar)
       - name: pmc_identifiers
         fields:
           - pmc_id
-        provider_order: [openalex, pubmed, semanticscholar]
+        provider_order: [pubmed]
 
       # 5. Title group
+      # Note: vernacular_title removed (PubMed no longer provides it)
       - name: title
         fields:
           - title
-          - vernacular_title
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 
       # 6. Abstract group
@@ -4613,6 +4620,8 @@ composite:
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 
       # 10. Publication dates
+      # Note: epub_date, accepted_date, received_date, revised_date removed
+      # (PubMed no longer provides these fields)
       - name: dates
         fields:
           - publication_date
@@ -4622,10 +4631,6 @@ composite:
           - pub_date
           - pub_month
           - pub_day
-          - epub_date
-          - accepted_date
-          - received_date
-          - revised_date
           - date_completed
           - date_revised
         provider_order: [crossref, openalex, pubmed, semanticscholar]
@@ -4666,10 +4671,12 @@ composite:
         provider_order: [openalex, semanticscholar]
 
       # 15. Document type
+      # Note: CrossRef and OpenAlex use raw 'type' field instead of mapped 'doc_type'
       - name: doc_type
         fields:
-          - doc_type
-        provider_order: [chembl, crossref, openalex]
+          - doc_type          # ChEMBL, PubMed (unified type)
+          - type              # CrossRef, OpenAlex raw type (journal-article, article, etc.)
+        provider_order: [chembl, crossref, openalex, pubmed]
 
       # 16. Language
       - name: language
@@ -4698,12 +4705,12 @@ composite:
         provider_order: [crossref, openalex, pubmed, semanticscholar]
 
       # 19. Provider-specific IDs
+      # Note: arxiv_id removed (SemanticScholar no longer provides it)
       - name: provider_ids
         fields:
           - openalex_id
           - paper_id
           - corpus_id
-          - arxiv_id
           - src_id
           - chembl_release
           - creation_date

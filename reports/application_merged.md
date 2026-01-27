@@ -18082,11 +18082,7 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_references,
     extract_year,
 )
-from bioetl.domain.entities.crossref import (
-    CROSSREF_TYPE_DEFAULT,
-    CROSSREF_TYPE_MAP,
-    CrossRefPublicationEntity,
-)
+from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 from bioetl.domain.normalization import extract_first_string
 from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects import DOI
@@ -18217,9 +18213,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             **dates,
             "year": extract_year(rec),
             "publication_date": publication_date,
-            "doc_type": CROSSREF_TYPE_MAP.get(
-                rec.get("type", ""), CROSSREF_TYPE_DEFAULT
-            ),
+            "type": rec.get("type"),  # Raw CrossRef type preserved
             "citation_count": rec.get("is-referenced-by-count"),
             "reference_count": rec.get("references-count"),
             "language": rec.get("language"),
@@ -18228,10 +18222,8 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "_source": "crossref",
             # Excluded fields (always NULL, not written to Delta Lake):
             # - is_oa: CrossRef doesn't provide Open Access info
-            # - pmid/pmc_id: CrossRef doesn't provide PubMed IDs
+            # - pmid/pmc_id: CrossRef doesn't provide PubMed IDs (excluded entirely)
             "is_oa": None,
-            "pmid": None,
-            "pmc_id": None,
             # Lookup metadata (from adapter fallback handler)
             "_lookup_method": rec.get("_lookup_method", "doi"),
             "_original_id": rec.get("_original_id"),
@@ -18379,15 +18371,16 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
-        """Convert Domain Entity to SilverRecord, excluding abstract and affiliations.
+        """Convert Domain Entity to SilverRecord, excluding unused fields.
 
         Overrides base implementation to remove fields not collected for CrossRef.
+        CrossRef uses raw 'type' field instead of mapped 'doc_type'.
 
         Args:
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without abstract and affiliations fields.
+            SilverRecord dictionary without excluded fields.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
@@ -18395,9 +18388,12 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         # Get base silver record
         silver_record = BaseTransformer.entity_to_silver_record(entity)
 
-        # Remove excluded fields
+        # Remove excluded fields (CrossRef doesn't provide these)
         silver_record.pop("abstract", None)
         silver_record.pop("affiliations", None)
+        silver_record.pop("pmid", None)
+        silver_record.pop("pmc_id", None)
+        silver_record.pop("doc_type", None)  # CrossRef uses raw 'type' instead
 
         return silver_record
 
@@ -18941,7 +18937,7 @@ from bioetl.application.pipelines.openalex.extractors import (
     extract_topics,
     reconstruct_abstract,
 )
-from bioetl.domain.entities.openalex import OPENALEX_TYPE_MAP, OpenAlexPublicationEntity
+from bioetl.domain.entities.openalex import OpenAlexPublicationEntity
 from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects import DOI, PublicationYear
 
@@ -19105,10 +19101,6 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             PublicationYear, rec.get("publication_year"), as_string=False
         )
 
-        # Map document type
-        raw_type = rec.get("type", "")
-        doc_type = OPENALEX_TYPE_MAP.get(raw_type, "PUBLICATION")
-
         # Lookup metadata (from adapter)
         lookup_method = rec.get("_lookup_method", "unknown")
         original_id = rec.get("_original_id")
@@ -19117,7 +19109,6 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "openalex_id": openalex_id,
             "doi": doi,
             "pmid": external_ids.get("pmid"),
-            "pmc_id": external_ids.get("pmcid"),  # API uses "pmcid", we use "pmc_id"
             "mag_id": external_ids.get("mag_id"),
             "title": rec.get("title"),
             "abstract": abstract,
@@ -19132,7 +19123,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "publication_date": self._normalize_partial_date(
                 rec.get("publication_date")
             ),
-            "doc_type": doc_type,
+            "type": rec.get("type"),
             "is_oa": oa_info.get("is_oa"),
             "oa_status": oa_info.get("oa_status"),
             # OpenAlex source field: cited_by_count
@@ -19183,6 +19174,31 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
         """
         return OpenAlexPublicationEntity
+
+    @staticmethod
+    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        """Convert Domain Entity to SilverRecord, excluding pmc_id and doc_type.
+
+        Overrides base implementation to remove fields not collected for OpenAlex.
+        OpenAlex uses raw 'type' field instead of mapped 'doc_type'.
+
+        Args:
+            entity: Domain entity (dataclass).
+
+        Returns:
+            SilverRecord dictionary without pmc_id and doc_type fields.
+
+        """
+        from bioetl.application.core.base_transformer import BaseTransformer
+
+        # Get base silver record
+        silver_record = BaseTransformer.entity_to_silver_record(entity)
+
+        # Remove excluded fields
+        silver_record.pop("pmc_id", None)
+        silver_record.pop("doc_type", None)  # OpenAlex uses raw 'type' instead
+
+        return silver_record
 
 ================================================================================
 File: __init__.py
@@ -21286,7 +21302,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "mid": mid,
             "publisher_id": publisher_id,
             "title": get_text(article.find(".//ArticleTitle")),
-            "vernacular_title": get_text(article.find(".//VernacularTitle")),
+            # vernacular_title excluded per user request
             "abstract": self._data_normalizer.strip_html_tags(
                 AbstractExtractor.extract_abstract(article)
             ),
@@ -21525,7 +21541,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         journal_issue = journal.find("JournalIssue") if journal else None
         pub_date_node = journal_issue.find("PubDate") if journal_issue else None
         raw_pub_date, raw_year = DateExtractor.extract_date(pub_date_node)
-        history = pubmed_data.find("History") if pubmed_data else None
 
         pub_month, pub_day = self._parse_month_day(pub_date_node)
 
@@ -21563,13 +21578,37 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "publication_date": publication_date,
             "year": validated_year,
             "publication_year": validated_year,
-            "accepted_date": DateExtractor.extract_history_date(history, "accepted"),
-            "received_date": DateExtractor.extract_history_date(history, "received"),
-            "revised_date": DateExtractor.extract_history_date(history, "revised"),
-            "epub_date": epub_date,
+            # Excluded per user request: accepted_date, received_date, revised_date, epub_date
             "date_completed": date_completed,
             "date_revised": date_revised,
         }
+
+    @staticmethod
+    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        """Convert Domain Entity to SilverRecord, excluding certain fields.
+
+        Overrides base implementation to remove fields not needed for PubMed.
+
+        Args:
+            entity: Domain entity (dataclass).
+
+        Returns:
+            SilverRecord dictionary without excluded fields.
+
+        """
+        from bioetl.application.core.base_transformer import BaseTransformer
+
+        # Get base silver record
+        silver_record = BaseTransformer.entity_to_silver_record(entity)
+
+        # Remove excluded fields per user request
+        silver_record.pop("vernacular_title", None)
+        silver_record.pop("epub_date", None)
+        silver_record.pop("received_date", None)
+        silver_record.pop("revised_date", None)
+        silver_record.pop("accepted_date", None)
+
+        return silver_record
 
 ================================================================================
 File: xml_utils.py
@@ -21696,6 +21735,7 @@ Semantic Scholar API responses.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from bioetl.domain.config import ValidationConfig
@@ -21703,6 +21743,183 @@ from bioetl.domain.value_objects import PublicationYear
 
 # Semantic Scholar-specific config with min_year=1500 for historical publications
 _SS_VALIDATION_CONFIG = ValidationConfig(min_publication_year=1500)
+
+
+# =============================================================================
+# Volume/Issue Parsing
+# =============================================================================
+
+# Patterns for parsing combined volume/issue strings from S2 API.
+# The API sometimes returns both values in the volume field (e.g., "32 4").
+_VOLUME_ISSUE_PATTERNS = [
+    # "32 4" → vol=32, issue=4 (space-separated, common S2 format)
+    re.compile(r"^(\d+)\s+(\d+)$"),
+    # "32(4)" or "32 (4)" → vol=32, issue=4
+    re.compile(r"^(\d+)\s*\((\d+)\)$"),
+    # "Vol. 32, No. 4" or "Vol 32 No 4"
+    re.compile(r"^[Vv]ol\.?\s*(\d+)[,\s]+[Nn]o\.?\s*(\d+)$"),
+    # "32:4" → vol=32, issue=4
+    re.compile(r"^(\d+):(\d+)$"),
+]
+
+
+def parse_volume_issue(volume_str: str | None) -> tuple[str | None, str | None]:
+    """Parse volume string that may contain issue number.
+
+    Semantic Scholar API sometimes returns combined volume/issue in the
+    volume field (e.g., "32 4" for volume 32, issue 4).
+
+    Args:
+        volume_str: Raw volume string from S2 API.
+
+    Returns:
+        Tuple of (volume, issue). Issue is None if not embedded.
+
+    Examples:
+        >>> parse_volume_issue("32 4")
+        ('32', '4')
+        >>> parse_volume_issue("523")
+        ('523', None)
+        >>> parse_volume_issue("40(3)")
+        ('40', '3')
+        >>> parse_volume_issue(None)
+        (None, None)
+
+    """
+    if not volume_str:
+        return (None, None)
+
+    cleaned = volume_str.strip()
+    if not cleaned:
+        return (None, None)
+
+    # Try each pattern for combined volume/issue
+    for pattern in _VOLUME_ISSUE_PATTERNS:
+        match = pattern.match(cleaned)
+        if match:
+            return (match.group(1), match.group(2))
+
+    # No issue found - return volume as-is
+    return (cleaned, None)
+
+
+# =============================================================================
+# Page Range Parsing
+# =============================================================================
+
+
+def _expand_abbreviated_page(first_page: str, tmp_last_page: str) -> str:
+    """Expand abbreviated last page number.
+
+    Academic publishing often abbreviates page ranges:
+    - "737-9" means 737-739 (not 737-9)
+    - "737-39" means 737-739
+    - "199-3" means 199-203 (rollover case)
+
+    Algorithm:
+    1. If tmp_last_page has >= digits than first_page, return as-is
+    2. Otherwise: last_page = (first_page // 10^n2) * 10^n2 + tmp_last_page
+    3. Handle rollover: if expanded < first_page, add 10^n2
+
+    Args:
+        first_page: First page (e.g., "737")
+        tmp_last_page: Potentially abbreviated last page (e.g., "9", "39", "839")
+
+    Returns:
+        Expanded last page string.
+
+    """
+    # Extract numeric parts only for calculation
+    first_digits = "".join(c for c in first_page if c.isdigit())
+    last_digits = "".join(c for c in tmp_last_page if c.isdigit())
+
+    # If either is non-numeric, return as-is (e.g., "S1-S5")
+    if not first_digits or not last_digits:
+        return tmp_last_page
+
+    n1 = len(first_digits)  # digits in first_page
+    n2 = len(last_digits)  # digits in tmp_last_page
+
+    # If last page has same or more digits, it's a full number
+    if n2 >= n1:
+        return tmp_last_page
+
+    # Expand abbreviated page number
+    # last_page = int(first_page / 10^n2) * 10^n2 + tmp_last_page
+    first_num = int(first_digits)
+    last_num = int(last_digits)
+    divisor = 10**n2
+
+    expanded = (first_num // divisor) * divisor + last_num
+
+    # Handle rollover case: "199-3" should be "199-203", not "199-193"
+    if expanded < first_num:
+        expanded += divisor
+
+    # Preserve any prefix from tmp_last_page (e.g., "S" in "S5")
+    prefix = "".join(c for c in tmp_last_page if not c.isdigit())
+    return f"{prefix}{expanded}" if prefix else str(expanded)
+
+
+def parse_page_range(pages_str: str | None) -> tuple[str | None, str | None]:
+    """Parse page range with abbreviated last page expansion.
+
+    Academic publishing often abbreviates page ranges:
+    - "737-9" means 737-739 (not 737-9)
+    - "737-39" means 737-739
+    - "737-839" means 737-839 (full number, no expansion)
+
+    Also handles whitespace, en-dashes (–), and em-dashes (—).
+
+    Args:
+        pages_str: Raw pages string (e.g., "737-9", "123-145").
+
+    Returns:
+        Tuple of (first_page, last_page). Both are strings or None.
+
+    Examples:
+        >>> parse_page_range("737-9")
+        ('737', '739')
+        >>> parse_page_range("737-39")
+        ('737', '739')
+        >>> parse_page_range("737-839")
+        ('737', '839')
+        >>> parse_page_range("123")
+        ('123', None)
+        >>> parse_page_range("S1-S5")
+        ('S1', 'S5')
+
+    """
+    if not pages_str:
+        return (None, None)
+
+    cleaned = pages_str.strip()
+    if not cleaned:
+        return (None, None)
+
+    # Normalize various dash types to hyphen
+    # EN DASH (U+2013) and EM DASH (U+2014) → HYPHEN-MINUS (U+002D)
+    cleaned = cleaned.replace("\u2013", "-").replace("\u2014", "-")
+
+    # Split on "-" (only first occurrence)
+    parts = cleaned.split("-", 1)
+
+    first_page = parts[0].strip()
+    if not first_page:
+        return (None, None)
+
+    # No range separator - single page
+    if len(parts) == 1:
+        return (first_page, None)
+
+    tmp_last_page = parts[1].strip()
+    if not tmp_last_page:
+        return (first_page, None)
+
+    # Expand abbreviated page number
+    last_page = _expand_abbreviated_page(first_page, tmp_last_page)
+
+    return (first_page, last_page)
 
 
 def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
@@ -21978,31 +22195,55 @@ def extract_journal_info(
     journal: dict[str, Any] | None,
     venue: str | None,
 ) -> dict[str, Any]:
-    """Extract journal information.
+    """Extract journal information with volume/issue and page parsing.
+
+    Parses combined volume/issue strings (e.g., "32 4" → volume=32, issue=4)
+    and expands abbreviated page ranges (e.g., "737-9" → first_page=737, last_page=739).
 
     Args:
         journal: Journal object from S2 response.
         venue: Venue string (fallback if journal is empty).
 
     Returns:
-        Dict with journal_name, volume, pages.
+        Dict with journal_name, volume, issue, pages, first_page, last_page.
 
     Example:
         >>> journal = {"name": "Nature", "volume": "629", "pages": "123-130"}
         >>> extract_journal_info(journal, "Nature")
-        {'journal_name': 'Nature', 'volume': '629', 'pages': '123-130'}
+        {'journal_name': 'Nature', 'volume': '629', 'issue': None, 'pages': '123-130', 'first_page': '123', 'last_page': '130'}
+        >>> journal = {"name": "J Med Chem", "volume": "32 4", "pages": "737-9"}
+        >>> extract_journal_info(journal, None)
+        {'journal_name': 'J Med Chem', 'volume': '32', 'issue': '4', 'pages': '737-9', 'first_page': '737', 'last_page': '739'}
 
     """
     if journal:
+        raw_volume = journal.get("volume")
+        raw_pages = journal.get("pages")
+
+        # Parse volume/issue from combined string
+        volume, issue = parse_volume_issue(raw_volume)
+
+        # Parse page range with abbreviation expansion
+        first_page, last_page = parse_page_range(raw_pages)
+
+        # Clean pages string (strip whitespace/newlines)
+        pages = raw_pages.strip() if raw_pages else None
+
         return {
             "journal_name": journal.get("name") or venue,
-            "volume": journal.get("volume"),
-            "pages": journal.get("pages"),
+            "volume": volume,
+            "issue": issue,
+            "pages": pages,
+            "first_page": first_page,
+            "last_page": last_page,
         }
     return {
         "journal_name": venue,
         "volume": None,
+        "issue": None,
         "pages": None,
+        "first_page": None,
+        "last_page": None,
     }
 
 
@@ -22200,7 +22441,6 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     validate_year,
 )
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
-from bioetl.domain.normalization import normalize_pmc_id, parse_page_range
 from bioetl.domain.value_objects import DOI, PubMedId
 
 if TYPE_CHECKING:
@@ -22333,15 +22573,13 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         # Note: contexts are only available when requesting citation details
         citation_contexts = extract_citation_contexts(rec.get("citations"))
 
-        # Journal/venue info
+        # Journal/venue info with parsed volume/issue and pages
+        # extract_journal_info now parses combined volume/issue (e.g., "32 4")
+        # and expands abbreviated page ranges (e.g., "737-9" → 737-739)
         journal_info = extract_journal_info(
             rec.get("journal"),
             rec.get("venue"),
         )
-
-        # Parse pages into unified first_page/last_page
-        pages = journal_info.get("pages")
-        first_page, last_page = parse_page_range(pages)
 
         # Open access info
         oa_info = extract_open_access_info(
@@ -22366,10 +22604,6 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "paper_id": paper_id,
             "doi": doi,
             "pmid": pmid,  # Use validated PMID from PubMedId Value Object
-            "pmc_id": normalize_pmc_id(
-                external_ids.get("pmcid")
-            ),  # API uses "pmcid", we use "pmc_id"
-            "arxiv_id": external_ids.get("arxiv"),
             "dblp_id": external_ids.get("dblp"),
             "corpus_id": external_ids.get("corpus_id"),
             "title": rec.get("title"),
@@ -22393,9 +22627,12 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             # affiliations excluded per user request
             "journal": journal_info.get("journal_name"),
             "volume": journal_info.get("volume"),
-            "pages": pages,  # Legacy field
-            "first_page": first_page,  # Unified field
-            "last_page": last_page,  # Unified field
+            "issue": journal_info.get("issue"),  # Parsed from combined "32 4" format
+            "pages": journal_info.get("pages"),  # Original pages string (cleaned)
+            "first_page": journal_info.get(
+                "first_page"
+            ),  # Parsed with abbreviation expansion
+            "last_page": journal_info.get("last_page"),  # Expanded (e.g., "9" → "739")
             "venue": rec.get("venue"),
             "year": year,
             "publication_date": self._normalize_partial_date(
@@ -22455,6 +22692,8 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         silver_record.pop("abstract", None)
         silver_record.pop("affiliations", None)
         silver_record.pop("authors", None)
+        silver_record.pop("pmc_id", None)
+        silver_record.pop("arxiv_id", None)
         return silver_record
 
 ================================================================================

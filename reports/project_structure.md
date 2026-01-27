@@ -440,6 +440,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 1da7890fad282838
     │   │   ├── 1dadbb07e2aab7fa
     │   │   ├── 1dbb52625d3efec7
+    │   │   ├── 1dc2ac78060cf9c1
     │   │   ├── 1dd290f36a5ee681
     │   │   ├── 1dd4aed681a6c6cd
     │   │   ├── 1dd9dd460b8f9c3b
@@ -453,6 +454,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 1e784a3bd33c9074
     │   │   ├── 1e85cfdbda9a1a36
     │   │   ├── 1ea790904b8fc03e
+    │   │   ├── 1eabbc4d8b7006ee
     │   │   ├── 1eac7ebe870c7955
     │   │   ├── 1ec0d1cbb5cd9314
     │   │   ├── 1ec11c5b46fa6fd8
@@ -491,6 +493,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 21ea69955d277d12
     │   │   ├── 221fcf0b2921206e
     │   │   ├── 22277cbf1b4264aa
+    │   │   ├── 223471b3638f739f
     │   │   ├── 2243e669b724f5f8
     │   │   ├── 22638c232e712951
     │   │   ├── 22813f5873d588c3
@@ -610,6 +613,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 2ae9e1e2aa3e06d7
     │   │   ├── 2af57d2635b47f19
     │   │   ├── 2b03e08247c437f0
+    │   │   ├── 2b5f0ee160866db1
     │   │   ├── 2b910db9687d421c
     │   │   ├── 2b9fcc739b4af112
     │   │   ├── 2ba06304080f8625
@@ -845,6 +849,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 3bcdd67b0e4aaf5d
     │   │   ├── 3bd12b5a806028fb
     │   │   ├── 3bde387543e00bce
+    │   │   ├── 3be942abe967df8f
     │   │   ├── 3bf2795bc3705240
     │   │   ├── 3c312bca578e5a82
     │   │   ├── 3c3264ea3d5195c4
@@ -880,6 +885,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 3e6d2bf9fda427dc
     │   │   ├── 3e956d09cb637946
     │   │   ├── 3e95721e8aecc663
+    │   │   ├── 3ec3c83f152e1c5f
     │   │   ├── 3ecca6b541ac4f81
     │   │   ├── 3ed369739e0fa007
     │   │   ├── 3ed9315389296bb0
@@ -898,6 +904,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 3fc1880a2b787765
     │   │   ├── 3fc8e14550663c67
     │   │   ├── 3fdf2c6e4674cc79
+    │   │   ├── 40026bcdc3977e71
     │   │   ├── 40084af46d8d3915
     │   │   ├── 401cb8ff8c4ecac9
     │   │   ├── 402dbdc886d55fda
@@ -1511,6 +1518,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 6a3f272d00ccb4f3
     │   │   ├── 6a5452f19f0fcafc
     │   │   ├── 6a606f4da039e222
+    │   │   ├── 6a7c24c3382ebbc6
     │   │   ├── 6aa35897ccb5c2bd
     │   │   ├── 6aa45120160954ed
     │   │   ├── 6aca3093335304cc
@@ -1843,6 +1851,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 827ef465a49f84af
     │   │   ├── 829009be5b58952a
     │   │   ├── 82b24a8b00ec4731
+    │   │   ├── 82f5f883f9a5fbd5
     │   │   ├── 8302411f893f9288
     │   │   ├── 8319ab8532cbfcc7
     │   │   ├── 832a3a77c49ebed6
@@ -2311,6 +2320,7 @@ BioactivityDataAcquisition2/
     │   │   ├── a2ced8abef458872
     │   │   ├── a2e759c0bf85b295
     │   │   ├── a2fc817e9ea1d4ad
+    │   │   ├── a3188bb35f250dff
     │   │   ├── a33b29be924660e4
     │   │   ├── a33fccb079d905d6
     │   │   ├── a34cc1952d05ec1e
@@ -2648,6 +2658,7 @@ BioactivityDataAcquisition2/
     │   │   ├── bac2962769b6ab9c
     │   │   ├── bac77bdc8745c8dc
     │   │   ├── baccdecd8ba9735d
+    │   │   ├── baff4722c4511751
     │   │   ├── bb06e7518b135b3d
     │   │   ├── bb12dc3875084acb
     │   │   ├── bb13668b6a0cb047
@@ -2935,6 +2946,7 @@ BioactivityDataAcquisition2/
     │   │   ├── ce0147f114a43105
     │   │   ├── ce16563d942e4231
     │   │   ├── ce27c2bf5bedc6ea
+    │   │   ├── ce540f13758639c3
     │   │   ├── ce66e0379693707b
     │   │   ├── ce6ae74ba46fb35e
     │   │   ├── ce70e691b83a753b
@@ -3071,6 +3083,7 @@ BioactivityDataAcquisition2/
     │   │   ├── d84ae486fe4f4c9e
     │   │   ├── d867df1bcd90b40a
     │   │   ├── d872275471087cf7
+    │   │   ├── d8722a200cbf39a1
     │   │   ├── d888bb9c2f36ef00
     │   │   ├── d8aa6e9b5c4cbbe6
     │   │   ├── d8bc0ceb4919af29
@@ -3106,6 +3119,7 @@ BioactivityDataAcquisition2/
     │   │   ├── daecf7a131a5e884
     │   │   ├── daee3e26985cc119
     │   │   ├── daf6f00770e9bad1
+    │   │   ├── dafb629d063e0611
     │   │   ├── db16e8f63dcbe1a8
     │   │   ├── db3969d3b5fff680
     │   │   ├── db3d6d147c72d356
@@ -3188,6 +3202,7 @@ BioactivityDataAcquisition2/
     │   │   ├── e10a12f22da511f8
     │   │   ├── e128f0df504866fb
     │   │   ├── e13180bab37ed448
+    │   │   ├── e160086d420d4b5a
     │   │   ├── e16d2c3e5d075246
     │   │   ├── e1908ed356e867b4
     │   │   ├── e1937848b01ff16a
@@ -3273,6 +3288,7 @@ BioactivityDataAcquisition2/
     │   │   ├── e6c5ca33183a02de
     │   │   ├── e6cd9c8290c27b3c
     │   │   ├── e6d134f6550fc543
+    │   │   ├── e6e1c1dbf9d6b2d1
     │   │   ├── e727d2aacd7eaae6
     │   │   ├── e72c775328ee7b3d
     │   │   ├── e73c16b17d33d440
@@ -3666,6 +3682,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp16446rlu
     │   │   ├── tmp1777lidl
     │   │   ├── tmp177eccym
+    │   │   ├── tmp19oi4l0v
     │   │   ├── tmp1_sigsj8
     │   │   ├── tmp1ag9wljf
     │   │   ├── tmp1awh5f63
@@ -4534,6 +4551,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpn5xs3vo2
     │   │   ├── tmpn7an4eq6
     │   │   ├── tmpn837l565
+    │   │   ├── tmpn8x7yh9n
     │   │   ├── tmpn9jzl8b3
     │   │   ├── tmpnao2_3ej
     │   │   ├── tmpne92qhtm
@@ -4679,6 +4697,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmprmlw11ly
     │   │   ├── tmprphe6gna
     │   │   ├── tmprqnv64pv
+    │   │   ├── tmprrcln_0a
     │   │   ├── tmprs__arvd
     │   │   ├── tmprsemugf9
     │   │   ├── tmprskb48a1
@@ -4784,6 +4803,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpup9d5q6h
     │   │   ├── tmpupg2kcw6
     │   │   ├── tmpupku4u6e
+    │   │   ├── tmpuqfy16oz
     │   │   ├── tmpuqhdu7v4
     │   │   ├── tmpurh07lm2
     │   │   ├── tmpurhm7w2z
@@ -4808,6 +4828,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpvd__a_ez
     │   │   ├── tmpve5nr2bq
     │   │   ├── tmpvh6mkkz6
+    │   │   ├── tmpvhqlxaon
     │   │   ├── tmpvi8mv9ru
     │   │   ├── tmpvikunvpa
     │   │   ├── tmpving1pcp
@@ -4972,6 +4993,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpzrw45t90
     │   │   ├── tmpzth1gn60
     │   │   ├── tmpztjhzz9b
+    │   │   ├── tmpzuis3_4w
     │   │   ├── tmpzxg_uxnd
     │   │   └── tmpzyn2i47v
     │   └── unicode_data/
@@ -10176,473 +10198,6 @@ BioactivityDataAcquisition2/
     │   │   ├── target_component.csv
     │   │   └── tissue.csv
     │   ├── output/
-    │   │   ├── bronze/
-    │   │   │   ├── chembl/
-    │   │   │   │   ├── publication/
-    │   │   │   │   │   ├── 2026-01-27/
-    │   │   │   │   │   │   ├── batch_2026-01-27_086c231f-89a4-4aa6-916d-8731173c964f.jsonl
-    │   │   │   │   │   │   ├── batch_2026-01-27_086c231f-89a4-4aa6-916d-8731173c964f.jsonl.zst
-    │   │   │   │   │   │   ├── batch_2026-01-27_086c231f-89a4-4aa6-916d-8731173c964f.jsonl.zst.meta.json
-    │   │   │   │   │   │   ├── batch_2026-01-27_20650268-d984-4d6f-b227-6dd90dc4d241.jsonl
-    │   │   │   │   │   │   ├── batch_2026-01-27_20650268-d984-4d6f-b227-6dd90dc4d241.jsonl.zst
-    │   │   │   │   │   │   ├── batch_2026-01-27_20650268-d984-4d6f-b227-6dd90dc4d241.jsonl.zst.meta.json
-    │   │   │   │   │   │   ├── batch_2026-01-27_24c7ceae-b961-4623-826d-6c724b2daca7.jsonl
-    │   │   │   │   │   │   ├── batch_2026-01-27_24c7ceae-b961-4623-826d-6c724b2daca7.jsonl.zst
-    │   │   │   │   │   │   ├── batch_2026-01-27_24c7ceae-b961-4623-826d-6c724b2daca7.jsonl.zst.meta.json
-    │   │   │   │   │   │   ├── batch_2026-01-27_57d4f1de-b80e-4c53-b7ec-cbfd4da8d5c3.jsonl
-    │   │   │   │   │   │   ├── batch_2026-01-27_57d4f1de-b80e-4c53-b7ec-cbfd4da8d5c3.jsonl.zst
-    │   │   │   │   │   │   ├── batch_2026-01-27_57d4f1de-b80e-4c53-b7ec-cbfd4da8d5c3.jsonl.zst.meta.json
-    │   │   │   │   │   │   ├── batch_2026-01-27_5d00f949-65c8-4106-a346-ab02553a0364.jsonl
-    │   │   │   │   │   │   ├── batch_2026-01-27_5d00f949-65c8-4106-a346-ab02553a0364.jsonl.zst
-    │   │   │   │   │   │   ├── batch_2026-01-27_5d00f949-65c8-4106-a346-ab02553a0364.jsonl.zst.meta.json
-    │   │   │   │   │   │   ├── batch_2026-01-27_6543e100-bc1d-4bb7-b5cb-b0526f21e0f7.jsonl
-    │   │   │   │   │   │   ├── batch_2026-01-27_6543e100-bc1d-4bb7-b5cb-b0526f21e0f7.jsonl.zst
-    │   │   │   │   │   │   ├── batch_2026-01-27_6543e100-bc1d-4bb7-b5cb-b0526f21e0f7.jsonl.zst.meta.json
-    │   │   │   │   │   │   ├── batch_2026-01-27_92ebc522-519d-4aea-8ff7-b1b39e2725ab.jsonl
-    │   │   │   │   │   │   ├── batch_2026-01-27_92ebc522-519d-4aea-8ff7-b1b39e2725ab.jsonl.zst
-    │   │   │   │   │   │   ├── batch_2026-01-27_92ebc522-519d-4aea-8ff7-b1b39e2725ab.jsonl.zst.meta.json
-    │   │   │   │   │   │   ├── batch_2026-01-27_abe40ce0-8c49-477b-9030-049e10935cf1.jsonl
-    │   │   │   │   │   │   ├── batch_2026-01-27_abe40ce0-8c49-477b-9030-049e10935cf1.jsonl.zst
-    │   │   │   │   │   │   ├── batch_2026-01-27_abe40ce0-8c49-477b-9030-049e10935cf1.jsonl.zst.meta.json
-    │   │   │   │   │   │   ├── batch_2026-01-27_bdb4864d-46da-450b-ad58-024d57eb1a09.jsonl
-    │   │   │   │   │   │   ├── batch_2026-01-27_bdb4864d-46da-450b-ad58-024d57eb1a09.jsonl.zst
-    │   │   │   │   │   │   ├── batch_2026-01-27_bdb4864d-46da-450b-ad58-024d57eb1a09.jsonl.zst.meta.json
-    │   │   │   │   │   │   ├── batch_2026-01-27_c147c98c-18db-4507-866a-6b24ccec0ef6.jsonl
-    │   │   │   │   │   │   ├── batch_2026-01-27_c147c98c-18db-4507-866a-6b24ccec0ef6.jsonl.zst
-    │   │   │   │   │   │   └── batch_2026-01-27_c147c98c-18db-4507-866a-6b24ccec0ef6.jsonl.zst.meta.json
-    │   │   │   │   │   ├── bronze_chembl_publication_dq_report.json
-    │   │   │   │   │   └── chembl_publication_metadata.yaml
-    │   │   │   │   ├── activity
-    │   │   │   │   ├── assay
-    │   │   │   │   ├── cell_line
-    │   │   │   │   ├── compound_record
-    │   │   │   │   ├── molecule
-    │   │   │   │   ├── publication_term
-    │   │   │   │   ├── target
-    │   │   │   │   └── target_component
-    │   │   │   ├── crossref/
-    │   │   │   │   └── publication/
-    │   │   │   │       ├── 2026-01-27/
-    │   │   │   │       │   ├── batch_2026-01-27_1e7dbb38-9c91-45bd-9e61-3481f4f5c0fb.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_1e7dbb38-9c91-45bd-9e61-3481f4f5c0fb.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_1e7dbb38-9c91-45bd-9e61-3481f4f5c0fb.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_30692242-c914-483c-99b9-e148b8c8c5c8.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_30692242-c914-483c-99b9-e148b8c8c5c8.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_30692242-c914-483c-99b9-e148b8c8c5c8.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_55dfe476-0390-40ce-baad-1d12017bb3a0.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_55dfe476-0390-40ce-baad-1d12017bb3a0.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_55dfe476-0390-40ce-baad-1d12017bb3a0.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_5b74d75f-f1b8-4163-a1e9-21c582f68f26.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_5b74d75f-f1b8-4163-a1e9-21c582f68f26.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_5b74d75f-f1b8-4163-a1e9-21c582f68f26.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_637cd4bf-18a2-40be-a13e-399148d54b50.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_637cd4bf-18a2-40be-a13e-399148d54b50.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_637cd4bf-18a2-40be-a13e-399148d54b50.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_6b5acd1e-3e38-49a3-8be9-f30a319d6f47.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_6b5acd1e-3e38-49a3-8be9-f30a319d6f47.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_6b5acd1e-3e38-49a3-8be9-f30a319d6f47.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_7459676c-4d79-4324-ae2e-33d46899d17b.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_7459676c-4d79-4324-ae2e-33d46899d17b.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_7459676c-4d79-4324-ae2e-33d46899d17b.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_7c7d2f7c-3925-416a-a4b0-a15f8ca77462.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_7c7d2f7c-3925-416a-a4b0-a15f8ca77462.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_7c7d2f7c-3925-416a-a4b0-a15f8ca77462.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_9e0c98c5-fea1-4944-979c-3e1a0093618d.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_9e0c98c5-fea1-4944-979c-3e1a0093618d.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_9e0c98c5-fea1-4944-979c-3e1a0093618d.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_efa1ebbb-559e-4c16-9eaa-2a9911f30dfc.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_efa1ebbb-559e-4c16-9eaa-2a9911f30dfc.jsonl.zst
-    │   │   │   │       │   └── batch_2026-01-27_efa1ebbb-559e-4c16-9eaa-2a9911f30dfc.jsonl.zst.meta.json
-    │   │   │   │       ├── bronze_crossref_publication_dq_report.json
-    │   │   │   │       └── crossref_work_metadata.yaml
-    │   │   │   ├── openalex/
-    │   │   │   │   └── publication/
-    │   │   │   │       ├── 2026-01-27/
-    │   │   │   │       │   ├── batch_2026-01-27_42c45767-85a1-4bf7-b1ac-a26ed898f2be.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_42c45767-85a1-4bf7-b1ac-a26ed898f2be.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_42c45767-85a1-4bf7-b1ac-a26ed898f2be.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_576f89f5-8cf5-4e5b-835c-d45e4750aae4.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_576f89f5-8cf5-4e5b-835c-d45e4750aae4.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_576f89f5-8cf5-4e5b-835c-d45e4750aae4.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_6ea6bc20-1211-45d3-86e4-08cb776984e3.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_6ea6bc20-1211-45d3-86e4-08cb776984e3.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_6ea6bc20-1211-45d3-86e4-08cb776984e3.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_7604c2cb-0a2f-4b2d-9cf3-313ec1fe5fe9.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_7604c2cb-0a2f-4b2d-9cf3-313ec1fe5fe9.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_7604c2cb-0a2f-4b2d-9cf3-313ec1fe5fe9.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_84500000-8c62-43d6-8d60-9858f39e3260.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_84500000-8c62-43d6-8d60-9858f39e3260.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_84500000-8c62-43d6-8d60-9858f39e3260.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_b02adc7b-2522-4aa4-8973-12dad3753a50.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_b02adc7b-2522-4aa4-8973-12dad3753a50.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_b02adc7b-2522-4aa4-8973-12dad3753a50.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_c0cf7c92-2cb1-4f50-a8f5-42e613a0756a.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_c0cf7c92-2cb1-4f50-a8f5-42e613a0756a.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_c0cf7c92-2cb1-4f50-a8f5-42e613a0756a.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_eb062319-9933-4f8b-a03d-51cacb52faf7.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_eb062319-9933-4f8b-a03d-51cacb52faf7.jsonl.zst
-    │   │   │   │       │   └── batch_2026-01-27_eb062319-9933-4f8b-a03d-51cacb52faf7.jsonl.zst.meta.json
-    │   │   │   │       ├── bronze_openalex_publication_dq_report.json
-    │   │   │   │       └── openalex_publication_metadata.yaml
-    │   │   │   ├── pubchem/
-    │   │   │   │   └── compound
-    │   │   │   ├── pubmed/
-    │   │   │   │   └── publication/
-    │   │   │   │       ├── 2026-01-27/
-    │   │   │   │       │   ├── batch_2026-01-27_10cb3db2-5a2c-4360-be67-66bb6c0d8f31.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_10cb3db2-5a2c-4360-be67-66bb6c0d8f31.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_10cb3db2-5a2c-4360-be67-66bb6c0d8f31.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_1249f43b-b8a5-457f-bda6-14afc3b97472.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_1249f43b-b8a5-457f-bda6-14afc3b97472.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_1249f43b-b8a5-457f-bda6-14afc3b97472.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_1c6f812f-3cd5-41e0-8716-f3b763714c70.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_1c6f812f-3cd5-41e0-8716-f3b763714c70.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_1c6f812f-3cd5-41e0-8716-f3b763714c70.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_37761672-d5a4-4c97-ad72-ac074bdbcb1f.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_37761672-d5a4-4c97-ad72-ac074bdbcb1f.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_37761672-d5a4-4c97-ad72-ac074bdbcb1f.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_583e4cc4-78ad-4f9e-abc9-a283a0bea971.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_583e4cc4-78ad-4f9e-abc9-a283a0bea971.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_583e4cc4-78ad-4f9e-abc9-a283a0bea971.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_59f32808-8ea7-489b-8ca0-25c79d39cc2e.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_59f32808-8ea7-489b-8ca0-25c79d39cc2e.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_59f32808-8ea7-489b-8ca0-25c79d39cc2e.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_69c213e4-5486-4725-a6c5-bcf1602bbbe8.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_69c213e4-5486-4725-a6c5-bcf1602bbbe8.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_69c213e4-5486-4725-a6c5-bcf1602bbbe8.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_840f2ae5-2e21-4e6e-94c1-2496892e1ca6.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_840f2ae5-2e21-4e6e-94c1-2496892e1ca6.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_840f2ae5-2e21-4e6e-94c1-2496892e1ca6.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_990ab6e3-ebaf-4f61-8e45-c36fb955b663.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_990ab6e3-ebaf-4f61-8e45-c36fb955b663.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_990ab6e3-ebaf-4f61-8e45-c36fb955b663.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_ab0c567d-3ff6-420e-be85-7bd8cf7da647.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_ab0c567d-3ff6-420e-be85-7bd8cf7da647.jsonl.zst
-    │   │   │   │       │   └── batch_2026-01-27_ab0c567d-3ff6-420e-be85-7bd8cf7da647.jsonl.zst.meta.json
-    │   │   │   │       ├── bronze_pubmed_publication_dq_report.json
-    │   │   │   │       └── pubmed_publication_metadata.yaml
-    │   │   │   ├── semanticscholar/
-    │   │   │   │   └── publication/
-    │   │   │   │       ├── 2026-01-27/
-    │   │   │   │       │   ├── batch_2026-01-27_0974bc4a-9d6e-4125-a5cc-7f713e2f6f5f.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_0974bc4a-9d6e-4125-a5cc-7f713e2f6f5f.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_0974bc4a-9d6e-4125-a5cc-7f713e2f6f5f.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_2e7cae01-e3ac-464b-bee1-9bc6a630e655.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_2e7cae01-e3ac-464b-bee1-9bc6a630e655.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_2e7cae01-e3ac-464b-bee1-9bc6a630e655.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_37c7f48f-a7af-45ea-b6f1-2af48cfb7f23.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_37c7f48f-a7af-45ea-b6f1-2af48cfb7f23.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_37c7f48f-a7af-45ea-b6f1-2af48cfb7f23.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_52f63a9a-a29e-433e-9a6b-c25718960dfa.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_52f63a9a-a29e-433e-9a6b-c25718960dfa.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_52f63a9a-a29e-433e-9a6b-c25718960dfa.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_5df11af1-a299-4e01-9e34-bc04218f67ac.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_5df11af1-a299-4e01-9e34-bc04218f67ac.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_5df11af1-a299-4e01-9e34-bc04218f67ac.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_725e1368-b269-4cb8-a9b4-d41cc53913ae.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_725e1368-b269-4cb8-a9b4-d41cc53913ae.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_725e1368-b269-4cb8-a9b4-d41cc53913ae.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_739d9842-5a05-451d-bd4d-14d5fd076c22.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_739d9842-5a05-451d-bd4d-14d5fd076c22.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_739d9842-5a05-451d-bd4d-14d5fd076c22.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_928ea531-b6e7-43fc-a905-443bf1f47e1e.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_928ea531-b6e7-43fc-a905-443bf1f47e1e.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_928ea531-b6e7-43fc-a905-443bf1f47e1e.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_d916b5d1-ea39-475a-939b-fdde2042203b.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_d916b5d1-ea39-475a-939b-fdde2042203b.jsonl.zst
-    │   │   │   │       │   ├── batch_2026-01-27_d916b5d1-ea39-475a-939b-fdde2042203b.jsonl.zst.meta.json
-    │   │   │   │       │   ├── batch_2026-01-27_e45eb3cd-8216-4dcb-8a02-663fe3ea4be4.jsonl
-    │   │   │   │       │   ├── batch_2026-01-27_e45eb3cd-8216-4dcb-8a02-663fe3ea4be4.jsonl.zst
-    │   │   │   │       │   └── batch_2026-01-27_e45eb3cd-8216-4dcb-8a02-663fe3ea4be4.jsonl.zst.meta.json
-    │   │   │   │       ├── bronze_semanticscholar_publication_dq_report.json
-    │   │   │   │       └── semanticscholar_publication_metadata.yaml
-    │   │   │   └── uniprot/
-    │   │   │       └── protein
-    │   │   ├── checkpoints/
-    │   │   ├── gold/
-    │   │   │   ├── chembl/
-    │   │   │   │   ├── publication/
-    │   │   │   │   │   ├── _delta_log/
-    │   │   │   │   │   │   ├── 00000000000000000000.json
-    │   │   │   │   │   │   ├── 00000000000000000001.json
-    │   │   │   │   │   │   ├── 00000000000000000002.json
-    │   │   │   │   │   │   ├── 00000000000000000003.json
-    │   │   │   │   │   │   ├── 00000000000000000004.json
-    │   │   │   │   │   │   ├── 00000000000000000005.json
-    │   │   │   │   │   │   ├── 00000000000000000006.json
-    │   │   │   │   │   │   ├── 00000000000000000007.json
-    │   │   │   │   │   │   ├── 00000000000000000008.json
-    │   │   │   │   │   │   └── 00000000000000000009.json
-    │   │   │   │   │   ├── chembl_publication.csv
-    │   │   │   │   │   ├── chembl_publication_metadata.yaml
-    │   │   │   │   │   ├── gold_chembl_publication_dq_report.json
-    │   │   │   │   │   ├── part-00000-066d9cad-e60f-4a5a-9302-69421eee2903-c000.snappy.parquet
-    │   │   │   │   │   ├── part-00000-17ddd8fb-3383-4052-ac62-eb4af22f8726-c000.snappy.parquet
-    │   │   │   │   │   ├── part-00000-3b269d91-1021-40f8-9c1b-766bfe019dd8-c000.snappy.parquet
-    │   │   │   │   │   ├── part-00000-91a93eb1-b51b-41b3-bc23-17296e47e885-c000.snappy.parquet
-    │   │   │   │   │   ├── part-00000-b0d2a143-8c6b-4299-8f98-1ec2a99fe14b-c000.snappy.parquet
-    │   │   │   │   │   ├── part-00000-bfd2748b-4873-465e-bf7c-6a8f7f08530f-c000.snappy.parquet
-    │   │   │   │   │   ├── part-00000-d5e67a39-e956-4275-90f5-d0a949063f61-c000.snappy.parquet
-    │   │   │   │   │   ├── part-00000-d621819a-9062-43e6-9522-e6e8b92d9819-c000.snappy.parquet
-    │   │   │   │   │   ├── part-00000-e3ff5cc1-10fd-4ad5-91ee-b9e7cfb304b7-c000.snappy.parquet
-    │   │   │   │   │   └── part-00000-eff09de4-1149-4e6e-be84-eb317c277cc2-c000.snappy.parquet
-    │   │   │   │   ├── activity
-    │   │   │   │   ├── cell_line
-    │   │   │   │   ├── compound_record
-    │   │   │   │   ├── publication_term
-    │   │   │   │   ├── target
-    │   │   │   │   └── target_component
-    │   │   │   ├── composite/
-    │   │   │   │   ├── publication/
-    │   │   │   │   │   ├── _delta_log/
-    │   │   │   │   │   │   └── 00000000000000000000.json
-    │   │   │   │   │   ├── composite_publication_metadata.yaml
-    │   │   │   │   │   └── part-00000-2828592f-f252-4556-8393-4bc9896664d9-c000.snappy.parquet
-    │   │   │   │   └── publication.csv
-    │   │   │   ├── crossref/
-    │   │   │   │   └── publication/
-    │   │   │   │       ├── _delta_log/
-    │   │   │   │       │   ├── 00000000000000000000.json
-    │   │   │   │       │   ├── 00000000000000000001.json
-    │   │   │   │       │   ├── 00000000000000000002.json
-    │   │   │   │       │   ├── 00000000000000000003.json
-    │   │   │   │       │   ├── 00000000000000000004.json
-    │   │   │   │       │   ├── 00000000000000000005.json
-    │   │   │   │       │   ├── 00000000000000000006.json
-    │   │   │   │       │   ├── 00000000000000000007.json
-    │   │   │   │       │   ├── 00000000000000000008.json
-    │   │   │   │       │   └── 00000000000000000009.json
-    │   │   │   │       ├── crossref_publication.csv
-    │   │   │   │       ├── crossref_publication_metadata.yaml
-    │   │   │   │       ├── gold_crossref_publication_dq_report.json
-    │   │   │   │       ├── part-00000-06b83c21-f633-489a-922f-180908dd7dbc-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-14316067-ef53-4d03-8349-4f6d57cec1c3-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-1f72f173-fe22-4a70-8d1e-e232963ee2f4-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-421d890c-ace7-47df-a202-ea8ee801d12c-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-48548429-886c-4736-aec2-28133b9d1a64-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-4b1744b2-0e4e-41e6-a088-975bd9f7d17c-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-4e2442f0-2ba2-4202-ae89-63862eff698a-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-76b37820-f474-4b76-89da-7c27b8997120-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-85fa6c4e-a8cf-4725-8eb1-37807216a3df-c000.snappy.parquet
-    │   │   │   │       └── part-00000-8f6c086d-e376-40b8-bae2-24bea6e66aff-c000.snappy.parquet
-    │   │   │   ├── openalex/
-    │   │   │   │   └── publication/
-    │   │   │   │       ├── _delta_log/
-    │   │   │   │       │   ├── 00000000000000000000.json
-    │   │   │   │       │   ├── 00000000000000000001.json
-    │   │   │   │       │   ├── 00000000000000000002.json
-    │   │   │   │       │   ├── 00000000000000000003.json
-    │   │   │   │       │   ├── 00000000000000000004.json
-    │   │   │   │       │   ├── 00000000000000000005.json
-    │   │   │   │       │   ├── 00000000000000000006.json
-    │   │   │   │       │   └── 00000000000000000007.json
-    │   │   │   │       ├── openalex_publication.csv
-    │   │   │   │       ├── openalex_publication_metadata.yaml
-    │   │   │   │       ├── part-00000-0d45c532-e8da-41cc-aeff-9dd643e60349-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-1d0a2435-c2a5-409d-ac99-408bf4cb2436-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-7644ee8b-d6e0-440e-9bd5-bd4e4bc43f65-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-78089b82-a9fd-44ca-8251-d0f1182a6399-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-b6e83c9f-ed04-449d-b103-8503855b19e0-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-c4e56aee-711d-4f74-8f74-8b075122df29-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-eaa4810c-30ff-4428-b30a-36c697a7afc5-c000.snappy.parquet
-    │   │   │   │       └── part-00000-f6923d6c-5156-4ee4-b8c7-96e0293c26a6-c000.snappy.parquet
-    │   │   │   ├── pubchem/
-    │   │   │   │   └── compound
-    │   │   │   ├── pubmed/
-    │   │   │   │   └── publication/
-    │   │   │   │       ├── _delta_log/
-    │   │   │   │       │   ├── 00000000000000000000.json
-    │   │   │   │       │   ├── 00000000000000000001.json
-    │   │   │   │       │   ├── 00000000000000000002.json
-    │   │   │   │       │   ├── 00000000000000000003.json
-    │   │   │   │       │   ├── 00000000000000000004.json
-    │   │   │   │       │   ├── 00000000000000000005.json
-    │   │   │   │       │   ├── 00000000000000000006.json
-    │   │   │   │       │   ├── 00000000000000000007.json
-    │   │   │   │       │   ├── 00000000000000000008.json
-    │   │   │   │       │   └── 00000000000000000009.json
-    │   │   │   │       ├── gold_pubmed_publication_dq_report.json
-    │   │   │   │       ├── part-00000-3b4c35d1-3766-4d92-842b-9635d50a74d6-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-4fd592e4-71d8-4859-818b-f491b6972242-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-51e1fa63-3bc3-44be-a2a8-6848e4fbb33d-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-5b086ad9-056d-44db-babd-7cfd7f0a804b-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-75a5085f-2ae6-47b5-bc06-67fcc0877e7a-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-89be8b72-7a55-4ffa-a98b-d65a40c5aff8-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-bc4efa71-2aa1-44a1-9206-73256003d12f-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-c9b53a3f-652b-4f05-8564-251134162b19-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-d154e43b-39ed-4042-bdc5-1c202bca52e5-c000.snappy.parquet
-    │   │   │   │       ├── part-00000-d9a1ba3e-2a09-4ec8-b8fc-1654049bf07f-c000.snappy.parquet
-    │   │   │   │       ├── pubmed_publication.csv
-    │   │   │   │       └── pubmed_publication_metadata.yaml
-    │   │   │   └── semanticscholar/
-    │   │   │       └── publication/
-    │   │   │           ├── _delta_log/
-    │   │   │           │   ├── 00000000000000000000.json
-    │   │   │           │   ├── 00000000000000000001.json
-    │   │   │           │   ├── 00000000000000000002.json
-    │   │   │           │   ├── 00000000000000000003.json
-    │   │   │           │   ├── 00000000000000000004.json
-    │   │   │           │   ├── 00000000000000000005.json
-    │   │   │           │   ├── 00000000000000000006.json
-    │   │   │           │   ├── 00000000000000000007.json
-    │   │   │           │   ├── 00000000000000000008.json
-    │   │   │           │   └── 00000000000000000009.json
-    │   │   │           ├── part-00000-047891f4-ee2b-4d61-98b0-1036b18a9317-c000.snappy.parquet
-    │   │   │           ├── part-00000-2ea28ca1-a233-484c-a046-bc76fcd8e40c-c000.snappy.parquet
-    │   │   │           ├── part-00000-40b3b9b0-fecb-46f7-b371-c3be81edd0c8-c000.snappy.parquet
-    │   │   │           ├── part-00000-78d4867e-d3a7-4c9c-b1ff-7fece16632c0-c000.snappy.parquet
-    │   │   │           ├── part-00000-98ade18e-9dd7-44e7-9bc7-372fe12a076b-c000.snappy.parquet
-    │   │   │           ├── part-00000-b1f913ae-8567-4f8e-a904-b9a47540bc9a-c000.snappy.parquet
-    │   │   │           ├── part-00000-c0a9d51d-f1dd-4eb2-869f-9317803bd5c8-c000.snappy.parquet
-    │   │   │           ├── part-00000-c46aa1a0-48c8-4209-aabd-a7836bfc2232-c000.snappy.parquet
-    │   │   │           ├── part-00000-c707ecfc-eab7-4241-a3b4-91325b38e328-c000.snappy.parquet
-    │   │   │           ├── part-00000-cb73cfdc-4c49-45ed-961b-7c8ab488d312-c000.snappy.parquet
-    │   │   │           ├── semanticscholar_publication.csv
-    │   │   │           └── semanticscholar_publication_metadata.yaml
-    │   │   └── silver/
-    │   │       ├── chembl/
-    │   │       │   ├── publication/
-    │   │       │   │   ├── _delta_log/
-    │   │       │   │   │   ├── 00000000000000000000.json
-    │   │       │   │   │   ├── 00000000000000000001.json
-    │   │       │   │   │   ├── 00000000000000000002.json
-    │   │       │   │   │   ├── 00000000000000000003.json
-    │   │       │   │   │   ├── 00000000000000000004.json
-    │   │       │   │   │   ├── 00000000000000000005.json
-    │   │       │   │   │   ├── 00000000000000000006.json
-    │   │       │   │   │   ├── 00000000000000000007.json
-    │   │       │   │   │   ├── 00000000000000000008.json
-    │   │       │   │   │   └── 00000000000000000009.json
-    │   │       │   │   ├── chembl_publication.csv
-    │   │       │   │   ├── chembl_publication_metadata.yaml
-    │   │       │   │   ├── part-00000-048d4245-f0d5-4b02-9df4-325e80ab885c-c000.snappy.parquet
-    │   │       │   │   ├── part-00000-0969caf7-7ddc-43ed-a481-e1d6b6cad6fc-c000.snappy.parquet
-    │   │       │   │   ├── part-00000-16394e41-b256-41c5-a80b-c1b4b5a34eab-c000.snappy.parquet
-    │   │       │   │   ├── part-00000-1923a915-9739-4512-b337-4c16653ff47b-c000.snappy.parquet
-    │   │       │   │   ├── part-00000-45889c01-650f-438a-888a-e2fcf32cf08e-c000.snappy.parquet
-    │   │       │   │   ├── part-00000-7b209ca9-eede-4d4f-9ec8-8ac7a6b23010-c000.snappy.parquet
-    │   │       │   │   ├── part-00000-8cc5109c-fa19-4e75-87db-c5c7a718efb5-c000.snappy.parquet
-    │   │       │   │   ├── part-00000-a3b2ae19-fc46-4cd7-8f05-771f5d65479e-c000.snappy.parquet
-    │   │       │   │   ├── part-00000-c36962f1-ce58-44f7-95fb-354ed705b2ff-c000.snappy.parquet
-    │   │       │   │   ├── part-00000-d86a3753-1596-4419-8900-e784fc49b0bd-c000.snappy.parquet
-    │   │       │   │   └── silver_chembl_publication_dq_report.json
-    │   │       │   ├── activity
-    │   │       │   ├── assay
-    │   │       │   ├── cell_line
-    │   │       │   ├── compound_record
-    │   │       │   ├── molecule
-    │   │       │   ├── publication_term
-    │   │       │   ├── target
-    │   │       │   └── target_component
-    │   │       ├── composite/
-    │   │       │   ├── publication/
-    │   │       │   │   ├── _delta_log/
-    │   │       │   │   │   └── 00000000000000000000.json
-    │   │       │   │   ├── composite_publication_metadata.yaml
-    │   │       │   │   └── part-00000-bbc71e03-65b9-43a1-bf79-ca54dd7d1e29-c000.snappy.parquet
-    │   │       │   └── publication.csv
-    │   │       ├── crossref/
-    │   │       │   └── publication/
-    │   │       │       ├── _delta_log/
-    │   │       │       │   ├── 00000000000000000000.json
-    │   │       │       │   ├── 00000000000000000001.json
-    │   │       │       │   ├── 00000000000000000002.json
-    │   │       │       │   ├── 00000000000000000003.json
-    │   │       │       │   ├── 00000000000000000004.json
-    │   │       │       │   ├── 00000000000000000005.json
-    │   │       │       │   ├── 00000000000000000006.json
-    │   │       │       │   ├── 00000000000000000007.json
-    │   │       │       │   ├── 00000000000000000008.json
-    │   │       │       │   └── 00000000000000000009.json
-    │   │       │       ├── crossref_publication.csv
-    │   │       │       ├── crossref_publication_metadata.yaml
-    │   │       │       ├── part-00000-2e2304cd-1012-446e-9ba1-bce6d1d86632-c000.snappy.parquet
-    │   │       │       ├── part-00000-3e90d93d-d7ba-477f-b2fd-d49821125a19-c000.snappy.parquet
-    │   │       │       ├── part-00000-3ea8be4b-85a9-45b5-a721-79a839bd57b5-c000.snappy.parquet
-    │   │       │       ├── part-00000-3fe52f19-7a93-49be-9f3b-37fbb57fe145-c000.snappy.parquet
-    │   │       │       ├── part-00000-8cd8edc7-c20b-4b32-85ae-4c54b5cd363e-c000.snappy.parquet
-    │   │       │       ├── part-00000-a3ac7406-ef65-4d5b-8b23-5f7df404cc4e-c000.snappy.parquet
-    │   │       │       ├── part-00000-c261c8d3-c9c8-4f7c-af41-8ffda5c4647a-c000.snappy.parquet
-    │   │       │       ├── part-00000-ee5b3ed7-fb7c-4d63-bd48-b6bf27ea8c92-c000.snappy.parquet
-    │   │       │       ├── part-00000-f3ee068b-b779-427e-bebe-754021341db6-c000.snappy.parquet
-    │   │       │       ├── part-00000-f6b3f9f4-e410-4aa3-96f5-1aa22be0e374-c000.snappy.parquet
-    │   │       │       └── silver_crossref_publication_dq_report.json
-    │   │       ├── openalex/
-    │   │       │   └── publication/
-    │   │       │       ├── _delta_log/
-    │   │       │       │   ├── 00000000000000000000.json
-    │   │       │       │   ├── 00000000000000000001.json
-    │   │       │       │   ├── 00000000000000000002.json
-    │   │       │       │   ├── 00000000000000000003.json
-    │   │       │       │   ├── 00000000000000000004.json
-    │   │       │       │   ├── 00000000000000000005.json
-    │   │       │       │   ├── 00000000000000000006.json
-    │   │       │       │   └── 00000000000000000007.json
-    │   │       │       ├── openalex_publication.csv
-    │   │       │       ├── openalex_publication_metadata.yaml
-    │   │       │       ├── part-00000-1ee72c73-06c5-4bb2-976a-abda1909ef08-c000.snappy.parquet
-    │   │       │       ├── part-00000-34716654-a895-453e-a0e8-eabbe6b3672c-c000.snappy.parquet
-    │   │       │       ├── part-00000-5adff216-3b14-48c8-b83b-fdfea15407a4-c000.snappy.parquet
-    │   │       │       ├── part-00000-b1415d6f-42b6-4fba-87fd-6c6b0b836286-c000.snappy.parquet
-    │   │       │       ├── part-00000-b24f8de0-2189-43ad-a6fe-dff26ec0a464-c000.snappy.parquet
-    │   │       │       ├── part-00000-e106645e-6c51-43a0-a27b-7193b694ee4e-c000.snappy.parquet
-    │   │       │       ├── part-00000-ed03d795-a014-49b0-b6a5-7f70334289e8-c000.snappy.parquet
-    │   │       │       └── part-00000-f3ffff66-d592-4a0e-bbaf-fa16a7aa400c-c000.snappy.parquet
-    │   │       ├── pubchem/
-    │   │       │   └── compound
-    │   │       ├── pubmed/
-    │   │       │   └── publication/
-    │   │       │       ├── _delta_log/
-    │   │       │       │   ├── 00000000000000000000.json
-    │   │       │       │   ├── 00000000000000000001.json
-    │   │       │       │   ├── 00000000000000000002.json
-    │   │       │       │   ├── 00000000000000000003.json
-    │   │       │       │   ├── 00000000000000000004.json
-    │   │       │       │   ├── 00000000000000000005.json
-    │   │       │       │   ├── 00000000000000000006.json
-    │   │       │       │   ├── 00000000000000000007.json
-    │   │       │       │   ├── 00000000000000000008.json
-    │   │       │       │   └── 00000000000000000009.json
-    │   │       │       ├── part-00000-0678676e-47b3-4da7-ab4e-9de4ef7c755d-c000.snappy.parquet
-    │   │       │       ├── part-00000-08d5ba75-2608-468f-9aa9-d0f23ba79105-c000.snappy.parquet
-    │   │       │       ├── part-00000-3ff6c479-91eb-4497-aa7d-949754ded281-c000.snappy.parquet
-    │   │       │       ├── part-00000-493ce29f-9e36-4916-b5cf-cffc9eb78b83-c000.snappy.parquet
-    │   │       │       ├── part-00000-6042e85a-7e47-4dcf-a1d5-161c25410e3e-c000.snappy.parquet
-    │   │       │       ├── part-00000-8af629a2-0e9a-4fd4-a1b7-6c701c163d70-c000.snappy.parquet
-    │   │       │       ├── part-00000-a71e3d2d-13d7-474a-8629-290cc79d8834-c000.snappy.parquet
-    │   │       │       ├── part-00000-bc09beb1-92bb-41b3-b31b-adac78e543be-c000.snappy.parquet
-    │   │       │       ├── part-00000-dfab0054-6736-4f2e-a5b5-1ddaa3973674-c000.snappy.parquet
-    │   │       │       ├── part-00000-f27f3c5c-8e5b-43c0-a95d-e2b28658a248-c000.snappy.parquet
-    │   │       │       ├── pubmed_publication.csv
-    │   │       │       ├── pubmed_publication_metadata.yaml
-    │   │       │       └── silver_pubmed_publication_dq_report.json
-    │   │       ├── semanticscholar/
-    │   │       │   └── publication/
-    │   │       │       ├── _delta_log/
-    │   │       │       │   ├── 00000000000000000000.json
-    │   │       │       │   ├── 00000000000000000001.json
-    │   │       │       │   ├── 00000000000000000002.json
-    │   │       │       │   ├── 00000000000000000003.json
-    │   │       │       │   ├── 00000000000000000004.json
-    │   │       │       │   ├── 00000000000000000005.json
-    │   │       │       │   ├── 00000000000000000006.json
-    │   │       │       │   ├── 00000000000000000007.json
-    │   │       │       │   ├── 00000000000000000008.json
-    │   │       │       │   └── 00000000000000000009.json
-    │   │       │       ├── part-00000-0650ba32-d765-467e-ac6c-a50497c5b8d1-c000.snappy.parquet
-    │   │       │       ├── part-00000-5e4818fd-156e-424c-a2dd-8b4e15a22ac2-c000.snappy.parquet
-    │   │       │       ├── part-00000-63d1efaa-cda7-4860-8b55-8eed9840d0e2-c000.snappy.parquet
-    │   │       │       ├── part-00000-7963bfa3-c239-461e-bde5-03d8fa3a15f0-c000.snappy.parquet
-    │   │       │       ├── part-00000-7c860592-6a93-424f-a364-c8abc18a1d8d-c000.snappy.parquet
-    │   │       │       ├── part-00000-bfa756ab-e5c1-471b-945d-e343a4afdcd1-c000.snappy.parquet
-    │   │       │       ├── part-00000-ca488888-ce78-44cd-b64b-fe4e26b79714-c000.snappy.parquet
-    │   │       │       ├── part-00000-caae4624-e0b7-45fe-9fd7-317d88cd1f50-c000.snappy.parquet
-    │   │       │       ├── part-00000-e0ed5147-2c42-4768-8e69-09e637407d22-c000.snappy.parquet
-    │   │       │       ├── part-00000-e366d4ca-1115-4292-966f-b94762228801-c000.snappy.parquet
-    │   │       │       ├── semanticscholar_publication.csv
-    │   │       │       └── semanticscholar_publication_metadata.yaml
-    │   │       └── uniprot/
-    │   │           └── protein
     │   └── silver/
     │       ├── chembl/
     │       │   └── publication/
@@ -13651,6 +13206,6 @@ BioactivityDataAcquisition2/
 ```
 
 **Statistics:**
-- Directories: 850
-- Files: 12795
-- Total items: 13645
+- Directories: 790
+- Files: 12410
+- Total items: 13200

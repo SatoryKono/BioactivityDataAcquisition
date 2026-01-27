@@ -148,11 +148,8 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
     doi: Series[str] = pa.Field(nullable=False)
 
-    # Cross-reference IDs for linking publications across providers
-    # pmid: PubMed ID (numeric string: "12345678") - Always NULL for CrossRef
-    pmid: Series[str] = pa.Field(nullable=True)
-    # pmc_id: PubMed Central ID (format: "PMC1234567") - Always NULL for CrossRef
-    pmc_id: Series[str] = pa.Field(nullable=True)
+    # Note: pmid and pmc_id excluded - CrossRef API doesn't provide PubMed identifiers
+    # and transformer explicitly removes these fields from output
 
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
