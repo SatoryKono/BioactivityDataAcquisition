@@ -5,7 +5,7 @@
 ## Локальный режим и файловое хранилище
 
 ### Напоминание: Redis/MinIO не используются в текущем режиме
-*   **Контекст**: Проект работает в режиме local-only по дизайну и не использует Redis или MinIO.
+*   **Контекст**: Проект работает в локальном режиме (local-only) по дизайну и не использует Redis или MinIO.
 *   **Ссылка**: См. [ADR-010: Local-Only Deployment](../02-architecture/decisions/ADR-010-local-only-deployment.md).
 
 ### Ошибка: `FileNotFoundError` или отсутствуют локальные пути данных
@@ -41,7 +41,7 @@
 *   **Причина**: Данные из источника изменились и больше не соответствуют модели в `src/bioetl/domain/`.
 *   **Решение**:
     1.  Изучите сообщение об ошибке и определите проблемное поле.
-    2.  Проверьте сырые данные в локальном Bronze-слое в `data/output/bronze/` (см. `data/` и [Local Storage Layout](local-storage-layout.md)).
+    2.  Проверьте сырые данные в локальном Bronze-слое по пути `data/output/bronze/{provider}/{entity}/{date}/` (см. `data/` и [Local Storage Layout](local-storage-layout.md)).
     3.  Обновите Pydantic-модель в `src/bioetl/domain/` (например, сделайте поле опциональным или добавьте новое). Это событие **schema drift** и его нужно задокументировать.
 
 ## Качество данных
