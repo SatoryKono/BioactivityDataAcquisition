@@ -255,8 +255,8 @@ pipeline_name: chembl_activity
 - [RULES.md v5.12, Appendix D](../../RULES.md) - Reference schema
 - [ADR-014: Deterministic Writes](ADR-014-deterministic-writes.md) - sort_by requirement
 - [ADR-027: DQ Rules Externalization](ADR-027-dq-rules-externalization.md) - Hierarchical DQ config
-- [03-file-policy.md](../../00-project_rules/03-file-policy.md) - File structure documentation
-- [04-extending-bioetl.md](../../00-project_rules/04-extending-bioetl.md) - Entity config template
+- [03-file-policy.md](../../00-project-rules/03-file-policy.md) - File structure documentation
+- [04-extending-bioetl.md](../../00-project-rules/04-extending-bioetl.md) - Entity config template
 - [configs/pipelines/_base.yaml](../../../configs/pipelines/_base.yaml) - Unified Base Schema v2.0.0
 - [configs/pipelines/_schema.json](../../../configs/pipelines/_schema.json) - JSON Schema v2.0
 
