@@ -217,6 +217,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
             if results:
                 result = results[0]
                 result["_lookup_method"] = "title"
+                result["_original_id"] = title
                 result["_search_title"] = title  # Track which title matched
                 yield result
                 found += 1
@@ -320,6 +321,15 @@ class OpenAlexAdapter(BaseHttpAdapter):
             raise ValueError(
                 f"OpenAlexAdapter supports 'work'/'publication', got: {entity_type}"
             )
+
+        # Validate filter_field - fallback only supports DOI-based lookups
+        if filter_field != "doi":
+            self.logger.warning(
+                "unsupported_filter_field_for_fallback",
+                field=filter_field,
+                msg="OpenAlex fallback only supports 'doi' filtering, skipping",
+            )
+            return
 
         fetched = 0
         found_dois: set[str] = set()
