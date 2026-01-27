@@ -1,0 +1,28 @@
+publication:
+  # Fields that are ALWAYS included in Gold
+  always_include:
+    - entity_id
+    - content_hash
+    - title
+    - doi
+    - pmid
+    - year
+    - citation_count
+    - dq_warn
+    - dq_error
+    - run_id
+    - ingestion_ts
+
+  # Fields excluded from Gold by default (PII/size)
+  exclude_by_default:
+    - affiliations           # PII: institutional data
+    - author_details         # PII: detailed information
+    - author_orcids          # PII: author identifiers
+    - references             # Size: massive data
+    - citation_contexts      # Size: text contexts
+
+  # Fields requiring explicit opt-in
+  opt_in:
+    - abstract               # Can be large
+    - authors                # PII, but often needed
+    - grants                 # Funding data
