@@ -129,6 +129,30 @@ python scripts/cleanup_project.py --apply --purge-logs
 
 ---
 
+### cleanup_consolidate.py
+
+**Назначение:** Консолидированный аудит очистки и качества проекта (dry-run по умолчанию).
+
+**Использование:**
+```bash
+# Dry-run (по умолчанию)
+python scripts/cleanup_consolidate.py
+
+# Применить удаление .pyc/__pycache__/temp файлов
+python scripts/cleanup_consolidate.py --apply
+```
+
+**Что анализирует:**
+- `.pyc`, `__pycache__`, временные файлы (по шаблонам cleanup_project.py);
+- YAML-конфиги без ссылок в коде/конфигах;
+- дубликаты функций в утилитарных модулях (AST);
+- неиспользуемые импорты (AST + текстовая проверка);
+- неиспользуемые зависимости по `pyproject.toml` и фактическим импортам.
+
+**Связанные инструменты:** `cleanup_project.py` — фактическая очистка кэшей и артефактов.
+
+---
+
 ### vacuum_delta.py
 
 **Назначение:** Еженедельный VACUUM для Delta Lake таблиц Silver слоя.
