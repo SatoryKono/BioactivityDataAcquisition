@@ -7044,9 +7044,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     abstract_structured: Series[bool] = pa.Field(
         nullable=True
     )  # Whether abstract has NLM sections
-    vernacular_title: Series[str] = pa.Field(
-        nullable=True
-    )  # Original non-English title
+    # Note: vernacular_title excluded from transformer output per design
 
     # Journal information
     journal: Series[str] = pa.Field(nullable=True)
@@ -7080,10 +7078,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     publication_year: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # Legacy alias
-    accepted_date: Series[str] = pa.Field(nullable=True)
-    received_date: Series[str] = pa.Field(nullable=True)
-    revised_date: Series[str] = pa.Field(nullable=True)
-    epub_date: Series[str] = pa.Field(nullable=True)
+    # Note: accepted_date, received_date, revised_date, epub_date excluded per design
     # MEDLINE-specific dates
     date_completed: Series[str] = pa.Field(
         nullable=True
@@ -7185,7 +7180,10 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     published_online: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
 
     # Metadata
-    doc_type: Series[str] = pa.Field(nullable=True)
+    # Note: doc_type excluded; CrossRef uses raw 'type' field instead
+    type: Series[str] = pa.Field(
+        nullable=True
+    )  # Raw CrossRef type (journal-article, etc.)
     citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     reference_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     language: Series[str] = pa.Field(nullable=True)
@@ -7255,8 +7253,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     doi: Series[str] = pa.Field(nullable=True)
     # pmid: PubMed ID (numeric string: "12345678")
     pmid: Series[str] = pa.Field(nullable=True)
-    # pmc_id: PubMed Central ID (format: "PMC1234567")
-    pmc_id: Series[str] = pa.Field(nullable=True)
+    # Note: pmc_id excluded from transformer output per design
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
@@ -7281,7 +7278,8 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     publication_date: Series[str] = pa.Field(nullable=True)
 
     # Metadata
-    doc_type: Series[str] = pa.Field(nullable=False)
+    # Note: doc_type excluded; OpenAlex uses raw 'type' field instead
+    type: Series[str] = pa.Field(nullable=True)  # Raw OpenAlex type (article, etc.)
     is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
     oa_status: Series[str] = pa.Field(nullable=True)
     # OpenAlex source field: cited_by_count
@@ -7331,10 +7329,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # External IDs
     doi: Series[str] = pa.Field(nullable=True)
     pmid: Series[str] = pa.Field(nullable=True)
-    # Cross-reference IDs for linking publications across providers
-    # pmc_id: PubMed Central ID (format: "PMC1234567")
-    pmc_id: Series[str] = pa.Field(nullable=True)
-    arxiv_id: Series[str] = pa.Field(nullable=True)
+    # Note: pmc_id and arxiv_id excluded from transformer output per design
     corpus_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
 
     # Core fields
@@ -7347,6 +7342,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # Journal/Venue
     journal: Series[str] = pa.Field(nullable=True)
     volume: Series[str] = pa.Field(nullable=True)
+    issue: Series[str] = pa.Field(nullable=True)  # Parsed from combined volume/issue
     pages: Series[str] = pa.Field(nullable=True)  # Legacy: "first-last" format
     first_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     last_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
@@ -9758,6 +9754,10 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     # Bibliographic references (JSON array of citation data)
     references: str | None = None
 
+    # Raw document type from CrossRef API (e.g., "journal-article", "book-chapter")
+    # Unlike doc_type (unified mapping), this preserves the original CrossRef type value
+    type: str | None = None
+
     # Override: Default source for CrossRef
     _source: str = "crossref"
 
@@ -10023,6 +10023,10 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
     # Quality indicators
     is_retracted: bool = False
+
+    # Raw document type from OpenAlex API (e.g., "article", "preprint", "book-chapter")
+    # Unlike doc_type (unified mapping), this preserves the original OpenAlex type value
+    type: str | None = None
 
     # Override: Default source for OpenAlex
     _source: str = "openalex"
@@ -10544,12 +10548,8 @@ class ArticleRecord(BaseModel):
     year: int | None = PydanticField(
         default=None, description="Publication year (1800-2100)"
     )
-    accepted_date: str | None = PydanticField(default=None, description="Date accepted")
-    received_date: str | None = PydanticField(default=None, description="Date received")
-    revised_date: str | None = PydanticField(default=None, description="Date revised")
-    epub_date: str | None = PydanticField(
-        default=None, description="Electronic publication date"
-    )
+    # Note: accepted_date, received_date, revised_date, epub_date excluded from
+    # transformer output per design (PubMed pipeline field exclusions)
 
     # Classification
     publication_types: list[str] = PydanticField(
@@ -10613,14 +10613,13 @@ class PubMedPublicationEntity(PublicationEntityBase):
         pages: Page numbers.
         pub_date: Publication date (ISO format).
         publication_year: Alias for year (legacy field).
-        accepted_date: Date accepted.
-        received_date: Date received.
-        revised_date: Date revised.
-        epub_date: Electronic publication date.
         mesh_terms: MeSH terms (list).
         keywords: Keywords (list).
         publication_types: Publication types (list).
         country: Country of publication.
+
+    Note: vernacular_title, accepted_date, received_date, revised_date, epub_date
+    are excluded from transformer output per PubMed pipeline design.
 
     Note: pmid is required for PubMed publications and validated in __post_init__.
     """
@@ -10643,10 +10642,8 @@ class PubMedPublicationEntity(PublicationEntityBase):
 
     # PubMed-specific dates (stored as ISO strings YYYY-MM-DD or partial)
     pub_date: str | None = None  # Publication date
-    accepted_date: str | None = None  # Date accepted
-    received_date: str | None = None  # Date received
-    revised_date: str | None = None  # Date revised
-    epub_date: str | None = None  # Electronic publication date
+    # Note: accepted_date, received_date, revised_date, epub_date excluded from
+    # transformer output per design (PubMed pipeline field exclusions)
 
     # PubMed-specific classification
     publication_types: list[str] = field(default_factory=list)
@@ -10660,7 +10657,7 @@ class PubMedPublicationEntity(PublicationEntityBase):
 
     # PubMed-specific metadata
     country: str | None = None
-    vernacular_title: str | None = None  # Original non-English title
+    # Note: vernacular_title excluded from transformer output per design
     abstract_structured: bool = False  # Whether abstract has labeled sections (NLM)
 
     # Additional journal fields (Gold schema forensic retention)
@@ -10759,7 +10756,8 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
         dblp_id: DBLP publication key.
         corpus_id: Semantic Scholar Corpus ID.
         tldr: AI-generated summary (TL;DR).
-        volume: Journal volume.
+        volume: Journal volume (parsed from combined format like "32 4").
+        issue: Journal issue number (parsed from combined volume/issue).
         pages: Page numbers.
         venue: Venue name (conference/journal).
         reference_count: Number of references.
@@ -10790,6 +10788,9 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
 
     # SemanticScholar-specific journal/venue information
     volume: str | None = None
+    issue: str | None = (
+        None  # Parsed from combined volume/issue (e.g., "32 4" → issue=4)
+    )
     pages: str | None = None  # Legacy: "first-last" format
     # first_page and last_page inherited from PublicationEntityBase
     venue: str | None = None
@@ -24057,9 +24058,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     abstract_structured: Series[bool] = pa.Field(
         nullable=True, description="Whether abstract has NLM sections"
     )
-    vernacular_title: Series[str] = pa.Field(
-        nullable=True, description="Original non-English title"
-    )
+    # Note: vernacular_title excluded from transformer output per design
     language: Series[str] = pa.Field(
         nullable=True,
         description="MARC language code (e.g., 'eng')",
@@ -24249,27 +24248,8 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         description="Publication types (JSON array, e.g., Journal Article, Review)",
     )
 
-    # === Additional Date Fields (extracted from PubmedData/History) ===
-    # Note: These are stored as ISO date strings (YYYY-MM-DD) to match transformer output
-    accepted_date: Series[str] = pa.Field(
-        nullable=True,
-        description="Manuscript acceptance date (from History/PubMedPubDate[@PubStatus='accepted'])",
-    )
-
-    received_date: Series[str] = pa.Field(
-        nullable=True,
-        description="Manuscript received date (from History/PubMedPubDate[@PubStatus='received'])",
-    )
-
-    revised_date: Series[str] = pa.Field(
-        nullable=True,
-        description="Manuscript revision date (from History/PubMedPubDate[@PubStatus='revised'])",
-    )
-
-    epub_date: Series[str] = pa.Field(
-        nullable=True,
-        description="Electronic publication date (from ArticleDate[@DateType='Electronic'])",
-    )
+    # Note: accepted_date, received_date, revised_date, epub_date excluded from
+    # transformer output per design (PubMed pipeline field exclusions)
 
     # === Author Affiliations ===
     affiliations: Series[str] = pa.Field(

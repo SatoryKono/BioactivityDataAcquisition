@@ -262,7 +262,7 @@ class TestFunctionComplexity:
         "_execute_checks": 12,  # CC=11 - Execute all enabled DQ checks (inherent complexity from multiple check types)
         # Composite pipeline domain models (ADR-026)
         "DQOverrideConfig": 10,  # CC=9 - DQ override validation with threshold checks
-        "from_dict": 11,  # CC=10 - Dictionary parsing with type conversions + FSM state parsing + dependency results
+        # Note: from_dict exemption defined earlier in EXEMPTIONS (line 187)
         # BatchExecutor DQ context extraction
         "get_dq_context": 13,  # CC=12 - DQ context gathering with nullable field handling
         # Composite pipeline logging

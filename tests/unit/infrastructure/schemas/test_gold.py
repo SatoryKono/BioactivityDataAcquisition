@@ -122,7 +122,7 @@ class TestGoldPublicationSchemaCrossRefFields:
         "schema_class,name",
         [
             (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
-            (CrossRefPublicationGoldSchema, "CrossRef Publication"),
+            # CrossRef excluded: pmid explicitly excluded from transformer output
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
@@ -137,9 +137,9 @@ class TestGoldPublicationSchemaCrossRefFields:
         "schema_class,name",
         [
             # ChEMBL excluded: pmc_id not available from ChEMBL API
+            # CrossRef excluded: pmc_id explicitly excluded from transformer output
             # OpenAlex excluded: pmc_id explicitly excluded from transformer output
             # SemanticScholar excluded: pmc_id explicitly excluded from transformer output
-            (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
         ],
     )
