@@ -256,27 +256,43 @@ src/bioetl/
 │
 ├── application/                 # Pipeline orchestration (§1.1)
 │   ├── core/                    # Core pipeline infrastructure
-│   │   ├── executor.py          # Batch executor
+│   │   ├── base.py              # Base pipeline primitives
+│   │   ├── base_transformer.py  # Base transformer contracts
+│   │   ├── batch_executor.py    # Batch executor
 │   │   ├── pipeline_services.py # Service container
 │   │   ├── runner.py            # PipelineRunner (Driving Adapter logic)
-│   │   ├── shutdown.py          # Graceful shutdown handling
-│   │   └── base_pipeline.py     # Abstract base pipeline
+│   │   └── shutdown.py          # Graceful shutdown handling
 │   ├── composite/               # Composite pipeline orchestration
 │   ├── pipelines/               # Concrete pipeline implementations
+│   │   ├── common/              # Shared pipeline helpers
 │   │   ├── chembl/              # Provider namespace
 │   │   │   ├── activity.py      # ChEMBL Activity pipeline
-│   │   │   └── assay.py         # ChEMBL Assay pipeline
-│   │   └── pubchem/             # Provider namespace
-│   │       └── activity.py      # PubChem Activity pipeline
+│   │   │   ├── assay.py         # ChEMBL Assay pipeline
+│   │   │   └── molecule.py      # ChEMBL Molecule pipeline
+│   │   ├── pubchem/             # Provider namespace
+│   │   │   └── compound.py      # PubChem Compound pipeline
+│   │   ├── pubmed/              # Provider namespace
+│   │   │   └── publication.py   # PubMed Publication pipeline
+│   │   ├── uniprot/             # Provider namespace
+│   │   │   └── protein.py       # UniProt Protein pipeline
+│   │   ├── crossref/            # Provider namespace
+│   │   │   └── transformer.py   # CrossRef transformer
+│   │   ├── openalex/            # Provider namespace
+│   │   │   └── transformer.py   # OpenAlex transformer
+│   │   ├── semanticscholar/     # Provider namespace
+│   │   │   └── transformer.py   # SemanticScholar transformer
+│   │   └── generic.py           # Generic pipeline helpers
 │   ├── services/                # Application services
 │   └── observability/           # Application-level observability
 │
 ├── composition/                 # Composition Root (DI container)
-│   ├── bootstrap.py             # Pipeline bootstrap & wiring
+│   ├── bootstrap/               # Bootstrap helpers
+│   ├── entrypoints.py           # CLI/runner entrypoints
 │   ├── registry.py              # Pipeline discovery
+│   ├── providers/               # Provider registration
 │   └── factories/               # Consolidated factories
-│       ├── generic_factory.py   # Universal pipeline factory
-│       ├── data_source_registry.py # Central source creation
+│       ├── pipeline_factory.py  # Pipeline factory
+│       ├── runner_factory.py    # Runner factory
 │       └── storage_factory.py   # Multi-layer storage factory
 │
 ├── infrastructure/              # I/O adapters (§1.1)
@@ -299,13 +315,14 @@ src/bioetl/
 │   └── config.py                # Settings (Pydantic)
 │
 └── interfaces/                  # External interfaces
-    └── cli/                     # CLI package (bioetl run/quarantine/checkpoint)
-        ├── __init__.py          # CLI package entry
-        ├── main.py              # Click command group
-        ├── commands/            # CLI subcommands
-        ├── orchestration/       # Pipeline orchestration adapters
-        │   └── signals.py       # OS signal handlers
-        └── utils/               # CLI helpers
+    ├── cli/                     # CLI package (bioetl run/quarantine/checkpoint)
+    │   ├── __init__.py          # CLI package entry
+    │   ├── __main__.py          # CLI module entrypoint
+    │   ├── main.py              # Click command group
+    │   └── commands/            # CLI subcommands
+    ├── http/                    # HTTP interfaces (health server)
+    ├── orchestration/           # Orchestration helpers
+    └── observability.py         # Interface observability wiring
 
 tests/
 ├── unit/                        # Isolated unit tests (mock I/O)
