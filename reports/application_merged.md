@@ -17,6 +17,7 @@ Path: composite\__init__.py
 
 This package contains application services for composite pipeline orchestration:
 - CompositePipelineRunner: Main orchestrator for composite pipelines
+- DependencyCoordinator: Sequential execution of dependency pipelines
 - EnrichmentCoordinator: Fan-out/fan-in coordination for enrichers
 - MergeService: Data merging with conflict resolution
 - KeyExtractorService: Extract join keys from seed Silver tables
@@ -35,6 +36,7 @@ from bioetl.application.composite.checkpoint import (
 from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.coordinator import EnrichmentCoordinator
+from bioetl.application.composite.dependency_coordinator import DependencyCoordinator
 from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.application.composite.merger import MergeService
 from bioetl.application.composite.preflight_validator import (
@@ -51,12 +53,158 @@ __all__ = [
     "CompositeCheckpointState",
     "CompositePipelineRunner",
     "CompositePreflightValidator",
+    "DependencyCoordinator",
     "EnrichmentCoordinator",
     "KeyExtractorService",
     "MergeService",
     "PreflightValidationError",
     "PreflightValidationResult",
 ]
+
+================================================================================
+File: aggregator.py
+Path: composite\aggregator.py
+================================================================================
+"""Enricher aggregator for 1:M relationships in composite pipelines.
+
+Provides functionality to aggregate multiple rows per join key into a single
+row before joining with seed data. See ADR-026.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from bioetl.domain.composite.aggregation import AggregationFunction
+
+if TYPE_CHECKING:
+    import polars as pl
+
+    from bioetl.domain.composite.aggregation import (
+        AggregationConfig,
+        AggregationFieldSpec,
+    )
+    from bioetl.domain.ports import LoggerPort
+
+
+class EnricherAggregator:
+    """Aggregates 1:M enricher data into 1:1 before join."""
+
+    def __init__(self, logger: LoggerPort) -> None:
+        """Initialize the aggregator.
+
+        Args:
+            logger: Logger port for structured logging.
+        """
+        self._logger = logger
+
+    def aggregate(
+        self,
+        df: pl.DataFrame,
+        config: AggregationConfig,
+        enricher_name: str,
+    ) -> pl.DataFrame:
+        """Aggregate 1:M enricher data into 1:1 before join.
+
+        Args:
+            df: Enricher DataFrame with multiple rows per join key.
+            config: Aggregation configuration.
+            enricher_name: Enricher name for logging.
+
+        Returns:
+            DataFrame with one row per join key.
+        """
+        self._logger.debug(
+            "Aggregating enricher data",
+            enricher=enricher_name,
+            rows_before=len(df),
+            group_by=config.group_by,
+            field_count=len(config.fields),
+        )
+
+        agg_exprs: list[pl.Expr] = []
+
+        for field_spec in config.fields:
+            expr = self._build_aggregation_expr(field_spec)
+            agg_exprs.append(expr)
+
+        result = df.group_by(config.group_by).agg(agg_exprs)
+
+        self._logger.info(
+            "Aggregated enricher data",
+            enricher=enricher_name,
+            rows_before=len(df),
+            rows_after=len(result),
+            group_by=config.group_by,
+        )
+
+        return result
+
+    def _build_aggregation_expr(self, spec: AggregationFieldSpec) -> pl.Expr:
+        """Build Polars expression for a single aggregation field."""
+        import polars as pl
+
+        output_name = spec.effective_output_field
+        base_col = pl.col(spec.source_field)
+
+        if spec.filter_condition:
+            filter_expr = self._parse_filter_condition(spec.filter_condition)
+            if filter_expr is not None:
+                base_col = base_col.filter(filter_expr)
+
+        match spec.agg_function:
+            case AggregationFunction.COLLECT_LIST:
+                expr = base_col.drop_nulls()
+            case AggregationFunction.COLLECT_SET:
+                expr = base_col.drop_nulls().unique()
+            case AggregationFunction.COUNT:
+                expr = base_col.count()
+            case AggregationFunction.FIRST:
+                expr = base_col.first()
+            case AggregationFunction.CONCAT_STR:
+                expr = base_col.drop_nulls().cast(pl.Utf8).str.join(", ")
+            case _:
+                expr = base_col
+
+        return expr.alias(output_name)
+
+    def _parse_filter_condition(self, condition: str) -> pl.Expr | None:
+        """Parse a simple filter condition into a Polars expression."""
+        import polars as pl
+
+        condition = condition.strip()
+        upper_condition = condition.upper()
+
+        if " IS NOT NULL" in upper_condition:
+            field = condition[: upper_condition.find(" IS NOT NULL")].strip()
+            return pl.col(field).is_not_null()
+
+        if " IS NULL" in upper_condition:
+            field = condition[: upper_condition.find(" IS NULL")].strip()
+            return pl.col(field).is_null()
+
+        if " == " in condition:
+            parts = condition.split(" == ", 1)
+            if len(parts) == 2:
+                field = parts[0].strip()
+                value = parts[1].strip().strip("'\"")
+                return pl.col(field) == value
+
+        if " != " in condition:
+            parts = condition.split(" != ", 1)
+            if len(parts) == 2:
+                field = parts[0].strip()
+                value = parts[1].strip().strip("'\"")
+                return pl.col(field) != value
+
+        self._logger.warning(
+            "Could not parse filter condition",
+            condition=condition,
+        )
+        return None
+
+
+__all__ = ["EnricherAggregator"]
 
 ================================================================================
 File: checkpoint.py
@@ -79,6 +227,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.composite.result import (
+    DependencyResult,
+    DependencyStatus,
     EnrichmentResult,
     EnrichmentStatus,
     SeedResult,
@@ -96,6 +246,7 @@ class CompositeCheckpointState:
     Tracks progress through composite execution phases:
     - FSM state (current phase of execution)
     - Seed completion
+    - Individual dependency completions
     - Individual enricher completions
     - Any intermediate state needed for resume
 
@@ -105,6 +256,8 @@ class CompositeCheckpointState:
         state: Current FSM state of the pipeline.
         seed_completed: Whether seed pipeline completed.
         seed_result: Result from seed if completed.
+        completed_dependencies: Set of completed dependency names.
+        dependency_results: Results from completed dependencies.
         completed_enrichers: Set of completed enricher names.
         enrichment_results: Results from completed enrichers.
         created_at: When checkpoint was created.
@@ -131,6 +284,8 @@ class CompositeCheckpointState:
     state: CompositePipelineState = CompositePipelineState.NOT_STARTED
     seed_completed: bool = False
     seed_result: SeedResult | None = None
+    completed_dependencies: frozenset[str] = field(default_factory=frozenset)
+    dependency_results: dict[str, DependencyResult] = field(default_factory=dict)
     completed_enrichers: frozenset[str] = field(default_factory=frozenset)
     enrichment_results: dict[str, EnrichmentResult] = field(default_factory=dict)
     created_at: datetime | None = None
@@ -147,6 +302,33 @@ class CompositeCheckpointState:
             state=CompositePipelineState.SEED_COMPLETED,
             seed_completed=True,
             seed_result=result,
+            completed_dependencies=self.completed_dependencies,
+            dependency_results=self.dependency_results,
+            completed_enrichers=self.completed_enrichers,
+            enrichment_results=self.enrichment_results,
+            created_at=self.created_at,
+            updated_at=datetime.now(tz=UTC),
+        )
+
+    def with_dependency_completed(
+        self, dependency_name: str, result: DependencyResult
+    ) -> CompositeCheckpointState:
+        """Create new state with dependency marked as completed.
+
+        Sets state to DEPENDENCIES_RUNNING to indicate dependency phase is in progress.
+        The transition to DEPENDENCIES_COMPLETED should be done explicitly
+        via with_state() when all dependencies are done.
+        """
+        new_completed = self.completed_dependencies | {dependency_name}
+        new_results = {**self.dependency_results, dependency_name: result}
+        return CompositeCheckpointState(
+            composite_name=self.composite_name,
+            run_id=self.run_id,
+            state=CompositePipelineState.DEPENDENCIES_RUNNING,
+            seed_completed=self.seed_completed,
+            seed_result=self.seed_result,
+            completed_dependencies=frozenset(new_completed),
+            dependency_results=new_results,
             completed_enrichers=self.completed_enrichers,
             enrichment_results=self.enrichment_results,
             created_at=self.created_at,
@@ -170,6 +352,8 @@ class CompositeCheckpointState:
             state=CompositePipelineState.ENRICHING,
             seed_completed=self.seed_completed,
             seed_result=self.seed_result,
+            completed_dependencies=self.completed_dependencies,
+            dependency_results=self.dependency_results,
             completed_enrichers=frozenset(new_completed),
             enrichment_results=new_results,
             created_at=self.created_at,
@@ -180,7 +364,8 @@ class CompositeCheckpointState:
         """Create new state with updated FSM state.
 
         Allows Runner to explicitly set state transitions (e.g., to MERGING,
-        ENRICHMENT_COMPLETED, FAILED, or COMPLETED) without modifying other fields.
+        ENRICHMENT_COMPLETED, DEPENDENCIES_COMPLETED, FAILED, or COMPLETED)
+        without modifying other fields.
 
         Args:
             new_state: New FSM state to set.
@@ -194,6 +379,8 @@ class CompositeCheckpointState:
             state=new_state,
             seed_completed=self.seed_completed,
             seed_result=self.seed_result,
+            completed_dependencies=self.completed_dependencies,
+            dependency_results=self.dependency_results,
             completed_enrichers=self.completed_enrichers,
             enrichment_results=self.enrichment_results,
             created_at=self.created_at,
@@ -221,6 +408,8 @@ class CompositeCheckpointState:
             "state": self.state.value,
             "seed_completed": self.seed_completed,
             "seed_result": self._serialize_seed_result(),
+            "completed_dependencies": list(self.completed_dependencies),
+            "dependency_results": self._serialize_dependency_results(),
             "completed_enrichers": list(self.completed_enrichers),
             "enrichment_results": self._serialize_enrichment_results(),
             "created_at": self.created_at.isoformat() if self.created_at else None,
@@ -238,6 +427,21 @@ class CompositeCheckpointState:
             "keys_generated": self.seed_result.keys_generated,
             "duration_seconds": self.seed_result.duration_seconds,
             "resumed": self.seed_result.resumed,
+        }
+
+    def _serialize_dependency_results(self) -> dict[str, dict[str, object]]:
+        """Serialize dependency results for JSON."""
+        return {
+            name: {
+                "pipeline_name": result.pipeline_name,
+                "status": result.status.value,
+                "records_extracted": result.records_extracted,
+                "records_silver": result.records_silver,
+                "duration_seconds": result.duration_seconds,
+                "error_message": result.error_message,
+                "resumed": result.resumed,
+            }
+            for name, result in self.dependency_results.items()
         }
 
     def _serialize_enrichment_results(self) -> dict[str, dict[str, object]]:
@@ -261,8 +465,9 @@ class CompositeCheckpointState:
     def from_dict(cls, data: dict[str, Any]) -> CompositeCheckpointState:
         """Create state from dictionary.
 
-        Handles backward compatibility for checkpoints without state field.
-        Gracefully handles corrupted state values by defaulting to NOT_STARTED.
+        Handles backward compatibility for checkpoints without state field
+        or dependency fields. Gracefully handles corrupted state values
+        by defaulting to NOT_STARTED.
         """
         seed_result = None
         if data.get("seed_result"):
@@ -276,7 +481,20 @@ class CompositeCheckpointState:
                 resumed=sr.get("resumed", False),
             )
 
-        enrichment_results = {}
+        # Parse dependency results (backward compatible - may not exist)
+        dependency_results: dict[str, DependencyResult] = {}
+        for name, dr_data in data.get("dependency_results", {}).items():
+            dependency_results[name] = DependencyResult(
+                pipeline_name=dr_data["pipeline_name"],
+                status=DependencyStatus(dr_data["status"]),
+                records_extracted=dr_data.get("records_extracted", 0),
+                records_silver=dr_data.get("records_silver", 0),
+                duration_seconds=dr_data.get("duration_seconds", 0.0),
+                error_message=dr_data.get("error_message"),
+                resumed=dr_data.get("resumed", False),
+            )
+
+        enrichment_results: dict[str, EnrichmentResult] = {}
         for name, er_data in data.get("enrichment_results", {}).items():
             enrichment_results[name] = EnrichmentResult(
                 enricher_name=er_data["enricher_name"],
@@ -319,6 +537,8 @@ class CompositeCheckpointState:
             state=state,
             seed_completed=data.get("seed_completed", False),
             seed_result=seed_result,
+            completed_dependencies=frozenset(data.get("completed_dependencies", [])),
+            dependency_results=dependency_results,
             completed_enrichers=frozenset(data.get("completed_enrichers", [])),
             enrichment_results=enrichment_results,
             created_at=created_at,
@@ -1675,6 +1895,238 @@ def value_to_string(value: object, dtype: pl.DataType) -> str:
     return str(value)
 
 ================================================================================
+File: dependency_coordinator.py
+Path: composite\dependency_coordinator.py
+================================================================================
+"""Dependency Coordinator.
+
+Application Service that coordinates dependency pipeline execution.
+Dependencies run after the seed but before enrichers to populate
+Silver tables that enrichers will read from.
+
+See ADR-026 for architectural decisions.
+"""
+
+from __future__ import annotations
+
+import asyncio
+from collections.abc import Callable, Sequence
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING
+
+from bioetl.domain.composite.result import DependencyResult
+
+if TYPE_CHECKING:
+    import polars as pl
+
+    from bioetl.application.core.runner import PipelineRunner
+    from bioetl.domain.composite.config import DependencyConfig
+    from bioetl.domain.ports import LoggerPort
+
+
+class DependencyCoordinator:
+    """Coordinates dependency pipeline execution.
+
+    Dependencies run sequentially after the seed but before enrichers.
+    They populate Silver tables that enrichers will read from.
+
+    Unlike enrichers which run in parallel, dependencies run sequentially
+    to avoid overwhelming APIs and ensure predictable ordering.
+
+    Attributes:
+        logger: Structured logger.
+
+    Example:
+        >>> coordinator = DependencyCoordinator(logger=logger)
+        >>> results = await coordinator.run_dependencies(
+        ...     keys=keys_df,
+        ...     dependencies=dependency_configs,
+        ...     completed=frozenset(),
+        ...     runner_factory=factory,
+        ... )
+    """
+
+    def __init__(self, logger: LoggerPort) -> None:
+        """Initialize dependency coordinator.
+
+        Args:
+            logger: Structured logger.
+        """
+        self._logger = logger
+
+    async def run_dependencies(
+        self,
+        keys: pl.DataFrame,
+        dependencies: Sequence[DependencyConfig],
+        completed: frozenset[str],
+        runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+    ) -> dict[str, DependencyResult]:
+        """Run all dependencies sequentially.
+
+        Dependencies run after seed to have access to seed's keys for filtering.
+        They populate Silver tables before enrichers run.
+
+        Args:
+            keys: DataFrame with join keys from seed.
+            dependencies: Dependency configurations.
+            completed: Set of already-completed dependencies (for resume).
+            runner_factory: Factory to create PipelineRunner for each dependency.
+
+        Returns:
+            Mapping of dependency name to result.
+
+        Example:
+            >>> results = await coordinator.run_dependencies(
+            ...     keys=keys_df,
+            ...     dependencies=[term_config],
+            ...     completed=frozenset(),
+            ...     runner_factory=factory,
+            ... )
+            >>> results["chembl_publication_term"].is_success
+            True
+        """
+        results: dict[str, DependencyResult] = {}
+
+        if not dependencies:
+            self._logger.debug(
+                "No dependencies to run",
+            )
+            return results
+
+        self._logger.info(
+            "Running dependencies",
+            count=len(dependencies),
+            dependencies=[d.pipeline for d in dependencies],
+        )
+
+        for dependency in dependencies:
+            if dependency.pipeline in completed:
+                self._logger.debug(
+                    "Skipping completed dependency",
+                    dependency=dependency.pipeline,
+                )
+                results[dependency.pipeline] = DependencyResult.skipped(
+                    pipeline_name=dependency.pipeline,
+                    reason="Already completed (resumed from checkpoint)",
+                )
+                continue
+
+            result = await self._run_single_dependency(
+                dependency=dependency,
+                keys=keys,
+                runner_factory=runner_factory,
+            )
+            results[dependency.pipeline] = result
+
+            # Stop on required dependency failure
+            if dependency.required and not result.is_success:
+                self._logger.error(
+                    "Required dependency failed, stopping",
+                    dependency=dependency.pipeline,
+                    status=result.status.value,
+                    error=result.error_message,
+                )
+                break
+
+        return results
+
+    async def _run_single_dependency(
+        self,
+        dependency: DependencyConfig,
+        keys: pl.DataFrame,
+        runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+    ) -> DependencyResult:
+        """Run a single dependency with timeout and error handling.
+
+        Args:
+            dependency: Dependency configuration.
+            keys: Keys DataFrame from seed.
+            runner_factory: Factory to create PipelineRunner.
+
+        Returns:
+            DependencyResult with execution outcome.
+        """
+        started_at = datetime.now(tz=UTC)
+
+        self._logger.info(
+            "Starting dependency",
+            dependency=dependency.pipeline,
+            keys_count=len(keys),
+            timeout_seconds=dependency.timeout_seconds,
+        )
+
+        try:
+            # Apply timeout
+            async with asyncio.timeout(dependency.timeout_seconds):
+                runner = runner_factory(dependency.pipeline, keys)
+                await runner.run()
+
+            completed_at = datetime.now(tz=UTC)
+            duration = (completed_at - started_at).total_seconds()
+
+            # Extract stats from runner
+            executor = getattr(runner, "_executor", None)
+            records_extracted = 0
+            records_silver = 0
+
+            if executor:
+                records_extracted = getattr(executor, "records_fetched", 0)
+                records_silver = getattr(executor, "records_silver", 0)
+
+            self._logger.info(
+                "Dependency completed",
+                dependency=dependency.pipeline,
+                records_extracted=records_extracted,
+                records_silver=records_silver,
+                duration_seconds=duration,
+            )
+
+            return DependencyResult.success(
+                pipeline_name=dependency.pipeline,
+                records_extracted=records_extracted,
+                records_silver=records_silver,
+                duration_seconds=duration,
+                started_at=started_at,
+                completed_at=completed_at,
+            )
+
+        except TimeoutError:
+            duration = (datetime.now(tz=UTC) - started_at).total_seconds()
+            self._logger.warning(
+                "Dependency timed out",
+                dependency=dependency.pipeline,
+                timeout_seconds=dependency.timeout_seconds,
+            )
+            return DependencyResult.timeout(
+                pipeline_name=dependency.pipeline,
+                timeout_seconds=dependency.timeout_seconds,
+            )
+
+        except Exception as e:
+            duration = (datetime.now(tz=UTC) - started_at).total_seconds()
+
+            if dependency.required:
+                self._logger.error(
+                    "Required dependency failed",
+                    dependency=dependency.pipeline,
+                    error=str(e),
+                    required=True,
+                )
+            else:
+                self._logger.warning(
+                    "Optional dependency failed",
+                    dependency=dependency.pipeline,
+                    error=str(e),
+                    required=False,
+                )
+
+            return DependencyResult.failed(
+                pipeline_name=dependency.pipeline,
+                error_message=str(e),
+                duration_seconds=duration,
+            )
+
+================================================================================
 File: fsm_helper.py
 Path: composite\fsm_helper.py
 ================================================================================
@@ -2061,6 +2513,7 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal
 
+from bioetl.application.composite.aggregator import EnricherAggregator
 from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.deduplication import EnricherDeduplicator
@@ -2142,6 +2595,7 @@ class MergeService:
         self._logger = logger
         self._delta_reader = delta_reader
         self._deduplicator = EnricherDeduplicator(logger)
+        self._aggregator = EnricherAggregator(logger)
         self._renamer = ColumnRenamer(logger)
         # Pass column_groups from config if available for YAML-based ordering
         self._orderer = ColumnOrderer(
@@ -2694,6 +3148,15 @@ class MergeService:
             # Secondary keys are fallbacks but NOT used in join operation
             primary_key = join_keys_list[0]
 
+            # Apply aggregation for MANY_TO_ONE enrichers BEFORE deduplication
+            # This converts 1:M relationships to 1:1
+            if enricher.is_many_to_one and enricher.aggregation is not None:
+                enricher_df = self._aggregator.aggregate(
+                    enricher_df,
+                    enricher.aggregation,
+                    enricher.pipeline,
+                )
+
             # Deduplicate enricher before join to prevent fan-out
             enricher_df = self._deduplicator.deduplicate(
                 enricher_df=enricher_df,
@@ -2739,36 +3202,11 @@ class MergeService:
             enricher_df = self._drop_system_columns(enricher_df)
 
             # Calculate qualified join key names for both seed and enricher
-            # Support both pre-renamed (qualified) and unqualified seed columns
-            seed_join_key_qualified: str | None = None
-            seed_join_key: str = primary_key  # Default to unqualified
-
-            if seed_pipeline is not None:
-                try:
-                    seed_provider, seed_entity = self._parse_pipeline_name(
-                        seed_pipeline
-                    )
-                    seed_join_key_qualified = (
-                        f"{seed_provider}.{seed_entity}.{primary_key}"
-                    )
-                    # Use qualified if present, otherwise fallback to unqualified
-                    if seed_join_key_qualified in merged.columns:
-                        seed_join_key = seed_join_key_qualified
-                    elif primary_key in merged.columns:
-                        seed_join_key = primary_key
-                except ValueError:
-                    # Fallback if seed_pipeline is invalid
-                    seed_join_key = primary_key
-
-            try:
-                enricher_provider, enricher_entity = self._parse_pipeline_name(
-                    enricher.pipeline
+            seed_join_key, enricher_join_key, seed_join_key_qualified = (
+                self._resolve_join_key_names(
+                    primary_key, seed_pipeline, enricher.pipeline, merged.columns
                 )
-                enricher_join_key = (
-                    f"{enricher_provider}.{enricher_entity}.{primary_key}"
-                )
-            except ValueError:
-                enricher_join_key = primary_key
+            )
 
             # Detect and resolve remaining conflicts
             # Exclude both seed and enricher join keys from conflict detection
@@ -2833,6 +3271,46 @@ class MergeService:
             return df.drop(columns_to_drop)
 
         return df
+
+    def _resolve_join_key_names(
+        self,
+        primary_key: str,
+        seed_pipeline: str | None,
+        enricher_pipeline: str,
+        merged_columns: list[str],
+    ) -> tuple[str, str, str | None]:
+        """Resolve qualified join key names for seed and enricher.
+
+        Args:
+            primary_key: Unqualified join key name.
+            seed_pipeline: Seed pipeline name for qualification.
+            enricher_pipeline: Enricher pipeline name for qualification.
+            merged_columns: Current merged DataFrame columns.
+
+        Returns:
+            Tuple of (seed_join_key, enricher_join_key, seed_join_key_qualified).
+        """
+        seed_join_key_qualified: str | None = None
+        seed_join_key = primary_key
+
+        if seed_pipeline is not None:
+            try:
+                seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
+                seed_join_key_qualified = f"{seed_provider}.{seed_entity}.{primary_key}"
+                if seed_join_key_qualified in merged_columns:
+                    seed_join_key = seed_join_key_qualified
+            except ValueError:
+                pass
+
+        try:
+            enricher_provider, enricher_entity = self._parse_pipeline_name(
+                enricher_pipeline
+            )
+            enricher_join_key = f"{enricher_provider}.{enricher_entity}.{primary_key}"
+        except ValueError:
+            enricher_join_key = primary_key
+
+        return seed_join_key, enricher_join_key, seed_join_key_qualified
 
     def _get_enricher_prefix(
         self,
@@ -4097,6 +4575,7 @@ from bioetl.application.composite.runner_helpers import (
 )
 from bioetl.domain.composite.result import (
     CompositeResult,
+    DependencyResult,
     EnrichmentResult,
     EnrichmentStatus,
     MergeResult,
@@ -4111,6 +4590,9 @@ if TYPE_CHECKING:
 
     from bioetl.application.composite.checkpoint import CompositeCheckpointManager
     from bioetl.application.composite.coordinator import EnrichmentCoordinator
+    from bioetl.application.composite.dependency_coordinator import (
+        DependencyCoordinator,
+    )
     from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.composite.merger import MergeService
     from bioetl.application.composite.preflight_validator import (
@@ -4194,6 +4676,9 @@ class CompositePipelineRunner:
         run_id: str | None = None,
         dq_report_service: DQReportService | None = None,
         preflight_validator: CompositePreflightValidator | None = None,
+        dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
+        | None = None,
+        dependency_coordinator: DependencyCoordinator | None = None,
     ) -> None:
         """Initialize composite pipeline runner.
 
@@ -4213,12 +4698,17 @@ class CompositePipelineRunner:
             dq_report_service: Optional DQ report service for generating reports.
             preflight_validator: Optional preflight validator for field_priorities.
                 If provided, validates configuration before Extract phase.
+            dependencies_runner_factory: Factory to create dependency PipelineRunner.
+                Takes pipeline name and keys DataFrame.
+            dependency_coordinator: Coordinator for running dependencies.
         """
         self._config = config
         self._runtime = runtime
         self._seed_runner_factory = seed_runner_factory
         self._enricher_runner_factory = enricher_runner_factory
+        self._dependencies_runner_factory = dependencies_runner_factory
         self._key_extractor = key_extractor
+        self._dependency_coordinator = dependency_coordinator
         self._coordinator = coordinator
         self._merger = merger
         self._checkpoint_manager = checkpoint_manager
@@ -4259,15 +4749,16 @@ class CompositePipelineRunner:
         2. Load checkpoint (for resume)
         3. Run seed pipeline (if not completed)
         4. Extract join keys from seed Silver
-        5. Run enrichers in parallel (fan-out)
-        6. Merge results into Gold
-        7. Delete checkpoint on success
+        5. Run dependencies (if configured, to populate Silver tables)
+        6. Run enrichers in parallel (fan-out)
+        7. Merge results into Gold
+        8. Delete checkpoint on success
 
         Returns:
             CompositeResult with all sub-pipeline results.
 
         Raises:
-            CriticalError: If seed or required enricher fails.
+            CriticalError: If seed or required enricher/dependency fails.
             RunnerAlreadyExecutedError: If this Runner instance was already executed.
         """
         # Protection against double execution
@@ -4443,10 +4934,93 @@ class CompositePipelineRunner:
             keys_count=len(keys_df),
         )
 
-        # Step 3: Determine which enrichers to run
+        # Track dependency results
+        dependency_results: dict[str, DependencyResult] = {}
+
+        # Step 3: Run dependencies (if any)
+        if (
+            self._config.dependencies
+            and self._dependency_coordinator
+            and self._dependencies_runner_factory
+        ):
+            # Validate and transition to DEPENDENCIES_RUNNING
+            previous_state = state.state
+            self._fsm.validate_fsm_transition(
+                previous_state, CompositePipelineState.DEPENDENCIES_RUNNING
+            )
+            state = state.with_state(CompositePipelineState.DEPENDENCIES_RUNNING)
+            await self._checkpoint_manager.save(state)
+
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.DEPENDENCIES_RUNNING,
+                stage="dependencies_start",
+                dependencies=[d.pipeline for d in self._config.dependencies],
+                count=len(self._config.dependencies),
+            )
+
+            self._logger.info(
+                PipelineEvent.phase_started("dependencies"),
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                dependencies=[d.pipeline for d in self._config.dependencies],
+                count=len(self._config.dependencies),
+            )
+
+            # Execute dependencies
+            dependency_results = await self._dependency_coordinator.run_dependencies(
+                keys=keys_df,
+                dependencies=self._config.dependencies,
+                completed=state.completed_dependencies,
+                runner_factory=self._dependencies_runner_factory,
+            )
+
+            # Update checkpoint with completed dependencies
+            for dep_name, dep_result in dependency_results.items():
+                if dep_result.is_success:
+                    state = state.with_dependency_completed(dep_name, dep_result)
+
+            # Check for required dependency failures
+            required_failed = [
+                dep_name
+                for dep_name, dep_result in dependency_results.items()
+                if not dep_result.is_success
+                and self._config.get_dependency(dep_name)
+                and self._config.get_dependency(dep_name).required  # type: ignore[union-attr]
+            ]
+            if required_failed:
+                # Required dependency failed - transition to FAILED
+                state = state.with_state(CompositePipelineState.FAILED)
+                await self._checkpoint_manager.save(state)
+                raise RuntimeError(f"Required dependencies failed: {required_failed}")
+
+            # Transition to DEPENDENCIES_COMPLETED
+            previous_state = state.state
+            state = state.with_state(CompositePipelineState.DEPENDENCIES_COMPLETED)
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.DEPENDENCIES_COMPLETED,
+                stage="dependencies_complete",
+                succeeded=len([r for r in dependency_results.values() if r.is_success]),
+                failed=len(
+                    [r for r in dependency_results.values() if not r.is_success]
+                ),
+            )
+            self._logger.info(
+                PipelineEvent.phase_completed("dependencies"),
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                succeeded=len([r for r in dependency_results.values() if r.is_success]),
+                failed=len(
+                    [r for r in dependency_results.values() if not r.is_success]
+                ),
+            )
+            await self._checkpoint_manager.save(state)
+
+        # Step 4: Determine which enrichers to run
         enrichers_to_run = self._get_enrichers_to_run(state)
 
-        # Step 4: Run enrichers (fan-out) with FSM state management
+        # Step 5: Run enrichers (fan-out) with FSM state management
         if enrichers_to_run:
             # Validate and transition to ENRICHING state before starting enrichments
             enricher_names = [e.pipeline for e in enrichers_to_run]
@@ -4511,7 +5085,7 @@ class CompositePipelineRunner:
             self._logger,
         )
 
-        # Step 5: Check required enrichers with FSM FAILED transition on error
+        # Step 6: Check required enrichers with FSM FAILED transition on error
         try:
             self._check_required_enrichers(enrichment_results)
         except RuntimeError as e:
@@ -4548,10 +5122,10 @@ class CompositePipelineRunner:
         # Step 5b: Transition to ENRICHMENT_COMPLETED
         state = await self._transition_to_enrichment_completed(state)
 
-        # Step 6: Execute merge or skip in dry run mode
+        # Step 7: Execute merge or skip in dry run mode
         state, merge_result = await self._execute_merge_stage(state, enrichment_results)
 
-        # Step 7: Finalize - set COMPLETED and cleanup checkpoint
+        # Step 8: Finalize - set COMPLETED and cleanup checkpoint
         await self._finalize_pipeline(state)
 
         completed_at = datetime.now(tz=UTC)
@@ -4588,6 +5162,7 @@ class CompositePipelineRunner:
             composite_name=self._config.name,
             composite_run_id=self._run_id_str,
             seed_result=seed_result,
+            dependency_results=dependency_results,
             enrichment_results=enrichment_results,
             merge_result=merge_result,
             total_duration_seconds=total_duration,
@@ -4595,6 +5170,7 @@ class CompositePipelineRunner:
             completed_at=completed_at,
             had_warnings=had_warnings,
             _required_enrichers=frozenset(self._config.required_enrichers),
+            _required_dependencies=frozenset(self._config.required_dependencies),
         )
 
     async def _transition_to_enrichment_completed(
@@ -4602,12 +5178,16 @@ class CompositePipelineRunner:
     ) -> CompositeCheckpointState:
         """Transition FSM state to ENRICHMENT_COMPLETED.
 
-        Handles the case where no enrichers were run (state is still SEED_COMPLETED).
-        Must go through ENRICHING first per FSM rules.
+        Handles the case where no enrichers were run (state is still SEED_COMPLETED
+        or DEPENDENCIES_COMPLETED). Must go through ENRICHING first per FSM rules.
         """
         from bioetl.domain.composite.state import CompositePipelineState
 
-        if state.state == CompositePipelineState.SEED_COMPLETED:
+        # Handle states that need to transition through ENRICHING first
+        if state.state in (
+            CompositePipelineState.SEED_COMPLETED,
+            CompositePipelineState.DEPENDENCIES_COMPLETED,
+        ):
             # Must go through ENRICHING first per FSM rules (no enrichers case)
             previous_state = state.state
             self._fsm.validate_fsm_transition(
@@ -5284,11 +5864,6 @@ from bioetl.application.core.cleanup_service import (
     LayerInfo,
 )
 from bioetl.application.core.lock_manager import LockManager
-from bioetl.application.core.memory_monitor import (
-    MemoryConfig,
-    MemoryMonitor,
-    MemoryStats,
-)
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.postrun_service import (
     DQEvaluationStatus,
@@ -5321,12 +5896,13 @@ from bioetl.application.services.medallion_types import (
     ClearResult,
     PrepareResult,
 )
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.config import MemoryConfig, PipelineConfig, RuntimeConfig
 from bioetl.domain.medallion import (
     Layer,
     WriteMode,
     WriteModePolicy,
 )
+from bioetl.domain.ports import MemoryStats
 
 __all__ = [
     "BasePipeline",
@@ -5346,7 +5922,6 @@ __all__ = [
     "LockManager",
     "MedallionLifecycleService",
     "MemoryConfig",
-    "MemoryMonitor",
     "MemoryStats",
     "PipelineConfig",
     "PipelineRunner",
@@ -5611,7 +6186,7 @@ import dataclasses
 import time
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, ClassVar, TypeVar
+from typing import TYPE_CHECKING, Any, ClassVar, Protocol, TypeVar, runtime_checkable
 
 import orjson
 
@@ -5634,6 +6209,26 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 T = TypeVar("T", bound="BaseEntity")
+V = TypeVar("V", covariant=True)
+
+
+@runtime_checkable
+class ValueObjectWithFromRaw(Protocol[V]):
+    """Protocol for Value Objects with from_raw() class method.
+
+    This protocol enables type-safe usage of validate_value_object()
+    with any Value Object class that implements from_raw().
+    """
+
+    @classmethod
+    def from_raw(cls, raw: Any) -> V | None:
+        """Create Value Object from raw value, returning None if invalid."""
+        ...
+
+    @property
+    def value(self) -> Any:
+        """Get the internal value."""
+        ...
 
 
 class TransformationError(Exception):
@@ -5759,6 +6354,92 @@ class BaseTransformer(ABC):
             List of hashed values, or None if input is None.
         """
         return self._pii_hasher.hash_list(values)
+
+    # ========================================================================
+    # Value Object Validation Methods (Consolidated Logic)
+    # ========================================================================
+
+    @staticmethod
+    def validate_value_object(
+        vo_class: type[ValueObjectWithFromRaw[Any]],
+        value: Any,
+        *,
+        as_string: bool = True,
+    ) -> str | int | None:
+        """Validate a value using a Value Object and return the result.
+
+        Consolidates the common pattern of:
+        1. Call VO.from_raw(value)
+        2. Return str(vo) if vo else None
+
+        This eliminates repetitive code across transformers.
+
+        Args:
+            vo_class: Value Object class with from_raw() class method.
+            value: Raw value to validate.
+            as_string: If True, return str(vo); if False, return vo.value.
+
+        Returns:
+            Validated value as string/int, or None if validation fails.
+
+        Example:
+            >>> # Instead of:
+            >>> doi_vo = DOI.from_raw(rec.get("doi"))
+            >>> doi = str(doi_vo) if doi_vo else None
+            >>>
+            >>> # Use:
+            >>> doi = self.validate_value_object(DOI, rec.get("doi"))
+
+        """
+        vo = vo_class.from_raw(value)
+        if vo is None:
+            return None
+        return str(vo) if as_string else vo.value
+
+    @staticmethod
+    def validate_value_objects(
+        vo_class: type[ValueObjectWithFromRaw[Any]],
+        values: list[Any] | None,
+        *,
+        as_string: bool = True,
+    ) -> list[str | int] | None:
+        """Validate a list of values using a Value Object.
+
+        Useful for fields like taxonomy_id list in target_transformer.
+
+        Args:
+            vo_class: Value Object class with from_raw() class method.
+            values: List of raw values to validate, or None.
+            as_string: If True, return str(vo); if False, return vo.value.
+
+        Returns:
+            List of validated values, or None if input is None/empty.
+
+        Example:
+            >>> # Instead of:
+            >>> validated_tax_ids: list[int] | None = None
+            >>> if raw_tax_ids:
+            >>>     validated_list: list[int] = []
+            >>>     for tid in raw_tax_ids:
+            >>>         vo = TaxonomyId.from_raw(tid)
+            >>>         if vo is not None:
+            >>>             validated_list.append(vo.value)
+            >>>     validated_tax_ids = validated_list if validated_list else None
+            >>>
+            >>> # Use:
+            >>> validated_tax_ids = self.validate_value_objects(
+            >>>     TaxonomyId, raw_tax_ids, as_string=False
+            >>> )
+
+        """
+        if not values:
+            return None
+        result: list[str | int] = []
+        for val in values:
+            vo = vo_class.from_raw(val)
+            if vo is not None:
+                result.append(str(vo) if as_string else vo.value)
+        return result if result else None
 
     async def transform(
         self,
@@ -6309,7 +6990,6 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.application.core.config import RecordProcessorConfig
-    from bioetl.application.core.memory_monitor import MemoryConfig
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.protocols import (
         GoldFilterCallback,
@@ -6317,6 +6997,7 @@ if TYPE_CHECKING:
         TransformCallback,
     )
     from bioetl.application.services.dq_report_service import DQReportContext
+    from bioetl.domain.config import MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.models.metadata import SourceMetadata
@@ -7481,7 +8162,6 @@ from bioetl.domain.exceptions import DataQualityThresholdError
 
 if TYPE_CHECKING:
     from bioetl.application.core.config import RecordProcessorConfig
-    from bioetl.application.core.memory_monitor import MemoryMonitor
     from bioetl.application.core.protocols import (
         GoldFilterCallback,
         GoldTransformCallback,
@@ -7489,6 +8169,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
+    from bioetl.domain.ports import MemoryMonitorPort
     from bioetl.domain.types import BatchID
 
 
@@ -7794,7 +8475,7 @@ class StreamingBatchProcessor:
     def __init__(
         self,
         transformer: BatchTransformer,
-        memory_monitor: MemoryMonitor | None = None,
+        memory_monitor: MemoryMonitorPort | None = None,
     ) -> None:
         """Initialize streaming processor.
 
@@ -8663,8 +9344,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.memory_monitor import MemoryConfig
-from bioetl.domain.config import DQConfig, TableConfig
+from bioetl.domain.config import DQConfig, MemoryConfig, TableConfig
 
 if TYPE_CHECKING:
     from bioetl.domain.types import RunType
@@ -9117,7 +9797,6 @@ Loads filter IDs from external sources (CSV) and passes them to the adapter.
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.domain.ports import FilterableDataSourcePort, InputFilterPort
@@ -9173,14 +9852,12 @@ class FilteredDataSource:
         """Access to filter load result with duplicate statistics."""
         return self._filter_result
 
-    def _filter_file_exists(self, source_path: str) -> bool:
-        """Check if filter file exists, log warning if missing.
+    def _log_filter_file_not_found(self, source_path: str) -> None:
+        """Log warning when filter file is not found.
 
-        Returns True if file exists, False otherwise (graceful degradation).
+        Called when InputFilterPort raises FileNotFoundError.
+        Graceful degradation: pipeline continues without filtering.
         """
-        if Path(source_path).exists():
-            return True
-
         if self._logger:
             self._logger.warning(
                 "input_filter_file_not_found",
@@ -9188,7 +9865,6 @@ class FilteredDataSource:
                 pipeline=self._pipeline_name,
                 message="Filter file not found, proceeding without filtering",
             )
-        return False
 
     async def __aenter__(self) -> Self:
         """Enter async context and load filter IDs if enabled."""
@@ -9209,28 +9885,40 @@ class FilteredDataSource:
     def _load_direct_filter_ids(self) -> None:
         """Load direct filter IDs from composite mode configuration."""
         self._filter_ids = list(self._filter_config.direct_filter_ids or [])
+        self._fallback_mapping = self._filter_config.direct_fallback_mapping
         if self._logger:
             self._logger.info(
                 "direct_filter_ids_loaded",
                 count=len(self._filter_ids),
+                fallback_mapping_size=len(self._fallback_mapping)
+                if self._fallback_mapping
+                else 0,
                 filter_field=self._filter_config.filter_field,
                 pipeline=self._pipeline_name,
             )
 
     async def _load_csv_filter_ids(self) -> None:
-        """Load filter IDs from CSV file."""
+        """Load filter IDs from CSV file.
+
+        Delegates file existence checking to InputFilterPort (infrastructure layer).
+        If file not found, logs warning and continues without filtering (graceful degradation).
+        """
         if not self._filter_reader:
             return
 
         source_path = self._filter_config.source_path
-        if not source_path or not self._filter_file_exists(source_path):
+        if not source_path:
             return
 
         columns = self._filter_config.get_columns()
-        if len(columns) > 1:
-            await self._load_multi_column_filter(source_path, columns)
-        elif self._filter_config.column_name:
-            await self._load_single_column_filter(source_path)
+        try:
+            if len(columns) > 1:
+                await self._load_multi_column_filter(source_path, columns)
+            elif self._filter_config.column_name:
+                await self._load_single_column_filter(source_path)
+        except FileNotFoundError:
+            # InputFilterPort raised FileNotFoundError - graceful degradation
+            self._log_filter_file_not_found(source_path)
 
     async def _load_multi_column_filter(
         self, source_path: str, columns: tuple[Any, ...]
@@ -10110,322 +10798,31 @@ class LockManager:
 File: memory_monitor.py
 Path: core\memory_monitor.py
 ================================================================================
-"""Memory monitoring for adaptive batch processing.
+"""Backward compatibility shim for memory monitoring types.
 
-Provides memory pressure detection and adaptive batch size recommendations.
-Uses psutil if available, falls back to resource module on Unix or estimates on Windows.
+The MemoryMonitor implementation has been moved to infrastructure layer:
+bioetl.infrastructure.system.memory_monitor
 
-Implements MemoryMonitorPort from domain/ports/memory.py.
+This module re-exports domain types (MemoryConfig, MemoryStats) for backward compatibility.
 
-Performance optimizations:
-- Module-level psutil availability cache (avoid repeated import checks)
-- Cached Process instance (avoid repeated process lookup)
-- Lazy psutil import (deferred until first get_memory_stats() call)
+For MemoryMonitor implementation, import from:
+- bioetl.infrastructure.system.memory_monitor (in composition layer)
+- Or use MemoryMonitorPort (domain/ports/memory.py) for type hints in application layer
+
+Note:
+    Memory monitoring involves system-level operations (reading /proc/meminfo,
+    using psutil) which belong in the infrastructure layer per Hexagonal Architecture.
+    Application layer should depend on MemoryMonitorPort (abstract interface), not
+    on the concrete MemoryMonitor class.
 """
 
 from __future__ import annotations
 
-import sys
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import TYPE_CHECKING, Any
-
-# Re-export MemoryStats from domain for backward compatibility
+# Re-export domain types for backward compatibility
+from bioetl.domain.config import MemoryConfig
 from bioetl.domain.ports import MemoryStats
 
-if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
-
-# Module-level cache for psutil availability (checked once per process)
-_PSUTIL_AVAILABLE: bool | None = None
-_PSUTIL_MODULE: Any = None  # Cached psutil module reference
-
-
-def _check_psutil_available() -> bool:
-    """Check psutil availability once and cache the result."""
-    global _PSUTIL_AVAILABLE, _PSUTIL_MODULE
-    if _PSUTIL_AVAILABLE is None:
-        try:
-            import psutil
-
-            _PSUTIL_MODULE = psutil
-            _PSUTIL_AVAILABLE = True
-        except ImportError:
-            _PSUTIL_AVAILABLE = False
-    return _PSUTIL_AVAILABLE
-
-
-@dataclass(frozen=True, slots=True)
-class MemoryConfig:
-    """Configuration for memory-aware batch processing.
-
-    Attributes:
-        max_batch_memory_mb: Maximum memory per batch in MB (default: 512MB).
-        memory_pressure_threshold: Threshold (0.0-1.0) for reducing batch size (default: 0.8).
-        min_batch_size: Minimum batch size even under memory pressure (default: 10).
-        check_interval_records: Check memory every N records (default: 100).
-        enable_adaptive_sizing: Enable/disable adaptive batch sizing (default: True).
-
-    """
-
-    max_batch_memory_mb: int = 512
-    memory_pressure_threshold: float = 0.8
-    min_batch_size: int = 10
-    check_interval_records: int = 100
-    enable_adaptive_sizing: bool = True
-
-
-@dataclass
-class MemoryMonitor:
-    """Monitor memory usage and provide adaptive batch size recommendations.
-
-    This class tracks memory consumption during batch processing and
-    automatically recommends batch size reductions when memory pressure
-    is detected, preventing OOM errors during large dataset processing.
-
-    Performance characteristics:
-    - First call to get_memory_stats(): ~1-2 ms (with psutil already imported)
-    - Subsequent calls: ~0.2-0.5 ms (cached Process instance)
-    - Initialization: <1 ms (no heavy imports in __post_init__)
-
-    Example:
-        >>> monitor = MemoryMonitor(config=MemoryConfig(), logger=logger)
-        >>> batch_size = 1000
-        >>> for batch in data_source:
-        ...     batch_size = monitor.get_recommended_batch_size(batch_size)
-        ...     # Process with adjusted batch size
-
-    """
-
-    config: MemoryConfig
-    logger: LoggerPort | None = None
-    _psutil_available: bool = field(default=False, init=False)
-    _last_batch_size: int = field(default=100, init=False)
-    _consecutive_pressure_count: int = field(default=0, init=False)
-    _cached_process: Any = field(default=None, init=False)
-
-    def __post_init__(self) -> None:
-        """Initialize memory monitor with lazy psutil detection.
-
-        Uses module-level cache for psutil availability check to avoid
-        repeated import overhead across multiple MemoryMonitor instances.
-        """
-        self._psutil_available = _check_psutil_available()
-        if self._psutil_available and self.logger:
-            self.logger.debug("psutil available for memory monitoring")
-        elif not self._psutil_available and self.logger:
-            self.logger.debug("psutil not available, using fallback memory monitoring")
-
-    def get_memory_stats(self) -> MemoryStats:
-        """Get current memory statistics.
-
-        Returns:
-            MemoryStats with current memory usage information.
-
-        """
-        if self._psutil_available:
-            return self._get_stats_psutil()
-        return self._get_stats_fallback()
-
-    def _get_stats_psutil(self) -> MemoryStats:
-        """Get memory stats using psutil.
-
-        Performance optimization: reuses cached psutil module and Process instance
-        to avoid repeated imports and process lookups (~40ms savings per init).
-        """
-        psutil = _PSUTIL_MODULE
-
-        vm = psutil.virtual_memory()
-
-        # Cache Process instance for subsequent calls (saves ~0.2ms per call)
-        if self._cached_process is None:
-            object.__setattr__(self, "_cached_process", psutil.Process())
-        process_memory = self._cached_process.memory_info()
-
-        return MemoryStats(
-            used_mb=vm.used / (1024 * 1024),
-            available_mb=vm.available / (1024 * 1024),
-            total_mb=vm.total / (1024 * 1024),
-            percent_used=vm.percent / 100.0,
-            process_mb=process_memory.rss / (1024 * 1024),
-        )
-
-    def _get_stats_fallback(self) -> MemoryStats:
-        """Get memory stats using fallback methods."""
-        if sys.platform != "win32":
-            return self._get_stats_resource()
-        return self._get_stats_estimate()
-
-    def _get_stats_resource(self) -> MemoryStats:
-        """Get memory stats using resource module (Unix only)."""
-        import resource
-
-        # Get process memory usage (Unix-only attributes)
-        rusage = resource.getrusage(resource.RUSAGE_SELF)
-        process_mb = rusage.ru_maxrss / 1024  # Convert KB to MB on Linux
-
-        # Try to read system memory from /proc/meminfo
-        try:
-            with Path("/proc/meminfo").open() as f:
-                meminfo = {}
-                for line in f:
-                    parts = line.split()
-                    if len(parts) >= 2:
-                        key = parts[0].rstrip(":")
-                        value = int(parts[1])  # in KB
-                        meminfo[key] = value
-
-                total_mb = meminfo.get("MemTotal", 0) / 1024
-                available_mb = meminfo.get("MemAvailable", 0) / 1024
-                used_mb = total_mb - available_mb
-                percent_used = used_mb / total_mb if total_mb > 0 else 0.5
-
-                return MemoryStats(
-                    used_mb=used_mb,
-                    available_mb=available_mb,
-                    total_mb=total_mb,
-                    percent_used=percent_used,
-                    process_mb=process_mb,
-                )
-        except (OSError, KeyError):
-            return self._get_stats_estimate()
-
-    def _get_stats_estimate(self) -> MemoryStats:
-        """Provide conservative estimates when actual stats unavailable."""
-        # Conservative estimate: assume 50% memory used
-        # This is safer than assuming low usage
-        return MemoryStats(
-            used_mb=4096.0,  # Assume 4GB used
-            available_mb=4096.0,  # Assume 4GB available
-            total_mb=8192.0,  # Assume 8GB total
-            percent_used=0.5,
-            process_mb=256.0,  # Assume 256MB process
-        )
-
-    def is_under_pressure(self) -> bool:
-        """Check if system is under memory pressure.
-
-        Returns:
-            True if memory usage exceeds the configured threshold.
-
-        """
-        if not self.config.enable_adaptive_sizing:
-            return False
-
-        stats = self.get_memory_stats()
-        return stats.percent_used >= self.config.memory_pressure_threshold
-
-    def get_recommended_batch_size(self, current_batch_size: int) -> int:
-        """Get recommended batch size based on memory pressure.
-
-        Implements adaptive batch sizing:
-        - If under memory pressure, reduces batch size by 50%
-        - If pressure persists for 3+ checks, reduces more aggressively
-        - Never goes below min_batch_size
-        - Gradually increases batch size when pressure is relieved
-
-        Args:
-            current_batch_size: Current batch size.
-
-        Returns:
-            Recommended batch size (may be smaller if under pressure).
-
-        """
-        if not self.config.enable_adaptive_sizing:
-            return current_batch_size
-
-        stats = self.get_memory_stats()
-        is_pressure = stats.percent_used >= self.config.memory_pressure_threshold
-
-        if is_pressure:
-            self._consecutive_pressure_count += 1
-            reduction_factor = self._get_reduction_factor()
-            new_size = max(
-                int(current_batch_size * reduction_factor),
-                self.config.min_batch_size,
-            )
-
-            if self.logger and new_size < current_batch_size:
-                self.logger.warning(
-                    "Memory pressure detected, reducing batch size",
-                    current_batch_size=current_batch_size,
-                    new_batch_size=new_size,
-                    memory_percent_used=round(stats.percent_used * 100, 1),
-                    consecutive_pressure_count=self._consecutive_pressure_count,
-                )
-
-            self._last_batch_size = new_size
-            return new_size
-
-        # Pressure relieved - consider gradual recovery
-        self._consecutive_pressure_count = 0
-
-        # If we previously reduced, try to recover gradually
-        if current_batch_size < self._last_batch_size:
-            recovery_size = min(
-                int(current_batch_size * 1.25),  # Increase by 25%
-                self._last_batch_size,
-            )
-            if self.logger:
-                self.logger.debug(
-                    "Memory pressure relieved, increasing batch size",
-                    current_batch_size=current_batch_size,
-                    new_batch_size=recovery_size,
-                    memory_percent_used=round(stats.percent_used * 100, 1),
-                )
-            return recovery_size
-
-        self._last_batch_size = current_batch_size
-        return current_batch_size
-
-    def _get_reduction_factor(self) -> float:
-        """Get batch size reduction factor based on pressure duration.
-
-        Returns:
-            Reduction factor (0.25 to 0.5).
-
-        """
-        if self._consecutive_pressure_count >= 5:
-            return 0.25  # Aggressive: reduce to 25%
-        if self._consecutive_pressure_count >= 3:
-            return 0.35  # Moderate-aggressive: reduce to 35%
-        return 0.5  # Standard: reduce by half
-
-    def estimate_batch_memory_mb(
-        self, record_count: int, avg_record_size_bytes: int = 1024
-    ) -> float:
-        """Estimate memory usage for a batch.
-
-        Args:
-            record_count: Number of records in batch.
-            avg_record_size_bytes: Average size per record in bytes.
-
-        Returns:
-            Estimated memory usage in MB.
-
-        """
-        # Factor in transformation overhead (2x for in-memory copies)
-        overhead_factor = 2.5
-        return (record_count * avg_record_size_bytes * overhead_factor) / (1024 * 1024)
-
-    def calculate_max_batch_size(self, avg_record_size_bytes: int = 1024) -> int:
-        """Calculate maximum batch size based on available memory.
-
-        Args:
-            avg_record_size_bytes: Average size per record in bytes.
-
-        Returns:
-            Maximum recommended batch size.
-
-        """
-        max_memory_bytes = self.config.max_batch_memory_mb * 1024 * 1024
-        overhead_factor = 2.5
-
-        max_records = int(max_memory_bytes / (avg_record_size_bytes * overhead_factor))
-        return max(max_records, self.config.min_batch_size)
-
-
-__all__ = ["MemoryConfig", "MemoryMonitor", "MemoryStats"]
+__all__ = ["MemoryConfig", "MemoryStats"]
 
 ================================================================================
 File: pipeline_services.py
@@ -14219,7 +14616,13 @@ _QUALITY_ANNOTATIONS = FieldGroup(
             "data_validity_comment",
             "data_validity_description",
         ),
-        *int_fields("document_year", "potential_duplicate", "toid"),
+        *int_fields(
+            "document_year",
+            "potential_duplicate",
+            "toid",
+            "manual_curation_flag",
+            "original_activity_id",
+        ),
     ),
 )
 
@@ -15359,8 +15762,9 @@ class MoleculeTransformer(BaseChemblTransformer):
         )
 
         # Validate InChI Key using Value Object (returns None for invalid/empty)
-        inchikey = InChIKey.from_raw(structure_data.get("inchikey"))
-        structure_data["inchikey"] = str(inchikey) if inchikey else None
+        structure_data["inchikey"] = self.validate_value_object(
+            InChIKey, structure_data.get("inchikey")
+        )
 
         # Validate SMILES using Value Object (returns None for invalid/empty)
         # ChEMBL provides canonical_smiles, so mark as canonical
@@ -15748,7 +16152,7 @@ Uses declarative field_specs DSL for mapping.
 from __future__ import annotations
 
 import hashlib
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
@@ -15756,7 +16160,8 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 from bioetl.domain.entities import DocumentTerm
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
 class PublicationTermTransformer(BaseChemblTransformer):
@@ -15783,6 +16188,67 @@ class PublicationTermTransformer(BaseChemblTransformer):
     entity_class = DocumentTerm
     primary_id_field = "document_chembl_id"
 
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Override base implementation to use composite entity_id.
+
+        PublicationTerm is a derived entity with composite primary key:
+        (document_chembl_id, term_type, term). The entity_id must be computed
+        from all three fields, not just document_chembl_id.
+
+        If record contains pre-computed entity_id (from PublicationTermDataSource),
+        use it directly. Otherwise, compute composite entity_id.
+
+        Args:
+            context: Pipeline context with run_id, run_type, logger.
+            record: Bronze record (pre-extracted term or raw publication).
+            index: Sequential index of the record in the pipeline run.
+
+        Returns:
+            SilverRecord if transformation successful, None if skipped.
+
+        """
+        # 1. Validate primary ID (document_chembl_id)
+        primary_id = self._get_required_field(record, self.primary_id_field)
+
+        # 2. Extract business data (term details)
+        business_data = self._extract_business_data(record, primary_id)
+
+        # 3. Compute entity_id using composite key
+        # Priority: pre-computed entity_id from record > computed from composite key
+        pre_computed_id = record.get("entity_id")
+        if pre_computed_id:
+            entity_id = str(pre_computed_id)
+        else:
+            # Compute from composite key (document_chembl_id, term_type, term)
+            entity_id = self.compute_term_entity_id(
+                document_chembl_id=str(
+                    business_data.get("document_chembl_id", primary_id)
+                ),
+                term_type=str(business_data.get("term_type", "")),
+                term=str(business_data.get("term", "")),
+            )
+
+        # 4. Compute content hash
+        content_hash = self.compute_content_hash(business_data, exclude_none=True)
+
+        # 5. Create domain entity
+        entity = self._create_entity(
+            self.entity_class,
+            context,
+            entity_id=entity_id,
+            content_hash=content_hash,
+            index=index,
+            **business_data,
+        )
+
+        # 6. Convert to SilverRecord
+        return cast("SilverRecord", self.entity_to_silver_record(entity))
+
     def _extract_business_data(
         self,
         record: BronzeRecord,
@@ -15792,25 +16258,41 @@ class PublicationTermTransformer(BaseChemblTransformer):
 
         Handles two cases:
         1. Pre-extracted term records (from PublicationTermDataSource) - pass through
-        2. Raw publication records - extract terms from mesh_terms/keywords arrays
+           with normalization (strip whitespace from term/term_type).
+        2. Raw publication records - extract terms from mesh_terms/keywords arrays.
+
+        Both paths apply consistent normalization via strip() on term and term_type
+        to ensure storage consistency regardless of input source.
 
         Args:
             record: Bronze record (either term record or document record).
             primary_id: Validated document_chembl_id value.
 
         Returns:
-            Dictionary of term business fields.
+            Dictionary of term business fields with normalized values.
 
         """
         # Case 1: Record is already a term record (from PublicationTermDataSource)
-        # These records have 'term' and 'term_type' fields directly
+        # These records have 'term' and 'term_type' fields directly.
+        # Apply same normalization as _create_term_data for consistency.
         if "term" in record and "term_type" in record:
+            raw_term = record.get("term")
+            raw_term_type = record.get("term_type")
+            raw_mesh_id = record.get("mesh_id")
+            raw_qualifier = record.get("qualifier")
+
+            # Normalize term and term_type (strip whitespace, convert to string)
+            term = str(raw_term).strip() if raw_term else ""
+            term_type = str(raw_term_type).strip() if raw_term_type else ""
+            mesh_id = str(raw_mesh_id).strip() if raw_mesh_id else None
+            qualifier = str(raw_qualifier).strip() if raw_qualifier else None
+
             return {
                 "document_chembl_id": str(record.get("document_chembl_id", primary_id)),
-                "term": record.get("term", ""),
-                "term_type": record.get("term_type", ""),
-                "mesh_id": record.get("mesh_id"),
-                "qualifier": record.get("qualifier"),
+                "term": term,
+                "term_type": term_type,
+                "mesh_id": mesh_id,
+                "qualifier": qualifier,
             }
 
         # Case 2: Raw document record - extract terms from nested arrays
@@ -16125,10 +16607,6 @@ class PublicationTransformer(BaseChemblTransformer):
         validated_year = year_vo.value if year_vo else None
         data["year"] = validated_year
 
-        # publication_date: ChEMBL API doesn't provide full date, only year
-        # Set to null (excluded from PyArrow/Gold schemas)
-        data["publication_date"] = None
-
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON
         # Authors stored as JSON-serialized list for unified format across providers
@@ -16156,19 +16634,41 @@ class PublicationTransformer(BaseChemblTransformer):
         # System field: data source identifier
         data["_source"] = "chembl"
 
-        # Unified publication fields (always NULL, excluded from PyArrow/Gold schemas)
+        # Unified publication fields (always NULL for ChEMBL)
         data["citation_count"] = None
         data["is_oa"] = None
         data["language"] = None
-
-        # Cross-reference IDs (pmc_id always NULL, excluded from PyArrow/Gold schemas)
-        data["pmc_id"] = None
 
         # DQ flags (default: no warnings or errors)
         data["_dq_warn"] = False
         data["_dq_error"] = False
 
         return data
+
+    @staticmethod
+    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        """Convert Domain Entity to SilverRecord, excluding unused fields.
+
+        Overrides base implementation to remove fields not collected for ChEMBL.
+
+        Args:
+            entity: Domain entity (dataclass).
+
+        Returns:
+            SilverRecord dictionary without affiliations, pmc_id, publication_date.
+
+        """
+        from bioetl.application.core.base_transformer import BaseTransformer
+
+        # Get base silver record
+        silver_record = BaseTransformer.entity_to_silver_record(entity)
+
+        # Remove excluded fields
+        silver_record.pop("affiliations", None)
+        silver_record.pop("pmc_id", None)
+        silver_record.pop("publication_date", None)
+
+        return silver_record
 
 ================================================================================
 File: target.py
@@ -16743,6 +17243,44 @@ class BasePublicationTransformer(BaseTransformer):
         # 8. Convert to SilverRecord
         return cast("SilverRecord", self.entity_to_silver_record(entity))
 
+    def _normalize_partial_date(self, date_str: str | None) -> str | None:
+        """Normalize partial date to YYYY-MM-DD format (end of period).
+
+        Common logic for provider APIs that return partial dates:
+        - Full date: "2024-05-15" (YYYY-MM-DD)
+        - Month precision: "2024-05" (YYYY-MM) -> "2024-05-30"
+        - Year precision: "2024" (YYYY) -> "2024-12-31"
+
+        Partial dates are normalized to end of period for consistency across BioETL.
+
+        Args:
+            date_str: Raw date string from provider API.
+
+        Returns:
+            Normalized ISO date string (YYYY-MM-DD) or None.
+
+        """
+        if not date_str:
+            return None
+
+        date_str = str(date_str).strip()
+
+        # Full ISO format (YYYY-MM-DD) - return as-is
+        # Check length and separators strictly to avoid false positives
+        if len(date_str) == 10 and date_str[4] == "-" and date_str[7] == "-":
+            return date_str
+
+        # Partial date: YYYY-MM → YYYY-MM-30 (end of month approximation)
+        if len(date_str) == 7 and date_str[4] == "-":
+            return f"{date_str}-30"
+
+        # Partial date: YYYY → YYYY-12-31 (end of year)
+        if len(date_str) == 4 and date_str.isdigit():
+            return f"{date_str}-12-31"
+
+        # Unknown format - return None for invalid dates
+        return None
+
 ================================================================================
 File: extractors.py
 Path: pipelines\common\extractors.py
@@ -16845,6 +17383,8 @@ Transformers and utilities for CrossRef data processing.
 """
 
 from bioetl.application.pipelines.crossref.extractors import (
+    extract_author_details,
+    extract_author_orcids,
     extract_authors,
     extract_content_domain,
     extract_dates,
@@ -16853,6 +17393,7 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_license_url,
     extract_page_info,
     extract_published_date,
+    extract_references,
     extract_year,
 )
 from bioetl.application.pipelines.crossref.transformer import (
@@ -16861,6 +17402,8 @@ from bioetl.application.pipelines.crossref.transformer import (
 
 __all__ = [
     "CrossRefPublicationTransformer",
+    "extract_author_details",
+    "extract_author_orcids",
     "extract_authors",
     "extract_content_domain",
     "extract_dates",
@@ -16869,8 +17412,134 @@ __all__ = [
     "extract_license_url",
     "extract_page_info",
     "extract_published_date",
+    "extract_references",
     "extract_year",
 ]
+
+================================================================================
+File: author_extractors.py
+Path: pipelines\crossref\author_extractors.py
+================================================================================
+"""Author extraction functions for CrossRef records.
+
+Provides pure functions for extracting author details, ORCID identifiers,
+and affiliations from CrossRef Works API responses.
+
+These functions are:
+- Stateless and pure (no side effects)
+- Unit testable in isolation
+- Reusable across different transformation contexts
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+
+def _normalize_orcid(orcid_value: str | None) -> str | None:
+    """Normalize ORCID to ID-only format (without URL prefix)."""
+    if not orcid_value or not isinstance(orcid_value, str):
+        return None
+    orcid = orcid_value.strip()
+    # Remove URL prefix if present
+    if orcid.startswith("https://orcid.org/"):
+        orcid = orcid[len("https://orcid.org/") :]
+    elif orcid.startswith("http://orcid.org/"):
+        orcid = orcid[len("http://orcid.org/") :]
+    # Validate format: 0000-0000-0000-000X
+    if len(orcid) == 19 and orcid[4] == "-" and orcid[9] == "-" and orcid[14] == "-":
+        return orcid
+    return None
+
+
+def _extract_author_sequence(author: dict[str, Any]) -> str | None:
+    """Extract and validate author sequence field."""
+    sequence = author.get("sequence")
+    if not sequence or not isinstance(sequence, str):
+        return None
+    sequence = sequence.strip().lower()
+    return sequence if sequence in ("first", "additional") else None
+
+
+def _extract_author_affiliations_list(author: dict[str, Any]) -> list[str]:
+    """Extract affiliations list from author object."""
+    affiliations: list[str] = []
+    aff_list = author.get("affiliation", [])
+    if not isinstance(aff_list, list):
+        return affiliations
+    for aff in aff_list:
+        aff_name = aff.get("name") if isinstance(aff, dict) else aff
+        if aff_name and isinstance(aff_name, str):
+            aff_name = aff_name.strip()
+            if aff_name:
+                affiliations.append(aff_name)
+    return affiliations
+
+
+def _build_author_detail(author: dict[str, Any]) -> dict[str, Any] | None:
+    """Build author detail dict from raw author object."""
+    given = author.get("given", "").strip() or None
+    family = author.get("family", "").strip() or None
+    org_name = author.get("name", "").strip() or None
+    if not given and not family and not org_name:
+        return None
+    authenticated_orcid = author.get("authenticated-orcid")
+    return {
+        "given": given,
+        "family": family,
+        "name": org_name,
+        "orcid": _normalize_orcid(author.get("ORCID")),
+        "authenticated_orcid": (
+            bool(authenticated_orcid) if authenticated_orcid is not None else None
+        ),
+        "sequence": _extract_author_sequence(author),
+        "affiliations": _extract_author_affiliations_list(author),
+    }
+
+
+def extract_author_details(publication: dict[str, Any]) -> list[dict[str, Any]]:
+    """Extract full author details from CrossRef publication.
+
+    Args:
+        publication: CrossRef publication record.
+
+    Returns:
+        List of author detail dictionaries with keys:
+        given, family, name, orcid, authenticated_orcid, sequence, affiliations.
+
+    """
+    author_details: list[dict[str, Any]] = []
+    for author in publication.get("author", []):
+        if not isinstance(author, dict):
+            continue
+        detail = _build_author_detail(author)
+        if detail:
+            author_details.append(detail)
+    return author_details
+
+
+def extract_author_orcids(publication: dict[str, Any]) -> list[str]:
+    """Extract list of ORCID identifiers from CrossRef publication.
+
+    Extracts and normalizes all ORCID identifiers from the author array.
+    Only includes non-empty, valid ORCIDs (normalized to ID-only format).
+
+    Args:
+        publication: CrossRef publication record.
+
+    Returns:
+        List of ORCID IDs (format: 0000-0000-0000-000X), preserving author order.
+        Authors without ORCID are not included.
+
+    """
+    orcids: list[str] = []
+    for author in publication.get("author", []):
+        if not isinstance(author, dict):
+            continue
+        orcid = _normalize_orcid(author.get("ORCID"))
+        if orcid:
+            orcids.append(orcid)
+    return orcids
 
 ================================================================================
 File: extractors.py
@@ -16893,12 +17562,35 @@ from __future__ import annotations
 
 from typing import Any
 
+from bioetl.application.pipelines.crossref.author_extractors import (
+    extract_author_details,
+    extract_author_orcids,
+)
+from bioetl.application.pipelines.crossref.reference_extractors import (
+    extract_references,
+)
 from bioetl.domain.normalization import (
     extract_first_string,
     format_date_parts,
     parse_page_range,
 )
 from bioetl.domain.value_objects import PublicationYear
+
+# Re-exports for backward compatibility
+__all__ = [
+    "extract_author_details",
+    "extract_author_orcids",
+    "extract_authors",
+    "extract_content_domain",
+    "extract_dates",
+    "extract_issn_by_type",
+    "extract_journal_info",
+    "extract_license_url",
+    "extract_page_info",
+    "extract_published_date",
+    "extract_references",
+    "extract_year",
+]
 
 
 def extract_authors(publication: dict[str, Any]) -> list[str]:
@@ -16944,6 +17636,49 @@ def extract_authors(publication: dict[str, Any]) -> list[str]:
             # Organizational author (e.g., "World Health Organization")
             authors.append(name)
     return authors
+
+
+def extract_affiliations(publication: dict[str, Any]) -> list[str]:
+    """Extract unique affiliations from CrossRef publication.
+
+    CrossRef affiliations are often nested inside author objects.
+    Format: author -> affiliation -> [{'name': 'University...'}] or string list.
+
+    Args:
+        publication: CrossRef publication record.
+
+    Returns:
+        List of unique affiliation strings (sorted).
+
+    Example:
+        >>> extract_affiliations({
+        ...     "author": [
+        ...         {"affiliation": [{"name": "University A"}]},
+        ...         {"affiliation": [{"name": "University B"}, {"name": "University A"}]}
+        ...     ]
+        ... })
+        ['University A', 'University B']
+    """
+    affiliations: set[str] = set()
+    for author in publication.get("author", []):
+        if not isinstance(author, dict):
+            continue
+
+        aff_list = author.get("affiliation", [])
+        if not isinstance(aff_list, list):
+            continue
+
+        for aff in aff_list:
+            name = None
+            if isinstance(aff, dict):
+                name = aff.get("name")
+            elif isinstance(aff, str):
+                name = aff
+
+            if name and isinstance(name, str):
+                affiliations.add(name.strip())
+
+    return sorted(affiliations)
 
 
 def extract_year(publication: dict[str, Any]) -> int | None:
@@ -17225,6 +17960,90 @@ def extract_published_date(publication: dict[str, Any]) -> str | None:
     return format_date_parts(published.get("date-parts"))
 
 ================================================================================
+File: reference_extractors.py
+Path: pipelines\crossref\reference_extractors.py
+================================================================================
+"""Reference extraction functions for CrossRef records.
+
+Provides pure functions for extracting bibliographic references from
+CrossRef Works API responses for citation network analysis.
+
+These functions are:
+- Stateless and pure (no side effects)
+- Unit testable in isolation
+- Reusable across different transformation contexts
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+
+def _clean_string(value: Any, lowercase: bool = False) -> str | None:
+    """Clean and optionally lowercase a string value."""
+    if not value or not isinstance(value, str):
+        return None
+    cleaned: str = value.strip()
+    if not cleaned:
+        return None
+    return cleaned.lower() if lowercase else cleaned
+
+
+def _parse_year(year_raw: Any) -> int | None:
+    """Parse year from string or int value."""
+    if not year_raw:
+        return None
+    if isinstance(year_raw, int):
+        return year_raw
+    if isinstance(year_raw, str):
+        year_str = year_raw.strip()
+        if year_str.isdigit():
+            return int(year_str)
+    return None
+
+
+def extract_references(publication: dict[str, Any]) -> list[dict[str, Any]]:
+    """Extract bibliographic references from CrossRef publication.
+
+    Parses the 'reference' array containing citations to other works.
+    This data is essential for citation network analysis and bibliometric studies.
+
+    Args:
+        publication: CrossRef publication record.
+
+    Returns:
+        List of reference dictionaries with normalized keys.
+        Each reference contains available bibliographic metadata.
+
+    """
+    references: list[dict[str, Any]] = []
+    for ref in publication.get("reference", []):
+        if not isinstance(ref, dict):
+            continue
+        references.append(
+            {
+                "key": _clean_string(ref.get("key")),
+                "doi": _clean_string(ref.get("DOI"), lowercase=True),
+                "doi_asserted_by": _clean_string(
+                    ref.get("doi-asserted-by"), lowercase=True
+                ),
+                "article_title": _clean_string(ref.get("article-title")),
+                "volume_title": _clean_string(ref.get("volume-title")),
+                "journal_title": _clean_string(ref.get("journal-title")),
+                "series_title": _clean_string(ref.get("series-title")),
+                "author": _clean_string(ref.get("author")),
+                "year": _parse_year(ref.get("year")),
+                "volume": _clean_string(ref.get("volume")),
+                "issue": _clean_string(ref.get("issue")),
+                "first_page": _clean_string(ref.get("first-page")),
+                "unstructured": _clean_string(ref.get("unstructured")),
+                "issn": _clean_string(ref.get("ISSN")),
+                "isbn": _clean_string(ref.get("ISBN")),
+            }
+        )
+    return references
+
+================================================================================
 File: transformer.py
 Path: pipelines\crossref\transformer.py
 ================================================================================
@@ -17250,6 +18069,8 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.crossref.extractors import (
+    extract_author_details,
+    extract_author_orcids,
     extract_authors,
     extract_content_domain,
     extract_dates,
@@ -17258,6 +18079,7 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_license_url,
     extract_page_info,
     extract_published_date,
+    extract_references,
     extract_year,
 )
 from bioetl.domain.entities.crossref import (
@@ -17347,10 +18169,11 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         # Cast to dict for type-safe access (BronzeRecord is an empty TypedDict marker)
         rec = cast("dict[str, Any]", record)
 
-        # Validate DOI using Value Object (returns None for invalid/empty)
-        # CrossRef always provides DOI, so we use empty string as fallback for type consistency
-        doi_vo = DOI.from_raw(rec.get("DOI"))
-        doi = str(doi_vo) if doi_vo else ""
+        # Normalize DOI using Value Object for consistent lowercase format.
+        # DOI validity is guaranteed by _pre_extract_validation, so we assert non-None.
+        # If DOI were somehow invalid here, it indicates a logic error.
+        doi = self.validate_value_object(DOI, rec.get("DOI"))
+        assert doi is not None, "DOI should be validated in _pre_extract_validation"
 
         # Use extractors for structured field extraction
         journal_info = extract_journal_info(rec)
@@ -17360,15 +18183,24 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         issn_by_type = extract_issn_by_type(rec)
         published_date = extract_published_date(rec)
 
-        # Extract abstract with HTML stripping via normalizer service
-        normalizer = self._data_normalizer
-        abstract_raw = rec.get("abstract", "")
-        abstract = normalizer.strip_html_tags(abstract_raw) if abstract_raw else None
-
         # Extract and hash PII fields (RULES.md §5.4)
         # Authors stored as JSON-serialized list for unified format across providers
         raw_authors = extract_authors(rec)
         hashed_authors = self.hash_pii_list(raw_authors) or []
+
+        # Extract author ORCID identifiers (not PII - designed for public identification)
+        author_orcids = extract_author_orcids(rec)
+        serialized_orcids = self.serialize_json_list(author_orcids)
+
+        # Extract full author details with ORCID, sequence, and affiliations
+        # Hash PII fields (given name, family name) while preserving non-PII data
+        raw_author_details = extract_author_details(rec)
+        hashed_author_details = self._hash_author_details(raw_author_details)
+        serialized_author_details = self.serialize_json(hashed_author_details)
+
+        # Extract bibliographic references (not PII - public citation data)
+        raw_references = extract_references(rec)
+        serialized_references = self.serialize_json(raw_references)
 
         # Compute unified publication_date (prefer print over online)
         publication_date = self._compute_publication_date(
@@ -17379,7 +18211,6 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         return {
             "doi": doi,
             "title": extract_first_string(rec.get("title", [])),
-            "abstract": abstract,
             "authors": self.serialize_json_list(hashed_authors),
             **journal_info,
             **page_info,
@@ -17413,6 +18244,10 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "published": published_date,
             **content_domain,
             **issn_by_type,
+            # NEW: Author and reference data (per PROMPT 3 enhancement)
+            "author_orcids": serialized_orcids,
+            "author_details": serialized_author_details,
+            "references": serialized_references,
         }
 
     def _get_primary_id_field(self) -> str:
@@ -17439,9 +18274,12 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         record: BronzeRecord,
         index: int,
     ) -> None:
-        """Validate DOI exists before extraction.
+        """Validate DOI exists and is well-formed before extraction.
 
         CrossRef publications require DOI as mandatory identifier.
+        Both missing and malformed DOIs result in record rejection,
+        as DOI is the primary identifier for entity_id computation.
+
         Raises ValueError (caught by BaseTransformer.transform).
 
         Args:
@@ -17450,12 +18288,60 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             index: Sequential index (unused).
 
         Raises:
-            ValueError: If DOI field is missing or empty.
+            ValueError: If DOI field is missing, empty, or malformed.
 
         """
-        doi = record.get("DOI")
-        if not doi:
+        raw_doi = record.get("DOI")
+        if not raw_doi:
             raise ValueError("DOI is required for CrossRef Publication")
+
+        # Cast to str for type safety (API always returns string DOIs)
+        raw_doi_str = str(raw_doi) if raw_doi else None
+
+        # Validate DOI format using Value Object
+        # This catches malformed DOIs like "invalid", "10.1234", etc.
+        doi_vo = DOI.from_raw(raw_doi_str)
+        if doi_vo is None:
+            raise ValueError(f"Invalid DOI format: {raw_doi}")
+
+    def _hash_author_details(
+        self, author_details: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        """Hash PII fields in author details while preserving non-PII data.
+
+        Author names (given, family, name) are PII and should be hashed.
+        Other fields (orcid, sequence, affiliations) are not PII.
+
+        Args:
+            author_details: List of author detail dictionaries.
+
+        Returns:
+            List of author details with hashed PII fields.
+
+        """
+        hashed_details: list[dict[str, Any]] = []
+
+        for author in author_details:
+            hashed_author: dict[str, Any] = {}
+
+            # Hash PII fields (author names)
+            for pii_field in ("given", "family", "name"):
+                value = author.get(pii_field)
+                if value and isinstance(value, str):
+                    hashed_author[pii_field] = self.hash_pii_value(value)
+                else:
+                    hashed_author[pii_field] = None
+
+            # Preserve non-PII fields (orcid, sequence, authenticated_orcid, affiliations)
+            # ORCID is a public persistent identifier, not PII
+            hashed_author["orcid"] = author.get("orcid")
+            hashed_author["authenticated_orcid"] = author.get("authenticated_orcid")
+            hashed_author["sequence"] = author.get("sequence")
+            hashed_author["affiliations"] = author.get("affiliations", [])
+
+            hashed_details.append(hashed_author)
+
+        return hashed_details
 
     def _compute_publication_date(
         self,
@@ -17490,6 +18376,30 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
         """
         return True
+
+    @staticmethod
+    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        """Convert Domain Entity to SilverRecord, excluding abstract and affiliations.
+
+        Overrides base implementation to remove fields not collected for CrossRef.
+
+        Args:
+            entity: Domain entity (dataclass).
+
+        Returns:
+            SilverRecord dictionary without abstract and affiliations fields.
+
+        """
+        from bioetl.application.core.base_transformer import BaseTransformer
+
+        # Get base silver record
+        silver_record = BaseTransformer.entity_to_silver_record(entity)
+
+        # Remove excluded fields
+        silver_record.pop("abstract", None)
+        silver_record.pop("affiliations", None)
+
+        return silver_record
 
 ================================================================================
 File: generic.py
@@ -17604,38 +18514,72 @@ Path: pipelines\openalex\extractors.py
 ================================================================================
 """Field extraction functions for OpenAlex records.
 
-Contains pure functions for extracting and normalizing fields
-from OpenAlex Works API responses.
-
-These functions are:
-- Stateless and pure (no side effects)
-- Unit testable in isolation
-- Reusable across different transformation contexts
+Pure functions for extracting/normalizing fields from OpenAlex API responses.
+Topics vs Concepts: OpenAlex deprecated concepts in 2024; use topics instead.
 """
 
 from __future__ import annotations
 
+import warnings
 from typing import Any
 
 
-def extract_doi(doi_url: str | None) -> str | None:
-    """Extract bare DOI from OpenAlex DOI URL.
-
-    OpenAlex stores DOIs as full URLs (e.g., "https://doi.org/10.1038/s41586-024-07487-w").
-    This function extracts just the DOI identifier.
+def _extract_id_from_url(url: str | None) -> str | None:
+    """Extract ID from OpenAlex URL (helper function).
 
     Args:
-        doi_url: DOI URL from OpenAlex (e.g., "https://doi.org/10.1038/...").
+        url: URL or bare ID string.
 
     Returns:
-        Bare DOI (e.g., "10.1038/s41586-024-07487-w") or None if not available.
-
-    Example:
-        >>> extract_doi("https://doi.org/10.1038/s41586-024-07487-w")
-        '10.1038/s41586-024-07487-w'
-        >>> extract_doi(None)
-        None
+        Extracted ID or original value.
     """
+    if not url or not isinstance(url, str):
+        return None
+    return url.split("/")[-1] if "/" in url else url
+
+
+def _get_nested_display_name(obj: Any) -> str | None:
+    """Get display_name from nested dict (helper function).
+
+    Args:
+        obj: Nested object (dict expected).
+
+    Returns:
+        display_name string or None.
+    """
+    if isinstance(obj, dict):
+        return obj.get("display_name")
+    return None
+
+
+def _parse_topic_dict(topic: dict[str, Any]) -> dict[str, Any] | None:
+    """Parse a single topic dict into normalized format (helper function).
+
+    Args:
+        topic: Raw topic dict from OpenAlex API.
+
+    Returns:
+        Normalized topic dict or None if invalid.
+    """
+    display_name = topic.get("display_name")
+    if not display_name or not isinstance(display_name, str):
+        return None
+
+    score = topic.get("score")
+    score_val = float(score) if isinstance(score, (int, float)) else 0.0
+
+    return {
+        "id": _extract_id_from_url(topic.get("id")),
+        "display_name": display_name.strip(),
+        "score": score_val,
+        "subfield": _get_nested_display_name(topic.get("subfield") or {}),
+        "field": _get_nested_display_name(topic.get("field") or {}),
+        "domain": _get_nested_display_name(topic.get("domain") or {}),
+    }
+
+
+def extract_doi(doi_url: str | None) -> str | None:
+    """Extract bare DOI from OpenAlex DOI URL."""
     if not doi_url:
         return None
     if doi_url.startswith("https://doi.org/"):
@@ -17648,23 +18592,7 @@ def extract_doi(doi_url: str | None) -> str | None:
 
 
 def extract_openalex_id(openalex_url: str | None) -> str | None:
-    """Extract OpenAlex ID from OpenAlex URL.
-
-    OpenAlex stores IDs as full URLs (e.g., "https://openalex.org/W2148763428").
-    This function extracts just the Work ID.
-
-    Args:
-        openalex_url: OpenAlex URL (e.g., "https://openalex.org/W2148763428").
-
-    Returns:
-        OpenAlex Work ID (e.g., "W2148763428") or None if not available.
-
-    Example:
-        >>> extract_openalex_id("https://openalex.org/W2148763428")
-        'W2148763428'
-        >>> extract_openalex_id(None)
-        None
-    """
+    """Extract OpenAlex ID from OpenAlex URL."""
     if not openalex_url:
         return None
     if "/" in openalex_url:
@@ -17673,24 +18601,7 @@ def extract_openalex_id(openalex_url: str | None) -> str | None:
 
 
 def extract_authors(authorships: list[dict[str, Any]]) -> list[str]:
-    """Extract author display names from authorships.
-
-    OpenAlex stores author information in an "authorships" array with
-    nested "author" objects containing display names.
-
-    Args:
-        authorships: List of authorship objects from OpenAlex.
-
-    Returns:
-        List of author display names.
-
-    Example:
-        >>> extract_authors([
-        ...     {"author": {"display_name": "John Doe"}},
-        ...     {"author": {"display_name": "Jane Smith"}},
-        ... ])
-        ['John Doe', 'Jane Smith']
-    """
+    """Extract author display names from authorships array."""
     authors = []
     for authorship in authorships:
         author = authorship.get("author", {})
@@ -17702,26 +18613,87 @@ def extract_authors(authorships: list[dict[str, Any]]) -> list[str]:
     return authors
 
 
-def extract_concepts(concepts: list[dict[str, Any]], max_count: int = 10) -> list[str]:
-    """Extract top concept names from concepts list.
+def extract_affiliations(authorships: list[dict[str, Any]]) -> list[str]:
+    """Extract unique affiliations from authorships (sorted)."""
+    affiliations: set[str] = set()
+    for authorship in authorships:
+        institutions = authorship.get("institutions", [])
+        if not isinstance(institutions, list):
+            continue
+        for inst in institutions:
+            if not isinstance(inst, dict):
+                continue
+            name = inst.get("display_name")
+            if name and isinstance(name, str):
+                affiliations.add(name.strip())
 
-    OpenAlex provides concepts sorted by relevance score.
-    This function extracts the display names of the top concepts.
+    return sorted(affiliations)
+
+
+def extract_institution_ids(authorships: list[dict[str, Any]]) -> list[str]:
+    """Extract unique OpenAlex institution IDs from authorships.
 
     Args:
-        concepts: List of concept objects (sorted by score).
-        max_count: Maximum concepts to extract (default 10).
+        authorships: List of authorship dicts from OpenAlex API.
 
     Returns:
-        List of concept display names.
+        Sorted list of unique institution IDs (e.g., ["I1234567890", "I9876543210"]).
 
-    Example:
-        >>> extract_concepts([
-        ...     {"display_name": "Chemistry", "score": 0.9},
-        ...     {"display_name": "Biology", "score": 0.7},
-        ... ])
-        ['Chemistry', 'Biology']
     """
+    ids: set[str] = set()
+    for authorship in authorships:
+        institutions = authorship.get("institutions", [])
+        if not isinstance(institutions, list):
+            continue
+        for inst in institutions:
+            if not isinstance(inst, dict):
+                continue
+            raw_id = inst.get("id")
+            extracted = _extract_id_from_url(raw_id)
+            if extracted:
+                ids.add(extracted)
+    return sorted(ids)
+
+
+def extract_institution_country_codes(authorships: list[dict[str, Any]]) -> list[str]:
+    """Extract unique institution country codes from authorships.
+
+    Args:
+        authorships: List of authorship dicts from OpenAlex API.
+
+    Returns:
+        Sorted list of unique ISO 2-letter country codes (e.g., ["DE", "GB", "US"]).
+
+    """
+    codes: set[str] = set()
+    for authorship in authorships:
+        institutions = authorship.get("institutions", [])
+        if not isinstance(institutions, list):
+            continue
+        for inst in institutions:
+            if not isinstance(inst, dict):
+                continue
+            code = inst.get("country_code")
+            if code and isinstance(code, str):
+                codes.add(code.upper())
+    return sorted(codes)
+
+
+def extract_concepts(
+    concepts: list[dict[str, Any]],
+    max_count: int = 10,
+    *,
+    warn_deprecated: bool = False,
+) -> list[str]:
+    """Extract top concept names (DEPRECATED: use extract_topics instead)."""
+    if warn_deprecated:
+        warnings.warn(
+            "extract_concepts() is deprecated. OpenAlex deprecated the 'concepts' "
+            "field in 2024 in favor of 'topics'. Use extract_topics() and "
+            "extract_primary_topic() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
     result = []
     for concept in concepts[:max_count]:
         if not isinstance(concept, dict):
@@ -17732,28 +18704,75 @@ def extract_concepts(concepts: list[dict[str, Any]], max_count: int = 10) -> lis
     return result
 
 
-def extract_journal_info(primary_location: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract journal information from primary_location.
+def extract_topics(
+    topics: list[dict[str, Any]] | None,
+    max_count: int = 10,
+) -> list[dict[str, Any]]:
+    """Extract topics with hierarchical classification (domain/field/subfield/topic)."""
+    if not topics or not isinstance(topics, list):
+        return []
 
-    OpenAlex stores source information in "primary_location.source".
-    This function extracts journal name, ISSN, and publisher.
+    result: list[dict[str, Any]] = []
+    for topic in topics[:max_count]:
+        if not isinstance(topic, dict):
+            continue
+        parsed = _parse_topic_dict(topic)
+        if parsed:
+            result.append(parsed)
+
+    return result
+
+
+def extract_primary_topic(
+    primary_topic: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    """Extract single most relevant topic for a work."""
+    if not primary_topic or not isinstance(primary_topic, dict):
+        return None
+    return _parse_topic_dict(primary_topic)
+
+
+def _parse_grant_dict(grant: dict[str, Any]) -> dict[str, Any] | None:
+    """Parse a single grant dict into normalized format (helper function).
 
     Args:
-        primary_location: Primary location object from OpenAlex.
+        grant: Raw grant dict from OpenAlex API.
 
     Returns:
-        Dictionary with journal_name, issn, publisher.
-
-    Example:
-        >>> extract_journal_info({
-        ...     "source": {
-        ...         "display_name": "Nature",
-        ...         "issn_l": "0028-0836",
-        ...         "host_organization_name": "Springer Nature"
-        ...     }
-        ... })
-        {'journal_name': 'Nature', 'issn': '0028-0836', 'publisher': 'Springer Nature'}
+        Normalized grant dict or None if invalid.
     """
+    funder_name = grant.get("funder_display_name")
+    if not funder_name or not isinstance(funder_name, str):
+        return None
+
+    award_id = grant.get("award_id")
+    award_str = str(award_id).strip() if award_id else None
+
+    return {
+        "funder": _extract_id_from_url(grant.get("funder")),
+        "funder_display_name": funder_name.strip(),
+        "award_id": award_str,
+    }
+
+
+def extract_grants(grants: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
+    """Extract grant/funding information from grants array."""
+    if not grants or not isinstance(grants, list):
+        return []
+
+    result: list[dict[str, Any]] = []
+    for grant in grants:
+        if not isinstance(grant, dict):
+            continue
+        parsed = _parse_grant_dict(grant)
+        if parsed:
+            result.append(parsed)
+
+    return result
+
+
+def extract_journal_info(primary_location: dict[str, Any] | None) -> dict[str, Any]:
+    """Extract journal info (journal_name, issn, publisher) from primary_location."""
     if not primary_location or not isinstance(primary_location, dict):
         return {"journal_name": None, "issn": None, "publisher": None}
 
@@ -17769,28 +18788,7 @@ def extract_journal_info(primary_location: dict[str, Any] | None) -> dict[str, A
 
 
 def reconstruct_abstract(inverted_index: dict[str, list[int]] | None) -> str | None:
-    """Reconstruct abstract from OpenAlex inverted index.
-
-    OpenAlex stores abstracts as inverted index format for storage efficiency:
-    {"word": [positions]}.
-    This function reconstructs the original text.
-
-    Args:
-        inverted_index: Dict mapping words to position lists.
-
-    Returns:
-        Reconstructed abstract text or None if not available.
-
-    Example:
-        >>> reconstruct_abstract({
-        ...     "This": [0],
-        ...     "is": [1, 4],
-        ...     "an": [2],
-        ...     "example": [3],
-        ...     "abstract": [5]
-        ... })
-        'This is an example is abstract'
-    """
+    """Reconstruct abstract from OpenAlex inverted index format."""
     if not inverted_index or not isinstance(inverted_index, dict):
         return None
 
@@ -17812,18 +18810,7 @@ def reconstruct_abstract(inverted_index: dict[str, list[int]] | None) -> str | N
 
 
 def extract_open_access_info(open_access: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract Open Access information from open_access object.
-
-    Args:
-        open_access: Open access object from OpenAlex.
-
-    Returns:
-        Dictionary with is_oa and oa_status.
-
-    Example:
-        >>> extract_open_access_info({"is_oa": True, "oa_status": "gold"})
-        {'is_oa': True, 'oa_status': 'gold'}
-    """
+    """Extract Open Access info (is_oa, oa_status)."""
     if not open_access or not isinstance(open_access, dict):
         return {"is_oa": None, "oa_status": None}
 
@@ -17834,32 +18821,7 @@ def extract_open_access_info(open_access: dict[str, Any] | None) -> dict[str, An
 
 
 def extract_external_ids(ids: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract external identifiers from ids object.
-
-    OpenAlex stores external IDs as URLs or raw values:
-    - pmid: "https://pubmed.ncbi.nlm.nih.gov/12345678" -> "12345678"
-    - pmcid: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC123456" -> "PMC123456"
-    - mag: Microsoft Academic Graph ID (integer or string)
-
-    Note: Returns intermediate keys matching API names. Transformer maps
-    pmcid -> pmc_id for schema consistency.
-
-    Args:
-        ids: IDs object from OpenAlex work.
-
-    Returns:
-        Dictionary with pmid, pmcid (maps to pmc_id in transformer), mag_id fields.
-
-    Example:
-        >>> extract_external_ids({
-        ...     "pmid": "https://pubmed.ncbi.nlm.nih.gov/32015508",
-        ...     "pmcid": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7095418",
-        ...     "mag": "3006090887"
-        ... })
-        {'pmid': '32015508', 'pmcid': 'PMC7095418', 'mag_id': '3006090887'}
-        >>> extract_external_ids(None)
-        {'pmid': None, 'pmcid': None, 'mag_id': None}
-    """
+    """Extract external identifiers (pmid, pmcid, mag_id) from ids object."""
     if not ids or not isinstance(ids, dict):
         return {"pmid": None, "pmcid": None, "mag_id": None}
 
@@ -17887,27 +18849,7 @@ def extract_external_ids(ids: dict[str, Any] | None) -> dict[str, Any]:
 
 
 def extract_mesh_terms(mesh: list[dict[str, Any]] | None) -> list[str]:
-    """Extract MeSH descriptor names from mesh array.
-
-    OpenAlex provides MeSH terms with descriptor and qualifier info.
-    This function extracts unique descriptor names.
-
-    Args:
-        mesh: List of MeSH term objects from OpenAlex.
-
-    Returns:
-        List of unique MeSH descriptor names.
-
-    Example:
-        >>> extract_mesh_terms([
-        ...     {"descriptor_ui": "D000818", "descriptor_name": "Animals"},
-        ...     {"descriptor_ui": "D006801", "descriptor_name": "Humans"},
-        ...     {"descriptor_ui": "D000818", "descriptor_name": "Animals"}
-        ... ])
-        ['Animals', 'Humans']
-        >>> extract_mesh_terms(None)
-        []
-    """
+    """Extract unique MeSH descriptor names from mesh array."""
     if not mesh or not isinstance(mesh, list):
         return []
 
@@ -17926,25 +18868,7 @@ def extract_mesh_terms(mesh: list[dict[str, Any]] | None) -> list[str]:
 
 
 def extract_keywords(keywords: list[dict[str, Any]] | None) -> list[str]:
-    """Extract keyword display names from keywords array.
-
-    OpenAlex provides keywords with display_name field.
-
-    Args:
-        keywords: List of keyword objects from OpenAlex.
-
-    Returns:
-        List of keyword display names.
-
-    Example:
-        >>> extract_keywords([
-        ...     {"id": "https://openalex.org/keywords/coronavirus", "display_name": "Coronavirus"},
-        ...     {"id": "https://openalex.org/keywords/pandemic", "display_name": "Pandemic"}
-        ... ])
-        ['Coronavirus', 'Pandemic']
-        >>> extract_keywords(None)
-        []
-    """
+    """Extract keyword display names from keywords array."""
     if not keywords or not isinstance(keywords, list):
         return []
 
@@ -17960,28 +18884,7 @@ def extract_keywords(keywords: list[dict[str, Any]] | None) -> list[str]:
 
 
 def extract_biblio_info(biblio: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract bibliographic info (volume, issue, pages) from biblio object.
-
-    OpenAlex provides bibliographic information in a "biblio" object
-    containing volume, issue, first_page, and last_page fields.
-
-    Args:
-        biblio: Biblio object from OpenAlex work.
-
-    Returns:
-        Dictionary with volume, issue, first_page, last_page.
-
-    Example:
-        >>> extract_biblio_info({
-        ...     "volume": "42",
-        ...     "issue": "3",
-        ...     "first_page": "123",
-        ...     "last_page": "145"
-        ... })
-        {'volume': '42', 'issue': '3', 'first_page': '123', 'last_page': '145'}
-        >>> extract_biblio_info(None)
-        {'volume': None, 'issue': None, 'first_page': None, 'last_page': None}
-    """
+    """Extract bibliographic info (volume, issue, first_page, last_page)."""
     if not biblio or not isinstance(biblio, dict):
         return {
             "volume": None,
@@ -18021,15 +18924,21 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.openalex.extractors import (
+    extract_affiliations,
     extract_authors,
     extract_biblio_info,
     extract_concepts,
     extract_external_ids,
+    extract_grants,
+    extract_institution_country_codes,
+    extract_institution_ids,
     extract_journal_info,
     extract_keywords,
     extract_mesh_terms,
     extract_open_access_info,
     extract_openalex_id,
+    extract_primary_topic,
+    extract_topics,
     reconstruct_abstract,
 )
 from bioetl.domain.entities.openalex import OPENALEX_TYPE_MAP, OpenAlexPublicationEntity
@@ -18058,7 +18967,10 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
     - authors: authorships (extraction + PII hashing)
     - journal: primary_location.source.display_name
     - year: publication_year
-    - concepts: concepts (top-level only)
+    - topics: topics (hierarchical 4-level classification)
+    - primary_topic: primary_topic (single most relevant topic)
+    - grants: grants (funding information)
+    - concepts: concepts (DEPRECATED - kept for backward compatibility)
 
     Handles lookup metadata:
     - _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
@@ -18069,6 +18981,11 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
     - Automatic primary ID validation and fallback logging
     - Content hash computation (excluding metadata)
     - Tracing and metrics observability (O1)
+
+    Note on Topics vs Concepts:
+    - OpenAlex deprecated the `concepts` field in 2024 in favor of `topics`
+    - Both fields are extracted during the transition period
+    - New downstream code should use `topics` and `primary_topic`
     """
 
     def __init__(
@@ -18130,8 +19047,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
         # Validate DOI using Value Object (returns None for invalid/empty)
         # OpenAlex stores DOIs as full URLs (e.g., "https://doi.org/10.1038/...")
-        doi_vo = DOI.from_raw(rec.get("doi"))
-        doi = str(doi_vo) if doi_vo else None
+        doi = self.validate_value_object(DOI, rec.get("doi"))
 
         # Reconstruct abstract from inverted index (then strip HTML for cleaning)
         abstract_index = rec.get("abstract_inverted_index")
@@ -18144,10 +19060,29 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         raw_authors = extract_authors(rec.get("authorships", []))
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
+        # Extract affiliations
+        raw_affiliations = extract_affiliations(rec.get("authorships", []))
+        serialized_affiliations = self.serialize_json_list(raw_affiliations)
+
+        # Extract institution IDs and country codes (for cross-referencing and geographic analysis)
+        institution_ids = extract_institution_ids(rec.get("authorships", []))
+        institution_country_codes = extract_institution_country_codes(
+            rec.get("authorships", [])
+        )
+
         # Extract journal info
         journal_info = extract_journal_info(rec.get("primary_location", {}))
 
-        # Extract concepts
+        # Extract topics (hierarchical classification - replaces deprecated concepts)
+        topics = extract_topics(rec.get("topics", []))
+
+        # Extract primary topic (single most relevant topic)
+        primary_topic = extract_primary_topic(rec.get("primary_topic"))
+
+        # Extract grants/funding information
+        grants = extract_grants(rec.get("grants", []))
+
+        # Extract concepts (DEPRECATED - kept for backward compatibility)
         concepts = extract_concepts(rec.get("concepts", []))
 
         # Extract Open Access info
@@ -18166,8 +19101,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         biblio_info = extract_biblio_info(rec.get("biblio", {}))
 
         # Validate year using PublicationYear Value Object
-        year_vo = PublicationYear.from_raw(rec.get("publication_year"))
-        year = year_vo.value if year_vo else None
+        year = self.validate_value_object(
+            PublicationYear, rec.get("publication_year"), as_string=False
+        )
 
         # Map document type
         raw_type = rec.get("type", "")
@@ -18186,6 +19122,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "title": rec.get("title"),
             "abstract": abstract,
             "authors": self.serialize_json_list(hashed_authors),
+            "affiliations": serialized_affiliations,
+            "institution_ids": institution_ids,
+            "institution_country_codes": institution_country_codes,
             "journal": journal_info.get("journal_name"),
             "issn": journal_info.get("issn"),
             "publisher": journal_info.get("publisher"),
@@ -18199,6 +19138,12 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             # OpenAlex source field: cited_by_count
             # Unified BioETL field: citation_count (standardized across all providers)
             "citation_count": rec.get("cited_by_count"),
+            # Topics (hierarchical classification - replaces deprecated concepts)
+            "topics": topics,
+            "primary_topic": primary_topic,
+            # Grants/funding information
+            "grants": grants,
+            # Concepts (DEPRECATED - kept for backward compatibility)
             "concepts": concepts,
             "mesh": mesh_terms,
             "keywords": keywords,
@@ -18238,45 +19183,6 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
         """
         return OpenAlexPublicationEntity
-
-    def _normalize_partial_date(self, date_str: str | None) -> str | None:
-        """Normalize partial date to YYYY-MM-DD format (end of period).
-
-        OpenAlex API may return partial dates in various formats:
-        - Full date: "2024-05-15" (YYYY-MM-DD)
-        - Month precision: "2024-05" (YYYY-MM)
-        - Year precision: "2024" (YYYY)
-
-        Partial dates are normalized to end of period for consistency:
-        - YYYY-MM → YYYY-MM-30 (approximate month end)
-        - YYYY → YYYY-12-31 (year end)
-
-        Args:
-            date_str: Raw date string from OpenAlex API.
-
-        Returns:
-            Normalized ISO date string (YYYY-MM-DD) or None.
-
-        """
-        if not date_str:
-            return None
-
-        date_str = str(date_str).strip()
-
-        # Full ISO format (YYYY-MM-DD) - return as-is
-        if len(date_str) == 10 and date_str[4] == "-" and date_str[7] == "-":
-            return date_str
-
-        # Partial date: YYYY-MM → YYYY-MM-30 (end of month approximation)
-        if len(date_str) == 7 and date_str[4] == "-":
-            return f"{date_str}-30"
-
-        # Partial date: YYYY → YYYY-12-31 (end of year)
-        if len(date_str) == 4 and date_str.isdigit():
-            return f"{date_str}-12-31"
-
-        # Unknown format - return None for invalid dates
-        return None
 
 ================================================================================
 File: __init__.py
@@ -18344,7 +19250,8 @@ from typing import TYPE_CHECKING, Any, cast
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.entities import PubchemMolecule
 from bioetl.domain.services import IdentityService
-from bioetl.domain.validation import validate_molecular_weight
+from bioetl.domain.transformations import safe_float, safe_int
+from bioetl.domain.validation import validate_molecular_weight, validate_non_negative
 from bioetl.domain.value_objects import InChIKey
 
 if TYPE_CHECKING:
@@ -18403,6 +19310,75 @@ class PubChemCompoundTransformer(BaseTransformer):
             data_normalizer=data_normalizer,
         )
 
+    def _extract_computed_descriptors(
+        self, record: BronzeRecord
+    ) -> dict[str, float | int | None]:
+        """Extract and validate computed molecular descriptors."""
+        return {
+            "xlogp": safe_float(record.get("xlogp")),  # Can be negative
+            "tpsa": validate_non_negative(record.get("tpsa")),
+            "complexity": validate_non_negative(record.get("complexity")),
+            "charge": safe_int(record.get("charge")),  # Can be negative
+        }
+
+    def _extract_atom_bond_counts(self, record: BronzeRecord) -> dict[str, int | None]:
+        """Extract and validate atom/bond count properties."""
+        return {
+            "heavy_atom_count": safe_int(record.get("heavy_atom_count")),
+            "h_bond_donor_count": safe_int(record.get("h_bond_donor_count")),
+            "h_bond_acceptor_count": safe_int(record.get("h_bond_acceptor_count")),
+            "rotatable_bond_count": safe_int(record.get("rotatable_bond_count")),
+        }
+
+    def _extract_stereochemistry(self, record: BronzeRecord) -> dict[str, int | None]:
+        """Extract and validate stereochemistry counts."""
+        return {
+            "atom_stereo_count": safe_int(record.get("atom_stereo_count")),
+            "defined_atom_stereo_count": safe_int(
+                record.get("defined_atom_stereo_count")
+            ),
+            "undefined_atom_stereo_count": safe_int(
+                record.get("undefined_atom_stereo_count")
+            ),
+            "bond_stereo_count": safe_int(record.get("bond_stereo_count")),
+            "defined_bond_stereo_count": safe_int(
+                record.get("defined_bond_stereo_count")
+            ),
+            "undefined_bond_stereo_count": safe_int(
+                record.get("undefined_bond_stereo_count")
+            ),
+            "isotope_atom_count": safe_int(record.get("isotope_atom_count")),
+            "covalent_unit_count": safe_int(record.get("covalent_unit_count")),
+        }
+
+    def _extract_3d_properties(
+        self, record: BronzeRecord
+    ) -> dict[str, float | int | None]:
+        """Extract and validate 3D molecular properties."""
+        return {
+            "volume_3d": validate_non_negative(record.get("volume_3d")),
+            "conformer_count_3d": safe_int(record.get("conformer_count_3d")),
+            "feature_acceptor_count_3d": safe_int(
+                record.get("feature_acceptor_count_3d")
+            ),
+            "feature_donor_count_3d": safe_int(record.get("feature_donor_count_3d")),
+            "feature_anion_count_3d": safe_int(record.get("feature_anion_count_3d")),
+            "feature_cation_count_3d": safe_int(record.get("feature_cation_count_3d")),
+            "feature_ring_count_3d": safe_int(record.get("feature_ring_count_3d")),
+            "feature_hydrophobe_count_3d": safe_int(
+                record.get("feature_hydrophobe_count_3d")
+            ),
+            "effective_rotor_count_3d": validate_non_negative(
+                record.get("effective_rotor_count_3d")
+            ),
+            "conformer_rmsd_3d": validate_non_negative(record.get("conformer_rmsd_3d")),
+            # Steric quadrupole moments can be negative (charge distribution)
+            "x_steric_quadrupole_3d": safe_float(record.get("x_steric_quadrupole_3d")),
+            "y_steric_quadrupole_3d": safe_float(record.get("y_steric_quadrupole_3d")),
+            "z_steric_quadrupole_3d": safe_float(record.get("z_steric_quadrupole_3d")),
+            "feature_count_3d": safe_int(record.get("feature_count_3d")),
+        }
+
     async def _transform_impl(
         self,
         context: PipelineContext,
@@ -18419,47 +19395,32 @@ class PubChemCompoundTransformer(BaseTransformer):
         Returns:
             SilverRecord if transformation successful, None if skipped.
 
-        Raises:
-            TransformationError: If cid is missing.
-            ValueError: If PubchemMolecule entity validation fails.
-
         """
-        # Step 1: Validate required field
         cid = self._get_required_field(record, "cid")
 
-        # Step 2: Build business data dictionary
-        # Validate and convert molecular_weight (handles string→float, range, precision)
-        mol_weight = validate_molecular_weight(record.get("molecular_weight"))
-
-        # Validate InChI Key using Value Object (returns None for invalid/empty)
-        raw_inchikey = record.get("inchikey")
-        inchikey_vo = InChIKey.from_raw(
-            str(raw_inchikey) if raw_inchikey is not None else None
-        )
-        inchikey = str(inchikey_vo) if inchikey_vo else None
-
+        # Build business data with all physicochemical properties
         business_data: dict[str, Any] = {
             "cid": str(cid),
-            "molecular_formula": record.get("molecular_formula"),
-            "molecular_weight": mol_weight,
             "canonical_smiles": record.get("canonical_smiles"),
             "isomeric_smiles": record.get("isomeric_smiles"),
             "inchi": record.get("inchi"),
-            "inchikey": inchikey,
+            "inchikey": self.validate_value_object(InChIKey, record.get("inchikey")),
+            "molecular_formula": record.get("molecular_formula"),
             "iupac_name": record.get("iupac_name"),
+            "molecular_weight": validate_molecular_weight(
+                record.get("molecular_weight")
+            ),
+            "exact_mass": validate_non_negative(record.get("exact_mass")),
+            "monoisotopic_mass": validate_non_negative(record.get("monoisotopic_mass")),
+            **self._extract_computed_descriptors(record),
+            **self._extract_atom_bond_counts(record),
+            **self._extract_stereochemistry(record),
+            **self._extract_3d_properties(record),
         }
 
-        # Step 3: Generate entity_id using IdentityService (RULES.md §2.8)
-        entity_id = self.compute_entity_id(
-            source_id=str(cid),
-            record={"cid": cid},
-        )
-
-        # Step 4: Compute content_hash (RULES.md §2.8.1)
+        entity_id = self.compute_entity_id(source_id=str(cid), record={"cid": cid})
         content_hash = self.compute_content_hash(business_data, exclude_none=True)
 
-        # Step 5: Create domain entity with lineage metadata
-        # ValueError is raised if invariants fail (e.g., no structural identifiers)
         entity = self._create_entity(
             PubchemMolecule,
             context,
@@ -18469,7 +19430,6 @@ class PubChemCompoundTransformer(BaseTransformer):
             **business_data,
         )
 
-        # Step 6: Convert to SilverRecord with lineage field renaming
         return cast("SilverRecord", self.entity_to_silver_record(entity))
 
 ================================================================================
@@ -18512,23 +19472,31 @@ pattern with extract() -> normalize() -> process() sequence.
 from __future__ import annotations
 
 from bioetl.application.pipelines.pubmed.extractors.abstract import AbstractExtractor
-from bioetl.application.pipelines.pubmed.extractors.author import AuthorExtractor
+from bioetl.application.pipelines.pubmed.extractors.author import (
+    AuthorExtractor,
+    StructuredAffiliation,
+)
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
 from bioetl.application.pipelines.pubmed.extractors.classification import (
     ClassificationExtractor,
 )
 from bioetl.application.pipelines.pubmed.extractors.date import DateExtractor
 from bioetl.application.pipelines.pubmed.extractors.identifier import (
+    AllArticleIds,
+    ELocationIds,
     IdentifierExtractor,
 )
 
 __all__ = [
     "AbstractExtractor",
+    "AllArticleIds",
     "AuthorExtractor",
     "BaseFieldExtractor",
     "ClassificationExtractor",
     "DateExtractor",
+    "ELocationIds",
     "IdentifierExtractor",
+    "StructuredAffiliation",
 ]
 
 ================================================================================
@@ -18644,15 +19612,33 @@ Path: pipelines\pubmed\extractors\author.py
 """Author extraction from PubMed XML elements.
 
 Handles parsing of author lists including individual and collective authors.
+Supports structured affiliation extraction with institutional identifiers.
 """
 
 from __future__ import annotations
 
+import re
 from typing import TypedDict
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
 from bioetl.application.pipelines.pubmed.xml_utils import get_text
+
+# Email pattern for detection and extraction
+EMAIL_PATTERN = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b")
+
+
+class StructuredAffiliation(TypedDict, total=False):
+    """Structured affiliation with identifier metadata.
+
+    MEDLINE AffiliationInfo can contain Identifier elements linking to
+    institutional databases like ROR (Research Organization Registry) or GRID.
+    """
+
+    text: str
+    identifier: str | None
+    identifier_source: str | None
+    email: str | None  # Extracted email for correspondence authors
 
 
 class RawAuthor(TypedDict, total=False):
@@ -18662,6 +19648,8 @@ class RawAuthor(TypedDict, total=False):
     initials: str | None
     fore_name: str | None
     collective_name: str | None
+    affiliations: list[str] | None
+    structured_affiliations: list[StructuredAffiliation] | None
 
 
 class AuthorExtractor(BaseFieldExtractor):
@@ -18670,6 +19658,7 @@ class AuthorExtractor(BaseFieldExtractor):
     Handles:
     - Individual authors with LastName, Initials/ForeName
     - Collective/group authors
+    - Author affiliations (AffiliationInfo)
     - Empty author lists
     """
 
@@ -18691,16 +19680,106 @@ class AuthorExtractor(BaseFieldExtractor):
 
         raw_authors: list[RawAuthor] = []
         for author in author_list.findall("Author"):
+            # Extract simple affiliations (legacy format)
+            affiliations: list[str] = []
+            # Extract structured affiliations with identifiers
+            structured_affiliations: list[StructuredAffiliation] = []
+
+            for info in author.findall("AffiliationInfo"):
+                aff_text = get_text(info.find("Affiliation"))
+                if aff_text:
+                    affiliations.append(aff_text)
+
+                    # Build structured affiliation
+                    structured_aff = self._extract_structured_affiliation(info)
+                    if structured_aff:
+                        structured_affiliations.append(structured_aff)
+
             raw_authors.append(
                 RawAuthor(
                     last_name=get_text(author.find("LastName")),
                     initials=get_text(author.find("Initials")),
                     fore_name=get_text(author.find("ForeName")),
                     collective_name=get_text(author.find("CollectiveName")),
+                    affiliations=affiliations if affiliations else None,
+                    structured_affiliations=(
+                        structured_affiliations if structured_affiliations else None
+                    ),
                 )
             )
 
         return raw_authors if raw_authors else None
+
+    def _extract_structured_affiliation(
+        self, aff_info: Element
+    ) -> StructuredAffiliation | None:
+        """Extract structured affiliation from AffiliationInfo element.
+
+        MEDLINE AffiliationInfo structure:
+        <AffiliationInfo>
+            <Affiliation>University Name, Department, City, Country.
+                         Electronic address: email@example.com</Affiliation>
+            <Identifier Source="ROR">https://ror.org/...</Identifier>
+            <Identifier Source="GRID">grid.12345.6</Identifier>
+        </AffiliationInfo>
+
+        Args:
+            aff_info: AffiliationInfo XML element.
+
+        Returns:
+            StructuredAffiliation dict or None if no text.
+        """
+        aff_elem = aff_info.find("Affiliation")
+        aff_text = get_text(aff_elem)
+        if not aff_text:
+            return None
+
+        # Extract identifier if present (prefer ROR, then GRID, then others)
+        identifier = None
+        identifier_source = None
+
+        # Try to find identifiers in priority order
+        for source in ["ROR", "GRID", "ISNI", "RINGGOLD"]:
+            for id_elem in aff_info.findall("Identifier"):
+                if id_elem.get("Source") == source and id_elem.text:
+                    identifier = id_elem.text.strip()
+                    identifier_source = source
+                    break
+            if identifier:
+                break
+
+        # If no prioritized identifier found, take the first available
+        if not identifier:
+            for id_elem in aff_info.findall("Identifier"):
+                if id_elem.text:
+                    identifier = id_elem.text.strip()
+                    identifier_source = id_elem.get("Source")
+                    break
+
+        # Extract email if present in affiliation text
+        email = self._extract_email_from_text(aff_text)
+
+        return StructuredAffiliation(
+            text=aff_text,
+            identifier=identifier,
+            identifier_source=identifier_source,
+            email=email,
+        )
+
+    def _extract_email_from_text(self, text: str) -> str | None:
+        """Extract email address from affiliation text.
+
+        PubMed affiliations may contain correspondence emails, often marked with
+        'Electronic address:' prefix.
+
+        Args:
+            text: Affiliation text that may contain email.
+
+        Returns:
+            Email address if found, None otherwise.
+        """
+        match = EMAIL_PATTERN.search(text)
+        return match.group(0) if match else None
 
     def normalize(self, raw_value: list[RawAuthor]) -> list[str]:
         """Нормализовать список авторов в формат 'LastName, Initials'.
@@ -18753,6 +19832,69 @@ class AuthorExtractor(BaseFieldExtractor):
             List of formatted author names.
         """
         return cls().process(article_node)
+
+    @classmethod
+    def parse_affiliations(cls, article_node: Element) -> list[str]:
+        """Extract unique list of affiliations from all authors.
+
+        Args:
+            article_node: The Article element containing AuthorList.
+
+        Returns:
+            List of unique affiliation strings.
+        """
+        extractor = cls()
+        raw_authors = extractor.extract(article_node)
+        if not raw_authors:
+            return []
+
+        # Collect all affiliations from all authors
+        all_affiliations: set[str] = set()
+        for author in raw_authors:
+            affs = author.get("affiliations")
+            if affs:
+                all_affiliations.update(affs)
+
+        return sorted(all_affiliations)
+
+    @classmethod
+    def parse_structured_affiliations(
+        cls, article_node: Element
+    ) -> list[StructuredAffiliation]:
+        """Extract unique structured affiliations with identifier metadata.
+
+        This method provides enhanced affiliation data including institutional
+        identifiers (ROR, GRID) and extracted email addresses for institutional
+        bibliometric analysis and author disambiguation.
+
+        Args:
+            article_node: The Article element containing AuthorList.
+
+        Returns:
+            List of unique StructuredAffiliation dicts, sorted by text.
+            Each dict contains:
+            - text: Affiliation text
+            - identifier: Institutional identifier (if available)
+            - identifier_source: Source of identifier (ROR, GRID, etc.)
+            - email: Extracted email (if present in text)
+        """
+        extractor = cls()
+        raw_authors = extractor.extract(article_node)
+        if not raw_authors:
+            return []
+
+        # Use text as key to deduplicate affiliations
+        seen_texts: dict[str, StructuredAffiliation] = {}
+        for author in raw_authors:
+            structured_affs = author.get("structured_affiliations")
+            if structured_affs:
+                for aff in structured_affs:
+                    text = aff.get("text", "")
+                    if text and text not in seen_texts:
+                        seen_texts[text] = aff
+
+        # Return sorted by text for consistent ordering
+        return sorted(seen_texts.values(), key=lambda x: x.get("text", ""))
 
 ================================================================================
 File: base.py
@@ -19367,7 +20509,18 @@ class DateExtractor(BaseFieldExtractor):
             return f"{year}-12-31"
 
         # Normalize day (end of month if missing)
-        day_num = day.zfill(2) if day and day.isdigit() else "30"
+        if day and day.isdigit():
+            day_num = day.zfill(2)
+        else:
+            # Calculate last day of month
+            import calendar
+
+            try:
+                _, last_day = calendar.monthrange(int(year), int(month_num))
+                day_num = str(last_day).zfill(2)
+            except (ValueError, IndexError):
+                # Fallback to 30 if invalid year/month or calculation fails
+                day_num = "30"
 
         return f"{year}-{month_num}-{day_num}"
 
@@ -19464,7 +20617,8 @@ Path: pipelines\pubmed\extractors\identifier.py
 ================================================================================
 """Identifier extraction from PubMed XML elements.
 
-Handles extraction of DOI, PMC ID, and other article identifiers.
+Handles extraction of DOI, PMC ID, PII, MID, and other article identifiers.
+Supports complete ArticleIdList and ELocationID extraction for cross-referencing.
 """
 
 from __future__ import annotations
@@ -19487,6 +20641,43 @@ class NormalizedIdentifiers(TypedDict):
 
     doi: str | None
     pmc_id: str | None
+
+
+class AllArticleIds(TypedDict, total=False):
+    """Complete set of article identifiers from PubMed.
+
+    ArticleIdList can contain various ID types:
+    - pubmed: PubMed ID
+    - doi: Digital Object Identifier
+    - pmc: PubMed Central ID
+    - pii: Publisher Item Identifier
+    - mid: Manuscript ID (PMC submission)
+    - publisher-id: Publisher-specific identifier
+    - pmcid: Alternative PMC ID format
+    - medline: MEDLINE unique ID
+    """
+
+    pubmed: str | None
+    doi: str | None
+    pmc: str | None
+    pii: str | None
+    mid: str | None
+    publisher_id: str | None
+    pmcid: str | None
+    medline: str | None
+    other_ids: dict[str, str]  # Any other ID types encountered
+
+
+class ELocationIds(TypedDict, total=False):
+    """Electronic location identifiers from ELocationID elements.
+
+    ELocationID provides additional identifiers like:
+    - doi: Digital Object Identifier
+    - pii: Publisher Item Identifier
+    """
+
+    doi: str | None
+    pii: str | None
 
 
 class IdentifierExtractor(BaseFieldExtractor):
@@ -19593,6 +20784,172 @@ class IdentifierExtractor(BaseFieldExtractor):
         raw = extractor._extract_pmc_raw(root)
         return extractor._normalize_text(raw)
 
+    @classmethod
+    def parse_all_article_ids(cls, root: Element) -> AllArticleIds:
+        """Extract complete set of article identifiers from ArticleIdList.
+
+        This method extracts all available identifiers from PubmedData/ArticleIdList,
+        including less common ones like PII, MID, and publisher-specific IDs that
+        are useful for cross-referencing with publisher databases.
+
+        Args:
+            root: Root PubmedArticle element.
+
+        Returns:
+            AllArticleIds dict with all available identifiers.
+            The 'other_ids' field contains any ID types not explicitly mapped.
+        """
+        extractor = cls()
+        result: AllArticleIds = {
+            "pubmed": None,
+            "doi": None,
+            "pmc": None,
+            "pii": None,
+            "mid": None,
+            "publisher_id": None,
+            "pmcid": None,
+            "medline": None,
+            "other_ids": {},
+        }
+
+        article_id_list = root.find(".//ArticleIdList")
+        if article_id_list is None:
+            return result
+
+        # Map IdType values to our field names
+        type_mapping = {
+            "pubmed": "pubmed",
+            "doi": "doi",
+            "pmc": "pmc",
+            "pii": "pii",
+            "mid": "mid",
+            "publisher-id": "publisher_id",
+            "pmcid": "pmcid",
+            "medline": "medline",
+        }
+
+        for aid in article_id_list.findall("ArticleId"):
+            id_type = aid.get("IdType")
+            if not id_type or not aid.text:
+                continue
+
+            normalized_value = extractor._normalize_text(aid.text)
+            if not normalized_value:
+                continue
+
+            if id_type in type_mapping:
+                result[type_mapping[id_type]] = normalized_value  # type: ignore[literal-required]
+            else:
+                # Store unknown ID types in other_ids
+                result["other_ids"][id_type] = normalized_value
+
+        return result
+
+    @classmethod
+    def extract_elocation_ids(cls, root: Element) -> ELocationIds:
+        """Extract electronic location identifiers from ELocationID elements.
+
+        ELocationID elements appear in Article and can contain DOI, PII,
+        and other electronic identifiers used by publishers.
+
+        Args:
+            root: Root PubmedArticle element.
+
+        Returns:
+            ELocationIds dict with doi and pii if available.
+        """
+        extractor = cls()
+        result: ELocationIds = {
+            "doi": None,
+            "pii": None,
+        }
+
+        article = root.find(".//Article")
+        if article is None:
+            return result
+
+        for eloc in article.findall(".//ELocationID"):
+            eid_type = eloc.get("EIdType")
+            if not eid_type or not eloc.text:
+                continue
+
+            normalized_value = extractor._normalize_text(eloc.text)
+            if not normalized_value:
+                continue
+
+            if eid_type == "doi":
+                result["doi"] = normalized_value
+            elif eid_type == "pii":
+                result["pii"] = normalized_value
+
+        return result
+
+    @classmethod
+    def extract_pii(cls, root: Element) -> str | None:
+        """Extract Publisher Item Identifier (PII).
+
+        Tries ELocationID first, then ArticleIdList.
+
+        Args:
+            root: Root PubmedArticle element.
+
+        Returns:
+            PII string or None.
+        """
+        extractor = cls()
+
+        # Try ELocationID first
+        article = root.find(".//Article")
+        if article is not None:
+            for eloc in article.findall(".//ELocationID"):
+                if eloc.get("EIdType") == "pii" and eloc.text:
+                    return extractor._normalize_text(eloc.text)
+
+        # Fallback to ArticleIdList
+        article_id_list = root.find(".//ArticleIdList")
+        if article_id_list is not None:
+            for aid in article_id_list.findall("ArticleId"):
+                if aid.get("IdType") == "pii" and aid.text:
+                    return extractor._normalize_text(aid.text)
+
+        return None
+
+    @classmethod
+    def extract_mid(cls, root: Element) -> str | None:
+        """Extract Manuscript ID (MID) used in PMC submission.
+
+        Args:
+            root: Root PubmedArticle element.
+
+        Returns:
+            MID string or None.
+        """
+        extractor = cls()
+        article_id_list = root.find(".//ArticleIdList")
+        if article_id_list is not None:
+            for aid in article_id_list.findall("ArticleId"):
+                if aid.get("IdType") == "mid" and aid.text:
+                    return extractor._normalize_text(aid.text)
+        return None
+
+    @classmethod
+    def extract_publisher_id(cls, root: Element) -> str | None:
+        """Extract publisher-specific identifier.
+
+        Args:
+            root: Root PubmedArticle element.
+
+        Returns:
+            Publisher ID string or None.
+        """
+        extractor = cls()
+        article_id_list = root.find(".//ArticleIdList")
+        if article_id_list is not None:
+            for aid in article_id_list.findall("ArticleId"):
+                if aid.get("IdType") == "publisher-id" and aid.text:
+                    return extractor._normalize_text(aid.text)
+        return None
+
 ================================================================================
 File: publication.py
 Path: pipelines\pubmed\publication.py
@@ -19630,6 +20987,7 @@ with other publication pipelines (CrossRef, OpenAlex, SemanticScholar).
 
 from __future__ import annotations
 
+import re
 import xml.etree.ElementTree as ET
 from typing import TYPE_CHECKING, Any, cast
 
@@ -19640,6 +20998,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
     ClassificationExtractor,
     DateExtractor,
     IdentifierExtractor,
+    StructuredAffiliation,
 )
 from bioetl.application.pipelines.pubmed.xml_utils import get_text
 from bioetl.domain.entities.pubmed import PubMedPublicationEntity
@@ -19675,6 +21034,18 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
     # Instance variable to cache parsed XML root between validation and extraction
     _cached_xml_root: ET.Element | None
+
+    # Date validation patterns for ISO date formats (YYYY, YYYY-MM, YYYY-MM-DD).
+    # Used to filter out invalid dates like "2024-13-99" or "n/a" before
+    # they propagate to _compute_publication_date.
+    _VALID_DATE_PATTERNS: tuple[re.Pattern[str], ...] = (
+        # Full date: YYYY-MM-DD (with valid month 01-12 and day 01-31)
+        re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$"),
+        # Partial month: YYYY-MM (with valid month 01-12)
+        re.compile(r"^\d{4}-(0[1-9]|1[0-2])$"),
+        # Partial year: YYYY
+        re.compile(r"^\d{4}$"),
+    )
 
     def __init__(
         self,
@@ -19747,6 +21118,28 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 pmid=record.get("pmid"),
             )
             raise ValueError(f"XML parse error: {e}") from e
+
+    def _is_valid_date_format(self, date_str: str | None) -> bool:
+        """Validate that date string matches expected ISO format.
+
+        Accepts:
+        - YYYY-MM-DD (full date with valid month 01-12 and day 01-31)
+        - YYYY-MM (partial with valid month 01-12)
+        - YYYY (year only)
+
+        This validation ensures that invalid dates like "2024-13-99", "n/a",
+        or malformed strings don't propagate to _compute_publication_date,
+        which would produce inconsistent results.
+
+        Args:
+            date_str: Date string to validate.
+
+        Returns:
+            True if date format is valid, False otherwise.
+        """
+        if not date_str:
+            return False
+        return any(pattern.match(date_str) for pattern in self._VALID_DATE_PATTERNS)
 
     def _extract_medline_metadata(
         self,
@@ -19860,14 +21253,38 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         raw_authors = AuthorExtractor.parse_authors(article)
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
+        # Extract structured affiliations with identifiers (affiliations field excluded)
+        structured_affs = AuthorExtractor.parse_structured_affiliations(article)
+        processed_structured_affs = self._process_structured_affiliations(
+            structured_affs
+        )
+        serialized_structured_affs = self.serialize_json_list(processed_structured_affs)
+
         # Validate DOI
         raw_doi = IdentifierExtractor.extract_doi(root)
         doi_vo = DOI.from_raw(raw_doi)
         normalized_doi = str(doi_vo) if doi_vo else None
 
+        # Extract and normalize additional identifiers.
+        # Using normalize_to_string ensures that empty strings ("") become None,
+        # which provides consistent handling in downstream processing and
+        # prevents inconsistent content_hash computation for equivalent records.
+        pii = self._data_normalizer.normalize_to_string(
+            IdentifierExtractor.extract_pii(root)
+        )
+        mid = self._data_normalizer.normalize_to_string(
+            IdentifierExtractor.extract_mid(root)
+        )
+        publisher_id = self._data_normalizer.normalize_to_string(
+            IdentifierExtractor.extract_publisher_id(root)
+        )
+
         return {
             "pmid": pmid,
             "doi": normalized_doi,
+            "pii": pii,
+            "mid": mid,
+            "publisher_id": publisher_id,
             "title": get_text(article.find(".//ArticleTitle")),
             "vernacular_title": get_text(article.find(".//VernacularTitle")),
             "abstract": self._data_normalizer.strip_html_tags(
@@ -19875,9 +21292,11 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             ),
             "abstract_structured": AbstractExtractor.is_abstract_structured(article),
             "authors": self.serialize_json_list(hashed_authors),
+            # affiliations excluded per user request
+            "structured_affiliations": serialized_structured_affs,
             "author_count": len(hashed_authors),
             **self._extract_journal_data(article),
-            **self._extract_date_data(article, pubmed_data),
+            **self._extract_date_data(article, pubmed_data, medline),
             **self._extract_classification_data(article, medline),
             **self._extract_medline_metadata(medline, pubmed_data),
             **self._extract_counts(article, pubmed_data),
@@ -19894,6 +21313,37 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "_dq_warn": False,
             "_dq_error": False,
         }
+
+    def _process_structured_affiliations(
+        self, affiliations: list[StructuredAffiliation]
+    ) -> list[dict[str, Any]]:
+        """Process structured affiliations with PII handling for emails.
+
+        Email addresses in affiliations are PII and must be hashed before
+        storing in Silver layer (RULES.md §5.4).
+
+        Args:
+            affiliations: List of structured affiliation dicts.
+
+        Returns:
+            List of processed affiliation dicts with hashed emails.
+        """
+        processed = []
+        for aff in affiliations:
+            processed_aff: dict[str, Any] = {
+                "text": aff.get("text"),
+                "identifier": aff.get("identifier"),
+                "identifier_source": aff.get("identifier_source"),
+            }
+            # Hash email if present (PII protection)
+            email = aff.get("email")
+            if email and self._pii_hasher:
+                processed_aff["email_hash"] = self._pii_hasher.hash_value(email)
+            else:
+                processed_aff["email_hash"] = None
+
+            processed.append(processed_aff)
+        return processed
 
     def _get_primary_id_field(self) -> str:
         """Return the primary ID field name for PubMed publications.
@@ -20002,36 +21452,24 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         return None
 
-    def _normalize_partial_date(self, date_str: str | None) -> str | None:
-        """Normalize partial date to YYYY-MM-DD (end of period).
-
-        Args:
-            date_str: Date string (YYYY, YYYY-MM, or YYYY-MM-DD).
-
-        Returns:
-            Full YYYY-MM-DD date or None.
-        """
-        if not date_str:
-            return None
-        if len(date_str) >= 10:
-            return date_str[:10]
-        if len(date_str) == 7:
-            # YYYY-MM → YYYY-MM-30
-            return f"{date_str}-30"
-        if len(date_str) == 4:
-            # YYYY → YYYY-12-31
-            return f"{date_str}-12-31"
-        return None
-
     def _parse_month_day(
         self, pub_date_node: ET.Element | None
     ) -> tuple[int | None, int | None]:
-        """Extract month and day as integers from PubDate node."""
+        """Extract month and day as integers from PubDate node.
+
+        Uses DateExtractor to handle both structured (Year/Month/Day)
+        and unstructured (MedlineDate) formats.
+        """
         if pub_date_node is None:
             return None, None
 
-        month_text = get_text(pub_date_node.find("Month"))
-        day_text = get_text(pub_date_node.find("Day"))
+        # Use DateExtractor logic to support MedlineDate parsing
+        raw_date = DateExtractor().extract(pub_date_node)
+        if not raw_date:
+            return None, None
+
+        month_text = raw_date.get("month")
+        day_text = raw_date.get("day")
 
         pub_month = self._parse_month(month_text)
         pub_day = int(day_text) if day_text and day_text.isdigit() else None
@@ -20064,13 +21502,29 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         return result
 
     def _extract_date_data(
-        self, article: ET.Element, pubmed_data: ET.Element | None
+        self,
+        article: ET.Element,
+        pubmed_data: ET.Element | None,
+        medline: ET.Element | None,
     ) -> dict[str, Any]:
-        """Extract date-related data from article XML."""
+        """Extract date-related data from article and MedlineCitation XML.
+
+        Validates date formats before use to prevent invalid dates like
+        "2024-13-99" or "n/a" from causing inconsistent publication_date
+        computation. Invalid dates are set to None.
+
+        Args:
+            article: Article XML element.
+            pubmed_data: PubmedData XML element (contains History with manuscript dates).
+            medline: MedlineCitation XML element (contains DateCompleted/DateRevised).
+
+        Returns:
+            Dictionary with all date-related fields.
+        """
         journal = article.find(".//Journal")
         journal_issue = journal.find("JournalIssue") if journal else None
         pub_date_node = journal_issue.find("PubDate") if journal_issue else None
-        pub_date, raw_year = DateExtractor.extract_date(pub_date_node)
+        raw_pub_date, raw_year = DateExtractor.extract_date(pub_date_node)
         history = pubmed_data.find("History") if pubmed_data else None
 
         pub_month, pub_day = self._parse_month_day(pub_date_node)
@@ -20078,9 +21532,28 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         year_vo = PublicationYear.from_raw(raw_year)
         validated_year = year_vo.value if year_vo else None
 
-        epub_date = DateExtractor.extract_article_date(article, "Electronic")
+        raw_epub_date = DateExtractor.extract_article_date(article, "Electronic")
+
+        # Validate date formats before passing to _compute_publication_date.
+        # Invalid dates (e.g., "2024-13-99", "n/a") are set to None to ensure
+        # _compute_publication_date falls back to the next priority source.
+        pub_date = raw_pub_date if self._is_valid_date_format(raw_pub_date) else None
+        epub_date = raw_epub_date if self._is_valid_date_format(raw_epub_date) else None
+
         publication_date = self._compute_publication_date(
             epub_date, pub_date, validated_year
+        )
+
+        # Extract MEDLINE indexing dates from MedlineCitation element
+        date_completed, _ = (
+            DateExtractor.extract_date(medline.find("DateCompleted"))
+            if medline is not None
+            else (None, None)
+        )
+        date_revised, _ = (
+            DateExtractor.extract_date(medline.find("DateRevised"))
+            if medline is not None
+            else (None, None)
         )
 
         return {
@@ -20094,8 +21567,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "received_date": DateExtractor.extract_history_date(history, "received"),
             "revised_date": DateExtractor.extract_history_date(history, "revised"),
             "epub_date": epub_date,
-            "date_completed": None,  # Not easily accessible from Article element
-            "date_revised": None,  # Not easily accessible from Article element
+            "date_completed": date_completed,
+            "date_revised": date_revised,
         }
 
 ================================================================================
@@ -20190,7 +21663,6 @@ Provides transformer and extractors for Semantic Scholar publication data.
 """
 
 from bioetl.application.pipelines.semanticscholar.extractors import (
-    extract_authors,
     extract_external_ids,
     extract_fields_of_study,
     extract_journal_info,
@@ -20203,7 +21675,7 @@ from bioetl.application.pipelines.semanticscholar.transformer import (
 
 __all__ = [
     "SemanticScholarPublicationTransformer",
-    "extract_authors",
+    # extract_authors excluded per user request
     "extract_external_ids",
     "extract_fields_of_study",
     "extract_journal_info",
@@ -20294,6 +21766,214 @@ def extract_authors(authors: list[dict[str, Any]] | None) -> list[str]:
     return result
 
 
+def extract_author_ids(authors: list[dict[str, Any]] | None) -> list[str]:
+    """Extract author IDs from authors list.
+
+    Args:
+        authors: List of author objects from S2.
+
+    Returns:
+        List of authorId strings.
+
+    Example:
+        >>> authors = [{"authorId": "123", "name": "John"}, {"authorId": "456", "name": "Jane"}]
+        >>> extract_author_ids(authors)
+        ['123', '456']
+    """
+    if not authors:
+        return []
+
+    result = []
+    for author in authors:
+        aid = author.get("authorId")
+        if aid:
+            result.append(str(aid))
+    return result
+
+
+def extract_author_s2_ids(authors: list[dict[str, Any]] | None) -> list[str]:
+    """Extract Semantic Scholar author IDs from authors list.
+
+    Extracts the 40-character hex S2 author IDs for author-level analytics
+    and disambiguation.
+
+    Args:
+        authors: List of author objects from S2 API.
+
+    Returns:
+        List of S2 author IDs (non-empty, in order of authorship).
+
+    Example:
+        >>> authors = [
+        ...     {"authorId": "1234567890abcdef1234567890abcdef12345678", "name": "John"},
+        ...     {"authorId": None, "name": "Jane"},
+        ...     {"authorId": "abcdef1234567890abcdef1234567890abcdef12", "name": "Bob"},
+        ... ]
+        >>> extract_author_s2_ids(authors)
+        ['1234567890abcdef1234567890abcdef12345678', 'abcdef1234567890abcdef1234567890abcdef12']
+
+    """
+    if not authors:
+        return []
+
+    result = []
+    for author in authors:
+        author_id = author.get("authorId")
+        if author_id and isinstance(author_id, str) and author_id.strip():
+            result.append(author_id.strip())
+    return result
+
+
+def extract_author_orcids(authors: list[dict[str, Any]] | None) -> list[str]:
+    """Extract ORCID identifiers from authors list.
+
+    ORCID (Open Researcher and Contributor ID) provides persistent digital
+    identifiers for researchers. This extracts ORCIDs from the externalIds
+    field of each author.
+
+    Args:
+        authors: List of author objects from S2 API with externalIds.
+
+    Returns:
+        List of ORCID identifiers (non-empty, in order of authorship).
+        Empty string placeholder is used for authors without ORCID.
+
+    Example:
+        >>> authors = [
+        ...     {"name": "John", "externalIds": {"ORCID": "0000-0001-2345-6789"}},
+        ...     {"name": "Jane", "externalIds": None},
+        ...     {"name": "Bob", "externalIds": {"ORCID": "0000-0002-3456-7890"}},
+        ... ]
+        >>> extract_author_orcids(authors)
+        ['0000-0001-2345-6789', '', '0000-0002-3456-7890']
+
+    """
+    if not authors:
+        return []
+
+    result = []
+    for author in authors:
+        external_ids = author.get("externalIds")
+        orcid = ""
+        if external_ids and isinstance(external_ids, dict):
+            orcid_val = external_ids.get("ORCID")
+            if orcid_val and isinstance(orcid_val, str) and orcid_val.strip():
+                orcid = orcid_val.strip()
+        result.append(orcid)
+    return result
+
+
+def extract_author_h_indices(authors: list[dict[str, Any]] | None) -> list[int | None]:
+    """Extract h-index values from authors list.
+
+    The h-index is a metric for research impact. This extracts h-index
+    values for each author from the S2 API response.
+
+    Args:
+        authors: List of author objects from S2 API with hIndex field.
+
+    Returns:
+        List of h-index values (int or None for each author, in order).
+
+    Example:
+        >>> authors = [
+        ...     {"name": "John", "hIndex": 45},
+        ...     {"name": "Jane", "hIndex": None},
+        ...     {"name": "Bob", "hIndex": 23},
+        ... ]
+        >>> extract_author_h_indices(authors)
+        [45, None, 23]
+
+    """
+    if not authors:
+        return []
+
+    result: list[int | None] = []
+    for author in authors:
+        h_index = author.get("hIndex")
+        if h_index is not None and isinstance(h_index, int) and h_index >= 0:
+            result.append(h_index)
+        else:
+            result.append(None)
+    return result
+
+
+def extract_citation_contexts(
+    citations: list[dict[str, Any]] | None,
+    max_contexts: int = 100,
+) -> list[str]:
+    """Extract citation context sentences from citations/references.
+
+    When requesting citation or reference details with the 'contexts' field,
+    S2 returns the actual sentences where a paper is cited. This is invaluable
+    for understanding how research is used and for citation sentiment analysis.
+
+    Args:
+        citations: List of citation/reference objects from S2 API.
+        max_contexts: Maximum number of context sentences to extract.
+
+    Returns:
+        List of citation context sentences (non-empty, stripped).
+
+    Example:
+        >>> citations = [
+        ...     {"paperId": "abc123", "contexts": ["The method in [1] shows...", "As shown by [1]..."]},
+        ...     {"paperId": "def456", "contexts": ["Building on [2]..."]},
+        ... ]
+        >>> extract_citation_contexts(citations, max_contexts=3)
+        ['The method in [1] shows...', 'As shown by [1]...', 'Building on [2]...']
+
+    """
+    if not citations:
+        return []
+
+    result: list[str] = []
+    for citation in citations:
+        contexts = citation.get("contexts")
+        if not contexts or not isinstance(contexts, list):
+            continue
+
+        for context in contexts:
+            if len(result) >= max_contexts:
+                return result
+            if context and isinstance(context, str) and context.strip():
+                result.append(context.strip())
+
+    return result
+
+
+def extract_affiliations(authors: list[dict[str, Any]] | None) -> list[str]:
+    """Extract affiliations from authors list.
+
+    Semantic Scholar authors may have affiliations as a list of strings.
+
+    Args:
+        authors: List of author objects from S2.
+
+    Returns:
+        List of unique affiliation strings (sorted).
+
+    Example:
+        >>> authors = [{"name": "John", "affiliations": ["Univ A"]}, {"name": "Jane", "affiliations": ["Univ B", "Univ A"]}]
+        >>> extract_affiliations(authors)
+        ['Univ A', 'Univ B']
+    """
+    if not authors:
+        return []
+
+    affiliations: set[str] = set()
+    for author in authors:
+        author_affs = author.get("affiliations")
+        if not author_affs or not isinstance(author_affs, list):
+            continue
+
+        for aff in author_affs:
+            if aff and isinstance(aff, str) and aff.strip():
+                affiliations.add(aff.strip())
+
+    return sorted(affiliations)
+
+
 def extract_journal_info(
     journal: dict[str, Any] | None,
     venue: str | None,
@@ -20368,13 +22048,22 @@ def extract_open_access_info(
     Extracts OA information from S2 API response and normalizes the status
     to lowercase for consistency with OpenAlex data.
 
+    Semantic meaning of is_oa values:
+    - True: Publication is confirmed open access
+    - False: Publication is confirmed closed access
+    - None: Open access status is unknown (API did not provide info)
+
+    We preserve None to distinguish "unknown" from "closed" for downstream
+    analytics. Converting None to False would misrepresent the data quality.
+
     Args:
-        is_open_access: Boolean flag from S2.
+        is_open_access: Boolean flag from S2 (True/False/None).
         open_access_pdf: PDF info object from S2.
 
     Returns:
-        Dict with is_oa (bool), url (str|None), oa_status (str|None).
-        If is_open_access is False or None and no OA PDF, oa_status is "closed".
+        Dict with is_oa (bool|None), url (str|None), oa_status (str|None).
+        - oa_status is "closed" only when is_oa is explicitly False
+        - oa_status is None when is_oa is None (unknown) and no PDF status
 
     Example:
         >>> oa_pdf = {"url": "https://example.com/paper.pdf", "status": "GREEN"}
@@ -20382,10 +22071,13 @@ def extract_open_access_info(
         {'is_oa': True, 'url': 'https://...', 'oa_status': 'green'}
         >>> extract_open_access_info(False, None)
         {'is_oa': False, 'url': None, 'oa_status': 'closed'}
+        >>> extract_open_access_info(None, None)
+        {'is_oa': None, 'url': None, 'oa_status': None}
 
     """
-    # Determine if open access
-    is_oa = is_open_access or False
+    # Preserve is_open_access as-is: True, False, or None (unknown)
+    # Do NOT convert None to False - they have different semantic meanings
+    is_oa = is_open_access
 
     # Extract URL and status from PDF info
     url: str | None = None
@@ -20398,8 +22090,9 @@ def extract_open_access_info(
     # Normalize status to lowercase
     oa_status = normalize_oa_status(raw_status)
 
-    # If not open access and no status, set to "closed"
-    if not is_oa and oa_status is None:
+    # Only set "closed" when is_oa is explicitly False (not None/unknown)
+    # This preserves the distinction between "closed" and "unknown"
+    if is_oa is False and oa_status is None:
         oa_status = "closed"
 
     return {
@@ -20494,7 +22187,11 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.semanticscholar.extractors import (
-    extract_authors,
+    extract_author_h_indices,
+    extract_author_ids,
+    extract_author_orcids,
+    extract_author_s2_ids,
+    extract_citation_contexts,
     extract_external_ids,
     extract_fields_of_study,
     extract_journal_info,
@@ -20530,7 +22227,10 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - title: title
     - abstract: abstract
     - tldr: tldr.text (AI-generated summary)
-    - authors: authors (extraction + optional PII hashing)
+    - authors: authors.name (extraction + optional PII hashing)
+    - author_s2_ids: authors.authorId (S2 author IDs for disambiguation)
+    - author_orcids: authors.externalIds.ORCID (persistent researcher IDs)
+    - author_h_indices: authors.hIndex (research impact metric)
     - journal: journal.name / venue
     - year: year
     - publication_date: publicationDate
@@ -20542,6 +22242,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - open_access_url: openAccessPdf.url
     - fields_of_study: fieldsOfStudy
     - publication_types: publicationTypes
+    - citation_contexts: citations.contexts (citing sentences, when available)
 
     Handles lookup metadata:
     - _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
@@ -20617,9 +22318,20 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         pmid_vo = PubMedId.from_raw(raw_pmid)
         pmid = str(pmid_vo) if pmid_vo else None
 
-        # Authors with optional PII hashing
-        raw_authors = extract_authors(rec.get("authors"))
-        hashed_authors = self.hash_pii_list(raw_authors) or []
+        # Get authors list for multiple extractions
+        authors_list = rec.get("authors")
+
+        # Extract author IDs
+        author_ids = extract_author_ids(rec.get("authors"))
+
+        # Extract author identifiers (for author-level analytics)
+        author_s2_ids = extract_author_s2_ids(authors_list)
+        author_orcids = extract_author_orcids(authors_list)
+        author_h_indices = extract_author_h_indices(authors_list)
+
+        # Extract citation contexts (if available from citations/references endpoint)
+        # Note: contexts are only available when requesting citation details
+        citation_contexts = extract_citation_contexts(rec.get("citations"))
 
         # Journal/venue info
         journal_info = extract_journal_info(
@@ -20661,9 +22373,24 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "dblp_id": external_ids.get("dblp"),
             "corpus_id": external_ids.get("corpus_id"),
             "title": rec.get("title"),
-            "abstract": self._data_normalizer.strip_html_tags(rec.get("abstract")),
+            # abstract, authors excluded per user request
             "tldr": tldr,
-            "authors": self.serialize_json_list(hashed_authors),
+            "author_ids": self.serialize_json(author_ids),
+            # Author identifiers (for author-level analytics and disambiguation)
+            "author_s2_ids": self.serialize_json_list(author_s2_ids)
+            if author_s2_ids
+            else None,
+            "author_orcids": self.serialize_json_list(author_orcids)
+            if any(author_orcids)
+            else None,
+            "author_h_indices": self.serialize_json(author_h_indices)
+            if any(h is not None for h in author_h_indices)
+            else None,
+            # Citation context (for citation sentiment analysis)
+            "citation_contexts": self.serialize_json_list(citation_contexts)
+            if citation_contexts
+            else None,
+            # affiliations excluded per user request
             "journal": journal_info.get("journal_name"),
             "volume": journal_info.get("volume"),
             "pages": pages,  # Legacy field
@@ -20709,41 +22436,26 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         """
         return SemanticScholarPublicationEntity
 
-    def _normalize_partial_date(self, date_str: str | None) -> str | None:
-        """Normalize partial date to YYYY-MM-DD format.
+    @staticmethod
+    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        """Convert Domain Entity to SilverRecord, excluding unused fields.
 
-        Semantic Scholar API may return partial dates (YYYY or YYYY-MM).
-        This method normalizes them to full ISO dates using end-of-period:
-        - YYYY -> YYYY-12-31 (end of year)
-        - YYYY-MM -> YYYY-MM-30 (end of month, simplified)
-        - YYYY-MM-DD -> unchanged
+        Overrides base implementation to remove fields not collected for S2.
 
         Args:
-            date_str: Raw date string from API.
+            entity: Domain entity (dataclass).
 
         Returns:
-            Normalized YYYY-MM-DD date string or None if invalid/empty.
+            SilverRecord dictionary without abstract, affiliations, authors.
 
         """
-        if not date_str:
-            return None
+        from bioetl.application.core.base_transformer import BaseTransformer
 
-        date_str = str(date_str).strip()
-
-        # Full ISO date (YYYY-MM-DD)
-        if len(date_str) == 10 and date_str[4] == "-" and date_str[7] == "-":
-            return date_str
-
-        # Year-month only (YYYY-MM) -> use day 30 as end-of-month
-        if len(date_str) == 7 and date_str[4] == "-":
-            return f"{date_str}-30"
-
-        # Year only (YYYY) -> use December 31 as end-of-year
-        if len(date_str) == 4 and date_str.isdigit():
-            return f"{date_str}-12-31"
-
-        # Invalid format - return None
-        return None
+        silver_record = BaseTransformer.entity_to_silver_record(entity)
+        silver_record.pop("abstract", None)
+        silver_record.pop("affiliations", None)
+        silver_record.pop("authors", None)
+        return silver_record
 
 ================================================================================
 File: __init__.py
@@ -20874,6 +22586,163 @@ def _build_isoform_data(iso: dict[str, Any]) -> dict[str, Any]:
     if isinstance(name, dict) and name.get("value"):
         isoform_data["name"] = name.get("value")
     return isoform_data
+
+
+def _extract_texts_from_dict(data: dict[str, Any] | None) -> list[str]:
+    """Extract text values from a dict with 'texts' key.
+
+    Args:
+        data: Dict containing 'texts' list.
+
+    Returns:
+        List of extracted text values.
+    """
+    if not isinstance(data, dict):
+        return []
+    texts = data.get("texts", [])
+    if not isinstance(texts, list):
+        return []
+    return [
+        str(t.get("value")) for t in texts if isinstance(t, dict) and t.get("value")
+    ]
+
+
+def _extract_cofactor_entry(cofactor: dict[str, Any]) -> dict[str, Any]:
+    """Extract data from a single cofactor entry.
+
+    Args:
+        cofactor: Cofactor dict from comment.
+
+    Returns:
+        Cofactor data dict with name, chebi_id, and optional note.
+    """
+    cofactor_data: dict[str, Any] = {}
+
+    name = cofactor.get("name")
+    if name:
+        cofactor_data["name"] = str(name)
+
+    xref = cofactor.get("cofactorCrossReference")
+    if isinstance(xref, dict):
+        chebi_id = xref.get("id")
+        if chebi_id:
+            cofactor_data["chebi_id"] = str(chebi_id)
+
+    note = cofactor.get("note")
+    notes = _extract_texts_from_dict(note)
+    if notes:
+        cofactor_data["note"] = notes[0] if len(notes) == 1 else notes
+
+    return cofactor_data
+
+
+def _extract_km_entry(km: dict[str, Any]) -> dict[str, Any]:
+    """Extract Michaelis constant entry."""
+    km_entry: dict[str, Any] = {}
+    if km.get("constant"):
+        km_entry["value"] = km["constant"]
+    if km.get("unit"):
+        km_entry["unit"] = km["unit"]
+    if km.get("substrate"):
+        km_entry["substrate"] = km["substrate"]
+    return km_entry
+
+
+def _extract_vmax_entry(vmax: dict[str, Any]) -> dict[str, Any]:
+    """Extract maximum velocity entry."""
+    vmax_entry: dict[str, Any] = {}
+    if vmax.get("velocity"):
+        vmax_entry["value"] = vmax["velocity"]
+    if vmax.get("unit"):
+        vmax_entry["unit"] = vmax["unit"]
+    if vmax.get("enzyme"):
+        vmax_entry["enzyme"] = vmax["enzyme"]
+    return vmax_entry
+
+
+def _extract_list_entries(data_list: Any, extractor: Any) -> list[dict[str, Any]]:
+    """Extract entries from a list using the provided extractor function."""
+    if not isinstance(data_list, list) or not data_list:
+        return []
+    return [
+        e
+        for e in (extractor(item) for item in data_list if isinstance(item, dict))
+        if e
+    ]
+
+
+def _extract_kinetic_parameters(kinetics: dict[str, Any]) -> dict[str, Any]:
+    """Extract kinetic parameters (Km, Vmax) from kineticParameters dict."""
+    kinetic_data: dict[str, Any] = {}
+
+    km_values = _extract_list_entries(
+        kinetics.get("michaelisConstants"), _extract_km_entry
+    )
+    if km_values:
+        kinetic_data["km"] = km_values
+
+    vmax_values = _extract_list_entries(
+        kinetics.get("maximumVelocities"), _extract_vmax_entry
+    )
+    if vmax_values:
+        kinetic_data["vmax"] = vmax_values
+
+    notes = _extract_texts_from_dict(kinetics.get("note"))
+    if notes:
+        kinetic_data["note"] = notes
+
+    return kinetic_data
+
+
+def _extract_absorption_data(absorption: dict[str, Any]) -> dict[str, Any]:
+    """Extract absorption (spectroscopic) data."""
+    abs_data: dict[str, Any] = {}
+    if absorption.get("max"):
+        abs_data["max"] = absorption["max"]
+    notes = _extract_texts_from_dict(absorption.get("note"))
+    if notes:
+        abs_data["note"] = notes
+    return abs_data
+
+
+def _extract_biophys_from_comment(comment: dict[str, Any]) -> dict[str, Any]:
+    """Extract biophysicochemical data from a single comment.
+
+    Args:
+        comment: BIOPHYSICOCHEMICAL PROPERTIES comment dict.
+
+    Returns:
+        Dict with extracted properties.
+    """
+    result: dict[str, Any] = {}
+
+    # Simple text extractions
+    ph_values = _extract_texts_from_dict(comment.get("phDependence"))
+    if ph_values:
+        result["ph_dependence"] = ph_values
+
+    temp_values = _extract_texts_from_dict(comment.get("temperatureDependence"))
+    if temp_values:
+        result["temperature_dependence"] = temp_values
+
+    redox_values = _extract_texts_from_dict(comment.get("redoxPotential"))
+    if redox_values:
+        result["redox_potential"] = redox_values
+
+    # Complex extractions
+    kinetics = comment.get("kineticParameters")
+    if isinstance(kinetics, dict):
+        kinetic_data = _extract_kinetic_parameters(kinetics)
+        if kinetic_data:
+            result["kinetic_parameters"] = kinetic_data
+
+    absorption = comment.get("absorption")
+    if isinstance(absorption, dict):
+        abs_data = _extract_absorption_data(absorption)
+        if abs_data:
+            result["absorption"] = abs_data
+
+    return result
 
 
 class CommentExtractor:
@@ -21031,6 +22900,78 @@ class CommentExtractor:
 
         return count if count > 0 else None
 
+    @staticmethod
+    def extract_cofactors(comments: Any) -> str | None:
+        """Extract cofactor information from COFACTOR comments.
+
+        Cofactors are metal ions or organic molecules required for protein function.
+        Each cofactor includes name and optional ChEBI cross-reference.
+
+        Args:
+            comments: List of comment objects.
+
+        Returns:
+            JSON array of cofactor objects with name and chebi_id, or None.
+        """
+        if not comments or not isinstance(comments, list):
+            return None
+
+        extracted: list[dict[str, Any]] = []
+        for comment in comments:
+            if not _is_comment_of_type(comment, "COFACTOR"):
+                continue
+
+            cofactors = comment.get("cofactors", [])
+            if not isinstance(cofactors, list):
+                continue
+
+            for cofactor in cofactors:
+                if not isinstance(cofactor, dict):
+                    continue
+                cofactor_data = _extract_cofactor_entry(cofactor)
+                if cofactor_data:
+                    extracted.append(cofactor_data)
+
+        return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
+
+    @staticmethod
+    def extract_biophysicochemical_properties(comments: Any) -> str | None:
+        """Extract biophysicochemical properties from comments.
+
+        Includes pH optima, temperature optima, kinetic parameters (Km, Vmax),
+        and redox potential values.
+
+        Args:
+            comments: List of comment objects.
+
+        Returns:
+            JSON object with biophysicochemical properties, or None.
+        """
+        if not comments or not isinstance(comments, list):
+            return None
+
+        extracted: dict[str, Any] = {}
+        for comment in comments:
+            if not _is_comment_of_type(comment, "BIOPHYSICOCHEMICAL PROPERTIES"):
+                continue
+            extracted.update(_extract_biophys_from_comment(comment))
+
+        return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
+
+    @classmethod
+    def extract_induction(cls, comments: Any) -> str | None:
+        """Extract induction information from INDUCTION comments.
+
+        Describes conditions under which gene expression is induced.
+
+        Args:
+            comments: List of comment objects.
+
+        Returns:
+            JSON array of induction text values, or None.
+        """
+        return cls.extract_by_type(comments, "INDUCTION")
+
 ================================================================================
 File: crossrefs.py
 Path: pipelines\uniprot\extractors\crossrefs.py
@@ -21140,7 +23081,7 @@ class CrossRefExtractor:
 
         Args:
             xrefs: List of cross-reference objects.
-            database: Database name (DrugBank, ChEMBL, GuidetoPHARMACOLOGY).
+            database: Database name (DrugBank, ChEMBL, GuidetoPHARMACOLOGY, PDB).
 
         Returns:
             JSON array of IDs or None.
@@ -21160,6 +23101,53 @@ class CrossRefExtractor:
                 ids.append(str(xref_id))
 
         return serialize_to_json(ids, ensure_ascii=False) if ids else None
+
+    @classmethod
+    def _build_pdb_entry(cls, xref: dict[str, Any]) -> dict[str, Any] | None:
+        """Build a PDB entry from a cross-reference dict."""
+        pdb_id = xref.get("id")
+        if not pdb_id:
+            return None
+
+        pdb_entry: dict[str, Any] = {"id": str(pdb_id)}
+        props = cls._parse_properties(xref.get("properties", []))
+
+        for key, field in [
+            ("Method", "method"),
+            ("Resolution", "resolution"),
+            ("Chains", "chains"),
+        ]:
+            if props.get(key):
+                pdb_entry[field] = props[key]
+
+        return pdb_entry
+
+    @classmethod
+    def extract_pdb_xrefs(cls, xrefs: Any) -> str | None:
+        """Extract PDB cross-references with structural details.
+
+        PDB references include information about 3D structure availability,
+        chains, and resolution which is valuable for structural biology.
+
+        Args:
+            xrefs: List of cross-reference objects.
+
+        Returns:
+            JSON array of PDB reference objects with id, method, resolution,
+            and chains, or None.
+        """
+        if not xrefs or not isinstance(xrefs, list):
+            return None
+
+        pdb_refs = [
+            entry
+            for xref in xrefs
+            if isinstance(xref, dict) and xref.get("database") == "PDB"
+            for entry in [cls._build_pdb_entry(xref)]
+            if entry is not None
+        ]
+
+        return serialize_to_json(pdb_refs, ensure_ascii=False) if pdb_refs else None
 
 ================================================================================
 File: features.py
@@ -21409,6 +23397,7 @@ Path: pipelines\uniprot\extractors\utils.py
 
 from __future__ import annotations
 
+from datetime import date
 from typing import Any, ClassVar
 
 import orjson
@@ -21561,6 +23550,25 @@ class ExtractorUtils:
             return None
         values = ExtractorUtils._extract_values_from_list(ec_numbers)
         return orjson.dumps(values).decode("utf-8") if values else None
+
+    @staticmethod
+    def parse_uniprot_date(date_str: Any) -> date | None:
+        """Parse UniProt date string to datetime.date.
+
+        UniProt API returns dates in ISO 8601 format (YYYY-MM-DD).
+
+        Args:
+            date_str: Date string from UniProt API (e.g., "2000-12-01").
+
+        Returns:
+            Parsed date object or None if invalid/empty.
+        """
+        if not date_str or not isinstance(date_str, str):
+            return None
+        try:
+            return date.fromisoformat(date_str)
+        except ValueError:
+            return None
 
 ================================================================================
 File: idmapping_transformer.py
@@ -21792,12 +23800,17 @@ class UniProtProteinTransformer(BaseTransformer):
     _SEQUENCE_LENGTH_PATH = ("sequence", "length")
     _SEQUENCE_MOL_WEIGHT_PATH = ("sequence", "molWeight")
     _SEQUENCE_CRC64_PATH = ("sequence", "crc64")
+    _SEQUENCE_MODIFIED_PATH = ("sequence", "modified")
     _PROTEIN_NAME_PATH = (
         "proteinDescription",
         "recommendedName",
         "fullName",
         "value",
     )
+    # Entry audit paths
+    _ENTRY_AUDIT_CREATED_PATH = ("entryAudit", "firstPublicDate")
+    _ENTRY_AUDIT_MODIFIED_PATH = ("entryAudit", "lastAnnotationUpdateDate")
+    _ENTRY_AUDIT_VERSION_PATH = ("entryAudit", "entryVersion")
 
     def __init__(
         self,
@@ -21883,6 +23896,7 @@ class UniProtProteinTransformer(BaseTransformer):
         self._add_organism_data(record, data)
         self._add_evidence_data(record, data)
         self._add_sequence_data(record, data)
+        self._add_audit_data(record, data)
         self._add_functional_annotations(record, data)
         self._add_cross_references(record, data)
         self._add_features_and_keywords(record, data)
@@ -21962,6 +23976,33 @@ class UniProtProteinTransformer(BaseTransformer):
         data["sequence_checksum"] = self._extract_by_path(
             record, self._SEQUENCE_CRC64_PATH
         )
+        # Sequence modification date
+        seq_modified_str = self._extract_by_path(record, self._SEQUENCE_MODIFIED_PATH)
+        seq_modified_date = ExtractorUtils.parse_uniprot_date(seq_modified_str)
+        data["sequence_modified"] = (
+            seq_modified_date.isoformat() if seq_modified_date else None
+        )
+
+    def _add_audit_data(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+        """Add entry audit metadata fields.
+
+        Extracts entry creation/modification dates and version from entryAudit object.
+        Dates are parsed and stored in ISO 8601 format (YYYY-MM-DD).
+        """
+        # Entry version (integer)
+        data["entry_version"] = self._extract_by_path(
+            record, self._ENTRY_AUDIT_VERSION_PATH
+        )
+
+        # Entry creation date
+        created_str = self._extract_by_path(record, self._ENTRY_AUDIT_CREATED_PATH)
+        created_date = ExtractorUtils.parse_uniprot_date(created_str)
+        data["entry_created"] = created_date.isoformat() if created_date else None
+
+        # Entry last modification date
+        modified_str = self._extract_by_path(record, self._ENTRY_AUDIT_MODIFIED_PATH)
+        modified_date = ExtractorUtils.parse_uniprot_date(modified_str)
+        data["entry_modified"] = modified_date.isoformat() if modified_date else None
 
     def _add_functional_annotations(
         self, record: BronzeRecord, data: dict[str, Any]
@@ -21996,6 +24037,13 @@ class UniProtProteinTransformer(BaseTransformer):
         )
         data["caution"] = CommentExtractor.extract_by_type(comments, "CAUTION")
 
+        # Biochemical properties
+        data["cofactors"] = CommentExtractor.extract_cofactors(comments)
+        data["biophysicochemical_properties"] = (
+            CommentExtractor.extract_biophysicochemical_properties(comments)
+        )
+        data["induction"] = CommentExtractor.extract_induction(comments)
+
     def _add_cross_references(self, record: BronzeRecord, data: dict[str, Any]) -> None:
         """Add cross-reference fields."""
         xrefs = record.get("uniProtKBCrossReferences")
@@ -22005,6 +24053,7 @@ class UniProtProteinTransformer(BaseTransformer):
         data["guidetopharmacology_ids"] = CrossRefExtractor.extract_xref_ids(
             xrefs, "GuidetoPHARMACOLOGY"
         )
+        data["pdb_xrefs"] = CrossRefExtractor.extract_pdb_xrefs(xrefs)
 
     def _add_features_and_keywords(
         self, record: BronzeRecord, data: dict[str, Any]
@@ -27079,6 +29128,8 @@ class RunOptions:
     filter_column: str | None = None
     filter_field: str | None = None
     filter_ids: tuple[str, ...] | None = None  # Direct filter IDs (no CSV)
+    fallback_column: str | None = None  # Column name for fallback search (CSV mode)
+    fallback_mapping: dict[str, str] | None = None  # Direct mapping (composite mode)
     vacuum_after_run: bool | None = None
     vacuum_retention_days: int | None = None
     log_level: str = "INFO"
@@ -27266,11 +29317,18 @@ class PipelineRunnerService:
         """
         # Build InputFilterContext
         if options.input_csv:
-            input_filter = InputFilterContext(
-                enabled=True,
+            input_filter = InputFilterContext.from_csv(
                 source_path=options.input_csv,
                 column_name=options.filter_column or "",
                 filter_field=options.filter_field or "",
+                fallback_column=options.fallback_column,
+            )
+        elif options.filter_ids:
+            # Direct IDs mode (composite pipelines)
+            input_filter = InputFilterContext.from_ids(
+                filter_ids=options.filter_ids,
+                filter_field=options.filter_field or "doi",
+                fallback_mapping=options.fallback_mapping,
             )
         else:
             input_filter = InputFilterContext.disabled()
