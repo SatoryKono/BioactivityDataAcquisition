@@ -25,6 +25,8 @@ class TestCompositePipelineStateEnum:
             "NOT_STARTED",
             "SEED_RUNNING",
             "SEED_COMPLETED",
+            "DEPENDENCIES_RUNNING",
+            "DEPENDENCIES_COMPLETED",
             "ENRICHING",
             "ENRICHMENT_COMPLETED",
             "MERGING",
@@ -362,7 +364,7 @@ class TestMetricValue:
         for state in CompositePipelineState:
             value = state.to_metric_value()
             assert isinstance(value, int)
-            assert 0 <= value <= 7
+            assert 0 <= value <= 9  # 10 states: 0-9
 
     def test_metric_values_progress_through_pipeline(self):
         """Metric values should generally increase through pipeline stages."""
