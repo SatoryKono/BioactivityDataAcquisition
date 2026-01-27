@@ -28,6 +28,15 @@ class PubchemMoleculeRecord(BaseModel):
     Required field: cid.
     At least one structural identifier (SMILES/InChI) should be present.
 
+    Contains all physicochemical properties defined in PubchemMoleculeSchema:
+    - Structural identifiers (SMILES, InChI, InChI Key)
+    - Nomenclature (molecular formula, IUPAC name)
+    - Physical properties (molecular weight, exact mass)
+    - Computed descriptors (XLogP, TPSA, complexity, charge)
+    - Atom/Bond counts (heavy atoms, H-bond donors/acceptors, rotatable bonds)
+    - Stereochemistry (atom/bond stereo counts)
+    - 3D properties (volume, conformer count, feature counts)
+
     Example:
         >>> record = PubchemMoleculeRecord(
         ...     cid="2244",
@@ -40,16 +49,10 @@ class PubchemMoleculeRecord(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    # Primary identifier (REQUIRED)
+    # === Primary Identifier (REQUIRED) ===
     cid: str = Field(description="PubChem Compound ID")
 
-    # Molecular properties
-    molecular_formula: str | None = Field(default=None, description="Molecular formula")
-    molecular_weight: float | None = Field(
-        default=None, description="Molecular weight in g/mol"
-    )
-
-    # Structure representations
+    # === Structural Identifiers ===
     canonical_smiles: str | None = Field(
         default=None, description="Canonical SMILES (connectivity)"
     )
@@ -59,25 +62,119 @@ class PubchemMoleculeRecord(BaseModel):
     inchi: str | None = Field(default=None, description="InChI string")
     inchikey: str | None = Field(default=None, description="InChI Key")
 
-    # Names
+    # === Nomenclature ===
+    molecular_formula: str | None = Field(default=None, description="Molecular formula")
     iupac_name: str | None = Field(default=None, description="IUPAC systematic name")
 
-    # Physical/Chemical properties
-    charge: int | None = Field(default=None, description="Formal charge")
-    complexity: float | None = Field(
-        default=None, description="Molecular complexity score"
+    # === Physical Properties ===
+    molecular_weight: float | None = Field(
+        default=None, description="Molecular weight in g/mol"
     )
-    h_bond_acceptor_count: int | None = Field(
-        default=None, description="H-bond acceptor count"
+    exact_mass: float | None = Field(
+        default=None, description="Monoisotopic exact mass (Da)"
+    )
+    monoisotopic_mass: float | None = Field(
+        default=None, description="Monoisotopic mass using most abundant isotope (Da)"
+    )
+
+    # === Computed Descriptors ===
+    xlogp: float | None = Field(
+        default=None, description="Computed octanol-water partition coefficient"
+    )
+    tpsa: float | None = Field(
+        default=None, description="Topological polar surface area (Å²)"
+    )
+    complexity: float | None = Field(
+        default=None, description="Structural complexity score"
+    )
+    charge: int | None = Field(default=None, description="Formal charge")
+
+    # === Atom/Bond Counts ===
+    heavy_atom_count: int | None = Field(
+        default=None, description="Non-hydrogen atom count"
     )
     h_bond_donor_count: int | None = Field(
-        default=None, description="H-bond donor count"
+        default=None, description="Hydrogen bond donor count"
+    )
+    h_bond_acceptor_count: int | None = Field(
+        default=None, description="Hydrogen bond acceptor count"
     )
     rotatable_bond_count: int | None = Field(
         default=None, description="Rotatable bond count"
     )
 
-    # Fingerprints
+    # === Stereochemistry ===
+    atom_stereo_count: int | None = Field(
+        default=None, description="Total stereocenters"
+    )
+    defined_atom_stereo_count: int | None = Field(
+        default=None, description="Defined stereocenters"
+    )
+    undefined_atom_stereo_count: int | None = Field(
+        default=None, description="Undefined stereocenters"
+    )
+    bond_stereo_count: int | None = Field(default=None, description="Total E/Z bonds")
+    defined_bond_stereo_count: int | None = Field(
+        default=None, description="Defined E/Z bonds"
+    )
+    undefined_bond_stereo_count: int | None = Field(
+        default=None, description="Undefined E/Z bonds"
+    )
+    isotope_atom_count: int | None = Field(
+        default=None, description="Isotopic atom count"
+    )
+    covalent_unit_count: int | None = Field(
+        default=None, description="Number of covalent units"
+    )
+
+    # === 3D Properties ===
+    volume_3d: float | None = Field(
+        default=None, description="3D molecular volume (Å³)"
+    )
+    conformer_count_3d: int | None = Field(
+        default=None, description="Number of 3D conformers"
+    )
+    feature_acceptor_count_3d: int | None = Field(
+        default=None, description="3D H-bond acceptor features"
+    )
+    feature_donor_count_3d: int | None = Field(
+        default=None, description="3D H-bond donor features"
+    )
+    feature_anion_count_3d: int | None = Field(
+        default=None, description="3D anion features"
+    )
+    feature_cation_count_3d: int | None = Field(
+        default=None, description="3D cation features"
+    )
+    feature_ring_count_3d: int | None = Field(
+        default=None, description="3D ring features"
+    )
+    feature_hydrophobe_count_3d: int | None = Field(
+        default=None, description="3D hydrophobic features"
+    )
+    effective_rotor_count_3d: float | None = Field(
+        default=None, description="Effective rotatable bonds (3D)"
+    )
+    conformer_rmsd_3d: float | None = Field(
+        default=None, description="Conformer model RMSD"
+    )
+    x_steric_quadrupole_3d: float | None = Field(
+        default=None,
+        description="X-axis steric quadrupole moment (3D charge distribution)",
+    )
+    y_steric_quadrupole_3d: float | None = Field(
+        default=None,
+        description="Y-axis steric quadrupole moment (3D charge distribution)",
+    )
+    z_steric_quadrupole_3d: float | None = Field(
+        default=None,
+        description="Z-axis steric quadrupole moment (3D charge distribution)",
+    )
+    feature_count_3d: int | None = Field(
+        default=None, description="Total count of 3D pharmacophore features"
+    )
+
+    # === Fingerprints (not in schema, but available) ===
     fingerprint: str | None = Field(default=None, description="PubChem fingerprint")
 
 
@@ -90,18 +187,72 @@ class PubchemMolecule(BaseEntity):
 
     Domain entity with lineage fields (run_id, content_hash, etc.).
     For DTO without lineage, use PubchemMoleculeRecord.
+
+    Contains all physicochemical properties defined in PubchemMoleculeSchema:
+    - Structural identifiers (SMILES, InChI, InChI Key)
+    - Nomenclature (molecular formula, IUPAC name)
+    - Physical properties (molecular weight, exact mass)
+    - Computed descriptors (XLogP, TPSA, complexity, charge)
+    - Atom/Bond counts (heavy atoms, H-bond donors/acceptors, rotatable bonds)
+    - Stereochemistry (atom/bond stereo counts)
+    - 3D properties (volume, conformer count, feature counts)
     """
 
+    # === Primary Identifier (REQUIRED) ===
     cid: str
-    molecular_formula: str | None = None
-    molecular_weight: float | None = None
 
-    # Structure representations
+    # === Structural Identifiers ===
     canonical_smiles: str | None = None
     isomeric_smiles: str | None = None
     inchi: str | None = None
     inchikey: str | None = None
+
+    # === Nomenclature ===
+    molecular_formula: str | None = None
     iupac_name: str | None = None
+
+    # === Physical Properties ===
+    molecular_weight: float | None = None
+    exact_mass: float | None = None
+    monoisotopic_mass: float | None = None
+
+    # === Computed Descriptors ===
+    xlogp: float | None = None
+    tpsa: float | None = None
+    complexity: float | None = None
+    charge: int | None = None
+
+    # === Atom/Bond Counts ===
+    heavy_atom_count: int | None = None
+    h_bond_donor_count: int | None = None
+    h_bond_acceptor_count: int | None = None
+    rotatable_bond_count: int | None = None
+
+    # === Stereochemistry ===
+    atom_stereo_count: int | None = None
+    defined_atom_stereo_count: int | None = None
+    undefined_atom_stereo_count: int | None = None
+    bond_stereo_count: int | None = None
+    defined_bond_stereo_count: int | None = None
+    undefined_bond_stereo_count: int | None = None
+    isotope_atom_count: int | None = None
+    covalent_unit_count: int | None = None
+
+    # === 3D Properties ===
+    volume_3d: float | None = None
+    conformer_count_3d: int | None = None
+    feature_acceptor_count_3d: int | None = None
+    feature_donor_count_3d: int | None = None
+    feature_anion_count_3d: int | None = None
+    feature_cation_count_3d: int | None = None
+    feature_ring_count_3d: int | None = None
+    feature_hydrophobe_count_3d: int | None = None
+    effective_rotor_count_3d: float | None = None
+    conformer_rmsd_3d: float | None = None
+    x_steric_quadrupole_3d: float | None = None
+    y_steric_quadrupole_3d: float | None = None
+    z_steric_quadrupole_3d: float | None = None
+    feature_count_3d: int | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()

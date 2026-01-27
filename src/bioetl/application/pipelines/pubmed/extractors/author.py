@@ -1,15 +1,33 @@
 """Author extraction from PubMed XML elements.
 
 Handles parsing of author lists including individual and collective authors.
+Supports structured affiliation extraction with institutional identifiers.
 """
 
 from __future__ import annotations
 
+import re
 from typing import TypedDict
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
 from bioetl.application.pipelines.pubmed.xml_utils import get_text
+
+# Email pattern for detection and extraction
+EMAIL_PATTERN = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b")
+
+
+class StructuredAffiliation(TypedDict, total=False):
+    """Structured affiliation with identifier metadata.
+
+    MEDLINE AffiliationInfo can contain Identifier elements linking to
+    institutional databases like ROR (Research Organization Registry) or GRID.
+    """
+
+    text: str
+    identifier: str | None
+    identifier_source: str | None
+    email: str | None  # Extracted email for correspondence authors
 
 
 class RawAuthor(TypedDict, total=False):
@@ -20,6 +38,7 @@ class RawAuthor(TypedDict, total=False):
     fore_name: str | None
     collective_name: str | None
     affiliations: list[str] | None
+    structured_affiliations: list[StructuredAffiliation] | None
 
 
 class AuthorExtractor(BaseFieldExtractor):
@@ -50,12 +69,20 @@ class AuthorExtractor(BaseFieldExtractor):
 
         raw_authors: list[RawAuthor] = []
         for author in author_list.findall("Author"):
-            # Extract affiliations
-            affiliations = []
+            # Extract simple affiliations (legacy format)
+            affiliations: list[str] = []
+            # Extract structured affiliations with identifiers
+            structured_affiliations: list[StructuredAffiliation] = []
+
             for info in author.findall("AffiliationInfo"):
                 aff_text = get_text(info.find("Affiliation"))
                 if aff_text:
                     affiliations.append(aff_text)
+
+                    # Build structured affiliation
+                    structured_aff = self._extract_structured_affiliation(info)
+                    if structured_aff:
+                        structured_affiliations.append(structured_aff)
 
             raw_authors.append(
                 RawAuthor(
@@ -64,10 +91,84 @@ class AuthorExtractor(BaseFieldExtractor):
                     fore_name=get_text(author.find("ForeName")),
                     collective_name=get_text(author.find("CollectiveName")),
                     affiliations=affiliations if affiliations else None,
+                    structured_affiliations=(
+                        structured_affiliations if structured_affiliations else None
+                    ),
                 )
             )
 
         return raw_authors if raw_authors else None
+
+    def _extract_structured_affiliation(
+        self, aff_info: Element
+    ) -> StructuredAffiliation | None:
+        """Extract structured affiliation from AffiliationInfo element.
+
+        MEDLINE AffiliationInfo structure:
+        <AffiliationInfo>
+            <Affiliation>University Name, Department, City, Country.
+                         Electronic address: email@example.com</Affiliation>
+            <Identifier Source="ROR">https://ror.org/...</Identifier>
+            <Identifier Source="GRID">grid.12345.6</Identifier>
+        </AffiliationInfo>
+
+        Args:
+            aff_info: AffiliationInfo XML element.
+
+        Returns:
+            StructuredAffiliation dict or None if no text.
+        """
+        aff_elem = aff_info.find("Affiliation")
+        aff_text = get_text(aff_elem)
+        if not aff_text:
+            return None
+
+        # Extract identifier if present (prefer ROR, then GRID, then others)
+        identifier = None
+        identifier_source = None
+
+        # Try to find identifiers in priority order
+        for source in ["ROR", "GRID", "ISNI", "RINGGOLD"]:
+            for id_elem in aff_info.findall("Identifier"):
+                if id_elem.get("Source") == source and id_elem.text:
+                    identifier = id_elem.text.strip()
+                    identifier_source = source
+                    break
+            if identifier:
+                break
+
+        # If no prioritized identifier found, take the first available
+        if not identifier:
+            for id_elem in aff_info.findall("Identifier"):
+                if id_elem.text:
+                    identifier = id_elem.text.strip()
+                    identifier_source = id_elem.get("Source")
+                    break
+
+        # Extract email if present in affiliation text
+        email = self._extract_email_from_text(aff_text)
+
+        return StructuredAffiliation(
+            text=aff_text,
+            identifier=identifier,
+            identifier_source=identifier_source,
+            email=email,
+        )
+
+    def _extract_email_from_text(self, text: str) -> str | None:
+        """Extract email address from affiliation text.
+
+        PubMed affiliations may contain correspondence emails, often marked with
+        'Electronic address:' prefix.
+
+        Args:
+            text: Affiliation text that may contain email.
+
+        Returns:
+            Email address if found, None otherwise.
+        """
+        match = EMAIL_PATTERN.search(text)
+        return match.group(0) if match else None
 
     def normalize(self, raw_value: list[RawAuthor]) -> list[str]:
         """Нормализовать список авторов в формат 'LastName, Initials'.
@@ -144,3 +245,42 @@ class AuthorExtractor(BaseFieldExtractor):
                 all_affiliations.update(affs)
 
         return sorted(all_affiliations)
+
+    @classmethod
+    def parse_structured_affiliations(
+        cls, article_node: Element
+    ) -> list[StructuredAffiliation]:
+        """Extract unique structured affiliations with identifier metadata.
+
+        This method provides enhanced affiliation data including institutional
+        identifiers (ROR, GRID) and extracted email addresses for institutional
+        bibliometric analysis and author disambiguation.
+
+        Args:
+            article_node: The Article element containing AuthorList.
+
+        Returns:
+            List of unique StructuredAffiliation dicts, sorted by text.
+            Each dict contains:
+            - text: Affiliation text
+            - identifier: Institutional identifier (if available)
+            - identifier_source: Source of identifier (ROR, GRID, etc.)
+            - email: Extracted email (if present in text)
+        """
+        extractor = cls()
+        raw_authors = extractor.extract(article_node)
+        if not raw_authors:
+            return []
+
+        # Use text as key to deduplicate affiliations
+        seen_texts: dict[str, StructuredAffiliation] = {}
+        for author in raw_authors:
+            structured_affs = author.get("structured_affiliations")
+            if structured_affs:
+                for aff in structured_affs:
+                    text = aff.get("text", "")
+                    if text and text not in seen_texts:
+                        seen_texts[text] = aff
+
+        # Return sorted by text for consistent ordering
+        return sorted(seen_texts.values(), key=lambda x: x.get("text", ""))

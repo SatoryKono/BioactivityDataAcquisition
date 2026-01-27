@@ -145,17 +145,17 @@ class ActivitySchema(ETLRecordSchema):
         nullable=True, description="Standardized upper bound."
     )
     toid: Series[int] | None = pa.Field(nullable=True, description="Test Occasion ID.")
-    # manual_curation_flag: Optional[Series[int]] = pa.Field(
-    #     nullable=True,
-    #     isin=[0, 1],
-    #     description="Manual curation flag.",
-    # )
-    # original_activity_id: Optional[Series[int]] = pa.Field(
-    #     nullable=True, description="Original activity ID."
-    # )
-    # ridx: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="Record index."
-    # )
+    manual_curation_flag: Series[int] | None = pa.Field(
+        nullable=True,
+        isin=[0, 1],
+        description="Manual curation flag indicating record was manually reviewed.",
+    )
+    original_activity_id: Series[int] | None = pa.Field(
+        nullable=True, description="Original activity ID for traceability."
+    )
+    data_validity_description: Series[str] | None = pa.Field(
+        nullable=True, description="Human-readable data validity explanation."
+    )
 
     # === Flattened Fields (from JSON) ===
     ligand_efficiency_bei: Series[float] | None = pa.Field(nullable=True)
@@ -188,7 +188,7 @@ class ActivitySchema(ETLRecordSchema):
     bao_format: Series[str] | None = pa.Field(nullable=True)
     bao_label: Series[str] | None = pa.Field(nullable=True)
     document_journal: Series[str] | None = pa.Field(nullable=True)
-    document_year: Series[float] | None = pa.Field(nullable=True)
+    document_year: Series[int] | None = pa.Field(nullable=True)
 
     class Config:
         """Pandera configuration."""

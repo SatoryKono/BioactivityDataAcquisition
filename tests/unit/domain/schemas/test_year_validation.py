@@ -93,6 +93,12 @@ class TestCrossRefYearValidation:
             "published": None,
             "issn_print": None,
             "issn_electronic": None,
+            # Author affiliations
+            "affiliations": None,
+            # Author and reference fields
+            "author_orcids": None,
+            "author_details": None,
+            "references": None,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
@@ -166,6 +172,8 @@ class TestSemanticScholarYearValidation:
             "tldr": None,
             "volume": None,
             "pages": None,
+            "first_page": None,
+            "last_page": None,
             "venue": None,
             "reference_count": 50,
             "influential_citation_count": None,
@@ -173,6 +181,14 @@ class TestSemanticScholarYearValidation:
             "oa_status": None,
             "fields_of_study": None,
             "publication_types": None,
+            # Author affiliations
+            "affiliations": None,
+            # Author identifiers
+            "author_s2_ids": None,
+            "author_orcids": None,
+            "author_h_indices": None,
+            # Citation context
+            "citation_contexts": None,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
@@ -297,6 +313,10 @@ class TestPubMedYearValidation:
             "pmid": "12345678",
             "doi": "10.1038/nature12373",
             "pmc_id": None,
+            # Additional identifiers
+            "pii": None,
+            "mid": None,
+            "publisher_id": None,
             # Core content
             "title": "Test Article",
             "abstract": None,
@@ -332,12 +352,29 @@ class TestPubMedYearValidation:
             "date_completed": date(2020, 5, 20),
             "date_revised": date(2020, 5, 21),
             "citation_subset": None,
+            # Enhanced affiliation data
+            "structured_affiliations": None,
+            # Counts
             "author_count": 5,
             "mesh_heading_count": 10,
             "keyword_count": 3,
             "grant_count": 2,
             "reference_count": 50,
             "chemical_count": 0,
+            # Classification data (JSON arrays)
+            "mesh_terms": None,
+            "chemicals": None,
+            "keywords": None,
+            "databanks": None,
+            "gene_symbols": None,
+            "publication_types": None,
+            # Additional date fields
+            "accepted_date": None,
+            "received_date": None,
+            "revised_date": None,
+            "epub_date": None,
+            # Author affiliations
+            "affiliations": None,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:

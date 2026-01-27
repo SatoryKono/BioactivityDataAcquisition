@@ -61,6 +61,8 @@ def mock_pcp_compound():
     compound.cid = 123
     compound.molecular_formula = "C9H8O4"
     compound.molecular_weight = 180.16
+    compound.exact_mass = 180.042259
+    compound.monoisotopic_mass = 180.042259
     # connectivity_smiles replaces deprecated canonical_smiles (pubchempy 1.0.5)
     compound.connectivity_smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"
     # smiles replaces deprecated isomeric_smiles (pubchempy 1.0.5)
@@ -75,6 +77,11 @@ def mock_pcp_compound():
     compound.h_bond_acceptor_count = 4
     compound.h_bond_donor_count = 1
     compound.rotatable_bond_count = 3
+    # 3D steric quadrupole moments
+    compound.x_steric_quadrupole_3d = 1.23
+    compound.y_steric_quadrupole_3d = -0.45
+    compound.z_steric_quadrupole_3d = 0.78
+    compound.feature_count_3d = 7
     compound.fingerprint = "mock_fingerprint"
     return compound
 

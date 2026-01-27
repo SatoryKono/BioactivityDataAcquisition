@@ -6,6 +6,7 @@ Aligned with RULES.md v5.10 and Publication Schema Unification spec.
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -109,6 +110,37 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     issn_electronic: Series[str] = pa.Field(
         nullable=True,
         description="Electronic ISSN (format: XXXX-XXXX)",
+    )
+
+    # === Metrics ===
+    reference_count: Series[pd.Int64Dtype] = pa.Field(
+        nullable=True,
+        ge=0,
+        description="Number of references (from references-count field)",
+    )
+
+    # === Author Affiliations ===
+    affiliations: Series[str] = pa.Field(
+        nullable=True,
+        description="Author affiliations (JSON array)",
+    )
+
+    # === Author ORCID Identifiers ===
+    author_orcids: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
+    )
+
+    # === Full Author Details ===
+    author_details: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of author objects with given, family, orcid, sequence, affiliations",
+    )
+
+    # === Bibliographic References ===
+    references: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of cited references with DOI, title, author, year, etc.",
     )
 
     class Config:

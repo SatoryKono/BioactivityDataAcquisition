@@ -254,6 +254,15 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     issn_print: str | None = None
     issn_electronic: str | None = None
 
+    # Author ORCID identifiers (JSON array of ORCID IDs)
+    author_orcids: str | None = None
+
+    # Full author details with ORCID, sequence, affiliations (JSON array)
+    author_details: str | None = None
+
+    # Bibliographic references (JSON array of citation data)
+    references: str | None = None
+
     # Override: Default source for CrossRef
     _source: str = "crossref"
 

@@ -147,6 +147,10 @@ class Bioactivity(BaseEntity):
     data_validity_comment: str | None = None
     data_validity_description: str | None = None
     potential_duplicate: int | None = None
+    manual_curation_flag: int | None = (
+        None  # 0/1: Whether manually reviewed by curators
+    )
+    original_activity_id: int | None = None  # FK to original activity for traceability
 
     # Action type (flattened from ChEMBL API nested structure)
     action_type_action_type: str | None = (
@@ -280,6 +284,8 @@ class Bioactivity(BaseEntity):
                 raw_data.get("data_validity_description")
             ),
             potential_duplicate=_safe_int(raw_data.get("potential_duplicate")),
+            manual_curation_flag=_safe_int(raw_data.get("manual_curation_flag")),
+            original_activity_id=_safe_int(raw_data.get("original_activity_id")),
             activity_properties=_safe_json(raw_data.get("activity_properties")),
             toid=_safe_int(raw_data.get("toid")),
         )

@@ -92,8 +92,19 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     )
     pages: Series[str] = pa.Field(
         nullable=True,
-        description="Page range",
+        description="Page range (legacy format, e.g., '123-456')",
     )
+
+    first_page: Series[str] = pa.Field(
+        nullable=True,
+        description="First page number (parsed from pages)",
+    )
+
+    last_page: Series[str] = pa.Field(
+        nullable=True,
+        description="Last page number (parsed from pages)",
+    )
+
     venue: Series[str] = pa.Field(
         nullable=True,
         description="Publication venue",
@@ -133,6 +144,34 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     publication_types: Series[str] = pa.Field(
         nullable=True,
         description="Publication types (JSON array)",
+    )
+
+    # === Author Affiliations ===
+    affiliations: Series[str] = pa.Field(
+        nullable=True,
+        description="Author affiliations (JSON array)",
+    )
+
+    # === Author Identifiers (for author-level analytics and disambiguation) ===
+    author_s2_ids: Series[str] = pa.Field(
+        nullable=True,
+        description="Semantic Scholar author IDs (JSON array of 40-char hex IDs)",
+    )
+
+    author_orcids: Series[str] = pa.Field(
+        nullable=True,
+        description="Author ORCID identifiers (JSON array, empty string for missing)",
+    )
+
+    author_h_indices: Series[str] = pa.Field(
+        nullable=True,
+        description="Author h-index values (JSON array, null for missing)",
+    )
+
+    # === Citation Context (for citation sentiment analysis) ===
+    citation_contexts: Series[str] = pa.Field(
+        nullable=True,
+        description="Citation context sentences (JSON array)",
     )
 
     class Config:

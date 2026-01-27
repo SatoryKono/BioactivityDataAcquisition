@@ -1,37 +1,71 @@
 """Field extraction functions for OpenAlex records.
 
-Contains pure functions for extracting and normalizing fields
-from OpenAlex Works API responses.
-
-These functions are:
-- Stateless and pure (no side effects)
-- Unit testable in isolation
-- Reusable across different transformation contexts
+Pure functions for extracting/normalizing fields from OpenAlex API responses.
+Topics vs Concepts: OpenAlex deprecated concepts in 2024; use topics instead.
 """
 
 from __future__ import annotations
 
+import warnings
 from typing import Any
 
 
-def extract_doi(doi_url: str | None) -> str | None:
-    """Extract bare DOI from OpenAlex DOI URL.
-
-    OpenAlex stores DOIs as full URLs (e.g., "https://doi.org/10.1038/s41586-024-07487-w").
-    This function extracts just the DOI identifier.
+def _extract_id_from_url(url: str | None) -> str | None:
+    """Extract ID from OpenAlex URL (helper function).
 
     Args:
-        doi_url: DOI URL from OpenAlex (e.g., "https://doi.org/10.1038/...").
+        url: URL or bare ID string.
 
     Returns:
-        Bare DOI (e.g., "10.1038/s41586-024-07487-w") or None if not available.
-
-    Example:
-        >>> extract_doi("https://doi.org/10.1038/s41586-024-07487-w")
-        '10.1038/s41586-024-07487-w'
-        >>> extract_doi(None)
-        None
+        Extracted ID or original value.
     """
+    if not url or not isinstance(url, str):
+        return None
+    return url.split("/")[-1] if "/" in url else url
+
+
+def _get_nested_display_name(obj: Any) -> str | None:
+    """Get display_name from nested dict (helper function).
+
+    Args:
+        obj: Nested object (dict expected).
+
+    Returns:
+        display_name string or None.
+    """
+    if isinstance(obj, dict):
+        return obj.get("display_name")
+    return None
+
+
+def _parse_topic_dict(topic: dict[str, Any]) -> dict[str, Any] | None:
+    """Parse a single topic dict into normalized format (helper function).
+
+    Args:
+        topic: Raw topic dict from OpenAlex API.
+
+    Returns:
+        Normalized topic dict or None if invalid.
+    """
+    display_name = topic.get("display_name")
+    if not display_name or not isinstance(display_name, str):
+        return None
+
+    score = topic.get("score")
+    score_val = float(score) if isinstance(score, (int, float)) else 0.0
+
+    return {
+        "id": _extract_id_from_url(topic.get("id")),
+        "display_name": display_name.strip(),
+        "score": score_val,
+        "subfield": _get_nested_display_name(topic.get("subfield") or {}),
+        "field": _get_nested_display_name(topic.get("field") or {}),
+        "domain": _get_nested_display_name(topic.get("domain") or {}),
+    }
+
+
+def extract_doi(doi_url: str | None) -> str | None:
+    """Extract bare DOI from OpenAlex DOI URL."""
     if not doi_url:
         return None
     if doi_url.startswith("https://doi.org/"):
@@ -44,23 +78,7 @@ def extract_doi(doi_url: str | None) -> str | None:
 
 
 def extract_openalex_id(openalex_url: str | None) -> str | None:
-    """Extract OpenAlex ID from OpenAlex URL.
-
-    OpenAlex stores IDs as full URLs (e.g., "https://openalex.org/W2148763428").
-    This function extracts just the Work ID.
-
-    Args:
-        openalex_url: OpenAlex URL (e.g., "https://openalex.org/W2148763428").
-
-    Returns:
-        OpenAlex Work ID (e.g., "W2148763428") or None if not available.
-
-    Example:
-        >>> extract_openalex_id("https://openalex.org/W2148763428")
-        'W2148763428'
-        >>> extract_openalex_id(None)
-        None
-    """
+    """Extract OpenAlex ID from OpenAlex URL."""
     if not openalex_url:
         return None
     if "/" in openalex_url:
@@ -69,24 +87,7 @@ def extract_openalex_id(openalex_url: str | None) -> str | None:
 
 
 def extract_authors(authorships: list[dict[str, Any]]) -> list[str]:
-    """Extract author display names from authorships.
-
-    OpenAlex stores author information in an "authorships" array with
-    nested "author" objects containing display names.
-
-    Args:
-        authorships: List of authorship objects from OpenAlex.
-
-    Returns:
-        List of author display names.
-
-    Example:
-        >>> extract_authors([
-        ...     {"author": {"display_name": "John Doe"}},
-        ...     {"author": {"display_name": "Jane Smith"}},
-        ... ])
-        ['John Doe', 'Jane Smith']
-    """
+    """Extract author display names from authorships array."""
     authors = []
     for authorship in authorships:
         author = authorship.get("author", {})
@@ -99,23 +100,7 @@ def extract_authors(authorships: list[dict[str, Any]]) -> list[str]:
 
 
 def extract_affiliations(authorships: list[dict[str, Any]]) -> list[str]:
-    """Extract unique affiliations from authorships.
-
-    OpenAlex stores affiliations inside authorships -> institutions.
-
-    Args:
-        authorships: List of authorship objects from OpenAlex.
-
-    Returns:
-        List of unique affiliation display names (sorted).
-
-    Example:
-        >>> extract_affiliations([
-        ...     {"institutions": [{"display_name": "Harvard University"}]},
-        ...     {"institutions": [{"display_name": "MIT"}, {"display_name": "Harvard University"}]}
-        ... ])
-        ['Harvard University', 'MIT']
-    """
+    """Extract unique affiliations from authorships (sorted)."""
     affiliations: set[str] = set()
     for authorship in authorships:
         institutions = authorship.get("institutions", [])
@@ -131,26 +116,21 @@ def extract_affiliations(authorships: list[dict[str, Any]]) -> list[str]:
     return sorted(affiliations)
 
 
-def extract_concepts(concepts: list[dict[str, Any]], max_count: int = 10) -> list[str]:
-    """Extract top concept names from concepts list.
-
-    OpenAlex provides concepts sorted by relevance score.
-    This function extracts the display names of the top concepts.
-
-    Args:
-        concepts: List of concept objects (sorted by score).
-        max_count: Maximum concepts to extract (default 10).
-
-    Returns:
-        List of concept display names.
-
-    Example:
-        >>> extract_concepts([
-        ...     {"display_name": "Chemistry", "score": 0.9},
-        ...     {"display_name": "Biology", "score": 0.7},
-        ... ])
-        ['Chemistry', 'Biology']
-    """
+def extract_concepts(
+    concepts: list[dict[str, Any]],
+    max_count: int = 10,
+    *,
+    warn_deprecated: bool = False,
+) -> list[str]:
+    """Extract top concept names (DEPRECATED: use extract_topics instead)."""
+    if warn_deprecated:
+        warnings.warn(
+            "extract_concepts() is deprecated. OpenAlex deprecated the 'concepts' "
+            "field in 2024 in favor of 'topics'. Use extract_topics() and "
+            "extract_primary_topic() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
     result = []
     for concept in concepts[:max_count]:
         if not isinstance(concept, dict):
@@ -161,28 +141,75 @@ def extract_concepts(concepts: list[dict[str, Any]], max_count: int = 10) -> lis
     return result
 
 
-def extract_journal_info(primary_location: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract journal information from primary_location.
+def extract_topics(
+    topics: list[dict[str, Any]] | None,
+    max_count: int = 10,
+) -> list[dict[str, Any]]:
+    """Extract topics with hierarchical classification (domain/field/subfield/topic)."""
+    if not topics or not isinstance(topics, list):
+        return []
 
-    OpenAlex stores source information in "primary_location.source".
-    This function extracts journal name, ISSN, and publisher.
+    result: list[dict[str, Any]] = []
+    for topic in topics[:max_count]:
+        if not isinstance(topic, dict):
+            continue
+        parsed = _parse_topic_dict(topic)
+        if parsed:
+            result.append(parsed)
+
+    return result
+
+
+def extract_primary_topic(
+    primary_topic: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    """Extract single most relevant topic for a work."""
+    if not primary_topic or not isinstance(primary_topic, dict):
+        return None
+    return _parse_topic_dict(primary_topic)
+
+
+def _parse_grant_dict(grant: dict[str, Any]) -> dict[str, Any] | None:
+    """Parse a single grant dict into normalized format (helper function).
 
     Args:
-        primary_location: Primary location object from OpenAlex.
+        grant: Raw grant dict from OpenAlex API.
 
     Returns:
-        Dictionary with journal_name, issn, publisher.
-
-    Example:
-        >>> extract_journal_info({
-        ...     "source": {
-        ...         "display_name": "Nature",
-        ...         "issn_l": "0028-0836",
-        ...         "host_organization_name": "Springer Nature"
-        ...     }
-        ... })
-        {'journal_name': 'Nature', 'issn': '0028-0836', 'publisher': 'Springer Nature'}
+        Normalized grant dict or None if invalid.
     """
+    funder_name = grant.get("funder_display_name")
+    if not funder_name or not isinstance(funder_name, str):
+        return None
+
+    award_id = grant.get("award_id")
+    award_str = str(award_id).strip() if award_id else None
+
+    return {
+        "funder": _extract_id_from_url(grant.get("funder")),
+        "funder_display_name": funder_name.strip(),
+        "award_id": award_str,
+    }
+
+
+def extract_grants(grants: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
+    """Extract grant/funding information from grants array."""
+    if not grants or not isinstance(grants, list):
+        return []
+
+    result: list[dict[str, Any]] = []
+    for grant in grants:
+        if not isinstance(grant, dict):
+            continue
+        parsed = _parse_grant_dict(grant)
+        if parsed:
+            result.append(parsed)
+
+    return result
+
+
+def extract_journal_info(primary_location: dict[str, Any] | None) -> dict[str, Any]:
+    """Extract journal info (journal_name, issn, publisher) from primary_location."""
     if not primary_location or not isinstance(primary_location, dict):
         return {"journal_name": None, "issn": None, "publisher": None}
 
@@ -198,28 +225,7 @@ def extract_journal_info(primary_location: dict[str, Any] | None) -> dict[str, A
 
 
 def reconstruct_abstract(inverted_index: dict[str, list[int]] | None) -> str | None:
-    """Reconstruct abstract from OpenAlex inverted index.
-
-    OpenAlex stores abstracts as inverted index format for storage efficiency:
-    {"word": [positions]}.
-    This function reconstructs the original text.
-
-    Args:
-        inverted_index: Dict mapping words to position lists.
-
-    Returns:
-        Reconstructed abstract text or None if not available.
-
-    Example:
-        >>> reconstruct_abstract({
-        ...     "This": [0],
-        ...     "is": [1, 4],
-        ...     "an": [2],
-        ...     "example": [3],
-        ...     "abstract": [5]
-        ... })
-        'This is an example is abstract'
-    """
+    """Reconstruct abstract from OpenAlex inverted index format."""
     if not inverted_index or not isinstance(inverted_index, dict):
         return None
 
@@ -241,18 +247,7 @@ def reconstruct_abstract(inverted_index: dict[str, list[int]] | None) -> str | N
 
 
 def extract_open_access_info(open_access: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract Open Access information from open_access object.
-
-    Args:
-        open_access: Open access object from OpenAlex.
-
-    Returns:
-        Dictionary with is_oa and oa_status.
-
-    Example:
-        >>> extract_open_access_info({"is_oa": True, "oa_status": "gold"})
-        {'is_oa': True, 'oa_status': 'gold'}
-    """
+    """Extract Open Access info (is_oa, oa_status)."""
     if not open_access or not isinstance(open_access, dict):
         return {"is_oa": None, "oa_status": None}
 
@@ -263,32 +258,7 @@ def extract_open_access_info(open_access: dict[str, Any] | None) -> dict[str, An
 
 
 def extract_external_ids(ids: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract external identifiers from ids object.
-
-    OpenAlex stores external IDs as URLs or raw values:
-    - pmid: "https://pubmed.ncbi.nlm.nih.gov/12345678" -> "12345678"
-    - pmcid: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC123456" -> "PMC123456"
-    - mag: Microsoft Academic Graph ID (integer or string)
-
-    Note: Returns intermediate keys matching API names. Transformer maps
-    pmcid -> pmc_id for schema consistency.
-
-    Args:
-        ids: IDs object from OpenAlex work.
-
-    Returns:
-        Dictionary with pmid, pmcid (maps to pmc_id in transformer), mag_id fields.
-
-    Example:
-        >>> extract_external_ids({
-        ...     "pmid": "https://pubmed.ncbi.nlm.nih.gov/32015508",
-        ...     "pmcid": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7095418",
-        ...     "mag": "3006090887"
-        ... })
-        {'pmid': '32015508', 'pmcid': 'PMC7095418', 'mag_id': '3006090887'}
-        >>> extract_external_ids(None)
-        {'pmid': None, 'pmcid': None, 'mag_id': None}
-    """
+    """Extract external identifiers (pmid, pmcid, mag_id) from ids object."""
     if not ids or not isinstance(ids, dict):
         return {"pmid": None, "pmcid": None, "mag_id": None}
 
@@ -316,27 +286,7 @@ def extract_external_ids(ids: dict[str, Any] | None) -> dict[str, Any]:
 
 
 def extract_mesh_terms(mesh: list[dict[str, Any]] | None) -> list[str]:
-    """Extract MeSH descriptor names from mesh array.
-
-    OpenAlex provides MeSH terms with descriptor and qualifier info.
-    This function extracts unique descriptor names.
-
-    Args:
-        mesh: List of MeSH term objects from OpenAlex.
-
-    Returns:
-        List of unique MeSH descriptor names.
-
-    Example:
-        >>> extract_mesh_terms([
-        ...     {"descriptor_ui": "D000818", "descriptor_name": "Animals"},
-        ...     {"descriptor_ui": "D006801", "descriptor_name": "Humans"},
-        ...     {"descriptor_ui": "D000818", "descriptor_name": "Animals"}
-        ... ])
-        ['Animals', 'Humans']
-        >>> extract_mesh_terms(None)
-        []
-    """
+    """Extract unique MeSH descriptor names from mesh array."""
     if not mesh or not isinstance(mesh, list):
         return []
 
@@ -355,25 +305,7 @@ def extract_mesh_terms(mesh: list[dict[str, Any]] | None) -> list[str]:
 
 
 def extract_keywords(keywords: list[dict[str, Any]] | None) -> list[str]:
-    """Extract keyword display names from keywords array.
-
-    OpenAlex provides keywords with display_name field.
-
-    Args:
-        keywords: List of keyword objects from OpenAlex.
-
-    Returns:
-        List of keyword display names.
-
-    Example:
-        >>> extract_keywords([
-        ...     {"id": "https://openalex.org/keywords/coronavirus", "display_name": "Coronavirus"},
-        ...     {"id": "https://openalex.org/keywords/pandemic", "display_name": "Pandemic"}
-        ... ])
-        ['Coronavirus', 'Pandemic']
-        >>> extract_keywords(None)
-        []
-    """
+    """Extract keyword display names from keywords array."""
     if not keywords or not isinstance(keywords, list):
         return []
 
@@ -389,28 +321,7 @@ def extract_keywords(keywords: list[dict[str, Any]] | None) -> list[str]:
 
 
 def extract_biblio_info(biblio: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract bibliographic info (volume, issue, pages) from biblio object.
-
-    OpenAlex provides bibliographic information in a "biblio" object
-    containing volume, issue, first_page, and last_page fields.
-
-    Args:
-        biblio: Biblio object from OpenAlex work.
-
-    Returns:
-        Dictionary with volume, issue, first_page, last_page.
-
-    Example:
-        >>> extract_biblio_info({
-        ...     "volume": "42",
-        ...     "issue": "3",
-        ...     "first_page": "123",
-        ...     "last_page": "145"
-        ... })
-        {'volume': '42', 'issue': '3', 'first_page': '123', 'last_page': '145'}
-        >>> extract_biblio_info(None)
-        {'volume': None, 'issue': None, 'first_page': None, 'last_page': None}
-    """
+    """Extract bibliographic info (volume, issue, first_page, last_page)."""
     if not biblio or not isinstance(biblio, dict):
         return {
             "volume": None,

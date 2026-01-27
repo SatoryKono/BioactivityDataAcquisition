@@ -62,11 +62,26 @@ def valid_record() -> dict:
         # Bibliographic info (from biblio object)
         "volume": "42",
         "issue": "3",
+        "first_page": "123",
+        "last_page": "145",
         # Additional metrics
         "fwci": 1.5,  # Field-Weighted Citation Impact
         "referenced_works_count": 25,
         # Quality indicators
         "is_retracted": False,
+        # Topics (hierarchical classification - replaces deprecated concepts)
+        "topics": '[{"id": "T12345", "display_name": "Topic A", "score": 0.95}]',
+        "primary_topic": '{"id": "T12345", "display_name": "Topic A", "score": 0.95}',
+        # Grants/funding information
+        "grants": '[{"funder": "F1234", "funder_display_name": "NIH", "award_id": "R01"}]',
+        # Classification (JSON arrays)
+        "concepts": '["Biology", "Genetics"]',
+        "mesh": '["D000123", "D000456"]',
+        "keywords": '["gene expression", "transcription"]',
+        # External identifier
+        "mag_id": "12345678",
+        # Author affiliations
+        "affiliations": '["MIT", "Stanford"]',
         # Lookup tracking
         "_source": "openalex",
         "_lookup_method": "doi",
@@ -338,3 +353,50 @@ class TestOpenAlexPublicationSchema:
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
         assert validated["is_retracted"].iloc[0] == True  # noqa: E712
+
+    def test_topics_nullable(self, valid_record: dict) -> None:
+        """Should allow null topics."""
+        valid_record["topics"] = None
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert pd.isna(validated["topics"].iloc[0])
+
+    def test_topics_json_string(self, valid_record: dict) -> None:
+        """Should accept topics as JSON-serialized string."""
+        topics_json = '[{"id": "T1", "display_name": "Topic 1", "score": 0.9}]'
+        valid_record["topics"] = topics_json
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["topics"].iloc[0] == topics_json
+
+    def test_primary_topic_nullable(self, valid_record: dict) -> None:
+        """Should allow null primary_topic."""
+        valid_record["primary_topic"] = None
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert pd.isna(validated["primary_topic"].iloc[0])
+
+    def test_primary_topic_json_string(self, valid_record: dict) -> None:
+        """Should accept primary_topic as JSON-serialized string."""
+        primary_topic_json = '{"id": "T1", "display_name": "Topic 1", "score": 0.9}'
+        valid_record["primary_topic"] = primary_topic_json
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["primary_topic"].iloc[0] == primary_topic_json
+
+    def test_grants_nullable(self, valid_record: dict) -> None:
+        """Should allow null grants."""
+        valid_record["grants"] = None
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert pd.isna(validated["grants"].iloc[0])
+
+    def test_grants_json_string(self, valid_record: dict) -> None:
+        """Should accept grants as JSON-serialized string."""
+        grants_json = (
+            '[{"funder": "F1", "funder_display_name": "NIH", "award_id": "R01"}]'
+        )
+        valid_record["grants"] = grants_json
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["grants"].iloc[0] == grants_json
