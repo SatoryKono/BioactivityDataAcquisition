@@ -70,7 +70,7 @@ graph TD
         Violation1["❌ BAD: domain/entities.py<br/>from application.services import X"]
         Fix1["✅ GOOD: domain/entities.py<br/>from domain.ports import XPort"]
 
-        Violation2["❌ BAD: application/core/runner.py<br/>from infrastructure.storage import DeltaWriter"]
+        Violation2["❌ BAD: application/core/runner.py<br/>from infrastructure.storage import SilverWriter"]
         Fix2["✅ GOOD: application/core/runner.py<br/>from domain.ports import StoragePort"]
 
         Violation3["❌ BAD: infrastructure/adapters/chembl.py<br/>from application.pipelines import ChemblPipeline"]
