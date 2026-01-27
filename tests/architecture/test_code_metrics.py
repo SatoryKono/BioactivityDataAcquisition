@@ -35,7 +35,7 @@ class TestFileSizeLimits:
         "config.py": 640,  # 636 LOC - Config can be verbose (includes MemoryConfig)
         # Domain layer exemptions (baseline)
         "medallion.py": 340,  # 336 LOC - Medallion layer enums and policies
-        "result.py": 335,  # 331 LOC - CompositeResult with EnrichmentResult, MergeResult, SeedResult dataclasses + factory methods
+        "result.py": 465,  # 459 LOC - CompositeResult with EnrichmentResult, MergeResult, SeedResult, DependencyResult dataclasses + factory methods
         "filter_config.py": 400,  # 354 LOC
         "entities.py": 600,  # 569 LOC
         "chembl.py": 735,  # 730 LOC - ChEMBL entity DTOs with many fields

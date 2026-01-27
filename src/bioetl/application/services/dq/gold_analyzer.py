@@ -182,7 +182,7 @@ class GoldDQAnalyzer:
         """
         # Convert PyArrow to Polars for consistent processing
         if isinstance(data, pa.Table):
-            df: pl.DataFrame = pl.from_arrow(data)  # type: ignore[assignment]
+            df: pl.DataFrame = pl.from_arrow(data)
         else:
             df = data
 
@@ -425,7 +425,7 @@ class GoldDQAnalyzer:
 
             # Convert reference table to Polars if needed
             if isinstance(ref_table, pa.Table):
-                ref_df: pl.DataFrame = pl.from_arrow(ref_table)  # type: ignore[assignment]
+                ref_df: pl.DataFrame = pl.from_arrow(ref_table)
             else:
                 ref_df = ref_table
 

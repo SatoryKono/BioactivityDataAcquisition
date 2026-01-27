@@ -296,8 +296,15 @@ module = [
     # Pandera DataFrameModel schemas with @pa.check decorators
     "bioetl.domain.schemas.uniprot.protein",
     "bioetl.domain.schemas.uniprot.isoform",
+    "bioetl.domain.schemas.uniprot.idmapping",
     "bioetl.domain.schemas.pubmed.article",
+    "bioetl.domain.schemas.pubmed.publication",
     "bioetl.domain.schemas.pubchem.compound",
+    # Pydantic validators with @field_validator decorators
+    "bioetl.domain.models.metadata",
+    "bioetl.infrastructure.schemas.composite_config",
+    "bioetl.infrastructure.schemas.base_schemas",
+    "bioetl.infrastructure.schemas.dq_config",
 ]
 disallow_untyped_decorators = false
 
@@ -322,6 +329,11 @@ module = [
     "bioetl.domain.entities.openalex",
     "bioetl.domain.entities.pubchem",
     "bioetl.domain.entities.pubmed",
+    # Gold layer Pandera DataFrameModel schemas
+    "bioetl.domain.contracts.gold.chembl",
+    "bioetl.domain.contracts.gold.uniprot",
+    "bioetl.domain.contracts.gold.pubchem",
+    "bioetl.domain.contracts.gold.publications",
 ]
 disable_error_code = ["misc"]
 
@@ -336,6 +348,16 @@ module = [
     "bioetl.domain.schemas.semanticscholar.publication",
     "bioetl.domain.schemas.pubmed.article",
     "bioetl.domain.schemas.pubchem.compound",
+    # Modules returning Any from external libraries (orjson, polars, etc.)
+    "bioetl.domain.serialization",
+    "bioetl.domain.services.dq_serializer",
+    "bioetl.application.pipelines.uniprot.extractors.utils",
+    "bioetl.application.composite.deduplication",
+    "bioetl.application.composite.coordinator",
+    "bioetl.infrastructure.storage.bronze_writer",
+    "bioetl.infrastructure.config.filter_config_loader",
+    "bioetl.infrastructure.config.dq_config_loader",
+    "bioetl.composition.bootstrap.runtime.composite",
 ]
 disable_error_code = ["no-any-return", "return-value"]
 
