@@ -47,7 +47,6 @@ def sample_publication():
     return {
         "DOI": "10.1234/test.article",
         "title": ["Test Article Title"],
-        "abstract": "<p>This is the <b>abstract</b> text.</p>",
         "author": [
             {"given": "John", "family": "Doe"},
             {"given": "Jane", "family": "Smith"},
@@ -131,7 +130,6 @@ def test_extract_business_data_full(transformer, sample_publication):
 
     assert data["doi"] == "10.1234/test.article"
     assert data["title"] == "Test Article Title"
-    assert data["abstract"] == "This is the abstract text."
     # Authors are now JSON-serialized list
     assert json.loads(data["authors"]) == ["John Doe", "Jane Smith", "Anonymous"]
     assert data["journal"] == "Journal of Testing"
@@ -326,25 +324,6 @@ def test_extract_business_data_single_page(transformer):
     assert data["last_page"] is None
 
 
-def test_extract_business_data_html_abstract_stripping(transformer):
-    """Test that HTML tags are stripped from abstract."""
-    publication = {
-        "DOI": "10.1234/test",
-        "abstract": "<jats:p>Abstract with <jats:bold>XML</jats:bold> tags.</jats:p>",
-    }
-    data = transformer._extract_business_data(publication)
-    assert "<" not in data["abstract"]
-    assert ">" not in data["abstract"]
-    assert "Abstract with XML tags." in data["abstract"]
-
-
-def test_extract_business_data_empty_abstract(transformer):
-    """Test empty abstract handling."""
-    publication = {"DOI": "10.1234/test", "abstract": ""}
-    data = transformer._extract_business_data(publication)
-    assert data["abstract"] is None
-
-
 def test_extract_business_data_issn_list(transformer):
     """Test ISSN list extraction."""
     publication = {"DOI": "10.1234/test", "ISSN": ["1234-5678", "8765-4321"]}
@@ -537,3 +516,27 @@ def test_extract_business_data_date_year_only(transformer):
     }
     data = transformer._extract_business_data(publication)
     assert data["published_print"] == "2023-12-31"  # End-of-period: December 31
+
+
+@pytest.mark.asyncio
+async def test_transform_excludes_abstract_and_affiliations(
+    transformer, pipeline_context
+):
+    """Test that abstract and affiliations are excluded from Silver record."""
+    publication = {
+        "DOI": "10.1234/test",
+        "title": ["Test"],
+        "abstract": "<p>Some abstract text</p>",
+        "author": [
+            {
+                "given": "John",
+                "family": "Doe",
+                "affiliation": [{"name": "University A"}],
+            }
+        ],
+    }
+    result = await transformer.transform(pipeline_context, publication, index=0)
+
+    assert result is not None
+    assert "abstract" not in result
+    assert "affiliations" not in result

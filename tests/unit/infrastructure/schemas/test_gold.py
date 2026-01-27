@@ -70,7 +70,7 @@ class TestGoldPublicationSchemaUnifiedFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            # ChEMBL excluded: publication_date not available from ChEMBL API
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -136,7 +136,7 @@ class TestGoldPublicationSchemaCrossRefFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            # ChEMBL excluded: pmc_id not available from ChEMBL API
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -157,7 +157,7 @@ class TestGoldPublicationSchemaCoreFields:
         "schema_class,name",
         [
             (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
-            (CrossRefPublicationGoldSchema, "CrossRef Publication"),
+            # CrossRef excluded: abstract not collected per user request
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
@@ -412,7 +412,7 @@ class TestGoldSchemaValidation:
             "content_hash": "xyz789",
             "document_chembl_id": "CHEMBL12345",
             "pmid": "12345678",
-            "pmc_id": "PMC1234567",
+            # pmc_id excluded: not available from ChEMBL API
             "doi": "10.1234/test",
             # patent_id excluded from unified publication schema
             "title": "Test Publication",
@@ -422,7 +422,7 @@ class TestGoldSchemaValidation:
             "journal": "Test Journal",
             "journal_full_title": "Test Journal Full Title",
             "year": 2024,
-            "publication_date": "2024-01-01",
+            # publication_date excluded: not available from ChEMBL API
             "volume": "10",
             "issue": "2",
             "first_page": "100",

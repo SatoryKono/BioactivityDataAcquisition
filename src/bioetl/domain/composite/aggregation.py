@@ -90,7 +90,7 @@ class EnricherCardinality(Enum):
             ) from None
 
 
-def _require_non_empty(value: str | tuple, name: str) -> None:
+def _require_non_empty(value: str | tuple[object, ...], name: str) -> None:
     """Validate that a value is non-empty."""
     if not value:
         raise ValueError(f"{name} cannot be empty")

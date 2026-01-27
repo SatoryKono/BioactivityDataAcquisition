@@ -123,7 +123,7 @@ class TestDateExtractorEdgeCases:
         date_str, year_int = DateExtractor.extract_date(node)
         # MedlineDate "2023 Jan-Feb" → year=2023, month=Feb (end of range)
         assert year_int == 2023
-        assert date_str == "2023-02-30"  # Feb + end-of-period day
+        assert date_str == "2023-02-28"  # Feb last valid day
 
     def test_medline_date_season_spring(self):
         """Test handling of MedlineDate with season (Spring)."""
@@ -136,7 +136,7 @@ class TestDateExtractorEdgeCases:
         date_str, year_int = DateExtractor.extract_date(node)
         # Spring → May (end of Mar-May period)
         assert year_int == 2023
-        assert date_str == "2023-05-30"
+        assert date_str == "2023-05-31"  # May has 31 days
 
     def test_medline_date_season_winter(self):
         """Test handling of MedlineDate with season (Winter)."""
@@ -149,7 +149,7 @@ class TestDateExtractorEdgeCases:
         date_str, year_int = DateExtractor.extract_date(node)
         # Winter → Feb (end of Dec-Feb period)
         assert year_int == 2023
-        assert date_str == "2023-02-30"
+        assert date_str == "2023-02-28"  # Feb last valid day
 
     def test_medline_date_quarter(self):
         """Test handling of MedlineDate with quarter."""
@@ -200,7 +200,7 @@ class TestDateExtractorEdgeCases:
         date_str, year_int = DateExtractor.extract_date(node)
         # Cross-year: take second year (2023) and second month (Jan)
         assert year_int == 2023
-        assert date_str == "2023-01-30"
+        assert date_str == "2023-01-31"  # Jan has 31 days
 
     def test_medline_date_invalid(self):
         """Test handling of invalid MedlineDate (no year)."""

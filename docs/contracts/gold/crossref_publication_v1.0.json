@@ -32,12 +32,6 @@
         "null"
       ]
     },
-    "abstract": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
     "authors": {
       "type": [
         "string",

@@ -273,7 +273,18 @@ class DateExtractor(BaseFieldExtractor):
             return f"{year}-12-31"
 
         # Normalize day (end of month if missing)
-        day_num = day.zfill(2) if day and day.isdigit() else "30"
+        if day and day.isdigit():
+            day_num = day.zfill(2)
+        else:
+            # Calculate last day of month
+            import calendar
+
+            try:
+                _, last_day = calendar.monthrange(int(year), int(month_num))
+                day_num = str(last_day).zfill(2)
+            except (ValueError, IndexError):
+                # Fallback to 30 if invalid year/month or calculation fails
+                day_num = "30"
 
         return f"{year}-{month_num}-{day_num}"
 

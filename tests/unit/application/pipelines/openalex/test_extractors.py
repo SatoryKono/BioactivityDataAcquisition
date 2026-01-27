@@ -15,6 +15,8 @@ from bioetl.application.pipelines.openalex.extractors import (
     extract_doi,
     extract_external_ids,
     extract_grants,
+    extract_institution_country_codes,
+    extract_institution_ids,
     extract_journal_info,
     extract_keywords,
     extract_mesh_terms,
@@ -185,6 +187,171 @@ class TestExtractAffiliations:
         ]
         result = extract_affiliations(authorships)
         assert result == []
+
+
+class TestExtractInstitutionIds:
+    """Tests for extract_institution_ids function."""
+
+    def test_extract_institution_ids_basic(self) -> None:
+        """Should extract unique institution IDs from authorships."""
+        authorships = [
+            {
+                "author": {"display_name": "John Doe"},
+                "institutions": [
+                    {
+                        "id": "https://openalex.org/I1234567890",
+                        "display_name": "Harvard",
+                    },
+                    {"id": "https://openalex.org/I9876543210", "display_name": "MIT"},
+                ],
+            },
+        ]
+        result = extract_institution_ids(authorships)
+        assert result == ["I1234567890", "I9876543210"]
+
+    def test_extract_institution_ids_deduplication(self) -> None:
+        """Should deduplicate institution IDs across authors."""
+        authorships = [
+            {
+                "author": {"display_name": "John Doe"},
+                "institutions": [
+                    {
+                        "id": "https://openalex.org/I1234567890",
+                        "display_name": "Harvard",
+                    },
+                ],
+            },
+            {
+                "author": {"display_name": "Jane Smith"},
+                "institutions": [
+                    {
+                        "id": "https://openalex.org/I1234567890",
+                        "display_name": "Harvard",
+                    },
+                ],
+            },
+        ]
+        result = extract_institution_ids(authorships)
+        assert result == ["I1234567890"]
+
+    def test_extract_institution_ids_bare_id(self) -> None:
+        """Should handle bare institution ID (no URL)."""
+        authorships = [
+            {
+                "institutions": [{"id": "I1234567890", "display_name": "Harvard"}],
+            },
+        ]
+        result = extract_institution_ids(authorships)
+        assert result == ["I1234567890"]
+
+    def test_extract_institution_ids_empty(self) -> None:
+        """Should return empty list for empty authorships."""
+        result = extract_institution_ids([])
+        assert result == []
+
+    def test_extract_institution_ids_no_institutions(self) -> None:
+        """Should handle authorships without institutions."""
+        authorships = [
+            {"author": {"display_name": "John Doe"}},
+        ]
+        result = extract_institution_ids(authorships)
+        assert result == []
+
+    def test_extract_institution_ids_missing_id(self) -> None:
+        """Should skip institutions without id field."""
+        authorships = [
+            {
+                "institutions": [
+                    {"display_name": "Harvard"},  # No id
+                    {"id": "https://openalex.org/I1234567890", "display_name": "MIT"},
+                ],
+            },
+        ]
+        result = extract_institution_ids(authorships)
+        assert result == ["I1234567890"]
+
+    def test_extract_institution_ids_invalid_structure(self) -> None:
+        """Should handle invalid institutions structure gracefully."""
+        authorships = [
+            {"institutions": "not_a_list"},
+            {
+                "institutions": [
+                    {"id": "https://openalex.org/I123", "display_name": "Valid"}
+                ]
+            },
+        ]
+        result = extract_institution_ids(authorships)
+        assert result == ["I123"]
+
+
+class TestExtractInstitutionCountryCodes:
+    """Tests for extract_institution_country_codes function."""
+
+    def test_extract_country_codes_basic(self) -> None:
+        """Should extract unique country codes from authorships."""
+        authorships = [
+            {
+                "institutions": [
+                    {"display_name": "Harvard", "country_code": "US"},
+                    {"display_name": "Oxford", "country_code": "GB"},
+                ],
+            },
+        ]
+        result = extract_institution_country_codes(authorships)
+        assert result == ["GB", "US"]  # Sorted
+
+    def test_extract_country_codes_uppercase(self) -> None:
+        """Should normalize country codes to uppercase."""
+        authorships = [
+            {
+                "institutions": [
+                    {"display_name": "Harvard", "country_code": "us"},
+                    {"display_name": "Oxford", "country_code": "gb"},
+                ],
+            },
+        ]
+        result = extract_institution_country_codes(authorships)
+        assert result == ["GB", "US"]
+
+    def test_extract_country_codes_deduplication(self) -> None:
+        """Should deduplicate country codes."""
+        authorships = [
+            {
+                "institutions": [
+                    {"display_name": "Harvard", "country_code": "US"},
+                    {"display_name": "MIT", "country_code": "US"},
+                ],
+            },
+        ]
+        result = extract_institution_country_codes(authorships)
+        assert result == ["US"]
+
+    def test_extract_country_codes_empty(self) -> None:
+        """Should return empty list for empty authorships."""
+        result = extract_institution_country_codes([])
+        assert result == []
+
+    def test_extract_country_codes_missing(self) -> None:
+        """Should skip institutions without country_code."""
+        authorships = [
+            {
+                "institutions": [
+                    {"display_name": "Harvard"},  # No country_code
+                    {"display_name": "Oxford", "country_code": "GB"},
+                ],
+            },
+        ]
+        result = extract_institution_country_codes(authorships)
+        assert result == ["GB"]
+
+    def test_extract_country_codes_invalid_structure(self) -> None:
+        """Should handle invalid institutions structure gracefully."""
+        authorships = [
+            {"institutions": "not_a_list"},
+            {"institutions": [{"display_name": "Valid", "country_code": "DE"}]},
+        ]
+        result = extract_institution_country_codes(authorships)
+        assert result == ["DE"]
 
 
 class TestExtractConcepts:

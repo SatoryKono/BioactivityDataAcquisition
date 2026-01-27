@@ -277,7 +277,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "structured_affiliations": serialized_structured_affs,
             "author_count": len(hashed_authors),
             **self._extract_journal_data(article),
-            **self._extract_date_data(article, pubmed_data),
+            **self._extract_date_data(article, pubmed_data, medline),
             **self._extract_classification_data(article, medline),
             **self._extract_medline_metadata(medline, pubmed_data),
             **self._extract_counts(article, pubmed_data),
@@ -436,12 +436,21 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     def _parse_month_day(
         self, pub_date_node: ET.Element | None
     ) -> tuple[int | None, int | None]:
-        """Extract month and day as integers from PubDate node."""
+        """Extract month and day as integers from PubDate node.
+
+        Uses DateExtractor to handle both structured (Year/Month/Day)
+        and unstructured (MedlineDate) formats.
+        """
         if pub_date_node is None:
             return None, None
 
-        month_text = get_text(pub_date_node.find("Month"))
-        day_text = get_text(pub_date_node.find("Day"))
+        # Use DateExtractor logic to support MedlineDate parsing
+        raw_date = DateExtractor().extract(pub_date_node)
+        if not raw_date:
+            return None, None
+
+        month_text = raw_date.get("month")
+        day_text = raw_date.get("day")
 
         pub_month = self._parse_month(month_text)
         pub_day = int(day_text) if day_text and day_text.isdigit() else None
@@ -474,9 +483,21 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         return result
 
     def _extract_date_data(
-        self, article: ET.Element, pubmed_data: ET.Element | None
+        self,
+        article: ET.Element,
+        pubmed_data: ET.Element | None,
+        medline: ET.Element | None,
     ) -> dict[str, Any]:
-        """Extract date-related data from article XML."""
+        """Extract date-related data from article and MedlineCitation XML.
+
+        Args:
+            article: Article XML element.
+            pubmed_data: PubmedData XML element (contains History with manuscript dates).
+            medline: MedlineCitation XML element (contains DateCompleted/DateRevised).
+
+        Returns:
+            Dictionary with all date-related fields.
+        """
         journal = article.find(".//Journal")
         journal_issue = journal.find("JournalIssue") if journal else None
         pub_date_node = journal_issue.find("PubDate") if journal_issue else None
@@ -493,6 +514,18 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             epub_date, pub_date, validated_year
         )
 
+        # Extract MEDLINE indexing dates from MedlineCitation element
+        date_completed, _ = (
+            DateExtractor.extract_date(medline.find("DateCompleted"))
+            if medline is not None
+            else (None, None)
+        )
+        date_revised, _ = (
+            DateExtractor.extract_date(medline.find("DateRevised"))
+            if medline is not None
+            else (None, None)
+        )
+
         return {
             "pub_date": pub_date,
             "pub_month": pub_month,
@@ -504,6 +537,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "received_date": DateExtractor.extract_history_date(history, "received"),
             "revised_date": DateExtractor.extract_history_date(history, "revised"),
             "epub_date": epub_date,
-            "date_completed": None,  # Not easily accessible from Article element
-            "date_revised": None,  # Not easily accessible from Article element
+            "date_completed": date_completed,
+            "date_revised": date_revised,
         }

@@ -20,7 +20,6 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.crossref.extractors import (
-    extract_affiliations,
     extract_author_details,
     extract_author_orcids,
     extract_authors,
@@ -133,19 +132,10 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         issn_by_type = extract_issn_by_type(rec)
         published_date = extract_published_date(rec)
 
-        # Extract abstract with HTML stripping via normalizer service
-        normalizer = self._data_normalizer
-        abstract_raw = rec.get("abstract", "")
-        abstract = normalizer.strip_html_tags(abstract_raw) if abstract_raw else None
-
         # Extract and hash PII fields (RULES.md §5.4)
         # Authors stored as JSON-serialized list for unified format across providers
         raw_authors = extract_authors(rec)
         hashed_authors = self.hash_pii_list(raw_authors) or []
-
-        # Extract affiliations
-        raw_affiliations = extract_affiliations(rec)
-        serialized_affiliations = self.serialize_json_list(raw_affiliations)
 
         # Extract author ORCID identifiers (not PII - designed for public identification)
         author_orcids = extract_author_orcids(rec)
@@ -170,9 +160,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         return {
             "doi": doi,
             "title": extract_first_string(rec.get("title", [])),
-            "abstract": abstract,
             "authors": self.serialize_json_list(hashed_authors),
-            "affiliations": serialized_affiliations,
             **journal_info,
             **page_info,
             **dates,
@@ -325,3 +313,27 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
         """
         return True
+
+    @staticmethod
+    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        """Convert Domain Entity to SilverRecord, excluding abstract and affiliations.
+
+        Overrides base implementation to remove fields not collected for CrossRef.
+
+        Args:
+            entity: Domain entity (dataclass).
+
+        Returns:
+            SilverRecord dictionary without abstract and affiliations fields.
+
+        """
+        from bioetl.application.core.base_transformer import BaseTransformer
+
+        # Get base silver record
+        silver_record = BaseTransformer.entity_to_silver_record(entity)
+
+        # Remove excluded fields
+        silver_record.pop("abstract", None)
+        silver_record.pop("affiliations", None)
+
+        return silver_record

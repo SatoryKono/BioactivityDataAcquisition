@@ -324,7 +324,7 @@ class TestExtractDateData:
         article = ET.fromstring(article_xml)
         pubmed_data = ET.fromstring(pubmed_data_xml)
 
-        result = transformer._extract_date_data(article, pubmed_data)
+        result = transformer._extract_date_data(article, pubmed_data, None)
 
         assert result["pub_date"] == "2023-03-15"
         assert result["year"] == 2023
@@ -333,6 +333,8 @@ class TestExtractDateData:
         assert result["received_date"] == "2022-12-01"
         assert result["revised_date"] == "2023-01-20"
         assert result["epub_date"] == "2023-03-10"
+        assert result["date_completed"] is None
+        assert result["date_revised"] is None
 
     def test_extract_date_data_year_only(self, transformer):
         """Test extraction with year-only publication date (end-of-period: Dec 31)."""
@@ -351,7 +353,7 @@ class TestExtractDateData:
         """
         article = ET.fromstring(article_xml)
 
-        result = transformer._extract_date_data(article, None)
+        result = transformer._extract_date_data(article, None, None)
 
         # End-of-period strategy: year-only → YYYY-12-31
         assert result["pub_date"] == "2023-12-31"
@@ -361,6 +363,8 @@ class TestExtractDateData:
         assert result["received_date"] is None
         assert result["revised_date"] is None
         assert result["epub_date"] is None
+        assert result["date_completed"] is None
+        assert result["date_revised"] is None
 
     def test_extract_date_data_no_dates(self, transformer):
         """Test extraction with no date data."""
@@ -369,7 +373,7 @@ class TestExtractDateData:
         article_xml = "<Article></Article>"
         article = ET.fromstring(article_xml)
 
-        result = transformer._extract_date_data(article, None)
+        result = transformer._extract_date_data(article, None, None)
 
         assert result["pub_date"] is None
         assert result["year"] is None
@@ -378,6 +382,8 @@ class TestExtractDateData:
         assert result["received_date"] is None
         assert result["revised_date"] is None
         assert result["epub_date"] is None
+        assert result["date_completed"] is None
+        assert result["date_revised"] is None
 
     def test_extract_date_data_missing_journal(self, transformer):
         """Test extraction when Journal element is missing."""
@@ -390,10 +396,50 @@ class TestExtractDateData:
         """
         article = ET.fromstring(article_xml)
 
-        result = transformer._extract_date_data(article, None)
+        result = transformer._extract_date_data(article, None, None)
 
         assert result["pub_date"] is None
         assert result["year"] is None
+        assert result["date_completed"] is None
+        assert result["date_revised"] is None
+
+    def test_extract_date_data_with_medline_dates(self, transformer):
+        """Test extraction of DateCompleted and DateRevised from MedlineCitation."""
+        import xml.etree.ElementTree as ET
+
+        article_xml = """
+        <Article>
+            <Journal>
+                <JournalIssue>
+                    <PubDate>
+                        <Year>2023</Year>
+                    </PubDate>
+                </JournalIssue>
+            </Journal>
+        </Article>
+        """
+        medline_xml = """
+        <MedlineCitation>
+            <DateCompleted>
+                <Year>2023</Year>
+                <Month>05</Month>
+                <Day>15</Day>
+            </DateCompleted>
+            <DateRevised>
+                <Year>2024</Year>
+                <Month>01</Month>
+                <Day>10</Day>
+            </DateRevised>
+        </MedlineCitation>
+        """
+        article = ET.fromstring(article_xml)
+        medline = ET.fromstring(medline_xml)
+
+        result = transformer._extract_date_data(article, None, medline)
+
+        assert result["date_completed"] == "2023-05-15"
+        assert result["date_revised"] == "2024-01-10"
+        assert result["year"] == 2023
 
 
 class TestExtractBusinessData:

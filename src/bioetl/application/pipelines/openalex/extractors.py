@@ -116,6 +116,55 @@ def extract_affiliations(authorships: list[dict[str, Any]]) -> list[str]:
     return sorted(affiliations)
 
 
+def extract_institution_ids(authorships: list[dict[str, Any]]) -> list[str]:
+    """Extract unique OpenAlex institution IDs from authorships.
+
+    Args:
+        authorships: List of authorship dicts from OpenAlex API.
+
+    Returns:
+        Sorted list of unique institution IDs (e.g., ["I1234567890", "I9876543210"]).
+
+    """
+    ids: set[str] = set()
+    for authorship in authorships:
+        institutions = authorship.get("institutions", [])
+        if not isinstance(institutions, list):
+            continue
+        for inst in institutions:
+            if not isinstance(inst, dict):
+                continue
+            raw_id = inst.get("id")
+            extracted = _extract_id_from_url(raw_id)
+            if extracted:
+                ids.add(extracted)
+    return sorted(ids)
+
+
+def extract_institution_country_codes(authorships: list[dict[str, Any]]) -> list[str]:
+    """Extract unique institution country codes from authorships.
+
+    Args:
+        authorships: List of authorship dicts from OpenAlex API.
+
+    Returns:
+        Sorted list of unique ISO 2-letter country codes (e.g., ["DE", "GB", "US"]).
+
+    """
+    codes: set[str] = set()
+    for authorship in authorships:
+        institutions = authorship.get("institutions", [])
+        if not isinstance(institutions, list):
+            continue
+        for inst in institutions:
+            if not isinstance(inst, dict):
+                continue
+            code = inst.get("country_code")
+            if code and isinstance(code, str):
+                codes.add(code.upper())
+    return sorted(codes)
+
+
 def extract_concepts(
     concepts: list[dict[str, Any]],
     max_count: int = 10,

@@ -192,6 +192,7 @@ class TestFilterConfigBuilderBuildSingleColumn:
             "/effective/path.csv",
             cli_column="cli_column",
             cli_field="cli_field",
+            cli_fallback_column=None,
         )
 
         assert result.column_name == "cli_column"
@@ -200,7 +201,7 @@ class TestFilterConfigBuilderBuildSingleColumn:
     def test_build_single_column_preserves_fallback(self, yaml_filter_with_fallback):
         """Test _build_single_column_config preserves fallback_column from YAML."""
         result = FilterConfigBuilder._build_single_column_config(
-            yaml_filter_with_fallback, "/effective/path.csv", None, None
+            yaml_filter_with_fallback, "/effective/path.csv", None, None, None
         )
 
         assert result.fallback_column == "title"

@@ -168,10 +168,6 @@ class PublicationTransformer(BaseChemblTransformer):
         validated_year = year_vo.value if year_vo else None
         data["year"] = validated_year
 
-        # publication_date: ChEMBL API doesn't provide full date, only year
-        # Set to null (excluded from PyArrow/Gold schemas)
-        data["publication_date"] = None
-
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON
         # Authors stored as JSON-serialized list for unified format across providers
@@ -199,16 +195,38 @@ class PublicationTransformer(BaseChemblTransformer):
         # System field: data source identifier
         data["_source"] = "chembl"
 
-        # Unified publication fields (always NULL, excluded from PyArrow/Gold schemas)
+        # Unified publication fields (always NULL for ChEMBL)
         data["citation_count"] = None
         data["is_oa"] = None
         data["language"] = None
-
-        # Cross-reference IDs (pmc_id always NULL, excluded from PyArrow/Gold schemas)
-        data["pmc_id"] = None
 
         # DQ flags (default: no warnings or errors)
         data["_dq_warn"] = False
         data["_dq_error"] = False
 
         return data
+
+    @staticmethod
+    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        """Convert Domain Entity to SilverRecord, excluding unused fields.
+
+        Overrides base implementation to remove fields not collected for ChEMBL.
+
+        Args:
+            entity: Domain entity (dataclass).
+
+        Returns:
+            SilverRecord dictionary without affiliations, pmc_id, publication_date.
+
+        """
+        from bioetl.application.core.base_transformer import BaseTransformer
+
+        # Get base silver record
+        silver_record = BaseTransformer.entity_to_silver_record(entity)
+
+        # Remove excluded fields
+        silver_record.pop("affiliations", None)
+        silver_record.pop("pmc_id", None)
+        silver_record.pop("publication_date", None)
+
+        return silver_record

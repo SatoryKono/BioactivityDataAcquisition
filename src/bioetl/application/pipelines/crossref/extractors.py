@@ -31,7 +31,6 @@ from bioetl.domain.value_objects import PublicationYear
 
 # Re-exports for backward compatibility
 __all__ = [
-    "extract_affiliations",
     "extract_author_details",
     "extract_author_orcids",
     "extract_authors",

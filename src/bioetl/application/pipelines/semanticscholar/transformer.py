@@ -13,6 +13,7 @@ from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_affiliations,
     extract_author_h_indices,
+    extract_author_ids,
     extract_author_orcids,
     extract_author_s2_ids,
     extract_authors,
@@ -147,11 +148,14 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         authors_list = rec.get("authors")
 
         # Authors with optional PII hashing
-        raw_authors = extract_authors(authors_list)
+        raw_authors = extract_authors(rec.get("authors"))
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
+        # Extract author IDs
+        author_ids = extract_author_ids(rec.get("authors"))
+
         # Extract affiliations
-        raw_affiliations = extract_affiliations(authors_list)
+        raw_affiliations = extract_affiliations(rec.get("authors"))
         serialized_affiliations = self.serialize_json_list(raw_affiliations)
 
         # Extract author identifiers (for author-level analytics)
@@ -206,7 +210,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "abstract": self._data_normalizer.strip_html_tags(rec.get("abstract")),
             "tldr": tldr,
             "authors": self.serialize_json_list(hashed_authors),
-            "affiliations": serialized_affiliations,
+            "author_ids": self.serialize_json(author_ids),
             # Author identifiers (for author-level analytics and disambiguation)
             "author_s2_ids": self.serialize_json_list(author_s2_ids)
             if author_s2_ids
@@ -221,6 +225,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "citation_contexts": self.serialize_json_list(citation_contexts)
             if citation_contexts
             else None,
+            "affiliations": serialized_affiliations,
             "journal": journal_info.get("journal_name"),
             "volume": journal_info.get("volume"),
             "pages": pages,  # Legacy field
