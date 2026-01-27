@@ -287,9 +287,14 @@ src/bioetl/
 │
 ├── composition/                 # Composition Root (DI container)
 │   ├── bootstrap/               # Bootstrap helpers
+│   ├── bootstrap_contexts.py    # Bootstrap contexts
+│   ├── bootstrap_logger.py      # Bootstrap logging setup
+│   ├── builders.py              # Composition builders
 │   ├── entrypoints.py           # CLI/runner entrypoints
+│   ├── observability.py         # Observability wiring
 │   ├── registry.py              # Pipeline discovery
 │   ├── providers/               # Provider registration
+│   ├── services/                # Composition services
 │   └── factories/               # Consolidated factories
 │       ├── pipeline_factory.py  # Pipeline factory
 │       ├── runner_factory.py    # Runner factory
@@ -318,9 +323,13 @@ src/bioetl/
     ├── cli/                     # CLI package (bioetl run/quarantine/checkpoint)
     │   ├── __init__.py          # CLI package entry
     │   ├── __main__.py          # CLI module entrypoint
+    │   ├── exit_codes.py        # CLI exit codes
+    │   ├── formatters.py        # CLI output formatting
     │   ├── main.py              # Click command group
     │   └── commands/            # CLI subcommands
     ├── http/                    # HTTP interfaces (health server)
+    │   ├── health_server.py     # Health server
+    │   └── types.py             # HTTP types
     ├── orchestration/           # Orchestration helpers
     └── observability.py         # Interface observability wiring
 
