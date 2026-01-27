@@ -375,6 +375,7 @@ graph TD
 | 00-map.md                | 2026-01-21   | v6.9 API Sync Completed      |
 | rules-summary.md         | 2026-01-21   | v5.12 Synced                 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
+| 03-development/          | 2026-01-26   | Config schema guidelines     |
 | ADR-001..028             | 2026-01-21   | All 28 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
