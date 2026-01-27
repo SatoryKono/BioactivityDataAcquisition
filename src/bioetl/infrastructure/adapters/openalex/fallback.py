@@ -72,10 +72,12 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
             if found_title and titles_match(title, found_title):
                 return cast("dict[str, Any]", result)
 
-        # Fallback: check if any candidate has no title (rare edge case)
-        # Only return if we haven't found a match yet
-        for result in candidates:
-            if not result.get("title"):
-                return cast("dict[str, Any]", result)
+        # Log when candidates exist but none match (for diagnostics)
+        self._logger.debug(
+            "openalex_title_fallback_no_match",
+            query_title=title[:50],
+            candidate_count=len(candidates),
+            candidate_titles=[c.get("title", "")[:30] for c in candidates[:3]],
+        )
 
         return None

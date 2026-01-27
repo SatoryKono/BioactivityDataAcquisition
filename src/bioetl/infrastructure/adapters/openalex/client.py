@@ -356,6 +356,8 @@ class OpenAlexAdapter(BaseHttpAdapter):
             )
 
         # Phase 2: Fallback by title for unresolved DOIs
+        missing_dois_count = len(valid_dois) - len(found_dois)
+        found_by_title_fallback = 0
         async for work in self._fallback_handler.process_missing_dois(
             dois=valid_dois,
             found_dois=found_dois,
@@ -366,10 +368,26 @@ class OpenAlexAdapter(BaseHttpAdapter):
         ):
             yield work
             fetched += 1
+            found_by_title_fallback += 1
             if limit and fetched >= limit:
                 return
 
+        # Log Phase 2 summary
+        if missing_dois_count > 0:
+            self.logger.info(
+                "openalex_title_fallback_summary",
+                missing_dois=missing_dois_count,
+                found_by_title=found_by_title_fallback,
+                not_found=missing_dois_count - found_by_title_fallback,
+                recovery_rate_pct=round(
+                    found_by_title_fallback / missing_dois_count * 100, 1
+                )
+                if missing_dois_count > 0
+                else 0.0,
+            )
+
         # Phase 3: Title-only entries (using handler)
+        found_by_title_only = 0
         async for work in self._fallback_handler.process_title_only_entries(
             entries=title_only_entries,
             fallback_mapping=fallback_mapping,
@@ -377,6 +395,22 @@ class OpenAlexAdapter(BaseHttpAdapter):
             fetched=fetched,
         ):
             yield work
+            fetched += 1
+            found_by_title_only += 1
+
+        # Log Phase 3 summary
+        if title_only_entries:
+            self.logger.info(
+                "openalex_title_only_summary",
+                total_title_only=len(title_only_entries),
+                found=found_by_title_only,
+                not_found=len(title_only_entries) - found_by_title_only,
+                hit_rate_pct=round(
+                    found_by_title_only / len(title_only_entries) * 100, 1
+                )
+                if title_only_entries
+                else 0.0,
+            )
 
     async def fetch(
         self,
