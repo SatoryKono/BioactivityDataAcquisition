@@ -7,11 +7,14 @@ classDiagram
         +write_bronze(records, provider, entity) BronzeWriteResult
         +write_silver(records, table, mode) WriteResult
         +write_gold(records, table, schema) WriteResult
-        +clear_silver(table) int
-        +clear_gold(table) int
+        +read_silver(table, columns) list~dict~
+        +write_silver_merged(table, records, primary_keys) None
+        +write_gold_merged(table, records, primary_keys) None
+        +clear_silver(table, dry_run: bool = False) int
+        +clear_gold(table, dry_run: bool = False) int
         +vacuum(table, retention_days) None
         +archive(source, dest) None
-        +health_check() bool
+        +health_check() HealthStatus
     }
 
     class SilverWriter {
