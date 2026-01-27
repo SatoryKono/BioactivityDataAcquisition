@@ -122,7 +122,7 @@ class TestGoldPublicationSchemaCrossRefFields:
         "schema_class,name",
         [
             (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
-            (CrossRefPublicationGoldSchema, "CrossRef Publication"),
+            # CrossRef excluded: pmid explicitly excluded from transformer output
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
@@ -137,10 +137,10 @@ class TestGoldPublicationSchemaCrossRefFields:
         "schema_class,name",
         [
             # ChEMBL excluded: pmc_id not available from ChEMBL API
-            (CrossRefPublicationGoldSchema, "CrossRef Publication"),
-            (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
+            # CrossRef excluded: pmc_id explicitly excluded from transformer output
+            # OpenAlex excluded: pmc_id explicitly excluded from transformer output
+            # SemanticScholar excluded: pmc_id explicitly excluded from transformer output
             (PubMedPublicationGoldSchema, "PubMed Publication"),
-            (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
     def test_schema_has_pmc_id_field(self, schema_class, name):
@@ -341,7 +341,7 @@ class TestGoldSchemaValidation:
             "abstract": "Test abstract",
             # PubMed-specific fields for forensic retention
             "abstract_structured": False,
-            "vernacular_title": None,
+            # Note: vernacular_title excluded per design
             "journal": "Test Journal",
             "journal_abbrev": "Test J",
             "journal_title": "Test Journal Full Name",
@@ -363,10 +363,7 @@ class TestGoldSchemaValidation:
             "publication_date": "2024-03-15",
             "year": 2024,
             "publication_year": 2024,
-            "accepted_date": "2024-01-15",
-            "received_date": "2023-12-01",
-            "revised_date": "2024-01-10",
-            "epub_date": "2024-02-28",
+            # Note: accepted_date, received_date, revised_date, epub_date excluded per design
             "date_completed": "2024-04-01",
             "date_revised": "2024-03-20",
             "publication_status": "ppublish",

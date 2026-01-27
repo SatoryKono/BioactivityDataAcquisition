@@ -89,12 +89,8 @@ class ArticleRecord(BaseModel):
     year: int | None = PydanticField(
         default=None, description="Publication year (1800-2100)"
     )
-    accepted_date: str | None = PydanticField(default=None, description="Date accepted")
-    received_date: str | None = PydanticField(default=None, description="Date received")
-    revised_date: str | None = PydanticField(default=None, description="Date revised")
-    epub_date: str | None = PydanticField(
-        default=None, description="Electronic publication date"
-    )
+    # Note: accepted_date, received_date, revised_date, epub_date excluded from
+    # transformer output per design (PubMed pipeline field exclusions)
 
     # Classification
     publication_types: list[str] = PydanticField(
@@ -158,14 +154,13 @@ class PubMedPublicationEntity(PublicationEntityBase):
         pages: Page numbers.
         pub_date: Publication date (ISO format).
         publication_year: Alias for year (legacy field).
-        accepted_date: Date accepted.
-        received_date: Date received.
-        revised_date: Date revised.
-        epub_date: Electronic publication date.
         mesh_terms: MeSH terms (list).
         keywords: Keywords (list).
         publication_types: Publication types (list).
         country: Country of publication.
+
+    Note: vernacular_title, accepted_date, received_date, revised_date, epub_date
+    are excluded from transformer output per PubMed pipeline design.
 
     Note: pmid is required for PubMed publications and validated in __post_init__.
     """
@@ -188,10 +183,8 @@ class PubMedPublicationEntity(PublicationEntityBase):
 
     # PubMed-specific dates (stored as ISO strings YYYY-MM-DD or partial)
     pub_date: str | None = None  # Publication date
-    accepted_date: str | None = None  # Date accepted
-    received_date: str | None = None  # Date received
-    revised_date: str | None = None  # Date revised
-    epub_date: str | None = None  # Electronic publication date
+    # Note: accepted_date, received_date, revised_date, epub_date excluded from
+    # transformer output per design (PubMed pipeline field exclusions)
 
     # PubMed-specific classification
     publication_types: list[str] = field(default_factory=list)
@@ -205,7 +198,7 @@ class PubMedPublicationEntity(PublicationEntityBase):
 
     # PubMed-specific metadata
     country: str | None = None
-    vernacular_title: str | None = None  # Original non-English title
+    # Note: vernacular_title excluded from transformer output per design
     abstract_structured: bool = False  # Whether abstract has labeled sections (NLM)
 
     # Additional journal fields (Gold schema forensic retention)

@@ -24,7 +24,6 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     validate_year,
 )
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
-from bioetl.domain.normalization import normalize_pmc_id, parse_page_range
 from bioetl.domain.value_objects import DOI, PubMedId
 
 if TYPE_CHECKING:
@@ -157,15 +156,13 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         # Note: contexts are only available when requesting citation details
         citation_contexts = extract_citation_contexts(rec.get("citations"))
 
-        # Journal/venue info
+        # Journal/venue info with parsed volume/issue and pages
+        # extract_journal_info now parses combined volume/issue (e.g., "32 4")
+        # and expands abbreviated page ranges (e.g., "737-9" → 737-739)
         journal_info = extract_journal_info(
             rec.get("journal"),
             rec.get("venue"),
         )
-
-        # Parse pages into unified first_page/last_page
-        pages = journal_info.get("pages")
-        first_page, last_page = parse_page_range(pages)
 
         # Open access info
         oa_info = extract_open_access_info(
@@ -190,10 +187,6 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "paper_id": paper_id,
             "doi": doi,
             "pmid": pmid,  # Use validated PMID from PubMedId Value Object
-            "pmc_id": normalize_pmc_id(
-                external_ids.get("pmcid")
-            ),  # API uses "pmcid", we use "pmc_id"
-            "arxiv_id": external_ids.get("arxiv"),
             "dblp_id": external_ids.get("dblp"),
             "corpus_id": external_ids.get("corpus_id"),
             "title": rec.get("title"),
@@ -217,9 +210,12 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             # affiliations excluded per user request
             "journal": journal_info.get("journal_name"),
             "volume": journal_info.get("volume"),
-            "pages": pages,  # Legacy field
-            "first_page": first_page,  # Unified field
-            "last_page": last_page,  # Unified field
+            "issue": journal_info.get("issue"),  # Parsed from combined "32 4" format
+            "pages": journal_info.get("pages"),  # Original pages string (cleaned)
+            "first_page": journal_info.get(
+                "first_page"
+            ),  # Parsed with abbreviation expansion
+            "last_page": journal_info.get("last_page"),  # Expanded (e.g., "9" → "739")
             "venue": rec.get("venue"),
             "year": year,
             "publication_date": self._normalize_partial_date(
@@ -279,4 +275,6 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         silver_record.pop("abstract", None)
         silver_record.pop("affiliations", None)
         silver_record.pop("authors", None)
+        silver_record.pop("pmc_id", None)
+        silver_record.pop("arxiv_id", None)
         return silver_record

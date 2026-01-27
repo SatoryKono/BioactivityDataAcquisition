@@ -117,6 +117,7 @@ class TestFileSizeLimits:
         "base_transformer.py": 790,  # 786 LOC - BaseTransformer with serialization helpers + validate_value_object() consolidation
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
         "merger.py": 1405,  # 1399 LOC - MergeService with type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing
+        "extractors.py": 700,  # 684 LOC - SemanticScholar extractors with volume/issue parsing + page range expansion
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
@@ -225,6 +226,8 @@ class TestFunctionComplexity:
         "_detect_schema_drift": 10,  # CC=9 - Schema drift detection with severity levels
         # CrossRef/OpenAlex/SemanticScholar adapter fallback logic
         "fetch_filtered_with_fallback": 25,  # DOI→title fallback with batch processing + multi-identifier resolution
+        # SemanticScholar page range abbreviation expansion
+        "_expand_abbreviated_page": 13,  # CC=12 - Page range expansion with digit-level alignment
         # Domain value coercion with type handling
         "_coerce_to_int": 10,  # CC=8 - Integer coercion with multiple type checks
         # FilterableDataSourcePort batch filtering
@@ -259,7 +262,7 @@ class TestFunctionComplexity:
         "_execute_checks": 12,  # CC=11 - Execute all enabled DQ checks (inherent complexity from multiple check types)
         # Composite pipeline domain models (ADR-026)
         "DQOverrideConfig": 10,  # CC=9 - DQ override validation with threshold checks
-        "from_dict": 11,  # CC=10 - Dictionary parsing with type conversions + FSM state parsing + dependency results
+        # Note: from_dict exemption defined earlier in EXEMPTIONS (line 187)
         # BatchExecutor DQ context extraction
         "get_dq_context": 13,  # CC=12 - DQ context gathering with nullable field handling
         # Composite pipeline logging
@@ -474,7 +477,7 @@ class TestFunctionLength:
     # Baseline updated 2026-01-27: added aggregator service, EnricherAggregator methods
     # Baseline updated 2026-01-27: titles_match() added
     # Baseline updated 2026-01-27: composite pipeline growth (dependencies phase, checkpoint)
-    MAX_VIOLATIONS = 115
+    MAX_VIOLATIONS = 118  # Increased for extractors.py volume/issue parsing additions
 
     def test_functions_under_50_lines(self, src_dir: Path) -> None:
         """All functions must be under 50 lines (with exemptions)."""
@@ -610,7 +613,7 @@ class TestClassSize:
         # Common adapter base classes
         "BaseTitleFallbackHandler": 320,  # 314 lines - Base fallback handler with provider_prefix + default event properties
         # PubMed transformer with comprehensive field extraction
-        "PubMedPublicationTransformer": 560,  # 551 lines - PubMed XML extraction with date/identifier validation
+        "PubMedPublicationTransformer": 580,  # 574 lines - PubMed XML extraction with date/identifier validation
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:

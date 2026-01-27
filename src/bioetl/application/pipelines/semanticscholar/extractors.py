@@ -7,6 +7,7 @@ Semantic Scholar API responses.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from bioetl.domain.config import ValidationConfig
@@ -14,6 +15,183 @@ from bioetl.domain.value_objects import PublicationYear
 
 # Semantic Scholar-specific config with min_year=1500 for historical publications
 _SS_VALIDATION_CONFIG = ValidationConfig(min_publication_year=1500)
+
+
+# =============================================================================
+# Volume/Issue Parsing
+# =============================================================================
+
+# Patterns for parsing combined volume/issue strings from S2 API.
+# The API sometimes returns both values in the volume field (e.g., "32 4").
+_VOLUME_ISSUE_PATTERNS = [
+    # "32 4" → vol=32, issue=4 (space-separated, common S2 format)
+    re.compile(r"^(\d+)\s+(\d+)$"),
+    # "32(4)" or "32 (4)" → vol=32, issue=4
+    re.compile(r"^(\d+)\s*\((\d+)\)$"),
+    # "Vol. 32, No. 4" or "Vol 32 No 4"
+    re.compile(r"^[Vv]ol\.?\s*(\d+)[,\s]+[Nn]o\.?\s*(\d+)$"),
+    # "32:4" → vol=32, issue=4
+    re.compile(r"^(\d+):(\d+)$"),
+]
+
+
+def parse_volume_issue(volume_str: str | None) -> tuple[str | None, str | None]:
+    """Parse volume string that may contain issue number.
+
+    Semantic Scholar API sometimes returns combined volume/issue in the
+    volume field (e.g., "32 4" for volume 32, issue 4).
+
+    Args:
+        volume_str: Raw volume string from S2 API.
+
+    Returns:
+        Tuple of (volume, issue). Issue is None if not embedded.
+
+    Examples:
+        >>> parse_volume_issue("32 4")
+        ('32', '4')
+        >>> parse_volume_issue("523")
+        ('523', None)
+        >>> parse_volume_issue("40(3)")
+        ('40', '3')
+        >>> parse_volume_issue(None)
+        (None, None)
+
+    """
+    if not volume_str:
+        return (None, None)
+
+    cleaned = volume_str.strip()
+    if not cleaned:
+        return (None, None)
+
+    # Try each pattern for combined volume/issue
+    for pattern in _VOLUME_ISSUE_PATTERNS:
+        match = pattern.match(cleaned)
+        if match:
+            return (match.group(1), match.group(2))
+
+    # No issue found - return volume as-is
+    return (cleaned, None)
+
+
+# =============================================================================
+# Page Range Parsing
+# =============================================================================
+
+
+def _expand_abbreviated_page(first_page: str, tmp_last_page: str) -> str:
+    """Expand abbreviated last page number.
+
+    Academic publishing often abbreviates page ranges:
+    - "737-9" means 737-739 (not 737-9)
+    - "737-39" means 737-739
+    - "199-3" means 199-203 (rollover case)
+
+    Algorithm:
+    1. If tmp_last_page has >= digits than first_page, return as-is
+    2. Otherwise: last_page = (first_page // 10^n2) * 10^n2 + tmp_last_page
+    3. Handle rollover: if expanded < first_page, add 10^n2
+
+    Args:
+        first_page: First page (e.g., "737")
+        tmp_last_page: Potentially abbreviated last page (e.g., "9", "39", "839")
+
+    Returns:
+        Expanded last page string.
+
+    """
+    # Extract numeric parts only for calculation
+    first_digits = "".join(c for c in first_page if c.isdigit())
+    last_digits = "".join(c for c in tmp_last_page if c.isdigit())
+
+    # If either is non-numeric, return as-is (e.g., "S1-S5")
+    if not first_digits or not last_digits:
+        return tmp_last_page
+
+    n1 = len(first_digits)  # digits in first_page
+    n2 = len(last_digits)  # digits in tmp_last_page
+
+    # If last page has same or more digits, it's a full number
+    if n2 >= n1:
+        return tmp_last_page
+
+    # Expand abbreviated page number
+    # last_page = int(first_page / 10^n2) * 10^n2 + tmp_last_page
+    first_num = int(first_digits)
+    last_num = int(last_digits)
+    divisor = 10**n2
+
+    expanded = (first_num // divisor) * divisor + last_num
+
+    # Handle rollover case: "199-3" should be "199-203", not "199-193"
+    if expanded < first_num:
+        expanded += divisor
+
+    # Preserve any prefix from tmp_last_page (e.g., "S" in "S5")
+    prefix = "".join(c for c in tmp_last_page if not c.isdigit())
+    return f"{prefix}{expanded}" if prefix else str(expanded)
+
+
+def parse_page_range(pages_str: str | None) -> tuple[str | None, str | None]:
+    """Parse page range with abbreviated last page expansion.
+
+    Academic publishing often abbreviates page ranges:
+    - "737-9" means 737-739 (not 737-9)
+    - "737-39" means 737-739
+    - "737-839" means 737-839 (full number, no expansion)
+
+    Also handles whitespace, en-dashes (–), and em-dashes (—).
+
+    Args:
+        pages_str: Raw pages string (e.g., "737-9", "123-145").
+
+    Returns:
+        Tuple of (first_page, last_page). Both are strings or None.
+
+    Examples:
+        >>> parse_page_range("737-9")
+        ('737', '739')
+        >>> parse_page_range("737-39")
+        ('737', '739')
+        >>> parse_page_range("737-839")
+        ('737', '839')
+        >>> parse_page_range("123")
+        ('123', None)
+        >>> parse_page_range("S1-S5")
+        ('S1', 'S5')
+
+    """
+    if not pages_str:
+        return (None, None)
+
+    cleaned = pages_str.strip()
+    if not cleaned:
+        return (None, None)
+
+    # Normalize various dash types to hyphen
+    # EN DASH (U+2013) and EM DASH (U+2014) → HYPHEN-MINUS (U+002D)
+    cleaned = cleaned.replace("\u2013", "-").replace("\u2014", "-")
+
+    # Split on "-" (only first occurrence)
+    parts = cleaned.split("-", 1)
+
+    first_page = parts[0].strip()
+    if not first_page:
+        return (None, None)
+
+    # No range separator - single page
+    if len(parts) == 1:
+        return (first_page, None)
+
+    tmp_last_page = parts[1].strip()
+    if not tmp_last_page:
+        return (first_page, None)
+
+    # Expand abbreviated page number
+    last_page = _expand_abbreviated_page(first_page, tmp_last_page)
+
+    return (first_page, last_page)
 
 
 def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
@@ -289,31 +467,55 @@ def extract_journal_info(
     journal: dict[str, Any] | None,
     venue: str | None,
 ) -> dict[str, Any]:
-    """Extract journal information.
+    """Extract journal information with volume/issue and page parsing.
+
+    Parses combined volume/issue strings (e.g., "32 4" → volume=32, issue=4)
+    and expands abbreviated page ranges (e.g., "737-9" → first_page=737, last_page=739).
 
     Args:
         journal: Journal object from S2 response.
         venue: Venue string (fallback if journal is empty).
 
     Returns:
-        Dict with journal_name, volume, pages.
+        Dict with journal_name, volume, issue, pages, first_page, last_page.
 
     Example:
         >>> journal = {"name": "Nature", "volume": "629", "pages": "123-130"}
         >>> extract_journal_info(journal, "Nature")
-        {'journal_name': 'Nature', 'volume': '629', 'pages': '123-130'}
+        {'journal_name': 'Nature', 'volume': '629', 'issue': None, 'pages': '123-130', 'first_page': '123', 'last_page': '130'}
+        >>> journal = {"name": "J Med Chem", "volume": "32 4", "pages": "737-9"}
+        >>> extract_journal_info(journal, None)
+        {'journal_name': 'J Med Chem', 'volume': '32', 'issue': '4', 'pages': '737-9', 'first_page': '737', 'last_page': '739'}
 
     """
     if journal:
+        raw_volume = journal.get("volume")
+        raw_pages = journal.get("pages")
+
+        # Parse volume/issue from combined string
+        volume, issue = parse_volume_issue(raw_volume)
+
+        # Parse page range with abbreviation expansion
+        first_page, last_page = parse_page_range(raw_pages)
+
+        # Clean pages string (strip whitespace/newlines)
+        pages = raw_pages.strip() if raw_pages else None
+
         return {
             "journal_name": journal.get("name") or venue,
-            "volume": journal.get("volume"),
-            "pages": journal.get("pages"),
+            "volume": volume,
+            "issue": issue,
+            "pages": pages,
+            "first_page": first_page,
+            "last_page": last_page,
         }
     return {
         "journal_name": venue,
         "volume": None,
+        "issue": None,
         "pages": None,
+        "first_page": None,
+        "last_page": None,
     }
 
 
