@@ -4,7 +4,6 @@
 
 > **Documentation Update:** 2026-01-26
 > - Architecture diagrams updated: Composite Pipeline (ADR-026) added to layer diagrams
-> - Composite pipeline diagram file отсутствует в `docs/02-architecture/diagrams/` (ссылка на `26_composite_pipeline_workflow.mmd` удалена)
 > - Cross-links added between all layer documents (Domain ↔ Application ↔ Infrastructure ↔ Interfaces ↔ Composition)
 > - All 7 providers now reflected in diagrams (including CrossRef, OpenAlex, SemanticScholar)
 > - ADR-030, ADR-031 added to registry
