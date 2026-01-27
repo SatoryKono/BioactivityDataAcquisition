@@ -30,7 +30,6 @@ This directory contains 34 Mermaid diagram source files documenting the BioETL a
 | 09 | `09-full-er-diagram.mermaid` | Entity-relationship diagram |
 | 10 | `10-infrastructure-layer-class-diagram.mermaid` | Infrastructure layer classes |
 | 11 | `11-lock-acquisition-sequence.mermaid` | Lock acquisition sequence |
-| 12 | `12-full-aws-deployment.mermaid` | AWS deployment architecture (reference) |
 | 13 | `13-domain-models-relationship.mermaid` | Domain model relationships |
 | 14 | `14-provider-health-states.mermaid` | Provider health states |
 | 15 | `15-dq-check-workflow.mermaid` | Data quality check workflow |
