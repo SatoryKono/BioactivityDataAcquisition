@@ -35,6 +35,7 @@ __all__ = [
     "ColumnGroupConfig",
     "CompositeConfig",
     "CompositeDQConfig",
+    "DependencyConfig",
     "DQOverrideConfig",
     "EnricherCardinality",
     "EnricherConfig",
@@ -83,6 +84,61 @@ class SeedConfig:
         _require_non_empty(self.output_keys, "seed output_keys")
         _require_non_empty(self.silver_table, "seed silver_table")
         _validate_positive_limit(self.limit, "seed")
+
+
+@dataclass(frozen=True, slots=True)
+class DependencyConfig:
+    """Configuration for a dependency pipeline.
+
+    Dependencies run after the seed but before enrichers to populate
+    Silver tables that enrichers will read from. Unlike enrichers,
+    dependencies execute as full standalone pipelines (API → Bronze → Silver).
+
+    Use cases:
+    - Derived entities that need full API data (e.g., publication_term from /document)
+    - Pipelines with force_full_scan that don't work with enricher filtering
+    - Data that must be pre-populated before enrichment phase
+
+    Attributes:
+        pipeline: Name of the dependency pipeline (e.g., "chembl_publication_term").
+        join_keys: Keys to extract from seed for filtering API calls.
+            Used to limit the scope of data fetched from the API.
+        required: If True, failure causes composite failure.
+        timeout_seconds: Maximum time for dependency execution.
+        silver_table: Path to dependency's Silver table.
+
+    Example:
+        >>> config = DependencyConfig(
+        ...     pipeline="chembl_publication_term",
+        ...     join_keys=("document_chembl_id",),
+        ...     silver_table="silver/chembl/publication_term",
+        ... )
+    """
+
+    pipeline: str
+    join_keys: tuple[str, ...]
+    required: bool = False
+    timeout_seconds: int = 600
+    silver_table: str | None = None
+
+    def __post_init__(self) -> None:
+        """Validate and convert types."""
+        if isinstance(self.join_keys, list):
+            object.__setattr__(self, "join_keys", tuple(self.join_keys))
+        self._validate()
+
+    def _validate(self) -> None:
+        """Validate configuration invariants."""
+        _require_non_empty(self.pipeline, "dependency pipeline name")
+        _require_non_empty(self.join_keys, f"dependency {self.pipeline} join_keys")
+        _validate_positive(
+            self.timeout_seconds, f"dependency {self.pipeline} timeout_seconds"
+        )
+
+    @property
+    def primary_join_key(self) -> str:
+        """Get the primary (first) join key."""
+        return self.join_keys[0]
 
 
 @dataclass(frozen=True, slots=True)
@@ -467,16 +523,25 @@ class LineageConfig:
 class CompositeConfig:
     """Complete composite pipeline configuration.
 
-    Combines all configuration aspects: seed, enrichers, merge,
+    Combines all configuration aspects: seed, dependencies, enrichers, merge,
     DQ, execution options, and lineage tracking.
 
     This is the main configuration object loaded from YAML and
     used by CompositePipelineRunner.
 
+    Execution order:
+    1. Seed pipeline runs first
+    2. Dependencies run after seed (to populate Silver tables)
+    3. Enrichers run after dependencies (read from populated Silver tables)
+    4. Merge combines all results
+
     Attributes:
         name: Composite pipeline name (e.g., "composite_publication").
         version: Configuration version (semver).
         seed: Seed pipeline configuration.
+        dependencies: Tuple of dependency configurations.
+            Dependencies run after seed but before enrichers to populate
+            Silver tables that enrichers will read from.
         enrichers: Tuple of enricher configurations.
         merge: Merge step configuration.
         dq: Data quality configuration.
@@ -488,6 +553,7 @@ class CompositeConfig:
         ...     name="composite_publication",
         ...     version="1.0.0",
         ...     seed=SeedConfig(...),
+        ...     dependencies=(DependencyConfig(...),),
         ...     enrichers=(EnricherConfig(...), EnricherConfig(...)),
         ...     merge=MergeConfig(...),
         ... )
@@ -500,6 +566,7 @@ class CompositeConfig:
     seed: SeedConfig
     enrichers: tuple[EnricherConfig, ...]
     merge: MergeConfig
+    dependencies: tuple[DependencyConfig, ...] = ()
     dq: CompositeDQConfig = field(default_factory=CompositeDQConfig)
     execution: ExecutionConfig = field(default_factory=ExecutionConfig)
     lineage: LineageConfig = field(default_factory=LineageConfig)
@@ -508,6 +575,8 @@ class CompositeConfig:
         """Validate and convert types."""
         if isinstance(self.enrichers, list):
             object.__setattr__(self, "enrichers", tuple(self.enrichers))
+        if isinstance(self.dependencies, list):
+            object.__setattr__(self, "dependencies", tuple(self.dependencies))
         self._validate()
 
     def _validate(self) -> None:
@@ -519,7 +588,9 @@ class CompositeConfig:
         if not self.enrichers:
             raise ValueError("composite must have at least one enricher")
         self._validate_join_keys()
+        self._validate_dependency_join_keys()
         self._validate_unique_enrichers()
+        self._validate_unique_dependencies()
 
     def _validate_join_keys(self) -> None:
         """Validate that enricher join keys exist in seed output_keys."""
@@ -539,6 +610,24 @@ class CompositeConfig:
             duplicates = [n for n in names if names.count(n) > 1]
             raise ValueError(f"Duplicate enricher pipelines: {set(duplicates)}")
 
+    def _validate_dependency_join_keys(self) -> None:
+        """Validate that dependency join keys exist in seed output_keys."""
+        seed_keys = set(self.seed.output_keys)
+        for dep in self.dependencies:
+            for key in dep.join_keys:
+                if key not in seed_keys:
+                    raise ValueError(
+                        f"Dependency {dep.pipeline} join_key '{key}' "
+                        f"not found in seed output_keys: {self.seed.output_keys}"
+                    )
+
+    def _validate_unique_dependencies(self) -> None:
+        """Validate that dependency pipeline names are unique."""
+        names = [d.pipeline for d in self.dependencies]
+        if len(names) != len(set(names)):
+            duplicates = [n for n in names if names.count(n) > 1]
+            raise ValueError(f"Duplicate dependency pipelines: {set(duplicates)}")
+
     @property
     def required_enrichers(self) -> tuple[str, ...]:
         """Get names of required enrichers."""
@@ -553,6 +642,28 @@ class CompositeConfig:
     def all_enricher_names(self) -> tuple[str, ...]:
         """Get names of all enrichers."""
         return tuple(e.pipeline for e in self.enrichers)
+
+    @property
+    def required_dependencies(self) -> tuple[str, ...]:
+        """Get names of required dependencies."""
+        return tuple(d.pipeline for d in self.dependencies if d.required)
+
+    @property
+    def optional_dependencies(self) -> tuple[str, ...]:
+        """Get names of optional dependencies."""
+        return tuple(d.pipeline for d in self.dependencies if not d.required)
+
+    @property
+    def all_dependency_names(self) -> tuple[str, ...]:
+        """Get names of all dependencies."""
+        return tuple(d.pipeline for d in self.dependencies)
+
+    def get_dependency(self, pipeline_name: str) -> DependencyConfig | None:
+        """Get dependency config by pipeline name."""
+        for dep in self.dependencies:
+            if dep.pipeline == pipeline_name:
+                return dep
+        return None
 
     def get_enricher(self, pipeline_name: str) -> EnricherConfig | None:
         """Get enricher config by pipeline name."""
@@ -576,6 +687,16 @@ class CompositeConfig:
                 "output_keys": list(self.seed.output_keys),
                 "silver_table": self.seed.silver_table,
             },
+            "dependencies": [
+                {
+                    "pipeline": d.pipeline,
+                    "join_keys": list(d.join_keys),
+                    "required": d.required,
+                    "timeout_seconds": d.timeout_seconds,
+                    "silver_table": d.silver_table,
+                }
+                for d in self.dependencies
+            ],
             "enrichers": [
                 {
                     "pipeline": e.pipeline,
