@@ -4,8 +4,6 @@
 
 This directory contains 34 Mermaid diagram source files documenting the BioETL architecture.
 
-> **Note**: `DeltaWriter` was renamed to `SilverWriter` (see `silver_writer.py`). Some older diagrams may reference the old name.
-
 ## Diagram Overview
 
 | # | File | Description |
@@ -41,7 +39,7 @@ This directory contains 34 Mermaid diagram source files documenting the BioETL a
 | 20 | `20-quarantine-record-states.mermaid` | Quarantine record states |
 | 21 | `21-activity-entity-data-flow.mermaid` | Activity entity data flow |
 | 22 | `22-client-api-request-sequence.mermaid` | Client API request sequence |
-| 23 | `23-delta-lake-writer-class.mermaid` | DeltaWriter class diagram |
+| 23 | `23-delta-lake-writer-class.mermaid` | SilverWriter class diagram |
 | 24 | `24-hash-service-class.mermaid` | Hash service class diagram |
 | 25 | `25-circuit-breaker-observer-class.mermaid` | CircuitBreaker class diagram |
 
