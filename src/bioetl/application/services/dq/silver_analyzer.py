@@ -21,11 +21,8 @@ from typing import Any
 import polars as pl
 import pyarrow as pa
 
-from bioetl.application.services.dq.utils import (
-    build_summary,
-    result_to_dict,
-    update_counts,
-)
+from bioetl.application.services.dq.utils import build_summary, update_counts
+from bioetl.domain.services.dq_serializer import to_dict
 from bioetl.domain.ports import SilverDQConfigPort
 from bioetl.domain.value_objects.dq_report import (
     CategoricalDistribution,
@@ -83,7 +80,7 @@ class SilverDQAnalyzer:
             record_count_result = self._check_record_count(
                 df, input_record_count, quarantined_count
             )
-            checks["record_count"] = result_to_dict(record_count_result)
+            checks["record_count"] = to_dict(record_count_result)
             passed, failed, warnings = update_counts(
                 record_count_result.status, passed, failed, warnings
             )
@@ -91,7 +88,7 @@ class SilverDQAnalyzer:
         if SilverDQCheckType.NULL_RATE in enabled_checks:
             null_results, overall_rate = self._check_null_rates(df)
             checks["null_rate"] = {
-                "columns": {r.column_name: result_to_dict(r) for r in null_results},
+                "columns": {r.column_name: to_dict(r) for r in null_results},
                 "overall_null_rate": overall_rate,
                 "status": DQCheckStatus.PASS.value,
             }
@@ -99,14 +96,14 @@ class SilverDQAnalyzer:
 
         if SilverDQCheckType.UNIQUENESS in enabled_checks:
             uniqueness_result = self._check_uniqueness(df, primary_keys)
-            checks["uniqueness"] = result_to_dict(uniqueness_result)
+            checks["uniqueness"] = to_dict(uniqueness_result)
             passed, failed, warnings = update_counts(
                 uniqueness_result.status, passed, failed, warnings
             )
 
         if SilverDQCheckType.TYPE_CONFORMANCE in enabled_checks:
             conformance_result = self._check_type_conformance(df)
-            checks["type_conformance"] = result_to_dict(conformance_result)
+            checks["type_conformance"] = to_dict(conformance_result)
             passed, failed, warnings = update_counts(
                 conformance_result.status, passed, failed, warnings
             )
@@ -120,7 +117,7 @@ class SilverDQAnalyzer:
 
         if SilverDQCheckType.SCHEMA_DRIFT in enabled_checks:
             drift_result = self._check_schema_drift(df, previous_schema)
-            checks["schema_drift"] = result_to_dict(drift_result)
+            checks["schema_drift"] = to_dict(drift_result)
             passed, failed, warnings = update_counts(
                 drift_result.status, passed, failed, warnings
             )
@@ -129,14 +126,14 @@ class SilverDQAnalyzer:
             dedup_result = self._check_deduplication(
                 df, primary_keys, input_record_count or len(df)
             )
-            checks["deduplication_stats"] = result_to_dict(dedup_result)
+            checks["deduplication_stats"] = to_dict(dedup_result)
             passed, failed, warnings = update_counts(
                 dedup_result.status, passed, failed, warnings
             )
 
         if SilverDQCheckType.CONTENT_HASH_INTEGRITY in enabled_checks:
             hash_result = self._check_content_hash_integrity(df)
-            checks["content_hash_integrity"] = result_to_dict(hash_result)
+            checks["content_hash_integrity"] = to_dict(hash_result)
             passed, failed, warnings = update_counts(
                 hash_result.status, passed, failed, warnings
             )
@@ -564,7 +561,7 @@ class SilverDQAnalyzer:
         }
 
         for col, numeric_dist in result.numeric_columns.items():
-            output["numeric_columns"][col] = result_to_dict(numeric_dist)
+            output["numeric_columns"][col] = to_dict(numeric_dist)
 
         for col, categorical_dist in result.categorical_columns.items():
             output["categorical_columns"][col] = {
