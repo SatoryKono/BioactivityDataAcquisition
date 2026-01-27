@@ -144,6 +144,16 @@ class OpenAlexPublicationRecord(BaseModel):
         default=None, description="Microsoft Academic Graph ID"
     )
 
+    # Institution identifiers (for cross-referencing and geographic analysis)
+    institution_ids: list[str] = PydanticField(
+        default_factory=list,
+        description="OpenAlex institution IDs (e.g., I1234567890)",
+    )
+    institution_country_codes: list[str] = PydanticField(
+        default_factory=list,
+        description="ISO 2-letter country codes of affiliated institutions",
+    )
+
     # Additional metadata
     language: str | None = PydanticField(default=None, description="Language code")
 
@@ -192,6 +202,10 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
     # External identifiers (in addition to inherited doi, pmid, pmc_id)
     mag_id: str | None = None  # Microsoft Academic Graph ID
+
+    # Institution identifiers (for cross-referencing and geographic analysis)
+    institution_ids: list[str] = field(default_factory=list)
+    institution_country_codes: list[str] = field(default_factory=list)
 
     # Topics (hierarchical classification - replaces deprecated concepts)
     # Each topic dict has: id, display_name, score, subfield, field, domain

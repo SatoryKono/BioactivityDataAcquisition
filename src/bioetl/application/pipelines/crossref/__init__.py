@@ -4,7 +4,6 @@ Transformers and utilities for CrossRef data processing.
 """
 
 from bioetl.application.pipelines.crossref.extractors import (
-    extract_affiliations,
     extract_author_details,
     extract_author_orcids,
     extract_authors,
@@ -24,7 +23,6 @@ from bioetl.application.pipelines.crossref.transformer import (
 
 __all__ = [
     "CrossRefPublicationTransformer",
-    "extract_affiliations",
     "extract_author_details",
     "extract_author_orcids",
     "extract_authors",

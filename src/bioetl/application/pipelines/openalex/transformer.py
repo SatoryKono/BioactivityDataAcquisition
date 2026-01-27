@@ -25,6 +25,8 @@ from bioetl.application.pipelines.openalex.extractors import (
     extract_concepts,
     extract_external_ids,
     extract_grants,
+    extract_institution_country_codes,
+    extract_institution_ids,
     extract_journal_info,
     extract_keywords,
     extract_mesh_terms,
@@ -157,6 +159,12 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         raw_affiliations = extract_affiliations(rec.get("authorships", []))
         serialized_affiliations = self.serialize_json_list(raw_affiliations)
 
+        # Extract institution IDs and country codes (for cross-referencing and geographic analysis)
+        institution_ids = extract_institution_ids(rec.get("authorships", []))
+        institution_country_codes = extract_institution_country_codes(
+            rec.get("authorships", [])
+        )
+
         # Extract journal info
         journal_info = extract_journal_info(rec.get("primary_location", {}))
 
@@ -210,6 +218,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "abstract": abstract,
             "authors": self.serialize_json_list(hashed_authors),
             "affiliations": serialized_affiliations,
+            "institution_ids": institution_ids,
+            "institution_country_codes": institution_country_codes,
             "journal": journal_info.get("journal_name"),
             "issn": journal_info.get("issn"),
             "publisher": journal_info.get("publisher"),

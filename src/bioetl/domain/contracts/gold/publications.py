@@ -162,9 +162,7 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
 
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
-    abstract: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
-    affiliations: Series[object] = pa.Field(nullable=True)  # list[str]
     journal: Series[str] = pa.Field(nullable=True)
     issn: Series[object] = pa.Field(nullable=True)  # list[str]
     publisher: Series[str] = pa.Field(nullable=True)

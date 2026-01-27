@@ -35,7 +35,7 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
         # === PUBLICATION_METADATA_FIELDS ===
-        pa.field("affiliations", pa.string()),  # JSON array of affiliations
+        # affiliations excluded per user request
         pa.field("authors", pa.string()),  # JSON array of author names
         pa.field("title", pa.string()),
         pa.field("journal", pa.string()),
@@ -47,13 +47,13 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         # === PUBLICATION_CROSSREF_FIELDS ===
         pa.field("document_chembl_id", pa.string()),  # Primary key
         pa.field("doi", pa.string()),
-        pa.field("pmc_id", pa.string()),  # PubMed Central ID
+        # pmc_id excluded: not available from ChEMBL API
         pa.field("pmid", pa.string()),  # PubMed ID (numeric string)
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
         pa.field("doc_type", pa.string()),  # PUBLICATION, PATENT, DATASET, BOOK
         pa.field("journal_full_title", pa.string()),
-        pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
+        # publication_date excluded: not available from ChEMBL API
         pa.field("src_id", pa.int64()),
         # === ChEMBL Release Metadata ===
         pa.field("chembl_release", pa.string()),  # e.g., CHEMBL_1, CHEMBL_34
@@ -664,6 +664,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("affiliations", pa.string()),
         # External IDs
         pa.field("arxiv_id", pa.string()),
+        pa.field("author_ids", pa.string()),
         pa.field("authors", pa.string()),
         # Metrics
         pa.field("citation_count", pa.int64()),
@@ -719,8 +720,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
         # === Business fields (alphabetical order) ===
-        pa.field("abstract", pa.string()),
-        pa.field("affiliations", pa.string()),
+        # abstract and affiliations excluded per user request
         pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
         pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("citation_count", pa.int64()),
@@ -793,6 +793,9 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("first_page", pa.string()),
         # Field-Weighted Citation Impact (must be non-negative)
         pa.field("fwci", pa.float64()),
+        # Institution identifiers (for cross-referencing and geographic analysis)
+        pa.field("institution_country_codes", pa.list_(pa.string())),
+        pa.field("institution_ids", pa.list_(pa.string())),
         pa.field("is_oa", pa.bool_()),
         # Quality indicators
         pa.field("is_retracted", pa.bool_()),

@@ -77,6 +77,31 @@ def extract_authors(authors: list[dict[str, Any]] | None) -> list[str]:
     return result
 
 
+def extract_author_ids(authors: list[dict[str, Any]] | None) -> list[str]:
+    """Extract author IDs from authors list.
+
+    Args:
+        authors: List of author objects from S2.
+
+    Returns:
+        List of authorId strings.
+
+    Example:
+        >>> authors = [{"authorId": "123", "name": "John"}, {"authorId": "456", "name": "Jane"}]
+        >>> extract_author_ids(authors)
+        ['123', '456']
+    """
+    if not authors:
+        return []
+
+    result = []
+    for author in authors:
+        aid = author.get("authorId")
+        if aid:
+            result.append(str(aid))
+    return result
+
+
 def extract_author_s2_ids(authors: list[dict[str, Any]] | None) -> list[str]:
     """Extract Semantic Scholar author IDs from authors list.
 

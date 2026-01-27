@@ -580,8 +580,8 @@ class TestPubMedTransformerDateExtraction:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        # End-of-period strategy: year+month → YYYY-MM-30
-        assert result["pub_date"] == "2024-12-30"
+        # End-of-period strategy: year+month → YYYY-MM-DD (last day of month)
+        assert result["pub_date"] == "2024-12-31"
         assert result["year"] == 2024
 
     @pytest.mark.asyncio
@@ -943,3 +943,40 @@ class TestPubMedTransformerUnifiedDateFields:
         assert result["publication_date"] == "2025-02-28"
         assert result["epub_date"] == "2025-02-28"
         assert result["pub_date"] == "2025-03-15"
+
+    @pytest.mark.asyncio
+    async def test_pub_day_extraction_with_medline_date(
+        self,
+        transformer: PubMedPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test extraction of pub_day from MedlineDate element."""
+        # MedlineDate format: "2023 Jan-Feb" -> month=02, day=None
+        # Note: DateExtractor currently returns day=None for MedlineDate
+        # So we expect pub_day to be None, but pub_month to be set.
+
+        xml = """<?xml version="1.0"?>
+        <PubmedArticle>
+          <MedlineCitation>
+            <PMID>123</PMID>
+            <Article>
+              <Journal>
+                <JournalIssue>
+                  <PubDate>
+                    <MedlineDate>2023 Jan-Feb</MedlineDate>
+                  </PubDate>
+                </JournalIssue>
+              </Journal>
+              <ArticleTitle>MedlineDate Test</ArticleTitle>
+            </Article>
+          </MedlineCitation>
+        </PubmedArticle>
+        """
+        record: dict[str, Any] = {"_raw_xml": xml}
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["pub_date"] == "2023-02-28"  # End of Feb (not leap year)
+        assert result["pub_month"] == 2
+        assert result["pub_day"] is None  # Day is not extracted from MedlineDate range

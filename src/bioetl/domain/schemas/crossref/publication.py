@@ -119,12 +119,6 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
         description="Number of references (from references-count field)",
     )
 
-    # === Author Affiliations ===
-    affiliations: Series[str] = pa.Field(
-        nullable=True,
-        description="Author affiliations (JSON array)",
-    )
-
     # === Author ORCID Identifiers ===
     author_orcids: Series[str] = pa.Field(
         nullable=True,
