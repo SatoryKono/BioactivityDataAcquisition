@@ -467,6 +467,7 @@ class TestFunctionLength:
     }
 
     # Maximum allowed violations (for tracking technical debt)
+    # Baseline updated 2026-01-27: filter config with fallback_column, updated function lengths
     # Baseline updated 2026-01-27: added aggregator service, EnricherAggregator methods
     # Baseline updated 2026-01-27: titles_match() added
     MAX_VIOLATIONS = 109
