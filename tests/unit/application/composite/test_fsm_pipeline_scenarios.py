@@ -405,6 +405,12 @@ class FakeCompositeConfig:
     def required_enrichers(self) -> tuple[str, ...]:
         return tuple(e.pipeline for e in self.enrichers if e.required)
 
+    @property
+    def required_dependencies(self) -> tuple[str, ...]:
+        return tuple(
+            d.pipeline for d in self.dependencies if getattr(d, "required", False)
+        )
+
 
 # =============================================================================
 # Helper Functions
