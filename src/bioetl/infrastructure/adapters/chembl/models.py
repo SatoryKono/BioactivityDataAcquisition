@@ -464,6 +464,16 @@ class ChemblReleaseInfo(BaseModel):
     )
 
 
+class ChemblMeshTerm(BaseModel):
+    """MeSH term record from ChEMBL API."""
+
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
+
+    mesh_heading: str | None = Field(default=None, description="MeSH heading")
+    mesh_id: str | None = Field(default=None, description="MeSH ID")
+    mesh_qualifier: str | None = Field(default=None, description="MeSH qualifier")
+
+
 class ChemblPublicationRecord(BaseModel):
     """Individual publication record from ChEMBL API.
 
@@ -497,6 +507,12 @@ class ChemblPublicationRecord(BaseModel):
         default=None, description="PubMed ID (numeric string)"
     )
     patent_id: str | None = Field(default=None, description="Patent ID")
+
+    # Keywords and Terms
+    keywords: list[str] | None = Field(default_factory=list, description="Keywords")
+    mesh_terms: list[ChemblMeshTerm] | None = Field(
+        default_factory=list, description="MeSH terms"
+    )
 
     # Source
     src_id: int | None = Field(default=None, description="Source ID")
