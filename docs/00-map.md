@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.12 | Last updated: 2026-01-26*
+*Synced with RULES.md v5.13 | Last updated: 2026-01-27*
 
 > **Documentation Update:** 2026-01-26
 > - Architecture diagrams updated: Composite Pipeline (ADR-026) added to layer diagrams
@@ -70,8 +70,8 @@ docs/
 │   ├── data-layers.md           # Bronze/Silver/Gold layer details
 │   ├── observability-layers.md  # Observability architecture
 │   ├── diagrams.md              # Mermaid diagrams collection
-│   ├── decisions/               # ADR-001..031 (31 records)
-│   └── diagrams/                # 35 Mermaid diagram files + render_diagrams.py
+│   ├── decisions/               # ADR-001..ADR-031 (31 records)
+│   └── diagrams/                # 34 Mermaid diagram files + render_diagrams.py
 │
 ├── 03-guides/                   # How-to guides (13 guides)
 │   ├── quick-start.md           # Quick start guide
@@ -284,9 +284,8 @@ src/bioetl/
 │   │   ├── bronze_writer.py     # JSONL + zstd writer
 │   │   ├── delta_writer.py      # Delta Lake merge/upsert
 │   │   └── gold_writer.py       # SCD Type 2 writer
-│   ├── locking/                 # Distributed locking
-│   │   ├── redis_lock.py        # Redis SETNX + heartbeat
-│   │   └── memory_lock.py       # In-memory (dev/test)
+│   ├── locking/                 # In-memory locking (Local-Only)
+│   │   └── memory_lock.py       # In-memory TTL-based lock (ADR-010)
 │   ├── checkpoint/              # Checkpoint persistence
 │   ├── quarantine/              # DQ failure handling
 │   ├── observability/           # Metrics, logging
@@ -295,9 +294,21 @@ src/bioetl/
 │   └── config.py                # Settings (Pydantic)
 │
 └── interfaces/                  # External interfaces
-    ├── cli.py                   # Click CLI (bioetl run/quarantine/checkpoint)
+    ├── cli/                     # Click CLI commands
+    │   ├── main.py              # Entry point, command groups
+    │   ├── commands/            # Command implementations
+    │   │   ├── run.py           # bioetl run
+    │   │   ├── run_all.py       # bioetl run-all
+    │   │   ├── run_composite.py # bioetl run-composite
+    │   │   ├── export.py        # bioetl export
+    │   │   ├── quarantine.py    # bioetl quarantine
+    │   │   ├── checkpoint.py    # bioetl checkpoint
+    │   │   ├── config.py        # bioetl config
+    │   │   ├── health.py        # bioetl health
+    │   │   ├── lock.py          # bioetl lock
+    │   │   └── maintenance.py   # bioetl maintenance
+    │   └── exit_codes.py        # Standardized exit codes
     └── orchestration/           # Pipeline orchestration adapters
-        └── signals.py           # OS signal handlers
 
 tests/
 ├── unit/                        # Isolated unit tests (mock I/O)
@@ -362,18 +373,18 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2026-01-21   | v5.12 (ADR Registry Update)  |
+| RULES.md                 | 2026-01-27   | v5.13 (ADR Registry Complete)|
 | REQUIREMENTS.md          | 2026-01-21   | v1.4 (156 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
-| 00-map.md                | 2026-01-21   | v6.9 API Sync Completed      |
+| 00-map.md                | 2026-01-27   | v7.0 Doc Sync Completed      |
 | rules-summary.md         | 2026-01-21   | v5.12 Synced                 |
 | 03-guides/               | 2026-01-20   | Consolidated (13 guides)     |
-| ADR-001..028             | 2026-01-21   | All 28 ADRs documented       |
+| ADR-001..031             | 2026-01-27   | All 31 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
 | archived/audits/         | 2026-01-21   | Historical audit files       |
-| 02-architecture/diagrams/| 2025-12-31   | 34 Mermaid diagrams          |
+| 02-architecture/diagrams/| 2026-01-27   | 34 Mermaid diagrams          |
 
 ---
 
-*Last updated: 2026-01-21. Documentation sync audit completed.*
+*Last updated: 2026-01-27. Documentation sync audit completed.*

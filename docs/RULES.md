@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.12 (ADR Registry Update), 2026-01-21* 
+*Версия: 5.13 (ADR Registry Complete), 2026-01-27* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -1126,8 +1126,12 @@ fields:
 | [ADR-026](02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) | Composite Pipeline Pattern | Accepted | 2026-01-15 |
 | [ADR-027](02-architecture/decisions/ADR-027-dq-rules-externalization.md) | DQ Rules Externalization | Accepted | 2026-01-19 |
 | [ADR-028](02-architecture/decisions/ADR-028-filter-rules-externalization.md) | Filter Rules Externalization | Accepted | 2026-01-20 |
+| [ADR-029](02-architecture/decisions/ADR-029-output-metadata-unification.md) | Output Metadata Unification | Accepted | 2026-01-20 |
+| [ADR-030](02-architecture/decisions/ADR-030-publication-pagination-strategy.md) | Publication Pagination Strategy | Accepted | 2026-01-21 |
+| [ADR-031](02-architecture/decisions/ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | Accepted | 2026-01-21 |
 
 ## История Изменений (Changelog)
+- **5.13** (2026-01-27): ADR Registry Complete. Добавлены ADR-029, 030, 031 в реестр (Приложение F). Теперь 31 ADR полностью документирован.
 - **5.12** (2026-01-21): ADR Registry Update. Добавлены ADR-021..028 в реестр (Приложение F). Добавлены inline ссылки на новые ADR в соответствующие секции (§1.1, §2.8, §3.2, App D).
 - **5.11** (2026-01-20): Int→Float Coercion Documentation. Добавлена §2.6 "Int→Float Coercion для Nullable Integers" — документация паттерна Gold-схем с `Series[float]` + `coerce=True` для nullable integer полей (34 occurrences). Это осознанное архитектурное решение для обработки nullable integers в Pandas/Polars.
 - **5.10** (2026-01-06): TTL/Heartbeat Values Correction. Исправлены значения Lock TTL (90s) и Heartbeat (30s) в §3.3 для соответствия реализации в `domain/config.py:238,241`. Синхронизация всех документов.

@@ -1,8 +1,8 @@
 # BioETL Pipeline Documentation
 
-*Generated: 2026-01-13 | Aligned with RULES.md v5.12*
+*Generated: 2026-01-27 | Aligned with RULES.md v5.13*
 
-This directory contains comprehensive documentation for all 17 BioETL pipelines.
+This directory contains comprehensive documentation for all 20 BioETL pipelines.
 
 ---
 
@@ -50,19 +50,33 @@ This directory contains comprehensive documentation for all 17 BioETL pipelines.
 | 16 | `chembl_activity` | ChEMBL | activity | [Spec](chembl/05-activity-spec.md) |
 | 17 | `uniprot_idmapping` | UniProt | idmapping | [Spec](uniprot/02-idmapping-spec.md) |
 
+### Batch 6 — Publication Metadata (ChEMBL)
+
+| # | Pipeline ID | Provider | Entity | Spec |
+|---|-------------|----------|--------|------|
+| 18 | `chembl_publication_similarity` | ChEMBL | publication_similarity | TODO |
+| 19 | `chembl_publication_term` | ChEMBL | publication_term | TODO |
+
+### Batch 7 — Composite Pipelines
+
+| # | Pipeline ID | Provider | Entity | Spec |
+|---|-------------|----------|--------|------|
+| 20 | `composite_publication` | Composite | publication | [ADR-026](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) |
+
 ---
 
 ## Provider Summary
 
 | Provider | Pipelines | Rate Limit | Auth |
 |----------|-----------|------------|------|
-| **ChEMBL** | 10 | None | Public |
+| **ChEMBL** | 12 | None | Public |
 | **UniProt** | 2 | 100 req/sec | API Key (optional) |
 | **PubChem** | 1 | 5 req/sec | Public |
 | **PubMed** | 1 | 3 req/sec (10 with key) | API Key |
 | **CrossRef** | 1 | 50 req/sec (polite) | mailto header |
 | **OpenAlex** | 1 | 10 req/sec | email-based |
 | **Semantic Scholar** | 1 | 100 req/5min | API Key |
+| **Composite** | 1 | N/A | N/A |
 
 ---
 
@@ -96,48 +110,79 @@ Each pipeline specification includes:
 
 ## Schema Files
 
-All Pandera schemas are located in `src/bioetl/domain/schemas/`:
+**Gold Schemas (Pandera):** Located in `src/bioetl/domain/contracts/gold/`
+
+**Silver Schemas (PyArrow):** Located in `src/bioetl/infrastructure/schemas/silver.py`
 
 ```
-schemas/
-├── base.py                    # ETLRecordSchema base class
+# Gold layer schemas (Pandera DataFrameModel)
+src/bioetl/domain/contracts/gold/
 ├── chembl/
 │   ├── activity.py
 │   ├── assay.py
-│   ├── assay_parameters.py
 │   ├── cell_line.py
-│   ├── compound_record.py
 │   ├── molecule.py
-│   ├── protein_classification.py
+│   ├── protein_class.py
 │   ├── publication.py
 │   ├── target.py
 │   └── target_component.py
-├── uniprot/
-│   ├── protein.py
-│   └── isoform.py
 ├── pubchem/
 │   └── compound.py
-├── pubmed/
-│   └── article.py
+├── uniprot/
+│   └── protein.py
 ├── crossref/
 │   └── publication.py
 ├── openalex/
 │   └── publication.py
+├── pubmed/
+│   └── publication.py
 └── semanticscholar/
     └── publication.py
+
+# Silver layer schemas (PyArrow)
+src/bioetl/infrastructure/schemas/silver.py
 ```
 
 ---
 
 ## Configuration Files
 
-All pipeline configs are in `configs/pipelines/`:
+Pipeline configs are in `configs/`:
 
 ```
-pipelines/
-├── _base.yaml                 # Base template
-├── _defaults.yaml             # Default parameters
-├── _providers/
+configs/
+├── pipelines/                 # Pipeline-specific configs
+│   ├── _base.yaml             # Base template with all options
+│   ├── chembl/
+│   │   ├── activity.yaml
+│   │   ├── assay.yaml
+│   │   ├── assay_parameters.yaml
+│   │   ├── cell_line.yaml
+│   │   ├── compound_record.yaml
+│   │   ├── molecule.yaml
+│   │   ├── protein_class.yaml
+│   │   ├── publication.yaml
+│   │   ├── publication_similarity.yaml
+│   │   ├── publication_term.yaml
+│   │   ├── target.yaml
+│   │   └── target_component.yaml
+│   ├── crossref/
+│   │   └── publication.yaml
+│   ├── openalex/
+│   │   └── publication.yaml
+│   ├── pubchem/
+│   │   └── compound.yaml
+│   ├── pubmed/
+│   │   └── publication.yaml
+│   ├── semanticscholar/
+│   │   └── publication.yaml
+│   ├── uniprot/
+│   │   ├── idmapping.yaml
+│   │   └── protein.yaml
+│   └── composite/
+│       └── publication.yaml
+│
+├── sources/                   # Provider source configs
 │   ├── chembl.yaml
 │   ├── crossref.yaml
 │   ├── openalex.yaml
@@ -145,30 +190,16 @@ pipelines/
 │   ├── pubmed.yaml
 │   ├── semanticscholar.yaml
 │   └── uniprot.yaml
-├── chembl/
-│   ├── activity.yaml
-│   ├── assay.yaml
-│   ├── assay_parameters.yaml
-│   ├── cell_line.yaml
-│   ├── compound_record.yaml
-│   ├── molecule.yaml
-│   ├── protein_class.yaml
-│   ├── publication.yaml
-│   ├── target.yaml
-│   └── target_component.yaml
-├── crossref/
-│   └── publication.yaml
-├── openalex/
-│   └── publication.yaml
-├── pubchem/
-│   └── compound.yaml
-├── pubmed/
-│   └── publications.yaml
-├── semanticscholar/
-│   └── publication.yaml
-└── uniprot/
-    ├── idmapping.yaml
-    └── protein.yaml
+│
+├── dq/                        # Data Quality configs (hierarchical)
+│   ├── _defaults.yaml
+│   ├── providers/
+│   └── entities/
+│
+└── filter/                    # Filter configs (hierarchical)
+    ├── _defaults.yaml
+    ├── providers/
+    └── entities/
 ```
 
 ---
