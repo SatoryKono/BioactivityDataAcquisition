@@ -1,15 +1,15 @@
-# Пайплайн: ChEMBL Document Similarity
+# Пайплайн: ChEMBL Publication Similarity
 
-**Имя пайплайна:** `chembl_document_similarity`
+**Имя пайплайна:** `chembl_publication_similarity`
 **Провайдер:** `chembl`
-**Сущность:** `document_similarity`
+**Сущность:** `publication_similarity`
 **Версия схемы:** 1.0.0
 
 ---
 
 ## 1. Описание
 
-Пайплайн извлекает данные о сходстве документов (коэффициенты Танимото) из API ChEMBL. Используется для анализа связей между научными публикациями на основе молекулярного и таргетного сходства.
+Пайплайн извлекает данные о сходстве публикаций (коэффициенты Танимото) из API ChEMBL. Используется для анализа связей между научными публикациями на основе молекулярного и таргетного сходства. Endpoint API остаётся `/document_similarity`.
 
 ---
 
@@ -20,10 +20,10 @@
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `sim_id` | `int` | Уникальный идентификатор записи сходства |
-| `doc_1` | `int` | ID первого документа |
-| `doc_2` | `int` | ID второго документа |
-| `pubmed_id1` | `int` | PubMed ID первого документа |
-| `pubmed_id2` | `int` | PubMed ID второго документа |
+| `doc_1` | `int` | ID первой публикации |
+| `doc_2` | `int` | ID второй публикации |
+| `pubmed_id1` | `int` | PubMed ID первой публикации |
+| `pubmed_id2` | `int` | PubMed ID второй публикации |
 
 ### Коэффициенты Танимото
 
@@ -38,7 +38,7 @@
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/document_similarity_transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/publication_similarity_transformer.py`
 
 ### Entity ID
 
@@ -75,10 +75,10 @@ max_tani = round(max(tid_tani, mol_tani), 6)
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_document_similarity
+bioetl run chembl_publication_similarity
 
 # С ограничением
-bioetl run chembl_document_similarity --limit 1000
+bioetl run chembl_publication_similarity --limit 1000
 ```
 
 ---
@@ -87,9 +87,9 @@ bioetl run chembl_document_similarity --limit 1000
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/document_similarity.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/document_similarity_transformer.py` |
-| Пайплайн | `src/bioetl/application/pipelines/chembl/document_similarity.py` |
+| Конфигурация | `configs/pipelines/chembl/publication_similarity.yaml` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/publication_similarity_transformer.py` |
+| Пайплайн | `src/bioetl/application/pipelines/chembl/publication_similarity.py` |
 
 ---
 

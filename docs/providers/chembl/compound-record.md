@@ -45,12 +45,12 @@
 
 ```
 Compound Record (M:1) → Molecule
-Compound Record (M:1) → Document (Publication)
+Compound Record (M:1) → Publication
 Compound Record (M:1) → Source
 ```
 
 **Граф зависимостей:**
-- Для полного анализа рекомендуется сначала загрузить `chembl_molecule` и `chembl_document`
+- Для полного анализа рекомендуется сначала загрузить `chembl_molecule` и `chembl_publication`
 - `src_id` ссылается на источник данных ChEMBL (1 = ChEMBL)
 
 ---
