@@ -70,7 +70,7 @@ done
 Use the included `render_diagrams.py` script:
 
 ```bash
-cd docs/architecture/diagrams
+cd docs/02-architecture/diagrams
 python render_diagrams.py
 ```
 
