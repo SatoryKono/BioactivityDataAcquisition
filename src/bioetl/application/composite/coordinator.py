@@ -14,6 +14,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
+from bioetl.domain.composite.strategy import FallbackStrategy
 
 if TYPE_CHECKING:
     import polars as pl
@@ -150,8 +151,11 @@ class EnrichmentCoordinator:
         # Wait for all enrichers to complete
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
+        # Map name to config for strategy lookup
+        enrichers_map = {e.pipeline: e for e in enrichers}
+
         # Process results
-        return self._process_results(enricher_names, results)
+        return self._process_results(enricher_names, results, enrichers_map)
 
     def _apply_filter(
         self, keys: pl.DataFrame, enricher: EnricherConfig
@@ -349,13 +353,15 @@ class EnrichmentCoordinator:
             except Exception as e:
                 duration = (datetime.now(tz=UTC) - started_at).total_seconds()
 
-                # Re-raise for required enrichers (logged as error)
-                if enricher.required:
+                # Re-raise for required enrichers OR fail strategy (logged as error)
+                if enricher.required or enricher.fallback_strategy == FallbackStrategy.FAIL:
+                    msg = "Required enricher failed" if enricher.required else "Enricher failed"
                     self._logger.error(
-                        "Required enricher failed",
+                        msg,
                         enricher=enricher.pipeline,
                         error=str(e),
-                        required=True,
+                        required=enricher.required,
+                        strategy=enricher.fallback_strategy.value,
                     )
                     raise
 
@@ -378,6 +384,7 @@ class EnrichmentCoordinator:
         self,
         enricher_names: list[str],
         results: list[EnrichmentResult | BaseException],
+        enrichers_map: dict[str, EnricherConfig],
     ) -> dict[str, EnrichmentResult]:
         """Process gathered results, handling exceptions.
 
@@ -388,6 +395,7 @@ class EnrichmentCoordinator:
         Args:
             enricher_names: Names of enrichers in order.
             results: Results from asyncio.gather.
+            enrichers_map: Mapping of pipeline name to config.
 
         Returns:
             Mapping of enricher name to result.
@@ -396,7 +404,11 @@ class EnrichmentCoordinator:
 
         for name, result in zip(enricher_names, results, strict=True):
             if isinstance(result, BaseException):
-                # Should not happen for required (already re-raised)
+                # Check if strategy requires failure
+                config = enrichers_map.get(name)
+                if config and config.fallback_strategy == FallbackStrategy.FAIL:
+                    raise result
+
                 processed[name] = EnrichmentResult.failed(
                     enricher_name=name,
                     error_message=str(result),
