@@ -173,7 +173,9 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
 
     # Metadata
     # Note: doc_type excluded; CrossRef uses raw 'type' field instead
-    type: Series[str] = pa.Field(nullable=True)  # Raw CrossRef type (journal-article, etc.)
+    type: Series[str] = pa.Field(
+        nullable=True
+    )  # Raw CrossRef type (journal-article, etc.)
     citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     reference_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     language: Series[str] = pa.Field(nullable=True)

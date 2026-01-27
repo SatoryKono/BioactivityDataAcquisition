@@ -137,10 +137,10 @@ class TestGoldPublicationSchemaCrossRefFields:
         "schema_class,name",
         [
             # ChEMBL excluded: pmc_id not available from ChEMBL API
+            # OpenAlex excluded: pmc_id explicitly excluded from transformer output
+            # SemanticScholar excluded: pmc_id explicitly excluded from transformer output
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
-            (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
-            (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
     def test_schema_has_pmc_id_field(self, schema_class, name):
