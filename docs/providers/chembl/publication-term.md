@@ -91,8 +91,8 @@ bioetl run chembl_publication_term
 # С ограничением
 bioetl run chembl_publication_term --limit 1000
 
-# С фильтрацией по документам
-bioetl run chembl_publication_term --input-filter data/input/documents.csv
+# С фильтрацией по публикациям
+bioetl run chembl_publication_term --input-filter data/input/publications.csv
 ```
 
 ---
