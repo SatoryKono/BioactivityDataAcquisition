@@ -23,7 +23,7 @@ def __init__(
     lock: LockPort,
     checkpoint: CheckpointPort,
     quarantine: QuarantinePort,
-    logger: BoundLogger,
+    logger: LoggerPort,
     metrics: MetricsPort,
     resume: bool = False,
     limit: int | None = None,
@@ -34,8 +34,8 @@ def __init__(
 
 1. **God Object Anti-pattern**: 13 параметров конструктора смешивают конфигурацию, runtime параметры и I/O порты
 
-2. **Циклические зависимости**: `BasePipeline` создаёт менеджеры (`PipelineOrchestrator`, `PipelineExecutor`,
-   `LockManager`, `QuarantineManager`), которые хранят ссылку на `self`
+2. **Риск циклических зависимостей**: сборка менеджеров внутри `BasePipeline`
+   приводит к self-ссылкам (менеджеры получают `pipeline` целиком)
 
 3. **Нарушение SRP**: Класс отвечает за хранение конфигурации И координацию выполнения
 
@@ -46,16 +46,17 @@ def __init__(
 ### Затронутые файлы
 
 - `src/bioetl/application/core/base.py` - основной класс
-- `src/bioetl/application/core/pipeline_config.py` - **NEW**
+- `src/bioetl/domain/config.py` - **NEW**
 - `src/bioetl/application/core/pipeline_services.py` - **NEW**
-- `src/bioetl/application/pipelines/chembl_activity.py` - наследник
-- `src/bioetl/application/core/orchestrator.py` - зависит от BasePipeline
-- `src/bioetl/application/core/executor.py` - зависит от BasePipeline
+- `src/bioetl/application/pipelines/chembl/activity.py` - наследник
+- `src/bioetl/application/core/runner.py` - зависит от BasePipeline
+- `src/bioetl/application/core/batch_executor.py` - зависит от BasePipeline
 - `src/bioetl/application/core/lock_manager.py` - зависит от BasePipeline
 - `src/bioetl/application/core/quarantine_manager.py` - зависит от BasePipeline
 - `tests/unit/application/test_base_pipeline.py` - тесты
-- `tests/unit/application/test_pipeline_executor.py` - тесты
-- `tests/unit/application/pipelines/test_chembl_activity.py` - тесты
+- `tests/unit/application/core/test_batch_executor.py` - тесты
+- `tests/unit/application/test_pipeline_config.py` - тесты
+- `tests/unit/application/pipelines/test_chembl_activity_unit.py` - тесты
 
 ## Решение
 
@@ -77,11 +78,11 @@ class PipelineConfig:
     checkpoint_interval: int = 1000
 ```
 
-#### PipelineRuntimeConfig (immutable dataclass)
+#### RuntimeConfig (immutable dataclass)
 
 ```python
 @dataclass(frozen=True)
-class PipelineRuntimeConfig:
+class RuntimeConfig:
     """Runtime execution parameters."""
     run_type: RunType
     resume: bool = False
@@ -100,7 +101,8 @@ class PipelineServices:
     checkpoint: CheckpointPort
     quarantine: QuarantinePort
     metrics: MetricsPort
-    logger: BoundLogger
+    tracing: TracingPort
+    logger: LoggerPort
 
     async def aclose(self) -> None:
         """Gracefully close all I/O resources."""
@@ -126,52 +128,67 @@ class BasePipeline(ABC):
     def __init__(
         self,
         config: PipelineConfig,
-        runtime: PipelineRuntimeConfig,
+        runtime: RuntimeConfig,
         services: PipelineServices,
+        run_id: RunID,
+        transformer: BaseTransformer | None = None,
     ) -> None:
         self._config = config
         self._runtime = runtime
         self._services = services
+        self._run_id = run_id
+        self._transformer = transformer
         # ... lazy-initialized components
 ```
 
 ### 3. Устранение циклических зависимостей
 
-Менеджеры получают только необходимые зависимости через `from_components()`:
+Сборка вынесена в composition layer: `PipelineRunner` получает зависимости
+через явный DI и не создаётся внутри `BasePipeline`.
 
 ```python
 # Вместо:
-self.orchestrator = PipelineOrchestrator(self)  # circular ref!
+self.runner = PipelineRunner(self)  # circular ref!
 
 # Стало:
-self._orchestrator = PipelineOrchestrator.from_components(
-    config=self._config,
-    runtime=self._runtime,
-    services=self._services,
-    context=self._context,
-    executor=self.executor,
-    checkpoint_manager=self.checkpoint_manager,
-    shutdown_signal=self._shutdown_signal,
-    logger=self._logger,
+pipeline = ChEMBLActivityPipeline.create(
+    run_id=run_id,
+    runtime=runtime,
+    services=services,
+    config=config,
+    transformer=transformer,
+)
+runner = PipelineRunner(
+    config=pipeline.config,
+    runtime=pipeline.runtime,
+    services=pipeline.services,
+    context=pipeline.context,
+    executor=batch_executor,
+    checkpoint_manager=checkpoint_manager,
+    shutdown_signal=pipeline.shutdown_signal,
+    logger=logger,
+    lock_manager=lock_manager,
+    preflight=preflight,
+    postrun=postrun,
+    lifecycle_service=lifecycle_service,
+    observer=observer,
+    pipeline=pipeline,
+    tracer=tracer,
 )
 ```
 
 ### 4. Resource Lifecycle Management
 
-Graceful shutdown реализован через:
+Graceful shutdown реализован в `PipelineRunner.run()` через контекстные
+менеджеры и `finally`-cleanup:
 
 ```python
-async def run_pipeline_flow(
-    pipeline: BasePipeline, logger: BoundLogger
-) -> None:
-    """Run a pipeline with logging and error handling."""
-    try:
-        await pipeline.run()
-    except Exception as e:
-        logger.exception("Pipeline execution failed", error=str(e))
-        raise
-    finally:
-        await pipeline.services.aclose()  # Always cleanup!
+try:
+    with self._observer:
+        async with self._services, self._lock_manager:
+            ...
+finally:
+    await self._postrun_service.cleanup(self._tracer)
 ```
 
 ## Последствия
@@ -209,7 +226,7 @@ async def run_pipeline_flow(
 ### Фаза 2: Создание структур
 
 - [x] `PipelineConfig` dataclass
-- [x] `PipelineRuntimeConfig` dataclass
+- [x] `RuntimeConfig` dataclass
 - [x] `PipelineServices` dataclass с `aclose()`
 
 ### Фаза 3: Рефакторинг BasePipeline
@@ -227,8 +244,8 @@ async def run_pipeline_flow(
 ### Фаза 5: Обновление тестов
 
 - [x] `test_base_pipeline.py`
-- [x] `test_pipeline_executor.py`
-- [x] `test_chembl_activity.py`
+- [x] `test_batch_executor.py`
+- [x] `test_chembl_activity_unit.py`
 
 ### Фаза 6: Удаление shim
 
