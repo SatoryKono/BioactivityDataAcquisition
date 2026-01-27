@@ -74,22 +74,22 @@ docs/
 │   └── diagrams/                # 35 Mermaid diagram files + render_diagrams.py
 │
 ├── 03-guides/                   # How-to guides (16 guides)
-│   ├── quick-start.md           # Quick start guide
-│   ├── getting-started.md       # Getting started
-│   ├── running-pipelines.md     # Running pipelines
-│   ├── testing.md               # Testing guide
-│   ├── local-storage-layout.md  # Storage layout explanation
-│   ├── pipeline-lifecycle.md    # Pipeline lifecycle
-│   ├── registry-pattern.md      # Registry pattern guide
-│   ├── troubleshooting.md       # Troubleshooting
 │   ├── add-new-source.md        # Adding new provider
 │   ├── add-pipeline-existing-source.md  # Adding pipeline to existing provider
+│   ├── cleanup-policy.md        # Storage cleanup policy
 │   ├── date-handling.md         # Date normalization guide
 │   ├── dq-configuration.md      # Data quality configuration
-│   ├── cleanup-policy.md        # Storage cleanup policy
 │   ├── file-path-audit-report.md # File path audit report
+│   ├── getting-started.md       # Getting started
+│   ├── local-storage-layout.md  # Storage layout explanation
 │   ├── metrics-monitoring.md    # Metrics monitoring guide
-│   └── pipeline-configuration.md # Pipeline configuration guide
+│   ├── pipeline-configuration.md # Pipeline configuration guide
+│   ├── pipeline-lifecycle.md    # Pipeline lifecycle
+│   ├── quick-start.md           # Quick start guide
+│   ├── registry-pattern.md      # Registry pattern guide
+│   ├── running-pipelines.md     # Running pipelines
+│   ├── testing.md               # Testing guide
+│   └── troubleshooting.md       # Troubleshooting
 │
 ├── 03-development/              # Development notes
 │   └── config-schema-guidelines.md # Config schema guidelines
