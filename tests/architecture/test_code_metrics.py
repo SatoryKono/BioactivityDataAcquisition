@@ -603,7 +603,7 @@ class TestClassSize:
         # ChEMBL adapter with complex FilterableDataSourcePort
         "ChemblAdapter": 920,  # 914 lines - FilterableDataSourcePort + health-aware batching + pagination + composite key deduplication + 500 error detection
         # Common adapter base classes
-        "BaseTitleFallbackHandler": 320,  # 314 lines - Base fallback handler with provider_prefix + default event properties
+        "BaseTitleFallbackHandler": 340,  # 332 lines - Base fallback handler with provider_prefix + default event properties + rate limiting
         # PubMed transformer with comprehensive field extraction
         "PubMedPublicationTransformer": 510,  # 468 lines - PubMed XML extraction with structured affiliations + identifiers
     }

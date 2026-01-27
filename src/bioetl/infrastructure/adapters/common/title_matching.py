@@ -90,7 +90,10 @@ def titles_match(
         # For short titles, use fuzzy matching to avoid false positives
         q_words = q.split()
         f_words = f.split()
-        if len(q_words) < MIN_WORDS_FOR_SUBSTRING or len(f_words) < MIN_WORDS_FOR_SUBSTRING:
+        if (
+            len(q_words) < MIN_WORDS_FOR_SUBSTRING
+            or len(f_words) < MIN_WORDS_FOR_SUBSTRING
+        ):
             # Fall back to fuzzy matching for short titles
             if not q_words or not f_words:
                 return False
