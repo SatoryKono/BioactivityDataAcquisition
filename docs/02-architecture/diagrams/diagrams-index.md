@@ -2,7 +2,7 @@
 
 *Updated: 2026-01-26*
 
-This directory contains 34 Mermaid diagram source files documenting the BioETL architecture.
+В каталоге 34 исходных файла диаграмм Mermaid, документирующих архитектуру BioETL.
 
 ## Diagram Overview
 
@@ -28,7 +28,6 @@ This directory contains 34 Mermaid diagram source files documenting the BioETL a
 | 09 | `09-full-er-diagram.mermaid` | Entity-relationship diagram |
 | 10 | `10-infrastructure-layer-class-diagram.mermaid` | Infrastructure layer classes |
 | 11 | `11-lock-acquisition-sequence.mermaid` | Lock acquisition sequence |
-| 12 | `12-full-aws-deployment.mermaid` | AWS deployment architecture (reference) |
 | 13 | `13-domain-models-relationship.mermaid` | Domain model relationships |
 | 14 | `14-provider-health-states.mermaid` | Provider health states |
 | 15 | `15-dq-check-workflow.mermaid` | Data quality check workflow |
@@ -39,7 +38,7 @@ This directory contains 34 Mermaid diagram source files documenting the BioETL a
 | 20 | `20-quarantine-record-states.mermaid` | Quarantine record states |
 | 21 | `21-activity-entity-data-flow.mermaid` | Activity entity data flow |
 | 22 | `22-client-api-request-sequence.mermaid` | Client API request sequence |
-| 23 | `23-delta-lake-writer-class.mermaid` | SilverWriter class diagram |
+| 23 | `23-silver-writer-class.mermaid` | SilverWriter class diagram |
 | 24 | `24-hash-service-class.mermaid` | Hash service class diagram |
 | 25 | `25-circuit-breaker-observer-class.mermaid` | CircuitBreaker class diagram |
 

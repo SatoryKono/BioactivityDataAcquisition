@@ -11,7 +11,7 @@
 | **Entity** | Activity |
 | **Configuration** | `configs/pipelines/chembl/activity.yaml` |
 | **Primary Key** | `activity_id` |
-| **Schema Version** | 1.0.0 |
+| **Config Version** | 1.2.0 |
 
 ## Description
 
@@ -56,9 +56,9 @@ The Activity entity contains **55 fields**. Key fields:
 
 | Layer | Format | Mode | Path Pattern |
 |-------|--------|------|--------------|
-| Bronze | JSONL + Zstd | Append-only | `bronze/v1/chembl/activity/{date}/batch_{id}.jsonl.zst` |
-| Silver | Delta Lake | Merge by `activity_id` | `silver/chembl_activity/` |
-| Gold | Delta Lake | Overwrite | `gold/chembl_activity/` |
+| Bronze | JSONL + Zstd | Append-only | `data/output/bronze/chembl/activity/` |
+| Silver | Delta Lake | Merge by `activity_id` | `data/output/silver/chembl/activity/` |
+| Gold | Delta Lake | Overwrite | `data/output/gold/chembl/activity/` |
 
 ### Gold Filter Criteria
 
@@ -90,9 +90,10 @@ bioetl run chembl_activity --run-type rebuild
 | Component | Path |
 |-----------|------|
 | Configuration | `configs/pipelines/chembl/activity.yaml` |
-| Entity Definition | `src/bioetl/domain/entities.py` |
+| Entity Definition | `src/bioetl/domain/entities/bioactivity.py` |
 | Transformer | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
-| Gold Filter | `src/bioetl/application/pipelines/chembl/activity_gold_filter.py` |
+| Gold Filter | `configs/filter/entities/chembl/activity.yaml` |
+| Data Quality | `configs/dq/entities/chembl/activity.yaml` |
 | Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` |
 
 ---
