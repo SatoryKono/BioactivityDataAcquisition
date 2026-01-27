@@ -211,6 +211,8 @@ class TestPubMedPublicationTransformer:
         assert result["pages"] == "123-145"
         # Dates
         assert result["pub_date"] == "2025-03-15"
+        assert result["pub_month"] == 3  # March
+        assert result["pub_day"] == 15  # Day from PubDate/Day element
         assert result["year"] == 2025
         assert result["publication_year"] == 2025
         assert result["epub_date"] == "2025-02-28"
