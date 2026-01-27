@@ -144,7 +144,9 @@ class DependencySchema(BaseModel):
         default=False, description="If True, failure causes composite failure"
     )
     timeout_seconds: int = Field(
-        default=600, gt=0, description="Maximum time for dependency execution in seconds"
+        default=600,
+        gt=0,
+        description="Maximum time for dependency execution in seconds",
     )
     silver_table: str | None = Field(
         default=None, description="Path to dependency's Silver table"

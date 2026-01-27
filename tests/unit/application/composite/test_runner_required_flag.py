@@ -69,6 +69,12 @@ class MockCompositeConfig:
     enrichers: tuple[MockEnricherConfig, ...] = ()
     dependencies: tuple = ()
 
+    @property
+    def required_dependencies(self) -> tuple[str, ...]:
+        return tuple(
+            d.pipeline for d in self.dependencies if getattr(d, "required", False)
+        )
+
     def __post_init__(self):
         if self.seed is None:
             self.seed = self.SeedConfig()

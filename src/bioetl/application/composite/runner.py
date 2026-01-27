@@ -440,9 +440,7 @@ class CompositePipelineRunner:
                 # Required dependency failed - transition to FAILED
                 state = state.with_state(CompositePipelineState.FAILED)
                 await self._checkpoint_manager.save(state)
-                raise RuntimeError(
-                    f"Required dependencies failed: {required_failed}"
-                )
+                raise RuntimeError(f"Required dependencies failed: {required_failed}")
 
             # Transition to DEPENDENCIES_COMPLETED
             previous_state = state.state
@@ -452,14 +450,18 @@ class CompositePipelineRunner:
                 to_state=CompositePipelineState.DEPENDENCIES_COMPLETED,
                 stage="dependencies_complete",
                 succeeded=len([r for r in dependency_results.values() if r.is_success]),
-                failed=len([r for r in dependency_results.values() if not r.is_success]),
+                failed=len(
+                    [r for r in dependency_results.values() if not r.is_success]
+                ),
             )
             self._logger.info(
                 PipelineEvent.phase_completed("dependencies"),
                 composite=self._config.name,
                 run_id=self._run_id_str,
                 succeeded=len([r for r in dependency_results.values() if r.is_success]),
-                failed=len([r for r in dependency_results.values() if not r.is_success]),
+                failed=len(
+                    [r for r in dependency_results.values() if not r.is_success]
+                ),
             )
             await self._checkpoint_manager.save(state)
 
