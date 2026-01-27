@@ -13,7 +13,7 @@
 *   **Причина**: Ожидаемая структура директорий в `data/` отсутствует или настроена неверно.
 *   **Решение**:
     1.  Сверьте локальную структуру хранения в [Local Storage Layout](local-storage-layout.md).
-    2.  Убедитесь, что директории под `data/output/` существуют и доступны для записи.
+    2.  Убедитесь, что базовая директория `data/` и подкаталоги `data/output/` существуют и доступны для записи.
     3.  Перезапустите пайплайн, чтобы он создал отсутствующие папки, если это требуется.
 
 ## Запуск пайплайнов
@@ -41,7 +41,7 @@
 *   **Причина**: Данные из источника изменились и больше не соответствуют модели в `src/bioetl/domain/`.
 *   **Решение**:
     1.  Изучите сообщение об ошибке и определите проблемное поле.
-    2.  Проверьте сырые данные в локальном Bronze-слое под `data/output/bronze/` (см. [Local Storage Layout](local-storage-layout.md)).
+    2.  Проверьте сырые данные в локальном Bronze-слое в `data/output/bronze/` (см. `data/` и [Local Storage Layout](local-storage-layout.md)).
     3.  Обновите Pydantic-модель в `src/bioetl/domain/` (например, сделайте поле опциональным или добавьте новое). Это событие **schema drift** и его нужно задокументировать.
 
 ## Качество данных
@@ -62,4 +62,5 @@
 - [Running Pipelines](running-pipelines.md) — CLI команды и опции
 - [Getting Started](getting-started.md) — первичная настройка
 - [ADR-010: Local-Only Deployment](../02-architecture/decisions/ADR-010-local-only-deployment.md) — режим локального запуска
+- [Local Storage Layout](local-storage-layout.md) — структура `data/` и слоёв хранения
 - [Project Rules](../RULES.md) — пороги качества данных и обработка ошибок
