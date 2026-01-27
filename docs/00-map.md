@@ -70,7 +70,7 @@ docs/
 │   ├── observability-layers.md  # Observability architecture
 │   ├── diagrams.md              # Mermaid diagrams collection
 │   ├── decisions/               # ADR-001..031 (31 records)
-│   └── diagrams/                # 34 .mermaid diagrams + supporting docs (index/policy) + render_diagrams.py
+│   └── diagrams/                # 34 диаграммы .mermaid + supporting docs (index/policy) + render_diagrams.py
 │
 ├── 03-guides/                   # How-to guides (16 guides)
 │   ├── add-new-source.md        # Adding new provider
@@ -413,7 +413,7 @@ graph TD
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
 | archived/audits/         | 2026-01-21   | Historical audit files       |
-| 02-architecture/diagrams/| 2025-12-31   | 34 Mermaid diagrams          |
+| 02-architecture/diagrams/| 2025-12-31   | 34 диаграммы Mermaid         |
 
 ---
 
