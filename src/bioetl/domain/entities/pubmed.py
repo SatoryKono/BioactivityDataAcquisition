@@ -77,11 +77,9 @@ class ArticleRecord(BaseModel):
     )
 
     # Authors (JSON-serialized list of hashed names for PII compliance)
+    # affiliations excluded per user request
     authors: str | None = PydanticField(
         default=None, description="Author names (JSON array, hashed for PII)"
-    )
-    affiliations: str | None = PydanticField(
-        default=None, description="Affiliations (JSON array of unique strings)"
     )
 
     # Dates (ISO format: YYYY-MM-DD or partial)

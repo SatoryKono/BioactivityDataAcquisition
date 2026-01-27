@@ -60,9 +60,8 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     first_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     last_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
 
-    # Authors
+    # Authors (affiliations excluded per user request)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
-    affiliations: Series[object] = pa.Field(nullable=True)  # list[str]
 
     # Date fields
     pub_date: Series[str] = pa.Field(nullable=True)
@@ -332,7 +331,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
 
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
-    abstract: Series[str] = pa.Field(nullable=True)
+    # abstract excluded per user request
     tldr: Series[str] = pa.Field(nullable=True)
     year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     publication_date: Series[str] = pa.Field(nullable=True)
@@ -357,8 +356,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # Classification (JSON strings)
     fields_of_study: Series[str] = pa.Field(nullable=True)
     publication_types: Series[str] = pa.Field(nullable=True)
-    authors: Series[str] = pa.Field(nullable=True)
-    affiliations: Series[object] = pa.Field(nullable=True)  # list[str]
+    # authors, affiliations excluded per user request
 
     # Source tracking (maps to _source column in DataFrame)
     source: Series[str] = pa.Field(nullable=True, alias="_source")

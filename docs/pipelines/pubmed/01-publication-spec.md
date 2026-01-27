@@ -27,7 +27,7 @@ PubMed publications are **biomedical literature** with MeSH indexing:
 
 - **MEDLINE citations**: Curated biomedical literature
 - **MeSH terms**: Medical Subject Headings for categorization
-- **Author affiliations**: Institution data
+- **Author affiliations**: Institution data (available in source, `structured_affiliations` field only)
 - **Grant information**: Funding sources
 - **Cross-database links**: DOI, PMC, ChEMBL
 

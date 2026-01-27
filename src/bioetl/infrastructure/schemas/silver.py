@@ -245,8 +245,7 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         ),  # Whether abstract has NLM sections
         # Dates (ISO format strings)
         pa.field("accepted_date", pa.string()),
-        # Authors
-        pa.field("affiliations", pa.string()),  # JSON-serialized list of affiliations
+        # Authors (affiliations excluded per user request)
         pa.field("author_count", pa.int64()),  # Denormalized count for query efficiency
         pa.field("authors", pa.string()),  # JSON-serialized list
         # Counts (denormalized for query efficiency)
@@ -659,13 +658,10 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         # _original_id: Original identifier used for lookup
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
-        pa.field("abstract", pa.string()),
-        # Classification (JSON strings)
-        pa.field("affiliations", pa.string()),
+        # abstract, affiliations, authors excluded per user request
         # External IDs
         pa.field("arxiv_id", pa.string()),
         pa.field("author_ids", pa.string()),
-        pa.field("authors", pa.string()),
         # Metrics
         pa.field("citation_count", pa.int64()),
         pa.field("corpus_id", pa.int64()),

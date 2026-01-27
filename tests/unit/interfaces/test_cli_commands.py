@@ -1306,6 +1306,10 @@ class TestRunCommandExceptionHandlers:
                 "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
                 return_value=mock_service,
             ),
+            patch("bioetl.interfaces.cli.commands.run.ensure_metrics_server_started"),
+            patch(
+                "bioetl.interfaces.cli.commands.run.health_server_context", MagicMock()
+            ),
         ):
             mock_registry.return_value.list_pipelines.return_value = ["foo"]
             result = cli_runner.invoke(cli, ["run", "--pipeline", "foo"])
@@ -1325,6 +1329,10 @@ class TestRunCommandExceptionHandlers:
             patch(
                 "bioetl.interfaces.cli.commands.run.get_pipeline_runner_service",
                 return_value=mock_service,
+            ),
+            patch("bioetl.interfaces.cli.commands.run.ensure_metrics_server_started"),
+            patch(
+                "bioetl.interfaces.cli.commands.run.health_server_context", MagicMock()
             ),
         ):
             mock_registry.return_value.list_pipelines.return_value = ["foo"]

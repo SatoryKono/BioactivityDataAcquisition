@@ -88,6 +88,22 @@ def _create_run_result(
 class TestRunAllWithMockedService:
     """Tests for run-all using mocked PipelineRunnerService."""
 
+    @pytest.fixture(autouse=True)
+    def mock_servers(self):
+        """Mock health and metrics servers to prevent port binding."""
+        with (
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.health_server_context",
+                MagicMock(),
+            ) as mock_health,
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.ensure_metrics_server_started"
+            ),
+        ):
+            mock_health.return_value.__aenter__.return_value = None
+            mock_health.return_value.__aexit__.return_value = None
+            yield
+
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     @patch("bioetl.interfaces.cli.commands.run_all.get_default_registry")
     @patch("bioetl.interfaces.cli.commands.run_all.get_pipeline_runner_service")

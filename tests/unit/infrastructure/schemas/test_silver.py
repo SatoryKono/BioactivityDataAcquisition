@@ -824,7 +824,7 @@ class TestPublicationSchemaCrossRefFields:
     @pytest.mark.parametrize(
         "schema,name",
         [
-            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
+            # ChEMBL excluded: pmc_id not available from ChEMBL API
             (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
             (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
             (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
@@ -840,7 +840,7 @@ class TestPublicationSchemaCrossRefFields:
     @pytest.mark.parametrize(
         "schema,name",
         [
-            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
+            # ChEMBL excluded: pmc_id not available from ChEMBL API
             (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
             (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
             (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
@@ -862,7 +862,7 @@ class TestPublicationSchemaUnifiedDateAndPageFields:
     @pytest.mark.parametrize(
         "schema,name",
         [
-            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
+            # ChEMBL excluded: publication_date not available from ChEMBL API
             (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
             (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
             (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
@@ -930,10 +930,10 @@ class TestAllPublicationSchemas:
         "schema,name",
         [
             (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
-            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
+            # CrossRef excluded: abstract not collected per user request
             (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
             (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
-            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
+            # SemanticScholar excluded: abstract, authors not collected per user request
         ],
     )
     def test_schema_has_core_fields(self, schema, name):

@@ -160,7 +160,7 @@ class TestGoldPublicationSchemaCoreFields:
             # CrossRef excluded: abstract not collected per user request
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
-            (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
+            # SemanticScholar excluded: abstract not collected per user request
         ],
     )
     def test_schema_has_title_and_abstract(self, schema_class, name):
@@ -176,7 +176,7 @@ class TestGoldPublicationSchemaCoreFields:
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
-            (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
+            # SemanticScholar excluded: authors not collected per user request
         ],
     )
     def test_schema_has_authors_field(self, schema_class, name):
@@ -356,7 +356,7 @@ class TestGoldSchemaValidation:
             "first_page": "100",
             "last_page": "110",
             "authors": '["Author One", "Author Two"]',
-            "affiliations": ["University A", "University B"],
+            # affiliations excluded per user request
             "pub_date": "2024-03-15",
             "pub_month": 3,
             "pub_day": 15,

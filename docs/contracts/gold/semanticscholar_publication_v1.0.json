@@ -50,12 +50,6 @@
         "null"
       ]
     },
-    "abstract": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
     "tldr": {
       "type": [
         "string",
@@ -150,12 +144,6 @@
       ]
     },
     "publication_types": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "authors": {
       "type": [
         "string",
         "null"

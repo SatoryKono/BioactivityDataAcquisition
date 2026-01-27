@@ -239,11 +239,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         raw_authors = AuthorExtractor.parse_authors(article)
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
-        # Extract affiliations (legacy format - plain text list)
-        raw_affiliations = AuthorExtractor.parse_affiliations(article)
-        serialized_affiliations = self.serialize_json_list(raw_affiliations)
-
-        # Extract structured affiliations with identifiers
+        # Extract structured affiliations with identifiers (affiliations field excluded)
         structured_affs = AuthorExtractor.parse_structured_affiliations(article)
         processed_structured_affs = self._process_structured_affiliations(
             structured_affs
@@ -273,7 +269,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             ),
             "abstract_structured": AbstractExtractor.is_abstract_structured(article),
             "authors": self.serialize_json_list(hashed_authors),
-            "affiliations": serialized_affiliations,
+            # affiliations excluded per user request
             "structured_affiliations": serialized_structured_affs,
             "author_count": len(hashed_authors),
             **self._extract_journal_data(article),
