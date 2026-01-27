@@ -385,3 +385,83 @@ class TestFilteredDataSourceDelegation:
         await filtered.aclose()
 
         mock_data_source.aclose.assert_called_once()
+
+
+@pytest.mark.unit
+class TestFilteredDataSourceFallback:
+    """Tests for fetch_filtered_with_fallback flow (composite mode)."""
+
+    @pytest.mark.asyncio
+    async def test_fetch_uses_fallback_when_direct_fallback_mapping_provided(
+        self,
+        mock_data_source_with_filtered,
+    ):
+        """Test fetch uses fetch_filtered_with_fallback when fallback_mapping is set."""
+        # Direct filter config with fallback mapping (composite mode)
+        config = InputFilterConfig(
+            enabled=True,
+            filter_field="doi",
+            direct_filter_ids=("10.1038/test1", "10.1038/test2"),
+            direct_fallback_mapping={
+                "10.1038/test1": "Machine Learning in Drug Discovery",
+                "10.1038/test2": "Deep Learning for Bioactivity",
+            },
+        )
+
+        filtered = FilteredDataSource(
+            data_source=mock_data_source_with_filtered,
+            filter_reader=None,
+            filter_config=config,
+        )
+
+        # Enter context to load direct filter IDs
+        await filtered.__aenter__()
+
+        # Verify fallback_mapping was loaded
+        assert filtered._fallback_mapping is not None
+        assert len(filtered._fallback_mapping) == 2
+        assert (
+            filtered._fallback_mapping["10.1038/test1"]
+            == "Machine Learning in Drug Discovery"
+        )
+
+        records = []
+        async for record in filtered.fetch("publication"):
+            records.append(record)
+
+        # Should use fetch_filtered_with_fallback (returns fallback_1, fallback_2)
+        assert len(records) == 2
+        assert records == [{"id": "fallback_1"}, {"id": "fallback_2"}]
+
+    @pytest.mark.asyncio
+    async def test_fetch_uses_regular_filtered_without_fallback_mapping(
+        self,
+        mock_data_source_with_filtered,
+    ):
+        """Test fetch uses fetch_filtered when no fallback_mapping is set."""
+        # Direct filter config WITHOUT fallback mapping
+        config = InputFilterConfig(
+            enabled=True,
+            filter_field="doi",
+            direct_filter_ids=("10.1038/test1", "10.1038/test2"),
+            # No direct_fallback_mapping
+        )
+
+        filtered = FilteredDataSource(
+            data_source=mock_data_source_with_filtered,
+            filter_reader=None,
+            filter_config=config,
+        )
+
+        await filtered.__aenter__()
+
+        # Verify no fallback_mapping
+        assert filtered._fallback_mapping is None
+
+        records = []
+        async for record in filtered.fetch("publication"):
+            records.append(record)
+
+        # Should use regular fetch_filtered (returns filtered_1, filtered_2)
+        assert len(records) == 2
+        assert records == [{"id": "filtered_1"}, {"id": "filtered_2"}]
