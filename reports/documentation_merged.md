@@ -4,13 +4,15 @@ Path: 00-map.md
 ================================================================================
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.12 | Last updated: 2026-01-21*
+*Synced with RULES.md v5.12 | Last updated: 2026-01-26*
 
-> **Documentation Audit Completed:** 2026-01-21
-> - RULES.md updated to v5.12: ADR-021..028 added to registry with inline references
-> - REQUIREMENTS.md updated to v1.4: correct count 156 (was 139)
-> - Added ADR-028-filter-rules-externalization to 00-map.md
-> - See: [archived/audits/sync-audit-2026-01-21.md](archived/audits/sync-audit-2026-01-21.md) for details
+> **Documentation Update:** 2026-01-26
+> - Architecture diagrams updated: Composite Pipeline (ADR-026) added to layer diagrams
+> - New diagram: `26_composite_pipeline_workflow.mmd` — visualizes seed → enrich → merge flow
+> - Cross-links added between all layer documents (Domain ↔ Application ↔ Infrastructure ↔ Interfaces ↔ Composition)
+> - All 7 providers now reflected in diagrams (including CrossRef, OpenAlex, SemanticScholar)
+> - ADR-030, ADR-031 added to registry
+> - See: [02-architecture/00-overview.md](02-architecture/00-overview.md) for updated architecture overview
 
 ## Quick Links
 
@@ -72,8 +74,8 @@ docs/
 │   ├── data-layers.md           # Bronze/Silver/Gold layer details
 │   ├── observability-layers.md  # Observability architecture
 │   ├── diagrams.md              # Mermaid diagrams collection
-│   ├── decisions/               # ADR-001..029 (29 records)
-│   └── diagrams/                # 34 Mermaid diagram files + render_diagrams.py
+│   ├── decisions/               # ADR-001..031 (31 records)
+│   └── diagrams/                # 35 Mermaid diagram files + render_diagrams.py
 │
 ├── 03-guides/                   # How-to guides (13 guides)
 │   ├── quick-start.md           # Quick start guide
@@ -187,6 +189,8 @@ docs/
 | [ADR-027: DQ Rules Externalization](02-architecture/decisions/ADR-027-dq-rules-externalization.md) | Hierarchical DQ configuration | §3.1.2   |
 | [ADR-028: Filter Rules Externalization](02-architecture/decisions/ADR-028-filter-rules-externalization.md) | Hierarchical filter configuration | App D   |
 | [ADR-029: Output Metadata Unification](02-architecture/decisions/ADR-029-output-metadata-unification.md) | Unified output metadata contracts | §2.4    |
+| [ADR-030: Publication Pagination Strategy](02-architecture/decisions/ADR-030-publication-pagination-strategy.md) | Publication pagination strategy | -       |
+| [ADR-031: Loading Strategy Formalization](02-architecture/decisions/ADR-031-loading-strategy-formalization.md) | Loading strategy formalization | -       |
 
 ### Data Management
 
@@ -975,7 +979,7 @@ Path: 02-architecture\00-overview.md
 ================================================================================
 # Architecture Overview
 
-*Synced with RULES.md v5.12 (2026-01-06)*
+*Synced with RULES.md v5.12 (2026-01-26)*
 
 ## Quick Navigation
 
@@ -1003,15 +1007,16 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 
 ### Diagrams
 
-- [diagrams/](diagrams/) — 34 Mermaid diagram files
+- [diagrams/](diagrams/) — 35 Mermaid diagram files
 - [diagrams/diagrams-index.md](diagrams/diagrams-index.md) — Full diagram index
 - [diagrams.md](diagrams.md) — Inline diagram collection
+- [../diagrams/mermaid/](../diagrams/mermaid/) — Additional 26 diagrams (includes Composite Pipeline workflow)
 
 ### Architecture Decision Records (ADRs)
 
 See [decisions/README.md](decisions/README.md) for full index with categories.
 
-29 ADRs documenting key architectural decisions:
+31 ADRs documenting key architectural decisions:
 
 | ADR | Topic | RULES.md Reference |
 |-----|-------|-------------------|
@@ -1044,6 +1049,8 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-027](decisions/ADR-027-dq-rules-externalization.md) | DQ Rules Externalization | §3.1.2 |
 | [ADR-028](decisions/ADR-028-filter-rules-externalization.md) | Filter Rules Externalization | App D |
 | [ADR-029](decisions/ADR-029-output-metadata-unification.md) | Output Metadata Unification | §2.4 |
+| [ADR-030](decisions/ADR-030-publication-pagination-strategy.md) | Publication Pagination Strategy | - |
+| [ADR-031](decisions/ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | - |
 
 ---
 
@@ -1067,6 +1074,17 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 2. **Ports & Adapters**: Interfaces in `domain/ports/`, implementations in `infrastructure/`
 3. **Composition Root**: Single assembly point in `composition/bootstrap.py`
 4. **Medallion Architecture**: Bronze (raw) → Silver (normalized) → Gold (curated)
+5. **Composite Pipeline** (ADR-026): Multi-source data enrichment with seed → enrich (fan-out) → merge workflow
+
+### Key Diagrams
+
+| Diagram | Description | File |
+|---------|-------------|------|
+| Five Layer Architecture | Complete system architecture with all 5 layers | [01_five_layer_architecture.mmd](../diagrams/mermaid/01_five_layer_architecture.mmd) |
+| Layers Interaction | How layers communicate | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid) |
+| Composite Pipeline | ADR-026 workflow: seed → enrich → merge | [26_composite_pipeline_workflow.mmd](../diagrams/mermaid/26_composite_pipeline_workflow.mmd) |
+| Provider Adapters | 7 providers with rate limits | [23_provider_adapters_overview.mmd](../diagrams/mermaid/23_provider_adapters_overview.mmd) |
+| Pipeline Hierarchy | Pipeline/Transformer inheritance | [17-pipeline-hierarchy.mermaid](diagrams/17-pipeline-hierarchy.mermaid) |
 
 ---
 
@@ -1225,6 +1243,39 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 - **Валидация данных:** Логика валидации бизнес-сущностей (например, проверка SMILES-строк) может находиться здесь, если она не требует внешних зависимостей.
 - **Иммутабельность:** Предпочтение отдаётся иммутабельным структурам данных (например, `NamedTuple`, `dataclasses(frozen=True)`).
 
+---
+
+## 4. Связанные Материалы
+
+### Навигация по Слоям
+
+| ← Предыдущий | Текущий | Следующий → |
+|--------------|---------|-------------|
+| — | **Domain** | [Application Layer](02-application-layer.md) |
+
+### Связанные Диаграммы
+
+| Диаграмма | Файл | Описание |
+|-----------|------|----------|
+| Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](diagrams/04-domain-layer-class-diagram.mermaid) | Классы портов, сущностей, конфигурации |
+| Domain DDD | [08-domain-ddd.mermaid](diagrams/08-domain-ddd.mermaid) | DDD-структура домена |
+| Domain Models | [13-domain-models-relationship.mermaid](diagrams/13-domain-models-relationship.mermaid) | Связи доменных моделей |
+| DDD Aggregates | [../diagrams/mermaid/09_ddd_aggregates.mmd](../diagrams/mermaid/09_ddd_aggregates.mmd) | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
+| Ports Architecture | [../diagrams/mermaid/07_ports_architecture.mmd](../diagrams/mermaid/07_ports_architecture.mmd) | Архитектура 26 портов |
+
+### Связанные ADR
+
+| ADR | Тема |
+|-----|------|
+| [ADR-004](decisions/ADR-004-pydantic-vs-dataclasses.md) | Pydantic vs Dataclasses — выбор dataclasses |
+| [ADR-021](decisions/ADR-021-ddd-aggregates-adoption.md) | DDD Aggregates — внедрение агрегатов |
+
+### Смежные Разделы Документации
+
+- [RULES.md §1 "Архитектура и Слои"](../RULES.md) — матрица импортов, правила слоёв
+- [API Reference: Domain](../04-reference/api/domain.md) — API документация слоя
+- [Glossary](../glossary.md) — терминология Ubiquitous Language
+
 ================================================================================
 File: 02-application-layer.md
 Path: 02-architecture\02-application-layer.md
@@ -1344,11 +1395,72 @@ class RunnerServices:
     observer: PipelineObserver
 ```
 
+### 2.5. `composite/` — Composite Pipeline (ADR-026)
+
+**Расположение:** `src/bioetl/application/composite/`
+
+Содержит компоненты для **композитных пайплайнов** — оркестрации нескольких пайплайнов для обогащения данных из разных источников.
+
+**Ключевые компоненты:**
+
+| Файл | Компонент | Назначение |
+|------|-----------|------------|
+| `runner.py` | `CompositePipelineRunner` | Оркестрирует: seed → enrich (fan-out) → merge |
+| `coordinator.py` | `EnrichmentCoordinator` | Параллельный запуск enrichers через asyncio.gather |
+| `merger.py` | `MergeService` | Объединение данных из разных источников (LEFT OUTER JOIN) |
+| `key_extractor.py` | `KeyExtractorService` | Извлечение join keys из seed pipeline |
+| `checkpoint.py` | `CompositeCheckpointManager` | Resume после сбоя |
+
+**Workflow Composite Pipeline:**
+```
+Seed Pipeline → Extract Keys → [CrossRef, OpenAlex, PubMed, SemanticScholar] → Merge → Gold
+                                     ↑ Fan-Out (parallel)
+```
+
+См. [ADR-026: Composite Pipeline Pattern](decisions/ADR-026-composite-pipeline-pattern.md) для деталей.
+
 ## 3. Принципы Работы
 
 - **Dependency Injection:** Пайплайны никогда не создают зависимости сами (`S3Storage()`). Они получают уже созданные экземпляры адаптеров в конструкторе. Это делает их легко тестируемыми и гибкими.
 - **Минимум логики:** Слой `Application` должен быть "тонким". Вся сложная бизнес-логика выносится в `Domain`, а детали реализации — в `Infrastructure`.
 - **Управление транзакциями:** Этот слой отвечает за управление жизненным циклом операций, включая обработку ошибок, повторные попытки и откат в случае сбоя.
+
+---
+
+## 4. Связанные Материалы
+
+### Навигация по Слоям
+
+| ← Предыдущий | Текущий | Следующий → |
+|--------------|---------|-------------|
+| [Domain Layer](01-domain-layer.md) | **Application** | [Infrastructure Layer](03-infrastructure-layer.md) |
+
+### Связанные Диаграммы
+
+| Диаграмма | Файл | Описание |
+|-----------|------|----------|
+| Application Layer Classes | [06-application-layer-class-diagram.mermaid](diagrams/06-application-layer-class-diagram.mermaid) | Классы слоя Application |
+| Pipeline Execution | [06-pipeline-execution.mermaid](diagrams/06-pipeline-execution.mermaid) | Поток выполнения пайплайна |
+| Pipeline Hierarchy | [17-pipeline-hierarchy.mermaid](diagrams/17-pipeline-hierarchy.mermaid) | Иерархия Pipeline/Transformer |
+| Layers Interaction | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid) | Взаимодействие слоёв (включая Composite) |
+| Composite Pipeline | [../diagrams/mermaid/26_composite_pipeline_workflow.mmd](../diagrams/mermaid/26_composite_pipeline_workflow.mmd) | Workflow Composite Pipeline |
+| Pipeline Core | [../diagrams/mermaid/10_pipeline_core_components.mmd](../diagrams/mermaid/10_pipeline_core_components.mmd) | Ядро пайплайнов |
+| BaseTransformer | [../diagrams/mermaid/19_base_transformer_template_method.mmd](../diagrams/mermaid/19_base_transformer_template_method.mmd) | Template Method паттерн |
+
+### Связанные ADR
+
+| ADR | Тема |
+|-----|------|
+| [ADR-015](decisions/ADR-015-pipeline-services-lifecycle.md) | Pipeline Services Lifecycle |
+| [ADR-020](decisions/ADR-020-basepipeline-decomposition.md) | BasePipeline Decomposition |
+| [ADR-026](decisions/ADR-026-composite-pipeline-pattern.md) | Composite Pipeline Pattern |
+
+### Смежные Разделы Документации
+
+- [Domain Layer](01-domain-layer.md) — порты, используемые Application
+- [Composition Layer](05-composition-layer.md) — сборка и DI пайплайнов
+- [API Reference: Application](../04-reference/api/application.md) — API документация слоя
+- [RULES.md §1 "Архитектура и Слои"](../RULES.md) — матрица импортов
 
 ================================================================================
 File: 03-infrastructure-layer.md
@@ -1391,10 +1503,13 @@ Path: 02-architecture\03-infrastructure-layer.md
 
 | Адаптер | Базовый класс | HTTP-клиент | Примечание |
 |---------|---------------|-------------|------------|
-| **ChemblAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP |
-| **UniProtAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP |
-| **PubMedAdapter** | `@dataclass` | `UnifiedHTTPClient` | Async HTTP |
-| **PubChemAdapter** | `BaseSyncAdapter` | `pubchempy` + ThreadPool | Legacy sync библиотека |
+| **ChemblAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 13 entities |
+| **UniProtAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 100 req/sec |
+| **PubMedAdapter** | `@dataclass` | `UnifiedHTTPClient` | Async HTTP, 3 req/sec |
+| **PubChemAdapter** | `BaseSyncAdapter` | `pubchempy` + ThreadPool | Legacy sync, 5 req/sec |
+| **CrossRefAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, polite pool |
+| **OpenAlexAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 10 req/sec |
+| **SemanticScholarAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 100 req/5min |
 
 **Архитектура HTTP-адаптеров:**
 
@@ -1471,6 +1586,43 @@ Redis-адаптер без изменения domain/application слоёв.
 - **Инверсия зависимостей:** Классы из `Infrastructure` зависят от абстракций (`Protocol`) из `Domain`, а не наоборот. Это позволяет подменять реализации без изменения ядра системы.
 - **Конфигурация:** Все необходимые параметры (API-ключи, пути, адреса серверов) адаптеры получают через DI из конфигурационных объектов.
 
+---
+
+## 4. Связанные Материалы
+
+### Навигация по Слоям
+
+| ← Предыдущий | Текущий | Следующий → |
+|--------------|---------|-------------|
+| [Application Layer](02-application-layer.md) | **Infrastructure** | [Interfaces Layer](04-interfaces-layer.md) |
+
+### Связанные Диаграммы
+
+| Диаграмма | Файл | Описание |
+|-----------|------|----------|
+| Infrastructure Classes | [10-infrastructure-layer-class-diagram.mermaid](diagrams/10-infrastructure-layer-class-diagram.mermaid) | Классы слоя Infrastructure |
+| Provider Adapters | [../diagrams/mermaid/23_provider_adapters_overview.mmd](../diagrams/mermaid/23_provider_adapters_overview.mmd) | Обзор 7 провайдеров и их rate limits |
+| HTTP Infrastructure | [../diagrams/mermaid/14_http_infrastructure.mmd](../diagrams/mermaid/14_http_infrastructure.mmd) | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
+| Circuit Breaker | [07-circuit-breaker-states.mermaid](diagrams/07-circuit-breaker-states.mermaid) | Состояния Circuit Breaker |
+| Storage Architecture | [../diagrams/mermaid/13_storage_architecture.mmd](../diagrams/mermaid/13_storage_architecture.mmd) | Bronze, Silver, Gold writers |
+| MemoryLock | [16-memory-lock-class.mermaid](diagrams/16-memory-lock-class.mermaid) | Класс MemoryLock |
+
+### Связанные ADR
+
+| ADR | Тема |
+|-----|------|
+| [ADR-003](decisions/ADR-003-in-memory-locking-strategy.md) | In-Memory Locking Strategy |
+| [ADR-007](decisions/ADR-007-circuit-breaker-implementation.md) | Circuit Breaker Implementation |
+| [ADR-010](decisions/ADR-010-local-only-deployment.md) | Local-Only Deployment |
+| [ADR-017](decisions/ADR-017-observability-architecture.md) | Observability Architecture |
+
+### Смежные Разделы Документации
+
+- [Domain Layer](01-domain-layer.md) — порты, реализуемые адаптерами
+- [Composition Layer](05-composition-layer.md) — фабрики создания адаптеров
+- [API Reference: Infrastructure](../04-reference/api/infrastructure.md) — API документация слоя
+- [RULES.md §3 "Ошибки"](../RULES.md) — классификация ошибок, retry logic
+
 ================================================================================
 File: 04-interfaces-layer.md
 Path: 02-architecture\04-interfaces-layer.md
@@ -1492,15 +1644,32 @@ Path: 02-architecture\04-interfaces-layer.md
 
 ## 2. Ключевые Компоненты
 
-### 2.1. `cli.py` — Интерфейс Командной Строки
+### 2.1. `cli/` — Интерфейс Командной Строки
 
-**Расположение:** `src/bioetl/interfaces/cli.py`
+**Расположение:** `src/bioetl/interfaces/cli/`
 
-Реализует CLI для взаимодействия с пользователем. Использует библиотеку `Click` для определения команд.
+Реализует CLI для взаимодействия с пользователем. Использует библиотеку **Click** для определения команд.
 
-**Пример команды:**
+**Доступные команды:**
+
+| Команда | Описание |
+|---------|----------|
+| `run` | Запуск одного пайплайна |
+| `run_all` | Запуск всех пайплайнов провайдера |
+| `export` | Экспорт данных из Gold |
+| `quarantine` | Управление карантинными записями |
+| `health` | Проверка здоровья провайдеров |
+
+**Примеры использования:**
 ```bash
+# Запуск пайплайна с лимитом
 python -m bioetl run --pipeline chembl_activity --limit 100
+
+# Запуск композитного пайплайна (ADR-026)
+python -m bioetl run --pipeline composite_publication
+
+# Проверка здоровья провайдеров
+python -m bioetl health --provider chembl
 ```
 
 `cli.py` парсит эти аргументы, вызывает функции из `src/bioetl/composition/bootstrap.py` для инициализации системы и запускает выполнение пайплайна.
@@ -1520,6 +1689,37 @@ python -m bioetl run --pipeline chembl_activity --limit 100
 - **Максимальная простота:** Этот слой должен быть как можно более "глупым". Его задача — делегировать работу другим слоям, а не выполнять её самому.
 - **Единственная ответственность:** Единственная ответственность этого слоя — запуск приложения и управление его жизненным циклом на самом верхнем уровне.
 - **Импорт из всех слоёв:** Это единственный слой, которому разрешено импортировать модули из `domain`, `application` и `infrastructure` для того, чтобы "собрать" приложение воедино.
+
+---
+
+## 4. Связанные Материалы
+
+### Навигация по Слоям
+
+| ← Предыдущий | Текущий | Следующий → |
+|--------------|---------|-------------|
+| [Infrastructure Layer](03-infrastructure-layer.md) | **Interfaces** | [Composition Layer](05-composition-layer.md) |
+
+### Связанные Диаграммы
+
+| Диаграмма | Файл | Описание |
+|-----------|------|----------|
+| Five Layer Architecture | [../diagrams/mermaid/01_five_layer_architecture.mmd](../diagrams/mermaid/01_five_layer_architecture.mmd) | Полная архитектура с Interfaces слоем |
+| Layers Interaction | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid) | Взаимодействие слоёв |
+| Graceful Shutdown | [../diagrams/mermaid/24_graceful_shutdown.mmd](../diagrams/mermaid/24_graceful_shutdown.mmd) | Sequence diagram graceful shutdown |
+
+### Связанные ADR
+
+| ADR | Тема |
+|-----|------|
+| [ADR-008](decisions/ADR-008-graceful-shutdown-strategy.md) | Graceful Shutdown Strategy |
+| [ADR-026](decisions/ADR-026-composite-pipeline-pattern.md) | Composite Pipeline — расширения CLI |
+
+### Смежные Разделы Документации
+
+- [Composition Layer](05-composition-layer.md) — bootstrap_pipeline, фабрики
+- [CLI Reference](../04-reference/cli.md) — полная документация CLI команд
+- [RULES.md §1 "Архитектура и Слои"](../RULES.md) — матрица импортов (interfaces может импортировать всё)
 
 ================================================================================
 File: 05-composition-layer.md
@@ -1578,13 +1778,16 @@ data_source = ProviderRegistry.create_data_source(
 )
 ```
 
-**Зарегистрированные провайдеры:**
-| Provider | Data Sources | Pipelines |
-|----------|--------------|-----------|
-| chembl | ChemblAdapter | activity, assay, molecule, target, document, target_component |
-| pubchem | PubChemAdapter | compound |
-| uniprot | UniProtAdapter | protein |
-| pubmed | PubMedAdapter | publications |
+**Зарегистрированные провайдеры (7 шт):**
+| Provider | Data Sources | Pipelines | Rate Limit |
+|----------|--------------|-----------|------------|
+| chembl | ChemblAdapter | activity, assay, molecule, target, document, target_component (13) | None |
+| pubchem | PubChemAdapter | compound | 5 req/sec |
+| uniprot | UniProtAdapter | protein | 100 req/sec |
+| pubmed | PubMedAdapter | publications | 3 req/sec |
+| crossref | CrossRefAdapter | publication | Polite pool |
+| openalex | OpenAlexAdapter | publication | 10 req/sec |
+| semanticscholar | SemanticScholarAdapter | publication | 100 req/5min |
 
 ### 2.3. `registry.py` — Реестр пайплайнов
 
@@ -1595,6 +1798,56 @@ data_source = ProviderRegistry.create_data_source(
 - **Composition Root:** Вся логика создания объектов должна находиться как можно ближе к точке входа в приложение. В BioETL это `src/bioetl/composition/`.
 - **Dependency Injection (DI):** Объекты никогда не создают свои зависимости сами. Если пайплайну нужен доступ к базе данных, он запрашивает `StoragePort` в конструкторе, а фабрика из слоя Composition предоставляет ему конкретную реализацию.
 - **Декларативность:** Использование `GenericPipelineFactory` позволяет добавлять новые пайплайны простым объявлением в `pipeline_factories.py` без написания шаблонного кода сборки.
+
+### 3.1. Composite Pipeline Bootstrap (ADR-026)
+
+Для композитных пайплайнов доступна функция `bootstrap_composite_pipeline()`:
+
+```python
+from bioetl.composition.composite.bootstrap import bootstrap_composite_pipeline
+
+runner = await bootstrap_composite_pipeline(
+    "composite_publication",
+    limit=1000,
+)
+result = await runner.run()
+```
+
+См. [ADR-026: Composite Pipeline Pattern](decisions/ADR-026-composite-pipeline-pattern.md) для деталей.
+
+---
+
+## 4. Связанные Материалы
+
+### Навигация по Слоям
+
+| ← Предыдущий | Текущий | Следующий → |
+|--------------|---------|-------------|
+| [Interfaces Layer](04-interfaces-layer.md) | **Composition** | — |
+
+### Связанные Диаграммы
+
+| Диаграмма | Файл | Описание |
+|-----------|------|----------|
+| Composition Root | [../diagrams/mermaid/11_composition_root.mmd](../diagrams/mermaid/11_composition_root.mmd) | DI container, factories, bootstrap |
+| Factory Pattern | [../diagrams/mermaid/20_factory_pattern_usage.mmd](../diagrams/mermaid/20_factory_pattern_usage.mmd) | Использование Factory паттерна |
+| Five Layer Architecture | [../diagrams/mermaid/01_five_layer_architecture.mmd](../diagrams/mermaid/01_five_layer_architecture.mmd) | Composition слой в архитектуре |
+| Layers Interaction | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid) | Bootstrap → Factories → Runner |
+
+### Связанные ADR
+
+| ADR | Тема |
+|-----|------|
+| [ADR-005](decisions/ADR-005-composition-layer-separation.md) | Composition Layer Separation |
+| [ADR-025](decisions/ADR-025-pipeline-config-unification.md) | Pipeline Config Unification |
+| [ADR-026](decisions/ADR-026-composite-pipeline-pattern.md) | Composite Pipeline Pattern |
+
+### Смежные Разделы Документации
+
+- [Interfaces Layer](04-interfaces-layer.md) — CLI использует bootstrap
+- [Application Layer](02-application-layer.md) — пайплайны, создаваемые фабриками
+- [Infrastructure Layer](03-infrastructure-layer.md) — адаптеры, регистрируемые в ProviderRegistry
+- [API Reference: Composition](../04-reference/api/composition.md) — API документация слоя
 
 ================================================================================
 File: architecture-diagrams.md
@@ -10530,9 +10783,9 @@ Path: 02-architecture\diagrams\diagrams-index.md
 ================================================================================
 # BioETL Architecture Diagrams
 
-*Updated: 2026-01-05*
+*Updated: 2026-01-26*
 
-This directory contains 34 Mermaid diagram source files documenting the BioETL architecture.
+This directory contains 35 Mermaid diagram source files documenting the BioETL architecture.
 
 > **Note**: `DeltaWriter` was renamed to `SilverWriter` (see `silver_writer.py`). Some older diagrams may reference the old name.
 
@@ -10574,6 +10827,14 @@ This directory contains 34 Mermaid diagram source files documenting the BioETL a
 | 23 | `23-delta-lake-writer-class.mermaid` | DeltaWriter class diagram |
 | 24 | `24-hash-service-class.mermaid` | Hash service class diagram |
 | 25 | `25-circuit-breaker-observer-class.mermaid` | CircuitBreaker class diagram |
+
+### New: Composite Pipeline Diagrams
+
+Additional diagrams for Composite Pipeline (ADR-026) are available in `/docs/diagrams/mermaid/`:
+
+| File | Description |
+|------|-------------|
+| `26_composite_pipeline_workflow.mmd` | Composite Pipeline workflow: seed → enrich (fan-out) → merge |
 
 ## Rendering to PNG
 
@@ -26912,6 +27173,226 @@ src/bioetl/application/services/dq/
 - **v1.0** (2026-01-25): Первоначальный анализ
 
 ================================================================================
+File: pipeline-field-validation-report.md
+Path: analysis\pipeline-field-validation-report.md
+================================================================================
+# Pipeline Field Validation Report
+
+**Дата анализа:** 2026-01-26
+**Аналитик:** Claude Code
+**Версия кодовой базы:** a1973db
+
+---
+
+## Резюме
+
+Проведён полный аудит соответствия полей между Pandera-схемами и трансформерами для всех 8 провайдеров (21 пайплайн). Выявлено:
+
+| Категория | Количество |
+|-----------|------------|
+| 🔴 Критические ошибки | 2 |
+| ⚠️ Предупреждения | 3 |
+| ✅ Корректные пайплайны | 5 |
+
+---
+
+## 1. ChEMBL Activity Pipeline
+
+### Схема: `ActivitySchema`
+**Файл:** `src/bioetl/domain/schemas/chembl/activity.py`
+
+### Извлекаемые поля (48):
+
+| Категория | Поля |
+|-----------|------|
+| Идентификаторы | `activity_id`, `assay_chembl_id`, `molecule_chembl_id`, `target_chembl_id`, `document_chembl_id`, `record_id`, `src_id` |
+| Стандартизованные значения | `standard_relation`, `standard_value`, `standard_units`, `standard_type`, `standard_flag`, `standard_text_value`, `standard_upper_value` |
+| Исходные значения | `type`, `relation`, `value`, `units`, `text_value`, `upper_value` |
+| Метрики | `pchembl_value` |
+| Качество | `data_validity_comment`, `activity_comment`, `potential_duplicate`, `toid` |
+| Онтологии | `bao_endpoint`, `uo_units`, `qudt_units`, `bao_format`, `bao_label` |
+| Ligand Efficiency | `ligand_efficiency_bei`, `ligand_efficiency_le`, `ligand_efficiency_lle`, `ligand_efficiency_sei` |
+| Action Type | `action_type_action_type`, `action_type_description`, `action_type_parent_type` |
+| Молекула/Таргет | `canonical_smiles`, `molecule_pref_name`, `parent_molecule_chembl_id`, `target_pref_name`, `target_organism`, `target_taxonomy_id` |
+| Ассей | `assay_type`, `assay_description`, `assay_variant_accession`, `assay_variant_mutation` |
+| Документ | `document_journal`, `document_year` |
+| JSON | `activity_properties` |
+
+**Статус:** ✅ Корректно
+
+---
+
+## 2. ChEMBL Molecule Pipeline
+
+### Схема: `MoleculeSchema`
+**Файл:** `src/bioetl/domain/schemas/chembl/molecule.py`
+
+### Извлекаемые поля (52):
+
+| Категория | Поля |
+|-----------|------|
+| Идентификаторы | `molecule_chembl_id` |
+| Свойства | `pref_name`, `molecule_type`, `structure_type`, `max_phase`, `first_approval` |
+| Флаги | `oral`, `parenteral`, `topical`, `therapeutic_flag`, `withdrawn_flag`, `black_box_warning`, `natural_product`, `first_in_class`, `prodrug`, `inorganic_flag`, `polymer_flag`, `chirality`, `dosed_ingredient`, `availability_type` |
+| USAN | `usan_stem`, `usan_stem_definition`, `usan_substem`, `usan_year` |
+| Биополимеры | `helm_notation`, `molecule_species` |
+| Иерархия | `hierarchy_parent_chembl_id`, `hierarchy_active_chembl_id`, `hierarchy_child_chembl_id` |
+| Физ-хим | `property_alogp`, `property_mw_freebase`, `property_full_mwt`, `property_hba`, `property_hbd`, `property_psa`, `property_rtb`, `property_ro5_violations`, `property_heavy_atoms`, `property_aromatic_rings`, `property_qed_weighted`, `property_full_molformula`, `property_ro3_pass` |
+| Структура | `canonical_smiles`, `standard_inchi`, `inchikey` |
+| JSON | `molecule_hierarchy`, `molecule_properties`, `molecule_structures`, `molecule_synonyms`, `cross_references`, `atc_classifications` |
+
+### ⚠️ Предупреждение
+
+| Поле | Проблема | Рекомендация |
+|------|----------|--------------|
+| `structure_standard_inchi_key` | Определено в схеме (строка 30), но не заполняется | Удалить из схемы или синхронизировать с `inchikey` |
+
+---
+
+## 3. PubChem Compound Pipeline
+
+### Схема: `PubchemMoleculeSchema`
+**Файл:** `src/bioetl/domain/schemas/pubchem/compound.py`
+
+### Извлекаемые поля (40):
+
+| Категория | Поля |
+|-----------|------|
+| Идентификаторы | `cid` |
+| Структура | `canonical_smiles`, `isomeric_smiles`, `inchi`, `inchi_key`, `molecular_formula`, `iupac_name` |
+| Физ-хим | `molecular_weight`, `exact_mass`, `monoisotopic_mass`, `xlogp`, `tpsa`, `complexity`, `charge` |
+| Атомы/Связи | `heavy_atom_count`, `h_bond_donor_count`, `h_bond_acceptor_count`, `rotatable_bond_count` |
+| Стереохимия | `atom_stereo_count`, `defined_atom_stereo_count`, `undefined_atom_stereo_count`, `bond_stereo_count`, `defined_bond_stereo_count`, `undefined_bond_stereo_count`, `isotope_atom_count`, `covalent_unit_count` |
+| 3D | `volume_3d`, `conformer_count_3d`, `feature_acceptor_count_3d`, `feature_donor_count_3d`, `feature_anion_count_3d`, `feature_cation_count_3d`, `feature_ring_count_3d`, `feature_hydrophobe_count_3d`, `effective_rotor_count_3d`, `conformer_rmsd_3d`, `x_steric_quadrupole_3d`, `y_steric_quadrupole_3d`, `z_steric_quadrupole_3d`, `feature_count_3d` |
+
+### ⚠️ Предупреждение
+
+| Поле | Проблема | Рекомендация |
+|------|----------|--------------|
+| `inchi_key` vs `inchikey` | Схема: `inchi_key`, трансформер: `inchikey` | Унифицировать именование |
+
+---
+
+## 4. UniProt Protein Pipeline
+
+### Схема: `UniprotTargetSchema`
+**Файл:** `src/bioetl/domain/schemas/uniprot/protein.py`
+
+### Извлекаемые поля (45):
+
+| Категория | Поля |
+|-----------|------|
+| Идентификаторы | `accession`, `entry_name`, `entry_type`, `secondary_accessions` |
+| Белковые имена | `protein_name`, `protein_short_names`, `protein_alternative_names`, `protein_ec_numbers`, `flag` |
+| Гены | `gene_primary`, `gene_synonyms`, `gene_orf_names` |
+| Организм | `organism_scientific`, `organism_common`, `taxonomy_id`, `lineage` |
+| Доказательства | `protein_existence`, `annotation_score`, `reviewed` |
+| Последовательность | `sequence`, `sequence_length`, `sequence_mass`, `sequence_checksum`, `sequence_modified` |
+| Аудит | `entry_version`, `entry_created`, `entry_modified` |
+| Функциональные | `function_comment`, `catalytic_activity`, `activity_regulation`, `subunit`, `pathway`, `subcellular_location`, `tissue_specificity`, `alternative_products`, `disease_involvement`, `similarity_comment`, `caution` |
+| Cross-refs | `go_terms`, `drugbank_ids`, `chembl_ids`, `guidetopharmacology_ids` |
+| Features | `features`, `keywords` |
+| Счётчики | `cross_reference_count`, `feature_count`, `keyword_count`, `isoform_count` |
+
+### 🔴 Критические ошибки
+
+| Поле | Проблема | Локация |
+|------|----------|---------|
+| `pharmaceutical_use` | Определено в схеме (строка 249), НЕ извлекается в трансформере | `transformer.py:271-302` |
+| `publication_count` | Определено в схеме (строка 309), НЕ вычисляется в трансформере | `transformer.py:321-328` |
+
+---
+
+## 5. PubMed Publication Pipeline
+
+### Схема: `PubMedPublicationSchema`
+**Файл:** `src/bioetl/domain/schemas/pubmed/publication.py`
+
+### Извлекаемые поля (52):
+
+| Категория | Поля |
+|-----------|------|
+| Идентификаторы | `pmid`, `doi`, `pii`, `mid`, `publisher_id`, `pmc_id` |
+| Контент | `title`, `vernacular_title`, `abstract`, `abstract_structured` |
+| Авторы | `authors`, `affiliations`, `structured_affiliations`, `author_count` |
+| Журнал | `journal`, `journal_title`, `journal_iso_abbrev`, `journal_issn_type`, `issn`, `nlm_unique_id`, `country` |
+| Pagination | `volume`, `issue`, `pages`, `medline_pgn`, `first_page`, `last_page` |
+| Даты | `year`, `publication_date`, `pub_month`, `pub_day`, `accepted_date`, `received_date`, `revised_date`, `epub_date`, `date_completed`, `date_revised` |
+| Статус | `publication_status`, `publication_type_list`, `publication_types` |
+| Классификация | `mesh_terms`, `mesh_heading_count`, `chemicals`, `chemical_count`, `keywords`, `keyword_count`, `databanks`, `gene_symbols` |
+| Счётчики | `grant_count`, `reference_count` |
+
+### ⚠️ Предупреждение
+
+| Поле | Проблема | Рекомендация |
+|------|----------|--------------|
+| `date_completed` | Всегда None (строка 507) | Извлечь из XML или удалить из схемы |
+| `date_revised` | Всегда None (строка 508) | Извлечь из XML или удалить из схемы |
+
+---
+
+## 6. CrossRef Publication Pipeline
+
+### Схема: `PublicationEnrichedSchema`
+**Файл:** `src/bioetl/domain/schemas/crossref/publication.py`
+
+### Извлекаемые поля (32):
+`doi`, `title`, `abstract`, `authors`, `affiliations`, `journal`, `publisher`, `issn`, `issn_print`, `issn_electronic`, `year`, `publication_date`, `published_print`, `published_online`, `published`, `doc_type`, `citation_count`, `reference_count`, `language`, `license_url`, `subjects`, `content_domain_domains`, `content_domain_crossmark_restriction`, `alternative_id`, `short_container_title`, `author_orcids`, `author_details`, `references`, `pmid`, `pmc_id`, `is_oa`, `_source`, `_lookup_method`, `_original_id`
+
+**Статус:** ✅ Корректно
+
+---
+
+## 7. OpenAlex Publication Pipeline
+
+### Схема: `OpenAlexPublicationSchema`
+**Файл:** `src/bioetl/domain/schemas/openalex/publication.py`
+
+### Извлекаемые поля (35):
+`openalex_id`, `doi`, `pmid`, `pmc_id`, `mag_id`, `title`, `abstract`, `authors`, `affiliations`, `journal`, `issn`, `publisher`, `year`, `publication_date`, `doc_type`, `is_oa`, `oa_status`, `citation_count`, `topics`, `primary_topic`, `grants`, `concepts`, `mesh`, `keywords`, `language`, `volume`, `issue`, `first_page`, `last_page`, `fwci`, `referenced_works_count`, `is_retracted`, `_lookup_method`, `_original_id`, `_source`
+
+**Статус:** ✅ Корректно
+
+---
+
+## 8. SemanticScholar Publication Pipeline
+
+### Схема: `SemanticScholarPublicationSchema`
+**Файл:** `src/bioetl/domain/schemas/semanticscholar/publication.py`
+
+### Извлекаемые поля (34):
+`paper_id`, `doi`, `pmid`, `pmc_id`, `arxiv_id`, `dblp_id`, `corpus_id`, `title`, `abstract`, `tldr`, `authors`, `affiliations`, `author_s2_ids`, `author_orcids`, `author_h_indices`, `journal`, `volume`, `pages`, `first_page`, `last_page`, `venue`, `year`, `publication_date`, `citation_count`, `reference_count`, `influential_citation_count`, `is_oa`, `open_access_url`, `oa_status`, `fields_of_study`, `publication_types`, `citation_contexts`, `_source`, `_lookup_method`, `_original_id`
+
+**Статус:** ✅ Корректно
+
+---
+
+## План исправлений
+
+### Критические (P0) — Немедленно
+
+| № | Проблема | Файл | Действие |
+|---|----------|------|----------|
+| 1 | UniProt: pharmaceutical_use | `transformer.py:271` | Добавить `CommentExtractor.extract_by_type(comments, "BIOTECHNOLOGY")` |
+| 2 | UniProt: publication_count | `transformer.py:321` | Добавить подсчёт публикаций из references или PubMed cross-refs |
+
+### Предупреждения (P1) — При следующем релизе
+
+| № | Проблема | Файл | Действие |
+|---|----------|------|----------|
+| 3 | PubChem: inchi_key naming | `compound.py`, `transformer.py` | Унифицировать к `inchi_key` |
+| 4 | ChEMBL: structure_standard_inchi_key | `molecule.py` | Удалить избыточное поле |
+| 5 | PubMed: date_completed/revised | `transformer.py` | Извлечь из XML или удалить |
+
+---
+
+## Рекомендации по CI
+
+1. Добавить архитектурный тест для проверки соответствия полей схем и трансформеров
+2. Создать автоматический скрипт аудита `scripts/audit_field_mapping.py`
+3. Интегрировать проверку в `make arch-test`
+
+================================================================================
 File: pipeline-interface-alignment-report.md
 Path: analysis\pipeline-interface-alignment-report.md
 ================================================================================
@@ -27256,6 +27737,709 @@ def __init__(
 ---
 
 **END OF REPORT**
+
+================================================================================
+File: pipeline-schema-analysis-report.md
+Path: analysis\pipeline-schema-analysis-report.md
+================================================================================
+# Pipeline Schema Analysis Report
+
+**Date**: 2026-01-26
+**Version**: 1.0
+**Author**: Claude Code Analysis
+
+---
+
+## Executive Summary
+
+This report analyzes the field extraction schemas across all 7 data providers (ChEMBL, PubChem, UniProt, CrossRef, OpenAlex, PubMed, SemanticScholar) in the BioETL pipeline. The analysis compares pipeline schemas with provider API schemas to identify discrepancies, missing fields, and potential extraction errors.
+
+---
+
+## Table of Contents
+
+1. [ChEMBL Pipeline Analysis](#1-chembl-pipeline-analysis)
+2. [PubChem Pipeline Analysis](#2-pubchem-pipeline-analysis)
+3. [UniProt Pipeline Analysis](#3-uniprot-pipeline-analysis)
+4. [CrossRef Pipeline Analysis](#4-crossref-pipeline-analysis)
+5. [OpenAlex Pipeline Analysis](#5-openalex-pipeline-analysis)
+6. [PubMed Pipeline Analysis](#6-pubmed-pipeline-analysis)
+7. [SemanticScholar Pipeline Analysis](#7-semanticscholar-pipeline-analysis)
+8. [Identified Discrepancies](#8-identified-discrepancies)
+9. [Correction Prompts](#9-correction-prompts)
+
+---
+
+## 1. ChEMBL Pipeline Analysis
+
+### 1.1 Activity Entity
+
+**Pipeline Schema** (`src/bioetl/domain/schemas/chembl/activity.py`):
+
+| Field Category | Extracted Fields |
+|----------------|------------------|
+| **Primary Key** | `activity_id` |
+| **Foreign Keys** | `assay_chembl_id`, `molecule_chembl_id`, `target_chembl_id`, `document_chembl_id` |
+| **Standardized Values** | `standard_relation`, `standard_value`, `standard_units`, `standard_type`, `standard_flag` |
+| **Derived Metrics** | `pchembl_value` |
+| **Quality Fields** | `data_validity_comment`, `activity_comment`, `potential_duplicate` |
+| **Ontologies** | `bao_endpoint`, `uo_units`, `qudt_units` |
+| **Original Values** | `src_id`, `record_id`, `type`, `relation`, `value`, `units`, `text_value`, `standard_text_value`, `upper_value`, `standard_upper_value`, `toid` |
+| **Ligand Efficiency** | `ligand_efficiency_bei`, `ligand_efficiency_le`, `ligand_efficiency_lle`, `ligand_efficiency_sei` |
+| **Action Type** | `action_type_action_type`, `action_type_description`, `action_type_parent_type` |
+| **Molecule/Target** | `canonical_smiles`, `molecule_pref_name`, `parent_molecule_chembl_id`, `target_pref_name`, `target_organism`, `target_taxonomy_id` |
+| **Assay Info** | `assay_type`, `assay_description`, `assay_variant_accession`, `assay_variant_mutation`, `bao_format`, `bao_label` |
+| **Document** | `document_journal`, `document_year` |
+| **JSON** | `activity_properties` |
+
+**ChEMBL API Provides** (per `/activity/schema`):
+- All fields above PLUS:
+  - `data_validity_description` (missing extraction)
+  - `manual_curation_flag` (commented out in schema)
+  - `original_activity_id` (commented out in schema)
+  - `ridx` (record index, commented out)
+
+**Discrepancies**:
+1. `data_validity_description` - API provides, not extracted
+2. `manual_curation_flag` - Commented out but available
+3. `original_activity_id` - Commented out but available
+
+### 1.2 Molecule Entity
+
+**Pipeline Schema** (`src/bioetl/domain/schemas/chembl/molecule.py`):
+
+| Field Category | Extracted Fields |
+|----------------|------------------|
+| **Primary Key** | `molecule_chembl_id` |
+| **Identifiers** | `structure_standard_inchi_key`, `inchikey` |
+| **Core Properties** | `pref_name`, `max_phase`, `structure_type`, `molecule_type`, `first_approval` |
+| **Flags** | `therapeutic_flag`, `oral`, `parenteral`, `topical`, `black_box_warning`, `natural_product`, `first_in_class`, `prodrug`, `inorganic_flag`, `polymer_flag`, `withdrawn_flag`, `chirality`, `dosed_ingredient`, `availability_type` |
+| **USAN** | `usan_year`, `usan_stem`, `usan_substem`, `usan_stem_definition` |
+| **Other** | `helm_notation`, `molecule_species` |
+| **Hierarchy** | `hierarchy_parent_chembl_id`, `hierarchy_active_chembl_id`, `hierarchy_child_chembl_id` |
+| **Properties** | `property_alogp`, `property_mw_freebase`, `property_full_mwt`, `property_hba`, `property_hbd`, `property_psa`, `property_rtb`, `property_ro5_violations`, `property_heavy_atoms`, `property_aromatic_rings`, `property_qed_weighted`, `property_full_molformula`, `property_ro3_pass` |
+| **Structures** | `canonical_smiles`, `standard_inchi` |
+| **JSON** | `molecule_hierarchy`, `molecule_properties`, `molecule_structures`, `molecule_synonyms`, `cross_references`, `atc_classifications` |
+
+**ChEMBL API Missing Fields** (Available but not extracted):
+1. `molregno` - Internal database ID (commented out)
+2. `chebi_id`, `chebi_par_id` - ChEBI identifiers (commented out)
+3. `downgraded`, `nomerge` flags (commented out)
+4. Additional properties: `cx_logd`, `cx_logp`, `cx_most_apka`, `cx_most_bpka`, `molecular_species`, `mw_monoisotopic`, `np_likeness_score`, `num_lipinski_ro5_violations`, `num_ro5_violations`
+
+### 1.3 Target Entity
+
+**Pipeline Schema** (`src/bioetl/domain/schemas/chembl/target.py`):
+
+| Field Category | Extracted Fields |
+|----------------|------------------|
+| **Primary Key** | `target_chembl_id` |
+| **Classification** | `target_type` |
+| **Metadata** | `pref_name`, `description`, `taxonomy_id`, `organism`, `species_group_flag`, `downgraded`, `dap_id` |
+| **Components (Lists)** | `component_accessions`, `component_ids`, `component_types`, `component_relationships`, `component_descriptions`, `component_organisms`, `component_taxonomy_ids` |
+| **JSON** | `target_components`, `cross_references`, `pipeline_stages`, `target_constraints`, `target_component_synonyms` |
+
+**Missing from API**:
+1. `tid` - Internal target ID (commented out)
+2. `target_parent_type` - Higher-level classification (commented out)
+
+### 1.4 Assay Entity
+
+**Pipeline Schema** (`src/bioetl/domain/schemas/chembl/assay.py`):
+
+| Field Category | Extracted Fields |
+|----------------|------------------|
+| **Primary Key** | `assay_chembl_id` |
+| **Classification** | `description`, `assay_type`, `assay_test_type`, `assay_category`, `assay_group` |
+| **Biological Context** | `assay_organism`, `assay_taxonomy_id`, `assay_strain`, `assay_tissue`, `assay_cell_type`, `assay_subcellular_fraction` |
+| **Target** | `target_chembl_id`, `relationship_type`, `relationship_description`, `confidence_score`, `confidence_description` |
+| **Metadata** | `src_id`, `src_assay_id`, `document_chembl_id`, `assay_pref_name`, `score` |
+| **Foreign Keys** | `cell_chembl_id`, `tissue_chembl_id` |
+| **BAO** | `bao_format`, `bao_label` |
+| **Variant** | `variant_accession`, `variant_isoform`, `variant_mutation`, `variant_organism`, `variant_sequence`, `variant_taxonomy_id`, `variant_sequence_json` |
+| **JSON** | `assay_classifications`, `assay_parameters` |
+
+**Missing**:
+1. `assay_id` - Internal ID (commented out)
+2. `curated_by`, `activity_count` (commented out)
+3. `a2t_complex`, `a2t_multi` - Assay-to-target flags
+4. `mc_*` fields - Multi-component fields (commented out)
+5. `aidx`, `ridx`, `tid_fixed`, `variant_id` (partially commented)
+
+---
+
+## 2. PubChem Pipeline Analysis
+
+### 2.1 Compound Entity
+
+**Pipeline Schema** (`src/bioetl/domain/schemas/pubchem/compound.py`):
+
+| Field Category | Extracted Fields |
+|----------------|------------------|
+| **Primary Key** | `cid` |
+| **Structural IDs** | `canonical_smiles`, `isomeric_smiles`, `inchi`, `inchi_key` |
+| **Nomenclature** | `molecular_formula`, `iupac_name` |
+| **Physical Properties** | `molecular_weight`, `exact_mass` |
+| **Computed Descriptors** | `xlogp`, `tpsa`, `complexity`, `charge` |
+| **Atom/Bond Counts** | `heavy_atom_count`, `h_bond_donor_count`, `h_bond_acceptor_count`, `rotatable_bond_count` |
+| **Stereochemistry** | `atom_stereo_count`, `defined_atom_stereo_count`, `undefined_atom_stereo_count`, `bond_stereo_count`, `defined_bond_stereo_count`, `undefined_bond_stereo_count`, `isotope_atom_count`, `covalent_unit_count` |
+| **3D Properties** | `volume_3d`, `conformer_count_3d`, `feature_acceptor_count_3d`, `feature_donor_count_3d`, `feature_anion_count_3d`, `feature_cation_count_3d`, `feature_ring_count_3d`, `feature_hydrophobe_count_3d`, `effective_rotor_count_3d`, `conformer_rmsd_3d` |
+
+**PubChem API Full Property List** (45 properties available):
+1. CID, MolecularFormula, MolecularWeight, CanonicalSMILES, IsomericSMILES
+2. InChI, InChIKey, IUPACName, XLogP, ExactMass, MonoisotopicMass
+3. TPSA, Complexity, Charge, HBondDonorCount, HBondAcceptorCount
+4. RotatableBondCount, HeavyAtomCount
+5. AtomStereoCount, DefinedAtomStereoCount, UndefinedAtomStereoCount
+6. BondStereoCount, DefinedBondStereoCount, UndefinedBondStereoCount
+7. CovalentUnitCount, Volume3D
+8. XStericQuadrupole3D, YStericQuadrupole3D, ZStericQuadrupole3D (NOT EXTRACTED)
+9. FeatureCount3D (NOT EXTRACTED), FeatureAcceptorCount3D, FeatureDonorCount3D
+10. FeatureAnionCount3D, FeatureCationCount3D, FeatureRingCount3D
+11. FeatureHydrophobeCount3D, ConformerModelRMSD3D, EffectiveRotorCount3D
+12. ConformerCount3D
+
+**Missing Fields**:
+1. `MonoisotopicMass` - Similar to ExactMass but different
+2. `XStericQuadrupole3D`, `YStericQuadrupole3D`, `ZStericQuadrupole3D` - 3D shape descriptors
+3. `FeatureCount3D` - Total 3D feature count
+4. Fingerprint data (881 bits)
+5. Patent information
+6. Synonyms list
+
+---
+
+## 3. UniProt Pipeline Analysis
+
+### 3.1 Protein Entity
+
+**Pipeline Schema** (`src/bioetl/domain/schemas/uniprot/protein.py`):
+
+| Field Category | Extracted Fields |
+|----------------|------------------|
+| **Primary Key** | `accession` |
+| **Identifiers** | `entry_name`, `entry_type`, `secondary_accessions` |
+| **Protein Names** | `protein_name`, `protein_short_names`, `protein_alternative_names`, `protein_ec_numbers`, `flag` |
+| **Gene Names** | `gene_primary`, `gene_synonyms`, `gene_orf_names` |
+| **Organism** | `organism_scientific`, `organism_common`, `taxonomy_id`, `lineage` |
+| **Evidence** | `protein_existence`, `annotation_score`, `reviewed` |
+| **Sequence** | `sequence`, `sequence_length`, `sequence_mass`, `sequence_checksum`, `sequence_modified` |
+| **Metadata** | `entry_version`, `entry_created`, `entry_modified` |
+| **Functional Annotation** | `function_comment`, `catalytic_activity`, `activity_regulation`, `subunit`, `pathway`, `subcellular_location`, `tissue_specificity`, `alternative_products`, `disease_involvement`, `pharmaceutical_use`, `similarity_comment`, `caution` |
+| **Cross-References** | `go_terms`, `drugbank_ids`, `chembl_ids`, `guidetopharmacology_ids` |
+| **Features** | `features`, `keywords` |
+| **Counts** | `cross_reference_count`, `feature_count`, `keyword_count`, `publication_count`, `isoform_count` |
+
+**UniProt API Additional Fields** (Available but not extracted):
+1. `organism.synonyms` - Organism synonym names
+2. `organism.host` - Virus host information
+3. `virus_host` - Direct virus host data
+4. `entryAudit` - Complete audit information
+5. `references` - Full publication references list
+6. `cofactor` - Cofactor information
+7. `biophysicochemical_properties` - pH, temperature optima
+8. `induction` - Gene induction information
+9. `biotechnology` - Biotechnology applications
+10. `disruption_phenotype` - Knockout phenotype data
+11. `pharmaceutical` - Pharmaceutical data (separate from pharmaceutical_use)
+12. `pdb_xrefs` - PDB structure cross-references
+13. `3d_structure` - 3D structure availability
+14. All additional cross-reference databases (150+ databases)
+
+---
+
+## 4. CrossRef Pipeline Analysis
+
+### 4.1 Publication Entity
+
+**Pipeline Schema** (`src/bioetl/domain/schemas/crossref/work.py`):
+
+| Field Category | Extracted Fields |
+|----------------|------------------|
+| **Primary Key** | `doi` |
+| **Core Fields** | `type`, `title` |
+| **Container** | `container_title`, `publisher`, `issn`, `isbn` |
+| **Volume/Issue** | `volume`, `issue`, `page` |
+| **Dates** | `published_date`, `created_date`, `deposited_date` |
+| **Content** | `abstract`, `language`, `subject` |
+| **License** | `license_url` |
+| **Metrics** | `is_referenced_by_count`, `references_count` |
+| **Funding** | `funder_names`, `clinical_trial_numbers` |
+| **Policies** | `update_policy` |
+
+**CrossRef API Additional Fields** (Available but not extracted):
+1. `author` - Full author list with ORCID, affiliation
+2. `editor` - Editor list
+3. `translator` - Translator list
+4. `contributor` - Other contributors
+5. `reference` - Complete reference list
+6. `funder` - Detailed funder info with DOI, award numbers
+7. `relation` - Related works
+8. `assertion` - Publisher assertions
+9. `article-number` - Article number (alternative to pages)
+10. `original-title` - Original title in original language
+11. `subtitle` - Subtitle
+12. `short-title` - Short title
+13. `group-title` - Group/section title
+14. `update-to` - Updated versions
+15. `source` - Data source
+16. `link` - Full-text links
+17. `score` - Relevance score
+18. `prefix` - DOI prefix
+19. `member` - Publisher member ID
+20. `standards-body` - Standards body info
+21. `part-number` - Part number
+22. `content-domain` - Content domain restrictions
+
+---
+
+## 5. OpenAlex Pipeline Analysis
+
+### 5.1 Publication Entity
+
+**Pipeline Schema** (`src/bioetl/domain/schemas/openalex/publication.py`):
+
+| Field Category | Extracted Fields |
+|----------------|------------------|
+| **Primary Key** | `openalex_id` |
+| **Cross-references** | `pmid`, `doi`, `pmc_id` |
+| **Core Content** | `title`, `abstract`, `authors` |
+| **Metadata** | `journal`, `year`, `publication_date`, `doc_type`, `language` |
+| **Metrics** | `citation_count`, `fwci`, `referenced_works_count` |
+| **Open Access** | `is_oa`, `oa_status` |
+| **Bibliographic** | `issn`, `publisher`, `volume`, `issue` |
+| **Quality** | `is_retracted` |
+| **Lookup** | `lookup_method`, `original_id`, `_source` |
+
+**OpenAlex API Additional Fields** (Available but not extracted):
+1. `corresponding_author_ids` - Corresponding authors
+2. `authorships.raw_affiliation_string` - Raw affiliation text
+3. `authorships.raw_author_name` - Raw author name
+4. `authorships.countries` - Author countries
+5. `authorships.institutions.country_code` - Institution country
+6. `apc_list`, `apc_paid` - APC information
+7. `best_oa_location` - Best OA location details
+8. `locations` - All publication locations
+9. `topics` - New topics system (replacing concepts)
+10. `keywords` - Author-provided keywords
+11. `mesh` - MeSH terms (extracted but needs verification)
+12. `sustainable_development_goals` - SDG classification
+13. `grants` - Grant information
+14. `indexed_in` - Indexing databases
+15. `ngrams_url` - N-grams URL
+16. `cited_by_percentile_year` - Citation percentile
+17. `biblio.first_page`, `biblio.last_page` - Page numbers (partially extracted)
+18. `primary_topic` - Primary topic classification
+19. `related_works` - Related works list
+20. `referenced_works` - Full reference list (URLs)
+21. `created_date`, `updated_date` - Record dates
+22. `abstract_inverted_index` - Raw inverted index
+
+---
+
+## 6. PubMed Pipeline Analysis
+
+### 6.1 Publication Entity
+
+**Pipeline Schema** (`src/bioetl/domain/schemas/pubmed/publication.py`):
+
+| Field Category | Extracted Fields |
+|----------------|------------------|
+| **Primary Key** | `pmid` |
+| **Identifiers** | `doi`, `pmc_id` |
+| **Content** | `title`, `abstract`, `abstract_structured`, `vernacular_title`, `language` |
+| **Journal** | `journal_title`, `journal_iso_abbrev`, `issn`, `journal_issn_type`, `nlm_unique_id`, `country` |
+| **Publication** | `medline_pgn`, `year`, `pub_month`, `pub_day`, `publication_status`, `publication_type_list` |
+| **Dates** | `date_completed`, `date_revised` |
+| **Metadata** | `citation_subset` |
+| **Counts** | `author_count`, `mesh_heading_count`, `keyword_count`, `grant_count`, `reference_count`, `chemical_count` |
+
+**PubMed/MEDLINE Additional Fields** (Available but not extracted):
+1. `AffiliationInfo` - Full affiliation details
+2. `AuthorList` - Detailed author info with identifiers
+3. `CollectiveName` - Group/consortium names
+4. `Investigator` - Investigator names
+5. `DataBankList` - Data bank accession numbers
+6. `CommentsCorrectionsList` - Corrections and comments
+7. `CoiStatement` - Conflict of interest statement
+8. `OtherAbstract` - Abstract in other languages
+9. `SpaceFlightMission` - Space flight mission data
+10. `SupplMeshList` - Supplementary MeSH concepts
+11. `OtherID` - Other database IDs
+12. `KeywordList` - Full keyword list with owner
+13. `PersonalNameSubjectList` - Personal name subjects
+14. `History` dates: `entrez`, `medline`, `pubmed` (beyond accepted/received/revised)
+15. `ArticleDate` - Multiple article dates
+16. `NumberOfReferences` - Reference count (direct field)
+17. `ELocationID` - Additional electronic IDs
+18. `Pagination.StartPage`, `Pagination.EndPage` - Separate page fields
+19. `ISSN.IssnType` - ISSN type information
+
+---
+
+## 7. SemanticScholar Pipeline Analysis
+
+### 7.1 Publication Entity
+
+**Pipeline Schema** (`src/bioetl/domain/schemas/semanticscholar/publication.py`):
+
+| Field Category | Extracted Fields |
+|----------------|------------------|
+| **Primary Key** | `paper_id` |
+| **Identifiers** | `arxiv_id`, `dblp_id`, `corpus_id`, `doi`, `pmid`, `pmc_id` |
+| **Content** | `title`, `abstract`, `tldr`, `authors` |
+| **Journal/Venue** | `journal`, `volume`, `pages`, `venue` |
+| **Metrics** | `citation_count`, `reference_count`, `influential_citation_count` |
+| **Open Access** | `is_oa`, `open_access_url`, `oa_status` |
+| **Classification** | `fields_of_study`, `publication_types` |
+| **Lookup** | `lookup_method`, `original_id`, `_source` |
+
+**SemanticScholar API Additional Fields** (Available but not extracted):
+1. `authors.authorId` - S2 author ID
+2. `authors.externalIds` - Author external IDs (ORCID, DBLP)
+3. `authors.url` - Author profile URL
+4. `authors.aliases` - Author name aliases
+5. `authors.hIndex` - Author h-index
+6. `citations` - Full citation list with details
+7. `references` - Full reference list with details
+8. `embedding` - Paper embedding vector
+9. `s2FieldsOfStudy` - S2-specific field classification
+10. `publicationVenue` - Detailed venue info with ISSN
+11. `publicationVenue.alternate_names` - Venue aliases
+12. `publicationVenue.url` - Venue URL
+13. `isPublisherLicensed` - License status
+14. `url` - Paper URL on S2
+15. `citationStyles` - Formatted citations (BibTeX, etc.)
+16. `journal.pages` - Journal page info (separate)
+17. `contexts` - Citation contexts
+
+---
+
+## 8. Identified Discrepancies
+
+### 8.1 Critical Issues
+
+| Provider | Issue | Severity | Impact |
+|----------|-------|----------|--------|
+| **ChEMBL Activity** | `data_validity_description` not extracted | Medium | Missing DQ metadata |
+| **PubChem** | `MonoisotopicMass` not extracted | Low | Missing alternative mass value |
+| **PubChem** | 3D steric quadrupole fields missing | Low | Incomplete 3D descriptors |
+| **UniProt** | `cofactor`, `biophysicochemical_properties` missing | Medium | Missing functional data |
+| **CrossRef** | Full `author` structure not extracted | High | Missing ORCID, affiliations |
+| **CrossRef** | `reference` list not extracted | High | Missing citation data |
+| **OpenAlex** | `topics` (new system) not extracted | Medium | Using deprecated `concepts` |
+| **OpenAlex** | `grants` not extracted | Medium | Missing funding data |
+| **PubMed** | `AffiliationInfo` structure incomplete | Medium | Missing detailed affiliations |
+| **SemanticScholar** | `embedding` vectors not extracted | Low | Missing ML features |
+
+### 8.2 Field Naming Inconsistencies
+
+| Provider | API Field | Schema Field | Issue |
+|----------|-----------|--------------|-------|
+| ChEMBL | `target_tax_id` | `target_taxonomy_id` | Renamed (correct) |
+| ChEMBL | `assay_tax_id` | `assay_taxonomy_id` | Renamed (correct) |
+| PubChem | `HBondDonorCount` | `h_bond_donor_count` | Snake_case (correct) |
+| OpenAlex | `cited_by_count` | `citation_count` | Unified naming (correct) |
+| OpenAlex | `pmcid` | `pmc_id` | Renamed (correct) |
+| SemanticScholar | `citationCount` | `citation_count` | Snake_case (correct) |
+| SemanticScholar | `referenceCount` | `reference_count` | Snake_case (correct) |
+
+### 8.3 Type Coercion Issues
+
+| Provider | Field | API Type | Schema Type | Issue |
+|----------|-------|----------|-------------|-------|
+| OpenAlex | `year` | `int` | `pd.Int64Dtype` | Nullable int handling |
+| OpenAlex | `citation_count` | `int` | `pd.Int64Dtype` | Nullable int handling |
+| SemanticScholar | `corpus_id` | `int` | `pd.Int64Dtype` | Nullable int handling |
+| PubMed | `pmid` | `int` (XML) | `str` | String for cross-provider consistency |
+
+---
+
+## 9. Correction Prompts
+
+### 9.1 ChEMBL Activity Pipeline Enhancement
+
+**PROMPT 1: Add Missing ChEMBL Activity Fields**
+
+The ChEMBL Activity pipeline currently extracts most fields from the ChEMBL REST API but is missing several important data quality and curation fields that could improve downstream analysis and data governance. After reviewing the ChEMBL API schema at `https://www.ebi.ac.uk/chembl/api/data/activity/schema`, I identified that the `data_validity_description` field provides human-readable explanations for data quality issues, complementing the existing `data_validity_comment` field which only provides coded values.
+
+Additionally, the `manual_curation_flag` and `original_activity_id` fields are currently commented out in the schema at `src/bioetl/domain/schemas/chembl/activity.py` (lines 148-158). The `manual_curation_flag` indicates whether an activity record has been manually reviewed by ChEMBL curators, which is valuable for quality filtering in drug discovery pipelines. The `original_activity_id` provides traceability to the original source record when activities have been standardized or merged.
+
+To implement these changes, you should:
+1. Uncomment the `manual_curation_flag` and `original_activity_id` fields in the ActivitySchema
+2. Add `data_validity_description` as a new optional string field
+3. Update the ActivityTransformer at `src/bioetl/application/pipelines/chembl/activity_transformer.py` to extract these fields in the `_QUALITY_ANNOTATIONS` FieldGroup
+4. Add corresponding fields to the PyArrow schema in `src/bioetl/infrastructure/schemas/silver.py`
+5. Update tests in `tests/unit/domain/schemas/chembl/test_activity_schema.py`
+
+The business value includes improved data quality tracking, better audit trails for curated data, and enhanced filtering capabilities for high-confidence bioactivity data in drug discovery applications.
+
+---
+
+### 9.2 PubChem Compound Pipeline Enhancement
+
+**PROMPT 2: Add Missing PubChem 3D Molecular Descriptors**
+
+The PubChem Compound pipeline at `src/bioetl/application/pipelines/pubchem/transformer.py` currently extracts most molecular properties from PubChem's PUG REST API but is missing several important 3D shape descriptors that are valuable for molecular modeling and virtual screening applications. Specifically, the pipeline does not extract the steric quadrupole moments (`XStericQuadrupole3D`, `YStericQuadrupole3D`, `ZStericQuadrupole3D`) which describe the 3D charge distribution shape of molecules, and the `FeatureCount3D` which provides the total count of pharmacophore features.
+
+The PubChem API provides these fields when requesting the `/property/` endpoint with the appropriate property names. Currently, the transformer only handles basic 3D properties defined in `PubchemMoleculeSchema` at `src/bioetl/domain/schemas/pubchem/compound.py`, but the steric quadrupole descriptors are absent despite being available from the API.
+
+Additionally, the `MonoisotopicMass` field, while similar to `ExactMass`, uses a different calculation method (most abundant isotope vs exact isotopic composition) and may be preferred in mass spectrometry applications. The pipeline currently only extracts `exact_mass` but should also capture `MonoisotopicMass` as a separate field.
+
+To implement these enhancements:
+1. Add `x_steric_quadrupole_3d`, `y_steric_quadrupole_3d`, `z_steric_quadrupole_3d` as nullable float fields in `PubchemMoleculeSchema`
+2. Add `feature_count_3d` as a nullable integer field
+3. Add `monoisotopic_mass` as a nullable float field
+4. Update the transformer to extract these fields from the Bronze record
+5. Update the PubChem adapter to request these additional properties from the API
+6. Add validation checks for the quadrupole fields (can be negative) and feature count (must be non-negative)
+
+These additions will enable more comprehensive molecular shape analysis for structure-activity relationship studies and improve compatibility with computational chemistry workflows that rely on 3D descriptors.
+
+---
+
+### 9.3 CrossRef Publication Pipeline Enhancement
+
+**PROMPT 3: Extract Full Author and Reference Data from CrossRef**
+
+The CrossRef Publication pipeline at `src/bioetl/application/pipelines/crossref/transformer.py` currently extracts author names but does not capture the full author structure provided by the CrossRef API, which includes ORCID identifiers, institutional affiliations, and author sequence information. This limitation significantly reduces the value of CrossRef data for author disambiguation, institutional analysis, and research collaboration studies.
+
+The CrossRef API `/works` endpoint returns an `author` array where each author object contains: `given` (first name), `family` (last name), `ORCID` (persistent identifier), `affiliation` (array of institution objects), `sequence` (first/additional), and `authenticated-orcid` (boolean). Currently, the `extract_authors` function in `src/bioetl/application/pipelines/crossref/extractors.py` only extracts the name components and discards the ORCID and affiliation data.
+
+Similarly, the `reference` field containing the full bibliography of cited works is not extracted. This field provides DOIs, article titles, authors, and other metadata for each reference, which is essential for citation network analysis and bibliometric studies. The CrossRef API provides this data under the `reference` array in work records.
+
+To implement comprehensive author and reference extraction:
+1. Update `extract_authors()` to return a structured dict including `given`, `family`, `orcid`, `sequence`, and `authenticated_orcid`
+2. Create a new `extract_affiliations()` function to parse the nested affiliation structure
+3. Add `author_orcids` as a JSON array field in the schema to store ORCID identifiers
+4. Create `extract_references()` function to parse the reference array
+5. Add `references` as a JSON field containing the serialized reference list
+6. Update `PublicationSchema` at `src/bioetl/domain/schemas/crossref/work.py` to include these new fields
+7. Consider PII implications for author data and apply appropriate hashing per RULES.md §5.4
+
+This enhancement will enable robust author identification through ORCID matching, institutional affiliation analysis, and complete citation network construction from CrossRef data.
+
+---
+
+### 9.4 OpenAlex Publication Pipeline Enhancement
+
+**PROMPT 4: Migrate from Deprecated Concepts to Topics System**
+
+The OpenAlex Publication pipeline at `src/bioetl/application/pipelines/openalex/transformer.py` currently extracts the `concepts` field which OpenAlex has deprecated in favor of the new `topics` classification system introduced in 2024. The concepts system provided broad subject categorization, but the topics system offers more granular, hierarchical classification with better coverage and accuracy for scientific publications.
+
+The transformer currently calls `extract_concepts(rec.get("concepts", []))` at line 153, but the OpenAlex API now recommends using `topics` which provides a four-level hierarchy: domain, field, subfield, and topic. Each topic object includes `id`, `display_name`, `score`, `subfield`, `field`, and `domain` properties that enable multi-resolution subject classification.
+
+Additionally, the pipeline does not extract the `grants` field which OpenAlex added to provide funding information. This field contains an array of grant objects with `funder`, `funder_display_name`, and `award_id` properties that are valuable for research funding analysis and compliance reporting.
+
+The `primary_topic` field, which identifies the single most relevant topic for a work, is also not extracted despite being a useful summary classification.
+
+To migrate to the topics system and add grants:
+1. Create `extract_topics()` function in `src/bioetl/application/pipelines/openalex/extractors.py` to parse the hierarchical topic structure
+2. Add `extract_primary_topic()` to get the single most relevant topic
+3. Create `extract_grants()` to parse funding information
+4. Update `OpenAlexPublicationSchema` to include `topics`, `primary_topic`, and `grants` fields
+5. Deprecate the `concepts` field with a migration path (keep for backward compatibility temporarily)
+6. Update the transformer to extract both systems during transition period
+7. Add documentation noting the deprecation timeline
+
+This migration ensures the pipeline uses OpenAlex's current best practices for subject classification and captures funding metadata that is increasingly important for research analytics.
+
+---
+
+### 9.5 UniProt Protein Pipeline Enhancement
+
+**PROMPT 5: Add Biochemical and Structural Cross-Reference Data**
+
+The UniProt Protein pipeline at `src/bioetl/application/pipelines/uniprot/transformer.py` extracts comprehensive functional annotation data but is missing several biochemically important fields that UniProt provides. Specifically, the `cofactor` comments section describes essential metal ions and organic molecules required for protein function, which is critical for enzyme characterization and drug target analysis.
+
+The `biophysicochemical_properties` comment type contains experimentally determined pH optima, temperature optima, kinetic parameters (Km, Vmax), and redox potential values. These quantitative properties are essential for protein engineering, biotechnology applications, and understanding enzyme behavior under different conditions.
+
+Currently, the `CommentExtractor` class at `src/bioetl/application/pipelines/uniprot/extractors.py` extracts comments for `FUNCTION`, `ACTIVITY REGULATION`, `SUBUNIT`, `PATHWAY`, `DISEASE`, `SIMILARITY`, and `CAUTION` types, but does not handle `COFACTOR`, `BIOPHYSICOCHEMICAL PROPERTIES`, or `INDUCTION` comment types.
+
+Additionally, the PDB cross-references which provide 3D structure availability are not extracted despite being valuable for structural biology applications. The current `CrossRefExtractor` only extracts GO, DrugBank, ChEMBL, and GuidetoPHARMACOLOGY references.
+
+To add these biochemical and structural fields:
+1. Add `extract_cofactors()` method to `CommentExtractor` to parse COFACTOR comments with chebi_id and name
+2. Add `extract_biophysicochemical_properties()` for pH, temperature, kinetic data
+3. Add `extract_induction()` for gene expression induction conditions
+4. Extend `CrossRefExtractor.extract_xref_ids()` to handle PDB references
+5. Add corresponding fields to `UniprotTargetSchema`: `cofactors`, `biophysicochemical_properties`, `induction`, `pdb_ids`
+6. Update the transformer `_add_functional_annotations()` method to call new extractors
+7. Serialize complex cofactor structures as JSON for the schema
+
+These additions will significantly enhance the utility of UniProt data for enzyme characterization, structural biology research, and biotechnology applications where biochemical properties are essential selection criteria.
+
+---
+
+### 9.6 PubMed Publication Pipeline Enhancement
+
+**PROMPT 6: Extract Complete Affiliation and Identifier Data from PubMed**
+
+The PubMed Publication pipeline at `src/bioetl/application/pipelines/pubmed/transformer.py` currently extracts basic author information but does not fully capture the `AffiliationInfo` structure that MEDLINE provides, which includes institutional identifiers, email addresses (for correspondence), and structured affiliation components. This limitation affects the ability to perform institutional-level bibliometric analysis and author disambiguation.
+
+The MEDLINE XML format provides `AffiliationInfo` elements within each `Author` element that can contain multiple `Affiliation` elements, each with a potential `Identifier` attribute linking to institutional databases like ROR (Research Organization Registry) or GRID. The current `AuthorExtractor.parse_affiliations()` at `src/bioetl/application/pipelines/pubmed/extractors.py` extracts affiliation text but discards identifier metadata.
+
+Additionally, the pipeline does not extract the complete set of external identifiers available in PubMed records. The `ArticleIdList` in `PubmedData` can contain identifiers beyond DOI and PMC, including `pubmed-not-medline` status indicators, publisher-specific IDs, and mid (manuscript ID) values used in the PMC submission process.
+
+The `ELocationID` elements provide additional electronic location identifiers including PII (Publisher Item Identifier) values that some publishers use for article tracking. These are currently not extracted despite being useful for publisher-specific data integration.
+
+To implement comprehensive affiliation and identifier extraction:
+1. Update `AuthorExtractor.parse_affiliations()` to extract `Identifier` attributes with source type
+2. Create structured affiliation objects with `text`, `identifier`, and `identifier_source` fields
+3. Add `parse_all_article_ids()` method to `IdentifierExtractor` for complete ID extraction
+4. Add `pii`, `mid`, and `publisher_id` fields to `PubMedPublicationSchema`
+5. Extract `ELocationID` elements and add corresponding schema fields
+6. Update the transformer to call enhanced extractors
+7. Consider PII implications for email addresses in affiliations and apply hashing
+
+This enhancement will enable robust institutional analysis, improve author disambiguation through institutional identifiers, and provide complete cross-referencing capabilities with publisher databases.
+
+---
+
+### 9.7 SemanticScholar Publication Pipeline Enhancement
+
+**PROMPT 7: Add Author Identifiers and Citation Context Data**
+
+The Semantic Scholar Publication pipeline at `src/bioetl/application/pipelines/semanticscholar/transformer.py` extracts author names but does not capture the rich author metadata that the S2 API provides, including S2 author IDs, ORCID identifiers, DBLP keys, and h-index values. This information is essential for author-level analytics, disambiguation, and research impact assessment.
+
+The S2 API returns an `authors` array where each author object contains: `authorId` (40-char hex S2 ID), `externalIds` (ORCID, DBLP, etc.), `name`, `aliases`, `url`, `hIndex`, and `citationCount`. The current `extract_authors()` function in `src/bioetl/application/pipelines/semanticscholar/extractors.py` only extracts the name field and discards this valuable metadata.
+
+Additionally, the S2 API provides `contexts` when requesting citation or reference details, which are the actual sentences where a paper is cited. This citation context data is invaluable for understanding how research is used and for citation sentiment analysis. The current pipeline does not request or extract citation contexts.
+
+The paper `embedding` field provides a dense vector representation of the paper's content that can be used for semantic similarity search and clustering. While storage of embeddings requires special consideration due to their size (768 dimensions), they are increasingly important for ML-powered literature discovery.
+
+To implement author identifier and citation context extraction:
+1. Update `extract_authors()` to return structured objects with `name`, `authorId`, `orcid`, `dblp_id`, `h_index`
+2. Add `author_s2_ids` and `author_orcids` JSON array fields to the schema
+3. Create `extract_citation_contexts()` function to parse context data when available
+4. Add `citation_contexts` field for storing citing sentence excerpts
+5. Consider adding `embedding` as a binary field or separate storage mechanism
+6. Update the S2 adapter to request `authors.externalIds` and `authors.hIndex` in the fields parameter
+7. Update `SemanticScholarPublicationSchema` at `src/bioetl/domain/schemas/semanticscholar/publication.py`
+
+This enhancement will enable comprehensive author analytics, support citation context-aware literature reviews, and provide the foundation for semantic similarity features in the publication dataset.
+
+---
+
+## Appendix A: Complete Field Inventory
+
+### ChEMBL Activity (56 fields)
+```
+activity_id, assay_chembl_id, molecule_chembl_id, target_chembl_id, document_chembl_id,
+standard_relation, standard_value, standard_units, standard_type, standard_flag,
+pchembl_value, data_validity_comment, activity_comment, potential_duplicate,
+bao_endpoint, uo_units, qudt_units, src_id, record_id, type, relation, value,
+units, text_value, standard_text_value, upper_value, standard_upper_value, toid,
+ligand_efficiency_bei, ligand_efficiency_le, ligand_efficiency_lle, ligand_efficiency_sei,
+action_type_action_type, action_type_description, action_type_parent_type,
+canonical_smiles, molecule_pref_name, parent_molecule_chembl_id, target_pref_name,
+target_organism, target_taxonomy_id, assay_type, assay_description,
+assay_variant_accession, assay_variant_mutation, bao_format, bao_label,
+document_journal, document_year, activity_properties,
+_entity_id, _content_hash, _run_id, _timestamp, _record_index
+```
+
+### PubChem Compound (35 fields)
+```
+cid, canonical_smiles, isomeric_smiles, inchi, inchi_key, molecular_formula,
+iupac_name, molecular_weight, exact_mass, xlogp, tpsa, complexity, charge,
+heavy_atom_count, h_bond_donor_count, h_bond_acceptor_count, rotatable_bond_count,
+atom_stereo_count, defined_atom_stereo_count, undefined_atom_stereo_count,
+bond_stereo_count, defined_bond_stereo_count, undefined_bond_stereo_count,
+isotope_atom_count, covalent_unit_count, volume_3d, conformer_count_3d,
+feature_acceptor_count_3d, feature_donor_count_3d, feature_anion_count_3d,
+feature_cation_count_3d, feature_ring_count_3d, feature_hydrophobe_count_3d,
+effective_rotor_count_3d, conformer_rmsd_3d,
+_entity_id, _content_hash, _run_id, _timestamp, _record_index
+```
+
+### UniProt Protein (53 fields)
+```
+accession, entry_name, entry_type, secondary_accessions, protein_name,
+protein_short_names, protein_alternative_names, protein_ec_numbers, flag,
+gene_primary, gene_synonyms, gene_orf_names, organism_scientific,
+organism_common, taxonomy_id, lineage, protein_existence, annotation_score,
+reviewed, sequence, sequence_length, sequence_mass, sequence_checksum,
+sequence_modified, entry_version, entry_created, entry_modified,
+function_comment, catalytic_activity, activity_regulation, subunit, pathway,
+subcellular_location, tissue_specificity, alternative_products,
+disease_involvement, pharmaceutical_use, similarity_comment, caution,
+go_terms, drugbank_ids, chembl_ids, guidetopharmacology_ids, features,
+keywords, cross_reference_count, feature_count, keyword_count,
+publication_count, isoform_count,
+_entity_id, _content_hash, _run_id, _timestamp, _record_index
+```
+
+### CrossRef Publication (28 fields)
+```
+doi, type, title, container_title, publisher, issn, isbn, volume, issue, page,
+published_date, created_date, deposited_date, abstract, language, subject,
+license_url, is_referenced_by_count, references_count, funder_names,
+clinical_trial_numbers, update_policy, authors, affiliations,
+_source, _lookup_method, _original_id, _dq_warn, _dq_error,
+_entity_id, _content_hash, _run_id, _timestamp, _record_index
+```
+
+### OpenAlex Publication (32 fields)
+```
+openalex_id, doi, pmid, pmc_id, mag_id, title, abstract, authors, affiliations,
+journal, issn, publisher, year, publication_date, doc_type, is_oa, oa_status,
+citation_count, concepts, mesh, keywords, language, volume, issue, first_page,
+last_page, fwci, referenced_works_count, is_retracted,
+_source, _lookup_method, _original_id, _dq_warn, _dq_error,
+_entity_id, _content_hash, _run_id, _timestamp, _record_index
+```
+
+### PubMed Publication (42 fields)
+```
+pmid, doi, pmc_id, title, vernacular_title, abstract, abstract_structured,
+authors, affiliations, author_count, journal, journal_title, journal_abbrev,
+journal_iso_abbrev, issn, journal_issn_type, nlm_unique_id, country,
+volume, issue, pages, medline_pgn, first_page, last_page, year,
+publication_year, pub_month, pub_day, publication_date, publication_status,
+publication_type_list, publication_types, keywords, keyword_count,
+mesh_terms, mesh_heading_count, chemicals, chemical_count, gene_symbols,
+databanks, citation_subset, grant_count, reference_count, language,
+date_completed, date_revised, accepted_date, received_date, revised_date,
+epub_date, pub_date,
+_source, _lookup_method, _original_id, _dq_warn, _dq_error,
+_entity_id, _content_hash, _run_id, _timestamp, _record_index
+```
+
+### SemanticScholar Publication (30 fields)
+```
+paper_id, doi, pmid, pmc_id, arxiv_id, dblp_id, corpus_id, title, abstract,
+tldr, authors, affiliations, journal, volume, pages, first_page, last_page,
+venue, year, publication_date, citation_count, reference_count,
+influential_citation_count, is_oa, open_access_url, oa_status,
+fields_of_study, publication_types,
+_source, _lookup_method, _original_id, _dq_warn, _dq_error,
+_entity_id, _content_hash, _run_id, _timestamp, _record_index
+```
+
+---
+
+## Appendix B: Verification Commands
+
+```bash
+# Count fields in schemas
+grep -c "Series\[" src/bioetl/domain/schemas/chembl/activity.py
+grep -c "Series\[" src/bioetl/domain/schemas/pubchem/compound.py
+grep -c "Series\[" src/bioetl/domain/schemas/uniprot/protein.py
+
+# Find commented-out fields
+grep -n "^    # " src/bioetl/domain/schemas/chembl/*.py
+
+# Check transformer field extraction
+grep -o '"[a-z_]*":' src/bioetl/application/pipelines/*/transformer.py | sort -u
+
+# Verify PyArrow schema alignment
+grep "pa.field" src/bioetl/infrastructure/schemas/silver.py | wc -l
+```
+
+---
+
+**Report End**
 
 ================================================================================
 File: 2026-01-04-architecture-audit.md
@@ -52910,6 +54094,481 @@ The decision to skip backward compatibility aliases was well-documented in ADR-0
 *Report generated by Claude Code (Opus 4.5) on 2026-01-21*
 
 ================================================================================
+File: schema_transformer_field_audit.md
+Path: audit\schema_transformer_field_audit.md
+================================================================================
+# Schema-Transformer Field Correspondence Audit Report
+
+**Generated**: 2026-01-26
+**Audited by**: Claude Code (Opus 4.5)
+**Scope**: All BioETL Pandera schemas and corresponding transformers
+
+---
+
+## Executive Summary
+
+This audit analyzes field correspondence between Pandera schemas (Silver layer validation) and transformers (Bronze→Silver extraction) across all 7 BioETL providers. The audit identifies:
+
+1. **Fields defined in schema but not extracted in transformer**
+2. **Fields extracted in transformer but missing from schema**
+3. **Type mismatches**
+4. **Naming inconsistencies**
+
+### Key Findings
+
+| Category | Count | Priority |
+|----------|-------|----------|
+| Missing transformer implementations | 2 | Low (internal ChEMBL entities) |
+| Schema-transformer field mismatches | 15 | Medium |
+| Fields in transformer but not schema | 8 | Low (handled by `strict=False`) |
+| System fields handled by BaseTransformer | OK | N/A |
+
+---
+
+## System Fields (Added by BaseTransformer)
+
+The following fields are **automatically added** by `BaseTransformer` and should NOT be extracted in `_extract_business_data`:
+
+From **ETLRecordSchema** (base):
+- `entity_id` - Computed by `compute_entity_id()`
+- `content_hash` - Computed by `compute_content_hash()`
+- `_run_id` - From PipelineContext
+- `_run_type` - From PipelineContext
+- `_source_batch_id` - From PipelineContext (nullable)
+- `_ingestion_ts` - Auto-generated timestamp
+- `_dq_warn` - Default False (can be overridden)
+- `_dq_error` - Default False (can be overridden)
+- `_index` - Sequential index parameter
+
+From **PublicationBaseSchema** (publication entities):
+- `pmid`, `doi`, `pmc_id` - Cross-reference IDs
+- `title`, `abstract`, `authors` - Core content
+- `journal`, `year`, `publication_date`, `doc_type`, `language` - Metadata
+- `citation_count`, `is_oa` - Metrics
+- `_lookup_method`, `_original_id`, `_source` - Lookup tracking
+
+---
+
+## Provider Audit Details
+
+### 1. ChEMBL Pipeline
+
+ChEMBL has 14 schema files and 12 transformer files.
+
+#### 1.1 ActivitySchema ↔ ActivityTransformer
+
+**Schema**: `src/bioetl/domain/schemas/chembl/activity.py`
+**Transformer**: `src/bioetl/application/pipelines/chembl/activity_transformer.py`
+
+| Field | Schema | Transformer | Status |
+|-------|--------|-------------|--------|
+| `activity_id` | ✅ | ✅ | OK |
+| `assay_chembl_id` | ✅ | ✅ | OK |
+| `molecule_chembl_id` | ✅ | ✅ | OK |
+| `target_chembl_id` | ✅ nullable | ✅ | OK |
+| `document_chembl_id` | ✅ nullable | ✅ | OK |
+| All standardized values | ✅ | ✅ via `_STANDARD_VALUES` FieldGroup | OK |
+| `ligand_efficiency_*` | ✅ | ✅ via `_extract_ligand_efficiency` | OK |
+| `action_type_*` | ✅ | ✅ via `_extract_action_type` | OK |
+| `activity_properties` | ✅ | ✅ JSON serialized | OK |
+| `target_taxonomy_id` | ✅ | ✅ (mapped from `target_tax_id`) | OK |
+| `manual_curation_flag` | ✅ | ✅ | OK |
+| `original_activity_id` | ✅ | ✅ | OK |
+| `data_validity_description` | ✅ | ✅ | OK |
+
+**Discrepancies**: None found. ✅
+
+---
+
+#### 1.2 MoleculeSchema ↔ MoleculeTransformer
+
+**Schema**: `src/bioetl/domain/schemas/chembl/molecule.py`
+**Transformer**: `src/bioetl/application/pipelines/chembl/molecule_transformer.py`
+
+| Field | Schema | Transformer | Status |
+|-------|--------|-------------|--------|
+| `molecule_chembl_id` | ✅ | ✅ | OK |
+| `structure_standard_inchi_key` | ✅ | ❌ Not extracted | **MISMATCH** |
+| `inchikey` | ✅ | ✅ (from structures) | OK |
+| `hierarchy_*` | ✅ | ✅ via flatten_nested_dict | OK |
+| `property_*` | ✅ | ✅ via flatten_nested_dict | OK |
+| `canonical_smiles` | ✅ | ✅ | OK |
+| `standard_inchi` | ✅ | ✅ | OK |
+
+**Discrepancies**:
+
+| Field | Problem | Recommendation |
+|-------|---------|----------------|
+| `structure_standard_inchi_key` | Schema field not extracted | Remove from schema or add extraction (appears to be legacy from `molecule_structures.standard_inchi_key`) |
+
+**Note**: The transformer extracts from `molecule_structures` and renames `standard_inchi_key` → `inchikey`. The schema has both `structure_standard_inchi_key` and `inchikey`, which is redundant.
+
+---
+
+#### 1.3 TargetSchema ↔ TargetTransformer
+
+**Schema**: `src/bioetl/domain/schemas/chembl/target.py`
+**Transformer**: `src/bioetl/application/pipelines/chembl/target_transformer.py`
+
+| Field | Schema | Transformer | Status |
+|-------|--------|-------------|--------|
+| `target_chembl_id` | ✅ | ✅ | OK |
+| `taxonomy_id` | ✅ | ✅ (mapped from `tax_id`) | OK |
+| `downgraded` | ✅ bool | ✅ converted to bool | OK |
+| `target_components` | ✅ JSON | ✅ | OK |
+| `cross_references` | ✅ JSON | ✅ (aggregated from components) | OK |
+| `component_*` lists | ✅ | ✅ via `_flatten_target_components` | OK |
+
+**Discrepancies**: None found. ✅
+
+---
+
+#### 1.4 AssaySchema ↔ AssayTransformer
+
+**Schema**: `src/bioetl/domain/schemas/chembl/assay.py`
+**Transformer**: `src/bioetl/application/pipelines/chembl/assay_transformer.py`
+
+| Field | Schema | Transformer | Status |
+|-------|--------|-------------|--------|
+| `assay_chembl_id` | ✅ | ✅ | OK |
+| `assay_taxonomy_id` | ✅ | ✅ (mapped from `assay_tax_id`) | OK |
+| `variant_taxonomy_id` | ✅ | ✅ (mapped from `variant_tax_id`) | OK |
+| `variant_*` fields | ✅ | ✅ via `_extract_variant` | OK |
+| `assay_type_description` | ❌ Not in schema | ✅ extracted via `_CLASSIFICATION` | **MISMATCH** |
+
+**Discrepancies**:
+
+| Field | Problem | Recommendation |
+|-------|---------|----------------|
+| `assay_type_description` | Extracted but not in schema | Add to AssaySchema or remove from transformer |
+
+---
+
+#### 1.5 CellLineSchema ↔ CellLineTransformer
+
+**Schema**: `src/bioetl/domain/schemas/chembl/cell_line.py`
+**Transformer**: `src/bioetl/application/pipelines/chembl/cell_line_transformer.py`
+
+**Discrepancies**: None found. ✅
+
+---
+
+#### 1.6 CompoundRecordSchema ↔ CompoundRecordTransformer
+
+**Schema**: `src/bioetl/domain/schemas/chembl/compound_record.py`
+**Transformer**: `src/bioetl/application/pipelines/chembl/compound_record_transformer.py`
+
+**Discrepancies**: None found. ✅
+
+---
+
+#### 1.7 TargetComponentSchema ↔ TargetComponentTransformer
+
+**Schema**: `src/bioetl/domain/schemas/chembl/target_component.py`
+**Transformer**: `src/bioetl/application/pipelines/chembl/target_component_transformer.py`
+
+| Field | Schema | Transformer | Status |
+|-------|--------|-------------|--------|
+| `targcomp_id` | ✅ PK | ❌ Not extracted | **MISMATCH** |
+| `tid` | ✅ required | ❌ Not extracted | **MISMATCH** |
+| `component_id` | ✅ required | ✅ (as primary_id) | OK |
+| `relationship` | ✅ | ❌ Not extracted | **MISMATCH** |
+| `stoichiometry` | ✅ | ❌ Not extracted | **MISMATCH** |
+| `homologue` | ✅ | ❌ Not extracted | **MISMATCH** |
+| `taxonomy_id` | ❌ Not in schema | ✅ extracted | **MISMATCH** |
+| `accession` | ❌ Not in schema | ✅ extracted | **MISMATCH** |
+| `component_type` | ❌ Not in schema | ✅ extracted | **MISMATCH** |
+| `description` | ❌ Not in schema | ✅ extracted | **MISMATCH** |
+| `organism` | ❌ Not in schema | ✅ extracted | **MISMATCH** |
+| `target_component_synonyms` | ❌ Not in schema | ✅ JSON | **MISMATCH** |
+| `target_component_xrefs` | ❌ Not in schema | ✅ JSON | **MISMATCH** |
+| `protein_classifications` | ❌ Not in schema | ✅ JSON | **MISMATCH** |
+| `protein_classification_ids` | ❌ Not in schema | ✅ extracted | **MISMATCH** |
+
+**Critical Discrepancy**: The schema and transformer are fundamentally misaligned. The schema represents the `target_component` table join structure (targcomp_id, tid, component_id), while the transformer extracts from the `/target_component` API endpoint which returns component details.
+
+**Recommendation**:
+1. **HIGH PRIORITY**: Create a new schema `ComponentSequenceSchema` that matches what the transformer actually extracts
+2. Keep `TargetComponentSchema` for the join table data if needed
+3. Or update the transformer to use a different data source that provides the join table data
+
+---
+
+#### 1.8 ProteinClassificationSchema ↔ ProteinClassTransformer
+
+**Discrepancies**: None found. ✅
+
+---
+
+#### 1.9 ChemblPublicationSchema ↔ PublicationTransformer
+
+**Schema**: `src/bioetl/domain/schemas/chembl/publication.py`
+**Transformer**: `src/bioetl/application/pipelines/chembl/publication_transformer.py`
+
+**Discrepancies**: None found. Schema inherits from PublicationBaseSchema and transformer provides all required fields. ✅
+
+---
+
+#### 1.10 PublicationSimilaritySchema ↔ PublicationSimilarityTransformer
+
+**Discrepancies**: None found. ✅
+
+---
+
+#### 1.11 PublicationTermSchema ↔ PublicationTermTransformer
+
+**Discrepancies**: None found. ✅
+
+---
+
+#### 1.12 AssayParametersSchema ↔ AssayParametersTransformer
+
+**Discrepancies**: None found. ✅
+
+---
+
+#### 1.13 Missing Transformers
+
+| Schema | Status | Notes |
+|--------|--------|-------|
+| `MoleculeFormSchema` | No transformer | Internal ChEMBL schema for molecule hierarchy |
+| `TargetRelationSchema` | No transformer | Internal ChEMBL schema for target relationships |
+
+**Recommendation**: These appear to be internal ChEMBL schemas not exposed via API. Mark as "internal only" or create transformers if data is needed.
+
+---
+
+### 2. PubChem Pipeline
+
+#### 2.1 PubchemMoleculeSchema ↔ PubChemCompoundTransformer
+
+**Schema**: `src/bioetl/domain/schemas/pubchem/compound.py`
+**Transformer**: `src/bioetl/application/pipelines/pubchem/transformer.py`
+
+| Field | Schema | Transformer | Status |
+|-------|--------|-------------|--------|
+| `cid` | ✅ int | ✅ str | **TYPE MISMATCH** |
+| `inchi_key` | ✅ | ✅ as `inchikey` | **NAMING** |
+| All 3D properties | ✅ | ✅ via `_extract_3d_properties` | OK |
+| All stereo counts | ✅ | ✅ via `_extract_stereochemistry` | OK |
+
+**Discrepancies**:
+
+| Field | Problem | Recommendation |
+|-------|---------|----------------|
+| `cid` | Schema expects `int`, transformer provides `str(cid)` | Transformer should keep int for entity_id computation, schema coerces |
+| `inchi_key` vs `inchikey` | Naming inconsistency | Schema uses `inchi_key`, transformer uses `inchikey` - check if coercion handles |
+
+---
+
+### 3. UniProt Pipeline
+
+#### 3.1 UniprotTargetSchema ↔ UniProtProteinTransformer
+
+**Schema**: `src/bioetl/domain/schemas/uniprot/protein.py`
+**Transformer**: `src/bioetl/application/pipelines/uniprot/transformer.py`
+
+| Field | Schema | Transformer | Status |
+|-------|--------|-------------|--------|
+| `accession` | ✅ | ✅ (from `primaryAccession`) | OK |
+| `entry_name` | ✅ | ✅ (from `uniProtkbId`) | OK |
+| `protein_name` | ✅ nullable | ✅ nullable | OK |
+| `gene_names` | ❌ Not in schema | ✅ extracted | **MISMATCH** |
+| `organism_id` | ❌ Not in schema | ✅ (alias for taxonomy_id) | **MISMATCH** |
+| `publication_count` | ✅ | ❌ Not extracted | **MISMATCH** |
+
+**Discrepancies**:
+
+| Field | Problem | Recommendation |
+|-------|---------|----------------|
+| `gene_names` | Extracted but not in schema | Add to schema (JSON array of gene names) |
+| `organism_id` | Legacy compatibility alias | Consider removing from transformer |
+| `publication_count` | In schema but not extracted | Add extraction or remove from schema |
+
+---
+
+#### 3.2 IDMappingSchema ↔ IDMappingTransformer
+
+**Discrepancies**: None found. ✅
+
+---
+
+### 4. PubMed Pipeline
+
+#### 4.1 PubMedPublicationSchema ↔ PubMedPublicationTransformer
+
+**Schema**: `src/bioetl/domain/schemas/pubmed/publication.py`
+**Transformer**: `src/bioetl/application/pipelines/pubmed/transformer.py`
+
+| Field | Schema | Transformer | Status |
+|-------|--------|-------------|--------|
+| `pmid` | ✅ str | ✅ str | OK |
+| `journal` | ✅ (base) | ✅ as `journal_title` | OK (aliased) |
+| `journal_abbrev` | ❌ Not in schema | ✅ extracted | **MISMATCH** |
+| `pub_date` | ❌ Not in schema | ✅ extracted | **MISMATCH** |
+| `publication_year` | ❌ Not in schema | ✅ (alias for year) | **MISMATCH** |
+| `pages` | ❌ Not in schema | ✅ extracted | **MISMATCH** |
+| `first_page`, `last_page` | ❌ Not in schema | ✅ extracted | **MISMATCH** |
+
+**Discrepancies**:
+
+| Field | Problem | Recommendation |
+|-------|---------|----------------|
+| `journal_abbrev` | Extracted but not in schema | Add to PubMedPublicationSchema |
+| `pub_date` | Extracted but not in schema | Add to schema (partial date string) |
+| `pages`, `first_page`, `last_page` | Extracted but not in schema | Add pagination fields to schema |
+| `publication_year` | Legacy alias | Remove from transformer (use `year`) |
+
+---
+
+### 5. CrossRef Pipeline
+
+#### 5.1 PublicationEnrichedSchema ↔ CrossRefPublicationTransformer
+
+**Schema**: `src/bioetl/domain/schemas/crossref/publication.py`
+**Transformer**: `src/bioetl/application/pipelines/crossref/transformer.py`
+
+| Field | Schema | Transformer | Status |
+|-------|--------|-------------|--------|
+| `doi` | ✅ non-nullable | ✅ | OK |
+| `subjects` | ✅ | ✅ as list | OK (coerced) |
+| `first_page`, `last_page` | ❌ Not in schema | ✅ via `extract_page_info` | **MISMATCH** |
+
+**Discrepancies**:
+
+| Field | Problem | Recommendation |
+|-------|---------|----------------|
+| `first_page`, `last_page` | Extracted but not in schema | Add to PublicationEnrichedSchema |
+
+---
+
+### 6. OpenAlex Pipeline
+
+#### 6.1 OpenAlexPublicationSchema ↔ OpenAlexPublicationTransformer
+
+**Schema**: `src/bioetl/domain/schemas/openalex/publication.py`
+**Transformer**: `src/bioetl/application/pipelines/openalex/transformer.py`
+
+**Discrepancies**: None found. Schema and transformer are well-aligned. ✅
+
+---
+
+### 7. SemanticScholar Pipeline
+
+#### 7.1 SemanticScholarPublicationSchema ↔ SemanticScholarPublicationTransformer
+
+**Schema**: `src/bioetl/domain/schemas/semanticscholar/publication.py`
+**Transformer**: `src/bioetl/application/pipelines/semanticscholar/transformer.py`
+
+**Discrepancies**: None found. Schema and transformer are well-aligned. ✅
+
+---
+
+## Summary of All Discrepancies
+
+### HIGH Priority (Schema-Transformer Structural Mismatch)
+
+| Provider | Entity | Issue | Action Required |
+|----------|--------|-------|-----------------|
+| ChEMBL | TargetComponent | Schema and transformer fundamentally misaligned | Create new ComponentSequenceSchema or fix transformer |
+
+### MEDIUM Priority (Missing Fields)
+
+| Provider | Entity | Field | Direction | Action |
+|----------|--------|-------|-----------|--------|
+| ChEMBL | Molecule | `structure_standard_inchi_key` | Schema only | Remove from schema (redundant with `inchikey`) |
+| ChEMBL | Assay | `assay_type_description` | Transformer only | Add to schema |
+| UniProt | Protein | `gene_names` | Transformer only | Add to schema |
+| UniProt | Protein | `publication_count` | Schema only | Add extraction or remove |
+| PubMed | Publication | `journal_abbrev`, `pub_date`, `pages`, `first_page`, `last_page` | Transformer only | Add to schema |
+| CrossRef | Publication | `first_page`, `last_page` | Transformer only | Add to schema |
+
+### LOW Priority (Naming/Type Inconsistencies)
+
+| Provider | Entity | Field | Issue | Action |
+|----------|--------|-------|-------|--------|
+| PubChem | Molecule | `cid` | str vs int type | Verify coercion handles this |
+| PubChem | Molecule | `inchi_key` vs `inchikey` | Naming | Standardize naming |
+
+---
+
+## Recommendations
+
+### 1. Immediate Actions (HIGH Priority)
+
+1. **Fix TargetComponentSchema**: Create a new schema that matches the actual transformer output, or update the transformer to match the existing schema structure.
+
+### 2. Short-term Actions (MEDIUM Priority)
+
+1. **Add missing fields to schemas**: Update schemas to include fields that transformers extract but schemas don't define.
+2. **Remove unused schema fields**: Remove `structure_standard_inchi_key` from MoleculeSchema (redundant).
+
+### 3. Long-term Actions (LOW Priority)
+
+1. **Standardize field naming**: Ensure consistent naming across all providers (e.g., `inchi_key` vs `inchikey`).
+2. **Add automated CI check**: Create a script that compares schema fields with transformer extraction.
+
+### 4. CI Automation Recommendation
+
+Create `scripts/audit_field_mapping.py`:
+
+```python
+"""Automated schema-transformer field mapping audit.
+
+Usage: python scripts/audit_field_mapping.py
+"""
+
+import ast
+import sys
+from pathlib import Path
+
+
+def extract_schema_fields(schema_file: Path) -> set[str]:
+    """Extract field names from Pandera schema."""
+    with open(schema_file) as f:
+        tree = ast.parse(f.read())
+
+    fields = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            fields.add(node.target.id)
+    return fields
+
+
+def extract_transformer_fields(transformer_file: Path) -> set[str]:
+    """Extract field names from _extract_business_data return dict."""
+    # Simplified - would need AST analysis of return statement
+    pass
+
+
+def main():
+    schemas_dir = Path("src/bioetl/domain/schemas")
+    pipelines_dir = Path("src/bioetl/application/pipelines")
+
+    # Compare each schema with its transformer
+    # Report discrepancies
+    pass
+
+
+if __name__ == "__main__":
+    main()
+```
+
+---
+
+## Appendix: Complete Field Lists by Entity
+
+### ChEMBL Activity (58 fields)
+Schema fields: activity_id, assay_chembl_id, molecule_chembl_id, target_chembl_id, document_chembl_id, standard_relation, standard_value, standard_units, standard_type, standard_flag, pchembl_value, data_validity_comment, activity_comment, potential_duplicate, bao_endpoint, uo_units, qudt_units, src_id, record_id, type, relation, value, units, text_value, standard_text_value, upper_value, standard_upper_value, toid, manual_curation_flag, original_activity_id, data_validity_description, ligand_efficiency_bei, ligand_efficiency_le, ligand_efficiency_lle, ligand_efficiency_sei, action_type_action_type, action_type_description, action_type_parent_type, activity_properties, canonical_smiles, molecule_pref_name, parent_molecule_chembl_id, target_pref_name, target_organism, target_taxonomy_id, assay_type, assay_description, assay_variant_accession, assay_variant_mutation, bao_format, bao_label, document_journal, document_year + system fields
+
+### PubChem Molecule (47 fields)
+Schema fields: cid, canonical_smiles, isomeric_smiles, inchi, inchi_key, molecular_formula, iupac_name, molecular_weight, exact_mass, monoisotopic_mass, xlogp, tpsa, complexity, charge, heavy_atom_count, h_bond_donor_count, h_bond_acceptor_count, rotatable_bond_count, atom_stereo_count, defined_atom_stereo_count, undefined_atom_stereo_count, bond_stereo_count, defined_bond_stereo_count, undefined_bond_stereo_count, isotope_atom_count, covalent_unit_count, volume_3d, conformer_count_3d, feature_acceptor_count_3d, feature_donor_count_3d, feature_anion_count_3d, feature_cation_count_3d, feature_ring_count_3d, feature_hydrophobe_count_3d, effective_rotor_count_3d, conformer_rmsd_3d, x_steric_quadrupole_3d, y_steric_quadrupole_3d, z_steric_quadrupole_3d, feature_count_3d + system fields
+
+---
+
+*End of Audit Report*
+
+================================================================================
 File: architecture-audit-2026-01-22.md
 Path: audits\architecture-audit-2026-01-22.md
 ================================================================================
@@ -53332,6 +54991,415 @@ BioETL представляет собой **референсную реализ
 ---
 
 *Аудит выполнен с использованием двойной верификации согласно RULES.md §7 (REQ-ARCH-040)*
+
+================================================================================
+File: architecture-audit-2026-01-26.md
+Path: audits\architecture-audit-2026-01-26.md
+================================================================================
+# Архитектурный аудит BioETL
+
+**Дата**: 2026-01-26
+**Версия**: 1.0
+**Аудитор**: Claude Code (Opus 4.5)
+**Статус**: Production-Ready
+
+---
+
+## Часть 1. Объективные метрики
+
+| Метрика | Значение | Команда проверки |
+|---------|----------|------------------|
+| **Покрытие тестами** | 89.99% | `pytest --cov=src/bioetl --cov-report=term` |
+| **Ошибки mypy** | 0 шт. | `mypy src/bioetl --strict` |
+| **Циклические импорты** | pass | `python -c "from bioetl.domain import *"` |
+| **Количество классов** | 908 шт. | `grep -r "^class " src/ --include="*.py"` |
+| **Количество файлов .py** | 509 шт. | `find src/ -name "*.py"` |
+| **Строки кода** | ~102,670 | `wc -l src/bioetl/**/*.py` |
+| **Средний размер модуля** | ~202 строк | total / кол-во файлов |
+| **TODO/FIXME в коде** | 20 шт. | `grep -rE "(TODO\|FIXME\|XXX\|HACK)" src/` |
+| **Использование print()** | 0 шт. | `grep -r "print(" src/bioetl --include="*.py"` |
+| **Hardcoded secrets** | 0 шт. | Проверено security тестами |
+| **Нарушения слоёв** | 0 шт. | `import-linter`, arch tests |
+| **Protocol-определений** | 43 шт. | `domain/ports/` |
+| **Тестов всего** | ~7,810 | `pytest --collect-only` |
+| **VCR кассет** | 86 шт. | `tests/fixtures/vcr/` |
+| **ADR документов** | 31 шт. | `docs/02-architecture/decisions/` |
+| **Gold контрактов** | 20 шт. | `docs/contracts/gold/` |
+
+---
+
+## Часть 2. Оценка по 10 категориям
+
+### Сводная таблица
+
+| # | Категория | Вес | Оценка | Взвеш. балл | Ключевые находки |
+|---|-----------|-----|--------|-------------|------------------|
+| 1 | Слоистая архитектура | 15% | **10** | 1.50 | 0 нарушений, import-linter + 360 arch тестов |
+| 2 | Контракты и Ports | 12% | **10** | 1.20 | 43 Protocol, все зависимости абстрагированы |
+| 3 | Medallion Architecture | 12% | **10** | 1.20 | JSONL+zstd, Delta Lake, SCD2, полное соответствие |
+| 4 | Обработка ошибок и CB | 10% | **10** | 1.00 | 3-tier classification, CB с метриками |
+| 5 | Блокировки и конкурентность | 10% | **9** | 0.90 | MemoryLock полный, нет fencing (by design) |
+| 6 | Валидация и DQ | 10% | **10** | 1.00 | 20 Pandera схем, Quarantine, Content Hash |
+| 7 | Логирование и наблюдаемость | 8% | **10** | 0.80 | LoggerPort, run_id везде, Prometheus, arch тесты |
+| 8 | Тестирование | 8% | **10** | 0.80 | 89.99% покрытие, VCR, snapshot, contract tests |
+| 9 | Безопасность и секреты | 8% | **9** | 0.72 | SecretStr, PII hashing, рекомендация defusedxml |
+| 10 | Документация | 7% | **10** | 0.70 | 31 ADR, Gold contracts, RULES.md 81KB |
+| **Итого** | **100%** | | **9.82** | | |
+
+### Интерпретация общего балла
+
+**9.82/10 — Production-ready, exemplary codebase**
+
+Проект демонстрирует образцовое следование архитектурным принципам:
+- Hexagonal Architecture (Ports & Adapters) строго соблюдена
+- Medallion Architecture полностью реализована
+- Observability-first подход (метрики, трейсинг, структурированные логи)
+- Comprehensive testing (unit, integration, architecture, e2e, contract)
+- Extensive documentation (ADR, contracts, RULES.md)
+
+---
+
+## Часть 3. Детальный анализ по категориям
+
+### 1. Слоистая архитектура (10/10)
+
+**Критерий**: §1.1 RULES.md — domain не импортирует infrastructure/application
+
+**Проверки выполнены:**
+```bash
+grep -r "from bioetl.infrastructure" src/bioetl/domain/  # 0 результатов
+grep -r "from bioetl.application" src/bioetl/domain/     # 0 результатов
+grep -r "from bioetl.interfaces" src/bioetl/application/ # 0 результатов
+```
+
+**Инструменты соблюдения:**
+- **import-linter**: 5 контрактов, все KEPT (`lint-imports --config .importlinter`)
+- **Architecture tests**: 360+ тестов в `tests/architecture/`
+- **CI/CD**: Автоматическая проверка на каждый PR
+
+**Вердикт**: Полное соответствие. Границы слоёв строго соблюдены.
+
+---
+
+### 2. Контракты и Ports (10/10)
+
+**Критерий**: §1.1.1 — использование Protocol в domain/ports, реализации в infrastructure
+
+**Найдено:**
+- **43 Protocol определения** в `domain/ports/`
+- Все внешние зависимости абстрагированы:
+  - HTTP → `DataSourcePort` → `BaseHttpAdapter`
+  - Storage → `StoragePort` → `BronzeWriter/SilverWriter/GoldWriter`
+  - Logging → `LoggerPort` → `UnifiedLogger`
+  - Metrics → `MetricsPort` → `PrometheusMetrics`
+  - Tracing → `TracingPort` → `NoOpTracing/OpenTelemetryTracer`
+
+**Нарушения**: 0 (прямые импорты httpx/structlog в application отсутствуют)
+
+**Вердикт**: Образцовая реализация Ports & Adapters.
+
+---
+
+### 3. Medallion Architecture (10/10)
+
+**Критерий**: §2.1 — Bronze (JSONL+zstd), Silver (Delta+merge), Gold (strict validation)
+
+| Слой | Требование | Реализация | Файл |
+|------|------------|------------|------|
+| Bronze | JSONL + zstd | ✅ `ZstdCompressor(level=3)` | `bronze_writer.py:364-368` |
+| Silver | Delta Lake + merge | ✅ `SilverWriteMode` enum | `silver_writer.py:846-881` |
+| Gold | Strict validation | ✅ `schema.strict=True` check | `gold_writer.py:260-266` |
+| Gold | SCD Type 2 | ✅ Полная реализация | `gold_writer.py:715-837` |
+
+**Write Mode Policy**: Enforced через `WriteModePolicy` (`medallion.py:140-165`)
+
+**Вердикт**: Полное соответствие RULES.md §2.1-2.3.
+
+---
+
+### 4. Обработка ошибок и Circuit Breaker (10/10)
+
+**Критерий**: §3.1 — классификация ошибок, §3.1.4 — Circuit Breaker
+
+**Error Classification** (`error_classifier.py:17-56`):
+- Critical: AuthFailure, DBUnavailable, LockLost
+- Recoverable: RateLimit, Timeout, NetworkError
+- DataQuality: SchemaViolation, InvalidData
+
+**Retry Logic** (`resilience.py:78-109`):
+- Max attempts: 3
+- Exponential backoff: 1s → 2s → 4s
+- Jitter: 10-50% (deterministic при `deterministic=True`)
+
+**Circuit Breaker** (`circuit_breaker.py:43-233`):
+| Параметр | Значение | Ссылка |
+|----------|----------|--------|
+| Failure threshold | 5 consecutive errors | Line 67 |
+| Recovery timeout | 300s (5 min) | Line 68 |
+| States | CLOSED → OPEN → HALF_OPEN | Lines 111-154 |
+| Metrics | `circuit_breaker_state`, `circuit_breaker_trips_total` | Lines 93-109 |
+
+**DQ Thresholds** (`config.py:259-260`):
+- Soft: 5% → Warning
+- Hard: 20% → Fail batch
+
+**Вердикт**: Полное соответствие ADR-007, ADR-016.
+
+---
+
+### 5. Блокировки и конкурентность (9/10)
+
+**Критерий**: §3.3 — Lock, TTL, Heartbeat, Safety Guard
+
+**MemoryLock Implementation** (`memory_lock.py`):
+| Компонент | Реализация | Ссылка |
+|-----------|------------|--------|
+| TTL | 90s (default) | `config.py:547` |
+| Heartbeat | 30s (default) | `config.py:544` |
+| acquire() | ✅ с wait/timeout | Lines 111-153 |
+| release() | ✅ с owner validation | Lines 155-184 |
+| heartbeat() | ✅ TTL extension | Lines 186-214 |
+| validate_owner() | ✅ Safety Guard | Lines 216-248 |
+| aclose() | ✅ Graceful shutdown | Lines 250-266 |
+
+**Redis Lock**: ✅ Отсутствует (per ADR-010 Local-Only Deployment)
+
+**Fencing Tokens**: ❌ Не реализованы (by design — single-instance)
+
+**Снижение балла**: -1 за отсутствие fencing tokens, хотя это архитектурное решение.
+
+**Вердикт**: Полная реализация для Local-Only, fencing tokens не требуются.
+
+---
+
+### 6. Валидация и DQ (10/10)
+
+**Критерий**: §2.6 — Pandera, Quarantine, Content Hash, thresholds
+
+**Pandera Schemas**: 20 Gold схем в `domain/contracts/gold/`
+- ChEMBL: 12 entities
+- Publications: 4 entities
+- PubChem/UniProt: 4 entities
+
+**Quarantine** (`infrastructure/quarantine/unified.py`):
+- Unified table: `common.quarantine`
+- Payload truncation: 64KB max
+- State machine: NEW → UNDER_REVIEW → IGNORED|REPROCESSED|EXPIRED
+
+**Content Hash** (`identity_service.py:87-117`):
+- Algorithm: SHA256(provider + canonical_json(normalized_record))
+- Normalization: NaN→null, float precision 10, dates→ISO, strings→strip
+
+**Sentinel Values**: ✅ 0 найдено (проверено grep)
+
+**Вердикт**: Полное соответствие RULES.md §2.6.
+
+---
+
+### 7. Логирование и наблюдаемость (10/10)
+
+**Критерий**: §3.2 — UnifiedLogger, run_id, Prometheus
+
+**LoggerPort** (`observability.py:102-138`):
+- Protocol с методами: bind(), info(), warning(), error(), debug(), exception()
+- Implementation: `UnifiedLogger` с обязательным `run_id`
+
+**run_id Enforcement** (`unified_logger.py:76-102`):
+- Mandatory binding at initialization
+- Присутствует во всех логах
+
+**Prometheus Metrics** (`prometheus_metrics.py`, `metrics.py`):
+- 20+ pre-defined metrics
+- Histograms, Counters, Gauges
+- Health check metrics
+
+**Architecture Test** (`test_no_structlog_in_application_interfaces.py`):
+- Запрет direct structlog import в application/interfaces
+- REQ-ARCH-032 enforced
+
+**Вердикт**: Образцовая observability-first архитектура.
+
+---
+
+### 8. Тестирование (10/10)
+
+**Критерий**: §4.2 — coverage ≥85%, VCR.py, golden tests
+
+| Метрика | Значение | Требование |
+|---------|----------|------------|
+| Coverage | 89.99% | ≥85% ✅ |
+| Test functions | ~7,810 | — |
+| Unit tests | 6,731 | — |
+| Integration tests | 288 | — |
+| Architecture tests | 421 | — |
+| E2E tests | 180 | — |
+| Contract tests | 30 | — |
+
+**VCR.py** (`conftest.py:227-407`):
+- 86 cassettes
+- Secret sanitization: Authorization, API keys, tokens → REDACTED
+- Email PII: `redacted@example.com`
+
+**Snapshot Tests**: 5 files using Syrupy
+
+**Contract Tests**: 4 providers (ChEMBL, PubChem, PubMed, UniProt)
+
+**Вердикт**: Превосходное тестовое покрытие.
+
+---
+
+### 9. Безопасность и секреты (9/10)
+
+**Критерий**: §5.2 — env vars, §5.4 — PII hashing
+
+**API Keys** (`_base.py:332-339`):
+- All via environment variables
+- `pydantic.SecretStr` wrapper
+- `get_secret_value()` access pattern
+
+**PII Hashing** (`pii_hasher.py`):
+- Algorithm: SHA256(NFKC_normalized_lowercase + salt)
+- Salt minimum: 32 characters
+- Rotation support: current + next salt
+
+**.gitignore**: `*.env` excluded, `.env.example` included
+
+**Security Scanning** (`Makefile:155-160`):
+- osv-scanner (Go binary)
+- pip-audit
+- bandit (SAST)
+
+**Known Issues**:
+- B314 (XML parsing): 2 instances, рекомендуется defusedxml
+- B104 (bind all interfaces): 3 instances, acceptable for local-only
+
+**Снижение балла**: -1 за отсутствие defusedxml
+
+**Вердикт**: Отличная безопасность с minor рекомендациями.
+
+---
+
+### 10. Документация и сопровождаемость (10/10)
+
+**Критерий**: §6, §7 — Data Contracts, ADR, docstrings
+
+| Артефакт | Количество/Размер |
+|----------|-------------------|
+| ADR documents | 31 |
+| RULES.md | 81KB (1154 строки) |
+| REQUIREMENTS.md | 43KB |
+| Gold contracts | 20 JSON schemas |
+| Docstrings | 487 файлов с docstrings |
+
+**ADR Coverage** (Приложение F RULES.md):
+- ADR-001..029 в реестре
+- Все ключевые решения задокументированы
+
+**Data Contracts** (`docs/contracts/gold/`):
+- JSON Schema для всех Gold entities
+- Версионирование: `{entity}_v{major}.{minor}.json`
+
+**Вердикт**: Исчерпывающая документация.
+
+---
+
+## Часть 4. План рефакторинга
+
+### Приоритет P3 (Улучшения, MAY требования)
+
+#### [P3] Добавить defusedxml для XML parsing
+
+**Категория**: Безопасность
+**Текущий балл → Целевой балл**: 9 → 10
+**Влияние на общий балл**: +0.08
+
+**Проблема**: `xml.etree.ElementTree.fromstring()` используется без defusedxml
+- `application/pipelines/pubmed/transformer.py:119`
+- `infrastructure/adapters/pubmed/xml_processor.py:27`
+
+**Решение**:
+```python
+import defusedxml.ElementTree as ET
+# вместо
+import xml.etree.ElementTree as ET
+```
+
+**Файлы**: 2 файла
+**Риски**: Минимальные — defusedxml drop-in replacement
+**Критерий готовности**: Bandit B314 warnings = 0
+**Трудозатраты**: S (часы)
+
+---
+
+#### [P3] Рассмотреть bind на localhost для health server
+
+**Категория**: Безопасность
+**Текущий балл → Целевой балл**: 9 → 10
+**Влияние на общий балл**: +0.08
+
+**Проблема**: Health server binds на `0.0.0.0` по умолчанию (B104)
+
+**Решение**: Изменить default на `127.0.0.1`, добавить CLI flag `--bind-all`
+
+**Файлы**:
+- `interfaces/cli/commands/health.py:29`
+- `interfaces/http/health_server.py:29`
+
+**Риски**: Может потребоваться изменение в deployment scripts
+**Критерий готовности**: Bandit B104 warnings = 0 (или skip в конфиге)
+**Трудозатраты**: S (часы)
+
+---
+
+### Roadmap
+
+| Фаза | Задачи | Ожидаемый балл |
+|------|--------|----------------|
+| **Текущее состояние** | — | **9.82** |
+| **Фаза 1** (опционально) | P3: defusedxml, localhost binding | 9.98 |
+
+**Вывод**: Проект находится в отличном состоянии. Рекомендуемые изменения носят косметический характер и не являются блокерами.
+
+---
+
+## Часть 5. Метрики контроля регресса
+
+| Метрика | Порог | Команда | Блокирует PR |
+|---------|-------|---------|--------------|
+| Coverage | ≥85% | `pytest --cov-fail-under=85` | ✅ Да |
+| mypy errors | 0 | `mypy --strict` | ✅ Да |
+| Циклические импорты | 0 | `lint-imports` | ✅ Да |
+| Нарушения слоёв | 0 | `pytest tests/architecture/` | ✅ Да |
+| print() в коде | 0 | `grep -r "print(" src/bioetl` | ✅ Да |
+| Hardcoded secrets | 0 | `pytest tests/security/` | ✅ Да |
+| Bandit high/critical | 0 | `bandit -r src/bioetl -ll` | ✅ Да |
+| pip-audit vulnerabilities | 0 | `pip-audit` | ✅ Да |
+
+**CI/CD Integration**: Все метрики проверяются в `.github/workflows/`:
+- `tests.yml` — coverage, tests
+- `import-linter.yml` — architecture
+- `security.yml` (если есть) — security scanning
+
+---
+
+## Заключение
+
+BioETL демонстрирует **образцовую** реализацию современной ETL-архитектуры:
+
+1. **Hexagonal Architecture** строго соблюдена — 0 нарушений
+2. **Medallion Architecture** полностью реализована с Delta Lake
+3. **Observability-first** — LoggerPort, MetricsPort, TracingPort
+4. **Comprehensive Testing** — 90% покрытие, VCR, snapshot, contract tests
+5. **Security by Design** — SecretStr, PII hashing, audit logging
+6. **Extensive Documentation** — 31 ADR, Gold contracts, 81KB RULES.md
+
+**Общий балл: 9.82/10 — Production-Ready**
+
+Проект готов к production deployment. Рекомендуемые улучшения (defusedxml, localhost binding) носят minor характер и могут быть реализованы в рамках maintenance.
+
+---
+
+*Отчёт сгенерирован автоматически на основе анализа кодовой базы.*
 
 ================================================================================
 File: config-gaps-2026-01-19.md
@@ -56935,7 +59003,7 @@ Path: diagrams\README.md
 ================================================================================
 # BioETL Architecture Diagrams
 
-*Версия: 1.0 | Дата: 2026-01-20*
+*Версия: 1.1 | Дата: 2026-01-26*
 
 Этот каталог содержит комплексную систему архитектурных диаграмм для проекта BioETL.
 
@@ -56943,12 +59011,12 @@ Path: diagrams\README.md
 
 - **DIAGRAM_CATALOG.md** - Каталог из 500 предложенных диаграмм
 - **TOP_50_DIAGRAMS.md** - Таблица 50 наиболее важных диаграмм с приоритетами
-- **mermaid/** - 25 Mermaid диаграмм (`.mmd` files)
+- **mermaid/** - 26 Mermaid диаграмм (`.mmd` files)
 - **images/** - Отрендеренные PNG диаграммы (создаются при рендеринге)
 
 ## Структура Диаграмм
 
-### TOP-25 Диаграммы (Priority ≥ 7.75)
+### TOP-26 Диаграммы (Priority ≥ 7.75)
 
 | # | Файл | Название | Тип |
 |---|------|----------|-----|
@@ -56977,6 +59045,7 @@ Path: diagrams\README.md
 | 23 | `23_provider_adapters_overview.mmd` | Provider Adapters Overview | Component |
 | 24 | `24_graceful_shutdown.mmd` | Graceful Shutdown | Sequence Diagram |
 | 25 | `25_pipeline_config_structure.mmd` | PipelineConfig Structure | Class Diagram |
+| 26 | `26_composite_pipeline_workflow.mmd` | Composite Pipeline Workflow (ADR-026) | Flowchart |
 
 ## Рендеринг Диаграмм в PNG
 
@@ -59893,15 +61962,30 @@ To build a robust, scalable, and maintainable data pipeline for acquiring and pr
 | **Circuit Breaker** | Fault tolerance for API failures | [ADR-007](02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) |
 | **Deterministic Writes** | Reproducible SCD2 with ingestion_ts | [ADR-014](02-architecture/decisions/ADR-014-deterministic-writes.md) |
 | **Gold Validation** | Pandera strict schema validation | [ADR-018](02-architecture/decisions/ADR-018-gold-strict-validation.md) |
+| **Composite Pipeline** | Multi-source data enrichment (seed → enrich → merge) | [ADR-026](02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) |
 
-## Supported Providers
+## Supported Providers (7)
 
-| Provider | Entities | Status |
-|----------|----------|--------|
-| **ChEMBL** | Activity, Assay, Molecule, Target, Target Component, Document | Production |
-| **PubChem** | Compound | Production |
-| **UniProt** | Protein | Production |
-| **PubMed** | Publication | Production |
+| Provider | Entities | Status | Rate Limit |
+|----------|----------|--------|------------|
+| **ChEMBL** | Activity, Assay, Molecule, Target, Target Component, Document (13 entities) | Production | None |
+| **PubChem** | Compound | Production | 5 req/sec |
+| **UniProt** | Protein | Production | 100 req/sec |
+| **PubMed** | Publication | Production | 3 req/sec |
+| **CrossRef** | Publication | Production | Polite pool |
+| **OpenAlex** | Publication | Production | 10 req/sec |
+| **SemanticScholar** | Publication | Production | 100 req/5min |
+
+### Composite Pipeline (ADR-026)
+
+BioETL supports multi-source data enrichment through Composite Pipelines:
+
+```bash
+# Run composite publication pipeline (seed from ChEMBL, enrich from CrossRef, OpenAlex, PubMed)
+bioetl run --pipeline composite_publication --limit 1000
+```
+
+See [Composite Pipeline Diagram](diagrams/mermaid/26_composite_pipeline_workflow.mmd) for workflow visualization.
 
 ## Current Version
 
@@ -59924,7 +62008,7 @@ make test
 
 ---
 
-*Last updated: 2026-01-07*
+*Last updated: 2026-01-26*
 
 ================================================================================
 File: README.md
@@ -63869,7 +65953,7 @@ PubMed publications are **biomedical literature** with MeSH indexing:
 
 - **MEDLINE citations**: Curated biomedical literature
 - **MeSH terms**: Medical Subject Headings for categorization
-- **Author affiliations**: Institution data
+- **Author affiliations**: Institution data (available in source, `structured_affiliations` field only)
 - **Grant information**: Funding sources
 - **Cross-database links**: DOI, PMC, ChEMBL
 
@@ -70302,6 +72386,7 @@ Path: verification\publication-field-mapping-report.md
 # Publication Pipeline Field Mapping Verification Report
 
 **Date**: 2026-01-19
+**Updated**: 2026-01-26 (Finding 1 resolved)
 **Scope**: All 7 Publication Pipelines
 **Status**: Completed
 
@@ -70310,6 +72395,8 @@ Path: verification\publication-field-mapping-report.md
 ## Executive Summary
 
 Systematic verification of field mapping across all publication pipeline layers (API → Transformer → Entity → Silver → Gold) identified **8 schema inconsistencies**. Cross-provider field normalization for DOI, PMID, and PMC ID is **correctly implemented**.
+
+**Update (2026-01-26)**: Finding 1 (`authors` field type mismatch) has been resolved. All Gold schemas now correctly use `Series[str]` for the `authors` field.
 
 ---
 
@@ -70320,60 +72407,49 @@ Systematic verification of field mapping across all publication pipeline layers 
 | 1 | `chembl_publication` | ChEMBL | document | ⚠️ Missing Gold fields |
 | 2 | `chembl_publication_similarity` | ChEMBL | document_similarity | ✅ Correct |
 | 3 | `chembl_publication_term` | ChEMBL | document_term | ✅ Correct |
-| 4 | `pubmed_publication` | PubMed | publication | ⚠️ Missing Gold fields + Type mismatch |
-| 5 | `crossref_publication` | CrossRef | work | ⚠️ Missing Gold fields + Type mismatch |
-| 6 | `openalex_publication` | OpenAlex | publication | ⚠️ Type mismatch |
+| 4 | `pubmed_publication` | PubMed | publication | ⚠️ Missing Gold fields (Type mismatch ✅ FIXED) |
+| 5 | `crossref_publication` | CrossRef | work | ⚠️ Missing Gold fields (Type mismatch ✅ FIXED) |
+| 6 | `openalex_publication` | OpenAlex | publication | ✅ Correct (Type mismatch ✅ FIXED) |
 | 7 | `semanticscholar_publication` | SemanticScholar | publication | ✅ Correct |
 
 ---
 
 ## Finding 1: TYPE_MISMATCH - `authors` Field Type Inconsistency
 
-**Severity**: HIGH
+**Severity**: HIGH → ✅ **RESOLVED** (2026-01-26)
 **Affected Pipelines**: `pubmed_publication`, `crossref_publication`, `openalex_publication`
 
 ### Issue
 
-The `authors` field has inconsistent types between Silver (JSON string) and Gold (Python list) schemas for 3 providers, while 2 providers are correctly aligned.
+~~The `authors` field has inconsistent types between Silver (JSON string) and Gold (Python list) schemas for 3 providers, while 2 providers are correctly aligned.~~
 
-### Evidence
+**Resolution**: All Gold schemas now use `Series[str]` for the `authors` field, matching the Silver layer where transformers serialize authors to JSON strings via `serialize_json_list()`.
+
+### Current State (Verified 2026-01-26)
 
 | Provider | Transformer Output | Silver Schema | Gold Schema | Status |
 |----------|-------------------|---------------|-------------|--------|
-| PubMed | JSON string | `pa.string()` | `Series[object]` | ❌ Mismatch |
-| CrossRef | JSON string | `pa.string()` | `Series[object]` | ❌ Mismatch |
-| OpenAlex | JSON string | `pa.string()` | `Series[object]` | ❌ Mismatch |
+| PubMed | JSON string | `pa.string()` | `Series[str]` | ✅ Correct |
+| CrossRef | JSON string | `pa.string()` | `Series[str]` | ✅ Correct |
+| OpenAlex | JSON string | `pa.string()` | `Series[str]` | ✅ Correct |
 | ChEMBL | JSON string | `pa.string()` | `Series[str]` | ✅ Correct |
 | SemanticScholar | JSON string | `pa.string()` | `Series[str]` | ✅ Correct |
 
-### File Locations
+### File Locations (Current)
 
-**Gold Schema (`src/bioetl/infrastructure/schemas/gold.py`)**:
-- Line 229: PubMed `authors: Series[object] = pa.Field(nullable=True)  # list[str]`
-- Line 766: CrossRef `authors: Series[object] = pa.Field(nullable=True)  # list[str]`
-- Line 835: OpenAlex `authors: Series[object] = pa.Field(nullable=True)  # list[str]`
-- Line 415: ChEMBL `authors: Series[str] = pa.Field(nullable=True)` ✅
-- Line 720: SemanticScholar `authors: Series[str] = pa.Field(nullable=True)` ✅
+**Gold Schema (`src/bioetl/domain/contracts/gold/publications.py`)**:
+- Line 64: PubMed `authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list` ✅
+- Line 162: CrossRef `authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list` ✅
+- Line 252: OpenAlex `authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list` ✅
+- Line 353: SemanticScholar `authors: Series[str] = pa.Field(nullable=True)` ✅
+
+**Silver Schema (`src/bioetl/domain/schemas/common/publication_base.py`)**:
+- Line 64-67: `authors: Series[str] = pa.Field(nullable=True, description="JSON array of author names")` ✅
 
 **Transformer Evidence (all serialize to JSON string)**:
-- `pubmed/transformer.py:179`: `"authors": self.serialize_json_list(hashed_authors)`
-- `crossref/transformer.py:143`: `"authors": self.serialize_json_list(hashed_authors)`
-- `openalex/transformer.py:182`: `"authors": self.serialize_json_list(hashed_authors)`
-
-### Recommended Fix
-
-Change Gold schema `Series[object]` → `Series[str]` for PubMed, CrossRef, and OpenAlex:
-
-```python
-# gold.py - PubMed (line 229)
-authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
-
-# gold.py - CrossRef (line 766)
-authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
-
-# gold.py - OpenAlex (line 835)
-authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
-```
+- `pubmed/transformer.py`: `"authors": self.serialize_json_list(hashed_authors)`
+- `crossref/transformer.py`: `"authors": self.serialize_json_list(hashed_authors)`
+- `openalex/transformer.py`: `"authors": self.serialize_json_list(hashed_authors)`
 
 ---
 
@@ -70536,12 +72612,12 @@ All providers use `normalize_pmc_id()`:
 
 ## Summary Table
 
-| Finding | Category | Severity | Pipelines Affected |
-|---------|----------|----------|-------------------|
-| 1 | TYPE_MISMATCH | HIGH | pubmed, crossref, openalex |
-| 2 | MISSING_FIELD | MEDIUM | crossref |
-| 3 | MISSING_FIELD | MEDIUM | pubmed |
-| 4 | MISSING_FIELD | MEDIUM | chembl_publication |
+| Finding | Category | Severity | Pipelines Affected | Status |
+|---------|----------|----------|-------------------|--------|
+| 1 | TYPE_MISMATCH | HIGH | pubmed, crossref, openalex | ✅ RESOLVED |
+| 2 | MISSING_FIELD | MEDIUM | crossref | Open |
+| 3 | MISSING_FIELD | MEDIUM | pubmed | Open |
+| 4 | MISSING_FIELD | MEDIUM | chembl_publication | Open |
 
 ---
 
@@ -70550,7 +72626,7 @@ All providers use `normalize_pmc_id()`:
 | Criteria | Status |
 |----------|--------|
 | Mapping Matrix Complete | ✅ Verified for all 7 pipelines |
-| No TYPE_MISMATCH | ⚠️ 3 type mismatches found (authors field) |
+| No TYPE_MISMATCH | ✅ All type mismatches resolved (authors field fixed 2026-01-26) |
 | No NULLABLE_MISMATCH | ✅ No nullable mismatches found |
 | Cross-Provider Linking | ✅ DOI/PMID/PMC ID mapping verified |
 | Documentation Updated | ✅ This report |

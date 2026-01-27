@@ -134,7 +134,7 @@ def test_extract_business_data_full(transformer, sample_publication):
     assert json.loads(data["authors"]) == ["John Doe", "Jane Smith", "Anonymous"]
     assert data["journal"] == "Journal of Testing"
     assert data["year"] == 2023
-    assert data["doc_type"] == "PUBLICATION"
+    assert data["type"] == "journal-article"  # Raw CrossRef type preserved
     assert data["citation_count"] == 100
     assert data["_source"] == "crossref"
 
@@ -145,7 +145,7 @@ def test_extract_business_data_minimal(transformer, minimal_publication):
 
     assert data["doi"] == "10.5678/minimal"
     assert data["title"] is None
-    assert data["doc_type"] == "PREPRINT"
+    assert data["type"] == "posted-content"  # Raw CrossRef type preserved
     assert data["_source"] == "crossref"
 
 
@@ -162,7 +162,7 @@ async def test_transform_full_record(transformer, pipeline_context, sample_publi
     assert result is not None
     assert result["doi"] == "10.1234/test.article"
     assert result["title"] == "Test Article Title"
-    assert result["doc_type"] == "PUBLICATION"
+    assert result["type"] == "journal-article"  # Raw CrossRef type preserved
     assert result["_source"] == "crossref"
     # Check lineage fields
     assert "_run_id" in result
@@ -180,7 +180,7 @@ async def test_transform_minimal_record(
 
     assert result is not None
     assert result["doi"] == "10.5678/minimal"
-    assert result["doc_type"] == "PREPRINT"
+    assert result["type"] == "posted-content"  # Raw CrossRef type preserved
 
 
 @pytest.mark.asyncio
@@ -502,12 +502,11 @@ def test_doc_type_default_constant():
     assert CROSSREF_TYPE_DEFAULT == "PUBLICATION"
 
 
-def test_doc_type_mapping_unknown_defaults_to_publication(transformer):
-    """Test that unknown type defaults to PUBLICATION via CROSSREF_TYPE_DEFAULT."""
+def test_type_preserved_for_unknown(transformer):
+    """Test that unknown/future type is preserved as-is."""
     publication = {"DOI": "10.1234/test", "type": "unknown-future-type"}
     data = transformer._extract_business_data(publication)
-    assert data["doc_type"] == CROSSREF_TYPE_DEFAULT
-    assert data["doc_type"] == "PUBLICATION"
+    assert data["type"] == "unknown-future-type"  # Raw type preserved
 
 
 @pytest.mark.asyncio
@@ -517,7 +516,7 @@ async def test_transform_with_preprint_type(transformer, pipeline_context):
     result = await transformer.transform(pipeline_context, publication, index=0)
 
     assert result is not None
-    assert result["doc_type"] == "PREPRINT"
+    assert result["type"] == "posted-content"  # Raw CrossRef type preserved
 
 
 @pytest.mark.asyncio

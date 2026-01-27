@@ -2813,63 +2813,103 @@ class BaseTitleFallbackHandler(ABC):
         Phase 1: Batch ID lookup - implemented by adapter
         Phase 2: Title fallback - process_missing_dois() for unresolved IDs
         Phase 3: Title-only - process_title_only_entries() for empty IDs
+
+    Event Naming Convention:
+        When provider_prefix is set, event names are auto-generated:
+        - {provider}_no_fallback_title
+        - {provider}_title_fallback_attempt
+        - {provider}_title_fallback_success
+        - {provider}_title_fallback_not_found
+        - {provider}_title_only_attempt
+        - {provider}_title_only_success
+        - {provider}_title_only_not_found
+
+        Subclasses can override individual event properties if needed.
     """
 
-    def __init__(self, logger: LoggerPort) -> None:
+    def __init__(
+        self, logger: LoggerPort, *, provider_prefix: str | None = None
+    ) -> None:
         """Initialize base fallback handler.
 
         Args:
             logger: Logger port for structured logging.
+            provider_prefix: Provider name prefix for auto-generating event names.
+                If provided, default event properties use this prefix.
+                Example: provider_prefix="crossref" generates
+                    "crossref_title_fallback_attempt" etc.
         """
         self._logger = logger
+        self._provider_prefix = provider_prefix
 
     @property
-    @abstractmethod
     def _event_no_fallback_title(self) -> str:
-        """Return log event name for missing fallback title."""
-        ...
+        """Return log event name for missing fallback title.
+
+        Default: '{provider}_no_fallback_title' if provider_prefix is set.
+        """
+        if self._provider_prefix:
+            return f"{self._provider_prefix}_no_fallback_title"
+        return "no_fallback_title"
 
     @property
-    @abstractmethod
     def _event_fallback_attempt(self) -> str:
-        """Return log event name for fallback attempt."""
-        ...
+        """Return log event name for fallback attempt.
+
+        Default: '{provider}_title_fallback_attempt' if provider_prefix is set.
+        """
+        if self._provider_prefix:
+            return f"{self._provider_prefix}_title_fallback_attempt"
+        return "title_fallback_attempt"
 
     @property
-    @abstractmethod
     def _event_fallback_success(self) -> str:
-        """Return log event name for successful fallback."""
-        ...
+        """Return log event name for successful fallback.
+
+        Default: '{provider}_title_fallback_success' if provider_prefix is set.
+        """
+        if self._provider_prefix:
+            return f"{self._provider_prefix}_title_fallback_success"
+        return "title_fallback_success"
 
     @property
-    @abstractmethod
     def _event_fallback_not_found(self) -> str:
-        """Return log event name for failed fallback."""
-        ...
+        """Return log event name for failed fallback.
+
+        Default: '{provider}_title_fallback_not_found' if provider_prefix is set.
+        """
+        if self._provider_prefix:
+            return f"{self._provider_prefix}_title_fallback_not_found"
+        return "title_fallback_not_found"
 
     @property
     def _event_title_only_attempt(self) -> str:
         """Return log event name for title-only lookup attempt.
 
-        Override in subclass to customize event name.
-        Default implementation returns '{provider}_title_only_attempt'.
+        Default: '{provider}_title_only_attempt' if provider_prefix is set.
         """
+        if self._provider_prefix:
+            return f"{self._provider_prefix}_title_only_attempt"
         return "title_only_attempt"
 
     @property
     def _event_title_only_success(self) -> str:
         """Return log event name for successful title-only lookup.
 
-        Override in subclass to customize event name.
+        Default: '{provider}_title_only_success' if provider_prefix is set.
         """
+        if self._provider_prefix:
+            return f"{self._provider_prefix}_title_only_success"
         return "title_only_success"
 
     @property
     def _event_title_only_not_found(self) -> str:
         """Return log event name for failed title-only lookup.
 
-        Override in subclass to customize event name.
+        Default: '{provider}_title_only_not_found' if provider_prefix is set.
         """
+        if self._provider_prefix:
+            return f"{self._provider_prefix}_title_only_not_found"
         return "title_only_not_found"
 
     @abstractmethod
@@ -2900,15 +2940,21 @@ class BaseTitleFallbackHandler(ABC):
     ) -> dict[str, Any]:
         """Process found result before yielding.
 
-        Override to add metadata like _lookup_method.
+        Default implementation adds standard metadata fields:
+        - _lookup_method = "title_fallback"
+        - _original_id = original_doi
+
+        Override to customize or extend.
 
         Args:
             result: The found publication record.
             original_doi: The DOI that was originally searched.
 
         Returns:
-            Processed result (may be modified or returned as-is).
+            Processed result with _lookup_method and _original_id added.
         """
+        result["_lookup_method"] = "title_fallback"
+        result["_original_id"] = original_doi
         return result
 
     def _get_fallback_title(
@@ -3089,19 +3135,28 @@ Used by:
 
 from __future__ import annotations
 
+import string
+
 
 def normalize_title(title: str) -> str:
     """Normalize title for comparison.
 
-    Normalizes whitespace and converts to lowercase.
+    Normalizes whitespace, converts to lowercase, and removes punctuation.
+    Punctuation is replaced by spaces to handle cases like "Non-linear" vs "Non linear".
 
     Args:
         title: Title string to normalize.
 
     Returns:
-        Normalized title (lowercase, single spaces).
+        Normalized title (lowercase, no punctuation, single spaces).
     """
-    return " ".join(title.lower().strip().split())
+    if not title:
+        return ""
+    # Replace punctuation with spaces
+    translator = str.maketrans(string.punctuation, " " * len(string.punctuation))
+    cleaned = title.translate(translator)
+    # Normalize whitespace
+    return " ".join(cleaned.lower().strip().split())
 
 
 def titles_match(
@@ -4125,6 +4180,7 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
     """Handles fallback search by title when DOI lookup fails.
 
     Extracts fallback logic to reduce main class size and cyclomatic complexity.
+    Uses provider_prefix="crossref" for auto-generated event names.
     """
 
     def __init__(
@@ -4138,59 +4194,12 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
             logger: Logger port for structured logging.
             search_fn: Async function to search publications by query.
         """
-        super().__init__(logger)
+        super().__init__(logger, provider_prefix="crossref")
         self._search_fn = search_fn
 
-    @property
-    def _event_no_fallback_title(self) -> str:
-        """Return log event name for missing fallback title."""
-        return "crossref_no_fallback_title"
-
-    @property
-    def _event_fallback_attempt(self) -> str:
-        """Return log event name for fallback attempt."""
-        return "crossref_title_fallback_attempt"
-
-    @property
-    def _event_fallback_success(self) -> str:
-        """Return log event name for successful fallback."""
-        return "crossref_title_fallback_success"
-
-    @property
-    def _event_fallback_not_found(self) -> str:
-        """Return log event name for failed fallback."""
-        return "crossref_title_fallback_not_found"
-
-    @property
-    def _event_title_only_attempt(self) -> str:
-        """Return log event name for title-only lookup attempt."""
-        return "crossref_title_only_attempt"
-
-    @property
-    def _event_title_only_success(self) -> str:
-        """Return log event name for successful title-only lookup."""
-        return "crossref_title_only_success"
-
-    @property
-    def _event_title_only_not_found(self) -> str:
-        """Return log event name for failed title-only lookup."""
-        return "crossref_title_only_not_found"
-
-    def _process_found_result(
-        self, result: dict[str, Any], original_doi: str
-    ) -> dict[str, Any]:
-        """Add lookup method metadata to found publication.
-
-        Args:
-            result: The found publication record.
-            original_doi: The DOI that was originally searched.
-
-        Returns:
-            Publication with _lookup_method and _original_id added.
-        """
-        result["_lookup_method"] = "title_fallback"
-        result["_original_id"] = original_doi
-        return result
+    def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:
+        """Return CrossRef DOI for logging."""
+        return ("found_doi", str(result.get("DOI", "unknown")))
 
     async def _search_by_title(self, title: str) -> dict[str, Any] | None:
         """Search for a publication by title.
@@ -4202,10 +4211,6 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
             First relevant publication or None.
         """
         return await self.search_by_title(title)
-
-    def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:
-        """Return CrossRef DOI for logging."""
-        return ("found_doi", str(result.get("DOI", "unknown")))
 
     async def search_by_title(
         self,
@@ -8741,9 +8746,11 @@ class OpenAlexAdapter(BaseHttpAdapter):
             if not title or not title.strip():
                 continue
 
-            result = await self._search_by_title(title, limit=1)
-            if result:
+            results = await self._search_by_title(title, limit=1)
+            if results:
+                result = results[0]
                 result["_lookup_method"] = "title"
+                result["_original_id"] = title
                 result["_search_title"] = title  # Track which title matched
                 yield result
                 found += 1
@@ -8847,6 +8854,15 @@ class OpenAlexAdapter(BaseHttpAdapter):
             raise ValueError(
                 f"OpenAlexAdapter supports 'work'/'publication', got: {entity_type}"
             )
+
+        # Validate filter_field - fallback only supports DOI-based lookups
+        if filter_field != "doi":
+            self.logger.warning(
+                "unsupported_filter_field_for_fallback",
+                field=filter_field,
+                msg="OpenAlex fallback only supports 'doi' filtering, skipping",
+            )
+            return
 
         fetched = 0
         found_dois: set[str] = set()
@@ -9051,7 +9067,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
 
     async def _search_by_title(
         self, title: str, limit: int = 3
-    ) -> dict[str, Any] | None:
+    ) -> list[dict[str, Any]]:
         """Search works by title (fuzzy match).
 
         Uses `filter=title.search:...` syntax.
@@ -9061,7 +9077,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
             limit: Maximum results to check for relevance.
 
         Returns:
-            First relevant publication or None.
+            List of relevant publications (empty if none found).
         """
         # Clean title for search
         clean_title = self._escape_title_for_search(title.strip()[:200])
@@ -9094,11 +9110,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
 
             data = response.json()
             results: list[dict[str, Any]] = data.get("results", [])
-
-            if results:
-                first_result: dict[str, Any] = results[0]
-                return first_result
-            return None
+            return results
 
         except Exception as e:
             self.logger.debug(
@@ -9106,7 +9118,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
                 title=title[:50],
                 error=str(e),
             )
-            return None
+            return []
 
     @staticmethod
     def _normalize_doi(doi: str) -> str | None:
@@ -9319,12 +9331,13 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
 
     Extracts fallback logic to reduce main class size and cyclomatic complexity.
     Uses title matching to validate search results and reduce false positives.
+    Uses provider_prefix="openalex" for auto-generated event names.
     """
 
     def __init__(
         self,
         logger: LoggerPort,
-        search_fn: Callable[[str, int], Any],  # Coroutine returning dict | None
+        search_fn: Callable[[str, int], Any],  # Coroutine returning list[dict]
     ) -> None:
         """Initialize fallback handler.
 
@@ -9332,48 +9345,14 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
             logger: Logger port for structured logging.
             search_fn: Async function to search works by title.
         """
-        super().__init__(logger)
+        super().__init__(logger, provider_prefix="openalex")
         self._search_fn = search_fn
-
-    @property
-    def _event_no_fallback_title(self) -> str:
-        """Return log event name for missing fallback title."""
-        return "openalex_no_fallback_title"
-
-    @property
-    def _event_fallback_attempt(self) -> str:
-        """Return log event name for fallback attempt."""
-        return "openalex_title_fallback_attempt"
-
-    @property
-    def _event_fallback_success(self) -> str:
-        """Return log event name for successful fallback."""
-        return "openalex_title_fallback_success"
-
-    @property
-    def _event_fallback_not_found(self) -> str:
-        """Return log event name for failed fallback."""
-        return "openalex_title_fallback_not_found"
-
-    @property
-    def _event_title_only_attempt(self) -> str:
-        """Return log event name for title-only lookup attempt."""
-        return "openalex_title_only_attempt"
-
-    @property
-    def _event_title_only_success(self) -> str:
-        """Return log event name for successful title-only lookup."""
-        return "openalex_title_only_success"
-
-    @property
-    def _event_title_only_not_found(self) -> str:
-        """Return log event name for failed title-only lookup."""
-        return "openalex_title_only_not_found"
 
     async def _search_by_title(self, title: str) -> dict[str, Any] | None:
         """Search for work by title using OpenAlex API.
 
         Validates results using title matching to reduce false positives.
+        Iterates through candidates to find the best match.
 
         Args:
             title: Publication title to search for.
@@ -9381,40 +9360,23 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
         Returns:
             Work record if found and title matches, None otherwise.
         """
-        result = await self._search_fn(title, 3)
-        if result is None:
+        candidates = await self._search_fn(title, 3)
+        if not candidates:
             return None
 
-        # Validate title match to reduce false positives
-        found_title = result.get("title", "")
-        if found_title and titles_match(title, found_title):
-            return cast(dict[str, Any], result)
+        # Iterate through candidates to find a match
+        for result in candidates:
+            found_title = result.get("title", "")
+            if found_title and titles_match(title, found_title):
+                return cast("dict[str, Any]", result)
 
-        # If no title in result, return it anyway
-        if not found_title:
-            return cast(dict[str, Any], result)
+        # Fallback: check if any candidate has no title (rare edge case)
+        # Only return if we haven't found a match yet
+        for result in candidates:
+            if not result.get("title"):
+                return cast("dict[str, Any]", result)
 
         return None
-
-    def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:
-        """Return OpenAlex work ID for logging."""
-        return ("found_id", str(result.get("id", "unknown")))
-
-    def _process_found_result(
-        self, result: dict[str, Any], original_doi: str
-    ) -> dict[str, Any]:
-        """Add lookup method metadata to found work.
-
-        Args:
-            result: The found work record.
-            original_doi: The DOI that was originally searched.
-
-        Returns:
-            Work with _lookup_method and _original_id added.
-        """
-        result["_lookup_method"] = "title_fallback"
-        result["_original_id"] = original_doi
-        return result
 
 ================================================================================
 File: __init__.py
@@ -9827,30 +9789,94 @@ class PubChemEntityMapper:
         """Convert pubchempy Compound to dictionary.
 
         Uses connectivity_smiles/smiles (replaces deprecated canonical/isomeric_smiles).
+        Extracts all physicochemical properties defined in PubchemMoleculeSchema.
+
+        Note: Some properties (especially 3D) may not be available for all compounds.
+        Uses getattr with default=None for safe access to optional attributes.
 
         Args:
             compound: PubChemPy Compound object.
 
         Returns:
-            Dictionary with normalized compound fields.
+            Dictionary with normalized compound fields including:
+            - Structural identifiers (SMILES, InChI, InChI Key)
+            - Nomenclature (molecular formula, IUPAC name)
+            - Physical properties (molecular weight, exact mass)
+            - Computed descriptors (XLogP, TPSA, complexity, charge)
+            - Atom/Bond counts (heavy atoms, H-bond donors/acceptors, rotatable bonds)
+            - Stereochemistry (atom/bond stereo counts)
+            - 3D properties (volume, conformer count, feature counts)
         """
         return {
+            # === Primary Key ===
             "cid": compound.cid,
-            "molecular_formula": compound.molecular_formula,
-            "molecular_weight": compound.molecular_weight,
+            # === Structural Identifiers ===
             # Use connectivity_smiles (replaces deprecated canonical_smiles)
-            "canonical_smiles": compound.connectivity_smiles,
+            "canonical_smiles": getattr(compound, "connectivity_smiles", None),
             # Use smiles (replaces deprecated isomeric_smiles)
-            "isomeric_smiles": compound.smiles,
-            "inchi": compound.inchi,
-            "inchikey": compound.inchikey,
-            "iupac_name": compound.iupac_name,
-            "charge": compound.charge,
-            "complexity": compound.complexity,
-            "h_bond_acceptor_count": compound.h_bond_acceptor_count,
-            "h_bond_donor_count": compound.h_bond_donor_count,
-            "rotatable_bond_count": compound.rotatable_bond_count,
-            "fingerprint": compound.fingerprint,
+            "isomeric_smiles": getattr(compound, "smiles", None),
+            "inchi": getattr(compound, "inchi", None),
+            "inchikey": getattr(compound, "inchikey", None),
+            # === Nomenclature ===
+            "molecular_formula": getattr(compound, "molecular_formula", None),
+            "iupac_name": getattr(compound, "iupac_name", None),
+            # === Physical Properties ===
+            "molecular_weight": getattr(compound, "molecular_weight", None),
+            "exact_mass": getattr(compound, "exact_mass", None),
+            "monoisotopic_mass": getattr(compound, "monoisotopic_mass", None),
+            # === Computed Descriptors ===
+            "xlogp": getattr(compound, "xlogp", None),
+            "tpsa": getattr(compound, "tpsa", None),
+            "complexity": getattr(compound, "complexity", None),
+            "charge": getattr(compound, "charge", None),
+            # === Atom/Bond Counts ===
+            "heavy_atom_count": getattr(compound, "heavy_atom_count", None),
+            "h_bond_donor_count": getattr(compound, "h_bond_donor_count", None),
+            "h_bond_acceptor_count": getattr(compound, "h_bond_acceptor_count", None),
+            "rotatable_bond_count": getattr(compound, "rotatable_bond_count", None),
+            # === Stereochemistry ===
+            "atom_stereo_count": getattr(compound, "atom_stereo_count", None),
+            "defined_atom_stereo_count": getattr(
+                compound, "defined_atom_stereo_count", None
+            ),
+            "undefined_atom_stereo_count": getattr(
+                compound, "undefined_atom_stereo_count", None
+            ),
+            "bond_stereo_count": getattr(compound, "bond_stereo_count", None),
+            "defined_bond_stereo_count": getattr(
+                compound, "defined_bond_stereo_count", None
+            ),
+            "undefined_bond_stereo_count": getattr(
+                compound, "undefined_bond_stereo_count", None
+            ),
+            "isotope_atom_count": getattr(compound, "isotope_atom_count", None),
+            "covalent_unit_count": getattr(compound, "covalent_unit_count", None),
+            # === 3D Properties (may not be available for all compounds) ===
+            "volume_3d": getattr(compound, "volume_3d", None),
+            "conformer_count_3d": getattr(compound, "conformer_count_3d", None),
+            "feature_acceptor_count_3d": getattr(
+                compound, "feature_acceptor_count_3d", None
+            ),
+            "feature_donor_count_3d": getattr(compound, "feature_donor_count_3d", None),
+            "feature_anion_count_3d": getattr(compound, "feature_anion_count_3d", None),
+            "feature_cation_count_3d": getattr(
+                compound, "feature_cation_count_3d", None
+            ),
+            "feature_ring_count_3d": getattr(compound, "feature_ring_count_3d", None),
+            "feature_hydrophobe_count_3d": getattr(
+                compound, "feature_hydrophobe_count_3d", None
+            ),
+            "effective_rotor_count_3d": getattr(
+                compound, "effective_rotor_count_3d", None
+            ),
+            "conformer_rmsd_3d": getattr(compound, "conformer_rmsd_3d", None),
+            # === 3D Steric Quadrupole Moments (may not be available for all compounds) ===
+            "x_steric_quadrupole_3d": getattr(compound, "x_steric_quadrupole_3d", None),
+            "y_steric_quadrupole_3d": getattr(compound, "y_steric_quadrupole_3d", None),
+            "z_steric_quadrupole_3d": getattr(compound, "z_steric_quadrupole_3d", None),
+            "feature_count_3d": getattr(compound, "feature_count_3d", None),
+            # === Fingerprints (not in schema, but available) ===
+            "fingerprint": getattr(compound, "fingerprint", None),
         }
 
     @staticmethod
@@ -10455,6 +10481,7 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
 
     Uses PubMed esearch API with title field search:
     term="Title text"[Title]
+    Uses provider_prefix="pubmed" for auto-generated event names.
     """
 
     def __init__(
@@ -10469,43 +10496,8 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
             search_fn: Async function to search publications by title.
                        Signature: search_fn(title: str, limit: int) -> list[dict]
         """
-        super().__init__(logger)
+        super().__init__(logger, provider_prefix="pubmed")
         self._search_fn = search_fn
-
-    @property
-    def _event_no_fallback_title(self) -> str:
-        """Return log event name for missing fallback title."""
-        return "pubmed_no_fallback_title"
-
-    @property
-    def _event_fallback_attempt(self) -> str:
-        """Return log event name for fallback attempt."""
-        return "pubmed_title_fallback_attempt"
-
-    @property
-    def _event_fallback_success(self) -> str:
-        """Return log event name for successful fallback."""
-        return "pubmed_title_fallback_success"
-
-    @property
-    def _event_fallback_not_found(self) -> str:
-        """Return log event name for failed fallback."""
-        return "pubmed_title_fallback_not_found"
-
-    @property
-    def _event_title_only_attempt(self) -> str:
-        """Return log event name for title-only lookup attempt."""
-        return "pubmed_title_only_attempt"
-
-    @property
-    def _event_title_only_success(self) -> str:
-        """Return log event name for successful title-only lookup."""
-        return "pubmed_title_only_success"
-
-    @property
-    def _event_title_only_not_found(self) -> str:
-        """Return log event name for failed title-only lookup."""
-        return "pubmed_title_only_not_found"
 
     async def _search_by_title(self, title: str) -> dict[str, Any] | None:
         """Search for publication by title using PubMed esearch.
@@ -10546,22 +10538,6 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
     def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:
         """Return PubMed PMID for logging."""
         return ("found_pmid", str(result.get("pmid", "unknown")))
-
-    def _process_found_result(
-        self, result: dict[str, Any], original_id: str
-    ) -> dict[str, Any]:
-        """Add lookup method metadata to found publication.
-
-        Args:
-            result: The found publication record.
-            original_id: The ID that was originally searched (DOI or PMID).
-
-        Returns:
-            Publication with _lookup_method and _original_id added.
-        """
-        result["_lookup_method"] = "title_fallback"
-        result["_original_id"] = original_id
-        return result
 
 ================================================================================
 File: models.py
@@ -11639,9 +11615,12 @@ if TYPE_CHECKING:
 SEMANTICSCHOLAR_BASE_URL = "https://api.semanticscholar.org/graph/v1"
 
 # Default fields to retrieve from Semantic Scholar
+# Note: authors.externalIds includes ORCID, DBLP, and other identifiers
+# authors.hIndex provides h-index metric for each author
 DEFAULT_FIELDS = (
     "paperId,externalIds,title,abstract,year,publicationDate,"
-    "venue,authors,citationCount,referenceCount,isOpenAccess,"
+    "venue,authors,authors.externalIds,authors.hIndex,authors.authorId,"
+    "citationCount,referenceCount,isOpenAccess,"
     "openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal"
 )
 
@@ -21422,13 +21401,20 @@ Usage:
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from bioetl.domain.composite.aggregation import (
+    AggregationConfig,
+    AggregationFieldSpec,
+    AggregationFunction,
+    EnricherCardinality,
+)
 from bioetl.domain.composite.config import (
     CompositeConfig,
     CompositeDQConfig,
+    DependencyConfig,
     DQOverrideConfig,
     EnricherConfig,
     ExecutionConfig,
@@ -21441,6 +21427,61 @@ from bioetl.domain.composite.strategy import (
     FallbackStrategy,
     MergeStrategy,
 )
+
+
+class AggregationFieldSchema(BaseModel):
+    """Pydantic schema for aggregation field specification.
+
+    Defines how to aggregate a single field from a 1:M enricher.
+    """
+
+    source: str = Field(
+        ..., min_length=1, description="Source column name to aggregate"
+    )
+    agg: Literal["collect_list", "collect_set", "count", "first", "concat_str"] = Field(
+        ..., description="Aggregation function to apply"
+    )
+    filter: str | None = Field(
+        default=None,
+        description="Optional filter condition (e.g., \"term_type == 'MESH'\")",
+    )
+
+    def to_domain(self, output_field: str) -> AggregationFieldSpec:
+        """Convert to domain AggregationFieldSpec.
+
+        Args:
+            output_field: The output field name (from the dict key).
+
+        Returns:
+            Domain AggregationFieldSpec object.
+        """
+        return AggregationFieldSpec(
+            source_field=self.source,
+            agg_function=AggregationFunction.from_string(self.agg),
+            filter_condition=self.filter,
+            output_field=output_field,
+        )
+
+
+class AggregationSchema(BaseModel):
+    """Pydantic schema for 1:M enricher aggregation config.
+
+    Defines how to aggregate multiple rows per join key into a single row.
+    """
+
+    group_by: str = Field(..., min_length=1, description="Join key to group by")
+    fields: dict[str, AggregationFieldSchema] = Field(
+        ..., min_length=1, description="Map of output_field -> aggregation spec"
+    )
+
+    def to_domain(self) -> AggregationConfig:
+        """Convert to domain AggregationConfig."""
+        return AggregationConfig(
+            group_by=self.group_by,
+            fields=tuple(
+                spec.to_domain(output_field=name) for name, spec in self.fields.items()
+            ),
+        )
 
 
 class SeedSchema(BaseModel):
@@ -21478,6 +21519,52 @@ class SeedSchema(BaseModel):
         )
 
 
+class DependencySchema(BaseModel):
+    """Pydantic schema for dependency pipeline configuration.
+
+    Dependencies run after seed but before enrichers to populate Silver tables.
+    """
+
+    pipeline: str = Field(
+        ..., min_length=1, description="Name of the dependency pipeline"
+    )
+    join_keys: list[str] = Field(
+        ..., min_length=1, description="Keys to extract from seed for filtering"
+    )
+    required: bool = Field(
+        default=False, description="If True, failure causes composite failure"
+    )
+    timeout_seconds: int = Field(
+        default=600,
+        gt=0,
+        description="Maximum time for dependency execution in seconds",
+    )
+    silver_table: str | None = Field(
+        default=None, description="Path to dependency's Silver table"
+    )
+
+    @field_validator("join_keys")
+    @classmethod
+    def validate_join_keys_not_empty(cls, v: list[str]) -> list[str]:
+        """Ensure join_keys contains valid strings."""
+        if not v:
+            raise ValueError("join_keys cannot be empty")
+        for key in v:
+            if not key or not key.strip():
+                raise ValueError("join_keys cannot contain empty strings")
+        return v
+
+    def to_domain(self) -> DependencyConfig:
+        """Convert to immutable domain DependencyConfig."""
+        return DependencyConfig(
+            pipeline=self.pipeline,
+            join_keys=tuple(self.join_keys),
+            required=self.required,
+            timeout_seconds=self.timeout_seconds,
+            silver_table=self.silver_table,
+        )
+
+
 class EnricherSchema(BaseModel):
     """Pydantic schema for enricher pipeline configuration."""
 
@@ -21505,6 +21592,14 @@ class EnricherSchema(BaseModel):
     limit: int | None = Field(
         default=None, gt=0, description="Optional limit on records to enrich"
     )
+    cardinality: Literal["one_to_one", "many_to_one"] = Field(
+        default="one_to_one",
+        description="Cardinality of enricher data (one_to_one or many_to_one)",
+    )
+    aggregation: AggregationSchema | None = Field(
+        default=None,
+        description="Aggregation config for many_to_one enrichers",
+    )
 
     @field_validator("join_keys")
     @classmethod
@@ -21517,6 +21612,16 @@ class EnricherSchema(BaseModel):
                 raise ValueError("join_keys cannot contain empty strings")
         return v
 
+    @model_validator(mode="after")
+    def validate_aggregation_required(self) -> Self:
+        """Ensure aggregation is provided when cardinality is many_to_one."""
+        if self.cardinality == "many_to_one" and self.aggregation is None:
+            raise ValueError(
+                f"Enricher '{self.pipeline}' with cardinality=many_to_one "
+                "requires aggregation config"
+            )
+        return self
+
     def to_domain(self) -> EnricherConfig:
         """Convert to immutable domain EnricherConfig."""
         return EnricherConfig(
@@ -21528,6 +21633,8 @@ class EnricherSchema(BaseModel):
             fallback_strategy=FallbackStrategy.from_string(self.fallback_strategy),
             silver_table=self.silver_table,
             limit=self.limit,
+            cardinality=EnricherCardinality.from_string(self.cardinality),
+            aggregation=self.aggregation.to_domain() if self.aggregation else None,
         )
 
 
@@ -21719,7 +21826,7 @@ class CompositeConfigSchema(BaseModel):
 
     Validates the 'composite' section of YAML files and converts to
     domain CompositeConfig. Includes cross-field validation for join keys
-    and enricher uniqueness.
+    and enricher/dependency uniqueness.
     """
 
     name: str = Field(..., min_length=1, description="Composite pipeline name")
@@ -21727,6 +21834,10 @@ class CompositeConfigSchema(BaseModel):
         default="1.0.0", min_length=1, description="Configuration version (semver)"
     )
     seed: SeedSchema = Field(..., description="Seed pipeline configuration")
+    dependencies: list[DependencySchema] = Field(
+        default_factory=list,
+        description="List of dependency configurations (run after seed, before enrichers)",
+    )
     enrichers: list[EnricherSchema] = Field(
         ..., min_length=1, description="List of enricher configurations"
     )
@@ -21755,6 +21866,19 @@ class CompositeConfigSchema(BaseModel):
         return self
 
     @model_validator(mode="after")
+    def validate_dependency_join_keys(self) -> CompositeConfigSchema:
+        """Validate that dependency join keys exist in seed output_keys."""
+        seed_keys = set(self.seed.output_keys)
+        for dep in self.dependencies:
+            for key in dep.join_keys:
+                if key not in seed_keys:
+                    raise ValueError(
+                        f"Dependency '{dep.pipeline}' join_key '{key}' "
+                        f"not found in seed output_keys: {self.seed.output_keys}"
+                    )
+        return self
+
+    @model_validator(mode="after")
     def validate_unique_enricher_names(self) -> CompositeConfigSchema:
         """Validate that enricher pipeline names are unique."""
         names = [e.pipeline for e in self.enrichers]
@@ -21763,12 +21887,22 @@ class CompositeConfigSchema(BaseModel):
             raise ValueError(f"Duplicate enricher pipelines: {duplicates}")
         return self
 
+    @model_validator(mode="after")
+    def validate_unique_dependency_names(self) -> CompositeConfigSchema:
+        """Validate that dependency pipeline names are unique."""
+        names = [d.pipeline for d in self.dependencies]
+        if len(names) != len(set(names)):
+            duplicates = {n for n in names if names.count(n) > 1}
+            raise ValueError(f"Duplicate dependency pipelines: {duplicates}")
+        return self
+
     def to_domain(self) -> CompositeConfig:
         """Convert to immutable domain CompositeConfig."""
         return CompositeConfig(
             name=self.name,
             version=self.version,
             seed=self.seed.to_domain(),
+            dependencies=tuple(d.to_domain() for d in self.dependencies),
             enrichers=tuple(e.to_domain() for e in self.enrichers),
             merge=self.merge.to_domain(),
             dq=self.dq_rules.to_domain(),
@@ -21803,10 +21937,13 @@ class CompositeConfigFileSchema(BaseModel):
 
 
 __all__ = [
+    "AggregationFieldSchema",
+    "AggregationSchema",
     "CompositeConfigFileSchema",
     "CompositeConfigSchema",
     "CompositeDQSchema",
     "DQOverrideSchema",
+    "DependencySchema",
     "EnricherSchema",
     "ExecutionSchema",
     "LineageSchema",
@@ -23644,6 +23781,7 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
         # === PUBLICATION_METADATA_FIELDS ===
+        # affiliations excluded per user request
         pa.field("authors", pa.string()),  # JSON array of author names
         pa.field("title", pa.string()),
         pa.field("journal", pa.string()),
@@ -23655,13 +23793,13 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         # === PUBLICATION_CROSSREF_FIELDS ===
         pa.field("document_chembl_id", pa.string()),  # Primary key
         pa.field("doi", pa.string()),
-        pa.field("pmc_id", pa.string()),  # PubMed Central ID
+        # pmc_id excluded: not available from ChEMBL API
         pa.field("pmid", pa.string()),  # PubMed ID (numeric string)
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
         pa.field("doc_type", pa.string()),  # PUBLICATION, PATENT, DATASET, BOOK
         pa.field("journal_full_title", pa.string()),
-        pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
+        # publication_date excluded: not available from ChEMBL API
         pa.field("src_id", pa.int64()),
         # === ChEMBL Release Metadata ===
         pa.field("chembl_release", pa.string()),  # e.g., CHEMBL_1, CHEMBL_34
@@ -23710,8 +23848,10 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("ligand_efficiency_le", pa.float64()),
         pa.field("ligand_efficiency_lle", pa.float64()),
         pa.field("ligand_efficiency_sei", pa.float64()),
+        pa.field("manual_curation_flag", pa.int64()),
         pa.field("molecule_chembl_id", pa.string()),
         pa.field("molecule_pref_name", pa.string()),
+        pa.field("original_activity_id", pa.int64()),
         pa.field("parent_molecule_chembl_id", pa.string()),
         pa.field("pchembl_value", pa.float64()),
         pa.field("potential_duplicate", pa.int64()),
@@ -23851,7 +23991,7 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         ),  # Whether abstract has NLM sections
         # Dates (ISO format strings)
         pa.field("accepted_date", pa.string()),
-        # Authors
+        # Authors (affiliations excluded per user request)
         pa.field("author_count", pa.int64()),  # Denormalized count for query efficiency
         pa.field("authors", pa.string()),  # JSON-serialized list
         # Counts (denormalized for query efficiency)
@@ -24264,11 +24404,10 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         # _original_id: Original identifier used for lookup
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
-        pa.field("abstract", pa.string()),
+        # abstract, affiliations, authors excluded per user request
         # External IDs
         pa.field("arxiv_id", pa.string()),
-        # Classification (JSON strings)
-        pa.field("authors", pa.string()),
+        pa.field("author_ids", pa.string()),
         # Metrics
         pa.field("citation_count", pa.int64()),
         pa.field("corpus_id", pa.int64()),
@@ -24323,7 +24462,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
         # === Business fields (alphabetical order) ===
-        pa.field("abstract", pa.string()),
+        # abstract and affiliations excluded per user request
         pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
         pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("citation_count", pa.int64()),
@@ -24381,6 +24520,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
         pa.field("abstract", pa.string()),
+        pa.field("affiliations", pa.string()),
         pa.field("authors", pa.string()),  # JSON-serialized list
         # OpenAlex source field: cited_by_count
         # Unified BioETL field: citation_count (standardized across all providers)
@@ -24395,6 +24535,9 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("first_page", pa.string()),
         # Field-Weighted Citation Impact (must be non-negative)
         pa.field("fwci", pa.float64()),
+        # Institution identifiers (for cross-referencing and geographic analysis)
+        pa.field("institution_country_codes", pa.list_(pa.string())),
+        pa.field("institution_ids", pa.list_(pa.string())),
         pa.field("is_oa", pa.bool_()),
         # Quality indicators
         pa.field("is_retracted", pa.bool_()),
@@ -30221,6 +30364,333 @@ class SilverWriter(BaseDeltaWriter):
             provider=provider_name,
             entity=entity_name,
         )
+
+================================================================================
+File: __init__.py
+Path: system\__init__.py
+================================================================================
+"""System-level infrastructure components.
+
+This package contains infrastructure adapters for system-level operations:
+- Memory monitoring (psutil, /proc/meminfo, resource module)
+- System metrics collection
+"""
+
+from __future__ import annotations
+
+from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
+
+__all__ = ["MemoryMonitor"]
+
+================================================================================
+File: memory_monitor.py
+Path: system\memory_monitor.py
+================================================================================
+"""Memory monitoring for adaptive batch processing.
+
+Provides memory pressure detection and adaptive batch size recommendations.
+Uses psutil if available, falls back to resource module on Unix or estimates on Windows.
+
+Implements MemoryMonitorPort from domain/ports/memory.py.
+
+Performance optimizations:
+- Module-level psutil availability cache (avoid repeated import checks)
+- Cached Process instance (avoid repeated process lookup)
+- Lazy psutil import (deferred until first get_memory_stats() call)
+
+Note:
+    This module is part of the infrastructure layer (Ports & Adapters architecture).
+    It provides the concrete implementation of MemoryMonitorPort defined in domain/ports/memory.py.
+"""
+
+from __future__ import annotations
+
+import sys
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+# Import domain value objects
+from bioetl.domain.config import MemoryConfig
+
+# Re-export MemoryStats from domain for backward compatibility
+from bioetl.domain.ports import MemoryStats
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort
+
+# Module-level cache for psutil availability (checked once per process)
+_PSUTIL_AVAILABLE: bool | None = None
+_PSUTIL_MODULE: Any = None  # Cached psutil module reference
+
+
+def _check_psutil_available() -> bool:
+    """Check psutil availability once and cache the result."""
+    global _PSUTIL_AVAILABLE, _PSUTIL_MODULE
+    if _PSUTIL_AVAILABLE is None:
+        try:
+            import psutil
+
+            _PSUTIL_MODULE = psutil
+            _PSUTIL_AVAILABLE = True
+        except ImportError:
+            _PSUTIL_AVAILABLE = False
+    return _PSUTIL_AVAILABLE
+
+
+@dataclass
+class MemoryMonitor:
+    """Monitor memory usage and provide adaptive batch size recommendations.
+
+    This class tracks memory consumption during batch processing and
+    automatically recommends batch size reductions when memory pressure
+    is detected, preventing OOM errors during large dataset processing.
+
+    Implements MemoryMonitorPort from domain/ports/memory.py.
+
+    Performance characteristics:
+    - First call to get_memory_stats(): ~1-2 ms (with psutil already imported)
+    - Subsequent calls: ~0.2-0.5 ms (cached Process instance)
+    - Initialization: <1 ms (no heavy imports in __post_init__)
+
+    Example:
+        >>> monitor = MemoryMonitor(config=MemoryConfig(), logger=logger)
+        >>> batch_size = 1000
+        >>> for batch in data_source:
+        ...     batch_size = monitor.get_recommended_batch_size(batch_size)
+        ...     # Process with adjusted batch size
+
+    """
+
+    config: MemoryConfig
+    logger: LoggerPort | None = None
+    _psutil_available: bool = field(default=False, init=False)
+    _last_batch_size: int = field(default=100, init=False)
+    _consecutive_pressure_count: int = field(default=0, init=False)
+    _cached_process: Any = field(default=None, init=False)
+
+    def __post_init__(self) -> None:
+        """Initialize memory monitor with lazy psutil detection.
+
+        Uses module-level cache for psutil availability check to avoid
+        repeated import overhead across multiple MemoryMonitor instances.
+        """
+        self._psutil_available = _check_psutil_available()
+        if self._psutil_available and self.logger:
+            self.logger.debug("psutil available for memory monitoring")
+        elif not self._psutil_available and self.logger:
+            self.logger.debug("psutil not available, using fallback memory monitoring")
+
+    def get_memory_stats(self) -> MemoryStats:
+        """Get current memory statistics.
+
+        Returns:
+            MemoryStats with current memory usage information.
+
+        """
+        if self._psutil_available:
+            return self._get_stats_psutil()
+        return self._get_stats_fallback()
+
+    def _get_stats_psutil(self) -> MemoryStats:
+        """Get memory stats using psutil.
+
+        Performance optimization: reuses cached psutil module and Process instance
+        to avoid repeated imports and process lookups (~40ms savings per init).
+        """
+        psutil = _PSUTIL_MODULE
+
+        vm = psutil.virtual_memory()
+
+        # Cache Process instance for subsequent calls (saves ~0.2ms per call)
+        if self._cached_process is None:
+            object.__setattr__(self, "_cached_process", psutil.Process())
+        process_memory = self._cached_process.memory_info()
+
+        return MemoryStats(
+            used_mb=vm.used / (1024 * 1024),
+            available_mb=vm.available / (1024 * 1024),
+            total_mb=vm.total / (1024 * 1024),
+            percent_used=vm.percent / 100.0,
+            process_mb=process_memory.rss / (1024 * 1024),
+        )
+
+    def _get_stats_fallback(self) -> MemoryStats:
+        """Get memory stats using fallback methods."""
+        if sys.platform != "win32":
+            return self._get_stats_resource()
+        return self._get_stats_estimate()
+
+    def _get_stats_resource(self) -> MemoryStats:
+        """Get memory stats using resource module (Unix only)."""
+        import resource
+
+        # Get process memory usage (Unix-only attributes)
+        rusage = resource.getrusage(resource.RUSAGE_SELF)  # type: ignore[attr-defined]
+        process_mb = rusage.ru_maxrss / 1024  # Convert KB to MB on Linux
+
+        # Try to read system memory from /proc/meminfo
+        try:
+            with Path("/proc/meminfo").open() as f:
+                meminfo = {}
+                for line in f:
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        key = parts[0].rstrip(":")
+                        value = int(parts[1])  # in KB
+                        meminfo[key] = value
+
+                total_mb = meminfo.get("MemTotal", 0) / 1024
+                available_mb = meminfo.get("MemAvailable", 0) / 1024
+                used_mb = total_mb - available_mb
+                percent_used = used_mb / total_mb if total_mb > 0 else 0.5
+
+                return MemoryStats(
+                    used_mb=used_mb,
+                    available_mb=available_mb,
+                    total_mb=total_mb,
+                    percent_used=percent_used,
+                    process_mb=process_mb,
+                )
+        except (OSError, KeyError):
+            return self._get_stats_estimate()
+
+    def _get_stats_estimate(self) -> MemoryStats:
+        """Provide conservative estimates when actual stats unavailable."""
+        # Conservative estimate: assume 50% memory used
+        # This is safer than assuming low usage
+        return MemoryStats(
+            used_mb=4096.0,  # Assume 4GB used
+            available_mb=4096.0,  # Assume 4GB available
+            total_mb=8192.0,  # Assume 8GB total
+            percent_used=0.5,
+            process_mb=256.0,  # Assume 256MB process
+        )
+
+    def is_under_pressure(self) -> bool:
+        """Check if system is under memory pressure.
+
+        Returns:
+            True if memory usage exceeds the configured threshold.
+
+        """
+        if not self.config.enable_adaptive_sizing:
+            return False
+
+        stats = self.get_memory_stats()
+        return stats.percent_used >= self.config.memory_pressure_threshold
+
+    def get_recommended_batch_size(self, current_batch_size: int) -> int:
+        """Get recommended batch size based on memory pressure.
+
+        Implements adaptive batch sizing:
+        - If under memory pressure, reduces batch size by 50%
+        - If pressure persists for 3+ checks, reduces more aggressively
+        - Never goes below min_batch_size
+        - Gradually increases batch size when pressure is relieved
+
+        Args:
+            current_batch_size: Current batch size.
+
+        Returns:
+            Recommended batch size (may be smaller if under pressure).
+
+        """
+        if not self.config.enable_adaptive_sizing:
+            return current_batch_size
+
+        stats = self.get_memory_stats()
+        is_pressure = stats.percent_used >= self.config.memory_pressure_threshold
+
+        if is_pressure:
+            self._consecutive_pressure_count += 1
+            reduction_factor = self._get_reduction_factor()
+            new_size = max(
+                int(current_batch_size * reduction_factor),
+                self.config.min_batch_size,
+            )
+
+            if self.logger and new_size < current_batch_size:
+                self.logger.warning(
+                    "Memory pressure detected, reducing batch size",
+                    current_batch_size=current_batch_size,
+                    new_batch_size=new_size,
+                    memory_percent_used=round(stats.percent_used * 100, 1),
+                    consecutive_pressure_count=self._consecutive_pressure_count,
+                )
+
+            self._last_batch_size = new_size
+            return new_size
+
+        # Pressure relieved - consider gradual recovery
+        self._consecutive_pressure_count = 0
+
+        # If we previously reduced, try to recover gradually
+        if current_batch_size < self._last_batch_size:
+            recovery_size = min(
+                int(current_batch_size * 1.25),  # Increase by 25%
+                self._last_batch_size,
+            )
+            if self.logger:
+                self.logger.debug(
+                    "Memory pressure relieved, increasing batch size",
+                    current_batch_size=current_batch_size,
+                    new_batch_size=recovery_size,
+                    memory_percent_used=round(stats.percent_used * 100, 1),
+                )
+            return recovery_size
+
+        self._last_batch_size = current_batch_size
+        return current_batch_size
+
+    def _get_reduction_factor(self) -> float:
+        """Get batch size reduction factor based on pressure duration.
+
+        Returns:
+            Reduction factor (0.25 to 0.5).
+
+        """
+        if self._consecutive_pressure_count >= 5:
+            return 0.25  # Aggressive: reduce to 25%
+        if self._consecutive_pressure_count >= 3:
+            return 0.35  # Moderate-aggressive: reduce to 35%
+        return 0.5  # Standard: reduce by half
+
+    def estimate_batch_memory_mb(
+        self, record_count: int, avg_record_size_bytes: int = 1024
+    ) -> float:
+        """Estimate memory usage for a batch.
+
+        Args:
+            record_count: Number of records in batch.
+            avg_record_size_bytes: Average size per record in bytes.
+
+        Returns:
+            Estimated memory usage in MB.
+
+        """
+        # Factor in transformation overhead (2x for in-memory copies)
+        overhead_factor = 2.5
+        return (record_count * avg_record_size_bytes * overhead_factor) / (1024 * 1024)
+
+    def calculate_max_batch_size(self, avg_record_size_bytes: int = 1024) -> int:
+        """Calculate maximum batch size based on available memory.
+
+        Args:
+            avg_record_size_bytes: Average size per record in bytes.
+
+        Returns:
+            Maximum recommended batch size.
+
+        """
+        max_memory_bytes = self.config.max_batch_memory_mb * 1024 * 1024
+        overhead_factor = 2.5
+
+        max_records = int(max_memory_bytes / (avg_record_size_bytes * overhead_factor))
+        return max(max_records, self.config.min_batch_size)
+
+
+__all__ = ["MemoryConfig", "MemoryMonitor", "MemoryStats"]
 
 ================================================================================
 File: __init__.py

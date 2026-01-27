@@ -263,6 +263,10 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     # Bibliographic references (JSON array of citation data)
     references: str | None = None
 
+    # Raw document type from CrossRef API (e.g., "journal-article", "book-chapter")
+    # Unlike doc_type (unified mapping), this preserves the original CrossRef type value
+    type: str | None = None
+
     # Override: Default source for CrossRef
     _source: str = "crossref"
 

@@ -33,11 +33,7 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_references,
     extract_year,
 )
-from bioetl.domain.entities.crossref import (
-    CROSSREF_TYPE_DEFAULT,
-    CROSSREF_TYPE_MAP,
-    CrossRefPublicationEntity,
-)
+from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 from bioetl.domain.normalization import extract_first_string
 from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects import DOI
@@ -168,9 +164,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             **dates,
             "year": extract_year(rec),
             "publication_date": publication_date,
-            "doc_type": CROSSREF_TYPE_MAP.get(
-                rec.get("type", ""), CROSSREF_TYPE_DEFAULT
-            ),
+            "type": rec.get("type"),  # Raw CrossRef type preserved
             "citation_count": rec.get("is-referenced-by-count"),
             "reference_count": rec.get("references-count"),
             "language": rec.get("language"),
@@ -179,10 +173,8 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "_source": "crossref",
             # Excluded fields (always NULL, not written to Delta Lake):
             # - is_oa: CrossRef doesn't provide Open Access info
-            # - pmid/pmc_id: CrossRef doesn't provide PubMed IDs
+            # - pmid/pmc_id: CrossRef doesn't provide PubMed IDs (excluded entirely)
             "is_oa": None,
-            "pmid": None,
-            "pmc_id": None,
             # Lookup metadata (from adapter fallback handler)
             "_lookup_method": rec.get("_lookup_method", "doi"),
             "_original_id": rec.get("_original_id"),
@@ -330,15 +322,16 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
-        """Convert Domain Entity to SilverRecord, excluding abstract and affiliations.
+        """Convert Domain Entity to SilverRecord, excluding unused fields.
 
         Overrides base implementation to remove fields not collected for CrossRef.
+        CrossRef uses raw 'type' field instead of mapped 'doc_type'.
 
         Args:
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without abstract and affiliations fields.
+            SilverRecord dictionary without excluded fields.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
@@ -346,8 +339,11 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         # Get base silver record
         silver_record = BaseTransformer.entity_to_silver_record(entity)
 
-        # Remove excluded fields
+        # Remove excluded fields (CrossRef doesn't provide these)
         silver_record.pop("abstract", None)
         silver_record.pop("affiliations", None)
+        silver_record.pop("pmid", None)
+        silver_record.pop("pmc_id", None)
+        silver_record.pop("doc_type", None)  # CrossRef uses raw 'type' instead
 
         return silver_record

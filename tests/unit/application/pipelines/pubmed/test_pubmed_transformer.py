@@ -215,10 +215,7 @@ class TestPubMedPublicationTransformer:
         assert result["pub_day"] == 15  # Day from PubDate/Day element
         assert result["year"] == 2025
         assert result["publication_year"] == 2025
-        assert result["epub_date"] == "2025-02-28"
-        assert result["received_date"] == "2024-12-01"
-        assert result["accepted_date"] == "2025-01-15"
-        assert result["revised_date"] == "2025-01-10"
+        # epub_date, received_date, accepted_date, revised_date excluded from pipeline
         # Classification
         assert result["language"] == "eng"
         assert result["country"] == "United States"
@@ -549,9 +546,8 @@ class TestPubMedTransformerDateExtraction:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["received_date"] is None
-        assert result["accepted_date"] is None
-        assert result["revised_date"] is None
+        # received_date, accepted_date, revised_date excluded from pipeline
+        # These fields are no longer output by the transformer
 
 
 @pytest.mark.unit
@@ -892,9 +888,9 @@ class TestPubMedTransformerUnifiedDateFields:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        # epub_date is "2025-02-28" which takes priority
+        # epub_date (2025-02-28) was used to compute publication_date but is excluded from output
         assert result["publication_date"] == "2025-02-28"
-        assert result["epub_date"] == "2025-02-28"
+        # epub_date excluded from pipeline output
         assert result["pub_date"] == "2025-03-15"
 
     @pytest.mark.asyncio

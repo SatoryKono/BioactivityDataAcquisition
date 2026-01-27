@@ -36,9 +36,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     abstract_structured: Series[bool] = pa.Field(
         nullable=True
     )  # Whether abstract has NLM sections
-    vernacular_title: Series[str] = pa.Field(
-        nullable=True
-    )  # Original non-English title
+    # Note: vernacular_title excluded from transformer output per design
 
     # Journal information
     journal: Series[str] = pa.Field(nullable=True)
@@ -72,10 +70,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     publication_year: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # Legacy alias
-    accepted_date: Series[str] = pa.Field(nullable=True)
-    received_date: Series[str] = pa.Field(nullable=True)
-    revised_date: Series[str] = pa.Field(nullable=True)
-    epub_date: Series[str] = pa.Field(nullable=True)
+    # Note: accepted_date, received_date, revised_date, epub_date excluded per design
     # MEDLINE-specific dates
     date_completed: Series[str] = pa.Field(
         nullable=True
@@ -153,11 +148,8 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
     doi: Series[str] = pa.Field(nullable=False)
 
-    # Cross-reference IDs for linking publications across providers
-    # pmid: PubMed ID (numeric string: "12345678") - Always NULL for CrossRef
-    pmid: Series[str] = pa.Field(nullable=True)
-    # pmc_id: PubMed Central ID (format: "PMC1234567") - Always NULL for CrossRef
-    pmc_id: Series[str] = pa.Field(nullable=True)
+    # Note: pmid and pmc_id excluded - CrossRef API doesn't provide PubMed identifiers
+    # and transformer explicitly removes these fields from output
 
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
@@ -177,7 +169,10 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     published_online: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
 
     # Metadata
-    doc_type: Series[str] = pa.Field(nullable=True)
+    # Note: doc_type excluded; CrossRef uses raw 'type' field instead
+    type: Series[str] = pa.Field(
+        nullable=True
+    )  # Raw CrossRef type (journal-article, etc.)
     citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     reference_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     language: Series[str] = pa.Field(nullable=True)
@@ -247,8 +242,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     doi: Series[str] = pa.Field(nullable=True)
     # pmid: PubMed ID (numeric string: "12345678")
     pmid: Series[str] = pa.Field(nullable=True)
-    # pmc_id: PubMed Central ID (format: "PMC1234567")
-    pmc_id: Series[str] = pa.Field(nullable=True)
+    # Note: pmc_id excluded from transformer output per design
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
@@ -273,7 +267,8 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     publication_date: Series[str] = pa.Field(nullable=True)
 
     # Metadata
-    doc_type: Series[str] = pa.Field(nullable=False)
+    # Note: doc_type excluded; OpenAlex uses raw 'type' field instead
+    type: Series[str] = pa.Field(nullable=True)  # Raw OpenAlex type (article, etc.)
     is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
     oa_status: Series[str] = pa.Field(nullable=True)
     # OpenAlex source field: cited_by_count
@@ -323,10 +318,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # External IDs
     doi: Series[str] = pa.Field(nullable=True)
     pmid: Series[str] = pa.Field(nullable=True)
-    # Cross-reference IDs for linking publications across providers
-    # pmc_id: PubMed Central ID (format: "PMC1234567")
-    pmc_id: Series[str] = pa.Field(nullable=True)
-    arxiv_id: Series[str] = pa.Field(nullable=True)
+    # Note: pmc_id and arxiv_id excluded from transformer output per design
     corpus_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
 
     # Core fields
@@ -339,6 +331,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # Journal/Venue
     journal: Series[str] = pa.Field(nullable=True)
     volume: Series[str] = pa.Field(nullable=True)
+    issue: Series[str] = pa.Field(nullable=True)  # Parsed from combined volume/issue
     pages: Series[str] = pa.Field(nullable=True)  # Legacy: "first-last" format
     first_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     last_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages

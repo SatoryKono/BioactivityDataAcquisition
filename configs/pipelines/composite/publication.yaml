@@ -8,9 +8,19 @@
 # - Enrichers: CrossRef (citations), OpenAlex (concepts), PubMed (MeSH),
 #              SemanticScholar (embeddings)
 #
+# NOTE: chembl_publication_term was removed because ChEMBL API no longer
+# provides mesh_terms/keywords fields in /document endpoint, and the
+# /document_term endpoint has been deprecated (returns 404).
+#
+# Field exclusions (2026-01-27):
+# - CrossRef: pmid, pmc_id, doc_type (uses raw 'type' instead)
+# - OpenAlex: pmc_id, doc_type (uses raw 'type' instead)
+# - PubMed: vernacular_title, epub_date, received_date, revised_date, accepted_date
+# - SemanticScholar: pmc_id, arxiv_id
+#
 # Version: 1.0.0
 # Reference: ADR-026 Composite Pipeline Pattern
-# Last Updated: 2026-01-15
+# Last Updated: 2026-01-27
 #
 # =============================================================================
 
@@ -47,16 +57,7 @@ composite:
   # - Derived entities (e.g., publication_term extracted from publication data)
   # - Pipelines with force_full_scan that don't work with enricher filtering
   # - Data that must be pre-populated before enrichment phase
-  dependencies:
-    # ChEMBL Publication Terms: Extract MeSH headings and keywords from ChEMBL
-    # This is a derived entity that extracts terms from publication records.
-    # Must run as dependency because it has force_full_scan=true.
-    - pipeline: chembl_publication_term
-      join_keys:
-        - document_chembl_id
-      required: false
-      timeout_seconds: 600
-      silver_table: silver/chembl/publication_term
+  dependencies: []  # No dependencies currently
 
   # ---------------------------------------------------------------------------
   # Enricher Pipelines
@@ -109,43 +110,6 @@ composite:
       fallback_strategy: skip  # Skip on failure (high rate limits)
       silver_table: silver/semanticscholar/publication
 
-    # ChEMBL Publication Terms: MeSH headings and keywords from ChEMBL
-    # This is a 1:M enricher - multiple terms per publication
-    - pipeline: chembl_publication_term
-      join_keys:
-        - document_chembl_id
-      required: false
-      filter_condition: null  # All seed records have document_chembl_id
-      timeout_seconds: 300    # Fast - local Delta Lake read
-      silver_table: silver/chembl/publication_term
-      cardinality: many_to_one
-      aggregation:
-        group_by: document_chembl_id
-        fields:
-          chembl_mesh_headings:
-            source: term
-            filter: "term_type == 'MESH_HEADING'"
-            agg: collect_list
-          chembl_mesh_qualifiers:
-            source: term
-            filter: "term_type == 'MESH_QUALIFIER'"
-            agg: collect_list
-          chembl_keywords:
-            source: term
-            filter: "term_type == 'KEYWORD'"
-            agg: collect_list
-          chembl_concepts:
-            source: term
-            filter: "term_type == 'CONCEPT'"
-            agg: collect_list
-          chembl_mesh_ids:
-            source: mesh_id
-            filter: "mesh_id IS NOT NULL"
-            agg: collect_set
-          chembl_term_count:
-            source: entity_id
-            agg: count
-
   # ---------------------------------------------------------------------------
   # Merge Configuration
   # ---------------------------------------------------------------------------
@@ -177,18 +141,6 @@ composite:
         - openalex       # OpenAlex concepts are unique
       tldr:
         - semanticscholar  # S2-only field
-      chembl_mesh_headings:
-        - chembl         # ChEMBL-only field
-      chembl_mesh_qualifiers:
-        - chembl         # ChEMBL-only field
-      chembl_keywords:
-        - chembl         # ChEMBL-only field
-      chembl_concepts:
-        - chembl         # ChEMBL-only field
-      chembl_mesh_ids:
-        - chembl         # ChEMBL-only field
-      chembl_term_count:
-        - chembl         # ChEMBL-only field
 
     # -------------------------------------------------------------------------
     # Column Ordering by Semantic Groups
@@ -223,16 +175,17 @@ composite:
         provider_order: [chembl, openalex, pubmed, semanticscholar]
 
       # 4. PMC IDs (separate group - not in seed)
+      # Note: Only PubMed provides pmc_id (removed from OpenAlex, SemanticScholar)
       - name: pmc_identifiers
         fields:
           - pmc_id
-        provider_order: [openalex, pubmed, semanticscholar]
+        provider_order: [pubmed]
 
       # 5. Title group
+      # Note: vernacular_title removed (PubMed no longer provides it)
       - name: title
         fields:
           - title
-          - vernacular_title
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 
       # 6. Abstract group
@@ -270,6 +223,8 @@ composite:
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 
       # 10. Publication dates
+      # Note: epub_date, accepted_date, received_date, revised_date removed
+      # (PubMed no longer provides these fields)
       - name: dates
         fields:
           - publication_date
@@ -279,10 +234,6 @@ composite:
           - pub_date
           - pub_month
           - pub_day
-          - epub_date
-          - accepted_date
-          - received_date
-          - revised_date
           - date_completed
           - date_revised
         provider_order: [crossref, openalex, pubmed, semanticscholar]
@@ -323,10 +274,12 @@ composite:
         provider_order: [openalex, semanticscholar]
 
       # 15. Document type
+      # Note: CrossRef and OpenAlex use raw 'type' field instead of mapped 'doc_type'
       - name: doc_type
         fields:
-          - doc_type
-        provider_order: [chembl, crossref, openalex]
+          - doc_type          # ChEMBL, PubMed (unified type)
+          - type              # CrossRef, OpenAlex raw type (journal-article, article, etc.)
+        provider_order: [chembl, crossref, openalex, pubmed]
 
       # 16. Language
       - name: language
@@ -348,25 +301,19 @@ composite:
           - fields_of_study
           - mesh_terms
           - mesh_heading_count
-          - chembl_mesh_headings      # ChEMBL publication term aggregation
-          - chembl_mesh_qualifiers    # ChEMBL publication term aggregation
-          - chembl_mesh_ids           # ChEMBL publication term aggregation
-          - chembl_keywords           # ChEMBL publication term aggregation
-          - chembl_concepts           # ChEMBL publication term aggregation
-          - chembl_term_count         # ChEMBL publication term aggregation
           - keywords
           - keyword_count
           - publication_types
           - publication_type_list
-        provider_order: [crossref, openalex, pubmed, chembl, semanticscholar]
+        provider_order: [crossref, openalex, pubmed, semanticscholar]
 
       # 19. Provider-specific IDs
+      # Note: arxiv_id removed (SemanticScholar no longer provides it)
       - name: provider_ids
         fields:
           - openalex_id
           - paper_id
           - corpus_id
-          - arxiv_id
           - src_id
           - chembl_release
           - creation_date
