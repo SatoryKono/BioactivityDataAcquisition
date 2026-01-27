@@ -71,11 +71,13 @@ factory = GenericPipelineFactory(
 **Доступные трансформеры:**
 | Provider | Трансформер | Расположение |
 |----------|-------------|--------------|
+| Common | `BasePublicationTransformer` | `pipelines/common/base_publication_transformer.py` |
 | ChEMBL | `ActivityTransformer` | `pipelines/chembl/activity_transformer.py` |
 | ChEMBL | `AssayTransformer` | `pipelines/chembl/assay_transformer.py` |
 | ChEMBL | `AssayParametersTransformer` | `pipelines/chembl/assay_parameters_transformer.py` |
 | ChEMBL | `CellLineTransformer` | `pipelines/chembl/cell_line_transformer.py` |
 | ChEMBL | `CompoundRecordTransformer` | `pipelines/chembl/compound_record_transformer.py` |
+| ChEMBL | `BaseChemblTransformer` | `pipelines/chembl/base_chembl_transformer.py` |
 | ChEMBL | `MoleculeTransformer` | `pipelines/chembl/molecule_transformer.py` |
 | ChEMBL | `ProteinClassTransformer` | `pipelines/chembl/protein_class_transformer.py` |
 | ChEMBL | `TargetTransformer` | `pipelines/chembl/target_transformer.py` |
