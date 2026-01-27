@@ -86,9 +86,10 @@ factory = GenericPipelineFactory(
 | CrossRef | `CrossRefPublicationTransformer` | `pipelines/crossref/transformer.py` |
 | OpenAlex | `OpenAlexPublicationTransformer` | `pipelines/openalex/transformer.py` |
 | PubChem | `PubChemCompoundTransformer` | `pipelines/pubchem/transformer.py` |
+| UniProt | `IDMappingTransformer` | `pipelines/uniprot/idmapping_transformer.py` |
 | UniProt | `UniProtProteinTransformer` | `pipelines/uniprot/transformer.py` |
 | PubMed | `PubMedPublicationTransformer` | `pipelines/pubmed/transformer.py` |
-| Semantic Scholar | `SemanticScholarPublicationTransformer` | `pipelines/semanticscholar/transformer.py` |
+| SemanticScholar | `SemanticScholarPublicationTransformer` | `pipelines/semanticscholar/transformer.py` |
 
 ### 2.4. `core/` — Ядро Исполнения Пайплайнов
 
