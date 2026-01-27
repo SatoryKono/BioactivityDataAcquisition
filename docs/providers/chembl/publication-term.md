@@ -1,15 +1,15 @@
-# Пайплайн: ChEMBL Document Term
+# Пайплайн: ChEMBL Publication Term
 
-**Имя пайплайна:** `chembl_document_term`
+**Имя пайплайна:** `chembl_publication_term`
 **Провайдер:** `chembl`
-**Сущность:** `document_term`
+**Сущность:** `publication_term`
 **Версия схемы:** 1.0.0
 
 ---
 
 ## 1. Описание
 
-Пайплайн извлекает термины (MeSH-дескрипторы, ключевые слова) из записей документов ChEMBL API. Это производная сущность — извлекает вложенные данные терминов из ответов API `/document` и преобразует связь 1:M (один документ → множество терминов) в плоскую структуру.
+Пайплайн извлекает термины (MeSH-дескрипторы, ключевые слова) из записей публикаций ChEMBL API. Это производная сущность — извлекает вложенные данные терминов из ответов API `/document` и преобразует связь 1:M (одна публикация → множество терминов) в плоскую структуру.
 
 **Типы терминов:**
 - `MESH_HEADING` — MeSH-дескрипторы
@@ -24,7 +24,7 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `document_chembl_id` | `str` | FK → ChEMBL ID родительского документа |
+| `document_chembl_id` | `str` | FK → ChEMBL ID родительской публикации |
 | `term` | `str` | Текст термина (напр., "Aspirin", "kinase inhibitor") |
 | `term_type` | `str` | Тип термина: MESH_HEADING, MESH_QUALIFIER, KEYWORD |
 
@@ -39,7 +39,7 @@
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/document_term_transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/publication_term_transformer.py`
 
 ### Entity ID
 
@@ -54,7 +54,7 @@ entity_id = hashlib.sha256(composite.encode()).hexdigest()[:16]
 
 ### Извлечение терминов
 
-Трансформер извлекает термины из двух полей документа:
+Трансформер извлекает термины из двух полей публикации:
 1. `mesh_terms` — массив MeSH-терминов (heading + qualifier)
 2. `keywords` — массив ключевых слов авторов
 
@@ -86,13 +86,13 @@ gold_filters:
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_document_term
+bioetl run chembl_publication_term
 
 # С ограничением
-bioetl run chembl_document_term --limit 1000
+bioetl run chembl_publication_term --limit 1000
 
 # С фильтрацией по документам
-bioetl run chembl_document_term --input-filter data/input/documents.csv
+bioetl run chembl_publication_term --input-filter data/input/documents.csv
 ```
 
 ---
@@ -113,21 +113,21 @@ sink:
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/document_term.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/document_term_transformer.py` |
-| Пайплайн | `src/bioetl/application/pipelines/chembl/document_term.py` |
-| Сущность | `src/bioetl/domain/entities/chembl_structures.py` (DocumentTerm) |
-| Схема | `src/bioetl/domain/schemas/chembl/document_term.py` |
+| Конфигурация | `configs/pipelines/chembl/publication_term.yaml` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/publication_term_transformer.py` |
+| Пайплайн | `src/bioetl/application/pipelines/chembl/publication_term.py` |
+| Сущность | `src/bioetl/domain/entities/chembl_structures.py` (PublicationTerm) |
+| Схема | `src/bioetl/domain/schemas/chembl/publication_term.py` |
 
 ---
 
 ## 8. Связь с родительской сущностью
 
-`chembl_document_term` — производная от `chembl_document`. Для полного покрытия рекомендуется сначала загрузить документы:
+`chembl_publication_term` — производная от `chembl_publication`. Для полного покрытия рекомендуется сначала загрузить публикации:
 
 ```bash
-bioetl run chembl_document --limit 100
-bioetl run chembl_document_term --limit 1000
+bioetl run chembl_publication --limit 100
+bioetl run chembl_publication_term --limit 1000
 ```
 
 ---
