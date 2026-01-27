@@ -108,7 +108,7 @@ docs/
 ├── archived/                    # Historical documents
 │   ├── audits/                  # Audit files (2025-2026)
 │   ├── plans/                   # Archived planning documents
-│   ├── project_rules/           # Deprecated project rules
+│   ├── project-rules/           # Deprecated project rules
 │   └── refactoring-plan.md      # Archived refactoring roadmap
 │
 ├── domain/schemas/              # Schema documentation
