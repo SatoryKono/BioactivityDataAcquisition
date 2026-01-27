@@ -227,25 +227,25 @@ flowchart TD
 
 ```plantuml
 @startuml
-title Pipeline Lock Acquisition (§3.3)
+title Pipeline Lock Acquisition (MemoryLock, TTL 90s, heartbeat 30s) (§3.3)
 
 participant Worker
-participant Redis
+participant MemoryLock
 participant DeltaLake
 
-Worker -> Redis: SETNX lock:chembl_activity
-Redis --> Worker: OK
+Worker -> MemoryLock: acquire lock:chembl_activity (TTL 90s)
+MemoryLock --> Worker: OK
 
-loop Every 30s
-    Worker -> Redis: EXPIRE (heartbeat)
+loop Every 30s (heartbeat)
+    Worker -> MemoryLock: refresh TTL (90s)
 end
 
-Worker -> Redis: GET lock (validate owner)
-Redis --> Worker: owner_id matches
+Worker -> MemoryLock: get lock (validate owner)
+MemoryLock --> Worker: owner_id matches
 
 Worker -> DeltaLake: write()
 
-Worker -> Redis: DEL lock
+Worker -> MemoryLock: release lock
 @enduml
 ```
 
