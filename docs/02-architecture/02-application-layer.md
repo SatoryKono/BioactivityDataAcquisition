@@ -73,9 +73,16 @@ factory = GenericPipelineFactory(
 |----------|-------------|--------------|
 | ChEMBL | `ActivityTransformer` | `pipelines/chembl/activity_transformer.py` |
 | ChEMBL | `AssayTransformer` | `pipelines/chembl/assay_transformer.py` |
+| ChEMBL | `AssayParametersTransformer` | `pipelines/chembl/assay_parameters_transformer.py` |
+| ChEMBL | `CellLineTransformer` | `pipelines/chembl/cell_line_transformer.py` |
+| ChEMBL | `CompoundRecordTransformer` | `pipelines/chembl/compound_record_transformer.py` |
 | ChEMBL | `MoleculeTransformer` | `pipelines/chembl/molecule_transformer.py` |
+| ChEMBL | `ProteinClassTransformer` | `pipelines/chembl/protein_class_transformer.py` |
 | ChEMBL | `TargetTransformer` | `pipelines/chembl/target_transformer.py` |
+| ChEMBL | `TargetComponentTransformer` | `pipelines/chembl/target_component_transformer.py` |
 | ChEMBL | `PublicationTransformer` | `pipelines/chembl/publication_transformer.py` |
+| ChEMBL | `PublicationSimilarityTransformer` | `pipelines/chembl/publication_similarity_transformer.py` |
+| ChEMBL | `PublicationTermTransformer` | `pipelines/chembl/publication_term_transformer.py` |
 | CrossRef | `CrossRefPublicationTransformer` | `pipelines/crossref/transformer.py` |
 | OpenAlex | `OpenAlexPublicationTransformer` | `pipelines/openalex/transformer.py` |
 | PubChem | `PubChemCompoundTransformer` | `pipelines/pubchem/transformer.py` |
