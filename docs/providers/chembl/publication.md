@@ -1,15 +1,15 @@
-# Пайплайн: ChEMBL Document
+# Пайплайн: ChEMBL Publication
 
-**Имя пайплайна:** `chembl_document`
+**Имя пайплайна:** `chembl_publication`
 **Провайдер:** `chembl`
-**Сущность:** `document`
+**Сущность:** `publication`
 **Версия схемы:** 1.0.0
 
 ---
 
 ## 1. Описание
 
-Пайплайн извлекает данные о научных публикациях из API ChEMBL. Документы связывают биоактивные данные с их первоисточниками (статьи, патенты).
+Пайплайн извлекает данные о научных публикациях из API ChEMBL. Публикации связывают биоактивные данные с их первоисточниками (статьи, патенты).
 
 ---
 
@@ -19,7 +19,7 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `document_chembl_id` | `str` | Уникальный ChEMBL ID документа |
+| `document_chembl_id` | `str` | Уникальный ChEMBL ID публикации |
 | `pubmed_id` | `int` | PubMed ID (если есть) |
 | `doi` | `str` | Digital Object Identifier |
 | `patent_id` | `str` | ID патента (если применимо) |
@@ -41,14 +41,14 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `doc_type` | `str` | Тип документа (PUBLICATION, PATENT) |
+| `doc_type` | `str` | Тип публикации (PUBLICATION, PATENT) |
 | `src_id` | `int` | ID источника данных |
 
 ---
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/document_transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/publication_transformer.py`
 
 ### Entity ID
 
@@ -71,10 +71,10 @@ entity_id = f"chembl:{document_chembl_id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_document
+bioetl run chembl_publication
 
 # С ограничением
-bioetl run chembl_document --limit 1000
+bioetl run chembl_publication --limit 1000
 ```
 
 ---
@@ -83,8 +83,9 @@ bioetl run chembl_document --limit 1000
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/document.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/document_transformer.py` |
+| Конфигурация | `configs/pipelines/chembl/publication.yaml` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/publication_transformer.py` |
+| Пайплайн | `src/bioetl/application/pipelines/chembl/publication.py` |
 
 ---
 

@@ -27,9 +27,9 @@ ChEMBL provides comprehensive bioactivity data with multiple entity types:
 | [Assay Parameters](chembl/assay-parameters.md) | Assay parameter definitions | Planned |
 | [Cell Line](chembl/cell-line.md) | Cell line data | Planned |
 | [Compound Record](chembl/compound-record.md) | Compound records | Planned |
-| [Document](chembl/document.md) | Literature references | Planned |
-| [Document Similarity](chembl/document-similarity.md) | Document similarity | Planned |
-| [Document Term](chembl/document-term.md) | Document terms | Planned |
+| [Publication](chembl/publication.md) | Literature references | ✅ Active |
+| [Publication Similarity](chembl/publication-similarity.md) | Publication similarity | ✅ Active |
+| [Publication Term](chembl/publication-term.md) | Publication terms | ✅ Active |
 | [Protein Class](chembl/protein-class.md) | Protein classification | Planned |
 | [Target Component](chembl/target-component.md) | Target components | Planned |
 
