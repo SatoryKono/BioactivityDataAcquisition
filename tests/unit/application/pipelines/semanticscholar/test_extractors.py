@@ -5,7 +5,11 @@ from __future__ import annotations
 
 from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_affiliations,
+    extract_author_h_indices,
+    extract_author_orcids,
+    extract_author_s2_ids,
     extract_authors,
+    extract_citation_contexts,
     extract_external_ids,
     extract_fields_of_study,
     extract_journal_info,
@@ -504,3 +508,223 @@ class TestNormalizeOaStatus:
         """Test whitespace is trimmed before normalization."""
         assert normalize_oa_status("  GOLD  ") == "gold"
         assert normalize_oa_status("\tgreen\n") == "green"
+
+
+class TestExtractAuthorS2Ids:
+    """Tests for extract_author_s2_ids function."""
+
+    def test_extract_multiple_ids(self) -> None:
+        """Test extracting multiple S2 author IDs."""
+        authors = [
+            {"authorId": "1234567890abcdef1234567890abcdef12345678", "name": "John"},
+            {"authorId": "abcdef1234567890abcdef1234567890abcdef12", "name": "Jane"},
+        ]
+        result = extract_author_s2_ids(authors)
+        assert result == [
+            "1234567890abcdef1234567890abcdef12345678",
+            "abcdef1234567890abcdef1234567890abcdef12",
+        ]
+
+    def test_skip_none_ids(self) -> None:
+        """Test that None author IDs are skipped."""
+        authors = [
+            {"authorId": "1234567890abcdef1234567890abcdef12345678", "name": "John"},
+            {"authorId": None, "name": "Jane"},
+            {"authorId": "abcdef1234567890abcdef1234567890abcdef12", "name": "Bob"},
+        ]
+        result = extract_author_s2_ids(authors)
+        assert result == [
+            "1234567890abcdef1234567890abcdef12345678",
+            "abcdef1234567890abcdef1234567890abcdef12",
+        ]
+
+    def test_skip_missing_ids(self) -> None:
+        """Test that missing authorId keys are skipped."""
+        authors = [
+            {"authorId": "1234567890abcdef1234567890abcdef12345678", "name": "John"},
+            {"name": "Jane"},  # No authorId key
+        ]
+        result = extract_author_s2_ids(authors)
+        assert result == ["1234567890abcdef1234567890abcdef12345678"]
+
+    def test_empty_list(self) -> None:
+        """Test with empty list."""
+        assert extract_author_s2_ids([]) == []
+
+    def test_none_input(self) -> None:
+        """Test with None input."""
+        assert extract_author_s2_ids(None) == []
+
+    def test_strip_whitespace(self) -> None:
+        """Test that IDs are stripped of whitespace."""
+        authors = [{"authorId": "  abc123  ", "name": "John"}]
+        result = extract_author_s2_ids(authors)
+        assert result == ["abc123"]
+
+
+class TestExtractAuthorOrcids:
+    """Tests for extract_author_orcids function."""
+
+    def test_extract_orcids(self) -> None:
+        """Test extracting ORCID identifiers."""
+        authors = [
+            {"name": "John", "externalIds": {"ORCID": "0000-0001-2345-6789"}},
+            {"name": "Jane", "externalIds": {"ORCID": "0000-0002-3456-7890"}},
+        ]
+        result = extract_author_orcids(authors)
+        assert result == ["0000-0001-2345-6789", "0000-0002-3456-7890"]
+
+    def test_placeholder_for_missing_orcid(self) -> None:
+        """Test that empty string is used for missing ORCID."""
+        authors = [
+            {"name": "John", "externalIds": {"ORCID": "0000-0001-2345-6789"}},
+            {"name": "Jane", "externalIds": None},
+            {"name": "Bob", "externalIds": {"DBLP": "some-dblp-id"}},
+        ]
+        result = extract_author_orcids(authors)
+        assert result == ["0000-0001-2345-6789", "", ""]
+
+    def test_missing_external_ids_key(self) -> None:
+        """Test authors without externalIds key."""
+        authors = [
+            {"name": "John", "externalIds": {"ORCID": "0000-0001-2345-6789"}},
+            {"name": "Jane"},  # No externalIds key
+        ]
+        result = extract_author_orcids(authors)
+        assert result == ["0000-0001-2345-6789", ""]
+
+    def test_empty_list(self) -> None:
+        """Test with empty list."""
+        assert extract_author_orcids([]) == []
+
+    def test_none_input(self) -> None:
+        """Test with None input."""
+        assert extract_author_orcids(None) == []
+
+    def test_strip_whitespace(self) -> None:
+        """Test that ORCIDs are stripped of whitespace."""
+        authors = [
+            {"name": "John", "externalIds": {"ORCID": "  0000-0001-2345-6789  "}}
+        ]
+        result = extract_author_orcids(authors)
+        assert result == ["0000-0001-2345-6789"]
+
+
+class TestExtractAuthorHIndices:
+    """Tests for extract_author_h_indices function."""
+
+    def test_extract_h_indices(self) -> None:
+        """Test extracting h-index values."""
+        authors = [
+            {"name": "John", "hIndex": 45},
+            {"name": "Jane", "hIndex": 23},
+        ]
+        result = extract_author_h_indices(authors)
+        assert result == [45, 23]
+
+    def test_none_for_missing_h_index(self) -> None:
+        """Test that None is returned for missing h-index."""
+        authors = [
+            {"name": "John", "hIndex": 45},
+            {"name": "Jane", "hIndex": None},
+            {"name": "Bob"},  # No hIndex key
+        ]
+        result = extract_author_h_indices(authors)
+        assert result == [45, None, None]
+
+    def test_zero_h_index(self) -> None:
+        """Test that zero h-index is valid."""
+        authors = [{"name": "John", "hIndex": 0}]
+        result = extract_author_h_indices(authors)
+        assert result == [0]
+
+    def test_negative_h_index_treated_as_none(self) -> None:
+        """Test that negative h-index is treated as None."""
+        authors = [{"name": "John", "hIndex": -1}]
+        result = extract_author_h_indices(authors)
+        assert result == [None]
+
+    def test_empty_list(self) -> None:
+        """Test with empty list."""
+        assert extract_author_h_indices([]) == []
+
+    def test_none_input(self) -> None:
+        """Test with None input."""
+        assert extract_author_h_indices(None) == []
+
+
+class TestExtractCitationContexts:
+    """Tests for extract_citation_contexts function."""
+
+    def test_extract_contexts(self) -> None:
+        """Test extracting citation context sentences."""
+        citations = [
+            {
+                "paperId": "abc123",
+                "contexts": ["The method in [1] shows...", "As shown by [1]..."],
+            },
+            {"paperId": "def456", "contexts": ["Building on [2]..."]},
+        ]
+        result = extract_citation_contexts(citations)
+        assert result == [
+            "The method in [1] shows...",
+            "As shown by [1]...",
+            "Building on [2]...",
+        ]
+
+    def test_max_contexts_limit(self) -> None:
+        """Test max_contexts parameter limits results."""
+        citations = [
+            {"paperId": "abc123", "contexts": ["Context 1", "Context 2", "Context 3"]},
+            {"paperId": "def456", "contexts": ["Context 4", "Context 5"]},
+        ]
+        result = extract_citation_contexts(citations, max_contexts=3)
+        assert result == ["Context 1", "Context 2", "Context 3"]
+
+    def test_skip_empty_contexts(self) -> None:
+        """Test that empty context strings are skipped."""
+        citations = [
+            {"paperId": "abc123", "contexts": ["Valid context", "", "  ", "Another"]},
+        ]
+        result = extract_citation_contexts(citations)
+        assert result == ["Valid context", "Another"]
+
+    def test_skip_none_contexts(self) -> None:
+        """Test that None contexts are skipped."""
+        citations = [
+            {"paperId": "abc123", "contexts": ["Valid", None, "Also valid"]},
+        ]
+        result = extract_citation_contexts(citations)
+        assert result == ["Valid", "Also valid"]
+
+    def test_missing_contexts_key(self) -> None:
+        """Test citations without contexts key."""
+        citations = [
+            {"paperId": "abc123", "contexts": ["Has context"]},
+            {"paperId": "def456"},  # No contexts key
+        ]
+        result = extract_citation_contexts(citations)
+        assert result == ["Has context"]
+
+    def test_none_contexts_field(self) -> None:
+        """Test when contexts field is None."""
+        citations = [
+            {"paperId": "abc123", "contexts": None},
+            {"paperId": "def456", "contexts": ["Valid"]},
+        ]
+        result = extract_citation_contexts(citations)
+        assert result == ["Valid"]
+
+    def test_empty_list(self) -> None:
+        """Test with empty list."""
+        assert extract_citation_contexts([]) == []
+
+    def test_none_input(self) -> None:
+        """Test with None input."""
+        assert extract_citation_contexts(None) == []
+
+    def test_strip_whitespace(self) -> None:
+        """Test that contexts are stripped of whitespace."""
+        citations = [{"paperId": "abc", "contexts": ["  Trimmed context  "]}]
+        result = extract_citation_contexts(citations)
+        assert result == ["Trimmed context"]

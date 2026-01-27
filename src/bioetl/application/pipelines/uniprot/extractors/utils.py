@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import date
 from typing import Any, ClassVar
 
 import orjson
@@ -154,3 +155,22 @@ class ExtractorUtils:
             return None
         values = ExtractorUtils._extract_values_from_list(ec_numbers)
         return orjson.dumps(values).decode("utf-8") if values else None
+
+    @staticmethod
+    def parse_uniprot_date(date_str: Any) -> date | None:
+        """Parse UniProt date string to datetime.date.
+
+        UniProt API returns dates in ISO 8601 format (YYYY-MM-DD).
+
+        Args:
+            date_str: Date string from UniProt API (e.g., "2000-12-01").
+
+        Returns:
+            Parsed date object or None if invalid/empty.
+        """
+        if not date_str or not isinstance(date_str, str):
+            return None
+        try:
+            return date.fromisoformat(date_str)
+        except ValueError:
+            return None

@@ -70,6 +70,20 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         """Validate PMCID format."""
         return cast("Series[bool]", series.isna() | series.str.match(r"^PMC\d+$"))
 
+    # === Additional Identifiers (for cross-referencing) ===
+    pii: Series[str] = pa.Field(
+        nullable=True,
+        description="Publisher Item Identifier",
+    )
+    mid: Series[str] = pa.Field(
+        nullable=True,
+        description="Manuscript ID (PMC submission process)",
+    )
+    publisher_id: Series[str] = pa.Field(
+        nullable=True,
+        description="Publisher-specific article identifier",
+    )
+
     # === Article Content (override title to be non-nullable) ===
     title: Series[str] = pa.Field(
         nullable=False,
@@ -185,6 +199,15 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         nullable=True, description="Citation subset codes (e.g., 'AIM')"
     )
 
+    # === Affiliation Data (enhanced for institutional analysis) ===
+    structured_affiliations: Series[str] = pa.Field(
+        nullable=True,
+        description=(
+            "JSON array of structured affiliations with identifier metadata. "
+            "Each object contains: text, identifier, identifier_source, email_hash"
+        ),
+    )
+
     # === Counts (denormalized for query efficiency) ===
     author_count: Series[int] = pa.Field(nullable=True, description="Number of authors")
 
@@ -235,6 +258,65 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     def _check_chemical_count(cls, series: Series[int]) -> Series[bool]:
         """Validate chemical count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
+
+    # === Classification Data (JSON arrays extracted by transformer) ===
+    mesh_terms: Series[str] = pa.Field(
+        nullable=True,
+        description="MeSH terms (JSON array of descriptor/qualifier strings)",
+    )
+
+    chemicals: Series[str] = pa.Field(
+        nullable=True,
+        description="Chemical substances (JSON array of name/registry pairs)",
+    )
+
+    keywords: Series[str] = pa.Field(
+        nullable=True,
+        description="Author keywords (JSON array)",
+    )
+
+    databanks: Series[str] = pa.Field(
+        nullable=True,
+        description="Databank accession numbers (JSON array)",
+    )
+
+    gene_symbols: Series[str] = pa.Field(
+        nullable=True,
+        description="Gene symbols (JSON array)",
+    )
+
+    publication_types: Series[str] = pa.Field(
+        nullable=True,
+        description="Publication types (JSON array, e.g., Journal Article, Review)",
+    )
+
+    # === Additional Date Fields (extracted from PubmedData/History) ===
+    # Note: These are stored as ISO date strings (YYYY-MM-DD) to match transformer output
+    accepted_date: Series[str] = pa.Field(
+        nullable=True,
+        description="Manuscript acceptance date (from History/PubMedPubDate[@PubStatus='accepted'])",
+    )
+
+    received_date: Series[str] = pa.Field(
+        nullable=True,
+        description="Manuscript received date (from History/PubMedPubDate[@PubStatus='received'])",
+    )
+
+    revised_date: Series[str] = pa.Field(
+        nullable=True,
+        description="Manuscript revision date (from History/PubMedPubDate[@PubStatus='revised'])",
+    )
+
+    epub_date: Series[str] = pa.Field(
+        nullable=True,
+        description="Electronic publication date (from ArticleDate[@DateType='Electronic'])",
+    )
+
+    # === Author Affiliations ===
+    affiliations: Series[str] = pa.Field(
+        nullable=True,
+        description="Author affiliations (JSON array)",
+    )
 
     class Config:
         """Pandera configuration."""

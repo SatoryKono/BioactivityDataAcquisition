@@ -186,6 +186,8 @@ class TestActivityTransformerTransform:
             "data_validity_comment": "Valid",
             "data_validity_description": "Data passed validation",
             "potential_duplicate": 0,
+            "manual_curation_flag": 1,
+            "original_activity_id": 98765,
         }
 
         result = await transformer.transform(mock_context, record, index=0)
@@ -193,7 +195,40 @@ class TestActivityTransformerTransform:
         assert result is not None
         assert result["activity_comment"] == "Potent inhibitor"
         assert result["data_validity_comment"] == "Valid"
+        assert result["data_validity_description"] == "Data passed validation"
         assert result["potential_duplicate"] == 0
+        assert result["manual_curation_flag"] == 1
+        assert result["original_activity_id"] == 98765
+
+    @pytest.mark.asyncio
+    async def test_transform_with_curation_fields_null(self, transformer, mock_context):
+        """Test transformation handles nullable curation fields."""
+        record = {
+            "activity_id": 12345,
+            "molecule_chembl_id": "CHEMBL25",
+            # Curation fields are missing/null
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["manual_curation_flag"] is None
+        assert result["original_activity_id"] is None
+        assert result["data_validity_description"] is None
+
+    @pytest.mark.asyncio
+    async def test_transform_with_curation_flag_zero(self, transformer, mock_context):
+        """Test transformation with manual_curation_flag set to 0 (not curated)."""
+        record = {
+            "activity_id": 12345,
+            "molecule_chembl_id": "CHEMBL25",
+            "manual_curation_flag": 0,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["manual_curation_flag"] == 0
 
     @pytest.mark.asyncio
     async def test_transform_with_json_fields_single(self, transformer, mock_context):

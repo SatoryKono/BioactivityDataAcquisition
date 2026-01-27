@@ -18,6 +18,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
     ClassificationExtractor,
     DateExtractor,
     IdentifierExtractor,
+    StructuredAffiliation,
 )
 from bioetl.application.pipelines.pubmed.xml_utils import get_text
 from bioetl.domain.entities.pubmed import PubMedPublicationEntity
@@ -238,18 +239,33 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         raw_authors = AuthorExtractor.parse_authors(article)
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
-        # Extract affiliations
+        # Extract affiliations (legacy format - plain text list)
         raw_affiliations = AuthorExtractor.parse_affiliations(article)
         serialized_affiliations = self.serialize_json_list(raw_affiliations)
+
+        # Extract structured affiliations with identifiers
+        structured_affs = AuthorExtractor.parse_structured_affiliations(article)
+        processed_structured_affs = self._process_structured_affiliations(
+            structured_affs
+        )
+        serialized_structured_affs = self.serialize_json_list(processed_structured_affs)
 
         # Validate DOI
         raw_doi = IdentifierExtractor.extract_doi(root)
         doi_vo = DOI.from_raw(raw_doi)
         normalized_doi = str(doi_vo) if doi_vo else None
 
+        # Extract additional identifiers
+        pii = IdentifierExtractor.extract_pii(root)
+        mid = IdentifierExtractor.extract_mid(root)
+        publisher_id = IdentifierExtractor.extract_publisher_id(root)
+
         return {
             "pmid": pmid,
             "doi": normalized_doi,
+            "pii": pii,
+            "mid": mid,
+            "publisher_id": publisher_id,
             "title": get_text(article.find(".//ArticleTitle")),
             "vernacular_title": get_text(article.find(".//VernacularTitle")),
             "abstract": self._data_normalizer.strip_html_tags(
@@ -258,6 +274,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "abstract_structured": AbstractExtractor.is_abstract_structured(article),
             "authors": self.serialize_json_list(hashed_authors),
             "affiliations": serialized_affiliations,
+            "structured_affiliations": serialized_structured_affs,
             "author_count": len(hashed_authors),
             **self._extract_journal_data(article),
             **self._extract_date_data(article, pubmed_data),
@@ -277,6 +294,37 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "_dq_warn": False,
             "_dq_error": False,
         }
+
+    def _process_structured_affiliations(
+        self, affiliations: list[StructuredAffiliation]
+    ) -> list[dict[str, Any]]:
+        """Process structured affiliations with PII handling for emails.
+
+        Email addresses in affiliations are PII and must be hashed before
+        storing in Silver layer (RULES.md §5.4).
+
+        Args:
+            affiliations: List of structured affiliation dicts.
+
+        Returns:
+            List of processed affiliation dicts with hashed emails.
+        """
+        processed = []
+        for aff in affiliations:
+            processed_aff: dict[str, Any] = {
+                "text": aff.get("text"),
+                "identifier": aff.get("identifier"),
+                "identifier_source": aff.get("identifier_source"),
+            }
+            # Hash email if present (PII protection)
+            email = aff.get("email")
+            if email and self._pii_hasher:
+                processed_aff["email_hash"] = self._pii_hasher.hash_value(email)
+            else:
+                processed_aff["email_hash"] = None
+
+            processed.append(processed_aff)
+        return processed
 
     def _get_primary_id_field(self) -> str:
         """Return the primary ID field name for PubMed publications.
