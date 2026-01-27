@@ -1,6 +1,6 @@
 %%{init: {'theme':'base', 'themeVariables': { 'fontSize':'13px'}}}%%
 graph TB
-    subgraph runner["PipelineRunner (186 LOC)"]
+    subgraph runner["PipelineRunner (189 LOC)"]
         direction TB
         RunnerInit["__init__(services, config)"]
         RunMethod["async run()"]
@@ -19,7 +19,7 @@ graph TB
         ServicesStruct["RunnerServices:<br/>- data_source: DataSourcePort<br/>- storage: StoragePort<br/>- lock: LockPort<br/>- checkpoint: CheckpointPort<br/>- quarantine: QuarantinePort<br/>- observer: PipelineObserver<br/>- metrics: MetricsPort<br/>- logger: LoggerPort<br/>- tracer: TracingPort"]
     end
 
-    subgraph executor["BatchExecutor (150 LOC)"]
+    subgraph executor["BatchExecutor (783 LOC)"]
         direction TB
         ExecutorLoop["execute_loop()"]
         LoadCheckpoint["load_checkpoint()"]
@@ -34,7 +34,7 @@ graph TB
         AdaptiveSize --> FetchBatch
     end
 
-    subgraph processor["RecordProcessor (200 LOC)"]
+    subgraph processor["RecordProcessor (222 LOC)"]
         direction TB
         ProcessMethod["async process(batch)"]
         Transform["transform_records()"]
@@ -48,7 +48,7 @@ graph TB
         WriteSilver --> WriteGold
     end
 
-    subgraph transformer["BatchTransformer (200 LOC)"]
+    subgraph transformer["BatchTransformer (404 LOC)"]
         direction TB
         TransformBatch["transform_batch()"]
         ApplyTransformer["apply_base_transformer()"]
@@ -62,7 +62,7 @@ graph TB
         CheckDQ --> QuarantineHandler
     end
 
-    subgraph writer["BatchWriter (180 LOC)"]
+    subgraph writer["BatchWriter (412 LOC)"]
         direction TB
         WriterInit["__init__(storage, lock)"]
         WriteMethod["async write(batch, layers)"]
@@ -93,13 +93,13 @@ graph TB
     subgraph managers["Supporting Managers"]
         direction TB
 
-        LockMgr["LockManager (150 LOC)<br/>acquire_with_heartbeat()<br/>release_lock()<br/>validate_ownership()"]
+        LockMgr["LockManager (270 LOC)<br/>acquire()<br/>start_heartbeat()<br/>validate()<br/>release()<br/>get_context()"]
 
-        CheckpointMgr["CheckpointManager (120 LOC)<br/>save_checkpoint(state)<br/>load_checkpoint() → state<br/>cleanup_old_checkpoints()"]
+        CheckpointMgr["CheckpointManager (133 LOC)<br/>load_checkpoint() → dict | None<br/>save_checkpoint(records_processed)<br/>delete_checkpoint()<br/>list_all() → list[str]"]
 
-        QuarantineMgr["QuarantineManager (100 LOC)<br/>quarantine_record(record, reason)<br/>query_quarantine(filters)<br/>update_status(entry_id, status)"]
+        QuarantineMgr["QuarantineManager (98 LOC)<br/>quarantine_record(record, error_type, batch_id, error_details, ingestion_ts)<br/>inspect(limit=100, error_code=None) → list[dict]<br/>get_stats() → dict"]
 
-        MemoryMon["MemoryMonitor (200 LOC)<br/>get_current_usage() → float<br/>calculate_batch_size(target) → int<br/>monitor_loop()"]
+        MemoryMon["MemoryMonitor (305 LOC)<br/>get_memory_stats() → MemoryStats<br/>is_under_pressure() → bool<br/>get_recommended_batch_size(current) → int<br/>estimate_batch_memory_mb(record_count, avg_record_size_bytes=1024) → float<br/>calculate_max_batch_size(avg_record_size_bytes=1024) → int"]
     end
 
     %% Component Interactions
@@ -134,9 +134,9 @@ graph TB
     Observer --> |"Logs events"| ServicesStruct
 
     %% Preflight and Postrun Services
-    PreflightSvc["PreflightService (120 LOC)<br/>check_infrastructure()<br/>check_provider_health()<br/>validate_config()"]
+    PreflightSvc["PreflightService (816 LOC)<br/>check_infrastructure()<br/>check_provider_health()<br/>validate_config()"]
 
-    PostrunSvc["PostrunService (180 LOC)<br/>analyze_dq_metrics()<br/>emit_final_metrics()<br/>trigger_vacuum()<br/>cleanup_resources()"]
+    PostrunSvc["PostrunService (298 LOC)<br/>analyze_dq_metrics()<br/>emit_final_metrics()<br/>trigger_vacuum()<br/>cleanup_resources()"]
 
     Preflight --> PreflightSvc
     Postrun --> PostrunSvc

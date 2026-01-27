@@ -19,13 +19,15 @@ Systematic verification of field mapping across all publication pipeline layers 
 
 | # | Pipeline | Provider | Entity | Status |
 |---|----------|----------|--------|--------|
-| 1 | `chembl_publication` | ChEMBL | document | ⚠️ Missing Gold fields |
-| 2 | `chembl_publication_similarity` | ChEMBL | document_similarity | ✅ Correct |
-| 3 | `chembl_publication_term` | ChEMBL | document_term | ✅ Correct |
+| 1 | `chembl_publication` | ChEMBL | publication | ⚠️ Missing Gold fields |
+| 2 | `chembl_publication_similarity` | ChEMBL | publication_similarity | ✅ Correct |
+| 3 | `chembl_publication_term` | ChEMBL | publication_term | ✅ Correct |
 | 4 | `pubmed_publication` | PubMed | publication | ⚠️ Missing Gold fields (Type mismatch ✅ FIXED) |
 | 5 | `crossref_publication` | CrossRef | work | ⚠️ Missing Gold fields (Type mismatch ✅ FIXED) |
 | 6 | `openalex_publication` | OpenAlex | publication | ✅ Correct (Type mismatch ✅ FIXED) |
 | 7 | `semanticscholar_publication` | SemanticScholar | publication | ✅ Correct |
+
+Примечание: API-ресурсы остаются `document*`, но canonical `entity_type` — `publication*` (см. ADR-024).
 
 ---
 
