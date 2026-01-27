@@ -35,6 +35,8 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-027](ADR-027-dq-rules-externalization.md) | DQ Rules Externalization | Accepted | Data Quality | 2026-01-19 |
 | [ADR-028](ADR-028-filter-rules-externalization.md) | Filter Rules Externalization | Accepted | Configuration | 2026-01-20 |
 | [ADR-029](ADR-029-output-metadata-unification.md) | Output Metadata Unification | Accepted | Data Modeling | 2026-01-23 |
+| [ADR-030](ADR-030-publication-pagination-strategy.md) | Publication Pagination Strategy (force_full_scan) | Accepted | Data Fetching | 2026-01-26 |
+| [ADR-031](ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | Accepted | Configuration | 2026-01-26 |
 
 ## ADRs by Category
 
@@ -77,6 +79,7 @@ This directory contains Architecture Decision Records documenting significant ar
 ### Data Fetching
 - [ADR-009](ADR-009-paginated-fetcher-mixin.md): PaginatedFetcherMixin Design
 - [ADR-011](ADR-011-remove-watermark-mechanism.md): Remove Watermark Mechanism
+- [ADR-030](ADR-030-publication-pagination-strategy.md): Publication Pagination Strategy — force_full_scan for publication entities
 
 ### Deployment
 - [ADR-010](ADR-010-local-only-deployment.md): Local-Only Deployment
@@ -90,6 +93,7 @@ This directory contains Architecture Decision Records documenting significant ar
 ### Configuration
 - [ADR-025](ADR-025-pipeline-config-unification.md): Pipeline Config Unification
 - [ADR-028](ADR-028-filter-rules-externalization.md): Filter Rules Externalization — Hierarchical filter config
+- [ADR-031](ADR-031-loading-strategy-formalization.md): Loading Strategy Formalization — LoadingStrategy enum
 
 ## ADR Relationships Graph
 

@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.12 | Last updated: 2026-01-26*
+*Synced with RULES.md v5.12 | Last updated: 2026-01-27*
 
 > **Documentation Update:** 2026-01-26
 > - Architecture diagrams updated: Composite Pipeline (ADR-026) added to layer diagrams
@@ -16,7 +16,7 @@
 |-------------------------|------------------------------------------------------------------------|
 | Understand the rules    | [RULES.md](RULES.md)                 |
 | Look up terminology     | [glossary.md](glossary.md)           |
-| Create a new pipeline   | [00-project_rules/04-extending-bioetl.md](00-project_rules/04-extending-bioetl.md)      |
+| Create a new pipeline   | [00-project-rules/04-extending-bioetl.md](00-project-rules/04-extending-bioetl.md)      |
 | Review a pipeline       | [templates/pipeline-review-checklist.md](templates/pipeline-review-checklist.md) |
 | Handle a prod error     | [05-operations/runbooks/index.md](05-operations/runbooks/index.md)                           |
 | Understand architecture | [02-architecture/00-overview.md](02-architecture/00-overview.md)                  |
@@ -30,7 +30,7 @@
 |----------|----------|----------|
 | **Public-facing** | English | README.md, CONTRIBUTING.md, CHANGELOG.md |
 | **User guides** | English | docs/03-guides/*, docs/04-reference/* |
-| **Internal governance** | Russian | RULES.md, AGENT.md, docs/00-project_rules/* |
+| **Internal governance** | Russian | RULES.md, AGENT.md, docs/00-project-rules/* |
 | **Architecture docs** | Russian | docs/02-architecture/* |
 | **Code comments** | Russian | Docstrings, inline comments |
 
@@ -50,7 +50,7 @@ docs/
 │   ├── audits/                  # Audit reports
 │   └── refactoring-plan.md     # Archived refactoring roadmap
 │
-├── 00-project_rules/            # Project governance
+├── 00-project-rules/            # Project governance
 │   ├── 03-file-policy.md        # File/directory structure
 │   └── 04-extending-bioetl.md   # How to add providers/pipelines
 │
@@ -108,7 +108,7 @@ docs/
 ├── archived/                    # Historical documents
 │   ├── audits/                  # Audit files (2025-2026)
 │   ├── plans/                   # Archived planning documents
-│   ├── project_rules/           # Deprecated project rules
+│   ├── project-rules/           # Deprecated project rules
 │   └── refactoring-plan.md      # Archived refactoring roadmap
 │
 ├── domain/schemas/              # Schema documentation
@@ -146,7 +146,7 @@ docs/
 
 1. [RULES.md](RULES.md) - Project rules (start here)
 2. [rules-summary.md](quick-reference/rules-summary.md) - Quick reference
-3. [04-extending-bioetl.md](00-project_rules/04-extending-bioetl.md) - Adding providers/pipelines
+3. [04-extending-bioetl.md](00-project-rules/04-extending-bioetl.md) - Adding providers/pipelines
 
 ### Architecture
 
@@ -365,10 +365,10 @@ graph TD
 | RULES.md                 | 2026-01-21   | v5.12 (ADR Registry Update)  |
 | REQUIREMENTS.md          | 2026-01-21   | v1.4 (156 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
-| 00-map.md                | 2026-01-21   | v6.9 API Sync Completed      |
+| 00-map.md                | 2026-01-27   | v7.0 Documentation Audit     |
 | rules-summary.md         | 2026-01-21   | v5.12 Synced                 |
 | 03-guides/               | 2026-01-20   | Consolidated (13 guides)     |
-| ADR-001..028             | 2026-01-21   | All 28 ADRs documented       |
+| ADR-001..031             | 2026-01-27   | All 31 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
 | archived/audits/         | 2026-01-21   | Historical audit files       |
@@ -376,4 +376,4 @@ graph TD
 
 ---
 
-*Last updated: 2026-01-21. Documentation sync audit completed.*
+*Last updated: 2026-01-27. Documentation audit completed.*
