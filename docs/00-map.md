@@ -3,7 +3,7 @@
 *Synced with RULES.md v5.12 | Last updated: 2026-01-26*
 
 > **Documentation Update:** 2026-01-26
-> - Architecture diagrams updated: Composite Pipeline (ADR-026) added to layer diagrams
+> - Architecture diagrams updated: layer diagrams refreshed
 > - Cross-links added between all layer documents (Domain ↔ Application ↔ Infrastructure ↔ Interfaces ↔ Composition)
 > - All 7 providers now reflected in diagrams (including CrossRef, OpenAlex, SemanticScholar)
 > - ADR-030, ADR-031 added to registry
