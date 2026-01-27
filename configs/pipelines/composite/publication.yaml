@@ -37,6 +37,28 @@ composite:
     silver_table: silver/chembl/publication
 
   # ---------------------------------------------------------------------------
+  # Dependency Pipelines
+  # ---------------------------------------------------------------------------
+  # Dependencies run after seed but before enrichers to populate Silver tables.
+  # Unlike enrichers which can read from existing Silver tables, dependencies
+  # call APIs to fetch data and write to Silver.
+  #
+  # Use dependencies for:
+  # - Derived entities (e.g., publication_term extracted from publication data)
+  # - Pipelines with force_full_scan that don't work with enricher filtering
+  # - Data that must be pre-populated before enrichment phase
+  dependencies:
+    # ChEMBL Publication Terms: Extract MeSH headings and keywords from ChEMBL
+    # This is a derived entity that extracts terms from publication records.
+    # Must run as dependency because it has force_full_scan=true.
+    - pipeline: chembl_publication_term
+      join_keys:
+        - document_chembl_id
+      required: false
+      timeout_seconds: 600
+      silver_table: silver/chembl/publication_term
+
+  # ---------------------------------------------------------------------------
   # Enricher Pipelines
   # ---------------------------------------------------------------------------
   # Each enricher fetches supplemental data from an external source.

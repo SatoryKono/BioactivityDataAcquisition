@@ -14,6 +14,7 @@ See ADR-026 for architectural decisions.
 
 from bioetl.domain.composite.config import (
     CompositeConfig,
+    DependencyConfig,
     EnricherConfig,
     MergeConfig,
     SeedConfig,
@@ -25,6 +26,8 @@ from bioetl.domain.composite.lineage import (
 )
 from bioetl.domain.composite.result import (
     CompositeResult,
+    DependencyResult,
+    DependencyStatus,
     EnrichmentResult,
     EnrichmentStatus,
     MergeResult,
@@ -48,6 +51,9 @@ __all__ = [
     "CompositePipelineState",
     "CompositeResult",
     "ConflictResolution",
+    "DependencyConfig",
+    "DependencyResult",
+    "DependencyStatus",
     "EnricherConfig",
     "EnrichmentResult",
     "EnrichmentStatus",

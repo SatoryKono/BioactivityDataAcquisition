@@ -119,25 +119,41 @@ class PublicationTermTransformer(BaseChemblTransformer):
 
         Handles two cases:
         1. Pre-extracted term records (from PublicationTermDataSource) - pass through
-        2. Raw publication records - extract terms from mesh_terms/keywords arrays
+           with normalization (strip whitespace from term/term_type).
+        2. Raw publication records - extract terms from mesh_terms/keywords arrays.
+
+        Both paths apply consistent normalization via strip() on term and term_type
+        to ensure storage consistency regardless of input source.
 
         Args:
             record: Bronze record (either term record or document record).
             primary_id: Validated document_chembl_id value.
 
         Returns:
-            Dictionary of term business fields.
+            Dictionary of term business fields with normalized values.
 
         """
         # Case 1: Record is already a term record (from PublicationTermDataSource)
-        # These records have 'term' and 'term_type' fields directly
+        # These records have 'term' and 'term_type' fields directly.
+        # Apply same normalization as _create_term_data for consistency.
         if "term" in record and "term_type" in record:
+            raw_term = record.get("term")
+            raw_term_type = record.get("term_type")
+            raw_mesh_id = record.get("mesh_id")
+            raw_qualifier = record.get("qualifier")
+
+            # Normalize term and term_type (strip whitespace, convert to string)
+            term = str(raw_term).strip() if raw_term else ""
+            term_type = str(raw_term_type).strip() if raw_term_type else ""
+            mesh_id = str(raw_mesh_id).strip() if raw_mesh_id else None
+            qualifier = str(raw_qualifier).strip() if raw_qualifier else None
+
             return {
                 "document_chembl_id": str(record.get("document_chembl_id", primary_id)),
-                "term": record.get("term", ""),
-                "term_type": record.get("term_type", ""),
-                "mesh_id": record.get("mesh_id"),
-                "qualifier": record.get("qualifier"),
+                "term": term,
+                "term_type": term_type,
+                "mesh_id": mesh_id,
+                "qualifier": qualifier,
             }
 
         # Case 2: Raw document record - extract terms from nested arrays

@@ -1015,3 +1015,146 @@ class TestPublicationTermTransformer:
         # Only the valid dict should be processed
         assert len(terms) == 1
         assert terms[0]["term"] == "Aspirin"
+
+    @pytest.mark.asyncio
+    async def test_transform_pre_extracted_term_normalizes_whitespace(
+        self, transformer, mock_context
+    ):
+        """Test that pre-extracted term records have whitespace stripped.
+
+        This tests the Case 1 branch in _extract_business_data where term
+        and term_type come directly from the record (PublicationTermDataSource).
+        """
+        record = {
+            "document_chembl_id": "CHEMBL1234567",
+            "term": "  kinase  ",
+            "term_type": "  KEYWORD  ",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["term"] == "kinase"
+        assert result["term_type"] == "KEYWORD"
+        assert result["document_chembl_id"] == "CHEMBL1234567"
+
+    @pytest.mark.asyncio
+    async def test_transform_pre_extracted_mesh_heading_with_qualifier(
+        self, transformer, mock_context
+    ):
+        """Test that pre-extracted MeSH heading preserves mesh_id and qualifier.
+
+        Verifies that the normalization in Case 1 branch doesn't lose
+        mesh_id or qualifier fields while applying strip().
+        """
+        record = {
+            "document_chembl_id": "CHEMBL1135642",
+            "term": "  Aspirin  ",
+            "term_type": "  MESH_HEADING  ",
+            "mesh_id": "  D001241  ",
+            "qualifier": "  pharmacology  ",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["term"] == "Aspirin"
+        assert result["term_type"] == "MESH_HEADING"
+        assert result["mesh_id"] == "D001241"
+        assert result["qualifier"] == "pharmacology"
+        assert result["document_chembl_id"] == "CHEMBL1135642"
+
+    @pytest.mark.asyncio
+    async def test_transform_pre_extracted_empty_term_returns_none(
+        self, transformer, mock_context
+    ):
+        """Test that pre-extracted record with empty term after strip returns None.
+
+        When term is empty or whitespace-only, the base transformer's
+        validation should reject the record (skip logic).
+        """
+        record = {
+            "document_chembl_id": "CHEMBL1234567",
+            "term": "   ",  # Only whitespace
+            "term_type": "KEYWORD",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        # Empty term should trigger skip logic in base transformer
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_transform_pre_extracted_empty_term_type_returns_none(
+        self, transformer, mock_context
+    ):
+        """Test that pre-extracted record with empty term_type returns None.
+
+        When term_type is empty or whitespace-only, the record should be
+        skipped as it lacks required classification.
+        """
+        record = {
+            "document_chembl_id": "CHEMBL1234567",
+            "term": "kinase",
+            "term_type": "   ",  # Only whitespace
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        # Empty term_type should trigger skip logic
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_transform_mesh_terms_array_strips_and_preserves_mesh_id(
+        self, transformer, mock_context
+    ):
+        """Test extraction from mesh_terms array strips whitespace and preserves mesh_id.
+
+        This tests the Case 2 branch where terms are extracted from nested arrays.
+        Verifies consistency with the pre-extracted term normalization.
+        """
+        record = {
+            "document_chembl_id": "CHEMBL1234567",
+            "mesh_terms": [
+                {
+                    "mesh_id": "D001241",
+                    "mesh_heading": "  Aspirin  ",
+                    "mesh_qualifier": "  pharmacology  ",
+                },
+            ],
+        }
+
+        terms = transformer.extract_terms_from_document(record, "CHEMBL1234567")
+
+        # Should extract 2 terms: heading + qualifier
+        assert len(terms) == 2
+
+        heading = next(t for t in terms if t["term_type"] == "MESH_HEADING")
+        assert heading["term"] == "Aspirin"  # Stripped
+        assert heading["mesh_id"] == "D001241"
+        assert heading["qualifier"] == "  pharmacology  "  # Qualifier preserved as-is
+
+        qualifier = next(t for t in terms if t["term_type"] == "MESH_QUALIFIER")
+        assert qualifier["term"] == "pharmacology"  # Stripped
+        assert qualifier["mesh_id"] == "D001241"
+
+    @pytest.mark.asyncio
+    async def test_transform_pre_extracted_with_none_mesh_id_and_qualifier(
+        self, transformer, mock_context
+    ):
+        """Test that pre-extracted record with None mesh_id/qualifier works correctly."""
+        record = {
+            "document_chembl_id": "CHEMBL1234567",
+            "term": "  kinase inhibitor  ",
+            "term_type": "KEYWORD",
+            "mesh_id": None,
+            "qualifier": None,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["term"] == "kinase inhibitor"
+        assert result["term_type"] == "KEYWORD"
+        assert result["mesh_id"] is None
+        assert result["qualifier"] is None

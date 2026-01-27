@@ -23,6 +23,7 @@ from bioetl.domain.composite.aggregation import (
 from bioetl.domain.composite.config import (
     CompositeConfig,
     CompositeDQConfig,
+    DependencyConfig,
     DQOverrideConfig,
     EnricherConfig,
     ExecutionConfig,
@@ -124,6 +125,50 @@ class SeedSchema(BaseModel):
             output_keys=tuple(self.output_keys),
             silver_table=self.silver_table,
             limit=self.limit,
+        )
+
+
+class DependencySchema(BaseModel):
+    """Pydantic schema for dependency pipeline configuration.
+
+    Dependencies run after seed but before enrichers to populate Silver tables.
+    """
+
+    pipeline: str = Field(
+        ..., min_length=1, description="Name of the dependency pipeline"
+    )
+    join_keys: list[str] = Field(
+        ..., min_length=1, description="Keys to extract from seed for filtering"
+    )
+    required: bool = Field(
+        default=False, description="If True, failure causes composite failure"
+    )
+    timeout_seconds: int = Field(
+        default=600, gt=0, description="Maximum time for dependency execution in seconds"
+    )
+    silver_table: str | None = Field(
+        default=None, description="Path to dependency's Silver table"
+    )
+
+    @field_validator("join_keys")
+    @classmethod
+    def validate_join_keys_not_empty(cls, v: list[str]) -> list[str]:
+        """Ensure join_keys contains valid strings."""
+        if not v:
+            raise ValueError("join_keys cannot be empty")
+        for key in v:
+            if not key or not key.strip():
+                raise ValueError("join_keys cannot contain empty strings")
+        return v
+
+    def to_domain(self) -> DependencyConfig:
+        """Convert to immutable domain DependencyConfig."""
+        return DependencyConfig(
+            pipeline=self.pipeline,
+            join_keys=tuple(self.join_keys),
+            required=self.required,
+            timeout_seconds=self.timeout_seconds,
+            silver_table=self.silver_table,
         )
 
 
@@ -388,7 +433,7 @@ class CompositeConfigSchema(BaseModel):
 
     Validates the 'composite' section of YAML files and converts to
     domain CompositeConfig. Includes cross-field validation for join keys
-    and enricher uniqueness.
+    and enricher/dependency uniqueness.
     """
 
     name: str = Field(..., min_length=1, description="Composite pipeline name")
@@ -396,6 +441,10 @@ class CompositeConfigSchema(BaseModel):
         default="1.0.0", min_length=1, description="Configuration version (semver)"
     )
     seed: SeedSchema = Field(..., description="Seed pipeline configuration")
+    dependencies: list[DependencySchema] = Field(
+        default_factory=list,
+        description="List of dependency configurations (run after seed, before enrichers)",
+    )
     enrichers: list[EnricherSchema] = Field(
         ..., min_length=1, description="List of enricher configurations"
     )
@@ -424,6 +473,19 @@ class CompositeConfigSchema(BaseModel):
         return self
 
     @model_validator(mode="after")
+    def validate_dependency_join_keys(self) -> CompositeConfigSchema:
+        """Validate that dependency join keys exist in seed output_keys."""
+        seed_keys = set(self.seed.output_keys)
+        for dep in self.dependencies:
+            for key in dep.join_keys:
+                if key not in seed_keys:
+                    raise ValueError(
+                        f"Dependency '{dep.pipeline}' join_key '{key}' "
+                        f"not found in seed output_keys: {self.seed.output_keys}"
+                    )
+        return self
+
+    @model_validator(mode="after")
     def validate_unique_enricher_names(self) -> CompositeConfigSchema:
         """Validate that enricher pipeline names are unique."""
         names = [e.pipeline for e in self.enrichers]
@@ -432,12 +494,22 @@ class CompositeConfigSchema(BaseModel):
             raise ValueError(f"Duplicate enricher pipelines: {duplicates}")
         return self
 
+    @model_validator(mode="after")
+    def validate_unique_dependency_names(self) -> CompositeConfigSchema:
+        """Validate that dependency pipeline names are unique."""
+        names = [d.pipeline for d in self.dependencies]
+        if len(names) != len(set(names)):
+            duplicates = {n for n in names if names.count(n) > 1}
+            raise ValueError(f"Duplicate dependency pipelines: {duplicates}")
+        return self
+
     def to_domain(self) -> CompositeConfig:
         """Convert to immutable domain CompositeConfig."""
         return CompositeConfig(
             name=self.name,
             version=self.version,
             seed=self.seed.to_domain(),
+            dependencies=tuple(d.to_domain() for d in self.dependencies),
             enrichers=tuple(e.to_domain() for e in self.enrichers),
             merge=self.merge.to_domain(),
             dq=self.dq_rules.to_domain(),
@@ -478,6 +550,7 @@ __all__ = [
     "CompositeConfigSchema",
     "CompositeDQSchema",
     "DQOverrideSchema",
+    "DependencySchema",
     "EnricherSchema",
     "ExecutionSchema",
     "LineageSchema",

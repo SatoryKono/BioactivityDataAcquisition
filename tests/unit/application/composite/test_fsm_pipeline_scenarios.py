@@ -399,6 +399,7 @@ class FakeCompositeConfig:
     merge: FakeMergeConfig = field(default_factory=FakeMergeConfig)
     dq: FakeDQConfig = field(default_factory=FakeDQConfig)
     enrichers: tuple[FakeEnricherConfig, ...] = ()
+    dependencies: tuple = ()
 
     @property
     def required_enrichers(self) -> tuple[str, ...]:
