@@ -13,7 +13,7 @@ Uses declarative field_specs DSL for mapping.
 from __future__ import annotations
 
 import hashlib
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
@@ -21,7 +21,8 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 from bioetl.domain.entities import DocumentTerm
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
 class PublicationTermTransformer(BaseChemblTransformer):
@@ -47,6 +48,65 @@ class PublicationTermTransformer(BaseChemblTransformer):
 
     entity_class = DocumentTerm
     primary_id_field = "document_chembl_id"
+
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Override base implementation to use composite entity_id.
+
+        PublicationTerm is a derived entity with composite primary key:
+        (document_chembl_id, term_type, term). The entity_id must be computed
+        from all three fields, not just document_chembl_id.
+
+        If record contains pre-computed entity_id (from PublicationTermDataSource),
+        use it directly. Otherwise, compute composite entity_id.
+
+        Args:
+            context: Pipeline context with run_id, run_type, logger.
+            record: Bronze record (pre-extracted term or raw publication).
+            index: Sequential index of the record in the pipeline run.
+
+        Returns:
+            SilverRecord if transformation successful, None if skipped.
+
+        """
+        # 1. Validate primary ID (document_chembl_id)
+        primary_id = self._get_required_field(record, self.primary_id_field)
+
+        # 2. Extract business data (term details)
+        business_data = self._extract_business_data(record, primary_id)
+
+        # 3. Compute entity_id using composite key
+        # Priority: pre-computed entity_id from record > computed from composite key
+        pre_computed_id = record.get("entity_id")
+        if pre_computed_id:
+            entity_id = str(pre_computed_id)
+        else:
+            # Compute from composite key (document_chembl_id, term_type, term)
+            entity_id = self.compute_term_entity_id(
+                document_chembl_id=str(business_data.get("document_chembl_id", primary_id)),
+                term_type=str(business_data.get("term_type", "")),
+                term=str(business_data.get("term", "")),
+            )
+
+        # 4. Compute content hash
+        content_hash = self.compute_content_hash(business_data, exclude_none=True)
+
+        # 5. Create domain entity
+        entity = self._create_entity(
+            self.entity_class,
+            context,
+            entity_id=entity_id,
+            content_hash=content_hash,
+            index=index,
+            **business_data,
+        )
+
+        # 6. Convert to SilverRecord
+        return cast("SilverRecord", self.entity_to_silver_record(entity))
 
     def _extract_business_data(
         self,
