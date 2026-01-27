@@ -125,7 +125,7 @@ All diagrams use the following Mermaid theme configuration:
 ├─────────────────────────────────────────────────────────────┤
 │                   INFRASTRUCTURE LAYER                      │
 │  Adapters (ChEMBL, PubChem, UniProt, PubMed),               │
-│  Storage (Bronze, Delta, Gold), Locking, Observability      │
+│  Storage (Bronze, Silver, Gold), Locking, Observability     │
 ├─────────────────────────────────────────────────────────────┤
 │                    COMPOSITION LAYER                        │
 │  Bootstrap, Factories, Registry (DI Container)              │
