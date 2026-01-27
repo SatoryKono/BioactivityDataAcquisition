@@ -45,12 +45,10 @@ class TestCrossRefYearValidation:
     @pytest.fixture
     def valid_record(self, base_etl_fields: dict) -> dict:
         """Create a valid CrossRef publication record."""
-        from bioetl.domain.schemas.crossref.publication import DOCUMENT_TYPES
-
         return {
             **base_etl_fields,
             "entity_id": "crossref:publication:10.1038/nature12373",
-            # Cross-reference IDs
+            # Excluded from Silver/Gold schemas - CrossRef API doesn't provide PubMed identifiers
             "pmid": None,
             "doi": "10.1038/nature12373",
             "pmc_id": None,
@@ -62,7 +60,8 @@ class TestCrossRefYearValidation:
             "journal": "Nature",
             "year": 2020,
             "publication_date": "2020-06-15",  # Unified date field
-            "doc_type": DOCUMENT_TYPES[0],
+            "doc_type": None,  # Excluded from Silver/Gold - CrossRef uses 'type' field
+            "type": "journal-article",  # Raw CrossRef type (replaces doc_type)
             "language": "en",
             # Metrics
             "citation_count": 100,
