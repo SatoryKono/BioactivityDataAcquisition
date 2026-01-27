@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
-[![Coverage](https://img.shields.io/badge/coverage-%3E80%25-brightgreen)](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/workflows/tests.yml)
+[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/workflows/tests.yml)
 [![Version](https://img.shields.io/badge/version-5.9.0-blue)](CHANGELOG.md)
 [![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development%20(55%25)-yellow)](IMPLEMENTATION_ROADMAP.md)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](SECURITY.md)
@@ -72,9 +72,9 @@ The domain layer implements Domain-Driven Design patterns:
 | Document | Description |
 |----------|-------------|
 | [API Reference](docs/04-reference/api/index.md) | Full API documentation with mkdocstrings |
-| [Architecture Decisions](docs/02-architecture/decisions/) | 20 ADRs explaining design choices |
+| [Architecture Decisions](docs/02-architecture/decisions/) | 31 ADRs explaining design choices |
 | [Ubiquitous Language](docs/glossary.md) | Domain terminology and canonical naming |
-| [RULES.md](docs/RULES.md) | Project governance and requirements (v5.10) |
+| [RULES.md](docs/RULES.md) | Project governance and requirements (v5.12) |
 | [CLI Reference](docs/04-reference/cli.md) | Command-line interface documentation |
 | [Operations Runbooks](docs/05-operations/runbooks/) | Incident response and procedures |
 
@@ -241,9 +241,9 @@ Access the docs at `http://localhost:8000`.
 .
 ├── configs/                  # YAML pipeline configurations
 ├── docs/                     # Documentation (Architecture, Guides, Runbooks)
-│   ├── 02-architecture/      # Layer docs, diagrams, ADRs (20 decisions)
+│   ├── 02-architecture/      # Layer docs, diagrams, ADRs (31 decisions)
 │   ├── glossary.md           # Ubiquitous Language glossary
-│   └── RULES.md              # Project governance (v5.10)
+│   └── RULES.md              # Project governance (v5.12)
 ├── src/
 │   └── bioetl/
 │       ├── domain/           # Pure business logic (DDD), NO I/O

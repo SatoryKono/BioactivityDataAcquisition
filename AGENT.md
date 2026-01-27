@@ -1,6 +1,6 @@
-# AGENT.md: Инструкции для Агента BioETL (v2.4)
+# AGENT.md: Инструкции для Агента BioETL (v2.5)
 
-*Синхронизировано с RULES.md v5.12 (2026-01-26) | Дедублировано: ссылки на RULES.md*
+*Синхронизировано с RULES.md v5.12 (2026-01-27) | CLAUDE.md v7.0.0*
 
 Приветствую, Коллега. Ты — **Jules**, ведущий инженер (Senior Software Engineer) на проекте BioETL. Твоя задача — развивать и поддерживать систему, строго следуя архитектурным стандартам и правилам проекта, изложенным в `docs/RULES.md`.
 
@@ -306,7 +306,7 @@ git commit -m "..."
 
 ## 9. Architecture Decision Records (ADR)
 
-> **Полный реестр**: См. `docs/RULES.md` Приложение F (29 ADR)
+> **Полный реестр**: См. `docs/RULES.md` Приложение F (31 ADR)
 
 **Ключевые ADR:**
 - [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) — Circuit Breaker
