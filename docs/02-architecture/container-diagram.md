@@ -3,45 +3,34 @@
 Эта диаграмма детализирует "Систему BioETL", представленную на диаграмме контекста. Она показывает основные контейнеры (приложения и хранилища данных), которые составляют систему BioETL, и их взаимодействие.
 
 ```mermaid
----
-title: 'C4 Container Diagram for BioETL System'
----
-C4Container
-    !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+flowchart TB
+    engineer["Инженер-программист<br/>CLI (bioetl run)"]
+    analyst["Аналитик данных"]
+    external_apis["Внешние научные API<br/>ChEMBL, PubChem, UniProt и др."]
 
-    Person(engineer, "Инженер-программист", "Разрабатывает и поддерживает систему.")
-    Person(analyst, "Аналитик данных", "Использует очищенные данные для анализа.")
+    subgraph bioetl_system["Система BioETL (локальный процесс)"]
+        pipeline_runner["PipelineRunner<br/>Application Layer"]
+        storage_port["StoragePort<br/>(Domain Port)"]
+        lock_port["LockPort<br/>(Domain Port)"]
+        writers["BronzeWriter / SilverWriter / GoldWriter<br/>(StoragePort impl)"]
+        memory_lock["MemoryLock<br/>(LockPort impl)"]
+        local_fs["Локальная файловая система<br/>data/ (bronze/silver/gold, checkpoints)"]
+    end
 
-    System_Ext(external_apis, "Внешние научные API", "ChEMBL, PubChem, UniProt и др.")
-
-    System_Boundary(bioetl_system, "Система BioETL") {
-        Container(app, "Python-приложение", "Python, FastAPI", "Основное приложение, запускающее ETL-пайплайны. Предоставляет метрики для Prometheus.")
-        Container(redis, "Сервис блокировок", "Redis", "Управляет распределенными блокировками для обеспечения целостности данных при параллельной обработке.")
-        ContainerDb(minio, "Объектное хранилище (S3)", "MinIO", "Хранит данные всех уровней (Bronze, Silver, Gold) в формате Delta Lake и JSONL.")
-        Container(prometheus, "Сборщик метрик", "Prometheus", "Собирает и хранит метрики производительности и состояния пайплайнов.")
-        Container(grafana, "Дашборды", "Grafana", "Визуализирует метрики из Prometheus.")
-    }
-
-    ' Взаимодействия
-    Rel_D(engineer, app, "Запускает пайплайны и управляет системой", "CLI (bioetl run)")
-    Rel_D(engineer, grafana, "Изучает дашборды для мониторинга", "HTTPS")
-
-    Rel_D(app, external_apis, "Извлекает сырые биоактивные данные", "HTTPS/API")
-    Rel_D(app, minio, "Читает и записывает данные", "S3 API")
-    Rel_D(app, redis, "Устанавливает и снимает блокировки", "Redis Protocol")
-
-    Rel_D(prometheus, app, "Скрейпит метрики", "HTTP (порт 8000)")
-    Rel_D(grafana, prometheus, "Запрашивает метрики для визуализации", "PromQL")
-
-    Rel_D(analyst, minio, "Анализирует агрегированные данные", "S3 API (Spark, Dremio и др.)")
-    Rel_D(analyst, grafana, "Просматривает дашборды состояния данных", "HTTPS")
-
+    engineer -->|"Запускает пайплайны"| pipeline_runner
+    pipeline_runner -->|"Запрашивает данные"| external_apis
+    pipeline_runner -->|"Пишет через порт"| storage_port
+    storage_port --> writers
+    writers -->|"Чтение/запись"| local_fs
+    pipeline_runner -->|"Блокировки"| lock_port
+    lock_port --> memory_lock
+    analyst -->|"Читает локальные данные"| local_fs
 ```
 
 ## Компоненты
 
-*   **Python-приложение**: Ядро системы. Этот контейнер выполняет всю логику ETL: извлечение данных из внешних API, их трансформацию и загрузку в хранилище. Он также предоставляет конечную точку `/metrics` для сбора данных мониторинга.
-*   **Сервис блокировок (Redis)**: Критически важный компонент для предотвращения "состояния гонки" при параллельном выполнении пайплайнов. Гарантирует, что только один процесс может выполнять эксклюзивную операцию (например, `rebuild`) для конкретной сущности.
-*   **Объектное хранилище (MinIO)**: Реализация S3, которая служит основой для Data Lake. Здесь хранятся все данные в соответствии с медальонной архитектурой.
-*   **Сборщик метрик (Prometheus)**: Периодически опрашивает Python-приложение для сбора метрик, таких как количество обработанных записей, время выполнения пайплайна, количество ошибок и т.д.
-*   **Дашборды (Grafana)**: Предоставляет веб-интерфейс для визуализации метрик, собранных Prometheus, что позволяет инженерам и аналитикам отслеживать состояние системы в реальном времени.
+*   **PipelineRunner (Application Layer)**: Локальный процесс, который оркестрирует пайплайны и вызывает порты для источников данных, хранения и блокировок.
+*   **StoragePort**: Доменный порт, через который `PipelineRunner` записывает данные в Bronze/Silver/Gold уровни.
+*   **BronzeWriter / SilverWriter / GoldWriter**: Реализации `StoragePort`, которые пишут данные в локальную файловую систему `data/`.
+*   **LockPort / MemoryLock**: Локальный механизм блокировок, реализующий `LockPort` в рамках single-instance выполнения (ADR-010).
+*   **Локальная файловая система (`data/`)**: Хранилище Bronze/Silver/Gold и checkpoints в рамках Local-Only развертывания.
