@@ -73,19 +73,26 @@ docs/
 │   ├── decisions/               # ADR-001..031 (31 records)
 │   └── diagrams/                # 35 Mermaid diagram files + render_diagrams.py
 │
-├── 03-guides/                   # How-to guides (13 guides)
-│   ├── quick-start.md           # Quick start guide
-│   ├── getting-started.md       # Getting started
-│   ├── running-pipelines.md     # Running pipelines
-│   ├── testing.md               # Testing guide
-│   ├── local-storage-layout.md  # Storage layout explanation
-│   ├── pipeline-lifecycle.md    # Pipeline lifecycle
-│   ├── registry-pattern.md      # Registry pattern guide
-│   ├── troubleshooting.md       # Troubleshooting
+├── 03-guides/                   # How-to guides (16 guides)
 │   ├── add-new-source.md        # Adding new provider
 │   ├── add-pipeline-existing-source.md  # Adding pipeline to existing provider
+│   ├── cleanup-policy.md        # Storage cleanup policy
 │   ├── date-handling.md         # Date normalization guide
-│   └── dq-configuration.md      # Data quality configuration
+│   ├── dq-configuration.md      # Data quality configuration
+│   ├── file-path-audit-report.md # File path audit report
+│   ├── getting-started.md       # Getting started
+│   ├── local-storage-layout.md  # Storage layout explanation
+│   ├── metrics-monitoring.md    # Metrics monitoring guide
+│   ├── pipeline-configuration.md # Pipeline configuration guide
+│   ├── pipeline-lifecycle.md    # Pipeline lifecycle
+│   ├── quick-start.md           # Quick start guide
+│   ├── registry-pattern.md      # Registry pattern guide
+│   ├── running-pipelines.md     # Running pipelines
+│   ├── testing.md               # Testing guide
+│   └── troubleshooting.md       # Troubleshooting
+│
+├── 03-development/              # Development notes
+│   └── config-schema-guidelines.md # Config schema guidelines
 │
 ├── 03-data-contracts/           # Data contracts
 │   └── gold-schemas.md          # Gold layer schema documentation
@@ -367,7 +374,8 @@ graph TD
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
 | 00-map.md                | 2026-01-21   | v6.9 API Sync Completed      |
 | rules-summary.md         | 2026-01-21   | v5.12 Synced                 |
-| 03-guides/               | 2026-01-20   | Consolidated (13 guides)     |
+| 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
+| 03-development/          | 2026-01-26   | Config schema guidelines     |
 | ADR-001..028             | 2026-01-21   | All 28 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
