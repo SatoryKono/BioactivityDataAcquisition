@@ -150,6 +150,7 @@ python scripts/cleanup_consolidation.py --apply --yes \\
 | Флаг | Описание |
 |------|----------|
 | `--apply` | Выполнить изменения (по умолчанию dry-run) |
+| `--dry-run` | Явно включить dry-run |
 | `--yes` | Пропустить подтверждения |
 | `--import-map` | YAML/JSON карта замен импортов |
 | `--obsolete-modules` | YAML/JSON список устаревших модулей |

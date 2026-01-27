@@ -137,7 +137,11 @@ def _find_marked_temp_files(root: Path) -> list[CleanupTarget]:
 
 def _load_import_rewrites(path: Path) -> list[ImportRewrite]:
     raw_text = path.read_text(encoding="utf-8")
-    data = yaml.safe_load(raw_text) if path.suffix in {".yml", ".yaml"} else json.loads(raw_text)
+    data = (
+        yaml.safe_load(raw_text)
+        if path.suffix in {".yml", ".yaml"}
+        else json.loads(raw_text)
+    )
 
     rewrites: list[ImportRewrite] = []
     if isinstance(data, dict):
@@ -223,7 +227,11 @@ def _archive_path(base_dir: Path, target: Path) -> Path:
 
 def _load_obsolete_modules(path: Path) -> list[Path]:
     raw_text = path.read_text(encoding="utf-8")
-    data = yaml.safe_load(raw_text) if path.suffix in {".yml", ".yaml"} else json.loads(raw_text)
+    data = (
+        yaml.safe_load(raw_text)
+        if path.suffix in {".yml", ".yaml"}
+        else json.loads(raw_text)
+    )
 
     modules: list[Path] = []
     if isinstance(data, list):
@@ -278,7 +286,11 @@ def _execute_cleanup(
         existing = [path for path in obsolete if path.exists()]
         missing = [path for path in obsolete if not path.exists()]
 
-        logger.info("Устаревшие модули: найдено %d, отсутствует %d.", len(existing), len(missing))
+        logger.info(
+            "Устаревшие модули: найдено %d, отсутствует %d.",
+            len(existing),
+            len(missing),
+        )
         for path in existing:
             logger.info("  [obsolete] %s", path.relative_to(root))
         for path in missing:
@@ -301,8 +313,11 @@ def _execute_cleanup(
                             continue
                 logger.info("Удалено устаревших модулей: %d.", len(existing))
             else:
-                archive_root = root / "reports" / "obsolete_modules" / datetime.now().strftime(
-                    "%Y%m%d_%H%M%S"
+                archive_root = (
+                    root
+                    / "reports"
+                    / "obsolete_modules"
+                    / datetime.now().strftime("%Y%m%d_%H%M%S")
                 )
                 for path in existing:
                     destination = _archive_path(archive_root, path)
@@ -328,12 +343,18 @@ def _execute_cleanup(
                 if replacements:
                     pending_updates[file_path] = updated
                     total_replacements += replacements
-                    logger.info("  [imports] %s (%d)", file_path.relative_to(root), replacements)
+                    logger.info(
+                        "  [imports] %s (%d)",
+                        file_path.relative_to(root),
+                        replacements,
+                    )
             total_files = len(pending_updates)
             if not total_files:
                 logger.info("Импорты: изменений не требуется.")
             elif apply:
-                if confirm and not typer.confirm("Подтвердить массовое обновление импортов?"):
+                if confirm and not typer.confirm(
+                    "Подтвердить массовое обновление импортов?"
+                ):
                     logger.warning("Обновление импортов отменено пользователем.")
                 else:
                     for file_path, updated in pending_updates.items():
@@ -359,7 +380,7 @@ def _execute_cleanup(
 def cleanup(
     apply: bool = typer.Option(
         False,
-        "--apply",
+        "--apply/--dry-run",
         help="Выполнить изменения (по умолчанию — dry-run)",
     ),
     yes: bool = typer.Option(
