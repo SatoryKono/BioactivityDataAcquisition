@@ -20,7 +20,7 @@
 
 ### 1.1 Five Layer Architecture
 
-![Five Layer Architecture](../diagrams/images/01_five_layer_architecture.png)
+[Five Layer Architecture](../diagrams/mermaid/01_five_layer_architecture.mmd)
 
 **Приоритет:** 9.69 | **Тип:** Component Diagram
 
@@ -64,7 +64,7 @@
 
 ### 1.2 Hexagonal Architecture Overview
 
-![Hexagonal Architecture](../diagrams/images/03_hexagonal_architecture.png)
+[Hexagonal Architecture](../diagrams/mermaid/03_hexagonal_architecture.mmd)
 
 **Приоритет:** 9.50 | **Тип:** C4 Context Diagram
 
@@ -99,7 +99,7 @@ Ports & Adapters паттерн - ключевой архитектурный п
 
 ### 1.3 Layer Dependency Matrix
 
-![Layer Dependency Matrix](../diagrams/images/04_layer_dependency_matrix.png)
+[Layer Dependency Matrix](../diagrams/mermaid/04_layer_dependency_matrix.mmd)
 
 **Приоритет:** 9.44 | **Тип:** Matrix Diagram
 
@@ -130,7 +130,7 @@ Ports & Adapters паттерн - ключевой архитектурный п
 
 ### 1.4 Medallion Architecture Overview
 
-![Medallion Architecture](../diagrams/images/05_medallion_architecture.png)
+[Medallion Architecture](../diagrams/mermaid/05_medallion_architecture.mmd)
 
 **Приоритет:** 9.38 | **Тип:** Flowchart
 
@@ -175,7 +175,7 @@ Bronze → Silver → Gold уровни хранения данных.
 
 ### 2.1 Complete Pipeline Flow
 
-![Complete Pipeline Flow](../diagrams/images/02_complete_pipeline_flow.png)
+[Complete Pipeline Flow](../diagrams/mermaid/02_complete_pipeline_flow.mmd)
 
 **Приоритет:** 9.56 | **Тип:** Flowchart
 
@@ -254,7 +254,7 @@ End-to-end поток данных от API провайдера до Gold layer
 
 ### 2.2 Silver Merge Operation
 
-![Silver Merge Operation](../diagrams/images/22_silver_merge_operation.png)
+[Silver Merge Operation](../diagrams/mermaid/22_silver_merge_operation.mmd)
 
 **Приоритет:** 8.31 | **Тип:** Flowchart
 
@@ -307,7 +307,7 @@ Delta merge by content_hash — критическая операция для i
 
 ### 3.1 Domain Model Overview
 
-![Domain Model](../diagrams/images/06_domain_model_overview.png)
+[Domain Model](../diagrams/mermaid/06_domain_model_overview.mmd)
 
 **Приоритет:** 9.31 | **Тип:** Class Diagram
 
@@ -338,7 +338,7 @@ Delta merge by content_hash — критическая операция для i
 
 ### 3.2 Ports Architecture
 
-![Ports Architecture](../diagrams/images/07_ports_architecture.png)
+[Ports Architecture](../diagrams/mermaid/07_ports_architecture.mmd)
 
 **Приоритет:** 9.25 | **Тип:** Interface Diagram
 
@@ -373,7 +373,7 @@ Delta merge by content_hash — критическая операция для i
 
 ### 3.3 Pipeline Core Components
 
-![Pipeline Core Components](../diagrams/images/10_pipeline_core_components.png)
+[Pipeline Core Components](../diagrams/mermaid/10_pipeline_core_components.mmd)
 
 **Приоритет:** 9.06 | **Тип:** Component Diagram
 
@@ -422,7 +422,7 @@ Delta merge by content_hash — критическая операция для i
 
 ### 4.1 Error Classification
 
-![Error Classification](../diagrams/images/12_error_classification.png)
+[Error Classification](../diagrams/mermaid/12_error_classification.mmd)
 
 **Приоритет:** 8.94 | **Тип:** Flowchart
 
@@ -467,7 +467,7 @@ Delta merge by content_hash — критическая операция для i
 
 ### 4.2 Retry Mechanism
 
-![Retry Mechanism](../diagrams/images/17_retry_mechanism.png)
+[Retry Mechanism](../diagrams/mermaid/17_retry_mechanism.mmd)
 
 **Приоритет:** 8.63 | **Тип:** Activity Diagram
 
@@ -509,7 +509,7 @@ delay = (backoff_factor ^ retry_count) * base_delay + random(jitter_min, jitter_
 
 ### 4.3 Circuit Breaker States
 
-![Circuit Breaker States](../diagrams/images/15_circuit_breaker_states.png)
+[Circuit Breaker States](../diagrams/mermaid/15_circuit_breaker_states.mmd)
 
 **Приоритет:** 8.75 | **Тип:** State Diagram
 
@@ -553,7 +553,7 @@ Fault tolerance pattern для защиты от каскадных сбоев.
 
 ### 4.4 Graceful Shutdown
 
-![Graceful Shutdown](../diagrams/images/24_graceful_shutdown.png)
+[Graceful Shutdown](../diagrams/mermaid/24_graceful_shutdown.mmd)
 
 **Приоритет:** 8.19 | **Тип:** Sequence Diagram
 
@@ -597,7 +597,7 @@ Fault tolerance pattern для защиты от каскадных сбоев.
 
 ### 5.1 PipelineConfig Structure
 
-![PipelineConfig Structure](../diagrams/images/25_pipeline_config_structure.png)
+[PipelineConfig Structure](../diagrams/mermaid/25_pipeline_config_structure.mmd)
 
 **Приоритет:** 8.13 | **Тип:** Class Diagram
 
