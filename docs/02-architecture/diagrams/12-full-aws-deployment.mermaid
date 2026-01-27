@@ -7,102 +7,76 @@ flowchart TB
         PubMed_API["🌐 PubMed API<br/>eutils.ncbi.nlm.nih.gov"]
     end
 
-    subgraph AWS["AWS Region (us-east-1)"]
-        subgraph VPC["VPC (10.0.0.0/16)"]
-            subgraph PrivateSubnet["Private Subnet"]
-                subgraph ECS["ECS Fargate Cluster"]
-                    chembl_activity["📦 chembl_activity<br/>worker task"]
-                    chembl_assay["📦 chembl_assay<br/>worker task"]
-                    chembl_target["📦 chembl_target<br/>worker task"]
-                    chembl_molecule["📦 chembl_molecule<br/>worker task"]
-                    pubchem_compound["📦 pubchem_compound<br/>worker task"]
-                    uniprot_protein["📦 uniprot_protein<br/>worker task"]
-                end
-
-                subgraph ElastiCache["ElastiCache"]
-                    Redis[("🔴 Redis Cluster<br/>lock coordination<br/>(future scaling)")]
-                end
-            end
-
-            subgraph PublicSubnet["Public Subnet"]
-                NAT["NAT Gateway"]
-            end
+    subgraph Local["Local Machine (Single Instance)"]
+        subgraph Orchestration["CLI Execution"]
+            CLI["🖥️ CLI / Manual run<br/>PipelineRunner"]
+            Schedule["⏰ Local scheduler<br/>(cron/systemd)"]
         end
 
-        subgraph S3["S3 Buckets"]
-            subgraph DataLake["bioetl-prod-datalake"]
-                Bronze[("📁 bronze/<br/>JSONL+zstd<br/>90 days retention")]
-                Silver[("📁 silver/<br/>Delta Lake<br/>permanent")]
-                Gold[("📁 gold/<br/>Delta/Parquet<br/>permanent")]
-            end
-
-            subgraph Operational["bioetl-prod-ops"]
-                Quarantine[("📁 quarantine/<br/>Parquet<br/>30 days")]
-                Checkpoints[("📁 checkpoints/<br/>JSON<br/>7 days")]
-                Lineage[("📁 lineage/<br/>Parquet<br/>permanent")]
-            end
+        subgraph Runtime["Local Pipeline Workers"]
+            chembl_activity["📦 chembl_activity<br/>local pipeline"]
+            chembl_assay["📦 chembl_assay<br/>local pipeline"]
+            chembl_target["📦 chembl_target<br/>local pipeline"]
+            chembl_molecule["📦 chembl_molecule<br/>local pipeline"]
+            pubchem_compound["📦 pubchem_compound<br/>local pipeline"]
+            uniprot_protein["📦 uniprot_protein<br/>local pipeline"]
         end
 
-        subgraph Monitoring["CloudWatch"]
-            Logs["📋 CloudWatch Logs<br/>/bioetl/pipeline/*"]
-            Metrics["📊 CloudWatch Metrics<br/>bioetl/*"]
-            Alarms["🚨 CloudWatch Alarms<br/>DQ thresholds<br/>Circuit breaker"]
-            Dashboard["📈 Dashboard<br/>Pipeline health"]
+        subgraph Locking["In-Process Locking"]
+            MemoryLock[("🔒 MemoryLock<br/>TTL 90s / heartbeat 30s")]
         end
 
-        subgraph Security["Security"]
-            Secrets["🔐 Secrets Manager<br/>API keys<br/>Credentials"]
-            IAM["👤 IAM Roles<br/>Task execution<br/>S3 access"]
+        subgraph Data["Local filesystem (data/)"]
+            Bronze[("📁 bronze/<br/>JSONL+zstd")]
+            Silver[("📁 silver/<br/>Delta Lake")]
+            Gold[("📁 gold/<br/>Delta/Parquet")]
+            Quarantine[("📁 quarantine/<br/>Parquet")]
+            Checkpoints[("📁 checkpoints/<br/>JSON")]
+            Lineage[("📁 lineage/<br/>Parquet")]
         end
 
-        subgraph EventBridge["EventBridge"]
-            Schedule["⏰ Scheduled Rules<br/>Daily incremental<br/>Weekly backfill"]
+        subgraph Observability["Local Observability"]
+            Logs["📋 Local logs<br/>stdout/file"]
+            Metrics["📊 In-process metrics"]
         end
     end
 
     %% External API connections
-    ChEMBL_API --> NAT
-    PubChem_API --> NAT
-    UniProt_API --> NAT
-    PubMed_API --> NAT
-    NAT --> chembl_activity
-    NAT --> pubchem_compound
-    NAT --> uniprot_protein
+    ChEMBL_API --> chembl_activity
+    PubChem_API --> pubchem_compound
+    UniProt_API --> uniprot_protein
+    PubMed_API --> chembl_activity
 
-    %% ECS to Redis
-    chembl_activity -.->|lock| Redis
-    chembl_assay -.->|lock| Redis
-    chembl_target -.->|lock| Redis
-    chembl_molecule -.->|lock| Redis
+    %% Orchestration to runtime
+    CLI --> chembl_activity
+    CLI --> chembl_assay
+    CLI --> chembl_target
+    CLI --> chembl_molecule
+    CLI --> pubchem_compound
+    CLI --> uniprot_protein
+    Schedule --> CLI
 
-    %% ECS to S3
+    %% Runtime to MemoryLock
+    chembl_activity -.->|lock| MemoryLock
+    chembl_assay -.->|lock| MemoryLock
+    chembl_target -.->|lock| MemoryLock
+    chembl_molecule -.->|lock| MemoryLock
+
+    %% Runtime to local filesystem
     chembl_activity --> Bronze
     chembl_activity --> Silver
     chembl_activity --> Gold
     chembl_activity --> Quarantine
     chembl_activity --> Checkpoints
+    chembl_activity --> Lineage
 
-    %% ECS to Monitoring
+    %% Runtime to local observability
     chembl_activity --> Logs
     chembl_activity --> Metrics
-
-    %% ECS to Security
-    chembl_activity --> Secrets
-    IAM --> chembl_activity
-
-    %% EventBridge scheduling
-    Schedule --> chembl_activity
-    Schedule --> chembl_assay
-    Schedule --> chembl_target
-    Schedule --> chembl_molecule
-
-    %% Alarms from metrics
-    Metrics --> Alarms
-    Alarms --> Dashboard
 
     %% Styling
     style Bronze fill:#CD7F32,color:#fff
     style Silver fill:#C0C0C0,color:#000
     style Gold fill:#FFD700,color:#000
     style Quarantine fill:#FF6B6B,color:#fff
-    style Redis fill:#DC382D,color:#fff
+    style MemoryLock fill:#4B7BEC,color:#fff
