@@ -2,24 +2,19 @@
 
 This guide provides solutions to common problems encountered during development and pipeline execution.
 
-## Docker & Infrastructure
+## Local-only Deployment & Storage
 
-### Error: `Connection refused` for Redis/MinIO/Postgres
-*   **Symptom**: The pipeline fails immediately with a connection error.
-*   **Cause**: The Docker containers for the infrastructure are not running or are not accessible.
-*   **Solution**:
-    1.  Ensure Docker Desktop is running.
-    2.  Run `make docker-up` to start the containers.
-    3.  Verify the containers are running with `docker ps`.
-    4.  Check your `.env` file to ensure the hostnames and ports match the Docker Compose configuration (e.g., `BIOETL_REDIS_URL=redis://localhost:6379/0`).
+### Reminder: Redis/MinIO are not used in the current mode
+*   **Context**: The project runs in local-only mode by design, without Redis or MinIO.
+*   **Reference**: See [ADR-010: Local-Only Deployment](../02-architecture/decisions/ADR-010-local-only-deployment.md).
 
-### Error: `Permission Denied` on `./docker-data`
-*   **Symptom**: Docker fails to start containers, complaining about file permissions.
-*   **Cause**: The `./docker-data` directory may have incorrect ownership, often after system changes or running Docker with different user accounts.
+### Error: `FileNotFoundError` or missing local data paths
+*   **Symptom**: The pipeline fails when reading or writing local files.
+*   **Cause**: The expected directory layout in `data/` does not exist or is misconfigured.
 *   **Solution**:
-    1.  Stop all running containers: `make docker-down`.
-    2.  Completely reset the Docker volumes: `make docker-reset`. This will delete all local data.
-    3.  Restart the containers: `make docker-up`.
+    1.  Confirm the local storage layout described in [Local Storage Layout](local-storage-layout.md).
+    2.  Ensure the expected directories under `data/` exist and are writable.
+    3.  Re-run the pipeline to recreate missing folders if needed.
 
 ## Pipeline Execution
 
@@ -27,7 +22,7 @@ This guide provides solutions to common problems encountered during development 
 *   **Symptom**: The CLI fails with a "pipeline not found" error.
 *   **Cause**: The name provided via `--pipeline` does not match any file in the `configs/pipelines/` directory.
 *   **Solution**:
-    1.  List all available pipelines: `python -m bioetl.main list`.
+    1.  List all available pipelines: `bioetl config list-pipelines` or `bioetl run-all --list-only`.
     2.  Verify the spelling of the pipeline name.
     3.  Ensure the corresponding YAML file exists in `configs/pipelines/`.
 
@@ -46,7 +41,7 @@ This guide provides solutions to common problems encountered during development 
 *   **Cause**: The data returned by the source API has changed, and it no longer matches the Pydantic model defined in `src/bioetl/domain/`.
 *   **Solution**:
     1.  Examine the error message to see which field is causing the validation failure.
-    2.  Inspect the raw data in the Bronze layer (MinIO) to understand the new structure.
+    2.  Inspect the raw data in the local Bronze layer under `data/` to understand the new structure (see [Local Storage Layout](local-storage-layout.md)).
     3.  Update the Pydantic model in the `src/bioetl/domain/` directory to accommodate the change (e.g., make a field optional, add a new field). This is a **schema drift** event and should be documented.
 
 ## Data Quality
