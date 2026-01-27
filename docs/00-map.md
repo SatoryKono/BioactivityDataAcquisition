@@ -311,7 +311,7 @@ src/bioetl/
 │   │   ├── delta_writer.py      # Delta Lake merge/upsert
 │   │   └── gold_writer.py       # SCD Type 2 writer
 │   ├── locking/                 # Distributed locking
-│   │   └── memory_lock.py       # In-memory (dev/test)
+│   │   └── memory_lock.py       # In-memory (local-only)
 │   ├── checkpoint/              # Checkpoint persistence
 │   ├── quarantine/              # DQ failure handling
 │   ├── observability/           # Metrics, logging
