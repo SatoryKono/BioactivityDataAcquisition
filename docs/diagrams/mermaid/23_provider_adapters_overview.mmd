@@ -3,7 +3,7 @@ graph TB
     subgraph providers["7 Provider Adapters"]
         direction LR
 
-        ChEMBL["ChEMBL<br/>13 pipelines<br/>694 LOC"]
+        ChEMBL["ChEMBL<br/>12 pipelines<br/>694 LOC"]
         PubChem["PubChem<br/>1 pipeline<br/>~400 LOC"]
         UniProt["UniProt<br/>2 pipelines<br/>~500 LOC"]
         CrossRef["CrossRef<br/>1 pipeline<br/>~350 LOC"]
@@ -22,14 +22,14 @@ graph TB
         UnifiedClient["UnifiedHTTPClient<br/>- RateLimiter<br/>- CircuitBreaker<br/>- Retry logic"]
     end
 
-    subgraph chembl["ChEMBL Adapter (13 entities)"]
+    subgraph chembl["ChEMBL Adapter (12 entities)"]
         direction TB
 
         ChemblAdapter["ChemblAdapter (694 LOC)"]
         ChemblMapper["ChemblEntityMapper<br/>URL/entity mapping"]
         ChemblDTO["DTO Models:<br/>- ActivityDTO<br/>- MoleculeDTO<br/>- TargetDTO<br/>- AssayDTO<br/>etc."]
 
-        ChemblEntities["Entities:<br/>activity, molecule, target,<br/>assay, assay_parameters,<br/>compound_record, cell_line,<br/>protein_class, publication,<br/>publication_term,<br/>publication_similarity,<br/>target_component, mechanism"]
+        ChemblEntities["Entities:<br/>activity, assay, assay_parameters,<br/>cell_line, compound_record,<br/>molecule, protein_class,<br/>publication, publication_term,<br/>publication_similarity, target,<br/>target_component"]
 
         ChemblAdapter --> ChemblMapper
         ChemblMapper --> ChemblDTO
