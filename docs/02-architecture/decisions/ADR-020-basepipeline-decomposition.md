@@ -34,8 +34,8 @@ def __init__(
 
 1. **God Object Anti-pattern**: 13 параметров конструктора смешивают конфигурацию, runtime параметры и I/O порты
 
-2. **Циклические зависимости**: `BasePipeline` создаёт менеджеры (`PipelineRunner`, `BatchExecutor`,
-   `LockManager`, `QuarantineManager`), которые хранят ссылку на `self`
+2. **Риск циклических зависимостей**: сборка менеджеров внутри `BasePipeline`
+   приводит к self-ссылкам (менеджеры получают `pipeline` целиком)
 
 3. **Нарушение SRP**: Класс отвечает за хранение конфигурации И координацию выполнения
 
@@ -179,20 +179,16 @@ runner = PipelineRunner(
 
 ### 4. Resource Lifecycle Management
 
-Graceful shutdown реализован через:
+Graceful shutdown реализован в `PipelineRunner.run()` через контекстные
+менеджеры и `finally`-cleanup:
 
 ```python
-async def run_pipeline_flow(
-    runner: PipelineRunner, logger: LoggerPort
-) -> None:
-    """Run a pipeline with logging and error handling."""
-    try:
-        await runner.run()
-    except Exception as e:
-        logger.exception("Pipeline execution failed", error=str(e))
-        raise
-    finally:
-        await runner.services.aclose()  # Always cleanup!
+try:
+    with self._observer:
+        async with self._services, self._lock_manager:
+            ...
+finally:
+    await self._postrun_service.cleanup(self._tracer)
 ```
 
 ## Последствия
