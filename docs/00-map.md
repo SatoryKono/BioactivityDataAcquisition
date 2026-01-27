@@ -258,12 +258,17 @@ src/bioetl/
 │   ├── core/                    # Core pipeline infrastructure
 │   │   ├── executor.py          # Batch executor
 │   │   ├── pipeline_services.py # Service container
+│   │   ├── runner.py            # PipelineRunner (Driving Adapter logic)
 │   │   ├── shutdown.py          # Graceful shutdown handling
 │   │   └── base_pipeline.py     # Abstract base pipeline
-│   ├── orchestration/           # Execution coordination
-│   │   └── runner.py            # PipelineRunner (Driving Adapter logic)
+│   ├── composite/               # Composite pipeline orchestration
 │   ├── pipelines/               # Concrete pipeline implementations
-│   │   └── chembl_activity.py   # ChEMBL Activity pipeline
+│   │   ├── chembl/              # Provider namespace
+│   │   │   ├── activity.py      # ChEMBL Activity pipeline
+│   │   │   └── assay.py         # ChEMBL Assay pipeline
+│   │   └── pubchem/             # Provider namespace
+│   │       └── activity.py      # PubChem Activity pipeline
+│   ├── services/                # Application services
 │   └── observability/           # Application-level observability
 │
 ├── composition/                 # Composition Root (DI container)
@@ -285,7 +290,6 @@ src/bioetl/
 │   │   ├── delta_writer.py      # Delta Lake merge/upsert
 │   │   └── gold_writer.py       # SCD Type 2 writer
 │   ├── locking/                 # Distributed locking
-│   │   ├── redis_lock.py        # Redis SETNX + heartbeat
 │   │   └── memory_lock.py       # In-memory (dev/test)
 │   ├── checkpoint/              # Checkpoint persistence
 │   ├── quarantine/              # DQ failure handling
@@ -295,9 +299,13 @@ src/bioetl/
 │   └── config.py                # Settings (Pydantic)
 │
 └── interfaces/                  # External interfaces
-    ├── cli.py                   # Click CLI (bioetl run/quarantine/checkpoint)
-    └── orchestration/           # Pipeline orchestration adapters
-        └── signals.py           # OS signal handlers
+    └── cli/                     # CLI package (bioetl run/quarantine/checkpoint)
+        ├── __init__.py          # CLI package entry
+        ├── main.py              # Click command group
+        ├── commands/            # CLI subcommands
+        ├── orchestration/       # Pipeline orchestration adapters
+        │   └── signals.py       # OS signal handlers
+        └── utils/               # CLI helpers
 
 tests/
 ├── unit/                        # Isolated unit tests (mock I/O)
