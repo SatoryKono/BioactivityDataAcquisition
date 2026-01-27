@@ -169,7 +169,7 @@ class TestFilterConfigBuilderBuildSingleColumn:
     def test_build_single_column_config_creates_config(self, yaml_filter_enabled):
         """Test _build_single_column_config creates InputFilterConfig."""
         result = FilterConfigBuilder._build_single_column_config(
-            yaml_filter_enabled, "/effective/path.csv", None, None
+            yaml_filter_enabled, "/effective/path.csv", None, None, None
         )
 
         assert isinstance(result, InputFilterConfig)
@@ -179,7 +179,7 @@ class TestFilterConfigBuilderBuildSingleColumn:
     def test_build_single_column_uses_yaml_defaults(self, yaml_filter_enabled):
         """Test _build_single_column_config uses YAML values when no CLI override."""
         result = FilterConfigBuilder._build_single_column_config(
-            yaml_filter_enabled, "/effective/path.csv", None, None
+            yaml_filter_enabled, "/effective/path.csv", None, None, None
         )
 
         assert result.column_name == "yaml_column"

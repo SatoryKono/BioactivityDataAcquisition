@@ -21,7 +21,7 @@ loading_strategy: full_scan_only
 # entity_id is generated as SHA256 hash of composite key
 primary_keys: ["entity_id"]
 silver_table: "chembl_publication_term"
-gold_table: "chembl_publication_term"
+gold_table: "  "
 
 source_file: ../../sources/chembl.yaml
 
