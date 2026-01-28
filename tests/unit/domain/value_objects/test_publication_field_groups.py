@@ -95,10 +95,7 @@ class TestPublicationFieldGroup:
             PublicationFieldGroup.from_string("bibliography")
             == PublicationFieldGroup.BIBLIOGRAPHY
         )
-        assert (
-            PublicationFieldGroup.from_string("TRASH")
-            == PublicationFieldGroup.TRASH
-        )
+        assert PublicationFieldGroup.from_string("TRASH") == PublicationFieldGroup.TRASH
         # Case-insensitive
         assert (
             PublicationFieldGroup.from_string("ID_AND_STATUS")
@@ -272,7 +269,9 @@ class TestFieldGroupConfig:
         config = FieldGroupConfig()
         assert config.get_group("title") == PublicationFieldGroup.BIBLIOGRAPHY
         assert config.get_group("doi") == PublicationFieldGroup.ID_AND_STATUS
-        assert config.get_group("authors") == PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS
+        assert (
+            config.get_group("authors") == PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS
+        )
 
     def test_get_group_qualified(self) -> None:
         """get_group() extracts field from qualified names."""
@@ -432,9 +431,7 @@ class TestFieldGroupConfig:
 
     def test_get_provider_rank_custom_priority(self) -> None:
         """get_provider_rank() respects custom provider_priority."""
-        config = FieldGroupConfig(
-            provider_priority=("crossref", "chembl", "pubmed")
-        )
+        config = FieldGroupConfig(provider_priority=("crossref", "chembl", "pubmed"))
         assert config.get_provider_rank("crossref.publication.title") == 0
         assert config.get_provider_rank("chembl.publication.title") == 1
         assert config.get_provider_rank("pubmed.publication.title") == 2
@@ -707,6 +704,6 @@ class TestFieldMappingCompleteness:
             "influential_citation_count",
         }
         for field in s2_fields:
-            assert (
-                field in FIELD_TO_GROUP_MAPPING
-            ), f"SemanticScholar field {field} not mapped"
+            assert field in FIELD_TO_GROUP_MAPPING, (
+                f"SemanticScholar field {field} not mapped"
+            )
