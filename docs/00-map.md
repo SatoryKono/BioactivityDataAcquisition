@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.12 | Last updated: 2026-01-27*
+*Synced with RULES.md v5.14 | Last updated: 2026-01-27*
 
 > **Documentation Update:** 2026-01-27
 > - Codebase metrics updated: ~516 Python files, ~110,300 LOC, ~7,770 tests
@@ -41,7 +41,7 @@ docs/
 ├── 00-map.md                    # This file (Project Navigator)
 ├── index.md                     # Welcome page
 ├── glossary.md                  # Ubiquitous Language terminology
-├── RULES.md                     # Canonical rules document (v5.12)
+├── RULES.md                     # Canonical rules document (v5.14)
 ├── REQUIREMENTS.md              # 156 testable requirements
 │
 ├── archived/                    # Historical documents
@@ -401,11 +401,11 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2026-01-21   | v5.12 (ADR Registry Update)  |
+| RULES.md                 | 2026-01-21   | v5.14 (ADR Registry Update)  |
 | REQUIREMENTS.md          | 2026-01-21   | v1.4 (156 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
 | 00-map.md                | 2026-01-27   | v7.0 Metrics Update          |
-| rules-summary.md         | 2026-01-21   | v5.12 Synced                 |
+| rules-summary.md         | 2026-01-21   | v5.14 Synced                 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-development/          | 2026-01-26   | Config schema guidelines     |
 | ADR-001..031             | 2026-01-27   | All 31 ADRs documented       |

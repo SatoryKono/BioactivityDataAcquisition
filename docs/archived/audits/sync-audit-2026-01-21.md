@@ -5,17 +5,17 @@
 ## Executive Summary
 
 Documentation audit and synchronization completed. Found **0 critical**, **0 major** (after fixes), and **0 minor** issues remaining. Three inconsistencies in 00-map.md were identified and fixed:
-1. RULES.md version reference updated (v5.11 → v5.12)
+1. RULES.md version reference updated (v5.11 → v5.14)
 2. Requirements count updated (127 → 156)
-3. rules-summary.md version reference updated (v5.11 → v5.12)
+3. rules-summary.md version reference updated (v5.11 → v5.14)
 
 ## Current Document State
 
 | Document | Version | Requirements/ADRs | Sync Status |
 |----------|---------|-------------------|-------------|
-| RULES.md | v5.12 | ADR-001..028 (28 total) | ✅ Source of truth |
-| REQUIREMENTS.md | v1.4 | 156 requirements | ✅ Synced with RULES.md v5.12 |
-| rules-summary.md | v5.12 | - | ✅ Synced with RULES.md v5.12 |
+| RULES.md | v5.14 | ADR-001..028 (28 total) | ✅ Source of truth |
+| REQUIREMENTS.md | v1.4 | 156 requirements | ✅ Synced with RULES.md v5.14 |
+| rules-summary.md | v5.14 | - | ✅ Synced with RULES.md v5.14 |
 | 00-map.md | v6.8 | References all 28 ADRs | ✅ Updated |
 
 ## Findings and Fixes Applied
@@ -24,9 +24,9 @@ Documentation audit and synchronization completed. Found **0 critical**, **0 maj
 
 | ID | Line | Before | After | Status |
 |----|------|--------|-------|--------|
-| F1 | 44 | `# Canonical rules document (v5.11)` | `# Canonical rules document (v5.12)` | ✅ Fixed |
+| F1 | 44 | `# Canonical rules document (v5.11)` | `# Canonical rules document (v5.14)` | ✅ Fixed |
 | F2 | 45 | `# 127 testable requirements` | `# 156 testable requirements` | ✅ Fixed |
-| F3 | 361 | `v5.11 Synced` | `v5.12 Synced` | ✅ Fixed |
+| F3 | 361 | `v5.11 Synced` | `v5.14 Synced` | ✅ Fixed |
 
 ### Verification Results
 
@@ -55,7 +55,7 @@ $ grep -E "^### REQ-|^#### REQ-" docs/REQUIREMENTS.md | wc -l
 ```bash
 $ head -3 docs/quick-reference/rules-summary.md
 # Rules Summary
-*Автоматически сгенерировано из RULES.md v5.12 (2026-01-20)*
+*Автоматически сгенерировано из RULES.md v5.14 (2026-01-20)*
 ```
 
 #### Guide Count (03-guides/)
@@ -94,7 +94,7 @@ All paths referenced in 00-map.md exist:
 ## Changelog
 
 - **2026-01-21 (Update 2)**: Fixed 3 inconsistencies in 00-map.md, updated audit status to COMPLETED
-- **2026-01-21 (Initial)**: Initial audit, identified issues before RULES.md v5.12 update
+- **2026-01-21 (Initial)**: Initial audit, identified issues before RULES.md v5.14 update
 
 ---
 

@@ -1,6 +1,6 @@
 # UniProt Protein Pipeline Specification
 
-*Version 1.1.0 | Aligned with RULES.md v5.12*
+*Version 1.1.0 | Aligned with RULES.md v5.14*
 
 ---
 

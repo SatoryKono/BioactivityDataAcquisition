@@ -5,15 +5,12 @@ Tests the pure functions in extractors.py module.
 
 from __future__ import annotations
 
-import warnings
-
 from bioetl.application.pipelines.openalex.extractors import (
     extract_affiliations,
     extract_author_ids,
     extract_author_orcids,
     extract_authors,
     extract_biblio_info,
-    extract_concepts,
     extract_doi,
     extract_external_ids,
     extract_grants,
@@ -522,39 +519,6 @@ class TestExtractInstitutionCountryCodes:
         ]
         result = extract_institution_country_codes(authorships)
         assert result == ["DE"]
-
-
-class TestExtractConcepts:
-    """Tests for extract_concepts function."""
-
-    def test_extract_concepts_basic(self) -> None:
-        """Should extract concept display names."""
-        concepts = [
-            {"display_name": "Chemistry", "score": 0.9},
-            {"display_name": "Biology", "score": 0.7},
-        ]
-        result = extract_concepts(concepts)
-        assert result == ["Chemistry", "Biology"]
-
-    def test_extract_concepts_with_limit(self) -> None:
-        """Should respect max_count limit."""
-        concepts = [
-            {"display_name": f"Concept{i}", "score": 0.9 - i * 0.1} for i in range(20)
-        ]
-        result = extract_concepts(concepts, max_count=5)
-        assert len(result) == 5
-        assert result[0] == "Concept0"
-
-    def test_extract_concepts_empty(self) -> None:
-        """Should return empty list for empty concepts."""
-        result = extract_concepts([])
-        assert result == []
-
-    def test_extract_concepts_strips_whitespace(self) -> None:
-        """Should strip whitespace from concept names."""
-        concepts = [{"display_name": "  Chemistry  "}]
-        result = extract_concepts(concepts)
-        assert result == ["Chemistry"]
 
 
 class TestExtractJournalInfo:
@@ -1217,32 +1181,3 @@ class TestExtractGrants:
         result = extract_grants(grants)  # type: ignore[arg-type]
         assert len(result) == 1
         assert result[0]["funder_display_name"] == "Valid"
-
-
-class TestExtractConceptsDeprecation:
-    """Tests for extract_concepts deprecation warning."""
-
-    def test_extract_concepts_deprecation_warning(self) -> None:
-        """Should emit deprecation warning when warn_deprecated=True."""
-        concepts = [{"display_name": "Chemistry", "score": 0.9}]
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            result = extract_concepts(concepts, warn_deprecated=True)
-            assert len(w) == 1
-            assert issubclass(w[0].category, DeprecationWarning)
-            assert "deprecated" in str(w[0].message).lower()
-            assert "topics" in str(w[0].message).lower()
-        assert result == ["Chemistry"]
-
-    def test_extract_concepts_no_warning_by_default(self) -> None:
-        """Should not emit deprecation warning by default."""
-        concepts = [{"display_name": "Chemistry", "score": 0.9}]
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            result = extract_concepts(concepts)
-            # No DeprecationWarning should be emitted
-            deprecation_warnings = [
-                x for x in w if issubclass(x.category, DeprecationWarning)
-            ]
-            assert len(deprecation_warnings) == 0
-        assert result == ["Chemistry"]
