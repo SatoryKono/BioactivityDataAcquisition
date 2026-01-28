@@ -44,7 +44,7 @@ def mock_context() -> PipelineContext:
     mock_logger.bind = MagicMock(return_value=mock_logger)
     mock_logger.warning = MagicMock()
 
-    # Use a deterministic run_id for snapshot reproducibility
+    # run_id is randomized; normalize_for_snapshot replaces it with placeholder
     run_id = uuid4()
     return PipelineContext(
         run_id=run_id,

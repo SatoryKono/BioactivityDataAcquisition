@@ -40,7 +40,7 @@ def convert_value(value: Any) -> Any:
         return value.isoformat()
     if isinstance(value, dict):
         return {key: convert_value(item) for key, item in value.items()}
-    if isinstance(value, (list, tuple)):
+    if isinstance(value, (list, tuple, set, frozenset)):
         return [convert_value(item) for item in value]
     return value
 
