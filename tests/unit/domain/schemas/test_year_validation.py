@@ -374,6 +374,8 @@ class TestPubMedYearValidation:
             "epub_date": None,
             # Author affiliations
             "affiliations": None,
+            # Author-affiliation mapping
+            "authors_with_affiliations": None,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
