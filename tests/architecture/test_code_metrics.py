@@ -58,7 +58,6 @@ class TestFileSizeLimits:
         # Domain value objects (rich domain models with validation)
         "batch.py": 550,  # 531 LOC - Batch aggregate with lifecycle methods
         "pipeline_run.py": 600,  # 581 LOC - PipelineRun aggregate with state machine
-        "publications.py": 450,  # 439 LOC - Gold contract for composite publications with many fields from multiple providers
         "quarantine_entry.py": 520,  # 501 LOC - QuarantineEntry with detailed error info
         "chemical.py": 600,  # 575 LOC - Chemical structure Value Objects (InChIKey, SMILES, PublicationYear)
         "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
@@ -73,7 +72,7 @@ class TestFileSizeLimits:
         "compound.py": 400,  # 397 LOC - PubChem molecule schema with 3D steric quadrupole + feature_count_3d + monoisotopic_mass
         "protein.py": 370,  # 365 LOC - UniProt target schema + deprecated alias __getattr__ (v2.0)
         # Domain contracts/gold (Gold layer Pandera schemas)
-        "publications.py": 400,  # 374 LOC - Gold layer publication schemas (PubMed, CrossRef, OpenAlex, SemanticScholar)
+        "publications.py": 450,  # 439 LOC - Gold layer publication schemas with author/institution identifiers
         # Note: chembl.py exemption at line 39 covers both domain/entities/chembl.py and domain/contracts/gold/chembl.py
         # Domain DQ models (data quality reports and serialization)
         "dq_serializer.py": 450,  # 447 LOC - DQ report serialization logic (increased for CC reduction)
