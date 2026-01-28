@@ -153,6 +153,11 @@ class OpenAlexPublicationRecord(BaseModel):
         default_factory=list,
         description="ISO 2-letter country codes of affiliated institutions",
     )
+    ror_ids: list[str] = PydanticField(
+        default_factory=list,
+        description="ROR IDs of affiliated institutions (full URL format). "
+        "May be empty if not returned by Works API.",
+    )
 
     # Author identifiers (JSON-serialized lists preserving author order)
     author_orcids: str | None = PydanticField(
@@ -216,6 +221,7 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # Institution identifiers (for cross-referencing and geographic analysis)
     institution_ids: list[str] = field(default_factory=list)
     institution_country_codes: list[str] = field(default_factory=list)
+    ror_ids: list[str] = field(default_factory=list)  # ROR IDs (may be empty)
 
     # Author identifiers (JSON-serialized lists preserving author order)
     author_orcids: str | None = None  # ORCID IDs (empty string for missing)

@@ -309,6 +309,12 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         description="Author affiliations (JSON array)",
     )
 
+    # === Structured Author-Affiliation Mapping ===
+    authors_with_affiliations: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of authors with their affiliations and identifiers",
+    )
+
     class Config:
         """Pandera configuration."""
 

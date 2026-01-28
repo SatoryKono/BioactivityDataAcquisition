@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.semanticscholar.extractors import (
+    extract_affiliations,
     extract_author_h_indices,
     extract_author_ids,
     extract_author_orcids,
@@ -152,6 +153,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         author_orcids = extract_author_orcids(authors_list)
         author_h_indices = extract_author_h_indices(authors_list)
 
+        # Extract affiliations from authors
+        affiliations = extract_affiliations(authors_list)
+
         # Extract citation contexts (if available from citations/references endpoint)
         # Note: contexts are only available when requesting citation details
         citation_contexts = extract_citation_contexts(rec.get("citations"))
@@ -207,7 +211,10 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "citation_contexts": self.serialize_json_list(citation_contexts)
             if citation_contexts
             else None,
-            # affiliations excluded per user request
+            # Author affiliations (unique, sorted)
+            "affiliations": self.serialize_json_list(affiliations)
+            if affiliations
+            else None,
             "journal": journal_info.get("journal_name"),
             "volume": journal_info.get("volume"),
             "issue": journal_info.get("issue"),  # Parsed from combined "32 4" format
@@ -266,14 +273,13 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without abstract, affiliations, authors.
+            SilverRecord dictionary without abstract, authors.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
 
         silver_record = BaseTransformer.entity_to_silver_record(entity)
         silver_record.pop("abstract", None)
-        silver_record.pop("affiliations", None)
         silver_record.pop("authors", None)
         silver_record.pop("pmc_id", None)
         silver_record.pop("arxiv_id", None)
