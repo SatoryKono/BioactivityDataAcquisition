@@ -16,7 +16,7 @@ class TestIsValidJson:
 
     def test_valid_json_array(self) -> None:
         """Should accept valid JSON arrays."""
-        series = pd.Series(['["a", "b"]', '[1, 2, 3]', "[]"])
+        series = pd.Series(['["a", "b"]', "[1, 2, 3]", "[]"])
         result = is_valid_json(series)
         assert result.all()
 
@@ -56,7 +56,7 @@ class TestIsValidJsonArray:
 
     def test_valid_arrays(self) -> None:
         """Should accept valid JSON arrays."""
-        series = pd.Series(['["a", "b"]', '[1, 2, 3]', "[]", '[[1], [2]]'])
+        series = pd.Series(['["a", "b"]', "[1, 2, 3]", "[]", "[[1], [2]]"])
         result = is_valid_json_array(series)
         assert result.all()
 

@@ -89,6 +89,8 @@ def valid_record() -> dict:
         # Institution identifiers
         "institution_ids": '["I1234567890", "I9876543210"]',
         "institution_country_codes": '["US", "GB"]',
+        # ROR identifiers (may be empty if not returned by Works API)
+        "ror_ids": None,
         # Lookup tracking
         "_source": "openalex",
         "_lookup_method": "doi",
