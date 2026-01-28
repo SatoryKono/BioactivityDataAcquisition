@@ -368,6 +368,7 @@ select = [
 ]
 ignore = [
     "E501",  # Line too long
+    "RUF001",  # Ambiguous unicode in strings - project uses Russian help text
     "RUF002",  # Ambiguous unicode - project uses Russian docstrings
     "RUF003",  # Ambiguous unicode in comments - project uses math symbols (×, ÷)
 ]
