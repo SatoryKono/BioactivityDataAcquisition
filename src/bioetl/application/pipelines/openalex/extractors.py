@@ -25,6 +25,7 @@ __all__ = [
     "extract_grants",
     "extract_institution_country_codes",
     "extract_institution_ids",
+    "extract_institution_ror_ids",
     "extract_journal_info",
     "extract_keywords",
     "extract_mesh_terms",
@@ -263,6 +264,53 @@ def extract_institution_country_codes(authorships: list[dict[str, Any]]) -> list
             if code and isinstance(code, str):
                 codes.add(code.upper())
     return sorted(codes)
+
+
+def extract_institution_ror_ids(authorships: list[dict[str, Any]]) -> list[str]:
+    """Extract unique ROR IDs from authorships institutions.
+
+    ROR (Research Organization Registry) provides persistent identifiers for
+    research institutions. OpenAlex includes ROR IDs in institution objects
+    when available.
+
+    Args:
+        authorships: List of authorship dicts from OpenAlex API.
+
+    Returns:
+        Sorted list of unique ROR IDs (full URL format, e.g.,
+        ["https://ror.org/0123456789", "https://ror.org/9876543210"]).
+
+    Note:
+        OpenAlex Works API may not return `ror` field by default depending
+        on the API endpoint and select parameters. If `ror` is missing from
+        institution objects, this returns an empty list.
+
+        For comprehensive ROR coverage, consider:
+        - Using PubMed structured affiliations (preferred, has explicit ROR)
+        - Enriching via OpenAlex Institutions API (separate lookup)
+        - Building OpenAlex ID → ROR mapping from data snapshot
+
+    Example:
+        >>> authorships = [
+        ...     {"institutions": [{"ror": "https://ror.org/0123456789"}]},
+        ...     {"institutions": [{"ror": "https://ror.org/9876543210"}]},
+        ... ]
+        >>> extract_institution_ror_ids(authorships)
+        ['https://ror.org/0123456789', 'https://ror.org/9876543210']
+
+    """
+    ror_ids: set[str] = set()
+    for authorship in authorships:
+        institutions = authorship.get("institutions", [])
+        if not isinstance(institutions, list):
+            continue
+        for inst in institutions:
+            if not isinstance(inst, dict):
+                continue
+            ror = inst.get("ror")
+            if ror and isinstance(ror, str) and ror.startswith("https://ror.org/"):
+                ror_ids.add(ror)
+    return sorted(ror_ids)
 
 
 def extract_concepts(
