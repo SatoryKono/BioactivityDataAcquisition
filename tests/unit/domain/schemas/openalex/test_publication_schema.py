@@ -40,7 +40,7 @@ def valid_record() -> dict:
         # Cross-reference IDs for linking publications across providers
         "doi": "10.1038/s41586-024-07487-w",
         "pmid": "12345678",  # PubMed ID (numeric string)
-        "pmc_id": "PMC1234567",  # PubMed Central ID (format: PMC1234567)
+        "pmc_id": None,  # Excluded from Silver/Gold schemas per design (2026-01)
         # Core content
         "title": "Example Publication",
         "abstract": "This is an abstract",
@@ -48,7 +48,8 @@ def valid_record() -> dict:
         # Publication metadata
         "year": 2024,
         "publication_date": "2024-05-15",
-        "doc_type": "PUBLICATION",
+        "doc_type": None,  # Excluded from Silver/Gold - OpenAlex uses 'type' field
+        "type": "article",  # Raw OpenAlex type (replaces doc_type)
         "language": "en",
         # Journal info
         "journal": "Nature",
@@ -251,12 +252,8 @@ class TestOpenAlexPublicationSchema:
         assert "_source" in valid_record
         assert valid_record["_source"] is not None
 
-    def test_doc_type_required(self, valid_record: dict) -> None:
-        """Should require doc_type field."""
-        valid_record["doc_type"] = None
-        df = pd.DataFrame([valid_record])
-        with pytest.raises(SchemaError):
-            OpenAlexPublicationSchema.validate(df)
+    # Note: test_doc_type_required removed - doc_type replaced by 'type' field (2026-01)
+    # OpenAlex now uses raw 'type' field instead of unified doc_type
 
     def test_content_hash_format(self, valid_record: dict) -> None:
         """Should validate content_hash is 64 hex chars."""
