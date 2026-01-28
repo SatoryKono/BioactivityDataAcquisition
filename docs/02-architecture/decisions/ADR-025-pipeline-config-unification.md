@@ -1,9 +1,8 @@
 # ADR-025: Pipeline Configuration Unification
 
-**Status**: Accepted
-**Date**: 2026-01-19 (Updated)
-**Authors**: Claude Code
-**Reviewers**: -
+**Status:** Accepted
+**Date:** 2026-01-19
+**Decision makers:** @BioETL-Team
 
 ## Context
 

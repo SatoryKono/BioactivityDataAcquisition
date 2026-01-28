@@ -1,10 +1,8 @@
 # ADR-026: Composite Pipeline Pattern
 
-- **Status**: Accepted
-- **Date**: 2026-01-15
-- **Author**: Claude Agent
-- **Reviewers**: TBD
-- **Context**: Design composite pipeline orchestration for multi-source data enrichment
+**Status:** Accepted
+**Date:** 2026-01-15
+**Decision makers:** @BioETL-Team
 
 ## Context
 

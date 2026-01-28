@@ -42,5 +42,7 @@ While `dataclasses` provide a convenient way to create classes for storing data,
 
 ## Related ADRs
 
+- [ADR-014](ADR-014-deterministic-data-processing.md): Deterministic Data Processing — requires consistent type handling
 - [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation — uses Pydantic/Pandera for Gold schema validation
 - [ADR-021](ADR-021-ddd-aggregates-adoption.md): DDD Aggregates — uses dataclasses for domain aggregates (different concern)
+- [ADR-023](ADR-023-entity-patterns.md): Entity Patterns — defines entity modeling with Pydantic

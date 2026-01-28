@@ -215,3 +215,5 @@ class ChEMBLActivityAdapter(PaginatedFetcherMixin):
 
 - ADR-007: Circuit Breaker (wraps fetch calls)
 - ADR-008: Graceful Shutdown (can interrupt pagination loop)
+- ADR-030: Full Scan Loading Strategy (uses pagination for complete data loads)
+- ADR-031: Composite Pipeline Pattern (orchestrates paginated fetches across providers)

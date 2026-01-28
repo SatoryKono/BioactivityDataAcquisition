@@ -153,9 +153,11 @@ class BasePipeline(ABC):
 
 ## Related ADRs
 
-- **ADR-010**: Local-Only Deployment — упрощение инфраструктуры
 - **ADR-002**: Medallion Architecture — сохраняется, меняется только механизм загрузки
 - **ADR-005**: Composition Layer — упрощён, удалены watermark factories
+- **ADR-010**: Local-Only Deployment — упрощение инфраструктуры
+- **ADR-030**: Full Scan Loading Strategy — развивает концепцию полной загрузки
+- **ADR-031**: Composite Pipeline Pattern — использует full scan для агрегации данных
 
 ## Migration Notes
 
