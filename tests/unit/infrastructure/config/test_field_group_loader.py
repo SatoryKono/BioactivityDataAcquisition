@@ -91,8 +91,12 @@ class TestLoadFieldGroups:
 
     def test_qualified_column_lookup(self, tmp_config: Path) -> None:
         registry = load_field_groups(tmp_config)
-        assert registry.get_group("chembl.publication.doi") == FieldGroupId.ID_AND_STATUS
-        assert registry.get_group("crossref.publication.doi") == FieldGroupId.ID_AND_STATUS
+        assert (
+            registry.get_group("chembl.publication.doi") == FieldGroupId.ID_AND_STATUS
+        )
+        assert (
+            registry.get_group("crossref.publication.doi") == FieldGroupId.ID_AND_STATUS
+        )
 
     def test_file_not_found(self, tmp_path: Path) -> None:
         with pytest.raises(FileNotFoundError, match="Field group config not found"):

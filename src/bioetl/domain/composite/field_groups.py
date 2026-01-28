@@ -247,7 +247,9 @@ class FieldGroupRegistry:
         """Get FieldMapping for a base field name."""
         return self._field_to_mapping.get(base_name.lower())
 
-    def get_group_definition(self, group_id: FieldGroupId) -> FieldGroupDefinition | None:
+    def get_group_definition(
+        self, group_id: FieldGroupId
+    ) -> FieldGroupDefinition | None:
         """Get FieldGroupDefinition for a group ID."""
         return self._group_to_def.get(group_id)
 
@@ -266,10 +268,7 @@ class FieldGroupRegistry:
         Returns:
             Filtered list of Gold-layer columns.
         """
-        return [
-            c for c in columns
-            if c.startswith("_") or self.is_gold_field(c)
-        ]
+        return [c for c in columns if c.startswith("_") or self.is_gold_field(c)]
 
     def get_trash_columns(self, columns: list[str]) -> list[str]:
         """Get columns that would be excluded from Gold layer.
@@ -281,8 +280,7 @@ class FieldGroupRegistry:
             List of trash columns (excluding system columns).
         """
         return [
-            c for c in columns
-            if not c.startswith("_") and not self.is_gold_field(c)
+            c for c in columns if not c.startswith("_") and not self.is_gold_field(c)
         ]
 
     def get_columns_by_group(
