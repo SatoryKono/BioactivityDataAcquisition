@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.domain.composite.config import EnricherConfig, MergeConfig
+    from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort, StoragePort
 
 
@@ -82,11 +83,13 @@ class MergeService:
         storage: StoragePort,
         logger: LoggerPort,
         delta_reader: DeltaReaderPort | None = None,
+        field_group_registry: FieldGroupRegistry | None = None,
     ) -> None:
         self._config = merge_config
         self._storage = storage
         self._logger = logger
         self._delta_reader = delta_reader
+        self._field_group_registry = field_group_registry
         self._deduplicator = EnricherDeduplicator(logger)
         self._aggregator = EnricherAggregator(logger)
         self._renamer = ColumnRenamer(logger)
@@ -352,11 +355,25 @@ class MergeService:
     ) -> None:
         """Write merged data to Gold layer via StoragePort.
 
+        When a FieldGroupRegistry is configured, trash-group columns are
+        excluded from the Gold output.
+
         Args:
             df: Polars DataFrame to write.
             run_id: Composite run ID for metadata tracking.
             sources_used: List of source pipelines used in merge.
         """
+        # Filter out trash columns when field group registry is available
+        if self._field_group_registry is not None:
+            trash_cols = self._field_group_registry.get_trash_columns(df.columns)
+            if trash_cols:
+                self._logger.info(
+                    "Filtering trash columns from Gold output",
+                    trash_count=len(trash_cols),
+                    trash_columns=trash_cols[:10],  # Log first 10 for brevity
+                )
+                df = df.drop(trash_cols)
+
         # Coerce null columns for Delta Lake compatibility
         df = self._coerce_null_columns(df)
 
