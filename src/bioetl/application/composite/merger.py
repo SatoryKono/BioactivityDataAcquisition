@@ -345,6 +345,7 @@ class MergeService:
             records,
             run_id=run_id,
             sources_used=sources_used,
+            preserve_column_order=True,
         )
 
     async def _write_merged_gold(
@@ -384,6 +385,7 @@ class MergeService:
             records,
             run_id=run_id,
             sources_used=sources_used,
+            preserve_column_order=True,
         )
 
     def _infer_silver_table(self, pipeline_name: str) -> str:

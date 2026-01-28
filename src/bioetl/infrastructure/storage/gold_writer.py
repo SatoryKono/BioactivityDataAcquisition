@@ -273,6 +273,7 @@ class GoldWriter(BaseDeltaWriter):
         *,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
     ) -> None:
         """Write merged records to Gold layer without Pandera schema.
 
@@ -285,6 +286,9 @@ class GoldWriter(BaseDeltaWriter):
             primary_keys: Optional list of column names for sorting.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
+            preserve_column_order: If True, skip canonical_column_order()
+                and preserve the column order from records (e.g. semantic
+                ordering applied by ColumnOrderer in composite pipelines).
         """
         from bioetl.domain.schemas.column_order import canonical_column_order
 
@@ -295,15 +299,17 @@ class GoldWriter(BaseDeltaWriter):
             )
             return
 
-        # Convert to Arrow and apply canonical column order
+        # Convert to Arrow and apply column order
         arrow_table = pa.Table.from_pylist(records)
 
         # Coerce Null-typed columns for Delta Lake compatibility
         arrow_table = coerce_null_types_for_delta(arrow_table)
 
-        # Enforce canonical column order (ADR-014, RULES.md §2.4)
-        ordered_columns = canonical_column_order(list(arrow_table.column_names))
-        arrow_table = arrow_table.select(ordered_columns)
+        # Apply canonical column order unless caller already ordered columns
+        # (e.g. ColumnOrderer in composite pipelines applies semantic ordering)
+        if not preserve_column_order:
+            ordered_columns = canonical_column_order(list(arrow_table.column_names))
+            arrow_table = arrow_table.select(ordered_columns)
 
         if primary_keys:
             valid_keys = [pk for pk in primary_keys if pk in arrow_table.schema.names]
