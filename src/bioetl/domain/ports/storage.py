@@ -179,6 +179,7 @@ class StoragePort(Protocol):
         *,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
     ) -> None:
         """Write merged records to Silver layer without explicit schema.
 
@@ -191,6 +192,9 @@ class StoragePort(Protocol):
             primary_keys: Optional list of column names for sorting.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
+            preserve_column_order: If True, skip canonical_column_order()
+                and preserve the column order from records (e.g. semantic
+                ordering applied by ColumnOrderer in composite pipelines).
 
         Note:
             This method bypasses strict schema validation since merged data
@@ -206,6 +210,7 @@ class StoragePort(Protocol):
         *,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
     ) -> None:
         """Write merged records to Gold layer without Pandera schema.
 
@@ -218,6 +223,9 @@ class StoragePort(Protocol):
             primary_keys: Optional list of column names for sorting.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
+            preserve_column_order: If True, skip canonical_column_order()
+                and preserve the column order from records (e.g. semantic
+                ordering applied by ColumnOrderer in composite pipelines).
 
         Note:
             This method bypasses Pandera validation since merged data
