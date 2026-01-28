@@ -594,7 +594,7 @@ class TestChemblAdapterBatchReduction:
 
         records = []
         async for record in adapter.fetch_filtered(
-            entity_type="document",
+            entity_type="publication",
             filter_ids=["CHEMBL1", "CHEMBL2", "CHEMBL3", "CHEMBL4"],
             filter_field="document_chembl_id",
         ):
@@ -649,7 +649,7 @@ class TestChemblAdapterBatchReduction:
 
         records = []
         async for record in adapter.fetch_filtered(
-            entity_type="document",
+            entity_type="publication",
             filter_ids=["CHEMBL_GOOD", "CHEMBL_BAD"],
             filter_field="document_chembl_id",
         ):
@@ -690,7 +690,7 @@ class TestChemblAdapterBatchReduction:
 
         records = []
         async for record in adapter.fetch_filtered(
-            entity_type="document",
+            entity_type="publication",
             filter_ids=["CHEMBL1", "CHEMBL2"],
             filter_field="document_chembl_id",
         ):
@@ -739,7 +739,7 @@ class TestChemblAdapterBatchReduction:
 
         records = []
         async for record in adapter.fetch_filtered(
-            entity_type="document",
+            entity_type="publication",
             filter_ids=["CHEMBL1", "CHEMBL2", "CHEMBL3", "CHEMBL4"],
             filter_field="document_chembl_id",
         ):

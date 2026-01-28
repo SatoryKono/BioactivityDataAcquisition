@@ -1,7 +1,7 @@
 """OpenAlex domain entities.
 
 Contains OpenAlexPublicationRecord (DTO) and OpenAlexPublicationEntity (domain).
-Topics vs Concepts: OpenAlex deprecated concepts in 2024; use topics instead.
+Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic.
 """
 
 from __future__ import annotations
@@ -118,13 +118,6 @@ class OpenAlexPublicationRecord(BaseModel):
         default_factory=list, description="Funding/grant information"
     )
 
-    # Concepts (DEPRECATED - kept for backward compatibility)
-    # OpenAlex deprecated concepts in 2024 in favor of topics
-    concepts: list[str] = PydanticField(
-        default_factory=list,
-        description="Top concept names (DEPRECATED: use topics instead)",
-    )
-
     # MeSH terms (Medical Subject Headings)
     mesh: list[str] = PydanticField(
         default_factory=list, description="MeSH descriptor names"
@@ -238,10 +231,6 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # Grants/funding information
     # Each grant dict has: funder, funder_display_name, award_id
     grants: list[dict[str, Any]] = field(default_factory=list)
-
-    # OpenAlex-specific: Concepts (DEPRECATED - kept for backward compatibility)
-    # OpenAlex deprecated concepts in 2024 in favor of topics
-    concepts: list[str] = field(default_factory=list)
 
     # MeSH terms (Medical Subject Headings)
     mesh: list[str] = field(default_factory=list)

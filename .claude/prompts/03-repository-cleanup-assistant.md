@@ -1,5 +1,5 @@
 # BioETL Repository Cleanup Assistant
-*Aligned with RULES.md v5.0 & 05-cleanup-policy.md*
+*Aligned with RULES.md v5.14 & docs/03-guides/cleanup-policy.md*
 
 ## Роль
 

@@ -69,10 +69,6 @@ def sample_openalex_record() -> dict[str, Any]:
         },
         # Note: OpenAlex API returns cited_by_count, transformed to citation_count
         "cited_by_count": 42,  # Source field name from OpenAlex API
-        "concepts": [
-            {"display_name": "Chemistry", "score": 0.9},
-            {"display_name": "Biology", "score": 0.7},
-        ],
         "language": "en",
         "_lookup_method": "doi",
     }
@@ -207,28 +203,6 @@ class TestOpenAlexPublicationTransformer:
             result = await transformer.transform(pipeline_context, record, 0)
             assert result is not None
             assert result["type"] == openalex_type  # Raw type preserved
-
-    @pytest.mark.asyncio
-    async def test_transform_concepts_extraction(
-        self,
-        transformer: OpenAlexPublicationTransformer,
-        pipeline_context: PipelineContext,
-    ) -> None:
-        """Should extract concepts from record."""
-        record = {
-            "id": "https://openalex.org/W1234567890",
-            "title": "Test",
-            "concepts": [
-                {"display_name": "Chemistry"},
-                {"display_name": "Biology"},
-            ],
-        }
-
-        result = await transformer.transform(pipeline_context, record, 0)
-
-        assert result is not None
-        # concepts is serialized to JSON string for schema compliance
-        assert result["concepts"] == '["Chemistry","Biology"]'
 
     @pytest.mark.asyncio
     async def test_transform_empty_abstract_inverted_index(

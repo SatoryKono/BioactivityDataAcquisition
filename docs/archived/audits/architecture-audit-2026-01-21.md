@@ -1,6 +1,6 @@
 # Архитектурный Аудит BioETL
 
-*Дата: 2026-01-21 | Версия проекта: 5.12 | RULES.md: v5.12*
+*Дата: 2026-01-21 | Версия проекта: 5.12 | RULES.md: v5.14*
 
 ---
 
@@ -401,7 +401,7 @@ tests/
 | **Schema Docs** | 4 entity schema docs |
 
 **Документация**:
-- `RULES.md` — v5.12, 1158 строк, Конституция проекта
+- `RULES.md` — v5.14, 1158 строк, Конституция проекта
 - `REQUIREMENTS.md` — 156 testable requirements
 - `00-map.md` — Project Navigator
 - `glossary.md` — Ubiquitous Language
@@ -413,7 +413,7 @@ tests/
 
 **Docstrings**: Google Style, на русском (per RULES.md).
 
-**CHANGELOG.md**: Актуален (последнее обновление в v5.12).
+**CHANGELOG.md**: Актуален (последнее обновление в v5.14).
 
 **Оценка: 10/10**
 
@@ -539,4 +539,4 @@ BioETL демонстрирует **образцовое соответстви�
 ---
 
 *Отчёт подготовлен: 2026-01-21*
-*Верификация по RULES.md v5.12*
+*Верификация по RULES.md v5.14*

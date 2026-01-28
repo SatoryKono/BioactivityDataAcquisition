@@ -91,7 +91,8 @@
 | `extract_doi()` | Нормализация DOI (удаление https://doi.org/) |
 | `reconstruct_abstract()` | Реконструкция абстракта из inverted index |
 | `extract_authors()` | Извлечение display_name из authorships |
-| `extract_concepts()` | Топ-10 концептов по score |
+| `extract_topics()` | Иерархическая классификация (domain/field/subfield/topic) |
+| `extract_primary_topic()` | Основная тема для быстрой категоризации |
 | `extract_journal_info()` | Журнал, ISSN-L, издатель из primary_location |
 | `extract_open_access_info()` | is_oa и oa_status из open_access |
 

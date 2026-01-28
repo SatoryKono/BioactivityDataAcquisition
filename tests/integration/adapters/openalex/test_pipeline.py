@@ -84,28 +84,6 @@ class TestOpenAlexPublicationTransformerIntegration:
         assert extract_openalex_id(None) is None
 
     @pytest.mark.asyncio
-    async def test_transformer_concepts_extraction(self) -> None:
-        """Test concepts extraction with max count."""
-        from bioetl.application.pipelines.openalex.extractors import extract_concepts
-
-        concepts = [
-            {"display_name": "Biology", "score": 0.9},
-            {"display_name": "Chemistry", "score": 0.8},
-            {"display_name": "Physics", "score": 0.7},
-            {"display_name": "Math", "score": 0.6},
-        ]
-
-        # Default max_count=10
-        result = extract_concepts(concepts)
-        assert len(result) == 4
-
-        # With max_count=2
-        result = extract_concepts(concepts, max_count=2)
-        assert len(result) == 2
-        assert "Biology" in result
-        assert "Chemistry" in result
-
-    @pytest.mark.asyncio
     async def test_transformer_journal_info_extraction(self) -> None:
         """Test journal info extraction from primary_location."""
         from bioetl.application.pipelines.openalex.extractors import (

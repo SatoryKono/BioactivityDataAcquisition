@@ -25,7 +25,6 @@ from bioetl.application.pipelines.openalex.extractors import (
     extract_author_orcids,
     extract_authors,
     extract_biblio_info,
-    extract_concepts,
     extract_external_ids,
     extract_grants,
     extract_institution_country_codes,
@@ -69,7 +68,6 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
     - topics: topics (hierarchical 4-level classification)
     - primary_topic: primary_topic (single most relevant topic)
     - grants: grants (funding information)
-    - concepts: concepts (DEPRECATED - kept for backward compatibility)
 
     Handles lookup metadata:
     - _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
@@ -80,11 +78,6 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
     - Automatic primary ID validation and fallback logging
     - Content hash computation (excluding metadata)
     - Tracing and metrics observability (O1)
-
-    Note on Topics vs Concepts:
-    - OpenAlex deprecated the `concepts` field in 2024 in favor of `topics`
-    - Both fields are extracted during the transition period
-    - New downstream code should use `topics` and `primary_topic`
     """
 
     def __init__(
@@ -188,9 +181,6 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         # Extract grants/funding information
         grants = extract_grants(rec.get("grants", []))
 
-        # Extract concepts (DEPRECATED - kept for backward compatibility)
-        concepts = extract_concepts(rec.get("concepts", []))
-
         # Extract Open Access info
         oa_info = extract_open_access_info(rec.get("open_access", {}))
 
@@ -253,8 +243,6 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "primary_topic": json.dumps(primary_topic) if primary_topic else None,
             # Grants/funding information (serialized to JSON string)
             "grants": self.serialize_json_list(grants) if grants else None,
-            # Concepts (DEPRECATED - kept for backward compatibility, serialized to JSON)
-            "concepts": self.serialize_json_list(concepts) if concepts else None,
             "mesh": mesh_terms,
             "keywords": keywords,
             "language": rec.get("language"),

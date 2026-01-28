@@ -685,6 +685,7 @@ def validate_year(year: int | None) -> int | None:
 
 
 __all__ = [
+    "VALID_OA_STATUS_VALUES",
     "extract_affiliations",
     "extract_author_h_indices",
     "extract_author_ids",
@@ -701,5 +702,4 @@ __all__ = [
     "parse_page_range",
     "parse_volume_issue",
     "validate_year",
-    "VALID_OA_STATUS_VALUES",
 ]

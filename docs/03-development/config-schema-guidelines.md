@@ -9,14 +9,11 @@
 ## TL;DR
 
 ```python
-# Правильно: импортируй из base_schemas для базовых классов
+# Импортируй из base_schemas для базовых классов
 from bioetl.infrastructure.schemas.base_schemas import BaseDQConfig, BaseCircuitBreakerConfig
 
-# Правильно: импортируй из pipeline_config для расширенных классов
+# Импортируй из pipeline_config для расширенных классов
 from bioetl.infrastructure.schemas.pipeline_config import DQConfig, InputFilterConfig
-
-# Устарело: не импортируй из common_config (только для backward compatibility)
-from bioetl.infrastructure.schemas.common_config import DQConfig  # Deprecated!
 ```
 
 ---
@@ -32,8 +29,7 @@ src/bioetl/infrastructure/schemas/
 ├── source_config.py     # Классы для configs/sources/*.yaml
 ├── filter_config.py     # Классы для configs/filter/*.yaml
 ├── dq_config.py         # Классы для configs/dq/*.yaml
-├── composite_config.py  # Классы для composite pipelines
-└── common_config.py     # Re-exports для backward compatibility (DEPRECATED)
+└── composite_config.py  # Классы для composite pipelines
 ```
 
 ### 1.2. Принцип Single Source of Truth
@@ -258,12 +254,10 @@ def validate_thresholds(self) -> BaseDQThresholds:
 ### 6.1. Обновление Импортов
 
 ```python
-# До (deprecated)
-from bioetl.infrastructure.schemas.common_config import DQConfig
-
-# После (preferred)
+# Импортируй из base_schemas для базовых классов
 from bioetl.infrastructure.schemas.base_schemas import BaseDQConfig
-# или для расширенной версии:
+
+# Или из pipeline_config для расширенной версии:
 from bioetl.infrastructure.schemas.pipeline_config import DQConfig
 ```
 
@@ -284,13 +278,6 @@ assert issubclass(CircuitBreakerYamlConfig, BaseCircuitBreakerConfig)
 
 ```python
 # tests/unit/infrastructure/schemas/test_base_schemas.py
-
-def test_inheritance_chain():
-    """Verify inheritance relationships."""
-    from bioetl.infrastructure.schemas.base_schemas import BaseDQConfig
-    from bioetl.infrastructure.schemas.common_config import DQConfig
-
-    assert issubclass(DQConfig, BaseDQConfig)
 
 def test_to_domain_conversion():
     """Verify domain conversion."""
@@ -333,8 +320,6 @@ def test_threshold_validation():
 | source_config | `RateLimitYamlConfig` | BaseRateLimitConfig | Source rate limit |
 | filter_config | `InputFilterFileConfig` | BaseInputFilterConfig | Standalone filter |
 | filter_config | `GoldFiltersFileConfig` | BaseGoldFiltersConfig | Standalone gold filter |
-| common_config | `DQConfig` | BaseDQConfig | Backward compat (deprecated) |
-| common_config | `CircuitBreakerConfig` | BaseCircuitBreakerConfig | Backward compat (deprecated) |
 
 ---
 

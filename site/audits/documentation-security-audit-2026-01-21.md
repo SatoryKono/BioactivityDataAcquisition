@@ -1,7 +1,7 @@
 # Documentation & Security Report
 
 **Дата**: 2026-01-21
-**RULES.md**: v5.12
+**RULES.md**: v5.14
 **Auditor**: Claude (automated audit)
 **Статус**: Production Release Stage 4/5
 
@@ -15,7 +15,7 @@
 |------|--------|
 | README.md | ✓ |
 | CHANGELOG.md | ✓ |
-| docs/RULES.md | ✓ (v5.12, 2026-01-21) |
+| docs/RULES.md | ✓ (v5.14, 2026-01-21) |
 | docs/00-map.md | ✓ |
 | docs/index.md | ✓ |
 | docs/REQUIREMENTS.md | ✓ |
@@ -228,7 +228,7 @@ make security  # Запускает osv-scanner + pip-audit в CI
 | Категория | Оценка | Комментарий |
 |-----------|--------|-------------|
 | Документация | **A** | Полная структура, все ADR в Accepted |
-| Версионирование | **A** | RULES.md v5.12, синхронизация соблюдается |
+| Версионирование | **A** | RULES.md v5.14, синхронизация соблюдается |
 | Диаграммы | **A** | 51 диаграмма, полное покрытие архитектуры |
 | Битые ссылки | **B** | 22 найдено, большинство в archived |
 | Секреты | **A** | Нет хардкода, все через env vars |

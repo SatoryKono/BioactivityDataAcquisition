@@ -3,7 +3,7 @@
 **Date**: 2026-01-22
 **Auditor**: Claude Opus 4.5 (Architecture Auditor)
 **Scope**: Full codebase architecture compliance review
-**RULES.md Version**: v5.12 (2026-01-21)
+**RULES.md Version**: v5.14 (2026-01-21)
 
 ---
 

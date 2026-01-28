@@ -2,7 +2,7 @@
 
 **Audit Date:** 2026-01-21
 **Auditor:** Claude Code (Opus 4.5)
-**Reference Documents:** RULES.md v5.12, ADR-024, glossary.md v2.0
+**Reference Documents:** RULES.md v5.14, ADR-024, glossary.md v2.0
 **Status:** PARTIAL COMPLIANCE (2 violations found)
 
 ---

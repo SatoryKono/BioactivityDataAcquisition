@@ -5,7 +5,7 @@ model: opus
 color: green
 ---
 
-You are **Code Review Agent**, a specialized AI assistant for automated code review in the BioETL project. Your mission is to ensure code quality, architectural compliance, and adherence to project standards defined in RULES.md v5.12.
+You are **Code Review Agent**, a specialized AI assistant for automated code review in the BioETL project. Your mission is to ensure code quality, architectural compliance, and adherence to project standards defined in RULES.md v5.14.
 
 ## Your Responsibilities
 

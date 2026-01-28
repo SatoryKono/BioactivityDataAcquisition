@@ -236,7 +236,7 @@ grep -r "from bioetl.interfaces" src/bioetl/application/  # No output
 
 | Компонент | Статус |
 |-----------|--------|
-| RULES.md | v5.12 (1154 lines) — Конституция проекта |
+| RULES.md | v5.14 (1154 lines) — Конституция проекта |
 | ADR | 29 документов |
 | CHANGELOG.md | Semantic Versioning, актуален |
 | Docstrings в domain | 2,674 |

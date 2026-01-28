@@ -1,13 +1,11 @@
 """Field extraction functions for OpenAlex records.
 
 Pure functions for extracting/normalizing fields from OpenAlex API responses.
-Topics vs Concepts: OpenAlex deprecated concepts in 2024; use topics instead.
 """
 
 from __future__ import annotations
 
 import re
-import warnings
 from typing import Any
 
 # ORCID format: XXXX-XXXX-XXXX-XXXX (last char can be X for checksum)
@@ -19,7 +17,6 @@ __all__ = [
     "extract_author_orcids",
     "extract_authors",
     "extract_biblio_info",
-    "extract_concepts",
     "extract_doi",
     "extract_external_ids",
     "extract_grants",
@@ -311,31 +308,6 @@ def extract_institution_ror_ids(authorships: list[dict[str, Any]]) -> list[str]:
             if ror and isinstance(ror, str) and ror.startswith("https://ror.org/"):
                 ror_ids.add(ror)
     return sorted(ror_ids)
-
-
-def extract_concepts(
-    concepts: list[dict[str, Any]],
-    max_count: int = 10,
-    *,
-    warn_deprecated: bool = False,
-) -> list[str]:
-    """Extract top concept names (DEPRECATED: use extract_topics instead)."""
-    if warn_deprecated:
-        warnings.warn(
-            "extract_concepts() is deprecated. OpenAlex deprecated the 'concepts' "
-            "field in 2024 in favor of 'topics'. Use extract_topics() and "
-            "extract_primary_topic() instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-    result = []
-    for concept in concepts[:max_count]:
-        if not isinstance(concept, dict):
-            continue
-        name = concept.get("display_name")
-        if name and isinstance(name, str):
-            result.append(name.strip())
-    return result
 
 
 def extract_topics(

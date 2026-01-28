@@ -1,7 +1,7 @@
 # Documentation Audit Report — 2026-01-25
 
 **Auditor**: Claude Code (Automated)
-**RULES.md Version**: v5.12
+**RULES.md Version**: v5.14
 **Previous Audit**: 2026-01-15
 
 ---
@@ -83,9 +83,9 @@ Maintenance audit completed successfully. Found and fixed ADR-029 missing from i
 
 | Document | Version | Status |
 |----------|---------|--------|
-| RULES.md | v5.12 | Source of truth |
-| CLAUDE.md | v5.12 | ✅ Synced |
-| All active docs | v5.12 | ✅ Synced |
+| RULES.md | v5.14 | Source of truth |
+| CLAUDE.md | v5.14 | ✅ Synced |
+| All active docs | v5.14 | ✅ Synced |
 
 ---
 
@@ -123,7 +123,7 @@ Maintenance audit completed successfully. Found and fixed ADR-029 missing from i
 - Directory structure (already correct)
 - Diagrams (already up-to-date)
 - Navigation links (no broken links)
-- Version synchronization (all v5.12)
+- Version synchronization (all v5.14)
 
 ---
 
@@ -147,7 +147,7 @@ Maintenance audit completed successfully. Found and fixed ADR-029 missing from i
 - [x] 34 Mermaid files
 - [x] No outdated DeltaWriter/TTL/heartbeat
 - [x] No broken links in 00-map.md
-- [x] All active docs synced to v5.12
+- [x] All active docs synced to v5.14
 - [x] Orphan documents archived
 
 ---

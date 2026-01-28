@@ -1,9 +1,9 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.12 | Last updated: 2026-01-21*
+*Synced with RULES.md v5.14 | Last updated: 2026-01-21*
 
 > **Documentation Audit Completed:** 2026-01-21
-> - RULES.md updated to v5.12: ADR-021..028 added to registry with inline references
+> - RULES.md updated to v5.14: ADR-021..028 added to registry with inline references
 > - REQUIREMENTS.md updated to v1.4: correct count 156 (was 139)
 > - Added ADR-028-filter-rules-externalization to 00-map.md
 > - See: [archived/audits/sync-audit-2026-01-21.md](archived/audits/sync-audit-2026-01-21.md) for details
@@ -41,7 +41,7 @@ docs/
 ├── 00-map.md                    # This file (Project Navigator)
 ├── index.md                     # Welcome page
 ├── glossary.md                  # Ubiquitous Language terminology
-├── RULES.md                     # Canonical rules document (v5.12)
+├── RULES.md                     # Canonical rules document (v5.14)
 ├── REQUIREMENTS.md              # 156 testable requirements
 │
 ├── archived/                    # Historical documents
@@ -357,11 +357,11 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2026-01-21   | v5.12 (ADR Registry Update)  |
+| RULES.md                 | 2026-01-21   | v5.14 (ADR Registry Update)  |
 | REQUIREMENTS.md          | 2026-01-21   | v1.4 (156 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
 | 00-map.md                | 2026-01-21   | v6.9 API Sync Completed      |
-| rules-summary.md         | 2026-01-21   | v5.12 Synced                 |
+| rules-summary.md         | 2026-01-21   | v5.14 Synced                 |
 | 03-guides/               | 2026-01-20   | Consolidated (13 guides)     |
 | ADR-001..028             | 2026-01-21   | All 28 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |

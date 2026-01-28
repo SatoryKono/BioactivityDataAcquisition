@@ -152,7 +152,7 @@ When asked to create a new ADR:
 ## Pre-Generation Checklist
 
 - [ ] No existing ADR covers this decision
-- [ ] Decision aligns with RULES.md v5.12
+- [ ] Decision aligns with RULES.md v5.14
 - [ ] Related ADRs identified: ADR-{NNN}, ADR-{NNN}
 - [ ] No conflicts with Critical ADRs (010, 014, 016)
 
@@ -224,7 +224,7 @@ grep -n "ADR-" docs/RULES.md
 - Include all required sections
 - Use RFC 2119 terminology (MUST/SHOULD/MAY) consistently
 - Cross-reference related ADRs bidirectionally
-- Align with RULES.md v5.12 requirements
+- Align with RULES.md v5.14 requirements
 
 ### MUST NOT
 - Skip ADR numbers (no gaps: 001, 002, 003...)
