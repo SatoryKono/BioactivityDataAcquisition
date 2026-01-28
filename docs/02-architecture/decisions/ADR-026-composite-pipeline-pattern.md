@@ -476,6 +476,77 @@ class ConflictResolution(str, Enum):
 - ColumnQualifier: `src/bioetl/domain/value_objects/column_qualifier.py`
 - ColumnOrderConfig: `src/bioetl/domain/value_objects/column_order.py`
 
+## Preserve All Sources Feature
+
+### Status: Accepted (Added 2026-01-28)
+
+### Context
+
+During merge, columns with the same semantic meaning from different providers (e.g., `title` from ChEMBL, CrossRef, OpenAlex) are typically **coalesced** into a single column using the configured conflict resolution strategy. This is the default behavior.
+
+However, some use cases require access to **all** provider values for comparison, quality analysis, or ML feature engineering.
+
+### Decision
+
+Add `preserve_all_sources: bool = False` to `MergeConfig`. When enabled:
+
+1. **Skip coalescing** - MergeService does not apply conflict resolution
+2. **Keep all qualified columns** - All `{provider}.{entity}.{field}` columns are retained
+3. **Full traceability** - Downstream consumers can see exactly what each provider returned
+
+### Configuration
+
+```yaml
+# configs/pipelines/composite/publication.yaml
+merge:
+  strategy: left_outer
+  conflict_resolution: seed_priority  # Used when preserve_all_sources=false
+  preserve_all_sources: true          # NEW: Keep all provider columns
+```
+
+### Behavior Comparison
+
+| Mode | Output Columns | Use Case |
+|------|----------------|----------|
+| `preserve_all_sources: false` (default) | `title` (single coalesced column) | Production views with "best" value |
+| `preserve_all_sources: true` | `chembl.publication.title`, `crossref.publication.title`, etc. | Data quality analysis, ML features |
+
+### Implementation
+
+- **Domain**: `MergeConfig.preserve_all_sources: bool = False` in `domain/composite/config.py`
+- **Application**: `MergeService._resolve_conflicts()` skips coalescing when flag is True
+- **Schema**: Pydantic schema updated with `preserve_all_sources` field
+
+### Example Output
+
+```python
+# preserve_all_sources: false (default)
+df.columns = ['entity_id', 'title', 'abstract', 'citation_count', ...]
+
+# preserve_all_sources: true
+df.columns = [
+    'entity_id',
+    'chembl.publication.title',
+    'crossref.publication.title',
+    'openalex.publication.title',
+    'pubmed.publication.title',
+    'chembl.publication.abstract',
+    ...
+]
+```
+
+### Consequences
+
+**Positive**:
+- Full data visibility for QA and analysis
+- No information loss during merge
+- Enables cross-provider comparison
+
+**Negative**:
+- Wider tables (more columns)
+- Downstream consumers must handle multiple columns per field
+- Breaking change for consumers expecting coalesced columns
+
 ## Application Layer
 
 ### CompositePipelineRunner

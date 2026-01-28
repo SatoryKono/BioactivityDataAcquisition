@@ -1,6 +1,6 @@
 # BioETL Glossary (Ubiquitous Language)
 
-*Version 2.2 | Updated: 2026-01-28 | Created: 2025-12-29*
+*Version 2.3 | Updated: 2026-01-28 | Created: 2025-12-29*
 
 This glossary defines the canonical terminology used throughout BioETL. Following Domain-Driven Design principles, these terms form the **Ubiquitous Language** — a shared vocabulary understood by both developers and domain experts.
 
@@ -109,6 +109,20 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Silver** | Normalized and deduplicated data layer (Delta Lake) | `cleansed`, `curated` |
 | **Gold** | Refined and validated data layer for analytics | `reporting`, `presentation` |
 | **BaseOutputMetadata** | Unified output metadata contract for all Medallion layers (ADR-029) | layer-specific `OutputMetadata` variants |
+
+### Composite Pipelines (ADR-026)
+
+| Canonical Term | Definition | Avoid |
+|----------------|------------|-------|
+| **Composite Pipeline** | Multi-source pipeline combining seed + enrichers into unified Gold entity | `merged pipeline`, `combined workflow` |
+| **Seed Pipeline** | Primary pipeline providing base entities for enrichment | `source pipeline`, `base pipeline` |
+| **Enricher** | Pipeline that adds supplemental data from external source | `enhancer`, `augmenter` |
+| **MergeService** | Application service that joins seed and enricher data | `Joiner`, `Combiner` |
+| **Preserve All Sources** | MergeConfig flag to keep all provider-qualified columns | `keep_all_columns` |
+| **Qualified Column** | Column name in `{provider}.{entity}.{field}` format | `prefixed column`, `namespaced column` |
+| **Column Group** | Semantic grouping of columns for output ordering | `field group` |
+| **Conflict Resolution** | Strategy for handling field value conflicts during merge | `conflict handling` |
+| **Coalesce** | Merge strategy taking first non-null value | `fill`, `combine` |
 
 ---
 

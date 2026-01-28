@@ -1,8 +1,8 @@
 # Composite Publication Pipeline
 
 > **Pipeline**: `composite_publication`
-> **Version**: 1.0.0
-> **Last Updated**: 2026-01-27
+> **Version**: 1.2.0
+> **Last Updated**: 2026-01-28
 > **Reference**: ADR-026 Composite Pipeline Pattern
 
 ---
@@ -128,6 +128,29 @@ merge:
 | `union` | All records from any source (with dedup) |
 
 **Current Configuration**: `left_outer` (all seed records preserved)
+
+### preserve_all_sources Mode
+
+The `preserve_all_sources` option controls whether columns from different providers are coalesced or kept separate:
+
+| Mode | Behavior | Output Example |
+|------|----------|----------------|
+| `preserve_all_sources: false` (default) | Columns are **coalesced** by priority | Single `title` column |
+| `preserve_all_sources: true` | All qualified columns **preserved** | `chembl.publication.title`, `crossref.publication.title`, etc. |
+
+**Current Configuration**: `preserve_all_sources: true` (all provider columns retained)
+
+**When to use each mode:**
+- **`false` (coalesce)**: Production views needing a single "best" value per field
+- **`true` (preserve)**: Data quality analysis, cross-provider comparison, ML feature engineering
+
+**Example configuration:**
+```yaml
+merge:
+  strategy: left_outer
+  conflict_resolution: seed_priority  # Used when preserve_all_sources=false
+  preserve_all_sources: true          # Keep all provider-qualified columns
+```
 
 ### Conflict Resolution Strategies
 
@@ -690,5 +713,6 @@ The composite pipeline tracks lineage at multiple levels:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.2.0 | 2026-01-28 | Added `preserve_all_sources` feature documentation; updated merge strategy section with mode comparison |
 | 1.1.0 | 2026-01-27 | Added Gold contract: CompositePublicationGoldSchema (Pandera), JSON Schema, updated filter config |
 | 1.0.0 | 2026-01-27 | Initial documentation; removed chembl_publication_term dependency; documented field exclusions |
