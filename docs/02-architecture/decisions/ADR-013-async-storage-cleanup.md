@@ -1,7 +1,7 @@
 # ADR-013: Асинхронная очистка хранилища в PipelineRunner
 
 **Status:** Accepted
-**Date:** 2024-12-24
+**Date:** 2025-12-24
 **Decision makers:** @BioETL-Team
 
 ## Context

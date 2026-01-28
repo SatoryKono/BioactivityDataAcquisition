@@ -1,9 +1,8 @@
 # ADR-028: Filter Rules Externalization
 
-**Status**: Accepted
-**Date**: 2026-01-20
-**Authors**: Claude Code
-**Reviewers**: -
+**Status:** Accepted
+**Date:** 2026-01-20
+**Decision makers:** @BioETL-Team
 
 ## Context
 
