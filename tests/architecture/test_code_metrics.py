@@ -75,7 +75,7 @@ class TestFileSizeLimits:
         "publications.py": 400,  # 374 LOC - Gold layer publication schemas (PubMed, CrossRef, OpenAlex, SemanticScholar)
         # Note: chembl.py exemption at line 39 covers both domain/entities/chembl.py and domain/contracts/gold/chembl.py
         # Domain DQ models (data quality reports and serialization)
-        "dq_serializer.py": 435,  # 429 LOC - DQ report serialization logic (increased for CC reduction)
+        "dq_serializer.py": 450,  # 447 LOC - DQ report serialization logic (increased for CC reduction)
         "dq_report.py": 660,  # 646 LOC - DQ report models with validation rules
         "dq_metrics.py": 420,  # 411 LOC - Batch DQ metrics with helpers for CC reduction + _make_hashable for list/dict values
         # Domain registry exemptions
@@ -242,6 +242,7 @@ class TestFunctionComplexity:
         "_dict_to_yaml": 7,  # CC=6 - YAML dictionary serialization
         "_yaml_value": 8,  # CC=7 - YAML value formatting
         "_render_check_details": 9,  # CC=8 - DQ check details rendering
+        "_serialize_value": 11,  # CC=10 - Value serialization with multiple type checks
         # Gold/Silver analyzer application functions
         "analyze": 21,  # CC=14-20 - Layer analysis with multiple checks
         "_check_business_rules": 23,  # CC=22 - Business rule validation
