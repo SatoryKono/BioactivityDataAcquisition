@@ -795,7 +795,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # OpenAlex source field: cited_by_count
         # Unified BioETL field: citation_count (standardized across all providers)
         pa.field("citation_count", pa.int64()),
-        pa.field("concepts", pa.list_(pa.string())),
+        # NOTE: concepts field removed - OpenAlex deprecated concepts in 2024, use topics instead
         # Note: doc_type excluded; OpenAlex uses raw 'type' field instead
         # Cross-reference IDs for linking publications across providers
         # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
