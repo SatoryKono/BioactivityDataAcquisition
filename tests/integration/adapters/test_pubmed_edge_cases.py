@@ -1,4 +1,3 @@
-# ruff: noqa: RUF001
 """Integration tests for PubMed adapter edge cases.
 
 Tests for real-world edge cases in PubMed API responses.

@@ -1,4 +1,3 @@
-# ruff: noqa: RUF001
 """Unit tests for PubMedPublicationTransformer.
 
 Comprehensive tests for XML parsing and field extraction edge cases.

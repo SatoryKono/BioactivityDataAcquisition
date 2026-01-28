@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from enum import Enum
 
 from bioetl.domain.services.dq_serializer import to_dict
@@ -35,7 +35,7 @@ class ContainerSample:
 
 def test_to_dict_serializes_dataclass_with_nested_values() -> None:
     """Проверяет рекурсивную сериализацию dataclass/Enum/datetime."""
-    timestamp = datetime(2024, 1, 1, 12, 30, tzinfo=timezone.utc)
+    timestamp = datetime(2024, 1, 1, 12, 30, tzinfo=UTC)
     nested = NestedSample(value=1, status=SampleStatus.OK)
     container = ContainerSample(
         created_at=timestamp,
