@@ -253,7 +253,6 @@
     'chemical_count': 0,
     'chemicals': list([
     ]),
-    'citation_count': None,
     'citation_subset': None,
     'content_hash': '<content_hash>',
     'country': 'United States',
@@ -268,7 +267,6 @@
     'gene_symbols': list([
     ]),
     'grant_count': 0,
-    'is_oa': None,
     'issn': '1234-5678',
     'issue': '3',
     'journal': 'Journal of Test Science',
@@ -335,7 +333,6 @@
     'chemical_count': 0,
     'chemicals': list([
     ]),
-    'citation_count': None,
     'citation_subset': None,
     'content_hash': '<content_hash>',
     'country': None,
@@ -350,7 +347,6 @@
     'gene_symbols': list([
     ]),
     'grant_count': 0,
-    'is_oa': None,
     'issn': None,
     'issue': None,
     'journal': None,
@@ -407,7 +403,6 @@
     'abstract': 'This is a test abstract for the document.',
     'authors': '["Test Author","Another Author"]',
     'chembl_release': 'CHEMBL_34',
-    'citation_count': None,
     'content_hash': '<content_hash>',
     'creation_date': '2024-01-15',
     'doc_type': 'PUBLICATION',
@@ -415,11 +410,9 @@
     'doi': '10.1000/test.doi',
     'entity_id': '<entity_id>',
     'first_page': '100',
-    'is_oa': None,
     'issue': '5',
     'journal': 'Test Journal',
     'journal_full_title': 'Full Test Journal Name',
-    'language': None,
     'last_page': '110',
     'pmid': '12345678',
     'src_id': 1,
