@@ -175,7 +175,10 @@ class GenericPipelineFactory(Generic[TPipeline]):
     ) -> DataSourcePort:
         """Create data source using the configured creator."""
         return self._create_data_source(
-            settings, pipeline_config, logger, filter_config,
+            settings,
+            pipeline_config,
+            logger,
+            filter_config,
             pipeline_name=self.pipeline_name,
         )
 
@@ -351,7 +354,11 @@ def build_pipeline_services(
     """
     pipeline_config = config or load_pipeline_config(pipeline_name)
     data_source = _create_data_source(
-        create_data_source_fn, settings, pipeline_config, logger, filter_config,
+        create_data_source_fn,
+        settings,
+        pipeline_config,
+        logger,
+        filter_config,
         pipeline_name=pipeline_name,
     )
 
