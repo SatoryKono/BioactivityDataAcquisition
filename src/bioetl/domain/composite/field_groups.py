@@ -15,7 +15,7 @@ See ADR-026 for Composite Publication Pipeline rationale.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Final
 
 from bioetl.domain.value_objects.publication_field_groups import (

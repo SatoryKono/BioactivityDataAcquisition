@@ -19,6 +19,13 @@ from bioetl.domain.composite.config import (
     MergeConfig,
     SeedConfig,
 )
+from bioetl.domain.composite.field_groups import (
+    FieldGroupDefinition,
+    FieldGroupId,
+    FieldGroupRegistry,
+    FieldMapping,
+    build_field_group_registry,
+)
 from bioetl.domain.composite.lineage import (
     EnrichmentStatusRecord,
     FieldSource,
@@ -59,6 +66,10 @@ __all__ = [
     "EnrichmentStatus",
     "EnrichmentStatusRecord",
     "FallbackStrategy",
+    "FieldGroupDefinition",
+    "FieldGroupId",
+    "FieldGroupRegistry",
+    "FieldMapping",
     "FieldSource",
     "LineageMetadata",
     "MergeConfig",
@@ -67,6 +78,7 @@ __all__ = [
     "SeedConfig",
     "SeedResult",
     "TransitionRules",
+    "build_field_group_registry",
     "can_transition",
     "get_transition_rules",
     "validate_transition",
