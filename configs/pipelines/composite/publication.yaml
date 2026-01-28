@@ -263,10 +263,20 @@ composite:
         pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
 
       # 3. Primary identifiers
-      - name: identifiers
+      - name: identifiers_document_chembl_id
         fields:
           - document_chembl_id
+        provider_order: [chembl]
+
+      # 3.2 doi identifiers
+      - name: identifiers_doi
+        fields:
           - doi
+        provider_order: [chembl, openalex, pubmed, semanticscholar]
+
+      # 3.2 doi identifiers
+      - name: identifiers_pmid
+        fields:
           - pmid
         provider_order: [chembl, openalex, pubmed, semanticscholar]
 
