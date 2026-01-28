@@ -244,9 +244,14 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
             "abstract_structured", pa.bool_()
         ),  # Whether abstract has NLM sections
         # Note: accepted_date, received_date, revised_date, epub_date excluded (API deprecated 2026-01)
-        # Authors (affiliations excluded per user request)
+        # Authors and affiliations
+        pa.field("affiliations", pa.string()),  # JSON array of unique affiliations
         pa.field("author_count", pa.int64()),  # Denormalized count for query efficiency
         pa.field("authors", pa.string()),  # JSON-serialized list
+        # Author-affiliation mapping (structured)
+        pa.field(
+            "authors_with_affiliations", pa.string()
+        ),  # JSON array: author → affiliations
         # Counts (denormalized for query efficiency)
         pa.field("chemical_count", pa.int64()),
         pa.field("citation_subset", pa.string()),  # Citation subset codes (e.g., 'AIM')
@@ -293,6 +298,8 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publication_types", pa.list_(pa.string())),
         pa.field("publication_year", pa.int64()),  # Legacy alias for year
         pa.field("reference_count", pa.int64()),  # Number of references
+        # Enhanced affiliation data with identifier metadata (ROR, GRID, etc.)
+        pa.field("structured_affiliations", pa.string()),  # JSON array
         pa.field("title", pa.string()),
         # Note: vernacular_title excluded (API deprecated 2026-01)
         pa.field("volume", pa.string()),
@@ -654,19 +661,33 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         # _original_id: Original identifier used for lookup
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
-        # abstract, affiliations, authors excluded per user request
-        # Note: arxiv_id excluded per design (2026-01)
-        pa.field("author_ids", pa.string()),
+        # Author affiliations (unique, sorted)
+        pa.field("affiliations", pa.string()),  # JSON array
+        # Author identifiers (for author-level analytics)
+        pa.field("author_h_indices", pa.string()),  # JSON array of h-index values
+        pa.field("author_ids", pa.string()),  # JSON array of S2 author IDs
+        pa.field("author_orcids", pa.string()),  # JSON array of ORCIDs
+        pa.field(
+            "author_s2_ids", pa.string()
+        ),  # JSON array of S2 author IDs (40-char hex)
+        # Citation context (for citation sentiment analysis)
+        pa.field("citation_contexts", pa.string()),  # JSON array of context sentences
         # Metrics
         pa.field("citation_count", pa.int64()),
         pa.field("corpus_id", pa.int64()),
+        # External identifiers
+        pa.field("dblp_id", pa.string()),  # DBLP publication key
         pa.field("doi", pa.string()),
         pa.field("fields_of_study", pa.string()),
         # Unified page fields (parsed from pages)
         pa.field("first_page", pa.string()),
+        pa.field(
+            "influential_citation_count", pa.int64()
+        ),  # Number of influential citations
         # Open Access
         pa.field("is_oa", pa.bool_()),
         # Journal/Venue
+        pa.field("issue", pa.string()),  # Parsed from combined volume/issue
         pa.field("journal", pa.string()),
         pa.field("last_page", pa.string()),
         pa.field("oa_status", pa.string()),
@@ -767,6 +788,9 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_original_id", pa.string()),
         pa.field("abstract", pa.string()),
         pa.field("affiliations", pa.string()),
+        # Author identifiers (JSON arrays preserving author order)
+        pa.field("author_ids", pa.string()),  # OpenAlex author IDs
+        pa.field("author_orcids", pa.string()),  # ORCID IDs (empty string for missing)
         pa.field("authors", pa.string()),  # JSON-serialized list
         # OpenAlex source field: cited_by_count
         # Unified BioETL field: citation_count (standardized across all providers)
@@ -780,6 +804,8 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("first_page", pa.string()),
         # Field-Weighted Citation Impact (must be non-negative)
         pa.field("fwci", pa.float64()),
+        # Grants/funding information (JSON array)
+        pa.field("grants", pa.string()),
         # Institution identifiers (for cross-referencing and geographic analysis)
         pa.field("institution_country_codes", pa.list_(pa.string())),
         pa.field("institution_ids", pa.list_(pa.string())),
@@ -805,12 +831,18 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Note: pmc_id excluded per design (2026-01)
         # pmid: PubMed ID (numeric string: "12345678") - nullable, may not exist for all publications
         pa.field("pmid", pa.string()),
+        # Primary topic (single most relevant topic for quick categorization)
+        pa.field("primary_topic", pa.string()),  # JSON object
         # Date fields
         pa.field("publication_date", pa.string()),
         pa.field("publisher", pa.string()),
         # Number of works referenced (from referenced_works_count)
         pa.field("referenced_works_count", pa.int64()),
+        # ROR IDs (may be empty if not returned by Works API)
+        pa.field("ror_ids", pa.string()),  # JSON array of ROR URLs
         pa.field("title", pa.string()),
+        # Topics (hierarchical 4-level classification - replaces deprecated concepts)
+        pa.field("topics", pa.string()),  # JSON array
         pa.field("type", pa.string()),  # Raw OpenAlex type (article, book, etc.)
         # Bibliographic info (from biblio object)
         pa.field("volume", pa.string()),
