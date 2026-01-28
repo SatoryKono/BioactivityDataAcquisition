@@ -45,6 +45,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.config import Settings
 
@@ -379,6 +380,52 @@ def bootstrap_composite_pipeline(
         CompositePipelineRunner ready for execution.
     """
     return bootstrap_composite_runner(config=config, runtime=runtime, run_id=run_id)
+
+
+def _load_field_group_registry(
+    composite_name: str,
+    logger: LoggerPort,
+) -> FieldGroupRegistry | None:
+    """Load field group registry for a composite pipeline.
+
+    Attempts to load field group configuration from YAML. Returns None
+    if no configuration is found (graceful degradation).
+
+    Args:
+        composite_name: Composite pipeline name (e.g., "composite_publication").
+        logger: Structured logger.
+
+    Returns:
+        FieldGroupRegistry if config found, None otherwise.
+    """
+    # Extract entity from composite name (e.g., "composite_publication" -> "publication")
+    entity = composite_name.replace("composite_", "") if "_" in composite_name else composite_name
+    config_path = FIELD_GROUP_CONFIG_DIR / f"{entity}.yaml"
+
+    if not config_path.exists():
+        logger.debug(
+            "No field group config found, skipping",
+            config_path=str(config_path),
+        )
+        return None
+
+    try:
+        registry = load_field_groups(config_path)
+        logger.info(
+            "Loaded field group registry",
+            config_path=str(config_path),
+            groups=len(registry.groups),
+            fields=registry.field_count,
+            columns=registry.column_count,
+        )
+        return registry
+    except (FieldGroupLoadError, FileNotFoundError) as e:
+        logger.warning(
+            "Failed to load field group config, continuing without it",
+            error=str(e),
+            config_path=str(config_path),
+        )
+        return None
 
 
 def _create_dq_report_service(
