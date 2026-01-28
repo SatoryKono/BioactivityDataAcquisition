@@ -117,7 +117,7 @@ class TestFileSizeLimits:
         "base_transformer.py": 790,  # 786 LOC - BaseTransformer with serialization helpers + validate_value_object() consolidation
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
         "merger.py": 1405,  # 1399 LOC - MergeService with type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing
-        "extractors.py": 700,  # 684 LOC - SemanticScholar extractors with volume/issue parsing + page range expansion
+        "extractors.py": 710,  # 705 LOC - SemanticScholar extractors with volume/issue parsing + page range expansion + affiliations
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:

@@ -626,6 +626,16 @@ composite:
         nullable: true
         description: "Author affiliations (multiple providers)"
 
+      institution_ids:
+        type: json_array
+        nullable: true
+        description: "OpenAlex institution IDs (e.g., I1234567890)"
+
+      institution_country_codes:
+        type: json_array
+        nullable: true
+        description: "OpenAlex institution country codes (ISO 2-letter, e.g., US, GB)"
+
       # === String Identifiers ===
       pii:
         type: string
