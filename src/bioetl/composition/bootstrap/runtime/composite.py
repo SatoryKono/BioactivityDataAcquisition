@@ -32,6 +32,10 @@ from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.config.field_group_loader import (
+    FieldGroupLoadError,
+    load_field_groups,
+)
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.schemas.composite_config import CompositeConfigFileSchema
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
@@ -55,6 +59,7 @@ __all__ = [
 
 # Default composite config path
 COMPOSITE_CONFIG_DIR = Path("configs/pipelines/composite")
+FIELD_GROUP_CONFIG_DIR = Path("configs/composite/field_groups")
 
 
 def load_composite_config(name: str) -> CompositeConfig:
@@ -313,11 +318,15 @@ def bootstrap_composite_runner(
         max_concurrency=config.execution.max_concurrency,
     )
 
+    # Load field group registry for semantic column grouping and Gold filtering
+    field_group_registry = _load_field_group_registry(config.name, logger)
+
     merger = MergeService(
         merge_config=config.merge,
         storage=storage,
         logger=logger,
         delta_reader=delta_reader,
+        field_group_registry=field_group_registry,
     )
 
     checkpoint_dir = Path(settings.data_dir) / "checkpoints" / "composite"
