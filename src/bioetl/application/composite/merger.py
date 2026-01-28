@@ -864,6 +864,19 @@ class MergeService:
         Returns:
             DataFrame with conflicts resolved.
         """
+        # Skip coalescing if preserve_all_sources is enabled
+        # This keeps all provider-qualified columns (e.g., chembl.publication.title,
+        # crossref.publication.title) instead of merging them
+        if self._config.preserve_all_sources:
+            qualified_cols = [
+                c for c in df.columns if "." in c and not c.startswith("_")
+            ]
+            self._logger.info(
+                "Skipping conflict resolution - preserve_all_sources=True",
+                qualified_columns=len(qualified_cols),
+            )
+            return df
+
         match self._config.conflict_resolution:
             case ConflictResolution.SEED_PRIORITY:
                 return self._coalesce_prefer_seed(df, enrichers, seed_pipeline)
