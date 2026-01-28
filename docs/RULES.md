@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.12 (ADR Registry Update), 2026-01-21* 
+*Версия: 5.14 (Composite Pipeline Documentation), 2026-01-28* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -280,8 +280,78 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
  
 **Исключения**: Из расчета хэша исключаются технические мета-поля: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`. 
  
-- **Детекция Коллизий**: При upsert проверять `_source_record_id`; если отличается — конфликт, логировать обе записи. 
- 
+- **Детекция Коллизий**: При upsert проверять `_source_record_id`; если отличается — конфликт, логировать обе записи.
+
+### 2.9. Composite Pipelines
+См. [ADR-026](02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) для архитектуры композитных пайплайнов.
+
+Composite Pipeline объединяет данные из нескольких источников в единую обогащённую сущность:
+1. **Seed Pipeline** — извлекает первичные сущности (напр., публикации из ChEMBL)
+2. **Enricher Pipelines** — обогащают данными из других источников (CrossRef, OpenAlex, PubMed)
+3. **Merge Step** — объединяет все обогащения в единую Gold-сущность
+
+#### 2.9.1. Merge Configuration
+
+| Параметр | Описание | Значения |
+|----------|----------|----------|
+| `strategy` | Стратегия объединения | `left_outer`, `inner`, `union` |
+| `conflict_resolution` | Разрешение конфликтов полей | `seed_priority`, `enricher_priority`, `coalesce`, `explicit_rules` |
+| `preserve_all_sources` | Сохранение всех колонок провайдеров | `true` / `false` (default) |
+
+#### 2.9.2. preserve_all_sources Feature
+
+Опция `preserve_all_sources` в `MergeConfig` контролирует обработку колонок при слиянии:
+
+| Режим | Поведение | Используется когда |
+|-------|-----------|-------------------|
+| `preserve_all_sources: false` (default) | Колонки из разных источников **сливаются** (coalesce) в единую колонку по приоритету | Нужна единая "лучшая" версия поля |
+| `preserve_all_sources: true` | **Все** квалифицированные колонки сохраняются | Нужны данные из всех источников для анализа |
+
+**Формат колонок при `preserve_all_sources: true`:**
+```
+{provider}.{entity}.{field}
+```
+
+**Пример:**
+```yaml
+# configs/pipelines/composite/publication.yaml
+merge:
+  strategy: left_outer
+  conflict_resolution: seed_priority
+  preserve_all_sources: true  # Сохранить все колонки провайдеров
+```
+
+**Результирующие колонки:**
+```
+# При preserve_all_sources: false (coalesce)
+title                           # Единственная колонка title
+
+# При preserve_all_sources: true (все источники)
+chembl.publication.title        # Значение из ChEMBL
+crossref.publication.title      # Значение из CrossRef
+openalex.publication.title      # Значение из OpenAlex
+pubmed.publication.title        # Значение из PubMed
+```
+
+**Когда использовать:**
+- **`preserve_all_sources: true`**: Анализ качества данных, сравнение источников, ML-фичи из нескольких провайдеров
+- **`preserve_all_sources: false`**: Продакшн-витрины с единственной "лучшей" версией каждого поля
+
+#### 2.9.3. Column Groups
+
+Для контроля порядка колонок в output используется конфигурация `column_groups`:
+
+```yaml
+merge:
+  column_groups:
+    - name: identifiers
+      fields: [document_chembl_id, doi, pmid]
+      provider_order: [chembl, crossref, openalex, pubmed]
+    - name: title
+      fields: [title]
+      provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+```
+
 ## 3. Обработка Ошибок и Наблюдаемость
 
 ### 3.1. Стратегия Обработки Ошибок
@@ -1131,6 +1201,7 @@ fields:
 | [ADR-031](02-architecture/decisions/ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | Accepted | 2026-01-26 |
 
 ## История Изменений (Changelog)
+- **5.14** (2026-01-28): Composite Pipeline Documentation. Добавлена секция §2.9 "Composite Pipelines" с документацией `preserve_all_sources` feature, column groups и merge strategies. Ссылка на ADR-026.
 - **5.13** (2026-01-28): ADR Registry Update. Добавлены ADR-029..031 в реестр (Приложение F): Output Metadata Unification, Publication Pagination Strategy, Loading Strategy Formalization.
 - **5.12** (2026-01-21): ADR Registry Update. Добавлены ADR-021..028 в реестр (Приложение F). Добавлены inline ссылки на новые ADR в соответствующие секции (§1.1, §2.8, §3.2, App D).
 - **5.11** (2026-01-20): Int→Float Coercion Documentation. Добавлена §2.6 "Int→Float Coercion для Nullable Integers" — документация паттерна Gold-схем с `Series[float]` + `coerce=True` для nullable integer полей (34 occurrences). Это осознанное архитектурное решение для обработки nullable integers в Pandas/Polars.
