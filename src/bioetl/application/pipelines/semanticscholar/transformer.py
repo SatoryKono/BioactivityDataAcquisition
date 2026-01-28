@@ -204,7 +204,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "author_orcids": self.serialize_json_list(author_orcids)
             if any(author_orcids)
             else None,
-            "author_h_indices": self.serialize_json(author_h_indices)
+            "author_h_indices": self.serialize_json_list(author_h_indices)
             if any(h is not None for h in author_h_indices)
             else None,
             # Citation context (for citation sentiment analysis)

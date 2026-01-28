@@ -227,7 +227,8 @@ class TestOpenAlexPublicationTransformer:
         result = await transformer.transform(pipeline_context, record, 0)
 
         assert result is not None
-        assert result["concepts"] == ["Chemistry", "Biology"]
+        # concepts is serialized to JSON string for schema compliance
+        assert result["concepts"] == '["Chemistry","Biology"]'
 
     @pytest.mark.asyncio
     async def test_transform_empty_abstract_inverted_index(

@@ -15,6 +15,7 @@ Note: Business logic functions are delegated to extractors module.
 
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
@@ -247,12 +248,13 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             # Unified BioETL field: citation_count (standardized across all providers)
             "citation_count": rec.get("cited_by_count"),
             # Topics (hierarchical classification - replaces deprecated concepts)
-            "topics": topics,
-            "primary_topic": primary_topic,
-            # Grants/funding information
-            "grants": grants,
-            # Concepts (DEPRECATED - kept for backward compatibility)
-            "concepts": concepts,
+            # Serialized to JSON string for schema compliance
+            "topics": self.serialize_json_list(topics) if topics else None,
+            "primary_topic": json.dumps(primary_topic) if primary_topic else None,
+            # Grants/funding information (serialized to JSON string)
+            "grants": self.serialize_json_list(grants) if grants else None,
+            # Concepts (DEPRECATED - kept for backward compatibility, serialized to JSON)
+            "concepts": self.serialize_json_list(concepts) if concepts else None,
             "mesh": mesh_terms,
             "keywords": keywords,
             "language": rec.get("language"),

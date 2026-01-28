@@ -307,6 +307,10 @@ class MergeConfig:
             Example: {"title": ["chembl", "crossref"]}
         field_mappings: Mapping to rename fields during merge.
             Example: {"crossref_title": "title"}
+        preserve_all_sources: If True, keep all provider-qualified columns
+            for common fields instead of coalescing them. Default: False.
+            When enabled, columns like chembl.publication.title and
+            crossref.publication.title are both preserved in the output.
 
     Example:
         >>> config = MergeConfig(
@@ -314,6 +318,7 @@ class MergeConfig:
         ...     conflict_resolution=ConflictResolution.SEED_PRIORITY,
         ...     output_silver_path="silver/composite/publication",
         ...     output_gold_path="gold/publication_enriched",
+        ...     preserve_all_sources=True,  # Keep all provider columns
         ... )
     """
 
@@ -324,6 +329,7 @@ class MergeConfig:
     field_priorities: dict[str, tuple[str, ...]] = field(default_factory=dict)
     field_mappings: dict[str, str] = field(default_factory=dict)
     column_groups: tuple[ColumnGroupConfig, ...] = ()
+    preserve_all_sources: bool = False
 
     def __post_init__(self) -> None:
         """Validate and convert types."""

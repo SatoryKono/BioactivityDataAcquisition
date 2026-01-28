@@ -21,6 +21,7 @@ from bioetl.domain.composite.aggregation import (
     EnricherCardinality,
 )
 from bioetl.domain.composite.config import (
+    ColumnGroupConfig,
     CompositeConfig,
     CompositeDQConfig,
     DependencyConfig,
@@ -254,6 +255,40 @@ class MergeOutputSchema(BaseModel):
     gold: str = Field(..., min_length=1, description="Path for merged Gold table")
 
 
+class ColumnGroupSchema(BaseModel):
+    """Pydantic schema for column group configuration.
+
+    Defines how columns are grouped and ordered in merged output.
+    """
+
+    name: str = Field(..., min_length=1, description="Group name for logging")
+    fields: list[str] = Field(
+        default_factory=list, description="Explicit field names to include"
+    )
+    pattern: str | None = Field(
+        default=None, description="Regex pattern to match field names"
+    )
+    provider_order: list[str] = Field(
+        default_factory=lambda: [
+            "chembl",
+            "crossref",
+            "openalex",
+            "pubmed",
+            "semanticscholar",
+        ],
+        description="Order of providers within this group",
+    )
+
+    @model_validator(mode="after")
+    def validate_fields_or_pattern(self) -> ColumnGroupSchema:
+        """Ensure at least one of fields or pattern is provided."""
+        if not self.fields and not self.pattern:
+            raise ValueError(
+                f"Column group '{self.name}' must have either fields or pattern"
+            )
+        return self
+
+
 class MergeSchema(BaseModel):
     """Pydantic schema for merge step configuration."""
 
@@ -276,6 +311,14 @@ class MergeSchema(BaseModel):
     output: MergeOutputSchema = Field(
         ..., description="Output paths for Silver and Gold tables"
     )
+    preserve_all_sources: bool = Field(
+        default=False,
+        description="Keep all provider-qualified columns instead of coalescing",
+    )
+    column_groups: list[ColumnGroupSchema] = Field(
+        default_factory=list,
+        description="Column ordering by semantic groups",
+    )
 
     @model_validator(mode="after")
     def validate_explicit_rules_requires_priorities(self) -> MergeSchema:
@@ -291,6 +334,16 @@ class MergeSchema(BaseModel):
         field_priorities_tuples = {
             k: tuple(v) for k, v in self.field_priorities.items()
         }
+        # Convert column groups to domain objects
+        column_groups_domain = tuple(
+            ColumnGroupConfig(
+                name=g.name,
+                fields=tuple(g.fields),
+                pattern=g.pattern,
+                provider_order=tuple(g.provider_order),
+            )
+            for g in self.column_groups
+        )
         return MergeConfig(
             strategy=MergeStrategy.from_string(self.strategy),
             conflict_resolution=ConflictResolution.from_string(
@@ -300,6 +353,8 @@ class MergeSchema(BaseModel):
             output_gold_path=self.output.gold,
             field_priorities=field_priorities_tuples,
             field_mappings=self.field_mappings,
+            preserve_all_sources=self.preserve_all_sources,
+            column_groups=column_groups_domain,
         )
 
 
@@ -548,6 +603,7 @@ class CompositeConfigFileSchema(BaseModel):
 __all__ = [
     "AggregationFieldSchema",
     "AggregationSchema",
+    "ColumnGroupSchema",
     "CompositeConfigFileSchema",
     "CompositeConfigSchema",
     "CompositeDQSchema",
