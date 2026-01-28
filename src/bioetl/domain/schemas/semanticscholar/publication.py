@@ -32,12 +32,18 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
 
     Validates publication records from Semantic Scholar Academic Graph API.
     Inherits common fields from PublicationBaseSchema:
-    - Cross-references: pmid, doi, pmc_id
+    - Cross-references: pmid, doi
     - Core content: title, abstract, authors
-    - Metadata: journal, year, publication_date, doc_type, language
+    - Metadata: journal, year, publication_date
     - Metrics: citation_count
     - Open Access: is_oa
     - Lookup tracking: lookup_method (overridden), original_id, source (overridden)
+
+    Fields excluded from PyArrow/Gold schemas:
+    - pmc_id: Excluded per design (2026-01)
+    - arxiv_id: Excluded per design (2026-01)
+    - language: S2 API doesn't return language
+    - doc_type: S2 uses publication_types (JSON array) instead
     """
 
     # === Primary Key (SemanticScholar-specific) ===
@@ -63,10 +69,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     )
 
     # === Provider-specific Identifiers ===
-    arxiv_id: Series[str] = pa.Field(
-        nullable=True,
-        description="ArXiv ID",
-    )
+    # Note: arxiv_id excluded per design (2026-01)
 
     dblp_id: Series[str] = pa.Field(
         nullable=True,

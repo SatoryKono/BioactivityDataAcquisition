@@ -1,13 +1,12 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.12 | Last updated: 2026-01-26*
+*Synced with RULES.md v5.12 | Last updated: 2026-01-27*
 
-> **Documentation Update:** 2026-01-26
-> - Architecture diagrams updated: layer diagrams refreshed
-> - Cross-links added between all layer documents (Domain ↔ Application ↔ Infrastructure ↔ Interfaces ↔ Composition)
-> - All 7 providers now reflected in diagrams (including CrossRef, OpenAlex, SemanticScholar)
-> - ADR-030, ADR-031 added to registry
-> - See: [02-architecture/00-overview.md](02-architecture/00-overview.md) for updated architecture overview
+> **Documentation Update:** 2026-01-27
+> - Codebase metrics updated: ~516 Python files, ~110,300 LOC, ~7,770 tests
+> - ADR count corrected: 31 ADRs (ADR-001 through ADR-031)
+> - Pipeline configs: 21 configurations
+> - Document Status section synchronized with actual codebase state
 
 ## Quick Links
 
@@ -405,11 +404,11 @@ graph TD
 | RULES.md                 | 2026-01-21   | v5.12 (ADR Registry Update)  |
 | REQUIREMENTS.md          | 2026-01-21   | v1.4 (156 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
-| 00-map.md                | 2026-01-21   | v6.9 API Sync Completed      |
+| 00-map.md                | 2026-01-27   | v7.0 Metrics Update          |
 | rules-summary.md         | 2026-01-21   | v5.12 Synced                 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-development/          | 2026-01-26   | Config schema guidelines     |
-| ADR-001..028             | 2026-01-21   | All 28 ADRs documented       |
+| ADR-001..031             | 2026-01-27   | All 31 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
 | archived/audits/         | 2026-01-21   | Historical audit files       |
@@ -417,4 +416,4 @@ graph TD
 
 ---
 
-*Last updated: 2026-01-21. Documentation sync audit completed.*
+*Last updated: 2026-01-27. Documentation sync audit completed.*
