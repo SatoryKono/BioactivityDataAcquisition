@@ -1,6 +1,6 @@
 # BioETL Glossary (Ubiquitous Language)
 
-*Version 2.1 | Updated: 2026-01-26 | Created: 2025-12-29*
+*Version 2.2 | Updated: 2026-01-28 | Created: 2025-12-29*
 
 This glossary defines the canonical terminology used throughout BioETL. Following Domain-Driven Design principles, these terms form the **Ubiquitous Language** — a shared vocabulary understood by both developers and domain experts.
 
@@ -91,6 +91,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Stage** | A discrete phase of pipeline execution (extract, transform, validate, load) | `step`, `phase` (as generic terms) |
 | **Run** | A single execution instance of a pipeline, identified by `run_id` | `execution`, `instance` |
 | **Run Type** | The mode of pipeline execution: `INCREMENTAL`, `BACKFILL`, `REBUILD` | `mode` |
+| **Loading Strategy** | Enum defining pipeline loading behavior: `FULL_SCAN_ONLY`, `WATERMARK_BASED` (ADR-031) | `force_full_scan` (deprecated boolean) |
 
 ### Batch Processing
 
@@ -107,6 +108,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Bronze** | Raw data layer (JSONL + zstd compression) | `raw`, `landing` |
 | **Silver** | Normalized and deduplicated data layer (Delta Lake) | `cleansed`, `curated` |
 | **Gold** | Refined and validated data layer for analytics | `reporting`, `presentation` |
+| **BaseOutputMetadata** | Unified output metadata contract for all Medallion layers (ADR-029) | layer-specific `OutputMetadata` variants |
 
 ---
 
