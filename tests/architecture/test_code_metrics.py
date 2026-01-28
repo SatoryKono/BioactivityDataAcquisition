@@ -80,6 +80,7 @@ class TestFileSizeLimits:
         "dq_metrics.py": 420,  # 411 LOC - Batch DQ metrics with helpers for CC reduction + _make_hashable for list/dict values
         # Domain registry exemptions
         "publication.py": 340,  # 331 LOC - Publication entity mapping registry with composite key support
+        "publication_field_groups.py": 430,  # 424 LOC - Field-to-group mapping for composite publication pipeline (ADR-026)
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
         "preflight_validator.py": 655,  # 651 LOC - extracted preflight validators (REFACTOR-003)
