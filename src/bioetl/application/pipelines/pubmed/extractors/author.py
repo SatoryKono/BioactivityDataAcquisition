@@ -109,6 +109,39 @@ class AuthorExtractor(BaseFieldExtractor):
 
         return raw_authors if raw_authors else None
 
+    def _find_prioritized_identifier(
+        self, aff_info: Element
+    ) -> tuple[str | None, str | None]:
+        """Find identifier in priority order (ROR > GRID > ISNI > RINGGOLD).
+
+        Args:
+            aff_info: AffiliationInfo XML element.
+
+        Returns:
+            Tuple of (identifier, source) or (None, None).
+        """
+        for source in ["ROR", "GRID", "ISNI", "RINGGOLD"]:
+            for id_elem in aff_info.findall("Identifier"):
+                if id_elem.get("Source") == source and id_elem.text:
+                    return id_elem.text.strip(), source
+        return None, None
+
+    def _find_any_identifier(
+        self, aff_info: Element
+    ) -> tuple[str | None, str | None]:
+        """Find first available identifier.
+
+        Args:
+            aff_info: AffiliationInfo XML element.
+
+        Returns:
+            Tuple of (identifier, source) or (None, None).
+        """
+        for id_elem in aff_info.findall("Identifier"):
+            if id_elem.text:
+                return id_elem.text.strip(), id_elem.get("Source")
+        return None, None
+
     def _extract_structured_affiliation(
         self, aff_info: Element
     ) -> StructuredAffiliation | None:
@@ -133,27 +166,10 @@ class AuthorExtractor(BaseFieldExtractor):
         if not aff_text:
             return None
 
-        # Extract identifier if present (prefer ROR, then GRID, then others)
-        identifier = None
-        identifier_source = None
-
-        # Try to find identifiers in priority order
-        for source in ["ROR", "GRID", "ISNI", "RINGGOLD"]:
-            for id_elem in aff_info.findall("Identifier"):
-                if id_elem.get("Source") == source and id_elem.text:
-                    identifier = id_elem.text.strip()
-                    identifier_source = source
-                    break
-            if identifier:
-                break
-
-        # If no prioritized identifier found, take the first available
+        # Extract identifier (prefer ROR, then GRID, then others)
+        identifier, identifier_source = self._find_prioritized_identifier(aff_info)
         if not identifier:
-            for id_elem in aff_info.findall("Identifier"):
-                if id_elem.text:
-                    identifier = id_elem.text.strip()
-                    identifier_source = id_elem.get("Source")
-                    break
+            identifier, identifier_source = self._find_any_identifier(aff_info)
 
         # Extract email if present in affiliation text
         email = self._extract_email_from_text(aff_text)
