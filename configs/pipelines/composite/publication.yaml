@@ -18,9 +18,14 @@
 # - PubMed: vernacular_title, epub_date, received_date, revised_date, accepted_date
 # - SemanticScholar: pmc_id, arxiv_id
 #
-# Version: 1.0.0
+# Full field coverage update (2026-01-28):
+# This configuration now includes ALL 181 extractable fields (100% coverage).
+# Previously included 142 of 181 fields (78.5%).
+# See column_groups section for complete field mappings.
+#
+# Version: 1.1.0
 # Reference: ADR-026 Composite Pipeline Pattern
-# Last Updated: 2026-01-27
+# Last Updated: 2026-01-28
 #
 # =============================================================================
 
@@ -29,7 +34,7 @@
 # -----------------------------------------------------------------------------
 composite:
   name: composite_publication
-  version: "1.0.0"
+  version: "1.1.0"
 
   # ---------------------------------------------------------------------------
   # Seed Pipeline Configuration
@@ -124,6 +129,7 @@ composite:
     # Field-level priority overrides (when using explicit_rules)
     # Maps field name to ordered list of source preferences
     field_priorities:
+      # === Core Content ===
       title:
         - chembl         # ChEMBL title is authoritative
         - crossref
@@ -132,15 +138,93 @@ composite:
         - pubmed         # PubMed has best abstracts
         - openalex
         - chembl
-      citations_count:
-        - crossref       # CrossRef is citation authority
-        - openalex
-      mesh_terms:
-        - pubmed         # PubMed MeSH is authoritative
-      concepts:
-        - openalex       # OpenAlex concepts are unique
       tldr:
         - semanticscholar  # S2-only field
+
+      # === Citation Metrics ===
+      citation_count:
+        - crossref       # CrossRef is citation authority
+        - openalex
+        - semanticscholar
+      reference_count:
+        - crossref       # CrossRef has most complete reference data
+        - pubmed
+        - semanticscholar
+      referenced_works_count:
+        - openalex       # OpenAlex-specific field (fallback to reference_count)
+      influential_citation_count:
+        - semanticscholar  # S2-only field
+
+      # === Classification/Topics ===
+      # NOTE: 'topics' replaces deprecated 'concepts' per OpenAlex 2024 migration
+      topics:
+        - openalex       # OpenAlex hierarchical topics (replaces concepts)
+      primary_topic:
+        - openalex       # OpenAlex-unique field
+      concepts:
+        - openalex       # DEPRECATED: use topics instead
+      mesh_terms:
+        - pubmed         # PubMed MeSH is authoritative
+      mesh:
+        - openalex       # OpenAlex MeSH extraction (fallback to mesh_terms)
+      fields_of_study:
+        - semanticscholar  # S2-unique field
+
+      # === Author Metadata ===
+      author_orcids:
+        - crossref       # CrossRef has most complete ORCID data
+        - semanticscholar
+      author_details:
+        - crossref       # CrossRef-unique detailed author objects
+      author_s2_ids:
+        - semanticscholar  # S2-unique author identifiers
+      author_h_indices:
+        - semanticscholar  # S2-unique h-index data
+
+      # === Affiliations ===
+      # Note: structured_affiliations (PubMed) preferred over affiliations
+      structured_affiliations:
+        - pubmed         # PubMed has structured affiliation data
+      affiliations:
+        - pubmed         # PubMed raw affiliations (deprecated)
+        - openalex
+        - semanticscholar
+
+      # === References/Citations Context ===
+      references:
+        - crossref       # CrossRef-unique cited references
+      citation_contexts:
+        - semanticscholar  # S2-unique citation context sentences
+
+      # === Quality Indicators ===
+      is_retracted:
+        - openalex       # OpenAlex-unique retraction status (CRITICAL)
+      fwci:
+        - openalex       # OpenAlex-unique FWCI metric
+
+      # === Funding ===
+      grants:
+        - openalex       # OpenAlex-unique grant/funding data
+
+      # === Chemicals & Genes (PubMed-specific) ===
+      chemicals:
+        - pubmed         # PubMed-unique chemical substances
+      gene_symbols:
+        - pubmed         # PubMed-unique gene symbols
+      databanks:
+        - pubmed         # PubMed-unique databank accessions
+
+      # === Alternative Identifiers ===
+      pii:
+        - pubmed         # PubMed Publisher Item Identifier
+      mid:
+        - pubmed         # PubMed Manuscript ID
+      publisher_id:
+        - pubmed         # PubMed publisher-specific ID
+      dblp_id:
+        - semanticscholar  # S2-unique DBLP identifier
+      mag_id:
+        - openalex       # OpenAlex MAG legacy ID
 
     # -------------------------------------------------------------------------
     # Column Ordering by Semantic Groups
@@ -203,6 +287,22 @@ composite:
           - author_count
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 
+      # 7a. Author identifiers (for author-level analytics)
+      - name: author_identifiers
+        fields:
+          - author_orcids          # CrossRef, SemanticScholar
+          - author_details         # CrossRef-unique (JSON: given, family, orcid, sequence, affiliations)
+          - author_s2_ids          # SemanticScholar-unique author IDs
+          - author_h_indices       # SemanticScholar-unique h-index values
+        provider_order: [crossref, semanticscholar]
+
+      # 7b. Author affiliations
+      - name: affiliations
+        fields:
+          - structured_affiliations  # PubMed (preferred, with identifiers)
+          - affiliations             # PubMed, OpenAlex, SemanticScholar (raw)
+        provider_order: [pubmed, openalex, semanticscholar]
+
       # 8. Journal group
       - name: journal
         fields:
@@ -254,7 +354,16 @@ composite:
         fields:
           - citation_count
           - reference_count
+          - referenced_works_count   # OpenAlex-specific (similar to reference_count)
+          - influential_citation_count  # SemanticScholar-unique
         provider_order: [crossref, openalex, semanticscholar, pubmed]
+
+      # 12a. Citation references (detailed reference data)
+      - name: citation_references
+        fields:
+          - references               # CrossRef-unique (JSON: DOI, title, author, year)
+          - citation_contexts        # SemanticScholar-unique (JSON: context sentences)
+        provider_order: [crossref, semanticscholar]
 
       # 13. ISSN group
       - name: issn
@@ -294,12 +403,16 @@ composite:
         provider_order: [crossref, openalex]
 
       # 18. Subject/Classification
+      # NOTE: 'topics' replaces deprecated 'concepts' per OpenAlex 2024 migration
       - name: subjects
         fields:
           - subjects
-          - concepts
+          - topics                   # OpenAlex hierarchical topics (replaces concepts)
+          - primary_topic            # OpenAlex primary topic classification
+          - concepts                 # OpenAlex (DEPRECATED: use topics instead)
           - fields_of_study
           - mesh_terms
+          - mesh                     # OpenAlex MeSH extraction (fallback to mesh_terms)
           - mesh_heading_count
           - keywords
           - keyword_count
@@ -318,9 +431,47 @@ composite:
           - chembl_release
           - creation_date
           - nlm_unique_id
+          - mag_id                   # OpenAlex MAG legacy ID
+          - dblp_id                  # SemanticScholar DBLP key
         provider_order: [chembl, openalex, semanticscholar, pubmed]
 
-      # 20. Miscellaneous fields
+      # 19a. Alternative publication identifiers
+      - name: alternative_ids
+        fields:
+          - pii                      # PubMed Publisher Item Identifier
+          - mid                      # PubMed Manuscript ID
+          - publisher_id             # PubMed publisher-specific identifier
+        provider_order: [pubmed]
+
+      # 20. Quality indicators (CRITICAL for data integrity)
+      - name: quality
+        fields:
+          - is_retracted             # OpenAlex-unique (CRITICAL: must flag retracted papers)
+        provider_order: [openalex]
+
+      # 21. Advanced metrics
+      - name: metrics
+        fields:
+          - fwci                     # OpenAlex Field-Weighted Citation Impact
+        provider_order: [openalex]
+
+      # 22. Funding/Grants
+      - name: funding
+        fields:
+          - grants                   # OpenAlex-unique (JSON: funder, award info)
+          - grant_count              # PubMed grant count
+        provider_order: [openalex, pubmed]
+
+      # 23. PubMed-specific chemical and gene data
+      - name: chemicals_genes
+        fields:
+          - chemicals                # PubMed-unique (JSON: name/registry pairs)
+          - chemical_count           # PubMed chemical count
+          - gene_symbols             # PubMed-unique gene symbols
+          - databanks                # PubMed-unique databank accessions
+        provider_order: [pubmed]
+
+      # 24. Miscellaneous fields
       - name: misc
         fields:
           - license_url
@@ -330,11 +481,9 @@ composite:
           - country
           - citation_subset
           - publication_status
-          - grant_count
-          - chemical_count
         provider_order: [crossref, pubmed]
 
-      # 21. DQ fields (always last)
+      # 25. DQ fields (always last)
       # Note: _source is a system field in the 'system' group
       - name: dq
         pattern: "^_dq_"
@@ -368,6 +517,125 @@ composite:
       - document_chembl_id
       - title
 
+    # Field-level validation rules for new fields
+    field_validations:
+      # === Quality Indicators (CRITICAL) ===
+      is_retracted:
+        type: boolean
+        nullable: false  # OpenAlex always provides this
+        description: "Retraction status - CRITICAL for data integrity"
+
+      # === Citation Metrics ===
+      influential_citation_count:
+        type: integer
+        nullable: true
+        min_value: 0
+        description: "SemanticScholar influential citations (non-negative)"
+
+      fwci:
+        type: float
+        nullable: true
+        min_value: 0.0
+        description: "OpenAlex Field-Weighted Citation Impact (non-negative)"
+
+      referenced_works_count:
+        type: integer
+        nullable: true
+        min_value: 0
+        description: "OpenAlex referenced works count (non-negative)"
+
+      # === JSON Array Fields (schema validation) ===
+      author_orcids:
+        type: json_array
+        nullable: true
+        description: "JSON array of ORCID identifiers"
+
+      author_details:
+        type: json_array
+        nullable: true
+        description: "JSON array of author objects (CrossRef)"
+
+      author_s2_ids:
+        type: json_array
+        nullable: true
+        description: "JSON array of S2 author IDs (40-char hex)"
+
+      author_h_indices:
+        type: json_array
+        nullable: true
+        description: "JSON array of author h-index values"
+
+      topics:
+        type: json_array
+        nullable: true
+        description: "OpenAlex hierarchical topics (replaces concepts)"
+
+      primary_topic:
+        type: json_object
+        nullable: true
+        description: "OpenAlex primary topic (single object)"
+
+      grants:
+        type: json_array
+        nullable: true
+        description: "OpenAlex funding/grant information"
+
+      references:
+        type: json_array
+        nullable: true
+        description: "CrossRef cited references"
+
+      citation_contexts:
+        type: json_array
+        nullable: true
+        description: "SemanticScholar citation context sentences"
+
+      chemicals:
+        type: json_array
+        nullable: true
+        description: "PubMed chemical substances"
+
+      databanks:
+        type: json_array
+        nullable: true
+        description: "PubMed databank accessions"
+
+      gene_symbols:
+        type: json_array
+        nullable: true
+        description: "PubMed gene symbols"
+
+      affiliations:
+        type: json_array
+        nullable: true
+        description: "Author affiliations (multiple providers)"
+
+      # === String Identifiers ===
+      pii:
+        type: string
+        nullable: true
+        description: "PubMed Publisher Item Identifier"
+
+      mid:
+        type: string
+        nullable: true
+        description: "PubMed Manuscript ID"
+
+      publisher_id:
+        type: string
+        nullable: true
+        description: "PubMed publisher-specific identifier"
+
+      dblp_id:
+        type: string
+        nullable: true
+        description: "SemanticScholar DBLP key"
+
+      mag_id:
+        type: string
+        nullable: true
+        description: "OpenAlex MAG legacy ID"
+
   # ---------------------------------------------------------------------------
   # Execution Options
   # ---------------------------------------------------------------------------
@@ -395,6 +663,39 @@ composite:
 
     # Include per-record enrichment status
     track_status: true
+
+    # Provider-specific lookup metadata (renamed with provider prefix)
+    # These fields track how each provider resolved the publication
+    provider_lookup_fields:
+      chembl:
+        _lookup_method: chembl_lookup_method
+        _original_id: chembl_original_id
+      crossref:
+        _lookup_method: crossref_lookup_method
+        _original_id: crossref_original_id
+      openalex:
+        _lookup_method: openalex_lookup_method
+        _original_id: openalex_original_id
+      pubmed:
+        _lookup_method: pubmed_lookup_method
+        _original_id: pubmed_original_id
+      semanticscholar:
+        _lookup_method: semanticscholar_lookup_method
+        _original_id: semanticscholar_original_id
+
+    # Field-level source tracking for overlapping fields
+    # These are fields that come from multiple providers
+    track_source_for_fields:
+      - title
+      - abstract
+      - citation_count
+      - reference_count
+      - mesh_terms
+      - affiliations
+      - author_orcids
+      - is_oa
+      - oa_status
+      - keywords
 
 # -----------------------------------------------------------------------------
 # Gold Filters (applied to merged output)
