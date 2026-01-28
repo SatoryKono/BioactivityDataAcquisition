@@ -104,7 +104,7 @@ class TestFileSizeLimits:
         "gold_writer.py": 910,  # 890 LOC - SCD Type 2 (metadata/arrow logic extracted to metadata_builder.py, arrow_converter.py)
         "bronze_writer.py": 800,  # 797 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
-        "silver.py": 930,  # 926 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields + unified DQ columns + affiliations + activity curation fields + composite publication pipeline fields)
+        "silver.py": 935,  # 931 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields + unified DQ columns + affiliations + activity curation fields + composite publication pipeline fields + OpenAlex author IDs + SemanticScholar affiliations)
         "client.py": 1000,  # 995 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "pipeline_config.py": 1080,  # 1078 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + force_full_scan (ADR-030)
@@ -117,7 +117,7 @@ class TestFileSizeLimits:
         "base_transformer.py": 790,  # 786 LOC - BaseTransformer with serialization helpers + validate_value_object() consolidation
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
         "merger.py": 1405,  # 1399 LOC - MergeService with type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing
-        "extractors.py": 710,  # 705 LOC - SemanticScholar extractors with volume/issue parsing + page range expansion + affiliations
+        "extractors.py": 720,  # 717 LOC - SemanticScholar extractors with volume/issue parsing + page range expansion + affiliations + complexity refactor
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:

@@ -665,7 +665,8 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         # _original_id: Original identifier used for lookup
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
-        # abstract, affiliations, authors excluded per user request
+        # abstract, authors excluded per user request
+        pa.field("affiliations", pa.string()),  # JSON array of author affiliations
         # Note: arxiv_id excluded per design (2026-01)
         # Author identifiers (for author-level analytics)
         pa.field("author_h_indices", pa.string()),  # JSON array of h-index values
@@ -796,6 +797,9 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_original_id", pa.string()),
         pa.field("abstract", pa.string()),
         pa.field("affiliations", pa.string()),
+        # Author identifiers
+        pa.field("author_ids", pa.string()),  # JSON array of OpenAlex author IDs
+        pa.field("author_orcids", pa.string()),  # JSON array of ORCID identifiers
         pa.field("authors", pa.string()),  # JSON-serialized list
         # OpenAlex source field: cited_by_count
         # Unified BioETL field: citation_count (standardized across all providers)
@@ -843,6 +847,8 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publisher", pa.string()),
         # Number of works referenced (from referenced_works_count)
         pa.field("referenced_works_count", pa.int64()),
+        # ROR IDs (Research Organization Registry identifiers)
+        pa.field("ror_ids", pa.string()),  # JSON array of ROR IDs
         pa.field("title", pa.string()),
         # Topics (hierarchical classification - replaces deprecated concepts)
         pa.field("topics", pa.string()),  # JSON array

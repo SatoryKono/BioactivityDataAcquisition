@@ -126,9 +126,7 @@ class AuthorExtractor(BaseFieldExtractor):
                     return id_elem.text.strip(), source
         return None, None
 
-    def _find_any_identifier(
-        self, aff_info: Element
-    ) -> tuple[str | None, str | None]:
+    def _find_any_identifier(self, aff_info: Element) -> tuple[str | None, str | None]:
         """Find first available identifier.
 
         Args:
