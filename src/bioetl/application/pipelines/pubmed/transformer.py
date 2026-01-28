@@ -372,6 +372,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 "text": aff.get("text"),
                 "identifier": aff.get("identifier"),
                 "identifier_source": aff.get("identifier_source"),
+                "ror_id": aff.get("ror_id"),
+                "grid_id": aff.get("grid_id"),
             }
             # Hash email if present (PII protection)
             email = aff.get("email")
@@ -422,26 +424,17 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             # Hash the name for PII compliance
             name_hash = self._pii_hasher.hash_value(name) if self._pii_hasher else None
 
-            # Process affiliations for this author
+            # Process affiliations for this author (use pre-computed ror_id/grid_id)
             affiliations: list[dict[str, Any]] = []
             structured_affs = author.get("structured_affiliations") or []
 
             for aff in structured_affs:
-                identifier = aff.get("identifier")
-                identifier_source = aff.get("identifier_source")
-
                 aff_entry: dict[str, Any] = {
                     "text": aff.get("text"),
-                    "ror_id": identifier if identifier_source == "ROR" else None,
-                    "grid_id": identifier if identifier_source == "GRID" else None,
-                    "identifier": (
-                        identifier if identifier_source not in ("ROR", "GRID") else None
-                    ),
-                    "identifier_source": (
-                        identifier_source
-                        if identifier_source not in ("ROR", "GRID")
-                        else None
-                    ),
+                    "ror_id": aff.get("ror_id"),
+                    "grid_id": aff.get("grid_id"),
+                    "identifier": aff.get("identifier"),
+                    "identifier_source": aff.get("identifier_source"),
                 }
                 affiliations.append(aff_entry)
 

@@ -250,6 +250,7 @@
     'affiliations': None,
     'author_count': 2,
     'authors': '["Smith, John","Doe, Jane"]',
+    'authors_with_affiliations': '[{"affiliations":[],"initials":null,"name_hash":"Smith, John"},{"affiliations":[],"initials":null,"name_hash":"Doe, Jane"}]',
     'chemical_count': 0,
     'chemicals': list([
     ]),
@@ -330,6 +331,7 @@
     'affiliations': None,
     'author_count': 0,
     'authors': None,
+    'authors_with_affiliations': None,
     'chemical_count': 0,
     'chemicals': list([
     ]),

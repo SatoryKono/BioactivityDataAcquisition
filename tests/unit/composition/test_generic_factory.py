@@ -116,7 +116,10 @@ class TestGenericPipelineFactory:
         )
 
         custom_creator.assert_called_once_with(
-            mock_settings, mock_pipeline_config, mock_logger, None,
+            mock_settings,
+            mock_pipeline_config,
+            mock_logger,
+            None,
             pipeline_name="test_pipeline",
         )
         assert result is mock_data_source
