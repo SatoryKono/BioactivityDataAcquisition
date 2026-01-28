@@ -112,7 +112,7 @@ class TestDocsVersionSync:
         assert doc_version is not None, (
             f"CLAUDE.md must reference RULES.md version.\n"
             f"Expected: RULES.md v{rules_version}\n"
-            f"Add: *Синхронизировано с RULES.md v{rules_version}*"  # noqa: RUF001
+            f"Add: *Синхронизировано с RULES.md v{rules_version}*"
         )
 
         assert doc_version == rules_version, (
