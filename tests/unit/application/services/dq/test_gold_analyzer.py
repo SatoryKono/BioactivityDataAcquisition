@@ -100,6 +100,18 @@ class TestHelperFunctions:
         result = convert_value([1, 2, DQCheckStatus.PASS])
         assert result == [1, 2, "pass"]
 
+    def test_convert_value_set(self) -> None:
+        """Convert set to list for JSON serialization."""
+        result = convert_value({1, 2, 3})
+        assert isinstance(result, list)
+        assert set(result) == {1, 2, 3}
+
+    def test_convert_value_frozenset(self) -> None:
+        """Convert frozenset to list for JSON serialization."""
+        result = convert_value(frozenset(["a", "b"]))
+        assert isinstance(result, list)
+        assert set(result) == {"a", "b"}
+
     def test_convert_value_dict(self) -> None:
         """Convert dict recursively."""
         result = convert_value({"status": DQCheckStatus.FAIL})
