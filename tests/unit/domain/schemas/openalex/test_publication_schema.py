@@ -83,6 +83,14 @@ def valid_record() -> dict:
         "mag_id": "12345678",
         # Author affiliations
         "affiliations": '["MIT", "Stanford"]',
+        # Author identifiers
+        "author_orcids": '["0000-0001-2345-6789", ""]',
+        "author_ids": '["A1234567890", "A9876543210"]',
+        # Institution identifiers
+        "institution_ids": '["I1234567890", "I9876543210"]',
+        "institution_country_codes": '["US", "GB"]',
+        # ROR identifiers (may be empty if not returned by Works API)
+        "ror_ids": None,
         # Lookup tracking
         "_source": "openalex",
         "_lookup_method": "doi",
@@ -397,3 +405,63 @@ class TestOpenAlexPublicationSchema:
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
         assert validated["grants"].iloc[0] == grants_json
+
+    def test_author_orcids_nullable(self, valid_record: dict) -> None:
+        """Should allow null author_orcids."""
+        valid_record["author_orcids"] = None
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert pd.isna(validated["author_orcids"].iloc[0])
+
+    def test_author_orcids_json_string(self, valid_record: dict) -> None:
+        """Should accept author_orcids as JSON-serialized string."""
+        orcids_json = '["0000-0001-2345-6789", "0000-0002-3456-7890"]'
+        valid_record["author_orcids"] = orcids_json
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["author_orcids"].iloc[0] == orcids_json
+
+    def test_author_ids_nullable(self, valid_record: dict) -> None:
+        """Should allow null author_ids."""
+        valid_record["author_ids"] = None
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert pd.isna(validated["author_ids"].iloc[0])
+
+    def test_author_ids_json_string(self, valid_record: dict) -> None:
+        """Should accept author_ids as JSON-serialized string."""
+        ids_json = '["A1234567890", "A9876543210"]'
+        valid_record["author_ids"] = ids_json
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["author_ids"].iloc[0] == ids_json
+
+    def test_institution_ids_nullable(self, valid_record: dict) -> None:
+        """Should allow null institution_ids."""
+        valid_record["institution_ids"] = None
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert pd.isna(validated["institution_ids"].iloc[0])
+
+    def test_institution_ids_json_string(self, valid_record: dict) -> None:
+        """Should accept institution_ids as JSON-serialized string."""
+        ids_json = '["I1234567890", "I9876543210"]'
+        valid_record["institution_ids"] = ids_json
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["institution_ids"].iloc[0] == ids_json
+
+    def test_institution_country_codes_nullable(self, valid_record: dict) -> None:
+        """Should allow null institution_country_codes."""
+        valid_record["institution_country_codes"] = None
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert pd.isna(validated["institution_country_codes"].iloc[0])
+
+    def test_institution_country_codes_json_string(self, valid_record: dict) -> None:
+        """Should accept institution_country_codes as JSON-serialized string."""
+        codes_json = '["US", "GB", "DE"]'
+        valid_record["institution_country_codes"] = codes_json
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["institution_country_codes"].iloc[0] == codes_json

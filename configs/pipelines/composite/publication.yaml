@@ -178,17 +178,24 @@ composite:
         - crossref       # CrossRef-unique detailed author objects
       author_s2_ids:
         - semanticscholar  # S2-unique author identifiers
+      author_openalex_ids:
+        - openalex         # OpenAlex-unique author identifiers
       author_h_indices:
         - semanticscholar  # S2-unique h-index data
 
       # === Affiliations ===
       # Note: structured_affiliations (PubMed) preferred over affiliations
+      # PubMed structured_affiliations contains ROR/GRID identifiers
       structured_affiliations:
-        - pubmed         # PubMed has structured affiliation data
+        - pubmed         # PubMed has structured affiliation data with ROR/GRID
       affiliations:
-        - pubmed         # PubMed raw affiliations (deprecated)
+        - pubmed         # PubMed raw affiliations
         - openalex
         - semanticscholar
+      institution_ids:
+        - openalex       # OpenAlex institution IDs (e.g., I1234567890)
+      institution_country_codes:
+        - openalex       # OpenAlex institution country codes (ISO 2-letter)
 
       # === References/Citations Context ===
       references:
@@ -292,15 +299,19 @@ composite:
         fields:
           - author_orcids          # CrossRef, SemanticScholar
           - author_details         # CrossRef-unique (JSON: given, family, orcid, sequence, affiliations)
+          - author_openalex_ids    # OpenAlex-unique author IDs
           - author_s2_ids          # SemanticScholar-unique author IDs
           - author_h_indices       # SemanticScholar-unique h-index values
-        provider_order: [crossref, semanticscholar]
+        provider_order: [crossref, openalex, semanticscholar]
 
       # 7b. Author affiliations
+      # Note: PubMed structured_affiliations contains ROR/GRID identifiers
       - name: affiliations
         fields:
-          - structured_affiliations  # PubMed (preferred, with identifiers)
-          - affiliations             # PubMed, OpenAlex, SemanticScholar (raw)
+          - structured_affiliations    # PubMed (preferred, with ROR/GRID identifiers)
+          - affiliations               # PubMed, OpenAlex, SemanticScholar (raw)
+          - institution_ids            # OpenAlex institution IDs
+          - institution_country_codes  # OpenAlex institution country codes
         provider_order: [pubmed, openalex, semanticscholar]
 
       # 8. Journal group
@@ -560,6 +571,11 @@ composite:
         nullable: true
         description: "JSON array of S2 author IDs (40-char hex)"
 
+      author_openalex_ids:
+        type: json_array
+        nullable: true
+        description: "JSON array of OpenAlex author IDs (e.g., A1234567890)"
+
       author_h_indices:
         type: json_array
         nullable: true
@@ -609,6 +625,16 @@ composite:
         type: json_array
         nullable: true
         description: "Author affiliations (multiple providers)"
+
+      institution_ids:
+        type: json_array
+        nullable: true
+        description: "OpenAlex institution IDs (e.g., I1234567890)"
+
+      institution_country_codes:
+        type: json_array
+        nullable: true
+        description: "OpenAlex institution country codes (ISO 2-letter, e.g., US, GB)"
 
       # === String Identifiers ===
       pii:

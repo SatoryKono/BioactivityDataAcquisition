@@ -198,6 +198,35 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="Author affiliations (JSON array)",
     )
 
+    # === Author Identifiers ===
+    author_orcids: Series[str] = pa.Field(
+        nullable=True,
+        description="ORCID IDs as JSON array (empty string for missing)",
+    )
+
+    author_ids: Series[str] = pa.Field(
+        nullable=True,
+        description="OpenAlex author IDs as JSON array (empty string for missing)",
+    )
+
+    # === Institution Identifiers ===
+    institution_ids: Series[str] = pa.Field(
+        nullable=True,
+        description="OpenAlex institution IDs (JSON array, e.g., I1234567890)",
+    )
+
+    institution_country_codes: Series[str] = pa.Field(
+        nullable=True,
+        description="ISO 2-letter country codes of affiliated institutions (JSON array)",
+    )
+
+    # === ROR Identifiers (Research Organization Registry) ===
+    ror_ids: Series[str] = pa.Field(
+        nullable=True,
+        description="ROR IDs of affiliated institutions (JSON array, full URL format). "
+        "May be empty if not returned by Works API.",
+    )
+
     class Config:
         """Pandera configuration."""
 

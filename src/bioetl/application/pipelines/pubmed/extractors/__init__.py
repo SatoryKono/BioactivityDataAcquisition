@@ -12,6 +12,7 @@ from __future__ import annotations
 from bioetl.application.pipelines.pubmed.extractors.abstract import AbstractExtractor
 from bioetl.application.pipelines.pubmed.extractors.author import (
     AuthorExtractor,
+    RawAuthor,
     StructuredAffiliation,
 )
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
@@ -34,5 +35,6 @@ __all__ = [
     "DateExtractor",
     "ELocationIds",
     "IdentifierExtractor",
+    "RawAuthor",
     "StructuredAffiliation",
 ]

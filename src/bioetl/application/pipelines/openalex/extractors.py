@@ -6,8 +6,35 @@ Topics vs Concepts: OpenAlex deprecated concepts in 2024; use topics instead.
 
 from __future__ import annotations
 
+import re
 import warnings
 from typing import Any
+
+# ORCID format: XXXX-XXXX-XXXX-XXXX (last char can be X for checksum)
+_ORCID_PATTERN = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$")
+
+__all__ = [
+    "extract_affiliations",
+    "extract_author_ids",
+    "extract_author_orcids",
+    "extract_authors",
+    "extract_biblio_info",
+    "extract_concepts",
+    "extract_doi",
+    "extract_external_ids",
+    "extract_grants",
+    "extract_institution_country_codes",
+    "extract_institution_ids",
+    "extract_institution_ror_ids",
+    "extract_journal_info",
+    "extract_keywords",
+    "extract_mesh_terms",
+    "extract_open_access_info",
+    "extract_openalex_id",
+    "extract_primary_topic",
+    "extract_topics",
+    "reconstruct_abstract",
+]
 
 
 def _extract_id_from_url(url: str | None) -> str | None:
@@ -99,6 +126,80 @@ def extract_authors(authorships: list[dict[str, Any]]) -> list[str]:
     return authors
 
 
+def _extract_orcid_from_url(url: str | None) -> str:
+    """Extract and validate ORCID from URL (helper function).
+
+    Args:
+        url: ORCID URL (e.g., "https://orcid.org/0000-0001-2345-6789") or None.
+
+    Returns:
+        Extracted ORCID ID if valid, empty string otherwise.
+    """
+    if not url or not isinstance(url, str):
+        return ""
+
+    # Remove URL prefix if present
+    orcid = url
+    if url.startswith("https://orcid.org/"):
+        orcid = url[18:]
+    elif url.startswith("http://orcid.org/"):
+        orcid = url[17:]
+
+    # Validate format
+    if _ORCID_PATTERN.match(orcid):
+        return orcid
+
+    return ""
+
+
+def extract_author_ids(authorships: list[dict[str, Any]]) -> list[str]:
+    """Extract OpenAlex author IDs from authorships (preserving order).
+
+    Args:
+        authorships: List of authorship dicts from OpenAlex API.
+
+    Returns:
+        List of OpenAlex author IDs (e.g., ["A1234567890", "", "A9876543210"]).
+    """
+    author_ids: list[str] = []
+    for authorship in authorships:
+        author = authorship.get("author", {})
+        if not isinstance(author, dict):
+            author_ids.append("")
+            continue
+        raw_id = author.get("id")
+        extracted = _extract_id_from_url(raw_id)
+        author_ids.append(extracted or "")
+    return author_ids
+
+
+def extract_author_orcids(authorships: list[dict[str, Any]]) -> list[str]:
+    """Extract ORCID identifiers from authorships (preserving order).
+
+    Args:
+        authorships: List of authorship dicts from OpenAlex API.
+
+    Returns:
+        List of ORCID IDs (empty string for missing), same length as input.
+
+    Example:
+        >>> extract_author_orcids([
+        ...     {"author": {"orcid": "https://orcid.org/0000-0001-2345-6789"}},
+        ...     {"author": {"orcid": None}},
+        ... ])
+        ['0000-0001-2345-6789', '']
+    """
+    orcids: list[str] = []
+    for authorship in authorships:
+        author = authorship.get("author", {})
+        if not isinstance(author, dict):
+            orcids.append("")
+            continue
+        orcid_url = author.get("orcid")
+        orcids.append(_extract_orcid_from_url(orcid_url))
+    return orcids
+
+
 def extract_affiliations(authorships: list[dict[str, Any]]) -> list[str]:
     """Extract unique affiliations from authorships (sorted)."""
     affiliations: set[str] = set()
@@ -163,6 +264,53 @@ def extract_institution_country_codes(authorships: list[dict[str, Any]]) -> list
             if code and isinstance(code, str):
                 codes.add(code.upper())
     return sorted(codes)
+
+
+def extract_institution_ror_ids(authorships: list[dict[str, Any]]) -> list[str]:
+    """Extract unique ROR IDs from authorships institutions.
+
+    ROR (Research Organization Registry) provides persistent identifiers for
+    research institutions. OpenAlex includes ROR IDs in institution objects
+    when available.
+
+    Args:
+        authorships: List of authorship dicts from OpenAlex API.
+
+    Returns:
+        Sorted list of unique ROR IDs (full URL format, e.g.,
+        ["https://ror.org/0123456789", "https://ror.org/9876543210"]).
+
+    Note:
+        OpenAlex Works API may not return `ror` field by default depending
+        on the API endpoint and select parameters. If `ror` is missing from
+        institution objects, this returns an empty list.
+
+        For comprehensive ROR coverage, consider:
+        - Using PubMed structured affiliations (preferred, has explicit ROR)
+        - Enriching via OpenAlex Institutions API (separate lookup)
+        - Building OpenAlex ID → ROR mapping from data snapshot
+
+    Example:
+        >>> authorships = [
+        ...     {"institutions": [{"ror": "https://ror.org/0123456789"}]},
+        ...     {"institutions": [{"ror": "https://ror.org/9876543210"}]},
+        ... ]
+        >>> extract_institution_ror_ids(authorships)
+        ['https://ror.org/0123456789', 'https://ror.org/9876543210']
+
+    """
+    ror_ids: set[str] = set()
+    for authorship in authorships:
+        institutions = authorship.get("institutions", [])
+        if not isinstance(institutions, list):
+            continue
+        for inst in institutions:
+            if not isinstance(inst, dict):
+                continue
+            ror = inst.get("ror")
+            if ror and isinstance(ror, str) and ror.startswith("https://ror.org/"):
+                ror_ids.add(ror)
+    return sorted(ror_ids)
 
 
 def extract_concepts(

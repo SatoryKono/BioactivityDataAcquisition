@@ -153,6 +153,21 @@ class OpenAlexPublicationRecord(BaseModel):
         default_factory=list,
         description="ISO 2-letter country codes of affiliated institutions",
     )
+    ror_ids: list[str] = PydanticField(
+        default_factory=list,
+        description="ROR IDs of affiliated institutions (full URL format). "
+        "May be empty if not returned by Works API.",
+    )
+
+    # Author identifiers (JSON-serialized lists preserving author order)
+    author_orcids: str | None = PydanticField(
+        default=None,
+        description="ORCID IDs as JSON array (empty string for missing)",
+    )
+    author_ids: str | None = PydanticField(
+        default=None,
+        description="OpenAlex author IDs as JSON array (empty string for missing)",
+    )
 
     # Additional metadata
     language: str | None = PydanticField(default=None, description="Language code")
@@ -206,6 +221,11 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # Institution identifiers (for cross-referencing and geographic analysis)
     institution_ids: list[str] = field(default_factory=list)
     institution_country_codes: list[str] = field(default_factory=list)
+    ror_ids: list[str] = field(default_factory=list)  # ROR IDs (may be empty)
+
+    # Author identifiers (JSON-serialized lists preserving author order)
+    author_orcids: str | None = None  # ORCID IDs (empty string for missing)
+    author_ids: str | None = None  # OpenAlex author IDs (empty string for missing)
 
     # Topics (hierarchical classification - replaces deprecated concepts)
     # Each topic dict has: id, display_name, score, subfield, field, domain

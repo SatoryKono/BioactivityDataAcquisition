@@ -19,6 +19,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
     ClassificationExtractor,
     DateExtractor,
     IdentifierExtractor,
+    RawAuthor,
     StructuredAffiliation,
 )
 from bioetl.application.pipelines.pubmed.xml_utils import get_text
@@ -270,9 +271,20 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         if article is None:
             return {"pmid": pmid}
 
-        # Extract and hash authors
-        raw_authors = AuthorExtractor.parse_authors(article)
-        hashed_authors = self.hash_pii_list(raw_authors) or []
+        # Extract raw author data with affiliations
+        author_extractor = AuthorExtractor()
+        raw_author_data = author_extractor.extract(article) or []
+
+        # Normalize and hash authors (legacy format for backward compatibility)
+        normalized_authors = (
+            author_extractor.normalize(raw_author_data) if raw_author_data else []
+        )
+        hashed_authors = self.hash_pii_list(normalized_authors) or []
+
+        # Build structured author-affiliation mapping
+        authors_with_affiliations = self._build_authors_with_affiliations(
+            raw_author_data
+        )
 
         # Extract structured affiliations with identifiers (affiliations field excluded)
         structured_affs = AuthorExtractor.parse_structured_affiliations(article)
@@ -313,6 +325,11 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             ),
             "abstract_structured": AbstractExtractor.is_abstract_structured(article),
             "authors": self.serialize_json_list(hashed_authors),
+            "authors_with_affiliations": (
+                self.serialize_json_list(authors_with_affiliations)
+                if authors_with_affiliations
+                else None
+            ),
             # affiliations excluded per user request
             "structured_affiliations": serialized_structured_affs,
             "author_count": len(hashed_authors),
@@ -355,6 +372,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 "text": aff.get("text"),
                 "identifier": aff.get("identifier"),
                 "identifier_source": aff.get("identifier_source"),
+                "ror_id": aff.get("ror_id"),
+                "grid_id": aff.get("grid_id"),
             }
             # Hash email if present (PII protection)
             email = aff.get("email")
@@ -365,6 +384,69 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
             processed.append(processed_aff)
         return processed
+
+    def _build_authors_with_affiliations(
+        self, raw_authors: list[RawAuthor]
+    ) -> list[dict[str, Any]]:
+        """Build structured author-affiliation mapping.
+
+        Links each author to their specific affiliations with identifiers.
+        Author names are hashed for PII compliance (RULES.md §5.4).
+
+        Args:
+            raw_authors: List of raw author dicts from AuthorExtractor.
+
+        Returns:
+            List of author objects with hashed names and affiliations.
+        """
+        result: list[dict[str, Any]] = []
+
+        for author in raw_authors:
+            # Build author name for hashing
+            last_name = author.get("last_name")
+            initials = author.get("initials")
+            fore_name = author.get("fore_name")
+            collective = author.get("collective_name")
+
+            # Determine display name
+            if last_name:
+                if initials:
+                    name = f"{last_name}, {initials}"
+                elif fore_name:
+                    name = f"{last_name}, {fore_name}"
+                else:
+                    name = last_name
+            elif collective:
+                name = collective
+            else:
+                continue  # Skip authors without any name
+
+            # Hash the name for PII compliance
+            name_hash = self._pii_hasher.hash_value(name) if self._pii_hasher else None
+
+            # Process affiliations for this author (use pre-computed ror_id/grid_id)
+            affiliations: list[dict[str, Any]] = []
+            structured_affs = author.get("structured_affiliations") or []
+
+            for aff in structured_affs:
+                aff_entry: dict[str, Any] = {
+                    "text": aff.get("text"),
+                    "ror_id": aff.get("ror_id"),
+                    "grid_id": aff.get("grid_id"),
+                    "identifier": aff.get("identifier"),
+                    "identifier_source": aff.get("identifier_source"),
+                }
+                affiliations.append(aff_entry)
+
+            result.append(
+                {
+                    "name_hash": name_hash,
+                    "initials": initials,
+                    "affiliations": affiliations,
+                }
+            )
+
+        return result
 
     def _get_primary_id_field(self) -> str:
         """Return the primary ID field name for PubMed publications.

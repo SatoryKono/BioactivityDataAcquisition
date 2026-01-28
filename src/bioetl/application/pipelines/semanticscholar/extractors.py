@@ -682,3 +682,24 @@ def validate_year(year: int | None) -> int | None:
         return None
     year_vo = PublicationYear.from_raw(year, config=_SS_VALIDATION_CONFIG)
     return year_vo.value if year_vo else None
+
+
+__all__ = [
+    "extract_affiliations",
+    "extract_author_h_indices",
+    "extract_author_ids",
+    "extract_author_orcids",
+    "extract_author_s2_ids",
+    "extract_authors",
+    "extract_citation_contexts",
+    "extract_external_ids",
+    "extract_fields_of_study",
+    "extract_journal_info",
+    "extract_open_access_info",
+    "extract_tldr",
+    "normalize_oa_status",
+    "parse_page_range",
+    "parse_volume_issue",
+    "validate_year",
+    "VALID_OA_STATUS_VALUES",
+]

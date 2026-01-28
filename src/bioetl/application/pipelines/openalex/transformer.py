@@ -20,6 +20,8 @@ from typing import TYPE_CHECKING, Any, cast
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.openalex.extractors import (
     extract_affiliations,
+    extract_author_ids,
+    extract_author_orcids,
     extract_authors,
     extract_biblio_info,
     extract_concepts,
@@ -27,6 +29,7 @@ from bioetl.application.pipelines.openalex.extractors import (
     extract_grants,
     extract_institution_country_codes,
     extract_institution_ids,
+    extract_institution_ror_ids,
     extract_journal_info,
     extract_keywords,
     extract_mesh_terms,
@@ -165,6 +168,13 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             rec.get("authorships", [])
         )
 
+        # Extract ROR IDs (may be empty if not returned by Works API)
+        ror_ids = extract_institution_ror_ids(rec.get("authorships", []))
+
+        # Extract author identifiers (ORCID and OpenAlex IDs)
+        author_orcids = extract_author_orcids(rec.get("authorships", []))
+        author_ids = extract_author_ids(rec.get("authorships", []))
+
         # Extract journal info
         journal_info = extract_journal_info(rec.get("primary_location", {}))
 
@@ -215,6 +225,14 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "affiliations": serialized_affiliations,
             "institution_ids": institution_ids,
             "institution_country_codes": institution_country_codes,
+            # ROR IDs (may be empty if not returned by Works API)
+            "ror_ids": self.serialize_json_list(ror_ids) if ror_ids else None,
+            "author_orcids": (
+                self.serialize_json_list(author_orcids) if any(author_orcids) else None
+            ),
+            "author_ids": (
+                self.serialize_json_list(author_ids) if any(author_ids) else None
+            ),
             "journal": journal_info.get("journal_name"),
             "issn": journal_info.get("issn"),
             "publisher": journal_info.get("publisher"),

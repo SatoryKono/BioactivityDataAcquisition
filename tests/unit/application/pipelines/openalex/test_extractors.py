@@ -9,6 +9,8 @@ import warnings
 
 from bioetl.application.pipelines.openalex.extractors import (
     extract_affiliations,
+    extract_author_ids,
+    extract_author_orcids,
     extract_authors,
     extract_biblio_info,
     extract_concepts,
@@ -124,6 +126,174 @@ class TestExtractAuthors:
         ]
         result = extract_authors(authorships)
         assert result == []
+
+
+class TestExtractAuthorIds:
+    """Tests for extract_author_ids function."""
+
+    def test_extract_author_ids_from_urls(self) -> None:
+        """Should extract author IDs from full OpenAlex URLs."""
+        authorships = [
+            {"author": {"id": "https://openalex.org/A1234567890"}},
+            {"author": {"id": "https://openalex.org/A9876543210"}},
+        ]
+        result = extract_author_ids(authorships)
+        assert result == ["A1234567890", "A9876543210"]
+
+    def test_extract_author_ids_preserves_order(self) -> None:
+        """Should preserve order and return same length as input."""
+        authorships = [
+            {"author": {"id": "https://openalex.org/A1234567890"}},
+            {"author": {"id": None}},
+            {"author": {"id": "https://openalex.org/A9876543210"}},
+        ]
+        result = extract_author_ids(authorships)
+        assert len(result) == 3
+        assert result == ["A1234567890", "", "A9876543210"]
+
+    def test_extract_author_ids_none_value(self) -> None:
+        """Should return empty string for None ID."""
+        authorships = [
+            {"author": {"display_name": "John Doe", "id": None}},
+        ]
+        result = extract_author_ids(authorships)
+        assert result == [""]
+
+    def test_extract_author_ids_missing_id_field(self) -> None:
+        """Should return empty string when id field is missing."""
+        authorships = [
+            {"author": {"display_name": "John Doe"}},
+        ]
+        result = extract_author_ids(authorships)
+        assert result == [""]
+
+    def test_extract_author_ids_bare_id(self) -> None:
+        """Should handle bare ID without URL prefix."""
+        authorships = [
+            {"author": {"id": "A1234567890"}},
+        ]
+        result = extract_author_ids(authorships)
+        assert result == ["A1234567890"]
+
+    def test_extract_author_ids_empty_list(self) -> None:
+        """Should return empty list for empty authorships."""
+        result = extract_author_ids([])
+        assert result == []
+
+    def test_extract_author_ids_invalid_author_structure(self) -> None:
+        """Should return empty string for invalid author structure."""
+        authorships = [
+            {"author": None},
+            {"author": "string"},
+            {"not_author": {}},
+        ]
+        result = extract_author_ids(authorships)
+        assert result == ["", "", ""]
+
+    def test_extract_author_ids_empty_string(self) -> None:
+        """Should return empty string for empty URL."""
+        authorships = [
+            {"author": {"id": ""}},
+        ]
+        result = extract_author_ids(authorships)
+        assert result == [""]
+
+
+class TestExtractAuthorOrcids:
+    """Tests for extract_author_orcids function."""
+
+    def test_extract_orcids_from_urls(self) -> None:
+        """Should extract ORCID IDs from full URLs."""
+        authorships = [
+            {"author": {"orcid": "https://orcid.org/0000-0001-2345-6789"}},
+            {"author": {"orcid": "https://orcid.org/0000-0002-3456-789X"}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == ["0000-0001-2345-6789", "0000-0002-3456-789X"]
+
+    def test_extract_orcids_preserves_order(self) -> None:
+        """Should preserve order and return same length as input."""
+        authorships = [
+            {"author": {"orcid": "https://orcid.org/0000-0001-2345-6789"}},
+            {"author": {"orcid": None}},
+            {"author": {"orcid": "https://orcid.org/0000-0003-4567-8901"}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert len(result) == 3
+        assert result == ["0000-0001-2345-6789", "", "0000-0003-4567-8901"]
+
+    def test_extract_orcids_none_value(self) -> None:
+        """Should return empty string for None ORCID."""
+        authorships = [
+            {"author": {"display_name": "John Doe", "orcid": None}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == [""]
+
+    def test_extract_orcids_missing_orcid_field(self) -> None:
+        """Should return empty string when orcid field is missing."""
+        authorships = [
+            {"author": {"display_name": "John Doe"}},  # No orcid field
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == [""]
+
+    def test_extract_orcids_invalid_format(self) -> None:
+        """Should return empty string for invalid ORCID format."""
+        authorships = [
+            {"author": {"orcid": "https://orcid.org/invalid-orcid"}},
+            {"author": {"orcid": "https://orcid.org/0000-0001"}},  # Too short
+            {"author": {"orcid": "not-a-url"}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == ["", "", ""]
+
+    def test_extract_orcids_http_url(self) -> None:
+        """Should handle http:// URLs (not just https://)."""
+        authorships = [
+            {"author": {"orcid": "http://orcid.org/0000-0001-2345-6789"}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == ["0000-0001-2345-6789"]
+
+    def test_extract_orcids_bare_orcid(self) -> None:
+        """Should handle bare ORCID without URL prefix."""
+        authorships = [
+            {"author": {"orcid": "0000-0001-2345-6789"}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == ["0000-0001-2345-6789"]
+
+    def test_extract_orcids_empty_list(self) -> None:
+        """Should return empty list for empty authorships."""
+        result = extract_author_orcids([])
+        assert result == []
+
+    def test_extract_orcids_invalid_author_structure(self) -> None:
+        """Should return empty string for invalid author structure."""
+        authorships = [
+            {"author": None},
+            {"author": "string"},
+            {"not_author": {}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == ["", "", ""]
+
+    def test_extract_orcids_with_checksum_x(self) -> None:
+        """Should accept ORCID with X checksum digit."""
+        authorships = [
+            {"author": {"orcid": "https://orcid.org/0000-0002-1825-009X"}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == ["0000-0002-1825-009X"]
+
+    def test_extract_orcids_empty_string_url(self) -> None:
+        """Should return empty string for empty URL."""
+        authorships = [
+            {"author": {"orcid": ""}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == [""]
 
 
 class TestExtractAffiliations:

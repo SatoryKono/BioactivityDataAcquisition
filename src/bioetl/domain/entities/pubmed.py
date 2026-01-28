@@ -221,6 +221,9 @@ class PubMedPublicationEntity(PublicationEntityBase):
 
     # Enhanced affiliation data (for institutional analysis)
     structured_affiliations: str | None = None  # JSON array with identifier metadata
+    authors_with_affiliations: str | None = (
+        None  # JSON array: author-affiliation mapping
+    )
 
     # Denormalized counts (Gold schema)
     author_count: int | None = None

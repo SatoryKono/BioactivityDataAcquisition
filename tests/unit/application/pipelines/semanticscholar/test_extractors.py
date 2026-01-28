@@ -248,6 +248,21 @@ class TestExtractAffiliations:
         result = extract_affiliations(authors)
         assert result == ["Univ A"]
 
+    def test_extract_affiliations_none_in_list(self) -> None:
+        """Should filter out None values inside affiliations list."""
+        authors = [{"name": "John", "affiliations": ["MIT", None, "Harvard"]}]
+        result = extract_affiliations(authors)
+        assert result == ["Harvard", "MIT"]
+
+    def test_extract_affiliations_unique_sorted(self) -> None:
+        """Should return unique sorted affiliations across all authors."""
+        authors = [
+            {"name": "John", "affiliations": ["MIT", "Harvard"]},
+            {"name": "Jane", "affiliations": ["MIT", "Stanford"]},
+        ]
+        result = extract_affiliations(authors)
+        assert result == ["Harvard", "MIT", "Stanford"]
+
 
 class TestExtractJournalInfo:
     """Tests for extract_journal_info function."""
