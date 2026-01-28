@@ -7,7 +7,7 @@ import argparse
 import ast
 import hashlib
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 DEFAULT_PATTERNS = (
@@ -167,7 +167,7 @@ class CallCounter(ast.NodeVisitor):
 
     def __init__(self, target_names: set[str]) -> None:
         self._target_names = target_names
-        self.counts = {name: 0 for name in target_names}
+        self.counts = dict.fromkeys(target_names, 0)
 
     def visit_Call(self, node: ast.Call) -> None:
         func_name = None
@@ -209,7 +209,7 @@ def render_report(
     report_path: Path,
 ) -> None:
     """Сформировать детальный отчет."""
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = datetime.now(UTC).isoformat()
     lines: list[str] = [
         "# Duplicate Function Report",
         "",
@@ -278,7 +278,7 @@ def update_dry_run_report(
     call_counts: dict[str, int],
 ) -> None:
     """Добавить секцию в общий dry-run отчет."""
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = datetime.now(UTC).isoformat()
     duplicates = {
         name: records for name, records in grouped.items() if len(records) > 1
     }
