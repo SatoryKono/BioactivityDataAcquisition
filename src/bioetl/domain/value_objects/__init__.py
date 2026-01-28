@@ -80,12 +80,6 @@ from bioetl.domain.value_objects.column_qualifier import (
     JOIN_KEY_COLUMNS,
     ColumnQualifier,
 )
-from bioetl.domain.value_objects.publication_field_groups import (
-    DEFAULT_FIELD_GROUP_CONFIG,
-    FIELD_TO_GROUP_MAPPING,
-    FieldGroupConfig,
-    PublicationFieldGroup,
-)
 from bioetl.domain.value_objects.compound_ids import (
     AssayId,
     CompoundId,
@@ -144,6 +138,12 @@ from bioetl.domain.value_objects.identifiers import (
     PubChemCid,
     UniProtId,
 )
+from bioetl.domain.value_objects.publication_field_groups import (
+    DEFAULT_FIELD_GROUP_CONFIG,
+    FIELD_TO_GROUP_MAPPING,
+    FieldGroupConfig,
+    PublicationFieldGroup,
+)
 from bioetl.domain.value_objects.publications import (
     DOI,
     PubMedId,
@@ -160,6 +160,7 @@ __all__ = [
     "DEFAULT_COLUMN_ORDER",
     "DEFAULT_FIELD_GROUP_CONFIG",
     "DOI",
+    "FIELD_TO_GROUP_MAPPING",
     "ISSN",
     "JOIN_KEY_COLUMNS",
     "ORCID",
@@ -201,7 +202,6 @@ __all__ = [
     "DeduplicationStatsResult",
     "DriftLevel",
     "EncodingValidationResult",
-    "FIELD_TO_GROUP_MAPPING",
     "FieldGroupConfig",
     "FieldPresenceResult",
     "FileIntegrityResult",
