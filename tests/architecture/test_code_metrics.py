@@ -81,6 +81,7 @@ class TestFileSizeLimits:
         # Domain registry exemptions
         "publication.py": 340,  # 331 LOC - Publication entity mapping registry with composite key support
         "publication_field_groups.py": 430,  # 424 LOC - Field-to-group mapping for composite publication pipeline (ADR-026)
+        "field_groups.py": 400,  # 392 LOC - FieldGroupRegistry domain models with FieldMapping/FieldGroupDefinition (ADR-026)
         # Application layer exemptions
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
         "preflight_validator.py": 655,  # 651 LOC - extracted preflight validators (REFACTOR-003)
@@ -92,7 +93,7 @@ class TestFileSizeLimits:
         # Composition layer exemptions
         "metadata_coordinator.py": 510,  # 506 LOC - MetadataCoordinator with centralized metadata management + extended lineage
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
-        "composite.py": 410,  # 405 LOC - Composite pipeline bootstrap with runner factories
+        "composite.py": 465,  # 460 LOC - Composite pipeline bootstrap with runner factories + field group registry loading
         "entrypoints.py": 780,  # 775 LOC - pipeline entrypoints (run_pipeline expanded + services + export + ensure_metrics_server_started)
         "registration.py": 720,  # 705 LOC - provider registration with data source creators (OpenAlex + SemanticScholar + UniProt IDMapping)
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
@@ -117,7 +118,7 @@ class TestFileSizeLimits:
         # Application layer exemptions
         "base_transformer.py": 790,  # 786 LOC - BaseTransformer with serialization helpers + validate_value_object() consolidation
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
-        "merger.py": 1405,  # 1399 LOC - MergeService with type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing
+        "merger.py": 1420,  # 1414 LOC - MergeService with type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering
         "extractors.py": 710,  # 705 LOC - SemanticScholar extractors with volume/issue parsing + page range expansion + affiliations
     }
 
@@ -604,7 +605,7 @@ class TestClassSize:
         # Composition services
         "MetadataCoordinator": 435,  # 434 lines - Metadata coordination for Medallion layers + extended lineage
         # Composite pipeline services (ADR-026)
-        "MergeService": 1350,  # 1347 lines - Composite merge service with conflict resolution + column priority ordering + secondary join key prefixing
+        "MergeService": 1370,  # 1361 lines - Composite merge service with conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
         "CompositePipelineRunner": 1080,  # 1059 lines - Composite pipeline orchestrator (FSM helpers extracted to fsm_helper.py)
         "CompositeCheckpointState": 305,  # 304 lines - Immutable checkpoint state with serialization helpers

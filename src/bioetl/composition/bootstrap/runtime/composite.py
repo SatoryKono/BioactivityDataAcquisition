@@ -399,7 +399,11 @@ def _load_field_group_registry(
         FieldGroupRegistry if config found, None otherwise.
     """
     # Extract entity from composite name (e.g., "composite_publication" -> "publication")
-    entity = composite_name.replace("composite_", "") if "_" in composite_name else composite_name
+    entity = (
+        composite_name.replace("composite_", "")
+        if "_" in composite_name
+        else composite_name
+    )
     config_path = FIELD_GROUP_CONFIG_DIR / f"{entity}.yaml"
 
     if not config_path.exists():
