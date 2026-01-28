@@ -6,11 +6,43 @@ Extracted to reduce code duplication per refactoring analysis 2026-01-25.
 
 from __future__ import annotations
 
+from dataclasses import fields, is_dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any
+
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     DQReportStatus,
     DQReportSummary,
 )
+
+
+def convert_value(value: Any) -> Any:
+    """Convert a value for serialization.
+
+    Handles dataclasses, enums, datetimes, and collection types.
+
+    Args:
+        value: Value to convert.
+
+    Returns:
+        Serializable representation of the value.
+    """
+    if is_dataclass(value) and not isinstance(value, type):
+        return {
+            field.name: convert_value(getattr(value, field.name))
+            for field in fields(value)
+        }
+    if isinstance(value, Enum):
+        return value.value
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, dict):
+        return {key: convert_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [convert_value(item) for item in value]
+    return value
 
 
 def update_counts(
@@ -73,5 +105,6 @@ def build_summary(
 
 __all__ = [
     "build_summary",
+    "convert_value",
     "update_counts",
 ]

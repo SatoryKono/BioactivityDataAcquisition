@@ -10,7 +10,6 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
-
 DEFAULT_PATTERNS = (
     "src/bioetl/application/**/utils.py",
     "src/bioetl/infrastructure/**/utils.py",
