@@ -356,7 +356,9 @@ class TestGoldSchemaValidation:
             "first_page": "100",
             "last_page": "110",
             "authors": '["Author One", "Author Two"]',
-            # affiliations excluded per user request
+            "affiliations": '["University A", "University B"]',
+            "structured_affiliations": '[{"text": "University A", "ror_id": null}]',
+            "authors_with_affiliations": '[{"name_hash": "abc123", "initials": "AO", "affiliations": []}]',
             "pub_date": "2024-03-15",
             "pub_month": 3,
             "pub_day": 15,
