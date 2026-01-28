@@ -55,7 +55,9 @@ def load_field_groups(path: Path) -> FieldGroupRegistry:
         raw = yaml.safe_load(f)
 
     if not isinstance(raw, dict):
-        raise FieldGroupLoadError(f"Invalid field group config: expected dict, got {type(raw).__name__}")
+        raise FieldGroupLoadError(
+            f"Invalid field group config: expected dict, got {type(raw).__name__}"
+        )
 
     return _parse_config(raw, source=str(path))
 

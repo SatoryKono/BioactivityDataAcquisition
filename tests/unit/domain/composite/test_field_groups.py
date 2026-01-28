@@ -133,8 +133,14 @@ class TestFieldGroupDefinition:
             display_name="Bibliography",
             include_in_gold=True,
             fields=(
-                FieldMapping("title", ("chembl.publication.title",), FieldGroupId.BIBLIOGRAPHY),
-                FieldMapping("abstract", ("chembl.publication.abstract",), FieldGroupId.BIBLIOGRAPHY),
+                FieldMapping(
+                    "title", ("chembl.publication.title",), FieldGroupId.BIBLIOGRAPHY
+                ),
+                FieldMapping(
+                    "abstract",
+                    ("chembl.publication.abstract",),
+                    FieldGroupId.BIBLIOGRAPHY,
+                ),
             ),
         )
         assert gd.group_id == FieldGroupId.BIBLIOGRAPHY
@@ -282,9 +288,17 @@ class TestFieldGroupRegistry:
 
     def test_get_group_qualified_column(self) -> None:
         registry = _build_test_registry()
-        assert registry.get_group("chembl.publication.doi") == FieldGroupId.ID_AND_STATUS
-        assert registry.get_group("crossref.publication.title") == FieldGroupId.BIBLIOGRAPHY
-        assert registry.get_group("crossref.publication.content_hash") == FieldGroupId.TRASH
+        assert (
+            registry.get_group("chembl.publication.doi") == FieldGroupId.ID_AND_STATUS
+        )
+        assert (
+            registry.get_group("crossref.publication.title")
+            == FieldGroupId.BIBLIOGRAPHY
+        )
+        assert (
+            registry.get_group("crossref.publication.content_hash")
+            == FieldGroupId.TRASH
+        )
 
     def test_get_group_unqualified(self) -> None:
         registry = _build_test_registry()
@@ -300,7 +314,9 @@ class TestFieldGroupRegistry:
         registry = _build_test_registry()
         assert registry.get_group("DOI") == FieldGroupId.ID_AND_STATUS
         assert registry.get_group("Title") == FieldGroupId.BIBLIOGRAPHY
-        assert registry.get_group("CHEMBL.PUBLICATION.DOI") == FieldGroupId.ID_AND_STATUS
+        assert (
+            registry.get_group("CHEMBL.PUBLICATION.DOI") == FieldGroupId.ID_AND_STATUS
+        )
 
     def test_is_gold_field(self) -> None:
         registry = _build_test_registry()
@@ -413,7 +429,9 @@ class TestFieldGroupRegistry:
     def test_get_group_definition_not_found(self) -> None:
         registry = _build_test_registry()
         # AUTHOR_AND_AFFILIATIONS not in test registry
-        assert registry.get_group_definition(FieldGroupId.AUTHOR_AND_AFFILIATIONS) is None
+        assert (
+            registry.get_group_definition(FieldGroupId.AUTHOR_AND_AFFILIATIONS) is None
+        )
 
     def test_field_count(self) -> None:
         registry = _build_test_registry()
@@ -448,9 +466,7 @@ class TestBuildFieldGroupRegistry:
                 FieldGroupDefinition(
                     group_id=FieldGroupId.BIBLIOGRAPHY,
                     display_name="Bibliography",
-                    fields=(
-                        FieldMapping("title", (), FieldGroupId.BIBLIOGRAPHY),
-                    ),
+                    fields=(FieldMapping("title", (), FieldGroupId.BIBLIOGRAPHY),),
                 ),
             ),
         )
