@@ -215,6 +215,7 @@ class StorageAdapter:
         *,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
     ) -> None:
         """Write merged records to Silver layer without explicit schema.
 
@@ -226,6 +227,7 @@ class StorageAdapter:
             primary_keys: Optional list of column names for sorting.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
+            preserve_column_order: If True, skip canonical reordering.
         """
         await self.silver.write_silver_merged(
             table_name,
@@ -233,6 +235,7 @@ class StorageAdapter:
             primary_keys,
             run_id=run_id,
             sources_used=sources_used,
+            preserve_column_order=preserve_column_order,
         )
 
     async def write_gold_merged(
@@ -243,6 +246,7 @@ class StorageAdapter:
         *,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
     ) -> None:
         """Write merged records to Gold layer without Pandera schema.
 
@@ -254,6 +258,7 @@ class StorageAdapter:
             primary_keys: Optional list of column names for sorting.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
+            preserve_column_order: If True, skip canonical reordering.
         """
         await self.gold.write_gold_merged(
             table_name,
@@ -261,6 +266,7 @@ class StorageAdapter:
             primary_keys,
             run_id=run_id,
             sources_used=sources_used,
+            preserve_column_order=preserve_column_order,
         )
 
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
