@@ -6,14 +6,15 @@ Identifies all pipelines, extracts metadata schemas (Silver/Gold),
 and generates a reference document.
 """
 
+import importlib
+import inspect
+import logging
 import os
 import sys
-import yaml
-import inspect
-import importlib
-import logging
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type
+
+import yaml
 
 # Add src to path
 sys.path.append(os.path.join(os.getcwd(), "src"))
@@ -139,7 +140,7 @@ def extract_schema_fields(schema_cls: Type[pa.DataFrameModel]) -> List[Dict[str,
 def generate_markdown(audit_data: List[Dict[str, Any]]) -> str:
     """Generates a Markdown report from the audit data."""
     md = ["# Metadata Audit: BioETL Pipelines\n"]
-    from datetime import datetime, UTC
+    from datetime import UTC, datetime
     md.append(f"Generated on: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S UTC')}\n")
     md.append("## Executive Summary\n")
     md.append(f"Total Pipelines: {len(audit_data)}\n")

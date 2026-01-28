@@ -41,18 +41,17 @@ from bioetl.domain.contracts.gold.chembl import (
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
 )
+from bioetl.domain.contracts.gold.pubchem import PubChemCompoundGoldSchema
 from bioetl.domain.contracts.gold.publications import (
     CrossRefPublicationGoldSchema,
     OpenAlexPublicationGoldSchema,
     PubMedPublicationGoldSchema,
     SemanticScholarPublicationGoldSchema,
 )
-from bioetl.domain.contracts.gold.pubchem import PubChemCompoundGoldSchema
 from bioetl.domain.contracts.gold.uniprot import (
     UniProtIDMappingGoldSchema,
     UniProtProteinGoldSchema,
 )
-
 
 # Mapping from Pandera schema class to output filename
 SCHEMA_MAPPING = {

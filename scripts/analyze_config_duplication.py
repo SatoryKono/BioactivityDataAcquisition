@@ -5,8 +5,9 @@ Usage: python scripts/analyze_config_duplication.py
 Output: Report of duplicated keys and values per entity config.
 """
 
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
+
 import yaml
 
 
