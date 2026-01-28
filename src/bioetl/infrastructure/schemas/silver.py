@@ -684,7 +684,9 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         # Unified page fields (parsed from pages)
         pa.field("first_page", pa.string()),
         # Metrics
-        pa.field("influential_citation_count", pa.int64()),  # Number of influential citations
+        pa.field(
+            "influential_citation_count", pa.int64()
+        ),  # Number of influential citations
         # Open Access
         pa.field("is_oa", pa.bool_()),
         pa.field("issue", pa.string()),  # Journal issue number
@@ -831,11 +833,11 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("oa_status", pa.string()),
         # Primary key
         pa.field("openalex_id", pa.string()),
-        # Primary topic (single most relevant topic for quick categorization)
-        pa.field("primary_topic", pa.string()),  # JSON object
         # Note: pmc_id excluded per design (2026-01)
         # pmid: PubMed ID (numeric string: "12345678") - nullable, may not exist for all publications
         pa.field("pmid", pa.string()),
+        # Primary topic (single most relevant topic for quick categorization)
+        pa.field("primary_topic", pa.string()),  # JSON object
         # Date fields
         pa.field("publication_date", pa.string()),
         pa.field("publisher", pa.string()),
