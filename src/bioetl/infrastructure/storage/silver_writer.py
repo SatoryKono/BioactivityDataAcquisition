@@ -183,30 +183,38 @@ class SilverWriter(BaseDeltaWriter):
         """Prepare Arrow table from records with schema filtering and sorting."""
         from bioetl.domain.schemas.column_order import canonical_column_order
 
-        schema_fields = set(schema.names)
         string_fields = {
             field.name
             for field in schema
             if pa.types.is_string(field.type) or pa.types.is_large_string(field.type)
         }
 
-        filtered_records = [
-            {
-                k: (
+        # Schema-driven iteration: iterating schema.names is faster than rec.items()
+        # when records contain many extra fields (common in Silver ETL).
+        # It also avoids repeated `if k in schema_fields` lookups.
+        filtered_records = []
+        schema_names = schema.names
+
+        for rec in records:
+            new_rec = {}
+            for k in schema_names:
+                if k in rec:
+                    v = rec[k]
                     # Uses OPT_SORT_KEYS for deterministic serialization (§2.8.1).
                     # Complex objects in Gold layer are flattened; Silver preserves
                     # JSON for forensic purposes.
-                    orjson.dumps(v, option=orjson.OPT_SORT_KEYS).decode("utf-8")
-                    if v is not None
-                    and k in string_fields
-                    and isinstance(v, (dict, list))
-                    else v
-                )
-                for k, v in rec.items()
-                if k in schema_fields
-            }
-            for rec in records
-        ]
+                    if (
+                        v is not None
+                        and k in string_fields
+                        and isinstance(v, (dict, list))
+                    ):
+                        new_rec[k] = orjson.dumps(
+                            v, option=orjson.OPT_SORT_KEYS
+                        ).decode("utf-8")
+                    else:
+                        new_rec[k] = v
+            filtered_records.append(new_rec)
+
         arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
 
         # Enforce canonical column order (ADR-014, RULES.md §2.4)
