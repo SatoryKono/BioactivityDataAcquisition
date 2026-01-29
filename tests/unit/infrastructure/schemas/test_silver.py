@@ -915,7 +915,6 @@ class TestPublicationSchemaUnifiedDateAndPageFields:
     @pytest.mark.parametrize(
         "schema,name",
         [
-            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
             (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
             (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
             (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
@@ -923,7 +922,7 @@ class TestPublicationSchemaUnifiedDateAndPageFields:
         ],
     )
     def test_schema_has_page_fields(self, schema, name):
-        """All publication schemas must have first_page and last_page fields."""
+        """Non-ChEMBL publication schemas must have first_page and last_page fields."""
         field_names = {f.name for f in schema}
         page_fields = {"first_page", "last_page"}
         missing = page_fields - field_names
@@ -933,6 +932,19 @@ class TestPublicationSchemaUnifiedDateAndPageFields:
             field = schema.field(field_name)
             assert field.type == pa.string(), (
                 f"{name}.{field_name} should be string, got {field.type}"
+            )
+
+    def test_chembl_schema_has_page_fields(self):
+        """ChEMBL publication schema uses page_first/page_last (unified naming)."""
+        field_names = {f.name for f in CHEMBL_PUBLICATION_SCHEMA}
+        page_fields = {"page_first", "page_last"}
+        missing = page_fields - field_names
+        assert not missing, f"ChEMBL Publication missing page fields: {missing}"
+
+        for field_name in page_fields:
+            field = CHEMBL_PUBLICATION_SCHEMA.field(field_name)
+            assert field.type == pa.string(), (
+                f"ChEMBL Publication.{field_name} should be string, got {field.type}"
             )
 
 
@@ -961,7 +973,6 @@ class TestAllPublicationSchemas:
     @pytest.mark.parametrize(
         "schema,name",
         [
-            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
             # CrossRef excluded: abstract not collected per user request
             (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
             (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
@@ -974,6 +985,13 @@ class TestAllPublicationSchemas:
         core_fields = {"title", "abstract", "authors", "year"}
         missing = core_fields - field_names
         assert not missing, f"{name} missing core fields: {missing}"
+
+    def test_chembl_schema_has_core_fields(self):
+        """ChEMBL publication schema uses publication_year (unified naming)."""
+        field_names = {f.name for f in CHEMBL_PUBLICATION_SCHEMA}
+        core_fields = {"title", "abstract", "authors", "publication_year"}
+        missing = core_fields - field_names
+        assert not missing, f"ChEMBL Publication missing core fields: {missing}"
 
     @pytest.mark.parametrize(
         "schema,name",
