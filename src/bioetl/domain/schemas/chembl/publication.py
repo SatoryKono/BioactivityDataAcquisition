@@ -14,7 +14,11 @@ from bioetl.domain.schemas.common.publication_base import (
     LOOKUP_METHODS,
     PublicationBaseSchema,
 )
-from bioetl.domain.validation import DOI_REGEX_PATTERN
+from bioetl.domain.validation import (
+    DOI_REGEX_PATTERN,
+    MAX_PUBLICATION_YEAR,
+    MIN_PUBLICATION_YEAR,
+)
 
 # Re-export for backwards compatibility
 __all__ = ["DOI_REGEX_PATTERN", "LOOKUP_METHODS", "ChemblPublicationSchema"]
@@ -69,6 +73,8 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     )
     publication_year: Series[int] = pa.Field(
         nullable=True,
+        ge=MIN_PUBLICATION_YEAR,
+        le=MAX_PUBLICATION_YEAR,
         description="Publication year.",
     )
 

@@ -192,22 +192,22 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     - Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
     - Business analysts can understand the model without knowing CrossRef API specifics
 
-    Inherited from PublicationEntityBase:
-        doi, pmid, title, abstract, authors, journal, issn (str), publisher,
-        year, publication_date, citation_count, doc_type, language, is_oa,
+    Inherited from PublicationEntityBase (unified field names):
+        doi, pmid, title, abstract, authors, affiliation_list, journal, issn (str), publisher,
+        page_first, page_last, publication_year, publication_date,
+        citations_received, citations_made, publication_type, language, is_oa,
         oa_status, _lookup_method, _original_id.
 
     CrossRef-specific Attributes:
         issn: List of ISSNs (overrides base str|None with list[str]).
         volume: Volume number.
         issue: Issue number.
-        first_page: First page number.
-        last_page: Last page number.
         published_print: Print publication date (ISO format).
         published_online: Online publication date (ISO format).
-        reference_count: Number of references in the publication.
         license_url: License URL.
-        subjects: Subject areas.
+        journal_name_short: Short journal/container title (unified field name).
+        subject_keywords: Subject areas (unified field name).
+        source_type: Raw CrossRef type (e.g., "journal-article"), maps to publication_type.
 
     Note: doi is required for CrossRef publications and validated in __post_init__.
 
@@ -224,18 +224,19 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     # CrossRef-specific publication details
     volume: str | None = None
     issue: str | None = None
-    # first_page and last_page inherited from PublicationEntityBase
+    # page_first and page_last inherited from PublicationEntityBase (unified names)
 
     # CrossRef-specific dates
     published_print: str | None = None  # ISO date: YYYY-MM-DD or YYYY-MM or YYYY
     published_online: str | None = None  # ISO date
 
     # CrossRef-specific metrics
-    reference_count: int | None = None  # references-count
+    # Note: citations_received and citations_made inherited from base (unified names)
+    # reference_count removed - mapped to citations_made in base
 
     # CrossRef-specific metadata
     license_url: str | None = None
-    subjects: list[str] = field(default_factory=list)
+    subject_keywords: list[str] = field(default_factory=list)  # Unified field name (was: subjects)
 
     # Content domain (Crossmark/license restrictions)
     content_domain_domains: list[str] = field(default_factory=list)
@@ -247,8 +248,8 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     # Canonical publication date (preferred over print/online)
     published: str | None = None
 
-    # Short journal/container title
-    short_container_title: list[str] = field(default_factory=list)
+    # Short journal/container title (unified field name)
+    journal_name_short: list[str] = field(default_factory=list)  # Was: short_container_title
 
     # ISSN by type (split from generic ISSN list)
     issn_print: str | None = None
@@ -264,7 +265,8 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     references: str | None = None
 
     # Raw document type from CrossRef API (e.g., "journal-article", "book-chapter")
-    # Unlike doc_type (unified mapping), this preserves the original CrossRef type value
+    # Unlike publication_type (unified mapping), this preserves the original CrossRef type value
+    # This field is used internally and mapped to publication_type in transformer
     source_type: str | None = None
 
     # Override: Default source for CrossRef
