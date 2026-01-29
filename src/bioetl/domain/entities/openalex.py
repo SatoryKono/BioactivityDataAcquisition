@@ -246,7 +246,6 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
     # Additional metrics
     fwci: float | None = None  # Field-Weighted Citation Impact
-    reference_count: int | None = None
 
     # Quality indicators
     is_retracted: bool = False

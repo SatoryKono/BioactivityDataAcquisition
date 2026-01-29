@@ -9,49 +9,25 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from bioetl.domain.entities.base import BaseEntity
-from bioetl.domain.validation import MAX_PUBLICATION_YEAR, MIN_PUBLICATION_YEAR
+from bioetl.domain.entities.publication_base import PublicationEntityBase
 
 
 @dataclass(frozen=True, kw_only=True)
-class ChemblPublication(BaseEntity):
+class ChemblPublication(PublicationEntityBase):
     """Represents a scientific document/publication (ChEMBL Document).
 
     Maps to ChEMBL API endpoint: /document
 
-    Contains all fields from ChEMBL document API endpoint.
+    Содержит только поля ChEMBL; общие поля публикации наследуются
+    из PublicationEntityBase.
     See: https://www.ebi.ac.uk/chembl/api/data/document
     """
 
     # Primary identifier
     document_chembl_id: str
 
-    # Publication identifiers
-    # Standardized to 'pmid' for cross-provider JOIN consistency (was 'pubmed_id')
-    pmid: str | None = None  # Numeric string for cross-provider consistency
-    doi: str | None = None
-
-    # Core metadata
-    title: str | None = None
-    authors: str | None = None  # JSON array of hashed author names
-    abstract: str | None = None
-    publication_type: str | None = None  # PUBLICATION, PATENT, DATASET, BOOK
-
-    # Journal information
-    journal: str | None = None
-    publication_year: int | None = None
-    publication_date: str | None = None  # Always NULL for ChEMBL (excluded from output)
     volume: str | None = None
     issue: str | None = None
-    page_first: str | None = None
-    page_last: str | None = None
-
-    # Cross-reference IDs (pmc_id always NULL for ChEMBL, excluded from output)
-    pmc_id: str | None = None
-
-    # Unified publication fields (always NULL for ChEMBL, excluded from output)
-    citation_count: int | None = None
-    is_oa: bool | None = None
-    language: str | None = None  # Excluded from PyArrow/Gold schemas
 
     # Source information
     src_id: int | None = None
@@ -59,13 +35,6 @@ class ChemblPublication(BaseEntity):
     # ChEMBL release metadata
     chembl_release: str | None = None  # e.g., CHEMBL_1, CHEMBL_34
     creation_date: str | None = None  # Record creation date in ChEMBL (YYYY-MM-DD)
-
-    # System fields
-    _source: str = "chembl"  # Data source identifier
-
-    # Lookup metadata (tracks resolution strategy)
-    _lookup_method: str = "direct"  # ChEMBL uses direct extraction
-    _original_id: str | None = None
 
     # Note: _dq_warn and _dq_error are inherited from BaseEntity
 
@@ -76,13 +45,6 @@ class ChemblPublication(BaseEntity):
     def _validate_invariants(self) -> None:
         if not self.document_chembl_id:
             raise ValueError("ChemblPublication document_chembl_id is required")
-        if self.publication_year is not None and not (
-            MIN_PUBLICATION_YEAR <= self.publication_year <= MAX_PUBLICATION_YEAR
-        ):
-            raise ValueError(
-                f"Year must be between {MIN_PUBLICATION_YEAR}-{MAX_PUBLICATION_YEAR}, "
-                f"got {self.publication_year}"
-            )
 
 
 @dataclass(frozen=True, kw_only=True)
