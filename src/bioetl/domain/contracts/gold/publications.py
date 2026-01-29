@@ -214,6 +214,19 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     issn_print: Series[str] = pa.Field(nullable=True)
     issn_electronic: Series[str] = pa.Field(nullable=True)
 
+    # Author identifiers
+    author_orcids: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array of ORCID identifiers
+    author_details: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array of author objects (given, family, orcid, sequence, affiliations)
+
+    # Bibliographic references
+    references: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array of cited references (DOI, title, author, year)
+
     # Source tracking (maps to _source column in DataFrame)
     source: Series[str] = pa.Field(nullable=True, alias="_source")
 
@@ -372,6 +385,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
+    authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     tldr: Series[str] = pa.Field(nullable=True)
     publication_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     publication_date: Series[str] = pa.Field(nullable=True)
