@@ -785,12 +785,12 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("issue", pa.string()),
         pa.field("journal", pa.string()),
         # Keywords extracted from OpenAlex
-        pa.field("keywords", pa.list_(pa.string())),
+        pa.field("subject_keywords", pa.list_(pa.string())),
         pa.field("language", pa.string()),
         # Microsoft Academic Graph ID (legacy, from ids object)
         pa.field("mag_id", pa.string()),
         # MeSH terms extracted from OpenAlex mesh field
-        pa.field("mesh_terms", pa.list_(pa.string())),
+        pa.field("subject_mesh", pa.list_(pa.string())),
         pa.field("oa_status", pa.string()),
         # Primary key
         pa.field("openalex_id", pa.string()),
@@ -808,7 +808,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publisher", pa.string()),
         # ROR IDs (may be empty if not returned by Works API)
         pa.field("ror_ids", pa.string()),  # JSON array of ROR URLs
-        pa.field("source_type", pa.string()),  # Raw OpenAlex type (article, book, etc.)
+        pa.field("publication_type", pa.string()),  # Raw OpenAlex type (article, book, etc.)
         pa.field("title", pa.string()),
         # Topics (hierarchical 4-level classification - replaces deprecated concepts)
         pa.field("topics", pa.string()),  # JSON array

@@ -270,7 +270,7 @@
     'grant_count': 0,
     'issn': '1234-5678',
     'issue': '3',
-    'journal': None,
+    'journal': 'Journal of Test Science',
     'journal_iso_abbrev': 'J Test Sci',
     'journal_issn_type': 'Print',
     'journal_name': 'Journal of Test Science',
