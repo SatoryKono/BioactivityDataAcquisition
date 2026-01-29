@@ -251,9 +251,8 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # Quality indicators
     is_retracted: bool = False
 
-    # Raw document type from OpenAlex API (e.g., "article", "preprint", "book-chapter")
-    # Unlike doc_type (unified mapping), this preserves the original OpenAlex type value
-    source_type: str | None = None
+    # Note: publication_type inherited from PublicationEntityBase
+    # Stores raw OpenAlex type (e.g., "article", "preprint", "book-chapter")
 
     # Override: Default source for OpenAlex
     _source: str = "openalex"

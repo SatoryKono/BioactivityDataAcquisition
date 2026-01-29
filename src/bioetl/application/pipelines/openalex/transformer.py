@@ -288,10 +288,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
-        """Convert Domain Entity to SilverRecord, excluding pmc_id and doc_type.
+        """Convert Domain Entity to SilverRecord, excluding pmc_id.
 
         Overrides base implementation to remove fields not collected for OpenAlex.
-        OpenAlex uses raw 'type' field instead of mapped 'doc_type'.
 
         Args:
             entity: Domain entity (dataclass).

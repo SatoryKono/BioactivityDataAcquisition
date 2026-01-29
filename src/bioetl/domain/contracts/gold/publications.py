@@ -255,8 +255,8 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     affiliation_list: Series[object] = pa.Field(nullable=True)  # list[str]
     # NOTE: concepts field removed - OpenAlex deprecated concepts in 2024, use topics instead
-    mesh_terms: Series[object] = pa.Field(nullable=True)  # list[str] - MeSH terms
-    keywords: Series[object] = pa.Field(nullable=True)  # list[str]
+    subject_mesh: Series[object] = pa.Field(nullable=True)  # list[str] - MeSH terms
+    subject_keywords: Series[object] = pa.Field(nullable=True)  # list[str]
     mag_id: Series[str] = pa.Field(nullable=True)  # Microsoft Academic Graph ID
 
     # Journal info
@@ -277,8 +277,8 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     publication_date: Series[str] = pa.Field(nullable=True)
 
     # Metadata
-    # Note: doc_type excluded; OpenAlex uses raw 'source_type' field instead
-    source_type: Series[str] = pa.Field(
+    # Raw OpenAlex type (article, book, etc.) - unified field name
+    publication_type: Series[str] = pa.Field(
         nullable=True
     )  # Raw OpenAlex type (article, etc.)
     is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
@@ -300,7 +300,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     )  # Number of references
 
     # Topics (hierarchical 4-level classification - replaces deprecated concepts)
-    topics: Series[str] = pa.Field(nullable=True)  # JSON array
+    subject_topics: Series[str] = pa.Field(nullable=True)  # JSON array
     primary_topic: Series[str] = pa.Field(nullable=True)  # JSON object
 
     # Grants/funding information
