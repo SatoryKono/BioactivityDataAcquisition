@@ -241,9 +241,9 @@ class TestChemblYearValidation:
             "authors": '["Author A", "Author B"]',  # JSON array
             # Publication metadata
             "journal": "Nature",
-            "year": 2020,
+            "publication_year": 2020,
             "publication_date": None,  # Always NULL for ChEMBL
-            "doc_type": "PUBLICATION",
+            "publication_type": "PUBLICATION",
             "language": None,
             # Metrics (always NULL for ChEMBL)
             "citation_count": None,
@@ -259,8 +259,8 @@ class TestChemblYearValidation:
             "src_id": 1,
             "volume": "1",
             "issue": "1",
-            "first_page": "1",
-            "last_page": "10",
+            "page_first": "1",
+            "page_last": "10",
             # ChEMBL release metadata
             "chembl_release": "CHEMBL_34",
             "creation_date": "2024-01-15",
@@ -271,23 +271,23 @@ class TestChemblYearValidation:
         from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
 
         for year in [MIN_PUBLICATION_YEAR, MAX_PUBLICATION_YEAR]:
-            valid_record["year"] = year
+            valid_record["publication_year"] = year
             df = pd.DataFrame([valid_record])
             validated = ChemblPublicationSchema.validate(df)
-            assert validated["year"].iloc[0] == year
+            assert validated["publication_year"].iloc[0] == year
 
     def test_year_outside_range_fails(self, valid_record: dict) -> None:
         """Should reject year outside valid range."""
         from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
 
         # Year below minimum
-        valid_record["year"] = MIN_PUBLICATION_YEAR - 1
+        valid_record["publication_year"] = MIN_PUBLICATION_YEAR - 1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             ChemblPublicationSchema.validate(df)
 
         # Year above maximum
-        valid_record["year"] = MAX_PUBLICATION_YEAR + 1
+        valid_record["publication_year"] = MAX_PUBLICATION_YEAR + 1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             ChemblPublicationSchema.validate(df)

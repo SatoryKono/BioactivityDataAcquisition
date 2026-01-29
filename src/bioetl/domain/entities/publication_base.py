@@ -42,15 +42,17 @@ class PublicationEntityBase(BaseEntity):
         title: Publication title.
         abstract: Publication abstract (HTML tags stripped).
         authors: JSON-serialized list of author names (hashed for PII compliance).
+        affiliation_list: JSON-serialized list of unique affiliations (unified field name).
         journal: Journal/venue name.
         issn: International Standard Serial Number.
         publisher: Publisher name.
-        first_page: First page number (unified across providers).
-        last_page: Last page number (unified across providers).
-        year: Publication year.
+        page_first: First page number (unified field name).
+        page_last: Last page number (unified field name).
+        publication_year: Publication year (unified field name).
         publication_date: Publication date (ISO format: YYYY-MM-DD).
-        citation_count: Number of citations.
-        doc_type: Document type (PUBLICATION, PREPRINT, etc.).
+        citations_received: Number of citations TO this publication (unified field name).
+        citations_made: Number of references FROM this publication (unified field name).
+        publication_type: Document type - PUBLICATION, PREPRINT, BOOK, DATASET, OTHER (unified field name).
         language: Publication language code.
         is_oa: Whether the publication is Open Access.
         oa_status: OA status (gold, green, hybrid, bronze, closed).
@@ -74,26 +76,27 @@ class PublicationEntityBase(BaseEntity):
     title: str | None = None
     abstract: str | None = None
     authors: str | None = None  # JSON-serialized list, PII hashed
-    affiliations: str | None = None  # JSON-serialized list of unique affiliations
+    affiliation_list: str | None = None  # JSON-serialized list of unique affiliations (unified field name)
 
     # Journal information
     journal: str | None = None
     issn: str | None = None
     publisher: str | None = None
 
-    # Pagination (unified across providers)
-    first_page: str | None = None
-    last_page: str | None = None
+    # Pagination (unified field names)
+    page_first: str | None = None
+    page_last: str | None = None
 
     # Dates
-    year: int | None = None
+    publication_year: int | None = None
     publication_date: str | None = None  # ISO format: YYYY-MM-DD
 
-    # Metrics
-    citation_count: int | None = None
+    # Metrics (unified field names)
+    citations_received: int | None = None  # Number of citations TO this publication
+    citations_made: int | None = None      # Number of references FROM this publication
 
     # Classification
-    doc_type: str = "PUBLICATION"
+    publication_type: str = "PUBLICATION"
     language: str | None = None
 
     # Open Access status
