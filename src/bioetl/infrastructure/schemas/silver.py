@@ -812,7 +812,9 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publisher", pa.string()),
         # ROR IDs (may be empty if not returned by Works API)
         pa.field("ror_ids", pa.string()),  # JSON array of ROR URLs
-        pa.field("publication_type", pa.string()),  # Raw OpenAlex type (article, book, etc.)
+        pa.field(
+            "publication_type", pa.string()
+        ),  # Raw OpenAlex type (article, book, etc.)
         pa.field("title", pa.string()),
         # Topics (hierarchical 4-level classification - replaces deprecated concepts)
         pa.field("subject_topics", pa.string()),  # JSON array

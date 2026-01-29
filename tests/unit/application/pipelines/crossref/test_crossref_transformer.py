@@ -162,7 +162,9 @@ async def test_transform_full_record(transformer, pipeline_context, sample_publi
     assert result is not None
     assert result["doi"] == "10.1234/test.article"
     assert result["title"] == "Test Article Title"
-    assert result["publication_type"] == "journal-article"  # Raw CrossRef type preserved
+    assert (
+        result["publication_type"] == "journal-article"
+    )  # Raw CrossRef type preserved
     assert result["_source"] == "crossref"
     # Check lineage fields
     assert "_run_id" in result
