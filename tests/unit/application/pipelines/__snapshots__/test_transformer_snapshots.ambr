@@ -247,7 +247,7 @@
     '_source_batch_id': None,
     'abstract': 'This is the abstract of the test article.',
     'abstract_structured': False,
-    'affiliations': None,
+    'affiliation_list': None,
     'author_count': 2,
     'authors': '["Smith, John","Doe, Jane"]',
     'authors_with_affiliations': '[{"affiliations":[],"initials":null,"name_hash":"Smith, John"},{"affiliations":[],"initials":null,"name_hash":"Doe, Jane"}]',
@@ -255,6 +255,7 @@
     'chemicals': list([
     ]),
     'citation_subset': None,
+    'citations_made': None,
     'content_hash': '<content_hash>',
     'country': 'United States',
     'databanks': list([
@@ -326,7 +327,7 @@
     '_source_batch_id': None,
     'abstract': None,
     'abstract_structured': False,
-    'affiliations': None,
+    'affiliation_list': None,
     'author_count': 0,
     'authors': None,
     'authors_with_affiliations': None,
@@ -334,6 +335,7 @@
     'chemicals': list([
     ]),
     'citation_subset': None,
+    'citations_made': None,
     'content_hash': '<content_hash>',
     'country': None,
     'databanks': list([
