@@ -238,10 +238,9 @@ groups:
         columns:
           - pubmed.publication.author_count
 
-      - base_name: author_ids
+      - base_name: author_openalex_ids
         columns:
-          - openalex.publication.author_ids
-          - semanticscholar.publication.author_ids
+          - openalex.publication.author_openalex_ids
 
       - base_name: author_orcids
         columns:
