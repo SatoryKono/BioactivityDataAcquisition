@@ -326,7 +326,6 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     abstract: Series[str] = pa.Field(nullable=True)
     doc_type: Series[str] = pa.Field(nullable=True)
     journal: Series[str] = pa.Field(nullable=True)
-    journal_full_title: Series[str] = pa.Field(nullable=True)
     year: Series[float] = pa.Field(nullable=True, coerce=True)
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)

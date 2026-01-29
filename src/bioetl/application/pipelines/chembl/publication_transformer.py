@@ -61,7 +61,6 @@ _JOURNAL_INFO = FieldGroup(
     fields=(
         *simple_fields(
             "journal",
-            "journal_full_title",
             "volume",
             "issue",
             "first_page",

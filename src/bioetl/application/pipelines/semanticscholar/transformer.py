@@ -223,7 +223,6 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
                 "first_page"
             ),  # Parsed with abbreviation expansion
             "last_page": journal_info.get("last_page"),  # Expanded (e.g., "9" → "739")
-            "venue": rec.get("venue"),
             "year": year,
             "publication_date": self._normalize_partial_date(
                 rec.get("publicationDate")

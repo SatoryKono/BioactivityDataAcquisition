@@ -44,7 +44,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     # PubMed-specific journal fields (forensic retention)
     journal_full_title: Series[str] = pa.Field(
         nullable=True
-    )  # Full journal name (PubMed)
+    )  # Full journal name (PubMed only, will be removed after PubMed unification)
     journal_iso_abbrev: Series[str] = pa.Field(nullable=True)  # ISO abbreviation
     journal_issn_type: Series[str] = pa.Field(
         nullable=True
@@ -291,7 +291,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     fwci: Series[float] = pa.Field(
         nullable=True, ge=0
     )  # Field-Weighted Citation Impact
-    referenced_works_count: Series[float] = pa.Field(
+    reference_count: Series[float] = pa.Field(
         nullable=True, ge=0, coerce=True
     )  # Number of references
 

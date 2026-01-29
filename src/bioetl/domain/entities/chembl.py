@@ -544,9 +544,6 @@ class ChemblPublicationRecord(BaseModel):
 
     # Journal information
     journal: str | None = Field(default=None, description="Journal name")
-    journal_full_title: str | None = Field(
-        default=None, description="Full journal title"
-    )
     year: int | None = Field(default=None, description="Publication year")
     volume: str | None = Field(default=None, description="Volume number")
     issue: str | None = Field(default=None, description="Issue number")

@@ -122,7 +122,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="Field-Weighted Citation Impact (must be non-negative)",
     )
 
-    referenced_works_count: Series[pd.Int64Dtype] = pa.Field(
+    reference_count: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
         ge=0,
         description="Number of works referenced (must be non-negative)",

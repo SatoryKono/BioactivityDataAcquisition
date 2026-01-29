@@ -91,12 +91,10 @@ column_groups:
   # 8. Journal group
   - name: journal
     fields:
-      - journal
-      - journal_full_title      # ChEMBL, PubMed (unified)
+      - journal                 # Canonical field (all providers use journal or venue→journal)
       - journal_abbrev
       - journal_iso_abbrev
-      - short_container_title
-      - venue
+      - short_container_title   # CrossRef-specific short title
     provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 
   # 9. Year group

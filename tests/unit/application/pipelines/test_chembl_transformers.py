@@ -236,7 +236,6 @@ class TestPublicationTransformer:
             "abstract": "Test abstract text",
             "doc_type": "PUBLICATION",
             "journal": "Journal Name",
-            "journal_full_title": "Full Journal Name",
             "year": 2024,
             "volume": "10",
             "issue": "5",
@@ -248,7 +247,7 @@ class TestPublicationTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["journal_full_title"] == "Full Journal Name"
+        assert result["journal"] == "Journal Name"
         assert result["src_id"] == 1
         assert result["_source"] == "chembl"  # System field
 

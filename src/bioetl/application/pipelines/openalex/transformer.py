@@ -255,7 +255,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "last_page": biblio_info.get("last_page"),
             # Additional metrics
             "fwci": rec.get("fwci"),
-            "referenced_works_count": rec.get("referenced_works_count"),
+            "reference_count": rec.get("referenced_works_count"),
             # Quality indicators
             "is_retracted": rec.get("is_retracted", False),
             "_lookup_method": lookup_method,

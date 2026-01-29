@@ -132,6 +132,7 @@ silver:
   rename_fields:
     referenced_works_count: reference_count
     mesh: mesh_terms
+    type: source_type  # Raw OpenAlex type → unified source_type
 
 gold:
   include_groups:
