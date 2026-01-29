@@ -319,6 +319,10 @@ class MergeSchema(BaseModel):
         default_factory=list,
         description="Column ordering by semantic groups",
     )
+    column_groups_file: str | None = Field(
+        default=None,
+        description="Path to column group config file relative to composite config",
+    )
 
     @model_validator(mode="after")
     def validate_explicit_rules_requires_priorities(self) -> MergeSchema:

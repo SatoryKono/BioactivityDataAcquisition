@@ -75,18 +75,20 @@ class ArrowDataConverter:
         self,
         records: list[dict[str, Any]],
         primary_keys: list[str] | None = None,
+        column_order: list[str] | None = None,
     ) -> pa.Table:
         """Convert records to PyArrow table with null type handling.
 
         Performs:
         1. Convert records to Arrow table
-        2. Apply canonical column order (ADR-014)
+        2. Apply canonical column order (ADR-014) or an explicit order
         3. Coerce null types to string (Delta Lake compatibility)
         4. Sort by primary keys for deterministic writes
 
         Args:
             records: List of record dictionaries.
             primary_keys: Optional list of columns for sorting.
+            column_order: Optional explicit column order to apply.
 
         Returns:
             PyArrow Table ready for Delta Lake write.
@@ -95,13 +97,17 @@ class ArrowDataConverter:
 
         arrow_data = pa.Table.from_pylist(records)
 
-        # Enforce canonical column order (ADR-014, RULES.md §2.4)
-        ordered_columns = canonical_column_order(list(arrow_data.column_names))
-        arrow_data = arrow_data.select(ordered_columns)
+        if column_order:
+            ordered_columns = [c for c in column_order if c in arrow_data.column_names]
+            remaining = [c for c in arrow_data.column_names if c not in ordered_columns]
+            arrow_data = arrow_data.select(ordered_columns + remaining)
+        else:
+            ordered_columns = canonical_column_order(list(arrow_data.column_names))
+            arrow_data = arrow_data.select(ordered_columns)
 
         # Check if schema needs sanitization (contains null types)
         schema_str = str(arrow_data.schema).lower()
-        if "null" in schema_str:
+        if 'null' in schema_str:
             arrow_data = self._sanitize_null_columns(arrow_data)
 
         # Sort by primary keys for deterministic writes
@@ -109,7 +115,7 @@ class ArrowDataConverter:
             valid_keys = [pk for pk in primary_keys if pk in arrow_data.schema.names]
             if valid_keys:
                 arrow_data = arrow_data.sort_by(
-                    [(pk, "ascending") for pk in valid_keys]
+                    [(pk, 'ascending') for pk in valid_keys]
                 )
 
         return arrow_data

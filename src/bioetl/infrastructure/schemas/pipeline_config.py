@@ -26,6 +26,7 @@ from pydantic import (
 from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.configs.base import BaseClientConfig, RateLimitConfig
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
+from bioetl.infrastructure.schemas.composite_config import ColumnGroupSchema
 
 if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig
@@ -958,6 +959,12 @@ class PipelineYamlConfig(BaseModel):
         "Format: {input_filter: {...}, gold_filters: {...}}",
     )
 
+    # Column ordering configuration (external file)
+    column_groups_file: str | None = Field(
+        default=None,
+        description="Path to column group config file relative to pipeline config.",
+    )
+
     primary_keys: list[str] = Field(min_length=1)
     silver_table: str = Field(min_length=1)
     gold_table: str | None = Field(default=None, min_length=1)
@@ -968,6 +975,10 @@ class PipelineYamlConfig(BaseModel):
     input_filter: InputFilterConfig = Field(default_factory=InputFilterConfig)
     maintenance: MaintenanceConfig = Field(default_factory=MaintenanceConfig)
     transform: TransformConfig = Field(default_factory=TransformConfig)
+    column_groups: list[ColumnGroupSchema] = Field(
+        default_factory=list,
+        description="Optional column ordering groups for Silver/Gold output",
+    )
 
     # Pagination strategy (ADR-030)
     force_full_scan: bool = Field(

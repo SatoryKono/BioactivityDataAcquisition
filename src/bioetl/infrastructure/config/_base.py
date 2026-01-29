@@ -31,6 +31,7 @@ from pydantic_settings import (
     SettingsConfigDict,
 )
 
+from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import DQConfig, PipelineConfig
 from bioetl.domain.filtering import GoldFilterConfig
 from bioetl.infrastructure.config_loader import (
@@ -165,6 +166,9 @@ def yaml_config_to_domain(
     # Extract transform info for lineage tracking
     transform_version = yaml_config.transform.version
     transform_steps = tuple(yaml_config.transform.steps)
+    column_groups = tuple(
+        ColumnGroupConfig(**group.model_dump()) for group in yaml_config.column_groups
+    )
 
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,
@@ -179,6 +183,7 @@ def yaml_config_to_domain(
         batch_size=yaml_config.batch_size,
         checkpoint_interval=yaml_config.checkpoint_interval,
         fields=tuple(source_fields),
+        column_groups=column_groups,
         dq=dq_config,
         on_schema_mismatch=on_schema_mismatch,
         transform_version=transform_version,

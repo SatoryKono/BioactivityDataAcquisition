@@ -179,6 +179,7 @@ class SilverWriter(BaseDeltaWriter):
         records: list[dict[str, Any]],
         schema: pa.Schema,
         primary_keys: list[str],
+        column_order: list[str] | None = None,
     ) -> pa.Table:
         """Prepare Arrow table from records with schema filtering and sorting."""
         from bioetl.domain.schemas.column_order import canonical_column_order
@@ -209,9 +210,14 @@ class SilverWriter(BaseDeltaWriter):
         ]
         arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
 
-        # Enforce canonical column order (ADR-014, RULES.md §2.4)
-        ordered_columns = canonical_column_order(list(arrow_data.column_names))
-        arrow_data = arrow_data.select(ordered_columns)
+        if column_order:
+            ordered_columns = [c for c in column_order if c in arrow_data.column_names]
+            remaining = [c for c in arrow_data.column_names if c not in ordered_columns]
+            arrow_data = arrow_data.select(ordered_columns + remaining)
+        else:
+            # Enforce canonical column order (ADR-014, RULES.md §2.4)
+            ordered_columns = canonical_column_order(list(arrow_data.column_names))
+            arrow_data = arrow_data.select(ordered_columns)
 
         # Sort rows by primary keys for deterministic writes
         if primary_keys:
@@ -515,6 +521,7 @@ class SilverWriter(BaseDeltaWriter):
         mode: str = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        column_order: list[str] | None = None,
         bronze_refs: list[BronzeWriteResult] | None = None,
     ) -> SilverWriteResult | None:
         """Write normalized records to Silver layer (Delta Lake merge/upsert).
@@ -530,6 +537,7 @@ class SilverWriter(BaseDeltaWriter):
                 - 'error': Raise SchemaEvolutionError (default)
                 - 'evolve': Allow schema evolution (add new columns)
                 - 'ignore': Proceed without changes (filter to existing schema)
+            column_order: Optional explicit column order to apply.
             bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
                 If provided, bronze_paths will be populated in Silver metadata
                 for complete lineage tracking (REQ-LINEAGE-001).
@@ -572,7 +580,12 @@ class SilverWriter(BaseDeltaWriter):
             await self._check_schema_drift(table_name, records, on_schema_mismatch)
 
             table_path = self._resolve_table_path(table_name)
-            arrow_data = self._prepare_arrow_data(records, schema, primary_keys)
+            arrow_data = self._prepare_arrow_data(
+                records,
+                schema,
+                primary_keys,
+                column_order=column_order,
+            )
 
             try:
                 await self._dispatch_write(

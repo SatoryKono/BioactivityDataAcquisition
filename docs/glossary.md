@@ -1,6 +1,6 @@
 # BioETL Glossary (Ubiquitous Language)
 
-*Version 2.3 | Updated: 2026-01-28 | Created: 2025-12-29*
+*Version 2.4 | Updated: 2026-01-29 | Created: 2025-12-29*
 
 This glossary defines the canonical terminology used throughout BioETL. Following Domain-Driven Design principles, these terms form the **Ubiquitous Language** — a shared vocabulary understood by both developers and domain experts.
 
@@ -121,6 +121,10 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Preserve All Sources** | MergeConfig flag to keep all provider-qualified columns | `keep_all_columns` |
 | **Qualified Column** | Column name in `{provider}.{entity}.{field}` format | `prefixed column`, `namespaced column` |
 | **Column Group** | Semantic grouping of columns for output ordering | `field group` |
+| **Field Group Registry** | Central registry (`FieldGroupRegistry`) for semantic field grouping, Gold filtering, and column ordering | `column registry` |
+| **Field Group Id** | Enum identifying a semantic group (e.g., `ID_AND_STATUS`, `BIBLIOGRAPHY`, `TRASH`). Alias for `PublicationFieldGroup` | `group type` |
+| **Field Mapping** | Frozen dataclass mapping a base field name to its provider-qualified columns and group | `column mapping` |
+| **Field Group Definition** | Frozen dataclass defining a semantic group with display name, Gold inclusion flag, and field mappings | `group config` |
 | **Conflict Resolution** | Strategy for handling field value conflicts during merge | `conflict handling` |
 | **Coalesce** | Merge strategy taking first non-null value | `fill`, `combine` |
 

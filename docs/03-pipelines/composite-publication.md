@@ -1,8 +1,8 @@
 # Composite Publication Pipeline
 
 > **Pipeline**: `composite_publication`
-> **Version**: 1.2.0
-> **Last Updated**: 2026-01-28
+> **Version**: 1.3.0
+> **Last Updated**: 2026-01-29
 > **Reference**: ADR-026 Composite Pipeline Pattern
 
 ---
@@ -151,6 +151,27 @@ merge:
   conflict_resolution: seed_priority  # Used when preserve_all_sources=false
   preserve_all_sources: true          # Keep all provider-qualified columns
 ```
+
+### Field Group Registry (Gold Filtering)
+
+When `preserve_all_sources: true`, the **Field Group Registry** (`FieldGroupRegistry`) controls which columns appear in Gold output and in what order.
+
+**Semantic Groups** (8 total):
+
+| Group | `include_in_gold` | Example Fields |
+|-------|--------------------|----------------|
+| `id_and_status` | true | `doi`, `pmid`, `document_chembl_id` |
+| `bibliography` | true | `title`, `abstract`, `journal` |
+| `author_and_affiliations` | true | `authors`, `author_count` |
+| `terms_and_keywords_and_topics` | true | `mesh_terms`, `keywords`, `concepts` |
+| `citations_and_reference` | true | `citation_count`, `reference_count` |
+| `date_and_places` | true | `year`, `publication_date`, `publisher` |
+| `publication_types` | true | `doc_type`, `type`, `is_oa` |
+| `trash` | **false** | `content_hash`, `language` |
+
+**Behavior**: During Gold write, `MergeService` drops all columns belonging to the `trash` group. System columns (`_*`) always pass through.
+
+**Configuration**: `configs/composite/field_groups/publication.yaml` (94 base fields mapped to provider-qualified columns)
 
 ### Conflict Resolution Strategies
 
@@ -704,6 +725,7 @@ The composite pipeline tracks lineage at multiple levels:
 | File | Purpose |
 |------|---------|
 | `configs/pipelines/composite/publication.yaml` | Main composite configuration |
+| `configs/composite/field_groups/publication.yaml` | Field group definitions (94 fields, 8 groups) |
 | `configs/filter/entities/composite/publication.yaml` | Gold filter rules |
 | `docs/02-architecture/decisions/ADR-026-composite-pipeline-pattern.md` | Architecture decision |
 
@@ -713,6 +735,7 @@ The composite pipeline tracks lineage at multiple levels:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.3.0 | 2026-01-29 | Added Field Group Registry section; field group YAML config reference; Gold trash-column filtering |
 | 1.2.0 | 2026-01-28 | Added `preserve_all_sources` feature documentation; updated merge strategy section with mode comparison |
 | 1.1.0 | 2026-01-27 | Added Gold contract: CompositePublicationGoldSchema (Pandera), JSON Schema, updated filter config |
 | 1.0.0 | 2026-01-27 | Initial documentation; removed chembl_publication_term dependency; documented field exclusions |
