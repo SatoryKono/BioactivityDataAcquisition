@@ -256,7 +256,7 @@
     'chemicals': list([
     ]),
     'citation_subset': None,
-    'citations_made': None,
+    'citations_made': 0,
     'content_hash': '<content_hash>',
     'country': 'United States',
     'databanks': list([
@@ -302,7 +302,6 @@
     'publication_year': 2025,
     'publisher': None,
     'publisher_id': None,
-    'citations_made': 0,
     'subject_keywords': list([
       'unit testing',
       'python',
@@ -337,7 +336,7 @@
     'chemicals': list([
     ]),
     'citation_subset': None,
-    'citations_made': None,
+    'citations_made': 0,
     'content_hash': '<content_hash>',
     'country': None,
     'databanks': list([
@@ -381,7 +380,6 @@
     'publication_year': None,
     'publisher': None,
     'publisher_id': None,
-    'citations_made': 0,
     'subject_keywords': list([
     ]),
     'subject_mesh': list([
