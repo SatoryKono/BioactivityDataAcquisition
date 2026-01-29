@@ -233,7 +233,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "publication_date": self._normalize_partial_date(
                 rec.get("publication_date")
             ),
-            "source_type": rec.get("type"),  # Raw OpenAlex type (article, book, etc.)
+            "publication_type": rec.get("type"),  # Raw OpenAlex type (article, book, etc.)
             "is_oa": oa_info.get("is_oa"),
             "oa_status": oa_info.get("oa_status"),
             # OpenAlex source field: cited_by_count
@@ -307,8 +307,5 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
         # Remove excluded fields
         silver_record.pop("pmc_id", None)
-        silver_record.pop(
-            "publication_type", None
-        )  # OpenAlex uses raw 'source_type' instead
 
         return silver_record

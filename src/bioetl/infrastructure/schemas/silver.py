@@ -811,7 +811,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publication_type", pa.string()),  # Raw OpenAlex type (article, book, etc.)
         pa.field("title", pa.string()),
         # Topics (hierarchical 4-level classification - replaces deprecated concepts)
-        pa.field("topics", pa.string()),  # JSON array
+        pa.field("subject_topics", pa.string()),  # JSON array
         # Bibliographic info (from biblio object)
         pa.field("volume", pa.string()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
