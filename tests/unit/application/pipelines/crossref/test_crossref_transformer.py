@@ -133,9 +133,9 @@ def test_extract_business_data_full(transformer, sample_publication):
     # Authors are now JSON-serialized list
     assert json.loads(data["authors"]) == ["John Doe", "Jane Smith", "Anonymous"]
     assert data["journal"] == "Journal of Testing"
-    assert data["year"] == 2023
+    assert data["publication_year"] == 2023
     assert data["source_type"] == "journal-article"  # Raw CrossRef type preserved
-    assert data["citation_count"] == 100
+    assert data["citations_received"] == 100
     assert data["_source"] == "crossref"
 
 
@@ -349,16 +349,16 @@ def test_extract_business_data_page_range(transformer):
     """Test page range extraction."""
     publication = {"DOI": "10.1234/test", "page": "123-145"}
     data = transformer._extract_business_data(publication)
-    assert data["first_page"] == "123"
-    assert data["last_page"] == "145"
+    assert data["page_first"] == "123"
+    assert data["page_last"] == "145"
 
 
 def test_extract_business_data_single_page(transformer):
     """Test single page extraction."""
     publication = {"DOI": "10.1234/test", "page": "42"}
     data = transformer._extract_business_data(publication)
-    assert data["first_page"] == "42"
-    assert data["last_page"] is None
+    assert data["page_first"] == "42"
+    assert data["page_last"] is None
 
 
 def test_extract_business_data_issn_list(transformer):
@@ -372,7 +372,7 @@ def test_extract_business_data_subject_list(transformer):
     """Test subjects extraction."""
     publication = {"DOI": "10.1234/test", "subject": ["Biology", "Chemistry"]}
     data = transformer._extract_business_data(publication)
-    assert data["subjects"] == ["Biology", "Chemistry"]
+    assert data["subject_keywords"] == ["Biology", "Chemistry"]
 
 
 @pytest.mark.asyncio

@@ -326,7 +326,6 @@ class TestExtractDateData:
         result = transformer._extract_date_data(article, pubmed_data, None)
 
         assert result["pub_date"] == "2023-03-15"
-        assert result["year"] == 2023
         assert result["publication_year"] == 2023
         # accepted_date, received_date, revised_date, epub_date excluded per user request
         assert result["date_completed"] is None
@@ -353,7 +352,6 @@ class TestExtractDateData:
 
         # End-of-period strategy: year-only → YYYY-12-31
         assert result["pub_date"] == "2023-12-31"
-        assert result["year"] == 2023
         assert result["publication_year"] == 2023
         # accepted_date, received_date, revised_date, epub_date excluded per user request
         assert result["date_completed"] is None
@@ -369,7 +367,6 @@ class TestExtractDateData:
         result = transformer._extract_date_data(article, None, None)
 
         assert result["pub_date"] is None
-        assert result["year"] is None
         assert result["publication_year"] is None
         # accepted_date, received_date, revised_date, epub_date excluded per user request
         assert result["date_completed"] is None
@@ -389,7 +386,7 @@ class TestExtractDateData:
         result = transformer._extract_date_data(article, None, None)
 
         assert result["pub_date"] is None
-        assert result["year"] is None
+        assert result["publication_year"] is None
         assert result["date_completed"] is None
         assert result["date_revised"] is None
 
@@ -429,7 +426,7 @@ class TestExtractDateData:
 
         assert result["date_completed"] == "2023-05-15"
         assert result["date_revised"] == "2024-01-10"
-        assert result["year"] == 2023
+        assert result["publication_year"] == 2023
 
 
 class TestExtractBusinessData:
@@ -525,7 +522,6 @@ class TestExtractBusinessData:
         assert result["volume"] == "10"
         assert result["issue"] == "5"
         assert result["pub_date"] == "2023-03-15"
-        assert result["year"] == 2023
         assert result["publication_year"] == 2023
         assert result["publication_types"] == ["Journal Article", "Review"]
         assert result["keywords"] == ["keyword1", "keyword2"]

@@ -46,10 +46,10 @@ def valid_record() -> dict:
         "abstract": "This is an abstract",
         "authors": '["John Doe", "Jane Smith"]',  # JSON array (unified format)
         # Publication metadata
-        "year": 2024,
+        "publication_year": 2024,
         "publication_date": "2024-05-15",
-        "doc_type": None,  # Excluded from Silver/Gold - OpenAlex uses 'source_type' field
-        "source_type": "article",  # Raw OpenAlex type (replaces doc_type)
+        "publication_type": None,  # Excluded from Silver/Gold - OpenAlex uses 'source_type' field
+        "source_type": "article",  # Raw OpenAlex type (replaces publication_type)
         "language": "en",
         # Journal info
         "journal": "Nature",
@@ -59,15 +59,15 @@ def valid_record() -> dict:
         "is_oa": True,
         "oa_status": "gold",
         # Metrics
-        "citation_count": 42,  # Unified field name (from OpenAlex cited_by_count)
+        "citations_received": 42,  # Unified field name (from OpenAlex cited_by_count)
         # Bibliographic info (from biblio object)
         "volume": "42",
         "issue": "3",
-        "first_page": "123",
-        "last_page": "145",
+        "page_first": "123",
+        "page_last": "145",
         # Additional metrics
         "fwci": 1.5,  # Field-Weighted Citation Impact
-        "reference_count": 25,
+        "citations_made": 25,
         # Quality indicators
         "is_retracted": False,
         # Topics (hierarchical classification - replaces deprecated concepts)

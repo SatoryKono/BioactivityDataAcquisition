@@ -122,7 +122,7 @@ async def test_pubmed_publication_date_fields(e2e_data_dir: Path):
         assert pmid is not None
 
         # Most publications should have at least year
-        year = record.get("year") or record.get("publication_year")
+        year = record.get("publication_year")
         if year is not None:
             assert 1800 <= year <= 2100, f"Invalid year {year} for PMID {pmid}"
 

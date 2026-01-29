@@ -207,23 +207,23 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             if citation_contexts
             else None,
             # Author affiliations (unique, sorted)
-            "affiliations": self.serialize_json_list(affiliations)
+            "affiliation_list": self.serialize_json_list(affiliations)
             if affiliations
             else None,
             "journal": journal_info.get("journal_name"),
             "volume": journal_info.get("volume"),
             "issue": journal_info.get("issue"),  # Parsed from combined "32 4" format
             "pages": journal_info.get("pages"),  # Original pages string (cleaned)
-            "first_page": journal_info.get(
+            "page_first": journal_info.get(
                 "first_page"
             ),  # Parsed with abbreviation expansion
-            "last_page": journal_info.get("last_page"),  # Expanded (e.g., "9" → "739")
-            "year": year,
+            "page_last": journal_info.get("last_page"),  # Expanded (e.g., "9" → "739")
+            "publication_year": year,
             "publication_date": self._normalize_partial_date(
                 rec.get("publicationDate")
             ),
-            "citation_count": rec.get("citationCount"),
-            "reference_count": rec.get("referenceCount"),
+            "citations_received": rec.get("citationCount"),
+            "citations_made": rec.get("referenceCount"),
             "influential_citation_count": rec.get("influentialCitationCount"),
             "is_oa": oa_info.get("is_oa"),
             "open_access_url": oa_info.get("url"),

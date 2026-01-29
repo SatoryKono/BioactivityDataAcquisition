@@ -349,16 +349,16 @@ class TestExtractPageInfo:
         assert result == {
             "volume": "42",
             "issue": "3",
-            "first_page": "123",
-            "last_page": "145",
+            "page_first": "123",
+            "page_last": "145",
         }
 
     def test_extract_page_info_single_page(self) -> None:
         """Should handle single page number."""
         publication = {"page": "42"}
         result = extract_page_info(publication)
-        assert result["first_page"] == "42"
-        assert result["last_page"] is None
+        assert result["page_first"] == "42"
+        assert result["page_last"] is None
 
     def test_extract_page_info_missing_fields(self) -> None:
         """Should return None for missing fields."""
@@ -366,8 +366,8 @@ class TestExtractPageInfo:
         assert result == {
             "volume": None,
             "issue": None,
-            "first_page": None,
-            "last_page": None,
+            "page_first": None,
+            "page_last": None,
         }
 
     def test_extract_page_info_partial(self) -> None:
@@ -376,15 +376,15 @@ class TestExtractPageInfo:
         result = extract_page_info(publication)
         assert result["volume"] == "10"
         assert result["issue"] is None
-        assert result["first_page"] == "1"
-        assert result["last_page"] == "50"
+        assert result["page_first"] == "1"
+        assert result["page_last"] == "50"
 
     def test_extract_page_info_article_number(self) -> None:
         """Should handle article numbers (e-pages)."""
         publication = {"page": "e12345"}
         result = extract_page_info(publication)
-        assert result["first_page"] == "e12345"
-        assert result["last_page"] is None
+        assert result["page_first"] == "e12345"
+        assert result["page_last"] is None
 
 
 class TestExtractDates:

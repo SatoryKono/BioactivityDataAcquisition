@@ -48,12 +48,12 @@ def valid_base_record() -> dict:
         "authors": '["John Doe", "Jane Smith"]',  # JSON array
         # === Publication metadata ===
         "journal": "Journal of Testing",
-        "year": 2024,
+        "publication_year": 2024,
         "publication_date": "2024-06-15",
-        "doc_type": "PUBLICATION",
+        "publication_type": "PUBLICATION",
         "language": "en",
         # === Metrics ===
-        "citation_count": 10,
+        "citations_received": 10,
         # === Open Access ===
         "is_oa": True,
         # === Lookup tracking (note: column names use _ prefix) ===
@@ -76,7 +76,7 @@ class TestPublicationBaseSchemaValidation:
         assert len(validated) == 1
         assert validated["pmid"].iloc[0] == "12345678"
         assert validated["doi"].iloc[0] == "10.1234/example.test"
-        assert validated["year"].iloc[0] == 2024
+        assert validated["publication_year"].iloc[0] == 2024
 
     def test_record_with_nullable_string_fields(self, valid_base_record: dict) -> None:
         """Record with nullable string fields set to None should pass."""
@@ -123,7 +123,7 @@ class TestPublicationBaseSchemaValidation:
         validated = PublicationBaseSchema.validate(df)
 
         assert len(validated) == 1
-        assert validated["year"].iloc[0] == 2024
+        assert validated["publication_year"].iloc[0] == 2024
         # Use == instead of 'is' for numpy bool comparison
         assert validated["_dq_warn"].iloc[0] == False  # noqa: E712
         assert validated["_dq_error"].iloc[0] == False  # noqa: E712

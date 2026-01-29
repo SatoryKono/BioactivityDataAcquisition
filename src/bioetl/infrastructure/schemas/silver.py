@@ -262,7 +262,7 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         # Primary identifiers
         pa.field("doi", pa.string()),
         # Unified page fields (parsed from medline_pgn/pages)
-        pa.field("first_page", pa.string()),
+        pa.field("page_first", pa.string()),
         pa.field("grant_count", pa.int64()),  # Number of grants
         # Journal information
         pa.field("issn", pa.string()),
@@ -279,7 +279,7 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         # Classification
         pa.field("keywords", pa.list_(pa.string())),
         pa.field("language", pa.string()),
-        pa.field("last_page", pa.string()),
+        pa.field("page_last", pa.string()),
         # Page numbers (MEDLINE format)
         pa.field("medline_pgn", pa.string()),  # Original PubMed pagination
         pa.field("mesh_heading_count", pa.int64()),  # Number of MeSH headings
@@ -295,14 +295,13 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publication_status", pa.string()),  # ppublish/epublish/aheadofprint
         pa.field("publication_type_list", pa.string()),  # JSON array of pub types
         pa.field("publication_types", pa.list_(pa.string())),
-        pa.field("publication_year", pa.int64()),  # Legacy alias for year
-        pa.field("reference_count", pa.int64()),  # Number of references
+        pa.field("publication_year", pa.int64()),
+        pa.field("reference_count", pa.int64()),  # Number of references (PubMed-specific)
         # Enhanced affiliation data with identifier metadata (ROR, GRID, etc.)
         pa.field("structured_affiliations", pa.string()),  # JSON array
         pa.field("title", pa.string()),
         # Note: vernacular_title excluded (API deprecated 2026-01)
         pa.field("volume", pa.string()),
-        pa.field("year", pa.int64()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
         pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
@@ -661,7 +660,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
         # Author affiliations (unique, sorted)
-        pa.field("affiliations", pa.string()),  # JSON array
+        pa.field("affiliation_list", pa.string()),  # JSON array
         # Author identifiers (for author-level analytics)
         pa.field("author_h_indices", pa.string()),  # JSON array of h-index values
         pa.field("author_orcids", pa.string()),  # JSON array of ORCIDs
@@ -671,14 +670,14 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         # Citation context (for citation sentiment analysis)
         pa.field("citation_contexts", pa.string()),  # JSON array of context sentences
         # Metrics
-        pa.field("citation_count", pa.int64()),
+        pa.field("citations_received", pa.int64()),
         pa.field("corpus_id", pa.int64()),
         # External identifiers
         pa.field("dblp_id", pa.string()),  # DBLP publication key
         pa.field("doi", pa.string()),
         pa.field("fields_of_study", pa.string()),
         # Unified page fields (parsed from pages)
-        pa.field("first_page", pa.string()),
+        pa.field("page_first", pa.string()),
         pa.field(
             "influential_citation_count", pa.int64()
         ),  # Number of influential citations
@@ -687,7 +686,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         # Journal/Venue
         pa.field("issue", pa.string()),  # Parsed from combined volume/issue
         pa.field("journal", pa.string()),
-        pa.field("last_page", pa.string()),
+        pa.field("page_last", pa.string()),
         pa.field("oa_status", pa.string()),
         pa.field("open_access_url", pa.string()),
         pa.field("pages", pa.string()),  # Legacy: "first-last" format
@@ -698,13 +697,11 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("pmid", pa.string()),
         pa.field("publication_date", pa.string()),
         pa.field("publication_types", pa.string()),
-        pa.field("reference_count", pa.int64()),
+        pa.field("citations_made", pa.int64()),
         # Core fields
         pa.field("title", pa.string()),
         pa.field("tldr", pa.string()),
-        pa.field("venue", pa.string()),
         pa.field("volume", pa.string()),
-        pa.field("year", pa.int64()),
         # === DQ suffix (MUST be last, if present) ===
         pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
@@ -731,20 +728,20 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         # abstract and affiliations excluded per user request
         pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
         pa.field("authors", pa.string()),  # JSON-serialized list
-        pa.field("citation_count", pa.int64()),
+        pa.field("citations_received", pa.int64()),
         pa.field("content_domain_crossmark_restriction", pa.bool_()),
         pa.field("content_domain_domains", pa.list_(pa.string())),
         # Note: doc_type excluded; CrossRef uses raw 'type' field instead
         # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
         pa.field("doi", pa.string()),
-        pa.field("first_page", pa.string()),
+        pa.field("page_first", pa.string()),
         pa.field("issn", pa.list_(pa.string())),
         pa.field("issn_electronic", pa.string()),  # Electronic ISSN
         pa.field("issn_print", pa.string()),  # Print ISSN
         pa.field("issue", pa.string()),
         pa.field("journal", pa.string()),
         pa.field("language", pa.string()),
-        pa.field("last_page", pa.string()),
+        pa.field("page_last", pa.string()),
         pa.field("license_url", pa.string()),
         # Note: pmid and pmc_id excluded - CrossRef API doesn't provide PubMed identifiers
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
@@ -752,15 +749,14 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("published_online", pa.string()),  # Provider-specific
         pa.field("published_print", pa.string()),  # Provider-specific
         pa.field("publisher", pa.string()),
-        pa.field("reference_count", pa.int64()),
-        pa.field("short_container_title", pa.list_(pa.string())),
+        pa.field("citations_made", pa.int64()),
+        pa.field("journal_name_short", pa.list_(pa.string())),
         pa.field(
             "source_type", pa.string()
         ),  # Raw CrossRef type (journal-article, etc.)
-        pa.field("subjects", pa.list_(pa.string())),
+        pa.field("subject_keywords", pa.list_(pa.string())),
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
-        pa.field("year", pa.int64()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
         pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
@@ -787,21 +783,21 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
         pa.field("abstract", pa.string()),
-        pa.field("affiliations", pa.string()),
+        pa.field("affiliation_list", pa.string()),  # JSON array
         # Author identifiers (JSON arrays preserving author order)
         pa.field("author_openalex_ids", pa.string()),  # OpenAlex author IDs
         pa.field("author_orcids", pa.string()),  # ORCID IDs (empty string for missing)
         pa.field("authors", pa.string()),  # JSON-serialized list
         # OpenAlex source field: cited_by_count
-        # Unified BioETL field: citation_count (standardized across all providers)
-        pa.field("citation_count", pa.int64()),
+        # Unified BioETL field: citations_received (standardized across all providers)
+        pa.field("citations_received", pa.int64()),
         # NOTE: concepts field removed - OpenAlex deprecated concepts in 2024, use topics instead
         # Note: doc_type excluded; OpenAlex uses raw 'type' field instead
         # Cross-reference IDs for linking publications across providers
         # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
         pa.field("doi", pa.string()),
         # Unified page fields (from biblio object)
-        pa.field("first_page", pa.string()),
+        pa.field("page_first", pa.string()),
         # Field-Weighted Citation Impact (must be non-negative)
         pa.field("fwci", pa.float64()),
         # Grants/funding information (JSON array)
@@ -820,7 +816,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Keywords extracted from OpenAlex
         pa.field("keywords", pa.list_(pa.string())),
         pa.field("language", pa.string()),
-        pa.field("last_page", pa.string()),
+        pa.field("page_last", pa.string()),
         # Microsoft Academic Graph ID (legacy, from ids object)
         pa.field("mag_id", pa.string()),
         # MeSH terms extracted from OpenAlex mesh field
@@ -837,7 +833,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publication_date", pa.string()),
         pa.field("publisher", pa.string()),
         # Number of works referenced
-        pa.field("reference_count", pa.int64()),
+        pa.field("citations_made", pa.int64()),
         # ROR IDs (may be empty if not returned by Works API)
         pa.field("ror_ids", pa.string()),  # JSON array of ROR URLs
         pa.field("source_type", pa.string()),  # Raw OpenAlex type (article, book, etc.)
@@ -846,7 +842,6 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("topics", pa.string()),  # JSON array
         # Bibliographic info (from biblio object)
         pa.field("volume", pa.string()),
-        pa.field("year", pa.int64()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
         pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),

@@ -261,10 +261,8 @@
     ]),
     'date_completed': None,
     'date_revised': None,
-    'doc_type': 'PUBLICATION',
     'doi': '10.1234/test.2025.001',
     'entity_id': '<entity_id>',
-    'first_page': '123',
     'gene_symbols': list([
     ]),
     'grant_count': 0,
@@ -280,7 +278,6 @@
       'python',
     ]),
     'language': 'eng',
-    'last_page': '145',
     'medline_pgn': '123-145',
     'mesh_heading_count': 1,
     'mesh_terms': list([
@@ -289,6 +286,8 @@
     'mid': None,
     'nlm_unique_id': None,
     'oa_status': None,
+    'page_first': '123',
+    'page_last': '145',
     'pages': '123-145',
     'pii': None,
     'pmc_id': 'PMC1234567',
@@ -298,6 +297,7 @@
     'pub_month': 3,
     'publication_date': '2025-02-28',
     'publication_status': None,
+    'publication_type': 'PUBLICATION',
     'publication_type_list': '["Journal Article","Research Support"]',
     'publication_types': list([
       'Journal Article',
@@ -310,7 +310,6 @@
     'structured_affiliations': None,
     'title': 'A Comprehensive Study of Unit Testing',
     'volume': '42',
-    'year': 2025,
   })
 # ---
 # name: TestPubMedPublicationTransformerSnapshot.test_transform_minimal_snapshot
@@ -341,10 +340,8 @@
     ]),
     'date_completed': None,
     'date_revised': None,
-    'doc_type': 'PUBLICATION',
     'doi': None,
     'entity_id': '<entity_id>',
-    'first_page': None,
     'gene_symbols': list([
     ]),
     'grant_count': 0,
@@ -358,7 +355,6 @@
     'keywords': list([
     ]),
     'language': None,
-    'last_page': None,
     'medline_pgn': None,
     'mesh_heading_count': 0,
     'mesh_terms': list([
@@ -366,6 +362,8 @@
     'mid': None,
     'nlm_unique_id': None,
     'oa_status': None,
+    'page_first': None,
+    'page_last': None,
     'pages': None,
     'pii': None,
     'pmc_id': None,
@@ -375,6 +373,7 @@
     'pub_month': None,
     'publication_date': None,
     'publication_status': None,
+    'publication_type': 'PUBLICATION',
     'publication_type_list': None,
     'publication_types': list([
     ]),
@@ -385,7 +384,6 @@
     'structured_affiliations': None,
     'title': 'Test Article Title',
     'volume': None,
-    'year': None,
   })
 # ---
 # name: TestPublicationTransformerSnapshot.test_transform_snapshot

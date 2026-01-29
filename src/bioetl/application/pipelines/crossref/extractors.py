@@ -231,13 +231,13 @@ def extract_journal_info(publication: dict[str, Any]) -> dict[str, Any]:
 def extract_page_info(publication: dict[str, Any]) -> dict[str, Any]:
     """Extract pagination information from publication.
 
-    Parses page range string (e.g., "123-145") into first_page and last_page.
+    Parses page range string (e.g., "123-145") into page_first and page_last.
 
     Args:
         publication: CrossRef publication record.
 
     Returns:
-        Dictionary with volume, issue, first_page, last_page fields.
+        Dictionary with volume, issue, page_first, page_last fields.
 
     Example:
         >>> extract_page_info({
@@ -245,19 +245,19 @@ def extract_page_info(publication: dict[str, Any]) -> dict[str, Any]:
         ...     "issue": "3",
         ...     "page": "123-145"
         ... })
-        {'volume': '42', 'issue': '3', 'first_page': '123', 'last_page': '145'}
+        {'volume': '42', 'issue': '3', 'page_first': '123', 'page_last': '145'}
         >>> extract_page_info({"page": "42"})
-        {'volume': None, 'issue': None, 'first_page': '42', 'last_page': None}
+        {'volume': None, 'issue': None, 'page_first': '42', 'page_last': None}
         >>> extract_page_info({})
-        {'volume': None, 'issue': None, 'first_page': None, 'last_page': None}
+        {'volume': None, 'issue': None, 'page_first': None, 'page_last': None}
 
     """
     first_page, last_page = parse_page_range(publication.get("page"))
     return {
         "volume": publication.get("volume"),
         "issue": publication.get("issue"),
-        "first_page": first_page,
-        "last_page": last_page,
+        "page_first": first_page,
+        "page_last": last_page,
     }
 
 

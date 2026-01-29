@@ -98,22 +98,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="Page range (legacy format, e.g., '123-456')",
     )
 
-    first_page: Series[str] = pa.Field(
-        nullable=True,
-        description="First page number (parsed from pages)",
-    )
-
-    last_page: Series[str] = pa.Field(
-        nullable=True,
-        description="Last page number (parsed from pages)",
-    )
-
     # === Provider-specific Metrics ===
-    reference_count: Series[pd.Int64Dtype] = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of references",
-    )
 
     influential_citation_count: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
@@ -142,12 +127,6 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     publication_types: Series[str] = pa.Field(
         nullable=True,
         description="Publication types (JSON array)",
-    )
-
-    # === Author Affiliations ===
-    affiliations: Series[str] = pa.Field(
-        nullable=True,
-        description="Author affiliations (JSON array)",
     )
 
     # === Author Identifiers (for author-level analytics and disambiguation) ===
