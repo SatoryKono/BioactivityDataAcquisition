@@ -240,34 +240,39 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field(
             "abstract_structured", pa.bool_()
         ),  # Whether abstract has NLM sections
-        pa.field("affiliations", pa.string()),  # JSON array of unique affiliations
+        pa.field("affiliation_list", pa.string()),  # JSON array of unique affiliations
+        pa.field("affiliation_structured", pa.string()),  # JSON array with ROR/GRID
         pa.field("author_count", pa.int64()),
         pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("authors_with_affiliations", pa.string()),  # JSON array
         pa.field("chemical_count", pa.int64()),
+        pa.field("chemicals", pa.string()),  # Chemical substances (JSON array)
         pa.field("citation_subset", pa.string()),  # Citation subset codes
+        pa.field("citations_made", pa.int64()),  # Unified: citations made
+        pa.field("citations_received", pa.int64()),  # Unified: citations received
         pa.field("country", pa.string()),
+        pa.field("databanks", pa.string()),  # Databank accession numbers (JSON array)
         pa.field("date_completed", pa.string()),  # MEDLINE processing completion date
         pa.field("date_revised", pa.string()),  # Record revision date
         pa.field("doi", pa.string()),
+        pa.field("gene_symbols", pa.string()),  # Gene symbols (JSON array)
         pa.field("grant_count", pa.int64()),
+        pa.field("is_oa", pa.bool_()),  # Open Access status
         pa.field("issn", pa.string()),
         pa.field("issue", pa.string()),
         pa.field("journal", pa.string()),
-        pa.field("journal_abbrev", pa.string()),
         pa.field("journal_iso_abbrev", pa.string()),  # ISO journal abbreviation
         pa.field("journal_issn_type", pa.string()),  # Print/Electronic/Linking
-        pa.field("journal_title", pa.string()),  # Full journal name (PubMed source)
+        pa.field("journal_name", pa.string()),  # Full journal name (PubMed source)
+        pa.field("journal_name_short", pa.string()),  # Journal abbreviation
         pa.field("keyword_count", pa.int64()),
-        pa.field("keywords", pa.list_(pa.string())),
         pa.field("language", pa.string()),
         pa.field("medline_pgn", pa.string()),  # Original PubMed pagination
         pa.field("mesh_heading_count", pa.int64()),
-        pa.field("mesh_terms", pa.list_(pa.string())),
         pa.field("nlm_unique_id", pa.string()),  # NLM catalog ID
         pa.field("page_first", pa.string()),
         pa.field("page_last", pa.string()),
-        pa.field("pages", pa.string()),  # Legacy: medline_pgn format
+        pa.field("page_range", pa.string()),  # Page range string
         pa.field("pmc_id", pa.string()),
         pa.field("pmid", pa.string()),
         pa.field("pub_date", pa.string()),
@@ -275,11 +280,13 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("pub_month", pa.int64()),  # Publication month (1-12)
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD format
         pa.field("publication_status", pa.string()),  # ppublish/epublish/aheadofprint
+        pa.field("publication_type", pa.string()),  # Unified: publication type
         pa.field("publication_type_list", pa.string()),  # JSON array of pub types
         pa.field("publication_types", pa.list_(pa.string())),
         pa.field("publication_year", pa.int64()),
         pa.field("reference_count", pa.int64()),  # PubMed-specific
-        pa.field("structured_affiliations", pa.string()),  # JSON array
+        pa.field("subject_keywords", pa.list_(pa.string())),  # Author keywords
+        pa.field("subject_mesh", pa.list_(pa.string())),  # MeSH terms
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
