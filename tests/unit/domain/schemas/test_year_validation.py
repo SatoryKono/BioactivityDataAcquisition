@@ -243,8 +243,11 @@ class TestChemblYearValidation:
             "publication_date": None,  # Always NULL for ChEMBL
             "publication_type": "PUBLICATION",
             "language": None,
-            # Metrics (always NULL for ChEMBL)
-            "citation_count": None,
+            # Affiliations (unified field name)
+            "affiliation_list": None,
+            # Metrics (unified field names, always NULL for ChEMBL)
+            "citations_received": None,
+            "citations_made": None,
             # Open Access (always NULL for ChEMBL)
             "is_oa": None,
             # Lookup tracking
@@ -323,8 +326,11 @@ class TestPubMedYearValidation:
             "publication_date": "2020-05-15",  # Unified date field
             "publication_type": "PUBLICATION",
             "language": "eng",
+            # Affiliations (unified field name)
+            "affiliation_list": None,
             # Metrics (unified field names)
             "citations_received": None,  # Not available from PubMed
+            "citations_made": None,  # Unified name, PubMed also has reference_count
             # Open Access
             "is_oa": None,
             # Lookup tracking
