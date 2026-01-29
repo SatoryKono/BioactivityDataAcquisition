@@ -233,7 +233,6 @@ class PubMedPublicationEntity(PublicationEntityBase):
     mesh_heading_count: int | None = None
     keyword_count: int | None = None
     grant_count: int | None = None
-    reference_count: int | None = None
     chemical_count: int | None = None
 
     # Legacy field (kept for backward compatibility)

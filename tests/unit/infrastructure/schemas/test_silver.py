@@ -403,7 +403,7 @@ class TestPubmedPublicationSchema:
     def test_has_list_fields(self):
         """Verify list fields exist and have correct types."""
         # authors is now JSON-serialized string (per commit fcf29f2)
-        list_fields = ["publication_types", "keywords", "mesh_terms"]
+        list_fields = ["publication_types", "subject_keywords", "subject_mesh"]
         for field_name in list_fields:
             assert field_name in PUBMED_PUBLICATION_SCHEMA.names
             field = PUBMED_PUBLICATION_SCHEMA.field(field_name)
@@ -425,7 +425,7 @@ class TestPubmedPublicationSchema:
 
     def test_has_journal_info(self):
         """Verify journal information fields exist."""
-        expected = ["journal", "journal_abbrev", "volume", "issue"]
+        expected = ["journal", "journal_name_short", "volume", "issue"]
         for field_name in expected:
             assert field_name in PUBMED_PUBLICATION_SCHEMA.names
 

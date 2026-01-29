@@ -284,7 +284,6 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publication_type_list", pa.string()),  # JSON array of pub types
         pa.field("publication_types", pa.list_(pa.string())),
         pa.field("publication_year", pa.int64()),
-        pa.field("reference_count", pa.int64()),  # PubMed-specific
         pa.field("subject_keywords", pa.list_(pa.string())),  # Author keywords
         pa.field("subject_mesh", pa.list_(pa.string())),  # MeSH terms
         pa.field("title", pa.string()),
