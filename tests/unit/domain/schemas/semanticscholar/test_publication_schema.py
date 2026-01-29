@@ -129,7 +129,7 @@ class TestPublicationDateValidation:
 
 
 class TestMetricsValidation:
-    """Tests for citation_count and reference_count validation."""
+    """Tests for citations_received and citations_made validation."""
 
     def test_valid_citation_count(self) -> None:
         """Test valid non-negative citation count."""
@@ -239,13 +239,13 @@ class TestSchemaFieldDefinitions:
             "title",
             "abstract",
             "tldr",
-            "year",
+            "publication_year",
             "publication_date",
             "journal",
             "volume",
             "pages",
-            "citation_count",
-            "reference_count",
+            "citations_received",
+            "citations_made",
             "influential_citation_count",
             "is_oa",
             "open_access_url",
