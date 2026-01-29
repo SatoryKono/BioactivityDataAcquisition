@@ -109,6 +109,21 @@ class AuthorExtractor(BaseFieldExtractor):
 
         return raw_authors if raw_authors else None
 
+    def _extract_identifier(self, aff_info: Element) -> tuple[str | None, str | None]:
+        """Extract identifier from AffiliationInfo."""
+        # Try to find identifiers in priority order
+        for source in ["ROR", "GRID", "ISNI", "RINGGOLD"]:
+            for id_elem in aff_info.findall("Identifier"):
+                if id_elem.get("Source") == source and id_elem.text:
+                    return id_elem.text.strip(), source
+
+        # If no prioritized identifier found, take the first available
+        for id_elem in aff_info.findall("Identifier"):
+            if id_elem.text:
+                return id_elem.text.strip(), id_elem.get("Source")
+
+        return None, None
+
     def _extract_structured_affiliation(
         self, aff_info: Element
     ) -> StructuredAffiliation | None:
@@ -151,31 +166,6 @@ class AuthorExtractor(BaseFieldExtractor):
             ror_id=ror_id,
             grid_id=grid_id,
         )
-
-    def _extract_identifier(self, aff_info: Element) -> tuple[str | None, str | None]:
-        """Extract institutional identifier from AffiliationInfo.
-
-        Prioritizes ROR, then GRID, then ISNI/RINGGOLD.
-        If no prioritized identifier is found, returns the first available one.
-
-        Args:
-            aff_info: AffiliationInfo XML element.
-
-        Returns:
-            Tuple of (identifier_value, source_name) or (None, None).
-        """
-        # Try to find identifiers in priority order
-        for source in ["ROR", "GRID", "ISNI", "RINGGOLD"]:
-            for id_elem in aff_info.findall("Identifier"):
-                if id_elem.get("Source") == source and id_elem.text:
-                    return id_elem.text.strip(), source
-
-        # If no prioritized identifier found, take the first available
-        for id_elem in aff_info.findall("Identifier"):
-            if id_elem.text:
-                return id_elem.text.strip(), id_elem.get("Source")
-
-        return None, None
 
     def _extract_email_from_text(self, text: str) -> str | None:
         """Extract email address from affiliation text.

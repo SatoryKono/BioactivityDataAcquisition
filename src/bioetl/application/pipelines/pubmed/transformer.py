@@ -57,6 +57,18 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     # Instance variable to cache parsed XML root between validation and extraction
     _cached_xml_root: ET.Element | None
 
+    # Date validation patterns for ISO date formats (YYYY, YYYY-MM, YYYY-MM-DD).
+    # Used to filter out invalid dates like "2024-13-99" or "n/a" before
+    # they propagate to _compute_publication_date.
+    _VALID_DATE_PATTERNS: tuple[re.Pattern[str], ...] = (
+        # Full date: YYYY-MM-DD (with valid month 01-12 and day 01-31)
+        re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$"),
+        # Partial month: YYYY-MM (with valid month 01-12)
+        re.compile(r"^\d{4}-(0[1-9]|1[0-2])$"),
+        # Partial year: YYYY
+        re.compile(r"^\d{4}$"),
+    )
+
     def __init__(
         self,
         provider: str = "pubmed",
@@ -128,6 +140,28 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 pmid=record.get("pmid"),
             )
             raise ValueError(f"XML parse error: {e}") from e
+
+    def _is_valid_date_format(self, date_str: str | None) -> bool:
+        """Validate that date string matches expected ISO format.
+
+        Accepts:
+        - YYYY-MM-DD (full date with valid month 01-12 and day 01-31)
+        - YYYY-MM (partial with valid month 01-12)
+        - YYYY (year only)
+
+        This validation ensures that invalid dates like "2024-13-99", "n/a",
+        or malformed strings don't propagate to _compute_publication_date,
+        which would produce inconsistent results.
+
+        Args:
+            date_str: Date string to validate.
+
+        Returns:
+            True if date format is valid, False otherwise.
+        """
+        if not date_str:
+            return False
+        return any(pattern.match(date_str) for pattern in self._VALID_DATE_PATTERNS)
 
     def _extract_medline_metadata(
         self,
@@ -210,77 +244,17 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "databanks": ClassificationExtractor.parse_databanks(medline),
         }
 
-    def _extract_identifiers(self, root: ET.Element) -> dict[str, Any]:
-        """Extract and normalize all identifiers (DOI, PII, MID, PublisherID)."""
-        raw_doi = IdentifierExtractor.extract_doi(root)
-        doi_vo = DOI.from_raw(raw_doi)
-        normalized_doi = str(doi_vo) if doi_vo else None
-
-        return {
-            "doi": normalized_doi,
-            "pii": self._data_normalizer.normalize_to_string(
-                IdentifierExtractor.extract_pii(root)
-            ),
-            "mid": self._data_normalizer.normalize_to_string(
-                IdentifierExtractor.extract_mid(root)
-            ),
-            "publisher_id": self._data_normalizer.normalize_to_string(
-                IdentifierExtractor.extract_publisher_id(root)
-            ),
-            "pmc_id": normalize_pmc_id(IdentifierExtractor.extract_pmc_id(root)),
-        }
-
-    def _extract_author_metadata(self, article: ET.Element) -> dict[str, Any]:
-        """Extract all author-related metadata including affiliations."""
-        author_extractor = AuthorExtractor()
-        raw_author_data = author_extractor.extract(article) or []
-
-        # Normalize and hash authors (legacy format)
-        normalized_authors = (
-            author_extractor.normalize(raw_author_data) if raw_author_data else []
-        )
-        hashed_authors = self.hash_pii_list(normalized_authors) or []
-
-        # Structured author-affiliation mapping
-        authors_with_affiliations = self._build_authors_with_affiliations(
-            raw_author_data
-        )
-
-        # Unique affiliations list
-        affiliation_values: list[str] = []
-        for author in raw_author_data:
-            affiliations = author.get("affiliations") or []
-            affiliation_values.extend(aff for aff in affiliations if aff)
-        unique_affiliations = sorted(set(affiliation_values))
-
-        # Structured affiliations with identifiers
-        structured_affs = AuthorExtractor.parse_structured_affiliations(article)
-        processed_structured_affs = self._process_structured_affiliations(
-            structured_affs
-        )
-
-        return {
-            "authors": self.serialize_json_list(hashed_authors),
-            "authors_with_affiliations": (
-                self.serialize_json_list(authors_with_affiliations)
-                if authors_with_affiliations
-                else None
-            ),
-            "affiliation_list": (
-                self.serialize_json_list(unique_affiliations)
-                if unique_affiliations
-                else None
-            ),
-            "affiliation_structured": self.serialize_json_list(
-                processed_structured_affs
-            ),
-            "author_count": len(hashed_authors),
-        }
-
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
         """Extract all business fields from PubMed XML.
 
         Uses the cached XML root from _pre_extract_validation.
+
+        Args:
+            record: Raw Bronze record (unused, XML already parsed).
+
+        Returns:
+            Dictionary of extracted and normalized fields.
+
         """
         root = self._cached_xml_root
         if root is None:
@@ -297,53 +271,98 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         if article is None:
             return {"pmid": pmid}
 
-        # 1. Base identifiers
-        data = {
+        # Extract raw author data with affiliations
+        author_extractor = AuthorExtractor()
+        raw_author_data = author_extractor.extract(article) or []
+
+        # Normalize and hash authors (legacy format for backward compatibility)
+        normalized_authors = (
+            author_extractor.normalize(raw_author_data) if raw_author_data else []
+        )
+        hashed_authors = self.hash_pii_list(normalized_authors) or []
+
+        # Build structured author-affiliation mapping
+        authors_with_affiliations = self._build_authors_with_affiliations(
+            raw_author_data
+        )
+
+        # Extract unique affiliations list (unified field name)
+        affiliation_values: list[str] = []
+        for author in raw_author_data:
+            affiliations = author.get("affiliations") or []
+            affiliation_values.extend(aff for aff in affiliations if aff)
+        unique_affiliations = sorted(set(affiliation_values))
+        serialized_affiliations = (
+            self.serialize_json_list(unique_affiliations)
+            if unique_affiliations
+            else None
+        )
+
+        # Extract structured affiliations with identifiers
+        structured_affs = AuthorExtractor.parse_structured_affiliations(article)
+        processed_structured_affs = self._process_structured_affiliations(
+            structured_affs
+        )
+        serialized_structured_affs = self.serialize_json_list(processed_structured_affs)
+
+        # Validate DOI
+        raw_doi = IdentifierExtractor.extract_doi(root)
+        doi_vo = DOI.from_raw(raw_doi)
+        normalized_doi = str(doi_vo) if doi_vo else None
+
+        # Extract and normalize additional identifiers.
+        # Using normalize_to_string ensures that empty strings ("") become None,
+        # which provides consistent handling in downstream processing and
+        # prevents inconsistent content_hash computation for equivalent records.
+        pii = self._data_normalizer.normalize_to_string(
+            IdentifierExtractor.extract_pii(root)
+        )
+        mid = self._data_normalizer.normalize_to_string(
+            IdentifierExtractor.extract_mid(root)
+        )
+        publisher_id = self._data_normalizer.normalize_to_string(
+            IdentifierExtractor.extract_publisher_id(root)
+        )
+
+        return {
             "pmid": pmid,
-            **self._extract_identifiers(root),
+            "doi": normalized_doi,
+            "pii": pii,
+            "mid": mid,
+            "publisher_id": publisher_id,
+            "title": get_text(article.find(".//ArticleTitle")),
+            # vernacular_title excluded per user request
+            "abstract": self._data_normalizer.strip_html_tags(
+                AbstractExtractor.extract_abstract(article)
+            ),
+            "abstract_structured": AbstractExtractor.is_abstract_structured(article),
+            "authors": self.serialize_json_list(hashed_authors),
+            "authors_with_affiliations": (
+                self.serialize_json_list(authors_with_affiliations)
+                if authors_with_affiliations
+                else None
+            ),
+            "affiliation_list": serialized_affiliations,
+            "affiliation_structured": serialized_structured_affs,
+            "author_count": len(hashed_authors),
+            **self._extract_journal_data(article),
+            **self._extract_date_data(article, pubmed_data, medline),
+            **self._extract_classification_data(article, medline),
+            **self._extract_medline_metadata(medline, pubmed_data),
+            **self._extract_counts(article, pubmed_data),
+            "language": get_text(article.find(".//Language")),
+            "pmc_id": normalize_pmc_id(IdentifierExtractor.extract_pmc_id(root)),
+            "_source": "pubmed",
+            "publication_type": "PUBLICATION",
+            "citations_received": None,
+            "is_oa": None,
+            "_lookup_method": cast("dict[str, Any]", record).get(
+                "_lookup_method", "pmid"
+            ),
+            "_original_id": cast("dict[str, Any]", record).get("_original_id"),
+            "_dq_warn": False,
+            "_dq_error": False,
         }
-
-        # 2. Content & Authors
-        data.update(
-            {
-                "title": get_text(article.find(".//ArticleTitle")),
-                "abstract": self._data_normalizer.strip_html_tags(
-                    AbstractExtractor.extract_abstract(article)
-                ),
-                "abstract_structured": AbstractExtractor.is_abstract_structured(
-                    article
-                ),
-                "language": get_text(article.find(".//Language")),
-            }
-        )
-        data.update(self._extract_author_metadata(article))
-
-        # 3. Journal & Dates
-        data.update(self._extract_journal_data(article))
-        data.update(self._extract_date_data(article, pubmed_data, medline))
-
-        # 4. Classifications & Metadata
-        data.update(self._extract_classification_data(article, medline))
-        data.update(self._extract_medline_metadata(medline, pubmed_data))
-        data.update(self._extract_counts(article, pubmed_data))
-
-        # 5. System fields
-        data.update(
-            {
-                "_source": "pubmed",
-                "publication_type": "PUBLICATION",
-                "citations_received": None,
-                "is_oa": None,
-                "_lookup_method": cast("dict[str, Any]", record).get(
-                    "_lookup_method", "pmid"
-                ),
-                "_original_id": cast("dict[str, Any]", record).get("_original_id"),
-                "_dq_warn": False,
-                "_dq_error": False,
-            }
-        )
-
-        return data
 
     def _process_structured_affiliations(
         self, affiliations: list[StructuredAffiliation]
@@ -630,12 +649,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         # Validate date formats before passing to _compute_publication_date.
         # Invalid dates (e.g., "2024-13-99", "n/a") are set to None to ensure
         # _compute_publication_date falls back to the next priority source.
-        pub_date = (
-            raw_pub_date if DateExtractor.is_valid_date_format(raw_pub_date) else None
-        )
-        epub_date = (
-            raw_epub_date if DateExtractor.is_valid_date_format(raw_epub_date) else None
-        )
+        pub_date = raw_pub_date if self._is_valid_date_format(raw_pub_date) else None
+        epub_date = raw_epub_date if self._is_valid_date_format(raw_epub_date) else None
 
         publication_date = self._compute_publication_date(
             epub_date, pub_date, validated_year

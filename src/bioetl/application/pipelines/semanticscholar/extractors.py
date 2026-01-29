@@ -80,6 +80,40 @@ def parse_volume_issue(volume_str: str | None) -> tuple[str | None, str | None]:
 # =============================================================================
 
 
+def _extract_digits(s: str) -> str:
+    """Extract digits from string."""
+    return "".join(c for c in s if c.isdigit())
+
+
+def _extract_prefix(s: str) -> str:
+    """Extract non-digit prefix from string."""
+    return "".join(c for c in s if not c.isdigit())
+
+
+def _calculate_expanded_page_number(
+    first_num: int,
+    last_num: int,
+    last_digits_len: int,
+) -> int:
+    """Calculate the expanded page number from first page and abbreviated last page.
+
+    Args:
+        first_num: parsed integer of first page.
+        last_num: parsed integer of last page (abbreviated).
+        last_digits_len: number of digits in the abbreviated last page.
+
+    Returns:
+        Expanded integer page number.
+    """
+    divisor = 10**last_digits_len
+    expanded = (first_num // divisor) * divisor + last_num
+
+    # Handle rollover case: "199-3" should be "199-203", not "199-193"
+    if expanded < first_num:
+        expanded += divisor
+    return expanded
+
+
 def _expand_abbreviated_page(first_page: str, tmp_last_page: str) -> str:
     """Expand abbreviated last page number.
 
@@ -102,8 +136,8 @@ def _expand_abbreviated_page(first_page: str, tmp_last_page: str) -> str:
 
     """
     # Extract numeric parts only for calculation
-    first_digits = "".join(c for c in first_page if c.isdigit())
-    last_digits = "".join(c for c in tmp_last_page if c.isdigit())
+    first_digits = _extract_digits(first_page)
+    last_digits = _extract_digits(tmp_last_page)
 
     # If either is non-numeric, return as-is (e.g., "S1-S5")
     if not first_digits or not last_digits:
@@ -117,19 +151,13 @@ def _expand_abbreviated_page(first_page: str, tmp_last_page: str) -> str:
         return tmp_last_page
 
     # Expand abbreviated page number
-    # last_page = int(first_page / 10^n2) * 10^n2 + tmp_last_page
     first_num = int(first_digits)
     last_num = int(last_digits)
-    divisor = 10**n2
 
-    expanded = (first_num // divisor) * divisor + last_num
-
-    # Handle rollover case: "199-3" should be "199-203", not "199-193"
-    if expanded < first_num:
-        expanded += divisor
+    expanded = _calculate_expanded_page_number(first_num, last_num, n2)
 
     # Preserve any prefix from tmp_last_page (e.g., "S" in "S5")
-    prefix = "".join(c for c in tmp_last_page if not c.isdigit())
+    prefix = _extract_prefix(tmp_last_page)
     return f"{prefix}{expanded}" if prefix else str(expanded)
 
 

@@ -101,18 +101,6 @@ class MedlineDateParser:
     # Pattern to find 4-digit years in text
     _YEAR_PATTERN: ClassVar[re.Pattern[str]] = re.compile(r"\b(19\d{2}|20\d{2})\b")
 
-    # Date validation patterns for ISO date formats (YYYY, YYYY-MM, YYYY-MM-DD).
-    # Used to filter out invalid dates like "2024-13-99" or "n/a" before
-    # they propagate to _compute_publication_date.
-    _VALID_DATE_PATTERNS: tuple[re.Pattern[str], ...] = (
-        # Full date: YYYY-MM-DD (with valid month 01-12 and day 01-31)
-        re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$"),
-        # Partial month: YYYY-MM (with valid month 01-12)
-        re.compile(r"^\d{4}-(0[1-9]|1[0-2])$"),
-        # Partial year: YYYY
-        re.compile(r"^\d{4}$"),
-    )
-
     def parse(self, medline_date: str) -> RawDate | None:
         """Parse MedlineDate free-text format into components.
 
@@ -362,34 +350,6 @@ class DateExtractor(BaseFieldExtractor):
                 date_str, _ = cls.extract_date(date_node)
                 return date_str
         return None
-
-    @classmethod
-    def is_valid_date_format(cls, date_str: str | None) -> bool:
-        """Validate that date string matches expected ISO format.
-
-        Accepts:
-        - YYYY-MM-DD (full date with valid month 01-12 and day 01-31)
-        - YYYY-MM (partial with valid month 01-12)
-        - YYYY (year only)
-
-        This validation ensures that invalid dates like "2024-13-99", "n/a",
-        or malformed strings don't propagate to _compute_publication_date,
-        which would produce inconsistent results.
-
-        Args:
-            date_str: Date string to validate.
-
-        Returns:
-            True if date format is valid, False otherwise.
-        """
-        if not date_str:
-            return False
-        # Use MedlineDateParser patterns for shared regexes if possible,
-        # but for ISO validation we use strict specific patterns.
-        return any(
-            pattern.match(date_str)
-            for pattern in MedlineDateParser._VALID_DATE_PATTERNS
-        )
 
     @classmethod
     def extract_article_date(

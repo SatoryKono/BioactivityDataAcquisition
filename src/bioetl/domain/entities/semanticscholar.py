@@ -16,7 +16,6 @@ Provider-specific fields (paper_id, pmc_id, arxiv_id, etc.) are defined here.
 from __future__ import annotations
 
 from dataclasses import dataclass
-
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 
 

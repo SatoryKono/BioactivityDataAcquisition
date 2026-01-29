@@ -12,7 +12,7 @@ Uses declarative field_specs DSL for mapping.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.field_specs import (
     PMID,
@@ -76,11 +76,7 @@ _JOURNAL_INFO = FieldGroup(
         FieldSpec("first_page", target="page_first"),
         FieldSpec("last_page", target="page_last"),
         # Unified temporal field
-        FieldSpec(
-            "year",
-            target="publication_year",
-            converter=lambda x: int(x) if x is not None else None,
-        ),
+        FieldSpec("year", target="publication_year", converter=int),
     ),
 )
 
@@ -214,7 +210,7 @@ class PublicationTransformer(BaseChemblTransformer):
         citation_count = record.get("citation_count")
         if citation_count is not None:
             try:
-                data["citations_received"] = int(citation_count)
+                data["citations_received"] = int(cast(Any, citation_count))
             except (TypeError, ValueError):
                 data["citations_received"] = None
         else:

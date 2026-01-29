@@ -71,6 +71,36 @@ class ArrowDataConverter:
             return pa.map_(key_type, item_type)
         return dtype
 
+    def _apply_column_ordering(
+        self, arrow_data: pa.Table, explicit_order: list[str] | None
+    ) -> pa.Table:
+        """Apply explicit or canonical column ordering."""
+        from bioetl.domain.schemas.column_order import canonical_column_order
+
+        if explicit_order:
+            ordered_columns = [
+                c for c in explicit_order if c in arrow_data.column_names
+            ]
+            remaining = [
+                c for c in arrow_data.column_names if c not in ordered_columns
+            ]
+            return arrow_data.select(ordered_columns + remaining)
+
+        ordered_columns = canonical_column_order(list(arrow_data.column_names))
+        return arrow_data.select(ordered_columns)
+
+    def _apply_sorting(
+        self, arrow_data: pa.Table, primary_keys: list[str] | None
+    ) -> pa.Table:
+        """Apply sorting by primary keys."""
+        if not primary_keys:
+            return arrow_data
+
+        valid_keys = [pk for pk in primary_keys if pk in arrow_data.schema.names]
+        if valid_keys:
+            return arrow_data.sort_by([(pk, "ascending") for pk in valid_keys])
+        return arrow_data
+
     def convert_records_to_arrow(
         self,
         records: list[dict[str, Any]],
@@ -102,64 +132,10 @@ class ArrowDataConverter:
         if "null" in schema_str:
             arrow_data = self._sanitize_null_columns(arrow_data)
 
+        # Sort by primary keys for deterministic writes
         arrow_data = self._apply_sorting(arrow_data, primary_keys)
 
         return arrow_data
-
-    def _apply_column_ordering(
-        self,
-        arrow_data: pa.Table,
-        column_order: list[str] | None,
-    ) -> pa.Table:
-        """Apply canonical or explicit column ordering."""
-        from bioetl.domain.schemas.column_order import canonical_column_order
-
-        if column_order:
-            ordered_columns = [c for c in column_order if c in arrow_data.column_names]
-            remaining = [c for c in arrow_data.column_names if c not in ordered_columns]
-            return arrow_data.select(ordered_columns + remaining)
-
-        ordered_columns = canonical_column_order(list(arrow_data.column_names))
-        return arrow_data.select(ordered_columns)
-
-    def _apply_sorting(
-        self,
-        arrow_data: pa.Table,
-        primary_keys: list[str] | None,
-    ) -> pa.Table:
-        """Sort table by primary keys for deterministic writes."""
-        if primary_keys:
-            valid_keys = [pk for pk in primary_keys if pk in arrow_data.schema.names]
-            if valid_keys:
-                return arrow_data.sort_by([(pk, "ascending") for pk in valid_keys])
-        return arrow_data
-
-    def _convert_column_to_string(self, col: pa.Array) -> pa.Array:
-        """Convert column to string type handling nulls safely."""
-        return pa.array(
-            [str(v) if v is not None else None for v in col.to_pylist()],
-            type=pa.string(),
-        )
-
-    def _process_column_for_delta(
-        self, col: pa.Array, field: pa.Field
-    ) -> tuple[pa.Array, pa.Field]:
-        """Process a single column for Delta Lake compatibility."""
-        new_type = self.sanitize_type_for_delta(field.type)
-
-        if pa.types.is_null(field.type):
-            new_col = pa.array([None] * len(col), type=pa.string())
-            return new_col, pa.field(field.name, pa.string(), field.nullable)
-
-        if new_type == field.type:
-            return col, field
-
-        try:
-            new_col = col.cast(new_type)
-        except pa.ArrowInvalid:
-            new_col = self._convert_column_to_string(col)
-
-        return new_col, pa.field(field.name, new_type, field.nullable)
 
     def _sanitize_null_columns(self, arrow_data: pa.Table) -> pa.Table:
         """Sanitize null-typed columns in Arrow table.
@@ -179,9 +155,31 @@ class ArrowDataConverter:
 
         for i, field in enumerate(arrow_data.schema):
             col = arrow_data.column(i)
-            new_col, new_field = self._process_column_for_delta(col, field)
-            new_columns.append(new_col)
-            new_fields.append(new_field)
+            new_type = self.sanitize_type_for_delta(field.type)
+
+            if pa.types.is_null(field.type):
+                # Create string array with all nulls
+                new_col = pa.array([None] * len(col), type=pa.string())
+                new_columns.append(new_col)
+            elif new_type != field.type:
+                # Try to cast for nested types
+                try:
+                    new_columns.append(col.cast(new_type))
+                except pa.ArrowInvalid:
+                    # If cast fails, convert to string via Python
+                    new_columns.append(
+                        pa.array(
+                            [
+                                str(v) if v is not None else None
+                                for v in col.to_pylist()
+                            ],
+                            type=pa.string(),
+                        )
+                    )
+            else:
+                new_columns.append(col)
+
+            new_fields.append(pa.field(field.name, new_type, field.nullable))
 
         new_schema = pa.schema(new_fields)
         return pa.Table.from_arrays(new_columns, schema=new_schema)

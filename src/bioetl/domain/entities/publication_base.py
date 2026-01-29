@@ -98,7 +98,7 @@ class PublicationEntityBase(BaseEntity):
     citations_made: int | None = None  # Number of references FROM this publication
 
     # Classification
-    publication_type: str = "PUBLICATION"
+    publication_type: str | None = "PUBLICATION"
     language: str | None = None
 
     # Open Access status

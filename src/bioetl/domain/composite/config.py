@@ -293,9 +293,9 @@ class LayerColumnConfig:
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
-        self._ensure_tuple("columns", self.columns)
-        self._ensure_tuple("include_groups", self.include_groups)
-        self._ensure_tuple("exclude_fields", self.exclude_fields)
+        _ensure_tuple(self, "columns")
+        _ensure_tuple(self, "include_groups")
+        _ensure_tuple(self, "exclude_fields")
 
         if self.column_groups is not None and isinstance(self.column_groups, list):
             object.__setattr__(
@@ -310,10 +310,6 @@ class LayerColumnConfig:
         if not isinstance(self.rename_fields, dict):
             object.__setattr__(self, "rename_fields", dict(self.rename_fields))
         self._validate()
-
-    def _ensure_tuple(self, field_name: str, value: Any) -> None:
-        if value is not None and isinstance(value, list):
-            object.__setattr__(self, field_name, tuple(value))
 
     def _validate(self) -> None:
         """Validate configuration invariants."""
@@ -374,18 +370,21 @@ class DataSchemaConfig:
     def __post_init__(self) -> None:
         """Validate and convert types."""
         if isinstance(self.column_groups, list):
-            object.__setattr__(
-                self,
-                "column_groups",
-                tuple(
-                    ColumnGroupConfig(**g) if isinstance(g, dict) else g
-                    for g in self.column_groups
-                ),
-            )
+            self._set_column_groups(self.column_groups)
         if isinstance(self.silver, dict):
             object.__setattr__(self, "silver", LayerColumnConfig(**self.silver))
         if isinstance(self.gold, dict):
             object.__setattr__(self, "gold", LayerColumnConfig(**self.gold))
+
+    def _set_column_groups(self, groups: list[dict[str, Any] | ColumnGroupConfig]) -> None:
+        object.__setattr__(
+            self,
+            "column_groups",
+            tuple(
+                ColumnGroupConfig(**g) if isinstance(g, dict) else g
+                for g in groups
+            ),
+        )
 
     def get_layer_groups(self, layer: str) -> tuple[ColumnGroupConfig, ...]:
         """Get effective column groups for a layer.
@@ -397,10 +396,9 @@ class DataSchemaConfig:
             Tuple of ColumnGroupConfig for the layer.
             Returns layer-specific groups if defined, otherwise shared groups.
         """
-        if layer == "silver" and self.silver and self.silver.column_groups:
-            return self.silver.column_groups
-        if layer == "gold" and self.gold and self.gold.column_groups:
-            return self.gold.column_groups
+        layer_config = getattr(self, layer, None)
+        if isinstance(layer_config, LayerColumnConfig) and layer_config.column_groups:
+            return layer_config.column_groups
         return self.column_groups
 
     def should_include_group(self, layer: str, group_name: str) -> bool:
@@ -864,7 +862,7 @@ class CompositeConfig:
         """Generate lock key for composite pipeline."""
         return f"composite:{self.name}"
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary for serialization."""
         return {
             "name": self.name,
@@ -933,3 +931,10 @@ def _validate_threshold_order(soft: float | None, hard: float | None) -> None:
     """Validate that soft threshold is less than hard threshold."""
     if soft is not None and hard is not None and soft >= hard:
         raise ValueError("soft_fail_threshold must be less than hard_fail_threshold")
+
+
+def _ensure_tuple(obj: Any, attr: str) -> None:
+    """Ensure an attribute is a tuple if it is a list."""
+    val = getattr(obj, attr)
+    if val is not None and isinstance(val, list):
+        object.__setattr__(obj, attr, tuple(val))
