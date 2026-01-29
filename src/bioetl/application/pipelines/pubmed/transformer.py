@@ -501,6 +501,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         if not journal:
             return {
+                "journal": None,
                 "journal_name": None,
                 "journal_name_short": None,
                 "journal_iso_abbrev": None,
@@ -522,6 +523,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         issn_type = issn_elem.get("IssnType") if issn_elem is not None else None
 
         return {
+            "journal": journal_name,
             "journal_name": journal_name,
             "journal_name_short": journal_abbrev,
             "journal_iso_abbrev": journal_abbrev,  # Alias for Gold schema
