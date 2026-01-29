@@ -5,8 +5,6 @@ Aligned with RULES.md v5.10, ChEMBL 34 schema, and Publication Schema Unificatio
 
 from __future__ import annotations
 
-from typing import Optional
-
 import pandera.pandas as pa
 from pandera.typing import Series
 

@@ -502,7 +502,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         if not journal:
             return {
                 "journal": None,
-                "journal": None,
                 "journal_name_short": None,
                 "journal_iso_abbrev": None,
                 "journal_issn_type": None,
@@ -516,15 +515,14 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             }
 
         journal_issue = journal.find("JournalIssue")
-        journal = get_text(journal.find("Title"))
+        journal_title = get_text(journal.find("Title"))
         journal_abbrev = get_text(journal.find("ISOAbbreviation"))
         issn_elem = journal.find("ISSN")
         issn = get_text(issn_elem)
         issn_type = issn_elem.get("IssnType") if issn_elem is not None else None
 
         return {
-            "journal": journal,
-
+            "journal": journal_title,
             "journal_name_short": journal_abbrev,
             "journal_iso_abbrev": journal_abbrev,  # Alias for Gold schema
             "journal_issn_type": issn_type,
