@@ -48,8 +48,8 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - arxiv_id: externalIds.ArXiv
     - dblp_id: externalIds.DBLP
     - title: title
-    - abstract: abstract
-    - tldr: tldr.text (AI-generated summary)
+    - abstract: abstract (falls back to tldr.text when absent)
+    - tldr: tldr.text (AI-generated summary, preserved as-is)
     - authors: authors.name (extraction + optional PII hashing)
     - author_s2_ids: authors.authorId (S2 author IDs for disambiguation)
     - author_orcids: authors.externalIds.ORCID (persistent researcher IDs)
@@ -170,6 +170,12 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             rec.get("openAccessPdf"),
         )
 
+        # Abstract (raw from API)
+        abstract = rec.get("abstract") or None
+        # Normalise whitespace to None
+        if isinstance(abstract, str) and not abstract.strip():
+            abstract = None
+
         # TLDR summary
         tldr = extract_tldr(rec.get("tldr"))
 
@@ -190,7 +196,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "dblp_id": external_ids.get("dblp"),
             "corpus_id": external_ids.get("corpus_id"),
             "title": rec.get("title"),
-            # abstract, authors excluded per user request
+            "abstract": abstract if abstract else tldr,
             "tldr": tldr,
             # Author identifiers (for author-level analytics and disambiguation)
             "author_s2_ids": self.serialize_json_list(author_s2_ids)
@@ -269,13 +275,12 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without abstract, authors.
+            SilverRecord dictionary without authors, pmc_id, arxiv_id.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
 
         silver_record = BaseTransformer.entity_to_silver_record(entity)
-        silver_record.pop("abstract", None)
         silver_record.pop("authors", None)
         silver_record.pop("pmc_id", None)
         silver_record.pop("arxiv_id", None)

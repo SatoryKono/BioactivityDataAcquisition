@@ -99,8 +99,8 @@ class TestSemanticScholarPublicationTransformer:
         assert result["pmid"] == "12345678"
         assert result["corpus_id"] == 123456
         assert result["title"] == "CRISPR-Cas9 gene editing in human embryos"
-        # abstract excluded per user request
-        assert "abstract" not in result
+        # abstract filled from raw API field when present
+        assert result["abstract"] == "This study demonstrates novel applications..."
         assert result["publication_year"] == 2024
         assert result["publication_date"] == "2024-05-15"
         assert result["journal"] == "Nature"
@@ -230,8 +230,8 @@ class TestSemanticScholarPublicationTransformer:
         assert result["paper_id"] == "a" * 40
         assert result["title"] == "Minimal Paper"
         assert result["doi"] is None
-        # abstract excluded per user request
-        assert "abstract" not in result
+        # abstract is None when no abstract and no tldr available
+        assert result["abstract"] is None
         assert result["publication_year"] is None
 
     @pytest.mark.asyncio
@@ -734,3 +734,134 @@ class TestSemanticScholarNewFields:
         assert result is not None
         assert result["citations_received"] == 10
         assert result["influential_citation_count"] == 0
+
+
+class TestSemanticScholarAbstractTldrUnification:
+    """Tests for abstract/tldr field unification.
+
+    When abstract is present in the API response, it should be used directly.
+    When abstract is absent or empty, it should be filled from tldr.
+    The tldr field is always preserved as-is.
+    """
+
+    @pytest.fixture
+    def transformer(self) -> SemanticScholarPublicationTransformer:
+        """Create a transformer instance."""
+        return SemanticScholarPublicationTransformer()
+
+    @pytest.fixture
+    def mock_context(self) -> PipelineContext:
+        """Create a mock pipeline context."""
+        mock_logger = MagicMock()
+        mock_logger.info = MagicMock()
+        mock_logger.warning = MagicMock()
+        mock_logger.debug = MagicMock()
+
+        return PipelineContext(
+            run_id=UUID("12345678-1234-5678-1234-567812345678"),
+            run_type=RunType.INCREMENTAL,
+            started_at=datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC),
+            logger=mock_logger,
+        )
+
+    @pytest.mark.asyncio
+    async def test_abstract_uses_raw_when_present(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """When API returns abstract, it should be used directly."""
+        record = {
+            "paperId": "a" * 40,
+            "title": "Test Paper",
+            "abstract": "Full abstract from API.",
+            "tldr": {"model": "tldr@v2.0.0", "text": "AI summary."},
+            "_lookup_method": "doi",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["abstract"] == "Full abstract from API."
+        assert result["tldr"] == "AI summary."
+
+    @pytest.mark.asyncio
+    async def test_abstract_falls_back_to_tldr_when_missing(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """When abstract is missing, it should be filled from tldr."""
+        record = {
+            "paperId": "b" * 40,
+            "title": "Test Paper",
+            "tldr": {"model": "tldr@v2.0.0", "text": "AI summary."},
+            "_lookup_method": "doi",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["abstract"] == "AI summary."
+        assert result["tldr"] == "AI summary."
+
+    @pytest.mark.asyncio
+    async def test_abstract_falls_back_to_tldr_when_empty(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """When abstract is empty string, it should be filled from tldr."""
+        record = {
+            "paperId": "c" * 40,
+            "title": "Test Paper",
+            "abstract": "",
+            "tldr": {"model": "tldr@v2.0.0", "text": "AI summary."},
+            "_lookup_method": "doi",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["abstract"] == "AI summary."
+        assert result["tldr"] == "AI summary."
+
+    @pytest.mark.asyncio
+    async def test_abstract_falls_back_to_tldr_when_whitespace(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """When abstract is whitespace-only, it should be filled from tldr."""
+        record = {
+            "paperId": "d" * 40,
+            "title": "Test Paper",
+            "abstract": "   ",
+            "tldr": {"model": "tldr@v2.0.0", "text": "AI summary."},
+            "_lookup_method": "doi",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["abstract"] == "AI summary."
+        assert result["tldr"] == "AI summary."
+
+    @pytest.mark.asyncio
+    async def test_both_abstract_and_tldr_none(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """When both abstract and tldr are missing, abstract should be None."""
+        record = {
+            "paperId": "e" * 40,
+            "title": "Test Paper",
+            "_lookup_method": "doi",
+        }
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["abstract"] is None
+        assert result["tldr"] is None

@@ -27,6 +27,7 @@ column_groups:
   - name: abstract
     fields:
       - abstract
+      - tldr
 
   - name: authors
     fields:
@@ -81,7 +82,6 @@ column_groups:
 
 # Field aliases for backward compatibility
 field_aliases:
-  tldr: abstract
   affiliations: affiliation_list
   year: publication_year
   first_page: page_first

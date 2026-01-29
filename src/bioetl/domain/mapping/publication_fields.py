@@ -101,8 +101,6 @@ _SEMANTICSCHOLAR_MAPPING: Final[dict[str, str]] = {
     # Note: SemanticScholar doesn't have doc_type - inferred from venue/journal
     # Temporal fields
     "year": "publication_year",
-    # Abstract alternative
-    "tldr": "abstract",  # TL;DR is their concise summary
     # Pagination
     "first_page": "page_first",
     "last_page": "page_last",
