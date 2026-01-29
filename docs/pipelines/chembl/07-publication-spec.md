@@ -66,9 +66,8 @@ document
 | 7 | `title` | string | Yes | Title |
 | 8 | `authors` | string | Yes | Authors string |
 | 9 | `abstract` | string | Yes | Abstract |
-| 10 | `journal` | string | Yes | Journal abbreviation |
-| 11 | `journal_full_title` | string | Yes | Full journal title |
-| 12 | `year` | integer | Yes | Publication year |
+| 10 | `journal` | string | Yes | Journal name (canonical field) |
+| 11 | `year` | integer | Yes | Publication year |
 | 13 | `volume` | string | Yes | Volume |
 | 14 | `issue` | string | Yes | Issue |
 | 15 | `first_page` | string | Yes | First page |
@@ -111,7 +110,6 @@ class ChemblPublicationSchema(ETLRecordSchema):
     authors: Series[str] | None = pa.Field(nullable=True)
     abstract: Series[str] | None = pa.Field(nullable=True)
     journal: Series[str] | None = pa.Field(nullable=True)
-    journal_full_title: Series[str] | None = pa.Field(nullable=True)
     year: Series[int] | None = pa.Field(
         nullable=True,
         ge=MIN_PUBLICATION_YEAR,  # 1800

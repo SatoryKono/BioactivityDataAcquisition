@@ -225,7 +225,7 @@ field_priorities:
 | **Title** | `title` | chembl → crossref → openalex → pubmed → semanticscholar | |
 | **Abstract** | `abstract`, `abstract_structured`, `tldr` | chembl → pubmed → crossref → openalex → semanticscholar | PubMed for abstract, S2 for tldr |
 | **Authors** | `authors`, `author_count` | chembl → crossref → openalex → pubmed → semanticscholar | |
-| **Journal** | `journal`, `journal_full_title`, `journal_title`, `journal_abbrev`, `journal_iso_abbrev`, `short_container_title`, `venue` | chembl → crossref → openalex → pubmed → semanticscholar | |
+| **Journal** | `journal` (canonical), `journal_abbrev`, `journal_iso_abbrev`, `short_container_title` | chembl → crossref → openalex → pubmed → semanticscholar | Unified: venue→journal, journal_full_title removed |
 | **Year** | `year`, `publication_year` | chembl → crossref → openalex → pubmed → semanticscholar | |
 | **Dates** | `publication_date`, `published`, `published_print`, `published_online`, `pub_date`, `pub_month`, `pub_day`, `date_completed`, `date_revised` | crossref → openalex → pubmed → semanticscholar | |
 | **Pagination** | `volume`, `issue`, `first_page`, `last_page`, `pages`, `medline_pgn` | chembl → crossref → pubmed → semanticscholar | |
@@ -632,7 +632,6 @@ The composite pipeline tracks lineage at multiple levels:
     "author_count": 2,
 
     "journal": "Nature",
-    "journal_full_title": "Nature",
     "volume": "500",
     "issue": "7463",
     "first_page": "472",

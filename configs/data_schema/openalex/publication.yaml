@@ -91,7 +91,7 @@ column_groups:
 
   - name: doc_type
     fields:
-      - type
+      - source_type
 
   - name: quality
     fields:
@@ -127,9 +127,6 @@ silver:
     - quality
     - language
     - dq
-  rename_fields:
-    mesh: mesh_terms
-    type: source_type  # Raw OpenAlex type → unified source_type
 
 gold:
   include_groups:
@@ -150,5 +147,3 @@ gold:
     - _index
     - _lookup_method
     - _original_id
-  rename_fields:
-    mesh: mesh_terms
