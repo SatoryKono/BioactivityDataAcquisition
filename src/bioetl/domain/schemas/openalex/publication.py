@@ -33,16 +33,13 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
 
     Validates publication records from OpenAlex Works API.
     Inherits common fields from PublicationBaseSchema:
-    - Cross-references: pmid, doi
-    - Core content: title, abstract, authors
-    - Metadata: journal, year (overridden), publication_date, language
-    - Metrics: citation_count (overridden for nullable int)
+    - Cross-references: pmid, doi, pmc_id
+    - Core content: title, abstract, authors, affiliation_list
+    - Metadata: journal, publication_year (overridden), publication_date, publication_type, language
+    - Pagination: page_first, page_last
+    - Metrics: citations_received, citations_made
     - Open Access: is_oa
     - Lookup tracking: lookup_method (overridden), original_id, source (overridden)
-
-    Fields excluded from PyArrow/Gold schemas:
-    - pmc_id: Excluded per design (2026-01)
-    - doc_type: OpenAlex uses raw 'type' field instead (article, book, etc.)
     """
 
     # === Primary Key (OpenAlex-specific) ===
@@ -60,12 +57,12 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="How record was resolved: doi, title_fallback, title_only",
     )
 
-    # === Override year with pd.Int64Dtype for nullable int ===
-    year: Series[pd.Int64Dtype] = pa.Field(
+    # === Override publication_year with pd.Int64Dtype for nullable int ===
+    publication_year: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
         ge=1800,
         le=2100,
-        description="Publication year (1800-2100).",
+        description="Publication year (1800-2100, nullable int override).",
     )
 
     # === Raw OpenAlex Type (replaces doc_type) ===
@@ -74,12 +71,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="Raw OpenAlex type (article, book, dataset, etc.)",
     )
 
-    # === Override citation_count with pd.Int64Dtype for nullable int ===
-    citation_count: Series[pd.Int64Dtype] = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of citations (from OpenAlex cited_by_count).",
-    )
+    # Note: citations_received and citations_made inherited from base as pd.Int64Dtype
 
     # === Override _source to be non-nullable ===
     _source: Series[str] = pa.Field(
@@ -121,12 +113,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         ge=0,
         description="Field-Weighted Citation Impact (must be non-negative)",
     )
-
-    reference_count: Series[pd.Int64Dtype] = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of works referenced (must be non-negative)",
-    )
+    # Note: reference_count removed — now inherited from base as citations_made
 
     # === Quality Indicators ===
     is_retracted: Series[bool] = pa.Field(
@@ -172,22 +159,8 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="Microsoft Academic Graph ID (legacy)",
     )
 
-    # === Bibliographic Page Info ===
-    first_page: Series[str] = pa.Field(
-        nullable=True,
-        description="First page number (from biblio object)",
-    )
-
-    last_page: Series[str] = pa.Field(
-        nullable=True,
-        description="Last page number (from biblio object)",
-    )
-
-    # === Author Affiliations ===
-    affiliations: Series[str] = pa.Field(
-        nullable=True,
-        description="Author affiliations (JSON array)",
-    )
+    # Note: page_first, page_last inherited from base (unified field names)
+    # Note: affiliation_list inherited from base (unified field name)
 
     # === Author Identifiers ===
     author_orcids: Series[str] = pa.Field(

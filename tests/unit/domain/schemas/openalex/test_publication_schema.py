@@ -82,7 +82,7 @@ def valid_record() -> dict:
         # External identifier
         "mag_id": "12345678",
         # Author affiliations
-        "affiliations": '["MIT", "Stanford"]',
+        "affiliation_list": '["MIT", "Stanford"]',
         # Author identifiers
         "author_orcids": '["0000-0001-2345-6789", ""]',
         "author_openalex_ids": '["A1234567890", "A9876543210"]',
