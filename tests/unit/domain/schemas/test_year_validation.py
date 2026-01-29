@@ -321,7 +321,9 @@ class TestPubMedYearValidation:
             "abstract": None,
             "authors": '["Author A", "Author B"]',  # JSON array
             # Publication metadata
-            "journal": "Nature",  # Unified journal field
+            "journal": "Nature",  # Base schema journal field
+            "journal_name": "Nature",  # PubMed-specific full journal title (unified)
+            "journal_name_short": "Nature",  # PubMed-specific abbreviation (unified)
             "publication_year": 2020,
             "publication_date": "2020-05-15",  # Unified date field
             "publication_type": "PUBLICATION",
@@ -348,6 +350,7 @@ class TestPubMedYearValidation:
             "nlm_unique_id": None,
             "country": "United States",
             "medline_pgn": "1-10",
+            "page_range": "1-10",
             "pub_month": 5,
             "pub_day": 15,
             "publication_status": "ppublish",
@@ -355,8 +358,8 @@ class TestPubMedYearValidation:
             "date_completed": date(2020, 5, 20),
             "date_revised": date(2020, 5, 21),
             "citation_subset": None,
-            # Enhanced affiliation data
-            "structured_affiliations": None,
+            # Enhanced affiliation data (unified field name)
+            "affiliation_structured": None,
             # Counts
             "author_count": 5,
             "mesh_heading_count": 10,
@@ -364,15 +367,14 @@ class TestPubMedYearValidation:
             "grant_count": 2,
             "reference_count": 50,
             "chemical_count": 0,
-            # Classification data (JSON arrays)
-            "mesh_terms": None,
+            # Classification data (JSON arrays, unified field names)
+            "subject_mesh": None,
             "chemicals": None,
-            "keywords": None,
+            "subject_keywords": None,
             "databanks": None,
             "gene_symbols": None,
             "publication_types": None,
-            # Author affiliations
-            "affiliations": None,
+            # Note: affiliation_list inherited from base (unified field name)
             # Author-affiliation mapping
             "authors_with_affiliations": None,
         }
