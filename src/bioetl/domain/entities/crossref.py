@@ -251,9 +251,7 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     published: str | None = None
 
     # Short journal/container title (unified field name)
-    journal_name_short: list[str] = field(
-        default_factory=list
-    )  # Was: short_container_title
+    journal_name_short: str | None = None  # Was: short_container_title
 
     # ISSN by type (split from generic ISSN list)
     issn_print: str | None = None

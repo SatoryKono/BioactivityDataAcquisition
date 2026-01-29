@@ -185,7 +185,9 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "_dq_error": False,
             # NEW: Additional CrossRef fields
             "alternative_id": rec.get("alternative-id", []) or [],
-            "journal_name_short": rec.get("short-container-title", []) or [],
+            "journal_name_short": extract_first_string(
+                rec.get("short-container-title")
+            ),
             "published": published_date,
             **content_domain,
             **issn_by_type,

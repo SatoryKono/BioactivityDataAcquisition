@@ -53,6 +53,7 @@ def sample_publication():
             {"family": "Anonymous"},
         ],
         "container-title": ["Journal of Testing"],
+        "short-container-title": ["J Test Sci", "JT Sci"],
         "ISSN": ["1234-5678", "8765-4321"],
         "publisher": "Test Publisher Inc.",
         "volume": "42",
@@ -133,6 +134,7 @@ def test_extract_business_data_full(transformer, sample_publication):
     # Authors are now JSON-serialized list
     assert json.loads(data["authors"]) == ["John Doe", "Jane Smith", "Anonymous"]
     assert data["journal"] == "Journal of Testing"
+    assert data["journal_name_short"] == "J Test Sci"
     assert data["publication_year"] == 2023
     assert data["publication_type"] == "journal-article"  # Raw CrossRef type preserved
     assert data["citations_received"] == 100
@@ -165,6 +167,7 @@ async def test_transform_full_record(transformer, pipeline_context, sample_publi
     assert (
         result["publication_type"] == "journal-article"
     )  # Raw CrossRef type preserved
+    assert result["journal_name_short"] == "J Test Sci"
     assert result["_source"] == "crossref"
     # Check lineage fields
     assert "_run_id" in result

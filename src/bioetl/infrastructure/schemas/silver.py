@@ -712,7 +712,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("issn_print", pa.string()),  # Print ISSN
         pa.field("issue", pa.string()),
         pa.field("journal", pa.string()),
-        pa.field("journal_name_short", pa.list_(pa.string())),
+        pa.field("journal_name_short", pa.string()),
         pa.field("language", pa.string()),
         pa.field("license_url", pa.string()),
         pa.field("page_first", pa.string()),

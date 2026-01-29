@@ -199,7 +199,7 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     published: Series[str] = pa.Field(nullable=True)
 
     # Short container title
-    journal_name_short: Series[object] = pa.Field(nullable=True)  # list[str]
+    journal_name_short: Series[str] = pa.Field(nullable=True)
 
     # ISSN by type
     issn_print: Series[str] = pa.Field(nullable=True)

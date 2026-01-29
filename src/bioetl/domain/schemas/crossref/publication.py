@@ -100,9 +100,9 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     )
 
     # === Short Container Title (unified field name) ===
-    journal_name_short: Series[object] = pa.Field(
+    journal_name_short: Series[str] = pa.Field(
         nullable=True,
-        description="Short journal/container title (list of strings, unified field name)",
+        description="Short journal/container title (unified field name)",
     )
 
     # === ISSN by Type ===
