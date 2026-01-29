@@ -145,9 +145,6 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         # Get authors list for multiple extractions
         authors_list = rec.get("authors")
 
-        # Extract author IDs
-        author_ids = extract_author_ids(rec.get("authors"))
-
         # Extract author identifiers (for author-level analytics)
         author_s2_ids = extract_author_s2_ids(authors_list)
         author_orcids = extract_author_orcids(authors_list)
@@ -196,7 +193,6 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "title": rec.get("title"),
             # abstract, authors excluded per user request
             "tldr": tldr,
-            "author_ids": self.serialize_json(author_ids),
             # Author identifiers (for author-level analytics and disambiguation)
             "author_s2_ids": self.serialize_json_list(author_s2_ids)
             if author_s2_ids

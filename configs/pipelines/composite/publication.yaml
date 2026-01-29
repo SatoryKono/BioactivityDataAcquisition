@@ -153,7 +153,7 @@ composite:
         - semanticscholar
       reference_count:
         - crossref       # CrossRef has most complete reference data
-        - openalex       # OpenAlex (unified from referenced_works_count)
+        - openalex
         - pubmed
         - semanticscholar
       influential_citation_count:
