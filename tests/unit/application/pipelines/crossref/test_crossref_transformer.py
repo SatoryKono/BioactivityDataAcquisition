@@ -506,7 +506,7 @@ def test_type_preserved_for_unknown(transformer):
     """Test that unknown/future type is preserved as-is."""
     publication = {"DOI": "10.1234/test", "type": "unknown-future-type"}
     data = transformer._extract_business_data(publication)
-    assert data["type"] == "unknown-future-type"  # Raw type preserved
+    assert data["source_type"] == "unknown-future-type"  # Raw type preserved
 
 
 @pytest.mark.asyncio
@@ -516,7 +516,7 @@ async def test_transform_with_preprint_type(transformer, pipeline_context):
     result = await transformer.transform(pipeline_context, publication, index=0)
 
     assert result is not None
-    assert result["type"] == "posted-content"  # Raw CrossRef type preserved
+    assert result["source_type"] == "posted-content"  # Raw CrossRef type preserved
 
 
 @pytest.mark.asyncio
