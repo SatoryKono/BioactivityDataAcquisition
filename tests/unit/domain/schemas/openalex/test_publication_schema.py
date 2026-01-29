@@ -67,7 +67,7 @@ def valid_record() -> dict:
         "last_page": "145",
         # Additional metrics
         "fwci": 1.5,  # Field-Weighted Citation Impact
-        "referenced_works_count": 25,
+        "reference_count": 25,
         # Quality indicators
         "is_retracted": False,
         # Topics (hierarchical classification - replaces deprecated concepts)
@@ -318,32 +318,32 @@ class TestOpenAlexPublicationSchema:
         validated = OpenAlexPublicationSchema.validate(df)
         assert pd.isna(validated["fwci"].iloc[0])
 
-    def test_referenced_works_count_non_negative(self, valid_record: dict) -> None:
-        """Should validate referenced_works_count is non-negative."""
+    def test_reference_count_non_negative(self, valid_record: dict) -> None:
+        """Should validate reference_count is non-negative."""
         # Valid count
-        valid_record["referenced_works_count"] = 25
+        valid_record["reference_count"] = 25
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["referenced_works_count"].iloc[0] == 25
+        assert validated["reference_count"].iloc[0] == 25
 
         # Zero is valid
-        valid_record["referenced_works_count"] = 0
+        valid_record["reference_count"] = 0
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["referenced_works_count"].iloc[0] == 0
+        assert validated["reference_count"].iloc[0] == 0
 
         # Negative count
-        valid_record["referenced_works_count"] = -1
+        valid_record["reference_count"] = -1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             OpenAlexPublicationSchema.validate(df)
 
-    def test_referenced_works_count_nullable(self, valid_record: dict) -> None:
-        """Should allow null referenced_works_count."""
-        valid_record["referenced_works_count"] = None
+    def test_reference_count_nullable(self, valid_record: dict) -> None:
+        """Should allow null reference_count."""
+        valid_record["reference_count"] = None
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert pd.isna(validated["referenced_works_count"].iloc[0])
+        assert pd.isna(validated["reference_count"].iloc[0])
 
     def test_is_retracted_values(self, valid_record: dict) -> None:
         """Should validate is_retracted boolean values."""

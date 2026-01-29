@@ -205,7 +205,6 @@ class TestFieldToGroupMapping:
         expected_fields = {
             "citation_count",
             "reference_count",
-            "referenced_works_count",
         }
         actual_fields = {
             f
@@ -600,7 +599,7 @@ class TestFieldMappingCompleteness:
             "primary_topic",
             "topics",
             "citation_count",
-            "referenced_works_count",
+            "reference_count",
             "institution_country_codes",
             "publication_date",
             "year",

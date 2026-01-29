@@ -66,7 +66,7 @@ column_groups:
   - name: citations
     fields:
       - citation_count
-      - referenced_works_count
+      - reference_count
       - fwci
 
   - name: open_access
@@ -127,10 +127,7 @@ silver:
     - quality
     - language
     - dq
-  # Унификация с другими провайдерами (CrossRef, PubMed, SemanticScholar)
-  # OpenAlex использует referenced_works_count, остальные — reference_count
   rename_fields:
-    referenced_works_count: reference_count
     mesh: mesh_terms
     type: source_type  # Raw OpenAlex type → unified source_type
 
@@ -155,5 +152,3 @@ gold:
     - _original_id
   rename_fields:
     mesh: mesh_terms
-  # Gold использует Silver output name (after rename)
-  # Silver переименовал referenced_works_count → reference_count
