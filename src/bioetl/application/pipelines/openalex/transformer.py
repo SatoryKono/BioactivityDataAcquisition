@@ -65,7 +65,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
     - authors: authorships (extraction + PII hashing)
     - journal: primary_location.source.display_name
     - year: publication_year
-    - topics: topics (hierarchical 4-level classification)
+    - subject_topics: topics (hierarchical 4-level classification)
     - primary_topic: primary_topic (single most relevant topic)
     - grants: grants (funding information)
 
@@ -173,7 +173,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         journal_info = extract_journal_info(rec.get("primary_location", {}))
 
         # Extract topics (hierarchical classification - replaces deprecated concepts)
-        topics = extract_topics(rec.get("topics", []))
+        subject_topics = extract_topics(rec.get("topics", []))
 
         # Extract primary topic (single most relevant topic)
         primary_topic = extract_primary_topic(rec.get("primary_topic"))
@@ -188,10 +188,10 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         external_ids = extract_external_ids(rec.get("ids", {}))
 
         # Extract MeSH terms
-        mesh_terms = extract_mesh_terms(rec.get("mesh", []))
+        subject_mesh = extract_mesh_terms(rec.get("mesh", []))
 
         # Extract keywords
-        keywords = extract_keywords(rec.get("keywords", []))
+        subject_keywords = extract_keywords(rec.get("keywords", []))
 
         # Extract bibliographic info (volume, issue, pages)
         biblio_info = extract_biblio_info(rec.get("biblio", {}))
@@ -241,12 +241,14 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "citations_received": rec.get("cited_by_count"),
             # Topics (hierarchical classification - replaces deprecated concepts)
             # Serialized to JSON string for schema compliance
-            "topics": self.serialize_json_list(topics) if topics else None,
+            "subject_topics": (
+                self.serialize_json_list(subject_topics) if subject_topics else None
+            ),
             "primary_topic": json.dumps(primary_topic) if primary_topic else None,
             # Grants/funding information (serialized to JSON string)
             "grants": self.serialize_json_list(grants) if grants else None,
-            "mesh_terms": mesh_terms,
-            "keywords": keywords,
+            "subject_mesh": subject_mesh,
+            "subject_keywords": subject_keywords,
             "language": rec.get("language"),
             # Bibliographic info (from biblio object)
             "volume": biblio_info.get("volume"),
