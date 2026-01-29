@@ -176,7 +176,7 @@ class PubMedPublicationEntity(PublicationEntityBase):
     publisher_id: str | None = None  # Publisher-specific identifier
 
     # PubMed-specific journal information
-    journal_name: str | None = None
+    journal: str | None = None
     journal_name_short: str | None = None
     volume: str | None = None
     issue: str | None = None

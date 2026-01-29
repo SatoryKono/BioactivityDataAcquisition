@@ -535,7 +535,7 @@ class TestExtractJournalInfo:
         }
         result = extract_journal_info(primary_location)
         assert result == {
-            "journal_name": "Nature",
+            "journal": "Nature",
             "issn": "0028-0836",
             "publisher": "Springer Nature",
         }
@@ -548,19 +548,19 @@ class TestExtractJournalInfo:
             }
         }
         result = extract_journal_info(primary_location)
-        assert result["journal_name"] == "Nature"
+        assert result["journal"] == "Nature"
         assert result["issn"] is None
         assert result["publisher"] is None
 
     def test_extract_journal_info_none(self) -> None:
         """Should return None values for None input."""
         result = extract_journal_info(None)
-        assert result == {"journal_name": None, "issn": None, "publisher": None}
+        assert result == {"journal": None, "issn": None, "publisher": None}
 
     def test_extract_journal_info_empty_source(self) -> None:
         """Should handle empty source gracefully."""
         result = extract_journal_info({"source": None})
-        assert result == {"journal_name": None, "issn": None, "publisher": None}
+        assert result == {"journal": None, "issn": None, "publisher": None}
 
 
 class TestReconstructAbstract:

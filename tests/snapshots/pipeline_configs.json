@@ -548,7 +548,6 @@
       {
         "fields": [
           "journal",
-          "journal_name",
           "journal_name_short",
           "journal_iso_abbrev",
           "issn",

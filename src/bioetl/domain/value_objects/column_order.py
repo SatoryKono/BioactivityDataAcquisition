@@ -84,7 +84,6 @@ PUBLICATION_FIELD_GROUPS: Final[dict[str, SemanticGroup]] = {
     "institutions": SemanticGroup.AUTHORS,
     # Journal/Source
     "journal": SemanticGroup.JOURNAL,
-    "journal_name": SemanticGroup.JOURNAL,
     "journal_title": SemanticGroup.JOURNAL,
     "source": SemanticGroup.JOURNAL,
     "publisher": SemanticGroup.JOURNAL,

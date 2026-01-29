@@ -477,7 +477,7 @@ def extract_journal_info(
         venue: Venue string (fallback if journal is empty).
 
     Returns:
-        Dict with journal_name, volume, issue, page_range, page_first, page_last.
+        Dict with journal, volume, issue, page_range, page_first, page_last.
 
     Example:
         >>> journal = {"name": "Nature", "volume": "629", "pages": "123-130"}
@@ -502,7 +502,7 @@ def extract_journal_info(
         pages = raw_pages.strip() if raw_pages else None
 
         return {
-            "journal_name": journal.get("name") or venue,
+            "journal": journal.get("name") or venue,
             "volume": volume,
             "issue": issue,
             "page_range": pages,
@@ -510,7 +510,7 @@ def extract_journal_info(
             "page_last": last_page,
         }
     return {
-        "journal_name": venue,
+        "journal": venue,
         "volume": None,
         "issue": None,
         "page_range": None,

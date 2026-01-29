@@ -210,7 +210,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "affiliation_list": self.serialize_json_list(affiliations)
             if affiliations
             else None,
-            "journal": journal_info.get("journal_name"),
+            "journal": journal_info.get("journal"),
             "volume": journal_info.get("volume"),
             "issue": journal_info.get("issue"),  # Parsed from combined "32 4" format
             "page_range": journal_info.get(

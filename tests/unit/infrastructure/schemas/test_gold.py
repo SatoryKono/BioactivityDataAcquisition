@@ -349,7 +349,6 @@ class TestGoldSchemaValidation:
             "abstract_structured": False,
             # Note: vernacular_title excluded per design
             "journal": "Test Journal",
-            "journal_name": "Test Journal",
             "journal_name_short": "Test J",
             "journal_iso_abbrev": "Test J.",
             "journal_issn_type": "Print",

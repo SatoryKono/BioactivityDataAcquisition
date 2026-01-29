@@ -99,7 +99,7 @@ class TestOpenAlexPublicationTransformerIntegration:
         }
 
         result = extract_journal_info(primary_location)
-        assert result["journal_name"] == "Nature"
+        assert result["journal"] == "Nature"
         assert result["issn"] == "0028-0836"
         assert result["publisher"] == "Springer Nature"
 

@@ -277,7 +277,7 @@ class TestExtractJournalInfo:
 
         result = extract_journal_info(journal, venue="Nature Publishing")
 
-        assert result["journal_name"] == "Nature"
+        assert result["journal"] == "Nature"
         assert result["volume"] == "629"
         assert result["issue"] is None  # No issue in simple volume
         assert result["page_range"] == "123-130"
@@ -290,7 +290,7 @@ class TestExtractJournalInfo:
 
         result = extract_journal_info(journal, venue="Conference Proceedings")
 
-        assert result["journal_name"] == "Conference Proceedings"
+        assert result["journal"] == "Conference Proceedings"
         assert result["volume"] == "10"
         assert result["issue"] is None
         assert result["page_range"] is None
@@ -301,7 +301,7 @@ class TestExtractJournalInfo:
         """Test when only venue is provided."""
         result = extract_journal_info(None, venue="ArXiv")
 
-        assert result["journal_name"] == "ArXiv"
+        assert result["journal"] == "ArXiv"
         assert result["volume"] is None
         assert result["issue"] is None
         assert result["page_range"] is None
@@ -312,7 +312,7 @@ class TestExtractJournalInfo:
         """Test with empty journal dict."""
         result = extract_journal_info({}, venue="Fallback Venue")
 
-        assert result["journal_name"] == "Fallback Venue"
+        assert result["journal"] == "Fallback Venue"
         assert result["volume"] is None
         assert result["issue"] is None
 
@@ -967,7 +967,7 @@ class TestExtractJournalInfoIntegration:
 
         result = extract_journal_info(journal, None)
 
-        assert result["journal_name"] == "Journal of medicinal chemistry"
+        assert result["journal"] == "Journal of medicinal chemistry"
         assert result["volume"] == "32"
         assert result["issue"] == "4"
         assert result["page_range"] == "737-9"  # Cleaned
@@ -984,7 +984,7 @@ class TestExtractJournalInfoIntegration:
 
         result = extract_journal_info(journal, "Nature")
 
-        assert result["journal_name"] == "Nature"
+        assert result["journal"] == "Nature"
         assert result["volume"] == "523"
         assert result["issue"] is None
         assert result["page_range"] == "561-567"
@@ -997,7 +997,7 @@ class TestExtractJournalInfoIntegration:
 
         result = extract_journal_info(journal, "Conference Proceedings")
 
-        assert result["journal_name"] == "Conference Proceedings"
+        assert result["journal"] == "Conference Proceedings"
         assert result["volume"] == "10"
         assert result["issue"] is None
 
@@ -1005,7 +1005,7 @@ class TestExtractJournalInfoIntegration:
         """Test with None journal."""
         result = extract_journal_info(None, "ArXiv")
 
-        assert result["journal_name"] == "ArXiv"
+        assert result["journal"] == "ArXiv"
         assert result["volume"] is None
         assert result["issue"] is None
         assert result["page_range"] is None
@@ -1016,6 +1016,6 @@ class TestExtractJournalInfoIntegration:
         """Test with empty journal dict."""
         result = extract_journal_info({}, "Fallback Venue")
 
-        assert result["journal_name"] == "Fallback Venue"
+        assert result["journal"] == "Fallback Venue"
         assert result["volume"] is None
         assert result["issue"] is None
