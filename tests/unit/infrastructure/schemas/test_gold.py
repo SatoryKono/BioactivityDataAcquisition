@@ -160,7 +160,7 @@ class TestGoldPublicationSchemaCoreFields:
             # CrossRef excluded: abstract not collected per user request
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
-            # SemanticScholar excluded: abstract not collected per user request
+            (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
     def test_schema_has_title_and_abstract(self, schema_class, name):

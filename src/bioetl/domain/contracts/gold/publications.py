@@ -362,7 +362,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
 
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
-    # abstract excluded per user request
+    abstract: Series[str] = pa.Field(nullable=True)
     tldr: Series[str] = pa.Field(nullable=True)
     publication_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     publication_date: Series[str] = pa.Field(nullable=True)

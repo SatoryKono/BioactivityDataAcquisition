@@ -48,7 +48,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - arxiv_id: externalIds.ArXiv
     - dblp_id: externalIds.DBLP
     - title: title
-    - abstract: abstract
+    - abstract: abstract (fallback to tldr.text if missing)
     - tldr: tldr.text (AI-generated summary)
     - authors: authors.name (extraction + optional PII hashing)
     - author_s2_ids: authors.authorId (S2 author IDs for disambiguation)
@@ -171,7 +171,12 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         )
 
         # TLDR summary
-        tldr = extract_tldr(rec.get("tldr"))
+        tldr = self._data_normalizer.normalize_string(extract_tldr(rec.get("tldr")))
+
+        # Abstract with TLDR fallback when abstract is missing/empty
+        abstract = self._data_normalizer.normalize_string(rec.get("abstract"))
+        if abstract is None:
+            abstract = tldr
 
         # Fields of study
         subject_fields = extract_fields_of_study(rec.get("fieldsOfStudy"))
@@ -190,7 +195,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "dblp_id": external_ids.get("dblp"),
             "corpus_id": external_ids.get("corpus_id"),
             "title": rec.get("title"),
-            # abstract, authors excluded per user request
+            "abstract": abstract,
             "tldr": tldr,
             # Author identifiers (for author-level analytics and disambiguation)
             "author_s2_ids": self.serialize_json_list(author_s2_ids)

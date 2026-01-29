@@ -642,6 +642,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         # Lookup metadata
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
+        pa.field("abstract", pa.string()),
         pa.field("affiliation_list", pa.string()),  # JSON array
         # Author identifiers (for author-level analytics)
         pa.field("author_h_indices", pa.string()),  # JSON array of h-index values

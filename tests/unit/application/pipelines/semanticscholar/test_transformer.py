@@ -99,8 +99,7 @@ class TestSemanticScholarPublicationTransformer:
         assert result["pmid"] == "12345678"
         assert result["corpus_id"] == 123456
         assert result["title"] == "CRISPR-Cas9 gene editing in human embryos"
-        # abstract excluded per user request
-        assert "abstract" not in result
+        assert result["abstract"] == "This study demonstrates novel applications..."
         assert result["publication_year"] == 2024
         assert result["publication_date"] == "2024-05-15"
         assert result["journal"] == "Nature"
@@ -125,6 +124,27 @@ class TestSemanticScholarPublicationTransformer:
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
+        assert (
+            result["tldr"] == "This paper presents a novel approach to gene editing..."
+        )
+
+    @pytest.mark.asyncio
+    async def test_transform_abstract_fallback_from_tldr(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+        sample_record: dict[str, Any],
+    ) -> None:
+        """Test that abstract falls back to TLDR when missing."""
+        sample_record["abstract"] = None
+
+        result = await transformer.transform(mock_context, sample_record, 0)
+
+        assert result is not None
+        assert (
+            result["abstract"]
+            == "This paper presents a novel approach to gene editing..."
+        )
         assert (
             result["tldr"] == "This paper presents a novel approach to gene editing..."
         )
@@ -230,8 +250,7 @@ class TestSemanticScholarPublicationTransformer:
         assert result["paper_id"] == "a" * 40
         assert result["title"] == "Minimal Paper"
         assert result["doi"] is None
-        # abstract excluded per user request
-        assert "abstract" not in result
+        assert result["abstract"] is None
         assert result["publication_year"] is None
 
     @pytest.mark.asyncio
