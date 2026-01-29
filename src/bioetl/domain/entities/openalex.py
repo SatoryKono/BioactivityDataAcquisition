@@ -157,7 +157,7 @@ class OpenAlexPublicationRecord(BaseModel):
         default=None,
         description="ORCID IDs as JSON array (empty string for missing)",
     )
-    author_ids: str | None = PydanticField(
+    author_openalex_ids: str | None = PydanticField(
         default=None,
         description="OpenAlex author IDs as JSON array (empty string for missing)",
     )
@@ -218,7 +218,7 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
     # Author identifiers (JSON-serialized lists preserving author order)
     author_orcids: str | None = None  # ORCID IDs (empty string for missing)
-    author_ids: str | None = None  # OpenAlex author IDs (empty string for missing)
+    author_openalex_ids: str | None = None  # OpenAlex author IDs (empty string for missing)
 
     # Topics (hierarchical classification - replaces deprecated concepts)
     # Each topic dict has: id, display_name, score, subfield, field, domain
@@ -251,7 +251,7 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
     # Raw document type from OpenAlex API (e.g., "article", "preprint", "book-chapter")
     # Unlike doc_type (unified mapping), this preserves the original OpenAlex type value
-    type: str | None = None
+    source_type: str | None = None
 
     # Override: Default source for OpenAlex
     _source: str = "openalex"

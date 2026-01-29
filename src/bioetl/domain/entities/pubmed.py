@@ -202,7 +202,7 @@ class PubMedPublicationEntity(PublicationEntityBase):
     abstract_structured: bool = False  # Whether abstract has labeled sections (NLM)
 
     # Additional journal fields (Gold schema forensic retention)
-    journal_title: str | None = None  # Full journal name (alias for journal)
+    journal_full_title: str | None = None  # Full journal name (unified with ChEMBL)
     journal_iso_abbrev: str | None = None  # ISO abbreviation (alias for journal_abbrev)
     journal_issn_type: str | None = None  # ISSN type: Print/Electronic/Linking
     nlm_unique_id: str | None = None  # NLM catalog ID
