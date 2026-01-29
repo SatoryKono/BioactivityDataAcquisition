@@ -730,29 +730,29 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         # abstract and affiliations excluded per user request
         pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
         pa.field("authors", pa.string()),  # JSON-serialized list
+        pa.field("citations_made", pa.int64()),
         pa.field("citations_received", pa.int64()),
         pa.field("content_domain_crossmark_restriction", pa.bool_()),
         pa.field("content_domain_domains", pa.list_(pa.string())),
         # Note: doc_type excluded; CrossRef uses raw 'type' field instead
         # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
         pa.field("doi", pa.string()),
-        pa.field("page_first", pa.string()),
         pa.field("issn", pa.list_(pa.string())),
         pa.field("issn_electronic", pa.string()),  # Electronic ISSN
         pa.field("issn_print", pa.string()),  # Print ISSN
         pa.field("issue", pa.string()),
         pa.field("journal", pa.string()),
+        pa.field("journal_name_short", pa.list_(pa.string())),
         pa.field("language", pa.string()),
-        pa.field("page_last", pa.string()),
         pa.field("license_url", pa.string()),
+        pa.field("page_first", pa.string()),
+        pa.field("page_last", pa.string()),
         # Note: pmid and pmc_id excluded - CrossRef API doesn't provide PubMed identifiers
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
         pa.field("published", pa.string()),  # Canonical publication date
         pa.field("published_online", pa.string()),  # Provider-specific
         pa.field("published_print", pa.string()),  # Provider-specific
         pa.field("publisher", pa.string()),
-        pa.field("citations_made", pa.int64()),
-        pa.field("journal_name_short", pa.list_(pa.string())),
         pa.field(
             "source_type", pa.string()
         ),  # Raw CrossRef type (journal-article, etc.)

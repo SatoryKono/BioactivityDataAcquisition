@@ -105,7 +105,7 @@ class TestSemanticScholarPublicationTransformer:
         assert result["publication_date"] == "2024-05-15"
         assert result["journal"] == "Nature"
         assert result["volume"] == "629"
-        assert result["pages"] == "123-130"
+        assert result["page_range"] == "123-130"
         assert result["citations_received"] == 42
         assert result["citations_made"] == 85
         assert result["is_oa"] is True
@@ -144,19 +144,19 @@ class TestSemanticScholarPublicationTransformer:
         assert "authors" not in result
 
     @pytest.mark.asyncio
-    async def test_transform_fields_of_study_serialized(
+    async def test_transform_subject_fields_serialized(
         self,
         transformer: SemanticScholarPublicationTransformer,
         mock_context: PipelineContext,
         sample_record: dict[str, Any],
     ) -> None:
-        """Test that fields_of_study are serialized as JSON."""
+        """Test that subject_fields are serialized as JSON."""
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        assert isinstance(result["fields_of_study"], str)
-        assert "Biology" in result["fields_of_study"]
-        assert "Medicine" in result["fields_of_study"]
+        assert isinstance(result["subject_fields"], str)
+        assert "Biology" in result["subject_fields"]
+        assert "Medicine" in result["subject_fields"]
 
     @pytest.mark.asyncio
     async def test_transform_missing_paper_id_skips_record(
@@ -582,7 +582,7 @@ class TestSemanticScholarUnifiedPageFields:
 
         assert result is not None
         # sample_record has journal.pages = "123-130"
-        assert result["pages"] == "123-130"
+        assert result["page_range"] == "123-130"
         assert result["page_first"] == "123"
         assert result["page_last"] == "130"
 
@@ -602,7 +602,7 @@ class TestSemanticScholarUnifiedPageFields:
         result = await transformer.transform(mock_context, record, 0)
 
         assert result is not None
-        assert result["pages"] is None
+        assert result["page_range"] is None
         assert result["page_first"] is None
         assert result["page_last"] is None
 
