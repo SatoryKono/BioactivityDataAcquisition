@@ -854,8 +854,8 @@ class TestExtractBiblioInfo:
         assert result == {
             "volume": None,
             "issue": None,
-            "first_page": None,
-            "last_page": None,
+            "page_first": None,
+            "page_last": None,
         }
 
     def test_extract_biblio_info_invalid_type(self) -> None:
@@ -864,8 +864,8 @@ class TestExtractBiblioInfo:
         assert result == {
             "volume": None,
             "issue": None,
-            "first_page": None,
-            "last_page": None,
+            "page_first": None,
+            "page_last": None,
         }
 
 
