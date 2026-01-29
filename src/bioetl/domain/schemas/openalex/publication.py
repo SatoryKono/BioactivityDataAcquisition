@@ -69,7 +69,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     )
 
     # === Raw OpenAlex Type (replaces doc_type) ===
-    type: Series[str] = pa.Field(
+    source_type: Series[str] = pa.Field(
         nullable=True,
         description="Raw OpenAlex type (article, book, dataset, etc.)",
     )
