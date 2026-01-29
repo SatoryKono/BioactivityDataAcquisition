@@ -167,7 +167,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
         # Extract author identifiers (ORCID and OpenAlex IDs)
         author_orcids = extract_author_orcids(rec.get("authorships", []))
-        author_ids = extract_author_ids(rec.get("authorships", []))
+        author_openalex_ids = extract_author_ids(rec.get("authorships", []))
 
         # Extract journal info
         journal_info = extract_journal_info(rec.get("primary_location", {}))
@@ -221,8 +221,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "author_orcids": (
                 self.serialize_json_list(author_orcids) if any(author_orcids) else None
             ),
-            "author_ids": (
-                self.serialize_json_list(author_ids) if any(author_ids) else None
+            "author_openalex_ids": (
+                self.serialize_json_list(author_openalex_ids) if any(author_openalex_ids) else None
             ),
             "journal": journal_info.get("journal_name"),
             "issn": journal_info.get("issn"),
