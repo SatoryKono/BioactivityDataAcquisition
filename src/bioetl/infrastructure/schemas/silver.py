@@ -665,7 +665,6 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("affiliations", pa.string()),  # JSON array
         # Author identifiers (for author-level analytics)
         pa.field("author_h_indices", pa.string()),  # JSON array of h-index values
-        pa.field("author_ids", pa.string()),  # JSON array of S2 author IDs
         pa.field("author_orcids", pa.string()),  # JSON array of ORCIDs
         pa.field(
             "author_s2_ids", pa.string()
@@ -789,7 +788,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("abstract", pa.string()),
         pa.field("affiliations", pa.string()),
         # Author identifiers (JSON arrays preserving author order)
-        pa.field("author_ids", pa.string()),  # OpenAlex author IDs
+        pa.field("author_openalex_ids", pa.string()),  # OpenAlex author IDs
         pa.field("author_orcids", pa.string()),  # ORCID IDs (empty string for missing)
         pa.field("authors", pa.string()),  # JSON-serialized list
         # OpenAlex source field: cited_by_count
