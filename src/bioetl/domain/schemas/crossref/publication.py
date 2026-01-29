@@ -121,7 +121,7 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     )
 
     # === Author ORCID Identifiers ===
-    author_orcids: Series[str] = pa.Field(
+    author_orcid_list: Series[str] = pa.Field(
         nullable=True,
         description="JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
     )

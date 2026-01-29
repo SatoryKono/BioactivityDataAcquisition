@@ -98,6 +98,7 @@ field_aliases:
   reference_count: citations_made
   subjects: subject_keywords
   source_type: publication_type
+  author_orcids: author_orcid_list
 
 # Layer-specific column filtering
 silver:

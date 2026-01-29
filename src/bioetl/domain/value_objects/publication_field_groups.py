@@ -160,6 +160,7 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "affiliation_structured": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_count": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_openalex_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
+    "author_orcid_list": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_orcids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_s2_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "authors": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
