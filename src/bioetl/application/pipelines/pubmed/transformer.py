@@ -341,8 +341,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "language": get_text(article.find(".//Language")),
             "pmc_id": normalize_pmc_id(IdentifierExtractor.extract_pmc_id(root)),
             "_source": "pubmed",
-            "doc_type": "PUBLICATION",
-            "citation_count": None,
+            "publication_type": "PUBLICATION",
+            "citations_received": None,
             "is_oa": None,
             "_lookup_method": cast("dict[str, Any]", record).get(
                 "_lookup_method", "pmid"
@@ -498,8 +498,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 "issue": None,
                 "pages": pages,
                 "medline_pgn": pages,
-                "first_page": first_page,
-                "last_page": last_page,
+                "page_first": first_page,
+                "page_last": last_page,
             }
 
         journal_issue = journal.find("JournalIssue")
@@ -519,8 +519,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "issue": get_text(journal_issue.find("Issue")) if journal_issue else None,
             "pages": pages,
             "medline_pgn": pages,  # Alias for Gold schema
-            "first_page": first_page,
-            "last_page": last_page,
+            "page_first": first_page,
+            "page_last": last_page,
         }
 
     def _compute_publication_date(
@@ -661,7 +661,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "pub_month": pub_month,
             "pub_day": pub_day,
             "publication_date": publication_date,
-            "year": validated_year,
             "publication_year": validated_year,
             # Excluded per user request: accepted_date, received_date, revised_date, epub_date
             "date_completed": date_completed,
@@ -692,7 +691,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         silver_record.pop("received_date", None)
         silver_record.pop("revised_date", None)
         silver_record.pop("accepted_date", None)
-        silver_record.pop("citation_count", None)
+        silver_record.pop("citations_received", None)
         silver_record.pop("is_oa", None)
 
         return silver_record

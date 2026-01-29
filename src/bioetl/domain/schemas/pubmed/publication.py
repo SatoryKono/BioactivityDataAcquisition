@@ -157,7 +157,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         nullable=True, description="Page numbers (MEDLINE format)"
     )
 
-    @pa.check("year", name="year_range")
+    @pa.check("publication_year", name="year_range")
     def _check_year(cls, series: Series[int]) -> Series[bool]:
         """Validate publication year range."""
         return cast(

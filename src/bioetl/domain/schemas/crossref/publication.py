@@ -6,7 +6,6 @@ Aligned with RULES.md v5.10 and Publication Schema Unification spec.
 
 from __future__ import annotations
 
-import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -73,8 +72,8 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
 
     # === Additional Metadata (CrossRef-specific) ===
     license_url: Series[str] = pa.Field(nullable=True, description="License URL")
-    subjects: Series[str] = pa.Field(
-        nullable=True, description="JSON array of subject areas"
+    subject_keywords: Series[str] = pa.Field(
+        nullable=True, description="JSON array of subject areas (unified field name)"
     )
 
     # === Content Domain ===
@@ -100,10 +99,10 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
         description="Canonical publication date (YYYY-MM-DD)",
     )
 
-    # === Short Container Title ===
-    short_container_title: Series[object] = pa.Field(
+    # === Short Container Title (unified field name) ===
+    journal_name_short: Series[object] = pa.Field(
         nullable=True,
-        description="Short journal/container title (list of strings)",
+        description="Short journal/container title (list of strings, unified field name)",
     )
 
     # === ISSN by Type ===
@@ -114,13 +113,6 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     issn_electronic: Series[str] = pa.Field(
         nullable=True,
         description="Electronic ISSN (format: XXXX-XXXX)",
-    )
-
-    # === Metrics ===
-    reference_count: Series[pd.Int64Dtype] = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of references (from references-count field)",
     )
 
     # === Author ORCID Identifiers ===

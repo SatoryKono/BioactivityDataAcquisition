@@ -220,16 +220,16 @@ class TestPubMedDateNormalization:
         transformer: PubMedPublicationTransformer,
         pipeline_context: PipelineContext,
     ) -> None:
-        """Year field should be an integer."""
+        """publication_year field should be an integer."""
         xml = _make_pubmed_xml(year="2024", month="03", day="15")
         record: dict[str, Any] = {"_raw_xml": xml}
 
         result = await transformer.transform(pipeline_context, record, 0)
 
-        year = result.get("year")
+        year = result.get("publication_year")
         assert year is not None
-        assert isinstance(year, int), f"year should be int, got {type(year)}"
-        assert 1800 <= year <= 2100, f"year out of valid range: {year}"
+        assert isinstance(year, int), f"publication_year should be int, got {type(year)}"
+        assert 1800 <= year <= 2100, f"publication_year out of valid range: {year}"
 
 
 @pytest.mark.unit

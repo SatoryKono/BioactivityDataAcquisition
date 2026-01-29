@@ -213,7 +213,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "title": rec.get("title"),
             "abstract": abstract,
             "authors": self.serialize_json_list(hashed_authors),
-            "affiliations": serialized_affiliations,
+            "affiliation_list": serialized_affiliations,
             "institution_ids": institution_ids,
             "institution_country_codes": institution_country_codes,
             # ROR IDs (may be empty if not returned by Works API)
@@ -229,7 +229,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "journal": journal_info.get("journal_name"),
             "issn": journal_info.get("issn"),
             "publisher": journal_info.get("publisher"),
-            "year": year,
+            "publication_year": year,
             "publication_date": self._normalize_partial_date(
                 rec.get("publication_date")
             ),
@@ -237,8 +237,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "is_oa": oa_info.get("is_oa"),
             "oa_status": oa_info.get("oa_status"),
             # OpenAlex source field: cited_by_count
-            # Unified BioETL field: citation_count (standardized across all providers)
-            "citation_count": rec.get("cited_by_count"),
+            # Unified BioETL field: citations_received (standardized across all providers)
+            "citations_received": rec.get("cited_by_count"),
             # Topics (hierarchical classification - replaces deprecated concepts)
             # Serialized to JSON string for schema compliance
             "topics": self.serialize_json_list(topics) if topics else None,
@@ -251,11 +251,11 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             # Bibliographic info (from biblio object)
             "volume": biblio_info.get("volume"),
             "issue": biblio_info.get("issue"),
-            "first_page": biblio_info.get("first_page"),
-            "last_page": biblio_info.get("last_page"),
+            "page_first": biblio_info.get("first_page"),
+            "page_last": biblio_info.get("last_page"),
             # Additional metrics
             "fwci": rec.get("fwci"),
-            "reference_count": rec.get("referenced_works_count"),
+            "citations_made": rec.get("referenced_works_count"),
             # Quality indicators
             "is_retracted": rec.get("is_retracted", False),
             "_lookup_method": lookup_method,
@@ -305,6 +305,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
         # Remove excluded fields
         silver_record.pop("pmc_id", None)
-        silver_record.pop("doc_type", None)  # OpenAlex uses raw 'source_type' instead
+        silver_record.pop(
+            "publication_type", None
+        )  # OpenAlex uses raw 'source_type' instead
 
         return silver_record

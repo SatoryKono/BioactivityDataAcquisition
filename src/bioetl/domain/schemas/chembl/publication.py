@@ -56,26 +56,18 @@ class ChemblPublicationSchema(PublicationBaseSchema):
         description="How record was resolved: direct for ChEMBL ID lookup",
     )
 
-    # === Override inherited base fields with renamed versions ===
-    # ChEMBL transformer outputs unified names; suppress inherited old names
-    year: Optional[Series[int]] = pa.Field(
-        nullable=True
-    )  # Superseded by publication_year
-    doc_type: Optional[Series[str]] = pa.Field(
-        nullable=True
-    )  # Superseded by publication_type
-
     # === Unified field names (ChEMBL-specific overrides) ===
+    # Note: old fields 'year' and 'doc_type' removed - replaced by unified names
     publication_type: Series[str] = pa.Field(
         nullable=True,
         isin=["PUBLICATION", "PATENT", "DATASET", "BOOK"],
-        description="Document type.",
+        description="Document type (unified field name).",
     )
     publication_year: Series[int] = pa.Field(
         nullable=True,
         ge=MIN_PUBLICATION_YEAR,
         le=MAX_PUBLICATION_YEAR,
-        description="Publication year.",
+        description="Publication year (unified field name).",
     )
 
     # === System Fields ===

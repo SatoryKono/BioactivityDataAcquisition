@@ -145,7 +145,6 @@ async def test_transform_bronze_to_silver(pipeline, pipeline_context):
     # Authors are now JSON-serialized
     assert json.loads(silver_record["authors"]) == ["Doe, J"]
     # Date fields
-    assert silver_record["year"] == 2023
     assert silver_record["publication_year"] == 2023
     assert silver_record["pub_date"] == "2023-03-15"
     # Note: accepted_date, received_date, epub_date are excluded from output per design

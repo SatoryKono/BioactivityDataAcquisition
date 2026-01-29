@@ -101,13 +101,13 @@ class TestSemanticScholarPublicationTransformer:
         assert result["title"] == "CRISPR-Cas9 gene editing in human embryos"
         # abstract excluded per user request
         assert "abstract" not in result
-        assert result["year"] == 2024
+        assert result["publication_year"] == 2024
         assert result["publication_date"] == "2024-05-15"
         assert result["journal"] == "Nature"
         assert result["volume"] == "629"
         assert result["pages"] == "123-130"
-        assert result["citation_count"] == 42
-        assert result["reference_count"] == 85
+        assert result["citations_received"] == 42
+        assert result["citations_made"] == 85
         assert result["is_oa"] is True
         assert result["open_access_url"] == "https://example.com/paper.pdf"
         assert result["oa_status"] == "green"  # Normalized to lowercase
@@ -232,7 +232,7 @@ class TestSemanticScholarPublicationTransformer:
         assert result["doi"] is None
         # abstract excluded per user request
         assert "abstract" not in result
-        assert result["year"] is None
+        assert result["publication_year"] is None
 
     @pytest.mark.asyncio
     async def test_transform_content_hash_generated(
@@ -295,7 +295,7 @@ class TestSemanticScholarPublicationTransformer:
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        assert result["year"] is None
+        assert result["publication_year"] is None
 
     @pytest.mark.asyncio
     async def test_transform_closed_access(
@@ -559,7 +559,7 @@ class TestSemanticScholarDateNormalization:
 
 
 class TestSemanticScholarUnifiedPageFields:
-    """Tests for unified page field parsing (first_page, last_page).
+    """Tests for unified page field parsing (page_first, page_last).
 
     Note: The parse_page_range function tests are in tests/unit/domain/test_normalization.py.
     These tests verify the integration with the transformer.
@@ -583,8 +583,8 @@ class TestSemanticScholarUnifiedPageFields:
         assert result is not None
         # sample_record has journal.pages = "123-130"
         assert result["pages"] == "123-130"
-        assert result["first_page"] == "123"
-        assert result["last_page"] == "130"
+        assert result["page_first"] == "123"
+        assert result["page_last"] == "130"
 
     @pytest.mark.asyncio
     async def test_unified_page_fields_no_pages(
@@ -603,8 +603,8 @@ class TestSemanticScholarUnifiedPageFields:
 
         assert result is not None
         assert result["pages"] is None
-        assert result["first_page"] is None
-        assert result["last_page"] is None
+        assert result["page_first"] is None
+        assert result["page_last"] is None
 
 
 class TestSemanticScholarNewFields:
@@ -690,8 +690,8 @@ class TestSemanticScholarNewFields:
         result = await transformer.transform(mock_context, record, 0)
 
         assert result is not None
-        assert result["citation_count"] == 100
-        assert result["reference_count"] == 50
+        assert result["citations_received"] == 100
+        assert result["citations_made"] == 50
         assert result["influential_citation_count"] == 25
 
     @pytest.mark.asyncio
@@ -711,7 +711,7 @@ class TestSemanticScholarNewFields:
         result = await transformer.transform(mock_context, record, 0)
 
         assert result is not None
-        assert result["citation_count"] == 100
+        assert result["citations_received"] == 100
         assert result["influential_citation_count"] is None
 
     @pytest.mark.asyncio
@@ -732,5 +732,5 @@ class TestSemanticScholarNewFields:
         result = await transformer.transform(mock_context, record, 0)
 
         assert result is not None
-        assert result["citation_count"] == 10
+        assert result["citations_received"] == 10
         assert result["influential_citation_count"] == 0

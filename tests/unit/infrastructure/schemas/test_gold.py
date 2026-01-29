@@ -23,8 +23,8 @@ from bioetl.domain.contracts import (
 PUBLICATION_DQ_FIELDS = {"_dq_warn", "_dq_error"}
 PUBLICATION_CROSS_REF_FIELDS = {"doi"}
 PUBLICATION_UNIFIED_DATE_FIELDS = {"publication_date"}
-PUBLICATION_UNIFIED_PAGE_FIELDS = {"first_page", "last_page"}
-PUBLICATION_CORE_FIELDS = {"title", "abstract", "authors", "year"}
+PUBLICATION_UNIFIED_PAGE_FIELDS = {"page_first", "page_last"}
+PUBLICATION_CORE_FIELDS = {"title", "abstract", "authors", "publication_year"}
 
 
 def get_schema_fields(schema_class) -> set[str]:
@@ -85,6 +85,7 @@ class TestGoldPublicationSchemaUnifiedFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
+            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             # OpenAlex doesn't have page fields - they were removed as unused
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -92,16 +93,10 @@ class TestGoldPublicationSchemaUnifiedFields:
         ],
     )
     def test_schema_has_page_fields(self, schema_class, name):
-        """Gold publication schemas with page data must have first_page and last_page fields."""
+        """Gold publication schemas with page data must have page_first and page_last fields."""
         fields = get_schema_fields(schema_class)
-        assert "first_page" in fields, f"{name} missing first_page field"
-        assert "last_page" in fields, f"{name} missing last_page field"
-
-    def test_chembl_schema_has_page_fields(self):
-        """ChEMBL Gold schema uses page_first/page_last (unified naming)."""
-        fields = get_schema_fields(ChEMBLDocumentGoldSchema)
-        assert "page_first" in fields, "ChEMBL Document missing page_first field"
-        assert "page_last" in fields, "ChEMBL Document missing page_last field"
+        assert "page_first" in fields, f"{name} missing page_first field"
+        assert "page_last" in fields, f"{name} missing page_last field"
 
 
 @pytest.mark.unit
@@ -363,16 +358,16 @@ class TestGoldSchemaValidation:
             "issue": "2",
             "pages": "100-110",
             "medline_pgn": "100-110",
-            "first_page": "100",
-            "last_page": "110",
+            "page_first": "100",
+            "page_last": "110",
             "authors": '["Author One", "Author Two"]',
-            "affiliations": '["University A", "University B"]',
+            "affiliation_list": '["University A", "University B"]',
             "structured_affiliations": '[{"text": "University A", "ror_id": null}]',
             "authors_with_affiliations": '[{"name_hash": "abc123", "initials": "AO", "affiliations": []}]',
             "pub_month": 3,
             "pub_day": 15,
             "publication_date": "2024-03-15",
-            "year": 2024,
+            "publication_year": 2024,
             # Note: accepted_date, received_date, revised_date, epub_date excluded per design
             "date_completed": "2024-04-01",
             "date_revised": "2024-03-20",

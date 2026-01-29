@@ -478,7 +478,7 @@ class TestCrossRefPublicationEntity:
         )
         assert publication.doi == "10.1234/test.article"
         assert publication._source == "crossref"
-        assert publication.doc_type == "PUBLICATION"
+        assert publication.publication_type == "PUBLICATION"
 
     def test_publication_with_all_optional_fields(self, base_entity_kwargs):
         """Test CrossRefPublicationEntity with all optional fields."""
@@ -493,22 +493,22 @@ class TestCrossRefPublicationEntity:
             publisher="Springer Nature",
             volume="499",
             issue="7461",
-            first_page="480",
-            last_page="485",
-            year=2023,
+            page_first="480",
+            page_last="485",
+            publication_year=2023,
             published_print="2023-07-25",
             published_online="2023-07-20",
-            doc_type="PUBLICATION",
-            citation_count=2847,
-            reference_count=50,
+            publication_type="PUBLICATION",
+            citations_received=2847,
+            citations_made=50,
             language="en",
             license_url="https://creativecommons.org/licenses/by/4.0/",
-            subjects=["Genetics", "Genomics"],
+            subject_keywords=["Genetics", "Genomics"],
         )
         assert publication.title == "The complete genome sequence"
         assert publication.journal == "Nature"
-        assert publication.year == 2023
-        assert publication.citation_count == 2847
+        assert publication.publication_year == 2023
+        assert publication.citations_received == 2847
         assert len(publication.authors) == 2
         assert len(publication.issn) == 2
 
@@ -520,14 +520,14 @@ class TestCrossRefPublicationEntity:
                 doi="",
             )
 
-    def test_publication_preprint_doc_type(self, base_entity_kwargs):
-        """Test CrossRefPublicationEntity with PREPRINT doc_type."""
+    def test_publication_preprint_publication_type(self, base_entity_kwargs):
+        """Test CrossRefPublicationEntity with PREPRINT publication_type."""
         publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1101/2023.01.01.123456",
-            doc_type="PREPRINT",
+            publication_type="PREPRINT",
         )
-        assert publication.doc_type == "PREPRINT"
+        assert publication.publication_type == "PREPRINT"
 
     def test_publication_default_authors_none(self, base_entity_kwargs):
         """Test that authors defaults to None (JSON string format)."""
@@ -545,13 +545,13 @@ class TestCrossRefPublicationEntity:
         )
         assert publication.issn == []
 
-    def test_publication_default_subjects_empty_list(self, base_entity_kwargs):
-        """Test that subjects defaults to empty list."""
+    def test_publication_default_subject_keywords_empty_list(self, base_entity_kwargs):
+        """Test that subject_keywords defaults to empty list."""
         publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
         )
-        assert publication.subjects == []
+        assert publication.subject_keywords == []
 
     def test_publication_is_frozen(self, base_entity_kwargs):
         """Test that CrossRefPublicationEntity is immutable."""
@@ -584,42 +584,42 @@ class TestCrossRefPublicationEntity:
         publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
-            citation_count=150,
-            reference_count=45,
+            citations_received=150,
+            citations_made=45,
         )
-        assert publication.citation_count == 150
-        assert publication.reference_count == 45
+        assert publication.citations_received == 150
+        assert publication.citations_made == 45
 
-    def test_publication_citation_count_can_be_zero(self, base_entity_kwargs):
-        """Test that citation_count can be zero."""
+    def test_publication_citations_received_can_be_zero(self, base_entity_kwargs):
+        """Test that citations_received can be zero."""
         publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
-            citation_count=0,
+            citations_received=0,
         )
-        assert publication.citation_count == 0
+        assert publication.citations_received == 0
 
     def test_publication_with_date_fields(self, base_entity_kwargs):
         """Test CrossRefPublicationEntity date fields."""
         publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
-            year=2023,
+            publication_year=2023,
             published_print="2023-06-15",
             published_online="2023-05-01",
         )
-        assert publication.year == 2023
+        assert publication.publication_year == 2023
         assert publication.published_print == "2023-06-15"
         assert publication.published_online == "2023-05-01"
 
     def test_publication_year_can_be_none(self, base_entity_kwargs):
-        """Test that year can be None for publications with unknown date."""
+        """Test that publication_year can be None for publications with unknown date."""
         publication = CrossRefPublicationEntity(
             **base_entity_kwargs,
             doi="10.1234/test",
-            year=None,
+            publication_year=None,
         )
-        assert publication.year is None
+        assert publication.publication_year is None
 
     def test_publication_with_license_url(self, base_entity_kwargs):
         """Test CrossRefPublicationEntity with license URL."""

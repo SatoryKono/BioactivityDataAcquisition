@@ -162,14 +162,14 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             **journal_info,
             **page_info,
             **dates,
-            "year": extract_year(rec),
+            "publication_year": extract_year(rec),
             "publication_date": publication_date,
             "source_type": rec.get("type"),  # Raw CrossRef type (journal-article, etc.)
-            "citation_count": rec.get("is-referenced-by-count"),
-            "reference_count": rec.get("references-count"),
+            "citations_received": rec.get("is-referenced-by-count"),
+            "citations_made": rec.get("references-count"),
             "language": rec.get("language"),
             "license_url": extract_license_url(rec),
-            "subjects": rec.get("subject", []),
+            "subject_keywords": rec.get("subject", []),
             "_source": "crossref",
             # Excluded fields (always NULL, not written to Delta Lake):
             # - is_oa: CrossRef doesn't provide Open Access info
@@ -183,7 +183,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "_dq_error": False,
             # NEW: Additional CrossRef fields
             "alternative_id": rec.get("alternative-id", []) or [],
-            "short_container_title": rec.get("short-container-title", []) or [],
+            "journal_name_short": rec.get("short-container-title", []) or [],
             "published": published_date,
             **content_domain,
             **issn_by_type,
@@ -341,9 +341,11 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
         # Remove excluded fields (CrossRef doesn't provide these)
         silver_record.pop("abstract", None)
-        silver_record.pop("affiliations", None)
+        silver_record.pop("affiliation_list", None)
         silver_record.pop("pmid", None)
         silver_record.pop("pmc_id", None)
-        silver_record.pop("doc_type", None)  # CrossRef uses raw 'source_type' instead
+        silver_record.pop(
+            "publication_type", None
+        )  # CrossRef uses raw 'source_type' instead
 
         return silver_record
