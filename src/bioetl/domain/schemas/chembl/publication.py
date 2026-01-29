@@ -63,12 +63,6 @@ class ChemblPublicationSchema(PublicationBaseSchema):
         isin=["PUBLICATION", "PATENT", "DATASET", "BOOK"],
         description="Document type (unified field name).",
     )
-    publication_year: Series[int] = pa.Field(
-        nullable=True,
-        ge=MIN_PUBLICATION_YEAR,
-        le=MAX_PUBLICATION_YEAR,
-        description="Publication year (unified field name).",
-    )
 
     # === System Fields ===
     _source: Series[str] = pa.Field(

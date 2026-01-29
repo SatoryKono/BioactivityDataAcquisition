@@ -8,7 +8,6 @@ Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic.
 
 from __future__ import annotations
 
-import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -55,14 +54,6 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         nullable=False,
         isin=LOOKUP_METHODS,
         description="How record was resolved: doi, title_fallback, title_only",
-    )
-
-    # === Override publication_year with pd.Int64Dtype for nullable int ===
-    publication_year: Series[pd.Int64Dtype] = pa.Field(
-        nullable=True,
-        ge=1800,
-        le=2100,
-        description="Publication year (1800-2100, nullable int override).",
     )
 
     # === Raw OpenAlex Type (replaces doc_type) ===
