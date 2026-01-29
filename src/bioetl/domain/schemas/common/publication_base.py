@@ -79,7 +79,7 @@ class PublicationBaseSchema(ETLRecordSchema):
         nullable=True,
         description="Journal name",
     )
-    publication_year: Series[int] = pa.Field(
+    publication_year: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
         ge=MIN_PUBLICATION_YEAR,
         le=MAX_PUBLICATION_YEAR,
