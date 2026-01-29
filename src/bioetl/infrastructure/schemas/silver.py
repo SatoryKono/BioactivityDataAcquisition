@@ -833,6 +833,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("primary_topic", pa.string()),  # JSON object
         # Date fields
         pa.field("publication_date", pa.string()),
+        pa.field("publication_year", pa.int64()),
         pa.field("publisher", pa.string()),
         # Number of works referenced
         pa.field("citations_made", pa.int64()),
