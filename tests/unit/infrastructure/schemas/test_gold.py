@@ -344,7 +344,7 @@ class TestGoldSchemaValidation:
             # Note: vernacular_title excluded per design
             "journal": "Test Journal",
             "journal_abbrev": "Test J",
-            "journal_title": "Test Journal Full Name",
+            "journal_full_title": "Test Journal Full Name",
             "journal_iso_abbrev": "Test J.",
             "journal_issn_type": "Print",
             "issn": "1234-5678",
