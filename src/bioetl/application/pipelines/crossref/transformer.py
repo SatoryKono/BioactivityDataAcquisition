@@ -192,7 +192,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             **content_domain,
             **issn_by_type,
             # NEW: Author and reference data (per PROMPT 3 enhancement)
-            "author_orcids": serialized_orcids,
+            "author_orcid_list": serialized_orcids,
             "author_details": serialized_author_details,
             "references": serialized_references,
         }

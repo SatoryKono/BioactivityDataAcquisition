@@ -258,7 +258,8 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     issn_electronic: str | None = None
 
     # Author ORCID identifiers (JSON array of ORCID IDs)
-    author_orcids: str | None = None
+    # Unified field name: author_orcid_list (was: author_orcids)
+    author_orcid_list: str | None = None
 
     # Full author details with ORCID, sequence, affiliations (JSON array)
     author_details: str | None = None

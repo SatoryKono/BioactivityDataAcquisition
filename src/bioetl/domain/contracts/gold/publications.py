@@ -213,9 +213,9 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     issn_electronic: Series[str] = pa.Field(nullable=True)
 
     # Author identifiers
-    author_orcids: Series[str] = pa.Field(
+    author_orcid_list: Series[str] = pa.Field(
         nullable=True
-    )  # JSON array of ORCID identifiers
+    )  # JSON array of ORCID identifiers (unified: was author_orcids)
     author_details: Series[str] = pa.Field(
         nullable=True
     )  # JSON array of author objects (given, family, orcid, sequence, affiliations)
