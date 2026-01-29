@@ -60,8 +60,8 @@ class TestCrossRefYearValidation:
             "journal": "Nature",
             "year": 2020,
             "publication_date": "2020-06-15",  # Unified date field
-            "doc_type": None,  # Excluded from Silver/Gold - CrossRef uses 'type' field
-            "type": "journal-article",  # Raw CrossRef type (replaces doc_type)
+            "doc_type": None,  # Excluded from Silver/Gold - CrossRef uses 'source_type' field
+            "source_type": "journal-article",  # Raw CrossRef type (replaces doc_type)
             "language": "en",
             # Metrics
             "citation_count": 100,
@@ -337,7 +337,7 @@ class TestPubMedYearValidation:
             # PubMed-specific fields
             "abstract_structured": None,
             "vernacular_title": None,
-            "journal_title": "Nature",
+            "journal_full_title": "Nature",
             "journal_iso_abbrev": "Nature",
             "issn": "0028-0836",
             "journal_issn_type": "Print",
