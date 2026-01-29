@@ -160,7 +160,8 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     title: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     journal: Series[str] = pa.Field(nullable=True)
-    issn: Series[object] = pa.Field(nullable=True)  # list[str]
+    issn: Series[str] = pa.Field(nullable=True)  # Primary ISSN (scalar)
+    issn_list: Series[str] = pa.Field(nullable=True)  # JSON array of all ISSNs
     publisher: Series[str] = pa.Field(nullable=True)
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)

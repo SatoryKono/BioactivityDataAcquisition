@@ -50,6 +50,12 @@
         "null"
       ]
     },
+    "issn_list": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "publisher": {
       "type": [
         "string",
