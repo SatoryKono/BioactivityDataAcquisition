@@ -123,7 +123,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
 
     # === Topics (hierarchical classification - replaces deprecated concepts) ===
     # Stored as JSON-serialized string for DataFrame compatibility
-    topics: Series[str] = pa.Field(
+    subject_topics: Series[str] = pa.Field(
         nullable=True,
         description="Hierarchical topic classification (JSON array)",
     )
@@ -143,14 +143,14 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     )
 
     # === Classification Fields (extracted by transformer) ===
-    mesh_terms: Series[str] = pa.Field(
+    subject_mesh: Series[str] = pa.Field(
         nullable=True,
-        description="MeSH terms (JSON array of descriptor names)",
+        description="MeSH terms (JSON array of descriptor names, unified field name)",
     )
 
-    keywords: Series[str] = pa.Field(
+    subject_keywords: Series[str] = pa.Field(
         nullable=True,
-        description="Keywords (JSON array)",
+        description="Keywords (JSON array, unified field name)",
     )
 
     # === External Identifier ===
