@@ -257,15 +257,6 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         """Validate grant count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    reference_count: Series[int] = pa.Field(
-        nullable=True, description="Number of references"
-    )
-
-    @pa.check("reference_count", name="reference_count_non_negative")
-    def _check_reference_count(cls, series: Series[int]) -> Series[bool]:
-        """Validate reference count is non-negative."""
-        return cast("Series[bool]", series.isna() | (series >= 0))
-
     chemical_count: Series[int] = pa.Field(
         nullable=True, description="Number of chemicals"
     )

@@ -220,7 +220,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             len(ref_list.findall(".//Reference")) if ref_list is not None else 0
         )
 
-        return {"grant_count": grant_count, "reference_count": reference_count}
+        return {"grant_count": grant_count, "citations_made": reference_count}
 
     def _extract_classification_data(
         self, article: ET.Element, medline: ET.Element | None
