@@ -234,57 +234,37 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        # Lookup metadata
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
-        # Title and abstract
         pa.field("abstract", pa.string()),
-        pa.field(
-            "abstract_structured", pa.bool_()
-        ),  # Whether abstract has NLM sections
-        # Note: accepted_date, received_date, revised_date, epub_date excluded (API deprecated 2026-01)
-        # Authors and affiliations
+        pa.field("abstract_structured", pa.bool_()),  # Whether abstract has NLM sections
         pa.field("affiliations", pa.string()),  # JSON array of unique affiliations
-        pa.field("author_count", pa.int64()),  # Denormalized count for query efficiency
+        pa.field("author_count", pa.int64()),
         pa.field("authors", pa.string()),  # JSON-serialized list
-        # Author-affiliation mapping (structured)
-        pa.field(
-            "authors_with_affiliations", pa.string()
-        ),  # JSON array: author → affiliations
-        # Counts (denormalized for query efficiency)
+        pa.field("authors_with_affiliations", pa.string()),  # JSON array
         pa.field("chemical_count", pa.int64()),
-        pa.field("citation_subset", pa.string()),  # Citation subset codes (e.g., 'AIM')
-        # Additional metadata
+        pa.field("citation_subset", pa.string()),  # Citation subset codes
         pa.field("country", pa.string()),
-        # MEDLINE dates
         pa.field("date_completed", pa.string()),  # MEDLINE processing completion date
-        pa.field("date_revised", pa.string()),  # Record revision date (MEDLINE)
-        # Primary identifiers
+        pa.field("date_revised", pa.string()),  # Record revision date
         pa.field("doi", pa.string()),
-        # Unified page fields (parsed from medline_pgn/pages)
-        pa.field("page_first", pa.string()),
-        pa.field("grant_count", pa.int64()),  # Number of grants
-        # Journal information
+        pa.field("grant_count", pa.int64()),
         pa.field("issn", pa.string()),
         pa.field("issue", pa.string()),
         pa.field("journal", pa.string()),
         pa.field("journal_abbrev", pa.string()),
-        # PubMed-specific journal fields (forensic retention)
         pa.field("journal_iso_abbrev", pa.string()),  # ISO journal abbreviation
-        pa.field(
-            "journal_issn_type", pa.string()
-        ),  # ISSN type: Print/Electronic/Linking
+        pa.field("journal_issn_type", pa.string()),  # Print/Electronic/Linking
         pa.field("journal_title", pa.string()),  # Full journal name (PubMed source)
-        pa.field("keyword_count", pa.int64()),  # Number of keywords
-        # Classification
+        pa.field("keyword_count", pa.int64()),
         pa.field("keywords", pa.list_(pa.string())),
         pa.field("language", pa.string()),
-        pa.field("page_last", pa.string()),
-        # Page numbers (MEDLINE format)
         pa.field("medline_pgn", pa.string()),  # Original PubMed pagination
-        pa.field("mesh_heading_count", pa.int64()),  # Number of MeSH headings
+        pa.field("mesh_heading_count", pa.int64()),
         pa.field("mesh_terms", pa.list_(pa.string())),
         pa.field("nlm_unique_id", pa.string()),  # NLM catalog ID
+        pa.field("page_first", pa.string()),
+        pa.field("page_last", pa.string()),
         pa.field("pages", pa.string()),  # Legacy: medline_pgn format
         pa.field("pmc_id", pa.string()),
         pa.field("pmid", pa.string()),
@@ -296,13 +276,9 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publication_type_list", pa.string()),  # JSON array of pub types
         pa.field("publication_types", pa.list_(pa.string())),
         pa.field("publication_year", pa.int64()),
-        pa.field(
-            "reference_count", pa.int64()
-        ),  # Number of references (PubMed-specific)
-        # Enhanced affiliation data with identifier metadata (ROR, GRID, etc.)
+        pa.field("reference_count", pa.int64()),  # PubMed-specific
         pa.field("structured_affiliations", pa.string()),  # JSON array
         pa.field("title", pa.string()),
-        # Note: vernacular_title excluded (API deprecated 2026-01)
         pa.field("volume", pa.string()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
         pa.field("_dq_warn", pa.bool_()),
@@ -657,50 +633,34 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
         # Lookup metadata
-        # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-        # _original_id: Original identifier used for lookup
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
-        # Author affiliations (unique, sorted)
         pa.field("affiliation_list", pa.string()),  # JSON array
         # Author identifiers (for author-level analytics)
         pa.field("author_h_indices", pa.string()),  # JSON array of h-index values
         pa.field("author_orcids", pa.string()),  # JSON array of ORCIDs
-        pa.field(
-            "author_s2_ids", pa.string()
-        ),  # JSON array of S2 author IDs (40-char hex)
-        # Citation context (for citation sentiment analysis)
+        pa.field("author_s2_ids", pa.string()),  # JSON array of S2 author IDs
         pa.field("citation_contexts", pa.string()),  # JSON array of context sentences
-        # Metrics
+        pa.field("citations_made", pa.int64()),
         pa.field("citations_received", pa.int64()),
         pa.field("corpus_id", pa.int64()),
-        # External identifiers
         pa.field("dblp_id", pa.string()),  # DBLP publication key
         pa.field("doi", pa.string()),
         pa.field("fields_of_study", pa.string()),
-        # Unified page fields (parsed from pages)
-        pa.field("page_first", pa.string()),
-        pa.field(
-            "influential_citation_count", pa.int64()
-        ),  # Number of influential citations
-        # Open Access
+        pa.field("influential_citation_count", pa.int64()),
         pa.field("is_oa", pa.bool_()),
-        # Journal/Venue
-        pa.field("issue", pa.string()),  # Parsed from combined volume/issue
+        pa.field("issue", pa.string()),
         pa.field("journal", pa.string()),
-        pa.field("page_last", pa.string()),
         pa.field("oa_status", pa.string()),
         pa.field("open_access_url", pa.string()),
+        pa.field("page_first", pa.string()),
+        pa.field("page_last", pa.string()),
         pa.field("pages", pa.string()),  # Legacy: "first-last" format
-        # Primary key
-        pa.field("paper_id", pa.string()),
+        pa.field("paper_id", pa.string()),  # Primary key
         # Note: pmc_id excluded per design (2026-01)
-        # pmid: PubMed ID (numeric string: "12345678")
         pa.field("pmid", pa.string()),
         pa.field("publication_date", pa.string()),
         pa.field("publication_types", pa.string()),
-        pa.field("citations_made", pa.int64()),
-        # Core fields
         pa.field("title", pa.string()),
         pa.field("tldr", pa.string()),
         pa.field("volume", pa.string()),
@@ -790,6 +750,8 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("author_openalex_ids", pa.string()),  # OpenAlex author IDs
         pa.field("author_orcids", pa.string()),  # ORCID IDs (empty string for missing)
         pa.field("authors", pa.string()),  # JSON-serialized list
+        # Number of works referenced
+        pa.field("citations_made", pa.int64()),
         # OpenAlex source field: cited_by_count
         # Unified BioETL field: citations_received (standardized across all providers)
         pa.field("citations_received", pa.int64()),
@@ -798,8 +760,6 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Cross-reference IDs for linking publications across providers
         # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
         pa.field("doi", pa.string()),
-        # Unified page fields (from biblio object)
-        pa.field("page_first", pa.string()),
         # Field-Weighted Citation Impact (must be non-negative)
         pa.field("fwci", pa.float64()),
         # Grants/funding information (JSON array)
@@ -818,7 +778,6 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Keywords extracted from OpenAlex
         pa.field("keywords", pa.list_(pa.string())),
         pa.field("language", pa.string()),
-        pa.field("page_last", pa.string()),
         # Microsoft Academic Graph ID (legacy, from ids object)
         pa.field("mag_id", pa.string()),
         # MeSH terms extracted from OpenAlex mesh field
@@ -826,6 +785,9 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("oa_status", pa.string()),
         # Primary key
         pa.field("openalex_id", pa.string()),
+        # Unified page fields (from biblio object)
+        pa.field("page_first", pa.string()),
+        pa.field("page_last", pa.string()),
         # Note: pmc_id excluded per design (2026-01)
         # pmid: PubMed ID (numeric string: "12345678") - nullable, may not exist for all publications
         pa.field("pmid", pa.string()),
@@ -835,8 +797,6 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publication_date", pa.string()),
         pa.field("publication_year", pa.int64()),
         pa.field("publisher", pa.string()),
-        # Number of works referenced
-        pa.field("citations_made", pa.int64()),
         # ROR IDs (may be empty if not returned by Works API)
         pa.field("ror_ids", pa.string()),  # JSON array of ROR URLs
         pa.field("source_type", pa.string()),  # Raw OpenAlex type (article, book, etc.)
