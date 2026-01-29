@@ -110,6 +110,7 @@ class TestSemanticScholarPublicationTransformer:
         assert result["is_oa"] is True
         assert result["open_access_url"] == "https://example.com/paper.pdf"
         assert result["oa_status"] == "green"  # Normalized to lowercase
+        assert result["publication_type"] == "JournalArticle"
         assert result["_source"] == "semanticscholar"
         assert result["_lookup_method"] == "doi"
 
@@ -179,6 +180,41 @@ class TestSemanticScholarPublicationTransformer:
         assert isinstance(result["subject_fields"], str)
         assert "Biology" in result["subject_fields"]
         assert "Medicine" in result["subject_fields"]
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("publication_types", [None, []])
+    async def test_transform_publication_type_empty(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+        sample_record: dict[str, Any],
+        publication_types: list[str] | None,
+    ) -> None:
+        """Test that publication_type is None when publicationTypes is empty/null."""
+        if publication_types is None:
+            sample_record.pop("publicationTypes", None)
+        else:
+            sample_record["publicationTypes"] = publication_types
+
+        result = await transformer.transform(mock_context, sample_record, 0)
+
+        assert result is not None
+        assert result["publication_type"] is None
+
+    @pytest.mark.asyncio
+    async def test_transform_publication_type_joined(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+        sample_record: dict[str, Any],
+    ) -> None:
+        """Test that publication_type joins list values with '|'."""
+        sample_record["publicationTypes"] = ["JournalArticle", "Review"]
+
+        result = await transformer.transform(mock_context, sample_record, 0)
+
+        assert result is not None
+        assert result["publication_type"] == "JournalArticle|Review"
 
     @pytest.mark.asyncio
     async def test_transform_missing_paper_id_skips_record(

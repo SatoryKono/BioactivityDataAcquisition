@@ -91,7 +91,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     publication_type_list: Series[str] = pa.Field(
         nullable=True
     )  # JSON array of pub types
-    publication_types: Series[object] = pa.Field(nullable=True)  # list[str]
+    publication_type: Series[object] = pa.Field(nullable=True)  # list[str]
 
     # Classification
     subject_keywords: Series[object] = pa.Field(nullable=True)  # list[str]
@@ -393,7 +393,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
 
     # Classification (JSON strings)
     subject_fields: Series[str] = pa.Field(nullable=True)
-    publication_types: Series[str] = pa.Field(nullable=True)
+    publication_type: Series[str] = pa.Field(nullable=True)
     citation_contexts: Series[str] = pa.Field(nullable=True)  # JSON array
 
     # Author affiliations

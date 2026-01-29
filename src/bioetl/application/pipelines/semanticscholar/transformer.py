@@ -64,6 +64,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - oa_status: openAccessPdf.status (normalized to lowercase)
     - open_access_url: openAccessPdf.url
     - subject_fields: fieldsOfStudy
+    - publication_type: publicationTypes joined by "|"
     - publication_types: publicationTypes
     - citation_contexts: citations.contexts (citing sentences, when available)
 
@@ -181,6 +182,18 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         # Fields of study
         subject_fields = extract_fields_of_study(rec.get("fieldsOfStudy"))
 
+        # Publication types (raw list and unified scalar)
+        publication_types = rec.get("publicationTypes")
+        publication_type = None
+        if isinstance(publication_types, list):
+            cleaned_types = [
+                str(item).strip()
+                for item in publication_types
+                if item is not None and str(item).strip()
+            ]
+            if cleaned_types:
+                publication_type = "|".join(cleaned_types)
+
         # Validate year
         year = validate_year(rec.get("year"))
 
@@ -236,7 +249,8 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "open_access_url": oa_info.get("url"),
             "oa_status": oa_info.get("oa_status"),
             "subject_fields": self.serialize_json(subject_fields),
-            "publication_types": self.serialize_json(rec.get("publicationTypes")),
+            "publication_type": publication_type,
+            "publication_types": self.serialize_json(publication_types),
             "_source": "semanticscholar",
             # Lookup metadata
             "_lookup_method": lookup_method,
