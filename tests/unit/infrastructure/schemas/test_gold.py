@@ -176,7 +176,7 @@ class TestGoldPublicationSchemaCoreFields:
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
-            # SemanticScholar excluded: authors not collected per user request
+            (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
     def test_schema_has_authors_field(self, schema_class, name):
@@ -364,6 +364,9 @@ class TestGoldSchemaValidation:
             "affiliation_list": '["University A", "University B"]',
             "affiliation_structured": '[{"text": "University A", "ror_id": null}]',
             "authors_with_affiliations": '[{"name_hash": "abc123", "initials": "AO", "affiliations": []}]',
+            "pii": "S0123-4567(24)00001-X",
+            "mid": "NIHMS123456",
+            "publisher_id": "pub-12345",
             "pub_month": 3,
             "pub_day": 15,
             "publication_date": "2024-03-15",

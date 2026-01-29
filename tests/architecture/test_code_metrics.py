@@ -72,7 +72,7 @@ class TestFileSizeLimits:
         "compound.py": 400,  # 397 LOC - PubChem molecule schema with 3D steric quadrupole + feature_count_3d + monoisotopic_mass
         "protein.py": 370,  # 365 LOC - UniProt target schema + deprecated alias __getattr__ (v2.0)
         # Domain contracts/gold (Gold layer Pandera schemas)
-        "publications.py": 450,  # 439 LOC - Gold layer publication schemas with author/institution identifiers
+        "publications.py": 470,  # 464 LOC - Gold layer publication schemas with author/institution identifiers + PubMed pii/mid/publisher_id + CrossRef author_orcids/details/references + S2 authors
         # Note: chembl.py exemption at line 39 covers both domain/entities/chembl.py and domain/contracts/gold/chembl.py
         # Domain DQ models (data quality reports and serialization)
         "dq_serializer.py": 450,  # 447 LOC - DQ report serialization logic (increased for CC reduction)
