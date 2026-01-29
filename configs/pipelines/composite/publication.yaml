@@ -5,16 +5,16 @@
 #
 # Combines publication data from multiple sources:
 # - Seed: ChEMBL publications
-# - Enrichers: CrossRef (citations), OpenAlex (concepts), PubMed (MeSH),
+# - Enrichers: CrossRef (citations), OpenAlex (topics), PubMed (MeSH),
 #              SemanticScholar (embeddings)
 #
 # NOTE: chembl_publication_term was removed because ChEMBL API no longer
-# provides mesh_terms/keywords fields in /document endpoint, and the
+# provides subject_mesh/subject_keywords fields in /document endpoint, and the
 # /document_term endpoint has been deprecated (returns 404).
 #
 # Field exclusions (2026-01-27):
-# - CrossRef: pmid, pmc_id, doc_type (uses raw 'type' instead)
-# - OpenAlex: pmc_id, doc_type (uses raw 'type' instead)
+# - CrossRef: pmid, pmc_id, publication_type (uses raw 'type' mapped to publication_type)
+# - OpenAlex: pmc_id, publication_type (uses raw 'type' mapped to publication_type)
 # - PubMed: vernacular_title, epub_date, received_date, revised_date, accepted_date
 # - SemanticScholar: pmc_id, arxiv_id
 #
@@ -81,7 +81,7 @@ composite:
       timeout_seconds: 900
       silver_table: silver/crossref/publication
 
-    # OpenAlex: Academic concepts and institutions
+    # OpenAlex: Academic topics and institutions
     # OPTIONAL: Failure logged, composite continues
     - pipeline: openalex_publication
       join_keys:
@@ -103,7 +103,7 @@ composite:
       timeout_seconds: 600
       silver_table: silver/pubmed/publication
 
-    # Semantic Scholar: AI/ML embeddings and TLDR
+    # Semantic Scholar: AI/ML embeddings and TLDR (mapped to abstract)
     # OPTIONAL: Higher rate limits, ok to skip
     - pipeline: semanticscholar_publication
       join_keys:
@@ -143,15 +143,14 @@ composite:
         - pubmed         # PubMed has best abstracts
         - openalex
         - chembl
-      tldr:
-        - semanticscholar  # S2-only field
+        - semanticscholar  # Fallback (mapped from TLDR)
 
       # === Citation Metrics ===
-      citation_count:
+      citations_received:
         - crossref       # CrossRef is citation authority
         - openalex
         - semanticscholar
-      reference_count:
+      citations_made:
         - crossref       # CrossRef has most complete reference data
         - openalex
         - pubmed
@@ -160,23 +159,26 @@ composite:
         - semanticscholar  # S2-only field
 
       # === Classification/Topics ===
-      # NOTE: 'topics' replaces deprecated 'concepts' per OpenAlex 2024 migration
-      topics:
-        - openalex       # OpenAlex hierarchical topics (replaces concepts)
+      # NOTE: subject_topics replaces deprecated concepts/topics per OpenAlex 2024 migration
+      subject_topics:
+        - openalex       # OpenAlex hierarchical topics
       primary_topic:
         - openalex       # OpenAlex-unique field
-      concepts:
-        - openalex       # DEPRECATED: use topics instead
-      mesh_terms:
+      subject_keywords:
+        - crossref       # CrossRef subjects -> subject_keywords
+        - openalex
+        - pubmed
+        - semanticscholar
+      subject_mesh:
         - pubmed         # PubMed MeSH is authoritative
-      mesh:
-        - openalex       # OpenAlex MeSH extraction (fallback to mesh_terms)
-      fields_of_study:
+        - openalex       # OpenAlex MeSH extraction (fallback)
+      subject_fields:
         - semanticscholar  # S2-unique field
 
       # === Author Metadata ===
       author_orcids:
         - crossref       # CrossRef has most complete ORCID data
+        - openalex
         - semanticscholar
       author_details:
         - crossref       # CrossRef-unique detailed author objects
@@ -188,11 +190,11 @@ composite:
         - semanticscholar  # S2-unique h-index data
 
       # === Affiliations ===
-      # Note: structured_affiliations (PubMed) preferred over affiliations
-      # PubMed structured_affiliations contains ROR/GRID identifiers
-      structured_affiliations:
+      # Note: affiliation_structured (PubMed) preferred over affiliation_list
+      # PubMed affiliation_structured contains ROR/GRID identifiers
+      affiliation_structured:
         - pubmed         # PubMed has structured affiliation data with ROR/GRID
-      affiliations:
+      affiliation_list:
         - pubmed         # PubMed raw affiliations
         - openalex
         - semanticscholar
@@ -242,7 +244,147 @@ composite:
     # -------------------------------------------------------------------------
     # Defines the order of columns in the merged output.
     # Columns are grouped semantically, with seed columns first within each group.
-    column_groups_file: ../data_schema/composite/publication.yaml
+    column_groups:
+      - name: identifiers
+        fields:
+          - entity_id
+          - content_hash
+          - _run_id
+          - _run_type
+          - _source_batch_id
+          - _source
+          - _ingestion_ts
+          - _index
+          - _lookup_method
+          - _original_id
+          - document_chembl_id
+          - doi
+          - pmid
+          - pmc_id
+          - openalex_id
+          - paper_id
+          - corpus_id
+          - src_id
+          - chembl_release
+          - nlm_unique_id
+          - mag_id
+          - dblp_id
+          - alternative_id
+          - pii
+          - mid
+          - publisher_id
+        pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
+        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+      - name: core_content
+        fields:
+          - title
+          - abstract
+          - abstract_structured
+        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+      - name: authors
+        fields:
+          - authors
+          - author_count
+          - authors_with_affiliations
+          - author_orcids
+          - author_details
+          - author_openalex_ids
+          - author_s2_ids
+          - author_h_indices
+        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+      - name: affiliations
+        fields:
+          - affiliation_list
+          - affiliation_structured
+          - institution_ids
+          - institution_country_codes
+          - ror_ids
+          - country
+        provider_order: [pubmed, openalex, semanticscholar, crossref, chembl]
+      - name: journal
+        fields:
+          - journal
+          - journal_name
+          - journal_name_short
+          - journal_iso_abbrev
+          - journal_issn_type
+          - issn
+          - issn_print
+          - issn_electronic
+          - publisher
+        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+      - name: temporal
+        fields:
+          - publication_year
+          - publication_date
+          - published
+          - published_print
+          - published_online
+          - pub_month
+          - pub_day
+          - date_completed
+          - date_revised
+          - creation_date
+        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+      - name: pagination
+        fields:
+          - volume
+          - issue
+          - page_first
+          - page_last
+          - page_range
+          - medline_pgn
+        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+      - name: citations
+        fields:
+          - citations_received
+          - citations_made
+          - influential_citation_count
+          - references
+          - citation_contexts
+          - citation_subset
+        provider_order: [crossref, openalex, pubmed, semanticscholar, chembl]
+      - name: subjects
+        fields:
+          - subject_topics
+          - primary_topic
+          - subject_fields
+          - subject_mesh
+          - mesh_heading_count
+          - subject_keywords
+          - keyword_count
+          - chemicals
+          - chemical_count
+          - gene_symbols
+          - databanks
+          - grants
+          - grant_count
+        provider_order: [openalex, pubmed, semanticscholar, crossref, chembl]
+      - name: open_access
+        fields:
+          - is_oa
+          - oa_status
+          - open_access_url
+          - license_url
+        provider_order: [openalex, semanticscholar, crossref]
+      - name: document_type
+        fields:
+          - publication_type
+          - publication_types
+          - publication_type_list
+          - publication_status
+        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+      - name: language
+        fields:
+          - language
+        provider_order: [crossref, openalex, pubmed]
+      - name: quality
+        fields:
+          - is_retracted
+          - fwci
+          - content_domain_domains
+          - content_domain_crossmark_restriction
+        provider_order: [openalex, crossref]
     output:
       silver: data/output/silver/composite/publication
       gold: data/output/gold/composite/publication
@@ -318,10 +460,10 @@ composite:
         nullable: true
         description: "JSON array of author h-index values"
 
-      topics:
+      subject_topics:
         type: json_array
         nullable: true
-        description: "OpenAlex hierarchical topics (replaces concepts)"
+        description: "OpenAlex hierarchical topics"
 
       primary_topic:
         type: json_object
@@ -358,7 +500,7 @@ composite:
         nullable: true
         description: "PubMed gene symbols"
 
-      affiliations:
+      affiliation_list:
         type: json_array
         nullable: true
         description: "Author affiliations (multiple providers)"
@@ -451,14 +593,14 @@ composite:
     track_source_for_fields:
       - title
       - abstract
-      - citation_count
-      - reference_count
-      - mesh_terms
-      - affiliations
+      - citations_received
+      - citations_made
+      - subject_mesh
+      - affiliation_list
       - author_orcids
       - is_oa
       - oa_status
-      - keywords
+      - subject_keywords
 
 # -----------------------------------------------------------------------------
 # Gold Filters (applied to merged output)
