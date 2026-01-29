@@ -148,14 +148,15 @@ class PubMedPublicationEntity(PublicationEntityBase):
 
     PubMed-specific Attributes:
         pmc_id: PubMed Central ID.
-        journal_abbrev: Journal abbreviation (ISO).
+        journal_name: Full journal title (unified field name).
+        journal_name_short: Journal abbreviation (unified field name).
         volume: Volume number.
         issue: Issue number.
-        pages: Page numbers.
+        page_range: Page numbers.
         pub_date: Publication date (ISO format).
         publication_year: Alias for year (legacy field).
-        mesh_terms: MeSH terms (list).
-        keywords: Keywords (list).
+        subject_mesh: MeSH terms (list).
+        subject_keywords: Keywords (list).
         publication_types: Publication types (list).
         country: Country of publication.
 
@@ -175,10 +176,11 @@ class PubMedPublicationEntity(PublicationEntityBase):
     publisher_id: str | None = None  # Publisher-specific identifier
 
     # PubMed-specific journal information
-    journal_abbrev: str | None = None
+    journal_name: str | None = None
+    journal_name_short: str | None = None
     volume: str | None = None
     issue: str | None = None
-    pages: str | None = None  # Legacy: medline_pgn format ("123-456")
+    page_range: str | None = None  # Unified page range (e.g., "123-456")
     # first_page and last_page inherited from PublicationEntityBase
 
     # PubMed-specific dates (stored as ISO strings YYYY-MM-DD or partial)
@@ -188,8 +190,8 @@ class PubMedPublicationEntity(PublicationEntityBase):
 
     # PubMed-specific classification
     publication_types: list[str] = field(default_factory=list)
-    keywords: list[str] = field(default_factory=list)
-    mesh_terms: list[str] = field(default_factory=list)
+    subject_keywords: list[str] = field(default_factory=list)
+    subject_mesh: list[str] = field(default_factory=list)
 
     # PubMed-specific chemical and genetic data
     chemicals: list[str] = field(default_factory=list)  # ChemicalList/NameOfSubstance
@@ -219,7 +221,7 @@ class PubMedPublicationEntity(PublicationEntityBase):
     citation_subset: str | None = None  # Citation subset codes (e.g., 'AIM')
 
     # Enhanced affiliation data (for institutional analysis)
-    structured_affiliations: str | None = None  # JSON array with identifier metadata
+    affiliation_structured: str | None = None  # JSON array with identifier metadata
     authors_with_affiliations: str | None = (
         None  # JSON array: author-affiliation mapping
     )

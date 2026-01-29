@@ -328,6 +328,9 @@ class TestPubMedYearValidation:
             "language": "eng",
             # Affiliations (unified field name)
             "affiliation_list": None,
+            # Pagination (unified field names)
+            "page_first": None,
+            "page_last": None,
             # Metrics (unified field names)
             "citations_received": None,  # Not available from PubMed
             "citations_made": None,  # Unified name, PubMed also has reference_count

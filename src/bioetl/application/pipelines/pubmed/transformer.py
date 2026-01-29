@@ -227,17 +227,17 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     ) -> dict[str, Any]:
         """Extract classification-related fields."""
         publication_types = ClassificationExtractor.parse_publication_types(article)
-        keywords = ClassificationExtractor.parse_keywords(medline)
-        mesh_terms = ClassificationExtractor.parse_mesh_terms(medline)
+        subject_keywords = ClassificationExtractor.parse_keywords(medline)
+        subject_mesh = ClassificationExtractor.parse_mesh_terms(medline)
         chemicals = ClassificationExtractor.parse_chemicals(medline)
 
         return {
             "publication_types": publication_types,
             "publication_type_list": self.serialize_json_list(publication_types),
-            "keywords": keywords,
-            "keyword_count": len(keywords) if keywords else 0,
-            "mesh_terms": mesh_terms,
-            "mesh_heading_count": len(mesh_terms) if mesh_terms else 0,
+            "subject_keywords": subject_keywords,
+            "keyword_count": len(subject_keywords) if subject_keywords else 0,
+            "subject_mesh": subject_mesh,
+            "mesh_heading_count": len(subject_mesh) if subject_mesh else 0,
             "chemicals": chemicals,
             "chemical_count": len(chemicals) if chemicals else 0,
             "gene_symbols": ClassificationExtractor.parse_gene_symbols(medline),
@@ -286,6 +286,18 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             raw_author_data
         )
 
+        # Extract unique affiliations list (unified field name)
+        affiliation_values: list[str] = []
+        for author in raw_author_data:
+            affiliations = author.get("affiliations") or []
+            affiliation_values.extend(aff for aff in affiliations if aff)
+        unique_affiliations = sorted(set(affiliation_values))
+        serialized_affiliations = (
+            self.serialize_json_list(unique_affiliations)
+            if unique_affiliations
+            else None
+        )
+
         # Extract structured affiliations with identifiers (affiliations field excluded)
         structured_affs = AuthorExtractor.parse_structured_affiliations(article)
         processed_structured_affs = self._process_structured_affiliations(
@@ -330,8 +342,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 if authors_with_affiliations
                 else None
             ),
-            # affiliations excluded per user request
-            "structured_affiliations": serialized_structured_affs,
+            "affiliation_list": serialized_affiliations,
+            "affiliation_structured": serialized_structured_affs,
             "author_count": len(hashed_authors),
             **self._extract_journal_data(article),
             **self._extract_date_data(article, pubmed_data, medline),
@@ -489,14 +501,14 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         if not journal:
             return {
-                "journal": None,
-                "journal_abbrev": None,
+                "journal_name": None,
+                "journal_name_short": None,
                 "journal_iso_abbrev": None,
                 "journal_issn_type": None,
                 "issn": None,
                 "volume": None,
                 "issue": None,
-                "pages": pages,
+                "page_range": pages,
                 "medline_pgn": pages,
                 "page_first": first_page,
                 "page_last": last_page,
@@ -510,14 +522,14 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         issn_type = issn_elem.get("IssnType") if issn_elem is not None else None
 
         return {
-            "journal": journal_name,
-            "journal_abbrev": journal_abbrev,
+            "journal_name": journal_name,
+            "journal_name_short": journal_abbrev,
             "journal_iso_abbrev": journal_abbrev,  # Alias for Gold schema
             "journal_issn_type": issn_type,
             "issn": issn,
             "volume": get_text(journal_issue.find("Volume")) if journal_issue else None,
             "issue": get_text(journal_issue.find("Issue")) if journal_issue else None,
-            "pages": pages,
+            "page_range": pages,
             "medline_pgn": pages,  # Alias for Gold schema
             "page_first": first_page,
             "page_last": last_page,

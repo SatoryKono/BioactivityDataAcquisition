@@ -193,10 +193,10 @@ class TestGoldPublicationSchemaCoreFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_year_field(self, schema_class, name):
-        """All Gold publication schemas must have year field."""
+    def test_schema_has_publication_year_field(self, schema_class, name):
+        """All Gold publication schemas must have publication_year field."""
         fields = get_schema_fields(schema_class)
-        assert "year" in fields, f"{name} missing year field"
+        assert "publication_year" in fields, f"{name} missing publication_year field"
 
     def test_chembl_schema_has_publication_year_field(self):
         """ChEMBL Gold schema uses publication_year (unified naming)."""
