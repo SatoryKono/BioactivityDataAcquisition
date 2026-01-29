@@ -33,6 +33,7 @@ column_groups:
   - name: issn
     fields:
       - issn
+      - issn_list
       - issn_print
       - issn_electronic
 

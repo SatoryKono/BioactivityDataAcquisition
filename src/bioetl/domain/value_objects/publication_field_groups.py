@@ -140,6 +140,7 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "abstract": PublicationFieldGroup.BIBLIOGRAPHY,
     "page_first": PublicationFieldGroup.BIBLIOGRAPHY,
     "issn": PublicationFieldGroup.BIBLIOGRAPHY,
+    "issn_list": PublicationFieldGroup.BIBLIOGRAPHY,
     "issn_electronic": PublicationFieldGroup.BIBLIOGRAPHY,
     "issn_print": PublicationFieldGroup.BIBLIOGRAPHY,
     "issue": PublicationFieldGroup.BIBLIOGRAPHY,

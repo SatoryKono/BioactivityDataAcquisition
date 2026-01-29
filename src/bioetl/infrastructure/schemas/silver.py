@@ -708,8 +708,9 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         # Note: doc_type excluded; CrossRef uses raw 'type' field instead
         # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
         pa.field("doi", pa.string()),
-        pa.field("issn", pa.list_(pa.string())),
+        pa.field("issn", pa.string()),
         pa.field("issn_electronic", pa.string()),  # Electronic ISSN
+        pa.field("issn_list", pa.string()),  # JSON array of all ISSNs
         pa.field("issn_print", pa.string()),  # Print ISSN
         pa.field("issue", pa.string()),
         pa.field("journal", pa.string()),

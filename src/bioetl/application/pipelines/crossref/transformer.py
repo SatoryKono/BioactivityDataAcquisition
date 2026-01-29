@@ -348,4 +348,14 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         silver_record.pop("pmid", None)
         silver_record.pop("pmc_id", None)
 
+        # Convert ISSN list to scalar + JSON array (unification with other providers)
+        issn_raw = silver_record.get("issn")
+        if isinstance(issn_raw, list):
+            silver_record["issn"] = issn_raw[0] if issn_raw else None
+            silver_record["issn_list"] = (
+                BaseTransformer.serialize_json_list(issn_raw) if issn_raw else None
+            )
+        else:
+            silver_record.setdefault("issn_list", None)
+
         return silver_record

@@ -367,10 +367,47 @@ def test_extract_business_data_single_page(transformer):
 
 
 def test_extract_business_data_issn_list(transformer):
-    """Test ISSN list extraction."""
+    """Test ISSN list extraction at business data level (before entity conversion)."""
     publication = {"DOI": "10.1234/test", "ISSN": ["1234-5678", "8765-4321"]}
     data = transformer._extract_business_data(publication)
     assert data["issn"] == ["1234-5678", "8765-4321"]
+
+
+@pytest.mark.asyncio
+async def test_transform_issn_scalar_and_list(transformer, pipeline_context):
+    """Test that full transformation produces scalar issn and JSON issn_list."""
+    publication = {
+        "DOI": "10.1234/test",
+        "ISSN": ["1234-5678", "8765-4321"],
+    }
+    result = await transformer.transform(pipeline_context, publication, index=0)
+
+    assert result is not None
+    assert result["issn"] == "1234-5678"
+    assert '"1234-5678"' in result["issn_list"]
+    assert '"8765-4321"' in result["issn_list"]
+
+
+@pytest.mark.asyncio
+async def test_transform_issn_empty(transformer, pipeline_context):
+    """Test empty ISSN produces None for both fields."""
+    publication = {"DOI": "10.1234/test"}
+    result = await transformer.transform(pipeline_context, publication, index=0)
+
+    assert result is not None
+    assert result["issn"] is None
+    assert result["issn_list"] is None
+
+
+@pytest.mark.asyncio
+async def test_transform_issn_single(transformer, pipeline_context):
+    """Test single ISSN produces scalar and single-element JSON array."""
+    publication = {"DOI": "10.1234/test", "ISSN": ["1234-5678"]}
+    result = await transformer.transform(pipeline_context, publication, index=0)
+
+    assert result is not None
+    assert result["issn"] == "1234-5678"
+    assert result["issn_list"] == '["1234-5678"]'
 
 
 def test_extract_business_data_subject_list(transformer):
