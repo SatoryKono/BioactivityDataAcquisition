@@ -14,6 +14,7 @@ See ADR-026 for architectural decisions.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 from bioetl.domain.composite.aggregation import (
     AggregationConfig,
@@ -292,12 +293,10 @@ class LayerColumnConfig:
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
-        if self.columns is not None and isinstance(self.columns, list):
-            object.__setattr__(self, "columns", tuple(self.columns))
-        if self.include_groups is not None and isinstance(self.include_groups, list):
-            object.__setattr__(self, "include_groups", tuple(self.include_groups))
-        if self.exclude_fields is not None and isinstance(self.exclude_fields, list):
-            object.__setattr__(self, "exclude_fields", tuple(self.exclude_fields))
+        self._ensure_tuple("columns", self.columns)
+        self._ensure_tuple("include_groups", self.include_groups)
+        self._ensure_tuple("exclude_fields", self.exclude_fields)
+
         if self.column_groups is not None and isinstance(self.column_groups, list):
             object.__setattr__(
                 self,
@@ -311,6 +310,10 @@ class LayerColumnConfig:
         if not isinstance(self.rename_fields, dict):
             object.__setattr__(self, "rename_fields", dict(self.rename_fields))
         self._validate()
+
+    def _ensure_tuple(self, field_name: str, value: Any) -> None:
+        if value is not None and isinstance(value, list):
+            object.__setattr__(self, field_name, tuple(value))
 
     def _validate(self) -> None:
         """Validate configuration invariants."""
@@ -394,9 +397,10 @@ class DataSchemaConfig:
             Tuple of ColumnGroupConfig for the layer.
             Returns layer-specific groups if defined, otherwise shared groups.
         """
-        layer_config = getattr(self, layer, None)
-        if layer_config and layer_config.column_groups:
-            return layer_config.column_groups
+        if layer == "silver" and self.silver and self.silver.column_groups:
+            return self.silver.column_groups
+        if layer == "gold" and self.gold and self.gold.column_groups:
+            return self.gold.column_groups
         return self.column_groups
 
     def should_include_group(self, layer: str, group_name: str) -> bool:

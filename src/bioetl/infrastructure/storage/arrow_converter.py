@@ -93,31 +93,45 @@ class ArrowDataConverter:
         Returns:
             PyArrow Table ready for Delta Lake write.
         """
-        from bioetl.domain.schemas.column_order import canonical_column_order
-
         arrow_data = pa.Table.from_pylist(records)
 
-        if column_order:
-            ordered_columns = [c for c in column_order if c in arrow_data.column_names]
-            remaining = [c for c in arrow_data.column_names if c not in ordered_columns]
-            arrow_data = arrow_data.select(ordered_columns + remaining)
-        else:
-            ordered_columns = canonical_column_order(list(arrow_data.column_names))
-            arrow_data = arrow_data.select(ordered_columns)
+        arrow_data = self._apply_column_ordering(arrow_data, column_order)
 
         # Check if schema needs sanitization (contains null types)
         schema_str = str(arrow_data.schema).lower()
         if "null" in schema_str:
             arrow_data = self._sanitize_null_columns(arrow_data)
 
-        # Sort by primary keys for deterministic writes
+        arrow_data = self._apply_sorting(arrow_data, primary_keys)
+
+        return arrow_data
+
+    def _apply_column_ordering(
+        self,
+        arrow_data: pa.Table,
+        column_order: list[str] | None,
+    ) -> pa.Table:
+        """Apply canonical or explicit column ordering."""
+        from bioetl.domain.schemas.column_order import canonical_column_order
+
+        if column_order:
+            ordered_columns = [c for c in column_order if c in arrow_data.column_names]
+            remaining = [c for c in arrow_data.column_names if c not in ordered_columns]
+            return arrow_data.select(ordered_columns + remaining)
+
+        ordered_columns = canonical_column_order(list(arrow_data.column_names))
+        return arrow_data.select(ordered_columns)
+
+    def _apply_sorting(
+        self,
+        arrow_data: pa.Table,
+        primary_keys: list[str] | None,
+    ) -> pa.Table:
+        """Sort table by primary keys for deterministic writes."""
         if primary_keys:
             valid_keys = [pk for pk in primary_keys if pk in arrow_data.schema.names]
             if valid_keys:
-                arrow_data = arrow_data.sort_by(
-                    [(pk, "ascending") for pk in valid_keys]
-                )
-
+                return arrow_data.sort_by([(pk, "ascending") for pk in valid_keys])
         return arrow_data
 
     def _convert_column_to_string(self, col: pa.Array) -> pa.Array:

@@ -57,18 +57,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     # Instance variable to cache parsed XML root between validation and extraction
     _cached_xml_root: ET.Element | None
 
-    # Date validation patterns for ISO date formats (YYYY, YYYY-MM, YYYY-MM-DD).
-    # Used to filter out invalid dates like "2024-13-99" or "n/a" before
-    # they propagate to _compute_publication_date.
-    _VALID_DATE_PATTERNS: tuple[re.Pattern[str], ...] = (
-        # Full date: YYYY-MM-DD (with valid month 01-12 and day 01-31)
-        re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$"),
-        # Partial month: YYYY-MM (with valid month 01-12)
-        re.compile(r"^\d{4}-(0[1-9]|1[0-2])$"),
-        # Partial year: YYYY
-        re.compile(r"^\d{4}$"),
-    )
-
     def __init__(
         self,
         provider: str = "pubmed",
@@ -140,28 +128,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 pmid=record.get("pmid"),
             )
             raise ValueError(f"XML parse error: {e}") from e
-
-    def _is_valid_date_format(self, date_str: str | None) -> bool:
-        """Validate that date string matches expected ISO format.
-
-        Accepts:
-        - YYYY-MM-DD (full date with valid month 01-12 and day 01-31)
-        - YYYY-MM (partial with valid month 01-12)
-        - YYYY (year only)
-
-        This validation ensures that invalid dates like "2024-13-99", "n/a",
-        or malformed strings don't propagate to _compute_publication_date,
-        which would produce inconsistent results.
-
-        Args:
-            date_str: Date string to validate.
-
-        Returns:
-            True if date format is valid, False otherwise.
-        """
-        if not date_str:
-            return False
-        return any(pattern.match(date_str) for pattern in self._VALID_DATE_PATTERNS)
 
     def _extract_medline_metadata(
         self,
@@ -264,9 +230,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "pmc_id": normalize_pmc_id(IdentifierExtractor.extract_pmc_id(root)),
         }
 
-    def _extract_author_metadata(
-        self, article: ET.Element
-    ) -> dict[str, Any]:
+    def _extract_author_metadata(self, article: ET.Element) -> dict[str, Any]:
         """Extract all author-related metadata including affiliations."""
         author_extractor = AuthorExtractor()
         raw_author_data = author_extractor.extract(article) or []
@@ -340,14 +304,18 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         }
 
         # 2. Content & Authors
-        data.update({
-            "title": get_text(article.find(".//ArticleTitle")),
-            "abstract": self._data_normalizer.strip_html_tags(
-                AbstractExtractor.extract_abstract(article)
-            ),
-            "abstract_structured": AbstractExtractor.is_abstract_structured(article),
-            "language": get_text(article.find(".//Language")),
-        })
+        data.update(
+            {
+                "title": get_text(article.find(".//ArticleTitle")),
+                "abstract": self._data_normalizer.strip_html_tags(
+                    AbstractExtractor.extract_abstract(article)
+                ),
+                "abstract_structured": AbstractExtractor.is_abstract_structured(
+                    article
+                ),
+                "language": get_text(article.find(".//Language")),
+            }
+        )
         data.update(self._extract_author_metadata(article))
 
         # 3. Journal & Dates
@@ -360,18 +328,20 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         data.update(self._extract_counts(article, pubmed_data))
 
         # 5. System fields
-        data.update({
-            "_source": "pubmed",
-            "publication_type": "PUBLICATION",
-            "citations_received": None,
-            "is_oa": None,
-            "_lookup_method": cast("dict[str, Any]", record).get(
-                "_lookup_method", "pmid"
-            ),
-            "_original_id": cast("dict[str, Any]", record).get("_original_id"),
-            "_dq_warn": False,
-            "_dq_error": False,
-        })
+        data.update(
+            {
+                "_source": "pubmed",
+                "publication_type": "PUBLICATION",
+                "citations_received": None,
+                "is_oa": None,
+                "_lookup_method": cast("dict[str, Any]", record).get(
+                    "_lookup_method", "pmid"
+                ),
+                "_original_id": cast("dict[str, Any]", record).get("_original_id"),
+                "_dq_warn": False,
+                "_dq_error": False,
+            }
+        )
 
         return data
 
@@ -660,8 +630,12 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         # Validate date formats before passing to _compute_publication_date.
         # Invalid dates (e.g., "2024-13-99", "n/a") are set to None to ensure
         # _compute_publication_date falls back to the next priority source.
-        pub_date = raw_pub_date if self._is_valid_date_format(raw_pub_date) else None
-        epub_date = raw_epub_date if self._is_valid_date_format(raw_epub_date) else None
+        pub_date = (
+            raw_pub_date if DateExtractor.is_valid_date_format(raw_pub_date) else None
+        )
+        epub_date = (
+            raw_epub_date if DateExtractor.is_valid_date_format(raw_epub_date) else None
+        )
 
         publication_date = self._compute_publication_date(
             epub_date, pub_date, validated_year

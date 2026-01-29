@@ -332,9 +332,7 @@ def _load_and_merge_data_schema(
             config["column_groups"] = column_groups
 
 
-def _load_and_merge_source_config(
-    config: dict[str, Any], config_path: Path
-) -> None:
+def _load_and_merge_source_config(config: dict[str, Any], config_path: Path) -> None:
     """Load and merge source configuration."""
     if source_file := config.get("source_file"):
         source_path = config_path.parent / source_file
