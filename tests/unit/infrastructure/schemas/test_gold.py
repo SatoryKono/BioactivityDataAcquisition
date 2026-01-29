@@ -359,12 +359,10 @@ class TestGoldSchemaValidation:
             "affiliations": '["University A", "University B"]',
             "structured_affiliations": '[{"text": "University A", "ror_id": null}]',
             "authors_with_affiliations": '[{"name_hash": "abc123", "initials": "AO", "affiliations": []}]',
-            "pub_date": "2024-03-15",
             "pub_month": 3,
             "pub_day": 15,
             "publication_date": "2024-03-15",
             "year": 2024,
-            "publication_year": 2024,
             # Note: accepted_date, received_date, revised_date, epub_date excluded per design
             "date_completed": "2024-04-01",
             "date_revised": "2024-03-20",
