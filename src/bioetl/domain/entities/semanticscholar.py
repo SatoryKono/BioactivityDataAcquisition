@@ -93,7 +93,6 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     publication_types: str | None = None
 
     # Author identifiers (for author-level analytics and disambiguation)
-    author_ids: str | None = None  # JSON array of author IDs
     author_s2_ids: str | None = None  # JSON array of S2 author IDs (40-char hex)
     author_orcids: str | None = None  # JSON array of ORCID identifiers
     author_h_indices: str | None = None  # JSON array of h-index values
