@@ -53,7 +53,15 @@ _PUBLICATION_IDS = FieldGroup(
 
 _CORE_METADATA = FieldGroup(
     name="core_metadata",
-    fields=simple_fields("title", "authors", "abstract", "doc_type"),
+    fields=simple_fields("title", "authors", "abstract"),
+)
+
+_PUBLICATION_TYPE = FieldGroup(
+    name="publication_type",
+    fields=(
+        # Unified field: doc_type → publication_type
+        FieldSpec("doc_type", target="publication_type"),
+    ),
 )
 
 _JOURNAL_INFO = FieldGroup(
@@ -63,10 +71,12 @@ _JOURNAL_INFO = FieldGroup(
             "journal",
             "volume",
             "issue",
-            "first_page",
-            "last_page",
         ),
-        *int_fields("year"),
+        # Unified pagination fields
+        FieldSpec("first_page", target="page_first"),
+        FieldSpec("last_page", target="page_last"),
+        # Unified temporal field
+        FieldSpec("year", target="publication_year", converter=int),
     ),
 )
 
@@ -79,6 +89,7 @@ _SOURCE_INFO = FieldGroup(
 _PUBLICATION_GROUPS: tuple[FieldGroup, ...] = (
     _PUBLICATION_IDS,
     _CORE_METADATA,
+    _PUBLICATION_TYPE,
     _JOURNAL_INFO,
     _SOURCE_INFO,
 )
@@ -163,9 +174,10 @@ class PublicationTransformer(BaseChemblTransformer):
         data["doi"] = str(doi) if doi else None
 
         # Validate year using PublicationYear Value Object
-        year_vo = PublicationYear.from_raw(data.get("year"))
+        # Note: field_specs already maps year → publication_year
+        year_vo = PublicationYear.from_raw(data.get("publication_year"))
         validated_year = year_vo.value if year_vo else None
-        data["year"] = validated_year
+        data["publication_year"] = validated_year
 
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON

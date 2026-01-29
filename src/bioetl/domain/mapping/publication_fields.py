@@ -131,6 +131,7 @@ PUBLICATION_FIELD_MAPPING: Final[dict[ProviderName, dict[str, str]]] = {
 # UNIFIED → PROVIDER MAPPINGS (Reverse mapping for backward compatibility)
 # ============================================================================
 
+
 def _build_reverse_mapping() -> dict[ProviderName, dict[str, str]]:
     """Build reverse mapping: Provider → Unified → Original."""
     reverse: dict[ProviderName, dict[str, str]] = {}
@@ -139,12 +140,15 @@ def _build_reverse_mapping() -> dict[ProviderName, dict[str, str]]:
     return reverse
 
 
-UNIFIED_TO_PROVIDER: Final[dict[ProviderName, dict[str, str]]] = _build_reverse_mapping()
+UNIFIED_TO_PROVIDER: Final[dict[ProviderName, dict[str, str]]] = (
+    _build_reverse_mapping()
+)
 
 
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
+
 
 def get_unified_name(provider: ProviderName, field_name: str) -> str:
     """Get unified field name for a provider-specific field.
@@ -184,6 +188,38 @@ def get_provider_name(provider: ProviderName, unified_field: str) -> str:
     """
     mapping = UNIFIED_TO_PROVIDER.get(provider, {})
     return mapping.get(unified_field, unified_field)
+
+
+def apply_field_mapping(
+    record: dict[str, any],
+    provider: ProviderName,
+) -> dict[str, any]:
+    """Apply field name mapping to a record (provider → unified names).
+
+    Renames fields according to PUBLICATION_FIELD_MAPPING for the given provider.
+    Fields not in mapping are preserved as-is.
+
+    Args:
+        record: Record dictionary with provider-specific field names.
+        provider: Provider name.
+
+    Returns:
+        New dictionary with unified field names.
+
+    Example:
+        >>> record = {"doc_type": "article", "year": 2020, "title": "Test"}
+        >>> apply_field_mapping(record, "chembl")
+        {"publication_type": "article", "publication_year": 2020, "title": "Test"}
+    """
+    mapping = PUBLICATION_FIELD_MAPPING.get(provider, {})
+    result = {}
+
+    for key, value in record.items():
+        # Map to unified name if mapping exists, otherwise keep original
+        unified_key = mapping.get(key, key)
+        result[unified_key] = value
+
+    return result
 
 
 # ============================================================================

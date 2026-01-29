@@ -754,11 +754,11 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publisher", pa.string()),
         pa.field("reference_count", pa.int64()),
         pa.field("short_container_title", pa.list_(pa.string())),
-        pa.field("subjects", pa.list_(pa.string())),
-        pa.field("title", pa.string()),
         pa.field(
             "source_type", pa.string()
         ),  # Raw CrossRef type (journal-article, etc.)
+        pa.field("subjects", pa.list_(pa.string())),
+        pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
         pa.field("year", pa.int64()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
@@ -840,10 +840,10 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("reference_count", pa.int64()),
         # ROR IDs (may be empty if not returned by Works API)
         pa.field("ror_ids", pa.string()),  # JSON array of ROR URLs
+        pa.field("source_type", pa.string()),  # Raw OpenAlex type (article, book, etc.)
         pa.field("title", pa.string()),
         # Topics (hierarchical 4-level classification - replaces deprecated concepts)
         pa.field("topics", pa.string()),  # JSON array
-        pa.field("source_type", pa.string()),  # Raw OpenAlex type (article, book, etc.)
         # Bibliographic info (from biblio object)
         pa.field("volume", pa.string()),
         pa.field("year", pa.int64()),

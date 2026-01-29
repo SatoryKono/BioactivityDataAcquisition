@@ -26,7 +26,7 @@ column_groups:
 
   - name: abstract
     fields:
-      - tldr
+      - abstract
 
   - name: authors
     fields:
@@ -36,7 +36,7 @@ column_groups:
 
   - name: affiliations
     fields:
-      - affiliations
+      - affiliation_list
 
   - name: journal
     fields:
@@ -44,7 +44,7 @@ column_groups:
 
   - name: year
     fields:
-      - year
+      - publication_year
 
   - name: dates
     fields:
@@ -54,20 +54,20 @@ column_groups:
     fields:
       - volume
       - issue
-      - first_page
-      - last_page
-      - pages
+      - page_first
+      - page_last
+      - page_range
 
   - name: citations
     fields:
-      - citation_count
-      - reference_count
+      - citations_received
+      - citations_made
       - influential_citation_count
       - citation_contexts
 
   - name: subjects
     fields:
-      - fields_of_study
+      - subject_fields
       - publication_types
 
   - name: open_access
@@ -78,6 +78,18 @@ column_groups:
 
   - name: dq
     pattern: "^_dq_"
+
+# Field aliases for backward compatibility
+field_aliases:
+  tldr: abstract
+  affiliations: affiliation_list
+  year: publication_year
+  first_page: page_first
+  last_page: page_last
+  pages: page_range
+  citation_count: citations_received
+  reference_count: citations_made
+  fields_of_study: subject_fields
 
 # Layer-specific column filtering
 silver:

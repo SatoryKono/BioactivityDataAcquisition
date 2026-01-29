@@ -104,6 +104,20 @@ column_groups:
   - name: dq
     pattern: "^_dq_"
 
+# Field aliases for backward compatibility
+field_aliases:
+  affiliations: affiliation_list
+  structured_affiliations: affiliation_structured
+  journal_title: journal_name
+  journal_abbrev: journal_name_short
+  year: publication_year
+  first_page: page_first
+  last_page: page_last
+  pages: page_range
+  reference_count: citations_made
+  mesh_terms: subject_mesh
+  keywords: subject_keywords
+
 # Layer-specific column filtering
 silver:
   include_groups:
