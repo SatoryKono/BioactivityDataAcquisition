@@ -30,7 +30,7 @@ column_groups:
   - name: authors
     fields:
       - authors
-      - author_ids
+      - author_openalex_ids
       - author_orcids
 
   - name: affiliations

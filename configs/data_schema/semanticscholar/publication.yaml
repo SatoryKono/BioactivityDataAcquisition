@@ -30,7 +30,6 @@ column_groups:
 
   - name: authors
     fields:
-      - author_ids
       - author_s2_ids
       - author_orcids
       - author_h_indices

@@ -174,7 +174,7 @@ class TestFieldToGroupMapping:
             "authors",
             "affiliations",
             "author_count",
-            "author_ids",
+            "author_openalex_ids",
             "author_orcids",
         }
         actual_fields = {
@@ -590,7 +590,7 @@ class TestFieldMappingCompleteness:
             "title",
             "volume",
             "affiliations",
-            "author_ids",
+            "author_openalex_ids",
             "author_orcids",
             "authors",
             "institution_ids",
@@ -687,7 +687,7 @@ class TestFieldMappingCompleteness:
             "venue",
             "volume",
             "affiliations",
-            "author_ids",
+            "author_openalex_ids",
             "author_orcids",
             "author_s2_ids",
             "tldr",
