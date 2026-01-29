@@ -237,14 +237,6 @@ class StoragePort(Protocol):
         """Clear Silver layer data for a specific table.
 
         Clears both Delta tables and CSV exports (if configured).
-        Should only be called for rebuild/backfill runs, NOT for incremental.
-
-        Args:
-            table_name: The name of the table to clear.
-            dry_run: If True, only count what would be deleted.
-
-        Returns:
-            Count of cleared items (tables + files).
         """
         ...
 
@@ -252,14 +244,6 @@ class StoragePort(Protocol):
         """Clear Gold layer data for a specific table.
 
         Clears both Delta tables and CSV exports (if configured).
-        Should only be called for rebuild/backfill runs, NOT for incremental.
-
-        Args:
-            table_name: The name of the table to clear.
-            dry_run: If True, only count what would be deleted.
-
-        Returns:
-            Count of cleared items (tables + files).
         """
         ...
 
@@ -268,48 +252,15 @@ class StoragePort(Protocol):
         ...
 
     async def health_check(self) -> HealthStatus:
-        """Check storage accessibility and basic write capability.
-
-        Validates:
-        - Bronze, Silver, Gold directories exist or can be created
-        - Directories are writable
-
-        Returns:
-            HealthStatus indicating storage health:
-            - HEALTHY: All layers accessible and writable
-            - DEGRADED: Partial access (some layers unavailable)
-            - UNHEALTHY: Storage completely unavailable
-        """
+        """Check storage accessibility and basic write capability."""
         ...
 
     async def clear_csv(self, table_name: str | None = None) -> int:
-        """Clear CSV export files for Silver and Gold layers.
-
-        Should be called at the start of a pipeline run to ensure
-        fresh CSV exports without duplicates from previous runs.
-
-        Args:
-            table_name: If provided, only clear CSV for this table.
-                       If None, clear all CSV files.
-
-        Returns:
-            Total number of files deleted.
-        """
+        """Clear CSV export files for Silver and Gold layers."""
         ...
 
     async def clear_delta(self, table_name: str | None = None) -> int:
-        """Clear Delta tables for Silver and Gold layers.
-
-        Should be called at the start of a pipeline run to ensure
-        fresh data without duplicates from previous runs.
-
-        Args:
-            table_name: If provided, only clear Delta table for this table.
-                       If None, clear all Delta tables.
-
-        Returns:
-            Total number of tables cleared.
-        """
+        """Clear Delta tables for Silver and Gold layers."""
         ...
 
     async def vacuum(
@@ -318,22 +269,7 @@ class StoragePort(Protocol):
         retention_hours: int = 168,
         dry_run: bool = False,
     ) -> int:
-        """Vacuum Delta table to remove old file versions.
-
-        Removes files no longer referenced by the Delta log and older
-        than retention period. Uses delta-rs VACUUM operation.
-
-        Args:
-            table_name: Table name in format "provider.entity" (e.g., "chembl.activity")
-            retention_hours: Minimum age of files to remove (default 168h = 7 days)
-            dry_run: If True, only report what would be removed
-
-        Returns:
-            Number of files removed (or would be removed if dry_run)
-
-        Raises:
-            StorageError: If vacuum operation fails
-        """
+        """Vacuum Delta table to remove old file versions."""
         ...
 
     async def archive(
@@ -342,21 +278,7 @@ class StoragePort(Protocol):
         target_path: str,
         remove_source: bool = False,
     ) -> int:
-        """Archive Delta table to cold storage.
-
-        Copies table data to archive location. Optionally removes source.
-
-        Args:
-            table_name: Table name to archive
-            target_path: Destination path for archive
-            remove_source: If True, remove source after successful copy
-
-        Returns:
-            Number of files archived
-
-        Raises:
-            StorageError: If archive operation fails
-        """
+        """Archive Delta table to cold storage."""
         ...
 
     def preview_cleanup(
@@ -364,11 +286,7 @@ class StoragePort(Protocol):
         silver_table: str,
         gold_table: str | None = None,
     ) -> dict[str, Any]:
-        """Preview what would be cleared without actual deletion.
-
-        Returns:
-            Dict with layer info (path, file_count, exists) and total_files.
-        """
+        """Preview what would be cleared without actual deletion."""
         ...
 
     async def optimize(
@@ -380,11 +298,6 @@ class StoragePort(Protocol):
         """Optimize storage for a specific table/entity.
 
         Unifies Vacuum (Delta) and file cleanup (Bronze).
-
-        Args:
-            table_name: Target identifier (e.g., 'provider.entity').
-            retention_hours: Retention period in hours.
-            dry_run: If True, only log what would be done.
         """
         ...
 
@@ -393,13 +306,5 @@ class StoragePort(Protocol):
         cutoff_date: datetime,
         dry_run: bool = False,
     ) -> dict[str, int]:
-        """Remove Bronze files older than cutoff date (RULES.md §2.1 retention).
-
-        Args:
-            cutoff_date: Files older than this date will be removed.
-            dry_run: If True, only count what would be removed.
-
-        Returns:
-            Dict with cleanup stats (files_removed, bytes_freed, directories_removed).
-        """
+        """Remove Bronze files older than cutoff date (RULES.md §2.1 retention)."""
         ...
