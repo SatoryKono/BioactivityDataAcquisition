@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 import orjson
 
 from bioetl.application.composite.column_orderer import ColumnOrderer
+from bioetl.domain.composite.config import DataSchemaConfig
 from bioetl.domain.exceptions import SchemaViolationError
 from bioetl.domain.locking import LockNotHeldError
 
@@ -58,6 +59,7 @@ class BatchWriter:
         batch_metrics: BatchMetricsRecorder,
         tracer: TracingPort | None = None,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
+        data_schema_config: DataSchemaConfig | None = None,
     ) -> None:
         """Initialize batch writer.
 
@@ -72,6 +74,7 @@ class BatchWriter:
             lock_validator: Async callable that validates lock ownership.
                 Returns True if lock is still held, False otherwise.
                 If None, lock validation is skipped (for tests).
+            data_schema_config: Optional layer-specific column configuration.
 
         """
         self._storage = storage
@@ -90,6 +93,7 @@ class BatchWriter:
         self._table_config = config.table_config
         self._gold_schema = config.gold_schema
         self._column_groups = config.column_groups
+        self._data_schema = data_schema_config
         self._column_orderer = (
             ColumnOrderer(self._context.logger, column_groups=self._column_groups)
             if self._column_groups
@@ -296,11 +300,19 @@ class BatchWriter:
             for r in records:
                 r["_source_batch_id"] = batch_id_str
 
-            column_order = self._get_column_order(
+            available_cols = (
                 list(self._silver_schema.names)
                 if self._silver_schema is not None
                 else self._collect_record_columns(records)
             )
+            column_order, rename_map = self._resolve_layer_columns(
+                "silver", available_cols
+            )
+
+            # Apply renames to records if specified
+            if rename_map:
+                records = self._apply_renames_to_records(records, rename_map)
+
             silver_result = await self._storage.write_silver(
                 table_name=self._silver_table_name,
                 records=records,
@@ -357,16 +369,25 @@ class BatchWriter:
                     }
                     for r in records
                 ]
-            column_order = self._get_column_order(
+            available_cols = (
                 list(schema_columns)
                 if schema_columns
                 else self._collect_record_columns(records)
             )
 
-            # Validate Gold records
+            # Validate Gold records (before renames)
             result = self._gold_validator.validate(records)
             if not result.valid:
                 raise SchemaViolationError("gold", result.errors)
+
+            # Resolve column order and renames for Gold layer
+            column_order, rename_map = self._resolve_layer_columns(
+                "gold", available_cols
+            )
+
+            # Apply renames to records if specified
+            if rename_map:
+                records = self._apply_renames_to_records(records, rename_map)
 
             # Pass ingestion_ts, run_id, and silver_refs for audit and lineage (ADR-014, REQ-LINEAGE-002)
             await self._storage.write_gold(
@@ -425,6 +446,73 @@ class BatchWriter:
         if not self._column_orderer:
             return None
         return self._column_orderer.order_column_names(columns)
+
+    def _apply_renames_to_records(
+        self, records: list[dict[str, Any]], rename_map: dict[str, str]
+    ) -> list[dict[str, Any]]:
+        """Apply column renames to records.
+
+        Args:
+            records: List of record dictionaries.
+            rename_map: Mapping of old_name -> new_name.
+
+        Returns:
+            List of records with renamed keys.
+        """
+        if not rename_map:
+            return records
+
+        renamed_records = []
+        for record in records:
+            renamed = {}
+            for key, value in record.items():
+                new_key = rename_map.get(key, key)
+                renamed[new_key] = value
+            renamed_records.append(renamed)
+        return renamed_records
+
+    def _resolve_layer_columns(
+        self, layer: Literal["silver", "gold"], available_columns: Sequence[str]
+    ) -> tuple[list[str] | None, dict[str, str]]:
+        """Resolve column order and renames for a specific medallion layer.
+
+        Resolution order:
+        1. If data_schema has layer-specific config → apply filtering + renames
+        2. Otherwise → use shared column_groups via ColumnOrderer
+
+        Args:
+            layer: Layer name ("silver" or "gold").
+            available_columns: Available columns in the DataFrame/records.
+
+        Returns:
+            Tuple of (ordered_columns, rename_map).
+            - ordered_columns: Ordered list of columns, or None if no configuration.
+            - rename_map: Dict of old_name -> new_name for renaming.
+        """
+        if not self._data_schema:
+            # Fallback to shared column_groups
+            return self._get_column_order(available_columns), {}
+
+        layer_config = getattr(self._data_schema, layer, None)
+        if not layer_config:
+            # No layer-specific config → use shared groups
+            return self._get_column_order(available_columns), {}
+
+        # Apply layer-specific filtering
+        if not self._column_orderer:
+            # No orderer → can't filter by groups, use explicit columns only
+            if layer_config.columns:
+                return (
+                    [c for c in layer_config.columns if c in available_columns],
+                    layer_config.rename_fields,
+                )
+            return None, {}
+
+        # Get filtered and ordered columns (with renames applied to column names)
+        ordered_columns = self._column_orderer.filter_by_layer_config(
+            available_columns, layer_config
+        )
+        return ordered_columns, layer_config.rename_fields
 
     def log_and_track_write_error(
         self, layer: str, error: Exception, batch_id: BatchID

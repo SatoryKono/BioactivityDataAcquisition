@@ -271,6 +271,10 @@ class TestDomainComplexity:
             # Composite pipeline domain models (ADR-026)
             "DQOverrideConfig": 10,  # CC=9 - DQ override validation with threshold checks
             "from_dict": 8,  # CC=6 - Dictionary parsing with type conversions
+            # Domain config immutability enforcement
+            "_ensure_immutability": 7,  # CC=6 - Config immutability with nested type checks
+            # Domain DataSchemaConfig/LayerColumnConfig validation
+            "LayerColumnConfig": 10,  # CC=8 - LayerColumnConfig __post_init__ with mutual exclusivity + type coercion
         }
 
         violations = []

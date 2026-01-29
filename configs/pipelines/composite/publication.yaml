@@ -153,10 +153,9 @@ composite:
         - semanticscholar
       reference_count:
         - crossref       # CrossRef has most complete reference data
+        - openalex       # OpenAlex (unified from referenced_works_count)
         - pubmed
         - semanticscholar
-      referenced_works_count:
-        - openalex       # OpenAlex-specific field (fallback to reference_count)
       influential_citation_count:
         - semanticscholar  # S2-only field
 
@@ -243,7 +242,7 @@ composite:
     # -------------------------------------------------------------------------
     # Defines the order of columns in the merged output.
     # Columns are grouped semantically, with seed columns first within each group.
-    column_groups_file: ../../../config/data_schema/composite/publication.yaml
+    column_groups_file: ../data_schema/composite/publication.yaml
     output:
       silver: data/output/silver/composite/publication
       gold: data/output/gold/composite/publication
@@ -292,12 +291,6 @@ composite:
         nullable: true
         min_value: 0.0
         description: "OpenAlex Field-Weighted Citation Impact (non-negative)"
-
-      referenced_works_count:
-        type: integer
-        nullable: true
-        min_value: 0
-        description: "OpenAlex referenced works count (non-negative)"
 
       # === JSON Array Fields (schema validation) ===
       author_orcids:

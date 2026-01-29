@@ -35,11 +35,13 @@ __all__ = [
     "ColumnGroupConfig",
     "CompositeConfig",
     "CompositeDQConfig",
+    "DataSchemaConfig",
     "DQOverrideConfig",
     "DependencyConfig",
     "EnricherCardinality",
     "EnricherConfig",
     "ExecutionConfig",
+    "LayerColumnConfig",
     "LineageConfig",
     "MergeConfig",
     "SeedConfig",
@@ -236,6 +238,181 @@ class EnricherConfig:
     def is_many_to_one(self) -> bool:
         """Check if this enricher has 1:M cardinality."""
         return self.cardinality == EnricherCardinality.MANY_TO_ONE
+
+
+@dataclass(frozen=True, slots=True)
+class LayerColumnConfig:
+    """Column configuration for a single medallion layer (Silver or Gold).
+
+    Supports three modes:
+    1. Explicit column list (columns parameter)
+    2. Filtering existing groups (include_groups/exclude_fields)
+    3. Layer-specific column groups (column_groups parameter)
+
+    Attributes:
+        columns: Explicit list of columns for this layer.
+            Takes precedence over other configuration.
+        column_groups: Layer-specific column groups.
+            If provided, overrides shared column_groups for this layer.
+        include_groups: Filter shared column_groups by group names.
+            Only groups with names in this list are included.
+        exclude_fields: Fields to exclude after group/pattern matching.
+            Supports glob patterns (e.g., "_dq_*", "*_internal").
+        rename_fields: Mapping of old_name -> new_name for renaming columns.
+            Applied after filtering but before ordering.
+
+            IMPORTANT: For Gold layer, use column names AFTER silver.rename_fields.
+            Gold reads from Silver, so renames must reference Silver output schema.
+
+            Example with rename chain:
+                silver:
+                  rename_fields: {"document_chembl_id": "chembl_doc_id"}
+                gold:
+                  rename_fields: {"chembl_doc_id": "publication_id"}
+                  # ↑ Uses Silver output name, not original!
+
+    Example:
+        >>> # Explicit columns for Gold layer
+        >>> gold_config = LayerColumnConfig(
+        ...     columns=("entity_id", "doi", "title", "year"),
+        ... )
+        >>> # Filter by groups with renaming
+        >>> gold_config = LayerColumnConfig(
+        ...     include_groups=("system", "identifiers", "title", "year"),
+        ...     exclude_fields=("abstract", "_dq_*"),
+        ...     rename_fields={"_run_id": "pipeline_run_id", "pmid": "pubmed_id"},
+        ... )
+    """
+
+    columns: tuple[str, ...] | None = None
+    column_groups: tuple[ColumnGroupConfig, ...] | None = None
+    include_groups: tuple[str, ...] | None = None
+    exclude_fields: tuple[str, ...] | None = None
+    rename_fields: dict[str, str] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        """Validate and convert types."""
+        if self.columns is not None and isinstance(self.columns, list):
+            object.__setattr__(self, "columns", tuple(self.columns))
+        if self.include_groups is not None and isinstance(self.include_groups, list):
+            object.__setattr__(self, "include_groups", tuple(self.include_groups))
+        if self.exclude_fields is not None and isinstance(self.exclude_fields, list):
+            object.__setattr__(self, "exclude_fields", tuple(self.exclude_fields))
+        if self.column_groups is not None and isinstance(self.column_groups, list):
+            object.__setattr__(
+                self,
+                "column_groups",
+                tuple(
+                    ColumnGroupConfig(**g) if isinstance(g, dict) else g
+                    for g in self.column_groups
+                ),
+            )
+        # Ensure rename_fields is a dict (not required, but validate if present)
+        if not isinstance(self.rename_fields, dict):
+            object.__setattr__(self, "rename_fields", dict(self.rename_fields))
+        self._validate()
+
+    def _validate(self) -> None:
+        """Validate configuration invariants."""
+        # At most one of: columns, include_groups, column_groups
+        modes = sum(
+            [
+                self.columns is not None,
+                self.include_groups is not None,
+                self.column_groups is not None,
+            ]
+        )
+        if modes > 1:
+            raise ValueError(
+                "LayerColumnConfig: only one of columns/include_groups/column_groups allowed"
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class DataSchemaConfig:
+    """Multi-layer column schema configuration.
+
+    Defines column ordering and filtering for different medallion layers.
+    Supports backward compatibility with shared column_groups.
+
+    Attributes:
+        column_groups: Shared column groups for all layers (legacy/default).
+        silver: Silver layer-specific column configuration.
+        gold: Gold layer-specific column configuration.
+
+    Resolution order:
+    1. If layer.columns is set → use explicit list
+    2. If layer.include_groups is set → filter shared column_groups
+    3. If layer.column_groups is set → use layer-specific groups
+    4. Otherwise → use shared column_groups
+
+    Example:
+        >>> # Backward compatible (shared groups)
+        >>> config = DataSchemaConfig(
+        ...     column_groups=(ColumnGroupConfig(...), ...),
+        ... )
+        >>> # Layer-specific filtering
+        >>> config = DataSchemaConfig(
+        ...     column_groups=(ColumnGroupConfig(...), ...),
+        ...     silver=LayerColumnConfig(
+        ...         include_groups=("system", "identifiers", "title", "abstract"),
+        ...     ),
+        ...     gold=LayerColumnConfig(
+        ...         include_groups=("system", "identifiers", "title"),
+        ...         exclude_fields=("_dq_*", "_composite_*"),
+        ...     ),
+        ... )
+    """
+
+    column_groups: tuple[ColumnGroupConfig, ...] = ()
+    silver: LayerColumnConfig | None = None
+    gold: LayerColumnConfig | None = None
+
+    def __post_init__(self) -> None:
+        """Validate and convert types."""
+        if isinstance(self.column_groups, list):
+            object.__setattr__(
+                self,
+                "column_groups",
+                tuple(
+                    ColumnGroupConfig(**g) if isinstance(g, dict) else g
+                    for g in self.column_groups
+                ),
+            )
+        if isinstance(self.silver, dict):
+            object.__setattr__(self, "silver", LayerColumnConfig(**self.silver))
+        if isinstance(self.gold, dict):
+            object.__setattr__(self, "gold", LayerColumnConfig(**self.gold))
+
+    def get_layer_groups(self, layer: str) -> tuple[ColumnGroupConfig, ...]:
+        """Get effective column groups for a layer.
+
+        Args:
+            layer: Layer name ("silver" or "gold").
+
+        Returns:
+            Tuple of ColumnGroupConfig for the layer.
+            Returns layer-specific groups if defined, otherwise shared groups.
+        """
+        layer_config = getattr(self, layer, None)
+        if layer_config and layer_config.column_groups:
+            return layer_config.column_groups
+        return self.column_groups
+
+    def should_include_group(self, layer: str, group_name: str) -> bool:
+        """Check if a group should be included for a layer.
+
+        Args:
+            layer: Layer name ("silver" or "gold").
+            group_name: Name of the column group.
+
+        Returns:
+            True if group should be included, False otherwise.
+        """
+        layer_config = getattr(self, layer, None)
+        if not layer_config or not layer_config.include_groups:
+            return True  # No filter → include all groups
+        return group_name in layer_config.include_groups
 
 
 @dataclass(frozen=True, slots=True)

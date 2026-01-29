@@ -243,7 +243,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "primary_topic": json.dumps(primary_topic) if primary_topic else None,
             # Grants/funding information (serialized to JSON string)
             "grants": self.serialize_json_list(grants) if grants else None,
-            "mesh": mesh_terms,
+            "mesh_terms": mesh_terms,
             "keywords": keywords,
             "language": rec.get("language"),
             # Bibliographic info (from biblio object)

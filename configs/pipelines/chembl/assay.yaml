@@ -1,4 +1,4 @@
-column_groups_file: ../../../config/data_schema/chembl/assay.yaml
+column_groups_file: ../../data_schema/chembl/assay.yaml
 # configs/pipelines/chembl/assay.yaml
 # =============================================================================
 # ChEMBL Assay Pipeline Configuration

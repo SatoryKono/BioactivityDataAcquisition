@@ -156,7 +156,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     )
 
     # === Classification Fields (extracted by transformer) ===
-    mesh: Series[str] = pa.Field(
+    mesh_terms: Series[str] = pa.Field(
         nullable=True,
         description="MeSH terms (JSON array of descriptor names)",
     )

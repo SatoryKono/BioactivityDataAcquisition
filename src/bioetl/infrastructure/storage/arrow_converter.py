@@ -107,7 +107,7 @@ class ArrowDataConverter:
 
         # Check if schema needs sanitization (contains null types)
         schema_str = str(arrow_data.schema).lower()
-        if 'null' in schema_str:
+        if "null" in schema_str:
             arrow_data = self._sanitize_null_columns(arrow_data)
 
         # Sort by primary keys for deterministic writes
@@ -115,7 +115,7 @@ class ArrowDataConverter:
             valid_keys = [pk for pk in primary_keys if pk in arrow_data.schema.names]
             if valid_keys:
                 arrow_data = arrow_data.sort_by(
-                    [(pk, 'ascending') for pk in valid_keys]
+                    [(pk, "ascending") for pk in valid_keys]
                 )
 
         return arrow_data

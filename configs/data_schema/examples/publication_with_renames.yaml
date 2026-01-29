@@ -1,0 +1,86 @@
+# Example: Layer-specific column configuration with rename chains
+# This demonstrates how to use rename_fields across Silver and Gold layers.
+#
+# IMPORTANT: Gold rename_fields MUST use column names AFTER silver.rename_fields!
+# Gold reads from Silver, so it sees Silver's output schema, not original names.
+
+column_groups:
+  - name: system
+    fields:
+      - entity_id
+      - content_hash
+      - _run_id
+      - _run_type
+      - _source_batch_id
+      - _ingestion_ts
+
+  - name: identifiers
+    fields:
+      - doi
+      - pmid
+      - pmc_id
+
+  - name: title
+    fields:
+      - title
+
+  - name: abstract
+    fields:
+      - abstract
+
+  - name: dq
+    pattern: "^_dq_"
+
+# Silver layer: Optionally rename to standardized internal names
+silver:
+  include_groups:
+    - system
+    - identifiers
+    - title
+    - abstract
+    - dq
+  # Optional: Standardize internal names in Silver
+  rename_fields:
+    entity_id: document_id         # Rename for internal consistency
+    content_hash: content_version  # More descriptive name
+
+# Gold layer: Rename to user-friendly names
+# IMPORTANT: Use column names AFTER silver.rename_fields!
+gold:
+  include_groups:
+    - system
+    - identifiers
+    - title
+    - abstract
+  exclude_fields:
+    - _dq_*
+    - _source_batch_id
+  # Rename from Silver output schema (not original names!)
+  rename_fields:
+    # System fields (using Silver output names!)
+    document_id: publication_id          # Silver renamed entity_id → document_id
+    content_version: version_hash        # Silver renamed content_hash → content_version
+    _run_id: pipeline_run_id             # Original name (not renamed in Silver)
+    _run_type: pipeline_run_type         # Original name
+    _ingestion_ts: ingestion_timestamp   # Original name
+    # Identifiers (original names, not renamed in Silver)
+    pmid: pubmed_id
+    pmc_id: pubmed_central_id
+    doi: digital_object_identifier
+
+# Rename chain visualization:
+# ┌──────────────────┬───────────────────┬─────────────────────────┐
+# │ Original         │ Silver            │ Gold                    │
+# ├──────────────────┼───────────────────┼─────────────────────────┤
+# │ entity_id        │ document_id       │ publication_id          │
+# │ content_hash     │ content_version   │ version_hash            │
+# │ _run_id          │ _run_id           │ pipeline_run_id         │
+# │ pmid             │ pmid              │ pubmed_id               │
+# │ doi              │ doi               │ digital_object_identifier│
+# │ title            │ title             │ title                   │
+# └──────────────────┴───────────────────┴─────────────────────────┘
+
+# Result:
+# Silver columns: document_id, content_version, _run_id, doi, pmid, title, abstract, _dq_*
+# Gold columns: publication_id, version_hash, pipeline_run_id,
+#               digital_object_identifier, pubmed_id, title, abstract

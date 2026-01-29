@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.14 | Last updated: 2026-01-27*
+*Synced with RULES.md v5.15 | Last updated: 2026-01-27*
 
 > **Documentation Update:** 2026-01-27
 > - Codebase metrics updated: ~516 Python files, ~110,300 LOC, ~7,770 tests
@@ -41,12 +41,8 @@ docs/
 ├── 00-map.md                    # This file (Project Navigator)
 ├── index.md                     # Welcome page
 ├── glossary.md                  # Ubiquitous Language terminology
-├── RULES.md                     # Canonical rules document (v5.14)
+├── RULES.md                     # Canonical rules document (v5.15)
 ├── REQUIREMENTS.md              # 156 testable requirements
-│
-├── archived/                    # Historical documents
-│   ├── audits/                  # Audit reports
-│   └── refactoring-plan.md     # Archived refactoring roadmap
 │
 ├── 00-project-rules/            # Project governance
 │   ├── 03-file-policy.md        # File/directory structure
@@ -110,12 +106,6 @@ docs/
 │   ├── vacuum-retention.md      # VACUUM retention policies
 │   └── RELEASE_CHECKLIST.md     # Release checklist
 │
-├── archived/                    # Historical documents
-│   ├── audits/                  # Audit files (2025-2026)
-│   ├── plans/                   # Archived planning documents
-│   ├── project-rules/           # Deprecated project rules
-│   └── refactoring-plan.md      # Archived refactoring roadmap
-│
 ├── domain/schemas/              # Schema documentation
 │   └── chembl/                  # ChEMBL entity schemas (4 files)
 │
@@ -129,16 +119,15 @@ docs/
 │   ├── openalex/                # OpenAlex (1 entity)
 │   └── semanticscholar/         # SemanticScholar (1 entity)
 │
-├── refactoring/                 # Active refactoring documentation
-│   ├── README.md                # Refactoring overview
-│   ├── duplication-analysis-2026-01.md
-│   └── refactoring-plan-duplicate-logic.md
+├── 03-pipelines/                # High-level pipeline guides (6 guides)
 │
-├── analysis/                    # Analysis reports
-│   ├── bioetl-interfaces-analysis-2026-01-14.md
-│   └── pipeline-interface-alignment-report.md
+├── pipelines/                   # Pipeline specifications (23 specs)
+│   ├── INDEX.md                 # Pipeline registry
+│   └── chembl/, crossref/, openalex/, pubchem/, pubmed/, semanticscholar/, uniprot/
 │
-├── contracts/gold/              # Gold layer JSON schemas
+├── contracts/gold/              # Gold layer JSON schemas (20 files)
+│
+├── verification/                # Data verification reports
 │
 └── templates/                   # Document & code templates
 ```
@@ -401,11 +390,11 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2026-01-21   | v5.14 (ADR Registry Update)  |
+| RULES.md                 | 2026-01-21   | v5.15 (ADR Registry Update)  |
 | REQUIREMENTS.md          | 2026-01-21   | v1.4 (156 requirements)      |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
 | 00-map.md                | 2026-01-27   | v7.0 Metrics Update          |
-| rules-summary.md         | 2026-01-21   | v5.14 Synced                 |
+| rules-summary.md         | 2026-01-21   | v5.15 Synced                 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-development/          | 2026-01-26   | Config schema guidelines     |
 | ADR-001..031             | 2026-01-27   | All 31 ADRs documented       |

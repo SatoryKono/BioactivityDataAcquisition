@@ -188,7 +188,7 @@ class TestFieldToGroupMapping:
         """Terms & Keywords group contains expected fields."""
         expected_fields = {
             "keywords",
-            "mesh",
+            "mesh_terms",
             "mesh_terms",
             "topics",
             "primary_topic",

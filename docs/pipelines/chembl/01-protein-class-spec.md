@@ -1,6 +1,6 @@
 # ChEMBL Protein Classification Pipeline Specification
 
-*Version 1.1.0 | Aligned with RULES.md v5.14*
+*Version 1.1.0 | Aligned with RULES.md v5.15*
 
 ---
 
