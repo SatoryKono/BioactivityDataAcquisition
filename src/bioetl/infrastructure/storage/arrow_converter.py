@@ -120,6 +120,33 @@ class ArrowDataConverter:
 
         return arrow_data
 
+    def _convert_column_to_string(self, col: pa.Array) -> pa.Array:
+        """Convert column to string type handling nulls safely."""
+        return pa.array(
+            [str(v) if v is not None else None for v in col.to_pylist()],
+            type=pa.string(),
+        )
+
+    def _process_column_for_delta(
+        self, col: pa.Array, field: pa.Field
+    ) -> tuple[pa.Array, pa.Field]:
+        """Process a single column for Delta Lake compatibility."""
+        new_type = self.sanitize_type_for_delta(field.type)
+
+        if pa.types.is_null(field.type):
+            new_col = pa.array([None] * len(col), type=pa.string())
+            return new_col, pa.field(field.name, pa.string(), field.nullable)
+
+        if new_type == field.type:
+            return col, field
+
+        try:
+            new_col = col.cast(new_type)
+        except pa.ArrowInvalid:
+            new_col = self._convert_column_to_string(col)
+
+        return new_col, pa.field(field.name, new_type, field.nullable)
+
     def _sanitize_null_columns(self, arrow_data: pa.Table) -> pa.Table:
         """Sanitize null-typed columns in Arrow table.
 
@@ -138,31 +165,9 @@ class ArrowDataConverter:
 
         for i, field in enumerate(arrow_data.schema):
             col = arrow_data.column(i)
-            new_type = self.sanitize_type_for_delta(field.type)
-
-            if pa.types.is_null(field.type):
-                # Create string array with all nulls
-                new_col = pa.array([None] * len(col), type=pa.string())
-                new_columns.append(new_col)
-            elif new_type != field.type:
-                # Try to cast for nested types
-                try:
-                    new_columns.append(col.cast(new_type))
-                except pa.ArrowInvalid:
-                    # If cast fails, convert to string via Python
-                    new_columns.append(
-                        pa.array(
-                            [
-                                str(v) if v is not None else None
-                                for v in col.to_pylist()
-                            ],
-                            type=pa.string(),
-                        )
-                    )
-            else:
-                new_columns.append(col)
-
-            new_fields.append(pa.field(field.name, new_type, field.nullable))
+            new_col, new_field = self._process_column_for_delta(col, field)
+            new_columns.append(new_col)
+            new_fields.append(new_field)
 
         new_schema = pa.schema(new_fields)
         return pa.Table.from_arrays(new_columns, schema=new_schema)

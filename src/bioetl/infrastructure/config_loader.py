@@ -296,6 +296,54 @@ def _merge_filter_config(
         config["gold_filters"] = merged_gold_filters
 
 
+def _load_and_merge_filter_config(
+    config: dict[str, Any], config_path: Path, entity_config: dict[str, Any]
+) -> None:
+    """Load and merge filter configuration."""
+    if filter_config_file := config.get("filter_config_file"):
+        filter_config = _load_filter_config(config_path, filter_config_file)
+        if filter_config:
+            _merge_filter_config(config, filter_config, entity_config)
+
+
+def _load_and_merge_data_schema(
+    config: dict[str, Any], config_path: Path, entity_config: dict[str, Any]
+) -> None:
+    """Load and merge data schema configuration."""
+    if "column_groups" in entity_config:
+        return
+
+    # Try new data_schema_file first
+    if data_schema_file := config.get("data_schema_file"):
+        data_schema = _load_data_schema_config(config_path, data_schema_file)
+        if data_schema:
+            if "column_groups" in data_schema:
+                config["column_groups"] = data_schema["column_groups"]
+            if "silver" in data_schema:
+                config.setdefault("data_schema", {})["silver"] = data_schema["silver"]
+            if "gold" in data_schema:
+                config.setdefault("data_schema", {})["gold"] = data_schema["gold"]
+            return
+
+    # Fallback to legacy column_groups_file
+    if column_groups_file := config.get("column_groups_file"):
+        column_groups = _load_column_groups_config(config_path, column_groups_file)
+        if column_groups is not None:
+            config["column_groups"] = column_groups
+
+
+def _load_and_merge_source_config(
+    config: dict[str, Any], config_path: Path
+) -> None:
+    """Load and merge source configuration."""
+    if source_file := config.get("source_file"):
+        source_path = config_path.parent / source_file
+        if source_path.exists():
+            with open(source_path, encoding="utf-8") as f:
+                source_config = yaml.safe_load(f) or {}
+            config["source"] = source_config.get("source", source_config)
+
+
 @lru_cache(maxsize=10)
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     """Load pipeline configuration from YAML file and return typed model.
@@ -345,39 +393,10 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     # Apply convention-based defaults (auto-compute paths/references)
     config = _apply_convention_defaults(config)
 
-    # Load and merge filter config from filter_config_file
-    if filter_config_file := config.get("filter_config_file"):
-        filter_config = _load_filter_config(config_path, filter_config_file)
-        if filter_config:
-            _merge_filter_config(config, filter_config, entity_config)
-
-    # Load column groups from external file unless explicitly set inline
-    # Priority: explicit inline > data_schema_file > column_groups_file (legacy)
-    if "column_groups" not in entity_config:
-        # Try new data_schema_file first (supports layer-specific configs)
-        if data_schema_file := config.get("data_schema_file"):
-            data_schema = _load_data_schema_config(config_path, data_schema_file)
-            if data_schema:
-                if "column_groups" in data_schema:
-                    config["column_groups"] = data_schema["column_groups"]
-                if "silver" in data_schema:
-                    config.setdefault("data_schema", {})["silver"] = data_schema[
-                        "silver"
-                    ]
-                if "gold" in data_schema:
-                    config.setdefault("data_schema", {})["gold"] = data_schema["gold"]
-        # Fallback to legacy column_groups_file
-        elif column_groups_file := config.get("column_groups_file"):
-            column_groups = _load_column_groups_config(config_path, column_groups_file)
-            if column_groups is not None:
-                config["column_groups"] = column_groups
-
-    if source_file := config.get("source_file"):
-        source_path = config_path.parent / source_file
-        if source_path.exists():
-            with open(source_path, encoding="utf-8") as f:
-                source_config = yaml.safe_load(f) or {}
-            config["source"] = source_config.get("source", source_config)
+    # Load and merge additional configurations
+    _load_and_merge_filter_config(config, config_path, entity_config)
+    _load_and_merge_data_schema(config, config_path, entity_config)
+    _load_and_merge_source_config(config, config_path)
 
     validated: PipelineYamlConfig = PipelineYamlConfig.model_validate(config)
     return validated

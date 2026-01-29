@@ -76,7 +76,7 @@ _JOURNAL_INFO = FieldGroup(
         FieldSpec("first_page", target="page_first"),
         FieldSpec("last_page", target="page_last"),
         # Unified temporal field
-        FieldSpec("year", target="publication_year", converter=int),
+        FieldSpec("year", target="publication_year", converter=lambda x: int(x) if x is not None else None),
     ),
 )
 

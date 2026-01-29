@@ -860,7 +860,7 @@ class CompositeConfig:
         """Generate lock key for composite pipeline."""
         return f"composite:{self.name}"
 
-    def to_dict(self) -> dict[str, object]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "name": self.name,
