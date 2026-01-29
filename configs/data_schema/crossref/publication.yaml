@@ -73,7 +73,7 @@ column_groups:
 
   - name: doc_type
     fields:
-      - type
+      - source_type
 
   - name: content_domain
     fields:
@@ -89,8 +89,6 @@ column_groups:
 
 # Layer-specific column filtering
 silver:
-  rename_fields:
-    type: source_type  # Raw CrossRef type → unified source_type
   include_groups:
     - system
     - identifiers

@@ -688,7 +688,6 @@ __all__ = [
     "VALID_OA_STATUS_VALUES",
     "extract_affiliations",
     "extract_author_h_indices",
-    "extract_author_ids",
     "extract_author_orcids",
     "extract_author_s2_ids",
     "extract_authors",
