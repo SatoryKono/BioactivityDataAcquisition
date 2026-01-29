@@ -654,7 +654,6 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("corpus_id", pa.int64()),
         pa.field("dblp_id", pa.string()),  # DBLP publication key
         pa.field("doi", pa.string()),
-        pa.field("subject_fields", pa.string()),
         pa.field("influential_citation_count", pa.int64()),
         pa.field("is_oa", pa.bool_()),
         pa.field("issue", pa.string()),
@@ -670,6 +669,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publication_date", pa.string()),
         pa.field("publication_types", pa.string()),
         pa.field("publication_year", pa.int64()),
+        pa.field("subject_fields", pa.string()),
         pa.field("title", pa.string()),
         pa.field("tldr", pa.string()),
         pa.field("volume", pa.string()),
@@ -788,13 +788,9 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Bibliographic info (from biblio object)
         pa.field("issue", pa.string()),
         pa.field("journal", pa.string()),
-        # Keywords extracted from OpenAlex
-        pa.field("subject_keywords", pa.list_(pa.string())),
         pa.field("language", pa.string()),
         # Microsoft Academic Graph ID (legacy, from ids object)
         pa.field("mag_id", pa.string()),
-        # MeSH terms extracted from OpenAlex mesh field
-        pa.field("subject_mesh", pa.list_(pa.string())),
         pa.field("oa_status", pa.string()),
         # Primary key
         pa.field("openalex_id", pa.string()),
@@ -808,16 +804,20 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("primary_topic", pa.string()),  # JSON object
         # Date fields
         pa.field("publication_date", pa.string()),
+        pa.field(
+            "publication_type", pa.string()
+        ),  # Raw OpenAlex type (article, book, etc.)
         pa.field("publication_year", pa.int64()),
         pa.field("publisher", pa.string()),
         # ROR IDs (may be empty if not returned by Works API)
         pa.field("ror_ids", pa.string()),  # JSON array of ROR URLs
-        pa.field(
-            "publication_type", pa.string()
-        ),  # Raw OpenAlex type (article, book, etc.)
-        pa.field("title", pa.string()),
+        # Keywords extracted from OpenAlex
+        pa.field("subject_keywords", pa.list_(pa.string())),
+        # MeSH terms extracted from OpenAlex mesh field
+        pa.field("subject_mesh", pa.list_(pa.string())),
         # Topics (hierarchical 4-level classification - replaces deprecated concepts)
         pa.field("subject_topics", pa.string()),  # JSON array
+        pa.field("title", pa.string()),
         # Bibliographic info (from biblio object)
         pa.field("volume", pa.string()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
