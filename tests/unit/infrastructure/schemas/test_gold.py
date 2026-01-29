@@ -429,11 +429,13 @@ class TestGoldSchemaValidation:
             "issue": "2",
             "page_first": "100",
             "page_last": "110",
+            "citations_received": None,
+            "citations_made": None,
             "src_id": 1,
             # ChEMBL release metadata
             "chembl_release": "CHEMBL_34",
             "creation_date": "2024-01-01",
-            # Note: citation_count, is_oa, language excluded - not available from ChEMBL API
+            # Примечание: citation_count маппится в citations_received; is_oa и language исключены
             "_lookup_method": "direct",
             "_original_id": "CHEMBL12345",
             "_source": "chembl",

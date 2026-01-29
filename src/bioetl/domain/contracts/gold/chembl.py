@@ -331,13 +331,15 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     issue: Series[str] = pa.Field(nullable=True)
     page_first: Series[str] = pa.Field(nullable=True)
     page_last: Series[str] = pa.Field(nullable=True)
+    citations_received: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)
 
     # ChEMBL release metadata
     chembl_release: Series[str] = pa.Field(nullable=True)
     creation_date: Series[str] = pa.Field(nullable=True)
 
-    # Note: citation_count, is_oa, language excluded - ChEMBL API doesn't provide these
+    # Примечание: citation_count маппится в citations_received; is_oa и language исключены
 
     # System field (per SYSTEM_FIELDS_PREFIX)
     source: Series[str] = pa.Field(nullable=True, alias="_source")

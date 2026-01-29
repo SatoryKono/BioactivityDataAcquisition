@@ -206,10 +206,19 @@ class PublicationTransformer(BaseChemblTransformer):
         # System field: data source identifier
         data["_source"] = "chembl"
 
-        # Unified publication fields (always NULL for ChEMBL)
-        data["citation_count"] = None
+        # Унифицированные поля публикации (в ChEMBL есть только citation_count)
+        citation_count = record.get("citation_count")
+        if citation_count is not None:
+            try:
+                data["citations_received"] = int(citation_count)
+            except (TypeError, ValueError):
+                data["citations_received"] = None
+        else:
+            data["citations_received"] = None
+        data["citations_made"] = None
         data["is_oa"] = None
         data["language"] = None
+        data["oa_status"] = None
 
         # DQ flags (default: no warnings or errors)
         data["_dq_warn"] = False
@@ -227,7 +236,8 @@ class PublicationTransformer(BaseChemblTransformer):
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without affiliations, pmc_id, publication_date.
+            SilverRecord без affiliation_list, pmc_id, publication_date, issn,
+            publisher, oa_status, is_oa и language.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
@@ -236,10 +246,12 @@ class PublicationTransformer(BaseChemblTransformer):
         silver_record = BaseTransformer.entity_to_silver_record(entity)
 
         # Remove excluded fields (not available from ChEMBL API)
-        silver_record.pop("affiliations", None)
+        silver_record.pop("affiliation_list", None)
         silver_record.pop("pmc_id", None)
         silver_record.pop("publication_date", None)
-        silver_record.pop("citation_count", None)
+        silver_record.pop("issn", None)
+        silver_record.pop("publisher", None)
+        silver_record.pop("oa_status", None)
         silver_record.pop("is_oa", None)
         silver_record.pop("language", None)
 

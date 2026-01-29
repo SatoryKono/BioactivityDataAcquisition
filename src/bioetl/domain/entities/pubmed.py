@@ -235,9 +235,6 @@ class PubMedPublicationEntity(PublicationEntityBase):
     grant_count: int | None = None
     chemical_count: int | None = None
 
-    # Legacy field (kept for backward compatibility)
-    publication_year: int | None = None  # Alias for year
-
     # Override: Default source for PubMed
     _source: str = "pubmed"
 

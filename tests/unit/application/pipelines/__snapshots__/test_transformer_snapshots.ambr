@@ -401,6 +401,8 @@
     'abstract': 'This is a test abstract for the document.',
     'authors': '["Test Author","Another Author"]',
     'chembl_release': 'CHEMBL_34',
+    'citations_made': None,
+    'citations_received': None,
     'content_hash': '<content_hash>',
     'creation_date': '2024-01-15',
     'document_chembl_id': 'CHEMBL1234567',
