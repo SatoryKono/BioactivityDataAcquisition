@@ -142,7 +142,7 @@ class TestOpenAlexPublicationTransformerIntegration:
         assert result == ["0000-0001-2345-6789", "", "0000-0002-3456-789X"]
 
     @pytest.mark.asyncio
-    async def test_transformer_author_ids_extraction(self) -> None:
+    async def test_transformer_author_openalex_ids_extraction(self) -> None:
         """Test OpenAlex author ID extraction from authorships."""
         from bioetl.application.pipelines.openalex.extractors import extract_author_ids
 

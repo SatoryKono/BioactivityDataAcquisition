@@ -195,7 +195,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="ORCID IDs as JSON array (empty string for missing)",
     )
 
-    author_ids: Series[str] = pa.Field(
+    author_openalex_ids: Series[str] = pa.Field(
         nullable=True,
         description="OpenAlex author IDs as JSON array (empty string for missing)",
     )
