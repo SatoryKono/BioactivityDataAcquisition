@@ -224,7 +224,7 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
     # Topics (hierarchical classification - replaces deprecated concepts)
     # Each topic dict has: id, display_name, score, subfield, field, domain
-    topics: list[dict[str, Any]] = field(default_factory=list)
+    subject_topics: list[dict[str, Any]] = field(default_factory=list)
 
     # Primary topic (single most relevant topic for quick categorization)
     # Dict with: id, display_name, score, subfield, field, domain
@@ -235,10 +235,10 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     grants: list[dict[str, Any]] = field(default_factory=list)
 
     # MeSH terms (Medical Subject Headings)
-    mesh_terms: list[str] = field(default_factory=list)
+    subject_mesh: list[str] = field(default_factory=list)
 
     # Keywords (author-assigned)
-    keywords: list[str] = field(default_factory=list)
+    subject_keywords: list[str] = field(default_factory=list)
 
     # Bibliographic info (from biblio object)
     volume: str | None = None

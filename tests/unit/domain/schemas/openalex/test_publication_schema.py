@@ -71,14 +71,14 @@ def valid_record() -> dict:
         # Quality indicators
         "is_retracted": False,
         # Topics (hierarchical classification - replaces deprecated concepts)
-        "topics": '[{"id": "T12345", "display_name": "Topic A", "score": 0.95}]',
+        "subject_topics": '[{"id": "T12345", "display_name": "Topic A", "score": 0.95}]',
         "primary_topic": '{"id": "T12345", "display_name": "Topic A", "score": 0.95}',
         # Grants/funding information
         "grants": '[{"funder": "F1234", "funder_display_name": "NIH", "award_id": "R01"}]',
-        # Classification (JSON arrays)
-        "concepts": '["Biology", "Genetics"]',
-        "mesh_terms": '["D000123", "D000456"]',
-        "keywords": '["gene expression", "transcription"]',
+        # Classification (JSON arrays, unified field names)
+        "concepts": '["Biology", "Genetics"]',  # Extra column (not in schema, allowed by strict=False)
+        "subject_mesh": '["D000123", "D000456"]',
+        "subject_keywords": '["gene expression", "transcription"]',
         # External identifier
         "mag_id": "12345678",
         # Author affiliations
@@ -152,38 +152,38 @@ class TestOpenAlexPublicationSchema:
         assert pd.isna(validated["doi"].iloc[0])
 
     def test_year_range_validation(self, valid_record: dict) -> None:
-        """Should validate year range (1800-2100)."""
+        """Should validate publication_year range (1800-2100)."""
         # Valid year
-        valid_record["year"] = 2024
+        valid_record["publication_year"] = 2024
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["year"].iloc[0] == 2024
+        assert validated["publication_year"].iloc[0] == 2024
 
         # Valid boundary values
         for year in [1800, 2100]:
-            valid_record["year"] = year
+            valid_record["publication_year"] = year
             df = pd.DataFrame([valid_record])
             validated = OpenAlexPublicationSchema.validate(df)
-            assert validated["year"].iloc[0] == year
+            assert validated["publication_year"].iloc[0] == year
 
         # Year too low
-        valid_record["year"] = 1799
+        valid_record["publication_year"] = 1799
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             OpenAlexPublicationSchema.validate(df)
 
         # Year too high
-        valid_record["year"] = 2101
+        valid_record["publication_year"] = 2101
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             OpenAlexPublicationSchema.validate(df)
 
     def test_year_nullable(self, valid_record: dict) -> None:
-        """Should allow null year."""
-        valid_record["year"] = None
+        """Should allow null publication_year."""
+        valid_record["publication_year"] = None
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert pd.isna(validated["year"].iloc[0])
+        assert pd.isna(validated["publication_year"].iloc[0])
 
     def test_publication_date_format(self, valid_record: dict) -> None:
         """Should validate publication_date format (YYYY-MM-DD)."""
@@ -216,20 +216,20 @@ class TestOpenAlexPublicationSchema:
         validated = OpenAlexPublicationSchema.validate(df)
         assert pd.isna(validated["oa_status"].iloc[0])
 
-    def test_citation_count_non_negative(self, valid_record: dict) -> None:
-        """Should validate citation_count is non-negative.
+    def test_citations_received_non_negative(self, valid_record: dict) -> None:
+        """Should validate citations_received is non-negative.
 
         Note: OpenAlex source field is 'cited_by_count', but we use the
-        unified field name 'citation_count' for cross-provider consistency.
+        unified field name 'citations_received' for cross-provider consistency.
         """
         # Valid count
-        valid_record["citation_count"] = 0
+        valid_record["citations_received"] = 0
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["citation_count"].iloc[0] == 0
+        assert validated["citations_received"].iloc[0] == 0
 
         # Negative count
-        valid_record["citation_count"] = -1
+        valid_record["citations_received"] = -1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             OpenAlexPublicationSchema.validate(df)
@@ -318,32 +318,32 @@ class TestOpenAlexPublicationSchema:
         validated = OpenAlexPublicationSchema.validate(df)
         assert pd.isna(validated["fwci"].iloc[0])
 
-    def test_reference_count_non_negative(self, valid_record: dict) -> None:
-        """Should validate reference_count is non-negative."""
+    def test_citations_made_non_negative(self, valid_record: dict) -> None:
+        """Should validate citations_made is non-negative."""
         # Valid count
-        valid_record["reference_count"] = 25
+        valid_record["citations_made"] = 25
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["reference_count"].iloc[0] == 25
+        assert validated["citations_made"].iloc[0] == 25
 
         # Zero is valid
-        valid_record["reference_count"] = 0
+        valid_record["citations_made"] = 0
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["reference_count"].iloc[0] == 0
+        assert validated["citations_made"].iloc[0] == 0
 
         # Negative count
-        valid_record["reference_count"] = -1
+        valid_record["citations_made"] = -1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             OpenAlexPublicationSchema.validate(df)
 
-    def test_reference_count_nullable(self, valid_record: dict) -> None:
-        """Should allow null reference_count."""
-        valid_record["reference_count"] = None
+    def test_citations_made_nullable(self, valid_record: dict) -> None:
+        """Should allow null citations_made."""
+        valid_record["citations_made"] = None
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert pd.isna(validated["reference_count"].iloc[0])
+        assert pd.isna(validated["citations_made"].iloc[0])
 
     def test_is_retracted_values(self, valid_record: dict) -> None:
         """Should validate is_retracted boolean values."""
@@ -359,20 +359,20 @@ class TestOpenAlexPublicationSchema:
         validated = OpenAlexPublicationSchema.validate(df)
         assert validated["is_retracted"].iloc[0] == True  # noqa: E712
 
-    def test_topics_nullable(self, valid_record: dict) -> None:
-        """Should allow null topics."""
-        valid_record["topics"] = None
+    def test_subject_topics_nullable(self, valid_record: dict) -> None:
+        """Should allow null subject_topics."""
+        valid_record["subject_topics"] = None
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert pd.isna(validated["topics"].iloc[0])
+        assert pd.isna(validated["subject_topics"].iloc[0])
 
-    def test_topics_json_string(self, valid_record: dict) -> None:
-        """Should accept topics as JSON-serialized string."""
+    def test_subject_topics_json_string(self, valid_record: dict) -> None:
+        """Should accept subject_topics as JSON-serialized string."""
         topics_json = '[{"id": "T1", "display_name": "Topic 1", "score": 0.9}]'
-        valid_record["topics"] = topics_json
+        valid_record["subject_topics"] = topics_json
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["topics"].iloc[0] == topics_json
+        assert validated["subject_topics"].iloc[0] == topics_json
 
     def test_primary_topic_nullable(self, valid_record: dict) -> None:
         """Should allow null primary_topic."""
