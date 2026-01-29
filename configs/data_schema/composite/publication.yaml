@@ -31,9 +31,9 @@ column_groups:
   - name: identifiers_doi
     fields:
       - doi
-    provider_order: [chembl, openalex, pubmed, semanticscholar]
+    provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 
-  # 3.2 doi identifiers
+  # 3.3 pmid identifiers
   - name: identifiers_pmid
     fields:
       - pmid
@@ -58,7 +58,6 @@ column_groups:
     fields:
       - abstract
       - abstract_structured
-      - tldr
     provider_order: [chembl, pubmed, crossref, openalex, semanticscholar]
 
   # 7. Authors group
@@ -66,6 +65,7 @@ column_groups:
     fields:
       - authors
       - author_count
+      - authors_with_affiliations
     provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 
   # 7a. Author identifiers (for author-level analytics)
@@ -82,29 +82,30 @@ column_groups:
   # Note: PubMed structured_affiliations contains ROR/GRID identifiers
   - name: affiliations
     fields:
-      - structured_affiliations    # PubMed (preferred, with ROR/GRID identifiers)
-      - affiliations               # PubMed, OpenAlex, SemanticScholar (raw)
+      - affiliation_structured     # PubMed (preferred, with ROR/GRID identifiers)
+      - affiliation_list           # PubMed, OpenAlex, SemanticScholar (raw)
       - institution_ids            # OpenAlex institution IDs
       - institution_country_codes  # OpenAlex institution country codes
+      - ror_ids                    # OpenAlex ROR identifiers
     provider_order: [pubmed, openalex, semanticscholar]
 
   # 8. Journal group
   - name: journal
     fields:
       - journal                 # Canonical field (all providers use journal or venue→journal)
-      - journal_abbrev
+      - journal_name
+      - journal_name_short
       - journal_iso_abbrev
-      - short_container_title   # CrossRef-specific short title
     provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 
   # 9. Year group
   - name: year
     fields:
-      - year                   # Canonical field (all providers)
+      - publication_year
     provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 
   # 10. Publication dates
-  # Note: Legacy fields removed (publication_year → year, pub_date → publication_date)
+  # Note: Legacy fields normalized (year → publication_year, pub_date → publication_date)
   # Note: epub_date, accepted_date, received_date, revised_date removed
   # (PubMed no longer provides these fields)
   - name: dates
@@ -124,17 +125,17 @@ column_groups:
     fields:
       - volume
       - issue
-      - first_page
-      - last_page
-      - pages
+      - page_first
+      - page_last
+      - page_range
       - medline_pgn
-    provider_order: [chembl, crossref, pubmed, semanticscholar]
+    provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 
   # 12. Citation metrics
   - name: citations
     fields:
-      - citation_count
-      - reference_count            # CrossRef, PubMed, SemanticScholar, OpenAlex (unified)
+      - citations_received
+      - citations_made
       - influential_citation_count  # SemanticScholar-unique
     provider_order: [crossref, openalex, semanticscholar, pubmed]
 
@@ -166,7 +167,7 @@ column_groups:
   # Note: CrossRef and OpenAlex use raw 'source_type' field instead of mapped 'doc_type'
   - name: doc_type
     fields:
-      - doc_type          # ChEMBL, PubMed (unified type)
+      - publication_type
       - source_type       # CrossRef, OpenAlex raw type (journal-article, article, etc.)
     provider_order: [chembl, crossref, openalex, pubmed]
 
@@ -183,18 +184,15 @@ column_groups:
     provider_order: [crossref, openalex]
 
   # 18. Subject/Classification
-  # NOTE: 'topics' replaces deprecated 'concepts' per OpenAlex 2024 migration
+  # NOTE: 'subject_topics' replaces deprecated 'concepts' per OpenAlex 2024 migration
   - name: subjects
     fields:
-      - subjects
-      - topics                   # OpenAlex hierarchical topics (replaces concepts)
+      - subject_topics
       - primary_topic            # OpenAlex primary topic classification
-      - concepts                 # OpenAlex (DEPRECATED: use topics instead)
-      - fields_of_study
-      - mesh_terms
-      - mesh                     # OpenAlex MeSH extraction (fallback to mesh_terms)
+      - subject_fields
+      - subject_mesh
       - mesh_heading_count
-      - keywords
+      - subject_keywords
       - keyword_count
       - publication_types
       - publication_type_list
@@ -267,6 +265,24 @@ column_groups:
   # Note: _source is a system field in the 'system' group
   - name: dq
     pattern: "^_dq_"
+
+# Field aliases for backward compatibility
+field_aliases:
+  year: publication_year
+  doc_type: publication_type
+  first_page: page_first
+  last_page: page_last
+  citation_count: citations_received
+  reference_count: citations_made
+  affiliations: affiliation_list
+  mesh_terms: subject_mesh
+  keywords: subject_keywords
+  topics: subject_topics
+  tldr: abstract
+  journal_title: journal_name
+  journal_abbrev: journal_name_short
+  pages: page_range
+  fields_of_study: subject_fields
 
 # Layer-specific column filtering (Variant 2 approach)
 # Silver: Include most fields for intermediate processing

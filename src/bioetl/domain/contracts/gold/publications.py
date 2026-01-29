@@ -40,7 +40,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
 
     # Journal information
     journal: Series[str] = pa.Field(nullable=True)
-    journal_abbrev: Series[str] = pa.Field(nullable=True)
+    journal_name_short: Series[str] = pa.Field(nullable=True)
     # PubMed-specific journal fields (forensic retention)
     journal_iso_abbrev: Series[str] = pa.Field(nullable=True)  # ISO abbreviation
     journal_issn_type: Series[str] = pa.Field(
@@ -52,7 +52,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     issue: Series[str] = pa.Field(nullable=True)
 
     # Page information
-    pages: Series[str] = pa.Field(nullable=True)  # Legacy: medline_pgn format
+    page_range: Series[str] = pa.Field(nullable=True)  # Page range string
     medline_pgn: Series[str] = pa.Field(nullable=True)  # Original PubMed pagination
     page_first: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     page_last: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
@@ -65,7 +65,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     authors_with_affiliations: Series[str] = pa.Field(
         nullable=True
     )  # JSON array: author -> affiliations
-    structured_affiliations: Series[str] = pa.Field(
+    affiliation_structured: Series[str] = pa.Field(
         nullable=True
     )  # JSON array with ROR/GRID identifiers
 
@@ -93,8 +93,8 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     publication_types: Series[object] = pa.Field(nullable=True)  # list[str]
 
     # Classification
-    keywords: Series[object] = pa.Field(nullable=True)  # list[str]
-    mesh_terms: Series[object] = pa.Field(nullable=True)  # list[str]
+    subject_keywords: Series[object] = pa.Field(nullable=True)  # list[str]
+    subject_mesh: Series[object] = pa.Field(nullable=True)  # list[str]
     chemicals: Series[object] = pa.Field(nullable=True)  # list[str]
     databanks: Series[object] = pa.Field(nullable=True)  # list[str]
     gene_symbols: Series[object] = pa.Field(nullable=True)  # list[str]
