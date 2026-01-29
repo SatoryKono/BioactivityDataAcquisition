@@ -237,7 +237,9 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
         pa.field("abstract", pa.string()),
-        pa.field("abstract_structured", pa.bool_()),  # Whether abstract has NLM sections
+        pa.field(
+            "abstract_structured", pa.bool_()
+        ),  # Whether abstract has NLM sections
         pa.field("affiliations", pa.string()),  # JSON array of unique affiliations
         pa.field("author_count", pa.int64()),
         pa.field("authors", pa.string()),  # JSON-serialized list

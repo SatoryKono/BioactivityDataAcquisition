@@ -496,10 +496,10 @@ groups:
         columns:
           - chembl.publication.src_id
 
-      - base_name: structured_affiliations
+      - base_name: affiliation_structured
         columns:
-          - pubmed.publication.structured_affiliations
+          - pubmed.publication.affiliation_structured
 
-      - base_name: subjects
+      - base_name: subject_keywords
         columns:
-          - crossref.publication.subjects
+          - crossref.publication.subject_keywords
