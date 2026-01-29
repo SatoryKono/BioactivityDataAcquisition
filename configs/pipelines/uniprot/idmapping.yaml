@@ -47,6 +47,7 @@ source:
 #   - Field validations: target_chembl_id, mapping_status, uniprot_accession
 #   - Conditional validations: found_has_accession
 dq_config_file: ../../dq/entities/uniprot/idmapping.yaml
+column_groups_file: ../../data_schema/uniprot/idmapping.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)

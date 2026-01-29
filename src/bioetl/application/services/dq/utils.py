@@ -6,7 +6,9 @@ Extracted to reduce code duplication per refactoring analysis 2026-01-25.
 
 from __future__ import annotations
 
+from dataclasses import fields, is_dataclass
 from datetime import datetime
+from enum import Enum
 from typing import Any
 
 from bioetl.domain.value_objects.dq_report import (
@@ -14,6 +16,33 @@ from bioetl.domain.value_objects.dq_report import (
     DQReportStatus,
     DQReportSummary,
 )
+
+
+def convert_value(value: Any) -> Any:
+    """Convert a value for serialization.
+
+    Handles dataclasses, enums, datetimes, and collection types.
+
+    Args:
+        value: Value to convert.
+
+    Returns:
+        Serializable representation of the value.
+    """
+    if is_dataclass(value) and not isinstance(value, type):
+        return {
+            field.name: convert_value(getattr(value, field.name))
+            for field in fields(value)
+        }
+    if isinstance(value, Enum):
+        return value.value
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, dict):
+        return {key: convert_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return [convert_value(item) for item in value]
+    return value
 
 
 def update_counts(
@@ -38,48 +67,6 @@ def update_counts(
     if status == DQCheckStatus.FAIL:
         return passed, failed + 1, warnings
     return passed, failed, warnings + 1
-
-
-def convert_value(value: Any) -> Any:
-    """Convert a value to serializable format.
-
-    Handles nested dataclasses, enums, datetimes, and collections.
-
-    Args:
-        value: Any value to convert.
-
-    Returns:
-        JSON-serializable value.
-    """
-    if hasattr(value, "value"):  # Enum
-        return value.value
-    if hasattr(value, "__dataclass_fields__"):
-        return result_to_dict(value)
-    if isinstance(value, datetime):
-        return value.isoformat()
-    if isinstance(value, (list, tuple)):
-        return [convert_value(v) for v in value]
-    if isinstance(value, dict):
-        return {k: convert_value(v) for k, v in value.items()}
-    return value
-
-
-def result_to_dict(result: Any) -> dict[str, Any]:
-    """Convert dataclass result to dict for serialization.
-
-    Args:
-        result: Dataclass result object.
-
-    Returns:
-        Dictionary representation suitable for JSON serialization.
-    """
-    if hasattr(result, "__dataclass_fields__"):
-        return {
-            field: convert_value(getattr(result, field))
-            for field in result.__dataclass_fields__
-            if not field.startswith("_")
-        }
-    return {"value": result}
 
 
 def build_summary(
@@ -119,6 +106,5 @@ def build_summary(
 __all__ = [
     "build_summary",
     "convert_value",
-    "result_to_dict",
     "update_counts",
 ]

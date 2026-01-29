@@ -32,6 +32,10 @@ from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.config.field_group_loader import (
+    FieldGroupLoadError,
+    load_field_groups,
+)
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.schemas.composite_config import CompositeConfigFileSchema
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
@@ -41,6 +45,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.config import Settings
 
@@ -55,6 +60,7 @@ __all__ = [
 
 # Default composite config path
 COMPOSITE_CONFIG_DIR = Path("configs/pipelines/composite")
+FIELD_GROUP_CONFIG_DIR = Path("configs/composite/field_groups")
 
 
 def load_composite_config(name: str) -> CompositeConfig:
@@ -77,8 +83,20 @@ def load_composite_config(name: str) -> CompositeConfig:
     if not config_path.exists():
         raise FileNotFoundError(f"Composite config not found: {config_path}")
 
-    with config_path.open() as f:
+    with config_path.open(encoding="utf-8") as f:
         raw = yaml.safe_load(f)
+
+    merge = (raw or {}).get("composite", {}).get("merge", {})
+    column_groups_file = merge.get("column_groups_file")
+    if column_groups_file and "column_groups" not in merge:
+        groups_path = config_path.parent / column_groups_file
+        if groups_path.exists():
+            with groups_path.open(encoding="utf-8") as f:
+                groups_raw = yaml.safe_load(f) or {}
+            if isinstance(groups_raw, list):
+                merge["column_groups"] = groups_raw
+            elif isinstance(groups_raw, dict):
+                merge["column_groups"] = groups_raw.get("column_groups", [])
 
     try:
         # Validate using Pydantic schema
@@ -313,11 +331,15 @@ def bootstrap_composite_runner(
         max_concurrency=config.execution.max_concurrency,
     )
 
+    # Load field group registry for semantic column grouping and Gold filtering
+    field_group_registry = _load_field_group_registry(config.name, logger)
+
     merger = MergeService(
         merge_config=config.merge,
         storage=storage,
         logger=logger,
         delta_reader=delta_reader,
+        field_group_registry=field_group_registry,
     )
 
     checkpoint_dir = Path(settings.data_dir) / "checkpoints" / "composite"
@@ -370,6 +392,56 @@ def bootstrap_composite_pipeline(
         CompositePipelineRunner ready for execution.
     """
     return bootstrap_composite_runner(config=config, runtime=runtime, run_id=run_id)
+
+
+def _load_field_group_registry(
+    composite_name: str,
+    logger: LoggerPort,
+) -> FieldGroupRegistry | None:
+    """Load field group registry for a composite pipeline.
+
+    Attempts to load field group configuration from YAML. Returns None
+    if no configuration is found (graceful degradation).
+
+    Args:
+        composite_name: Composite pipeline name (e.g., "composite_publication").
+        logger: Structured logger.
+
+    Returns:
+        FieldGroupRegistry if config found, None otherwise.
+    """
+    # Extract entity from composite name (e.g., "composite_publication" -> "publication")
+    entity = (
+        composite_name.replace("composite_", "")
+        if "_" in composite_name
+        else composite_name
+    )
+    config_path = FIELD_GROUP_CONFIG_DIR / f"{entity}.yaml"
+
+    if not config_path.exists():
+        logger.debug(
+            "No field group config found, skipping",
+            config_path=str(config_path),
+        )
+        return None
+
+    try:
+        registry = load_field_groups(config_path)
+        logger.info(
+            "Loaded field group registry",
+            config_path=str(config_path),
+            groups=len(registry.groups),
+            fields=registry.field_count,
+            columns=registry.column_count,
+        )
+        return registry
+    except (FieldGroupLoadError, FileNotFoundError) as e:
+        logger.warning(
+            "Failed to load field group config, continuing without it",
+            error=str(e),
+            config_path=str(config_path),
+        )
+        return None
 
 
 def _create_dq_report_service(

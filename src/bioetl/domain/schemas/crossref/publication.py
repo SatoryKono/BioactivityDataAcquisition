@@ -6,7 +6,6 @@ Aligned with RULES.md v5.10 and Publication Schema Unification spec.
 
 from __future__ import annotations
 
-import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -28,12 +27,17 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
 
     Represents publication metadata from CrossRef API with citation enrichment.
     Inherits common fields from PublicationBaseSchema:
-    - Cross-references: pmid, doi (overridden to non-nullable), pmc_id
+    - Cross-references: doi (overridden to non-nullable)
     - Core content: title, abstract, authors
-    - Metadata: journal, year, publication_date, doc_type (overridden), language
+    - Metadata: journal, year, publication_date, language
     - Metrics: citation_count
     - Open Access: is_oa
     - Lookup tracking: _lookup_method, _original_id, source (overridden)
+
+    Fields excluded from PyArrow/Gold schemas (not available from CrossRef API):
+    - pmid: CrossRef API doesn't provide PubMed IDs
+    - pmc_id: CrossRef API doesn't provide PMC IDs
+    - doc_type: CrossRef uses raw 'type' field instead (journal-article, etc.)
     """
 
     # === Primary Key (override doi to be non-nullable) ===
@@ -44,7 +48,12 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     )
 
     # === Provider-specific Fields ===
-    issn: Series[str] = pa.Field(nullable=True, description="JSON array of ISSNs")
+    issn: Series[str] = pa.Field(
+        nullable=True, description="Primary ISSN (first from ISSN array)"
+    )
+    issn_list: Series[str] = pa.Field(
+        nullable=True, description="JSON array of all ISSNs"
+    )
     publisher: Series[str] = pa.Field(nullable=True, description="Publisher name")
 
     # === Dates (CrossRef-specific) ===
@@ -55,11 +64,10 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
         nullable=True, description="Online publication date (ISO format)"
     )
 
-    # === Override doc_type with CrossRef-specific values ===
-    doc_type: Series[str] = pa.Field(
-        nullable=False,
-        isin=DOCUMENT_TYPES,
-        description="Document type: PUBLICATION or PREPRINT",
+    # === Raw CrossRef Type (replaces doc_type) ===
+    publication_type: Series[str] = pa.Field(
+        nullable=True,
+        description="Raw CrossRef type (journal-article, book, etc.)",
     )
 
     # === Override _source to be non-nullable with fixed value ===
@@ -69,8 +77,8 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
 
     # === Additional Metadata (CrossRef-specific) ===
     license_url: Series[str] = pa.Field(nullable=True, description="License URL")
-    subjects: Series[str] = pa.Field(
-        nullable=True, description="JSON array of subject areas"
+    subject_keywords: Series[str] = pa.Field(
+        nullable=True, description="JSON array of subject areas (unified field name)"
     )
 
     # === Content Domain ===
@@ -96,10 +104,10 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
         description="Canonical publication date (YYYY-MM-DD)",
     )
 
-    # === Short Container Title ===
-    short_container_title: Series[object] = pa.Field(
+    # === Short Container Title (unified field name) ===
+    journal_name_short: Series[str] = pa.Field(
         nullable=True,
-        description="Short journal/container title (list of strings)",
+        description="Short journal/container title (unified field name)",
     )
 
     # === ISSN by Type ===
@@ -112,15 +120,8 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
         description="Electronic ISSN (format: XXXX-XXXX)",
     )
 
-    # === Metrics ===
-    reference_count: Series[pd.Int64Dtype] = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of references (from references-count field)",
-    )
-
     # === Author ORCID Identifiers ===
-    author_orcids: Series[str] = pa.Field(
+    author_orcid_list: Series[str] = pa.Field(
         nullable=True,
         description="JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
     )

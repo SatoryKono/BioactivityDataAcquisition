@@ -153,3 +153,27 @@ When adding new tools to this directory:
 - Handle errors gracefully with informative messages
 - Output statistics when processing multiple files
 - Use `get_project_root()` pattern for path resolution
+
+---
+
+## Scripts
+
+### duplicate_function_analyzer.py
+
+AST-анализатор дубликатов функций в выбранной области (по умолчанию `src/bioetl/application/**/utils.py`,
+`src/bioetl/infrastructure/**/utils.py`).
+
+**Location:** `src/tools/scripts/duplicate_function_analyzer.py`
+
+#### Usage
+
+```bash
+# Default scope
+python src/tools/scripts/duplicate_function_analyzer.py
+
+# Custom scope
+python src/tools/scripts/duplicate_function_analyzer.py \
+  --pattern src/bioetl/application/**/utils.py \
+  --pattern src/bioetl/infrastructure/**/utils.py \
+  --report reports/duplicate_function_report.md
+```

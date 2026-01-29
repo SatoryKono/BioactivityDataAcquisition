@@ -204,16 +204,15 @@ class TestPubMedPublicationTransformer:
         assert result["abstract"] == "This is the abstract of the test article."
         # Journal info
         assert result["journal"] == "Journal of Test Science"
-        assert result["journal_abbrev"] == "J Test Sci"
+        assert result["journal_name_short"] == "J Test Sci"
         assert result["issn"] == "1234-5678"
         assert result["volume"] == "42"
         assert result["issue"] == "3"
-        assert result["pages"] == "123-145"
+        assert result["page_range"] == "123-145"
         # Dates
         assert result["pub_date"] == "2025-03-15"
         assert result["pub_month"] == 3  # March
         assert result["pub_day"] == 15  # Day from PubDate/Day element
-        assert result["year"] == 2025
         assert result["publication_year"] == 2025
         # epub_date, received_date, accepted_date, revised_date excluded from pipeline
         # Classification
@@ -221,8 +220,8 @@ class TestPubMedPublicationTransformer:
         assert result["country"] == "United States"
         # Lists
         assert "Journal Article" in result["publication_types"]
-        assert "unit testing" in result["keywords"]
-        assert "Software Testing" in result["mesh_terms"]
+        assert "unit testing" in result["subject_keywords"]
+        assert "Software Testing" in result["subject_mesh"]
         # Authors (JSON-serialized list, may be hashed)
         assert result["authors"] is not None
         import json
@@ -388,7 +387,7 @@ class TestPubMedPublicationTransformer:
         assert result is not None
         assert result["_index"] == 42
 
-    # test_transform_affiliations removed: affiliations field excluded per user request
+    # test_transform_affiliations removed: affiliations field renamed to affiliation_list
 
 
 @pytest.mark.unit
@@ -423,7 +422,7 @@ class TestPubMedTransformerJournalExtraction:
 
         assert result is not None
         assert result["journal"] is None
-        assert result["journal_abbrev"] is None
+        assert result["journal_name_short"] is None
         assert result["issn"] is None
         assert result["volume"] is None
         assert result["issue"] is None
@@ -454,7 +453,7 @@ class TestPubMedTransformerJournalExtraction:
 
         assert result is not None
         assert result["journal"] == "Partial Journal"
-        assert result["journal_abbrev"] is None
+        assert result["journal_name_short"] is None
         assert result["volume"] is None
 
 
@@ -498,7 +497,7 @@ class TestPubMedTransformerDateExtraction:
         assert result is not None
         # End-of-period strategy: year-only → YYYY-12-31
         assert result["pub_date"] == "2024-12-31"
-        assert result["year"] == 2024
+        assert result["publication_year"] == 2024
 
     @pytest.mark.asyncio
     async def test_year_month_date(
@@ -532,7 +531,7 @@ class TestPubMedTransformerDateExtraction:
         assert result is not None
         # End-of-period strategy: year+month → YYYY-MM-DD (last day of month)
         assert result["pub_date"] == "2024-12-31"
-        assert result["year"] == 2024
+        assert result["publication_year"] == 2024
 
     @pytest.mark.asyncio
     async def test_missing_history_dates(
@@ -630,7 +629,7 @@ class TestPubMedTransformerIdentifierExtraction:
 
 @pytest.mark.unit
 class TestPubMedTransformerClassificationExtraction:
-    """Tests for classification data extraction (keywords, MeSH, pub types)."""
+    """Tests for classification data extraction (subject keywords, MeSH, pub types)."""
 
     @pytest.fixture
     def transformer(self) -> PubMedPublicationTransformer:
@@ -651,8 +650,8 @@ class TestPubMedTransformerClassificationExtraction:
         assert result is not None
         # Empty lists or None depending on implementation
         assert result["publication_types"] is None or result["publication_types"] == []
-        assert result["keywords"] is None or result["keywords"] == []
-        assert result["mesh_terms"] is None or result["mesh_terms"] == []
+        assert result["subject_keywords"] is None or result["subject_keywords"] == []
+        assert result["subject_mesh"] is None or result["subject_mesh"] == []
 
     @pytest.mark.asyncio
     async def test_multiple_keywords(
@@ -681,10 +680,10 @@ class TestPubMedTransformerClassificationExtraction:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert len(result["keywords"]) == 3
-        assert "keyword1" in result["keywords"]
-        assert "keyword2" in result["keywords"]
-        assert "keyword3" in result["keywords"]
+        assert len(result["subject_keywords"]) == 3
+        assert "keyword1" in result["subject_keywords"]
+        assert "keyword2" in result["subject_keywords"]
+        assert "keyword3" in result["subject_keywords"]
 
 
 @pytest.mark.unit
@@ -787,7 +786,7 @@ class TestPubMedTransformerDoiNormalization:
 
 @pytest.mark.unit
 class TestPubMedTransformerUnifiedPageFields:
-    """Tests for unified page field parsing (first_page, last_page).
+    """Tests for unified page field parsing (page_first, page_last).
 
     Note: The parse_page_range function tests are in tests/unit/domain/test_normalization.py.
     These tests verify the integration with the transformer.
@@ -810,9 +809,9 @@ class TestPubMedTransformerUnifiedPageFields:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["pages"] == "123-145"
-        assert result["first_page"] == "123"
-        assert result["last_page"] == "145"
+        assert result["page_range"] == "123-145"
+        assert result["page_first"] == "123"
+        assert result["page_last"] == "145"
 
 
 @pytest.mark.unit
@@ -1273,7 +1272,7 @@ class TestPubMedTransformerDateValidation:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["year"] == 2024
+        assert result["publication_year"] == 2024
         # When only year is available, publication_date uses end-of-year
         assert result["publication_date"] == "2024-12-31"
 

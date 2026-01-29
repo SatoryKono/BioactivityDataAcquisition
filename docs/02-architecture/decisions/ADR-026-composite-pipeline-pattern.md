@@ -1,10 +1,8 @@
 # ADR-026: Composite Pipeline Pattern
 
-- **Status**: Accepted
-- **Date**: 2026-01-15
-- **Author**: Claude Agent
-- **Reviewers**: TBD
-- **Context**: Design composite pipeline orchestration for multi-source data enrichment
+**Status:** Accepted
+**Date:** 2026-01-15
+**Decision makers:** @BioETL-Team
 
 ## Context
 
@@ -477,6 +475,147 @@ class ConflictResolution(str, Enum):
 - ColumnOrderer: `src/bioetl/application/composite/column_orderer.py`
 - ColumnQualifier: `src/bioetl/domain/value_objects/column_qualifier.py`
 - ColumnOrderConfig: `src/bioetl/domain/value_objects/column_order.py`
+
+## Preserve All Sources Feature
+
+### Status: Accepted (Added 2026-01-28)
+
+### Context
+
+During merge, columns with the same semantic meaning from different providers (e.g., `title` from ChEMBL, CrossRef, OpenAlex) are typically **coalesced** into a single column using the configured conflict resolution strategy. This is the default behavior.
+
+However, some use cases require access to **all** provider values for comparison, quality analysis, or ML feature engineering.
+
+### Decision
+
+Add `preserve_all_sources: bool = False` to `MergeConfig`. When enabled:
+
+1. **Skip coalescing** - MergeService does not apply conflict resolution
+2. **Keep all qualified columns** - All `{provider}.{entity}.{field}` columns are retained
+3. **Full traceability** - Downstream consumers can see exactly what each provider returned
+
+### Configuration
+
+```yaml
+# configs/pipelines/composite/publication.yaml
+merge:
+  strategy: left_outer
+  conflict_resolution: seed_priority  # Used when preserve_all_sources=false
+  preserve_all_sources: true          # NEW: Keep all provider columns
+```
+
+### Behavior Comparison
+
+| Mode | Output Columns | Use Case |
+|------|----------------|----------|
+| `preserve_all_sources: false` (default) | `title` (single coalesced column) | Production views with "best" value |
+| `preserve_all_sources: true` | `chembl.publication.title`, `crossref.publication.title`, etc. | Data quality analysis, ML features |
+
+### Implementation
+
+- **Domain**: `MergeConfig.preserve_all_sources: bool = False` in `domain/composite/config.py`
+- **Application**: `MergeService._resolve_conflicts()` skips coalescing when flag is True
+- **Schema**: Pydantic schema updated with `preserve_all_sources` field
+
+### Example Output
+
+```python
+# preserve_all_sources: false (default)
+df.columns = ['entity_id', 'title', 'abstract', 'citation_count', ...]
+
+# preserve_all_sources: true
+df.columns = [
+    'entity_id',
+    'chembl.publication.title',
+    'crossref.publication.title',
+    'openalex.publication.title',
+    'pubmed.publication.title',
+    'chembl.publication.abstract',
+    ...
+]
+```
+
+### Consequences
+
+**Positive**:
+- Full data visibility for QA and analysis
+- No information loss during merge
+- Enables cross-provider comparison
+
+**Negative**:
+- Wider tables (more columns)
+- Downstream consumers must handle multiple columns per field
+- Breaking change for consumers expecting coalesced columns
+
+## Field Group Registry
+
+When `preserve_all_sources: true` is enabled, the number of columns grows significantly (94 base fields × up to 5 providers). The **Field Group Registry** (`FieldGroupRegistry`) provides semantic grouping for these columns.
+
+### Purpose
+
+1. **Gold Filtering**: Automatically exclude TRASH-group fields (e.g., `content_hash`, `language`) from Gold output
+2. **Column Ordering**: Sort output columns by semantic group (ID_AND_STATUS first, TRASH last) and provider priority
+3. **Validation**: Identify unmapped columns for data quality checks
+
+### Domain Models
+
+```
+FieldGroupId (enum)          — 8 semantic groups (alias for PublicationFieldGroup)
+FieldMapping (frozen)        — base_name → provider_columns + group
+FieldGroupDefinition (frozen)— group_id, display_name, include_in_gold, fields
+FieldGroupRegistry           — central registry with lookup indices
+```
+
+### YAML Configuration
+
+Field groups are defined in `configs/composite/field_groups/publication.yaml`:
+
+```yaml
+version: "1.0"
+entity: publication
+provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+groups:
+  - id: id_and_status
+    display_name: "ID & Status"
+    include_in_gold: true
+    fields:
+      - base_name: doi
+        columns:
+          - chembl.publication.doi
+          - crossref.publication.doi
+          - openalex.publication.doi
+  - id: trash
+    display_name: "Trash"
+    include_in_gold: false
+    fields:
+      - base_name: content_hash
+        columns: [chembl.publication.content_hash, ...]
+```
+
+### Integration with MergeService
+
+During `_write_merged_gold()`, `MergeService` uses the registry to filter out TRASH columns:
+
+```python
+if self._field_group_registry is not None:
+    trash_cols = self._field_group_registry.get_trash_columns(df.columns)
+    if trash_cols:
+        df = df.drop(trash_cols)
+```
+
+### Graceful Degradation
+
+If no YAML config exists for a composite pipeline, bootstrap continues without the registry. No filtering or ordering is applied — the pipeline works as before.
+
+### Files
+
+| Layer | File | Description |
+|-------|------|-------------|
+| Domain | `domain/composite/field_groups.py` | Models: FieldMapping, FieldGroupDefinition, FieldGroupRegistry |
+| Infrastructure | `infrastructure/config/field_group_loader.py` | YAML → domain object loader |
+| Config | `configs/composite/field_groups/publication.yaml` | 8 groups, 94 fields |
+| Composition | `composition/bootstrap/runtime/composite.py` | Bootstrap integration |
+| Application | `application/composite/merger.py` | Gold filtering integration |
 
 ## Application Layer
 
@@ -1102,5 +1241,5 @@ def run(pipeline: str, enrich_only: str | None, required_only: bool, ...):
 - ADR-010: Local-Only Deployment
 - ADR-015: Pipeline Services Lifecycle
 - ADR-020: BasePipeline Decomposition
-- RULES.md v5.12 §2.4 (Backfill/Replay)
-- RULES.md v5.12 §3.3 (Concurrency & Locks)
+- RULES.md v5.15 §2.4 (Backfill/Replay)
+- RULES.md v5.15 §3.3 (Concurrency & Locks)

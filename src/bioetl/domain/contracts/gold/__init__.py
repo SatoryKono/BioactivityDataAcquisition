@@ -8,6 +8,7 @@ Submodules:
     pubchem: PubChem compound schemas
     uniprot: UniProt protein database schemas
     publications: Cross-provider publication schemas (PubMed, CrossRef, OpenAlex, SemanticScholar)
+    composite: Composite pipeline schemas (merged multi-source entities)
 
 Example usage:
     >>> from bioetl.domain.contracts.gold import chembl
@@ -16,6 +17,9 @@ Example usage:
 
     >>> from bioetl.domain.contracts.gold.publications import PubMedPublicationGoldSchema
     >>> PubMedPublicationGoldSchema.validate(pubmed_df)
+
+    >>> from bioetl.domain.contracts.gold.composite import CompositePublicationGoldSchema
+    >>> CompositePublicationGoldSchema.validate(composite_df)
 """
 
 from __future__ import annotations
@@ -34,6 +38,9 @@ from bioetl.domain.contracts.gold.chembl import (
     ChEMBLProteinClassGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
+)
+from bioetl.domain.contracts.gold.composite import (
+    CompositePublicationGoldSchema,
 )
 from bioetl.domain.contracts.gold.pubchem import PubChemCompoundGoldSchema
 from bioetl.domain.contracts.gold.publications import (
@@ -60,6 +67,7 @@ __all__ = [
     "ChEMBLProteinClassGoldSchema",
     "ChEMBLTargetComponentGoldSchema",
     "ChEMBLTargetGoldSchema",
+    "CompositePublicationGoldSchema",
     "CrossRefPublicationGoldSchema",
     "OpenAlexPublicationGoldSchema",
     "PubChemCompoundGoldSchema",

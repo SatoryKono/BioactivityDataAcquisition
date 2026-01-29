@@ -20,7 +20,7 @@ from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.domain.composite.config import ColumnGroupConfig
+    from bioetl.domain.composite.config import ColumnGroupConfig, LayerColumnConfig
     from bioetl.domain.ports import LoggerPort
 
 __all__ = ["ColumnOrderer"]
@@ -103,6 +103,20 @@ class ColumnOrderer:
             )
 
         return df.select(ordered)
+
+    def order_column_names(self, columns: Sequence[str]) -> list[str]:
+        """Order column names by semantic groups.
+
+        Uses YAML-based column groups when configured, otherwise falls back
+        to the default semantic ordering.
+        """
+        if not columns:
+            return []
+
+        if self._column_groups:
+            return self._order_by_yaml_groups(columns)
+
+        return self.get_ordered_columns(columns)
 
     def get_ordered_columns(self, columns: Sequence[str]) -> list[str]:
         """Get columns in semantic order.
@@ -301,3 +315,88 @@ class ColumnOrderer:
         if len(parts) == 2:
             return parts[1]  # field.A -> A (conflict suffix) - keep original
         return column
+
+    def filter_by_layer_config(
+        self,
+        columns: Sequence[str],
+        layer_config: LayerColumnConfig,
+    ) -> list[str]:
+        """Filter columns by layer-specific configuration.
+
+        Supports three filtering modes:
+        1. Explicit column list (layer_config.columns)
+        2. Group-based filtering (layer_config.include_groups + exclude_fields)
+        3. Layer-specific groups (layer_config.column_groups)
+
+        Also applies rename_fields mapping if specified.
+
+        Args:
+            columns: Available columns to filter.
+            layer_config: Layer-specific column configuration.
+
+        Returns:
+            Filtered list of columns in semantic order (with renames applied).
+        """
+        from fnmatch import fnmatch
+
+        # Mode 1: Explicit column list
+        if layer_config.columns:
+            # Return columns in specified order, keeping only those available
+            filtered = [c for c in layer_config.columns if c in columns]
+            return self._apply_renames(filtered, layer_config.rename_fields)
+
+        # Mode 2: Group-based filtering
+        if layer_config.include_groups:
+            if not self._column_groups:
+                self._logger.warning(
+                    "include_groups specified but no column_groups configured",
+                    include_groups=layer_config.include_groups,
+                )
+                return list(columns)
+
+            # Filter groups by include_groups
+            included_groups = [
+                g for g in self._column_groups if g.name in layer_config.include_groups
+            ]
+
+            # Match columns to included groups
+            all_cols = set(columns)
+            matched: set[str] = set()
+            for group in included_groups:
+                group_columns = self._collect_group_columns(all_cols - matched, group)
+                matched.update(group_columns)
+
+            # Apply exclude_fields filter
+            if layer_config.exclude_fields:
+                matched = {
+                    c
+                    for c in matched
+                    if not any(
+                        fnmatch(c, pattern) for pattern in layer_config.exclude_fields
+                    )
+                }
+
+            # Order by semantic groups
+            ordered = self._order_by_yaml_groups(list(matched))
+            return self._apply_renames(ordered, layer_config.rename_fields)
+
+        # Mode 3: Layer-specific groups (handled by caller via constructor)
+        # If we reach here, no filtering is needed
+        return list(columns)
+
+    def _apply_renames(
+        self, columns: list[str], rename_map: dict[str, str]
+    ) -> list[str]:
+        """Apply column renames from rename_fields mapping.
+
+        Args:
+            columns: List of column names to rename.
+            rename_map: Mapping of old_name -> new_name.
+
+        Returns:
+            List of columns with renames applied.
+        """
+        if not rename_map:
+            return columns
+
+        return [rename_map.get(col, col) for col in columns]

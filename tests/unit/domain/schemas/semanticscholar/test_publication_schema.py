@@ -129,7 +129,7 @@ class TestPublicationDateValidation:
 
 
 class TestMetricsValidation:
-    """Tests for citation_count and reference_count validation."""
+    """Tests for citations_received and citations_made validation."""
 
     def test_valid_citation_count(self) -> None:
         """Test valid non-negative citation count."""
@@ -229,30 +229,29 @@ class TestSchemaFieldDefinitions:
         schema = SemanticScholarPublicationSchema.to_schema()
         # Note: underscore-prefixed fields are not exposed in schema.columns
         # by pandera, so we only test public business fields here
+        # Note: pmc_id, arxiv_id excluded per design (2026-01)
         required_fields = [
             "paper_id",
             "doi",
             "pmid",
-            "pmc_id",
-            "arxiv_id",
             "dblp_id",
             "corpus_id",
             "title",
             "abstract",
             "tldr",
-            "year",
+            "publication_year",
             "publication_date",
             "journal",
             "volume",
-            "pages",
-            "venue",
-            "citation_count",
-            "reference_count",
+            "page_range",
+            "citations_received",
+            "citations_made",
             "influential_citation_count",
             "is_oa",
             "open_access_url",
             "oa_status",
-            "fields_of_study",
+            "subject_fields",
+            "publication_type",
             "publication_types",
             "authors",
             # Note: _source is not in schema.columns because pandera ignores
@@ -285,11 +284,10 @@ class TestSchemaFieldDefinitions:
         """Test optional string fields are nullable."""
         schema = SemanticScholarPublicationSchema.to_schema()
         # Note: underscore-prefixed fields like _original_id are not exposed
+        # Note: pmc_id, arxiv_id excluded per design (2026-01)
         nullable_fields = [
             "doi",
             "pmid",
-            "pmc_id",
-            "arxiv_id",
             "dblp_id",
             "title",
             "abstract",
@@ -297,11 +295,11 @@ class TestSchemaFieldDefinitions:
             "publication_date",
             "journal",
             "volume",
-            "pages",
-            "venue",
+            "page_range",
             "open_access_url",
             "oa_status",
-            "fields_of_study",
+            "subject_fields",
+            "publication_type",
             "publication_types",
             "authors",
         ]

@@ -4,8 +4,16 @@
 # =============================================================================
 # Entity-specific filter rules for composite publication pipeline.
 # Reference: ADR-028 (Filter Rules Externalization)
+#
+# Gold Contract: CompositePublicationGoldSchema
+# JSON Schema: docs/contracts/gold/composite_publication_v1.0.json
+#
+# Version: 1.1.0
+# Last Updated: 2026-01-27
+#
+# =============================================================================
 
-version: "1.0.0"
+version: "1.1.0"
 provider: composite
 entity: publication
 
@@ -20,8 +28,56 @@ input_filter:
 # -----------------------------------------------------------------------------
 # Gold Filters
 # -----------------------------------------------------------------------------
-# Criteria for valid publications
+# Criteria for valid publications in Gold layer
+# Note: Composite uses qualified column names ({provider}.{entity}.{field})
+# Filter rules apply to either qualified or coalesced column names
 gold_filters:
-  # Only include publications with title
+  # Required fields - records missing these are excluded from Gold
+  # Note: Title may appear as chembl.publication.title (qualified) or title (coalesced)
   required_fields:
     - title
+
+  # Field-specific validation (applied before Gold write)
+  # Note: Since composite has variable columns, only validate core fields
+  columns: {}
+
+# -----------------------------------------------------------------------------
+# DQ Thresholds (from composite config)
+# -----------------------------------------------------------------------------
+# These thresholds are applied during composite merge:
+# - soft_fail_threshold: 0.10 (10% errors = warning)
+# - hard_fail_threshold: 0.30 (30% errors = failure)
+#
+# Per-enricher overrides defined in composite config:
+# - semanticscholar_publication: soft=0.20, hard=0.50
+# - pubmed_publication: soft=0.15, hard=0.40
+
+# -----------------------------------------------------------------------------
+# Gold Contract Reference
+# -----------------------------------------------------------------------------
+# Required system fields (from CompositePublicationGoldSchema):
+#   - entity_id (not null)
+#   - content_hash (not null)
+#   - _dq_warn (not null, bool)
+#   - _dq_error (not null, bool)
+#   - _run_id (not null)
+#   - _run_type (not null)
+#   - _ingestion_ts (not null)
+#   - _index (not null)
+#
+# Required lineage fields (added by MergeService):
+#   - _composite_run_id (not null)
+#   - _source_providers (not null, JSON list)
+#   - _enrichment_status (not null, JSON dict)
+#   - _lineage_created_at (not null, ISO timestamp)
+#
+# Optional seed fields:
+#   - _source (nullable)
+#   - _lookup_method (nullable)
+#   - _original_id (nullable)
+#   - _source_batch_id (nullable)
+#
+# Business fields use qualified names:
+#   - chembl.publication.document_chembl_id (seed primary key)
+#   - chembl.publication.title, crossref.publication.title, etc.
+#   - Additional columns depend on enricher success

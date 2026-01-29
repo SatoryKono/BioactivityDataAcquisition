@@ -40,15 +40,15 @@ def valid_record() -> dict:
         # Cross-reference IDs for linking publications across providers
         "doi": "10.1038/s41586-024-07487-w",
         "pmid": "12345678",  # PubMed ID (numeric string)
-        "pmc_id": "PMC1234567",  # PubMed Central ID (format: PMC1234567)
+        "pmc_id": None,  # Excluded from Silver/Gold schemas per design (2026-01)
         # Core content
         "title": "Example Publication",
         "abstract": "This is an abstract",
         "authors": '["John Doe", "Jane Smith"]',  # JSON array (unified format)
         # Publication metadata
-        "year": 2024,
+        "publication_year": 2024,
         "publication_date": "2024-05-15",
-        "doc_type": "PUBLICATION",
+        "publication_type": "article",  # Raw OpenAlex type (unified field name)
         "language": "en",
         # Journal info
         "journal": "Nature",
@@ -58,30 +58,38 @@ def valid_record() -> dict:
         "is_oa": True,
         "oa_status": "gold",
         # Metrics
-        "citation_count": 42,  # Unified field name (from OpenAlex cited_by_count)
+        "citations_received": 42,  # Unified field name (from OpenAlex cited_by_count)
         # Bibliographic info (from biblio object)
         "volume": "42",
         "issue": "3",
-        "first_page": "123",
-        "last_page": "145",
+        "page_first": "123",
+        "page_last": "145",
         # Additional metrics
         "fwci": 1.5,  # Field-Weighted Citation Impact
-        "referenced_works_count": 25,
+        "citations_made": 25,
         # Quality indicators
         "is_retracted": False,
         # Topics (hierarchical classification - replaces deprecated concepts)
-        "topics": '[{"id": "T12345", "display_name": "Topic A", "score": 0.95}]',
+        "subject_topics": '[{"id": "T12345", "display_name": "Topic A", "score": 0.95}]',
         "primary_topic": '{"id": "T12345", "display_name": "Topic A", "score": 0.95}',
         # Grants/funding information
         "grants": '[{"funder": "F1234", "funder_display_name": "NIH", "award_id": "R01"}]',
-        # Classification (JSON arrays)
-        "concepts": '["Biology", "Genetics"]',
-        "mesh": '["D000123", "D000456"]',
-        "keywords": '["gene expression", "transcription"]',
+        # Classification (JSON arrays, unified field names)
+        "concepts": '["Biology", "Genetics"]',  # Extra column (not in schema, allowed by strict=False)
+        "subject_mesh": '["D000123", "D000456"]',
+        "subject_keywords": '["gene expression", "transcription"]',
         # External identifier
         "mag_id": "12345678",
         # Author affiliations
-        "affiliations": '["MIT", "Stanford"]',
+        "affiliation_list": '["MIT", "Stanford"]',
+        # Author identifiers
+        "author_orcids": '["0000-0001-2345-6789", ""]',
+        "author_openalex_ids": '["A1234567890", "A9876543210"]',
+        # Institution identifiers
+        "institution_ids": '["I1234567890", "I9876543210"]',
+        "institution_country_codes": '["US", "GB"]',
+        # ROR identifiers (may be empty if not returned by Works API)
+        "ror_ids": None,
         # Lookup tracking
         "_source": "openalex",
         "_lookup_method": "doi",
@@ -143,38 +151,38 @@ class TestOpenAlexPublicationSchema:
         assert pd.isna(validated["doi"].iloc[0])
 
     def test_year_range_validation(self, valid_record: dict) -> None:
-        """Should validate year range (1800-2100)."""
+        """Should validate publication_year range (1800-2100)."""
         # Valid year
-        valid_record["year"] = 2024
+        valid_record["publication_year"] = 2024
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["year"].iloc[0] == 2024
+        assert validated["publication_year"].iloc[0] == 2024
 
         # Valid boundary values
         for year in [1800, 2100]:
-            valid_record["year"] = year
+            valid_record["publication_year"] = year
             df = pd.DataFrame([valid_record])
             validated = OpenAlexPublicationSchema.validate(df)
-            assert validated["year"].iloc[0] == year
+            assert validated["publication_year"].iloc[0] == year
 
         # Year too low
-        valid_record["year"] = 1799
+        valid_record["publication_year"] = 1799
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             OpenAlexPublicationSchema.validate(df)
 
         # Year too high
-        valid_record["year"] = 2101
+        valid_record["publication_year"] = 2101
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             OpenAlexPublicationSchema.validate(df)
 
     def test_year_nullable(self, valid_record: dict) -> None:
-        """Should allow null year."""
-        valid_record["year"] = None
+        """Should allow null publication_year."""
+        valid_record["publication_year"] = None
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert pd.isna(validated["year"].iloc[0])
+        assert pd.isna(validated["publication_year"].iloc[0])
 
     def test_publication_date_format(self, valid_record: dict) -> None:
         """Should validate publication_date format (YYYY-MM-DD)."""
@@ -207,20 +215,20 @@ class TestOpenAlexPublicationSchema:
         validated = OpenAlexPublicationSchema.validate(df)
         assert pd.isna(validated["oa_status"].iloc[0])
 
-    def test_citation_count_non_negative(self, valid_record: dict) -> None:
-        """Should validate citation_count is non-negative.
+    def test_citations_received_non_negative(self, valid_record: dict) -> None:
+        """Should validate citations_received is non-negative.
 
         Note: OpenAlex source field is 'cited_by_count', but we use the
-        unified field name 'citation_count' for cross-provider consistency.
+        unified field name 'citations_received' for cross-provider consistency.
         """
         # Valid count
-        valid_record["citation_count"] = 0
+        valid_record["citations_received"] = 0
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["citation_count"].iloc[0] == 0
+        assert validated["citations_received"].iloc[0] == 0
 
         # Negative count
-        valid_record["citation_count"] = -1
+        valid_record["citations_received"] = -1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             OpenAlexPublicationSchema.validate(df)
@@ -251,12 +259,8 @@ class TestOpenAlexPublicationSchema:
         assert "_source" in valid_record
         assert valid_record["_source"] is not None
 
-    def test_doc_type_required(self, valid_record: dict) -> None:
-        """Should require doc_type field."""
-        valid_record["doc_type"] = None
-        df = pd.DataFrame([valid_record])
-        with pytest.raises(SchemaError):
-            OpenAlexPublicationSchema.validate(df)
+    # Note: test_doc_type_required removed - doc_type replaced by 'type' field (2026-01)
+    # OpenAlex now uses raw 'type' field instead of unified doc_type
 
     def test_content_hash_format(self, valid_record: dict) -> None:
         """Should validate content_hash is 64 hex chars."""
@@ -313,32 +317,32 @@ class TestOpenAlexPublicationSchema:
         validated = OpenAlexPublicationSchema.validate(df)
         assert pd.isna(validated["fwci"].iloc[0])
 
-    def test_referenced_works_count_non_negative(self, valid_record: dict) -> None:
-        """Should validate referenced_works_count is non-negative."""
+    def test_citations_made_non_negative(self, valid_record: dict) -> None:
+        """Should validate citations_made is non-negative."""
         # Valid count
-        valid_record["referenced_works_count"] = 25
+        valid_record["citations_made"] = 25
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["referenced_works_count"].iloc[0] == 25
+        assert validated["citations_made"].iloc[0] == 25
 
         # Zero is valid
-        valid_record["referenced_works_count"] = 0
+        valid_record["citations_made"] = 0
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["referenced_works_count"].iloc[0] == 0
+        assert validated["citations_made"].iloc[0] == 0
 
         # Negative count
-        valid_record["referenced_works_count"] = -1
+        valid_record["citations_made"] = -1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             OpenAlexPublicationSchema.validate(df)
 
-    def test_referenced_works_count_nullable(self, valid_record: dict) -> None:
-        """Should allow null referenced_works_count."""
-        valid_record["referenced_works_count"] = None
+    def test_citations_made_nullable(self, valid_record: dict) -> None:
+        """Should allow null citations_made."""
+        valid_record["citations_made"] = None
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert pd.isna(validated["referenced_works_count"].iloc[0])
+        assert pd.isna(validated["citations_made"].iloc[0])
 
     def test_is_retracted_values(self, valid_record: dict) -> None:
         """Should validate is_retracted boolean values."""
@@ -354,20 +358,20 @@ class TestOpenAlexPublicationSchema:
         validated = OpenAlexPublicationSchema.validate(df)
         assert validated["is_retracted"].iloc[0] == True  # noqa: E712
 
-    def test_topics_nullable(self, valid_record: dict) -> None:
-        """Should allow null topics."""
-        valid_record["topics"] = None
+    def test_subject_topics_nullable(self, valid_record: dict) -> None:
+        """Should allow null subject_topics."""
+        valid_record["subject_topics"] = None
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert pd.isna(validated["topics"].iloc[0])
+        assert pd.isna(validated["subject_topics"].iloc[0])
 
-    def test_topics_json_string(self, valid_record: dict) -> None:
-        """Should accept topics as JSON-serialized string."""
+    def test_subject_topics_json_string(self, valid_record: dict) -> None:
+        """Should accept subject_topics as JSON-serialized string."""
         topics_json = '[{"id": "T1", "display_name": "Topic 1", "score": 0.9}]'
-        valid_record["topics"] = topics_json
+        valid_record["subject_topics"] = topics_json
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["topics"].iloc[0] == topics_json
+        assert validated["subject_topics"].iloc[0] == topics_json
 
     def test_primary_topic_nullable(self, valid_record: dict) -> None:
         """Should allow null primary_topic."""
@@ -400,3 +404,63 @@ class TestOpenAlexPublicationSchema:
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
         assert validated["grants"].iloc[0] == grants_json
+
+    def test_author_orcids_nullable(self, valid_record: dict) -> None:
+        """Should allow null author_orcids."""
+        valid_record["author_orcids"] = None
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert pd.isna(validated["author_orcids"].iloc[0])
+
+    def test_author_orcids_json_string(self, valid_record: dict) -> None:
+        """Should accept author_orcids as JSON-serialized string."""
+        orcids_json = '["0000-0001-2345-6789", "0000-0002-3456-7890"]'
+        valid_record["author_orcids"] = orcids_json
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["author_orcids"].iloc[0] == orcids_json
+
+    def test_author_ids_nullable(self, valid_record: dict) -> None:
+        """Should allow null author_openalex_ids."""
+        valid_record["author_openalex_ids"] = None
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert pd.isna(validated["author_openalex_ids"].iloc[0])
+
+    def test_author_ids_json_string(self, valid_record: dict) -> None:
+        """Should accept author_openalex_ids as JSON-serialized string."""
+        ids_json = '["A1234567890", "A9876543210"]'
+        valid_record["author_openalex_ids"] = ids_json
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["author_openalex_ids"].iloc[0] == ids_json
+
+    def test_institution_ids_nullable(self, valid_record: dict) -> None:
+        """Should allow null institution_ids."""
+        valid_record["institution_ids"] = None
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert pd.isna(validated["institution_ids"].iloc[0])
+
+    def test_institution_ids_json_string(self, valid_record: dict) -> None:
+        """Should accept institution_ids as JSON-serialized string."""
+        ids_json = '["I1234567890", "I9876543210"]'
+        valid_record["institution_ids"] = ids_json
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["institution_ids"].iloc[0] == ids_json
+
+    def test_institution_country_codes_nullable(self, valid_record: dict) -> None:
+        """Should allow null institution_country_codes."""
+        valid_record["institution_country_codes"] = None
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert pd.isna(validated["institution_country_codes"].iloc[0])
+
+    def test_institution_country_codes_json_string(self, valid_record: dict) -> None:
+        """Should accept institution_country_codes as JSON-serialized string."""
+        codes_json = '["US", "GB", "DE"]'
+        valid_record["institution_country_codes"] = codes_json
+        df = pd.DataFrame([valid_record])
+        validated = OpenAlexPublicationSchema.validate(df)
+        assert validated["institution_country_codes"].iloc[0] == codes_json

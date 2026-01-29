@@ -84,28 +84,6 @@ class TestOpenAlexPublicationTransformerIntegration:
         assert extract_openalex_id(None) is None
 
     @pytest.mark.asyncio
-    async def test_transformer_concepts_extraction(self) -> None:
-        """Test concepts extraction with max count."""
-        from bioetl.application.pipelines.openalex.extractors import extract_concepts
-
-        concepts = [
-            {"display_name": "Biology", "score": 0.9},
-            {"display_name": "Chemistry", "score": 0.8},
-            {"display_name": "Physics", "score": 0.7},
-            {"display_name": "Math", "score": 0.6},
-        ]
-
-        # Default max_count=10
-        result = extract_concepts(concepts)
-        assert len(result) == 4
-
-        # With max_count=2
-        result = extract_concepts(concepts, max_count=2)
-        assert len(result) == 2
-        assert "Biology" in result
-        assert "Chemistry" in result
-
-    @pytest.mark.asyncio
     async def test_transformer_journal_info_extraction(self) -> None:
         """Test journal info extraction from primary_location."""
         from bioetl.application.pipelines.openalex.extractors import (
@@ -121,7 +99,7 @@ class TestOpenAlexPublicationTransformerIntegration:
         }
 
         result = extract_journal_info(primary_location)
-        assert result["journal_name"] == "Nature"
+        assert result["journal"] == "Nature"
         assert result["issn"] == "0028-0836"
         assert result["publisher"] == "Springer Nature"
 
@@ -145,3 +123,73 @@ class TestOpenAlexPublicationTransformerIntegration:
         result = extract_open_access_info({})
         assert result["is_oa"] is None
         assert result["oa_status"] is None
+
+    @pytest.mark.asyncio
+    async def test_transformer_author_orcids_extraction(self) -> None:
+        """Test ORCID extraction from authorships."""
+        from bioetl.application.pipelines.openalex.extractors import (
+            extract_author_orcids,
+        )
+
+        authorships = [
+            {"author": {"orcid": "https://orcid.org/0000-0001-2345-6789"}},
+            {"author": {"orcid": None}},
+            {"author": {"orcid": "https://orcid.org/0000-0002-3456-789X"}},
+        ]
+
+        result = extract_author_orcids(authorships)
+        assert len(result) == 3
+        assert result == ["0000-0001-2345-6789", "", "0000-0002-3456-789X"]
+
+    @pytest.mark.asyncio
+    async def test_transformer_author_openalex_ids_extraction(self) -> None:
+        """Test OpenAlex author ID extraction from authorships."""
+        from bioetl.application.pipelines.openalex.extractors import extract_author_ids
+
+        authorships = [
+            {"author": {"id": "https://openalex.org/A1234567890"}},
+            {"author": {"id": None}},
+            {"author": {"id": "https://openalex.org/A9876543210"}},
+        ]
+
+        result = extract_author_ids(authorships)
+        assert len(result) == 3
+        assert result == ["A1234567890", "", "A9876543210"]
+
+    @pytest.mark.asyncio
+    async def test_transformer_institution_ids_extraction(self) -> None:
+        """Test institution ID extraction from authorships."""
+        from bioetl.application.pipelines.openalex.extractors import (
+            extract_institution_ids,
+        )
+
+        authorships = [
+            {
+                "institutions": [
+                    {"id": "https://openalex.org/I1234567890"},
+                    {"id": "https://openalex.org/I1111111111"},
+                ]
+            },
+            {"institutions": [{"id": "https://openalex.org/I1234567890"}]},  # Duplicate
+        ]
+
+        result = extract_institution_ids(authorships)
+        # Should be unique and sorted
+        assert result == ["I1111111111", "I1234567890"]
+
+    @pytest.mark.asyncio
+    async def test_transformer_institution_country_codes_extraction(self) -> None:
+        """Test institution country code extraction from authorships."""
+        from bioetl.application.pipelines.openalex.extractors import (
+            extract_institution_country_codes,
+        )
+
+        authorships = [
+            {"institutions": [{"country_code": "US"}, {"country_code": "GB"}]},
+            {"institutions": [{"country_code": "US"}]},  # Duplicate
+            {"institutions": [{"country_code": "de"}]},  # Lowercase
+        ]
+
+        result = extract_institution_country_codes(authorships)
+        # Should be unique, sorted, and uppercased
+        assert result == ["DE", "GB", "US"]

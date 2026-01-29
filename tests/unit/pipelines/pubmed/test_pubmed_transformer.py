@@ -1,4 +1,3 @@
-# ruff: noqa: RUF001
 """Unit tests for PubMedPublicationTransformer.
 
 Comprehensive tests for XML parsing and field extraction edge cases.
@@ -209,11 +208,11 @@ class TestExtractJournalData:
         result = transformer._extract_journal_data(article)
 
         assert result["journal"] == "Nature Medicine"
-        assert result["journal_abbrev"] == "Nat Med"
+        assert result["journal_name_short"] == "Nat Med"
         assert result["issn"] == "1234-5678"
         assert result["volume"] == "25"
         assert result["issue"] == "10"
-        assert result["pages"] == "100-110"
+        assert result["page_range"] == "100-110"
 
     def test_extract_journal_data_missing_journal(self, transformer):
         """Test extraction when Journal element is missing."""
@@ -231,11 +230,11 @@ class TestExtractJournalData:
         result = transformer._extract_journal_data(article)
 
         assert result["journal"] is None
-        assert result["journal_abbrev"] is None
+        assert result["journal_name_short"] is None
         assert result["issn"] is None
         assert result["volume"] is None
         assert result["issue"] is None
-        assert result["pages"] == "100-110"
+        assert result["page_range"] == "100-110"
 
     def test_extract_journal_data_partial(self, transformer):
         """Test extraction with partial journal data."""
@@ -253,11 +252,11 @@ class TestExtractJournalData:
         result = transformer._extract_journal_data(article)
 
         assert result["journal"] == "Test Journal"
-        assert result["journal_abbrev"] is None
+        assert result["journal_name_short"] is None
         assert result["issn"] is None
         assert result["volume"] is None
         assert result["issue"] is None
-        assert result["pages"] is None
+        assert result["page_range"] is None
 
     def test_extract_journal_data_missing_journal_issue(self, transformer):
         """Test extraction when JournalIssue is missing."""
@@ -276,7 +275,7 @@ class TestExtractJournalData:
         result = transformer._extract_journal_data(article)
 
         assert result["journal"] == "Test Journal"
-        assert result["journal_abbrev"] == "Test J"
+        assert result["journal_name_short"] == "Test J"
         assert result["volume"] is None
         assert result["issue"] is None
 
@@ -327,7 +326,6 @@ class TestExtractDateData:
         result = transformer._extract_date_data(article, pubmed_data, None)
 
         assert result["pub_date"] == "2023-03-15"
-        assert result["year"] == 2023
         assert result["publication_year"] == 2023
         # accepted_date, received_date, revised_date, epub_date excluded per user request
         assert result["date_completed"] is None
@@ -354,7 +352,6 @@ class TestExtractDateData:
 
         # End-of-period strategy: year-only → YYYY-12-31
         assert result["pub_date"] == "2023-12-31"
-        assert result["year"] == 2023
         assert result["publication_year"] == 2023
         # accepted_date, received_date, revised_date, epub_date excluded per user request
         assert result["date_completed"] is None
@@ -370,7 +367,6 @@ class TestExtractDateData:
         result = transformer._extract_date_data(article, None, None)
 
         assert result["pub_date"] is None
-        assert result["year"] is None
         assert result["publication_year"] is None
         # accepted_date, received_date, revised_date, epub_date excluded per user request
         assert result["date_completed"] is None
@@ -390,7 +386,7 @@ class TestExtractDateData:
         result = transformer._extract_date_data(article, None, None)
 
         assert result["pub_date"] is None
-        assert result["year"] is None
+        assert result["publication_year"] is None
         assert result["date_completed"] is None
         assert result["date_revised"] is None
 
@@ -430,7 +426,7 @@ class TestExtractDateData:
 
         assert result["date_completed"] == "2023-05-15"
         assert result["date_revised"] == "2024-01-10"
-        assert result["year"] == 2023
+        assert result["publication_year"] == 2023
 
 
 class TestExtractBusinessData:
@@ -521,16 +517,15 @@ class TestExtractBusinessData:
         # Authors are now JSON-serialized
         assert json.loads(result["authors"]) == ["Doe, J", "Smith, Jane"]
         assert result["journal"] == "Test Journal"
-        assert result["journal_abbrev"] == "Test J"
+        assert result["journal_name_short"] == "Test J"
         assert result["issn"] == "1234-5678"
         assert result["volume"] == "10"
         assert result["issue"] == "5"
         assert result["pub_date"] == "2023-03-15"
-        assert result["year"] == 2023
         assert result["publication_year"] == 2023
         assert result["publication_types"] == ["Journal Article", "Review"]
-        assert result["keywords"] == ["keyword1", "keyword2"]
-        assert result["mesh_terms"] == ["Proteins"]
+        assert result["subject_keywords"] == ["keyword1", "keyword2"]
+        assert result["subject_mesh"] == ["Proteins"]
         assert result["language"] == "eng"
         assert result["country"] == "United States"
         assert result["pmc_id"] == "PMC123456"

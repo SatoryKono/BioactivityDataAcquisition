@@ -162,14 +162,16 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             **journal_info,
             **page_info,
             **dates,
-            "year": extract_year(rec),
+            "publication_year": extract_year(rec),
             "publication_date": publication_date,
-            "type": rec.get("type"),  # Raw CrossRef type preserved
-            "citation_count": rec.get("is-referenced-by-count"),
-            "reference_count": rec.get("references-count"),
+            "publication_type": rec.get(
+                "type"
+            ),  # Raw CrossRef type (journal-article, etc.)
+            "citations_received": rec.get("is-referenced-by-count"),
+            "citations_made": rec.get("references-count"),
             "language": rec.get("language"),
             "license_url": extract_license_url(rec),
-            "subjects": rec.get("subject", []),
+            "subject_keywords": rec.get("subject", []),
             "_source": "crossref",
             # Excluded fields (always NULL, not written to Delta Lake):
             # - is_oa: CrossRef doesn't provide Open Access info
@@ -183,12 +185,14 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "_dq_error": False,
             # NEW: Additional CrossRef fields
             "alternative_id": rec.get("alternative-id", []) or [],
-            "short_container_title": rec.get("short-container-title", []) or [],
+            "journal_name_short": extract_first_string(
+                rec.get("short-container-title")
+            ),
             "published": published_date,
             **content_domain,
             **issn_by_type,
             # NEW: Author and reference data (per PROMPT 3 enhancement)
-            "author_orcids": serialized_orcids,
+            "author_orcid_list": serialized_orcids,
             "author_details": serialized_author_details,
             "references": serialized_references,
         }
@@ -325,7 +329,6 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         """Convert Domain Entity to SilverRecord, excluding unused fields.
 
         Overrides base implementation to remove fields not collected for CrossRef.
-        CrossRef uses raw 'type' field instead of mapped 'doc_type'.
 
         Args:
             entity: Domain entity (dataclass).
@@ -341,9 +344,18 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
         # Remove excluded fields (CrossRef doesn't provide these)
         silver_record.pop("abstract", None)
-        silver_record.pop("affiliations", None)
+        silver_record.pop("affiliation_list", None)
         silver_record.pop("pmid", None)
         silver_record.pop("pmc_id", None)
-        silver_record.pop("doc_type", None)  # CrossRef uses raw 'type' instead
+
+        # Convert ISSN list to scalar + JSON array (unification with other providers)
+        issn_raw = silver_record.get("issn")
+        if isinstance(issn_raw, list):
+            silver_record["issn"] = issn_raw[0] if issn_raw else None
+            silver_record["issn_list"] = (
+                BaseTransformer.serialize_json_list(issn_raw) if issn_raw else None
+            )
+        else:
+            silver_record.setdefault("issn_list", None)
 
         return silver_record

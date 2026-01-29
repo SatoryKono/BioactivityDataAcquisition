@@ -84,6 +84,7 @@ class StoragePort(Protocol):
         mode: Literal["merge", "append", "delete"] = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        column_order: list[str] | None = None,
         bronze_refs: list[BronzeWriteResult] | None = None,
     ) -> SilverWriteResult | None:
         """Write transformed records to the Silver layer.
@@ -99,6 +100,7 @@ class StoragePort(Protocol):
                 - 'error': Raise SchemaEvolutionError (default)
                 - 'evolve': Allow schema evolution (add new columns)
                 - 'ignore': Proceed without changes (filter to existing schema)
+            column_order: Optional explicit column order to apply.
             bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
                 If provided, bronze_paths will be populated in Silver metadata
                 for complete lineage tracking (REQ-LINEAGE-001).
@@ -124,6 +126,7 @@ class StoragePort(Protocol):
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,
+        column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
         silver_refs: list[Any] | None = None,
@@ -136,6 +139,7 @@ class StoragePort(Protocol):
             schema: Pandera DataFrameSchema for strict validation (required).
             primary_keys: Optional list of column names for sorting/deduplication.
             mode: The write mode (e.g., 'overwrite', 'append', 'scd2').
+            column_order: Optional explicit column order to apply.
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required for audit.
             run_id: Run identifier for audit correlation across layers.
@@ -179,6 +183,7 @@ class StoragePort(Protocol):
         *,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
     ) -> None:
         """Write merged records to Silver layer without explicit schema.
 
@@ -191,6 +196,9 @@ class StoragePort(Protocol):
             primary_keys: Optional list of column names for sorting.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
+            preserve_column_order: If True, skip canonical_column_order()
+                and preserve the column order from records (e.g. semantic
+                ordering applied by ColumnOrderer in composite pipelines).
 
         Note:
             This method bypasses strict schema validation since merged data
@@ -206,6 +214,7 @@ class StoragePort(Protocol):
         *,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
     ) -> None:
         """Write merged records to Gold layer without Pandera schema.
 
@@ -218,6 +227,9 @@ class StoragePort(Protocol):
             primary_keys: Optional list of column names for sorting.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
+            preserve_column_order: If True, skip canonical_column_order()
+                and preserve the column order from records (e.g. semantic
+                ordering applied by ColumnOrderer in composite pipelines).
 
         Note:
             This method bypasses Pandera validation since merged data

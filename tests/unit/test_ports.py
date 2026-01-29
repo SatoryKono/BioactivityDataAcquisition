@@ -186,6 +186,7 @@ class TestStoragePortProtocol:
                 *,
                 run_id: str | None = None,
                 sources_used: list[str] | None = None,
+                preserve_column_order: bool = False,
             ) -> None:
                 pass
 
@@ -197,6 +198,7 @@ class TestStoragePortProtocol:
                 *,
                 run_id: str | None = None,
                 sources_used: list[str] | None = None,
+                preserve_column_order: bool = False,
             ) -> None:
                 pass
 

@@ -32,12 +32,18 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
 
     Validates publication records from Semantic Scholar Academic Graph API.
     Inherits common fields from PublicationBaseSchema:
-    - Cross-references: pmid, doi, pmc_id
+    - Cross-references: pmid, doi
     - Core content: title, abstract, authors
-    - Metadata: journal, year, publication_date, doc_type, language
+    - Metadata: journal, year, publication_date
     - Metrics: citation_count
     - Open Access: is_oa
     - Lookup tracking: lookup_method (overridden), original_id, source (overridden)
+
+    Fields excluded from PyArrow/Gold schemas:
+    - pmc_id: Excluded per design (2026-01)
+    - arxiv_id: Excluded per design (2026-01)
+    - language: S2 API doesn't return language
+    - doc_type: S2 uses publication_type (JSON array) instead
     """
 
     # === Primary Key (SemanticScholar-specific) ===
@@ -63,10 +69,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     )
 
     # === Provider-specific Identifiers ===
-    arxiv_id: Series[str] = pa.Field(
-        nullable=True,
-        description="ArXiv ID",
-    )
+    # Note: arxiv_id excluded per design (2026-01)
 
     dblp_id: Series[str] = pa.Field(
         nullable=True,
@@ -90,32 +93,12 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         nullable=True,
         description="Volume",
     )
-    pages: Series[str] = pa.Field(
+    page_range: Series[str] = pa.Field(
         nullable=True,
         description="Page range (legacy format, e.g., '123-456')",
     )
 
-    first_page: Series[str] = pa.Field(
-        nullable=True,
-        description="First page number (parsed from pages)",
-    )
-
-    last_page: Series[str] = pa.Field(
-        nullable=True,
-        description="Last page number (parsed from pages)",
-    )
-
-    venue: Series[str] = pa.Field(
-        nullable=True,
-        description="Publication venue",
-    )
-
     # === Provider-specific Metrics ===
-    reference_count: Series[pd.Int64Dtype] = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of references",
-    )
 
     influential_citation_count: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
@@ -136,20 +119,19 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     )
 
     # === Provider-specific Classification ===
-    fields_of_study: Series[str] = pa.Field(
+    subject_fields: Series[str] = pa.Field(
         nullable=True,
         description="Fields of study (JSON array)",
+    )
+
+    publication_type: Series[str] = pa.Field(
+        nullable=True,
+        description="Publication types (pipe-delimited string)",
     )
 
     publication_types: Series[str] = pa.Field(
         nullable=True,
         description="Publication types (JSON array)",
-    )
-
-    # === Author Affiliations ===
-    affiliations: Series[str] = pa.Field(
-        nullable=True,
-        description="Author affiliations (JSON array)",
     )
 
     # === Author Identifiers (for author-level analytics and disambiguation) ===

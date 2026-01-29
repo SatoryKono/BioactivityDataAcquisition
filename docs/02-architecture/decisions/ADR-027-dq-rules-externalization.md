@@ -1,9 +1,8 @@
 # ADR-027: DQ Rules Externalization
 
-**Status**: Accepted
-**Date**: 2026-01-19
-**Authors**: Claude Code
-**Reviewers**: -
+**Status:** Accepted
+**Date:** 2026-01-19
+**Decision makers:** @BioETL-Team
 
 ## Context
 

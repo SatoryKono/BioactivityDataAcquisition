@@ -30,14 +30,18 @@ class PublicationBaseSchema(ETLRecordSchema):
     Provider-specific schemas inherit from this and add their own fields.
     This unified schema ensures cross-provider analysis compatibility.
 
-    Field Categories:
+    Field Categories (unified field names):
     - Cross-reference IDs: pmid, doi, pmc_id
-    - Core content: title, abstract, authors
-    - Publication metadata: journal, year, publication_date, doc_type, language
-    - Metrics: citation_count
+    - Core content: title, abstract, authors, affiliation_list
+    - Publication metadata: journal, publication_year, publication_date, publication_type, language
+    - Pagination: page_first, page_last
+    - Metrics: citations_received, citations_made
     - Open Access: is_oa
     - Lookup tracking: _lookup_method, _original_id
     - System: _source (data source identifier)
+
+    Note: Old field names (year, doc_type, citation_count, first_page, last_page)
+    have been replaced with unified names for cross-provider consistency.
     """
 
     # === Cross-reference IDs (common to all providers) ===
@@ -65,38 +69,57 @@ class PublicationBaseSchema(ETLRecordSchema):
         nullable=True,
         description="JSON array of author names (PII hashed)",
     )
+    affiliation_list: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of unique affiliations (unified field name)",
+    )
 
     # === Publication metadata (common to all providers) ===
     journal: Series[str] = pa.Field(
         nullable=True,
         description="Journal name",
     )
-    year: Series[int] = pa.Field(
+    publication_year: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
         ge=MIN_PUBLICATION_YEAR,
         le=MAX_PUBLICATION_YEAR,
-        description="Publication year",
+        description="Publication year (unified field name)",
     )
     publication_date: Series[str] = pa.Field(
         nullable=True,
         str_matches=r"^\d{4}-\d{2}-\d{2}$",
         description="Publication date (YYYY-MM-DD)",
     )
-    doc_type: Series[str] = pa.Field(
+    publication_type: Series[str] = pa.Field(
         nullable=True,
-        description="Document type (PUBLICATION, PREPRINT, PATENT, etc.)",
+        description="Document type - PUBLICATION, PREPRINT, BOOK, DATASET, OTHER (unified field name)",
     )
     language: Series[str] = pa.Field(
         nullable=True,
         description="Language code (ISO 639-1 or MARC)",
     )
 
-    # === Metrics (common to all providers) ===
+    # === Pagination (unified field names) ===
+    page_first: Series[str] = pa.Field(
+        nullable=True,
+        description="First page number (unified field name)",
+    )
+    page_last: Series[str] = pa.Field(
+        nullable=True,
+        description="Last page number (unified field name)",
+    )
+
+    # === Metrics (unified field names) ===
     # Use pd.Int64Dtype for nullable integer support
-    citation_count: Series[pd.Int64Dtype] = pa.Field(
+    citations_received: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
         ge=0,
-        description="Number of citations (provider-dependent availability)",
+        description="Number of citations TO this publication (unified field name)",
+    )
+    citations_made: Series[pd.Int64Dtype] = pa.Field(
+        nullable=True,
+        ge=0,
+        description="Number of references FROM this publication (unified field name)",
     )
 
     # === Open Access (common to all providers) ===

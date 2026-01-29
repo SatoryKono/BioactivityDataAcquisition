@@ -20,12 +20,9 @@ from typing import Any
 
 import orjson
 
-from bioetl.application.services.dq.utils import (
-    build_summary,
-    result_to_dict,
-    update_counts,
-)
+from bioetl.application.services.dq.utils import build_summary, update_counts
 from bioetl.domain.ports import BronzeDQConfigPort
+from bioetl.domain.services.dq_serializer import to_dict
 from bioetl.domain.value_objects.dq_report import (
     BronzeDQCheckType,
     BronzeDQReport,
@@ -82,7 +79,7 @@ class BronzeDQAnalyzer:
         # Record count check
         if BronzeDQCheckType.RECORD_COUNT in enabled_checks:
             record_count_result = self._check_record_count(record_list)
-            checks["record_count"] = result_to_dict(record_count_result)
+            checks["record_count"] = to_dict(record_count_result)
             passed, failed, warnings = update_counts(
                 record_count_result.status, passed, failed, warnings
             )
@@ -90,7 +87,7 @@ class BronzeDQAnalyzer:
         # File integrity check
         if BronzeDQCheckType.FILE_INTEGRITY in enabled_checks:
             file_integrity_result = self._check_file_integrity(record_list)
-            checks["file_integrity"] = result_to_dict(file_integrity_result)
+            checks["file_integrity"] = to_dict(file_integrity_result)
             passed, failed, warnings = update_counts(
                 file_integrity_result.status, passed, failed, warnings
             )
@@ -98,7 +95,7 @@ class BronzeDQAnalyzer:
         # Schema snapshot
         if BronzeDQCheckType.SCHEMA_SNAPSHOT in enabled_checks:
             schema_snapshot_result = self._check_schema_snapshot(record_list)
-            checks["schema_snapshot"] = result_to_dict(schema_snapshot_result)
+            checks["schema_snapshot"] = to_dict(schema_snapshot_result)
             passed, failed, warnings = update_counts(
                 schema_snapshot_result.status, passed, failed, warnings
             )
@@ -113,7 +110,7 @@ class BronzeDQAnalyzer:
         # Encoding validation
         if BronzeDQCheckType.ENCODING_VALIDATION in enabled_checks:
             encoding_result = self._check_encoding(record_list)
-            checks["encoding_validation"] = result_to_dict(encoding_result)
+            checks["encoding_validation"] = to_dict(encoding_result)
             passed, failed, warnings = update_counts(
                 encoding_result.status, passed, failed, warnings
             )

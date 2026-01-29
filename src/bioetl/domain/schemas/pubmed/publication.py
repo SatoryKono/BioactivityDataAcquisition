@@ -12,6 +12,7 @@ from __future__ import annotations
 from datetime import date
 from typing import cast
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -40,6 +41,18 @@ class PubMedPublicationSchema(PublicationBaseSchema):
 
     Note: Renamed from ArticleSchema per ADR-024 for consistency with
     entity_type='publication' in pipeline configs and other providers.
+
+    Fields excluded from PyArrow/Gold schemas (API deprecated 2026-01):
+    - vernacular_title: Original non-English title (deprecated)
+    - epub_date: Electronic publication date (deprecated)
+    - received_date: Manuscript received date (deprecated)
+    - revised_date: Manuscript revised date (deprecated)
+    - accepted_date: Manuscript accepted date (deprecated)
+
+    Fields excluded (not available from PubMed API):
+    - citation_count: PubMed doesn't provide citation metrics
+    - is_oa: Open Access status not available directly
+    - oa_status: OA status requires external enrichment
     """
 
     # === Primary Key (str for cross-provider consistency) ===
@@ -113,8 +126,11 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         )
 
     # === Journal Information (PubMed-specific) ===
-    journal_title: Series[str] = pa.Field(
-        nullable=True, description="Full journal name"
+    journal: Series[str] = pa.Field(
+        nullable=True, description="Full journal title (unified field name)"
+    )
+    journal_name_short: Series[str] = pa.Field(
+        nullable=True, description="Journal abbreviation (unified field name)"
     )
     journal_iso_abbrev: Series[str] = pa.Field(
         nullable=True, description="ISO journal abbreviation"
@@ -147,9 +163,12 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     medline_pgn: Series[str] = pa.Field(
         nullable=True, description="Page numbers (MEDLINE format)"
     )
+    page_range: Series[str] = pa.Field(
+        nullable=True, description="Page numbers (unified field name)"
+    )
 
-    @pa.check("year", name="year_range")
-    def _check_year(cls, series: Series[int]) -> Series[bool]:
+    @pa.check("publication_year", name="year_range")
+    def _check_year(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate publication year range."""
         return cast(
             "Series[bool]",
@@ -198,7 +217,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
 
     # === Affiliation Data (enhanced for institutional analysis) ===
-    structured_affiliations: Series[str] = pa.Field(
+    affiliation_structured: Series[str] = pa.Field(
         nullable=True,
         description=(
             "JSON array of structured affiliations with identifier metadata. "
@@ -239,15 +258,6 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         """Validate grant count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    reference_count: Series[int] = pa.Field(
-        nullable=True, description="Number of references"
-    )
-
-    @pa.check("reference_count", name="reference_count_non_negative")
-    def _check_reference_count(cls, series: Series[int]) -> Series[bool]:
-        """Validate reference count is non-negative."""
-        return cast("Series[bool]", series.isna() | (series >= 0))
-
     chemical_count: Series[int] = pa.Field(
         nullable=True, description="Number of chemicals"
     )
@@ -258,7 +268,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         return cast("Series[bool]", series.isna() | (series >= 0))
 
     # === Classification Data (JSON arrays extracted by transformer) ===
-    mesh_terms: Series[str] = pa.Field(
+    subject_mesh: Series[str] = pa.Field(
         nullable=True,
         description="MeSH terms (JSON array of descriptor/qualifier strings)",
     )
@@ -268,7 +278,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         description="Chemical substances (JSON array of name/registry pairs)",
     )
 
-    keywords: Series[str] = pa.Field(
+    subject_keywords: Series[str] = pa.Field(
         nullable=True,
         description="Author keywords (JSON array)",
     )
@@ -291,10 +301,12 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     # Note: accepted_date, received_date, revised_date, epub_date excluded from
     # transformer output per design (PubMed pipeline field exclusions)
 
-    # === Author Affiliations ===
-    affiliations: Series[str] = pa.Field(
+    # Note: affiliation_list inherited from base (unified field name)
+
+    # === Structured Author-Affiliation Mapping ===
+    authors_with_affiliations: Series[str] = pa.Field(
         nullable=True,
-        description="Author affiliations (JSON array)",
+        description="JSON array of authors with their affiliations and identifiers",
     )
 
     class Config:

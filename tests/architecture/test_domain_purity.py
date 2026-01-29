@@ -267,9 +267,14 @@ class TestDomainComplexity:
             "_dict_to_yaml": 7,  # CC=6 - YAML dictionary serialization
             "_yaml_value": 8,  # CC=7 - YAML value formatting
             "_render_check_details": 9,  # CC=8 - DQ check details rendering
+            "_serialize_value": 11,  # CC=10 - Value serialization with multiple type checks
             # Composite pipeline domain models (ADR-026)
             "DQOverrideConfig": 10,  # CC=9 - DQ override validation with threshold checks
             "from_dict": 8,  # CC=6 - Dictionary parsing with type conversions
+            # Domain config immutability enforcement
+            "_ensure_immutability": 7,  # CC=6 - Config immutability with nested type checks
+            # Domain DataSchemaConfig/LayerColumnConfig validation
+            "LayerColumnConfig": 10,  # CC=8 - LayerColumnConfig __post_init__ with mutual exclusivity + type coercion
         }
 
         violations = []

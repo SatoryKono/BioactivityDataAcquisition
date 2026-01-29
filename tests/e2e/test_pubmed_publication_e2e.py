@@ -122,7 +122,7 @@ async def test_pubmed_publication_date_fields(e2e_data_dir: Path):
         assert pmid is not None
 
         # Most publications should have at least year
-        year = record.get("year") or record.get("publication_year")
+        year = record.get("publication_year")
         if year is not None:
             assert 1800 <= year <= 2100, f"Invalid year {year} for PMID {pmid}"
 
@@ -144,9 +144,9 @@ async def test_pubmed_publication_journal_fields(e2e_data_dir: Path):
 
     Publications should have journal information:
     - journal: Full journal name
-    - journal_abbrev: ISO abbreviation
+    - journal_name_short: ISO abbreviation
     - issn: Journal ISSN
-    - volume, issue, pages
+    - volume, issue, page_range
     """
     # Arrange
     ctx = create_test_context("pubmed_publication", limit=5)
@@ -169,8 +169,8 @@ async def test_pubmed_publication_classification_fields(e2e_data_dir: Path):
     """E2E: Verify classification fields are extracted.
 
     Publications may have:
-    - keywords: Author-provided keywords
-    - mesh_terms: MeSH subject headings
+    - subject_keywords: Author-provided keywords
+    - subject_mesh: MeSH subject headings
     - publication_types: Type of publication (Journal Article, Review, etc.)
     """
     # Arrange
@@ -185,8 +185,8 @@ async def test_pubmed_publication_classification_fields(e2e_data_dir: Path):
 
     for record in records:
         # Keywords and mesh_terms should be lists (possibly empty)
-        keywords = record.get("keywords")
-        mesh_terms = record.get("mesh_terms")
+        keywords = record.get("subject_keywords")
+        mesh_terms = record.get("subject_mesh")
         pub_types = record.get("publication_types")
 
         if keywords is not None:

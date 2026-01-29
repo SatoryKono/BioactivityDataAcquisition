@@ -99,18 +99,18 @@ class TestSemanticScholarPublicationTransformer:
         assert result["pmid"] == "12345678"
         assert result["corpus_id"] == 123456
         assert result["title"] == "CRISPR-Cas9 gene editing in human embryos"
-        # abstract excluded per user request
-        assert "abstract" not in result
-        assert result["year"] == 2024
+        assert result["abstract"] == "This study demonstrates novel applications..."
+        assert result["publication_year"] == 2024
         assert result["publication_date"] == "2024-05-15"
         assert result["journal"] == "Nature"
         assert result["volume"] == "629"
-        assert result["pages"] == "123-130"
-        assert result["citation_count"] == 42
-        assert result["reference_count"] == 85
+        assert result["page_range"] == "123-130"
+        assert result["citations_received"] == 42
+        assert result["citations_made"] == 85
         assert result["is_oa"] is True
         assert result["open_access_url"] == "https://example.com/paper.pdf"
         assert result["oa_status"] == "green"  # Normalized to lowercase
+        assert result["publication_type"] == "JournalArticle"
         assert result["_source"] == "semanticscholar"
         assert result["_lookup_method"] == "doi"
 
@@ -130,6 +130,29 @@ class TestSemanticScholarPublicationTransformer:
         )
 
     @pytest.mark.asyncio
+    @pytest.mark.parametrize("abstract_value", [None, "   "])
+    async def test_transform_abstract_fallback_from_tldr(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+        sample_record: dict[str, Any],
+        abstract_value: str | None,
+    ) -> None:
+        """Test that abstract falls back to TLDR when missing/empty."""
+        sample_record["abstract"] = abstract_value
+
+        result = await transformer.transform(mock_context, sample_record, 0)
+
+        assert result is not None
+        assert (
+            result["abstract"]
+            == "This paper presents a novel approach to gene editing..."
+        )
+        assert (
+            result["tldr"] == "This paper presents a novel approach to gene editing..."
+        )
+
+    @pytest.mark.asyncio
     async def test_transform_authors_excluded(
         self,
         transformer: SemanticScholarPublicationTransformer,
@@ -144,19 +167,54 @@ class TestSemanticScholarPublicationTransformer:
         assert "authors" not in result
 
     @pytest.mark.asyncio
-    async def test_transform_fields_of_study_serialized(
+    async def test_transform_subject_fields_serialized(
         self,
         transformer: SemanticScholarPublicationTransformer,
         mock_context: PipelineContext,
         sample_record: dict[str, Any],
     ) -> None:
-        """Test that fields_of_study are serialized as JSON."""
+        """Test that subject_fields are serialized as JSON."""
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        assert isinstance(result["fields_of_study"], str)
-        assert "Biology" in result["fields_of_study"]
-        assert "Medicine" in result["fields_of_study"]
+        assert isinstance(result["subject_fields"], str)
+        assert "Biology" in result["subject_fields"]
+        assert "Medicine" in result["subject_fields"]
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("publication_types", [None, []])
+    async def test_transform_publication_type_empty(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+        sample_record: dict[str, Any],
+        publication_types: list[str] | None,
+    ) -> None:
+        """Test that publication_type is None when publicationTypes is empty/null."""
+        if publication_types is None:
+            sample_record.pop("publicationTypes", None)
+        else:
+            sample_record["publicationTypes"] = publication_types
+
+        result = await transformer.transform(mock_context, sample_record, 0)
+
+        assert result is not None
+        assert result["publication_type"] is None
+
+    @pytest.mark.asyncio
+    async def test_transform_publication_type_joined(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+        sample_record: dict[str, Any],
+    ) -> None:
+        """Test that publication_type joins list values with '|'."""
+        sample_record["publicationTypes"] = ["JournalArticle", "Review"]
+
+        result = await transformer.transform(mock_context, sample_record, 0)
+
+        assert result is not None
+        assert result["publication_type"] == "JournalArticle|Review"
 
     @pytest.mark.asyncio
     async def test_transform_missing_paper_id_skips_record(
@@ -230,9 +288,8 @@ class TestSemanticScholarPublicationTransformer:
         assert result["paper_id"] == "a" * 40
         assert result["title"] == "Minimal Paper"
         assert result["doi"] is None
-        # abstract excluded per user request
-        assert "abstract" not in result
-        assert result["year"] is None
+        assert result["abstract"] is None
+        assert result["publication_year"] is None
 
     @pytest.mark.asyncio
     async def test_transform_content_hash_generated(
@@ -295,7 +352,7 @@ class TestSemanticScholarPublicationTransformer:
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        assert result["year"] is None
+        assert result["publication_year"] is None
 
     @pytest.mark.asyncio
     async def test_transform_closed_access(
@@ -559,7 +616,7 @@ class TestSemanticScholarDateNormalization:
 
 
 class TestSemanticScholarUnifiedPageFields:
-    """Tests for unified page field parsing (first_page, last_page).
+    """Tests for unified page field parsing (page_first, page_last).
 
     Note: The parse_page_range function tests are in tests/unit/domain/test_normalization.py.
     These tests verify the integration with the transformer.
@@ -582,9 +639,9 @@ class TestSemanticScholarUnifiedPageFields:
 
         assert result is not None
         # sample_record has journal.pages = "123-130"
-        assert result["pages"] == "123-130"
-        assert result["first_page"] == "123"
-        assert result["last_page"] == "130"
+        assert result["page_range"] == "123-130"
+        assert result["page_first"] == "123"
+        assert result["page_last"] == "130"
 
     @pytest.mark.asyncio
     async def test_unified_page_fields_no_pages(
@@ -602,9 +659,9 @@ class TestSemanticScholarUnifiedPageFields:
         result = await transformer.transform(mock_context, record, 0)
 
         assert result is not None
-        assert result["pages"] is None
-        assert result["first_page"] is None
-        assert result["last_page"] is None
+        assert result["page_range"] is None
+        assert result["page_first"] is None
+        assert result["page_last"] is None
 
 
 class TestSemanticScholarNewFields:
@@ -690,8 +747,8 @@ class TestSemanticScholarNewFields:
         result = await transformer.transform(mock_context, record, 0)
 
         assert result is not None
-        assert result["citation_count"] == 100
-        assert result["reference_count"] == 50
+        assert result["citations_received"] == 100
+        assert result["citations_made"] == 50
         assert result["influential_citation_count"] == 25
 
     @pytest.mark.asyncio
@@ -711,7 +768,7 @@ class TestSemanticScholarNewFields:
         result = await transformer.transform(mock_context, record, 0)
 
         assert result is not None
-        assert result["citation_count"] == 100
+        assert result["citations_received"] == 100
         assert result["influential_citation_count"] is None
 
     @pytest.mark.asyncio
@@ -732,5 +789,5 @@ class TestSemanticScholarNewFields:
         result = await transformer.transform(mock_context, record, 0)
 
         assert result is not None
-        assert result["citation_count"] == 10
+        assert result["citations_received"] == 10
         assert result["influential_citation_count"] == 0

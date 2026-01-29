@@ -126,6 +126,20 @@ class TransformDict(TypedDict, total=False):
 
 
 # =============================================================================
+# Column Ordering Configuration TypedDicts
+# =============================================================================
+
+
+class ColumnGroupDict(TypedDict, total=False):
+    """YAML structure for column group ordering."""
+
+    name: Required[str]
+    fields: list[str]
+    pattern: str
+    provider_order: list[str]
+
+
+# =============================================================================
 # DQ Configuration TypedDicts (Extended)
 # =============================================================================
 
@@ -353,6 +367,7 @@ class PipelineConfigDict(TypedDict, total=False):
 
     # Transform
     transform: TransformDict
+    column_groups: list[ColumnGroupDict]
 
     # Sink
     sink: SinkDict

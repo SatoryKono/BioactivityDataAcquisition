@@ -9,6 +9,7 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
+import json
 import pytest
 
 from bioetl.application.pipelines.openalex.transformer import (
@@ -67,12 +68,8 @@ def sample_openalex_record() -> dict[str, Any]:
             "is_oa": True,
             "oa_status": "gold",
         },
-        # Note: OpenAlex API returns cited_by_count, transformed to citation_count
+        # Note: OpenAlex API returns cited_by_count, transformed to citations_received
         "cited_by_count": 42,  # Source field name from OpenAlex API
-        "concepts": [
-            {"display_name": "Chemistry", "score": 0.9},
-            {"display_name": "Biology", "score": 0.7},
-        ],
         "language": "en",
         "_lookup_method": "doi",
     }
@@ -97,16 +94,16 @@ class TestOpenAlexPublicationTransformer:
         assert result["openalex_id"] == "W2148763428"
         assert result["doi"] == "10.1038/s41586-024-07487-w"
         assert result["title"] == "Example Publication Title"
-        assert result["year"] == 2024
+        assert result["publication_year"] == 2024
         assert result["publication_date"] == "2024-05-15"
-        assert result["type"] == "article"  # Raw OpenAlex type preserved
+        assert result["publication_type"] == "article"  # Raw OpenAlex type preserved
         assert result["abstract"] == "This is an abstract"
         assert result["journal"] == "Nature"
         assert result["issn"] == "0028-0836"
         assert result["publisher"] == "Springer Nature"
         assert result["is_oa"] is True
         assert result["oa_status"] == "gold"
-        assert result["citation_count"] == 42  # Unified field name
+        assert result["citations_received"] == 42  # Unified field name
         assert result["language"] == "en"
         assert result["_source"] == "openalex"
         assert result["_lookup_method"] == "doi"
@@ -187,7 +184,7 @@ class TestOpenAlexPublicationTransformer:
         result = await transformer.transform(pipeline_context, record, 0)
 
         assert result is not None
-        assert result["year"] is None  # Filtered out
+        assert result["publication_year"] is None  # Filtered out
 
     @pytest.mark.asyncio
     async def test_transform_type_preserved(
@@ -206,28 +203,7 @@ class TestOpenAlexPublicationTransformer:
             }
             result = await transformer.transform(pipeline_context, record, 0)
             assert result is not None
-            assert result["type"] == openalex_type  # Raw type preserved
-
-    @pytest.mark.asyncio
-    async def test_transform_concepts_extraction(
-        self,
-        transformer: OpenAlexPublicationTransformer,
-        pipeline_context: PipelineContext,
-    ) -> None:
-        """Should extract concepts from record."""
-        record = {
-            "id": "https://openalex.org/W1234567890",
-            "title": "Test",
-            "concepts": [
-                {"display_name": "Chemistry"},
-                {"display_name": "Biology"},
-            ],
-        }
-
-        result = await transformer.transform(pipeline_context, record, 0)
-
-        assert result is not None
-        assert result["concepts"] == ["Chemistry", "Biology"]
+            assert result["publication_type"] == openalex_type  # Raw type preserved
 
     @pytest.mark.asyncio
     async def test_transform_empty_abstract_inverted_index(
@@ -298,6 +274,52 @@ class TestOpenAlexPublicationTransformer:
         assert "_index" in result
         assert result["_run_type"] == "incremental"
         assert result["_index"] == 0
+
+    @pytest.mark.asyncio
+    async def test_transform_affiliation_list_serialized(
+        self,
+        transformer: OpenAlexPublicationTransformer,
+        pipeline_context: PipelineContext,
+    ) -> None:
+        """Should serialize affiliation_list as JSON string."""
+        record = {
+            "id": "https://openalex.org/W1234567890",
+            "title": "Affiliation Test",
+            "_lookup_method": "doi",
+            "authorships": [
+                {"institutions": [{"display_name": "MIT"}]},
+                {
+                    "institutions": [
+                        {"display_name": "Stanford"},
+                        {"display_name": "MIT"},
+                    ]
+                },
+            ],
+        }
+
+        result = await transformer.transform(pipeline_context, record, 0)
+
+        assert result is not None
+        assert result["affiliation_list"] == json.dumps(["MIT", "Stanford"])
+
+    @pytest.mark.asyncio
+    async def test_transform_affiliation_list_empty(
+        self,
+        transformer: OpenAlexPublicationTransformer,
+        pipeline_context: PipelineContext,
+    ) -> None:
+        """Should serialize empty affiliation_list to JSON empty array."""
+        record = {
+            "id": "https://openalex.org/W1234567891",
+            "title": "Empty Affiliation Test",
+            "_lookup_method": "doi",
+            "authorships": [],
+        }
+
+        result = await transformer.transform(pipeline_context, record, 0)
+
+        assert result is not None
+        assert result["affiliation_list"] == "[]"
 
 
 class TestOpenAlexDoiNormalization:

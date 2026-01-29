@@ -2,7 +2,7 @@
 
 Справочник для Claude Code при работе с репозиторием BioETL.
 
-*Синхронизировано с RULES.md v5.12 (2026-01-26) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.0.0*
+*Синхронизировано с RULES.md v5.15 (2026-01-29) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.3.0*
 
 ---
 
@@ -124,16 +124,16 @@ ls tests/architecture/test_*.py
 | **Язык** | Python 3.11+ |
 | **Стиль документации** | Русский, RFC 2119 keywords |
 
-### 1.1. Метрики Кодовой Базы (2026-01-21)
+### 1.1. Метрики Кодовой Базы (2026-01-29)
 
 | Метрика | Значение |
 |---------|----------|
-| **Python-файлов** | ~485 |
-| **Строк кода** | ~68,400 |
-| **Тестов** | ~5,277 |
-| **ADR** | 29 |
+| **Python-файлов** | ~497 |
+| **Строк кода** | ~108,200 |
+| **Тестов** | ~9,890 |
+| **ADR** | 31 |
 | **Провайдеров** | 7 |
-| **Pipeline-конфигураций** | 20 |
+| **Pipeline-конфигураций** | 21 |
 
 ---
 
@@ -337,7 +337,7 @@ cat docs/archived/refactoring-plan.md | head -60
 
 **Circuit Breaker**: 5 consecutive errors → Open 5 мин (см. [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md))
 
-**29 ADR** определяют архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
+**31 ADR** определяют архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
 (полный реестр в `docs/RULES.md` Приложение F)
 
 ---
@@ -392,11 +392,11 @@ async def aclose() -> None                             # Graceful shutdown
 
 | Уровень | Директория | Тестов | Правила |
 |---------|------------|--------|---------|
-| **Unit** | `tests/unit/` | ~4335 | In-memory fakes предпочтительны |
-| **Integration** | `tests/integration/` | ~216 | VCR.py для HTTP |
-| **Architecture** | `tests/architecture/` | ~360 | Проверка слоёв, контракты портов |
+| **Unit** | `tests/unit/` | ~7074 | In-memory fakes предпочтительны |
+| **Integration** | `tests/integration/` | ~288 | VCR.py для HTTP |
+| **Architecture** | `tests/architecture/` | ~421 | Проверка слоёв, контракты портов |
 
-**Всего:** ~5277 тестов | **Цель покрытия:** ≥85% (`--cov-fail-under=85`)
+**Всего:** ~7780 тестов | **Цель покрытия:** ≥85% (`--cov-fail-under=85`)
 
 ### Основные команды
 
@@ -492,7 +492,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 | `docs/RULES.md` | **Конституция проекта** — единственный источник истины для архитектурных правил |
 | `AGENT.md` | Инструкции для агента (персона, workflow, специфика работы) |
 | `.claude/PROJECT_CONTEXT.md` | Компактный контекст для быстрой справки |
-| `docs/02-architecture/decisions/` | ADR (001-029) — архитектурные решения |
+| `docs/02-architecture/decisions/` | ADR (001-031) — архитектурные решения |
 | `docs/REQUIREMENTS.md` | 127 тестируемых требований |
 
 > **Иерархия документации**: При противоречиях приоритет имеет `docs/RULES.md`.

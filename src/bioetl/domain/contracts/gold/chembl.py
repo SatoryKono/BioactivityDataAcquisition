@@ -324,25 +324,22 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     title: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
-    doc_type: Series[str] = pa.Field(nullable=True)
+    publication_type: Series[str] = pa.Field(nullable=True)
     journal: Series[str] = pa.Field(nullable=True)
-    journal_full_title: Series[str] = pa.Field(nullable=True)
-    year: Series[float] = pa.Field(nullable=True, coerce=True)
+    publication_year: Series[float] = pa.Field(nullable=True, coerce=True)
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)
-    first_page: Series[str] = pa.Field(nullable=True)
-    last_page: Series[str] = pa.Field(nullable=True)
+    page_first: Series[str] = pa.Field(nullable=True)
+    page_last: Series[str] = pa.Field(nullable=True)
+    citations_received: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)
 
     # ChEMBL release metadata
     chembl_release: Series[str] = pa.Field(nullable=True)
     creation_date: Series[str] = pa.Field(nullable=True)
 
-    # Unified publication fields (for cross-provider data linking)
-    # Note: ChEMBL doesn't provide these natively, but included for schema consistency
-    citation_count: Series[float] = pa.Field(nullable=True, coerce=True)
-    is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
-    language: Series[str] = pa.Field(nullable=True)
+    # Примечание: citation_count маппится в citations_received; is_oa и language исключены
 
     # System field (per SYSTEM_FIELDS_PREFIX)
     source: Series[str] = pa.Field(nullable=True, alias="_source")

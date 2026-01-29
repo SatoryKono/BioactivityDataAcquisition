@@ -39,6 +39,12 @@ source:
 dq_config_file: ../../dq/entities/openalex/publication.yaml
 
 # -----------------------------------------------------------------------------
+# Data Schema Configuration (Column Ordering)
+# -----------------------------------------------------------------------------
+# Use data_schema_file for layer-specific column configuration (silver/gold).
+data_schema_file: ../../data_schema/openalex/publication.yaml
+
+# -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):

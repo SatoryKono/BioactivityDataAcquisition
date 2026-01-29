@@ -11,8 +11,8 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.semanticscholar.extractors import (
+    extract_affiliations,
     extract_author_h_indices,
-    extract_author_ids,
     extract_author_orcids,
     extract_author_s2_ids,
     extract_citation_contexts,
@@ -48,7 +48,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - arxiv_id: externalIds.ArXiv
     - dblp_id: externalIds.DBLP
     - title: title
-    - abstract: abstract
+    - abstract: abstract (fallback to tldr.text if missing)
     - tldr: tldr.text (AI-generated summary)
     - authors: authors.name (extraction + optional PII hashing)
     - author_s2_ids: authors.authorId (S2 author IDs for disambiguation)
@@ -63,7 +63,8 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - is_oa: isOpenAccess (normalized)
     - oa_status: openAccessPdf.status (normalized to lowercase)
     - open_access_url: openAccessPdf.url
-    - fields_of_study: fieldsOfStudy
+    - subject_fields: fieldsOfStudy
+    - publication_type: publicationTypes joined by "|"
     - publication_types: publicationTypes
     - citation_contexts: citations.contexts (citing sentences, when available)
 
@@ -144,13 +145,13 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         # Get authors list for multiple extractions
         authors_list = rec.get("authors")
 
-        # Extract author IDs
-        author_ids = extract_author_ids(rec.get("authors"))
-
         # Extract author identifiers (for author-level analytics)
         author_s2_ids = extract_author_s2_ids(authors_list)
         author_orcids = extract_author_orcids(authors_list)
         author_h_indices = extract_author_h_indices(authors_list)
+
+        # Extract affiliations from authors
+        affiliations = extract_affiliations(authors_list)
 
         # Extract citation contexts (if available from citations/references endpoint)
         # Note: contexts are only available when requesting citation details
@@ -171,10 +172,27 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         )
 
         # TLDR summary
-        tldr = extract_tldr(rec.get("tldr"))
+        tldr = self._data_normalizer.normalize_string(extract_tldr(rec.get("tldr")))
+
+        # Abstract with TLDR fallback when abstract is missing/empty
+        abstract = self._data_normalizer.normalize_string(rec.get("abstract"))
+        if abstract is None:
+            abstract = tldr
 
         # Fields of study
-        fields_of_study = extract_fields_of_study(rec.get("fieldsOfStudy"))
+        subject_fields = extract_fields_of_study(rec.get("fieldsOfStudy"))
+
+        # Publication types (raw list and unified scalar)
+        publication_types = rec.get("publicationTypes")
+        publication_type = None
+        if isinstance(publication_types, list):
+            cleaned_types = [
+                str(item).strip()
+                for item in publication_types
+                if item is not None and str(item).strip()
+            ]
+            if cleaned_types:
+                publication_type = "|".join(cleaned_types)
 
         # Validate year
         year = validate_year(rec.get("year"))
@@ -190,9 +208,8 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "dblp_id": external_ids.get("dblp"),
             "corpus_id": external_ids.get("corpus_id"),
             "title": rec.get("title"),
-            # abstract, authors excluded per user request
+            "abstract": abstract,
             "tldr": tldr,
-            "author_ids": self.serialize_json(author_ids),
             # Author identifiers (for author-level analytics and disambiguation)
             "author_s2_ids": self.serialize_json_list(author_s2_ids)
             if author_s2_ids
@@ -200,35 +217,40 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "author_orcids": self.serialize_json_list(author_orcids)
             if any(author_orcids)
             else None,
-            "author_h_indices": self.serialize_json(author_h_indices)
+            "author_h_indices": self.serialize_json_list(author_h_indices)
             if any(h is not None for h in author_h_indices)
             else None,
             # Citation context (for citation sentiment analysis)
             "citation_contexts": self.serialize_json_list(citation_contexts)
             if citation_contexts
             else None,
-            # affiliations excluded per user request
-            "journal": journal_info.get("journal_name"),
+            # Author affiliations (unique, sorted)
+            "affiliation_list": self.serialize_json_list(affiliations)
+            if affiliations
+            else None,
+            "journal": journal_info.get("journal"),
             "volume": journal_info.get("volume"),
             "issue": journal_info.get("issue"),  # Parsed from combined "32 4" format
-            "pages": journal_info.get("pages"),  # Original pages string (cleaned)
-            "first_page": journal_info.get(
-                "first_page"
+            "page_range": journal_info.get(
+                "page_range"
+            ),  # Original pages string (cleaned)
+            "page_first": journal_info.get(
+                "page_first"
             ),  # Parsed with abbreviation expansion
-            "last_page": journal_info.get("last_page"),  # Expanded (e.g., "9" → "739")
-            "venue": rec.get("venue"),
-            "year": year,
+            "page_last": journal_info.get("page_last"),  # Expanded (e.g., "9" → "739")
+            "publication_year": year,
             "publication_date": self._normalize_partial_date(
                 rec.get("publicationDate")
             ),
-            "citation_count": rec.get("citationCount"),
-            "reference_count": rec.get("referenceCount"),
+            "citations_received": rec.get("citationCount"),
+            "citations_made": rec.get("referenceCount"),
             "influential_citation_count": rec.get("influentialCitationCount"),
             "is_oa": oa_info.get("is_oa"),
             "open_access_url": oa_info.get("url"),
             "oa_status": oa_info.get("oa_status"),
-            "fields_of_study": self.serialize_json(fields_of_study),
-            "publication_types": self.serialize_json(rec.get("publicationTypes")),
+            "subject_fields": self.serialize_json(subject_fields),
+            "publication_type": publication_type,
+            "publication_types": self.serialize_json(publication_types),
             "_source": "semanticscholar",
             # Lookup metadata
             "_lookup_method": lookup_method,
@@ -266,14 +288,12 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without abstract, affiliations, authors.
+            SilverRecord dictionary without authors.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
 
         silver_record = BaseTransformer.entity_to_silver_record(entity)
-        silver_record.pop("abstract", None)
-        silver_record.pop("affiliations", None)
         silver_record.pop("authors", None)
         silver_record.pop("pmc_id", None)
         silver_record.pop("arxiv_id", None)

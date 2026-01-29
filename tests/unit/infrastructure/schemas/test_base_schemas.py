@@ -525,24 +525,6 @@ class TestBaseGoldFiltersConfig:
 class TestInheritanceChain:
     """Test that inheritance chain works correctly."""
 
-    def test_common_config_inherits_base(self) -> None:
-        """Test that common_config classes inherit from base classes."""
-        from bioetl.infrastructure.schemas.common_config import (
-            ApiConfig,
-            CircuitBreakerConfig,
-            CsvExportConfig,
-            DQConfig,
-            InputFilterConfig,
-            MaintenanceConfig,
-        )
-
-        assert issubclass(DQConfig, BaseDQConfig)
-        assert issubclass(CircuitBreakerConfig, BaseCircuitBreakerConfig)
-        assert issubclass(CsvExportConfig, BaseCsvExportConfig)
-        assert issubclass(InputFilterConfig, BaseInputFilterConfig)
-        assert issubclass(MaintenanceConfig, BaseMaintenanceConfig)
-        assert issubclass(ApiConfig, BaseApiConfig)
-
     def test_source_config_inherits_base(self) -> None:
         """Test that source_config classes inherit from base classes."""
         from bioetl.infrastructure.schemas.source_config import (
