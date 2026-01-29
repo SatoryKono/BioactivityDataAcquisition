@@ -50,7 +50,7 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
         influential_citation_count: Number of influential citations.
         open_access_url: URL to open access PDF.
         subject_fields: JSON string of fields of study.
-        publication_types: JSON string of publication types.
+        publication_type: JSON string of publication types.
         author_s2_ids: JSON string of S2 author IDs (40-char hex).
         author_orcids: JSON string of ORCID identifiers.
         author_h_indices: JSON string of h-index values.
@@ -89,7 +89,7 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
 
     # SemanticScholar-specific classification (JSON strings)
     subject_fields: str | None = None
-    publication_types: str | None = None
+    publication_type: str | None = None
 
     # Author identifiers (for author-level analytics and disambiguation)
     author_s2_ids: str | None = None  # JSON array of S2 author IDs (40-char hex)

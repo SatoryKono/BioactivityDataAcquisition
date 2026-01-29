@@ -251,6 +251,7 @@ class TestSchemaFieldDefinitions:
             "open_access_url",
             "oa_status",
             "subject_fields",
+            "publication_type",
             "publication_types",
             "authors",
             # Note: _source is not in schema.columns because pandera ignores
@@ -298,6 +299,7 @@ class TestSchemaFieldDefinitions:
             "open_access_url",
             "oa_status",
             "subject_fields",
+            "publication_type",
             "publication_types",
             "authors",
         ]

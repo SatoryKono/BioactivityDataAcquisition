@@ -43,7 +43,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     - pmc_id: Excluded per design (2026-01)
     - arxiv_id: Excluded per design (2026-01)
     - language: S2 API doesn't return language
-    - doc_type: S2 uses publication_types (JSON array) instead
+    - doc_type: S2 uses publication_type (JSON array) instead
     """
 
     # === Primary Key (SemanticScholar-specific) ===
@@ -124,7 +124,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="Fields of study (JSON array)",
     )
 
-    publication_types: Series[str] = pa.Field(
+    publication_type: Series[str] = pa.Field(
         nullable=True,
         description="Publication types (JSON array)",
     )

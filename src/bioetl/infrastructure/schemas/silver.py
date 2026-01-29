@@ -667,6 +667,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         # Note: pmc_id excluded per design (2026-01)
         pa.field("pmid", pa.string()),
         pa.field("publication_date", pa.string()),
+        pa.field("publication_type", pa.string()),
         pa.field("publication_types", pa.string()),
         pa.field("publication_year", pa.int64()),
         pa.field("subject_fields", pa.string()),

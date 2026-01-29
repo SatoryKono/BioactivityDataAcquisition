@@ -278,7 +278,6 @@ field_aliases:
   mesh_terms: subject_mesh
   keywords: subject_keywords
   topics: subject_topics
-  tldr: abstract
   journal_title: journal_name
   journal_abbrev: journal_name_short
   pages: page_range
@@ -331,7 +330,7 @@ gold:
     - identifiers_doi     # Primary identifier
     - identifiers_pmid    # Secondary identifier
     - title               # Core metadata
-    - abstract            # Core content (tldr included)
+    - abstract            # Core content
     - authors             # Authorship (authors, author_count)
     - journal             # Publication venue
     - year                # Temporal dimension

@@ -71,6 +71,10 @@ column_groups:
       - subject_fields
       - publication_types
 
+  - name: doc_type
+    fields:
+      - publication_type
+
   - name: open_access
     fields:
       - is_oa
@@ -106,6 +110,7 @@ silver:
     - pagination
     - citations
     - subjects
+    - doc_type
     - open_access
     - dq
 
@@ -118,6 +123,7 @@ gold:
     - authors
     - journal
     - year
+    - doc_type
     - citations
     - open_access
   exclude_fields:
