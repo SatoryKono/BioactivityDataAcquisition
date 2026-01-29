@@ -669,6 +669,7 @@ class TestFieldMappingCompleteness:
             "corpus_id",
             "doi",
             "entity_id",
+            "abstract",
             "subject_fields",
             "is_oa",
             "oa_status",

@@ -121,6 +121,7 @@ groups:
           - chembl.publication.abstract
           - openalex.publication.abstract
           - pubmed.publication.abstract
+          - semanticscholar.publication.abstract
 
       - base_name: page_first
         columns:
@@ -135,6 +136,10 @@ groups:
           - crossref.publication.issn
           - openalex.publication.issn
           - pubmed.publication.issn
+
+      - base_name: issn_list
+        columns:
+          - crossref.publication.issn_list
 
       - base_name: issn_electronic
         columns:
