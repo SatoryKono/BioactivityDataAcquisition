@@ -76,7 +76,9 @@ class PublicationEntityBase(BaseEntity):
     title: str | None = None
     abstract: str | None = None
     authors: str | None = None  # JSON-serialized list, PII hashed
-    affiliation_list: str | None = None  # JSON-serialized list of unique affiliations (unified field name)
+    affiliation_list: str | None = (
+        None  # JSON-serialized list of unique affiliations (unified field name)
+    )
 
     # Journal information
     journal: str | None = None
@@ -93,7 +95,7 @@ class PublicationEntityBase(BaseEntity):
 
     # Metrics (unified field names)
     citations_received: int | None = None  # Number of citations TO this publication
-    citations_made: int | None = None      # Number of references FROM this publication
+    citations_made: int | None = None  # Number of references FROM this publication
 
     # Classification
     publication_type: str = "PUBLICATION"

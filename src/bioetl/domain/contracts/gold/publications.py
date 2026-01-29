@@ -167,7 +167,9 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     page_last: Series[str] = pa.Field(nullable=True)
 
     # Date fields
-    publication_year: Series[float] = pa.Field(nullable=True, ge=1900, le=2100, coerce=True)
+    publication_year: Series[float] = pa.Field(
+        nullable=True, ge=1900, le=2100, coerce=True
+    )
     publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
     published_print: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
     published_online: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
@@ -268,12 +270,16 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     page_last: Series[str] = pa.Field(nullable=True)
 
     # Date fields
-    publication_year: Series[float] = pa.Field(nullable=True, ge=1500, le=2100, coerce=True)
+    publication_year: Series[float] = pa.Field(
+        nullable=True, ge=1500, le=2100, coerce=True
+    )
     publication_date: Series[str] = pa.Field(nullable=True)
 
     # Metadata
     # Note: doc_type excluded; OpenAlex uses raw 'source_type' field instead
-    source_type: Series[str] = pa.Field(nullable=True)  # Raw OpenAlex type (article, etc.)
+    source_type: Series[str] = pa.Field(
+        nullable=True
+    )  # Raw OpenAlex type (article, etc.)
     is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
     oa_status: Series[str] = pa.Field(nullable=True)
     is_retracted: Series[bool] = pa.Field(
@@ -370,7 +376,9 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     venue: Series[str] = pa.Field(nullable=True)
 
     # Metrics
-    citations_received: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)  # int64
+    citations_received: Series[float] = pa.Field(
+        nullable=True, ge=0, coerce=True
+    )  # int64
     citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)  # int64
     influential_citation_count: Series[float] = pa.Field(
         nullable=True, ge=0, coerce=True

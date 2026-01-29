@@ -296,7 +296,9 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publication_type_list", pa.string()),  # JSON array of pub types
         pa.field("publication_types", pa.list_(pa.string())),
         pa.field("publication_year", pa.int64()),
-        pa.field("reference_count", pa.int64()),  # Number of references (PubMed-specific)
+        pa.field(
+            "reference_count", pa.int64()
+        ),  # Number of references (PubMed-specific)
         # Enhanced affiliation data with identifier metadata (ROR, GRID, etc.)
         pa.field("structured_affiliations", pa.string()),  # JSON array
         pa.field("title", pa.string()),

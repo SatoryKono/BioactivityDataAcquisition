@@ -236,7 +236,9 @@ class CrossRefPublicationEntity(PublicationEntityBase):
 
     # CrossRef-specific metadata
     license_url: str | None = None
-    subject_keywords: list[str] = field(default_factory=list)  # Unified field name (was: subjects)
+    subject_keywords: list[str] = field(
+        default_factory=list
+    )  # Unified field name (was: subjects)
 
     # Content domain (Crossmark/license restrictions)
     content_domain_domains: list[str] = field(default_factory=list)
@@ -249,7 +251,9 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     published: str | None = None
 
     # Short journal/container title (unified field name)
-    journal_name_short: list[str] = field(default_factory=list)  # Was: short_container_title
+    journal_name_short: list[str] = field(
+        default_factory=list
+    )  # Was: short_container_title
 
     # ISSN by type (split from generic ISSN list)
     issn_print: str | None = None
