@@ -42,18 +42,23 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("publication_year", pa.int64()),
         pa.field("volume", pa.string()),
         pa.field("issue", pa.string()),
-        pa.field("page_first", pa.string()),
-        pa.field("page_last", pa.string()),
+        pa.field("page_first", pa.string()),  # Unified: from first_page
+        pa.field("page_last", pa.string()),  # Unified: from last_page
         # === PUBLICATION_CROSSREF_FIELDS ===
         pa.field("document_chembl_id", pa.string()),  # Primary key
         pa.field("doi", pa.string()),
         # pmc_id excluded: not available from ChEMBL API
-        pa.field("pmid", pa.string()),  # PubMed ID (numeric string)
+        pa.field("pmid", pa.string()),  # Unified: from pubmed_id
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
-        pa.field("publication_type", pa.string()),  # PUBLICATION, PATENT, DATASET, BOOK
+        pa.field("publication_type", pa.string()),  # Unified: from doc_type
         # publication_date excluded: not available from ChEMBL API
         pa.field("src_id", pa.int64()),
+        # === Unified citation metrics ===
+        pa.field("citations_received", pa.int64()),  # Unified: from citation_count
+        pa.field(
+            "citations_made", pa.int64()
+        ),  # Unified: references made (N/A for ChEMBL)
         # === ChEMBL Release Metadata ===
         pa.field("chembl_release", pa.string()),  # e.g., CHEMBL_1, CHEMBL_34
         pa.field("creation_date", pa.string()),  # Record creation date (YYYY-MM-DD)
@@ -249,7 +254,7 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("chemicals", pa.string()),  # Chemical substances (JSON array)
         pa.field("citation_subset", pa.string()),  # Citation subset codes
         pa.field("citations_made", pa.int64()),  # Unified: citations made
-        pa.field("citations_received", pa.int64()),  # Unified: citations received
+        # citations_received: excluded (PubMed doesn't provide citation metrics)
         pa.field("country", pa.string()),
         pa.field("databanks", pa.string()),  # Databank accession numbers (JSON array)
         pa.field("date_completed", pa.string()),  # MEDLINE processing completion date
@@ -257,7 +262,7 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("doi", pa.string()),
         pa.field("gene_symbols", pa.string()),  # Gene symbols (JSON array)
         pa.field("grant_count", pa.int64()),
-        pa.field("is_oa", pa.bool_()),  # Open Access status
+        # is_oa: excluded (PubMed doesn't provide OA status directly)
         pa.field("issn", pa.string()),
         pa.field("issue", pa.string()),
         pa.field("journal", pa.string()),
@@ -649,8 +654,8 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("author_orcids", pa.string()),  # JSON array of ORCIDs
         pa.field("author_s2_ids", pa.string()),  # JSON array of S2 author IDs
         pa.field("citation_contexts", pa.string()),  # JSON array of context sentences
-        pa.field("citations_made", pa.int64()),
-        pa.field("citations_received", pa.int64()),
+        pa.field("citations_made", pa.int64()),  # Unified: from referenceCount
+        pa.field("citations_received", pa.int64()),  # Unified: from citationCount
         pa.field("corpus_id", pa.int64()),
         pa.field("dblp_id", pa.string()),  # DBLP publication key
         pa.field("doi", pa.string()),
@@ -667,8 +672,10 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         # Note: pmc_id excluded per design (2026-01)
         pa.field("pmid", pa.string()),
         pa.field("publication_date", pa.string()),
-        pa.field("publication_type", pa.string()),
-        pa.field("publication_types", pa.string()),
+        pa.field(
+            "publication_type", pa.string()
+        ),  # Unified: from publicationTypes (joined)
+        pa.field("publication_types", pa.string()),  # Raw publicationTypes (JSON array)
         pa.field("publication_year", pa.int64()),
         pa.field("subject_fields", pa.string()),
         pa.field("title", pa.string()),
@@ -702,8 +709,10 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("author_details", pa.string()),  # JSON array of author objects
         pa.field("author_orcids", pa.string()),  # JSON array of ORCID IDs
         pa.field("authors", pa.string()),  # JSON-serialized list
-        pa.field("citations_made", pa.int64()),
-        pa.field("citations_received", pa.int64()),
+        pa.field("citations_made", pa.int64()),  # Unified: from references-count
+        pa.field(
+            "citations_received", pa.int64()
+        ),  # Unified: from is-referenced-by-count
         pa.field("content_domain_crossmark_restriction", pa.bool_()),
         pa.field("content_domain_domains", pa.list_(pa.string())),
         # Note: doc_type excluded; CrossRef uses raw 'type' field instead
@@ -765,7 +774,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("author_openalex_ids", pa.string()),  # OpenAlex author IDs
         pa.field("author_orcids", pa.string()),  # ORCID IDs (empty string for missing)
         pa.field("authors", pa.string()),  # JSON-serialized list
-        # Number of works referenced
+        # Unified: from referenced_works_count
         pa.field("citations_made", pa.int64()),
         # OpenAlex source field: cited_by_count
         # Unified BioETL field: citations_received (standardized across all providers)
