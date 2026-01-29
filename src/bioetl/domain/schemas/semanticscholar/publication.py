@@ -126,6 +126,11 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
 
     publication_type: Series[str] = pa.Field(
         nullable=True,
+        description="Publication types (pipe-delimited string)",
+    )
+
+    publication_types: Series[str] = pa.Field(
+        nullable=True,
         description="Publication types (JSON array)",
     )
 

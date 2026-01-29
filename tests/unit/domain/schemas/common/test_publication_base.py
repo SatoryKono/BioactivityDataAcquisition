@@ -91,7 +91,7 @@ class TestPublicationBaseSchemaValidation:
         record["pmc_id"] = None
         record["title"] = None
         record["abstract"] = None
-        # Note: year is int64 (non-nullable in Pandera), keep as valid int
+        # Note: year is pd.Int64Dtype (nullable integer), keep as valid int
 
         df = pd.DataFrame([record])
 
@@ -116,7 +116,7 @@ class TestPublicationBaseSchemaValidation:
     def test_type_coercion(self, valid_base_record: dict) -> None:
         """Values should be coerced to correct types (coerce=True)."""
         record = valid_base_record.copy()
-        # Year as string should be coerced to int
+        # Year as string should be coerced to Int64
         record["publication_year"] = "2024"
         # _dq_warn as int should be coerced to bool
         record["_dq_warn"] = 0

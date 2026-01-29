@@ -12,6 +12,7 @@ from __future__ import annotations
 from datetime import date
 from typing import cast
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -167,7 +168,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
 
     @pa.check("publication_year", name="year_range")
-    def _check_year(cls, series: Series[int]) -> Series[bool]:
+    def _check_year(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate publication year range."""
         return cast(
             "Series[bool]",

@@ -153,8 +153,13 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
         # Extract affiliations
-        raw_affiliations = extract_affiliations(rec.get("authorships", []))
-        serialized_affiliations = self.serialize_json_list(raw_affiliations)
+        authorships = rec.get("authorships")
+        raw_affiliations = (
+            extract_affiliations(authorships) if isinstance(authorships, list) else None
+        )
+        serialized_affiliations = (
+            json.dumps(raw_affiliations) if raw_affiliations is not None else None
+        )
 
         # Extract institution IDs and country codes (for cross-referencing and geographic analysis)
         institution_ids = extract_institution_ids(rec.get("authorships", []))

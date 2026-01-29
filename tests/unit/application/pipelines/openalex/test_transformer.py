@@ -9,6 +9,7 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
+import json
 import pytest
 
 from bioetl.application.pipelines.openalex.transformer import (
@@ -273,6 +274,52 @@ class TestOpenAlexPublicationTransformer:
         assert "_index" in result
         assert result["_run_type"] == "incremental"
         assert result["_index"] == 0
+
+    @pytest.mark.asyncio
+    async def test_transform_affiliation_list_serialized(
+        self,
+        transformer: OpenAlexPublicationTransformer,
+        pipeline_context: PipelineContext,
+    ) -> None:
+        """Should serialize affiliation_list as JSON string."""
+        record = {
+            "id": "https://openalex.org/W1234567890",
+            "title": "Affiliation Test",
+            "_lookup_method": "doi",
+            "authorships": [
+                {"institutions": [{"display_name": "MIT"}]},
+                {
+                    "institutions": [
+                        {"display_name": "Stanford"},
+                        {"display_name": "MIT"},
+                    ]
+                },
+            ],
+        }
+
+        result = await transformer.transform(pipeline_context, record, 0)
+
+        assert result is not None
+        assert result["affiliation_list"] == json.dumps(["MIT", "Stanford"])
+
+    @pytest.mark.asyncio
+    async def test_transform_affiliation_list_empty(
+        self,
+        transformer: OpenAlexPublicationTransformer,
+        pipeline_context: PipelineContext,
+    ) -> None:
+        """Should serialize empty affiliation_list to JSON empty array."""
+        record = {
+            "id": "https://openalex.org/W1234567891",
+            "title": "Empty Affiliation Test",
+            "_lookup_method": "doi",
+            "authorships": [],
+        }
+
+        result = await transformer.transform(pipeline_context, record, 0)
+
+        assert result is not None
+        assert result["affiliation_list"] == "[]"
 
 
 class TestOpenAlexDoiNormalization:
