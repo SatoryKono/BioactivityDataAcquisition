@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.12 (ADR Registry Update), 2026-01-21* 
+*Версия: 5.15 (Field Group Registry), 2026-01-29* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -280,8 +280,152 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
  
 **Исключения**: Из расчета хэша исключаются технические мета-поля: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`. 
  
-- **Детекция Коллизий**: При upsert проверять `_source_record_id`; если отличается — конфликт, логировать обе записи. 
- 
+- **Детекция Коллизий**: При upsert проверять `_source_record_id`; если отличается — конфликт, логировать обе записи.
+
+### 2.9. Composite Pipelines
+См. [ADR-026](02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) для архитектуры композитных пайплайнов.
+
+Composite Pipeline объединяет данные из нескольких источников в единую обогащённую сущность:
+1. **Seed Pipeline** — извлекает первичные сущности (напр., публикации из ChEMBL)
+2. **Enricher Pipelines** — обогащают данными из других источников (CrossRef, OpenAlex, PubMed)
+3. **Merge Step** — объединяет все обогащения в единую Gold-сущность
+
+#### 2.9.1. Merge Configuration
+
+| Параметр | Описание | Значения |
+|----------|----------|----------|
+| `strategy` | Стратегия объединения | `left_outer`, `inner`, `union` |
+| `conflict_resolution` | Разрешение конфликтов полей | `seed_priority`, `enricher_priority`, `coalesce`, `explicit_rules` |
+| `preserve_all_sources` | Сохранение всех колонок провайдеров | `true` / `false` (default) |
+
+#### 2.9.2. preserve_all_sources Feature
+
+Опция `preserve_all_sources` в `MergeConfig` контролирует обработку колонок при слиянии:
+
+| Режим | Поведение | Используется когда |
+|-------|-----------|-------------------|
+| `preserve_all_sources: false` (default) | Колонки из разных источников **сливаются** (coalesce) в единую колонку по приоритету | Нужна единая "лучшая" версия поля |
+| `preserve_all_sources: true` | **Все** квалифицированные колонки сохраняются | Нужны данные из всех источников для анализа |
+
+**Формат колонок при `preserve_all_sources: true`:**
+```
+{provider}.{entity}.{field}
+```
+
+**Пример:**
+```yaml
+# configs/pipelines/composite/publication.yaml
+merge:
+  strategy: left_outer
+  conflict_resolution: seed_priority
+  preserve_all_sources: true  # Сохранить все колонки провайдеров
+```
+
+**Результирующие колонки:**
+```
+# При preserve_all_sources: false (coalesce)
+title                           # Единственная колонка title
+
+# При preserve_all_sources: true (все источники)
+chembl.publication.title        # Значение из ChEMBL
+crossref.publication.title      # Значение из CrossRef
+openalex.publication.title      # Значение из OpenAlex
+pubmed.publication.title        # Значение из PubMed
+```
+
+**Когда использовать:**
+- **`preserve_all_sources: true`**: Анализ качества данных, сравнение источников, ML-фичи из нескольких провайдеров
+- **`preserve_all_sources: false`**: Продакшн-витрины с единственной "лучшей" версией каждого поля
+
+#### 2.9.3. Column Groups
+
+Для контроля порядка колонок в output используется конфигурация `column_groups`:
+
+```yaml
+merge:
+  column_groups:
+    - name: identifiers
+      fields: [document_chembl_id, doi, pmid]
+      provider_order: [chembl, crossref, openalex, pubmed]
+    - name: title
+      fields: [title]
+      provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+```
+
+#### 2.9.4. Field Group Registry
+
+`FieldGroupRegistry` обеспечивает семантическую группировку полей для:
+- **Упорядочивание колонок** в merged output (группы отсортированы по приоритету enum)
+- **Фильтрация Gold-слоя** — группа `TRASH` автоматически исключается из Gold output
+- **Валидация** — отслеживание mapped/unmapped/system колонок
+
+**8 семантических групп** (`PublicationFieldGroup` enum):
+
+| Группа | Описание | Включается в Gold |
+|--------|----------|-------------------|
+| `ID_AND_STATUS` | Идентификаторы, DOI, PMID, статусы | Да |
+| `BIBLIOGRAPHY` | Title, abstract, journal, volume, pages | Да |
+| `AUTHOR_AND_AFFILIATIONS` | Авторы, аффилиации, ORCID | Да |
+| `TERMS_AND_KEYWORDS_AND_TOPICS` | Keywords, MeSH, topics | Да |
+| `CITATIONS_AND_REFERENCE` | Счётчики цитирований, ссылки | Да |
+| `DATE_AND_PLACES` | Даты публикации, страны | Да |
+| `PUBLICATION_TYPES` | Типы документов | Да |
+| `TRASH` | Внутренние, избыточные, low-value | **Нет** |
+
+**Конфигурация:** `configs/composite/field_groups/publication.yaml` — 94 базовых поля, маппинг на провайдерские колонки.
+
+**Доменные модели** (`domain/composite/field_groups.py`):
+- `FieldMapping` — маппинг `base_name → provider_columns + group`
+- `FieldGroupDefinition` — определение группы с её полями
+- `FieldGroupRegistry` — центральный реестр для lookup, фильтрации, сортировки
+
+**Интеграция:** Bootstrap загружает реестр из YAML и инжектит в `MergeService`. При записи Gold trash-колонки фильтруются автоматически. При отсутствии конфигурации — graceful degradation (фильтрация не применяется).
+
+#### 2.9.5. Column Renames (Layer-Specific)
+
+`rename_fields` в `data_schema` конфигурации позволяет переименовывать колонки на уровне Silver и Gold слоёв.
+
+**ВАЖНО**: `gold.rename_fields` **MUST** использовать имена колонок **ПОСЛЕ** `silver.rename_fields`.  
+Gold читает из Silver (Medallion flow), поэтому видит Silver output schema, а не оригинальные имена.
+
+**Формат конфигурации:**
+```yaml
+# configs/data_schema/{provider}/{entity}.yaml
+column_groups: [...]  # Shared groups
+
+silver:
+  include_groups: [system, identifiers, title]
+  rename_fields:
+    entity_id: document_id         # Rename in Silver
+    content_hash: content_version
+
+gold:
+  include_groups: [system, identifiers, title]
+  exclude_fields: [_dq_*, _source_batch_id]
+  rename_fields:
+    # Use Silver output names (not original!)
+    document_id: publication_id         # Silver renamed entity_id → document_id
+    content_version: version_hash       # Silver renamed content_hash → content_version
+    _run_id: pipeline_run_id            # Original name (not renamed in Silver)
+```
+
+**Rename Chain:**
+```
+Original → Silver → Gold
+---------------------------------
+entity_id → document_id → publication_id
+content_hash → content_version → version_hash
+_run_id → _run_id → pipeline_run_id
+```
+
+**Когда использовать:**
+- **Silver**: Редко. Только для стандартизации внутренних имён между провайдерами
+- **Gold**: Часто. Для user-friendly имён в аналитических витринах
+
+**Best Practice:**
+- Сохранять оригинальные имена в Silver (упрощает отладку)
+- Применять бизнес-имена только в Gold (`_run_id` → `pipeline_run_id`, `pmid` → `pubmed_id`)
+
 ## 3. Обработка Ошибок и Наблюдаемость
 
 ### 3.1. Стратегия Обработки Ошибок
@@ -1126,8 +1270,14 @@ fields:
 | [ADR-026](02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) | Composite Pipeline Pattern | Accepted | 2026-01-15 |
 | [ADR-027](02-architecture/decisions/ADR-027-dq-rules-externalization.md) | DQ Rules Externalization | Accepted | 2026-01-19 |
 | [ADR-028](02-architecture/decisions/ADR-028-filter-rules-externalization.md) | Filter Rules Externalization | Accepted | 2026-01-20 |
+| [ADR-029](02-architecture/decisions/ADR-029-output-metadata-unification.md) | Output Metadata Unification | Accepted | 2026-01-23 |
+| [ADR-030](02-architecture/decisions/ADR-030-publication-pagination-strategy.md) | Publication Pagination Strategy | Accepted | 2026-01-26 |
+| [ADR-031](02-architecture/decisions/ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | Accepted | 2026-01-26 |
 
 ## История Изменений (Changelog)
+- **5.15** (2026-01-29): Field Group Registry. Добавлена §2.9.4 "Field Group Registry" — семантическая группировка полей для Gold-фильтрации и сортировки колонок. Домен: `FieldGroupRegistry`, `FieldMapping`, `FieldGroupDefinition`. YAML-конфиг: `configs/composite/field_groups/publication.yaml`. Интеграция с `MergeService` для автоматической фильтрации TRASH-полей из Gold.
+- **5.14** (2026-01-28): Composite Pipeline Documentation. Добавлена секция §2.9 "Composite Pipelines" с документацией `preserve_all_sources` feature, column groups и merge strategies. Ссылка на ADR-026.
+- **5.13** (2026-01-28): ADR Registry Update. Добавлены ADR-029..031 в реестр (Приложение F): Output Metadata Unification, Publication Pagination Strategy, Loading Strategy Formalization.
 - **5.12** (2026-01-21): ADR Registry Update. Добавлены ADR-021..028 в реестр (Приложение F). Добавлены inline ссылки на новые ADR в соответствующие секции (§1.1, §2.8, §3.2, App D).
 - **5.11** (2026-01-20): Int→Float Coercion Documentation. Добавлена §2.6 "Int→Float Coercion для Nullable Integers" — документация паттерна Gold-схем с `Series[float]` + `coerce=True` для nullable integer полей (34 occurrences). Это осознанное архитектурное решение для обработки nullable integers в Pandas/Polars.
 - **5.10** (2026-01-06): TTL/Heartbeat Values Correction. Исправлены значения Lock TTL (90s) и Heartbeat (30s) в §3.3 для соответствия реализации в `domain/config.py:238,241`. Синхронизация всех документов.

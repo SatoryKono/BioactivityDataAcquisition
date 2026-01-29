@@ -1,6 +1,6 @@
 # BioETL Glossary (Ubiquitous Language)
 
-*Version 2.1 | Updated: 2026-01-26 | Created: 2025-12-29*
+*Version 2.4 | Updated: 2026-01-29 | Created: 2025-12-29*
 
 This glossary defines the canonical terminology used throughout BioETL. Following Domain-Driven Design principles, these terms form the **Ubiquitous Language** — a shared vocabulary understood by both developers and domain experts.
 
@@ -91,6 +91,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Stage** | A discrete phase of pipeline execution (extract, transform, validate, load) | `step`, `phase` (as generic terms) |
 | **Run** | A single execution instance of a pipeline, identified by `run_id` | `execution`, `instance` |
 | **Run Type** | The mode of pipeline execution: `INCREMENTAL`, `BACKFILL`, `REBUILD` | `mode` |
+| **Loading Strategy** | Enum defining pipeline loading behavior: `FULL_SCAN_ONLY`, `WATERMARK_BASED` (ADR-031) | `force_full_scan` (deprecated boolean) |
 
 ### Batch Processing
 
@@ -107,6 +108,25 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Bronze** | Raw data layer (JSONL + zstd compression) | `raw`, `landing` |
 | **Silver** | Normalized and deduplicated data layer (Delta Lake) | `cleansed`, `curated` |
 | **Gold** | Refined and validated data layer for analytics | `reporting`, `presentation` |
+| **BaseOutputMetadata** | Unified output metadata contract for all Medallion layers (ADR-029) | layer-specific `OutputMetadata` variants |
+
+### Composite Pipelines (ADR-026)
+
+| Canonical Term | Definition | Avoid |
+|----------------|------------|-------|
+| **Composite Pipeline** | Multi-source pipeline combining seed + enrichers into unified Gold entity | `merged pipeline`, `combined workflow` |
+| **Seed Pipeline** | Primary pipeline providing base entities for enrichment | `source pipeline`, `base pipeline` |
+| **Enricher** | Pipeline that adds supplemental data from external source | `enhancer`, `augmenter` |
+| **MergeService** | Application service that joins seed and enricher data | `Joiner`, `Combiner` |
+| **Preserve All Sources** | MergeConfig flag to keep all provider-qualified columns | `keep_all_columns` |
+| **Qualified Column** | Column name in `{provider}.{entity}.{field}` format | `prefixed column`, `namespaced column` |
+| **Column Group** | Semantic grouping of columns for output ordering | `field group` |
+| **Field Group Registry** | Central registry (`FieldGroupRegistry`) for semantic field grouping, Gold filtering, and column ordering | `column registry` |
+| **Field Group Id** | Enum identifying a semantic group (e.g., `ID_AND_STATUS`, `BIBLIOGRAPHY`, `TRASH`). Alias for `PublicationFieldGroup` | `group type` |
+| **Field Mapping** | Frozen dataclass mapping a base field name to its provider-qualified columns and group | `column mapping` |
+| **Field Group Definition** | Frozen dataclass defining a semantic group with display name, Gold inclusion flag, and field mappings | `group config` |
+| **Conflict Resolution** | Strategy for handling field value conflicts during merge | `conflict handling` |
+| **Coalesce** | Merge strategy taking first non-null value | `fill`, `combine` |
 
 ---
 

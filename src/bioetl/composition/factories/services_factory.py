@@ -24,6 +24,7 @@ from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.dq_factory import DQServicesFactory
 from bioetl.composition.factories.storage import StorageContext, StorageFactory
+from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.medallion import LoadingStrategy
@@ -430,6 +431,7 @@ class ServicesBuilder:
         *,
         strict_gold_validation: bool = False,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
+        column_groups: tuple[ColumnGroupConfig, ...] = (),
     ) -> RecordProcessor:
         """Create configured RecordProcessor.
 
@@ -479,6 +481,7 @@ class ServicesBuilder:
             gold_schema=gold_schema,
             dq_config=dq_config,
             table_config=table_config,
+            column_groups=column_groups,
         )
 
         # Create Gold validator from schema (DI pattern)
@@ -548,6 +551,7 @@ class ServicesBuilder:
             gold_transform_callback=callbacks.gold_transform,
             strict_gold_validation=strict_gold_validation,
             lock_validator=lock_validator,
+            column_groups=tuple(pipeline.config.column_groups),
         )
 
     @staticmethod
@@ -615,6 +619,7 @@ class ServicesBuilder:
             silver_output_path=silver_output_path,
             gold_output_path=gold_output_path,
             flat_structure=flat_structure,
+            column_groups=pipeline.config.column_groups,
         )
 
         # Create Gold validator

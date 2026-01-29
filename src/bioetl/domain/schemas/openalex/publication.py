@@ -3,16 +3,11 @@
 Aligned with RULES.md v5.10 and Publication Schema Unification spec.
 Includes lookup metadata fields for DOI/title resolution tracking.
 
-Topics vs Concepts (2024 Migration):
-- OpenAlex deprecated the `concepts` field in 2024 in favor of `topics`
-- Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic
-- The `concepts` field is kept for backward compatibility during transition
-- New code should use `topics` and `primary_topic` fields
+Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic.
 """
 
 from __future__ import annotations
 
-import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -38,9 +33,10 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     Validates publication records from OpenAlex Works API.
     Inherits common fields from PublicationBaseSchema:
     - Cross-references: pmid, doi, pmc_id
-    - Core content: title, abstract, authors
-    - Metadata: journal, year (overridden), publication_date, doc_type (overridden), language
-    - Metrics: citation_count (overridden for nullable int)
+    - Core content: title, abstract, authors, affiliation_list
+    - Metadata: journal, publication_year (overridden), publication_date, publication_type, language
+    - Pagination: page_first, page_last
+    - Metrics: citations_received, citations_made
     - Open Access: is_oa
     - Lookup tracking: lookup_method (overridden), original_id, source (overridden)
     """
@@ -60,26 +56,13 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="How record was resolved: doi, title_fallback, title_only",
     )
 
-    # === Override year with pd.Int64Dtype for nullable int ===
-    year: Series[pd.Int64Dtype] = pa.Field(
+    # === Raw OpenAlex Type (replaces doc_type) ===
+    publication_type: Series[str] = pa.Field(
         nullable=True,
-        ge=1800,
-        le=2100,
-        description="Publication year (1800-2100).",
+        description="Raw OpenAlex type (article, book, dataset, etc.)",
     )
 
-    # === Override doc_type to be non-nullable ===
-    doc_type: Series[str] = pa.Field(
-        nullable=False,
-        description="Publication type (PUBLICATION, PREPRINT, etc.)",
-    )
-
-    # === Override citation_count with pd.Int64Dtype for nullable int ===
-    citation_count: Series[pd.Int64Dtype] = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of citations (from OpenAlex cited_by_count).",
-    )
+    # Note: citations_received and citations_made inherited from base as pd.Int64Dtype
 
     # === Override _source to be non-nullable ===
     _source: Series[str] = pa.Field(
@@ -121,12 +104,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         ge=0,
         description="Field-Weighted Citation Impact (must be non-negative)",
     )
-
-    referenced_works_count: Series[pd.Int64Dtype] = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of works referenced (must be non-negative)",
-    )
+    # Note: reference_count removed — now inherited from base as citations_made
 
     # === Quality Indicators ===
     is_retracted: Series[bool] = pa.Field(
@@ -136,7 +114,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
 
     # === Topics (hierarchical classification - replaces deprecated concepts) ===
     # Stored as JSON-serialized string for DataFrame compatibility
-    topics: Series[str] = pa.Field(
+    subject_topics: Series[str] = pa.Field(
         nullable=True,
         description="Hierarchical topic classification (JSON array)",
     )
@@ -156,19 +134,14 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     )
 
     # === Classification Fields (extracted by transformer) ===
-    concepts: Series[str] = pa.Field(
+    subject_mesh: Series[str] = pa.Field(
         nullable=True,
-        description="OpenAlex concepts (JSON array, DEPRECATED: use topics)",
+        description="MeSH terms (JSON array of descriptor names, unified field name)",
     )
 
-    mesh: Series[str] = pa.Field(
+    subject_keywords: Series[str] = pa.Field(
         nullable=True,
-        description="MeSH terms (JSON array of descriptor names)",
-    )
-
-    keywords: Series[str] = pa.Field(
-        nullable=True,
-        description="Keywords (JSON array)",
+        description="Keywords (JSON array, unified field name)",
     )
 
     # === External Identifier ===
@@ -177,21 +150,36 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="Microsoft Academic Graph ID (legacy)",
     )
 
-    # === Bibliographic Page Info ===
-    first_page: Series[str] = pa.Field(
+    # Note: page_first, page_last inherited from base (unified field names)
+    # Note: affiliation_list inherited from base (unified field name)
+
+    # === Author Identifiers ===
+    author_orcids: Series[str] = pa.Field(
         nullable=True,
-        description="First page number (from biblio object)",
+        description="ORCID IDs as JSON array (empty string for missing)",
     )
 
-    last_page: Series[str] = pa.Field(
+    author_openalex_ids: Series[str] = pa.Field(
         nullable=True,
-        description="Last page number (from biblio object)",
+        description="OpenAlex author IDs as JSON array (empty string for missing)",
     )
 
-    # === Author Affiliations ===
-    affiliations: Series[str] = pa.Field(
+    # === Institution Identifiers ===
+    institution_ids: Series[str] = pa.Field(
         nullable=True,
-        description="Author affiliations (JSON array)",
+        description="OpenAlex institution IDs (JSON array, e.g., I1234567890)",
+    )
+
+    institution_country_codes: Series[str] = pa.Field(
+        nullable=True,
+        description="ISO 2-letter country codes of affiliated institutions (JSON array)",
+    )
+
+    # === ROR Identifiers (Research Organization Registry) ===
+    ror_ids: Series[str] = pa.Field(
+        nullable=True,
+        description="ROR IDs of affiliated institutions (JSON array, full URL format). "
+        "May be empty if not returned by Works API.",
     )
 
     class Config:

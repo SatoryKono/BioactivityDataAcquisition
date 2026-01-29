@@ -11,12 +11,13 @@ Usage:
     python scripts/config_gap_analysis.py -o docs/audits/config_gaps.md
 """
 
-from pathlib import Path
-from dataclasses import dataclass, field
-from datetime import date
-import yaml
 import re
 import sys
+from dataclasses import dataclass, field
+from datetime import date
+from pathlib import Path
+
+import yaml
 
 CONFIGS_DIR = Path("configs/pipelines")
 DQ_DIR = Path("configs/dq")

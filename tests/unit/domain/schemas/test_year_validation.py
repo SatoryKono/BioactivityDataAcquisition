@@ -45,12 +45,10 @@ class TestCrossRefYearValidation:
     @pytest.fixture
     def valid_record(self, base_etl_fields: dict) -> dict:
         """Create a valid CrossRef publication record."""
-        from bioetl.domain.schemas.crossref.publication import DOCUMENT_TYPES
-
         return {
             **base_etl_fields,
             "entity_id": "crossref:publication:10.1038/nature12373",
-            # Cross-reference IDs
+            # Excluded from Silver/Gold schemas - CrossRef API doesn't provide PubMed identifiers
             "pmid": None,
             "doi": "10.1038/nature12373",
             "pmc_id": None,
@@ -60,12 +58,12 @@ class TestCrossRefYearValidation:
             "authors": '["Author A", "Author B"]',  # JSON array
             # Publication metadata
             "journal": "Nature",
-            "year": 2020,
+            "publication_year": 2020,
             "publication_date": "2020-06-15",  # Unified date field
-            "doc_type": DOCUMENT_TYPES[0],
+            "publication_type": "journal-article",  # Raw CrossRef type (unified field name)
             "language": "en",
-            # Metrics
-            "citation_count": 100,
+            # Metrics (unified field names)
+            "citations_received": 100,
             # Open Access
             "is_oa": None,
             # Lookup tracking
@@ -74,27 +72,28 @@ class TestCrossRefYearValidation:
             "_source": "crossref",
             # CrossRef-specific fields
             "issn": None,
+            "issn_list": None,
             "publisher": "Nature Publishing Group",
             "volume": "1",
             "issue": "1",
-            "first_page": "1",
-            "last_page": "10",
+            "page_first": "1",
+            "page_last": "10",
             "published_print": None,
             "published_online": None,
-            "reference_count": 50,
+            "citations_made": 50,
             "license_url": None,
-            "subjects": None,
+            "subject_keywords": None,
             # Content domain fields
             "content_domain_domains": None,
             "content_domain_crossmark_restriction": None,
             # Additional CrossRef fields
             "alternative_id": None,
-            "short_container_title": None,
+            "journal_name_short": None,
             "published": None,
             "issn_print": None,
             "issn_electronic": None,
             # Author affiliations
-            "affiliations": None,
+            "affiliation_list": None,
             # Author and reference fields
             "author_orcids": None,
             "author_details": None,
@@ -108,10 +107,10 @@ class TestCrossRefYearValidation:
         )
 
         for year in [MIN_PUBLICATION_YEAR, MAX_PUBLICATION_YEAR]:
-            valid_record["year"] = year
+            valid_record["publication_year"] = year
             df = pd.DataFrame([valid_record])
             validated = PublicationEnrichedSchema.validate(df)
-            assert validated["year"].iloc[0] == year
+            assert validated["publication_year"].iloc[0] == year
 
     def test_year_outside_range_fails(self, valid_record: dict) -> None:
         """Should reject year outside valid range."""
@@ -120,13 +119,13 @@ class TestCrossRefYearValidation:
         )
 
         # Year below minimum
-        valid_record["year"] = MIN_PUBLICATION_YEAR - 1
+        valid_record["publication_year"] = MIN_PUBLICATION_YEAR - 1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             PublicationEnrichedSchema.validate(df)
 
         # Year above maximum
-        valid_record["year"] = MAX_PUBLICATION_YEAR + 1
+        valid_record["publication_year"] = MAX_PUBLICATION_YEAR + 1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             PublicationEnrichedSchema.validate(df)
@@ -152,12 +151,12 @@ class TestSemanticScholarYearValidation:
             "authors": '["Author A", "Author B"]',  # JSON array
             # Publication metadata
             "journal": "Nature",
-            "year": 2020,
+            "publication_year": 2020,
             "publication_date": "2020-06-15",  # Unified date field
-            "doc_type": "PUBLICATION",
+            "publication_type": "PUBLICATION",
             "language": None,
-            # Metrics
-            "citation_count": 100,
+            # Metrics (unified field names)
+            "citations_received": 100,
             # Open Access
             "is_oa": True,
             # Lookup tracking
@@ -166,23 +165,21 @@ class TestSemanticScholarYearValidation:
             "_source": "semanticscholar",
             # SemanticScholar-specific fields
             "paper_id": "a" * 40,  # 40-char hex
-            "arxiv_id": None,
             "dblp_id": None,
             "corpus_id": 12345,
             "tldr": None,
             "volume": None,
-            "pages": None,
-            "first_page": None,
-            "last_page": None,
-            "venue": None,
-            "reference_count": 50,
+            "page_range": None,
+            "page_first": None,
+            "page_last": None,
+            "citations_made": 50,
             "influential_citation_count": None,
             "open_access_url": None,
             "oa_status": None,
-            "fields_of_study": None,
+            "subject_fields": None,
             "publication_types": None,
             # Author affiliations
-            "affiliations": None,
+            "affiliation_list": None,
             # Author identifiers
             "author_s2_ids": None,
             "author_orcids": None,
@@ -198,10 +195,10 @@ class TestSemanticScholarYearValidation:
         )
 
         for year in [MIN_PUBLICATION_YEAR, MAX_PUBLICATION_YEAR]:
-            valid_record["year"] = year
+            valid_record["publication_year"] = year
             df = pd.DataFrame([valid_record])
             validated = SemanticScholarPublicationSchema.validate(df)
-            assert validated["year"].iloc[0] == year
+            assert validated["publication_year"].iloc[0] == year
 
     def test_year_outside_range_fails(self, valid_record: dict) -> None:
         """Should reject year outside valid range."""
@@ -210,13 +207,13 @@ class TestSemanticScholarYearValidation:
         )
 
         # Year below minimum (was 1500, now 1800)
-        valid_record["year"] = MIN_PUBLICATION_YEAR - 1
+        valid_record["publication_year"] = MIN_PUBLICATION_YEAR - 1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             SemanticScholarPublicationSchema.validate(df)
 
         # Year above maximum
-        valid_record["year"] = MAX_PUBLICATION_YEAR + 1
+        valid_record["publication_year"] = MAX_PUBLICATION_YEAR + 1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             SemanticScholarPublicationSchema.validate(df)
@@ -242,12 +239,15 @@ class TestChemblYearValidation:
             "authors": '["Author A", "Author B"]',  # JSON array
             # Publication metadata
             "journal": "Nature",
-            "year": 2020,
+            "publication_year": 2020,
             "publication_date": None,  # Always NULL for ChEMBL
-            "doc_type": "PUBLICATION",
+            "publication_type": "PUBLICATION",
             "language": None,
-            # Metrics (always NULL for ChEMBL)
-            "citation_count": None,
+            # Affiliations (unified field name)
+            "affiliation_list": None,
+            # Metrics (unified field names, always NULL for ChEMBL)
+            "citations_received": None,
+            "citations_made": None,
             # Open Access (always NULL for ChEMBL)
             "is_oa": None,
             # Lookup tracking
@@ -258,11 +258,10 @@ class TestChemblYearValidation:
             # ChEMBL-specific fields
             "document_chembl_id": "CHEMBL1234567",
             "src_id": 1,
-            "journal_full_title": "Nature Journal",
             "volume": "1",
             "issue": "1",
-            "first_page": "1",
-            "last_page": "10",
+            "page_first": "1",
+            "page_last": "10",
             # ChEMBL release metadata
             "chembl_release": "CHEMBL_34",
             "creation_date": "2024-01-15",
@@ -273,23 +272,23 @@ class TestChemblYearValidation:
         from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
 
         for year in [MIN_PUBLICATION_YEAR, MAX_PUBLICATION_YEAR]:
-            valid_record["year"] = year
+            valid_record["publication_year"] = year
             df = pd.DataFrame([valid_record])
             validated = ChemblPublicationSchema.validate(df)
-            assert validated["year"].iloc[0] == year
+            assert validated["publication_year"].iloc[0] == year
 
     def test_year_outside_range_fails(self, valid_record: dict) -> None:
         """Should reject year outside valid range."""
         from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
 
         # Year below minimum
-        valid_record["year"] = MIN_PUBLICATION_YEAR - 1
+        valid_record["publication_year"] = MIN_PUBLICATION_YEAR - 1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             ChemblPublicationSchema.validate(df)
 
         # Year above maximum
-        valid_record["year"] = MAX_PUBLICATION_YEAR + 1
+        valid_record["publication_year"] = MAX_PUBLICATION_YEAR + 1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             ChemblPublicationSchema.validate(df)
@@ -322,13 +321,20 @@ class TestPubMedYearValidation:
             "abstract": None,
             "authors": '["Author A", "Author B"]',  # JSON array
             # Publication metadata
-            "journal": "Nature",  # Unified journal field
-            "year": 2020,
+            "journal": "Nature",  # Base schema journal field
+            "journal_name_short": "Nature",  # PubMed-specific abbreviation (unified)
+            "publication_year": 2020,
             "publication_date": "2020-05-15",  # Unified date field
-            "doc_type": "PUBLICATION",
+            "publication_type": "PUBLICATION",
             "language": "eng",
-            # Metrics
-            "citation_count": None,  # Not available from PubMed
+            # Affiliations (unified field name)
+            "affiliation_list": None,
+            # Pagination (unified field names)
+            "page_first": None,
+            "page_last": None,
+            # Metrics (unified field names)
+            "citations_received": None,  # Not available from PubMed
+            "citations_made": None,  # Unified name for reference count
             # Open Access
             "is_oa": None,
             # Lookup tracking
@@ -337,14 +343,13 @@ class TestPubMedYearValidation:
             "_source": "pubmed",
             # PubMed-specific fields
             "abstract_structured": None,
-            "vernacular_title": None,
-            "journal_title": "Nature",
             "journal_iso_abbrev": "Nature",
             "issn": "0028-0836",
             "journal_issn_type": "Print",
             "nlm_unique_id": None,
             "country": "United States",
             "medline_pgn": "1-10",
+            "page_range": "1-10",
             "pub_month": 5,
             "pub_day": 15,
             "publication_status": "ppublish",
@@ -352,29 +357,25 @@ class TestPubMedYearValidation:
             "date_completed": date(2020, 5, 20),
             "date_revised": date(2020, 5, 21),
             "citation_subset": None,
-            # Enhanced affiliation data
-            "structured_affiliations": None,
+            # Enhanced affiliation data (unified field name)
+            "affiliation_structured": None,
             # Counts
             "author_count": 5,
             "mesh_heading_count": 10,
             "keyword_count": 3,
             "grant_count": 2,
-            "reference_count": 50,
+            # reference_count removed — citations_made is the unified field
             "chemical_count": 0,
-            # Classification data (JSON arrays)
-            "mesh_terms": None,
+            # Classification data (JSON arrays, unified field names)
+            "subject_mesh": None,
             "chemicals": None,
-            "keywords": None,
+            "subject_keywords": None,
             "databanks": None,
             "gene_symbols": None,
             "publication_types": None,
-            # Additional date fields
-            "accepted_date": None,
-            "received_date": None,
-            "revised_date": None,
-            "epub_date": None,
-            # Author affiliations
-            "affiliations": None,
+            # Note: affiliation_list inherited from base (unified field name)
+            # Author-affiliation mapping
+            "authors_with_affiliations": None,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
@@ -382,36 +383,36 @@ class TestPubMedYearValidation:
         from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
 
         for year in [MIN_PUBLICATION_YEAR, MAX_PUBLICATION_YEAR]:
-            valid_record["year"] = year
+            valid_record["publication_year"] = year
             df = pd.DataFrame([valid_record])
             validated = PubMedPublicationSchema.validate(df)
-            assert validated["year"].iloc[0] == year
+            assert validated["publication_year"].iloc[0] == year
 
     def test_year_outside_range_fails(self, valid_record: dict) -> None:
         """Should reject year outside valid range."""
         from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
 
         # Year below minimum
-        valid_record["year"] = MIN_PUBLICATION_YEAR - 1
+        valid_record["publication_year"] = MIN_PUBLICATION_YEAR - 1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             PubMedPublicationSchema.validate(df)
 
         # Year above maximum
-        valid_record["year"] = MAX_PUBLICATION_YEAR + 1
+        valid_record["publication_year"] = MAX_PUBLICATION_YEAR + 1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             PubMedPublicationSchema.validate(df)
 
     def test_year_field_renamed_from_pub_year(self, valid_record: dict) -> None:
-        """Verify 'year' field is used instead of legacy 'pub_year'."""
+        """Verify 'publication_year' field is used instead of legacy 'pub_year'."""
         from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
 
-        # Record with 'year' should work
-        valid_record["year"] = 2020
+        # Record with 'publication_year' should work
+        valid_record["publication_year"] = 2020
         df = pd.DataFrame([valid_record])
         validated = PubMedPublicationSchema.validate(df)
-        assert "year" in validated.columns
+        assert "publication_year" in validated.columns
 
         # Verify there's no 'pub_year' column in schema
         assert "pub_year" not in validated.columns

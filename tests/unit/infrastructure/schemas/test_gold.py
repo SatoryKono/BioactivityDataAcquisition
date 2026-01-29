@@ -23,8 +23,8 @@ from bioetl.domain.contracts import (
 PUBLICATION_DQ_FIELDS = {"_dq_warn", "_dq_error"}
 PUBLICATION_CROSS_REF_FIELDS = {"doi"}
 PUBLICATION_UNIFIED_DATE_FIELDS = {"publication_date"}
-PUBLICATION_UNIFIED_PAGE_FIELDS = {"first_page", "last_page"}
-PUBLICATION_CORE_FIELDS = {"title", "abstract", "authors", "year"}
+PUBLICATION_UNIFIED_PAGE_FIELDS = {"page_first", "page_last"}
+PUBLICATION_CORE_FIELDS = {"title", "abstract", "authors", "publication_year"}
 
 
 def get_schema_fields(schema_class) -> set[str]:
@@ -93,10 +93,10 @@ class TestGoldPublicationSchemaUnifiedFields:
         ],
     )
     def test_schema_has_page_fields(self, schema_class, name):
-        """Gold publication schemas with page data must have first_page and last_page fields."""
+        """Gold publication schemas with page data must have page_first and page_last fields."""
         fields = get_schema_fields(schema_class)
-        assert "first_page" in fields, f"{name} missing first_page field"
-        assert "last_page" in fields, f"{name} missing last_page field"
+        assert "page_first" in fields, f"{name} missing page_first field"
+        assert "page_last" in fields, f"{name} missing page_last field"
 
 
 @pytest.mark.unit
@@ -160,7 +160,7 @@ class TestGoldPublicationSchemaCoreFields:
             # CrossRef excluded: abstract not collected per user request
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
-            # SemanticScholar excluded: abstract not collected per user request
+            (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
     def test_schema_has_title_and_abstract(self, schema_class, name):
@@ -176,7 +176,7 @@ class TestGoldPublicationSchemaCoreFields:
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
-            # SemanticScholar excluded: authors not collected per user request
+            (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
     def test_schema_has_authors_field(self, schema_class, name):
@@ -187,17 +187,23 @@ class TestGoldPublicationSchemaCoreFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_year_field(self, schema_class, name):
-        """All Gold publication schemas must have year field."""
+    def test_schema_has_publication_year_field(self, schema_class, name):
+        """All Gold publication schemas must have publication_year field."""
         fields = get_schema_fields(schema_class)
-        assert "year" in fields, f"{name} missing year field"
+        assert "publication_year" in fields, f"{name} missing publication_year field"
+
+    def test_chembl_schema_has_publication_year_field(self):
+        """ChEMBL Gold schema uses publication_year (unified naming)."""
+        fields = get_schema_fields(ChEMBLDocumentGoldSchema)
+        assert "publication_year" in fields, (
+            "ChEMBL Document missing publication_year field"
+        )
 
 
 @pytest.mark.unit
@@ -343,34 +349,37 @@ class TestGoldSchemaValidation:
             "abstract_structured": False,
             # Note: vernacular_title excluded per design
             "journal": "Test Journal",
-            "journal_abbrev": "Test J",
-            "journal_title": "Test Journal Full Name",
+            "journal_name_short": "Test J",
             "journal_iso_abbrev": "Test J.",
             "journal_issn_type": "Print",
             "issn": "1234-5678",
             "nlm_unique_id": "7501160",
             "volume": "10",
             "issue": "2",
-            "pages": "100-110",
+            "page_range": "100-110",
             "medline_pgn": "100-110",
-            "first_page": "100",
-            "last_page": "110",
+            "page_first": "100",
+            "page_last": "110",
             "authors": '["Author One", "Author Two"]',
-            # affiliations excluded per user request
-            "pub_date": "2024-03-15",
+            "affiliation_list": '["University A", "University B"]',
+            "affiliation_structured": '[{"text": "University A", "ror_id": null}]',
+            "authors_with_affiliations": '[{"name_hash": "abc123", "initials": "AO", "affiliations": []}]',
+            "pii": "S0123-4567(24)00001-X",
+            "mid": "NIHMS123456",
+            "publisher_id": "pub-12345",
             "pub_month": 3,
             "pub_day": 15,
             "publication_date": "2024-03-15",
-            "year": 2024,
             "publication_year": 2024,
             # Note: accepted_date, received_date, revised_date, epub_date excluded per design
             "date_completed": "2024-04-01",
             "date_revised": "2024-03-20",
             "publication_status": "ppublish",
             "publication_type_list": '["Journal Article"]',
+            "publication_type": "PUBLICATION",
             "publication_types": ["Journal Article"],
-            "keywords": ["test"],
-            "mesh_terms": ["Testing"],
+            "subject_keywords": ["test"],
+            "subject_mesh": ["Testing"],
             "chemicals": ["Aspirin"],
             "databanks": ["GenBank"],
             "gene_symbols": ["TP53"],
@@ -382,7 +391,7 @@ class TestGoldSchemaValidation:
             "mesh_heading_count": 1,
             "keyword_count": 1,
             "grant_count": 0,
-            "reference_count": 10,
+            "citations_made": 10,
             "chemical_count": 0,
             "_source": "pubmed",
             "_lookup_method": "direct",
@@ -415,23 +424,21 @@ class TestGoldSchemaValidation:
             "title": "Test Publication",
             "authors": '["Author One"]',
             "abstract": "Test abstract",
-            "doc_type": "PUBLICATION",
+            "publication_type": "PUBLICATION",
             "journal": "Test Journal",
-            "journal_full_title": "Test Journal Full Title",
-            "year": 2024,
+            "publication_year": 2024,
             # publication_date excluded: not available from ChEMBL API
             "volume": "10",
             "issue": "2",
-            "first_page": "100",
-            "last_page": "110",
+            "page_first": "100",
+            "page_last": "110",
+            "citations_received": None,
+            "citations_made": None,
             "src_id": 1,
             # ChEMBL release metadata
             "chembl_release": "CHEMBL_34",
             "creation_date": "2024-01-01",
-            # Unified publication fields (ChEMBL doesn't provide these)
-            "citation_count": None,
-            "is_oa": False,  # Use False for nullable bool compatibility
-            "language": None,
+            # Примечание: citation_count маппится в citations_received; is_oa и language исключены
             "_lookup_method": "direct",
             "_original_id": "CHEMBL12345",
             "_source": "chembl",

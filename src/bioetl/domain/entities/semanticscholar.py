@@ -45,13 +45,12 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
         tldr: AI-generated summary (TL;DR).
         volume: Journal volume (parsed from combined format like "32 4").
         issue: Journal issue number (parsed from combined volume/issue).
-        pages: Page numbers.
+        page_range: Page numbers.
         venue: Venue name (conference/journal).
-        reference_count: Number of references.
         influential_citation_count: Number of influential citations.
         open_access_url: URL to open access PDF.
-        fields_of_study: JSON string of fields of study.
-        publication_types: JSON string of publication types.
+        subject_fields: JSON string of fields of study.
+        publication_type: JSON string of publication types.
         author_s2_ids: JSON string of S2 author IDs (40-char hex).
         author_orcids: JSON string of ORCID identifiers.
         author_h_indices: JSON string of h-index values.
@@ -73,28 +72,27 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     # SemanticScholar-specific: AI-generated summary
     tldr: str | None = None
 
-    # SemanticScholar-specific journal/venue information
+    # SemanticScholar-specific journal information
     volume: str | None = None
     issue: str | None = (
         None  # Parsed from combined volume/issue (e.g., "32 4" → issue=4)
     )
-    pages: str | None = None  # Legacy: "first-last" format
+    page_range: str | None = None  # Legacy: "first-last" format
     # first_page and last_page inherited from PublicationEntityBase
-    venue: str | None = None
 
     # SemanticScholar-specific metrics
-    reference_count: int | None = None
+    # Note: citations_made inherited from PublicationEntityBase
     influential_citation_count: int | None = None
 
     # SemanticScholar-specific OA URL
     open_access_url: str | None = None
 
     # SemanticScholar-specific classification (JSON strings)
-    fields_of_study: str | None = None
-    publication_types: str | None = None
+    subject_fields: str | None = None
+    publication_type: str | None = None
+    publication_types: str | None = None  # JSON array of publication types
 
     # Author identifiers (for author-level analytics and disambiguation)
-    author_ids: str | None = None  # JSON array of author IDs
     author_s2_ids: str | None = None  # JSON array of S2 author IDs (40-char hex)
     author_orcids: str | None = None  # JSON array of ORCID identifiers
     author_h_indices: str | None = None  # JSON array of h-index values

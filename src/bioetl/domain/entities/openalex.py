@@ -1,7 +1,7 @@
 """OpenAlex domain entities.
 
 Contains OpenAlexPublicationRecord (DTO) and OpenAlexPublicationEntity (domain).
-Topics vs Concepts: OpenAlex deprecated concepts in 2024; use topics instead.
+Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic.
 """
 
 from __future__ import annotations
@@ -118,15 +118,8 @@ class OpenAlexPublicationRecord(BaseModel):
         default_factory=list, description="Funding/grant information"
     )
 
-    # Concepts (DEPRECATED - kept for backward compatibility)
-    # OpenAlex deprecated concepts in 2024 in favor of topics
-    concepts: list[str] = PydanticField(
-        default_factory=list,
-        description="Top concept names (DEPRECATED: use topics instead)",
-    )
-
     # MeSH terms (Medical Subject Headings)
-    mesh: list[str] = PydanticField(
+    mesh_terms: list[str] = PydanticField(
         default_factory=list, description="MeSH descriptor names"
     )
 
@@ -153,6 +146,21 @@ class OpenAlexPublicationRecord(BaseModel):
         default_factory=list,
         description="ISO 2-letter country codes of affiliated institutions",
     )
+    ror_ids: list[str] = PydanticField(
+        default_factory=list,
+        description="ROR IDs of affiliated institutions (full URL format). "
+        "May be empty if not returned by Works API.",
+    )
+
+    # Author identifiers (JSON-serialized lists preserving author order)
+    author_orcids: str | None = PydanticField(
+        default=None,
+        description="ORCID IDs as JSON array (empty string for missing)",
+    )
+    author_openalex_ids: str | None = PydanticField(
+        default=None,
+        description="OpenAlex author IDs as JSON array (empty string for missing)",
+    )
 
     # Additional metadata
     language: str | None = PydanticField(default=None, description="Language code")
@@ -167,7 +175,7 @@ class OpenAlexPublicationRecord(BaseModel):
     fwci: float | None = PydanticField(
         default=None, description="Field-Weighted Citation Impact"
     )
-    referenced_works_count: int | None = PydanticField(
+    reference_count: int | None = PydanticField(
         default=None, description="Number of works referenced"
     )
 
@@ -206,10 +214,17 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # Institution identifiers (for cross-referencing and geographic analysis)
     institution_ids: list[str] = field(default_factory=list)
     institution_country_codes: list[str] = field(default_factory=list)
+    ror_ids: list[str] = field(default_factory=list)  # ROR IDs (may be empty)
+
+    # Author identifiers (JSON-serialized lists preserving author order)
+    author_orcids: str | None = None  # ORCID IDs (empty string for missing)
+    author_openalex_ids: str | None = (
+        None  # OpenAlex author IDs (empty string for missing)
+    )
 
     # Topics (hierarchical classification - replaces deprecated concepts)
     # Each topic dict has: id, display_name, score, subfield, field, domain
-    topics: list[dict[str, Any]] = field(default_factory=list)
+    subject_topics: list[dict[str, Any]] = field(default_factory=list)
 
     # Primary topic (single most relevant topic for quick categorization)
     # Dict with: id, display_name, score, subfield, field, domain
@@ -219,15 +234,11 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # Each grant dict has: funder, funder_display_name, award_id
     grants: list[dict[str, Any]] = field(default_factory=list)
 
-    # OpenAlex-specific: Concepts (DEPRECATED - kept for backward compatibility)
-    # OpenAlex deprecated concepts in 2024 in favor of topics
-    concepts: list[str] = field(default_factory=list)
-
     # MeSH terms (Medical Subject Headings)
-    mesh: list[str] = field(default_factory=list)
+    subject_mesh: list[str] = field(default_factory=list)
 
     # Keywords (author-assigned)
-    keywords: list[str] = field(default_factory=list)
+    subject_keywords: list[str] = field(default_factory=list)
 
     # Bibliographic info (from biblio object)
     volume: str | None = None
@@ -235,14 +246,12 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
     # Additional metrics
     fwci: float | None = None  # Field-Weighted Citation Impact
-    referenced_works_count: int | None = None
 
     # Quality indicators
     is_retracted: bool = False
 
-    # Raw document type from OpenAlex API (e.g., "article", "preprint", "book-chapter")
-    # Unlike doc_type (unified mapping), this preserves the original OpenAlex type value
-    type: str | None = None
+    # Note: publication_type inherited from PublicationEntityBase
+    # Stores raw OpenAlex type (e.g., "article", "preprint", "book-chapter")
 
     # Override: Default source for OpenAlex
     _source: str = "openalex"

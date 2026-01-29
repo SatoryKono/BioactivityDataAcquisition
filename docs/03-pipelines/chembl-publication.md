@@ -75,8 +75,7 @@ sequenceDiagram
 | `authors` | `str` | Yes | `$.authors` | Parse → Hash PII → JSON serialize |
 | `abstract` | `str` | Yes | `$.abstract` | Strip HTML tags |
 | `doc_type` | `str` | Yes | `$.doc_type` | Enum: PUBLICATION, PATENT, DATASET, BOOK |
-| `journal` | `str` | Yes | `$.journal` | Direct |
-| `journal_full_title` | `str` | Yes | `$.journal_full_title` | Direct |
+| `journal` | `str` | Yes | `$.journal` | Direct (canonical field) |
 | `year` | `int` | Yes | `$.year` | PublicationYear validation (1800-2100) |
 | `volume` | `str` | Yes | `$.volume` | Direct |
 | `issue` | `str` | Yes | `$.issue` | Direct |
@@ -212,8 +211,7 @@ if release_info and isinstance(release_info, dict):
 | `authors` | `str` | No | Yes | Valid JSON array |
 | `abstract` | `str` | No | Yes | - |
 | `doc_type` | `str` | No | Yes | Enum validation |
-| `journal` | `str` | No | Yes | - |
-| `journal_full_title` | `str` | No | Yes | - |
+| `journal` | `str` | No | Yes | Canonical field |
 | `year` | `float` | Yes | Yes | Coerced from int; nullable |
 | `volume` | `str` | No | Yes | - |
 | `issue` | `str` | No | Yes | - |
@@ -374,7 +372,6 @@ erDiagram
   "abstract": "We report the discovery of a series of potent kinase inhibitors...",
   "doc_type": "PUBLICATION",
   "journal": "J Med Chem",
-  "journal_full_title": "Journal of Medicinal Chemistry",
   "year": 2020,
   "volume": "63",
   "issue": "12",
@@ -413,7 +410,6 @@ erDiagram
   "abstract": "We report the discovery of a series of potent kinase inhibitors...",
   "doc_type": "PUBLICATION",
   "journal": "J Med Chem",
-  "journal_full_title": "Journal of Medicinal Chemistry",
   "year": 2020.0,
   "volume": "63",
   "issue": "12",

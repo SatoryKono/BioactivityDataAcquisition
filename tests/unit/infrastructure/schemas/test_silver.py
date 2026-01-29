@@ -403,7 +403,7 @@ class TestPubmedPublicationSchema:
     def test_has_list_fields(self):
         """Verify list fields exist and have correct types."""
         # authors is now JSON-serialized string (per commit fcf29f2)
-        list_fields = ["publication_types", "keywords", "mesh_terms"]
+        list_fields = ["publication_types", "subject_keywords", "subject_mesh"]
         for field_name in list_fields:
             assert field_name in PUBMED_PUBLICATION_SCHEMA.names
             field = PUBMED_PUBLICATION_SCHEMA.field(field_name)
@@ -418,16 +418,27 @@ class TestPubmedPublicationSchema:
         field = PUBMED_PUBLICATION_SCHEMA.field("authors")
         assert field.type == pa.string(), f"authors should be string, got {field.type}"
 
-    def test_year_is_int64(self):
-        """Verify year is int64."""
-        field = PUBMED_PUBLICATION_SCHEMA.field("year")
+    def test_publication_year_is_int64(self):
+        """Verify publication_year is int64."""
+        field = PUBMED_PUBLICATION_SCHEMA.field("publication_year")
         assert field.type == pa.int64()
 
     def test_has_journal_info(self):
         """Verify journal information fields exist."""
-        expected = ["journal", "journal_abbrev", "volume", "issue"]
+        expected = ["journal", "journal_name_short", "volume", "issue"]
         for field_name in expected:
             assert field_name in PUBMED_PUBLICATION_SCHEMA.names
+
+
+class TestCrossrefPublicationSchema:
+    """Tests for CROSSREF_PUBLICATION_SCHEMA."""
+
+    def test_journal_name_short_is_string(self):
+        """Verify journal_name_short is a string field."""
+        field = CROSSREF_PUBLICATION_SCHEMA.field("journal_name_short")
+        assert field.type == pa.string(), (
+            f"journal_name_short should be string, got {field.type}"
+        )
 
 
 class TestSchemaFieldCounts:
@@ -738,8 +749,16 @@ class TestSilverSchemaValidation:
 # Required fields for all publication schemas (unified across providers)
 PUBLICATION_DQ_FIELDS = frozenset({"_dq_warn", "_dq_error"})
 PUBLICATION_LOOKUP_FIELDS = frozenset({"_lookup_method", "_original_id"})
-PUBLICATION_CROSS_REF_FIELDS = frozenset({"pmid", "doi", "pmc_id"})
-PUBLICATION_UNIFIED_FIELDS = frozenset({"publication_date", "first_page", "last_page"})
+# Cross-reference fields vary by provider due to API availability
+# - ChEMBL: pmid, doi (pmc_id not available from ChEMBL API)
+# - CrossRef: doi only (pmid, pmc_id not available from CrossRef API)
+# - OpenAlex: pmid, doi (pmc_id excluded per design 2026-01)
+# - PubMed: pmid, doi, pmc_id (all available)
+# - SemanticScholar: pmid, doi (pmc_id excluded per design 2026-01)
+PUBLICATION_CROSS_REF_FIELDS_MINIMAL = frozenset({"doi"})  # All providers have doi
+PUBLICATION_UNIFIED_PAGE_FIELDS = frozenset(
+    {"page_first", "page_last"}
+)  # publication_date varies
 
 
 class TestPublicationSchemaDQFields:
@@ -819,37 +838,61 @@ class TestPublicationSchemaLookupFields:
 
 
 class TestPublicationSchemaCrossRefFields:
-    """Test that all publication schemas have cross-reference ID fields."""
+    """Test that publication schemas have appropriate cross-reference ID fields.
+
+    Cross-reference field availability varies by provider:
+    - ChEMBL: pmid, doi (pmc_id not available from ChEMBL API)
+    - CrossRef: doi only (pmid, pmc_id not available from CrossRef API)
+    - OpenAlex: pmid, doi (pmc_id excluded per design 2026-01)
+    - PubMed: pmid, doi, pmc_id (all available)
+    - SemanticScholar: pmid, doi (pmc_id excluded per design 2026-01)
+    """
 
     @pytest.mark.parametrize(
-        "schema,name",
+        "schema,name,expected_fields",
         [
-            # ChEMBL excluded: pmc_id not available from ChEMBL API
-            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
-            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
-            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
-            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
+            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication", {"pmid", "doi"}),
+            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication", {"doi"}),
+            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication", {"pmid", "doi"}),
+            (
+                PUBMED_PUBLICATION_SCHEMA,
+                "PubMed Publication",
+                {"pmid", "doi", "pmc_id"},
+            ),
+            (
+                SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
+                "SemanticScholar Publication",
+                {"pmid", "doi"},
+            ),
         ],
     )
-    def test_schema_has_cross_ref_fields(self, schema, name):
-        """All publication schemas must have pmid, doi, pmc_id."""
+    def test_schema_has_cross_ref_fields(self, schema, name, expected_fields):
+        """Publication schemas must have their provider-specific cross-ref fields."""
         field_names = {f.name for f in schema}
-        missing = PUBLICATION_CROSS_REF_FIELDS - field_names
+        missing = expected_fields - field_names
         assert not missing, f"{name} missing cross-ref fields: {missing}"
 
     @pytest.mark.parametrize(
-        "schema,name",
+        "schema,name,expected_fields",
         [
-            # ChEMBL excluded: pmc_id not available from ChEMBL API
-            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
-            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
-            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
-            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
+            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication", {"pmid", "doi"}),
+            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication", {"doi"}),
+            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication", {"pmid", "doi"}),
+            (
+                PUBMED_PUBLICATION_SCHEMA,
+                "PubMed Publication",
+                {"pmid", "doi", "pmc_id"},
+            ),
+            (
+                SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
+                "SemanticScholar Publication",
+                {"pmid", "doi"},
+            ),
         ],
     )
-    def test_cross_ref_fields_are_string(self, schema, name):
+    def test_cross_ref_fields_are_string(self, schema, name, expected_fields):
         """Cross-reference fields must be string type."""
-        for field_name in PUBLICATION_CROSS_REF_FIELDS:
+        for field_name in expected_fields:
             field = schema.field(field_name)
             assert field.type == pa.string(), (
                 f"{name}.{field_name} should be string, got {field.type}"
@@ -891,9 +934,9 @@ class TestPublicationSchemaUnifiedDateAndPageFields:
         ],
     )
     def test_schema_has_page_fields(self, schema, name):
-        """All publication schemas must have first_page and last_page fields."""
+        """All publication schemas must have page_first and page_last fields."""
         field_names = {f.name for f in schema}
-        page_fields = {"first_page", "last_page"}
+        page_fields = {"page_first", "page_last"}
         missing = page_fields - field_names
         assert not missing, f"{name} missing page fields: {missing}"
 
@@ -933,13 +976,13 @@ class TestAllPublicationSchemas:
             # CrossRef excluded: abstract not collected per user request
             (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
             (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
-            # SemanticScholar excluded: abstract, authors not collected per user request
+            # SemanticScholar excluded: authors not collected per user request
         ],
     )
     def test_schema_has_core_fields(self, schema, name):
         """All publication schemas must have core content fields."""
         field_names = {f.name for f in schema}
-        core_fields = {"title", "abstract", "authors", "year"}
+        core_fields = {"title", "abstract", "authors", "publication_year"}
         missing = core_fields - field_names
         assert not missing, f"{name} missing core fields: {missing}"
 

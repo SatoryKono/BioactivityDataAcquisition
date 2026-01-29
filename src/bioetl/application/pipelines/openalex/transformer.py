@@ -15,18 +15,21 @@ Note: Business logic functions are delegated to extractors module.
 
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.openalex.extractors import (
     extract_affiliations,
+    extract_author_ids,
+    extract_author_orcids,
     extract_authors,
     extract_biblio_info,
-    extract_concepts,
     extract_external_ids,
     extract_grants,
     extract_institution_country_codes,
     extract_institution_ids,
+    extract_institution_ror_ids,
     extract_journal_info,
     extract_keywords,
     extract_mesh_terms,
@@ -62,10 +65,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
     - authors: authorships (extraction + PII hashing)
     - journal: primary_location.source.display_name
     - year: publication_year
-    - topics: topics (hierarchical 4-level classification)
+    - subject_topics: topics (hierarchical 4-level classification)
     - primary_topic: primary_topic (single most relevant topic)
     - grants: grants (funding information)
-    - concepts: concepts (DEPRECATED - kept for backward compatibility)
 
     Handles lookup metadata:
     - _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
@@ -76,11 +78,6 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
     - Automatic primary ID validation and fallback logging
     - Content hash computation (excluding metadata)
     - Tracing and metrics observability (O1)
-
-    Note on Topics vs Concepts:
-    - OpenAlex deprecated the `concepts` field in 2024 in favor of `topics`
-    - Both fields are extracted during the transition period
-    - New downstream code should use `topics` and `primary_topic`
     """
 
     def __init__(
@@ -156,8 +153,13 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
         # Extract affiliations
-        raw_affiliations = extract_affiliations(rec.get("authorships", []))
-        serialized_affiliations = self.serialize_json_list(raw_affiliations)
+        authorships = rec.get("authorships")
+        raw_affiliations = (
+            extract_affiliations(authorships) if isinstance(authorships, list) else None
+        )
+        serialized_affiliations = (
+            json.dumps(raw_affiliations) if raw_affiliations is not None else None
+        )
 
         # Extract institution IDs and country codes (for cross-referencing and geographic analysis)
         institution_ids = extract_institution_ids(rec.get("authorships", []))
@@ -165,20 +167,24 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             rec.get("authorships", [])
         )
 
+        # Extract ROR IDs (may be empty if not returned by Works API)
+        ror_ids = extract_institution_ror_ids(rec.get("authorships", []))
+
+        # Extract author identifiers (ORCID and OpenAlex IDs)
+        author_orcids = extract_author_orcids(rec.get("authorships", []))
+        author_openalex_ids = extract_author_ids(rec.get("authorships", []))
+
         # Extract journal info
         journal_info = extract_journal_info(rec.get("primary_location", {}))
 
         # Extract topics (hierarchical classification - replaces deprecated concepts)
-        topics = extract_topics(rec.get("topics", []))
+        subject_topics = extract_topics(rec.get("topics", []))
 
         # Extract primary topic (single most relevant topic)
         primary_topic = extract_primary_topic(rec.get("primary_topic"))
 
         # Extract grants/funding information
         grants = extract_grants(rec.get("grants", []))
-
-        # Extract concepts (DEPRECATED - kept for backward compatibility)
-        concepts = extract_concepts(rec.get("concepts", []))
 
         # Extract Open Access info
         oa_info = extract_open_access_info(rec.get("open_access", {}))
@@ -187,10 +193,10 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         external_ids = extract_external_ids(rec.get("ids", {}))
 
         # Extract MeSH terms
-        mesh_terms = extract_mesh_terms(rec.get("mesh", []))
+        subject_mesh = extract_mesh_terms(rec.get("mesh", []))
 
         # Extract keywords
-        keywords = extract_keywords(rec.get("keywords", []))
+        subject_keywords = extract_keywords(rec.get("keywords", []))
 
         # Extract bibliographic info (volume, issue, pages)
         biblio_info = extract_biblio_info(rec.get("biblio", {}))
@@ -212,40 +218,53 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "title": rec.get("title"),
             "abstract": abstract,
             "authors": self.serialize_json_list(hashed_authors),
-            "affiliations": serialized_affiliations,
+            "affiliation_list": serialized_affiliations,
             "institution_ids": institution_ids,
             "institution_country_codes": institution_country_codes,
-            "journal": journal_info.get("journal_name"),
+            # ROR IDs (may be empty if not returned by Works API)
+            "ror_ids": self.serialize_json_list(ror_ids) if ror_ids else None,
+            "author_orcids": (
+                self.serialize_json_list(author_orcids) if any(author_orcids) else None
+            ),
+            "author_openalex_ids": (
+                self.serialize_json_list(author_openalex_ids)
+                if any(author_openalex_ids)
+                else None
+            ),
+            "journal": journal_info.get("journal"),
             "issn": journal_info.get("issn"),
             "publisher": journal_info.get("publisher"),
-            "year": year,
+            "publication_year": year,
             "publication_date": self._normalize_partial_date(
                 rec.get("publication_date")
             ),
-            "type": rec.get("type"),
+            "publication_type": rec.get(
+                "type"
+            ),  # Raw OpenAlex type (article, book, etc.)
             "is_oa": oa_info.get("is_oa"),
             "oa_status": oa_info.get("oa_status"),
             # OpenAlex source field: cited_by_count
-            # Unified BioETL field: citation_count (standardized across all providers)
-            "citation_count": rec.get("cited_by_count"),
+            # Unified BioETL field: citations_received (standardized across all providers)
+            "citations_received": rec.get("cited_by_count"),
             # Topics (hierarchical classification - replaces deprecated concepts)
-            "topics": topics,
-            "primary_topic": primary_topic,
-            # Grants/funding information
-            "grants": grants,
-            # Concepts (DEPRECATED - kept for backward compatibility)
-            "concepts": concepts,
-            "mesh": mesh_terms,
-            "keywords": keywords,
+            # Serialized to JSON string for schema compliance
+            "subject_topics": (
+                self.serialize_json_list(subject_topics) if subject_topics else None
+            ),
+            "primary_topic": json.dumps(primary_topic) if primary_topic else None,
+            # Grants/funding information (serialized to JSON string)
+            "grants": self.serialize_json_list(grants) if grants else None,
+            "subject_mesh": subject_mesh,
+            "subject_keywords": subject_keywords,
             "language": rec.get("language"),
             # Bibliographic info (from biblio object)
             "volume": biblio_info.get("volume"),
             "issue": biblio_info.get("issue"),
-            "first_page": biblio_info.get("first_page"),
-            "last_page": biblio_info.get("last_page"),
+            "page_first": biblio_info.get("page_first"),
+            "page_last": biblio_info.get("page_last"),
             # Additional metrics
             "fwci": rec.get("fwci"),
-            "referenced_works_count": rec.get("referenced_works_count"),
+            "citations_made": rec.get("referenced_works_count"),
             # Quality indicators
             "is_retracted": rec.get("is_retracted", False),
             "_lookup_method": lookup_method,
@@ -276,10 +295,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
-        """Convert Domain Entity to SilverRecord, excluding pmc_id and doc_type.
+        """Convert Domain Entity to SilverRecord, excluding pmc_id.
 
         Overrides base implementation to remove fields not collected for OpenAlex.
-        OpenAlex uses raw 'type' field instead of mapped 'doc_type'.
 
         Args:
             entity: Domain entity (dataclass).
@@ -295,6 +313,5 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
         # Remove excluded fields
         silver_record.pop("pmc_id", None)
-        silver_record.pop("doc_type", None)  # OpenAlex uses raw 'type' instead
 
         return silver_record

@@ -91,6 +91,8 @@ citationCount, referenceCount, influentialCitationCount, isOpenAccess,
 openAccessPdf, tldr, fieldsOfStudy, publicationTypes, journal
 ```
 
+**Note**: `venue` field is used as fallback for `journal.name` and is not stored separately after transformation.
+
 ### API Response Structure
 
 ```json
@@ -179,13 +181,13 @@ openAccessPdf, tldr, fieldsOfStudy, publicationTypes, journal
 | `tldr.text` | `tldr` | string | AI-generated summary |
 | `year` | `year` | int64 | Validated: 1500-2100 |
 | `publicationDate` | `publication_date` | string | ISO format (partial OK) |
-| `venue` | `venue` | string | Conference/venue name |
+| `venue` | - | string | Used as fallback for `journal` (not stored separately) |
 
 #### Journal Information
 
 | API Field | Silver Field | Type | Processing |
 |-----------|--------------|------|------------|
-| `journal.name` | `journal` | string | Fallback to `venue` if null |
+| `journal.name` or `venue` | `journal` | string | Unified field; `venue` used as fallback if `journal.name` is null |
 | `journal.volume` | `volume` | string | Parsed from combined format |
 | - | `issue` | string | Parsed from combined format |
 | `journal.pages` | `pages` | string | Original value (cleaned) |
@@ -287,13 +289,15 @@ The `tldr` field contains an AI-generated summary from Semantic Scholar's model:
 
 Only the `text` field is extracted and stored.
 
-### Journal/Venue Fallback
+### Journal Name Extraction
 
-If `journal.name` is null or empty, the `venue` field is used as fallback:
+The `journal` field is extracted from `journal.name` with `venue` as fallback:
 
 ```python
-journal_name = journal.get("name") or venue
+journal_name = journal.get("name") or venue  # Stored in 'journal' field
 ```
+
+**Note**: After transformation, only the unified `journal` field is stored (no separate `venue` field).
 
 ### Volume/Issue Parsing
 
@@ -386,7 +390,6 @@ Publication year is validated against range 1500-2100:
 | `pages` | string | Yes | - |
 | `first_page` | string | Yes | - |
 | `last_page` | string | Yes | - |
-| `venue` | string | Yes | - |
 | `citation_count` | float | Yes | ge=0, coerce=True |
 | `reference_count` | float | Yes | ge=0, coerce=True |
 | `is_oa` | bool | Yes | coerce=True |
@@ -623,7 +626,6 @@ enrichers:
   "pages": "102-6",
   "first_page": "102",
   "last_page": "106",
-  "venue": "Nature",
   "year": 2013,
   "publication_date": "2013-08-01",
   "is_oa": true,
@@ -665,7 +667,6 @@ enrichers:
   "pages": "102-6",
   "first_page": "102",
   "last_page": "106",
-  "venue": "Nature",
   "year": 2013,
   "publication_date": "2013-08-01",
   "is_oa": true,
@@ -727,7 +728,6 @@ erDiagram
         string pages
         string first_page
         string last_page
-        string venue
     }
 
     OPEN_ACCESS {

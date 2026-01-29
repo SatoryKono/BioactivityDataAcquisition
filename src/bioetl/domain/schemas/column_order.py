@@ -43,11 +43,11 @@ PUBLICATION_METADATA_FIELDS: Final[tuple[str, ...]] = (
     "authors",
     "title",
     "journal",
-    "year",
+    "publication_year",  # was: year
     "volume",
     "issue",
-    "first_page",
-    "last_page",
+    "page_first",  # was: first_page
+    "page_last",  # was: last_page
     "language",
 )
 
@@ -60,10 +60,11 @@ PUBLICATION_CROSSREF_FIELDS: Final[tuple[str, ...]] = (
 
 
 PUBLICATION_UNIFIED_FIELDS: Final[tuple[str, ...]] = (
-    "doc_type",
+    "publication_type",  # was: doc_type
     "is_oa",
     "abstract",
-    "citation_count",
+    "citations_received",  # was: citation_count
+    "citations_made",  # added: reference_count equivalent
     "publication_date",
 )
 

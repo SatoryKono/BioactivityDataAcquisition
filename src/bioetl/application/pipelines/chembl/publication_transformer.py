@@ -53,7 +53,15 @@ _PUBLICATION_IDS = FieldGroup(
 
 _CORE_METADATA = FieldGroup(
     name="core_metadata",
-    fields=simple_fields("title", "authors", "abstract", "doc_type"),
+    fields=simple_fields("title", "authors", "abstract"),
+)
+
+_PUBLICATION_TYPE = FieldGroup(
+    name="publication_type",
+    fields=(
+        # Unified field: doc_type → publication_type
+        FieldSpec("doc_type", target="publication_type"),
+    ),
 )
 
 _JOURNAL_INFO = FieldGroup(
@@ -61,13 +69,14 @@ _JOURNAL_INFO = FieldGroup(
     fields=(
         *simple_fields(
             "journal",
-            "journal_full_title",
             "volume",
             "issue",
-            "first_page",
-            "last_page",
         ),
-        *int_fields("year"),
+        # Unified pagination fields
+        FieldSpec("first_page", target="page_first"),
+        FieldSpec("last_page", target="page_last"),
+        # Unified temporal field
+        FieldSpec("year", target="publication_year", converter=int),
     ),
 )
 
@@ -80,6 +89,7 @@ _SOURCE_INFO = FieldGroup(
 _PUBLICATION_GROUPS: tuple[FieldGroup, ...] = (
     _PUBLICATION_IDS,
     _CORE_METADATA,
+    _PUBLICATION_TYPE,
     _JOURNAL_INFO,
     _SOURCE_INFO,
 )
@@ -164,9 +174,10 @@ class PublicationTransformer(BaseChemblTransformer):
         data["doi"] = str(doi) if doi else None
 
         # Validate year using PublicationYear Value Object
-        year_vo = PublicationYear.from_raw(data.get("year"))
+        # Note: field_specs already maps year → publication_year
+        year_vo = PublicationYear.from_raw(data.get("publication_year"))
         validated_year = year_vo.value if year_vo else None
-        data["year"] = validated_year
+        data["publication_year"] = validated_year
 
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON
@@ -195,10 +206,19 @@ class PublicationTransformer(BaseChemblTransformer):
         # System field: data source identifier
         data["_source"] = "chembl"
 
-        # Unified publication fields (always NULL for ChEMBL)
-        data["citation_count"] = None
+        # Унифицированные поля публикации (в ChEMBL есть только citation_count)
+        citation_count = record.get("citation_count")
+        if citation_count is not None:
+            try:
+                data["citations_received"] = int(citation_count)
+            except (TypeError, ValueError):
+                data["citations_received"] = None
+        else:
+            data["citations_received"] = None
+        data["citations_made"] = None
         data["is_oa"] = None
         data["language"] = None
+        data["oa_status"] = None
 
         # DQ flags (default: no warnings or errors)
         data["_dq_warn"] = False
@@ -216,7 +236,8 @@ class PublicationTransformer(BaseChemblTransformer):
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without affiliations, pmc_id, publication_date.
+            SilverRecord без affiliation_list, pmc_id, publication_date, issn,
+            publisher, oa_status, is_oa и language.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
@@ -224,9 +245,14 @@ class PublicationTransformer(BaseChemblTransformer):
         # Get base silver record
         silver_record = BaseTransformer.entity_to_silver_record(entity)
 
-        # Remove excluded fields
-        silver_record.pop("affiliations", None)
+        # Remove excluded fields (not available from ChEMBL API)
+        silver_record.pop("affiliation_list", None)
         silver_record.pop("pmc_id", None)
         silver_record.pop("publication_date", None)
+        silver_record.pop("issn", None)
+        silver_record.pop("publisher", None)
+        silver_record.pop("oa_status", None)
+        silver_record.pop("is_oa", None)
+        silver_record.pop("language", None)
 
         return silver_record

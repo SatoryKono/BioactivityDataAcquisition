@@ -22,12 +22,22 @@ class StructuredAffiliation(TypedDict, total=False):
 
     MEDLINE AffiliationInfo can contain Identifier elements linking to
     institutional databases like ROR (Research Organization Registry) or GRID.
+
+    Attributes:
+        text: Affiliation text.
+        identifier: Raw identifier value (any source).
+        identifier_source: Source of identifier (ROR, GRID, ISNI, etc.).
+        email: Extracted email for correspondence authors.
+        ror_id: ROR identifier if source is ROR (convenience field).
+        grid_id: GRID identifier if source is GRID (convenience field).
     """
 
     text: str
     identifier: str | None
     identifier_source: str | None
-    email: str | None  # Extracted email for correspondence authors
+    email: str | None
+    ror_id: str | None  # Duplicated from identifier if source == "ROR"
+    grid_id: str | None  # Duplicated from identifier if source == "GRID"
 
 
 class RawAuthor(TypedDict, total=False):
@@ -148,11 +158,17 @@ class AuthorExtractor(BaseFieldExtractor):
         # Extract email if present in affiliation text
         email = self._extract_email_from_text(aff_text)
 
+        # Convenience fields for common identifier types
+        ror_id = identifier if identifier_source == "ROR" else None
+        grid_id = identifier if identifier_source == "GRID" else None
+
         return StructuredAffiliation(
             text=aff_text,
             identifier=identifier,
             identifier_source=identifier_source,
             email=email,
+            ror_id=ror_id,
+            grid_id=grid_id,
         )
 
     def _extract_email_from_text(self, text: str) -> str | None:

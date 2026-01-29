@@ -1,0 +1,158 @@
+column_groups:
+  - name: system
+    fields:
+      - entity_id
+      - content_hash
+      - _run_id
+      - _run_type
+      - _source_batch_id
+      - _source
+      - _ingestion_ts
+      - _index
+      - _lookup_method
+      - _original_id
+
+  - name: identifiers
+    fields:
+      - pmid
+      - pmc_id
+      - doi
+      - nlm_unique_id
+
+  - name: title
+    fields:
+      - title
+
+  - name: abstract
+    fields:
+      - abstract
+      - abstract_structured
+
+  - name: authors
+    fields:
+      - authors
+      - author_count
+      - authors_with_affiliations
+
+  - name: affiliations
+    fields:
+      - affiliation_list
+      - affiliation_structured
+
+  - name: journal
+    fields:
+      - journal
+      - journal_name
+      - journal_name_short
+      - journal_iso_abbrev
+      - issn
+      - journal_issn_type
+
+  - name: year
+    fields:
+      - publication_year
+
+  - name: dates
+    fields:
+      - publication_date
+      - pub_date
+      - pub_day
+      - pub_month
+      - date_completed
+      - date_revised
+
+  - name: pagination
+    fields:
+      - volume
+      - issue
+      - page_first
+      - page_last
+      - page_range
+      - medline_pgn
+
+  - name: citations
+    fields:
+      - citations_made
+      - citation_subset
+
+  - name: subjects
+    fields:
+      - subject_mesh
+      - mesh_heading_count
+      - subject_keywords
+      - keyword_count
+      - publication_types
+      - publication_type_list
+
+  - name: funding
+    fields:
+      - grant_count
+
+  - name: chemicals
+    fields:
+      - chemical_count
+
+  - name: language
+    fields:
+      - language
+
+  - name: misc
+    fields:
+      - country
+      - publication_status
+
+  - name: dq
+    pattern: "^_dq_"
+
+# Field aliases for backward compatibility
+field_aliases:
+  affiliations: affiliation_list
+  structured_affiliations: affiliation_structured
+  journal_title: journal_name
+  journal_abbrev: journal_name_short
+  year: publication_year
+  first_page: page_first
+  last_page: page_last
+  pages: page_range
+  reference_count: citations_made
+  mesh_terms: subject_mesh
+  keywords: subject_keywords
+
+# Layer-specific column filtering
+silver:
+  include_groups:
+    - system
+    - identifiers
+    - title
+    - abstract
+    - authors
+    - affiliations
+    - journal
+    - year
+    - dates
+    - pagination
+    - citations
+    - subjects
+    - funding
+    - chemicals
+    - language
+    - misc
+    - dq
+
+gold:
+  include_groups:
+    - system
+    - identifiers
+    - title
+    - abstract
+    - authors
+    - affiliations
+    - journal
+    - year
+    - subjects
+  exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+    - _lookup_method
+    - _original_id

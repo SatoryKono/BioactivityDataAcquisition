@@ -1,8 +1,8 @@
 # Composite Publication Pipeline
 
 > **Pipeline**: `composite_publication`
-> **Version**: 1.0.0
-> **Last Updated**: 2026-01-27
+> **Version**: 1.3.0
+> **Last Updated**: 2026-01-29
 > **Reference**: ADR-026 Composite Pipeline Pattern
 
 ---
@@ -129,6 +129,50 @@ merge:
 
 **Current Configuration**: `left_outer` (all seed records preserved)
 
+### preserve_all_sources Mode
+
+The `preserve_all_sources` option controls whether columns from different providers are coalesced or kept separate:
+
+| Mode | Behavior | Output Example |
+|------|----------|----------------|
+| `preserve_all_sources: false` (default) | Columns are **coalesced** by priority | Single `title` column |
+| `preserve_all_sources: true` | All qualified columns **preserved** | `chembl.publication.title`, `crossref.publication.title`, etc. |
+
+**Current Configuration**: `preserve_all_sources: true` (all provider columns retained)
+
+**When to use each mode:**
+- **`false` (coalesce)**: Production views needing a single "best" value per field
+- **`true` (preserve)**: Data quality analysis, cross-provider comparison, ML feature engineering
+
+**Example configuration:**
+```yaml
+merge:
+  strategy: left_outer
+  conflict_resolution: seed_priority  # Used when preserve_all_sources=false
+  preserve_all_sources: true          # Keep all provider-qualified columns
+```
+
+### Field Group Registry (Gold Filtering)
+
+When `preserve_all_sources: true`, the **Field Group Registry** (`FieldGroupRegistry`) controls which columns appear in Gold output and in what order.
+
+**Semantic Groups** (8 total):
+
+| Group | `include_in_gold` | Example Fields |
+|-------|--------------------|----------------|
+| `id_and_status` | true | `doi`, `pmid`, `document_chembl_id` |
+| `bibliography` | true | `title`, `abstract`, `journal` |
+| `author_and_affiliations` | true | `authors`, `author_count` |
+| `terms_and_keywords_and_topics` | true | `mesh_terms`, `keywords`, `concepts` |
+| `citations_and_reference` | true | `citation_count`, `reference_count` |
+| `date_and_places` | true | `year`, `publication_date`, `publisher` |
+| `publication_types` | true | `doc_type`, `type`, `is_oa` |
+| `trash` | **false** | `content_hash`, `language` |
+
+**Behavior**: During Gold write, `MergeService` drops all columns belonging to the `trash` group. System columns (`_*`) always pass through.
+
+**Configuration**: `configs/composite/field_groups/publication.yaml` (94 base fields mapped to provider-qualified columns)
+
 ### Conflict Resolution Strategies
 
 | Strategy | Behavior |
@@ -181,7 +225,7 @@ field_priorities:
 | **Title** | `title` | chembl → crossref → openalex → pubmed → semanticscholar | |
 | **Abstract** | `abstract`, `abstract_structured`, `tldr` | chembl → pubmed → crossref → openalex → semanticscholar | PubMed for abstract, S2 for tldr |
 | **Authors** | `authors`, `author_count` | chembl → crossref → openalex → pubmed → semanticscholar | |
-| **Journal** | `journal`, `journal_full_title`, `journal_title`, `journal_abbrev`, `journal_iso_abbrev`, `short_container_title`, `venue` | chembl → crossref → openalex → pubmed → semanticscholar | |
+| **Journal** | `journal` (canonical), `journal_abbrev`, `journal_iso_abbrev`, `short_container_title` | chembl → crossref → openalex → pubmed → semanticscholar | Unified: venue→journal, journal_full_title removed |
 | **Year** | `year`, `publication_year` | chembl → crossref → openalex → pubmed → semanticscholar | |
 | **Dates** | `publication_date`, `published`, `published_print`, `published_online`, `pub_date`, `pub_month`, `pub_day`, `date_completed`, `date_revised` | crossref → openalex → pubmed → semanticscholar | |
 | **Pagination** | `volume`, `issue`, `first_page`, `last_page`, `pages`, `medline_pgn` | chembl → crossref → pubmed → semanticscholar | |
@@ -447,68 +491,73 @@ erDiagram
 
 ---
 
-## Gold Layer Status: NOT DEFINED
+## Gold Layer Contract
 
-### Current State
+### Contract Definition
 
-**The Gold contract for `composite_publication` is NOT defined.**
+**The Gold contract for `composite_publication` is now defined.**
 
-There is:
-- **No JSON Schema** at `docs/contracts/gold/composite_publication_*.json`
-- **No Pandera schema** for Gold validation
-- **Only partial Gold filter** in config:
+| Artifact | Location |
+|----------|----------|
+| **Pandera Schema** | `src/bioetl/domain/contracts/gold/composite.py` |
+| **JSON Schema** | `docs/contracts/gold/composite_publication_v1.0.json` |
+| **Filter Config** | `configs/filter/entities/composite/publication.yaml` |
 
-```yaml
-gold_filters:
-  required_fields:
-    - title
+### Schema: CompositePublicationGoldSchema
+
+```python
+class CompositePublicationGoldSchema(pa.DataFrameModel):
+    # System fields (from seed)
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+    dq_warn: Series[bool] = pa.Field(nullable=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, alias="_dq_error")
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    # Composite lineage metadata (added by MergeService)
+    composite_run_id: Series[str] = pa.Field(nullable=False, alias="_composite_run_id")
+    source_providers: Series[str] = pa.Field(nullable=False, alias="_source_providers")
+    enrichment_status: Series[str] = pa.Field(nullable=False, alias="_enrichment_status")
+    lineage_created_at: Series[str] = pa.Field(nullable=False, alias="_lineage_created_at")
+
+    class Config:
+        strict = False  # Allow additional qualified columns from enrichers
+        coerce = True
 ```
 
-### What Currently Exists
+### Required Fields
 
-1. **Gold output is written** by `MergeService._write_merged_gold()` to `data/output/gold/composite/publication`
-2. **No schema validation** is applied to Gold output
-3. **Required fields** are only `title` (from filter config) and `document_chembl_id` (from DQ rules)
+| Field | Type | Description |
+|-------|------|-------------|
+| `entity_id` | string | SHA256 hash of primary key |
+| `content_hash` | string | SHA256 hash of business fields |
+| `_dq_warn` | boolean | Data quality warning flag |
+| `_dq_error` | boolean | Data quality error flag |
+| `_run_id` | string | Pipeline run identifier |
+| `_run_type` | string | Run type (incremental/full) |
+| `_ingestion_ts` | string | Ingestion timestamp |
+| `_index` | integer | Record index |
+| `_composite_run_id` | string | Composite pipeline run UUID |
+| `_source_providers` | string | JSON list of providers |
+| `_enrichment_status` | string | JSON dict of enricher statuses |
+| `_lineage_created_at` | string | ISO timestamp of merge |
 
-### TODO: Define Gold Contract
+### Design Notes
 
-To properly define the Gold contract, the following is required:
+1. **`strict = False`**: Composite schemas allow additional columns because:
+   - Business columns use qualified names: `{provider}.{entity}.{field}`
+   - Actual columns depend on which enrichers succeeded
+   - Coalesced columns may have unqualified names
 
-1. **Create Pandera Schema** at `src/bioetl/domain/contracts/gold/composite.py`:
-   ```python
-   class CompositePublicationGoldSchema(DataFrameModel):
-       entity_id: Series[str] = Field(nullable=False)
-       content_hash: Series[str] = Field(nullable=False)
-       document_chembl_id: Series[str] = Field(nullable=False)
-       doi: Series[str] = Field(nullable=True)
-       pmid: Series[str] = Field(nullable=True)
-       title: Series[str] = Field(nullable=False, str_length={"min_value": 1})
-       # ... additional fields with validation
-   ```
+2. **Variable Columns**: The schema validates core required fields while allowing:
+   - `chembl.publication.document_chembl_id` (seed primary key)
+   - `chembl.publication.title`, `crossref.publication.citation_count`, etc.
+   - Any additional enricher columns
 
-2. **Generate JSON Schema** via `make generate-contracts`
-
-3. **Define Required Fields**:
-   - `entity_id`, `content_hash` (system)
-   - `document_chembl_id` (primary key)
-   - `title` (business requirement)
-
-4. **Add Validation Rules**:
-   - `year` range: 1900-2100
-   - `citation_count` >= 0
-   - `publication_date` format: `^\d{4}-\d{2}-\d{2}$`
-
-5. **Update Filter Config** at `configs/filter/entities/composite/publication.yaml`:
-   ```yaml
-   gold_filters:
-     required_fields:
-       - document_chembl_id
-       - title
-     ranges:
-       year:
-         min: 1900
-         max: 2100
-   ```
+3. **Filter Config**: Gold filters require `title` field (qualified or coalesced)
 
 ---
 
@@ -583,7 +632,6 @@ The composite pipeline tracks lineage at multiple levels:
     "author_count": 2,
 
     "journal": "Nature",
-    "journal_full_title": "Nature",
     "volume": "500",
     "issue": "7463",
     "first_page": "472",
@@ -645,22 +693,24 @@ The composite pipeline tracks lineage at multiple levels:
 
 ### Current Limitations
 
-1. **No Gold Contract**: Gold output lacks formal schema validation (Pandera/JSON Schema)
+1. **No Field-Level Lineage**: `_field_sources` tracking is not implemented; cannot trace which source contributed each individual field value
 
-2. **No Field-Level Lineage**: `_field_sources` tracking is not implemented; cannot trace which source contributed each individual field value
+2. **No Incremental Mode**: Composite pipeline only supports full runs, not delta/incremental enrichment
 
-3. **No Incremental Mode**: Composite pipeline only supports full runs, not delta/incremental enrichment
+3. **chembl_publication_term Removed**: MeSH terms from ChEMBL are no longer available; relies on PubMed for classification
 
-4. **chembl_publication_term Removed**: MeSH terms from ChEMBL are no longer available; relies on PubMed for classification
+4. **Sequential Seed Requirement**: Seed must complete before enrichers start (no streaming)
 
-5. **Sequential Seed Requirement**: Seed must complete before enrichers start (no streaming)
+5. **Memory Pressure**: Large seed datasets may cause memory issues during parallel enrichment
 
-6. **Memory Pressure**: Large seed datasets may cause memory issues during parallel enrichment
+### Completed
+
+- [x] Define `CompositePublicationGoldSchema` in Pandera (2026-01-27)
+- [x] Generate JSON Schema contract (2026-01-27)
+- [x] Update filter config with Gold contract reference (2026-01-27)
 
 ### TODO List
 
-- [ ] Define `CompositePublicationGoldSchema` in Pandera
-- [ ] Generate JSON Schema contract
 - [ ] Implement field-level lineage tracking (`_field_sources`)
 - [ ] Add incremental/delta composite runs
 - [ ] Implement caching of enrichment results
@@ -674,6 +724,7 @@ The composite pipeline tracks lineage at multiple levels:
 | File | Purpose |
 |------|---------|
 | `configs/pipelines/composite/publication.yaml` | Main composite configuration |
+| `configs/composite/field_groups/publication.yaml` | Field group definitions (94 fields, 8 groups) |
 | `configs/filter/entities/composite/publication.yaml` | Gold filter rules |
 | `docs/02-architecture/decisions/ADR-026-composite-pipeline-pattern.md` | Architecture decision |
 
@@ -683,4 +734,7 @@ The composite pipeline tracks lineage at multiple levels:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.3.0 | 2026-01-29 | Added Field Group Registry section; field group YAML config reference; Gold trash-column filtering |
+| 1.2.0 | 2026-01-28 | Added `preserve_all_sources` feature documentation; updated merge strategy section with mode comparison |
+| 1.1.0 | 2026-01-27 | Added Gold contract: CompositePublicationGoldSchema (Pandera), JSON Schema, updated filter config |
 | 1.0.0 | 2026-01-27 | Initial documentation; removed chembl_publication_term dependency; documented field exclusions |

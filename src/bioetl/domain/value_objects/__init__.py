@@ -138,6 +138,12 @@ from bioetl.domain.value_objects.identifiers import (
     PubChemCid,
     UniProtId,
 )
+from bioetl.domain.value_objects.publication_field_groups import (
+    DEFAULT_FIELD_GROUP_CONFIG,
+    FIELD_TO_GROUP_MAPPING,
+    FieldGroupConfig,
+    PublicationFieldGroup,
+)
 from bioetl.domain.value_objects.publications import (
     DOI,
     PubMedId,
@@ -152,7 +158,9 @@ from bioetl.domain.value_objects.taxonomy_id import (
 
 __all__ = [
     "DEFAULT_COLUMN_ORDER",
+    "DEFAULT_FIELD_GROUP_CONFIG",
     "DOI",
+    "FIELD_TO_GROUP_MAPPING",
     "ISSN",
     "JOIN_KEY_COLUMNS",
     "ORCID",
@@ -194,6 +202,7 @@ __all__ = [
     "DeduplicationStatsResult",
     "DriftLevel",
     "EncodingValidationResult",
+    "FieldGroupConfig",
     "FieldPresenceResult",
     "FileIntegrityResult",
     "ForeignKeyResult",
@@ -208,6 +217,7 @@ __all__ = [
     "PChemblValue",
     "PubChemCid",
     "PubMedId",
+    "PublicationFieldGroup",
     "PublicationYear",
     "RecordCountResult",
     "ReferentialIntegrityResult",

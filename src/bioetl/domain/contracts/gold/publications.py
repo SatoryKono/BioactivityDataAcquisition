@@ -40,9 +40,9 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
 
     # Journal information
     journal: Series[str] = pa.Field(nullable=True)
-    journal_abbrev: Series[str] = pa.Field(nullable=True)
+
+    journal_name_short: Series[str] = pa.Field(nullable=True)
     # PubMed-specific journal fields (forensic retention)
-    journal_title: Series[str] = pa.Field(nullable=True)  # Full journal name (PubMed)
     journal_iso_abbrev: Series[str] = pa.Field(nullable=True)  # ISO abbreviation
     journal_issn_type: Series[str] = pa.Field(
         nullable=True
@@ -53,23 +53,33 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     issue: Series[str] = pa.Field(nullable=True)
 
     # Page information
-    pages: Series[str] = pa.Field(nullable=True)  # Legacy: medline_pgn format
+    page_range: Series[str] = pa.Field(nullable=True)  # Page range string
     medline_pgn: Series[str] = pa.Field(nullable=True)  # Original PubMed pagination
-    first_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
-    last_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
+    page_first: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
+    page_last: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
 
-    # Authors (affiliations excluded per user request)
+    # Authors and affiliations
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
+    affiliation_list: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array of unique affiliations
+    authors_with_affiliations: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array: author -> affiliations
+    affiliation_structured: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array with ROR/GRID identifiers
+
+    # Additional identifiers (PubMed-specific)
+    pii: Series[str] = pa.Field(nullable=True)  # Publisher Item Identifier
+    mid: Series[str] = pa.Field(nullable=True)  # Manuscript ID (PMC submission)
+    publisher_id: Series[str] = pa.Field(nullable=True)  # Publisher-specific identifier
 
     # Date fields
-    pub_date: Series[str] = pa.Field(nullable=True)
     pub_month: Series[float] = pa.Field(nullable=True, coerce=True)  # Month (1-12)
     pub_day: Series[float] = pa.Field(nullable=True, coerce=True)  # Day (1-31)
     publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
-    year: Series[float] = pa.Field(nullable=True, coerce=True)
-    publication_year: Series[float] = pa.Field(
-        nullable=True, coerce=True
-    )  # Legacy alias
+    publication_year: Series[float] = pa.Field(nullable=True, coerce=True)
     # Note: accepted_date, received_date, revised_date, epub_date excluded per design
     # MEDLINE-specific dates
     date_completed: Series[str] = pa.Field(
@@ -86,11 +96,12 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     publication_type_list: Series[str] = pa.Field(
         nullable=True
     )  # JSON array of pub types
+    publication_type: Series[object] = pa.Field(nullable=True)  # list[str]
     publication_types: Series[object] = pa.Field(nullable=True)  # list[str]
 
     # Classification
-    keywords: Series[object] = pa.Field(nullable=True)  # list[str]
-    mesh_terms: Series[object] = pa.Field(nullable=True)  # list[str]
+    subject_keywords: Series[object] = pa.Field(nullable=True)  # list[str]
+    subject_mesh: Series[object] = pa.Field(nullable=True)  # list[str]
     chemicals: Series[object] = pa.Field(nullable=True)  # list[str]
     databanks: Series[object] = pa.Field(nullable=True)  # list[str]
     gene_symbols: Series[object] = pa.Field(nullable=True)  # list[str]
@@ -105,7 +116,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     mesh_heading_count: Series[float] = pa.Field(nullable=True, coerce=True)
     keyword_count: Series[float] = pa.Field(nullable=True, coerce=True)
     grant_count: Series[float] = pa.Field(nullable=True, coerce=True)
-    reference_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     chemical_count: Series[float] = pa.Field(nullable=True, coerce=True)
 
     # Source tracking (maps to _source column in DataFrame)
@@ -155,29 +166,32 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     title: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     journal: Series[str] = pa.Field(nullable=True)
-    issn: Series[object] = pa.Field(nullable=True)  # list[str]
+    issn: Series[str] = pa.Field(nullable=True)  # Primary ISSN (scalar)
+    issn_list: Series[str] = pa.Field(nullable=True)  # JSON array of all ISSNs
     publisher: Series[str] = pa.Field(nullable=True)
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)
-    first_page: Series[str] = pa.Field(nullable=True)
-    last_page: Series[str] = pa.Field(nullable=True)
+    page_first: Series[str] = pa.Field(nullable=True)
+    page_last: Series[str] = pa.Field(nullable=True)
 
     # Date fields
-    year: Series[float] = pa.Field(nullable=True, ge=1900, le=2100, coerce=True)
+    publication_year: Series[float] = pa.Field(
+        nullable=True, ge=1900, le=2100, coerce=True
+    )
     publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
     published_print: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
     published_online: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
 
     # Metadata
-    # Note: doc_type excluded; CrossRef uses raw 'type' field instead
-    type: Series[str] = pa.Field(
+    # Raw CrossRef type (journal-article, etc.) - unified field name
+    publication_type: Series[str] = pa.Field(
         nullable=True
     )  # Raw CrossRef type (journal-article, etc.)
-    citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
-    reference_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    citations_received: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     language: Series[str] = pa.Field(nullable=True)
     license_url: Series[str] = pa.Field(nullable=True)
-    subjects: Series[object] = pa.Field(nullable=True)  # list[str]
+    subject_keywords: Series[object] = pa.Field(nullable=True)  # list[str]
 
     # Content domain (Crossmark/license restrictions)
     content_domain_domains: Series[object] = pa.Field(nullable=True)  # list[str]
@@ -192,11 +206,24 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     published: Series[str] = pa.Field(nullable=True)
 
     # Short container title
-    short_container_title: Series[object] = pa.Field(nullable=True)  # list[str]
+    journal_name_short: Series[str] = pa.Field(nullable=True)
 
     # ISSN by type
     issn_print: Series[str] = pa.Field(nullable=True)
     issn_electronic: Series[str] = pa.Field(nullable=True)
+
+    # Author identifiers
+    author_orcid_list: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array of ORCID identifiers (unified: was author_orcids)
+    author_details: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array of author objects (given, family, orcid, sequence, affiliations)
+
+    # Bibliographic references
+    references: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array of cited references (DOI, title, author, year)
 
     # Source tracking (maps to _source column in DataFrame)
     source: Series[str] = pa.Field(nullable=True, alias="_source")
@@ -246,35 +273,67 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
-    affiliations: Series[object] = pa.Field(nullable=True)  # list[str]
-    concepts: Series[object] = pa.Field(nullable=True)  # list[str]
-    mesh: Series[object] = pa.Field(nullable=True)  # list[str] - MeSH terms
-    keywords: Series[object] = pa.Field(nullable=True)  # list[str]
+    affiliation_list: Series[str] = pa.Field(nullable=True)  # JSON array
+    # NOTE: concepts field removed - OpenAlex deprecated concepts in 2024, use topics instead
+    subject_mesh: Series[object] = pa.Field(nullable=True)  # list[str] - MeSH terms
+    subject_keywords: Series[object] = pa.Field(nullable=True)  # list[str]
     mag_id: Series[str] = pa.Field(nullable=True)  # Microsoft Academic Graph ID
 
     # Journal info
     journal: Series[str] = pa.Field(nullable=True)
     issn: Series[str] = pa.Field(nullable=True)
     publisher: Series[str] = pa.Field(nullable=True)
+    volume: Series[str] = pa.Field(nullable=True)
+    issue: Series[str] = pa.Field(nullable=True)
 
-    # Page fields (nullable - OpenAlex API doesn't typically provide page information)
-    # Added for schema consistency across all publication providers
-    first_page: Series[str] = pa.Field(nullable=True)
-    last_page: Series[str] = pa.Field(nullable=True)
+    # Page fields (from biblio object)
+    page_first: Series[str] = pa.Field(nullable=True)
+    page_last: Series[str] = pa.Field(nullable=True)
 
     # Date fields
-    year: Series[float] = pa.Field(nullable=True, ge=1500, le=2100, coerce=True)
+    publication_year: Series[float] = pa.Field(
+        nullable=True, ge=1500, le=2100, coerce=True
+    )
     publication_date: Series[str] = pa.Field(nullable=True)
 
     # Metadata
-    # Note: doc_type excluded; OpenAlex uses raw 'type' field instead
-    type: Series[str] = pa.Field(nullable=True)  # Raw OpenAlex type (article, etc.)
+    # Raw OpenAlex type (article, book, etc.) - unified field name
+    publication_type: Series[str] = pa.Field(
+        nullable=True
+    )  # Raw OpenAlex type (article, etc.)
     is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
     oa_status: Series[str] = pa.Field(nullable=True)
+    is_retracted: Series[bool] = pa.Field(
+        nullable=True, coerce=True
+    )  # Quality indicator
     # OpenAlex source field: cited_by_count
-    # Unified BioETL field: citation_count (standardized across all providers)
-    citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    # Unified BioETL field: citations_received (standardized across all providers)
+    citations_received: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     language: Series[str] = pa.Field(nullable=True)
+
+    # Metrics
+    fwci: Series[float] = pa.Field(
+        nullable=True, ge=0
+    )  # Field-Weighted Citation Impact
+    citations_made: Series[float] = pa.Field(
+        nullable=True, ge=0, coerce=True
+    )  # Number of references
+
+    # Topics (hierarchical 4-level classification - replaces deprecated concepts)
+    subject_topics: Series[str] = pa.Field(nullable=True)  # JSON array
+    primary_topic: Series[str] = pa.Field(nullable=True)  # JSON object
+
+    # Grants/funding information
+    grants: Series[str] = pa.Field(nullable=True)  # JSON array
+
+    # Institution identifiers
+    institution_ids: Series[object] = pa.Field(nullable=True)  # list[str]
+    institution_country_codes: Series[object] = pa.Field(nullable=True)  # list[str]
+    ror_ids: Series[str] = pa.Field(nullable=True)  # JSON array of ROR URLs
+
+    # Author identifiers
+    author_openalex_ids: Series[str] = pa.Field(nullable=True)  # OpenAlex author IDs
+    author_orcids: Series[str] = pa.Field(nullable=True)  # ORCID IDs
 
     # Source tracking (maps to _source column in DataFrame)
     source: Series[str] = pa.Field(nullable=False, alias="_source")
@@ -323,23 +382,29 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
 
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
-    # abstract excluded per user request
+    abstract: Series[str] = pa.Field(nullable=True)
+    authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     tldr: Series[str] = pa.Field(nullable=True)
-    year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    publication_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     publication_date: Series[str] = pa.Field(nullable=True)
 
     # Journal/Venue
     journal: Series[str] = pa.Field(nullable=True)
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)  # Parsed from combined volume/issue
-    pages: Series[str] = pa.Field(nullable=True)  # Legacy: "first-last" format
-    first_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
-    last_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
+    page_range: Series[str] = pa.Field(nullable=True)  # Page range: "first-last" format
+    page_first: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
+    page_last: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     venue: Series[str] = pa.Field(nullable=True)
 
     # Metrics
-    citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)  # int64
-    reference_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)  # int64
+    citations_received: Series[float] = pa.Field(
+        nullable=True, ge=0, coerce=True
+    )  # int64
+    citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)  # int64
+    influential_citation_count: Series[float] = pa.Field(
+        nullable=True, ge=0, coerce=True
+    )  # int64
 
     # Open Access
     is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
@@ -347,9 +412,23 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     oa_status: Series[str] = pa.Field(nullable=True)
 
     # Classification (JSON strings)
-    fields_of_study: Series[str] = pa.Field(nullable=True)
-    publication_types: Series[str] = pa.Field(nullable=True)
-    # authors, affiliations excluded per user request
+    subject_fields: Series[str] = pa.Field(nullable=True)
+    publication_type: Series[str] = pa.Field(nullable=True)
+    publication_types: Series[str] = pa.Field(nullable=True)  # JSON array
+    citation_contexts: Series[str] = pa.Field(nullable=True)  # JSON array
+
+    # Author affiliations
+    affiliation_list: Series[str] = pa.Field(nullable=True)  # JSON array
+
+    # Author identifiers
+    author_s2_ids: Series[str] = pa.Field(nullable=True)  # JSON array (40-char hex)
+    author_orcids: Series[str] = pa.Field(nullable=True)  # JSON array of ORCIDs
+    author_h_indices: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array of h-index values
+
+    # External identifiers
+    dblp_id: Series[str] = pa.Field(nullable=True)  # DBLP publication key
 
     # Source tracking (maps to _source column in DataFrame)
     source: Series[str] = pa.Field(nullable=True, alias="_source")

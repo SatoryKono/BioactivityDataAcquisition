@@ -5,13 +5,12 @@ Tests the pure functions in extractors.py module.
 
 from __future__ import annotations
 
-import warnings
-
 from bioetl.application.pipelines.openalex.extractors import (
     extract_affiliations,
+    extract_author_ids,
+    extract_author_orcids,
     extract_authors,
     extract_biblio_info,
-    extract_concepts,
     extract_doi,
     extract_external_ids,
     extract_grants,
@@ -124,6 +123,174 @@ class TestExtractAuthors:
         ]
         result = extract_authors(authorships)
         assert result == []
+
+
+class TestExtractAuthorIds:
+    """Tests for extract_author_ids function."""
+
+    def test_extract_author_ids_from_urls(self) -> None:
+        """Should extract author IDs from full OpenAlex URLs."""
+        authorships = [
+            {"author": {"id": "https://openalex.org/A1234567890"}},
+            {"author": {"id": "https://openalex.org/A9876543210"}},
+        ]
+        result = extract_author_ids(authorships)
+        assert result == ["A1234567890", "A9876543210"]
+
+    def test_extract_author_ids_preserves_order(self) -> None:
+        """Should preserve order and return same length as input."""
+        authorships = [
+            {"author": {"id": "https://openalex.org/A1234567890"}},
+            {"author": {"id": None}},
+            {"author": {"id": "https://openalex.org/A9876543210"}},
+        ]
+        result = extract_author_ids(authorships)
+        assert len(result) == 3
+        assert result == ["A1234567890", "", "A9876543210"]
+
+    def test_extract_author_ids_none_value(self) -> None:
+        """Should return empty string for None ID."""
+        authorships = [
+            {"author": {"display_name": "John Doe", "id": None}},
+        ]
+        result = extract_author_ids(authorships)
+        assert result == [""]
+
+    def test_extract_author_ids_missing_id_field(self) -> None:
+        """Should return empty string when id field is missing."""
+        authorships = [
+            {"author": {"display_name": "John Doe"}},
+        ]
+        result = extract_author_ids(authorships)
+        assert result == [""]
+
+    def test_extract_author_ids_bare_id(self) -> None:
+        """Should handle bare ID without URL prefix."""
+        authorships = [
+            {"author": {"id": "A1234567890"}},
+        ]
+        result = extract_author_ids(authorships)
+        assert result == ["A1234567890"]
+
+    def test_extract_author_ids_empty_list(self) -> None:
+        """Should return empty list for empty authorships."""
+        result = extract_author_ids([])
+        assert result == []
+
+    def test_extract_author_ids_invalid_author_structure(self) -> None:
+        """Should return empty string for invalid author structure."""
+        authorships = [
+            {"author": None},
+            {"author": "string"},
+            {"not_author": {}},
+        ]
+        result = extract_author_ids(authorships)
+        assert result == ["", "", ""]
+
+    def test_extract_author_ids_empty_string(self) -> None:
+        """Should return empty string for empty URL."""
+        authorships = [
+            {"author": {"id": ""}},
+        ]
+        result = extract_author_ids(authorships)
+        assert result == [""]
+
+
+class TestExtractAuthorOrcids:
+    """Tests for extract_author_orcids function."""
+
+    def test_extract_orcids_from_urls(self) -> None:
+        """Should extract ORCID IDs from full URLs."""
+        authorships = [
+            {"author": {"orcid": "https://orcid.org/0000-0001-2345-6789"}},
+            {"author": {"orcid": "https://orcid.org/0000-0002-3456-789X"}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == ["0000-0001-2345-6789", "0000-0002-3456-789X"]
+
+    def test_extract_orcids_preserves_order(self) -> None:
+        """Should preserve order and return same length as input."""
+        authorships = [
+            {"author": {"orcid": "https://orcid.org/0000-0001-2345-6789"}},
+            {"author": {"orcid": None}},
+            {"author": {"orcid": "https://orcid.org/0000-0003-4567-8901"}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert len(result) == 3
+        assert result == ["0000-0001-2345-6789", "", "0000-0003-4567-8901"]
+
+    def test_extract_orcids_none_value(self) -> None:
+        """Should return empty string for None ORCID."""
+        authorships = [
+            {"author": {"display_name": "John Doe", "orcid": None}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == [""]
+
+    def test_extract_orcids_missing_orcid_field(self) -> None:
+        """Should return empty string when orcid field is missing."""
+        authorships = [
+            {"author": {"display_name": "John Doe"}},  # No orcid field
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == [""]
+
+    def test_extract_orcids_invalid_format(self) -> None:
+        """Should return empty string for invalid ORCID format."""
+        authorships = [
+            {"author": {"orcid": "https://orcid.org/invalid-orcid"}},
+            {"author": {"orcid": "https://orcid.org/0000-0001"}},  # Too short
+            {"author": {"orcid": "not-a-url"}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == ["", "", ""]
+
+    def test_extract_orcids_http_url(self) -> None:
+        """Should handle http:// URLs (not just https://)."""
+        authorships = [
+            {"author": {"orcid": "http://orcid.org/0000-0001-2345-6789"}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == ["0000-0001-2345-6789"]
+
+    def test_extract_orcids_bare_orcid(self) -> None:
+        """Should handle bare ORCID without URL prefix."""
+        authorships = [
+            {"author": {"orcid": "0000-0001-2345-6789"}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == ["0000-0001-2345-6789"]
+
+    def test_extract_orcids_empty_list(self) -> None:
+        """Should return empty list for empty authorships."""
+        result = extract_author_orcids([])
+        assert result == []
+
+    def test_extract_orcids_invalid_author_structure(self) -> None:
+        """Should return empty string for invalid author structure."""
+        authorships = [
+            {"author": None},
+            {"author": "string"},
+            {"not_author": {}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == ["", "", ""]
+
+    def test_extract_orcids_with_checksum_x(self) -> None:
+        """Should accept ORCID with X checksum digit."""
+        authorships = [
+            {"author": {"orcid": "https://orcid.org/0000-0002-1825-009X"}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == ["0000-0002-1825-009X"]
+
+    def test_extract_orcids_empty_string_url(self) -> None:
+        """Should return empty string for empty URL."""
+        authorships = [
+            {"author": {"orcid": ""}},
+        ]
+        result = extract_author_orcids(authorships)
+        assert result == [""]
 
 
 class TestExtractAffiliations:
@@ -354,39 +521,6 @@ class TestExtractInstitutionCountryCodes:
         assert result == ["DE"]
 
 
-class TestExtractConcepts:
-    """Tests for extract_concepts function."""
-
-    def test_extract_concepts_basic(self) -> None:
-        """Should extract concept display names."""
-        concepts = [
-            {"display_name": "Chemistry", "score": 0.9},
-            {"display_name": "Biology", "score": 0.7},
-        ]
-        result = extract_concepts(concepts)
-        assert result == ["Chemistry", "Biology"]
-
-    def test_extract_concepts_with_limit(self) -> None:
-        """Should respect max_count limit."""
-        concepts = [
-            {"display_name": f"Concept{i}", "score": 0.9 - i * 0.1} for i in range(20)
-        ]
-        result = extract_concepts(concepts, max_count=5)
-        assert len(result) == 5
-        assert result[0] == "Concept0"
-
-    def test_extract_concepts_empty(self) -> None:
-        """Should return empty list for empty concepts."""
-        result = extract_concepts([])
-        assert result == []
-
-    def test_extract_concepts_strips_whitespace(self) -> None:
-        """Should strip whitespace from concept names."""
-        concepts = [{"display_name": "  Chemistry  "}]
-        result = extract_concepts(concepts)
-        assert result == ["Chemistry"]
-
-
 class TestExtractJournalInfo:
     """Tests for extract_journal_info function."""
 
@@ -401,7 +535,7 @@ class TestExtractJournalInfo:
         }
         result = extract_journal_info(primary_location)
         assert result == {
-            "journal_name": "Nature",
+            "journal": "Nature",
             "issn": "0028-0836",
             "publisher": "Springer Nature",
         }
@@ -414,19 +548,19 @@ class TestExtractJournalInfo:
             }
         }
         result = extract_journal_info(primary_location)
-        assert result["journal_name"] == "Nature"
+        assert result["journal"] == "Nature"
         assert result["issn"] is None
         assert result["publisher"] is None
 
     def test_extract_journal_info_none(self) -> None:
         """Should return None values for None input."""
         result = extract_journal_info(None)
-        assert result == {"journal_name": None, "issn": None, "publisher": None}
+        assert result == {"journal": None, "issn": None, "publisher": None}
 
     def test_extract_journal_info_empty_source(self) -> None:
         """Should handle empty source gracefully."""
         result = extract_journal_info({"source": None})
-        assert result == {"journal_name": None, "issn": None, "publisher": None}
+        assert result == {"journal": None, "issn": None, "publisher": None}
 
 
 class TestReconstructAbstract:
@@ -688,8 +822,8 @@ class TestExtractBiblioInfo:
         assert result == {
             "volume": "42",
             "issue": "3",
-            "first_page": "123",
-            "last_page": "145",
+            "page_first": "123",
+            "page_last": "145",
         }
 
     def test_extract_biblio_info_partial(self) -> None:
@@ -701,8 +835,8 @@ class TestExtractBiblioInfo:
         result = extract_biblio_info(biblio)
         assert result["volume"] == "42"
         assert result["issue"] is None
-        assert result["first_page"] == "123"
-        assert result["last_page"] is None
+        assert result["page_first"] == "123"
+        assert result["page_last"] is None
 
     def test_extract_biblio_info_none(self) -> None:
         """Should return None values for None input."""
@@ -710,8 +844,8 @@ class TestExtractBiblioInfo:
         assert result == {
             "volume": None,
             "issue": None,
-            "first_page": None,
-            "last_page": None,
+            "page_first": None,
+            "page_last": None,
         }
 
     def test_extract_biblio_info_empty(self) -> None:
@@ -720,8 +854,8 @@ class TestExtractBiblioInfo:
         assert result == {
             "volume": None,
             "issue": None,
-            "first_page": None,
-            "last_page": None,
+            "page_first": None,
+            "page_last": None,
         }
 
     def test_extract_biblio_info_invalid_type(self) -> None:
@@ -730,8 +864,8 @@ class TestExtractBiblioInfo:
         assert result == {
             "volume": None,
             "issue": None,
-            "first_page": None,
-            "last_page": None,
+            "page_first": None,
+            "page_last": None,
         }
 
 
@@ -1047,32 +1181,3 @@ class TestExtractGrants:
         result = extract_grants(grants)  # type: ignore[arg-type]
         assert len(result) == 1
         assert result[0]["funder_display_name"] == "Valid"
-
-
-class TestExtractConceptsDeprecation:
-    """Tests for extract_concepts deprecation warning."""
-
-    def test_extract_concepts_deprecation_warning(self) -> None:
-        """Should emit deprecation warning when warn_deprecated=True."""
-        concepts = [{"display_name": "Chemistry", "score": 0.9}]
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            result = extract_concepts(concepts, warn_deprecated=True)
-            assert len(w) == 1
-            assert issubclass(w[0].category, DeprecationWarning)
-            assert "deprecated" in str(w[0].message).lower()
-            assert "topics" in str(w[0].message).lower()
-        assert result == ["Chemistry"]
-
-    def test_extract_concepts_no_warning_by_default(self) -> None:
-        """Should not emit deprecation warning by default."""
-        concepts = [{"display_name": "Chemistry", "score": 0.9}]
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            result = extract_concepts(concepts)
-            # No DeprecationWarning should be emitted
-            deprecation_warnings = [
-                x for x in w if issubclass(x.category, DeprecationWarning)
-            ]
-            assert len(deprecation_warnings) == 0
-        assert result == ["Chemistry"]

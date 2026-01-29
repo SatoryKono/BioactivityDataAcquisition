@@ -53,6 +53,7 @@ def sample_publication():
             {"family": "Anonymous"},
         ],
         "container-title": ["Journal of Testing"],
+        "short-container-title": ["J Test Sci", "JT Sci"],
         "ISSN": ["1234-5678", "8765-4321"],
         "publisher": "Test Publisher Inc.",
         "volume": "42",
@@ -133,9 +134,10 @@ def test_extract_business_data_full(transformer, sample_publication):
     # Authors are now JSON-serialized list
     assert json.loads(data["authors"]) == ["John Doe", "Jane Smith", "Anonymous"]
     assert data["journal"] == "Journal of Testing"
-    assert data["year"] == 2023
-    assert data["type"] == "journal-article"  # Raw CrossRef type preserved
-    assert data["citation_count"] == 100
+    assert data["journal_name_short"] == "J Test Sci"
+    assert data["publication_year"] == 2023
+    assert data["publication_type"] == "journal-article"  # Raw CrossRef type preserved
+    assert data["citations_received"] == 100
     assert data["_source"] == "crossref"
 
 
@@ -145,7 +147,7 @@ def test_extract_business_data_minimal(transformer, minimal_publication):
 
     assert data["doi"] == "10.5678/minimal"
     assert data["title"] is None
-    assert data["type"] == "posted-content"  # Raw CrossRef type preserved
+    assert data["publication_type"] == "posted-content"  # Raw CrossRef type preserved
     assert data["_source"] == "crossref"
 
 
@@ -162,7 +164,10 @@ async def test_transform_full_record(transformer, pipeline_context, sample_publi
     assert result is not None
     assert result["doi"] == "10.1234/test.article"
     assert result["title"] == "Test Article Title"
-    assert result["type"] == "journal-article"  # Raw CrossRef type preserved
+    assert (
+        result["publication_type"] == "journal-article"
+    )  # Raw CrossRef type preserved
+    assert result["journal_name_short"] == "J Test Sci"
     assert result["_source"] == "crossref"
     # Check lineage fields
     assert "_run_id" in result
@@ -180,7 +185,7 @@ async def test_transform_minimal_record(
 
     assert result is not None
     assert result["doi"] == "10.5678/minimal"
-    assert result["type"] == "posted-content"  # Raw CrossRef type preserved
+    assert result["publication_type"] == "posted-content"  # Raw CrossRef type preserved
 
 
 @pytest.mark.asyncio
@@ -349,30 +354,67 @@ def test_extract_business_data_page_range(transformer):
     """Test page range extraction."""
     publication = {"DOI": "10.1234/test", "page": "123-145"}
     data = transformer._extract_business_data(publication)
-    assert data["first_page"] == "123"
-    assert data["last_page"] == "145"
+    assert data["page_first"] == "123"
+    assert data["page_last"] == "145"
 
 
 def test_extract_business_data_single_page(transformer):
     """Test single page extraction."""
     publication = {"DOI": "10.1234/test", "page": "42"}
     data = transformer._extract_business_data(publication)
-    assert data["first_page"] == "42"
-    assert data["last_page"] is None
+    assert data["page_first"] == "42"
+    assert data["page_last"] is None
 
 
 def test_extract_business_data_issn_list(transformer):
-    """Test ISSN list extraction."""
+    """Test ISSN list extraction at business data level (before entity conversion)."""
     publication = {"DOI": "10.1234/test", "ISSN": ["1234-5678", "8765-4321"]}
     data = transformer._extract_business_data(publication)
     assert data["issn"] == ["1234-5678", "8765-4321"]
+
+
+@pytest.mark.asyncio
+async def test_transform_issn_scalar_and_list(transformer, pipeline_context):
+    """Test that full transformation produces scalar issn and JSON issn_list."""
+    publication = {
+        "DOI": "10.1234/test",
+        "ISSN": ["1234-5678", "8765-4321"],
+    }
+    result = await transformer.transform(pipeline_context, publication, index=0)
+
+    assert result is not None
+    assert result["issn"] == "1234-5678"
+    assert '"1234-5678"' in result["issn_list"]
+    assert '"8765-4321"' in result["issn_list"]
+
+
+@pytest.mark.asyncio
+async def test_transform_issn_empty(transformer, pipeline_context):
+    """Test empty ISSN produces None for both fields."""
+    publication = {"DOI": "10.1234/test"}
+    result = await transformer.transform(pipeline_context, publication, index=0)
+
+    assert result is not None
+    assert result["issn"] is None
+    assert result["issn_list"] is None
+
+
+@pytest.mark.asyncio
+async def test_transform_issn_single(transformer, pipeline_context):
+    """Test single ISSN produces scalar and single-element JSON array."""
+    publication = {"DOI": "10.1234/test", "ISSN": ["1234-5678"]}
+    result = await transformer.transform(pipeline_context, publication, index=0)
+
+    assert result is not None
+    assert result["issn"] == "1234-5678"
+    assert result["issn_list"] == '["1234-5678"]'
 
 
 def test_extract_business_data_subject_list(transformer):
     """Test subjects extraction."""
     publication = {"DOI": "10.1234/test", "subject": ["Biology", "Chemistry"]}
     data = transformer._extract_business_data(publication)
-    assert data["subjects"] == ["Biology", "Chemistry"]
+    assert data["subject_keywords"] == ["Biology", "Chemistry"]
 
 
 @pytest.mark.asyncio
@@ -506,7 +548,7 @@ def test_type_preserved_for_unknown(transformer):
     """Test that unknown/future type is preserved as-is."""
     publication = {"DOI": "10.1234/test", "type": "unknown-future-type"}
     data = transformer._extract_business_data(publication)
-    assert data["type"] == "unknown-future-type"  # Raw type preserved
+    assert data["publication_type"] == "unknown-future-type"  # Raw type preserved
 
 
 @pytest.mark.asyncio
@@ -516,7 +558,7 @@ async def test_transform_with_preprint_type(transformer, pipeline_context):
     result = await transformer.transform(pipeline_context, publication, index=0)
 
     assert result is not None
-    assert result["type"] == "posted-content"  # Raw CrossRef type preserved
+    assert result["publication_type"] == "posted-content"  # Raw CrossRef type preserved
 
 
 @pytest.mark.asyncio

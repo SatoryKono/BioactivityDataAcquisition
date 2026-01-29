@@ -32,6 +32,12 @@ source_file: ../../sources/crossref.yaml
 dq_config_file: ../../dq/entities/crossref/publication.yaml
 
 # -----------------------------------------------------------------------------
+# Data Schema Configuration (Column Ordering)
+# -----------------------------------------------------------------------------
+# Use data_schema_file for layer-specific column configuration (silver/gold).
+data_schema_file: ../../data_schema/crossref/publication.yaml
+
+# -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):

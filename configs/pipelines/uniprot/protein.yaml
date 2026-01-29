@@ -1,3 +1,4 @@
+column_groups_file: ../../data_schema/uniprot/protein.yaml
 # configs/pipelines/uniprot/protein.yaml
 # =============================================================================
 # UniProt Protein Pipeline Configuration

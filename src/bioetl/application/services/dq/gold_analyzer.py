@@ -20,12 +20,9 @@ from typing import Any
 import polars as pl
 import pyarrow as pa
 
-from bioetl.application.services.dq.utils import (
-    build_summary,
-    result_to_dict,
-    update_counts,
-)
+from bioetl.application.services.dq.utils import build_summary, update_counts
 from bioetl.domain.ports import GoldDQConfigPort
+from bioetl.domain.services.dq_serializer import to_dict
 from bioetl.domain.value_objects.dq_report import (
     AnomalyDetectionResult,
     AnomalyMetric,
@@ -92,7 +89,7 @@ class GoldDQAnalyzer:
 
         if GoldDQCheckType.RECORD_COUNT in enabled_checks:
             record_count_result = self._check_record_count(df, baseline_stats)
-            checks["record_count"] = result_to_dict(record_count_result)
+            checks["record_count"] = to_dict(record_count_result)
             passed, failed, warnings = update_counts(
                 record_count_result.status, passed, failed, warnings
             )
@@ -101,14 +98,14 @@ class GoldDQAnalyzer:
             completeness_result = self._check_completeness(
                 df, required_fields, completeness_threshold
             )
-            checks["completeness"] = result_to_dict(completeness_result)
+            checks["completeness"] = to_dict(completeness_result)
             passed, failed, warnings = update_counts(
                 completeness_result.status, passed, failed, warnings
             )
 
         if GoldDQCheckType.BUSINESS_RULES in enabled_checks:
             business_rules_result = self._check_business_rules(df, business_rules)
-            checks["business_rules"] = result_to_dict(business_rules_result)
+            checks["business_rules"] = to_dict(business_rules_result)
             passed, failed, warnings = update_counts(
                 business_rules_result.status, passed, failed, warnings
             )
@@ -117,28 +114,28 @@ class GoldDQAnalyzer:
             ref_integrity_result = self._check_referential_integrity(
                 df, reference_tables
             )
-            checks["referential_integrity"] = result_to_dict(ref_integrity_result)
+            checks["referential_integrity"] = to_dict(ref_integrity_result)
             passed, failed, warnings = update_counts(
                 ref_integrity_result.status, passed, failed, warnings
             )
 
         if GoldDQCheckType.STATISTICAL_PROFILE in enabled_checks:
             stat_profile_result = self._check_statistical_profile(df, baseline_stats)
-            checks["statistical_profile"] = result_to_dict(stat_profile_result)
+            checks["statistical_profile"] = to_dict(stat_profile_result)
             passed, failed, warnings = update_counts(
                 stat_profile_result.status, passed, failed, warnings
             )
 
         if GoldDQCheckType.ANOMALY_DETECTION in enabled_checks:
             anomaly_result = self._check_anomaly_detection(df, baseline_stats)
-            checks["anomaly_detection"] = result_to_dict(anomaly_result)
+            checks["anomaly_detection"] = to_dict(anomaly_result)
             passed, failed, warnings = update_counts(
                 anomaly_result.status, passed, failed, warnings
             )
 
         if GoldDQCheckType.SCD_INTEGRITY in enabled_checks:
             scd_result = self._check_scd_integrity(df, scd_config)
-            checks["scd_integrity"] = result_to_dict(scd_result)
+            checks["scd_integrity"] = to_dict(scd_result)
             passed, failed, warnings = update_counts(
                 scd_result.status, passed, failed, warnings
             )

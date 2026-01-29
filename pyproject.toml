@@ -34,6 +34,7 @@ dependencies = [
     "prometheus-client>=0.20",
     # CLI
     "click>=8.1",
+    "typer>=0.12",
     # Logging
     "structlog>=24.0",
     # High-performance JSON serialization (required by batch_writer, bronze_writer, delta_writer)
@@ -367,6 +368,7 @@ select = [
 ]
 ignore = [
     "E501",  # Line too long
+    "RUF001",  # Ambiguous unicode in strings - project uses Russian help text
     "RUF002",  # Ambiguous unicode - project uses Russian docstrings
     "RUF003",  # Ambiguous unicode in comments - project uses math symbols (×, ÷)
 ]

@@ -248,6 +248,21 @@ class TestExtractAffiliations:
         result = extract_affiliations(authors)
         assert result == ["Univ A"]
 
+    def test_extract_affiliations_none_in_list(self) -> None:
+        """Should filter out None values inside affiliations list."""
+        authors = [{"name": "John", "affiliations": ["MIT", None, "Harvard"]}]
+        result = extract_affiliations(authors)
+        assert result == ["Harvard", "MIT"]
+
+    def test_extract_affiliations_unique_sorted(self) -> None:
+        """Should return unique sorted affiliations across all authors."""
+        authors = [
+            {"name": "John", "affiliations": ["MIT", "Harvard"]},
+            {"name": "Jane", "affiliations": ["MIT", "Stanford"]},
+        ]
+        result = extract_affiliations(authors)
+        assert result == ["Harvard", "MIT", "Stanford"]
+
 
 class TestExtractJournalInfo:
     """Tests for extract_journal_info function."""
@@ -262,12 +277,12 @@ class TestExtractJournalInfo:
 
         result = extract_journal_info(journal, venue="Nature Publishing")
 
-        assert result["journal_name"] == "Nature"
+        assert result["journal"] == "Nature"
         assert result["volume"] == "629"
         assert result["issue"] is None  # No issue in simple volume
-        assert result["pages"] == "123-130"
-        assert result["first_page"] == "123"
-        assert result["last_page"] == "130"
+        assert result["page_range"] == "123-130"
+        assert result["page_first"] == "123"
+        assert result["page_last"] == "130"
 
     def test_fallback_to_venue(self) -> None:
         """Test fallback to venue when journal name is missing."""
@@ -275,29 +290,29 @@ class TestExtractJournalInfo:
 
         result = extract_journal_info(journal, venue="Conference Proceedings")
 
-        assert result["journal_name"] == "Conference Proceedings"
+        assert result["journal"] == "Conference Proceedings"
         assert result["volume"] == "10"
         assert result["issue"] is None
-        assert result["pages"] is None
-        assert result["first_page"] is None
-        assert result["last_page"] is None
+        assert result["page_range"] is None
+        assert result["page_first"] is None
+        assert result["page_last"] is None
 
     def test_venue_only(self) -> None:
         """Test when only venue is provided."""
         result = extract_journal_info(None, venue="ArXiv")
 
-        assert result["journal_name"] == "ArXiv"
+        assert result["journal"] == "ArXiv"
         assert result["volume"] is None
         assert result["issue"] is None
-        assert result["pages"] is None
-        assert result["first_page"] is None
-        assert result["last_page"] is None
+        assert result["page_range"] is None
+        assert result["page_first"] is None
+        assert result["page_last"] is None
 
     def test_empty_journal(self) -> None:
         """Test with empty journal dict."""
         result = extract_journal_info({}, venue="Fallback Venue")
 
-        assert result["journal_name"] == "Fallback Venue"
+        assert result["journal"] == "Fallback Venue"
         assert result["volume"] is None
         assert result["issue"] is None
 
@@ -952,12 +967,12 @@ class TestExtractJournalInfoIntegration:
 
         result = extract_journal_info(journal, None)
 
-        assert result["journal_name"] == "Journal of medicinal chemistry"
+        assert result["journal"] == "Journal of medicinal chemistry"
         assert result["volume"] == "32"
         assert result["issue"] == "4"
-        assert result["pages"] == "737-9"  # Cleaned
-        assert result["first_page"] == "737"
-        assert result["last_page"] == "739"  # Expanded
+        assert result["page_range"] == "737-9"  # Cleaned
+        assert result["page_first"] == "737"
+        assert result["page_last"] == "739"  # Expanded
 
     def test_simple_volume_full_pages(self) -> None:
         """Test simple volume with full page range."""
@@ -969,12 +984,12 @@ class TestExtractJournalInfoIntegration:
 
         result = extract_journal_info(journal, "Nature")
 
-        assert result["journal_name"] == "Nature"
+        assert result["journal"] == "Nature"
         assert result["volume"] == "523"
         assert result["issue"] is None
-        assert result["pages"] == "561-567"
-        assert result["first_page"] == "561"
-        assert result["last_page"] == "567"
+        assert result["page_range"] == "561-567"
+        assert result["page_first"] == "561"
+        assert result["page_last"] == "567"
 
     def test_venue_fallback(self) -> None:
         """Test venue fallback when journal name is missing."""
@@ -982,7 +997,7 @@ class TestExtractJournalInfoIntegration:
 
         result = extract_journal_info(journal, "Conference Proceedings")
 
-        assert result["journal_name"] == "Conference Proceedings"
+        assert result["journal"] == "Conference Proceedings"
         assert result["volume"] == "10"
         assert result["issue"] is None
 
@@ -990,17 +1005,17 @@ class TestExtractJournalInfoIntegration:
         """Test with None journal."""
         result = extract_journal_info(None, "ArXiv")
 
-        assert result["journal_name"] == "ArXiv"
+        assert result["journal"] == "ArXiv"
         assert result["volume"] is None
         assert result["issue"] is None
-        assert result["pages"] is None
-        assert result["first_page"] is None
-        assert result["last_page"] is None
+        assert result["page_range"] is None
+        assert result["page_first"] is None
+        assert result["page_last"] is None
 
     def test_empty_journal(self) -> None:
         """Test with empty journal dict."""
         result = extract_journal_info({}, "Fallback Venue")
 
-        assert result["journal_name"] == "Fallback Venue"
+        assert result["journal"] == "Fallback Venue"
         assert result["volume"] is None
         assert result["issue"] is None

@@ -2,7 +2,7 @@
 
 Tests the base schema used by all publication entities across providers.
 Validates common fields: pmid, doi, pmc_id, title, abstract, authors, journal,
-year, publication_date, citation_count, is_oa, lookup_method, source, doc_type, language.
+publication_year, publication_date, citations_received, is_oa, lookup_method, source, publication_type, language.
 """
 
 from __future__ import annotations
@@ -46,20 +46,25 @@ def valid_base_record() -> dict:
         "title": "Test Publication Title",
         "abstract": "This is a test abstract for the publication.",
         "authors": '["John Doe", "Jane Smith"]',  # JSON array
+        "affiliation_list": '["University of Testing"]',  # JSON array (unified)
         # === Publication metadata ===
         "journal": "Journal of Testing",
-        "year": 2024,
+        "publication_year": 2024,
         "publication_date": "2024-06-15",
-        "doc_type": "PUBLICATION",
+        "publication_type": "PUBLICATION",
         "language": "en",
-        # === Metrics ===
-        "citation_count": 10,
+        # === Pagination (unified field names) ===
+        "page_first": "1",
+        "page_last": "10",
+        # === Metrics (unified field names) ===
+        "citations_received": 10,
+        "citations_made": 5,
         # === Open Access ===
         "is_oa": True,
         # === Lookup tracking (note: column names use _ prefix) ===
         "_lookup_method": "doi",
         "_original_id": "10.1234/example.test",
-        "source": "test_provider",
+        "_source": "test_provider",
     }
 
 
@@ -76,7 +81,7 @@ class TestPublicationBaseSchemaValidation:
         assert len(validated) == 1
         assert validated["pmid"].iloc[0] == "12345678"
         assert validated["doi"].iloc[0] == "10.1234/example.test"
-        assert validated["year"].iloc[0] == 2024
+        assert validated["publication_year"].iloc[0] == 2024
 
     def test_record_with_nullable_string_fields(self, valid_base_record: dict) -> None:
         """Record with nullable string fields set to None should pass."""
@@ -86,7 +91,7 @@ class TestPublicationBaseSchemaValidation:
         record["pmc_id"] = None
         record["title"] = None
         record["abstract"] = None
-        # Note: year is int64 (non-nullable in Pandera), keep as valid int
+        # Note: year is pd.Int64Dtype (nullable integer), keep as valid int
 
         df = pd.DataFrame([record])
 
@@ -111,8 +116,8 @@ class TestPublicationBaseSchemaValidation:
     def test_type_coercion(self, valid_base_record: dict) -> None:
         """Values should be coerced to correct types (coerce=True)."""
         record = valid_base_record.copy()
-        # Year as string should be coerced to int
-        record["year"] = "2024"
+        # Year as string should be coerced to Int64
+        record["publication_year"] = "2024"
         # _dq_warn as int should be coerced to bool
         record["_dq_warn"] = 0
         # _dq_error as int should be coerced to bool
@@ -123,7 +128,7 @@ class TestPublicationBaseSchemaValidation:
         validated = PublicationBaseSchema.validate(df)
 
         assert len(validated) == 1
-        assert validated["year"].iloc[0] == 2024
+        assert validated["publication_year"].iloc[0] == 2024
         # Use == instead of 'is' for numpy bool comparison
         assert validated["_dq_warn"].iloc[0] == False  # noqa: E712
         assert validated["_dq_error"].iloc[0] == False  # noqa: E712
@@ -217,15 +222,15 @@ class TestPublicationBaseSchemaFieldValidation:
 
         for year in valid_years:
             record = valid_base_record.copy()
-            record["year"] = year
+            record["publication_year"] = year
             df = pd.DataFrame([record])
             validated = PublicationBaseSchema.validate(df)
-            assert validated["year"].iloc[0] == year
+            assert validated["publication_year"].iloc[0] == year
 
     def test_year_below_minimum_fails(self, valid_base_record: dict) -> None:
         """Year below minimum (1800) should fail."""
         record = valid_base_record.copy()
-        record["year"] = 1799
+        record["publication_year"] = 1799
 
         df = pd.DataFrame([record])
 
@@ -235,7 +240,7 @@ class TestPublicationBaseSchemaFieldValidation:
     def test_year_above_maximum_fails(self, valid_base_record: dict) -> None:
         """Year above maximum (2100) should fail."""
         record = valid_base_record.copy()
-        record["year"] = 2101
+        record["publication_year"] = 2101
 
         df = pd.DataFrame([record])
 
@@ -292,15 +297,15 @@ class TestPublicationBaseSchemaMultipleRecords:
         record2["entity_id"] = "test_pub_002"
         record2["pmid"] = "87654321"
         record2["doi"] = "10.9999/another.test"
-        record2["year"] = 2023
+        record2["publication_year"] = 2023
 
         record3 = valid_base_record.copy()
         record3["entity_id"] = "test_pub_003"
         record3["pmid"] = "11111111"
         record3["doi"] = None
         record3["pmc_id"] = None
-        # Note: year is int64 in Pandera schema, must be valid integer
-        record3["year"] = 2022
+        # Note: publication_year is int64 in Pandera schema, must be valid integer
+        record3["publication_year"] = 2022
 
         records = [record1, record2, record3]
 
@@ -328,7 +333,7 @@ class TestPublicationBaseSchemaMultipleRecords:
         """Lazy validation should collect all errors."""
         record1 = valid_base_record.copy()
         record1["pmid"] = "INVALID1"  # Invalid PMID
-        record1["year"] = 1799  # Invalid year
+        record1["publication_year"] = 1799  # Invalid year
 
         record2 = valid_base_record.copy()
         record2["entity_id"] = "test_pub_002"
