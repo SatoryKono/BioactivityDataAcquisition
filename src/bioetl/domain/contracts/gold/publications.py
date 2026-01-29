@@ -42,7 +42,9 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     journal: Series[str] = pa.Field(nullable=True)
     journal_abbrev: Series[str] = pa.Field(nullable=True)
     # PubMed-specific journal fields (forensic retention)
-    journal_full_title: Series[str] = pa.Field(nullable=True)  # Full journal name (PubMed)
+    journal_full_title: Series[str] = pa.Field(
+        nullable=True
+    )  # Full journal name (PubMed)
     journal_iso_abbrev: Series[str] = pa.Field(nullable=True)  # ISO abbreviation
     journal_issn_type: Series[str] = pa.Field(
         nullable=True
