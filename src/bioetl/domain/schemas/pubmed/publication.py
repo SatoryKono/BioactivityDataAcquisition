@@ -125,9 +125,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         )
 
     # === Journal Information (PubMed-specific) ===
-    journal_title: Series[str] = pa.Field(
-        nullable=True, description="Full journal name"
-    )
+    # journal field inherited from PublicationBaseSchema (renamed from journal_title)
     journal_iso_abbrev: Series[str] = pa.Field(
         nullable=True, description="ISO journal abbreviation"
     )
@@ -156,9 +154,13 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
 
     # === Publication Details (override year for check) ===
-    medline_pgn: Series[str] = pa.Field(
-        nullable=True, description="Page numbers (MEDLINE format)"
+    volume: Series[str] = pa.Field(nullable=True, description="Volume")
+    issue: Series[str] = pa.Field(nullable=True, description="Issue")
+    pages: Series[str] = pa.Field(
+        nullable=True, description="Page numbers (renamed from medline_pgn)"
     )
+    first_page: Series[str] = pa.Field(nullable=True, description="First page")
+    last_page: Series[str] = pa.Field(nullable=True, description="Last page")
 
     @pa.check("year", name="year_range")
     def _check_year(cls, series: Series[int]) -> Series[bool]:

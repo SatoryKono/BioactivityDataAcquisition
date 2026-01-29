@@ -94,12 +94,6 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
         description="Alternative IDs (publisher-specific, e.g., PII)",
     )
 
-    # === Canonical Publication Date ===
-    published: Series[str] = pa.Field(
-        nullable=True,
-        description="Canonical publication date (YYYY-MM-DD)",
-    )
-
     # === Short Container Title ===
     short_container_title: Series[object] = pa.Field(
         nullable=True,

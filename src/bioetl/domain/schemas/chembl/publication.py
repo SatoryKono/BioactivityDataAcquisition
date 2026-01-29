@@ -79,9 +79,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     )
 
     # === Provider-specific Journal Fields ===
-    journal_full_title: Series[str] = pa.Field(
-        nullable=True, description="Full journal title."
-    )
+    # journal field inherited from PublicationBaseSchema (renamed from journal_full_title)
     volume: Series[str] = pa.Field(nullable=True, description="Volume.")
     issue: Series[str] = pa.Field(nullable=True, description="Issue.")
     first_page: Series[str] = pa.Field(nullable=True, description="First page.")

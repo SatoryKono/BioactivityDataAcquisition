@@ -512,7 +512,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         return {
             "journal": journal_name,
-            "journal_title": journal_name,  # Alias for Gold schema
             "journal_abbrev": journal_abbrev,
             "journal_iso_abbrev": journal_abbrev,  # Alias for Gold schema
             "journal_issn_type": issn_type,
@@ -520,7 +519,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "volume": get_text(journal_issue.find("Volume")) if journal_issue else None,
             "issue": get_text(journal_issue.find("Issue")) if journal_issue else None,
             "pages": pages,
-            "medline_pgn": pages,  # Alias for Gold schema
             "first_page": first_page,
             "last_page": last_page,
         }

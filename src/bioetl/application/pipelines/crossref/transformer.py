@@ -184,7 +184,6 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             # NEW: Additional CrossRef fields
             "alternative_id": rec.get("alternative-id", []) or [],
             "short_container_title": rec.get("short-container-title", []) or [],
-            "published": published_date,
             **content_domain,
             **issn_by_type,
             # NEW: Author and reference data (per PROMPT 3 enhancement)

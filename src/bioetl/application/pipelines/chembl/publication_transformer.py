@@ -59,9 +59,9 @@ _CORE_METADATA = FieldGroup(
 _JOURNAL_INFO = FieldGroup(
     name="journal_info",
     fields=(
+        # Rename journal_full_title -> journal for unification
+        FieldSpec("journal_full_title", target="journal"),
         *simple_fields(
-            "journal",
-            "journal_full_title",
             "volume",
             "issue",
             "first_page",
