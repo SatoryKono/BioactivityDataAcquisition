@@ -212,7 +212,13 @@ async def test_chembl_publication_metadata_fields(e2e_data_dir: Path):
     records = get_silver_records(e2e_data_dir, "chembl_publication")
 
     # Publication fields that may be present
-    publication_fields = ["title", "year", "doi", "pubmed_id", "doc_type"]
+    publication_fields = [
+        "title",
+        "publication_year",
+        "doi",
+        "pmid",
+        "publication_type",
+    ]
 
     docs_with_publication_info = 0
     for record in records:

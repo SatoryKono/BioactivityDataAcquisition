@@ -206,7 +206,7 @@ class TestPublicationTransformer:
         assert result["document_chembl_id"] == "CHEMBL1234567"
         assert result["pmid"] == "12345678"  # Standardized output field name
         assert result["doi"] == "10.1000/test.doi"
-        assert result["year"] == 2024
+        assert result["publication_year"] == 2024
         assert "entity_id" in result
         assert "content_hash" in result
         assert "_run_id" in result

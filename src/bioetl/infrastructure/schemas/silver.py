@@ -39,11 +39,11 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("authors", pa.string()),  # JSON array of author names
         pa.field("title", pa.string()),
         pa.field("journal", pa.string()),
-        pa.field("year", pa.int64()),
+        pa.field("publication_year", pa.int64()),
         pa.field("volume", pa.string()),
         pa.field("issue", pa.string()),
-        pa.field("first_page", pa.string()),
-        pa.field("last_page", pa.string()),
+        pa.field("page_first", pa.string()),
+        pa.field("page_last", pa.string()),
         # === PUBLICATION_CROSSREF_FIELDS ===
         pa.field("document_chembl_id", pa.string()),  # Primary key
         pa.field("doi", pa.string()),
@@ -51,7 +51,7 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("pmid", pa.string()),  # PubMed ID (numeric string)
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
-        pa.field("doc_type", pa.string()),  # PUBLICATION, PATENT, DATASET, BOOK
+        pa.field("publication_type", pa.string()),  # PUBLICATION, PATENT, DATASET, BOOK
         # publication_date excluded: not available from ChEMBL API
         pa.field("src_id", pa.int64()),
         # === ChEMBL Release Metadata ===
