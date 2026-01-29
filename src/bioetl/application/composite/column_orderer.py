@@ -104,6 +104,20 @@ class ColumnOrderer:
 
         return df.select(ordered)
 
+    def order_column_names(self, columns: Sequence[str]) -> list[str]:
+        """Order column names by semantic groups.
+
+        Uses YAML-based column groups when configured, otherwise falls back
+        to the default semantic ordering.
+        """
+        if not columns:
+            return []
+
+        if self._column_groups:
+            return self._order_by_yaml_groups(columns)
+
+        return self.get_ordered_columns(columns)
+
     def get_ordered_columns(self, columns: Sequence[str]) -> list[str]:
         """Get columns in semantic order.
 

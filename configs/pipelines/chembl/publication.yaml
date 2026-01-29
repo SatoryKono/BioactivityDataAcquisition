@@ -42,6 +42,7 @@ dq_config_file: ../../dq/entities/chembl/publication.yaml
 #   3. configs/filter/entities/chembl/publication.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 filter_config_file: ../../filter/entities/chembl/publication.yaml
+column_groups_file: ../../../config/data_schema/chembl/publication.yaml
 
 # Entity-specific sink overrides
 # Note: dq_report.enabled inherited from _base.yaml for all layers

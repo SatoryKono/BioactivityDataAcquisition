@@ -112,6 +112,7 @@ class StorageAdapter:
         mode: Literal["merge", "append", "delete"] = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        column_order: list[str] | None = None,
         bronze_refs: list[BronzeWriteResult] | None = None,
     ) -> SilverWriteResult | None:
         """Write transformed records to Silver layer.
@@ -124,6 +125,7 @@ class StorageAdapter:
             mode: The write mode (e.g., 'merge', 'append', 'delete').
             partition_cols: Optional list of columns to partition by.
             on_schema_mismatch: How to handle schema drift.
+            column_order: Optional explicit column order to apply.
             bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
                 If provided, bronze_paths will be populated in Silver metadata
                 for complete lineage tracking (REQ-LINEAGE-001).
@@ -144,6 +146,7 @@ class StorageAdapter:
             mode=mode,
             partition_cols=partition_cols,
             on_schema_mismatch=on_schema_mismatch,
+            column_order=column_order,
             bronze_refs=bronze_refs,
         )
 
@@ -155,6 +158,7 @@ class StorageAdapter:
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,
+        column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
         silver_refs: list[Any] | None = None,
@@ -167,6 +171,7 @@ class StorageAdapter:
             schema: Pandera schema for validation
             primary_keys: Optional primary key columns
             mode: Write mode
+            column_order: Optional explicit column order to apply.
             ingestion_ts: Ingestion timestamp for audit (ADR-014)
             run_id: Run identifier for audit correlation
             silver_refs: Optional list of SilverWriteResult from Silver writes.
@@ -183,6 +188,7 @@ class StorageAdapter:
             schema=schema,
             primary_keys=primary_keys,
             mode=mode,
+            column_order=column_order,
             ingestion_ts=ingestion_ts,
             run_id=run_id,
             silver_refs=silver_refs,

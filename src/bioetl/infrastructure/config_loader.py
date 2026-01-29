@@ -81,6 +81,32 @@ def _apply_file_reference_defaults(
     config.setdefault(
         "filter_config_file", f"../../filter/entities/{provider}/{entity_type}.yaml"
     )
+    config.setdefault(
+        "column_groups_file",
+        f"../../../config/data_schema/{provider}/{entity_type}.yaml",
+    )
+
+
+def _load_column_groups_config(
+    config_path: Path, column_groups_file: str
+) -> list[dict[str, Any]] | None:
+    """Load column group configuration from column_groups_file."""
+    column_groups_path = config_path.parent / column_groups_file
+    if not column_groups_path.exists():
+        return None
+
+    with open(column_groups_path, encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+
+    if isinstance(data, list):
+        return data
+
+    if isinstance(data, dict):
+        groups = data.get("column_groups")
+        if isinstance(groups, list):
+            return groups
+
+    return None
 
 
 def _apply_layer_defaults(
@@ -285,6 +311,15 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
         filter_config = _load_filter_config(config_path, filter_config_file)
         if filter_config:
             _merge_filter_config(config, filter_config, entity_config)
+
+    # Load column groups from external file unless explicitly set inline
+    if (
+        "column_groups" not in entity_config
+        and (column_groups_file := config.get("column_groups_file"))
+    ):
+        column_groups = _load_column_groups_config(config_path, column_groups_file)
+        if column_groups is not None:
+            config["column_groups"] = column_groups
 
     if source_file := config.get("source_file"):
         source_path = config_path.parent / source_file

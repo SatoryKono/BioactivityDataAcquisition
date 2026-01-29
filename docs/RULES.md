@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.14 (Composite Pipeline Documentation), 2026-01-28* 
+*Версия: 5.15 (Field Group Registry), 2026-01-29* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -351,6 +351,35 @@ merge:
       fields: [title]
       provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 ```
+
+#### 2.9.4. Field Group Registry
+
+`FieldGroupRegistry` обеспечивает семантическую группировку полей для:
+- **Упорядочивание колонок** в merged output (группы отсортированы по приоритету enum)
+- **Фильтрация Gold-слоя** — группа `TRASH` автоматически исключается из Gold output
+- **Валидация** — отслеживание mapped/unmapped/system колонок
+
+**8 семантических групп** (`PublicationFieldGroup` enum):
+
+| Группа | Описание | Включается в Gold |
+|--------|----------|-------------------|
+| `ID_AND_STATUS` | Идентификаторы, DOI, PMID, статусы | Да |
+| `BIBLIOGRAPHY` | Title, abstract, journal, volume, pages | Да |
+| `AUTHOR_AND_AFFILIATIONS` | Авторы, аффилиации, ORCID | Да |
+| `TERMS_AND_KEYWORDS_AND_TOPICS` | Keywords, MeSH, topics | Да |
+| `CITATIONS_AND_REFERENCE` | Счётчики цитирований, ссылки | Да |
+| `DATE_AND_PLACES` | Даты публикации, страны | Да |
+| `PUBLICATION_TYPES` | Типы документов | Да |
+| `TRASH` | Внутренние, избыточные, low-value | **Нет** |
+
+**Конфигурация:** `configs/composite/field_groups/publication.yaml` — 94 базовых поля, маппинг на провайдерские колонки.
+
+**Доменные модели** (`domain/composite/field_groups.py`):
+- `FieldMapping` — маппинг `base_name → provider_columns + group`
+- `FieldGroupDefinition` — определение группы с её полями
+- `FieldGroupRegistry` — центральный реестр для lookup, фильтрации, сортировки
+
+**Интеграция:** Bootstrap загружает реестр из YAML и инжектит в `MergeService`. При записи Gold trash-колонки фильтруются автоматически. При отсутствии конфигурации — graceful degradation (фильтрация не применяется).
 
 ## 3. Обработка Ошибок и Наблюдаемость
 
@@ -1201,6 +1230,7 @@ fields:
 | [ADR-031](02-architecture/decisions/ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | Accepted | 2026-01-26 |
 
 ## История Изменений (Changelog)
+- **5.15** (2026-01-29): Field Group Registry. Добавлена §2.9.4 "Field Group Registry" — семантическая группировка полей для Gold-фильтрации и сортировки колонок. Домен: `FieldGroupRegistry`, `FieldMapping`, `FieldGroupDefinition`. YAML-конфиг: `configs/composite/field_groups/publication.yaml`. Интеграция с `MergeService` для автоматической фильтрации TRASH-полей из Gold.
 - **5.14** (2026-01-28): Composite Pipeline Documentation. Добавлена секция §2.9 "Composite Pipelines" с документацией `preserve_all_sources` feature, column groups и merge strategies. Ссылка на ADR-026.
 - **5.13** (2026-01-28): ADR Registry Update. Добавлены ADR-029..031 в реестр (Приложение F): Output Metadata Unification, Publication Pagination Strategy, Loading Strategy Formalization.
 - **5.12** (2026-01-21): ADR Registry Update. Добавлены ADR-021..028 в реестр (Приложение F). Добавлены inline ссылки на новые ADR в соответствующие секции (§1.1, §2.8, §3.2, App D).

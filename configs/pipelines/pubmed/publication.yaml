@@ -33,6 +33,7 @@ source:
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 filter_config_file: ../../filter/entities/pubmed/publication.yaml
+column_groups_file: ../../../config/data_schema/pubmed/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Sink Overrides

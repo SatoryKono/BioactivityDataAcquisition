@@ -30,6 +30,7 @@ source_file: ../../sources/crossref.yaml
 #   2. configs/dq/providers/crossref.yaml (provider-specific)
 #   3. configs/dq/entities/crossref/publication.yaml (entity-specific)
 dq_config_file: ../../dq/entities/crossref/publication.yaml
+column_groups_file: ../../../config/data_schema/crossref/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)

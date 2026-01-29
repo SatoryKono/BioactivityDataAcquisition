@@ -11,12 +11,13 @@ Safety Guard (RULES.md §4.6):
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Literal, cast
 
 import orjson
 
+from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.domain.exceptions import SchemaViolationError
 from bioetl.domain.locking import LockNotHeldError
 
@@ -88,6 +89,12 @@ class BatchWriter:
         self._silver_schema = config.silver_schema
         self._table_config = config.table_config
         self._gold_schema = config.gold_schema
+        self._column_groups = config.column_groups
+        self._column_orderer = (
+            ColumnOrderer(self._context.logger, column_groups=self._column_groups)
+            if self._column_groups
+            else None
+        )
 
         # Pre-calculate table names and write modes to avoid repeated logic in hot paths
         self._silver_table_name = (
@@ -289,6 +296,11 @@ class BatchWriter:
             for r in records:
                 r["_source_batch_id"] = batch_id_str
 
+            column_order = self._get_column_order(
+                list(self._silver_schema.names)
+                if self._silver_schema is not None
+                else self._collect_record_columns(records)
+            )
             silver_result = await self._storage.write_silver(
                 table_name=self._silver_table_name,
                 records=records,
@@ -296,6 +308,7 @@ class BatchWriter:
                 schema=self._silver_schema,
                 mode=self._silver_mode,
                 on_schema_mismatch=self._table_config.on_schema_mismatch,
+                column_order=column_order,
                 bronze_refs=bronze_refs,
             )
             self._end_span(span)
@@ -344,6 +357,11 @@ class BatchWriter:
                     }
                     for r in records
                 ]
+            column_order = self._get_column_order(
+                list(schema_columns)
+                if schema_columns
+                else self._collect_record_columns(records)
+            )
 
             # Validate Gold records
             result = self._gold_validator.validate(records)
@@ -357,6 +375,7 @@ class BatchWriter:
                 schema=self._gold_schema,
                 primary_keys=list(self._table_config.primary_keys),
                 mode=self._gold_mode,
+                column_order=column_order,
                 ingestion_ts=self._context.started_at,
                 run_id=self._context.run_id,
                 silver_refs=silver_refs,
@@ -389,6 +408,23 @@ class BatchWriter:
             return set(schema.columns.keys())
 
         return None
+
+    def _collect_record_columns(self, records: list[dict[str, Any]]) -> list[str]:
+        """Collect columns from records in a stable, first-seen order."""
+        columns: list[str] = []
+        seen: set[str] = set()
+        for record in records:
+            for key in record:
+                if key not in seen:
+                    seen.add(key)
+                    columns.append(key)
+        return columns
+
+    def _get_column_order(self, columns: Sequence[str]) -> list[str] | None:
+        """Resolve explicit column order from YAML groups if configured."""
+        if not self._column_orderer:
+            return None
+        return self._column_orderer.order_column_names(columns)
 
     def log_and_track_write_error(
         self, layer: str, error: Exception, batch_id: BatchID

@@ -547,6 +547,76 @@ df.columns = [
 - Downstream consumers must handle multiple columns per field
 - Breaking change for consumers expecting coalesced columns
 
+## Field Group Registry
+
+When `preserve_all_sources: true` is enabled, the number of columns grows significantly (94 base fields × up to 5 providers). The **Field Group Registry** (`FieldGroupRegistry`) provides semantic grouping for these columns.
+
+### Purpose
+
+1. **Gold Filtering**: Automatically exclude TRASH-group fields (e.g., `content_hash`, `language`) from Gold output
+2. **Column Ordering**: Sort output columns by semantic group (ID_AND_STATUS first, TRASH last) and provider priority
+3. **Validation**: Identify unmapped columns for data quality checks
+
+### Domain Models
+
+```
+FieldGroupId (enum)          — 8 semantic groups (alias for PublicationFieldGroup)
+FieldMapping (frozen)        — base_name → provider_columns + group
+FieldGroupDefinition (frozen)— group_id, display_name, include_in_gold, fields
+FieldGroupRegistry           — central registry with lookup indices
+```
+
+### YAML Configuration
+
+Field groups are defined in `configs/composite/field_groups/publication.yaml`:
+
+```yaml
+version: "1.0"
+entity: publication
+provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+groups:
+  - id: id_and_status
+    display_name: "ID & Status"
+    include_in_gold: true
+    fields:
+      - base_name: doi
+        columns:
+          - chembl.publication.doi
+          - crossref.publication.doi
+          - openalex.publication.doi
+  - id: trash
+    display_name: "Trash"
+    include_in_gold: false
+    fields:
+      - base_name: content_hash
+        columns: [chembl.publication.content_hash, ...]
+```
+
+### Integration with MergeService
+
+During `_write_merged_gold()`, `MergeService` uses the registry to filter out TRASH columns:
+
+```python
+if self._field_group_registry is not None:
+    trash_cols = self._field_group_registry.get_trash_columns(df.columns)
+    if trash_cols:
+        df = df.drop(trash_cols)
+```
+
+### Graceful Degradation
+
+If no YAML config exists for a composite pipeline, bootstrap continues without the registry. No filtering or ordering is applied — the pipeline works as before.
+
+### Files
+
+| Layer | File | Description |
+|-------|------|-------------|
+| Domain | `domain/composite/field_groups.py` | Models: FieldMapping, FieldGroupDefinition, FieldGroupRegistry |
+| Infrastructure | `infrastructure/config/field_group_loader.py` | YAML → domain object loader |
+| Config | `configs/composite/field_groups/publication.yaml` | 8 groups, 94 fields |
+| Composition | `composition/bootstrap/runtime/composite.py` | Bootstrap integration |
+| Application | `application/composite/merger.py` | Gold filtering integration |
+
 ## Application Layer
 
 ### CompositePipelineRunner

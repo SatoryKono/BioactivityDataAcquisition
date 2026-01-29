@@ -83,8 +83,20 @@ def load_composite_config(name: str) -> CompositeConfig:
     if not config_path.exists():
         raise FileNotFoundError(f"Composite config not found: {config_path}")
 
-    with config_path.open() as f:
+    with config_path.open(encoding="utf-8") as f:
         raw = yaml.safe_load(f)
+
+    merge = (raw or {}).get("composite", {}).get("merge", {})
+    column_groups_file = merge.get("column_groups_file")
+    if column_groups_file and "column_groups" not in merge:
+        groups_path = config_path.parent / column_groups_file
+        if groups_path.exists():
+            with groups_path.open(encoding="utf-8") as f:
+                groups_raw = yaml.safe_load(f) or {}
+            if isinstance(groups_raw, list):
+                merge["column_groups"] = groups_raw
+            elif isinstance(groups_raw, dict):
+                merge["column_groups"] = groups_raw.get("column_groups", [])
 
     try:
         # Validate using Pydantic schema

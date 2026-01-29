@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import DQConfig, MemoryConfig, TableConfig
 
 if TYPE_CHECKING:
@@ -23,6 +24,7 @@ class RecordProcessorConfig:
     dq_config: DQConfig | None = None
     table_config: TableConfig = field(default_factory=TableConfig)
     memory_config: MemoryConfig = field(default_factory=MemoryConfig)
+    column_groups: tuple[ColumnGroupConfig, ...] = ()
     # DQ report output paths (for flat_structure support)
     bronze_output_path: str | None = None
     silver_output_path: str | None = None

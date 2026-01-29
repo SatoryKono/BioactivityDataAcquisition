@@ -23,6 +23,7 @@ source_file: ../../sources/chembl.yaml
 #   2. configs/dq/providers/chembl.yaml (provider-specific)
 #   3. configs/dq/entities/chembl/target_component.yaml (entity-specific)
 dq_config_file: ../../dq/entities/chembl/target_component.yaml
+column_groups_file: ../../../config/data_schema/chembl/target_component.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)

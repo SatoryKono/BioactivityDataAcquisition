@@ -17,6 +17,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
+from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.medallion import GoldWriteMode, LoadingStrategy, SilverWriteMode
 from bioetl.domain.types import RunType
 
@@ -420,6 +421,7 @@ class PipelineConfig:
     batch_size: int = 100
     checkpoint_interval: int = 1000
     fields: tuple[str, ...] = ()
+    column_groups: tuple[ColumnGroupConfig, ...] = ()
 
     # Data Quality
     dq: DQConfig = field(default_factory=DQConfig)
@@ -456,6 +458,8 @@ class PipelineConfig:
             object.__setattr__(self, "partition_cols", tuple(self.partition_cols))
         if isinstance(self.fields, list):
             object.__setattr__(self, "fields", tuple(self.fields))
+        if isinstance(self.column_groups, list):
+            object.__setattr__(self, "column_groups", tuple(self.column_groups))
         if isinstance(self.transform_steps, list):
             object.__setattr__(self, "transform_steps", tuple(self.transform_steps))
 

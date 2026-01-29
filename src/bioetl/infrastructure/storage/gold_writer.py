@@ -147,6 +147,7 @@ class GoldWriter(BaseDeltaWriter):
         partition_cols: list[str] | None = None,
         scd_config: dict[str, Any] | None = None,
         *,
+        column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
         silver_refs: list[Any] | None = None,
@@ -161,6 +162,7 @@ class GoldWriter(BaseDeltaWriter):
             mode: Write mode - 'overwrite', 'append', or 'scd2'
             partition_cols: Optional partition columns
             scd_config: Required config for SCD2 mode
+            column_order: Optional explicit column order to apply.
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required for SCD2 mode
                          and audit logging.
@@ -200,6 +202,7 @@ class GoldWriter(BaseDeltaWriter):
                 schema,
                 scd_config,
                 ingestion_ts,
+                column_order,
             )
 
             if self._audit:
@@ -437,13 +440,19 @@ class GoldWriter(BaseDeltaWriter):
         schema: DataFrameSchema,
         scd_config: dict[str, Any] | None,
         ingestion_ts: datetime | None,
+        column_order: list[str] | None,
     ) -> None:
         """Dispatch to appropriate write method based on mode."""
         if mode == GoldWriteMode.SCD2:
             assert ingestion_ts is not None  # Validated in _validate_scd2_requirements
             assert scd_config is not None
             await self._write_scd2(
-                table_path, records, scd_config, partition_cols, ingestion_ts
+                table_path,
+                records,
+                scd_config,
+                partition_cols,
+                ingestion_ts,
+                column_order,
             )
         else:
             await self._write_simple(
@@ -454,6 +463,7 @@ class GoldWriter(BaseDeltaWriter):
                 partition_cols,
                 primary_keys,
                 schema,
+                column_order,
             )
 
     async def _log_gold_audit(
@@ -648,7 +658,9 @@ class GoldWriter(BaseDeltaWriter):
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, func, *args)
 
-    def _to_arrow_table(self, records: list[dict[str, Any]]) -> pa.Table:
+    def _to_arrow_table(
+        self, records: list[dict[str, Any]], column_order: list[str] | None = None
+    ) -> pa.Table:
         """Convert records to PyArrow table, handling null types.
 
         Delta Lake doesn't support null type, so we convert null columns to string.
@@ -659,7 +671,10 @@ class GoldWriter(BaseDeltaWriter):
         from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
 
         converter = ArrowDataConverter(logger=self.logger)
-        return converter.convert_records_to_arrow(records)
+        return converter.convert_records_to_arrow(
+            records,
+            column_order=column_order,
+        )
 
     async def _write_simple(
         self,
@@ -670,9 +685,10 @@ class GoldWriter(BaseDeltaWriter):
         partition_cols: list[str] | None,
         primary_keys: list[str] | None = None,
         _schema: DataFrameSchema | None = None,
+        column_order: list[str] | None = None,
     ) -> None:
         """Write records using simple overwrite or append mode."""
-        arrow_data = self._to_arrow_table(records)
+        arrow_data = self._to_arrow_table(records, column_order=column_order)
 
         # Sort by primary keys for deterministic writing
         if primary_keys:
@@ -725,6 +741,7 @@ class GoldWriter(BaseDeltaWriter):
         scd_config: dict[str, Any],
         partition_cols: list[str] | None,
         ingestion_ts: datetime,
+        column_order: list[str] | None = None,
     ) -> None:
         """Write records using SCD Type 2 (history tracking).
 
@@ -763,10 +780,17 @@ class GoldWriter(BaseDeltaWriter):
                         lambda table_path=table_path: DeltaTable(table_path)
                     )
                     await self._merge_scd2(
-                        dt, records, business_key, scd_config, ingestion_ts
+                        dt,
+                        records,
+                        business_key,
+                        scd_config,
+                        ingestion_ts,
+                        column_order,
                     )
                 except TableNotFoundError:
-                    arrow_data = self._to_arrow_table(records)
+                    arrow_data = self._to_arrow_table(
+                        records, column_order=column_order
+                    )
                     await self._run_in_executor(
                         lambda table_or_uri=table_path,
                         data=arrow_data,
@@ -795,6 +819,7 @@ class GoldWriter(BaseDeltaWriter):
         business_key: str | list[str],
         scd_config: dict[str, Any],
         ingestion_ts: datetime,
+        column_order: list[str] | None = None,
     ) -> None:
         """Merge records using SCD Type 2 logic.
 
@@ -811,7 +836,7 @@ class GoldWriter(BaseDeltaWriter):
         else:
             business_keys = business_key
 
-        new_data = self._to_arrow_table(records)
+        new_data = self._to_arrow_table(records, column_order=column_order)
         valid_to_col = scd_config.get("valid_to_col", "valid_to")
         current_flag_col = scd_config.get("current_flag_col", "is_current")
         merge_condition = " AND ".join(
