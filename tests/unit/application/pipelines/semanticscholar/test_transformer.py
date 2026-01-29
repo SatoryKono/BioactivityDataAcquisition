@@ -129,14 +129,16 @@ class TestSemanticScholarPublicationTransformer:
         )
 
     @pytest.mark.asyncio
+    @pytest.mark.parametrize("abstract_value", [None, "   "])
     async def test_transform_abstract_fallback_from_tldr(
         self,
         transformer: SemanticScholarPublicationTransformer,
         mock_context: PipelineContext,
         sample_record: dict[str, Any],
+        abstract_value: str | None,
     ) -> None:
-        """Test that abstract falls back to TLDR when missing."""
-        sample_record["abstract"] = None
+        """Test that abstract falls back to TLDR when missing/empty."""
+        sample_record["abstract"] = abstract_value
 
         result = await transformer.transform(mock_context, sample_record, 0)
 

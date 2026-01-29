@@ -72,6 +72,7 @@ class TestCrossRefYearValidation:
             "_source": "crossref",
             # CrossRef-specific fields
             "issn": None,
+            "issn_list": None,
             "publisher": "Nature Publishing Group",
             "volume": "1",
             "issue": "1",
