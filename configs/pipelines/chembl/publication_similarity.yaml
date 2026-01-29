@@ -40,7 +40,7 @@ dq_config_file: ../../dq/entities/chembl/publication_similarity.yaml
 #   3. configs/filter/entities/chembl/publication_similarity.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 filter_config_file: ../../filter/entities/chembl/publication_similarity.yaml
-column_groups_file: ../../../config/data_schema/chembl/publication_similarity.yaml
+column_groups_file: ../../data_schema/chembl/publication_similarity.yaml
 
 # Entity-specific sink overrides
 sink:

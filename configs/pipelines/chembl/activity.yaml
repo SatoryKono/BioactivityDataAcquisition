@@ -1,4 +1,4 @@
-column_groups_file: ../../../config/data_schema/chembl/activity.yaml
+column_groups_file: ../../data_schema/chembl/activity.yaml
 # configs/pipelines/chembl/activity.yaml
 # =============================================================================
 # ChEMBL Activity Pipeline Configuration

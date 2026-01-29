@@ -964,6 +964,10 @@ class PipelineYamlConfig(BaseModel):
         default=None,
         description="Path to column group config file relative to pipeline config.",
     )
+    data_schema_file: str | None = Field(
+        default=None,
+        description="Path to data schema file with layer-specific columns (silver/gold).",
+    )
 
     primary_keys: list[str] = Field(min_length=1)
     silver_table: str = Field(min_length=1)

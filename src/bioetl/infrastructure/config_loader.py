@@ -83,7 +83,7 @@ def _apply_file_reference_defaults(
     )
     config.setdefault(
         "column_groups_file",
-        f"../../../config/data_schema/{provider}/{entity_type}.yaml",
+        f"../data_schema/{provider}/{entity_type}.yaml",
     )
 
 
@@ -107,6 +107,45 @@ def _load_column_groups_config(
             return groups
 
     return None
+
+
+def _load_data_schema_config(
+    config_path: Path, data_schema_file: str
+) -> dict[str, Any] | None:
+    """Load data schema configuration with layer-specific column definitions.
+
+    Supports:
+    1. Legacy format: column_groups only
+    2. Layer-specific format: silver/gold with filtering
+
+    Args:
+        config_path: Path to pipeline config file.
+        data_schema_file: Relative path to data schema YAML.
+
+    Returns:
+        Dictionary with column_groups, silver, and gold keys, or None if file not found.
+    """
+    schema_path = config_path.parent / data_schema_file
+    if not schema_path.exists():
+        return None
+
+    with open(schema_path, encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+
+    # Build result with backward compatibility
+    result: dict[str, Any] = {}
+
+    # Always include column_groups if present (for backward compatibility)
+    if "column_groups" in data:
+        result["column_groups"] = data["column_groups"]
+
+    # Add layer-specific configs if present
+    if "silver" in data:
+        result["silver"] = data["silver"]
+    if "gold" in data:
+        result["gold"] = data["gold"]
+
+    return result if result else None
 
 
 def _apply_layer_defaults(
@@ -313,13 +352,25 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
             _merge_filter_config(config, filter_config, entity_config)
 
     # Load column groups from external file unless explicitly set inline
-    if (
-        "column_groups" not in entity_config
-        and (column_groups_file := config.get("column_groups_file"))
-    ):
-        column_groups = _load_column_groups_config(config_path, column_groups_file)
-        if column_groups is not None:
-            config["column_groups"] = column_groups
+    # Priority: explicit inline > data_schema_file > column_groups_file (legacy)
+    if "column_groups" not in entity_config:
+        # Try new data_schema_file first (supports layer-specific configs)
+        if data_schema_file := config.get("data_schema_file"):
+            data_schema = _load_data_schema_config(config_path, data_schema_file)
+            if data_schema:
+                if "column_groups" in data_schema:
+                    config["column_groups"] = data_schema["column_groups"]
+                if "silver" in data_schema:
+                    config.setdefault("data_schema", {})["silver"] = data_schema[
+                        "silver"
+                    ]
+                if "gold" in data_schema:
+                    config.setdefault("data_schema", {})["gold"] = data_schema["gold"]
+        # Fallback to legacy column_groups_file
+        elif column_groups_file := config.get("column_groups_file"):
+            column_groups = _load_column_groups_config(config_path, column_groups_file)
+            if column_groups is not None:
+                config["column_groups"] = column_groups
 
     if source_file := config.get("source_file"):
         source_path = config_path.parent / source_file

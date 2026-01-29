@@ -824,7 +824,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Microsoft Academic Graph ID (legacy, from ids object)
         pa.field("mag_id", pa.string()),
         # MeSH terms extracted from OpenAlex mesh field
-        pa.field("mesh", pa.list_(pa.string())),
+        pa.field("mesh_terms", pa.list_(pa.string())),
         pa.field("oa_status", pa.string()),
         # Primary key
         pa.field("openalex_id", pa.string()),

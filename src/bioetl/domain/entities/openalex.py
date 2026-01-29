@@ -119,7 +119,7 @@ class OpenAlexPublicationRecord(BaseModel):
     )
 
     # MeSH terms (Medical Subject Headings)
-    mesh: list[str] = PydanticField(
+    mesh_terms: list[str] = PydanticField(
         default_factory=list, description="MeSH descriptor names"
     )
 
@@ -233,7 +233,7 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     grants: list[dict[str, Any]] = field(default_factory=list)
 
     # MeSH terms (Medical Subject Headings)
-    mesh: list[str] = field(default_factory=list)
+    mesh_terms: list[str] = field(default_factory=list)
 
     # Keywords (author-assigned)
     keywords: list[str] = field(default_factory=list)

@@ -381,6 +381,51 @@ merge:
 
 **Интеграция:** Bootstrap загружает реестр из YAML и инжектит в `MergeService`. При записи Gold trash-колонки фильтруются автоматически. При отсутствии конфигурации — graceful degradation (фильтрация не применяется).
 
+#### 2.9.5. Column Renames (Layer-Specific)
+
+`rename_fields` в `data_schema` конфигурации позволяет переименовывать колонки на уровне Silver и Gold слоёв.
+
+**ВАЖНО**: `gold.rename_fields` **MUST** использовать имена колонок **ПОСЛЕ** `silver.rename_fields`.  
+Gold читает из Silver (Medallion flow), поэтому видит Silver output schema, а не оригинальные имена.
+
+**Формат конфигурации:**
+```yaml
+# configs/data_schema/{provider}/{entity}.yaml
+column_groups: [...]  # Shared groups
+
+silver:
+  include_groups: [system, identifiers, title]
+  rename_fields:
+    entity_id: document_id         # Rename in Silver
+    content_hash: content_version
+
+gold:
+  include_groups: [system, identifiers, title]
+  exclude_fields: [_dq_*, _source_batch_id]
+  rename_fields:
+    # Use Silver output names (not original!)
+    document_id: publication_id         # Silver renamed entity_id → document_id
+    content_version: version_hash       # Silver renamed content_hash → content_version
+    _run_id: pipeline_run_id            # Original name (not renamed in Silver)
+```
+
+**Rename Chain:**
+```
+Original → Silver → Gold
+---------------------------------
+entity_id → document_id → publication_id
+content_hash → content_version → version_hash
+_run_id → _run_id → pipeline_run_id
+```
+
+**Когда использовать:**
+- **Silver**: Редко. Только для стандартизации внутренних имён между провайдерами
+- **Gold**: Часто. Для user-friendly имён в аналитических витринах
+
+**Best Practice:**
+- Сохранять оригинальные имена в Silver (упрощает отладку)
+- Применять бизнес-имена только в Gold (`_run_id` → `pipeline_run_id`, `pmid` → `pubmed_id`)
+
 ## 3. Обработка Ошибок и Наблюдаемость
 
 ### 3.1. Стратегия Обработки Ошибок

@@ -20,7 +20,7 @@
 
 ### 1.1 Five Layer Architecture
 
-[Five Layer Architecture](../diagrams/mermaid/01_five_layer_architecture.mmd)
+[Five Layer Architecture](diagrams/01_five_layer_architecture.mmd)
 
 **Приоритет:** 9.69 | **Тип:** Component Diagram
 
@@ -58,13 +58,13 @@
 - ✅ Infrastructure реализует Domain Ports
 - ✅ Composition собирает зависимости
 
-**Файл:** [`docs/diagrams/mermaid/01_five_layer_architecture.mmd`](../diagrams/mermaid/01_five_layer_architecture.mmd)
+**Файл:** [`docs/diagrams/mermaid/01_five_layer_architecture.mmd`](diagrams/01_five_layer_architecture.mmd)
 
 ---
 
 ### 1.2 Hexagonal Architecture Overview
 
-[Hexagonal Architecture](../diagrams/mermaid/03_hexagonal_architecture.mmd)
+[Hexagonal Architecture](diagrams/03_hexagonal_architecture.mmd)
 
 **Приоритет:** 9.50 | **Тип:** C4 Context Diagram
 
@@ -93,13 +93,13 @@ Ports & Adapters паттерн - ключевой архитектурный п
 - TracingPort, MetricsPort, LoggerPort
 - И другие...
 
-**Файл:** [`docs/diagrams/mermaid/03_hexagonal_architecture.mmd`](../diagrams/mermaid/03_hexagonal_architecture.mmd)
+**Файл:** [`docs/diagrams/mermaid/03_hexagonal_architecture.mmd`](diagrams/03_hexagonal_architecture.mmd)
 
 ---
 
 ### 1.3 Layer Dependency Matrix
 
-[Layer Dependency Matrix](../diagrams/mermaid/04_layer_dependency_matrix.mmd)
+[Layer Dependency Matrix](diagrams/04_layer_dependency_matrix.mmd)
 
 **Приоритет:** 9.44 | **Тип:** Matrix Diagram
 
@@ -124,13 +124,13 @@ Ports & Adapters паттерн - ключевой архитектурный п
 
 **Нарушение = Блокер PR**
 
-**Файл:** [`docs/diagrams/mermaid/04_layer_dependency_matrix.mmd`](../diagrams/mermaid/04_layer_dependency_matrix.mmd)
+**Файл:** [`docs/diagrams/mermaid/04_layer_dependency_matrix.mmd`](diagrams/04_layer_dependency_matrix.mmd)
 
 ---
 
 ### 1.4 Medallion Architecture Overview
 
-[Medallion Architecture](../diagrams/mermaid/05_medallion_architecture.mmd)
+[Medallion Architecture](diagrams/05_medallion_architecture.mmd)
 
 **Приоритет:** 9.38 | **Тип:** Flowchart
 
@@ -167,7 +167,7 @@ Bronze → Silver → Gold уровни хранения данных.
 - Delta Time Travel (7-day history)
 - VACUUM cleanup (weekly)
 
-**Файл:** [`docs/diagrams/mermaid/05_medallion_architecture.mmd`](../diagrams/mermaid/05_medallion_architecture.mmd)
+**Файл:** [`docs/diagrams/mermaid/05_medallion_architecture.mmd`](diagrams/05_medallion_architecture.mmd)
 
 ---
 
@@ -175,7 +175,7 @@ Bronze → Silver → Gold уровни хранения данных.
 
 ### 2.1 Complete Pipeline Flow
 
-[Complete Pipeline Flow](../diagrams/mermaid/02_complete_pipeline_flow.mmd)
+[Complete Pipeline Flow](diagrams/02_complete_pipeline_flow.mmd)
 
 **Приоритет:** 9.56 | **Тип:** Flowchart
 
@@ -248,13 +248,13 @@ End-to-end поток данных от API провайдера до Gold layer
 **Graceful Shutdown:**
 - SIGTERM → Finish current batch → Save checkpoint → Exit(0)
 
-**Файл:** [`docs/diagrams/mermaid/02_complete_pipeline_flow.mmd`](../diagrams/mermaid/02_complete_pipeline_flow.mmd)
+**Файл:** [`docs/diagrams/mermaid/02_complete_pipeline_flow.mmd`](diagrams/02_complete_pipeline_flow.mmd)
 
 ---
 
 ### 2.2 Silver Merge Operation
 
-[Silver Merge Operation](../diagrams/mermaid/22_silver_merge_operation.mmd)
+[Silver Merge Operation](diagrams/22_silver_merge_operation.mmd)
 
 **Приоритет:** 8.31 | **Тип:** Flowchart
 
@@ -299,7 +299,7 @@ Delta merge by content_hash — критическая операция для i
 - ✓ Automatic deduplication
 - ✓ Optimistic concurrency
 
-**Файл:** [`docs/diagrams/mermaid/22_silver_merge_operation.mmd`](../diagrams/mermaid/22_silver_merge_operation.mmd)
+**Файл:** [`docs/diagrams/mermaid/22_silver_merge_operation.mmd`](diagrams/22_silver_merge_operation.mmd)
 
 ---
 
@@ -307,7 +307,7 @@ Delta merge by content_hash — критическая операция для i
 
 ### 3.1 Domain Model Overview
 
-[Domain Model](../diagrams/mermaid/06_domain_model_overview.mmd)
+[Domain Model](diagrams/06_domain_model_overview.mmd)
 
 **Приоритет:** 9.31 | **Тип:** Class Diagram
 
@@ -332,13 +332,13 @@ Delta merge by content_hash — критическая операция для i
 - DataNormalizationService, IdentityService
 - UnitConverter, ActivityAggregator, ValueValidator
 
-**Файл:** [`docs/diagrams/mermaid/06_domain_model_overview.mmd`](../diagrams/mermaid/06_domain_model_overview.mmd)
+**Файл:** [`docs/diagrams/mermaid/06_domain_model_overview.mmd`](diagrams/06_domain_model_overview.mmd)
 
 ---
 
 ### 3.2 Ports Architecture
 
-[Ports Architecture](../diagrams/mermaid/07_ports_architecture.mmd)
+[Ports Architecture](diagrams/07_ports_architecture.mmd)
 
 **Приоритет:** 9.25 | **Тип:** Interface Diagram
 
@@ -367,13 +367,13 @@ Delta merge by content_hash — критическая операция для i
 - StructlogLogger → LoggerPort
 - NoOpTracing/NoOpMetrics → Null Object Pattern
 
-**Файл:** [`docs/diagrams/mermaid/07_ports_architecture.mmd`](../diagrams/mermaid/07_ports_architecture.mmd)
+**Файл:** [`docs/diagrams/mermaid/07_ports_architecture.mmd`](diagrams/07_ports_architecture.mmd)
 
 ---
 
 ### 3.3 Pipeline Core Components
 
-[Pipeline Core Components](../diagrams/mermaid/10_pipeline_core_components.mmd)
+[Pipeline Core Components](diagrams/10_pipeline_core_components.mmd)
 
 **Приоритет:** 9.06 | **Тип:** Component Diagram
 
@@ -414,7 +414,7 @@ Delta merge by content_hash — критическая операция для i
 **Services:**
 - PreflightService, PostrunService, PipelineObserver
 
-**Файл:** [`docs/diagrams/mermaid/10_pipeline_core_components.mmd`](../diagrams/mermaid/10_pipeline_core_components.mmd)
+**Файл:** [`docs/diagrams/mermaid/10_pipeline_core_components.mmd`](diagrams/10_pipeline_core_components.mmd)
 
 ---
 
@@ -422,7 +422,7 @@ Delta merge by content_hash — критическая операция для i
 
 ### 4.1 Error Classification
 
-[Error Classification](../diagrams/mermaid/12_error_classification.mmd)
+[Error Classification](diagrams/12_error_classification.mmd)
 
 **Приоритет:** 8.94 | **Тип:** Flowchart
 
@@ -461,13 +461,13 @@ Delta merge by content_hash — критическая операция для i
   - RecoverableError (429, 5xx)
   - DataQualityError (invalid data)
 
-**Файл:** [`docs/diagrams/mermaid/12_error_classification.mmd`](../diagrams/mermaid/12_error_classification.mmd)
+**Файл:** [`docs/diagrams/mermaid/12_error_classification.mmd`](diagrams/12_error_classification.mmd)
 
 ---
 
 ### 4.2 Retry Mechanism
 
-[Retry Mechanism](../diagrams/mermaid/17_retry_mechanism.mmd)
+[Retry Mechanism](diagrams/17_retry_mechanism.mmd)
 
 **Приоритет:** 8.63 | **Тип:** Activity Diagram
 
@@ -503,13 +503,13 @@ delay = (backoff_factor ^ retry_count) * base_delay + random(jitter_min, jitter_
 - 400 Bad Request
 - 404 Not Found
 
-**Файл:** [`docs/diagrams/mermaid/17_retry_mechanism.mmd`](../diagrams/mermaid/17_retry_mechanism.mmd)
+**Файл:** [`docs/diagrams/mermaid/17_retry_mechanism.mmd`](diagrams/17_retry_mechanism.mmd)
 
 ---
 
 ### 4.3 Circuit Breaker States
 
-[Circuit Breaker States](../diagrams/mermaid/15_circuit_breaker_states.mmd)
+[Circuit Breaker States](diagrams/15_circuit_breaker_states.mmd)
 
 **Приоритет:** 8.75 | **Тип:** State Diagram
 
@@ -547,13 +547,13 @@ Fault tolerance pattern для защиты от каскадных сбоев.
 - `circuit_breaker_state` (gauge)
 - `circuit_breaker_failure_count` (gauge)
 
-**Файл:** [`docs/diagrams/mermaid/15_circuit_breaker_states.mmd`](../diagrams/mermaid/15_circuit_breaker_states.mmd)
+**Файл:** [`docs/diagrams/mermaid/15_circuit_breaker_states.mmd`](diagrams/15_circuit_breaker_states.mmd)
 
 ---
 
 ### 4.4 Graceful Shutdown
 
-[Graceful Shutdown](../diagrams/mermaid/24_graceful_shutdown.mmd)
+[Graceful Shutdown](diagrams/24_graceful_shutdown.mmd)
 
 **Приоритет:** 8.19 | **Тип:** Sequence Diagram
 
@@ -589,7 +589,7 @@ Fault tolerance pattern для защиты от каскадных сбоев.
 - last_batch_id
 - timestamp
 
-**Файл:** [`docs/diagrams/mermaid/24_graceful_shutdown.mmd`](../diagrams/mermaid/24_graceful_shutdown.mmd)
+**Файл:** [`docs/diagrams/mermaid/24_graceful_shutdown.mmd`](diagrams/24_graceful_shutdown.mmd)
 
 ---
 
@@ -597,7 +597,7 @@ Fault tolerance pattern для защиты от каскадных сбоев.
 
 ### 5.1 PipelineConfig Structure
 
-[PipelineConfig Structure](../diagrams/mermaid/25_pipeline_config_structure.mmd)
+[PipelineConfig Structure](diagrams/25_pipeline_config_structure.mmd)
 
 **Приоритет:** 8.13 | **Тип:** Class Diagram
 
@@ -645,7 +645,7 @@ bioetl run chembl_activity \
   --data-dir /path/to/data
 ```
 
-**Файл:** [`docs/diagrams/mermaid/25_pipeline_config_structure.mmd`](../diagrams/mermaid/25_pipeline_config_structure.mmd)
+**Файл:** [`docs/diagrams/mermaid/25_pipeline_config_structure.mmd`](diagrams/25_pipeline_config_structure.mmd)
 
 ---
 
@@ -653,19 +653,19 @@ bioetl run chembl_activity \
 
 ### Полный Список Диаграмм
 
-См. [`DIAGRAM_CATALOG.md`](../diagrams/DIAGRAM_CATALOG.md) для каталога всех 500 предложенных диаграмм.
+См. [`diagram-catalog.md`](diagrams/diagram-catalog.md) для каталога диаграмм.
 
 ### TOP-50 Таблица
 
-См. [`TOP_50_DIAGRAMS.md`](../diagrams/TOP_50_DIAGRAMS.md) для полной таблицы с приоритетами и обоснованиями.
+См. [`top-50-diagrams.md`](diagrams/top-50-diagrams.md) для полной таблицы с приоритетами и обоснованиями.
 
 ### Mermaid Исходники
 
-Все `.mmd` файлы находятся в [`docs/diagrams/mermaid/`](../diagrams/mermaid/).
+Все `.mermaid` файлы находятся в [`docs/02-architecture/diagrams/`](diagrams/).
 
 ### Рендеринг
 
-Инструкции по рендерингу диаграмм в PNG: [`docs/diagrams/README.md`](../diagrams/README.md)
+Скрипт рендеринга: [`render_diagrams.sh`](diagrams/render_diagrams.sh), [`render_diagrams.py`](diagrams/render_diagrams.py)
 
 ---
 

@@ -77,7 +77,7 @@ def valid_record() -> dict:
         "grants": '[{"funder": "F1234", "funder_display_name": "NIH", "award_id": "R01"}]',
         # Classification (JSON arrays)
         "concepts": '["Biology", "Genetics"]',
-        "mesh": '["D000123", "D000456"]',
+        "mesh_terms": '["D000123", "D000456"]',
         "keywords": '["gene expression", "transcription"]',
         # External identifier
         "mag_id": "12345678",

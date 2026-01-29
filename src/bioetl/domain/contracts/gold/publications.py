@@ -257,7 +257,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     affiliations: Series[object] = pa.Field(nullable=True)  # list[str]
     # NOTE: concepts field removed - OpenAlex deprecated concepts in 2024, use topics instead
-    mesh: Series[object] = pa.Field(nullable=True)  # list[str] - MeSH terms
+    mesh_terms: Series[object] = pa.Field(nullable=True)  # list[str] - MeSH terms
     keywords: Series[object] = pa.Field(nullable=True)  # list[str]
     mag_id: Series[str] = pa.Field(nullable=True)  # Microsoft Academic Graph ID
 

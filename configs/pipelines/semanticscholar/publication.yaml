@@ -32,7 +32,12 @@ source_file: ../../sources/semanticscholar.yaml
 #   2. configs/dq/providers/semanticscholar.yaml (provider-specific)
 #   3. configs/dq/entities/semanticscholar/publication.yaml (entity-specific)
 dq_config_file: ../../dq/entities/semanticscholar/publication.yaml
-column_groups_file: ../../../config/data_schema/semanticscholar/publication.yaml
+
+# -----------------------------------------------------------------------------
+# Data Schema Configuration (Column Ordering)
+# -----------------------------------------------------------------------------
+# Use data_schema_file for layer-specific column configuration (silver/gold).
+data_schema_file: ../../data_schema/semanticscholar/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)

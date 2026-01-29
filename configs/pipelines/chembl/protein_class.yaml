@@ -28,7 +28,7 @@ checkpoint_interval: 500
 #   2. configs/dq/providers/chembl.yaml (provider-specific)
 #   3. configs/dq/entities/chembl/protein_class.yaml (entity-specific)
 dq_config_file: ../../dq/entities/chembl/protein_class.yaml
-column_groups_file: ../../../config/data_schema/chembl/protein_class.yaml
+column_groups_file: ../../data_schema/chembl/protein_class.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
