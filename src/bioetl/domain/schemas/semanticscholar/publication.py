@@ -108,11 +108,6 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="Last page number (parsed from pages)",
     )
 
-    venue: Series[str] = pa.Field(
-        nullable=True,
-        description="Publication venue",
-    )
-
     # === Provider-specific Metrics ===
     reference_count: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,

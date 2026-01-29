@@ -180,7 +180,6 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "chemical_count": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
     "citation_count": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
     "reference_count": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
-    "referenced_works_count": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
     # ===== DATE_AND_PLACES =====
     "institution_country_codes": PublicationFieldGroup.DATE_AND_PLACES,
     "country": PublicationFieldGroup.DATE_AND_PLACES,

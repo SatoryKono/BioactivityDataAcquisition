@@ -257,7 +257,6 @@ class TestChemblYearValidation:
             # ChEMBL-specific fields
             "document_chembl_id": "CHEMBL1234567",
             "src_id": 1,
-            "journal_full_title": "Nature Journal",
             "volume": "1",
             "issue": "1",
             "first_page": "1",

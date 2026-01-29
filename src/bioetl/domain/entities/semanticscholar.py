@@ -73,14 +73,13 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     # SemanticScholar-specific: AI-generated summary
     tldr: str | None = None
 
-    # SemanticScholar-specific journal/venue information
+    # SemanticScholar-specific journal information
     volume: str | None = None
     issue: str | None = (
         None  # Parsed from combined volume/issue (e.g., "32 4" → issue=4)
     )
     pages: str | None = None  # Legacy: "first-last" format
     # first_page and last_page inherited from PublicationEntityBase
-    venue: str | None = None
 
     # SemanticScholar-specific metrics
     reference_count: int | None = None

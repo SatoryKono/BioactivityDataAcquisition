@@ -192,7 +192,6 @@ class TestPublicationTransformerSnapshot:
             "abstract": "This is a test abstract for the document.",
             "doc_type": "PUBLICATION",
             "journal": "Test Journal",
-            "journal_full_title": "Full Test Journal Name",
             "year": 2024,
             "volume": "10",
             "issue": "5",

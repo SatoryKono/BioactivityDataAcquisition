@@ -490,7 +490,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         if not journal:
             return {
                 "journal": None,
-                "journal_full_title": None,
                 "journal_abbrev": None,
                 "journal_iso_abbrev": None,
                 "journal_issn_type": None,
@@ -512,7 +511,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         return {
             "journal": journal_name,
-            "journal_full_title": journal_name,  # Unified with ChEMBL
             "journal_abbrev": journal_abbrev,
             "journal_iso_abbrev": journal_abbrev,  # Alias for Gold schema
             "journal_issn_type": issn_type,

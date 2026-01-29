@@ -42,7 +42,6 @@ column_groups:
   - name: journal
     fields:
       - journal
-      - venue
 
   - name: year
     fields:

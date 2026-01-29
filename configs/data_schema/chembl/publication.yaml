@@ -33,7 +33,6 @@ column_groups:
   - name: journal
     fields:
       - journal
-      - journal_full_title
 
   - name: year
     fields:

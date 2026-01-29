@@ -175,7 +175,7 @@ class OpenAlexPublicationRecord(BaseModel):
     fwci: float | None = PydanticField(
         default=None, description="Field-Weighted Citation Impact"
     )
-    referenced_works_count: int | None = PydanticField(
+    reference_count: int | None = PydanticField(
         default=None, description="Number of works referenced"
     )
 
@@ -246,7 +246,7 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
     # Additional metrics
     fwci: float | None = None  # Field-Weighted Citation Impact
-    referenced_works_count: int | None = None
+    reference_count: int | None = None
 
     # Quality indicators
     is_retracted: bool = False
