@@ -80,7 +80,7 @@ _PUBMED_MAPPING: Final[dict[str, str]] = {
     # Temporal fields
     "year": "publication_year",
     # Journal fields (canonicalize to unified names)
-    "journal_title": "journal_name",
+    "journal_title": "journal",
     "journal_abbrev": "journal_name_short",
     # Pagination
     "first_page": "page_first",

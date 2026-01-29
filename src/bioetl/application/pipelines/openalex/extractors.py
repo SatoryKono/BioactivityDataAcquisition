@@ -378,16 +378,16 @@ def extract_grants(grants: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
 
 
 def extract_journal_info(primary_location: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract journal info (journal_name, issn, publisher) from primary_location."""
+    """Extract journal info (journal, issn, publisher) from primary_location."""
     if not primary_location or not isinstance(primary_location, dict):
-        return {"journal_name": None, "issn": None, "publisher": None}
+        return {"journal": None, "issn": None, "publisher": None}
 
     source = primary_location.get("source", {}) or {}
     if not isinstance(source, dict):
-        return {"journal_name": None, "issn": None, "publisher": None}
+        return {"journal": None, "issn": None, "publisher": None}
 
     return {
-        "journal_name": source.get("display_name"),
+        "journal": source.get("display_name"),
         "issn": source.get("issn_l"),
         "publisher": source.get("host_organization_name"),
     }

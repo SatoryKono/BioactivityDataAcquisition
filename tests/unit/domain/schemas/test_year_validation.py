@@ -321,7 +321,6 @@ class TestPubMedYearValidation:
             "authors": '["Author A", "Author B"]',  # JSON array
             # Publication metadata
             "journal": "Nature",  # Base schema journal field
-            "journal_name": "Nature",  # PubMed-specific full journal title (unified)
             "journal_name_short": "Nature",  # PubMed-specific abbreviation (unified)
             "publication_year": 2020,
             "publication_date": "2020-05-15",  # Unified date field

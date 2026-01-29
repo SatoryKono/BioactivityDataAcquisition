@@ -273,7 +273,6 @@
     'journal': 'Journal of Test Science',
     'journal_iso_abbrev': 'J Test Sci',
     'journal_issn_type': 'Print',
-    'journal_name': 'Journal of Test Science',
     'journal_name_short': 'J Test Sci',
     'keyword_count': 2,
     'language': 'eng',

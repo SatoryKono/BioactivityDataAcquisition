@@ -625,7 +625,6 @@ class TestFieldMappingCompleteness:
             "issn",
             "issue",
             "journal",
-            "journal_name",
             "journal_iso_abbrev",
             "journal_issn_type",
             "journal_name_short",

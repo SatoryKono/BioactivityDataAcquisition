@@ -226,7 +226,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
                 if any(author_openalex_ids)
                 else None
             ),
-            "journal": journal_info.get("journal_name"),
+            "journal": journal_info.get("journal"),
             "issn": journal_info.get("issn"),
             "publisher": journal_info.get("publisher"),
             "publication_year": year,

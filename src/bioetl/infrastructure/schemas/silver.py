@@ -263,7 +263,7 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("journal", pa.string()),
         pa.field("journal_iso_abbrev", pa.string()),  # ISO journal abbreviation
         pa.field("journal_issn_type", pa.string()),  # Print/Electronic/Linking
-        pa.field("journal_name", pa.string()),  # Full journal name (PubMed source)
+        pa.field("journal", pa.string()),  # Full journal name (PubMed source)
         pa.field("journal_name_short", pa.string()),  # Journal abbreviation
         pa.field("keyword_count", pa.int64()),
         pa.field("language", pa.string()),

@@ -203,7 +203,7 @@ class TestPubMedPublicationTransformer:
         assert result["title"] == "A Comprehensive Study of Unit Testing"
         assert result["abstract"] == "This is the abstract of the test article."
         # Journal info
-        assert result["journal_name"] == "Journal of Test Science"
+        assert result["journal"] == "Journal of Test Science"
         assert result["journal_name_short"] == "J Test Sci"
         assert result["issn"] == "1234-5678"
         assert result["volume"] == "42"
@@ -421,7 +421,7 @@ class TestPubMedTransformerJournalExtraction:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["journal_name"] is None
+        assert result["journal"] is None
         assert result["journal_name_short"] is None
         assert result["issn"] is None
         assert result["volume"] is None
@@ -452,7 +452,7 @@ class TestPubMedTransformerJournalExtraction:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["journal_name"] == "Partial Journal"
+        assert result["journal"] == "Partial Journal"
         assert result["journal_name_short"] is None
         assert result["volume"] is None
 
