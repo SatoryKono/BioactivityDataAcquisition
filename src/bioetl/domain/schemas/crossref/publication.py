@@ -61,7 +61,7 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     )
 
     # === Raw CrossRef Type (replaces doc_type) ===
-    type: Series[str] = pa.Field(
+    source_type: Series[str] = pa.Field(
         nullable=True,
         description="Raw CrossRef type (journal-article, book, etc.)",
     )

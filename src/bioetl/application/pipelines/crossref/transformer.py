@@ -164,7 +164,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             **dates,
             "year": extract_year(rec),
             "publication_date": publication_date,
-            "type": rec.get("type"),  # Raw CrossRef type preserved
+            "source_type": rec.get("type"),  # Raw CrossRef type (journal-article, etc.)
             "citation_count": rec.get("is-referenced-by-count"),
             "reference_count": rec.get("references-count"),
             "language": rec.get("language"),
@@ -344,6 +344,6 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         silver_record.pop("affiliations", None)
         silver_record.pop("pmid", None)
         silver_record.pop("pmc_id", None)
-        silver_record.pop("doc_type", None)  # CrossRef uses raw 'type' instead
+        silver_record.pop("doc_type", None)  # CrossRef uses raw 'source_type' instead
 
         return silver_record

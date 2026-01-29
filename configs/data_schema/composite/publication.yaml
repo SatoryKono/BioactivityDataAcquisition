@@ -165,11 +165,11 @@ column_groups:
     provider_order: [openalex, semanticscholar]
 
   # 15. Document type
-  # Note: CrossRef and OpenAlex use raw 'type' field instead of mapped 'doc_type'
+  # Note: CrossRef and OpenAlex use raw 'source_type' field instead of mapped 'doc_type'
   - name: doc_type
     fields:
       - doc_type          # ChEMBL, PubMed (unified type)
-      - type              # CrossRef, OpenAlex raw type (journal-article, article, etc.)
+      - source_type       # CrossRef, OpenAlex raw type (journal-article, article, etc.)
     provider_order: [chembl, crossref, openalex, pubmed]
 
   # 16. Language
