@@ -13,7 +13,6 @@ from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_affiliations,
     extract_author_h_indices,
-    extract_author_ids,
     extract_author_orcids,
     extract_author_s2_ids,
     extract_citation_contexts,

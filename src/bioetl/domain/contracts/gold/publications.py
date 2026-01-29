@@ -308,7 +308,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     ror_ids: Series[str] = pa.Field(nullable=True)  # JSON array of ROR URLs
 
     # Author identifiers
-    author_ids: Series[str] = pa.Field(nullable=True)  # OpenAlex author IDs
+    author_openalex_ids: Series[str] = pa.Field(nullable=True)  # OpenAlex author IDs
     author_orcids: Series[str] = pa.Field(nullable=True)  # ORCID IDs
 
     # Source tracking (maps to _source column in DataFrame)
@@ -393,7 +393,6 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     affiliations: Series[str] = pa.Field(nullable=True)  # JSON array
 
     # Author identifiers
-    author_ids: Series[str] = pa.Field(nullable=True)  # JSON array of S2 author IDs
     author_s2_ids: Series[str] = pa.Field(nullable=True)  # JSON array (40-char hex)
     author_orcids: Series[str] = pa.Field(nullable=True)  # JSON array of ORCIDs
     author_h_indices: Series[str] = pa.Field(
