@@ -495,13 +495,12 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
     def _extract_journal_data(self, article: ET.Element) -> dict[str, Any]:
         """Extract journal-related data from article XML."""
-        journal = article.find(".//Journal")
+        journal_elem = article.find(".//Journal")
         pages = get_text(article.find(".//Pagination/MedlinePgn"))
         first_page, last_page = parse_page_range(pages)
 
-        if not journal:
+        if not journal_elem:
             return {
-                "journal": None,
                 "journal": None,
                 "journal_name_short": None,
                 "journal_iso_abbrev": None,
@@ -515,16 +514,15 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 "page_last": last_page,
             }
 
-        journal_issue = journal.find("JournalIssue")
-        journal = get_text(journal.find("Title"))
-        journal_abbrev = get_text(journal.find("ISOAbbreviation"))
-        issn_elem = journal.find("ISSN")
+        journal_issue = journal_elem.find("JournalIssue")
+        journal_title = get_text(journal_elem.find("Title"))
+        journal_abbrev = get_text(journal_elem.find("ISOAbbreviation"))
+        issn_elem = journal_elem.find("ISSN")
         issn = get_text(issn_elem)
         issn_type = issn_elem.get("IssnType") if issn_elem is not None else None
 
         return {
-            "journal": journal,
-
+            "journal": journal_title,
             "journal_name_short": journal_abbrev,
             "journal_iso_abbrev": journal_abbrev,  # Alias for Gold schema
             "journal_issn_type": issn_type,

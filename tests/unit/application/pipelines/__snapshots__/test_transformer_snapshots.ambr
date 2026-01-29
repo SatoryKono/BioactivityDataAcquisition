@@ -352,7 +352,6 @@
     'journal': None,
     'journal_iso_abbrev': None,
     'journal_issn_type': None,
-    'journal_name': None,
     'journal_name_short': None,
     'keyword_count': 0,
     'language': None,
