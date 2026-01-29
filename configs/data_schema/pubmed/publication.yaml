@@ -1,0 +1,145 @@
+column_groups:
+  - name: system
+    fields:
+      - entity_id
+      - content_hash
+      - _run_id
+      - _run_type
+      - _source_batch_id
+      - _source
+      - _ingestion_ts
+      - _index
+      - _lookup_method
+      - _original_id
+
+  - name: identifiers
+    fields:
+      - pmid
+      - pmc_id
+      - doi
+      - nlm_unique_id
+
+  - name: title
+    fields:
+      - title
+
+  - name: abstract
+    fields:
+      - abstract
+      - abstract_structured
+
+  - name: authors
+    fields:
+      - authors
+      - author_count
+      - authors_with_affiliations
+
+  - name: affiliations
+    fields:
+      - affiliations
+      - structured_affiliations
+
+  - name: journal
+    fields:
+      - journal
+      - journal_title
+      - journal_abbrev
+      - journal_iso_abbrev
+      - issn
+      - journal_issn_type
+
+  - name: year
+    fields:
+      - year
+      - publication_year
+
+  - name: dates
+    fields:
+      - publication_date
+      - pub_date
+      - pub_day
+      - pub_month
+      - date_completed
+      - date_revised
+
+  - name: pagination
+    fields:
+      - volume
+      - issue
+      - first_page
+      - last_page
+      - pages
+      - medline_pgn
+
+  - name: citations
+    fields:
+      - reference_count
+      - citation_subset
+
+  - name: subjects
+    fields:
+      - mesh_terms
+      - mesh_heading_count
+      - keywords
+      - keyword_count
+      - publication_types
+      - publication_type_list
+
+  - name: funding
+    fields:
+      - grant_count
+
+  - name: chemicals
+    fields:
+      - chemical_count
+
+  - name: language
+    fields:
+      - language
+
+  - name: misc
+    fields:
+      - country
+      - publication_status
+
+  - name: dq
+    pattern: "^_dq_"
+
+# Layer-specific column filtering
+silver:
+  include_groups:
+    - system
+    - identifiers
+    - title
+    - abstract
+    - authors
+    - affiliations
+    - journal
+    - year
+    - dates
+    - pagination
+    - citations
+    - subjects
+    - funding
+    - chemicals
+    - language
+    - misc
+    - dq
+
+gold:
+  include_groups:
+    - system
+    - identifiers
+    - title
+    - abstract
+    - authors
+    - affiliations
+    - journal
+    - year
+    - subjects
+  exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+    - _lookup_method
+    - _original_id

@@ -10,4 +10,8 @@ providers:
     updateIntervalSeconds: 30
     allowUiUpdates: true
     options:
-      path: /var/lib/grafana/dashboards/bioetl
+      # Абсолютный путь к папке с JSON-дашбордами.
+      # Замените на актуальный путь к grafana/dashboards/ в вашей системе.
+      # Пример Windows: C:/Users/<user>/projects/BioactivityDataAcquisition2/grafana/dashboards
+      # Пример Linux:   /home/<user>/projects/BioactivityDataAcquisition2/grafana/dashboards
+      path: grafana/dashboards
