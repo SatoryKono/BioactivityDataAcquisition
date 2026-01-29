@@ -52,7 +52,6 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
         pa.field("doc_type", pa.string()),  # PUBLICATION, PATENT, DATASET, BOOK
-        pa.field("journal_full_title", pa.string()),
         # publication_date excluded: not available from ChEMBL API
         pa.field("src_id", pa.int64()),
         # === ChEMBL Release Metadata ===
