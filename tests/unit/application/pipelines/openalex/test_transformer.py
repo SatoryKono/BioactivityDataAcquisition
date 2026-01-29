@@ -95,7 +95,7 @@ class TestOpenAlexPublicationTransformer:
         assert result["title"] == "Example Publication Title"
         assert result["year"] == 2024
         assert result["publication_date"] == "2024-05-15"
-        assert result["type"] == "article"  # Raw OpenAlex type preserved
+        assert result["source_type"] == "article"  # Raw OpenAlex type preserved
         assert result["abstract"] == "This is an abstract"
         assert result["journal"] == "Nature"
         assert result["issn"] == "0028-0836"
