@@ -102,9 +102,9 @@ class CompositePublicationGoldSchema(pa.DataFrameModel):
     # Example qualified names:
     # - chembl.publication.title
     # - chembl.publication.document_chembl_id
-    # - crossref.publication.citation_count
-    # - pubmed.publication.mesh_terms
-    # - openalex.publication.concepts
+    # - crossref.publication.citations_received
+    # - pubmed.publication.subject_mesh
+    # - openalex.publication.subject_topics
     # - semanticscholar.publication.tldr
     #
     # Since columns are dynamically determined by enrichers, we use strict=False
