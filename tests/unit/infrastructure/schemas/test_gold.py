@@ -373,6 +373,7 @@ class TestGoldSchemaValidation:
             "date_revised": "2024-03-20",
             "publication_status": "ppublish",
             "publication_type_list": '["Journal Article"]',
+            "publication_type": "PUBLICATION",
             "publication_types": ["Journal Article"],
             "subject_keywords": ["test"],
             "subject_mesh": ["Testing"],

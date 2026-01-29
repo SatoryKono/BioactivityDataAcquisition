@@ -90,6 +90,7 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     # SemanticScholar-specific classification (JSON strings)
     subject_fields: str | None = None
     publication_type: str | None = None
+    publication_types: str | None = None  # JSON array of publication types
 
     # Author identifiers (for author-level analytics and disambiguation)
     author_s2_ids: str | None = None  # JSON array of S2 author IDs (40-char hex)

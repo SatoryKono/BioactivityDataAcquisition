@@ -5,8 +5,6 @@ Aligned with RULES.md v5.10, ChEMBL 34 schema, and Publication Schema Unificatio
 
 from __future__ import annotations
 
-from typing import Optional
-
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -14,11 +12,7 @@ from bioetl.domain.schemas.common.publication_base import (
     LOOKUP_METHODS,
     PublicationBaseSchema,
 )
-from bioetl.domain.validation import (
-    DOI_REGEX_PATTERN,
-    MAX_PUBLICATION_YEAR,
-    MIN_PUBLICATION_YEAR,
-)
+from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Re-export for backwards compatibility
 __all__ = ["DOI_REGEX_PATTERN", "LOOKUP_METHODS", "ChemblPublicationSchema"]
