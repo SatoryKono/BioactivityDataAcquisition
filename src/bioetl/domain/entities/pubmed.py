@@ -10,7 +10,7 @@ DTO Design:
 - Adapters return DTOs, transformers convert to Domain Entities
 
 Note: PubMedPublicationEntity inherits common fields from PublicationEntityBase.
-Provider-specific fields (pmc_id, journal_abbrev, etc.) are defined here.
+Provider-specific fields (pmc_id, journal_name_short, etc.) are defined here.
 """
 
 from __future__ import annotations
@@ -204,10 +204,10 @@ class PubMedPublicationEntity(PublicationEntityBase):
     abstract_structured: bool = False  # Whether abstract has labeled sections (NLM)
 
     # Additional journal fields (Gold schema forensic retention)
-    journal_iso_abbrev: str | None = None  # ISO abbreviation (alias for journal_abbrev)
+    journal_iso_abbrev: str | None = None  # ISO abbreviation (alias for journal_name_short)
     journal_issn_type: str | None = None  # ISSN type: Print/Electronic/Linking
     nlm_unique_id: str | None = None  # NLM catalog ID
-    medline_pgn: str | None = None  # Original PubMed pagination (alias for pages)
+    medline_pgn: str | None = None  # Original PubMed pagination (alias for page_range)
 
     # Additional date fields
     pub_month: int | None = None  # Publication month (1-12)

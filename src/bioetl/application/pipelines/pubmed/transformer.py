@@ -298,7 +298,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             else None
         )
 
-        # Extract structured affiliations with identifiers (affiliations field excluded)
+        # Extract structured affiliations with identifiers
         structured_affs = AuthorExtractor.parse_structured_affiliations(article)
         processed_structured_affs = self._process_structured_affiliations(
             structured_affs
