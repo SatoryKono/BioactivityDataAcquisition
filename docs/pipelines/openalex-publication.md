@@ -194,7 +194,7 @@ When DOI resolution fails, the pipeline automatically falls back to title-based 
 | `topics[0..9]` | `topics` | list[dict] | Hierarchical (new format) |
 | `primary_topic` | `primary_topic` | dict | Most relevant topic |
 | `concepts[0..9]` | `concepts` | list[string] | **DEPRECATED** |
-| `mesh[].descriptor_name` | `mesh` | list[string] | MeSH terms |
+| `mesh[].descriptor_name` | `mesh_terms` | list[string] | MeSH terms |
 | `keywords[].display_name` | `keywords` | list[string] | Author keywords |
 | `grants[]` | `grants` | list[dict] | Funding information |
 
@@ -309,7 +309,7 @@ Each topic includes 4-level classification hierarchy:
 | `authors` | string | Yes | JSON list |
 | `affiliations` | list[str] | Yes | - |
 | `concepts` | list[str] | Yes | - |
-| `mesh` | list[str] | Yes | - |
+| `mesh_terms` | list[str] | Yes | - |
 | `keywords` | list[str] | Yes | - |
 | `mag_id` | string | Yes | - |
 | `journal` | string | Yes | - |

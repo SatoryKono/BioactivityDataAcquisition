@@ -1,0 +1,118 @@
+column_groups:
+  - name: system
+    fields:
+      - entity_id
+      - content_hash
+      - _run_id
+      - _run_type
+      - _source_batch_id
+      - _source
+      - _ingestion_ts
+      - _index
+      - _lookup_method
+      - _original_id
+
+  - name: identifiers
+    fields:
+      - paper_id
+      - doi
+      - pmid
+      - corpus_id
+      - dblp_id
+
+  - name: title
+    fields:
+      - title
+
+  - name: abstract
+    fields:
+      - tldr
+
+  - name: authors
+    fields:
+      - author_ids
+      - author_s2_ids
+      - author_orcids
+      - author_h_indices
+
+  - name: affiliations
+    fields:
+      - affiliations
+
+  - name: journal
+    fields:
+      - journal
+      - venue
+
+  - name: year
+    fields:
+      - year
+
+  - name: dates
+    fields:
+      - publication_date
+
+  - name: pagination
+    fields:
+      - volume
+      - issue
+      - first_page
+      - last_page
+      - pages
+
+  - name: citations
+    fields:
+      - citation_count
+      - reference_count
+      - influential_citation_count
+      - citation_contexts
+
+  - name: subjects
+    fields:
+      - fields_of_study
+      - publication_types
+
+  - name: open_access
+    fields:
+      - is_oa
+      - oa_status
+      - open_access_url
+
+  - name: dq
+    pattern: "^_dq_"
+
+# Layer-specific column filtering
+silver:
+  include_groups:
+    - system
+    - identifiers
+    - title
+    - abstract
+    - authors
+    - affiliations
+    - journal
+    - year
+    - dates
+    - pagination
+    - citations
+    - subjects
+    - open_access
+    - dq
+
+gold:
+  include_groups:
+    - system
+    - identifiers
+    - title
+    - abstract
+    - authors
+    - journal
+    - year
+    - citations
+    - open_access
+  exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+    - _lookup_method
+    - _original_id
