@@ -430,6 +430,17 @@ class TestPubmedPublicationSchema:
             assert field_name in PUBMED_PUBLICATION_SCHEMA.names
 
 
+class TestCrossrefPublicationSchema:
+    """Tests for CROSSREF_PUBLICATION_SCHEMA."""
+
+    def test_journal_name_short_is_string(self):
+        """Verify journal_name_short is a string field."""
+        field = CROSSREF_PUBLICATION_SCHEMA.field("journal_name_short")
+        assert field.type == pa.string(), (
+            f"journal_name_short should be string, got {field.type}"
+        )
+
+
 class TestSchemaFieldCounts:
     """Test approximate field counts for each schema."""
 
