@@ -388,7 +388,7 @@ class TestGoldSchemaValidation:
             "mesh_heading_count": 1,
             "keyword_count": 1,
             "grant_count": 0,
-            "reference_count": 10,
+            "citations_made": 10,
             "chemical_count": 0,
             "_source": "pubmed",
             "_lookup_method": "direct",

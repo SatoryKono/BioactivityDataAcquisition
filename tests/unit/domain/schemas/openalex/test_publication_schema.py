@@ -48,8 +48,7 @@ def valid_record() -> dict:
         # Publication metadata
         "publication_year": 2024,
         "publication_date": "2024-05-15",
-        "publication_type": None,  # Excluded from Silver/Gold - OpenAlex uses 'source_type' field
-        "source_type": "article",  # Raw OpenAlex type (replaces publication_type)
+        "publication_type": "article",  # Raw OpenAlex type (unified field name)
         "language": "en",
         # Journal info
         "journal": "Nature",

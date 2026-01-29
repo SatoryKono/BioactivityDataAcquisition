@@ -60,8 +60,7 @@ class TestCrossRefYearValidation:
             "journal": "Nature",
             "publication_year": 2020,
             "publication_date": "2020-06-15",  # Unified date field
-            "publication_type": None,  # Excluded from Silver/Gold - CrossRef uses 'source_type' field
-            "source_type": "journal-article",  # Raw CrossRef type (replaces publication_type)
+            "publication_type": "journal-article",  # Raw CrossRef type (unified field name)
             "language": "en",
             # Metrics (unified field names)
             "citations_received": 100,
@@ -335,7 +334,7 @@ class TestPubMedYearValidation:
             "page_last": None,
             # Metrics (unified field names)
             "citations_received": None,  # Not available from PubMed
-            "citations_made": None,  # Unified name, PubMed also has reference_count
+            "citations_made": None,  # Unified name for reference count
             # Open Access
             "is_oa": None,
             # Lookup tracking
@@ -365,7 +364,7 @@ class TestPubMedYearValidation:
             "mesh_heading_count": 10,
             "keyword_count": 3,
             "grant_count": 2,
-            "reference_count": 50,
+            # reference_count removed — citations_made is the unified field
             "chemical_count": 0,
             # Classification data (JSON arrays, unified field names)
             "subject_mesh": None,

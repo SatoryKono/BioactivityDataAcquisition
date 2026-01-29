@@ -95,7 +95,7 @@ class TestOpenAlexPublicationTransformer:
         assert result["title"] == "Example Publication Title"
         assert result["publication_year"] == 2024
         assert result["publication_date"] == "2024-05-15"
-        assert result["source_type"] == "article"  # Raw OpenAlex type preserved
+        assert result["publication_type"] == "article"  # Raw OpenAlex type preserved
         assert result["abstract"] == "This is an abstract"
         assert result["journal"] == "Nature"
         assert result["issn"] == "0028-0836"
@@ -202,7 +202,7 @@ class TestOpenAlexPublicationTransformer:
             }
             result = await transformer.transform(pipeline_context, record, 0)
             assert result is not None
-            assert result["source_type"] == openalex_type  # Raw type preserved
+            assert result["publication_type"] == openalex_type  # Raw type preserved
 
     @pytest.mark.asyncio
     async def test_transform_empty_abstract_inverted_index(

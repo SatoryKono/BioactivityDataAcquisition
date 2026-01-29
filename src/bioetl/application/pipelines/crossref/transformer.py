@@ -164,7 +164,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             **dates,
             "publication_year": extract_year(rec),
             "publication_date": publication_date,
-            "source_type": rec.get("type"),  # Raw CrossRef type (journal-article, etc.)
+            "publication_type": rec.get("type"),  # Raw CrossRef type (journal-article, etc.)
             "citations_received": rec.get("is-referenced-by-count"),
             "citations_made": rec.get("references-count"),
             "language": rec.get("language"),
@@ -325,7 +325,6 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         """Convert Domain Entity to SilverRecord, excluding unused fields.
 
         Overrides base implementation to remove fields not collected for CrossRef.
-        CrossRef uses raw 'type' field instead of mapped 'doc_type'.
 
         Args:
             entity: Domain entity (dataclass).
@@ -344,8 +343,5 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         silver_record.pop("affiliation_list", None)
         silver_record.pop("pmid", None)
         silver_record.pop("pmc_id", None)
-        silver_record.pop(
-            "publication_type", None
-        )  # CrossRef uses raw 'source_type' instead
 
         return silver_record
