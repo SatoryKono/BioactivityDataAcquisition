@@ -27,6 +27,7 @@ column_groups:
   - name: abstract
     fields:
       - abstract
+      - tldr
 
   - name: authors
     fields:
