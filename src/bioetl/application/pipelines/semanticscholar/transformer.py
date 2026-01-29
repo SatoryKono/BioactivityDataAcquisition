@@ -63,7 +63,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - is_oa: isOpenAccess (normalized)
     - oa_status: openAccessPdf.status (normalized to lowercase)
     - open_access_url: openAccessPdf.url
-    - fields_of_study: fieldsOfStudy
+    - subject_fields: fieldsOfStudy
     - publication_types: publicationTypes
     - citation_contexts: citations.contexts (citing sentences, when available)
 
@@ -174,7 +174,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         tldr = extract_tldr(rec.get("tldr"))
 
         # Fields of study
-        fields_of_study = extract_fields_of_study(rec.get("fieldsOfStudy"))
+        subject_fields = extract_fields_of_study(rec.get("fieldsOfStudy"))
 
         # Validate year
         year = validate_year(rec.get("year"))
@@ -213,7 +213,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "journal": journal_info.get("journal_name"),
             "volume": journal_info.get("volume"),
             "issue": journal_info.get("issue"),  # Parsed from combined "32 4" format
-            "pages": journal_info.get("pages"),  # Original pages string (cleaned)
+            "page_range": journal_info.get("pages"),  # Original pages string (cleaned)
             "page_first": journal_info.get(
                 "first_page"
             ),  # Parsed with abbreviation expansion
@@ -228,7 +228,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "is_oa": oa_info.get("is_oa"),
             "open_access_url": oa_info.get("url"),
             "oa_status": oa_info.get("oa_status"),
-            "fields_of_study": self.serialize_json(fields_of_study),
+            "subject_fields": self.serialize_json(subject_fields),
             "publication_types": self.serialize_json(rec.get("publicationTypes")),
             "_source": "semanticscholar",
             # Lookup metadata

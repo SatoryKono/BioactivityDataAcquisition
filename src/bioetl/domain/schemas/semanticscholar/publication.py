@@ -93,7 +93,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         nullable=True,
         description="Volume",
     )
-    pages: Series[str] = pa.Field(
+    page_range: Series[str] = pa.Field(
         nullable=True,
         description="Page range (legacy format, e.g., '123-456')",
     )
@@ -119,7 +119,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     )
 
     # === Provider-specific Classification ===
-    fields_of_study: Series[str] = pa.Field(
+    subject_fields: Series[str] = pa.Field(
         nullable=True,
         description="Fields of study (JSON array)",
     )
