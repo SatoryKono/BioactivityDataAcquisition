@@ -218,7 +218,9 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
     # Author identifiers (JSON-serialized lists preserving author order)
     author_orcids: str | None = None  # ORCID IDs (empty string for missing)
-    author_openalex_ids: str | None = None  # OpenAlex author IDs (empty string for missing)
+    author_openalex_ids: str | None = (
+        None  # OpenAlex author IDs (empty string for missing)
+    )
 
     # Topics (hierarchical classification - replaces deprecated concepts)
     # Each topic dict has: id, display_name, score, subfield, field, domain

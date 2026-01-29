@@ -222,7 +222,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
                 self.serialize_json_list(author_orcids) if any(author_orcids) else None
             ),
             "author_openalex_ids": (
-                self.serialize_json_list(author_openalex_ids) if any(author_openalex_ids) else None
+                self.serialize_json_list(author_openalex_ids)
+                if any(author_openalex_ids)
+                else None
             ),
             "journal": journal_info.get("journal_name"),
             "issn": journal_info.get("issn"),
