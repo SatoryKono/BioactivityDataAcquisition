@@ -70,6 +70,13 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
         nullable=True
     )  # JSON array with ROR/GRID identifiers
 
+    # Additional identifiers (PubMed-specific)
+    pii: Series[str] = pa.Field(nullable=True)  # Publisher Item Identifier
+    mid: Series[str] = pa.Field(nullable=True)  # Manuscript ID (PMC submission)
+    publisher_id: Series[str] = pa.Field(
+        nullable=True
+    )  # Publisher-specific identifier
+
     # Date fields
     pub_month: Series[float] = pa.Field(nullable=True, coerce=True)  # Month (1-12)
     pub_day: Series[float] = pa.Field(nullable=True, coerce=True)  # Day (1-31)
