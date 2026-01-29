@@ -185,7 +185,7 @@ class TestFunctionComplexity:
 
     # Exemptions for specific functions (baseline for existing code)
     EXEMPTIONS = {
-        "_extract_business_data": 12,  # XML extraction with many conditionals
+        "_extract_business_data": 14,  # XML extraction with many conditionals + unified field names
         "_extract_structured_affiliation": 13,  # CC=12 - Affiliation parsing with multiple conditional paths
         "_run_with_lock": 38,  # CC=37 - CompositePipelineRunner orchestration with FSM state transitions + lock handling + checkpoint resume + dependency phase
         "from_dict": 11,  # CC=10 - CompositeCheckpointState deserialization with backward compatibility
@@ -631,7 +631,7 @@ class TestClassSize:
         # Common adapter base classes
         "BaseTitleFallbackHandler": 320,  # 314 lines - Base fallback handler with provider_prefix + default event properties
         # PubMed transformer with comprehensive field extraction
-        "PubMedPublicationTransformer": 660,  # 657 lines - PubMed XML extraction with date/identifier validation + author extractor
+        "PubMedPublicationTransformer": 670,  # PubMed XML extraction with date/identifier validation + author extractor + unified field names
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:
