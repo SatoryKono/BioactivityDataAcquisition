@@ -1,7 +1,7 @@
 """Retrying Data Source Decorator.
 
 Implements the Decorator Pattern for DataSourcePort to add retry logic.
-Separates retry concerns from the core adapter logic per ADR-xxx.
+Separates retry concerns from the core adapter logic per ADR-016.
 
 This decorator wraps any DataSourcePort implementation and adds:
 - Configurable retry attempts with exponential backoff

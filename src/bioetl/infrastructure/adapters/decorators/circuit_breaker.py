@@ -1,7 +1,7 @@
 """Circuit Breaker Data Source Decorator.
 
 Implements the Decorator Pattern for DataSourcePort to add circuit breaker protection.
-Separates circuit breaker concerns from the core adapter logic per ADR-xxx.
+Separates circuit breaker concerns from the core adapter logic per ADR-007.
 
 This decorator wraps any DataSourcePort implementation and adds:
 - Circuit breaker state management (CLOSED -> OPEN -> HALF_OPEN -> CLOSED)
