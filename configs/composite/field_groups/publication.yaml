@@ -335,10 +335,6 @@ groups:
           - pubmed.publication.reference_count
           - semanticscholar.publication.reference_count
 
-      - base_name: referenced_works_count
-        columns:
-          - openalex.publication.referenced_works_count
-
   # ===== DATE_AND_PLACES =====
   - id: date_and_places
     display_name: "Date & Places"

@@ -64,7 +64,7 @@ entity_field_validations:
     nullable: true
     error_message: "FWCI must be non-negative"
 
-  - field: referenced_works_count
+  - field: reference_count
     type: range
     min: 0
     nullable: true
