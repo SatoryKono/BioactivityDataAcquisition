@@ -836,8 +836,8 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Date fields
         pa.field("publication_date", pa.string()),
         pa.field("publisher", pa.string()),
-        # Number of works referenced (from referenced_works_count)
-        pa.field("referenced_works_count", pa.int64()),
+        # Number of works referenced
+        pa.field("reference_count", pa.int64()),
         # ROR IDs (may be empty if not returned by Works API)
         pa.field("ror_ids", pa.string()),  # JSON array of ROR URLs
         pa.field("title", pa.string()),
