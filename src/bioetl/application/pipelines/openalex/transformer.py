@@ -253,8 +253,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             # Bibliographic info (from biblio object)
             "volume": biblio_info.get("volume"),
             "issue": biblio_info.get("issue"),
-            "page_first": biblio_info.get("first_page"),
-            "page_last": biblio_info.get("last_page"),
+            "page_first": biblio_info.get("page_first"),
+            "page_last": biblio_info.get("page_last"),
             # Additional metrics
             "fwci": rec.get("fwci"),
             "citations_made": rec.get("referenced_works_count"),

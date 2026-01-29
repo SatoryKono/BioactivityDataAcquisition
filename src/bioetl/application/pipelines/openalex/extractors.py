@@ -490,17 +490,17 @@ def extract_keywords(keywords: list[dict[str, Any]] | None) -> list[str]:
 
 
 def extract_biblio_info(biblio: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract bibliographic info (volume, issue, first_page, last_page)."""
+    """Extract bibliographic info (volume, issue, page_first, page_last)."""
     if not biblio or not isinstance(biblio, dict):
         return {
             "volume": None,
             "issue": None,
-            "first_page": None,
-            "last_page": None,
+            "page_first": None,
+            "page_last": None,
         }
     return {
         "volume": biblio.get("volume"),
         "issue": biblio.get("issue"),
-        "first_page": biblio.get("first_page"),
-        "last_page": biblio.get("last_page"),
+        "page_first": biblio.get("first_page"),
+        "page_last": biblio.get("last_page"),
     }
