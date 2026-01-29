@@ -140,8 +140,6 @@ class TestInterfacesNoDIrectInfrastructure:
             pytest.skip("CLI commands directory not found")
 
         # Expected legacy violations - keep in sync with test above
-        # Note: quarantine.py was fixed in IF-002 refactoring to use QuarantineService
-        # Note: health.py was fixed to use composition entrypoints for DI
         expected_violations: dict[str, list[str]] = {
             # All CLI commands now properly use composition entrypoints
         }
