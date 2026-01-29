@@ -35,7 +35,7 @@ column_groups:
 
   - name: affiliations
     fields:
-      - affiliations
+      - affiliation_list
 
   - name: institutions
     fields:
@@ -50,7 +50,7 @@ column_groups:
 
   - name: year
     fields:
-      - year
+      - publication_year
 
   - name: dates
     fields:
@@ -60,13 +60,13 @@ column_groups:
     fields:
       - volume
       - issue
-      - first_page
-      - last_page
+      - page_first
+      - page_last
 
   - name: citations
     fields:
-      - citation_count
-      - reference_count
+      - citations_received
+      - citations_made
       - fwci
 
   - name: open_access
@@ -76,10 +76,10 @@ column_groups:
 
   - name: subjects
     fields:
-      - topics
+      - subject_topics
       - primary_topic
-      - keywords
-      - mesh_terms
+      - subject_keywords
+      - subject_mesh
 
   - name: publisher
     fields:
@@ -91,7 +91,7 @@ column_groups:
 
   - name: doc_type
     fields:
-      - source_type
+      - publication_type
 
   - name: quality
     fields:
@@ -103,6 +103,19 @@ column_groups:
 
   - name: dq
     pattern: "^_dq_"
+
+# Field aliases for backward compatibility
+field_aliases:
+  affiliations: affiliation_list
+  year: publication_year
+  first_page: page_first
+  last_page: page_last
+  citation_count: citations_received
+  reference_count: citations_made
+  topics: subject_topics
+  keywords: subject_keywords
+  mesh_terms: subject_mesh
+  source_type: publication_type
 
 # Layer-specific column filtering
 silver:

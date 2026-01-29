@@ -28,7 +28,7 @@ column_groups:
   - name: journal
     fields:
       - journal
-      - short_container_title
+      - journal_name_short
 
   - name: issn
     fields:
@@ -38,7 +38,7 @@ column_groups:
 
   - name: year
     fields:
-      - year
+      - publication_year
 
   - name: dates
     fields:
@@ -51,17 +51,17 @@ column_groups:
     fields:
       - volume
       - issue
-      - first_page
-      - last_page
+      - page_first
+      - page_last
 
   - name: citations
     fields:
-      - citation_count
-      - reference_count
+      - citations_received
+      - citations_made
 
   - name: subjects
     fields:
-      - subjects
+      - subject_keywords
 
   - name: language
     fields:
@@ -73,7 +73,7 @@ column_groups:
 
   - name: doc_type
     fields:
-      - source_type
+      - publication_type
 
   - name: content_domain
     fields:
@@ -86,6 +86,17 @@ column_groups:
 
   - name: dq
     pattern: "^_dq_"
+
+# Field aliases for backward compatibility
+field_aliases:
+  short_container_title: journal_name_short
+  year: publication_year
+  first_page: page_first
+  last_page: page_last
+  citation_count: citations_received
+  reference_count: citations_made
+  subjects: subject_keywords
+  source_type: publication_type
 
 # Layer-specific column filtering
 silver:

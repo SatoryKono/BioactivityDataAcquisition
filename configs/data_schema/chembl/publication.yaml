@@ -36,18 +36,18 @@ column_groups:
 
   - name: year
     fields:
-      - year
+      - publication_year
 
   - name: pagination
     fields:
       - volume
       - issue
-      - first_page
-      - last_page
+      - page_first
+      - page_last
 
   - name: doc_type
     fields:
-      - doc_type
+      - publication_type
 
   - name: provider_ids
     fields:
@@ -57,6 +57,13 @@ column_groups:
 
   - name: dq
     pattern: "^_dq_"
+
+# Field aliases for backward compatibility
+field_aliases:
+  year: publication_year
+  first_page: page_first
+  last_page: page_last
+  doc_type: publication_type
 
 # Layer-specific column filtering
 silver:
