@@ -92,8 +92,7 @@ column_groups:
   - name: journal
     fields:
       - journal
-      - journal_full_title
-      - journal_title
+      - journal_full_title      # ChEMBL, PubMed (unified)
       - journal_abbrev
       - journal_iso_abbrev
       - short_container_title
@@ -103,20 +102,19 @@ column_groups:
   # 9. Year group
   - name: year
     fields:
-      - year
-      - publication_year
+      - year                   # Canonical field (all providers)
     provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 
   # 10. Publication dates
+  # Note: Legacy fields removed (publication_year → year, pub_date → publication_date)
   # Note: epub_date, accepted_date, received_date, revised_date removed
   # (PubMed no longer provides these fields)
   - name: dates
     fields:
-      - publication_date
+      - publication_date       # Canonical field (YYYY-MM-DD)
       - published
       - published_print
       - published_online
-      - pub_date
       - pub_month
       - pub_day
       - date_completed

@@ -125,7 +125,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         )
 
     # === Journal Information (PubMed-specific) ===
-    journal_title: Series[str] = pa.Field(
+    journal_full_title: Series[str] = pa.Field(
         nullable=True, description="Full journal name"
     )
     journal_iso_abbrev: Series[str] = pa.Field(

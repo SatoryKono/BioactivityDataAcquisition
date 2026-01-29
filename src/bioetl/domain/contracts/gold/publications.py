@@ -42,7 +42,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     journal: Series[str] = pa.Field(nullable=True)
     journal_abbrev: Series[str] = pa.Field(nullable=True)
     # PubMed-specific journal fields (forensic retention)
-    journal_title: Series[str] = pa.Field(nullable=True)  # Full journal name (PubMed)
+    journal_full_title: Series[str] = pa.Field(nullable=True)  # Full journal name (PubMed)
     journal_iso_abbrev: Series[str] = pa.Field(nullable=True)  # ISO abbreviation
     journal_issn_type: Series[str] = pa.Field(
         nullable=True
@@ -71,14 +71,10 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     )  # JSON array with ROR/GRID identifiers
 
     # Date fields
-    pub_date: Series[str] = pa.Field(nullable=True)
     pub_month: Series[float] = pa.Field(nullable=True, coerce=True)  # Month (1-12)
     pub_day: Series[float] = pa.Field(nullable=True, coerce=True)  # Day (1-31)
     publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
     year: Series[float] = pa.Field(nullable=True, coerce=True)
-    publication_year: Series[float] = pa.Field(
-        nullable=True, coerce=True
-    )  # Legacy alias
     # Note: accepted_date, received_date, revised_date, epub_date excluded per design
     # MEDLINE-specific dates
     date_completed: Series[str] = pa.Field(
