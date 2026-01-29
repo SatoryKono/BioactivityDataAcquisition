@@ -110,7 +110,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     mesh_heading_count: Series[float] = pa.Field(nullable=True, coerce=True)
     keyword_count: Series[float] = pa.Field(nullable=True, coerce=True)
     grant_count: Series[float] = pa.Field(nullable=True, coerce=True)
-    reference_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     chemical_count: Series[float] = pa.Field(nullable=True, coerce=True)
 
     # Source tracking (maps to _source column in DataFrame)
@@ -176,8 +176,8 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     published_online: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
 
     # Metadata
-    # Note: doc_type excluded; CrossRef uses raw 'source_type' field instead
-    source_type: Series[str] = pa.Field(
+    # Raw CrossRef type (journal-article, etc.) - unified field name
+    publication_type: Series[str] = pa.Field(
         nullable=True
     )  # Raw CrossRef type (journal-article, etc.)
     citations_received: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
@@ -371,7 +371,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     journal: Series[str] = pa.Field(nullable=True)
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)  # Parsed from combined volume/issue
-    pages: Series[str] = pa.Field(nullable=True)  # Legacy: "first-last" format
+    page_range: Series[str] = pa.Field(nullable=True)  # Page range: "first-last" format
     page_first: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     page_last: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     venue: Series[str] = pa.Field(nullable=True)
@@ -391,7 +391,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     oa_status: Series[str] = pa.Field(nullable=True)
 
     # Classification (JSON strings)
-    fields_of_study: Series[str] = pa.Field(nullable=True)
+    subject_fields: Series[str] = pa.Field(nullable=True)
     publication_types: Series[str] = pa.Field(nullable=True)
     citation_contexts: Series[str] = pa.Field(nullable=True)  # JSON array
 

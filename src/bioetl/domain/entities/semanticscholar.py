@@ -47,7 +47,6 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
         issue: Journal issue number (parsed from combined volume/issue).
         page_range: Page numbers.
         venue: Venue name (conference/journal).
-        reference_count: Number of references.
         influential_citation_count: Number of influential citations.
         open_access_url: URL to open access PDF.
         subject_fields: JSON string of fields of study.
@@ -82,7 +81,7 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     # first_page and last_page inherited from PublicationEntityBase
 
     # SemanticScholar-specific metrics
-    reference_count: int | None = None
+    # Note: citations_made inherited from PublicationEntityBase
     influential_citation_count: int | None = None
 
     # SemanticScholar-specific OA URL

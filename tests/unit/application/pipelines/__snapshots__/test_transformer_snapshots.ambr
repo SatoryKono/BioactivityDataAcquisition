@@ -302,7 +302,7 @@
     'publication_year': 2025,
     'publisher': None,
     'publisher_id': None,
-    'reference_count': 0,
+    'citations_made': 0,
     'subject_keywords': list([
       'unit testing',
       'python',
@@ -381,7 +381,7 @@
     'publication_year': None,
     'publisher': None,
     'publisher_id': None,
-    'reference_count': 0,
+    'citations_made': 0,
     'subject_keywords': list([
     ]),
     'subject_mesh': list([

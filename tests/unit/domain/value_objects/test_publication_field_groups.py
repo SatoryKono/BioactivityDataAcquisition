@@ -187,9 +187,10 @@ class TestFieldToGroupMapping:
     def test_terms_and_keywords_fields(self) -> None:
         """Terms & Keywords group contains expected fields."""
         expected_fields = {
-            "keywords",
-            "mesh_terms",
-            "topics",
+            "subject_keywords",
+            "subject_mesh",
+            "subject_topics",
+            "subject_fields",
             "primary_topic",
         }
         actual_fields = {
@@ -230,7 +231,6 @@ class TestFieldToGroupMapping:
     def test_publication_types_fields(self) -> None:
         """Publication Types group contains expected fields."""
         expected_fields = {
-            "type",
             "publication_types",
             "publication_type_list",
         }
@@ -283,7 +283,7 @@ class TestFieldGroupConfig:
             == PublicationFieldGroup.ID_AND_STATUS
         )
         assert (
-            config.get_group("pubmed.publication.mesh_terms")
+            config.get_group("pubmed.publication.subject_mesh")
             == PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS
         )
 
@@ -557,7 +557,7 @@ class TestFieldMappingCompleteness:
             "published_online",
             "published_print",
             "publication_year",
-            "type",
+            "publication_type",
             "content_hash",
             "language",
             "license_url",
@@ -593,16 +593,16 @@ class TestFieldMappingCompleteness:
             "author_orcids",
             "authors",
             "institution_ids",
-            "keywords",
+            "subject_keywords",
             "mesh",
             "primary_topic",
-            "topics",
+            "subject_topics",
             "citations_received",
             "citations_made",
             "institution_country_codes",
             "publication_date",
             "publication_year",
-            "type",
+            "publication_type",
             "content_hash",
             "fwci",
             "grants",
@@ -625,22 +625,23 @@ class TestFieldMappingCompleteness:
             "issn",
             "issue",
             "journal",
-            "journal_abbrev",
+            "journal_name",
             "journal_iso_abbrev",
             "journal_issn_type",
-            "journal_title",
+            "journal_name_short",
             "page_last",
-            "pages",
+            "page_range",
             "title",
             "volume",
             "affiliation_list",
+            "affiliation_structured",
             "author_count",
             "authors",
             "authors_with_affiliations",
             "keyword_count",
-            "keywords",
+            "subject_keywords",
             "mesh_heading_count",
-            "mesh_terms",
+            "subject_mesh",
             "citation_subset",
             "chemical_count",
             "citations_made",
@@ -659,7 +660,6 @@ class TestFieldMappingCompleteness:
             "language",
             "medline_pgn",
             "pub_day",
-            "structured_affiliations",
         }
         for field in pubmed_fields:
             assert field in FIELD_TO_GROUP_MAPPING, f"PubMed field {field} not mapped"
@@ -670,7 +670,7 @@ class TestFieldMappingCompleteness:
             "corpus_id",
             "doi",
             "entity_id",
-            "fields_of_study",
+            "subject_fields",
             "is_oa",
             "oa_status",
             "open_access_url",
@@ -680,7 +680,7 @@ class TestFieldMappingCompleteness:
             "issue",
             "journal",
             "page_last",
-            "pages",
+            "page_range",
             "title",
             "venue",
             "volume",

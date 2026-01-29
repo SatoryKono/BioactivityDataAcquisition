@@ -207,7 +207,7 @@ class CrossRefPublicationEntity(PublicationEntityBase):
         license_url: License URL.
         journal_name_short: Short journal/container title (unified field name).
         subject_keywords: Subject areas (unified field name).
-        source_type: Raw CrossRef type (e.g., "journal-article"), maps to publication_type.
+        publication_type: Raw CrossRef type (e.g., "journal-article"), inherited from base.
 
     Note: doi is required for CrossRef publications and validated in __post_init__.
 
@@ -268,10 +268,8 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     # Bibliographic references (JSON array of citation data)
     references: str | None = None
 
-    # Raw document type from CrossRef API (e.g., "journal-article", "book-chapter")
-    # Unlike publication_type (unified mapping), this preserves the original CrossRef type value
-    # This field is used internally and mapped to publication_type in transformer
-    source_type: str | None = None
+    # Note: publication_type inherited from PublicationEntityBase
+    # Stores raw CrossRef type (e.g., "journal-article", "book-chapter")
 
     # Override: Default source for CrossRef
     _source: str = "crossref"

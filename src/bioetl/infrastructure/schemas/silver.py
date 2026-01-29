@@ -654,7 +654,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("corpus_id", pa.int64()),
         pa.field("dblp_id", pa.string()),  # DBLP publication key
         pa.field("doi", pa.string()),
-        pa.field("fields_of_study", pa.string()),
+        pa.field("subject_fields", pa.string()),
         pa.field("influential_citation_count", pa.int64()),
         pa.field("is_oa", pa.bool_()),
         pa.field("issue", pa.string()),
@@ -663,12 +663,13 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("open_access_url", pa.string()),
         pa.field("page_first", pa.string()),
         pa.field("page_last", pa.string()),
-        pa.field("pages", pa.string()),  # Legacy: "first-last" format
+        pa.field("page_range", pa.string()),  # Page range: "first-last" format
         pa.field("paper_id", pa.string()),  # Primary key
         # Note: pmc_id excluded per design (2026-01)
         pa.field("pmid", pa.string()),
         pa.field("publication_date", pa.string()),
         pa.field("publication_types", pa.string()),
+        pa.field("publication_year", pa.int64()),
         pa.field("title", pa.string()),
         pa.field("tldr", pa.string()),
         pa.field("volume", pa.string()),
@@ -697,6 +698,8 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         # === Business fields (alphabetical order) ===
         # abstract and affiliations excluded per user request
         pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
+        pa.field("author_details", pa.string()),  # JSON array of author objects
+        pa.field("author_orcids", pa.string()),  # JSON array of ORCID IDs
         pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("citations_made", pa.int64()),
         pa.field("citations_received", pa.int64()),
@@ -722,8 +725,10 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("published_print", pa.string()),  # Provider-specific
         pa.field("publisher", pa.string()),
         pa.field(
-            "source_type", pa.string()
+            "publication_type", pa.string()
         ),  # Raw CrossRef type (journal-article, etc.)
+        pa.field("publication_year", pa.int64()),
+        pa.field("references", pa.string()),  # JSON array of cited references
         pa.field("subject_keywords", pa.list_(pa.string())),
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
