@@ -490,7 +490,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         if not journal:
             return {
                 "journal": None,
-                "journal_title": None,
+                "journal_full_title": None,
                 "journal_abbrev": None,
                 "journal_iso_abbrev": None,
                 "journal_issn_type": None,
