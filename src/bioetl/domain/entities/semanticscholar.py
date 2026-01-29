@@ -45,12 +45,12 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
         tldr: AI-generated summary (TL;DR).
         volume: Journal volume (parsed from combined format like "32 4").
         issue: Journal issue number (parsed from combined volume/issue).
-        pages: Page numbers.
+        page_range: Page numbers.
         venue: Venue name (conference/journal).
         reference_count: Number of references.
         influential_citation_count: Number of influential citations.
         open_access_url: URL to open access PDF.
-        fields_of_study: JSON string of fields of study.
+        subject_fields: JSON string of fields of study.
         publication_types: JSON string of publication types.
         author_s2_ids: JSON string of S2 author IDs (40-char hex).
         author_orcids: JSON string of ORCID identifiers.
@@ -78,7 +78,7 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     issue: str | None = (
         None  # Parsed from combined volume/issue (e.g., "32 4" → issue=4)
     )
-    pages: str | None = None  # Legacy: "first-last" format
+    page_range: str | None = None  # Legacy: "first-last" format
     # first_page and last_page inherited from PublicationEntityBase
 
     # SemanticScholar-specific metrics
@@ -89,7 +89,7 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     open_access_url: str | None = None
 
     # SemanticScholar-specific classification (JSON strings)
-    fields_of_study: str | None = None
+    subject_fields: str | None = None
     publication_types: str | None = None
 
     # Author identifiers (for author-level analytics and disambiguation)
