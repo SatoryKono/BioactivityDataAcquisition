@@ -720,14 +720,14 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("page_last", pa.string()),
         # Note: pmid and pmc_id excluded - CrossRef API doesn't provide PubMed identifiers
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
-        pa.field("published", pa.string()),  # Canonical publication date
-        pa.field("published_online", pa.string()),  # Provider-specific
-        pa.field("published_print", pa.string()),  # Provider-specific
-        pa.field("publisher", pa.string()),
         pa.field(
             "publication_type", pa.string()
         ),  # Raw CrossRef type (journal-article, etc.)
         pa.field("publication_year", pa.int64()),
+        pa.field("published", pa.string()),  # Canonical publication date
+        pa.field("published_online", pa.string()),  # Provider-specific
+        pa.field("published_print", pa.string()),  # Provider-specific
+        pa.field("publisher", pa.string()),
         pa.field("references", pa.string()),  # JSON array of cited references
         pa.field("subject_keywords", pa.list_(pa.string())),
         pa.field("title", pa.string()),

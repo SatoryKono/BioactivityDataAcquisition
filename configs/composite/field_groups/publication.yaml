@@ -176,6 +176,12 @@ groups:
         columns:
           - pubmed.publication.journal_issn_type
 
+      - base_name: journal_name
+        columns:
+          - pubmed.publication.journal_name
+          - openalex.publication.journal_name
+          - semanticscholar.publication.journal_name
+
       - base_name: journal_title
         columns:
           - pubmed.publication.journal_title
@@ -187,6 +193,10 @@ groups:
           - openalex.publication.page_last
           - pubmed.publication.page_last
           - semanticscholar.publication.page_last
+
+      - base_name: page_range
+        columns:
+          - pubmed.publication.page_range
 
       - base_name: pages
         columns:
@@ -263,6 +273,10 @@ groups:
         columns:
           - pubmed.publication.authors_with_affiliations
 
+      - base_name: affiliation_structured
+        columns:
+          - pubmed.publication.affiliation_structured
+
       - base_name: institution_ids
         columns:
           - openalex.publication.institution_ids
@@ -306,6 +320,23 @@ groups:
       - base_name: topics
         columns:
           - openalex.publication.topics
+
+      - base_name: subject_fields
+        columns:
+          - semanticscholar.publication.subject_fields
+
+      - base_name: subject_keywords
+        columns:
+          - crossref.publication.subject_keywords
+
+      - base_name: subject_mesh
+        columns:
+          - openalex.publication.subject_mesh
+          - pubmed.publication.subject_mesh
+
+      - base_name: subject_topics
+        columns:
+          - openalex.publication.subject_topics
 
   # ===== CITATIONS_AND_REFERENCE =====
   - id: citations_and_reference
@@ -495,11 +526,3 @@ groups:
       - base_name: src_id
         columns:
           - chembl.publication.src_id
-
-      - base_name: affiliation_structured
-        columns:
-          - pubmed.publication.affiliation_structured
-
-      - base_name: subject_keywords
-        columns:
-          - crossref.publication.subject_keywords
