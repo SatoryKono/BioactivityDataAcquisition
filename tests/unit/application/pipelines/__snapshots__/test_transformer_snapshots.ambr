@@ -272,9 +272,9 @@
     'issue': '3',
     'journal': 'Journal of Test Science',
     'journal_abbrev': 'J Test Sci',
+    'journal_full_title': 'Journal of Test Science',
     'journal_iso_abbrev': 'J Test Sci',
     'journal_issn_type': 'Print',
-    'journal_title': 'Journal of Test Science',
     'keyword_count': 2,
     'keywords': list([
       'unit testing',
@@ -353,9 +353,9 @@
     'issue': None,
     'journal': None,
     'journal_abbrev': None,
+    'journal_full_title': None,
     'journal_iso_abbrev': None,
     'journal_issn_type': None,
-    'journal_title': None,
     'keyword_count': 0,
     'keywords': list([
     ]),
