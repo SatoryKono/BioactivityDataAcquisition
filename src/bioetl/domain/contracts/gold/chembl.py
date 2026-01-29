@@ -324,13 +324,13 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     title: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
-    doc_type: Series[str] = pa.Field(nullable=True)
+    publication_type: Series[str] = pa.Field(nullable=True)
     journal: Series[str] = pa.Field(nullable=True)
-    year: Series[float] = pa.Field(nullable=True, coerce=True)
+    publication_year: Series[float] = pa.Field(nullable=True, coerce=True)
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)
-    first_page: Series[str] = pa.Field(nullable=True)
-    last_page: Series[str] = pa.Field(nullable=True)
+    page_first: Series[str] = pa.Field(nullable=True)
+    page_last: Series[str] = pa.Field(nullable=True)
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)
 
     # ChEMBL release metadata

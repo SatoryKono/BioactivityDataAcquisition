@@ -5,6 +5,8 @@ Aligned with RULES.md v5.10, ChEMBL 34 schema, and Publication Schema Unificatio
 
 from __future__ import annotations
 
+from typing import Optional
+
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -50,11 +52,24 @@ class ChemblPublicationSchema(PublicationBaseSchema):
         description="How record was resolved: direct for ChEMBL ID lookup",
     )
 
-    # === Override doc_type with ChEMBL-specific values ===
-    doc_type: Series[str] = pa.Field(
+    # === Override inherited base fields with renamed versions ===
+    # ChEMBL transformer outputs unified names; suppress inherited old names
+    year: Optional[Series[int]] = pa.Field(
+        nullable=True
+    )  # Superseded by publication_year
+    doc_type: Optional[Series[str]] = pa.Field(
+        nullable=True
+    )  # Superseded by publication_type
+
+    # === Unified field names (ChEMBL-specific overrides) ===
+    publication_type: Series[str] = pa.Field(
         nullable=True,
         isin=["PUBLICATION", "PATENT", "DATASET", "BOOK"],
         description="Document type.",
+    )
+    publication_year: Series[int] = pa.Field(
+        nullable=True,
+        description="Publication year.",
     )
 
     # === System Fields ===
@@ -81,8 +96,8 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     # === Provider-specific Journal Fields ===
     volume: Series[str] = pa.Field(nullable=True, description="Volume.")
     issue: Series[str] = pa.Field(nullable=True, description="Issue.")
-    first_page: Series[str] = pa.Field(nullable=True, description="First page.")
-    last_page: Series[str] = pa.Field(nullable=True, description="Last page.")
+    page_first: Series[str] = pa.Field(nullable=True, description="First page.")
+    page_last: Series[str] = pa.Field(nullable=True, description="Last page.")
 
     # === DQ Fields ===
     _dq_warn: Series[bool] = pa.Field(

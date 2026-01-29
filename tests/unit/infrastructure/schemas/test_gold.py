@@ -85,7 +85,6 @@ class TestGoldPublicationSchemaUnifiedFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             # OpenAlex doesn't have page fields - they were removed as unused
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -97,6 +96,12 @@ class TestGoldPublicationSchemaUnifiedFields:
         fields = get_schema_fields(schema_class)
         assert "first_page" in fields, f"{name} missing first_page field"
         assert "last_page" in fields, f"{name} missing last_page field"
+
+    def test_chembl_schema_has_page_fields(self):
+        """ChEMBL Gold schema uses page_first/page_last (unified naming)."""
+        fields = get_schema_fields(ChEMBLDocumentGoldSchema)
+        assert "page_first" in fields, "ChEMBL Document missing page_first field"
+        assert "page_last" in fields, "ChEMBL Document missing page_last field"
 
 
 @pytest.mark.unit
@@ -187,7 +192,6 @@ class TestGoldPublicationSchemaCoreFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -198,6 +202,13 @@ class TestGoldPublicationSchemaCoreFields:
         """All Gold publication schemas must have year field."""
         fields = get_schema_fields(schema_class)
         assert "year" in fields, f"{name} missing year field"
+
+    def test_chembl_schema_has_publication_year_field(self):
+        """ChEMBL Gold schema uses publication_year (unified naming)."""
+        fields = get_schema_fields(ChEMBLDocumentGoldSchema)
+        assert "publication_year" in fields, (
+            "ChEMBL Document missing publication_year field"
+        )
 
 
 @pytest.mark.unit
@@ -414,14 +425,14 @@ class TestGoldSchemaValidation:
             "title": "Test Publication",
             "authors": '["Author One"]',
             "abstract": "Test abstract",
-            "doc_type": "PUBLICATION",
+            "publication_type": "PUBLICATION",
             "journal": "Test Journal",
-            "year": 2024,
+            "publication_year": 2024,
             # publication_date excluded: not available from ChEMBL API
             "volume": "10",
             "issue": "2",
-            "first_page": "100",
-            "last_page": "110",
+            "page_first": "100",
+            "page_last": "110",
             "src_id": 1,
             # ChEMBL release metadata
             "chembl_release": "CHEMBL_34",

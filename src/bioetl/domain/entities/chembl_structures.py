@@ -34,17 +34,16 @@ class ChemblPublication(BaseEntity):
     title: str | None = None
     authors: str | None = None  # JSON array of hashed author names
     abstract: str | None = None
-    doc_type: str | None = None  # PUBLICATION, PATENT, DATASET, BOOK
+    publication_type: str | None = None  # PUBLICATION, PATENT, DATASET, BOOK
 
     # Journal information
     journal: str | None = None
-    journal_full_title: str | None = None
-    year: int | None = None
+    publication_year: int | None = None
     publication_date: str | None = None  # Always NULL for ChEMBL (excluded from output)
     volume: str | None = None
     issue: str | None = None
-    first_page: str | None = None
-    last_page: str | None = None
+    page_first: str | None = None
+    page_last: str | None = None
 
     # Cross-reference IDs (pmc_id always NULL for ChEMBL, excluded from output)
     pmc_id: str | None = None
@@ -77,12 +76,12 @@ class ChemblPublication(BaseEntity):
     def _validate_invariants(self) -> None:
         if not self.document_chembl_id:
             raise ValueError("ChemblPublication document_chembl_id is required")
-        if self.year is not None and not (
-            MIN_PUBLICATION_YEAR <= self.year <= MAX_PUBLICATION_YEAR
+        if self.publication_year is not None and not (
+            MIN_PUBLICATION_YEAR <= self.publication_year <= MAX_PUBLICATION_YEAR
         ):
             raise ValueError(
                 f"Year must be between {MIN_PUBLICATION_YEAR}-{MAX_PUBLICATION_YEAR}, "
-                f"got {self.year}"
+                f"got {self.publication_year}"
             )
 
 
