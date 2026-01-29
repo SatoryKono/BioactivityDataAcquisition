@@ -189,7 +189,6 @@ class TestFieldToGroupMapping:
         expected_fields = {
             "keywords",
             "mesh_terms",
-            "mesh_terms",
             "topics",
             "primary_topic",
         }

@@ -36,21 +36,20 @@ column_groups:
 
   - name: affiliations
     fields:
-      - affiliations
-      - structured_affiliations
+      - affiliation_list
+      - affiliation_structured
 
   - name: journal
     fields:
       - journal
-      - journal_title
-      - journal_abbrev
+      - journal_name
+      - journal_name_short
       - journal_iso_abbrev
       - issn
       - journal_issn_type
 
   - name: year
     fields:
-      - year
       - publication_year
 
   - name: dates
@@ -66,21 +65,21 @@ column_groups:
     fields:
       - volume
       - issue
-      - first_page
-      - last_page
-      - pages
+      - page_first
+      - page_last
+      - page_range
       - medline_pgn
 
   - name: citations
     fields:
-      - reference_count
+      - citations_made
       - citation_subset
 
   - name: subjects
     fields:
-      - mesh_terms
+      - subject_mesh
       - mesh_heading_count
-      - keywords
+      - subject_keywords
       - keyword_count
       - publication_types
       - publication_type_list

@@ -1,7 +1,5 @@
 """Unit tests for ColumnOrderer rename functionality."""
 
-import pytest
-
 from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.domain.composite.config import ColumnGroupConfig, LayerColumnConfig
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger

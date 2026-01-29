@@ -344,7 +344,6 @@ class TestGoldSchemaValidation:
             # Note: vernacular_title excluded per design
             "journal": "Test Journal",
             "journal_abbrev": "Test J",
-            "journal_full_title": "Test Journal Full Name",
             "journal_iso_abbrev": "Test J.",
             "journal_issn_type": "Print",
             "issn": "1234-5678",
@@ -417,7 +416,6 @@ class TestGoldSchemaValidation:
             "abstract": "Test abstract",
             "doc_type": "PUBLICATION",
             "journal": "Test Journal",
-            "journal_full_title": "Test Journal Full Title",
             "year": 2024,
             # publication_date excluded: not available from ChEMBL API
             "volume": "10",
