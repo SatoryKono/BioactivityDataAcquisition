@@ -33,10 +33,10 @@ groups:
         columns:
           - semanticscholar.publication.corpus_id
 
-      - base_name: doc_type
+      - base_name: publication_type
         columns:
-          - chembl.publication.doc_type
-          - pubmed.publication.doc_type
+          - chembl.publication.publication_type
+          - pubmed.publication.publication_type
 
       - base_name: document_chembl_id
         columns:
@@ -122,13 +122,13 @@ groups:
           - openalex.publication.abstract
           - pubmed.publication.abstract
 
-      - base_name: first_page
+      - base_name: page_first
         columns:
-          - chembl.publication.first_page
-          - crossref.publication.first_page
-          - openalex.publication.first_page
-          - pubmed.publication.first_page
-          - semanticscholar.publication.first_page
+          - chembl.publication.page_first
+          - crossref.publication.page_first
+          - openalex.publication.page_first
+          - pubmed.publication.page_first
+          - semanticscholar.publication.page_first
 
       - base_name: issn
         columns:
@@ -180,13 +180,13 @@ groups:
         columns:
           - pubmed.publication.journal_title
 
-      - base_name: last_page
+      - base_name: page_last
         columns:
-          - chembl.publication.last_page
-          - crossref.publication.last_page
-          - openalex.publication.last_page
-          - pubmed.publication.last_page
-          - semanticscholar.publication.last_page
+          - chembl.publication.page_last
+          - crossref.publication.page_last
+          - openalex.publication.page_last
+          - pubmed.publication.page_last
+          - semanticscholar.publication.page_last
 
       - base_name: pages
         columns:
@@ -199,9 +199,9 @@ groups:
           - crossref.publication.publisher
           - openalex.publication.publisher
 
-      - base_name: short_container_title
+      - base_name: journal_name_short
         columns:
-          - crossref.publication.short_container_title
+          - crossref.publication.journal_name_short
 
       - base_name: title
         columns:
@@ -228,11 +228,11 @@ groups:
     display_name: "Author & Affiliations"
     include_in_gold: true
     fields:
-      - base_name: affiliations
+      - base_name: affiliation_list
         columns:
-          - openalex.publication.affiliations
-          - pubmed.publication.affiliations
-          - semanticscholar.publication.affiliations
+          - openalex.publication.affiliation_list
+          - pubmed.publication.affiliation_list
+          - semanticscholar.publication.affiliation_list
 
       - base_name: author_count
         columns:
@@ -320,19 +320,19 @@ groups:
         columns:
           - pubmed.publication.chemical_count
 
-      - base_name: citation_count
+      - base_name: citations_received
         columns:
-          - crossref.publication.citation_count
-          - openalex.publication.citation_count
-          - pubmed.publication.citation_count
-          - semanticscholar.publication.citation_count
+          - crossref.publication.citations_received
+          - openalex.publication.citations_received
+          - pubmed.publication.citations_received
+          - semanticscholar.publication.citations_received
 
-      - base_name: reference_count
+      - base_name: citations_made
         columns:
-          - crossref.publication.reference_count
-          - openalex.publication.reference_count
-          - pubmed.publication.reference_count
-          - semanticscholar.publication.reference_count
+          - crossref.publication.citations_made
+          - openalex.publication.citations_made
+          - pubmed.publication.citations_made
+          - semanticscholar.publication.citations_made
 
   # ===== DATE_AND_PLACES =====
   - id: date_and_places

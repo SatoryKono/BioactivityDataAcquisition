@@ -213,11 +213,13 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "journal": journal_info.get("journal_name"),
             "volume": journal_info.get("volume"),
             "issue": journal_info.get("issue"),  # Parsed from combined "32 4" format
-            "page_range": journal_info.get("pages"),  # Original pages string (cleaned)
+            "page_range": journal_info.get(
+                "page_range"
+            ),  # Original pages string (cleaned)
             "page_first": journal_info.get(
-                "first_page"
+                "page_first"
             ),  # Parsed with abbreviation expansion
-            "page_last": journal_info.get("last_page"),  # Expanded (e.g., "9" → "739")
+            "page_last": journal_info.get("page_last"),  # Expanded (e.g., "9" → "739")
             "publication_year": year,
             "publication_date": self._normalize_partial_date(
                 rec.get("publicationDate")

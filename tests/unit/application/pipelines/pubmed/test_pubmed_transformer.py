@@ -786,7 +786,7 @@ class TestPubMedTransformerDoiNormalization:
 
 @pytest.mark.unit
 class TestPubMedTransformerUnifiedPageFields:
-    """Tests for unified page field parsing (first_page, last_page).
+    """Tests for unified page field parsing (page_first, page_last).
 
     Note: The parse_page_range function tests are in tests/unit/domain/test_normalization.py.
     These tests verify the integration with the transformer.
