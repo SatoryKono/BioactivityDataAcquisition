@@ -452,7 +452,13 @@ class PipelineConfig:
 
     def _ensure_immutability(self) -> None:
         """Convert incoming lists to tuples for immutability."""
-        for attr in ("primary_keys", "partition_cols", "fields", "column_groups", "transform_steps"):
+        for attr in (
+            "primary_keys",
+            "partition_cols",
+            "fields",
+            "column_groups",
+            "transform_steps",
+        ):
             val = getattr(self, attr)
             if isinstance(val, list):
                 object.__setattr__(self, attr, tuple(val))

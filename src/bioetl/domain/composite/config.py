@@ -254,9 +254,7 @@ def _coerce_column_groups(obj: object, attr: str) -> None:
         object.__setattr__(
             obj,
             attr,
-            tuple(
-                ColumnGroupConfig(**g) if isinstance(g, dict) else g for g in val
-            ),
+            tuple(ColumnGroupConfig(**g) if isinstance(g, dict) else g for g in val),
         )
 
 

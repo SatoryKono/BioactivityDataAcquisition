@@ -111,7 +111,8 @@ class DQReportSerializer:
         """Serialize to JSON with pretty formatting."""
         data = to_dict(report)
         return orjson.dumps(
-            data, option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS,
+            data,
+            option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS,
         ).decode("utf-8")
 
     def _to_yaml(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
@@ -408,7 +409,9 @@ class DQReportSerializer:
     def _format_detail_value(self, value: Any) -> str:
         """Format a detail value for HTML display."""
         if isinstance(value, dict):
-            return f"<pre>{orjson.dumps(value, option=orjson.OPT_INDENT_2).decode()}</pre>"
+            return (
+                f"<pre>{orjson.dumps(value, option=orjson.OPT_INDENT_2).decode()}</pre>"
+            )
         if isinstance(value, (list, tuple)):
             return ", ".join(str(v) for v in value) if value else "[]"
         return str(value)

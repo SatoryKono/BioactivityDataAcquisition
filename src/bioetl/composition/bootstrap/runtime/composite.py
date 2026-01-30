@@ -227,8 +227,8 @@ def bootstrap_composite_runner(
         fallback_mapping: dict[str, str] | None = None
 
         if enricher_cfg:
-            filter_ids, filter_field, fallback_mapping = (
-                _extract_filter_ids_from_keys(enricher_cfg, keys)
+            filter_ids, filter_field, fallback_mapping = _extract_filter_ids_from_keys(
+                enricher_cfg, keys
             )
 
         # many_to_one: no limit; one_to_one: limit to seed count
