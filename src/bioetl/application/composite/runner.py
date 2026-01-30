@@ -301,9 +301,7 @@ class CompositePipelineRunner:
         )
 
         # Step 4: Run enrichment phase
-        state, enrichment_results = await self._execute_enrichment_phase(
-            state, keys_df
-        )
+        state, enrichment_results = await self._execute_enrichment_phase(state, keys_df)
 
         # Step 5: Transition to ENRICHMENT_COMPLETED
         state = await self._transition_to_enrichment_completed(state)
@@ -339,9 +337,7 @@ class CompositePipelineRunner:
                 to_state=CompositePipelineState.SEED_COMPLETED,
                 stage="seed_resume",
             )
-        return state, SeedResult(
-            pipeline_name=self._config.seed.pipeline, resumed=True
-        )
+        return state, SeedResult(pipeline_name=self._config.seed.pipeline, resumed=True)
 
     async def _run_seed_with_fsm(
         self, state: CompositeCheckpointState
@@ -432,6 +428,9 @@ class CompositePipelineRunner:
         dependency_results: dict[str, DependencyResult] = {}
         if not self._has_dependencies_configured():
             return state, dependency_results
+
+        assert self._dependency_coordinator is not None
+        assert self._dependencies_runner_factory is not None
 
         previous_state = state.state
         self._fsm.validate_fsm_transition(

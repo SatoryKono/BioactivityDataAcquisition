@@ -109,9 +109,7 @@ class AuthorExtractor(BaseFieldExtractor):
 
         return raw_authors if raw_authors else None
 
-    def _find_identifier(
-        self, aff_info: Element
-    ) -> tuple[str | None, str | None]:
+    def _find_identifier(self, aff_info: Element) -> tuple[str | None, str | None]:
         """Find the best identifier from AffiliationInfo, preferring ROR > GRID > ISNI > RINGGOLD.
 
         Args:

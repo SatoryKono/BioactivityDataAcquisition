@@ -125,9 +125,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         ]
         return "|".join(cleaned) if cleaned else "PUBLICATION"
 
-    def _extract_validated_ids(
-        self, rec: dict[str, Any]
-    ) -> dict[str, Any]:
+    def _extract_validated_ids(self, rec: dict[str, Any]) -> dict[str, Any]:
         """Extract and validate external identifiers using Value Objects."""
         external_ids = extract_external_ids(rec.get("externalIds"))
         doi_vo = DOI.from_raw(external_ids.get("doi"))
@@ -140,9 +138,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "corpus_id": external_ids.get("corpus_id"),
         }
 
-    def _extract_author_metadata(
-        self, authors_list: Any
-    ) -> dict[str, Any]:
+    def _extract_author_metadata(self, authors_list: Any) -> dict[str, Any]:
         """Extract author identifiers, h-indices, and affiliations."""
         author_s2_ids = extract_author_s2_ids(authors_list)
         author_orcids = extract_author_orcids(authors_list)
