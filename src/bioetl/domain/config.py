@@ -452,16 +452,10 @@ class PipelineConfig:
 
     def _ensure_immutability(self) -> None:
         """Convert incoming lists to tuples for immutability."""
-        if isinstance(self.primary_keys, list):
-            object.__setattr__(self, "primary_keys", tuple(self.primary_keys))
-        if isinstance(self.partition_cols, list):
-            object.__setattr__(self, "partition_cols", tuple(self.partition_cols))
-        if isinstance(self.fields, list):
-            object.__setattr__(self, "fields", tuple(self.fields))
-        if isinstance(self.column_groups, list):
-            object.__setattr__(self, "column_groups", tuple(self.column_groups))
-        if isinstance(self.transform_steps, list):
-            object.__setattr__(self, "transform_steps", tuple(self.transform_steps))
+        for attr in ("primary_keys", "partition_cols", "fields", "column_groups", "transform_steps"):
+            val = getattr(self, attr)
+            if isinstance(val, list):
+                object.__setattr__(self, attr, tuple(val))
 
     def _convert_write_modes(self) -> None:
         """Convert string write modes to enums (backward compatibility)."""
