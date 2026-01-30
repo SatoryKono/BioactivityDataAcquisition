@@ -75,7 +75,7 @@ class TestFileSizeLimits:
         "publications.py": 470,  # 464 LOC - Gold layer publication schemas with author/institution identifiers + PubMed pii/mid/publisher_id + CrossRef author_orcids/details/references + S2 authors
         # Note: chembl.py exemption at line 39 covers both domain/entities/chembl.py and domain/contracts/gold/chembl.py
         # Domain DQ models (data quality reports and serialization)
-        "dq_serializer.py": 450,  # 447 LOC - DQ report serialization logic (increased for CC reduction)
+        "dq_serializer.py": 460,  # 457 LOC - DQ report serialization with extracted helpers for CC ≤ 5
         "dq_report.py": 660,  # 646 LOC - DQ report models with validation rules
         "dq_metrics.py": 420,  # 411 LOC - Batch DQ metrics with helpers for CC reduction + _make_hashable for list/dict values
         # Domain registry exemptions

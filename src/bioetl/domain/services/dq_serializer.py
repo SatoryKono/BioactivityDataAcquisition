@@ -32,16 +32,21 @@ def to_dict(obj: Any) -> dict[str, Any]:
     Returns:
         Dictionary representation of the object.
     """
-    if is_dataclass(obj) and not isinstance(obj, type):
+    if _is_dataclass_instance(obj):
         return cast(dict[str, Any], _serialize_value(obj))
     if isinstance(obj, dict):
         return cast(dict[str, Any], _serialize_value(obj))
     return {"value": _serialize_value(obj)}
 
 
+def _is_dataclass_instance(value: Any) -> bool:
+    """Check if value is a dataclass instance (not the class itself)."""
+    return is_dataclass(value) and not isinstance(value, type)
+
+
 def _serialize_value(value: Any) -> Any:
     """Serialize a value with dataclass/enum/datetime/collection support."""
-    if is_dataclass(value) and not isinstance(value, type):
+    if _is_dataclass_instance(value):
         return {
             field.name: _serialize_value(getattr(value, field.name))
             for field in fields(value)
@@ -50,6 +55,11 @@ def _serialize_value(value: Any) -> Any:
         return value.value
     if isinstance(value, datetime):
         return value.isoformat()
+    return _serialize_collection(value)
+
+
+def _serialize_collection(value: Any) -> Any:
+    """Serialize dict/list/tuple or return primitive as-is."""
     if isinstance(value, dict):
         return {key: _serialize_value(item) for key, item in value.items()}
     if isinstance(value, (list, tuple)):

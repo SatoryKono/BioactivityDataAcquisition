@@ -240,6 +240,24 @@ class EnricherConfig:
         return self.cardinality == EnricherCardinality.MANY_TO_ONE
 
 
+def _coerce_optional_list(obj: object, attr: str) -> None:
+    """Convert a list field to tuple on a frozen dataclass (if not None)."""
+    val = getattr(obj, attr)
+    if val is not None and isinstance(val, list):
+        object.__setattr__(obj, attr, tuple(val))
+
+
+def _coerce_column_groups(obj: object) -> None:
+    """Convert column_groups list of dicts/objects to tuple of ColumnGroupConfig."""
+    groups = getattr(obj, "column_groups", None)
+    if groups is not None and isinstance(groups, list):
+        object.__setattr__(
+            obj,
+            "column_groups",
+            tuple(ColumnGroupConfig(**g) if isinstance(g, dict) else g for g in groups),
+        )
+
+
 @dataclass(frozen=True, slots=True)
 class LayerColumnConfig:
     """Column configuration for a single medallion layer (Silver or Gold).
@@ -292,22 +310,10 @@ class LayerColumnConfig:
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
-        if self.columns is not None and isinstance(self.columns, list):
-            object.__setattr__(self, "columns", tuple(self.columns))
-        if self.include_groups is not None and isinstance(self.include_groups, list):
-            object.__setattr__(self, "include_groups", tuple(self.include_groups))
-        if self.exclude_fields is not None and isinstance(self.exclude_fields, list):
-            object.__setattr__(self, "exclude_fields", tuple(self.exclude_fields))
-        if self.column_groups is not None and isinstance(self.column_groups, list):
-            object.__setattr__(
-                self,
-                "column_groups",
-                tuple(
-                    ColumnGroupConfig(**g) if isinstance(g, dict) else g
-                    for g in self.column_groups
-                ),
-            )
-        # Ensure rename_fields is a dict (not required, but validate if present)
+        _coerce_optional_list(self, "columns")
+        _coerce_optional_list(self, "include_groups")
+        _coerce_optional_list(self, "exclude_fields")
+        _coerce_column_groups(self)
         if not isinstance(self.rename_fields, dict):
             object.__setattr__(self, "rename_fields", dict(self.rename_fields))
         self._validate()
@@ -370,15 +376,7 @@ class DataSchemaConfig:
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
-        if isinstance(self.column_groups, list):
-            object.__setattr__(
-                self,
-                "column_groups",
-                tuple(
-                    ColumnGroupConfig(**g) if isinstance(g, dict) else g
-                    for g in self.column_groups
-                ),
-            )
+        _coerce_column_groups(self)
         if isinstance(self.silver, dict):
             object.__setattr__(self, "silver", LayerColumnConfig(**self.silver))
         if isinstance(self.gold, dict):
