@@ -207,10 +207,10 @@ class PublicationTransformer(BaseChemblTransformer):
         data["_source"] = "chembl"
 
         # Унифицированные поля публикации (в ChEMBL есть только citation_count)
-        citation_count = record.get("citation_count")
-        if citation_count is not None:
+        citation_count_raw = record.get("citation_count")
+        if citation_count_raw is not None:
             try:
-                data["citations_received"] = int(citation_count)
+                data["citations_received"] = int(str(citation_count_raw))
             except (TypeError, ValueError):
                 data["citations_received"] = None
         else:
