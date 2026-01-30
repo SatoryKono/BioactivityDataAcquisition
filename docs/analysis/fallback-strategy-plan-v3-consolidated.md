@@ -19,7 +19,7 @@
 | F3 | PubMed: в коде **нет** DOI lookup | 2, 3 | `pubmed_client.py:241`: `if filter_field != "pmid": warning("Assuming PMIDs")` |
 | F4 | Противоречие: "не менять порт" + "добавить метод в Protocol" | 1 | Добавление метода в `FilterableDataSourcePort` = изменение интерфейса для ВСЕХ реализаций |
 | F5 | CSV title-only использует маркеры `__title_only_N__`, не пустые строки | 1, 2, 3 | `csv_filter_reader.py:186`: `marker = f"__title_only_{title_only_count}__"` |
-| F6 | `fallback_mapping` — generic `{id: value}`, не всегда `{id: title}` | 3 | `data_source.py:162`: "fallback value", UniProt: gene name (`client.py:380`) |
+| F6 | `fallback_mapping` — generic `{id: value}`, не всегда `{id: title}` | 3 | `data_source.py:162`: "fallback value" (generic контракт порта) |
 | F7 | PubMed CSV: колонка `pubmed_id`, не `pmid` | 1, 3 | `pubmed/publication.yaml:20`: `column_name: "pubmed_id"` |
 | F8 | Пропущены direct IDs mode и multi-column filtering | 2, 3 | `input_config.py:54`: `direct_filter_ids`, `filtered_data_source.py:86-91` |
 
@@ -36,7 +36,7 @@ FilterableDataSourcePort (domain/ports/data_source.py:82-168)
     ├── fetch_filtered_with_fallback() → Phases 1-3:
     │       │
     │       │   fallback_mapping: dict[str, str]  ← GENERIC: {primary_id: fallback_value}
-    │       │   (title для публикаций, gene_name для UniProt, etc.)
+    │       │   (title для publication pipelines)
     │       │
     │       ├── Phase 1: Primary ID batch → adapter-specific
     │       ├── Phase 2: Title fallback   → BaseTitleFallbackHandler.process_missing_dois()
@@ -57,10 +57,12 @@ FilterableDataSourcePort (domain/ports/data_source.py:82-168)
 | `InputFilterConfig` | `domain/filtering/input_config.py` | 125 | Config (single fallback_column, direct IDs, multi-column) |
 | `CsvFilterReader` | `infrastructure/adapters/input/csv_filter_reader.py` | ~280 | CSV загрузка с `__title_only_N__` маркерами |
 
-### 1.3. Реализации по провайдерам
+### 1.3. Реализации по провайдерам (publication pipelines)
 
 **ВАЖНО**: Таблица разделяет **API capability** (что поддерживает API провайдера)
 и **Implementation status** (что реализовано в коде адаптера).
+
+> **Scope**: Только publication pipelines. UniProt (accession→gene_name fallback) не входит в scope данного плана.
 
 | Provider | Handler (LOC) | Primary ID | Реализованные Phases | API supports | Code implements |
 |----------|--------------|-----------|---------------------|-------------|----------------|
@@ -68,7 +70,6 @@ FilterableDataSourcePort (domain/ports/data_source.py:82-168)
 | **OpenAlex** | `TitleFallbackHandler` (72) | DOI | 3 (DOI→Title→Title-only) | DOI, **PMID**, Title | **DOI only** (`client.py:326`) |
 | **PubMed** | `TitleFallbackHandler` (83) | PMID | 3 (PMID→Title→Title-only) | PMID, **DOI** (esearch), Title | **PMID only** (`pubmed_client.py:241`) |
 | **SemanticScholar** | `S2TitleFallbackHandler` (226) | DOI | 3 (DOI→Title→Title-only) | DOI, **PMID** (batch), Title | **DOI only** (`adapter.py:312`) |
-| **UniProt** | Generic (inline) | accession | 2 (accession→gene_name) | accession, gene_name | accession, gene_name |
 
 ### 1.4. Режимы фильтрации (полный список)
 
@@ -175,7 +176,7 @@ class ExtendedFallbackDataSourcePort(FilterableDataSourcePort, Protocol):
 
 **Преимущества нового Protocol перед изменением существующего:**
 - `FilterableDataSourcePort` остаётся **без изменений** → 0 breaking changes
-- Адаптеры без alternate ID (CrossRef, UniProt) не затрагиваются
+- Адаптеры без alternate ID (CrossRef) не затрагиваются
 - `FilteredDataSource` использует `isinstance()` для выбора стратегии
 - Постепенная миграция: адаптеры переходят на новый Protocol по мере готовности
 
@@ -239,7 +240,7 @@ BaseAlternateIdFallbackHandler (НОВЫЙ, extends BaseTitleFallbackHandler)
 | 3.5 | `infrastructure/adapters/semanticscholar/fallback.py` | MODIFY | Добавить `S2ExtendedFallbackHandler` с `_search_by_pmid()` |
 | 3.6 | `infrastructure/adapters/semanticscholar/adapter.py` | MODIFY | Реализовать `ExtendedFallbackDataSourcePort` |
 
-**CrossRef и UniProt**: НЕ затрагиваются. Остаются на `FilterableDataSourcePort`.
+**CrossRef**: НЕ затрагивается. Остаётся на `FilterableDataSourcePort`.
 
 ### Phase 4: Application Layer
 
