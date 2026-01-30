@@ -281,196 +281,228 @@ class CompositePipelineRunner:
         if self._runtime.resume and state.is_resumable:
             self._fsm.log_resume_context(state)
 
-        # Track results
-        seed_result: SeedResult | None = None
-        enrichment_results: dict[str, EnrichmentResult] = {}
-        merge_result: MergeResult | None = None
-
-        # Step 1: Run seed (if not completed)
-        if not state.seed_completed:
-            # Validate and transition to SEED_RUNNING before starting seed
-            previous_state = state.state
-            self._fsm.validate_fsm_transition(
-                previous_state, CompositePipelineState.SEED_RUNNING
-            )
-            state = state.with_state(CompositePipelineState.SEED_RUNNING)
-            self._fsm.log_fsm_transition(
-                from_state=previous_state,
-                to_state=CompositePipelineState.SEED_RUNNING,
-                stage="seed_start",
-            )
-            # Log phase event for seed start
-            self._logger.info(
-                PipelineEvent.phase_started("seed"),
-                composite=self._config.name,
-                run_id=self._run_id_str,
-            )
-            await self._save_checkpoint_safe(state, "seed_running")
-
-            # Execute seed with error handling
-            try:
-                seed_result = await self._run_seed()
-            except Exception as e:
-                # Seed failed - transition to FAILED state
-                self._logger.error(
-                    "Seed pipeline failed",
-                    composite=self._config.name,
-                    run_id=self._run_id_str,
-                    seed_pipeline=self._config.seed.pipeline,
-                    error=str(e),
-                )
-                self._fsm.log_fsm_transition(
-                    from_state=CompositePipelineState.SEED_RUNNING,
-                    to_state=CompositePipelineState.FAILED,
-                    stage="seed_failed",
-                    error=str(e),
-                )
-                # Save FAILED state to checkpoint for resume awareness
-                failed_state = state.with_state(CompositePipelineState.FAILED)
-                await self._save_checkpoint_safe(failed_state, "seed_failed")
-                # Re-raise to trigger outer error handling and lock release
-                raise
-
-            # Seed succeeded - transition to SEED_COMPLETED
-            state = state.with_seed_completed(seed_result)
-            self._fsm.log_fsm_transition(
-                from_state=CompositePipelineState.SEED_RUNNING,
-                to_state=CompositePipelineState.SEED_COMPLETED,
-                stage="seed_complete",
-                records_extracted=seed_result.records_extracted,
-                records_silver=seed_result.records_silver,
-            )
-            # Log phase event for seed completion
-            self._logger.info(
-                PipelineEvent.phase_completed("seed"),
-                composite=self._config.name,
-                run_id=self._run_id_str,
-                records_extracted=seed_result.records_extracted,
-                records_silver=seed_result.records_silver,
-            )
-            await self._save_checkpoint_safe(state, "seed_completed")
-        else:
-            # Resume: seed already completed
-            self._logger.info(
-                "Seed already completed, resuming from checkpoint",
-                composite=self._config.name,
-                run_id=self._run_id_str,
-            )
-            # Ensure FSM state reflects SEED_COMPLETED when resuming
-            if state.state != CompositePipelineState.SEED_COMPLETED:
-                previous_state = state.state
-                state = state.with_state(CompositePipelineState.SEED_COMPLETED)
-                self._fsm.log_fsm_transition(
-                    from_state=previous_state,
-                    to_state=CompositePipelineState.SEED_COMPLETED,
-                    stage="seed_resume",
-                )
-            seed_result = SeedResult(
-                pipeline_name=self._config.seed.pipeline,
-                resumed=True,
-            )
+        # Step 1: Run seed phase
+        state, seed_result = await self._execute_seed_phase(state)
 
         # Step 2: Extract keys from seed Silver
         keys_df = await self._key_extractor.extract(
             silver_table=self._config.seed.silver_table,
             keys=self._config.seed.output_keys,
         )
-
         self._logger.info(
             "Extracted keys for enrichment",
             composite=self._config.name,
             keys_count=len(keys_df),
         )
 
-        # Track dependency results
-        dependency_results: dict[str, DependencyResult] = {}
+        # Step 3: Run dependencies phase
+        state, dependency_results = await self._execute_dependencies_phase(
+            state, keys_df
+        )
 
-        # Step 3: Run dependencies (if any)
-        if (
+        # Step 4: Run enrichment phase
+        state, enrichment_results = await self._execute_enrichment_phase(state, keys_df)
+
+        # Step 5: Transition to ENRICHMENT_COMPLETED
+        state = await self._transition_to_enrichment_completed(state)
+
+        # Step 6: Execute merge or skip in dry run mode
+        state, merge_result = await self._execute_merge_stage(state, enrichment_results)
+
+        # Step 7: Finalize - set COMPLETED and cleanup checkpoint
+        await self._finalize_pipeline(state)
+
+        return self._build_composite_result(
+            seed_result, dependency_results, enrichment_results, merge_result
+        )
+
+    async def _execute_seed_phase(
+        self, state: CompositeCheckpointState
+    ) -> tuple[CompositeCheckpointState, SeedResult]:
+        """Execute the seed phase or resume from checkpoint."""
+        if not state.seed_completed:
+            return await self._run_seed_with_fsm(state)
+
+        # Resume: seed already completed
+        self._logger.info(
+            "Seed already completed, resuming from checkpoint",
+            composite=self._config.name,
+            run_id=self._run_id_str,
+        )
+        if state.state != CompositePipelineState.SEED_COMPLETED:
+            previous_state = state.state
+            state = state.with_state(CompositePipelineState.SEED_COMPLETED)
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.SEED_COMPLETED,
+                stage="seed_resume",
+            )
+        return state, SeedResult(pipeline_name=self._config.seed.pipeline, resumed=True)
+
+    async def _run_seed_with_fsm(
+        self, state: CompositeCheckpointState
+    ) -> tuple[CompositeCheckpointState, SeedResult]:
+        """Run seed pipeline with FSM state transitions."""
+        previous_state = state.state
+        self._fsm.validate_fsm_transition(
+            previous_state, CompositePipelineState.SEED_RUNNING
+        )
+        state = state.with_state(CompositePipelineState.SEED_RUNNING)
+        self._fsm.log_fsm_transition(
+            from_state=previous_state,
+            to_state=CompositePipelineState.SEED_RUNNING,
+            stage="seed_start",
+        )
+        self._logger.info(
+            PipelineEvent.phase_started("seed"),
+            composite=self._config.name,
+            run_id=self._run_id_str,
+        )
+        await self._save_checkpoint_safe(state, "seed_running")
+
+        try:
+            seed_result = await self._run_seed()
+        except Exception as e:
+            self._logger.error(
+                "Seed pipeline failed",
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                seed_pipeline=self._config.seed.pipeline,
+                error=str(e),
+            )
+            self._fsm.log_fsm_transition(
+                from_state=CompositePipelineState.SEED_RUNNING,
+                to_state=CompositePipelineState.FAILED,
+                stage="seed_failed",
+                error=str(e),
+            )
+            failed_state = state.with_state(CompositePipelineState.FAILED)
+            await self._save_checkpoint_safe(failed_state, "seed_failed")
+            raise
+
+        state = state.with_seed_completed(seed_result)
+        self._fsm.log_fsm_transition(
+            from_state=CompositePipelineState.SEED_RUNNING,
+            to_state=CompositePipelineState.SEED_COMPLETED,
+            stage="seed_complete",
+            records_extracted=seed_result.records_extracted,
+            records_silver=seed_result.records_silver,
+        )
+        self._logger.info(
+            PipelineEvent.phase_completed("seed"),
+            composite=self._config.name,
+            run_id=self._run_id_str,
+            records_extracted=seed_result.records_extracted,
+            records_silver=seed_result.records_silver,
+        )
+        await self._save_checkpoint_safe(state, "seed_completed")
+        return state, seed_result
+
+    def _has_dependencies_configured(self) -> bool:
+        """Check if dependencies phase is configured and ready."""
+        return bool(
             self._config.dependencies
             and self._dependency_coordinator
             and self._dependencies_runner_factory
-        ):
-            # Validate and transition to DEPENDENCIES_RUNNING
-            previous_state = state.state
-            self._fsm.validate_fsm_transition(
-                previous_state, CompositePipelineState.DEPENDENCIES_RUNNING
-            )
-            state = state.with_state(CompositePipelineState.DEPENDENCIES_RUNNING)
+        )
+
+    def _find_required_failures(
+        self, results: dict[str, DependencyResult]
+    ) -> list[str]:
+        """Find required dependencies that failed."""
+        failed = []
+        for name, result in results.items():
+            if result.is_success:
+                continue
+            dep_cfg = self._config.get_dependency(name)
+            if dep_cfg and dep_cfg.required:
+                failed.append(name)
+        return failed
+
+    async def _execute_dependencies_phase(
+        self,
+        state: CompositeCheckpointState,
+        keys_df: pl.DataFrame,
+    ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]:
+        """Execute the dependencies phase if configured."""
+        dependency_results: dict[str, DependencyResult] = {}
+        if not self._has_dependencies_configured():
+            return state, dependency_results
+
+        assert self._dependency_coordinator is not None
+        assert self._dependencies_runner_factory is not None
+
+        previous_state = state.state
+        self._fsm.validate_fsm_transition(
+            previous_state, CompositePipelineState.DEPENDENCIES_RUNNING
+        )
+        state = state.with_state(CompositePipelineState.DEPENDENCIES_RUNNING)
+        await self._checkpoint_manager.save(state)
+
+        dep_pipelines = [d.pipeline for d in self._config.dependencies]
+        self._fsm.log_fsm_transition(
+            from_state=previous_state,
+            to_state=CompositePipelineState.DEPENDENCIES_RUNNING,
+            stage="dependencies_start",
+            dependencies=dep_pipelines,
+            count=len(dep_pipelines),
+        )
+        self._logger.info(
+            PipelineEvent.phase_started("dependencies"),
+            composite=self._config.name,
+            run_id=self._run_id_str,
+            dependencies=dep_pipelines,
+            count=len(dep_pipelines),
+        )
+
+        dependency_results = await self._dependency_coordinator.run_dependencies(
+            keys=keys_df,
+            dependencies=self._config.dependencies,
+            completed=state.completed_dependencies,
+            runner_factory=self._dependencies_runner_factory,
+        )
+
+        for dep_name, dep_result in dependency_results.items():
+            if dep_result.is_success:
+                state = state.with_dependency_completed(dep_name, dep_result)
+
+        required_failed = self._find_required_failures(dependency_results)
+        if required_failed:
+            state = state.with_state(CompositePipelineState.FAILED)
             await self._checkpoint_manager.save(state)
+            raise RuntimeError(f"Required dependencies failed: {required_failed}")
 
-            self._fsm.log_fsm_transition(
-                from_state=previous_state,
-                to_state=CompositePipelineState.DEPENDENCIES_RUNNING,
-                stage="dependencies_start",
-                dependencies=[d.pipeline for d in self._config.dependencies],
-                count=len(self._config.dependencies),
-            )
+        previous_state = state.state
+        state = state.with_state(CompositePipelineState.DEPENDENCIES_COMPLETED)
+        succeeded = sum(1 for r in dependency_results.values() if r.is_success)
+        failed = len(dependency_results) - succeeded
+        self._fsm.log_fsm_transition(
+            from_state=previous_state,
+            to_state=CompositePipelineState.DEPENDENCIES_COMPLETED,
+            stage="dependencies_complete",
+            succeeded=succeeded,
+            failed=failed,
+        )
+        self._logger.info(
+            PipelineEvent.phase_completed("dependencies"),
+            composite=self._config.name,
+            run_id=self._run_id_str,
+            succeeded=succeeded,
+            failed=failed,
+        )
+        await self._checkpoint_manager.save(state)
+        return state, dependency_results
 
-            self._logger.info(
-                PipelineEvent.phase_started("dependencies"),
-                composite=self._config.name,
-                run_id=self._run_id_str,
-                dependencies=[d.pipeline for d in self._config.dependencies],
-                count=len(self._config.dependencies),
-            )
-
-            # Execute dependencies
-            dependency_results = await self._dependency_coordinator.run_dependencies(
-                keys=keys_df,
-                dependencies=self._config.dependencies,
-                completed=state.completed_dependencies,
-                runner_factory=self._dependencies_runner_factory,
-            )
-
-            # Update checkpoint with completed dependencies
-            for dep_name, dep_result in dependency_results.items():
-                if dep_result.is_success:
-                    state = state.with_dependency_completed(dep_name, dep_result)
-
-            # Check for required dependency failures
-            required_failed = [
-                dep_name
-                for dep_name, dep_result in dependency_results.items()
-                if not dep_result.is_success
-                and self._config.get_dependency(dep_name)
-                and self._config.get_dependency(dep_name).required  # type: ignore[union-attr]
-            ]
-            if required_failed:
-                # Required dependency failed - transition to FAILED
-                state = state.with_state(CompositePipelineState.FAILED)
-                await self._checkpoint_manager.save(state)
-                raise RuntimeError(f"Required dependencies failed: {required_failed}")
-
-            # Transition to DEPENDENCIES_COMPLETED
-            previous_state = state.state
-            state = state.with_state(CompositePipelineState.DEPENDENCIES_COMPLETED)
-            self._fsm.log_fsm_transition(
-                from_state=previous_state,
-                to_state=CompositePipelineState.DEPENDENCIES_COMPLETED,
-                stage="dependencies_complete",
-                succeeded=len([r for r in dependency_results.values() if r.is_success]),
-                failed=len(
-                    [r for r in dependency_results.values() if not r.is_success]
-                ),
-            )
-            self._logger.info(
-                PipelineEvent.phase_completed("dependencies"),
-                composite=self._config.name,
-                run_id=self._run_id_str,
-                succeeded=len([r for r in dependency_results.values() if r.is_success]),
-                failed=len(
-                    [r for r in dependency_results.values() if not r.is_success]
-                ),
-            )
-            await self._checkpoint_manager.save(state)
-
-        # Step 4: Determine which enrichers to run
+    async def _execute_enrichment_phase(
+        self,
+        state: CompositeCheckpointState,
+        keys_df: pl.DataFrame,
+    ) -> tuple[CompositeCheckpointState, dict[str, EnrichmentResult]]:
+        """Execute the enrichment phase."""
         enrichers_to_run = self._get_enrichers_to_run(state)
+        enrichment_results: dict[str, EnrichmentResult] = {}
 
-        # Step 5: Run enrichers (fan-out) with FSM state management
         if enrichers_to_run:
-            # Validate and transition to ENRICHING state before starting enrichments
             enricher_names = [e.pipeline for e in enrichers_to_run]
             previous_state = state.state
             self._fsm.validate_fsm_transition(
@@ -479,7 +511,6 @@ class CompositePipelineRunner:
             state = state.with_state(CompositePipelineState.ENRICHING)
             await self._checkpoint_manager.save(state)
 
-            # Log FSM transition to ENRICHING
             self._fsm.log_fsm_transition(
                 from_state=previous_state,
                 to_state=CompositePipelineState.ENRICHING,
@@ -487,7 +518,6 @@ class CompositePipelineRunner:
                 enrichers=enricher_names,
                 count=len(enrichers_to_run),
             )
-            # Log phase event for enrichment start
             self._logger.info(
                 PipelineEvent.phase_started("enrichment"),
                 composite=self._config.name,
@@ -503,26 +533,21 @@ class CompositePipelineRunner:
                 runner_factory=self._enricher_runner_factory,
             )
 
-            # Update checkpoint with completed enrichers
             for name, result in enrichment_results.items():
                 if result.is_success or result.status == EnrichmentStatus.SKIPPED:
                     state = state.with_enricher_completed(name, result)
             await self._checkpoint_manager.save(state)
 
-            # Log aggregated enrichment results
             log_enrichment_summary(enrichment_results, self._config.name, self._logger)
         else:
-            # No enrichers to run - skip enrichment stage
             self._logger.info(
                 "No enrichers to run, skipping enrichment stage",
                 composite=self._config.name,
                 reason="all_completed_or_filtered",
             )
 
-        # Merge with previously completed enrichers
         enrichment_results.update(state.enrichment_results)
 
-        # Step 4b: Add NOT_RUN results for optional enrichers skipped due to required_only
         enrichment_results = add_not_run_results(
             enrichment_results,
             enrichers_to_run,
@@ -533,22 +558,18 @@ class CompositePipelineRunner:
             self._logger,
         )
 
-        # Step 6: Check required enrichers with FSM FAILED transition on error
+        # Check required enrichers with FSM FAILED transition on error
         try:
             self._check_required_enrichers(enrichment_results)
         except RuntimeError as e:
-            # Required enricher failed - transition to FAILED state
             previous_state = state.state
             state = state.with_state(CompositePipelineState.FAILED)
-
-            # Log FSM transition to FAILED
             self._fsm.log_fsm_transition(
                 from_state=previous_state,
                 to_state=CompositePipelineState.FAILED,
                 stage="required_enricher_failed",
                 error=str(e),
             )
-
             try:
                 await self._checkpoint_manager.save(state)
             except Exception as save_error:
@@ -558,7 +579,6 @@ class CompositePipelineRunner:
                     run_id=self._run_id_str,
                     error=str(save_error),
                 )
-
             self._logger.error(
                 "Required enricher failed, pipeline transitioning to FAILED",
                 composite=self._config.name,
@@ -567,20 +587,20 @@ class CompositePipelineRunner:
             )
             raise
 
-        # Step 5b: Transition to ENRICHMENT_COMPLETED
-        state = await self._transition_to_enrichment_completed(state)
+        return state, enrichment_results
 
-        # Step 7: Execute merge or skip in dry run mode
-        state, merge_result = await self._execute_merge_stage(state, enrichment_results)
-
-        # Step 8: Finalize - set COMPLETED and cleanup checkpoint
-        await self._finalize_pipeline(state)
-
+    def _build_composite_result(
+        self,
+        seed_result: SeedResult,
+        dependency_results: dict[str, DependencyResult],
+        enrichment_results: dict[str, EnrichmentResult],
+        merge_result: MergeResult | None,
+    ) -> CompositeResult:
+        """Build the final CompositeResult."""
         completed_at = datetime.now(tz=UTC)
-        started = self._started_at or completed_at  # Fallback if not set
+        started = self._started_at or completed_at
         total_duration = (completed_at - started).total_seconds()
 
-        # Calculate if we had warnings from optional enricher failures
         had_warnings = calculate_had_warnings(
             enrichment_results,
             frozenset(self._config.required_enrichers),
@@ -588,7 +608,6 @@ class CompositePipelineRunner:
             self._logger,
         )
 
-        # Log completion with appropriate status
         if had_warnings:
             self._logger.info(
                 PipelineEvent.COMPLETE,
