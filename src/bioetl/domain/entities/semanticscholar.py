@@ -15,7 +15,7 @@ Provider-specific fields (paper_id, pmc_id, arxiv_id, etc.) are defined here.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 
@@ -89,7 +89,7 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
 
     # SemanticScholar-specific classification (JSON strings)
     subject_fields: str | None = None
-    publication_type: str | None = None
+    publication_type: str | None = field(default=None)  # type: ignore[assignment]
     publication_types: str | None = None  # JSON array of publication types
 
     # Author identifiers (for author-level analytics and disambiguation)

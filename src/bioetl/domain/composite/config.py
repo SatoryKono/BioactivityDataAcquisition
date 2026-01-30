@@ -394,7 +394,12 @@ class DataSchemaConfig:
             Tuple of ColumnGroupConfig for the layer.
             Returns layer-specific groups if defined, otherwise shared groups.
         """
-        layer_config = getattr(self, layer, None)
+        layer_config = None
+        if layer == "silver":
+            layer_config = self.silver
+        elif layer == "gold":
+            layer_config = self.gold
+
         if layer_config and layer_config.column_groups:
             return layer_config.column_groups
         return self.column_groups
