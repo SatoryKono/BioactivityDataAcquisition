@@ -1,14 +1,20 @@
 """Composite pipeline configuration models.
+
 Defines immutable configuration objects for composite pipelines:
 - SeedConfig: Seed pipeline configuration
 - EnricherConfig: Single enricher configuration
 - MergeConfig: Merge operation configuration
 - CompositeConfig: Complete composite pipeline configuration
+
 Aggregation configuration is defined in aggregation.py and re-exported here.
+
 See ADR-026 for architectural decisions.
 """
+
 from __future__ import annotations
+
 from dataclasses import dataclass, field
+
 from bioetl.domain.composite.aggregation import (
     AggregationConfig,
     AggregationFieldSpec,
@@ -20,6 +26,15 @@ from bioetl.domain.composite.strategy import (
     FallbackStrategy,
     MergeStrategy,
 )
+from bioetl.domain.composite.validators import (
+    normalize_data_schema_config,
+    require_non_empty,
+    validate_optional_threshold,
+    validate_positive,
+    validate_positive_limit,
+    validate_threshold_order,
+)
+
 # Re-export aggregation types for backward compatibility
 __all__ = [
     "AggregationConfig",
@@ -39,16 +54,21 @@ __all__ = [
     "MergeConfig",
     "SeedConfig",
 ]
+
+
 @dataclass(frozen=True, slots=True)
 class SeedConfig:
     """Configuration for seed pipeline in a composite.
+
     The seed pipeline extracts primary entities that will be
     enriched by downstream pipelines.
+
     Attributes:
         pipeline: Name of the seed pipeline (e.g., "chembl_publication").
         output_keys: Keys to extract for enrichment (e.g., ["doi", "pmid"]).
         silver_table: Path to seed Silver table output.
         limit: Optional limit on records to extract.
+
     Example:
         >>> config = SeedConfig(
         ...     pipeline="chembl_publication",
@@ -56,31 +76,39 @@ class SeedConfig:
         ...     silver_table="silver/chembl/publication",
         ... )
     """
+
     pipeline: str
     output_keys: tuple[str, ...]
     silver_table: str
     limit: int | None = None
+
     def __post_init__(self) -> None:
         """Validate and convert types."""
         if isinstance(self.output_keys, list):
             object.__setattr__(self, "output_keys", tuple(self.output_keys))
         self._validate()
+
     def _validate(self) -> None:
         """Validate configuration invariants."""
-        _require_non_empty(self.pipeline, "seed pipeline name")
-        _require_non_empty(self.output_keys, "seed output_keys")
-        _require_non_empty(self.silver_table, "seed silver_table")
-        _validate_positive_limit(self.limit, "seed")
+        require_non_empty(self.pipeline, "seed pipeline name")
+        require_non_empty(self.output_keys, "seed output_keys")
+        require_non_empty(self.silver_table, "seed silver_table")
+        validate_positive_limit(self.limit, "seed")
+
+
 @dataclass(frozen=True, slots=True)
 class DependencyConfig:
     """Configuration for a dependency pipeline.
+
     Dependencies run after the seed but before enrichers to populate
     Silver tables that enrichers will read from. Unlike enrichers,
     dependencies execute as full standalone pipelines (API → Bronze → Silver).
+
     Use cases:
     - Derived entities that need full API data (e.g., publication_term from /document)
     - Pipelines with force_full_scan that don't work with enricher filtering
     - Data that must be pre-populated before enrichment phase
+
     Attributes:
         pipeline: Name of the dependency pipeline (e.g., "chembl_publication_term").
         join_keys: Keys to extract from seed for filtering API calls.
@@ -88,6 +116,7 @@ class DependencyConfig:
         required: If True, failure causes composite failure.
         timeout_seconds: Maximum time for dependency execution.
         silver_table: Path to dependency's Silver table.
+
     Example:
         >>> config = DependencyConfig(
         ...     pipeline="chembl_publication_term",
@@ -95,31 +124,39 @@ class DependencyConfig:
         ...     silver_table="silver/chembl/publication_term",
         ... )
     """
+
     pipeline: str
     join_keys: tuple[str, ...]
     required: bool = False
     timeout_seconds: int = 600
     silver_table: str | None = None
+
     def __post_init__(self) -> None:
         """Validate and convert types."""
         if isinstance(self.join_keys, list):
             object.__setattr__(self, "join_keys", tuple(self.join_keys))
         self._validate()
+
     def _validate(self) -> None:
         """Validate configuration invariants."""
-        _require_non_empty(self.pipeline, "dependency pipeline name")
-        _require_non_empty(self.join_keys, f"dependency {self.pipeline} join_keys")
-        _validate_positive(
+        require_non_empty(self.pipeline, "dependency pipeline name")
+        require_non_empty(self.join_keys, f"dependency {self.pipeline} join_keys")
+        validate_positive(
             self.timeout_seconds, f"dependency {self.pipeline} timeout_seconds"
         )
+
     @property
     def primary_join_key(self) -> str:
         """Get the primary (first) join key."""
         return self.join_keys[0]
+
+
 @dataclass(frozen=True, slots=True)
 class EnricherConfig:
     """Configuration for a single enrichment pipeline.
+
     Defines how an enricher joins with seed data and handles failures.
+
     Attributes:
         pipeline: Name of the enricher pipeline (e.g., "crossref_publication").
         join_keys: Keys to join on from seed (e.g., ("doi",) or ("doi", "pmid")).
@@ -135,11 +172,13 @@ class EnricherConfig:
             ONE_TO_ONE (default) or MANY_TO_ONE.
         aggregation: Aggregation config for MANY_TO_ONE enrichers.
             Required when cardinality is MANY_TO_ONE.
+
     Example:
         >>> config = EnricherConfig(
         ...     pipeline="crossref_publication", join_keys=("doi",), required=True,
         ... )
     """
+
     pipeline: str
     join_keys: tuple[str, ...]
     required: bool = False
@@ -150,6 +189,7 @@ class EnricherConfig:
     limit: int | None = None
     cardinality: EnricherCardinality = EnricherCardinality.ONE_TO_ONE
     aggregation: AggregationConfig | None = None
+
     def __post_init__(self) -> None:
         """Validate and convert types."""
         if isinstance(self.join_keys, list):
@@ -173,14 +213,15 @@ class EnricherConfig:
                 AggregationConfig(**self.aggregation),
             )
         self._validate()
+
     def _validate(self) -> None:
         """Validate configuration invariants."""
-        _require_non_empty(self.pipeline, "enricher pipeline name")
-        _require_non_empty(self.join_keys, f"enricher {self.pipeline} join_keys")
-        _validate_positive(
+        require_non_empty(self.pipeline, "enricher pipeline name")
+        require_non_empty(self.join_keys, f"enricher {self.pipeline} join_keys")
+        validate_positive(
             self.timeout_seconds, f"enricher {self.pipeline} timeout_seconds"
         )
-        _validate_positive_limit(self.limit, f"enricher {self.pipeline}")
+        validate_positive_limit(self.limit, f"enricher {self.pipeline}")
         # Validate cardinality/aggregation relationship
         if (
             self.cardinality == EnricherCardinality.MANY_TO_ONE
@@ -190,25 +231,32 @@ class EnricherConfig:
                 f"Enricher '{self.pipeline}' with cardinality=many_to_one "
                 "requires aggregation config"
             )
+
     @property
     def primary_join_key(self) -> str:
         """Get the primary (first) join key."""
         return self.join_keys[0]
+
     @property
     def has_fallback_keys(self) -> bool:
         """Check if fallback join keys are available."""
         return len(self.join_keys) > 1
+
     @property
     def is_many_to_one(self) -> bool:
         """Check if this enricher has 1:M cardinality."""
         return self.cardinality == EnricherCardinality.MANY_TO_ONE
+
+
 @dataclass(frozen=True, slots=True)
 class LayerColumnConfig:
     """Column configuration for a single medallion layer (Silver or Gold).
+
     Supports three modes:
     1. Explicit column list (columns parameter)
     2. Filtering existing groups (include_groups/exclude_fields)
     3. Layer-specific column groups (column_groups parameter)
+
     Attributes:
         columns: Explicit list of columns for this layer.
             Takes precedence over other configuration.
@@ -220,14 +268,17 @@ class LayerColumnConfig:
             Supports glob patterns (e.g., "_dq_*", "*_internal").
         rename_fields: Mapping of old_name -> new_name for renaming columns.
             Applied after filtering but before ordering.
+
             IMPORTANT: For Gold layer, use column names AFTER silver.rename_fields.
             Gold reads from Silver, so renames must reference Silver output schema.
+
             Example with rename chain:
                 silver:
                   rename_fields: {"document_chembl_id": "chembl_doc_id"}
                 gold:
                   rename_fields: {"chembl_doc_id": "publication_id"}
                   # ↑ Uses Silver output name, not original!
+
     Example:
         >>> # Explicit columns for Gold layer
         >>> gold_config = LayerColumnConfig(
@@ -240,11 +291,13 @@ class LayerColumnConfig:
         ...     rename_fields={"_run_id": "pipeline_run_id", "pmid": "pubmed_id"},
         ... )
     """
+
     columns: tuple[str, ...] | None = None
     column_groups: tuple[ColumnGroupConfig, ...] | None = None
     include_groups: tuple[str, ...] | None = None
     exclude_fields: tuple[str, ...] | None = None
     rename_fields: dict[str, str] = field(default_factory=dict)
+
     def __post_init__(self) -> None:
         """Validate and convert types."""
         if self.columns is not None and isinstance(self.columns, list):
@@ -266,6 +319,7 @@ class LayerColumnConfig:
         if not isinstance(self.rename_fields, dict):
             object.__setattr__(self, "rename_fields", dict(self.rename_fields))
         self._validate()
+
     def _validate(self) -> None:
         """Validate configuration invariants."""
         # At most one of: columns, include_groups, column_groups
@@ -280,20 +334,26 @@ class LayerColumnConfig:
             raise ValueError(
                 "LayerColumnConfig: only one of columns/include_groups/column_groups allowed"
             )
+
+
 @dataclass(frozen=True, slots=True)
 class DataSchemaConfig:
     """Multi-layer column schema configuration.
+
     Defines column ordering and filtering for different medallion layers.
     Supports backward compatibility with shared column_groups.
+
     Attributes:
         column_groups: Shared column groups for all layers (legacy/default).
         silver: Silver layer-specific column configuration.
         gold: Gold layer-specific column configuration.
+
     Resolution order:
     1. If layer.columns is set → use explicit list
     2. If layer.include_groups is set → filter shared column_groups
     3. If layer.column_groups is set → use layer-specific groups
     4. Otherwise → use shared column_groups
+
     Example:
         >>> # Backward compatible (shared groups)
         >>> config = DataSchemaConfig(
@@ -311,31 +371,21 @@ class DataSchemaConfig:
         ...     ),
         ... )
     """
+
     column_groups: tuple[ColumnGroupConfig, ...] = ()
     silver: LayerColumnConfig | None = None
     gold: LayerColumnConfig | None = None
+
     def __post_init__(self) -> None:
         """Validate and convert types."""
-        self._convert_types()
-    def _convert_types(self) -> None:
-        """Convert inputs to immutable types."""
-        if isinstance(self.column_groups, list):
-            object.__setattr__(
-                self,
-                "column_groups",
-                tuple(
-                    ColumnGroupConfig(**g) if isinstance(g, dict) else g
-                    for g in self.column_groups
-                ),
-            )
-        if isinstance(self.silver, dict):
-            object.__setattr__(self, "silver", LayerColumnConfig(**self.silver))
-        if isinstance(self.gold, dict):
-            object.__setattr__(self, "gold", LayerColumnConfig(**self.gold))
+        normalize_data_schema_config(self)
+
     def get_layer_groups(self, layer: str) -> tuple[ColumnGroupConfig, ...]:
         """Get effective column groups for a layer.
+
         Args:
             layer: Layer name ("silver" or "gold").
+
         Returns:
             Tuple of ColumnGroupConfig for the layer.
             Returns layer-specific groups if defined, otherwise shared groups.
@@ -345,14 +395,18 @@ class DataSchemaConfig:
             layer_config = self.silver
         elif layer == "gold":
             layer_config = self.gold
+
         if layer_config and layer_config.column_groups:
             return layer_config.column_groups
         return self.column_groups
+
     def should_include_group(self, layer: str, group_name: str) -> bool:
         """Check if a group should be included for a layer.
+
         Args:
             layer: Layer name ("silver" or "gold").
             group_name: Name of the column group.
+
         Returns:
             True if group should be included, False otherwise.
         """
@@ -360,11 +414,15 @@ class DataSchemaConfig:
         if not layer_config or not layer_config.include_groups:
             return True  # No filter → include all groups
         return group_name in layer_config.include_groups
+
+
 @dataclass(frozen=True, slots=True)
 class ColumnGroupConfig:
     """Configuration for a column group in output ordering.
+
     Defines how columns are grouped and ordered in the merged output.
     Columns can be matched by explicit field names or regex patterns.
+
     Attributes:
         name: Group name for logging/debugging.
         fields: Explicit list of field names to include in this group.
@@ -374,6 +432,7 @@ class ColumnGroupConfig:
             Applied after explicit field matching.
         provider_order: Order of providers within this group.
             Seed columns (no prefix) always come first.
+
     Example:
         >>> group = ColumnGroupConfig(
         ...     name="title",
@@ -381,6 +440,7 @@ class ColumnGroupConfig:
         ...     provider_order=("chembl", "crossref", "openalex"),
         ... )
     """
+
     name: str
     fields: tuple[str, ...] = ()
     pattern: str | None = None
@@ -391,6 +451,7 @@ class ColumnGroupConfig:
         "pubmed",
         "semanticscholar",
     )
+
     def __post_init__(self) -> None:
         """Validate and convert types."""
         if isinstance(self.fields, list):
@@ -398,17 +459,22 @@ class ColumnGroupConfig:
         if isinstance(self.provider_order, list):
             object.__setattr__(self, "provider_order", tuple(self.provider_order))
         self._validate()
+
     def _validate(self) -> None:
         """Validate configuration invariants."""
-        _require_non_empty(self.name, "column group name")
+        require_non_empty(self.name, "column group name")
         if not self.fields and not self.pattern:
             raise ValueError(
                 f"Column group '{self.name}' must have either fields or pattern"
             )
+
+
 @dataclass(frozen=True, slots=True)
 class MergeConfig:
     """Configuration for merge step.
+
     Defines how enriched data is combined into a unified output.
+
     Attributes:
         strategy: Join strategy for merging (left_outer, inner, union).
         conflict_resolution: Strategy for field conflicts.
@@ -423,6 +489,7 @@ class MergeConfig:
             for common fields instead of coalescing them. Default: False.
             When enabled, columns like chembl.publication.title and
             crossref.publication.title are both preserved in the output.
+
     Example:
         >>> config = MergeConfig(
         ...     strategy=MergeStrategy.LEFT_OUTER,
@@ -432,6 +499,7 @@ class MergeConfig:
         ...     preserve_all_sources=True,  # Keep all provider columns
         ... )
     """
+
     strategy: MergeStrategy
     conflict_resolution: ConflictResolution
     output_silver_path: str
@@ -440,6 +508,7 @@ class MergeConfig:
     field_mappings: dict[str, str] = field(default_factory=dict)
     column_groups: tuple[ColumnGroupConfig, ...] = ()
     preserve_all_sources: bool = False
+
     def __post_init__(self) -> None:
         """Validate and convert types."""
         self._convert_strategy()
@@ -447,12 +516,14 @@ class MergeConfig:
         self._convert_field_priorities()
         self._convert_column_groups()
         self._validate()
+
     def _convert_strategy(self) -> None:
         """Convert strategy string to enum if needed."""
         if isinstance(self.strategy, str):
             object.__setattr__(
                 self, "strategy", MergeStrategy.from_string(self.strategy)
             )
+
     def _convert_conflict_resolution(self) -> None:
         """Convert conflict_resolution string to enum if needed."""
         if isinstance(self.conflict_resolution, str):
@@ -461,6 +532,7 @@ class MergeConfig:
                 "conflict_resolution",
                 ConflictResolution.from_string(self.conflict_resolution),
             )
+
     def _convert_field_priorities(self) -> None:
         """Convert list values in field_priorities to tuples."""
         if self.field_priorities:
@@ -469,6 +541,7 @@ class MergeConfig:
                 for k, v in self.field_priorities.items()
             }
             object.__setattr__(self, "field_priorities", converted)
+
     def _convert_column_groups(self) -> None:
         """Convert list of column groups to tuple of ColumnGroupConfig."""
         if isinstance(self.column_groups, list):
@@ -477,6 +550,7 @@ class MergeConfig:
                 for g in self.column_groups
             )
             object.__setattr__(self, "column_groups", converted)
+
     def _validate(self) -> None:
         """Validate configuration invariants."""
         if not self.output_silver_path:
@@ -490,49 +564,65 @@ class MergeConfig:
             raise ValueError(
                 "field_priorities required when using EXPLICIT_RULES conflict resolution"
             )
+
     def get_field_priority(self, field_name: str) -> tuple[str, ...] | None:
         """Get source priority order for a field.
+
         Args:
             field_name: Name of the field.
+
         Returns:
             Tuple of source names in priority order, or None if not configured.
         """
         return self.field_priorities.get(field_name)
+
+
 @dataclass(frozen=True, slots=True)
 class DQOverrideConfig:
     """DQ threshold overrides for a specific enricher.
+
     Allows customizing DQ thresholds per-enricher when defaults
     are too strict or lenient.
+
     Attributes:
         soft_fail_threshold: Override soft threshold (0.0-1.0).
         hard_fail_threshold: Override hard threshold (0.0-1.0).
     """
+
     soft_fail_threshold: float | None = None
     hard_fail_threshold: float | None = None
+
     def __post_init__(self) -> None:
         """Validate threshold values."""
-        _validate_optional_threshold(self.soft_fail_threshold, "soft_fail_threshold")
-        _validate_optional_threshold(self.hard_fail_threshold, "hard_fail_threshold")
-        _validate_threshold_order(self.soft_fail_threshold, self.hard_fail_threshold)
+        validate_optional_threshold(self.soft_fail_threshold, "soft_fail_threshold")
+        validate_optional_threshold(self.hard_fail_threshold, "hard_fail_threshold")
+        validate_threshold_order(self.soft_fail_threshold, self.hard_fail_threshold)
+
+
 @dataclass(frozen=True, slots=True)
 class CompositeDQConfig:
     """Data quality configuration for composite pipelines.
+
     Extends standard DQConfig with per-enricher overrides.
+
     Attributes:
         soft_fail_threshold: Default soft threshold for composite.
         hard_fail_threshold: Default hard threshold for composite.
         enricher_overrides: Per-enricher DQ threshold overrides.
         required_fields: Fields required in final Gold output.
     """
+
     soft_fail_threshold: float = 0.10
     hard_fail_threshold: float = 0.30
     enricher_overrides: dict[str, DQOverrideConfig] = field(default_factory=dict)
     required_fields: tuple[str, ...] = ()
+
     def __post_init__(self) -> None:
         """Validate and convert types."""
         if isinstance(self.required_fields, list):
             object.__setattr__(self, "required_fields", tuple(self.required_fields))
         self._validate()
+
     def _validate(self) -> None:
         """Validate DQ configuration."""
         if not 0.0 <= self.soft_fail_threshold <= 1.0:
@@ -549,31 +639,38 @@ class CompositeDQConfig:
             raise ValueError(
                 "soft_fail_threshold must be less than hard_fail_threshold"
             )
+
     def get_enricher_soft_threshold(self, enricher_name: str) -> float:
         """Get effective soft threshold for an enricher."""
         override = self.enricher_overrides.get(enricher_name)
         if override and override.soft_fail_threshold is not None:
             return override.soft_fail_threshold
         return self.soft_fail_threshold
+
     def get_enricher_hard_threshold(self, enricher_name: str) -> float:
         """Get effective hard threshold for an enricher."""
         override = self.enricher_overrides.get(enricher_name)
         if override and override.hard_fail_threshold is not None:
             return override.hard_fail_threshold
         return self.hard_fail_threshold
+
+
 @dataclass(frozen=True, slots=True)
 class ExecutionConfig:
     """Execution options for composite pipeline.
+
     Attributes:
         max_concurrency: Maximum concurrent enrichers.
         checkpoint_enabled: Enable checkpointing for resume.
         retry_max_attempts: Max retry attempts per enricher.
         retry_backoff_multiplier: Backoff multiplier for retries.
     """
+
     max_concurrency: int = 4
     checkpoint_enabled: bool = True
     retry_max_attempts: int = 3
     retry_backoff_multiplier: float = 2.0
+
     def __post_init__(self) -> None:
         """Validate configuration."""
         if self.max_concurrency <= 0:
@@ -589,29 +686,39 @@ class ExecutionConfig:
                 f"retry_backoff_multiplier must be positive, "
                 f"got {self.retry_backoff_multiplier}"
             )
+
+
 @dataclass(frozen=True, slots=True)
 class LineageConfig:
     """Configuration for lineage tracking.
+
     Attributes:
         track_field_sources: Track which source provided each field.
         track_timestamps: Include enrichment timestamps.
         track_status: Include per-record enrichment status.
     """
+
     track_field_sources: bool = True
     track_timestamps: bool = True
     track_status: bool = True
+
+
 @dataclass(frozen=True, slots=True)
 class CompositeConfig:
     """Complete composite pipeline configuration.
+
     Combines all configuration aspects: seed, dependencies, enrichers, merge,
     DQ, execution options, and lineage tracking.
+
     This is the main configuration object loaded from YAML and
     used by CompositePipelineRunner.
+
     Execution order:
     1. Seed pipeline runs first
     2. Dependencies run after seed (to populate Silver tables)
     3. Enrichers run after dependencies (read from populated Silver tables)
     4. Merge combines all results
+
     Attributes:
         name: Composite pipeline name (e.g., "composite_publication").
         version: Configuration version (semver).
@@ -624,6 +731,7 @@ class CompositeConfig:
         dq: Data quality configuration.
         execution: Execution options.
         lineage: Lineage tracking configuration.
+
     Example:
         >>> config = CompositeConfig(
         ...     name="composite_publication",
@@ -636,6 +744,7 @@ class CompositeConfig:
         >>> config.required_enrichers
         ('crossref_publication',)
     """
+
     name: str
     version: str
     seed: SeedConfig
@@ -645,6 +754,7 @@ class CompositeConfig:
     dq: CompositeDQConfig = field(default_factory=CompositeDQConfig)
     execution: ExecutionConfig = field(default_factory=ExecutionConfig)
     lineage: LineageConfig = field(default_factory=LineageConfig)
+
     def __post_init__(self) -> None:
         """Validate and convert types."""
         if isinstance(self.enrichers, list):
@@ -652,6 +762,7 @@ class CompositeConfig:
         if isinstance(self.dependencies, list):
             object.__setattr__(self, "dependencies", tuple(self.dependencies))
         self._validate()
+
     def _validate(self) -> None:
         """Validate composite configuration."""
         if not self.name:
@@ -664,6 +775,7 @@ class CompositeConfig:
         self._validate_dependency_join_keys()
         self._validate_unique_enrichers()
         self._validate_unique_dependencies()
+
     def _validate_join_keys(self) -> None:
         """Validate that enricher join keys exist in seed output_keys."""
         seed_keys = set(self.seed.output_keys)
@@ -674,12 +786,14 @@ class CompositeConfig:
                         f"Enricher {enricher.pipeline} join_key '{key}' "
                         f"not found in seed output_keys: {self.seed.output_keys}"
                     )
+
     def _validate_unique_enrichers(self) -> None:
         """Validate that enricher pipeline names are unique."""
         names = [e.pipeline for e in self.enrichers]
         if len(names) != len(set(names)):
             duplicates = [n for n in names if names.count(n) > 1]
             raise ValueError(f"Duplicate enricher pipelines: {set(duplicates)}")
+
     def _validate_dependency_join_keys(self) -> None:
         """Validate that dependency join keys exist in seed output_keys."""
         seed_keys = set(self.seed.output_keys)
@@ -690,52 +804,63 @@ class CompositeConfig:
                         f"Dependency {dep.pipeline} join_key '{key}' "
                         f"not found in seed output_keys: {self.seed.output_keys}"
                     )
+
     def _validate_unique_dependencies(self) -> None:
         """Validate that dependency pipeline names are unique."""
         names = [d.pipeline for d in self.dependencies]
         if len(names) != len(set(names)):
             duplicates = [n for n in names if names.count(n) > 1]
             raise ValueError(f"Duplicate dependency pipelines: {set(duplicates)}")
+
     @property
     def required_enrichers(self) -> tuple[str, ...]:
         """Get names of required enrichers."""
         return tuple(e.pipeline for e in self.enrichers if e.required)
+
     @property
     def optional_enrichers(self) -> tuple[str, ...]:
         """Get names of optional enrichers."""
         return tuple(e.pipeline for e in self.enrichers if not e.required)
+
     @property
     def all_enricher_names(self) -> tuple[str, ...]:
         """Get names of all enrichers."""
         return tuple(e.pipeline for e in self.enrichers)
+
     @property
     def required_dependencies(self) -> tuple[str, ...]:
         """Get names of required dependencies."""
         return tuple(d.pipeline for d in self.dependencies if d.required)
+
     @property
     def optional_dependencies(self) -> tuple[str, ...]:
         """Get names of optional dependencies."""
         return tuple(d.pipeline for d in self.dependencies if not d.required)
+
     @property
     def all_dependency_names(self) -> tuple[str, ...]:
         """Get names of all dependencies."""
         return tuple(d.pipeline for d in self.dependencies)
+
     def get_dependency(self, pipeline_name: str) -> DependencyConfig | None:
         """Get dependency config by pipeline name."""
         for dep in self.dependencies:
             if dep.pipeline == pipeline_name:
                 return dep
         return None
+
     def get_enricher(self, pipeline_name: str) -> EnricherConfig | None:
         """Get enricher config by pipeline name."""
         for enricher in self.enrichers:
             if enricher.pipeline == pipeline_name:
                 return enricher
         return None
+
     @property
     def lock_key(self) -> str:
         """Generate lock key for composite pipeline."""
         return f"composite:{self.name}"
+
     def to_dict(self) -> dict[str, object]:
         """Convert to dictionary for serialization."""
         return {
@@ -772,24 +897,3 @@ class CompositeConfig:
                 "output_gold_path": self.merge.output_gold_path,
             },
         }
-# Helper validation functions to reduce cyclomatic complexity
-def _require_non_empty(value: object, field_name: str) -> None:
-    """Validate that a value is not empty."""
-    if not value:
-        raise ValueError(f"{field_name} cannot be empty")
-def _validate_positive(value: int | float, field_name: str) -> None:
-    """Validate that a value is positive."""
-    if value <= 0:
-        raise ValueError(f"{field_name} must be positive, got {value}")
-def _validate_positive_limit(limit: int | None, context: str) -> None:
-    """Validate that an optional limit is positive if provided."""
-    if limit is not None and limit <= 0:
-        raise ValueError(f"{context} limit must be positive, got {limit}")
-def _validate_optional_threshold(value: float | None, name: str) -> None:
-    """Validate that an optional threshold is in [0.0, 1.0] range."""
-    if value is not None and not 0.0 <= value <= 1.0:
-        raise ValueError(f"{name} must be between 0.0 and 1.0, got {value}")
-def _validate_threshold_order(soft: float | None, hard: float | None) -> None:
-    """Validate that soft threshold is less than hard threshold."""
-    if soft is not None and hard is not None and soft >= hard:
-        raise ValueError("soft_fail_threshold must be less than hard_fail_threshold")

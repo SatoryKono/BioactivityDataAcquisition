@@ -14,7 +14,10 @@ PUBLICATION_FIELDS_MAPPING: dict[str, dict[str, Any]] = {
         "volume": "volume",
         "issue": "issue",
         "pages": "pagination",
-        "field_groups": [PublicationFieldGroup.METADATA, PublicationFieldGroup.IDENTIFIERS],
+        "field_groups": [
+            PublicationFieldGroup.BIBLIOGRAPHY,
+            PublicationFieldGroup.ID_AND_STATUS,
+        ],
     },
     "crossref": {
         "title": "title",
@@ -26,6 +29,9 @@ PUBLICATION_FIELDS_MAPPING: dict[str, dict[str, Any]] = {
         "volume": "volume",
         "issue": "issue",
         "pages": "page",
-        "field_groups": [PublicationFieldGroup.METADATA, PublicationFieldGroup.IDENTIFIERS],
+        "field_groups": [
+            PublicationFieldGroup.BIBLIOGRAPHY,
+            PublicationFieldGroup.ID_AND_STATUS,
+        ],
     },
 }
