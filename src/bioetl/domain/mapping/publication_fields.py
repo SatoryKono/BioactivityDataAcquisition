@@ -2,69 +2,97 @@ from typing import Any
 
 from bioetl.domain.value_objects.publication_field_groups import PublicationFieldGroup
 
+PUBLICATION_FIELDS_MAPPING: dict[str, dict[str, Any]] = {
+    "pubmed": {
+        "pmid": "pmid",
+        "doi": "doi",
+        "title": "title",
+        "abstract": "abstract",
+        "journal": "journal",
+        "journal_title": "journal",  # Legacy alias
+        "journal_iso": "journal_iso",
+        "journal_issn": "journal_issn",
+        "publication_date": "publication_date",
+        "year": "year",
+        "authors": "authors",
+        "affiliations": "affiliations",
+        "language": "language",
+        "publication_type": "publication_type",
+        "keywords": "keywords",
+        "mesh_terms": "mesh_terms",
+        "chemicals": "chemicals",
+        "citations": "citations",
+        "references": "references",
+        "pmc_id": "pmc_id",
+        "license": "license",
+        "copyright": "copyright",
+        "publisher": "publisher",
+    },
+    "crossref": {
+        "DOI": "doi",
+        "title": "title",
+        "abstract": "abstract",
+        "container-title": "journal",
+        "short-container-title": "journal_iso",
+        "ISSN": "journal_issn",
+        "published": "publication_date",
+        "issued": "publication_date",  # Fallback
+        "created": "created_date",
+        "author": "authors",
+        "publisher": "publisher",
+        "type": "publication_type",
+        "language": "language",
+        "reference": "references",
+        "is-referenced-by-count": "citation_count",
+        "URL": "url",
+        "link": "links",
+        "license": "license",
+        "subject": "keywords",
+    },
+}
 
-PUBLICATION_FIELDS_MAPPING: dict[str, Any] = {
-    # Common fields
-    "pmid": PublicationFieldGroup.ID_AND_STATUS,
-    "doi": PublicationFieldGroup.ID_AND_STATUS,
-    "pmc_id": PublicationFieldGroup.ID_AND_STATUS,
-    "title": PublicationFieldGroup.BIBLIOGRAPHY,
-    "abstract": PublicationFieldGroup.BIBLIOGRAPHY,
-    "journal": PublicationFieldGroup.BIBLIOGRAPHY,
-    "journal_name_short": PublicationFieldGroup.BIBLIOGRAPHY,
-    "publication_year": PublicationFieldGroup.DATE_AND_PLACES,
-    "publication_date": PublicationFieldGroup.DATE_AND_PLACES,
-    "volume": PublicationFieldGroup.BIBLIOGRAPHY,
-    "issue": PublicationFieldGroup.BIBLIOGRAPHY,
-    "page_first": PublicationFieldGroup.BIBLIOGRAPHY,
-    "page_last": PublicationFieldGroup.BIBLIOGRAPHY,
-    "issn": PublicationFieldGroup.BIBLIOGRAPHY,
-    "issn_print": PublicationFieldGroup.BIBLIOGRAPHY,
-    "issn_electronic": PublicationFieldGroup.BIBLIOGRAPHY,
-    "language": PublicationFieldGroup.TRASH,
-    "publication_type": PublicationFieldGroup.ID_AND_STATUS,
-    "publisher": PublicationFieldGroup.BIBLIOGRAPHY,
-    "license_url": PublicationFieldGroup.TRASH,
-    "is_oa": PublicationFieldGroup.ID_AND_STATUS,
-    "citations_received": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
-    "citations_made": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
-    "content_domain_domains": PublicationFieldGroup.TRASH,
-    "content_domain_crossmark_restriction": PublicationFieldGroup.TRASH,
-
-    # Author and affiliation fields
-    "authors": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
-    "affiliation_list": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
-    "author_details": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
-    "author_orcid_list": PublicationFieldGroup.TRASH,  # Deprecated
-    "author_orcids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,  # Legacy
-
-    # List fields
-    "issn_list": PublicationFieldGroup.BIBLIOGRAPHY,
-    "subject_keywords": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
-    "references": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
-
-    # Internal fields
-    "entity_id": PublicationFieldGroup.ID_AND_STATUS,
-    "content_hash": PublicationFieldGroup.TRASH,
-    "_run_id": PublicationFieldGroup.ID_AND_STATUS,
-    "_run_type": PublicationFieldGroup.ID_AND_STATUS,
-    "_source_batch_id": PublicationFieldGroup.ID_AND_STATUS,
-    "_ingestion_ts": PublicationFieldGroup.ID_AND_STATUS,
-    "_dq_warn": PublicationFieldGroup.ID_AND_STATUS,
-    "_dq_error": PublicationFieldGroup.ID_AND_STATUS,
-    "_index": PublicationFieldGroup.ID_AND_STATUS,
-    "_lookup_method": PublicationFieldGroup.ID_AND_STATUS,
-    "_original_id": PublicationFieldGroup.ID_AND_STATUS,
-    "_source": PublicationFieldGroup.ID_AND_STATUS,
-
-    # Deprecated / Trash fields
-    "published_print": PublicationFieldGroup.TRASH,
-    "published_online": PublicationFieldGroup.TRASH,
-    "alternative_id": PublicationFieldGroup.ID_AND_STATUS,
-    "published": PublicationFieldGroup.TRASH,
+# Invert the mapping for internal use (Unified -> Provider)
+UNIFIED_TO_PROVIDER: dict[str, dict[str, str]] = {
+    provider: {v: k for k, v in mapping.items() if isinstance(v, str)}
+    for provider, mapping in PUBLICATION_FIELDS_MAPPING.items()
 }
 
 
-def get_field_group(field_name: str) -> Any:
-    """Get the group for a given field name."""
-    return PUBLICATION_FIELDS_MAPPING.get(field_name, PublicationFieldGroup.TRASH)
+def apply_field_mapping(
+    data: dict[str, Any], provider: str, strict: bool = False
+) -> dict[str, Any]:
+    """
+    Map provider-specific fields to unified schema fields.
+
+    Args:
+        data: Dictionary of data from provider
+        provider: Provider name (pubmed, crossref, etc)
+        strict: If True, only include mapped fields
+
+    Returns:
+        Dictionary with unified field names
+    """
+    if provider not in PUBLICATION_FIELDS_MAPPING:
+        return data
+
+    mapping = PUBLICATION_FIELDS_MAPPING[provider]
+    result = {}
+
+    for key, value in data.items():
+        if key in mapping:
+            unified_key = mapping[key]
+            result[unified_key] = value
+        elif not strict:
+            result[key] = value
+
+    return result
+
+
+def get_provider_name(unified_name: str, provider: str) -> str | None:
+    """Get the provider-specific name for a unified field."""
+    return UNIFIED_TO_PROVIDER.get(provider, {}).get(unified_name)
+
+
+def get_unified_name(provider_name: str, provider: str) -> str | None:
+    """Get the unified name for a provider-specific field."""
+    return PUBLICATION_FIELDS_MAPPING.get(provider, {}).get(provider_name)
