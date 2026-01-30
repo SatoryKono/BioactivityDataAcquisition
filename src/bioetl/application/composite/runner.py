@@ -470,23 +470,35 @@ class CompositePipelineRunner:
 
         # Step 5: Run enrichers (fan-out) with FSM state management
         if enrichers_to_run:
-            # Validate and transition to ENRICHING state before starting enrichments
             enricher_names = [e.pipeline for e in enrichers_to_run]
-            previous_state = state.state
-            self._fsm.validate_fsm_transition(
-                previous_state, CompositePipelineState.ENRICHING
-            )
-            state = state.with_state(CompositePipelineState.ENRICHING)
-            await self._checkpoint_manager.save(state)
 
-            # Log FSM transition to ENRICHING
-            self._fsm.log_fsm_transition(
-                from_state=previous_state,
-                to_state=CompositePipelineState.ENRICHING,
-                stage="enrichment_start",
-                enrichers=enricher_names,
-                count=len(enrichers_to_run),
-            )
+            # Guard: skip transition if already in ENRICHING state (resume path)
+            if state.state != CompositePipelineState.ENRICHING:
+                # Validate and transition to ENRICHING state before starting enrichments
+                previous_state = state.state
+                self._fsm.validate_fsm_transition(
+                    previous_state, CompositePipelineState.ENRICHING
+                )
+                state = state.with_state(CompositePipelineState.ENRICHING)
+                await self._checkpoint_manager.save(state)
+
+                # Log FSM transition to ENRICHING
+                self._fsm.log_fsm_transition(
+                    from_state=previous_state,
+                    to_state=CompositePipelineState.ENRICHING,
+                    stage="enrichment_start",
+                    enrichers=enricher_names,
+                    count=len(enrichers_to_run),
+                )
+            else:
+                # Already in ENRICHING state (resume from partial enrichment)
+                self._logger.info(
+                    "Already in ENRICHING state, continuing enrichment",
+                    composite=self._config.name,
+                    run_id=self._run_id_str,
+                    enrichers=enricher_names,
+                    count=len(enrichers_to_run),
+                )
             # Log phase event for enrichment start
             self._logger.info(
                 PipelineEvent.phase_started("enrichment"),
@@ -749,8 +761,14 @@ class CompositePipelineRunner:
                 raise
         else:
             # Dry run mode - skip merge, transition directly to COMPLETED
+            # ENRICHMENT_COMPLETED -> COMPLETED is a valid FSM transition for dry_run
+            previous_state = state.state
+            self._fsm.validate_fsm_transition(
+                previous_state, CompositePipelineState.COMPLETED
+            )
+            state = state.with_state(CompositePipelineState.COMPLETED)
             self._fsm.log_fsm_transition(
-                from_state=state.state,
+                from_state=previous_state,
                 to_state=CompositePipelineState.COMPLETED,
                 stage="dry_run_skip_merge",
                 reason="dry_run_mode",

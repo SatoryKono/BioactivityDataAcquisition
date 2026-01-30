@@ -11,6 +11,9 @@ ENRICHMENT_COMPLETED -> MERGING -> COMPLETED. Any active state can -> FAILED.
 Note: Dependencies are optional. If no dependencies, SEED_COMPLETED transitions
 directly to ENRICHING (or DEPENDENCIES_RUNNING which immediately transitions to
 DEPENDENCIES_COMPLETED).
+
+Note: ENRICHMENT_COMPLETED can also transition directly to COMPLETED for dry_run
+mode, where the merge stage is intentionally skipped.
 """
 
 from __future__ import annotations
@@ -143,7 +146,7 @@ _STATE_TRANSITIONS: Mapping[str, frozenset[str]] = {
     "dependencies_running": frozenset({"dependencies_completed", "failed"}),
     "dependencies_completed": frozenset({"enriching"}),
     "enriching": frozenset({"enrichment_completed", "failed"}),
-    "enrichment_completed": frozenset({"merging"}),
+    "enrichment_completed": frozenset({"merging", "completed"}),
     "merging": frozenset({"completed", "failed"}),
     "completed": frozenset(),  # Terminal state
     "failed": frozenset(),  # Terminal state

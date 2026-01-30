@@ -168,6 +168,10 @@ class TestValidTransitions:
                 CompositePipelineState.ENRICHMENT_COMPLETED,
                 CompositePipelineState.MERGING,
             ),
+            (
+                CompositePipelineState.ENRICHMENT_COMPLETED,
+                CompositePipelineState.COMPLETED,
+            ),
             (CompositePipelineState.MERGING, CompositePipelineState.COMPLETED),
             (CompositePipelineState.MERGING, CompositePipelineState.FAILED),
         ],
@@ -342,6 +346,13 @@ class TestAllowedTransitions:
             {CompositePipelineState.ENRICHMENT_COMPLETED, CompositePipelineState.FAILED}
         )
 
+    def test_enrichment_completed_allowed_transitions(self):
+        """ENRICHMENT_COMPLETED should allow MERGING or COMPLETED (dry_run)."""
+        allowed = CompositePipelineState.ENRICHMENT_COMPLETED.allowed_transitions
+        assert allowed == frozenset(
+            {CompositePipelineState.MERGING, CompositePipelineState.COMPLETED}
+        )
+
     def test_merging_allowed_transitions(self):
         """MERGING should allow COMPLETED or FAILED."""
         allowed = CompositePipelineState.MERGING.allowed_transitions
@@ -489,6 +500,29 @@ class TestHappyPathScenario:
 
         assert state.is_terminal is True
         assert state.is_success is False
+
+    def test_dry_run_path_skips_merge(self):
+        """Dry run should transition directly from ENRICHMENT_COMPLETED to COMPLETED."""
+        state = CompositePipelineState.NOT_STARTED
+
+        # Seed phase
+        state.validate_transition(CompositePipelineState.SEED_RUNNING)
+        state = CompositePipelineState.SEED_RUNNING
+        state.validate_transition(CompositePipelineState.SEED_COMPLETED)
+        state = CompositePipelineState.SEED_COMPLETED
+
+        # Enrichment phase
+        state.validate_transition(CompositePipelineState.ENRICHING)
+        state = CompositePipelineState.ENRICHING
+        state.validate_transition(CompositePipelineState.ENRICHMENT_COMPLETED)
+        state = CompositePipelineState.ENRICHMENT_COMPLETED
+
+        # Dry run: skip merge, go directly to COMPLETED
+        state.validate_transition(CompositePipelineState.COMPLETED)
+        state = CompositePipelineState.COMPLETED
+
+        assert state.is_terminal is True
+        assert state.is_success is True
 
 
 class TestResumableStates:
