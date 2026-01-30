@@ -592,24 +592,16 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             return None
 
         month_lower = month_text.strip().lower()[:3]
-        month_map = {
-            "jan": 1,
-            "feb": 2,
-            "mar": 3,
-            "apr": 4,
-            "may": 5,
-            "jun": 6,
-            "jul": 7,
-            "aug": 8,
-            "sep": 9,
-            "oct": 10,
-            "nov": 11,
-            "dec": 12,
-        }
-        result = month_map.get(month_lower)
-        if result is None and month_text.isdigit():
-            result = int(month_text)
-        return result
+
+        # Look up in DateExtractor's MONTH_MAP (which uses 2-digit strings)
+        month_str = DateExtractor.MONTH_MAP.get(month_lower)
+        if month_str:
+            return int(month_str)
+
+        if month_text.isdigit():
+            return int(month_text)
+
+        return None
 
     def _extract_date_data(
         self,

@@ -189,10 +189,7 @@ class DateExtractor(BaseFieldExtractor):
     """
 
     MONTH_MAP: ClassVar[dict[str, str]] = MedlineDateParser.MONTH_MAP
-
-    def __init__(self) -> None:
-        """Initialize with MedlineDate parser."""
-        self._medline_parser = MedlineDateParser()
+    _MEDLINE_PARSER: ClassVar[MedlineDateParser] = MedlineDateParser()
 
     def extract(self, element: Element | None) -> RawDate | None:
         """Извлечь сырые компоненты даты из XML элемента.
@@ -221,7 +218,7 @@ class DateExtractor(BaseFieldExtractor):
         # Fallback: delegate to MedlineDate parser
         medline_date = get_text(element.find("MedlineDate"))
         if medline_date:
-            return self._medline_parser.parse(medline_date)
+            return self._MEDLINE_PARSER.parse(medline_date)
 
         return None
 
