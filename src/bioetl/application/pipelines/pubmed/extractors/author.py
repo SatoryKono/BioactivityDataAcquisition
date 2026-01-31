@@ -285,6 +285,23 @@ class AuthorExtractor(BaseFieldExtractor):
         if not raw_authors:
             return []
 
+        return cls.deduplicate_affiliations(raw_authors)
+
+    @staticmethod
+    def deduplicate_affiliations(
+        raw_authors: list[RawAuthor],
+    ) -> list[StructuredAffiliation]:
+        """Deduplicate structured affiliations from extracted author data.
+
+        Extracts and deduplicates affiliations from the raw author structures
+        without re-parsing XML. Useful when raw_author_data is already available.
+
+        Args:
+            raw_authors: List of RawAuthor dicts extracted from XML.
+
+        Returns:
+            List of unique StructuredAffiliation dicts, sorted by text.
+        """
         # Use text as key to deduplicate affiliations
         seen_texts: dict[str, StructuredAffiliation] = {}
         for author in raw_authors:

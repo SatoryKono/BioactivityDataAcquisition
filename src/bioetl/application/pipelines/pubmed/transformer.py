@@ -251,9 +251,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     ) -> dict[str, Any]:
         """Extract and process author-related fields from article XML."""
         normalized_authors = (
-            self._author_extractor.normalize(raw_author_data)
-            if raw_author_data
-            else []
+            self._author_extractor.normalize(raw_author_data) if raw_author_data else []
         )
         hashed_authors = self.hash_pii_list(normalized_authors) or []
 
@@ -270,17 +268,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         unique_affiliations = sorted(set(affiliation_values))
 
         # Structured affiliations with identifiers (deduplicated from raw_author_data)
-        seen_texts: dict[str, StructuredAffiliation] = {}
-        for author in raw_author_data:
-            structured_affs_list = author.get("structured_affiliations")
-            if structured_affs_list:
-                for aff in structured_affs_list:
-                    text = aff.get("text", "")
-                    if text and text not in seen_texts:
-                        seen_texts[text] = aff
-
-        # Return sorted by text for consistent ordering
-        structured_affs = sorted(seen_texts.values(), key=lambda x: x.get("text", ""))
+        structured_affs = AuthorExtractor.deduplicate_affiliations(raw_author_data)
         processed = self._process_structured_affiliations(structured_affs)
 
         return {
