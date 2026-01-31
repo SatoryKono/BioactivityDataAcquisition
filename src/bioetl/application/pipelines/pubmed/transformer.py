@@ -104,6 +104,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             data_normalizer=data_normalizer,
         )
         self._cached_xml_root = None
+        self._author_extractor = AuthorExtractor()
+        self._date_extractor = DateExtractor()
 
     def _pre_extract_validation(
         self,
@@ -249,7 +251,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     ) -> dict[str, Any]:
         """Extract and process author-related fields from article XML."""
         normalized_authors = (
-            AuthorExtractor().normalize(raw_author_data) if raw_author_data else []
+            self._author_extractor.normalize(raw_author_data)
+            if raw_author_data
+            else []
         )
         hashed_authors = self.hash_pii_list(normalized_authors) or []
 
@@ -265,8 +269,18 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             )
         unique_affiliations = sorted(set(affiliation_values))
 
-        # Structured affiliations with identifiers
-        structured_affs = AuthorExtractor.parse_structured_affiliations(article)
+        # Structured affiliations with identifiers (deduplicated from raw_author_data)
+        seen_texts: dict[str, StructuredAffiliation] = {}
+        for author in raw_author_data:
+            structured_affs_list = author.get("structured_affiliations")
+            if structured_affs_list:
+                for aff in structured_affs_list:
+                    text = aff.get("text", "")
+                    if text and text not in seen_texts:
+                        seen_texts[text] = aff
+
+        # Return sorted by text for consistent ordering
+        structured_affs = sorted(seen_texts.values(), key=lambda x: x.get("text", ""))
         processed = self._process_structured_affiliations(structured_affs)
 
         return {
@@ -333,7 +347,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         medline = root.find(".//MedlineCitation")
         pubmed_data = root.find(".//PubmedData")
 
-        raw_author_data = AuthorExtractor().extract(article) or []
+        raw_author_data = self._author_extractor.extract(article) or []
 
         return {
             **identifiers,
@@ -574,7 +588,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             return None, None
 
         # Use DateExtractor logic to support MedlineDate parsing
-        raw_date = DateExtractor().extract(pub_date_node)
+        raw_date = self._date_extractor.extract(pub_date_node)
         if not raw_date:
             return None, None
 
