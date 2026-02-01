@@ -208,11 +208,8 @@ class SilverWriter(BaseDeltaWriter):
                         # Uses OPT_SORT_KEYS for deterministic serialization (§2.8.1).
                         # Complex objects in Gold layer are flattened; Silver preserves
                         # JSON for forensic purposes.
-                        new_rec[name] = orjson.dumps(
-                            val, option=orjson.OPT_SORT_KEYS
-                        ).decode("utf-8")
-                    else:
-                        new_rec[name] = val
+                        val = orjson.dumps(val, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+                    new_rec[name] = val
             filtered_records.append(new_rec)
         arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
 
@@ -284,9 +281,8 @@ class SilverWriter(BaseDeltaWriter):
         try:
             return SilverWriteMode(mode)
         except ValueError:
-            valid_modes = [m.value for m in SilverWriteMode]
             raise ValueError(
-                f"Invalid Silver write mode '{mode}'. Allowed: {valid_modes}"
+                f"Invalid Silver write mode '{mode}'. Allowed: {[m.value for m in SilverWriteMode]}"
             ) from None
 
     def _deduplicate_by_primary_keys(
@@ -728,11 +724,7 @@ class SilverWriter(BaseDeltaWriter):
             run_id = RunID(UUID(run_id_str))
         except (ValueError, TypeError):
             # If run_id is not a valid UUID, skip audit logging
-            self.logger.warning(
-                "audit_skipped_invalid_run_id",
-                table=table_name,
-                run_id=run_id_str,
-            )
+            self.logger.warning("audit_skipped_invalid_run_id", table=table_name, run_id=run_id_str)
             return
 
         # Parse timestamp (ensure UTC-aware for consistency)
@@ -740,10 +732,8 @@ class SilverWriter(BaseDeltaWriter):
 
         if isinstance(ingestion_ts_str, str):
             timestamp = datetime.fromisoformat(ingestion_ts_str)
-        elif isinstance(ingestion_ts_str, datetime):
-            timestamp = ingestion_ts_str
         else:
-            timestamp = datetime.now(UTC)
+            timestamp = ingestion_ts_str if isinstance(ingestion_ts_str, datetime) else datetime.now(UTC)
         if timestamp.tzinfo is None:
             timestamp = timestamp.replace(tzinfo=UTC)
 
