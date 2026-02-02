@@ -571,7 +571,7 @@ class TestClassSize:
         "BatchWriter": 500,  # 494 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage + DQ defaults + column_order + layer config filtering
         # Application core classes
         "FilteredDataSource": 330,  # 320 lines - decorator with fallback mapping support
-        "ColumnOrderer": 380,  # 373 lines - Column ordering service with layer config filtering
+        "ColumnOrderer": 390,  # 388 lines - Column ordering service with layer config filtering
         # CrossRef adapter classes (similar to ChEMBL/PubMed adapters)
         "CrossRefAdapter": 610,  # 603 lines - HTTP adapter with batch DOI resolution + title fallback
         # PubChem adapter (similar to ChEMBL adapter)

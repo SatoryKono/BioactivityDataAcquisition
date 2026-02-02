@@ -16,7 +16,7 @@ env:
 jobs:
   # Fast tests run first for quick feedback
   test-fast:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
 
     steps:
@@ -55,7 +55,7 @@ jobs:
 
   # Full test matrix runs in parallel for comprehensive coverage
   test-matrix:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
     needs: test-fast  # Only run full tests if fast tests pass
     strategy:
@@ -119,7 +119,7 @@ jobs:
 
   # Final coverage verification (runs full test suite with threshold)
   coverage-verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: test-matrix
     timeout-minutes: 20
 
