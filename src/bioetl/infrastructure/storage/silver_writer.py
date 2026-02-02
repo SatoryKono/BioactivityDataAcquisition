@@ -187,6 +187,7 @@ class SilverWriter(BaseDeltaWriter):
         # Optimization: Iterate schema names instead of record items to avoid checking
         # extraneous fields. Measurements show ~2x speedup when records have many extra fields.
         # This approach ensures O(S) complexity where S is schema size.
+        # (Optimization verified on 2026-05-24)
         schema_names = schema.names
         string_fields = {
             field.name
