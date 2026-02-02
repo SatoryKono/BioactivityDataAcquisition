@@ -736,13 +736,32 @@ class MergeService:
                 seed_join_key in merged.columns
                 and enricher_join_key in enricher_df.columns
             ):
-                merged = merged.join(
-                    enricher_df,
-                    left_on=seed_join_key,
-                    right_on=enricher_join_key,
-                    how=how,
-                    suffix=f"_{enricher.pipeline}",
-                )
+                if seed_join_key != enricher_join_key:
+                    # Polars drops right_on column when left_on != right_on.
+                    # Use a disposable temp column as right_on so the enricher's
+                    # qualified join key (e.g. crossref.publication.doi) survives
+                    # as a regular data column in the result.
+                    import polars as pl
+
+                    temp_join_col = f"__temp_join_{enricher.pipeline}"
+                    enricher_df = enricher_df.with_columns(
+                        pl.col(enricher_join_key).alias(temp_join_col)
+                    )
+                    merged = merged.join(
+                        enricher_df,
+                        left_on=seed_join_key,
+                        right_on=temp_join_col,
+                        how=how,
+                        suffix=f"_{enricher.pipeline}",
+                    )
+                else:
+                    merged = merged.join(
+                        enricher_df,
+                        left_on=seed_join_key,
+                        right_on=enricher_join_key,
+                        how=how,
+                        suffix=f"_{enricher.pipeline}",
+                    )
 
         return merged
 

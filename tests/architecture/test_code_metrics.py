@@ -119,7 +119,7 @@ class TestFileSizeLimits:
         # Application layer exemptions
         "base_transformer.py": 790,  # 786 LOC - BaseTransformer with serialization helpers + validate_value_object() consolidation
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
-        "merger.py": 1420,  # 1414 LOC - MergeService with type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering
+        "merger.py": 1440,  # 1435 LOC - MergeService with type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation
         "extractors.py": 710,  # 705 LOC - SemanticScholar extractors with volume/issue parsing + page range expansion + affiliations
     }
 
@@ -619,7 +619,7 @@ class TestClassSize:
         # Composition services
         "MetadataCoordinator": 435,  # 434 lines - Metadata coordination for Medallion layers + extended lineage
         # Composite pipeline services (ADR-026)
-        "MergeService": 1370,  # 1361 lines - Composite merge service with conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering
+        "MergeService": 1390,  # 1382 lines - Composite merge service with conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
         "CompositePipelineRunner": 1080,  # 1059 lines - Composite pipeline orchestrator (FSM helpers extracted to fsm_helper.py)
         "CompositeCheckpointState": 305,  # 304 lines - Immutable checkpoint state with serialization helpers
