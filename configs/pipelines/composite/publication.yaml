@@ -240,151 +240,123 @@ composite:
         - openalex       # OpenAlex MAG legacy ID
 
     # -------------------------------------------------------------------------
-    # Column Ordering by Semantic Groups
+    # Column Ordering by Canonical Categories
     # -------------------------------------------------------------------------
     # Defines the order of columns in the merged output.
-    # Columns are grouped semantically, with seed columns first within each group.
+    # Categories and field order follow docs/schemas/publication_field_order.csv
+    # (6 canonical categories, 167 fully-qualified fields).
     column_groups:
-      - name: identifiers
+      - name: id
         fields:
-          - entity_id
+          - alternative_id
+          - chembl_release
           - content_hash
-          - _run_id
-          - _run_type
-          - _source_batch_id
-          - _source
-          - _ingestion_ts
-          - _index
-          - _lookup_method
-          - _original_id
+          - corpus_id
+          - dblp_id
           - document_chembl_id
-          - doi
-          - pmid
-          - pmc_id
+          - entity_id
+          - mag_id
+          - nlm_unique_id
           - openalex_id
           - paper_id
-          - corpus_id
+          - pmc_id
+          - pmid
           - src_id
-          - chembl_release
-          - nlm_unique_id
-          - mag_id
-          - dblp_id
-          - alternative_id
-          - pii
-          - mid
-          - publisher_id
         pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: core_content
+      - name: bibliography
         fields:
-          - title
           - abstract
           - abstract_structured
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: authors
-        fields:
-          - authors
-          - author_count
-          - authors_with_affiliations
-          - author_orcids
-          - author_details
-          - author_openalex_ids
-          - author_s2_ids
-          - author_h_indices
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: affiliations
-        fields:
-          - affiliation_list
-          - affiliation_structured
-          - institution_ids
-          - institution_country_codes
-          - ror_ids
-          - country
-        provider_order: [pubmed, openalex, semanticscholar, crossref, chembl]
-      - name: journal
-        fields:
+          - doi
+          - issn
+          - issn_electronic
+          - issn_list
+          - issn_print
+          - issue
           - journal
-          - journal_name
-          - journal_name_short
           - journal_iso_abbrev
           - journal_issn_type
-          - issn
-          - issn_print
-          - issn_electronic
-          - publisher
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: temporal
-        fields:
-          - publication_year
-          - publication_date
-          - published
-          - published_print
-          - published_online
-          - pub_month
-          - pub_day
-          - date_completed
-          - date_revised
-          - creation_date
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: pagination
-        fields:
-          - volume
-          - issue
+          - journal_name_short
           - page_first
           - page_last
           - page_range
-          - medline_pgn
+          - published
+          - published_online
+          - published_print
+          - publisher
+          - publication_year
+          - title
+          - volume
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: citations
+      - name: author_and_affiliation
         fields:
-          - citations_received
-          - citations_made
-          - influential_citation_count
-          - references
-          - citation_contexts
+          - affiliation_list
+          - affiliation_structured
+          - author_count
+          - author_details
+          - author_h_indices
+          - author_openalex_ids
+          - author_orcid_list
+          - author_orcids
+          - author_s2_ids
+          - authors
+          - authors_with_affiliations
+          - country
+          - institution_country_codes
+          - institution_ids
+          - ror_ids
+        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+      - name: date
+        fields:
+          - creation_date
+          - date_completed
+          - date_revised
+          - pub_date
+          - pub_day
+          - pub_month
+          - publication_date
+        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+      - name: topics_and_keywords
+        fields:
+          - chemical_count
+          - chemicals
           - citation_subset
-        provider_order: [crossref, openalex, pubmed, semanticscholar, chembl]
-      - name: subjects
-        fields:
-          - subject_topics
+          - databanks
+          - fwci
+          - gene_symbols
+          - keyword_count
+          - mesh_heading_count
           - primary_topic
           - subject_fields
-          - subject_mesh
-          - mesh_heading_count
           - subject_keywords
-          - keyword_count
-          - chemicals
-          - chemical_count
-          - gene_symbols
-          - databanks
-          - grants
-          - grant_count
-        provider_order: [openalex, pubmed, semanticscholar, crossref, chembl]
-      - name: open_access
+          - subject_mesh
+          - subject_topics
+        provider_order: [crossref, openalex, pubmed, semanticscholar, chembl]
+      - name: publication
         fields:
+          - citation_contexts
+          - citations_made
+          - citations_received
+          - content_domain_crossmark_restriction
+          - content_domain_domains
+          - grant_count
+          - grants
+          - influential_citation_count
           - is_oa
+          - is_retracted
+          - language
+          - license_url
+          - medline_pgn
           - oa_status
           - open_access_url
-          - license_url
-        provider_order: [openalex, semanticscholar, crossref]
-      - name: document_type
-        fields:
-          - publication_type
-          - publication_types
-          - publication_type_list
           - publication_status
+          - publication_type
+          - publication_type_list
+          - publication_types
+          - references
+          - tldr
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: language
-        fields:
-          - language
-        provider_order: [crossref, openalex, pubmed]
-      - name: quality
-        fields:
-          - is_retracted
-          - fwci
-          - content_domain_domains
-          - content_domain_crossmark_restriction
-        provider_order: [openalex, crossref]
     output:
       silver: data/output/silver/composite/publication
       gold: data/output/gold/composite/publication
