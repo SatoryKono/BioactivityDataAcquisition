@@ -492,3 +492,58 @@ class TestColumnOrdererYAMLGroups:
             "chembl.publication.title",
         ]
         assert result.columns == expected
+
+    def test_yaml_groups_dq_fields_always_last(self, mock_logger: MagicMock) -> None:
+        """DQ suffix fields (_dq_error, _dq_warn) are always the last two columns."""
+        groups = [
+            ColumnGroupConfig(
+                name="system",
+                fields=("entity_id", "_run_id"),
+                pattern=r"^_",
+            ),
+            ColumnGroupConfig(name="content", fields=("title",)),
+        ]
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
+
+        df = pl.DataFrame(
+            {
+                "title": ["T1"],
+                "_run_id": ["r1"],
+                "entity_id": ["e1"],
+                "_dq_error": [False],
+                "_dq_warn": [False],
+                "unknown_field": ["X"],
+            }
+        )
+        result = orderer.order_columns(df)
+
+        # _dq_error and _dq_warn MUST be the last two columns
+        assert result.columns[-2] == "_dq_error"
+        assert result.columns[-1] == "_dq_warn"
+        # Other fields should precede them
+        assert "title" in result.columns[:-2]
+        assert "entity_id" in result.columns[:-2]
+        assert "_run_id" in result.columns[:-2]
+        assert "unknown_field" in result.columns[:-2]
+
+    def test_yaml_groups_dq_fields_last_even_without_remaining(
+        self, mock_logger: MagicMock
+    ) -> None:
+        """DQ fields are last even when all other columns are in explicit groups."""
+        groups = [
+            ColumnGroupConfig(name="system", fields=("entity_id",)),
+            ColumnGroupConfig(name="content", fields=("title",)),
+        ]
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
+
+        df = pl.DataFrame(
+            {
+                "entity_id": ["e1"],
+                "title": ["T1"],
+                "_dq_error": [False],
+                "_dq_warn": [False],
+            }
+        )
+        result = orderer.order_columns(df)
+
+        assert result.columns == ["entity_id", "title", "_dq_error", "_dq_warn"]

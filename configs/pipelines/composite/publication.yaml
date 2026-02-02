@@ -245,16 +245,34 @@ composite:
     # Defines the order of columns in the merged output.
     # Categories and field order follow docs/schemas/publication_field_order.csv
     # (6 canonical categories, 167 fully-qualified fields).
+    #
+    # The "system" group MUST be first: it captures ETL metadata columns
+    # (entity_id, content_hash, _run_id, etc.) that would otherwise fall
+    # into the "remaining" bucket at the end of the output.
     column_groups:
+      # === System / ETL metadata (MUST be first) ===
+      - name: system
+        fields:
+          - entity_id
+          - content_hash
+          - _run_id
+          - _run_type
+          - _source_batch_id
+          - _source
+          - _ingestion_ts
+          - _index
+          - _lookup_method
+          - _original_id
+        pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
+        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+      # === Business identifiers ===
       - name: id
         fields:
           - alternative_id
           - chembl_release
-          - content_hash
           - corpus_id
           - dblp_id
           - document_chembl_id
-          - entity_id
           - mag_id
           - nlm_unique_id
           - openalex_id
@@ -262,7 +280,6 @@ composite:
           - pmc_id
           - pmid
           - src_id
-        pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
       - name: bibliography
         fields:

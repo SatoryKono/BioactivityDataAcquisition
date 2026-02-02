@@ -6,7 +6,7 @@ Column Order Convention (per RULES.md §2.4 and ADR-014):
 1. System prefix fields (entity_id, content_hash, _run_id, _run_type,
    _source_batch_id, _ingestion_ts, _index) - MUST be first
 2. Business fields - sorted alphabetically
-3. DQ suffix fields (_dq_warn, _dq_error) - MUST be last (if present)
+3. DQ suffix fields (_dq_error, _dq_warn) - MUST be last (if present)
 """
 
 from __future__ import annotations
@@ -63,8 +63,8 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("chembl_release", pa.string()),  # e.g., CHEMBL_1, CHEMBL_34
         pa.field("creation_date", pa.string()),  # Record creation date (YYYY-MM-DD)
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -138,8 +138,8 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("upper_value", pa.float64()),
         pa.field("value", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -168,8 +168,8 @@ PUBCHEM_COMPOUND_SCHEMA = pa.schema(
             "molecular_weight", pa.float64()
         ),  # Transformed to float by transformer
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -192,8 +192,8 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("protein_name", pa.string()),
         pa.field("sequence_length", pa.int64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -218,8 +218,8 @@ UNIPROT_ID_MAPPING_SCHEMA = pa.schema(
         pa.field("uniprot_accession", pa.string()),
         # === DQ suffix (MUST be last, if present) ===
         # DQ warning flag (True for not_found)
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -293,8 +293,8 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -354,8 +354,8 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
             "variant_taxonomy_id", pa.int64()
         ),  # Standardized name (was variant_tax_id)
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -400,8 +400,8 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         # Note: protein_classifications not available in /target endpoint
         # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -431,8 +431,8 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         pa.field("target_component_xrefs", pa.string()),
         pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -462,8 +462,8 @@ CHEMBL_CELL_LINE_SCHEMA = pa.schema(
         pa.field("cl_lincs_id", pa.string()),
         pa.field("efo_id", pa.string()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -488,8 +488,8 @@ CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
         pa.field("term", pa.string()),
         pa.field("term_type", pa.string()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -564,8 +564,8 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("usan_year", pa.int64()),
         pa.field("withdrawn_flag", pa.bool_()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -593,8 +593,8 @@ CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
         pa.field("src_compound_id", pa.string()),
         pa.field("src_id", pa.int64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -625,8 +625,8 @@ CHEMBL_DOCUMENT_SIMILARITY_SCHEMA = pa.schema(
         pa.field("sim_id", pa.int64()),
         pa.field("tid_tani", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -682,8 +682,8 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("tldr", pa.string()),
         pa.field("volume", pa.string()),
         # === DQ suffix (MUST be last, if present) ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -744,8 +744,8 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -832,8 +832,8 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Bibliographic info (from biblio object)
         pa.field("volume", pa.string()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -864,8 +864,8 @@ CHEMBL_PROTEIN_CLASS_SCHEMA = pa.schema(
         pa.field("short_name", pa.string()),
         pa.field("sort_order", pa.int64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -901,7 +901,7 @@ CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
         pa.field("units", pa.string()),
         pa.field("value", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )

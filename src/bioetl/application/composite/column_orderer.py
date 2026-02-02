@@ -10,6 +10,7 @@ import re
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
+from bioetl.domain.schemas.column_order import DQ_FIELDS_SUFFIX
 from bioetl.domain.value_objects.column_order import (
     DEFAULT_COLUMN_ORDER,
     ColumnOrderConfig,
@@ -256,8 +257,10 @@ class ColumnOrderer:
             ordered_columns.extend(group_columns)
             used_columns.update(group_columns)
 
-        # Add remaining columns at the end (alphabetically)
-        remaining = sorted(all_columns - used_columns)
+        # Add remaining columns at the end (alphabetically),
+        # excluding DQ suffix fields which must come last
+        dq_suffix_set = frozenset(DQ_FIELDS_SUFFIX)
+        remaining = sorted(all_columns - used_columns - dq_suffix_set)
         if remaining:
             ordered_columns.extend(remaining)
             self._logger.debug(
@@ -265,6 +268,17 @@ class ColumnOrderer:
                 count=len(remaining),
                 sample=remaining[:5],
             )
+
+        # DQ suffix fields MUST be last (DQ_FIELDS_SUFFIX convention)
+        # Remove any DQ fields that may have been captured by groups earlier
+        for dq_field in DQ_FIELDS_SUFFIX:
+            if dq_field in ordered_columns:
+                ordered_columns.remove(dq_field)
+
+        # Re-append DQ fields at the very end, preserving DQ_FIELDS_SUFFIX order
+        for dq_field in DQ_FIELDS_SUFFIX:
+            if dq_field in all_columns:
+                ordered_columns.append(dq_field)
 
         return ordered_columns
 

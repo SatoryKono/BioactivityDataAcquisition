@@ -54,7 +54,7 @@ class TestCanonicalColumnOrderFunction:
         """DQ fields should come last."""
         columns = ["_dq_warn", "name", "entity_id", "_dq_error"]
         result = canonical_column_order(columns)
-        assert result[-2:] == ["_dq_warn", "_dq_error"]
+        assert result[-2:] == ["_dq_error", "_dq_warn"]
 
     def test_preserves_all_columns(self) -> None:
         """All input columns should be in output."""
@@ -103,8 +103,8 @@ class TestCanonicalColumnOrderFunction:
             "_ingestion_ts",
             "_index",
             "business_field",
-            "_dq_warn",
             "_dq_error",
+            "_dq_warn",
         ]
         assert result == expected
 
