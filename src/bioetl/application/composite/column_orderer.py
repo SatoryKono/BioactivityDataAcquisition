@@ -18,12 +18,56 @@ from bioetl.domain.value_objects.column_order import (
 from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     import polars as pl
 
     from bioetl.domain.composite.config import ColumnGroupConfig, LayerColumnConfig
     from bioetl.domain.ports import LoggerPort
 
+    _SortFn = Callable[[list[str], tuple[str, ...]], list[str]]
+
 __all__ = ["ColumnOrderer"]
+
+
+def _collect_pattern_columns(
+    available: set[str],
+    used: set[str],
+    group: ColumnGroupConfig,
+    sort_fn: _SortFn,
+    logger: LoggerPort,
+) -> list[str]:
+    """Collect columns matching a group regex pattern.
+
+    Args:
+        available: Set of available column names.
+        used: Set of already-matched column names (mutated in-place).
+        group: Column group configuration with optional pattern.
+        sort_fn: Provider-sorting callable.
+        logger: Logger for warnings on invalid patterns.
+
+    Returns:
+        Sorted list of pattern-matched columns not already in *used*.
+    """
+    if not group.pattern:
+        return []
+    try:
+        pattern_re = re.compile(group.pattern, re.IGNORECASE)
+    except re.error as e:
+        logger.warning(
+            "Invalid regex pattern in column group",
+            group=group.name,
+            pattern=group.pattern,
+            error=str(e),
+        )
+        return []
+
+    pattern_matches: list[str] = []
+    for col in available:
+        if col not in used and pattern_re.search(col):
+            pattern_matches.append(col)
+            used.add(col)
+    return sort_fn(pattern_matches, group.provider_order)
 
 
 class ColumnOrderer:
@@ -256,28 +300,14 @@ class ColumnOrderer:
                 if extracted == field_name or col == field_name:
                     field_matches.append(col)
                     used.add(col)
-            # Sort providers within this field
             ordered.extend(self._sort_by_provider(field_matches, group.provider_order))
 
         # Match by pattern (appended after explicit fields)
-        if group.pattern:
-            try:
-                pattern_re = re.compile(group.pattern, re.IGNORECASE)
-                pattern_matches: list[str] = []
-                for col in available:
-                    if col not in used and pattern_re.search(col):
-                        pattern_matches.append(col)
-                        used.add(col)
-                ordered.extend(
-                    self._sort_by_provider(pattern_matches, group.provider_order)
-                )
-            except re.error as e:
-                self._logger.warning(
-                    "Invalid regex pattern in column group",
-                    group=group.name,
-                    pattern=group.pattern,
-                    error=str(e),
-                )
+        ordered.extend(
+            _collect_pattern_columns(
+                available, used, group, self._sort_by_provider, self._logger
+            )
+        )
 
         return ordered
 
