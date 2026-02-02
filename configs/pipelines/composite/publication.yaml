@@ -112,7 +112,7 @@ composite:
       required: false    # Optional - high rate limits, ok to skip
       filter_condition: "doi IS NOT NULL OR title IS NOT NULL"
       timeout_seconds: 1200
-      fallback_strategy: skip  # Skip on failure (high rate limits)
+      #fallback_strategy: skip  # Skip on failure (high rate limits)
       silver_table: silver/semanticscholar/publication
 
   # ---------------------------------------------------------------------------
