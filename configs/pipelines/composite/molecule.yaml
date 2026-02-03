@@ -58,7 +58,7 @@ composite:
     # OPTIONAL: Failure logged, composite continues (graceful degradation)
     - pipeline: pubchem_compound
       join_keys:
-        - inchikey           # Primary join key (IUPAC standard)
+        - inchi_key          # Primary join key (IUPAC standard) - uses seed field name
         - canonical_smiles   # Fallback key (less reliable)
       required: false        # Graceful degradation - seed data preserved on failure
       filter_condition: "inchi_key IS NOT NULL"  # Only join records with structure
@@ -73,8 +73,8 @@ composite:
     # Join strategy: left_outer preserves all seed records
     strategy: left_outer
 
-    # Conflict resolution: explicit field-level priorities
-    conflict_resolution: explicit_rules
+    # Conflict resolution: seed values take priority (used when preserve_all_sources=false)
+    conflict_resolution: seed_priority
 
     # Preserve all provider-qualified columns for common fields
     # When true, keeps columns like chembl.molecule.canonical_smiles, pubchem.compound.canonical_smiles

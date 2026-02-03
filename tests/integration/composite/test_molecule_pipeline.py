@@ -14,18 +14,22 @@ Reference: ADR-026 Composite Pipeline Pattern
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 
 import polars as pl
 import pytest
 
-from bioetl.application.composite.merger import MergeService
+from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.domain.composite.config import (
     ColumnGroupConfig,
     CompositeConfig,
     EnricherConfig,
     MergeConfig,
     SeedConfig,
+)
+from bioetl.domain.composite.strategy import (
+    ConflictResolution,
+    MergeStrategy,
 )
 
 if TYPE_CHECKING:
@@ -132,55 +136,51 @@ def composite_molecule_config() -> CompositeConfig:
         version="1.0.0",
         seed=SeedConfig(
             pipeline="chembl_molecule",
-            output_keys=["molecule_chembl_id", "inchi_key", "canonical_smiles"],
+            output_keys=("molecule_chembl_id", "inchi_key", "canonical_smiles"),
             silver_table="silver/chembl/molecule",
         ),
-        enrichers=[
+        enrichers=(
             EnricherConfig(
                 pipeline="pubchem_compound",
-                join_keys=["inchikey", "canonical_smiles"],
+                join_keys=("inchi_key", "canonical_smiles"),
                 required=False,
                 filter_condition="inchi_key IS NOT NULL",
                 timeout_seconds=3600,
                 silver_table="silver/pubchem/compound",
             ),
-        ],
-        dependencies=[],
+        ),
         merge=MergeConfig(
-            strategy="left_outer",
-            conflict_resolution="explicit_rules",
+            strategy=MergeStrategy.LEFT_OUTER,
+            conflict_resolution=ConflictResolution.SEED_PRIORITY,
             preserve_all_sources=True,
             field_priorities={
                 "canonical_smiles": ["chembl", "pubchem"],
-                "inchikey": ["chembl", "pubchem"],
+                "inchi_key": ["chembl", "pubchem"],
                 "molecular_weight": ["pubchem", "chembl"],
             },
-            column_groups=[
+            column_groups=(
                 ColumnGroupConfig(
                     name="system",
-                    fields=[
+                    fields=(
                         "entity_id",
                         "content_hash",
                         "_run_id",
                         "_run_type",
                         "_ingestion_ts",
-                    ],
+                    ),
                     pattern=None,
-                    provider_order=["chembl", "pubchem"],
+                    provider_order=("chembl", "pubchem"),
                 ),
                 ColumnGroupConfig(
                     name="identifiers",
-                    fields=["molecule_chembl_id", "cid", "inchi_key", "inchikey"],
+                    fields=("molecule_chembl_id", "cid", "inchi_key", "inchikey"),
                     pattern=None,
-                    provider_order=["chembl", "pubchem"],
+                    provider_order=("chembl", "pubchem"),
                 ),
-            ],
+            ),
             output_silver_path="silver/composite/molecule",
             output_gold_path="gold/composite/molecule",
         ),
-        dq_rules=None,
-        execution=None,
-        lineage=None,
     )
 
 
@@ -199,27 +199,12 @@ class TestCompositeMoleculePipeline:
         seed_molecule_df: pl.DataFrame,
         composite_molecule_config: CompositeConfig,
     ) -> None:
-        """Verify pipeline runs with seed only (no enrichers matched)."""
-        # Create merge service
-        merge_service = MergeService(
-            config=composite_molecule_config,
-            logger=mock_logger,
-        )
-
-        # Empty enricher DataFrame (no matches)
-        empty_pubchem = pl.DataFrame(
-            schema={
-                "entity_id": pl.Utf8,
-                "cid": pl.Utf8,
-                "inchikey": pl.Utf8,
-                "canonical_smiles": pl.Utf8,
-            }
-        )
+        """Verify pipeline configuration preserves all seed records."""
+        # Create column renamer
+        renamer = ColumnRenamer(mock_logger)
 
         # Rename seed for merge
-        seed_renamed = merge_service._rename_seed_columns(
-            seed_molecule_df, "chembl_molecule"
-        )
+        seed_renamed = renamer.rename_dataframe(seed_molecule_df, "chembl_molecule")
 
         # All seed records should be preserved
         assert len(seed_renamed) == 3
@@ -233,17 +218,12 @@ class TestCompositeMoleculePipeline:
         composite_molecule_config: CompositeConfig,
     ) -> None:
         """Verify InChIKey-based join works correctly."""
-        # Create merge service
-        merge_service = MergeService(
-            config=composite_molecule_config,
-            logger=mock_logger,
-        )
+        # Create column renamer
+        renamer = ColumnRenamer(mock_logger)
 
         # Rename DataFrames
-        seed_renamed = merge_service._rename_seed_columns(
-            seed_molecule_df, "chembl_molecule"
-        )
-        enricher_renamed = merge_service._rename_enricher_columns(
+        seed_renamed = renamer.rename_dataframe(seed_molecule_df, "chembl_molecule")
+        enricher_renamed = renamer.rename_dataframe(
             enricher_pubchem_df, "pubchem_compound"
         )
 
@@ -270,29 +250,20 @@ class TestCompositeMoleculePipeline:
             non_null_count = joined.filter(pl.col(cid_col).is_not_null()).height
             assert non_null_count == 2, "Expected 2 records with PubChem CID"
 
-    def test_conflict_resolution_explicit_rules(
+    def test_conflict_resolution_field_priorities(
         self,
-        mock_logger: LoggerPort,
-        seed_molecule_df: pl.DataFrame,
-        enricher_pubchem_df: pl.DataFrame,
         composite_molecule_config: CompositeConfig,
     ) -> None:
-        """Verify field_priorities are respected."""
-        # Create merge service
-        merge_service = MergeService(
-            config=composite_molecule_config,
-            logger=mock_logger,
-        )
-
+        """Verify field_priorities are configured correctly."""
         # Verify field priorities are configured
         assert composite_molecule_config.merge.field_priorities is not None
         priorities = composite_molecule_config.merge.field_priorities
 
-        # canonical_smiles: ChEMBL priority
-        assert priorities.get("canonical_smiles") == ["chembl", "pubchem"]
+        # canonical_smiles: ChEMBL priority (tuples for immutability)
+        assert priorities.get("canonical_smiles") == ("chembl", "pubchem")
 
         # molecular_weight: PubChem priority
-        assert priorities.get("molecular_weight") == ["pubchem", "chembl"]
+        assert priorities.get("molecular_weight") == ("pubchem", "chembl")
 
     def test_graceful_degradation_on_enricher_failure(
         self,
@@ -304,16 +275,11 @@ class TestCompositeMoleculePipeline:
         # Enricher is marked as required=False
         assert composite_molecule_config.enrichers[0].required is False
 
-        # When enricher fails, seed data should be preserved
-        merge_service = MergeService(
-            config=composite_molecule_config,
-            logger=mock_logger,
-        )
+        # Create column renamer
+        renamer = ColumnRenamer(mock_logger)
 
-        # Rename seed for merge
-        seed_renamed = merge_service._rename_seed_columns(
-            seed_molecule_df, "chembl_molecule"
-        )
+        # When enricher fails, seed data should be preserved
+        seed_renamed = renamer.rename_dataframe(seed_molecule_df, "chembl_molecule")
 
         # All 3 seed records should be preserved
         assert len(seed_renamed) == 3
@@ -328,9 +294,9 @@ class TestCompositeMoleculePipeline:
         inchikey_pattern = r"^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
 
         for inchikey in seed_molecule_df["inchi_key"].to_list():
-            assert re.match(
-                inchikey_pattern, inchikey
-            ), f"Invalid InChIKey format: {inchikey}"
+            assert re.match(inchikey_pattern, inchikey), (
+                f"Invalid InChIKey format: {inchikey}"
+            )
 
     def test_column_groups_ordering(
         self,
