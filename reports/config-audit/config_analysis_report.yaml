@@ -1,0 +1,222 @@
+analysis_metadata:
+  generated_at: '2026-02-03T13:54:16.742999+00:00'
+  tool_version: 2.0.0
+config_counts:
+  total: 58
+  pipeline_configs: 19
+  composite_configs: 2
+  dq_configs: 21
+  filter_configs: 8
+  source_configs: 7
+issue_summary:
+  total: 0
+  by_severity: {}
+  by_category: {}
+issues: []
+comparison_matrix:
+- parameter: pipeline_name
+  chembl/activity: chembl_activity
+  chembl/assay: chembl_assay
+  chembl/assay_parameters: chembl_assay_parameters
+  chembl/cell_line: chembl_cell_line
+  chembl/compound_record: chembl_compound_record
+  chembl/molecule: chembl_molecule
+  chembl/protein_class: chembl_protein_class
+  chembl/publication: chembl_publication
+  chembl/publication_similarity: chembl_publication_similarity
+  chembl/publication_term: chembl_publication_term
+  chembl/target: chembl_target
+  chembl/target_component: chembl_target_component
+  crossref/publication: crossref_publication
+  openalex/publication: openalex_publication
+  pubchem/compound: pubchem_compound
+  pubmed/publication: pubmed_publication
+  semanticscholar/publication: semanticscholar_publication
+  uniprot/idmapping: uniprot_idmapping
+  uniprot/protein: uniprot_protein
+  status: OK
+- parameter: provider
+  chembl/activity: chembl
+  chembl/assay: chembl
+  chembl/assay_parameters: chembl
+  chembl/cell_line: chembl
+  chembl/compound_record: chembl
+  chembl/molecule: chembl
+  chembl/protein_class: chembl
+  chembl/publication: chembl
+  chembl/publication_similarity: chembl
+  chembl/publication_term: chembl
+  chembl/target: chembl
+  chembl/target_component: chembl
+  crossref/publication: crossref
+  openalex/publication: openalex
+  pubchem/compound: pubchem
+  pubmed/publication: pubmed
+  semanticscholar/publication: semanticscholar
+  uniprot/idmapping: uniprot
+  uniprot/protein: uniprot
+  status: OK
+- parameter: entity_type
+  chembl/activity: activity
+  chembl/assay: assay
+  chembl/assay_parameters: assay_parameters
+  chembl/cell_line: cell_line
+  chembl/compound_record: compound_record
+  chembl/molecule: molecule
+  chembl/protein_class: protein_class
+  chembl/publication: publication
+  chembl/publication_similarity: publication_similarity
+  chembl/publication_term: publication_term
+  chembl/target: target
+  chembl/target_component: target_component
+  crossref/publication: work
+  openalex/publication: publication
+  pubchem/compound: compound
+  pubmed/publication: publication
+  semanticscholar/publication: publication
+  uniprot/idmapping: idmapping
+  uniprot/protein: protein
+  status: OK
+- parameter: version
+  chembl/activity: 1.2.0
+  chembl/assay: 1.2.0
+  chembl/assay_parameters: 1.2.0
+  chembl/cell_line: 1.2.0
+  chembl/compound_record: 1.2.0
+  chembl/molecule: 1.2.0
+  chembl/protein_class: 1.2.0
+  chembl/publication: 2.1.0
+  chembl/publication_similarity: 2.1.0
+  chembl/publication_term: 2.1.0
+  chembl/target: 1.2.0
+  chembl/target_component: 1.2.0
+  crossref/publication: 1.2.0
+  openalex/publication: 1.2.0
+  pubchem/compound: 1.2.0
+  pubmed/publication: 1.2.0
+  semanticscholar/publication: 1.2.0
+  uniprot/idmapping: 1.1.0
+  uniprot/protein: 1.2.0
+  status: OK
+- parameter: primary_keys
+  chembl/activity: '[''activity_id'']'
+  chembl/assay: '[''assay_chembl_id'']'
+  chembl/assay_parameters: '[''assay_param_id'']'
+  chembl/cell_line: '[''cell_chembl_id'']'
+  chembl/compound_record: '[''record_id'']'
+  chembl/molecule: '[''molecule_chembl_id'']'
+  chembl/protein_class: '[''protein_class_id'']'
+  chembl/publication: '[''document_chembl_id'']'
+  chembl/publication_similarity: '[''sim_id'']'
+  chembl/publication_term: '[''entity_id'']'
+  chembl/target: '[''target_chembl_id'']'
+  chembl/target_component: '[''component_id'']'
+  crossref/publication: '[''doi'']'
+  openalex/publication: '[''openalex_id'']'
+  pubchem/compound: '[''cid'']'
+  pubmed/publication: '[''pmid'']'
+  semanticscholar/publication: '[''paper_id'']'
+  uniprot/idmapping: '[''target_chembl_id'']'
+  uniprot/protein: '[''accession'']'
+  status: OK
+- parameter: silver_table
+  chembl/activity: chembl_activity
+  chembl/assay: chembl_assay
+  chembl/assay_parameters: chembl_assay_parameters
+  chembl/cell_line: chembl_cell_line
+  chembl/compound_record: chembl_compound_record
+  chembl/molecule: chembl_molecule
+  chembl/protein_class: chembl_protein_class
+  chembl/publication: chembl_publication
+  chembl/publication_similarity: chembl_publication_similarity
+  chembl/publication_term: chembl_publication_term
+  chembl/target: chembl_target
+  chembl/target_component: chembl_target_component
+  crossref/publication: crossref_publication
+  openalex/publication: openalex_publication
+  pubchem/compound: pubchem_compound
+  pubmed/publication: pubmed_publication
+  semanticscholar/publication: semanticscholar_publication
+  uniprot/idmapping: uniprot_idmapping
+  uniprot/protein: uniprot_protein
+  status: OK
+- parameter: gold_table
+  chembl/activity: chembl_activity
+  chembl/assay: chembl_assay
+  chembl/assay_parameters: chembl_assay_parameters
+  chembl/cell_line: chembl_cell_line
+  chembl/compound_record: chembl_compound_record
+  chembl/molecule: chembl_molecule
+  chembl/protein_class: chembl_protein_class
+  chembl/publication: chembl_publication
+  chembl/publication_similarity: chembl_publication_similarity
+  chembl/publication_term: chembl_publication_term
+  chembl/target: chembl_target
+  chembl/target_component: chembl_target_component
+  crossref/publication: crossref_publication
+  openalex/publication: openalex_publication
+  pubchem/compound: pubchem_compound
+  pubmed/publication: pubmed_publication
+  semanticscholar/publication: semanticscholar_publication
+  uniprot/idmapping: uniprot_idmapping
+  uniprot/protein: uniprot_protein
+  status: OK
+inventory_keys:
+- _base
+- chembl/activity
+- chembl/assay
+- chembl/assay_parameters
+- chembl/cell_line
+- chembl/compound_record
+- chembl/molecule
+- chembl/protein_class
+- chembl/publication
+- chembl/publication_similarity
+- chembl/publication_term
+- chembl/target
+- chembl/target_component
+- composite/publication
+- composite/target
+- crossref/publication
+- dq/_defaults
+- dq/entities/chembl/activity
+- dq/entities/chembl/assay
+- dq/entities/chembl/assay_parameters
+- dq/entities/chembl/cell_line
+- dq/entities/chembl/compound_record
+- dq/entities/chembl/molecule
+- dq/entities/chembl/protein_class
+- dq/entities/chembl/publication
+- dq/entities/chembl/publication_similarity
+- dq/entities/chembl/publication_term
+- dq/entities/chembl/target
+- dq/entities/chembl/target_component
+- dq/entities/crossref/publication
+- dq/entities/openalex/publication
+- dq/entities/pubchem/compound
+- dq/entities/pubmed/publication
+- dq/entities/semanticscholar/publication
+- dq/entities/uniprot/idmapping
+- dq/entities/uniprot/protein
+- dq/entities/uniprot/target
+- filter/_defaults
+- filter/providers/chembl
+- filter/providers/crossref
+- filter/providers/openalex
+- filter/providers/pubchem
+- filter/providers/pubmed
+- filter/providers/semanticscholar
+- filter/providers/uniprot
+- openalex/publication
+- pubchem/compound
+- pubmed/publication
+- semanticscholar/publication
+- sources/chembl
+- sources/crossref
+- sources/openalex
+- sources/pubchem
+- sources/pubmed
+- sources/semanticscholar
+- sources/uniprot
+- uniprot/idmapping
+- uniprot/protein
