@@ -1,7 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://bioetl/pipeline-config-schema-v2",
-  "title": "BioETL Pipeline Configuration Schema v2.0",
+  "$id": "https://bioetl/pipeline-config-schema-v2.1",
+  "title": "BioETL Pipeline Configuration Schema v2.1",
+  "description": "Schema for BioETL pipeline configurations. Note: 'sink' is optional when using convention-based path resolution (ADR-029).",
   "type": "object",
   "required": [
     "pipeline_name",
@@ -10,8 +11,7 @@
     "version",
     "primary_keys",
     "silver_table",
-    "gold_table",
-    "sink"
+    "gold_table"
   ],
   "properties": {
     "pipeline_name": {
@@ -26,7 +26,7 @@
     },
     "entity_type": {
       "type": "string",
-      "description": "Entity type (e.g., activity, assay, molecule)"
+      "description": "Entity type (e.g., activity, assay, molecule, work for CrossRef)"
     },
     "version": {
       "type": "string",
@@ -41,7 +41,7 @@
       "type": "array",
       "items": {"type": "string"},
       "minItems": 1,
-      "description": "Primary key field(s) for entity"
+      "description": "Primary key field(s) for entity. Auto-propagated to sink.silver.primary_key and sort_by.columns"
     },
     "silver_table": {
       "type": "string",
@@ -51,13 +51,51 @@
       "type": "string",
       "description": "Gold layer table name"
     },
+    "force_full_scan": {
+      "type": "boolean",
+      "default": false,
+      "description": "Disable checkpoint resume and always perform full data scan. Used for publication entities due to API offset instability (ADR-030, ADR-031)"
+    },
+    "loading_strategy": {
+      "type": "string",
+      "enum": ["incremental", "full_scan_only"],
+      "default": "incremental",
+      "description": "Data loading strategy. 'full_scan_only' requires force_full_scan=true"
+    },
+    "batch_size": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10000,
+      "description": "Override default batch size for API requests (provider default used if not specified)"
+    },
+    "checkpoint_interval": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Override checkpoint interval (records processed between checkpoints)"
+    },
     "source_file": {
       "type": "string",
-      "description": "Reference to source configuration file"
+      "description": "Reference to source configuration file. Auto-computed as ../../sources/{provider}.yaml if not specified"
+    },
+    "dq_config_file": {
+      "type": "string",
+      "description": "Reference to DQ configuration file. Auto-computed as ../../dq/entities/{provider}/{entity_type}.yaml if not specified"
+    },
+    "filter_config_file": {
+      "type": "string",
+      "description": "Reference to filter configuration file. Auto-computed as ../../filter/entities/{provider}/{entity_type}.yaml if not specified"
+    },
+    "column_groups_file": {
+      "type": "string",
+      "description": "Reference to column groups file (legacy). Prefer data_schema_file for new configs"
+    },
+    "data_schema_file": {
+      "type": "string",
+      "description": "Reference to data schema file with layer-specific column definitions (silver/gold)"
     },
     "source": {
       "type": "object",
-      "description": "Pipeline-specific source configuration"
+      "description": "Pipeline-specific source configuration (overrides values from source_file)"
     },
     "dq_rules": {
       "type": "object",
@@ -78,67 +116,76 @@
     },
     "sink": {
       "type": "object",
-      "required": ["bronze", "silver", "gold"],
+      "description": "Sink configuration for medallion layers. Optional when using convention-based paths (ADR-029)",
       "properties": {
         "bronze": {
           "type": "object",
-          "required": ["path"],
+          "description": "Bronze layer configuration. Path auto-computed if not specified",
           "properties": {
-            "path": {"type": "string"}
+            "path": {"type": "string", "description": "Output path. Default: data/output/bronze/{provider}/{entity_type}"},
+            "flat_structure": {"type": "boolean", "default": true, "description": "If true, path already includes provider/entity"}
           }
         },
         "silver": {
           "type": "object",
-          "required": ["path", "primary_key"],
+          "description": "Silver layer configuration. Path, primary_key, sort_by auto-computed if not specified",
           "properties": {
-            "path": {"type": "string"},
+            "path": {"type": "string", "description": "Output path. Default: data/output/silver/{provider}/{entity_type}"},
             "primary_key": {
               "type": "array",
-              "items": {"type": "string"}
+              "items": {"type": "string"},
+              "description": "Merge key. Default: primary_keys from root"
             },
             "partition_by": {
               "type": "array",
-              "items": {"type": "string"}
+              "items": {"type": "string"},
+              "description": "Partition columns. Default: [] (no partitioning)"
             },
             "sort_by": {
               "type": "object",
+              "description": "Sort configuration for deterministic writes (ADR-014)",
               "properties": {
                 "columns": {
                   "type": "array",
-                  "items": {"type": "string"}
+                  "items": {"type": "string"},
+                  "description": "Sort columns. Default: primary_keys"
                 },
-                "ascending": {"type": "boolean"}
+                "ascending": {"type": "boolean", "default": true}
               }
             },
             "csv_export": {
               "type": "object",
               "properties": {
-                "path": {"type": "string"}
+                "path": {"type": "string", "description": "CSV export path. Default: same as silver path"}
               }
-            }
+            },
+            "flat_structure": {"type": "boolean", "default": true}
           }
         },
         "gold": {
           "type": "object",
-          "required": ["path"],
+          "description": "Gold layer configuration. Path, sort_by auto-computed if not specified",
           "properties": {
-            "path": {"type": "string"},
+            "path": {"type": "string", "description": "Output path. Default: data/output/gold/{provider}/{entity_type}"},
             "sort_by": {
               "type": "object",
+              "description": "Sort configuration for deterministic writes (ADR-014)",
               "properties": {
                 "columns": {
                   "type": "array",
-                  "items": {"type": "string"}
+                  "items": {"type": "string"},
+                  "description": "Sort columns. Default: primary_keys"
                 },
-                "ascending": {"type": "boolean"}
+                "ascending": {"type": "boolean", "default": true}
               }
             },
             "csv_export": {
               "type": "object",
               "properties": {
-                "path": {"type": "string"}
+                "path": {"type": "string", "description": "CSV export path. Default: same as gold path"}
               }
-            }
+            },
+            "flat_structure": {"type": "boolean", "default": true}
           }
         }
       }
