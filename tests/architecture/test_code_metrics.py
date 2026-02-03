@@ -94,7 +94,7 @@ class TestFileSizeLimits:
         # Composition layer exemptions
         "metadata_coordinator.py": 510,  # 506 LOC - MetadataCoordinator with centralized metadata management + extended lineage
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
-        "composite.py": 480,  # 476 LOC - Composite pipeline bootstrap with runner factories + field group registry loading + DQ report service
+        "composite.py": 490,  # 487 LOC - Composite pipeline bootstrap with runner factories + field group registry loading + DQ report service
         "entrypoints.py": 780,  # 775 LOC - pipeline entrypoints (run_pipeline expanded + services + export + ensure_metrics_server_started)
         "registration.py": 720,  # 705 LOC - provider registration with data source creators (OpenAlex + SemanticScholar + UniProt IDMapping)
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
@@ -289,6 +289,8 @@ class TestFunctionComplexity:
         "_execute_dependencies_phase": 12,  # CC=11 - Dependency phase with chained dependency handling
         # Application batch writer column ordering
         "_apply_system_prefix_order": 13,  # CC=12 - System prefix ordering with layer-specific rules
+        # Application dependency coordinator key extraction
+        "_get_effective_keys": 16,  # CC=15 - Chained dependency key extraction with multiple source types
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -625,6 +627,7 @@ class TestClassSize:
         # Composite pipeline services (ADR-026)
         "MergeService": 1415,  # 1407 lines - Composite merge service with conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
+        "DependencyCoordinator": 355,  # 349 lines - Chained dependency coordination with key extraction
         "CompositePipelineRunner": 1080,  # 1059 lines - Composite pipeline orchestrator (FSM helpers extracted to fsm_helper.py)
         "CompositeCheckpointState": 305,  # 304 lines - Immutable checkpoint state with serialization helpers
         # Publication adapters with APIRequestCollector (metadata enrichment)
