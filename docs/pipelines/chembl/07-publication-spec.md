@@ -1,6 +1,6 @@
 # ChEMBL Publication (Document) Pipeline Specification
 
-*Version 1.1.0 | Aligned with RULES.md v5.16*
+*Version 1.1.0 | Aligned with RULES.md v5.17*
 
 ---
 

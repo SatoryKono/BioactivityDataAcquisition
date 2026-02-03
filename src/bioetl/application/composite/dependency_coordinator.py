@@ -177,51 +177,109 @@ class DependencyCoordinator:
 
         Returns:
             DataFrame with keys for this dependency.
+
+        Raises:
+            ValueError: If chained dependency config is invalid or keys cannot be read.
         """
         # Standard dependency: use seed keys
         if dependency.uses_seed_keys:
+            self._logger.debug(
+                "Using seed keys for dependency",
+                dependency=dependency.pipeline,
+                key_count=len(seed_keys),
+            )
             return seed_keys
 
         # Chained dependency: read from key_source's Silver table
         if self._delta_reader is None:
-            self._logger.warning(
-                "No delta_reader for chained dependency, falling back to seed keys",
-                dependency=dependency.pipeline,
-                key_source=dependency.key_source,
+            raise ValueError(
+                f"Chained dependency '{dependency.pipeline}' requires delta_reader, "
+                f"but none was provided. key_source='{dependency.key_source}'"
             )
-            return seed_keys
 
         source_config = dep_config_lookup.get(dependency.key_source or "")
-        if not source_config or not source_config.silver_table:
-            self._logger.warning(
-                "Key source not found or has no Silver table, using seed keys",
-                dependency=dependency.pipeline,
-                key_source=dependency.key_source,
+        if not source_config:
+            raise ValueError(
+                f"Chained dependency '{dependency.pipeline}' references unknown "
+                f"key_source='{dependency.key_source}'. "
+                f"Available dependencies: {list(dep_config_lookup.keys())}"
             )
-            return seed_keys
+
+        if not source_config.silver_table:
+            raise ValueError(
+                f"Chained dependency '{dependency.pipeline}' references "
+                f"key_source='{dependency.key_source}' which has no silver_table configured"
+            )
 
         try:
-            source_keys: pl.DataFrame | None = await self._delta_reader.read_table(
-                source_config.silver_table
-            )
-            if source_keys is not None and len(source_keys) > 0:
-                self._logger.info(
-                    "Using chained dependency keys",
+            # Read PyArrow table from Silver
+            pa_table = await self._delta_reader.read_table(source_config.silver_table)
+
+            if pa_table is None or pa_table.num_rows == 0:
+                self._logger.warning(
+                    "Source Silver table is empty, falling back to seed keys",
                     dependency=dependency.pipeline,
                     key_source=dependency.key_source,
                     source_table=source_config.silver_table,
-                    key_count=len(source_keys),
                 )
-                return source_keys
-        except Exception as e:
-            self._logger.warning(
-                "Failed to read chained keys, falling back to seed",
+                return seed_keys
+
+            # Convert PyArrow Table → Polars DataFrame
+            # from_arrow returns DataFrame for Table, Series for Array
+            source_keys_result = pl.from_arrow(pa_table)
+            if not isinstance(source_keys_result, pl.DataFrame):
+                raise TypeError(
+                    f"Expected DataFrame from PyArrow Table, got {type(source_keys_result)}"
+                )
+            source_keys: pl.DataFrame = source_keys_result
+
+            # Validate that join key column exists
+            join_key = dependency.join_keys[0] if dependency.join_keys else None
+            if join_key and join_key not in source_keys.columns:
+                raise ValueError(
+                    f"Column '{join_key}' not found in source table "
+                    f"'{source_config.silver_table}'. "
+                    f"Available columns: {list(source_keys.columns)}"
+                )
+
+            self._logger.info(
+                "Using chained dependency keys",
                 dependency=dependency.pipeline,
                 key_source=dependency.key_source,
-                error=str(e),
+                source_table=source_config.silver_table,
+                key_count=len(source_keys),
+                columns=list(source_keys.columns),
             )
+            return source_keys
 
-        return seed_keys
+        except FileNotFoundError:
+            # Table doesn't exist yet (first run) — fallback to seed keys is OK
+            self._logger.warning(
+                "Source Silver table not found (first run?), falling back to seed keys",
+                dependency=dependency.pipeline,
+                key_source=dependency.key_source,
+                source_table=source_config.silver_table,
+            )
+            return seed_keys
+
+        except ValueError:
+            # Re-raise validation errors
+            raise
+
+        except Exception as e:
+            # For chained dependencies, errors should be explicit, not silent
+            self._logger.error(
+                "Failed to read chained dependency keys",
+                dependency=dependency.pipeline,
+                key_source=dependency.key_source,
+                source_table=source_config.silver_table,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            raise ValueError(
+                f"Failed to read keys for chained dependency '{dependency.pipeline}' "
+                f"from '{source_config.silver_table}': {e}"
+            ) from e
 
     async def _run_single_dependency(
         self,

@@ -293,6 +293,20 @@ def bootstrap_composite_runner(
                         filter_field = dep_cfg.filter_field or key
                         break
 
+        # Debug logging for dependency filter configuration
+        logger.debug(
+            "Creating dependency runner",
+            pipeline=pipeline_name,
+            keys_columns=list(keys.columns) if keys is not None else [],
+            keys_count=len(keys) if keys is not None else 0,
+            join_keys=list(dep_cfg.join_keys) if dep_cfg else [],
+            filter_field=filter_field,
+            filter_ids_count=len(filter_ids) if filter_ids else 0,
+            filter_ids_sample=list(filter_ids)[:5] if filter_ids else [],
+            is_chained=dep_cfg.key_source is not None if dep_cfg else False,
+            key_source=dep_cfg.key_source if dep_cfg else None,
+        )
+
         options = RunOptions(
             run_type="incremental",
             limit=len(keys) if filter_ids and keys is not None else None,
