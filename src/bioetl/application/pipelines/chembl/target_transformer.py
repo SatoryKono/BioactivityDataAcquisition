@@ -57,6 +57,7 @@ class TargetTransformer(BaseChemblTransformer):
             "component_ids": None,
             "component_types": None,
             "component_relationships": None,
+            "component_descriptions": None,
         }
 
     def _extract_basic_component_fields(
@@ -68,6 +69,9 @@ class TargetTransformer(BaseChemblTransformer):
             "component_ids": extract_list_field(components, "component_id", safe_int),
             "component_types": extract_list_field(components, "component_type"),
             "component_relationships": extract_list_field(components, "relationship"),
+            "component_descriptions": extract_list_field(
+                components, "component_description"
+            ),
         }
 
     def _aggregate_synonyms(
