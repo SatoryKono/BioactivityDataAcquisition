@@ -498,9 +498,7 @@ class TestFunctionLength:
     # Baseline updated 2026-01-27: titles_match() added
     # Baseline updated 2026-01-27: composite pipeline growth (dependencies phase, checkpoint)
     # Baseline updated 2026-02-03: technical debt allowance
-    MAX_VIOLATIONS = (
-        130  # Increased for column_order support in writers + extractors growth + technical debt
-    )
+    MAX_VIOLATIONS = 130  # Increased for column_order support in writers + extractors growth + technical debt
 
     def test_functions_under_50_lines(self, src_dir: Path) -> None:
         """All functions must be under 50 lines (with exemptions)."""
