@@ -1,3 +1,6 @@
+# BioETL Pipeline Configuration Comparison Matrix
+# Generated: 2026-02-03 | Version: 2.1
+# Legend: CONV = convention-based (auto-computed), EXPL = explicitly set, - = not applicable
 parameter,chembl/activity,chembl/assay,chembl/assay_parameters,chembl/cell_line,chembl/compound_record,chembl/molecule,chembl/protein_class,chembl/publication,chembl/publication_similarity,chembl/publication_term,chembl/target,chembl/target_component,crossref/publication,openalex/publication,pubchem/compound,pubmed/publication,semanticscholar/publication,uniprot/idmapping,uniprot/protein,status
 pipeline_name,chembl_activity,chembl_assay,chembl_assay_parameters,chembl_cell_line,chembl_compound_record,chembl_molecule,chembl_protein_class,chembl_publication,chembl_publication_similarity,chembl_publication_term,chembl_target,chembl_target_component,crossref_publication,openalex_publication,pubchem_compound,pubmed_publication,semanticscholar_publication,uniprot_idmapping,uniprot_protein,OK
 provider,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,chembl,crossref,openalex,pubchem,pubmed,semanticscholar,uniprot,uniprot,OK
@@ -6,3 +9,18 @@ version,1.2.0,1.2.0,1.2.0,1.2.0,1.2.0,1.2.0,1.2.0,2.1.0,2.1.0,2.1.0,1.2.0,1.2.0,
 primary_keys,['activity_id'],['assay_chembl_id'],['assay_param_id'],['cell_chembl_id'],['record_id'],['molecule_chembl_id'],['protein_class_id'],['document_chembl_id'],['sim_id'],['entity_id'],['target_chembl_id'],['component_id'],['doi'],['openalex_id'],['cid'],['pmid'],['paper_id'],['target_chembl_id'],['accession'],OK
 silver_table,chembl_activity,chembl_assay,chembl_assay_parameters,chembl_cell_line,chembl_compound_record,chembl_molecule,chembl_protein_class,chembl_publication,chembl_publication_similarity,chembl_publication_term,chembl_target,chembl_target_component,crossref_publication,openalex_publication,pubchem_compound,pubmed_publication,semanticscholar_publication,uniprot_idmapping,uniprot_protein,OK
 gold_table,chembl_activity,chembl_assay,chembl_assay_parameters,chembl_cell_line,chembl_compound_record,chembl_molecule,chembl_protein_class,chembl_publication,chembl_publication_similarity,chembl_publication_term,chembl_target,chembl_target_component,crossref_publication,openalex_publication,pubchem_compound,pubmed_publication,semanticscholar_publication,uniprot_idmapping,uniprot_protein,OK
+# Configuration Style Analysis
+config_style,CONV,CONV,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,CONV,INFO
+source_file,CONV,CONV,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,CONV,EXPL,EXPL,CONV,OK
+dq_config_file,CONV,CONV,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,CONV,EXPL,EXPL,CONV,OK
+column_schema_ref,column_groups_file,column_groups_file,column_groups_file,column_groups_file,column_groups_file,column_groups_file,column_groups_file,data_schema_file,column_groups_file,column_groups_file,column_groups_file,column_groups_file,data_schema_file,data_schema_file,column_groups_file,data_schema_file,data_schema_file,column_groups_file,column_groups_file,OK
+sink.bronze.path,CONV,CONV,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,CONV,OK
+sink.silver.path,CONV,CONV,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,CONV,OK
+sink.silver.primary_key,CONV,CONV,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,CONV,EXPL,EXPL,CONV,OK
+sink.silver.sort_by,CONV,CONV,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,CONV,EXPL,EXPL,CONV,OK
+sink.silver.partition_by,CONV,assay_type,type,-,-,molecule_type,class_level,doc_type,-,term_type,target_type,organism,-,year,batch_date,pub_year,year,-,organism,OK
+sink.gold.path,CONV,CONV,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,CONV,OK
+sink.gold.sort_by,CONV,CONV,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,EXPL,CONV,EXPL,EXPL,CONV,OK
+flat_structure,CONV,CONV,CONV,CONV,CONV,CONV,CONV,true,CONV,CONV,CONV,CONV,true,true,CONV,true,true,CONV,CONV,OK
+force_full_scan,-,-,-,-,-,-,-,true,true,true,-,-,true,true,-,true,true,-,-,OK
+dq_rules_inline,EXPL,EXPL,-,-,-,EXPL,-,-,-,-,EXPL,-,-,-,EXPL,-,-,-,-,OK
