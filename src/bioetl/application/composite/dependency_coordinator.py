@@ -17,11 +17,11 @@ from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+import polars as pl
+
 from bioetl.domain.composite.result import DependencyResult
 
 if TYPE_CHECKING:
-    import polars as pl
-
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import DependencyConfig
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort
@@ -201,7 +201,7 @@ class DependencyCoordinator:
             return seed_keys
 
         try:
-            source_keys = await self._delta_reader.read_table(
+            source_keys: pl.DataFrame | None = await self._delta_reader.read_table(
                 source_config.silver_table
             )
             if source_keys is not None and len(source_keys) > 0:
