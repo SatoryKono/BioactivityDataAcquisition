@@ -94,7 +94,7 @@ class TestFileSizeLimits:
         # Composition layer exemptions
         "metadata_coordinator.py": 510,  # 506 LOC - MetadataCoordinator with centralized metadata management + extended lineage
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
-        "composite.py": 490,  # 487 LOC - Composite pipeline bootstrap with runner factories + field group registry loading + DQ report service
+        "composite.py": 515,  # 512 LOC - Composite pipeline bootstrap with runner factories + field group registry loading + DQ report service
         "entrypoints.py": 780,  # 775 LOC - pipeline entrypoints (run_pipeline expanded + services + export + ensure_metrics_server_started)
         "registration.py": 720,  # 705 LOC - provider registration with data source creators (OpenAlex + SemanticScholar + UniProt IDMapping)
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
@@ -111,7 +111,7 @@ class TestFileSizeLimits:
         "client.py": 1000,  # 995 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "pipeline_config.py": 1095,  # 1089 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + force_full_scan (ADR-030) + column_groups
-        "composite_config.py": 665,  # 658 LOC - Composite pipeline configuration schema with validation
+        "composite_config.py": 680,  # 679 LOC - Composite pipeline configuration schema with validation
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
@@ -120,7 +120,7 @@ class TestFileSizeLimits:
         # Application layer exemptions
         "base_transformer.py": 790,  # 786 LOC - BaseTransformer with serialization helpers + validate_value_object() consolidation
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
-        "merger.py": 1465,  # 1460 LOC - MergeService with type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation
+        "merger.py": 1635,  # 1631 LOC - MergeService with dependency join support + type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation
         "extractors.py": 710,  # 705 LOC - SemanticScholar extractors with volume/issue parsing + page range expansion + affiliations
     }
 
@@ -258,7 +258,7 @@ class TestFunctionComplexity:
         "_check_value_distribution": 18,  # CC=17 - Value distribution analysis
         "_check_schema_drift": 14,  # CC=13 - Schema drift detection
         # Composite pipeline merge service
-        "merge": 12,  # CC=11 - MergeService.merge() orchestrates seed/enricher join with conflict resolution
+        "merge": 23,  # CC=22 - MergeService.merge() orchestrates seed/enricher/dependency join with conflict resolution
         "_apply_explicit_rules": 11,  # CC=10 - Explicit field priority rules (refactored with helper methods)
         "_apply_joins": 15,  # CC=13 - Join logic with multiple enrichers
         "_coalesce_prefer_seed": 16,  # CC=15 - Type-safe coalesce with seed priority and null handling
@@ -277,6 +277,8 @@ class TestFunctionComplexity:
         "_extract_schema_metadata": 17,  # CC=16 - Schema metadata extraction with multiple field type checks
         # Domain config immutability enforcement
         "_ensure_immutability": 7,  # CC=6 - Config immutability with nested type checks
+        # Domain composite config validation
+        "_validate_unique_enrichers": 7,  # CC=6 - Enricher uniqueness validation with pipeline name checks
         # Infrastructure Silver writer Arrow preparation
         "_prepare_arrow_data": 18,  # CC=17 - Arrow data preparation with null/type coercion
         # Domain DataSchemaConfig/LayerColumnConfig validation
@@ -625,7 +627,7 @@ class TestClassSize:
         # Composition services
         "MetadataCoordinator": 435,  # 434 lines - Metadata coordination for Medallion layers + extended lineage
         # Composite pipeline services (ADR-026)
-        "MergeService": 1415,  # 1407 lines - Composite merge service with conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation
+        "MergeService": 1575,  # 1570 lines - Composite merge service with dependency join support + conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
         "DependencyCoordinator": 355,  # 349 lines - Chained dependency coordination with key extraction
         "CompositePipelineRunner": 1080,  # 1059 lines - Composite pipeline orchestrator (FSM helpers extracted to fsm_helper.py)

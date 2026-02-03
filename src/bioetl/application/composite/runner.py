@@ -18,6 +18,7 @@ from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.runner_helpers import (
     add_not_run_results,
     calculate_had_warnings,
+    get_mergeable_dependencies,
     get_mergeable_enrichers,
     log_enrichment_summary,
 )
@@ -307,7 +308,9 @@ class CompositePipelineRunner:
         state = await self._transition_to_enrichment_completed(state)
 
         # Step 6: Execute merge or skip in dry run mode
-        state, merge_result = await self._execute_merge_stage(state, enrichment_results)
+        state, merge_result = await self._execute_merge_stage(
+            state, enrichment_results, dependency_results
+        )
 
         # Step 7: Finalize - set COMPLETED and cleanup checkpoint
         await self._finalize_pipeline(state)
@@ -695,6 +698,7 @@ class CompositePipelineRunner:
         self,
         state: CompositeCheckpointState,
         enrichment_results: dict[str, EnrichmentResult],
+        dependency_results: dict[str, DependencyResult] | None = None,
     ) -> tuple[CompositeCheckpointState, MergeResult | None]:
         """Execute merge stage or skip in dry run mode.
 
@@ -732,11 +736,21 @@ class CompositePipelineRunner:
                     enrichment_results, self._config.enrichers, self._logger
                 )
 
+                # Get only dependencies with data to merge
+                mergeable_dependencies = get_mergeable_dependencies(
+                    dependency_results or {},
+                    self._config.dependencies,
+                    self._logger,
+                )
+
                 merge_result = await self._merger.merge(
                     seed_table=self._config.seed.silver_table,
                     enrichers=mergeable_enrichers,
                     enrichment_results=enrichment_results,
                     run_id=self._run_id_str,
+                    seed_pipeline=self._config.seed.pipeline,
+                    dependencies=mergeable_dependencies,
+                    dependency_results=dependency_results,
                 )
 
                 # Log phase event for merge completion

@@ -318,6 +318,10 @@ class UniProtProteinTransformer(BaseTransformer):
             xrefs, "GuidetoPHARMACOLOGY"
         )
         data["pdb_xrefs"] = CrossRefExtractor.extract_pdb_xrefs(xrefs)
+        # Extended cross-references for drug discovery
+        data["interpro_xrefs"] = CrossRefExtractor.extract_interpro_xrefs(xrefs)
+        data["pfam_xrefs"] = CrossRefExtractor.extract_pfam_xrefs(xrefs)
+        data["reactome_xrefs"] = CrossRefExtractor.extract_reactome_xrefs(xrefs)
 
     def _add_features_and_keywords(
         self, record: BronzeRecord, data: dict[str, Any]

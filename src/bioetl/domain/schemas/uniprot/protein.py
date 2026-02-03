@@ -287,6 +287,18 @@ class UniprotTargetSchema(ETLRecordSchema):
         nullable=True,
         description="JSON array of PDB cross-references with structure details",
     )
+    interpro_xrefs: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of InterPro domain entries with id and name",
+    )
+    pfam_xrefs: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of Pfam family entries with id, name, and match_status",
+    )
+    reactome_xrefs: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of Reactome pathway entries with id and pathway_name",
+    )
 
     # === Features & Keywords ===
     features: Series[str] | None = pa.Field(

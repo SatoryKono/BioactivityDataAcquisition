@@ -194,6 +194,9 @@ class UniprotTarget(BaseEntity):
     chembl_ids: str | None = None
     guidetopharmacology_ids: str | None = None
     pdb_xrefs: str | None = None  # JSON array of PDB cross-references
+    interpro_xrefs: str | None = None  # JSON array of InterPro domain entries
+    pfam_xrefs: str | None = None  # JSON array of Pfam family entries
+    reactome_xrefs: str | None = None  # JSON array of Reactome pathway entries
 
     # Features & Keywords (JSON arrays)
     features: str | None = None
