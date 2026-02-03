@@ -135,12 +135,24 @@ class TestIDMappingDataSourceFetch:
 
     @pytest.fixture
     def mock_client(self) -> MagicMock:
-        """Create mock ID mapping client."""
+        """Create mock ID mapping client with new dict format."""
         client = MagicMock()
         client.map_ids = AsyncMock(
             return_value={
-                "CHEMBL204": "P00742",
-                "CHEMBL205": "P12345",
+                "CHEMBL204": {
+                    "uniprot_accession": "P00742",
+                    "uniprot_entry_name": "FA10_HUMAN",
+                    "organism_scientific": "Homo sapiens",
+                    "taxonomy_id": 9606,
+                    "reviewed": True,
+                },
+                "CHEMBL205": {
+                    "uniprot_accession": "P12345",
+                    "uniprot_entry_name": "TEST_HUMAN",
+                    "organism_scientific": "Homo sapiens",
+                    "taxonomy_id": 9606,
+                    "reviewed": True,
+                },
             }
         )
         return client
@@ -503,7 +515,9 @@ class TestIDMappingDataSourceEdgeCases:
         csv_path = tmp_path / "custom.csv"
         csv_path.write_text("custom_id,name\nCHEMBL1,Name1\n")
 
-        mock_client.map_ids = AsyncMock(return_value={"CHEMBL1": "P00001"})
+        mock_client.map_ids = AsyncMock(
+            return_value={"CHEMBL1": {"uniprot_accession": "P00001", "reviewed": True}}
+        )
 
         data_source = IDMappingDataSource(
             idmapping_client=mock_client,
@@ -530,7 +544,9 @@ class TestIDMappingDataSourceEdgeCases:
         csv_path = tmp_path / "targets.csv"
         csv_path.write_text("target_chembl_id\nCHEMBL1\nCHEMBL2\n")
 
-        mock_client.map_ids = AsyncMock(return_value={"CHEMBL1": "P00001"})
+        mock_client.map_ids = AsyncMock(
+            return_value={"CHEMBL1": {"uniprot_accession": "P00001", "reviewed": True}}
+        )
 
         data_source = IDMappingDataSource(
             idmapping_client=mock_client,
@@ -565,7 +581,9 @@ class TestIDMappingDataSourceEdgeCases:
         csv_path = tmp_path / "targets.csv"
         csv_path.write_text("target_chembl_id\nCHEMBL1\n")
 
-        mock_client.map_ids = AsyncMock(return_value={"CHEMBL1": "P00001"})
+        mock_client.map_ids = AsyncMock(
+            return_value={"CHEMBL1": {"uniprot_accession": "P00001", "reviewed": True}}
+        )
 
         data_source = IDMappingDataSource(
             idmapping_client=mock_client,

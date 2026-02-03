@@ -488,9 +488,6 @@ def _create_uniprot_idmapping_data_source(
     """
     from pathlib import Path
 
-    # Ignore filter_config - the input file IS the data source
-    _ = filter_config
-
     _, HttpClientFactory = _get_factories()
 
     # Create HTTP client for ID Mapping API
@@ -522,12 +519,18 @@ def _create_uniprot_idmapping_data_source(
         from_db = getattr(pipeline_config.source.api, "from_db", from_db)
         to_db = getattr(pipeline_config.source.api, "to_db", to_db)
 
+    # Extract seed IDs from filter_config (composite mode)
+    seed_ids: list[str] | None = None
+    if filter_config and filter_config.direct_filter_ids:
+        seed_ids = list(filter_config.direct_filter_ids)
+
     return IDMappingDataSource(
         idmapping_client=idmapping_client,
         input_path=input_path,
         logger=logger,
         from_db=from_db,
         to_db=to_db,
+        seed_ids=seed_ids,
     )
 
 

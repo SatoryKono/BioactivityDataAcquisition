@@ -436,6 +436,7 @@
     'description': 'Test protein component',
     'entity_id': '<entity_id>',
     'organism': 'Homo sapiens',
+    'protein_classification_id': None,
     'protein_classification_ids': None,
     'protein_classifications': None,
     'target_component_synonyms': '[{"synonym":"Gene1"},{"synonym":"Protein1"}]',
@@ -455,24 +456,16 @@
     'component_accessions': list([
       'P35354',
     ]),
-    'component_descriptions': None,
+    'component_id': 123,
     'component_ids': list([
       123,
     ]),
-    'component_organisms': list([
-      'Homo sapiens',
-    ]),
     'component_relationships': None,
-    'component_taxonomy_ids': list([
-      9606,
-    ]),
     'component_types': list([
       'PROTEIN',
     ]),
     'content_hash': '<content_hash>',
     'cross_references': '{"xref_id":"P35354","xref_src_db":"UniProt"}',
-    'dap_id': None,
-    'description': 'Prostaglandin G/H synthase 2',
     'downgraded': False,
     'entity_id': '<entity_id>',
     'organism': 'Homo sapiens',
@@ -482,7 +475,6 @@
     'target_chembl_id': 'CHEMBL1862',
     'target_component_synonyms': None,
     'target_components': '{"accession":"P35354","component_id":123,"component_type":"PROTEIN","organism":"Homo sapiens","target_component_xrefs":[{"xref_id":"P35354","xref_src_db":"UniProt"}],"tax_id":9606}',
-    'target_constraints': None,
     'target_type': 'SINGLE PROTEIN',
     'taxonomy_id': 9606,
   })

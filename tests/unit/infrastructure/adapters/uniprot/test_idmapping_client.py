@@ -64,11 +64,22 @@ class TestUniProtIDMappingClient:
         status_response.status_code = 200
         status_response.json.return_value = {"jobStatus": "FINISHED"}
 
-        # Mock results
+        # Mock results with full entry metadata
         results_response = MagicMock()
         results_response.status_code = 200
         results_response.json.return_value = {
-            "results": [{"from": "CHEMBL204", "to": {"primaryAccession": "P00742"}}]
+            "results": [
+                {
+                    "from": "CHEMBL204",
+                    "to": {
+                        "primaryAccession": "P00742",
+                        "uniProtkbId": "FA10_HUMAN",
+                        "entryType": "UniProtKB reviewed (Swiss-Prot)",
+                        "organism": {"scientificName": "Homo sapiens", "taxonId": 9606},
+                        "annotationScore": 5,
+                    },
+                }
+            ]
         }
         results_response.headers = {}
 
@@ -79,7 +90,14 @@ class TestUniProtIDMappingClient:
 
         result = await idmapping_client.map_ids("ChEMBL", "UniProtKB", ["CHEMBL204"])
 
-        assert result == {"CHEMBL204": "P00742"}
+        # Verify dict format with entry metadata
+        assert "CHEMBL204" in result
+        entry_data = result["CHEMBL204"]
+        assert entry_data is not None
+        assert entry_data["uniprot_accession"] == "P00742"
+        assert entry_data["uniprot_entry_name"] == "FA10_HUMAN"
+        assert entry_data["reviewed"] is True
+        assert entry_data["taxonomy_id"] == 9606
 
     @pytest.mark.asyncio
     async def test_map_ids_single_id_not_found(
@@ -133,8 +151,14 @@ class TestUniProtIDMappingClient:
         results_response.status_code = 200
         results_response.json.return_value = {
             "results": [
-                {"from": "CHEMBL204", "to": {"primaryAccession": "P00742"}},
-                {"from": "CHEMBL205", "to": {"primaryAccession": "P00915"}},
+                {
+                    "from": "CHEMBL204",
+                    "to": {"primaryAccession": "P00742", "uniProtkbId": "FA10_HUMAN"},
+                },
+                {
+                    "from": "CHEMBL205",
+                    "to": {"primaryAccession": "P00915", "uniProtkbId": "CAH1_HUMAN"},
+                },
                 # CHEMBL206 not in results = not found
             ]
         }
@@ -149,11 +173,11 @@ class TestUniProtIDMappingClient:
             "ChEMBL", "UniProtKB", ["CHEMBL204", "CHEMBL205", "CHEMBL206"]
         )
 
-        assert result == {
-            "CHEMBL204": "P00742",
-            "CHEMBL205": "P00915",
-            "CHEMBL206": None,
-        }
+        # Verify found entries have dict format
+        assert result["CHEMBL204"]["uniprot_accession"] == "P00742"
+        assert result["CHEMBL205"]["uniprot_accession"] == "P00915"
+        # Not found should be None
+        assert result["CHEMBL206"] is None
 
     @pytest.mark.asyncio
     async def test_map_ids_job_error(self, idmapping_client, mock_http_client):
@@ -226,7 +250,7 @@ class TestUniProtIDMappingClient:
         status_response.status_code = 200
         status_response.json.return_value = {"jobStatus": "FINISHED"}
 
-        # Mock results with direct string mapping
+        # Mock results with direct string mapping (some DBs return simple strings)
         results_response = MagicMock()
         results_response.status_code = 200
         results_response.json.return_value = {
@@ -241,7 +265,8 @@ class TestUniProtIDMappingClient:
 
         result = await idmapping_client.map_ids("ChEMBL", "UniProtKB", ["CHEMBL204"])
 
-        assert result == {"CHEMBL204": "P00742"}
+        # Direct string mapping wraps accession in minimal dict format
+        assert result["CHEMBL204"]["uniprot_accession"] == "P00742"
 
     @pytest.mark.asyncio
     async def test_health_check_healthy(self, idmapping_client, mock_http_client):

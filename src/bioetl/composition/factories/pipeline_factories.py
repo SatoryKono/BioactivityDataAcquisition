@@ -81,6 +81,7 @@ from bioetl.application.pipelines.uniprot.idmapping_transformer import (
     IDMappingTransformer,
 )
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
+from bioetl.composition.factories.data_source_factory import DataSourceRegistry
 from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
 
@@ -135,6 +136,7 @@ if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.application.core.base_transformer import BaseTransformer
+    from bioetl.composition.factories.data_source_factory import DataSourceCreator
 
 
 # =============================================================================
@@ -150,10 +152,15 @@ class PipelineFactoryConfig(NamedTuple):
 
     Attributes:
         pipeline_name: Unique identifier for the pipeline (e.g., "chembl_activity")
-        provider: Data provider name (e.g., "chembl", "pubchem")
+        provider: Data provider name (e.g., "chembl", "pubchem").
+            Used for transformer metadata (content hash, entity ID, tracing).
         transformer_class: Transformer class for Bronze→Silver transformation
         silver_schema: PyArrow schema for Silver layer validation
         gold_schema: Pandera schema for Gold layer validation (required)
+        data_source_provider: Override provider name for DataSourceRegistry lookup.
+            When set, data source is created using this provider name instead of
+            ``provider``. Use when the ProviderRegistry key differs from the
+            transformer provider (e.g., "uniprot_idmapping" vs "uniprot").
     """
 
     pipeline_name: str
@@ -161,6 +168,7 @@ class PipelineFactoryConfig(NamedTuple):
     transformer_class: type[BaseTransformer]
     silver_schema: pa.Schema | None
     gold_schema: Any  # Pandera schema class
+    data_source_provider: str | None = None
 
 
 # Consolidated pipeline definitions - single source of truth
@@ -272,6 +280,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=IDMappingTransformer,
         silver_schema=UNIPROT_ID_MAPPING_SCHEMA,
         gold_schema=UniProtIDMappingGoldSchema,
+        data_source_provider="uniprot_idmapping",
     ),
     # PubMed pipeline
     PipelineFactoryConfig(
@@ -319,6 +328,11 @@ def _create_factory(
     Returns:
         Configured GenericPipelineFactory instance
     """
+    # Resolve data source creator: use data_source_provider override if set
+    data_source_creator: DataSourceCreator | None = None
+    if config.data_source_provider:
+        data_source_creator = DataSourceRegistry.get(config.data_source_provider)
+
     return GenericPipelineFactory(
         pipeline_name=config.pipeline_name,
         pipeline_class=GenericPipeline,
@@ -326,6 +340,7 @@ def _create_factory(
         silver_schema=config.silver_schema,
         gold_schema=config.gold_schema,
         transformer_class=config.transformer_class,
+        data_source_creator=data_source_creator,
     )
 
 

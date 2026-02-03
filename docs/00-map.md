@@ -1,12 +1,13 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.15 | Last updated: 2026-01-27*
+*Synced with RULES.md v5.16 | Last updated: 2026-02-02*
 
-> **Documentation Update:** 2026-01-27
-> - Codebase metrics updated: ~516 Python files, ~110,300 LOC, ~7,770 tests
-> - ADR count corrected: 31 ADRs (ADR-001 through ADR-031)
+> **Documentation Update:** 2026-02-02
+> - Codebase metrics updated: ~500 Python files, ~109,300 LOC, ~8,330 tests
+> - ADR count corrected: 32 ADRs (ADR-001 through ADR-032)
 > - Pipeline configs: 21 configurations
-> - Document Status section synchronized with actual codebase state
+> - Adapter listing completed (all 7 providers)
+> - Gold contract link fixed (chembl_activity_v1.0.json)
 
 ## Quick Links
 
@@ -18,7 +19,7 @@
 | Review a pipeline       | [templates/pipeline-review-checklist.md](templates/pipeline-review-checklist.md) |
 | Handle a prod error     | [05-operations/runbooks/index.md](05-operations/runbooks/index.md)                           |
 | Understand architecture | [02-architecture/00-overview.md](02-architecture/00-overview.md)                  |
-| Check data contracts    | [contracts/gold/activity_v1.0.json](contracts/gold/activity_v1.0.json)                        |
+| Check data contracts    | [contracts/gold/chembl_activity_v1.0.json](contracts/gold/chembl_activity_v1.0.json)          |
 
 ---
 
@@ -64,7 +65,7 @@ docs/
 │   ├── data-layers.md           # Bronze/Silver/Gold layer details
 │   ├── observability-layers.md  # Observability architecture
 │   ├── diagrams.md              # Mermaid diagrams collection
-│   ├── decisions/               # ADR-001..031 (31 records)
+│   ├── decisions/               # ADR-001..032 (32 records)
 │   └── diagrams/                # 34 диаграммы .mermaid + supporting docs (index/policy) + render_diagrams.py
 │
 ├── 03-guides/                   # How-to guides (16 guides)
@@ -181,6 +182,7 @@ docs/
 | [ADR-029: Output Metadata Unification](02-architecture/decisions/ADR-029-output-metadata-unification.md) | Unified output metadata contracts | §2.4    |
 | [ADR-030: Publication Pagination Strategy](02-architecture/decisions/ADR-030-publication-pagination-strategy.md) | Publication pagination strategy | -       |
 | [ADR-031: Loading Strategy Formalization](02-architecture/decisions/ADR-031-loading-strategy-formalization.md) | Loading strategy formalization | -       |
+| [ADR-032: Unified HTTP Client](02-architecture/decisions/ADR-032-unified-http-client.md) | Unified HTTP client pattern | App A   |
 
 ### Data Management
 
@@ -298,7 +300,11 @@ src/bioetl/
 │   ├── adapters/                # External API clients
 │   │   ├── http/                # HTTP client infrastructure
 │   │   ├── chembl/              # ChEMBL API adapter
+│   │   ├── crossref/            # CrossRef API adapter
+│   │   ├── openalex/            # OpenAlex API adapter
 │   │   ├── pubchem/             # PubChem API adapter
+│   │   ├── pubmed/              # PubMed API adapter
+│   │   ├── semanticscholar/     # Semantic Scholar API adapter
 │   │   └── uniprot/             # UniProt API adapter
 │   ├── storage/                 # Data persistence
 │   │   ├── bronze_writer.py     # JSONL + zstd writer

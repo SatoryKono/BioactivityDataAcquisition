@@ -22,8 +22,9 @@ if TYPE_CHECKING:
 class IDMappingDataSource:
     """Data source for ChEMBL → UniProt ID mapping.
 
-    Reads target_chembl_id values from input CSV file and maps them
-    to UniProt accessions using the UniProt ID Mapping REST API.
+    Reads target_chembl_id values from seed filter IDs (composite mode)
+    or input CSV file (standalone mode), then maps them to UniProt
+    accessions using the UniProt ID Mapping REST API.
 
     Implements DataSourcePort protocol for integration with GenericPipeline.
 
@@ -48,16 +49,20 @@ class IDMappingDataSource:
         from_db: str = "ChEMBL",
         to_db: str = "UniProtKB",
         id_column: str = "target_chembl_id",
+        seed_ids: list[str] | None = None,
     ) -> None:
         """Initialize ID Mapping data source.
 
         Args:
             idmapping_client: UniProt ID Mapping client for API calls.
             input_path: Path to CSV file containing ChEMBL target IDs.
+                Used as fallback when seed_ids is not provided.
             logger: LoggerPort for structured logging.
             from_db: Source database for ID mapping (default: 'ChEMBL').
             to_db: Target database for ID mapping (default: 'UniProtKB').
             id_column: Column name in CSV containing ChEMBL IDs.
+            seed_ids: Pre-extracted ChEMBL target IDs from composite seed phase.
+                When provided, CSV file is not read.
         """
         self._client = idmapping_client
         self._input_path = input_path
@@ -65,6 +70,7 @@ class IDMappingDataSource:
         self._from_db = from_db
         self._to_db = to_db
         self._id_column = id_column
+        self._seed_ids = seed_ids
         self._is_open = False
 
     async def __aenter__(self) -> Self:
@@ -100,25 +106,28 @@ class IDMappingDataSource:
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch ID mapping records.
 
-        Reads ChEMBL IDs from CSV and maps them to UniProt accessions.
-        Returns records with target_chembl_id and uniprot_accession fields.
+        Resolves ChEMBL IDs from one of three sources (priority order):
+        1. seed_ids from constructor (composite pipeline mode)
+        2. filter_ids parameter (if passed by caller)
+        3. CSV file at input_path (standalone mode)
+
+        Then maps them to UniProt accessions via UniProt ID Mapping API.
 
         Args:
             entity_type: Entity type (should be 'idmapping').
             limit: Optional limit on number of records.
             query: Unused (for interface compatibility).
-            filter_ids: Unused (IDs come from CSV).
-            filter_field: Unused.
+            filter_ids: Optional ChEMBL IDs passed by caller.
+            filter_field: Unused (for interface compatibility).
 
         Yields:
             Dicts with target_chembl_id and uniprot_accession fields.
 
         Raises:
-            FileNotFoundError: If input CSV file doesn't exist.
+            FileNotFoundError: If input CSV file doesn't exist (standalone mode).
             ValueError: If required column is missing from CSV.
         """
-        # Ignore unused parameters (interface compatibility)
-        _ = query, filter_ids, filter_field
+        _ = query, filter_field
 
         if entity_type != "idmapping":
             self._logger.warning(
@@ -127,8 +136,21 @@ class IDMappingDataSource:
                 received=entity_type,
             )
 
-        # Step 1: Read ChEMBL IDs from CSV (async to avoid blocking event loop)
-        chembl_ids = await self._read_chembl_ids_async()
+        # Step 1: Resolve ChEMBL IDs — seed_ids > filter_ids > CSV
+        if self._seed_ids:
+            chembl_ids = list(self._seed_ids)
+            self._logger.info(
+                "idmapping_using_seed_ids",
+                count=len(chembl_ids),
+            )
+        elif filter_ids:
+            chembl_ids = list(filter_ids)
+            self._logger.info(
+                "idmapping_using_filter_ids",
+                count=len(chembl_ids),
+            )
+        else:
+            chembl_ids = await self._read_chembl_ids_async()
 
         # Apply limit if specified
         if limit is not None:
@@ -138,8 +160,10 @@ class IDMappingDataSource:
             self._logger.warning("no_ids_to_map", input_path=str(self._input_path))
             return
 
+        source = "seed" if self._seed_ids else "csv"
         self._logger.info(
             "idmapping_fetch_started",
+            source=source,
             input_path=str(self._input_path),
             chembl_id_count=len(chembl_ids),
         )
@@ -154,14 +178,17 @@ class IDMappingDataSource:
         # Step 3: Yield records for each ChEMBL ID
         found_count = 0
         for chembl_id in chembl_ids:
-            uniprot_accession = mapping_results.get(chembl_id)
-            if uniprot_accession:
+            entry_data = mapping_results.get(chembl_id)
+            if entry_data is not None and isinstance(entry_data, dict):
                 found_count += 1
-
-            yield {
-                "target_chembl_id": chembl_id,
-                "uniprot_accession": uniprot_accession,
-            }
+                result: dict[str, Any] = {"target_chembl_id": chembl_id}
+                result.update(entry_data)
+                yield result
+            else:
+                yield {
+                    "target_chembl_id": chembl_id,
+                    "uniprot_accession": None,
+                }
 
         self._logger.info(
             "idmapping_fetch_completed",
@@ -217,22 +244,23 @@ class IDMappingDataSource:
         """Check data source health.
 
         Verifies:
-        1. Input file exists
+        1. Input file exists (only in standalone mode, skipped when seed_ids provided)
         2. ID Mapping API is healthy
 
         Returns:
             HealthStatus indicating overall health.
         """
-        # Check input file (async to avoid blocking event loop)
-        loop = asyncio.get_running_loop()
-        file_exists = await loop.run_in_executor(None, self._input_path.exists)
-        if not file_exists:
-            self._logger.warning(
-                "health_check_failed",
-                reason="input_file_missing",
-                path=str(self._input_path),
-            )
-            return HealthStatus.UNHEALTHY
+        # Skip file check when seed_ids are provided (composite mode)
+        if not self._seed_ids:
+            loop = asyncio.get_running_loop()
+            file_exists = await loop.run_in_executor(None, self._input_path.exists)
+            if not file_exists:
+                self._logger.warning(
+                    "health_check_failed",
+                    reason="input_file_missing",
+                    path=str(self._input_path),
+                )
+                return HealthStatus.UNHEALTHY
 
         # Check API health
         api_status = await self._client.health_check()

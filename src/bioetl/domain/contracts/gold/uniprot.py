@@ -44,7 +44,7 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
 class UniProtIDMappingGoldSchema(pa.DataFrameModel):
     """Schema for UniProt ID Mapping in Gold layer.
 
-    Maps ChEMBL target IDs to UniProt accessions.
+    Maps ChEMBL target IDs to UniProt accessions with entry metadata.
     Records with mapping_status='not_found' have null uniprot_accession.
     """
 
@@ -58,8 +58,23 @@ class UniProtIDMappingGoldSchema(pa.DataFrameModel):
     # Mapped identifier (nullable - None if not found)
     uniprot_accession: Series[str] = pa.Field(nullable=True)
 
-    # Mapping status: 'found', 'not_found', 'error'
+    # Mapping status: 'found', 'not_found', 'error', 'multiple'
     mapping_status: Series[str] = pa.Field(nullable=False)
+
+    # UniProt entry metadata
+    uniprot_entry_name: Series[str] = pa.Field(nullable=True)
+    organism_scientific: Series[str] = pa.Field(nullable=True)
+    organism_common: Series[str] = pa.Field(nullable=True)
+    taxonomy_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int → float
+    protein_name: Series[str] = pa.Field(nullable=True)
+    gene_primary: Series[str] = pa.Field(nullable=True)
+    sequence_length: Series[float] = pa.Field(nullable=True, coerce=True)  # int → float
+    sequence_mass: Series[float] = pa.Field(nullable=True, coerce=True)  # int → float
+    reviewed: Series[bool] = pa.Field(nullable=True)
+    annotation_score: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int → float
+    all_mappings: Series[str] = pa.Field(nullable=True)
 
     # DQ warning flag (True for not_found)
     dq_warn: Series[bool] = pa.Field(nullable=False, alias="_dq_warn")

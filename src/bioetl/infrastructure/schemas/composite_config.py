@@ -133,13 +133,18 @@ class DependencySchema(BaseModel):
     """Pydantic schema for dependency pipeline configuration.
 
     Dependencies run after seed but before enrichers to populate Silver tables.
+
+    Supports chained dependencies via `key_source`:
+    - None or "seed": Extract join_keys from seed output (default behavior)
+    - "<pipeline_name>": Extract join_keys from that pipeline's Silver table
+      (useful when join keys come from enrichers, not seed)
     """
 
     pipeline: str = Field(
         ..., min_length=1, description="Name of the dependency pipeline"
     )
     join_keys: list[str] = Field(
-        ..., min_length=1, description="Keys to extract from seed for filtering"
+        ..., min_length=1, description="Keys to extract from key_source for filtering"
     )
     required: bool = Field(
         default=False, description="If True, failure causes composite failure"
@@ -151,6 +156,21 @@ class DependencySchema(BaseModel):
     )
     silver_table: str | None = Field(
         default=None, description="Path to dependency's Silver table"
+    )
+    key_source: str | None = Field(
+        default=None,
+        description=(
+            "Source of join keys: None/'seed' for seed keys, "
+            "or pipeline name for chained dependencies"
+        ),
+    )
+    filter_field: str | None = Field(
+        default=None,
+        description=(
+            "Field name to use when filtering the target API. "
+            "Defaults to first join_key. Useful when source column differs "
+            "from target API field (e.g., protein_classification_id vs protein_class_id)"
+        ),
     )
 
     @field_validator("join_keys")
@@ -172,6 +192,8 @@ class DependencySchema(BaseModel):
             required=self.required,
             timeout_seconds=self.timeout_seconds,
             silver_table=self.silver_table,
+            key_source=self.key_source,
+            filter_field=self.filter_field,
         )
 
 
@@ -323,6 +345,10 @@ class MergeSchema(BaseModel):
         default=None,
         description="Path to column group config file relative to composite config",
     )
+    exclude_fields: list[str] = Field(
+        default_factory=list,
+        description="Columns to drop from merged output (supports glob patterns)",
+    )
 
     @model_validator(mode="after")
     def validate_explicit_rules_requires_priorities(self) -> MergeSchema:
@@ -359,6 +385,7 @@ class MergeSchema(BaseModel):
             field_mappings=self.field_mappings,
             preserve_all_sources=self.preserve_all_sources,
             column_groups=column_groups_domain,
+            exclude_fields=tuple(self.exclude_fields),
         )
 
 
@@ -535,9 +562,17 @@ class CompositeConfigSchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_dependency_join_keys(self) -> CompositeConfigSchema:
-        """Validate that dependency join keys exist in seed output_keys."""
+        """Validate that dependency join keys exist in seed output_keys.
+
+        For chained dependencies (key_source != None and != "seed"),
+        join_keys are taken from the key_source's Silver table,
+        so they are NOT validated against seed output_keys.
+        """
         seed_keys = set(self.seed.output_keys)
         for dep in self.dependencies:
+            # Skip validation for chained dependencies
+            if dep.key_source is not None and dep.key_source != "seed":
+                continue
             for key in dep.join_keys:
                 if key not in seed_keys:
                     raise ValueError(

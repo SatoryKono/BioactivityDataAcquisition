@@ -19,13 +19,14 @@ from pandera.typing import Series
 from bioetl.domain.schemas.base import ETLRecordSchema
 
 # === Fixed Value Constants ===
-MAPPING_STATUSES = ["found", "not_found", "error"]
+MAPPING_STATUSES = ["found", "not_found", "error", "multiple"]
 
 
 class IDMappingSchema(ETLRecordSchema):
     """UniProt ID Mapping validation schema for Silver layer.
 
     Validates mapping results from ChEMBL targets to UniProt accessions.
+    Includes comprehensive UniProt entry metadata when mapping is found.
     """
 
     # === Primary Key ===
@@ -54,13 +55,78 @@ class IDMappingSchema(ETLRecordSchema):
 
     mapping_status: Series[str] = pa.Field(
         nullable=False,
-        description="Status of mapping: 'found', 'not_found', or 'error'",
+        description="Status of mapping: 'found', 'not_found', 'error', or 'multiple'",
     )
 
     @pa.check("mapping_status", name="mapping_status_values")
     def _check_mapping_status(cls, series: Series[str]) -> Series[bool]:
         """Validate mapping status is one of the allowed values."""
         return cast("Series[bool]", series.isin(MAPPING_STATUSES))
+
+    # === UniProt Entry Metadata ===
+    uniprot_entry_name: Series[str] | None = pa.Field(
+        nullable=True,
+        description="UniProt entry name (e.g., FA10_HUMAN)",
+    )
+
+    organism_scientific: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Scientific organism name (e.g., Homo sapiens)",
+    )
+
+    organism_common: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Common organism name (e.g., Human)",
+    )
+
+    taxonomy_id: Series[float] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        ge=1,
+        description="NCBI Taxonomy ID",
+    )
+
+    protein_name: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Recommended protein name",
+    )
+
+    gene_primary: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Primary gene name",
+    )
+
+    sequence_length: Series[float] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        ge=1,
+        description="Protein sequence length",
+    )
+
+    sequence_mass: Series[float] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        ge=1,
+        description="Molecular weight in Daltons",
+    )
+
+    reviewed: Series[bool] | None = pa.Field(
+        nullable=True,
+        description="True if Swiss-Prot (reviewed), False if TrEMBL",
+    )
+
+    annotation_score: Series[float] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        ge=1,
+        le=5,
+        description="Quality score 1-5 (5 = best annotated)",
+    )
+
+    all_mappings: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of all accessions when multiple mappings found",
+    )
 
     class Config:
         """Pandera configuration."""
