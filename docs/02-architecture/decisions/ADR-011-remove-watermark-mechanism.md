@@ -153,11 +153,12 @@ class BasePipeline(ABC):
 
 ## Related ADRs
 
-- **ADR-002**: Medallion Architecture — сохраняется, меняется только механизм загрузки
-- **ADR-005**: Composition Layer — упрощён, удалены watermark factories
-- **ADR-010**: Local-Only Deployment — упрощение инфраструктуры
-- **ADR-030**: Full Scan Loading Strategy — развивает концепцию полной загрузки
-- **ADR-031**: Composite Pipeline Pattern — использует full scan для агрегации данных
+- [ADR-002](ADR-002-medallion-architecture.md): Medallion Architecture — сохраняется, меняется только механизм загрузки
+- [ADR-005](ADR-005-composition-layer-separation.md): Composition Layer — упрощён, удалены watermark factories
+- [ADR-010](ADR-010-local-only-deployment.md): Local-Only Deployment — упрощение инфраструктуры
+- [ADR-026](ADR-026-composite-pipeline-pattern.md): Composite Pipeline Pattern — использует full scan для агрегации данных
+- [ADR-030](ADR-030-publication-pagination-strategy.md): Publication Pagination Strategy — развивает концепцию полной загрузки
+- [ADR-031](ADR-031-loading-strategy-formalization.md): Loading Strategy Formalization — формализация стратегий загрузки
 
 ## Migration Notes
 

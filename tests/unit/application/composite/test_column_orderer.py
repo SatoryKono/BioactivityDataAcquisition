@@ -422,3 +422,128 @@ class TestColumnOrdererYAMLGroups:
 
         # Default behavior: system before title
         assert result.columns.index("_run_id") < result.columns.index("title")
+
+    def test_yaml_groups_preserve_field_order(self, mock_logger: MagicMock) -> None:
+        """Fields within a YAML group are emitted in field-list order, not sorted."""
+        groups = [
+            ColumnGroupConfig(
+                name="bibliography",
+                fields=("abstract", "doi", "title", "volume"),
+                provider_order=("chembl", "crossref"),
+            ),
+        ]
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
+
+        df = pl.DataFrame(
+            {
+                "chembl.publication.volume": ["1"],
+                "crossref.publication.title": ["T1"],
+                "chembl.publication.title": ["T2"],
+                "chembl.publication.abstract": ["A1"],
+                "chembl.publication.doi": ["10.1/a"],
+            }
+        )
+        result = orderer.order_columns(df)
+
+        # Fields should follow the field-list order: abstract, doi, title, volume
+        # Within each field, providers sorted by provider_order
+        assert result.columns == [
+            "chembl.publication.abstract",  # abstract first
+            "chembl.publication.doi",  # doi second
+            "chembl.publication.title",  # title third (chembl before crossref)
+            "crossref.publication.title",
+            "chembl.publication.volume",  # volume last
+        ]
+
+    def test_yaml_groups_canonical_category_order(self, mock_logger: MagicMock) -> None:
+        """Canonical-style groups (id, bibliography) maintain field order."""
+        groups = [
+            ColumnGroupConfig(
+                name="id",
+                fields=("entity_id", "pmid"),
+                provider_order=("chembl", "openalex"),
+            ),
+            ColumnGroupConfig(
+                name="bibliography",
+                fields=("abstract", "title"),
+                provider_order=("chembl", "openalex"),
+            ),
+        ]
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
+
+        df = pl.DataFrame(
+            {
+                "openalex.publication.abstract": ["A1"],
+                "chembl.publication.title": ["T1"],
+                "chembl.publication.entity_id": ["e1"],
+                "openalex.publication.pmid": ["123"],
+                "chembl.publication.abstract": ["A2"],
+            }
+        )
+        result = orderer.order_columns(df)
+
+        # id group: entity_id before pmid
+        # bibliography group: abstract before title
+        expected = [
+            "chembl.publication.entity_id",
+            "openalex.publication.pmid",
+            "chembl.publication.abstract",
+            "openalex.publication.abstract",
+            "chembl.publication.title",
+        ]
+        assert result.columns == expected
+
+    def test_yaml_groups_dq_fields_always_last(self, mock_logger: MagicMock) -> None:
+        """DQ suffix fields (_dq_error, _dq_warn) are always the last two columns."""
+        groups = [
+            ColumnGroupConfig(
+                name="system",
+                fields=("entity_id", "_run_id"),
+                pattern=r"^_",
+            ),
+            ColumnGroupConfig(name="content", fields=("title",)),
+        ]
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
+
+        df = pl.DataFrame(
+            {
+                "title": ["T1"],
+                "_run_id": ["r1"],
+                "entity_id": ["e1"],
+                "_dq_error": [False],
+                "_dq_warn": [False],
+                "unknown_field": ["X"],
+            }
+        )
+        result = orderer.order_columns(df)
+
+        # _dq_error and _dq_warn MUST be the last two columns
+        assert result.columns[-2] == "_dq_error"
+        assert result.columns[-1] == "_dq_warn"
+        # Other fields should precede them
+        assert "title" in result.columns[:-2]
+        assert "entity_id" in result.columns[:-2]
+        assert "_run_id" in result.columns[:-2]
+        assert "unknown_field" in result.columns[:-2]
+
+    def test_yaml_groups_dq_fields_last_even_without_remaining(
+        self, mock_logger: MagicMock
+    ) -> None:
+        """DQ fields are last even when all other columns are in explicit groups."""
+        groups = [
+            ColumnGroupConfig(name="system", fields=("entity_id",)),
+            ColumnGroupConfig(name="content", fields=("title",)),
+        ]
+        orderer = ColumnOrderer(mock_logger, column_groups=groups)
+
+        df = pl.DataFrame(
+            {
+                "entity_id": ["e1"],
+                "title": ["T1"],
+                "_dq_error": [False],
+                "_dq_warn": [False],
+            }
+        )
+        result = orderer.order_columns(df)
+
+        assert result.columns == ["entity_id", "title", "_dq_error", "_dq_warn"]

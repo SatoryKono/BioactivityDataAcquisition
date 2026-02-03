@@ -80,6 +80,16 @@ def parse_volume_issue(volume_str: str | None) -> tuple[str | None, str | None]:
 # =============================================================================
 
 
+def _extract_digits(s: str) -> str:
+    """Extract only digit characters from a string."""
+    return "".join(c for c in s if c.isdigit())
+
+
+def _extract_non_digits(s: str) -> str:
+    """Extract only non-digit characters from a string."""
+    return "".join(c for c in s if not c.isdigit())
+
+
 def _expand_abbreviated_page(first_page: str, tmp_last_page: str) -> str:
     """Expand abbreviated last page number.
 
@@ -101,26 +111,21 @@ def _expand_abbreviated_page(first_page: str, tmp_last_page: str) -> str:
         Expanded last page string.
 
     """
-    # Extract numeric parts only for calculation
-    first_digits = "".join(c for c in first_page if c.isdigit())
-    last_digits = "".join(c for c in tmp_last_page if c.isdigit())
+    first_digits = _extract_digits(first_page)
+    last_digits = _extract_digits(tmp_last_page)
 
     # If either is non-numeric, return as-is (e.g., "S1-S5")
     if not first_digits or not last_digits:
         return tmp_last_page
 
-    n1 = len(first_digits)  # digits in first_page
-    n2 = len(last_digits)  # digits in tmp_last_page
-
     # If last page has same or more digits, it's a full number
-    if n2 >= n1:
+    if len(last_digits) >= len(first_digits):
         return tmp_last_page
 
     # Expand abbreviated page number
-    # last_page = int(first_page / 10^n2) * 10^n2 + tmp_last_page
     first_num = int(first_digits)
     last_num = int(last_digits)
-    divisor = 10**n2
+    divisor = 10 ** len(last_digits)
 
     expanded = (first_num // divisor) * divisor + last_num
 
@@ -129,7 +134,7 @@ def _expand_abbreviated_page(first_page: str, tmp_last_page: str) -> str:
         expanded += divisor
 
     # Preserve any prefix from tmp_last_page (e.g., "S" in "S5")
-    prefix = "".join(c for c in tmp_last_page if not c.isdigit())
+    prefix = _extract_non_digits(tmp_last_page)
     return f"{prefix}{expanded}" if prefix else str(expanded)
 
 

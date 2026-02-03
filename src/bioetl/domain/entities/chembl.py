@@ -492,9 +492,6 @@ class TargetRecord(BaseModel):
     component_descriptions: list[str] | None = Field(
         default=None, description="Component descriptions"
     )
-    component_organisms: list[str] | None = Field(
-        default=None, description="Component organisms"
-    )
     component_tax_ids: list[int] | None = Field(
         default=None, description="Component taxonomy IDs"
     )

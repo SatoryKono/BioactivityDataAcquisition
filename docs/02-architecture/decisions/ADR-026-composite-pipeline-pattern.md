@@ -112,6 +112,89 @@ Implement **Composite Pipeline Pattern** with the following architecture:
 | Network timeout | Retry with backoff (3x) | Automatic |
 | Partial completion | Checkpoint saved | `--resume` flag |
 
+### 4.1. Dependency Pipelines
+
+**Status:** Added 2026-02-03
+
+Dependencies are pipelines that run **after seed but before enrichers**. Unlike enrichers
+which read from pre-populated Silver tables, dependencies execute full API→Bronze→Silver
+pipelines to populate Silver tables.
+
+#### Execution Order
+
+```
+1. Seed Pipeline      → Populates Silver/seed
+2. Dependencies       → Populates Silver/dependency (sequential)
+3. Enrichers          → Read from Silver, enrich seed data (parallel)
+4. Merge              → Combine all sources
+```
+
+#### Use Cases
+
+| Use Case | Example |
+|----------|---------|
+| Reference tables | `protein_class` hierarchy (~1.5K records) |
+| Derived entities | `publication_term` (MeSH terms from /document API) |
+| Chained data | `protein_class` using IDs from `target_component` |
+
+#### Chained Dependencies (key_source)
+
+**Problem:** Some dependencies need keys from *another dependency's* output, not from seed.
+
+**Example:** `chembl_protein_class` needs `protein_classification_id` values, but these
+come from `chembl_target_component` Silver table, not from seed.
+
+**Solution:** `key_source` field specifies where to read join keys from.
+
+```yaml
+dependencies:
+  # Standard dependency: uses keys from seed
+  - pipeline: chembl_target_component
+    join_keys: [component_id]      # Column in seed
+    silver_table: silver/chembl/target_component
+
+  # Chained dependency: uses keys from another dependency
+  - pipeline: chembl_protein_class
+    join_keys: [protein_classification_id]  # Column in key_source table
+    filter_field: protein_class_id          # API filter field name
+    key_source: chembl_target_component     # Read keys from this Silver table
+    silver_table: silver/chembl/protein_class
+```
+
+#### Configuration Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `pipeline` | string | Dependency pipeline name |
+| `join_keys` | list[string] | Column names to extract from key source |
+| `key_source` | string? | Source of keys: `null`/`"seed"` = seed, or pipeline name |
+| `filter_field` | string? | API filter field (if differs from join_key) |
+| `required` | bool | If true, failure stops composite |
+| `timeout_seconds` | int | Per-dependency timeout |
+| `silver_table` | string? | Path to Silver table |
+
+#### Implementation
+
+- **DependencyCoordinator**: Reads keys from correct source (seed or chained)
+- **`DependencyConfig.uses_seed_keys`**: Property to check key source
+- **Sequential execution**: Dependencies run in order (chaining requires this)
+
+#### Example: Target Composite Pipeline
+
+```
+Seed: chembl_target
+  └─ Provides: target_chembl_id, component_id
+
+Dependencies:
+  1. chembl_target_component (component_id from seed)
+     └─ Populates: Silver with protein_classification_id
+  2. chembl_protein_class (protein_classification_id from #1)
+     └─ Populates: Silver with protein class hierarchy
+
+Enrichers:
+  - uniprot_idmapping (target_chembl_id from seed)
+```
+
 ### 5. Locking Strategy: Hierarchical Locks
 
 ```
@@ -311,6 +394,27 @@ class CompositePipelineRunner:
 ### CompositeConfig
 
 ```python
+@dataclass(frozen=True, slots=True)
+class DependencyConfig:
+    """Configuration for a dependency pipeline.
+
+    Dependencies run after seed but before enrichers to populate Silver tables.
+    Supports chained dependencies via key_source field.
+    """
+    pipeline: str                    # Pipeline name (e.g., "chembl_protein_class")
+    join_keys: tuple[str, ...]       # Keys to extract for filtering
+    required: bool = False           # If True, failure = composite failure
+    timeout_seconds: int = 600       # Per-dependency timeout
+    silver_table: str | None = None  # Path to Silver table
+    key_source: str | None = None    # None/"seed" = seed keys, or pipeline name
+    filter_field: str | None = None  # API filter field (if differs from join_key)
+
+    @property
+    def uses_seed_keys(self) -> bool:
+        """Check if dependency uses keys from seed."""
+        return self.key_source is None or self.key_source == "seed"
+
+
 @dataclass(frozen=True, slots=True)
 class EnricherConfig:
     """Configuration for a single enrichment pipeline."""
@@ -1241,5 +1345,5 @@ def run(pipeline: str, enrich_only: str | None, required_only: bool, ...):
 - ADR-010: Local-Only Deployment
 - ADR-015: Pipeline Services Lifecycle
 - ADR-020: BasePipeline Decomposition
-- RULES.md v5.15 §2.4 (Backfill/Replay)
-- RULES.md v5.15 §3.3 (Concurrency & Locks)
+- RULES.md v5.17 §2.4 (Backfill/Replay)
+- RULES.md v5.17 §3.3 (Concurrency & Locks)

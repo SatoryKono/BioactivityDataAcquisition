@@ -46,7 +46,7 @@ class IDMappingPort(Protocol):
         from_db: str,
         to_db: str,
         ids: list[str],
-    ) -> Mapping[str, str | None]:
+    ) -> Mapping[str, dict[str, Any] | None]:
         """Map identifiers from source database to target database.
 
         Args:
@@ -55,7 +55,7 @@ class IDMappingPort(Protocol):
             ids: List of identifiers to map.
 
         Returns:
-            Dictionary mapping each input ID to its mapped value,
+            Dictionary mapping each input ID to its entry data dict,
             or None if no mapping was found.
 
         Raises:

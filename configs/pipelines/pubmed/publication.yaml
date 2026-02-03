@@ -26,8 +26,8 @@ gold_table: "pubmed_publication"
 # -----------------------------------------------------------------------------
 source:
   search_term: "bioinformatics[Title/Abstract] AND drug discovery[Title/Abstract]"
-  email: "${BIOETL_NCBI_EMAIL}"
-  api_key: "${BIOETL_NCBI_API_KEY}"
+  email: "${BIOETL_PUBMED_EMAIL}"
+  api_key: "${BIOETL_PUBMED_API_KEY}"
 
 # -----------------------------------------------------------------------------
 # Data Schema Configuration (Column Ordering)

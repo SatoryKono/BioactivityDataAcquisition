@@ -2,7 +2,7 @@
 
 Справочник для Claude Code при работе с репозиторием BioETL.
 
-*Синхронизировано с RULES.md v5.15 (2026-01-29) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.3.0*
+*Синхронизировано с RULES.md v5.17 (2026-02-03) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.5.0*
 
 ---
 
@@ -79,10 +79,8 @@ grep -n "def " src/bioetl/application/core/runner.py  # Проверить ме�
 > "bootstrap_pipeline смешивает ответственности и требует декомпозиции"
 
 **✅ Делай так:**
-> "bootstrap_pipeline (`bootstrap.py:68-167`, 100 строк) делегирует:
-> - `bootstrap_observability()` — строка 108
-> - `FilterConfigBuilder.build()` — строка 139
-> - `factory.create_runner()` — строка 159
+> "bootstrap_pipeline рефакторирован в `composition/bootstrap/` (directory),
+> делегирует через sub-modules: `assembly/`, `cli/`, `runtime/`.
 >
 > **Вывод**: Уже декомпозирован, задача не требуется."
 
@@ -124,16 +122,17 @@ ls tests/architecture/test_*.py
 | **Язык** | Python 3.11+ |
 | **Стиль документации** | Русский, RFC 2119 keywords |
 
-### 1.1. Метрики Кодовой Базы (2026-01-29)
+### 1.1. Метрики Кодовой Базы (2026-02-03)
 
 | Метрика | Значение |
 |---------|----------|
-| **Python-файлов** | ~497 |
-| **Строк кода** | ~108,200 |
-| **Тестов** | ~9,890 |
-| **ADR** | 31 |
+| **Python-файлов** | ~500 |
+| **Строк кода** | ~109,300 |
+| **Тестов** | ~9,926 (функций test_) |
+| **ADR** | 32 |
 | **Провайдеров** | 7 |
-| **Pipeline-конфигураций** | 21 |
+| **Pipeline-конфигураций** | 21 (19 entity + 2 composite) |
+| **Конфиг-файлов всего** | 58 (pipelines, dq, filter, sources) |
 
 ---
 
@@ -153,7 +152,7 @@ src/bioetl/
 **Ключевые ограничения** (детали в `RULES.md` §1.1):
 - **Матрица импортов**: `domain` ← `application` ← `composition` → `infrastructure`; `interfaces` может импортировать всё
 - **Нарушение = Блокер PR**. Проверяется `import-linter` и `tests/architecture/`
-- **DI**: Зависимости передаются в конструктор. `composition/bootstrap.py` — единственное место сборки
+- **DI**: Зависимости передаются в конструктор. `composition/bootstrap/` — единственное место сборки
 
 ### 2.3. ⚠️ Архитектурные Пояснения (Избегай Ложных Выводов)
 
@@ -163,19 +162,19 @@ src/bioetl/
 | Компонент | ❌ Ложное утверждение | ✅ Реальность |
 |-----------|----------------------|---------------|
 | **Email в config/adapters** | "PII поля (email) требуют хэширования HashService" | **НЕ PII**: `default_email` — технический идентификатор для NCBI API, не персональные данные. NCBI требует email для идентификации инструмента. См. `config.py:364-371`, `pubmed_client.py:38-42` |
-| **PipelineRunner** | "God object, слишком много ответственностей" | **186 строк**, делегирует через `RunnerServices` bundle (`runner.py:84-88`) |
+| **PipelineRunner** | "God object, слишком много ответственностей" | **161 строка**, делегирует через `PipelineServices` bundle (`runner.py:54,89`) |
 | **bootstrap_pipeline** | "Смешивает сборку и бизнес-логику" | Тонкий фасад, делегирует фабрикам: `factory.create_runner()` |
-| **ChEMBL Adapter** | "Монолит 517 строк, объединяет всё" | **694 строки**, делегирует через `EntityMapper` (112 LOC), `ErrorClassifier`, `AdapterMetrics`, `BaseHttpAdapter` (`client.py:30,76-84,90`) |
-| **GoldWriter** | "Монолит 593 строки, требует декомпозиции" | **650 строк**, делегирует CSV в `CsvExporter`, audit в `AuditPort`. Режимы OVERWRITE/APPEND/SCD2 — когезивны (`gold_writer.py:70-71,87-88`) |
+| **ChEMBL Adapter** | "Монолит 517 строк, объединяет всё" | **870 строк**, делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics`, `BaseHttpAdapter` (`client.py`) |
+| **GoldWriter** | "Монолит 593 строки, требует декомпозиции" | **818 строк**, делегирует CSV в `CsvExporter`, audit в `AuditPort`. Режимы OVERWRITE/APPEND/SCD2 — когезивны (`gold_writer.py`) |
 | **CLI** | "Содержит бизнес-логику подтверждений" | Подтверждения — **законная** ответственность interfaces слоя |
 | **WriteModePolicy default** | "DeltaWriter нарушает DI" | Опциональный параметр с default — валидный паттерн для value objects |
 | **BaseTransformer** | "Нет DQ-валидации" | By design: Template Method. DQ — ответственность конкретных трансформеров |
 | **MedallionLifecycle** | "Не использует политики" | Использует `MedallionPolicy.should_clear_silver/gold` |
 | **BronzeWriter** | "Нет observability" | Имеет структурированное логирование (`bronze_writer.py:197-205`) |
 | **DQ/Medallion политики** | "Нет автоматизации" | Реализовано: `MedallionPolicy`, `DQConfig`, `SilverWriteMode`, `GoldWriteMode` enums |
-| **bootstrap_pipeline** | "140+ строк, усложняет тестирование" | **185 строк** (`bootstrap.py`), делегирует через фабрики и helper-функции |
+| **bootstrap_pipeline** | "140+ строк, усложняет тестирование" | Рефакторинг в `composition/bootstrap/` (directory с `assembly/`, `cli/`, `runtime/`), делегирует через фабрики и helper-функции |
 | **RecordProcessor** | "Совмещает метрики/карантин/запись" | **Делегирует** в `BatchMetricsRecorder`, `BatchTransformer`, `BatchWriter`, `QuarantineManager` (`record_processor.py:59-85`) |
-| **PipelineRunner** | "Не выпускает метрики по стадиям" | Использует `PipelineObserver` через `RunnerServices.observer` (`runner.py:89,117`) |
+| **PipelineRunner** | "Не выпускает метрики по стадиям" | Использует `PipelineObserver` через `PipelineServices` (`runner.py:89`) |
 | **Write mode validation** | "Нет валидации через Enum" | **Реализовано**: `SilverWriteMode`, `GoldWriteMode` enums (`delta_writer.py:53-64`, `gold_writer.py:42-54`) |
 | **Архитектурные тесты** | "Не связаны с метриками" | 360 тестов в `tests/architecture/`, `make arch-test` в CI |
 | **MemoryLock** | "Требуется Redis для распределённых блокировок" | **MemoryLock достаточен** для локального запуска. Проект **by design** использует локальные пайплайны. См. §5 Блокировки. |
@@ -337,7 +336,7 @@ cat docs/archived/refactoring-plan.md | head -60
 
 **Circuit Breaker**: 5 consecutive errors → Open 5 мин (см. [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md))
 
-**31 ADR** определяют архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
+**32 ADR** определяют архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
 (полный реестр в `docs/RULES.md` Приложение F)
 
 ---
@@ -392,11 +391,11 @@ async def aclose() -> None                             # Graceful shutdown
 
 | Уровень | Директория | Тестов | Правила |
 |---------|------------|--------|---------|
-| **Unit** | `tests/unit/` | ~7074 | In-memory fakes предпочтительны |
-| **Integration** | `tests/integration/` | ~288 | VCR.py для HTTP |
+| **Unit** | `tests/unit/` | ~7,249 | In-memory fakes предпочтительны |
+| **Integration** | `tests/integration/` | ~291 | VCR.py для HTTP |
 | **Architecture** | `tests/architecture/` | ~421 | Проверка слоёв, контракты портов |
 
-**Всего:** ~7780 тестов | **Цель покрытия:** ≥85% (`--cov-fail-under=85`)
+**Всего:** ~8,330 тестов (функций `test_`) | **Цель покрытия:** ≥85% (`--cov-fail-under=85`)
 
 ### Основные команды
 
@@ -437,7 +436,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 | Domain Ports | `src/bioetl/domain/ports/` |
 | Adapters | `src/bioetl/infrastructure/adapters/{provider}/` |
 | Pipelines | `src/bioetl/application/pipelines/` |
-| Bootstrap | `src/bioetl/composition/bootstrap.py` |
+| Bootstrap | `src/bioetl/composition/bootstrap/` |
 | CLI | `src/bioetl/interfaces/cli/` |
 | Configs | `configs/pipelines/{provider}/{entity}.yaml` |
 | Tests | `tests/` |

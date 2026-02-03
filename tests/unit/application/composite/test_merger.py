@@ -714,6 +714,8 @@ class TestApplyJoinsSmartColumnRenaming:
 
         # Regular columns should also be prefixed with qualified name
         assert "crossref.publication.citation_count" in result.columns
+        # Enricher DOI preserved as qualified data column
+        assert "crossref.publication.doi" in result.columns
 
     @pytest.mark.asyncio
     async def test_multiple_enrichers_secondary_keys_prefixed(self, merge_service):
@@ -1417,6 +1419,8 @@ class TestQualifiedJoinKeys:
         assert "chembl.publication.doi" in result.columns
         assert "chembl.publication.title" in result.columns
         assert "crossref.publication.citation_count" in result.columns
+        # Enricher DOI preserved as data column
+        assert "crossref.publication.doi" in result.columns
         # Both seed records preserved (left join)
         assert len(result) == 2
         # First record has enrichment
@@ -1503,6 +1507,9 @@ class TestQualifiedJoinKeys:
         assert "chembl.publication.title" in result.columns
         assert "crossref.publication.citation_count" in result.columns
         assert "openalex.publication.concepts" in result.columns
+        # Enricher DOI columns preserved
+        assert "crossref.publication.doi" in result.columns
+        assert "openalex.publication.doi" in result.columns
 
     @pytest.mark.asyncio
     async def test_enricher_join_key_becomes_qualified(self, merge_service):
@@ -1537,9 +1544,58 @@ class TestQualifiedJoinKeys:
 
         # Enricher title should be qualified
         assert "crossref.publication.title" in result.columns
+        # Enricher DOI preserved as qualified data column
+        assert "crossref.publication.doi" in result.columns
         # Original seed columns preserved
         assert "doi" in result.columns
         assert "title" in result.columns
+
+    @pytest.mark.asyncio
+    async def test_enricher_join_key_preserved_as_data_column(self, merge_service):
+        """Test that enricher DOI/PMID are preserved after join.
+
+        Polars drops right_on column when left_on != right_on. The fix uses
+        a temporary column as right_on so the qualified enricher join key
+        survives as a regular data column.
+        """
+        import polars as pl
+
+        seed_df = pl.DataFrame(
+            {
+                "chembl.publication.doi": ["10.1/a", "10.1/b"],
+                "chembl.publication.title": ["T1", "T2"],
+            }
+        )
+        enricher_df = pl.DataFrame(
+            {
+                "doi": ["10.1/a"],
+                "citation_count": [100],
+            }
+        )
+
+        enricher_config = EnricherConfig(
+            pipeline="crossref_publication",
+            join_keys=("doi",),
+            required=False,
+        )
+
+        result = await merge_service._apply_joins(
+            seed_df=seed_df,
+            enricher_dfs={"crossref_publication": enricher_df},
+            enrichers=[enricher_config],
+            seed_pipeline="chembl_publication",
+        )
+
+        # Both seed and enricher DOIs preserved
+        assert "chembl.publication.doi" in result.columns
+        assert "crossref.publication.doi" in result.columns
+
+        # Values match: enricher DOI has value for matched row, null for unmatched
+        assert result["crossref.publication.doi"][0] == "10.1/a"
+        assert result["crossref.publication.doi"][1] is None
+
+        # Temp column NOT present in result
+        assert not any(c.startswith("__temp_join_") for c in result.columns)
 
 
 @pytest.mark.unit

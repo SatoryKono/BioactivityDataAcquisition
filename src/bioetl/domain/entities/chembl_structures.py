@@ -106,13 +106,8 @@ class Target(BaseEntity):
     # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
     taxonomy_id: int | None = None
     species_group_flag: bool | None = None
-    description: str | None = None  # General target description
     downgraded: bool | None = None  # Flag for deprecated/downgraded records
-
-    # Optional fields (present for specific target types)
-    dap_id: int | None = None  # Drug-Affinity Panel ID (if available)
     pipeline_stages: str | None = None  # JSON string (for complexes/families)
-    target_constraints: str | None = None  # JSON string (if available)
 
     # Complex fields (JSON serialized)
     target_components: str | None = None  # JSON string of array
@@ -121,13 +116,11 @@ class Target(BaseEntity):
 
     # Flattened component fields (aggregated lists)
     component_accessions: list[str] | None = None
+    component_id: int | None = None  # Primary component ID (component_ids[0])
     component_ids: list[int] | None = None
     component_types: list[str] | None = None
     component_relationships: list[str] | None = None
     component_descriptions: list[str] | None = None
-    component_organisms: list[str] | None = None  # Organisms from components
-    # Standardized to 'taxonomy_ids' for NCBI consistency (was 'tax_ids')
-    component_taxonomy_ids: list[int] | None = None  # Taxonomy IDs from components
 
     # Note: protein_classifications are NOT available in /target endpoint.
     # They are only available via /target_component endpoint (TargetComponent entity).
@@ -166,6 +159,9 @@ class TargetComponent(BaseEntity):
     protein_classifications: str | None = None  # JSON string of list (forensic)
 
     # Flattened fields (extracted from protein_classifications)
+    protein_classification_id: int | None = (
+        None  # Primary classification (first from list)
+    )
     protein_classification_ids: list[int] | None = None
 
     def __post_init__(self) -> None:

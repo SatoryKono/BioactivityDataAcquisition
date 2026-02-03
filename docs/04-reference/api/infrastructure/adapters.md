@@ -109,9 +109,59 @@ Data source adapter for ChEMBL database.
 
 **Features**:
 - Async HTTP requests with rate limiting
-- Entity mapping via `EntityMapper`
+- Entity mapping via `ChemblEntityMapper`
 - Circuit breaker integration
 - Structured error classification
+- Composite key deduplication for multi-PK entities
+- Direct endpoint fallback for single-record failures
+
+#### URL Formation
+
+API URLs are constructed in `infrastructure/adapters/chembl/entity_mapper.py`:
+
+| Component | Location | Example |
+|-----------|----------|---------|
+| Base URL | `CHEMBL_API_BASE` | `https://www.ebi.ac.uk/chembl/api/data` |
+| Resource URL | `ChemblEntityMapper.get_resource_url()` | `/activity`, `/molecule`, `/target` |
+| Direct record URL | `ChemblEntityMapper.get_direct_record_url()` | `/target/CHEMBL1075105` |
+| Status endpoint | `CHEMBL_STATUS_URL` | `/status` |
+
+**Entity to API resource mapping** (`_NON_PUBLICATION_ENTITY_MAPPING`):
+
+| Entity Type | API Resource |
+|-------------|--------------|
+| `activity` | `activity` |
+| `assay` | `assay` |
+| `molecule`, `compound` | `molecule` |
+| `target` | `target` |
+| `target_component` | `target_component` |
+| `cell_line` | `cell_line` |
+| `compound_record` | `compound_record` |
+| `protein_class` | `protein_classification` |
+| `publication` | `document` (via domain registry) |
+
+**Query parameters** (`ChemblAdapter._build_params()`):
+
+```python
+params = {
+    "format": "json",        # Required (ChEMBL no longer supports .json extension)
+    "limit": batch_size,     # Health-aware: full/half depending on circuit breaker
+    "offset": offset,        # Pagination offset
+}
+# Filter parameters: "{field}__in": "ID1,ID2,ID3"
+```
+
+**Configuration**: `configs/sources/chembl.yaml`
+
+```yaml
+source:
+    provider_config:
+        base_url: https://www.ebi.ac.uk/chembl/api/data
+        page_size: 20
+        batch_size: 20
+    rate_limit:
+        requests_per_second: 3
+```
 
 ### PubChemAdapter
 

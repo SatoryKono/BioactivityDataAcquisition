@@ -210,7 +210,7 @@ class PublicationTransformer(BaseChemblTransformer):
         citation_count = record.get("citation_count")
         if citation_count is not None:
             try:
-                data["citations_received"] = int(citation_count)
+                data["citations_received"] = int(str(citation_count))
             except (TypeError, ValueError):
                 data["citations_received"] = None
         else:

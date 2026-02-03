@@ -115,3 +115,64 @@ class FeatureExtractor:
                 extracted.append(kw_data)
 
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
+
+    @staticmethod
+    def extract_features_by_type(features: Any, feature_type: str) -> str | None:
+        """Extract sequence features by type.
+
+        Args:
+            features: List of feature objects.
+            feature_type: Type of features to extract (e.g., "Domain", "Active site").
+
+        Returns:
+            JSON array of matching features or None.
+        """
+        if not features or not isinstance(features, list):
+            return None
+
+        extracted: list[dict[str, Any]] = []
+        for feature in features:
+            if not isinstance(feature, dict):
+                continue
+            if feature.get("type") == feature_type:
+                feature_data = _build_feature_dict(feature)
+                if feature_data:
+                    extracted.append(feature_data)
+
+        return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
+
+    @staticmethod
+    def extract_domains(features: Any) -> str | None:
+        """Extract protein domain features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of domain features or None.
+        """
+        return FeatureExtractor.extract_features_by_type(features, "Domain")
+
+    @staticmethod
+    def extract_binding_sites(features: Any) -> str | None:
+        """Extract binding site features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of binding site features or None.
+        """
+        return FeatureExtractor.extract_features_by_type(features, "Binding site")
+
+    @staticmethod
+    def extract_active_sites(features: Any) -> str | None:
+        """Extract active site features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of active site features or None.
+        """
+        return FeatureExtractor.extract_features_by_type(features, "Active site")
