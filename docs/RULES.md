@@ -1162,6 +1162,35 @@ make run-local    # запуск сэмплового пайплайна на ф
 | **GtoP** | `pyGtoP` (deprecated) | - | - | None | - |
 
 \* **Generic Probe**: Lightweight GET-запрос к базовому endpoint API (e.g., root или `/status`). Если API не предоставляет dedicated health endpoint, использовать минимальный запрос данных с timeout 5 секунд.
+
+### А.1. Формирование URL для ChEMBL API
+
+URL-адреса для ChEMBL формируются в `infrastructure/adapters/chembl/entity_mapper.py`:
+
+| Компонент | Константа/Метод | Значение |
+|-----------|-----------------|----------|
+| **Base URL** | `CHEMBL_API_BASE` | `https://www.ebi.ac.uk/chembl/api/data` |
+| **Status URL** | `CHEMBL_STATUS_URL` | `{BASE}/status` |
+| **Resource URL** | `ChemblEntityMapper.get_resource_url()` | `{BASE}/{resource}` |
+| **Direct record** | `ChemblEntityMapper.get_direct_record_url()` | `{BASE}/{resource}/{id}` |
+
+**Маппинг entity → API resource** (`_NON_PUBLICATION_ENTITY_MAPPING`):
+
+| Entity Type | API Resource | Primary Key |
+|-------------|--------------|-------------|
+| `activity` | `activity` | `activity_id` |
+| `assay` | `assay` | `assay_chembl_id` |
+| `molecule` | `molecule` | `molecule_chembl_id` |
+| `target` | `target` | `target_chembl_id` |
+| `protein_class` | `protein_classification` | `protein_class_id` |
+| `publication` | `document` | `document_chembl_id` |
+
+**Query parameters** (формируются в `ChemblAdapter._build_params()`):
+- `format=json` — обязательный (ChEMBL не поддерживает `.json` extension)
+- `limit`, `offset` — пагинация (health-aware: уменьшается при деградации)
+- `{field}__in=ID1,ID2,...` — фильтрация по списку ID
+
+**Конфигурация**: `configs/sources/chembl.yaml`
  
 **Health Check Endpoints**: 
 - `GET /health` (Liveness) 

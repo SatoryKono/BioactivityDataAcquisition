@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - BioETL/0.1.0 (contact@example.com)
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document?limit=250&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&limit=100&offset=0
   response:
     body:
       string: '{"documents": [{"document_chembl_id": "CHEMBL1200001", "title": "Aspirin

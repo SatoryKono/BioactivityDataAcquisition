@@ -73,11 +73,13 @@ CHEMBL_DTO_MODELS: dict[str, type[BaseModel]] = {
 
 # Entity types that don't support limit/offset pagination
 # These endpoints return all records in a single response
-_NO_PAGINATION_ENTITIES: frozenset[str] = frozenset({
-    "target",
-    "target_component",
-    "protein_class",
-})
+_NO_PAGINATION_ENTITIES: frozenset[str] = frozenset(
+    {
+        "target",
+        "target_component",
+        "protein_class",
+    }
+)
 
 
 @dataclass
@@ -154,7 +156,9 @@ class ChemblAdapter(BaseHttpAdapter):
             return reduced
         return self._page_size
 
-    def _build_params(self, offset: int, entity_type: str | None = None) -> dict[str, Any]:
+    def _build_params(
+        self, offset: int, entity_type: str | None = None
+    ) -> dict[str, Any]:
         """Build API request parameters with health-aware batch size.
 
         Args:
