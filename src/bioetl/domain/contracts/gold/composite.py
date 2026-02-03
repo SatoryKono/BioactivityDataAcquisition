@@ -120,6 +120,113 @@ class CompositePublicationGoldSchema(pa.DataFrameModel):
         coerce = True  # Enable type coercion for nullable integers
 
 
+class CompositeMoleculeGoldSchema(pa.DataFrameModel):
+    """Schema for Composite Molecule in Gold layer.
+
+    Merged molecule entity combining data from multiple providers:
+    - Seed: chembl_molecule
+    - Enrichers: pubchem_compound
+
+    Column naming:
+        Business columns use qualified format: {provider}.{entity}.{field}
+        Example: chembl.molecule.inchikey, pubchem.compound.xlogp
+
+    Required fields:
+        - System fields (entity_id, content_hash)
+        - Seed primary key (molecule_chembl_id via qualified name)
+        - InChIKey (required for structural identification)
+        - Lineage metadata (_composite_run_id, etc.)
+
+    Join keys (by priority):
+        1. inchikey (primary) - Standard InChIKey, 27 characters
+        2. canonical_smiles (fallback) - Canonical SMILES string
+
+    Field priorities:
+        - Structural identifiers (inchikey, canonical_smiles): ChEMBL authoritative
+        - Molecular properties (molecular_weight, xlogp, tpsa): PubChem authoritative
+
+    Note: Uses strict=False to allow variable enricher columns.
+    """
+
+    # =========================================================================
+    # System Fields (from seed)
+    # =========================================================================
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # =========================================================================
+    # DQ Fields (from seed)
+    # =========================================================================
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
+    # =========================================================================
+    # Lineage Metadata (from seed)
+    # =========================================================================
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    # Source tracking (from seed)
+    source: Series[str] = pa.Field(nullable=True, alias="_source")
+
+    # Lookup metadata (from seed)
+    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+
+    # =========================================================================
+    # Composite Lineage Metadata (added by MergeService)
+    # =========================================================================
+    composite_run_id: Series[str] = pa.Field(nullable=False, alias="_composite_run_id")
+    source_providers: Series[str] = pa.Field(
+        nullable=False, alias="_source_providers"
+    )  # JSON list
+    enrichment_status: Series[str] = pa.Field(
+        nullable=False, alias="_enrichment_status"
+    )  # JSON dict
+    lineage_created_at: Series[str] = pa.Field(
+        nullable=False, alias="_lineage_created_at"
+    )  # ISO timestamp
+
+    # =========================================================================
+    # Seed Primary Key (ChEMBL molecule ID)
+    # =========================================================================
+    # Note: Qualified column name from seed
+    # In the merged output, this appears as: chembl.molecule.molecule_chembl_id
+    # The unqualified version may also be present depending on merge configuration
+
+    # =========================================================================
+    # Core Business Fields (may be qualified or coalesced)
+    # =========================================================================
+    # Note: These fields may appear with qualified names depending on merge strategy.
+    # With coalesce/seed_priority, the winning value uses the seed column name.
+    # With no coalesce, all provider columns are preserved with qualified names.
+    #
+    # Example qualified names:
+    # - chembl.molecule.molecule_chembl_id
+    # - chembl.molecule.inchikey
+    # - chembl.molecule.canonical_smiles
+    # - pubchem.compound.cid
+    # - pubchem.compound.molecular_weight
+    # - pubchem.compound.xlogp
+    # - pubchem.compound.tpsa
+    #
+    # Since columns are dynamically determined by enrichers, we use strict=False
+
+    class Config:
+        """Pandera configuration.
+
+        Note: strict=False allows additional columns from enrichers.
+        The actual columns depend on which enrichers succeeded and the merge strategy.
+        """
+
+        strict = False  # Allow additional qualified columns from enrichers
+        coerce = True  # Enable type coercion for nullable integers
+
+
 __all__ = [
+    "CompositeMoleculeGoldSchema",
     "CompositePublicationGoldSchema",
 ]

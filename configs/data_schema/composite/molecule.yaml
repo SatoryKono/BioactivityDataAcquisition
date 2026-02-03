@@ -1,0 +1,323 @@
+# configs/data_schema/composite/molecule.yaml
+# =============================================================================
+# Composite Molecule Data Schema Configuration
+# =============================================================================
+# Layer-specific column configuration (ADR-029: Data Schema Externalization)
+# This file demonstrates Variant 2 approach: filtering shared column_groups by layer
+#
+# Providers: ChEMBL (seed), PubChem (enricher)
+# Join Keys: inchikey (primary), canonical_smiles (fallback)
+#
+# Version: 1.0.0
+# Last Updated: 2026-02-03
+# =============================================================================
+
+# Shared column groups (used by both Silver and Gold unless overridden)
+column_groups:
+  # 1. System fields (always first)
+  - name: system
+    fields:
+      - entity_id
+      - content_hash
+      - _run_id
+      - _run_type
+      - _source_batch_id
+      - _source
+      - _ingestion_ts
+      - _index
+      - _lookup_method
+      - _original_id
+
+  # 2. Lineage metadata (added by MergeService)
+  - name: lineage
+    pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
+
+  # 3. Primary identifiers (ChEMBL)
+  - name: identifiers_chembl
+    fields:
+      - molecule_chembl_id
+    provider_order: [chembl]
+
+  # 4. Primary identifiers (PubChem)
+  - name: identifiers_pubchem
+    fields:
+      - cid
+    provider_order: [pubchem]
+
+  # 5. Structural identifiers (shared join keys)
+  - name: identifiers_structure
+    fields:
+      - inchikey
+      - standard_inchi
+    provider_order: [chembl, pubchem]
+
+  # 6. SMILES representations
+  - name: smiles
+    fields:
+      - canonical_smiles
+      - isomeric_smiles
+    provider_order: [chembl, pubchem]
+
+  # 7. Molecular formula
+  - name: formula
+    fields:
+      - molecular_formula
+    provider_order: [pubchem, chembl]
+
+  # 8. Molecular weight and mass
+  - name: mass
+    fields:
+      - molecular_weight
+      - exact_mass
+      - monoisotopic_mass
+    provider_order: [pubchem, chembl]
+
+  # 9. Lipophilicity and surface area
+  - name: lipophilicity
+    fields:
+      - xlogp
+      - tpsa
+    provider_order: [pubchem, chembl]
+
+  # 10. Complexity and charge
+  - name: complexity
+    fields:
+      - complexity
+      - charge
+    provider_order: [pubchem]
+
+  # 11. Hydrogen bond counts
+  - name: hbond_counts
+    fields:
+      - h_bond_donor_count
+      - h_bond_acceptor_count
+    provider_order: [pubchem, chembl]
+
+  # 12. Bond counts
+  - name: bond_counts
+    fields:
+      - rotatable_bond_count
+      - covalent_unit_count
+    provider_order: [pubchem, chembl]
+
+  # 13. Atom counts
+  - name: atom_counts
+    fields:
+      - heavy_atom_count
+    provider_order: [pubchem, chembl]
+
+  # 14. Stereochemistry
+  - name: stereochemistry
+    fields:
+      - atom_stereo_count
+      - defined_atom_stereo_count
+      - undefined_atom_stereo_count
+      - bond_stereo_count
+      - defined_bond_stereo_count
+      - undefined_bond_stereo_count
+      - isotope_atom_count
+      - chirality
+    provider_order: [pubchem, chembl]
+
+  # 15. 3D properties (PubChem-specific)
+  - name: 3d_properties
+    fields:
+      - volume_3d
+      - conformer_count_3d
+      - conformer_rmsd_3d
+      - effective_rotor_count_3d
+      - feature_count_3d
+      - feature_acceptor_count_3d
+      - feature_donor_count_3d
+      - feature_anion_count_3d
+      - feature_cation_count_3d
+      - feature_ring_count_3d
+      - feature_hydrophobe_count_3d
+      - x_steric_quadrupole_3d
+      - y_steric_quadrupole_3d
+      - z_steric_quadrupole_3d
+    provider_order: [pubchem]
+
+  # 16. Nomenclature
+  - name: nomenclature
+    fields:
+      - pref_name
+      - iupac_name
+    provider_order: [chembl, pubchem]
+
+  # 17. Synonyms
+  - name: synonyms
+    fields:
+      - molecule_synonyms
+    provider_order: [chembl, pubchem]
+
+  # 18. USAN nomenclature (ChEMBL-specific)
+  - name: usan
+    fields:
+      - usan_stem
+      - usan_substem
+      - usan_stem_definition
+      - usan_year
+    provider_order: [chembl]
+
+  # 19. Clinical development phase
+  - name: clinical_phase
+    fields:
+      - max_phase
+      - first_approval
+    provider_order: [chembl]
+
+  # 20. Therapeutic flags
+  - name: therapeutic_flags
+    fields:
+      - therapeutic_flag
+      - oral
+      - parenteral
+      - topical
+      - black_box_warning
+      - withdrawn_flag
+    provider_order: [chembl]
+
+  # 21. Drug classification
+  - name: drug_classification
+    fields:
+      - natural_product
+      - first_in_class
+      - prodrug
+      - dosed_ingredient
+    provider_order: [chembl]
+
+  # 22. Molecule type and structure
+  - name: molecule_type
+    fields:
+      - molecule_type
+      - structure_type
+      - inorganic_flag
+      - polymer_flag
+      - availability_type
+    provider_order: [chembl]
+
+  # 23. ChEMBL calculated properties
+  - name: chembl_properties
+    fields:
+      - property_alogp
+      - property_mw_freebase
+      - property_full_mwt
+      - property_hba
+      - property_hbd
+      - property_psa
+      - property_rtb
+      - property_ro5_violations
+      - property_heavy_atoms
+      - property_aromatic_rings
+      - property_qed_weighted
+      - property_full_molformula
+      - property_ro3_pass
+    provider_order: [chembl]
+
+  # 24. Molecule hierarchy (ChEMBL-specific)
+  - name: hierarchy
+    fields:
+      - hierarchy_parent_chembl_id
+      - hierarchy_active_chembl_id
+      - hierarchy_child_chembl_id
+      - molecule_hierarchy
+      - molecule_species
+    provider_order: [chembl]
+
+  # 25. Complex fields (JSON)
+  - name: complex_fields
+    fields:
+      - molecule_properties
+      - molecule_structures
+      - cross_references
+      - atc_classifications
+      - helm_notation
+    provider_order: [chembl]
+
+  # 26. DQ fields (always last)
+  - name: dq
+    pattern: "^_dq_"
+
+# Field aliases for backward compatibility
+field_aliases:
+  # ChEMBL -> Unified
+  property_full_mwt: molecular_weight
+  property_alogp: alogp
+  property_psa: psa
+  property_hba: hba
+  property_hbd: hbd
+  property_rtb: rtb
+  property_heavy_atoms: num_heavy_atoms
+  property_aromatic_rings: num_aromatic_rings
+  standard_inchi_key: inchikey
+  structure_standard_inchi_key: inchikey
+  full_mwt: molecular_weight
+  alogp: xlogp
+  psa: tpsa
+  hba: h_bond_acceptor_count
+  hbd: h_bond_donor_count
+  rtb: rotatable_bond_count
+  # PubChem -> Unified
+  inchi_key: inchikey
+  inchi: standard_inchi
+
+# Layer-specific column filtering (Variant 2 approach)
+# Silver: Include most fields for intermediate processing
+silver:
+  include_groups:
+    - system
+    - lineage
+    - identifiers_chembl
+    - identifiers_pubchem
+    - identifiers_structure
+    - smiles
+    - formula
+    - mass
+    - lipophilicity
+    - complexity
+    - hbond_counts
+    - bond_counts
+    - atom_counts
+    - stereochemistry
+    - 3d_properties
+    - nomenclature
+    - synonyms
+    - usan
+    - clinical_phase
+    - therapeutic_flags
+    - drug_classification
+    - molecule_type
+    - chembl_properties
+    - hierarchy
+    - complex_fields
+    - dq
+
+# Gold: Minimal curated dataset for analytics
+gold:
+  include_groups:
+    - system               # entity_id, content_hash, _run_id (essential)
+    - identifiers_chembl   # molecule_chembl_id
+    - identifiers_pubchem  # cid
+    - identifiers_structure  # inchikey, standard_inchi
+    - smiles               # canonical_smiles, isomeric_smiles
+    - formula              # molecular_formula
+    - mass                 # molecular_weight, exact_mass
+    - lipophilicity        # xlogp, tpsa
+    - hbond_counts         # h_bond_donor_count, h_bond_acceptor_count
+    - bond_counts          # rotatable_bond_count
+    - atom_counts          # heavy_atom_count
+    - nomenclature         # pref_name, iupac_name
+    - clinical_phase       # max_phase, first_approval
+    - therapeutic_flags    # therapeutic_flag, withdrawn_flag
+  exclude_fields:
+    - _dq_*               # Remove DQ fields from Gold
+    - _composite_*        # Remove internal composite metadata
+    - _source_batch_id    # Remove internal batch tracking
+    - _index              # Remove internal indexing
+    - _lookup_method      # Remove internal lookup metadata
+
+# Output paths
+output:
+  silver: data/output/silver/composite/molecule
+  gold: data/output/gold/composite/molecule

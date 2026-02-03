@@ -1,0 +1,112 @@
+# configs/filter/entities/composite/molecule.yaml
+# =============================================================================
+# Composite Molecule Filter Configuration
+# =============================================================================
+# Entity-specific filter rules for composite molecule pipeline.
+# Reference: ADR-028 (Filter Rules Externalization)
+#
+# Gold Contract: CompositeMoleculeGoldSchema
+#
+# Version: 1.0.0
+# Last Updated: 2026-02-03
+#
+# =============================================================================
+
+version: "1.0.0"
+provider: composite
+entity: molecule
+
+# -----------------------------------------------------------------------------
+# Input Filter
+# -----------------------------------------------------------------------------
+# No input filter for composite pipeline
+# Composite pipeline aggregates from multiple sources internally
+input_filter:
+  enabled: false
+
+# -----------------------------------------------------------------------------
+# Gold Filters
+# -----------------------------------------------------------------------------
+# Criteria for valid molecules in Gold layer
+# Note: Composite uses qualified column names ({provider}.{entity}.{field})
+# Filter rules apply to either qualified or coalesced column names
+gold_filters:
+  # Required fields - records missing these are excluded from Gold
+  # Note: Fields may appear as chembl.molecule.inchikey (qualified) or inchikey (coalesced)
+  required_fields:
+    - molecule_chembl_id
+    - inchikey
+
+  # Field-specific validation (applied before Gold write)
+  # Note: Since composite has variable columns, only validate core fields
+  columns:
+    molecule_chembl_id:
+      type: string
+      pattern: "^CHEMBL\\d+$"
+      nullable: false
+      description: "ChEMBL molecule identifier (seed primary key)"
+
+    inchikey:
+      type: string
+      pattern: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
+      nullable: false
+      description: "Standard InChIKey (27 characters, join key)"
+
+    cid:
+      type: integer
+      min_value: 1
+      nullable: true
+      description: "PubChem Compound ID (enricher primary key)"
+
+    max_phase:
+      type: float
+      allowed: [-1, 0, 0.5, 1, 2, 3, 4]
+      nullable: true
+      description: "Maximum clinical development phase"
+
+    molecular_weight:
+      type: float
+      min_value: 0.0
+      max_value: 100000.0
+      nullable: true
+      description: "Molecular weight in g/mol"
+
+# -----------------------------------------------------------------------------
+# DQ Thresholds (from composite config)
+# -----------------------------------------------------------------------------
+# These thresholds are applied during composite merge:
+# - soft_fail_threshold: 0.10 (10% errors = warning)
+# - hard_fail_threshold: 0.30 (30% errors = failure)
+#
+# Per-enricher overrides defined in composite config:
+# - pubchem_compound: soft=0.30, hard=0.60
+
+# -----------------------------------------------------------------------------
+# Gold Contract Reference
+# -----------------------------------------------------------------------------
+# Required system fields (from CompositeMoleculeGoldSchema):
+#   - entity_id (not null)
+#   - content_hash (not null)
+#   - _dq_warn (not null, bool)
+#   - _dq_error (not null, bool)
+#   - _run_id (not null)
+#   - _run_type (not null)
+#   - _ingestion_ts (not null)
+#   - _index (not null)
+#
+# Required lineage fields (added by MergeService):
+#   - _composite_run_id (not null)
+#   - _source_providers (not null, JSON list)
+#   - _enrichment_status (not null, JSON dict)
+#   - _lineage_created_at (not null, ISO timestamp)
+#
+# Optional seed fields:
+#   - _source (nullable)
+#   - _lookup_method (nullable)
+#   - _original_id (nullable)
+#   - _source_batch_id (nullable)
+#
+# Business fields use qualified names:
+#   - chembl.molecule.molecule_chembl_id (seed primary key)
+#   - chembl.molecule.inchikey, pubchem.compound.inchi_key, etc.
+#   - Additional columns depend on enricher success

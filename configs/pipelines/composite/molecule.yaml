@@ -1,0 +1,496 @@
+# configs/pipelines/composite/molecule.yaml
+# =============================================================================
+# Composite Molecule Pipeline Configuration
+# =============================================================================
+#
+# Combines chemical compound data from multiple sources:
+# - Seed: ChEMBL molecules (molecule_chembl_id, canonical_smiles, inchikey, ...)
+# - Enrichers:
+#   - PubChem compounds (cid, molecular properties, computed descriptors)
+#
+# Join keys (by priority):
+# 1. inchikey (primary) - Standard InChIKey, 27 characters, unique structure ID
+# 2. canonical_smiles (fallback) - Canonical SMILES string
+#
+# Field mapping (ChEMBL -> PubChem -> Unified):
+# - molecule_chembl_id -> - -> molecule_chembl_id (chembl only)
+# - - -> cid -> cid (pubchem only)
+# - inchikey -> inchi_key -> inchikey (chembl priority)
+# - canonical_smiles -> canonical_smiles -> canonical_smiles (chembl priority)
+# - property_full_mwt -> molecular_weight -> molecular_weight (pubchem priority)
+# - property_alogp -> xlogp -> xlogp (pubchem priority)
+# - property_psa -> tpsa -> tpsa (pubchem priority)
+# - molecule_synonyms -> synonyms -> synonyms (merge)
+#
+# Version: 1.0.0
+# Reference: ADR-026 Composite Pipeline Pattern
+# Last Updated: 2026-02-03
+#
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Composite Pipeline Configuration
+# -----------------------------------------------------------------------------
+composite:
+  name: composite_molecule
+  version: "1.0.0"
+
+  # ---------------------------------------------------------------------------
+  # Seed Pipeline Configuration
+  # ---------------------------------------------------------------------------
+  # The seed pipeline extracts primary entities from ChEMBL molecules.
+  # Its output provides join keys (inchikey, canonical_smiles) for enrichment.
+  seed:
+    pipeline: chembl_molecule
+    output_keys:
+      - molecule_chembl_id  # ChEMBL molecule ID (primary key)
+      - inchikey            # Standard InChIKey (primary join key)
+      - canonical_smiles    # Canonical SMILES (fallback join key)
+      - pref_name           # Molecule name (for logging/debugging)
+      - molecule_type       # Classification (for filtering)
+    silver_table: silver/chembl/molecule
+
+  # ---------------------------------------------------------------------------
+  # Dependency Pipelines
+  # ---------------------------------------------------------------------------
+  # No dependencies currently - PubChem enrichment is direct lookup
+  dependencies: []
+
+  # ---------------------------------------------------------------------------
+  # Enricher Pipelines
+  # ---------------------------------------------------------------------------
+  # Each enricher fetches supplemental data from an external source.
+  enrichers:
+    # PubChem: Molecular properties and computed descriptors
+    # OPTIONAL: Not all ChEMBL molecules have PubChem CIDs
+    - pipeline: pubchem_compound
+      join_keys:
+        - inchikey          # Primary join key (27-char InChIKey)
+        - canonical_smiles  # Fallback key if InChIKey not found
+      required: false       # Optional - many ChEMBL molecules lack PubChem mapping
+      filter_condition: "inchikey IS NOT NULL"
+      timeout_seconds: 900
+      silver_table: silver/pubchem/compound
+
+  # ---------------------------------------------------------------------------
+  # Merge Configuration
+  # ---------------------------------------------------------------------------
+  # Defines how enriched data is combined into the final output.
+  merge:
+    # Join strategy: left_outer preserves all seed records
+    strategy: left_outer
+
+    # Conflict resolution: use explicit field-level priorities
+    conflict_resolution: explicit_rules
+
+    # Preserve all provider-qualified columns for overlapping fields
+    # When true, keeps columns like chembl.molecule.canonical_smiles,
+    # pubchem.compound.canonical_smiles instead of coalescing
+    preserve_all_sources: true
+
+    # Field-level priority overrides (when using explicit_rules)
+    # Maps field name to ordered list of source preferences
+    field_priorities:
+      # === Structural Identifiers (ChEMBL authoritative for structure) ===
+      inchikey:
+        - chembl         # ChEMBL InChIKey is primary
+        - pubchem
+      canonical_smiles:
+        - chembl         # ChEMBL canonical SMILES is authoritative
+        - pubchem
+      standard_inchi:
+        - chembl         # ChEMBL InChI is authoritative
+        - pubchem
+
+      # === Molecular Properties (PubChem has richer computed data) ===
+      molecular_weight:
+        - pubchem        # PubChem molecular_weight is authoritative
+        - chembl
+      xlogp:
+        - pubchem        # PubChem XLogP (computed)
+        - chembl         # ChEMBL ALogP
+      tpsa:
+        - pubchem        # PubChem TPSA
+        - chembl         # ChEMBL PSA
+
+      # === Atom/Bond Counts (PubChem has detailed counts) ===
+      h_bond_donor_count:
+        - pubchem        # PubChem HBD count
+        - chembl
+      h_bond_acceptor_count:
+        - pubchem        # PubChem HBA count
+        - chembl
+      rotatable_bond_count:
+        - pubchem        # PubChem rotatable bonds
+        - chembl
+      heavy_atom_count:
+        - pubchem        # PubChem heavy atoms
+        - chembl
+
+      # === Nomenclature (merge from both sources) ===
+      iupac_name:
+        - pubchem        # PubChem IUPAC name
+      molecular_formula:
+        - pubchem        # PubChem molecular formula
+        - chembl
+
+      # === Stereochemistry (PubChem has detailed counts) ===
+      atom_stereo_count:
+        - pubchem        # PubChem stereo counts
+      defined_atom_stereo_count:
+        - pubchem
+      bond_stereo_count:
+        - pubchem
+      isotope_atom_count:
+        - pubchem
+
+      # === 3D Properties (PubChem-unique) ===
+      volume_3d:
+        - pubchem        # PubChem 3D volume
+      conformer_count_3d:
+        - pubchem        # PubChem conformer count
+      complexity:
+        - pubchem        # PubChem structural complexity
+
+    # -------------------------------------------------------------------------
+    # Column Ordering by Semantic Categories
+    # -------------------------------------------------------------------------
+    column_groups:
+      # === System / ETL metadata (MUST be first) ===
+      - name: system
+        fields:
+          - entity_id
+          - content_hash
+          - _run_id
+          - _run_type
+          - _source_batch_id
+          - _source
+          - _ingestion_ts
+          - _index
+          - _lookup_method
+          - _original_id
+        pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_|^_dq_"
+        provider_order: [chembl, pubchem]
+
+      # === Primary identifiers ===
+      - name: identifiers
+        fields:
+          - molecule_chembl_id
+          - cid
+          - inchikey
+          - standard_inchi
+        provider_order: [chembl, pubchem]
+
+      # === Structural representations ===
+      - name: structure
+        fields:
+          - canonical_smiles
+          - isomeric_smiles
+          - molecular_formula
+          - helm_notation
+        provider_order: [chembl, pubchem]
+
+      # === Molecular properties ===
+      - name: properties
+        fields:
+          - molecular_weight
+          - exact_mass
+          - monoisotopic_mass
+          - xlogp
+          - tpsa
+          - complexity
+          - charge
+        provider_order: [pubchem, chembl]
+
+      # === Atom and bond counts ===
+      - name: counts
+        fields:
+          - heavy_atom_count
+          - h_bond_donor_count
+          - h_bond_acceptor_count
+          - rotatable_bond_count
+          - covalent_unit_count
+        provider_order: [pubchem, chembl]
+
+      # === Stereochemistry ===
+      - name: stereochemistry
+        fields:
+          - atom_stereo_count
+          - defined_atom_stereo_count
+          - undefined_atom_stereo_count
+          - bond_stereo_count
+          - defined_bond_stereo_count
+          - undefined_bond_stereo_count
+          - isotope_atom_count
+          - chirality
+        provider_order: [pubchem, chembl]
+
+      # === 3D properties (PubChem-specific) ===
+      - name: 3d_properties
+        fields:
+          - volume_3d
+          - conformer_count_3d
+          - conformer_rmsd_3d
+          - effective_rotor_count_3d
+          - feature_count_3d
+          - feature_acceptor_count_3d
+          - feature_donor_count_3d
+          - feature_anion_count_3d
+          - feature_cation_count_3d
+          - feature_ring_count_3d
+          - feature_hydrophobe_count_3d
+          - x_steric_quadrupole_3d
+          - y_steric_quadrupole_3d
+          - z_steric_quadrupole_3d
+        provider_order: [pubchem]
+
+      # === Nomenclature ===
+      - name: nomenclature
+        fields:
+          - pref_name
+          - iupac_name
+          - molecule_synonyms
+          - usan_stem
+          - usan_substem
+          - usan_stem_definition
+          - usan_year
+        provider_order: [chembl, pubchem]
+
+      # === Drug-likeness and pharmacology ===
+      - name: druglikeness
+        fields:
+          - max_phase
+          - first_approval
+          - therapeutic_flag
+          - oral
+          - parenteral
+          - topical
+          - black_box_warning
+          - natural_product
+          - first_in_class
+          - prodrug
+          - withdrawn_flag
+          - availability_type
+          - dosed_ingredient
+          - molecule_type
+          - structure_type
+          - inorganic_flag
+          - polymer_flag
+        provider_order: [chembl]
+
+      # === Calculated properties (ChEMBL-specific) ===
+      - name: calculated_properties
+        fields:
+          - property_alogp
+          - property_mw_freebase
+          - property_full_mwt
+          - property_hba
+          - property_hbd
+          - property_psa
+          - property_rtb
+          - property_ro5_violations
+          - property_heavy_atoms
+          - property_aromatic_rings
+          - property_qed_weighted
+          - property_full_molformula
+          - property_ro3_pass
+        provider_order: [chembl]
+
+      # === Hierarchy (ChEMBL-specific) ===
+      - name: hierarchy
+        fields:
+          - hierarchy_parent_chembl_id
+          - hierarchy_active_chembl_id
+          - hierarchy_child_chembl_id
+          - molecule_hierarchy
+          - molecule_species
+        provider_order: [chembl]
+
+      # === Complex fields (JSON) ===
+      - name: complex_fields
+        fields:
+          - molecule_properties
+          - molecule_structures
+          - cross_references
+          - atc_classifications
+        provider_order: [chembl]
+
+    # Fields excluded from merged output (Silver + Gold)
+    exclude_fields:
+      # Internal system fields
+      - "*.molecule.structure_standard_inchi_key"  # Redundant with inchikey
+
+    output:
+      silver: data/output/silver/composite/molecule
+      gold: data/output/gold/composite/molecule
+
+  # ---------------------------------------------------------------------------
+  # Data Quality Configuration
+  # ---------------------------------------------------------------------------
+  dq_rules:
+    # Composite-level thresholds (applied to merge result)
+    soft_fail_threshold: 0.10  # 10% errors = warning
+    hard_fail_threshold: 0.30  # 30% errors = failure
+
+    # Per-enricher threshold overrides
+    enricher_overrides:
+      # PubChem may have many unmatched InChIKeys
+      pubchem_compound:
+        soft_fail_threshold: 0.30  # 30% not_found is acceptable
+        hard_fail_threshold: 0.60  # Only fail if >60% errors
+
+    # Required fields in final Gold output
+    required_fields:
+      - molecule_chembl_id
+      - inchikey
+
+    # Field-level validation rules for new fields
+    field_validations:
+      # === Primary Keys ===
+      molecule_chembl_id:
+        type: string
+        nullable: false
+        pattern: "^CHEMBL\\d+$"
+        description: "ChEMBL molecule ID (primary key)"
+
+      cid:
+        type: integer
+        nullable: true
+        min_value: 1
+        description: "PubChem Compound ID"
+
+      # === Structural Identifiers ===
+      inchikey:
+        type: string
+        nullable: true
+        pattern: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
+        description: "Standard InChI Key (27 characters)"
+
+      canonical_smiles:
+        type: string
+        nullable: true
+        description: "Canonical SMILES string"
+
+      # === Molecular Properties ===
+      molecular_weight:
+        type: float
+        nullable: true
+        min_value: 0.0
+        max_value: 100000.0
+        description: "Molecular weight in g/mol"
+
+      xlogp:
+        type: float
+        nullable: true
+        min_value: -20.0
+        max_value: 30.0
+        description: "Computed octanol-water partition coefficient"
+
+      tpsa:
+        type: float
+        nullable: true
+        min_value: 0.0
+        description: "Topological polar surface area"
+
+      # === Drug-likeness ===
+      max_phase:
+        type: float
+        nullable: true
+        allowed: [-1, 0, 0.5, 1, 2, 3, 4]
+        description: "Maximum clinical phase"
+
+      # === Counts ===
+      h_bond_donor_count:
+        type: integer
+        nullable: true
+        min_value: 0
+        max_value: 50
+        description: "Hydrogen bond donor count"
+
+      h_bond_acceptor_count:
+        type: integer
+        nullable: true
+        min_value: 0
+        max_value: 50
+        description: "Hydrogen bond acceptor count"
+
+      rotatable_bond_count:
+        type: integer
+        nullable: true
+        min_value: 0
+        max_value: 100
+        description: "Rotatable bond count"
+
+      heavy_atom_count:
+        type: integer
+        nullable: true
+        min_value: 1
+        max_value: 500
+        description: "Heavy (non-hydrogen) atom count"
+
+  # ---------------------------------------------------------------------------
+  # Execution Options
+  # ---------------------------------------------------------------------------
+  execution:
+    # Maximum concurrent enrichers (only 1 currently, but keep for future)
+    max_concurrency: 2
+
+    # Enable checkpointing for resume capability
+    checkpoint_enabled: true
+
+    # Retry configuration for recoverable errors
+    retry:
+      max_attempts: 3
+      backoff_multiplier: 2.0
+
+  # ---------------------------------------------------------------------------
+  # Lineage Configuration
+  # ---------------------------------------------------------------------------
+  lineage:
+    # Track which source provided each field value
+    track_field_sources: true
+
+    # Include timestamps for each enrichment
+    track_timestamps: true
+
+    # Include per-record enrichment status
+    track_status: true
+
+    # Provider-specific lookup metadata
+    provider_lookup_fields:
+      chembl:
+        _lookup_method: chembl_lookup_method
+        _original_id: chembl_original_id
+      pubchem:
+        _lookup_method: pubchem_lookup_method
+        _original_id: pubchem_original_id
+
+    # Field-level source tracking for overlapping fields
+    track_source_for_fields:
+      - inchikey
+      - canonical_smiles
+      - molecular_weight
+      - xlogp
+      - tpsa
+      - h_bond_donor_count
+      - h_bond_acceptor_count
+      - rotatable_bond_count
+      - heavy_atom_count
+
+# -----------------------------------------------------------------------------
+# Gold Filters (applied to merged output)
+# -----------------------------------------------------------------------------
+gold_filters:
+  # Only include molecules with primary identifiers
+  required_fields:
+    - molecule_chembl_id
+    - inchikey
+
+# -----------------------------------------------------------------------------
+# Filter Configuration (ADR-028)
+# -----------------------------------------------------------------------------
+# Filter rules are loaded from hierarchical config files:
+#   1. configs/filter/_defaults.yaml (global defaults)
+#   2. configs/filter/providers/composite.yaml (provider-specific)
+#   3. configs/filter/entities/composite/molecule.yaml (entity-specific)
+filter_config_file: ../../filter/entities/composite/molecule.yaml
