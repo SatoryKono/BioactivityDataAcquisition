@@ -51,16 +51,34 @@
 #   - dq_rules are loaded from dq_config_file
 #   - Inline overrides in pipeline config are merged on top
 #
-# Minimal Pipeline Config Example:
-#   pipeline_name: chembl_activity
-#   provider: chembl
-#   entity_type: activity
-#   version: "1.2.0"
-#   description: "Extract biological activity records from ChEMBL API"
-#   primary_keys: ["activity_id"]
-#   silver_table: "chembl_activity"
-#   gold_table: "chembl_activity"
-#   # All paths, filters, DQ rules inherited by convention
+# =============================================================================
+#
+# Configuration Style Guide
+# =============================================================================
+#
+# Two styles are supported. Choose based on your needs:
+#
+# 1. CONVENTION-BASED MINIMAL (Recommended for new configs)
+#    Use when: Standard paths, no special overrides needed
+#    Benefits: Less duplication, easier maintenance
+#    Example:
+#      pipeline_name: chembl_activity
+#      provider: chembl
+#      entity_type: activity
+#      version: "1.2.0"
+#      primary_keys: ["activity_id"]
+#      silver_table: "chembl_activity"
+#      gold_table: "chembl_activity"
+#      # All paths auto-computed by convention
+#
+# 2. EXPLICIT FULL
+#    Use when: Non-standard paths, complex DQ rules, special overrides
+#    Benefits: Self-documenting, no hidden behavior
+#    Example: See chembl/molecule.yaml, chembl/target.yaml
+#
+# 3. HYBRID (For special cases)
+#    Use when: Mostly convention but need specific overrides
+#    Example: pubmed/publication.yaml (explicit sink paths, convention DQ)
 #
 # =============================================================================
 
